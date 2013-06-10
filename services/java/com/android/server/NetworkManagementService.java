@@ -34,7 +34,6 @@ import static com.android.server.NetworkManagementService.NetdResponseCode.Tethe
 import static com.android.server.NetworkManagementService.NetdResponseCode.TtyListResult;
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
 
-import android.bluetooth.BluetoothTetheringDataTracker;
 import android.content.Context;
 import android.net.INetworkManagementEventObserver;
 import android.net.InterfaceConfiguration;
@@ -61,6 +60,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.util.Preconditions;
 import com.android.server.NativeDaemonConnector.Command;
+import com.android.server.NativeDaemonConnector.SensitiveArg;
 import com.android.server.net.LockdownVpnTracker;
 import com.google.android.collect.Maps;
 
@@ -1001,7 +1001,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             } else {
                 mConnector.execute("softap", "set", wlanIface, wifiConfig.SSID,
                                    "broadcast", getSecurityType(wifiConfig),
-                                   wifiConfig.preSharedKey);
+                                   new SensitiveArg(wifiConfig.preSharedKey));
             }
             mConnector.execute("softap", "startap");
         } catch (NativeDaemonConnectorException e) {
@@ -1051,7 +1051,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             } else {
                 mConnector.execute("softap", "set", wlanIface, wifiConfig.SSID,
                                    "broadcast", getSecurityType(wifiConfig),
-                                   wifiConfig.preSharedKey);
+                                   new SensitiveArg(wifiConfig.preSharedKey));
             }
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
