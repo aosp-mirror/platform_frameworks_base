@@ -28512,6 +28512,7 @@ package android.view.transition {
 
   public class TransitionManager {
     ctor public TransitionManager();
+    method public static void beginDelayedTransition(android.view.ViewGroup, android.view.transition.Transition);
     method public android.view.transition.Transition getDefaultTransition();
     method public static void go(android.view.transition.Scene);
     method public static void go(android.view.transition.Scene, android.view.transition.Transition);
