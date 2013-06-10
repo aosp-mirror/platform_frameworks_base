@@ -38,7 +38,8 @@ import javax.microedition.khronos.opengles.GL;
  */
 public class Canvas {
     // assigned in constructors or setBitmap, freed in finalizer
-    int mNativeCanvas;
+    /** @hide */
+    public int mNativeCanvas;
     
     // may be null
     private Bitmap mBitmap;
@@ -132,8 +133,9 @@ public class Canvas {
         mBitmap = bitmap;
         mDensity = bitmap.mDensity;
     }
-    
-    Canvas(int nativeCanvas) {
+
+    /** @hide */
+    public Canvas(int nativeCanvas) {
         if (nativeCanvas == 0) {
             throw new IllegalStateException();
         }
