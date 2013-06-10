@@ -11883,6 +11883,7 @@ package android.media {
     ctor public MediaExtractor();
     method public boolean advance();
     method public long getCachedDuration();
+    method public java.util.Map<java.util.UUID, byte[]> getPsshInfo();
     method public boolean getSampleCryptoInfo(android.media.MediaCodec.CryptoInfo);
     method public int getSampleFlags();
     method public long getSampleTime();
