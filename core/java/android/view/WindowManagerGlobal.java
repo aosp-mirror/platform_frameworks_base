@@ -335,15 +335,13 @@ public final class WindowManagerGlobal {
             }
         }
         root.die(immediate);
+        if (view != null) {
+            view.assignParent(null);
+        }
     }
 
     void doRemoveView(ViewRootImpl root) {
         synchronized (mLock) {
-            final View view = root.getView();
-            if (view != null) {
-                view.assignParent(null);
-            }
-
             final int index = mRoots.indexOf(root);
             if (index >= 0) {
                 mRoots.remove(index);
