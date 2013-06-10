@@ -619,7 +619,7 @@
     <string name="permdesc_cache_filesystem" msgid="5578967642265550955">"允許應用程式讀取及寫入快取檔案系統。"</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"撥打/接聽網路電話"</string>
     <string name="permdesc_use_sip" msgid="4717632000062674294">"允許應用程式使用 SIP 服務撥打/接聽網路電話。"</string>
-    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"讀取網路用量記錄"</string>
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"讀取網路用量紀錄"</string>
     <string name="permdesc_readNetworkUsageHistory" msgid="7689060749819126472">"允許應用程式讀取特定網路和應用程式的網路使用記錄。"</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"管理網路政策"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"允許應用程式管理網路政策並定義應用程式專用規則。"</string>
