@@ -1719,6 +1719,9 @@ public class Notification implements Parcelable
             extras.putBoolean(EXTRA_PROGRESS_INDETERMINATE, mProgressIndeterminate);
             extras.putBoolean(EXTRA_SHOW_CHRONOMETER, mUseChronometer);
             extras.putBoolean(EXTRA_SHOW_WHEN, mShowWhen);
+            if (mLargeIcon != null) {
+                extras.putParcelable(EXTRA_LARGE_ICON, mLargeIcon);
+            }
         }
 
         /**
