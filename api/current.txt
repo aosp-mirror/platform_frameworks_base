@@ -26343,6 +26343,7 @@ package android.view {
     method public float getY();
     method public boolean hasFocus();
     method public boolean hasFocusable();
+    method public boolean hasLayout();
     method public boolean hasOnClickListeners();
     method public boolean hasOverlappingRendering();
     method public boolean hasTransientState();
@@ -26355,6 +26356,7 @@ package android.view {
     method public void invalidate();
     method public void invalidateDrawable(android.graphics.drawable.Drawable);
     method public boolean isActivated();
+    method public boolean isAttachedToWindow();
     method public boolean isClickable();
     method public boolean isDirty();
     method public boolean isDrawingCacheEnabled();

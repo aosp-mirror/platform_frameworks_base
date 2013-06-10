@@ -2195,6 +2195,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static final int PFLAG3_VIEW_IS_ANIMATING_ALPHA = 0x2;
 
+    /**
+     * Flag indicating that the view has been through at least one layout since it
+     * was last attached to a window.
+     */
+    static final int PFLAG3_HAS_LAYOUT = 0x4;
+
 
     /* End of masks for mPrivateFlags3 */
 
@@ -6135,6 +6141,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
             }
         }
+    }
+
+    /**
+     * Returns true if this view is currently attached to a window.
+     */
+    public boolean isAttachedToWindow() {
+        return mAttachInfo != null;
+    }
+
+    /**
+     * Returns true if this view has been through at least one layout since it
+     * was last attached to or detached from a window.
+     */
+    public boolean hasLayout() {
+        return (mPrivateFlags3 & PFLAG3_HAS_LAYOUT) == PFLAG3_HAS_LAYOUT;
     }
 
     /**
@@ -11779,6 +11800,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags &= ~PFLAG_AWAKEN_SCROLL_BARS_ON_ATTACH;
         }
 
+        mPrivateFlags3 &= ~PFLAG3_HAS_LAYOUT;
+
         jumpDrawablesToCurrentState();
 
         clearAccessibilityFocus();
@@ -12065,6 +12088,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected void onDetachedFromWindow() {
         mPrivateFlags &= ~PFLAG_CANCEL_NEXT_UP_EVENT;
+        mPrivateFlags3 &= ~PFLAG3_HAS_LAYOUT;
 
         removeUnsetPressCallback();
         removeLongPressCallback();
@@ -14371,6 +14395,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
         }
         mPrivateFlags &= ~PFLAG_FORCE_LAYOUT;
+        mPrivateFlags3 |= PFLAG3_HAS_LAYOUT;
     }
 
     /**
