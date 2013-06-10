@@ -204,9 +204,28 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     }
 
     /**
+     * Wrapper around argument that indicates it's sensitive and shouldn't be
+     * logged.
+     */
+    public static class SensitiveArg {
+        private final Object mArg;
+
+        public SensitiveArg(Object arg) {
+            mArg = arg;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(mArg);
+        }
+    }
+
+    /**
      * Make command for daemon, escaping arguments as needed.
      */
-    private void makeCommand(StringBuilder builder, String cmd, Object... args) {
+    @VisibleForTesting
+    static void makeCommand(StringBuilder rawBuilder, StringBuilder logBuilder, int sequenceNumber,
+            String cmd, Object... args) {
         if (cmd.indexOf('\0') >= 0) {
             throw new IllegalArgumentException("Unexpected command: " + cmd);
         }
@@ -214,16 +233,26 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
             throw new IllegalArgumentException("Arguments must be separate from command");
         }
 
-        builder.append(cmd);
+        rawBuilder.append(sequenceNumber).append(' ').append(cmd);
+        logBuilder.append(sequenceNumber).append(' ').append(cmd);
         for (Object arg : args) {
             final String argString = String.valueOf(arg);
             if (argString.indexOf('\0') >= 0) {
                 throw new IllegalArgumentException("Unexpected argument: " + arg);
             }
 
-            builder.append(' ');
-            appendEscaped(builder, argString);
+            rawBuilder.append(' ');
+            logBuilder.append(' ');
+
+            appendEscaped(rawBuilder, argString);
+            if (arg instanceof SensitiveArg) {
+                logBuilder.append("[scrubbed]");
+            } else {
+                appendEscaped(logBuilder, argString);
+            }
         }
+
+        rawBuilder.append('\0');
     }
 
     /**
@@ -303,27 +332,27 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
      */
     public NativeDaemonEvent[] execute(int timeout, String cmd, Object... args)
             throws NativeDaemonConnectorException {
-        final ArrayList<NativeDaemonEvent> events = Lists.newArrayList();
-
-        final int sequenceNumber = mSequenceNumber.incrementAndGet();
-        final StringBuilder cmdBuilder =
-                new StringBuilder(Integer.toString(sequenceNumber)).append(' ');
         final long startTime = SystemClock.elapsedRealtime();
 
-        makeCommand(cmdBuilder, cmd, args);
+        final ArrayList<NativeDaemonEvent> events = Lists.newArrayList();
 
-        final String logCmd = cmdBuilder.toString(); /* includes cmdNum, cmd, args */
+        final StringBuilder rawBuilder = new StringBuilder();
+        final StringBuilder logBuilder = new StringBuilder();
+        final int sequenceNumber = mSequenceNumber.incrementAndGet();
+
+        makeCommand(rawBuilder, logBuilder, sequenceNumber, cmd, args);
+
+        final String rawCmd = rawBuilder.toString();
+        final String logCmd = logBuilder.toString();
+
         log("SND -> {" + logCmd + "}");
-
-        cmdBuilder.append('\0');
-        final String sentCmd = cmdBuilder.toString(); /* logCmd + \0 */
 
         synchronized (mDaemonLock) {
             if (mOutputStream == null) {
                 throw new NativeDaemonConnectorException("missing output stream");
             } else {
                 try {
-                    mOutputStream.write(sentCmd.getBytes(Charsets.UTF_8));
+                    mOutputStream.write(rawCmd.getBytes(Charsets.UTF_8));
                 } catch (IOException e) {
                     throw new NativeDaemonConnectorException("problem sending command", e);
                 }
@@ -332,7 +361,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
         NativeDaemonEvent event = null;
         do {
-            event = mResponseQueue.remove(sequenceNumber, timeout, sentCmd);
+            event = mResponseQueue.remove(sequenceNumber, timeout, logCmd);
             if (event == null) {
                 loge("timed-out waiting for response to " + logCmd);
                 throw new NativeDaemonFailureException(logCmd, event);
@@ -447,10 +476,11 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
     private static class ResponseQueue {
 
         private static class PendingCmd {
-            public int cmdNum;
+            public final int cmdNum;
+            public final String logCmd;
+
             public BlockingQueue<NativeDaemonEvent> responses =
                     new ArrayBlockingQueue<NativeDaemonEvent>(10);
-            public String request;
 
             // The availableResponseCount member is used to track when we can remove this
             // instance from the ResponseQueue.
@@ -468,7 +498,11 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
             // hold references to this instance already so it can be removed from
             // mPendingCmds queue.
             public int availableResponseCount;
-            public PendingCmd(int c, String r) {cmdNum = c; request = r;}
+
+            public PendingCmd(int cmdNum, String logCmd) {
+                this.cmdNum = cmdNum;
+                this.logCmd = logCmd;
+            }
         }
 
         private final LinkedList<PendingCmd> mPendingCmds;
@@ -497,7 +531,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                         // let any waiter timeout waiting for this
                         PendingCmd pendingCmd = mPendingCmds.remove();
                         Slog.e("NativeDaemonConnector.ResponseQueue",
-                                "Removing request: " + pendingCmd.request + " (" +
+                                "Removing request: " + pendingCmd.logCmd + " (" +
                                 pendingCmd.cmdNum + ")");
                     }
                     found = new PendingCmd(cmdNum, null);
@@ -515,7 +549,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
 
         // note that the timeout does not count time in deep sleep.  If you don't want
         // the device to sleep, hold a wakelock
-        public NativeDaemonEvent remove(int cmdNum, int timeoutMs, String origCmd) {
+        public NativeDaemonEvent remove(int cmdNum, int timeoutMs, String logCmd) {
             PendingCmd found = null;
             synchronized (mPendingCmds) {
                 for (PendingCmd pendingCmd : mPendingCmds) {
@@ -525,7 +559,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                     }
                 }
                 if (found == null) {
-                    found = new PendingCmd(cmdNum, origCmd);
+                    found = new PendingCmd(cmdNum, logCmd);
                     mPendingCmds.add(found);
                 }
                 found.availableResponseCount--;
@@ -547,7 +581,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
             pw.println("Pending requests:");
             synchronized (mPendingCmds) {
                 for (PendingCmd pendingCmd : mPendingCmds) {
-                    pw.println("  Cmd " + pendingCmd.cmdNum + " - " + pendingCmd.request);
+                    pw.println("  Cmd " + pendingCmd.cmdNum + " - " + pendingCmd.logCmd);
                 }
             }
         }

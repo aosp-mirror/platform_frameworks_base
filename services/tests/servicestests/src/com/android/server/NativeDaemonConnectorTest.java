@@ -17,9 +17,12 @@
 package com.android.server;
 
 import static com.android.server.NativeDaemonConnector.appendEscaped;
+import static com.android.server.NativeDaemonConnector.makeCommand;
 
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
+
+import com.android.server.NativeDaemonConnector.SensitiveArg;
 
 /**
  * Tests for {@link NativeDaemonConnector}.
@@ -66,5 +69,29 @@ public class NativeDaemonConnectorTest extends AndroidTestCase {
         builder.setLength(0);
         appendEscaped(builder, "caf\u00E9 c\u00F6ffee");
         assertEquals("\"caf\u00E9 c\u00F6ffee\"", builder.toString());
+    }
+
+    public void testSensitiveArgs() throws Exception {
+        final StringBuilder rawBuilder = new StringBuilder();
+        final StringBuilder logBuilder = new StringBuilder();
+
+        rawBuilder.setLength(0);
+        logBuilder.setLength(0);
+        makeCommand(rawBuilder, logBuilder, 1, "foo", "bar", "baz");
+        assertEquals("1 foo bar baz\0", rawBuilder.toString());
+        assertEquals("1 foo bar baz", logBuilder.toString());
+
+        rawBuilder.setLength(0);
+        logBuilder.setLength(0);
+        makeCommand(rawBuilder, logBuilder, 1, "foo", new SensitiveArg("bar"), "baz");
+        assertEquals("1 foo bar baz\0", rawBuilder.toString());
+        assertEquals("1 foo [scrubbed] baz", logBuilder.toString());
+
+        rawBuilder.setLength(0);
+        logBuilder.setLength(0);
+        makeCommand(rawBuilder, logBuilder, 1, "foo", new SensitiveArg("foo bar"), "baz baz",
+                new SensitiveArg("wat"));
+        assertEquals("1 foo \"foo bar\" \"baz baz\" wat\0", rawBuilder.toString());
+        assertEquals("1 foo [scrubbed] \"baz baz\" [scrubbed]", logBuilder.toString());
     }
 }
