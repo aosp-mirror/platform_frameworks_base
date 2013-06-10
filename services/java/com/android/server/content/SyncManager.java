@@ -1971,6 +1971,10 @@ public class SyncManager {
                 for (int i = 0, N = info.periodicSyncs.size(); i < N; i++) {
                     final Bundle extras = info.periodicSyncs.get(i).first;
                     final Long periodInMillis = info.periodicSyncs.get(i).second * 1000;
+                    // Skip if the period is invalid
+                    if (periodInMillis <= 0) {
+                        continue;
+                    }
                     // find when this periodic sync was last scheduled to run
                     final long lastPollTimeAbsolute = status.getPeriodicSyncTime(i);
 
