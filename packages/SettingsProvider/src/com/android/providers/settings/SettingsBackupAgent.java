@@ -20,6 +20,7 @@ import android.app.backup.BackupAgentHelper;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.FullBackupDataOutput;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -330,7 +331,16 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                 if (DEBUG_BACKUP) {
                     Log.v(TAG, "Starting deferred restore of wifi data");
                 }
+                final ContentResolver cr = getContentResolver();
+                final int scanAlways = Settings.Global.getInt(cr,
+                        Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0);
                 final int retainedWifiState = enableWifi(false);
+                if (scanAlways != 0) {
+                    Settings.Global.putInt(cr,
+                            Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0);
+                    // !!! Give the wifi stack a moment to quiesce
+                    try { Thread.sleep(1000); } catch (InterruptedException e) {}
+                }
                 if (restoredSupplicantData != null) {
                     restoreWifiSupplicant(FILE_WIFI_SUPPLICANT,
                             restoredSupplicantData, restoredSupplicantData.length);
@@ -344,6 +354,10 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                             restoredWifiConfigFile, restoredWifiConfigFile.length);
                 }
                 // restore the previous WIFI state.
+                if (scanAlways != 0) {
+                    Settings.Global.putInt(cr,
+                            Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, scanAlways);
+                }
                 enableWifi(retainedWifiState == WifiManager.WIFI_STATE_ENABLED ||
                         retainedWifiState == WifiManager.WIFI_STATE_ENABLING);
             }
