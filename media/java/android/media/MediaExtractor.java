@@ -199,9 +199,9 @@ final public class MediaExtractor {
     public native final int getTrackCount();
 
     /**
-     * Get the PSSH info if present. This returns a map of uuid-to-bytes, with the uuid specifying
+     * Get the PSSH info if present.
+     * @return a map of uuid-to-bytes, with the uuid specifying
      * the crypto scheme, and the bytes being the data specific to that scheme.
-     * {@hide}
      */
     public Map<UUID, byte[]> getPsshInfo() {
         Map<UUID, byte[]> psshMap = null;
