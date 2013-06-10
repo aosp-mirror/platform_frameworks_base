@@ -17,10 +17,12 @@
 package com.google.android.test.activity;
 
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -137,41 +139,35 @@ public class ArrayMapTests {
             }
         }
 
+        return true;
+    }
+
+    private static boolean compareSets(HashSet set, ArraySet array) {
+        if (set.size() != array.size()) {
+            Log.e("test", "Bad size: expected " + set.size() + ", got " + array.size());
+            return false;
+        }
+
+        for (Object entry : set) {
+            if (!array.contains(entry)) {
+                Log.e("test", "Bad value: expected " + entry + " not found in ArraySet");
+                return false;
+            }
+        }
+
+        for (int i=0; i<array.size(); i++) {
+            Object entry = array.valueAt(i);
+            if (!set.contains(entry)) {
+                Log.e("test", "Bad value: unexpected " + entry + " in ArraySet");
+                return false;
+            }
+        }
+
         int index = 0;
-        for (Object entry : array.entrySet()) {
-            Object key = ((Map.Entry)entry).getKey();
-            Object value = ((Map.Entry)entry).getValue();
-            Object realKey = array.keyAt(index);
-            Object realValue = array.valueAt(index);
-            if (!compare(key, realKey)) {
-                Log.e("test", "Bad entry iterator: expected key " + realKey + ", got " + key
-                        + " at index " + index);
-                return false;
-            }
-            if (!compare(value, realValue)) {
-                Log.e("test", "Bad entry iterator: expected value " + realValue + ", got " + value
-                        + " at index " + index);
-                return false;
-            }
-            index++;
-        }
-
-        index = 0;
-        for (Object key : array.keySet()) {
-            Object realKey = array.keyAt(index);
-            if (!compare(key, realKey)) {
-                Log.e("test", "Bad key iterator: expected key " + realKey + ", got " + key
-                        + " at index " + index);
-                return false;
-            }
-            index++;
-        }
-
-        index = 0;
-        for (Object value : array.values()) {
-            Object realValue = array.valueAt(index);
-            if (!compare(value, realValue)) {
-                Log.e("test", "Bad value iterator: expected value " + realValue + ", got " + value
+        for (Object entry : array) {
+            Object realEntry = array.valueAt(index);
+            if (!compare(entry, realEntry)) {
+                Log.e("test", "Bad iterator: expected value " + realEntry + ", got " + entry
                         + " at index " + index);
                 return false;
             }
@@ -190,14 +186,14 @@ public class ArrayMapTests {
             Object value = entry.getKey();
             Object realValue = array.keyAt(index);
             if (!compare(realValue, value)) {
-                Log.e("test", "Bad hash array entry set: expected key " + realValue
+                Log.e("test", "Bad array map entry set: expected key " + realValue
                         + ", got " + value + " at index " + index);
                 return false;
             }
             value = entry.getValue();
             realValue = array.valueAt(index);
             if (!compare(realValue, value)) {
-                Log.e("test", "Bad hash array entry set: expected value " + realValue
+                Log.e("test", "Bad array map entry set: expected value " + realValue
                         + ", got " + value + " at index " + index);
                 return false;
             }
@@ -211,7 +207,7 @@ public class ArrayMapTests {
             Object value = keyIt.next();
             Object realValue = array.keyAt(index);
             if (!compare(realValue, value)) {
-                Log.e("test", "Bad hash array key set: expected key " + realValue
+                Log.e("test", "Bad array map key set: expected key " + realValue
                         + ", got " + value + " at index " + index);
                 return false;
             }
@@ -225,7 +221,7 @@ public class ArrayMapTests {
             Object value = valueIt.next();
             Object realValue = array.valueAt(index);
             if (!compare(realValue, value)) {
-                Log.e("test", "Bad hash array value col: expected value " + realValue
+                Log.e("test", "Bad array map value col: expected value " + realValue
                         + ", got " + value + " at index " + index);
                 return false;
             }
@@ -235,7 +231,7 @@ public class ArrayMapTests {
         return true;
     }
 
-    private static void dump(HashMap map, ArrayMap array) {
+    private static void dump(Map map, ArrayMap array) {
         Log.e("test", "HashMap of " + map.size() + " entries:");
         Set<Map.Entry> mapSet = map.entrySet();
         for (Map.Entry entry : mapSet) {
@@ -244,6 +240,17 @@ public class ArrayMapTests {
         Log.e("test", "ArrayMap of " + array.size() + " entries:");
         for (int i=0; i<array.size(); i++) {
             Log.e("test", "    " + array.keyAt(i) + " -> " + array.valueAt(i));
+        }
+    }
+
+    private static void dump(Set set, ArraySet array) {
+        Log.e("test", "HashSet of " + set.size() + " entries:");
+        for (Object entry : set) {
+            Log.e("test", "    " + entry);
+        }
+        Log.e("test", "ArraySet of " + array.size() + " entries:");
+        for (int i=0; i<array.size(); i++) {
+            Log.e("test", "    " + array.valueAt(i));
         }
     }
 
@@ -260,60 +267,93 @@ public class ArrayMapTests {
     }
 
     public static void run() {
-        HashMap<ControlledHash, Integer> mHashMap = new HashMap<ControlledHash, Integer>();
-        ArrayMap<ControlledHash, Integer> mArrayMap = new ArrayMap<ControlledHash, Integer>();
+        HashMap<ControlledHash, Integer> hashMap = new HashMap<ControlledHash, Integer>();
+        ArrayMap<ControlledHash, Integer> arrayMap = new ArrayMap<ControlledHash, Integer>();
+        HashSet<ControlledHash> hashSet = new HashSet<ControlledHash>();
+        ArraySet<ControlledHash> arraySet = new ArraySet<ControlledHash>();
 
         for (int i=0; i<OPS.length; i++) {
-            Integer oldMap;
+            Integer oldHash;
             Integer oldArray;
+            boolean hashChanged;
+            boolean arrayChanged;
             switch (OPS[i]) {
                 case OP_ADD:
                     Log.i("test", "Adding key: " + KEYS[i]);
-                    oldMap = mHashMap.put(new ControlledHash(KEYS[i]), i);
-                    oldArray = mArrayMap.put(new ControlledHash(KEYS[i]), i);
+                    oldHash = hashMap.put(new ControlledHash(KEYS[i]), i);
+                    oldArray = arrayMap.put(new ControlledHash(KEYS[i]), i);
+                    hashChanged = hashSet.add(new ControlledHash(KEYS[i]));
+                    arrayChanged = arraySet.add(new ControlledHash(KEYS[i]));
                     break;
                 case OP_REM:
                     Log.i("test", "Removing key: " + KEYS[i]);
-                    oldMap = mHashMap.remove(new ControlledHash(KEYS[i]));
-                    oldArray = mArrayMap.remove(new ControlledHash(KEYS[i]));
+                    oldHash = hashMap.remove(new ControlledHash(KEYS[i]));
+                    oldArray = arrayMap.remove(new ControlledHash(KEYS[i]));
+                    hashChanged = hashSet.remove(new ControlledHash(KEYS[i]));
+                    arrayChanged = arraySet.remove(new ControlledHash(KEYS[i]));
                     break;
                 default:
                     Log.e("test", "Bad operation " + OPS[i] + " @ " + i);
                     return;
             }
-            if (!compare(oldMap, oldArray)) {
-                Log.e("test", "Bad result: expected " + oldMap + ", got " + oldArray);
-                dump(mHashMap, mArrayMap);
+            if (!compare(oldHash, oldArray)) {
+                Log.e("test", "Bad result: expected " + oldHash + ", got " + oldArray);
+                dump(hashMap, arrayMap);
                 return;
             }
-            if (!validateArrayMap(mArrayMap)) {
-                dump(mHashMap, mArrayMap);
+            if (hashChanged != arrayChanged) {
+                Log.e("test", "Bad change: expected " + hashChanged + ", got " + arrayChanged);
+                dump(hashSet, arraySet);
                 return;
             }
-            if (!compareMaps(mHashMap, mArrayMap)) {
-                dump(mHashMap, mArrayMap);
+            if (!validateArrayMap(arrayMap)) {
+                dump(hashMap, arrayMap);
+                return;
+            }
+            if (!compareMaps(hashMap, arrayMap)) {
+                dump(hashMap, arrayMap);
+                return;
+            }
+            if (!compareSets(hashSet, arraySet)) {
+                dump(hashSet, arraySet);
                 return;
             }
         }
 
-        mArrayMap.put(new ControlledHash(50000), 100);
+        arrayMap.put(new ControlledHash(50000), 100);
         ControlledHash lookup = new ControlledHash(50000);
-        Iterator<ControlledHash> it = mArrayMap.keySet().iterator();
+        Iterator<ControlledHash> it = arrayMap.keySet().iterator();
         while (it.hasNext()) {
             if (it.next().equals(lookup)) {
                 it.remove();
             }
         }
-        if (mArrayMap.containsKey(lookup)) {
-            Log.e("test", "Bad iterator: didn't remove test key");
-            dump(mHashMap, mArrayMap);
+        if (arrayMap.containsKey(lookup)) {
+            Log.e("test", "Bad map iterator: didn't remove test key");
+            dump(hashMap, arrayMap);
         }
 
-        if (!equalsTest()) {
+        arraySet.add(new ControlledHash(50000));
+        it = arraySet.iterator();
+        while (it.hasNext()) {
+            if (it.next().equals(lookup)) {
+                it.remove();
+            }
+        }
+        if (arraySet.contains(lookup)) {
+            Log.e("test", "Bad set iterator: didn't remove test key");
+            dump(hashSet, arraySet);
+        }
+
+        if (!equalsMapTest()) {
             return;
         }
 
-        // copy constructor test
+        if (!equalsSetTest()) {
+            return;
+        }
+
+        // map copy constructor test
         ArrayMap newMap = new ArrayMap<Integer, String>();
         for (int i = 0; i < 10; ++i) {
             newMap.put(i, String.valueOf(i));
@@ -322,15 +362,31 @@ public class ArrayMapTests {
         if (!compare(mapCopy, newMap)) {
             Log.e("test", "ArrayMap copy constructor failure: expected " +
                     newMap + ", got " + mapCopy);
-            dump(mHashMap, mArrayMap);
+            dump(newMap, mapCopy);
+            return;
+        }
+
+        // set copy constructor test
+        ArraySet newSet = new ArraySet<Integer>();
+        for (int i = 0; i < 10; ++i) {
+            newSet.add(i);
+        }
+        ArraySet setCopy = new ArraySet(newSet);
+        if (!compare(setCopy, newSet)) {
+            Log.e("test", "ArraySet copy constructor failure: expected " +
+                    newSet + ", got " + setCopy);
+            dump(newSet, setCopy);
             return;
         }
 
         Log.e("test", "Test successful; printing final map.");
-        dump(mHashMap, mArrayMap);
+        dump(hashMap, arrayMap);
+
+        Log.e("test", "Test successful; printing final set.");
+        dump(hashSet, arraySet);
     }
 
-    private static boolean equalsTest() {
+    private static boolean equalsMapTest() {
         ArrayMap<Integer, String> map1 = new ArrayMap<Integer, String>();
         ArrayMap<Integer, String> map2 = new ArrayMap<Integer, String>();
         HashMap<Integer, String> map3 = new HashMap<Integer, String>();
@@ -363,6 +419,44 @@ public class ArrayMapTests {
         if (compare(map1, map2) || compare(map1, map3) || compare(map3, map1)) {
             Log.e("test", "ArrayMap equals failure for map contents " + map1 + ", " +
                     map2 + ", " + map3);
+            return false;
+        }
+
+        return true;
+    }
+
+    private static boolean equalsSetTest() {
+        ArraySet<Integer> set1 = new ArraySet<Integer>();
+        ArraySet<Integer> set2 = new ArraySet<Integer>();
+        HashSet<Integer> set3 = new HashSet<Integer>();
+        if (!compare(set1, set2) || !compare(set1, set3) || !compare(set3, set2)) {
+            Log.e("test", "ArraySet equals failure for empty sets " + set1 + ", " +
+                    set2 + ", " + set3);
+            return false;
+        }
+
+        for (int i = 0; i < 10; ++i) {
+            set1.add(i);
+            set2.add(i);
+            set3.add(i);
+        }
+        if (!compare(set1, set2) || !compare(set1, set3) || !compare(set3, set2)) {
+            Log.e("test", "ArraySet equals failure for populated sets " + set1 + ", " +
+                    set2 + ", " + set3);
+            return false;
+        }
+
+        set1.remove(0);
+        if (compare(set1, set2) || compare(set1, set3) || compare(set3, set1)) {
+            Log.e("test", "ArraSet equals failure for set size " + set1 + ", " +
+                    set2 + ", " + set3);
+            return false;
+        }
+
+        set1.add(-1);
+        if (compare(set1, set2) || compare(set1, set3) || compare(set3, set1)) {
+            Log.e("test", "ArraySet equals failure for set contents " + set1 + ", " +
+                    set2 + ", " + set3);
             return false;
         }
 
