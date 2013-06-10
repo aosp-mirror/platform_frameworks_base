@@ -7024,7 +7024,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    private void notifySubtreeAccessibilityStateChangedIfNeeded() {
+    public void notifySubtreeAccessibilityStateChangedIfNeeded() {
         if (!AccessibilityManager.getInstance(mContext).isEnabled()) {
             return;
         }
@@ -18867,6 +18867,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             final long minEventIntevalMillis =
                     ViewConfiguration.getSendRecurringAccessibilityEventsInterval();
             if (timeSinceLastMillis >= minEventIntevalMillis) {
+                removeCallbacks(this);
                 run();
             } else {
                 postDelayed(this, minEventIntevalMillis - timeSinceLastMillis);
