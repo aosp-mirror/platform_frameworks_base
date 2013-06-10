@@ -580,7 +580,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         } catch (SettingNotFoundException e) {
         }
 
-        mBugreportState.enabled = enabled;
+        mBugreportState.enabled = enabled && mUserTracker.isCurrentUserOwner();
         mBugreportCallback.refreshView(mBugreportTile, mBugreportState);
     }
 
