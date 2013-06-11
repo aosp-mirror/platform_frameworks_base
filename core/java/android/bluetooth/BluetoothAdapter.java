@@ -599,6 +599,25 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * enable or disable Bluetooth HCI snoop log.
+     *
+     * <p>Requires the {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission
+     *
+     * @return true to indicate configure HCI log successfully, or false on
+     *         immediate error
+     * @hide
+     */
+    public boolean configHciSnoopLog(boolean enable) {
+        try {
+            synchronized(mManagerCallback) {
+                if (mService != null) return mService.configHciSnoopLog(enable);
+            }
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return false;
+    }
+
+    /**
      * Get the UUIDs supported by the local Bluetooth adapter.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
