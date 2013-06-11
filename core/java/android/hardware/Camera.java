@@ -2769,21 +2769,24 @@ public class Camera {
          * JPEG {@link PictureCallback}. The camera driver may set orientation
          * in the EXIF header without rotating the picture. Or the driver may
          * rotate the picture and the EXIF thumbnail. If the Jpeg picture is
-         * rotated, the orientation in the EXIF header will be missing or 1
-         * (row #0 is top and column #0 is left side).
+         * rotated, the orientation in the EXIF header will be missing or 1 (row
+         * #0 is top and column #0 is left side).
          *
-         * <p>If applications want to rotate the picture to match the orientation
-         * of what users see, apps should use {@link
-         * android.view.OrientationEventListener} and {@link CameraInfo}.
-         * The value from OrientationEventListener is relative to the natural
-         * orientation of the device. CameraInfo.orientation is the angle
-         * between camera orientation and natural device orientation. The sum
-         * of the two is the rotation angle for back-facing camera. The
-         * difference of the two is the rotation angle for front-facing camera.
-         * Note that the JPEG pictures of front-facing cameras are not mirrored
-         * as in preview display.
+         * <p>
+         * If applications want to rotate the picture to match the orientation
+         * of what users see, apps should use
+         * {@link android.view.OrientationEventListener} and
+         * {@link android.hardware.Camera.CameraInfo}. The value from
+         * OrientationEventListener is relative to the natural orientation of
+         * the device. CameraInfo.orientation is the angle between camera
+         * orientation and natural device orientation. The sum of the two is the
+         * rotation angle for back-facing camera. The difference of the two is
+         * the rotation angle for front-facing camera. Note that the JPEG
+         * pictures of front-facing cameras are not mirrored as in preview
+         * display.
          *
-         * <p>For example, suppose the natural orientation of the device is
+         * <p>
+         * For example, suppose the natural orientation of the device is
          * portrait. The device is rotated 270 degrees clockwise, so the device
          * orientation is 270. Suppose a back-facing camera sensor is mounted in
          * landscape and the top side of the camera sensor is aligned with the
