@@ -28,6 +28,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable.ConstantState;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Trace;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -35,6 +36,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.util.LongSparseArray;
+import android.view.DisplayAdjustments;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -117,8 +119,9 @@ public class Resources {
     private final Configuration mConfiguration = new Configuration();
     /*package*/ final DisplayMetrics mMetrics = new DisplayMetrics();
     private NativePluralRules mPluralRule;
-    
-    private CompatibilityInfo mCompatibilityInfo;
+
+    private CompatibilityInfo mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
+    private WeakReference<IBinder> mToken;
 
     static {
         sPreloadedDrawables = new LongSparseArray[2];
@@ -173,7 +176,7 @@ public class Resources {
      *               selecting/computing resource values (optional).
      */
     public Resources(AssetManager assets, DisplayMetrics metrics, Configuration config) {
-        this(assets, metrics, config, null);
+        this(assets, metrics, config, CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
     }
 
     /**
@@ -184,15 +187,16 @@ public class Resources {
      *                selecting/computing resource values.
      * @param config Desired device configuration to consider when 
      *               selecting/computing resource values (optional).
-     * @param compInfo this resource's compatibility info. It will use the default compatibility
-     *  info when it's null.
+     * @param compatInfo this resource's compatibility info. Must not be null.
+     * @param token The Activity token for determining stack affiliation. Usually null.
      * @hide
      */
-    public Resources(AssetManager assets, DisplayMetrics metrics,
-            Configuration config, CompatibilityInfo compInfo) {
+    public Resources(AssetManager assets, DisplayMetrics metrics, Configuration config,
+            CompatibilityInfo compatInfo, IBinder token) {
         mAssets = assets;
         mMetrics.setToDefaults();
-        mCompatibilityInfo = compInfo;
+        mCompatibilityInfo = compatInfo;
+        mToken = new WeakReference<IBinder>(token);
         updateConfiguration(config, metrics);
         assets.ensureStringBlocks();
     }

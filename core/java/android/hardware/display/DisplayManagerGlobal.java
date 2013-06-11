@@ -28,7 +28,7 @@ import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.CompatibilityInfoHolder;
+import android.view.DisplayAdjustments;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
@@ -164,18 +164,18 @@ public final class DisplayManagerGlobal {
      * Gets information about a logical display.
      *
      * The display metrics may be adjusted to provide compatibility
-     * for legacy applications.
+     * for legacy applications or limited screen areas.
      *
      * @param displayId The logical display id.
-     * @param cih The compatibility info, or null if none is required.
+     * @param daj The compatibility info and activityToken.
      * @return The display object, or null if there is no display with the given id.
      */
-    public Display getCompatibleDisplay(int displayId, CompatibilityInfoHolder cih) {
+    public Display getCompatibleDisplay(int displayId, DisplayAdjustments daj) {
         DisplayInfo displayInfo = getDisplayInfo(displayId);
         if (displayInfo == null) {
             return null;
         }
-        return new Display(this, displayId, displayInfo, cih);
+        return new Display(this, displayId, displayInfo, daj);
     }
 
     /**
@@ -185,7 +185,18 @@ public final class DisplayManagerGlobal {
      * @return The display object, or null if there is no display with the given id.
      */
     public Display getRealDisplay(int displayId) {
-        return getCompatibleDisplay(displayId, null);
+        return getCompatibleDisplay(displayId, DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
+    }
+
+    /**
+     * Gets information about a logical display without applying any compatibility metrics.
+     *
+     * @param displayId The logical display id.
+     * @param IBinder the activity token for this display.
+     * @return The display object, or null if there is no display with the given id.
+     */
+    public Display getRealDisplay(int displayId, IBinder token) {
+        return getCompatibleDisplay(displayId, new DisplayAdjustments(token));
     }
 
     public void registerDisplayListener(DisplayListener listener, Handler handler) {

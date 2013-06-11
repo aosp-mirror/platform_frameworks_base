@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.content.res.CompatibilityInfo;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -60,7 +61,7 @@ public final class Display {
     private final String mAddress;
     private final int mOwnerUid;
     private final String mOwnerPackageName;
-    private final CompatibilityInfoHolder mCompatibilityInfo;
+    private final DisplayAdjustments mDisplayAdjustments;
 
     private DisplayInfo mDisplayInfo; // never null
     private boolean mIsValid;
@@ -203,11 +204,11 @@ public final class Display {
      */
     public Display(DisplayManagerGlobal global,
             int displayId, DisplayInfo displayInfo /*not null*/,
-            CompatibilityInfoHolder compatibilityInfo) {
+            DisplayAdjustments daj) {
         mGlobal = global;
         mDisplayId = displayId;
         mDisplayInfo = displayInfo;
-        mCompatibilityInfo = compatibilityInfo;
+        mDisplayAdjustments = daj;
         mIsValid = true;
 
         // Cache properties that cannot change as long as the display is valid.
@@ -348,11 +349,11 @@ public final class Display {
     /**
      * Gets the compatibility info used by this display instance.
      *
-     * @return The compatibility info holder, or null if none is required.
+     * @return The display adjustments holder, or null if none is required.
      * @hide
      */
-    public CompatibilityInfoHolder getCompatibilityInfo() {
-        return mCompatibilityInfo;
+    public DisplayAdjustments getDisplayAdjustments() {
+        return mDisplayAdjustments;
     }
 
     /**
@@ -393,7 +394,7 @@ public final class Display {
     public void getSize(Point outSize) {
         synchronized (this) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getAppMetrics(mTempMetrics, mCompatibilityInfo);
+            mDisplayInfo.getAppMetrics(mTempMetrics, mDisplayAdjustments);
             outSize.x = mTempMetrics.widthPixels;
             outSize.y = mTempMetrics.heightPixels;
         }
@@ -408,7 +409,7 @@ public final class Display {
     public void getRectSize(Rect outSize) {
         synchronized (this) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getAppMetrics(mTempMetrics, mCompatibilityInfo);
+            mDisplayInfo.getAppMetrics(mTempMetrics, mDisplayAdjustments);
             outSize.set(0, 0, mTempMetrics.widthPixels, mTempMetrics.heightPixels);
         }
     }
@@ -573,7 +574,7 @@ public final class Display {
     public void getMetrics(DisplayMetrics outMetrics) {
         synchronized (this) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getAppMetrics(outMetrics, mCompatibilityInfo);
+            mDisplayInfo.getAppMetrics(outMetrics, mDisplayAdjustments);
         }
     }
 
@@ -611,7 +612,9 @@ public final class Display {
     public void getRealMetrics(DisplayMetrics outMetrics) {
         synchronized (this) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getLogicalMetrics(outMetrics, null);
+            mDisplayInfo.getLogicalMetrics(outMetrics,
+                    CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO,
+                    mDisplayAdjustments.getActivityToken());
         }
     }
 
@@ -658,7 +661,7 @@ public final class Display {
         long now = SystemClock.uptimeMillis();
         if (now > mLastCachedAppSizeUpdate + CACHED_APP_SIZE_DURATION_MILLIS) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getAppMetrics(mTempMetrics, mCompatibilityInfo);
+            mDisplayInfo.getAppMetrics(mTempMetrics, mDisplayAdjustments);
             mCachedAppWidthCompat = mTempMetrics.widthPixels;
             mCachedAppHeightCompat = mTempMetrics.heightPixels;
             mLastCachedAppSizeUpdate = now;
@@ -670,7 +673,7 @@ public final class Display {
     public String toString() {
         synchronized (this) {
             updateDisplayInfoLocked();
-            mDisplayInfo.getAppMetrics(mTempMetrics, mCompatibilityInfo);
+            mDisplayInfo.getAppMetrics(mTempMetrics, mDisplayAdjustments);
             return "Display id " + mDisplayId + ": " + mDisplayInfo
                     + ", " + mTempMetrics + ", isValid=" + mIsValid;
         }

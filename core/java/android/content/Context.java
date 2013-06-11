@@ -35,7 +35,7 @@ import android.os.Looper;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AttributeSet;
-import android.view.CompatibilityInfoHolder;
+import android.view.DisplayAdjustments;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -2752,15 +2752,15 @@ public abstract class Context {
     public abstract Context createDisplayContext(Display display);
 
     /**
-     * Gets the compatibility info holder for this context.  This information
-     * is provided on a per-application basis and is used to simulate lower density
-     * display metrics for legacy applications.
+     * Gets the display adjustments holder for this context.  This information
+     * is provided on a per-application or activity basis and is used to simulate lower density
+     * display metrics for legacy applications and restricted screen sizes.
      *
      * @param displayId The display id for which to get compatibility info.
      * @return The compatibility info holder, or null if not required by the application.
      * @hide
      */
-    public abstract CompatibilityInfoHolder getCompatibilityInfo(int displayId);
+    public abstract DisplayAdjustments getDisplayAdjustments(int displayId);
 
     /**
      * Indicates whether this Context is restricted.

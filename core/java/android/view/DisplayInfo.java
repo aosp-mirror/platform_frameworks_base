@@ -17,6 +17,7 @@
 package android.view;
 
 import android.content.res.CompatibilityInfo;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
@@ -343,12 +344,22 @@ public final class DisplayInfo implements Parcelable {
         return 0;
     }
 
-    public void getAppMetrics(DisplayMetrics outMetrics, CompatibilityInfoHolder cih) {
-        getMetricsWithSize(outMetrics, cih, appWidth, appHeight);
+    public void getAppMetrics(DisplayMetrics outMetrics) {
+        getAppMetrics(outMetrics, CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
     }
 
-    public void getLogicalMetrics(DisplayMetrics outMetrics, CompatibilityInfoHolder cih) {
-        getMetricsWithSize(outMetrics, cih, logicalWidth, logicalHeight);
+    public void getAppMetrics(DisplayMetrics outMetrics, DisplayAdjustments displayAdjustments) {
+        getMetricsWithSize(outMetrics, displayAdjustments.getCompatibilityInfo(),
+                displayAdjustments.getActivityToken(), appWidth, appHeight);
+    }
+
+    public void getAppMetrics(DisplayMetrics outMetrics, CompatibilityInfo ci, IBinder token) {
+        getMetricsWithSize(outMetrics, ci, token, appWidth, appHeight);
+    }
+
+    public void getLogicalMetrics(DisplayMetrics outMetrics, CompatibilityInfo compatInfo,
+            IBinder token) {
+        getMetricsWithSize(outMetrics, compatInfo, token, logicalWidth, logicalHeight);
     }
 
     public int getNaturalWidth() {
@@ -368,8 +379,8 @@ public final class DisplayInfo implements Parcelable {
         return Display.hasAccess(uid, flags, ownerUid);
     }
 
-    private void getMetricsWithSize(DisplayMetrics outMetrics, CompatibilityInfoHolder cih,
-            int width, int height) {
+    private void getMetricsWithSize(DisplayMetrics outMetrics, CompatibilityInfo compatInfo,
+            IBinder token, int width, int height) {
         outMetrics.densityDpi = outMetrics.noncompatDensityDpi = logicalDensityDpi;
         outMetrics.noncompatWidthPixels  = outMetrics.widthPixels = width;
         outMetrics.noncompatHeightPixels = outMetrics.heightPixels = height;
@@ -380,11 +391,8 @@ public final class DisplayInfo implements Parcelable {
         outMetrics.xdpi = outMetrics.noncompatXdpi = physicalXDpi;
         outMetrics.ydpi = outMetrics.noncompatYdpi = physicalYDpi;
 
-        if (cih != null) {
-            CompatibilityInfo ci = cih.getIfNeeded();
-            if (ci != null) {
-                ci.applyToDisplayMetrics(outMetrics);
-            }
+        if (!compatInfo.equals(CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO)) {
+            compatInfo.applyToDisplayMetrics(outMetrics);
         }
     }
 

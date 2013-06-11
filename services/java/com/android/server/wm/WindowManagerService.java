@@ -97,6 +97,7 @@ import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.view.Choreographer;
 import android.view.Display;
+import android.view.DisplayAdjustments;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IApplicationToken;
@@ -6609,8 +6610,9 @@ public class WindowManagerService extends IWindowManager.Stub
             displayInfo.logicalDensityDpi = displayContent.mBaseDisplayDensity;
             displayInfo.appWidth = appWidth;
             displayInfo.appHeight = appHeight;
-            displayInfo.getLogicalMetrics(mRealDisplayMetrics, null);
-            displayInfo.getAppMetrics(mDisplayMetrics, null);
+            displayInfo.getLogicalMetrics(mRealDisplayMetrics,
+                    CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
+            displayInfo.getAppMetrics(mDisplayMetrics);
             mDisplayManagerService.setDisplayInfoOverrideFromWindowManager(
                     displayContent.getDisplayId(), displayInfo);
         }

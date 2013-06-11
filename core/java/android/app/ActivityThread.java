@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.view.DisplayAdjustments.DEVELOPMENT_RESOURCES_DEPEND_ON_ACTIVITY_TOKEN;
+
 import android.app.backup.BackupAgent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
@@ -75,7 +77,7 @@ import android.util.Log;
 import android.util.LogPrinter;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
-import android.view.CompatibilityInfoHolder;
+import android.view.DisplayAdjustments;
 import android.view.Display;
 import android.view.HardwareRenderer;
 import android.view.View;
@@ -209,8 +211,8 @@ public final class ActivityThread {
             = new HashMap<String, WeakReference<LoadedApk>>();
     final HashMap<String, WeakReference<LoadedApk>> mResourcePackages
             = new HashMap<String, WeakReference<LoadedApk>>();
-    final HashMap<CompatibilityInfo, DisplayMetrics> mDefaultDisplayMetrics
-            = new HashMap<CompatibilityInfo, DisplayMetrics>();
+    final HashMap<DisplayAdjustments, DisplayMetrics> mDefaultDisplayMetrics
+            = new HashMap<DisplayAdjustments, DisplayMetrics>();
     final HashMap<ResourcesKey, WeakReference<Resources> > mActiveResources
             = new HashMap<ResourcesKey, WeakReference<Resources> >();
     final ArrayList<ActivityClientRecord> mRelaunchingActivities
@@ -1554,6 +1556,7 @@ public final class ActivityThread {
     }
 
     private class Idler implements MessageQueue.IdleHandler {
+        @Override
         public final boolean queueIdle() {
             ActivityClientRecord a = mNewActivities;
             boolean stopProfiling = false;
@@ -1592,6 +1595,7 @@ public final class ActivityThread {
     }
 
     final class GcIdler implements MessageQueue.IdleHandler {
+        @Override
         public final boolean queueIdle() {
             doGcIfNeeded();
             return false;
@@ -1604,8 +1608,10 @@ public final class ActivityThread {
         final private Configuration mOverrideConfiguration;
         final private float mScale;
         final private int mHash;
+        final private IBinder mToken;
 
-        ResourcesKey(String resDir, int displayId, Configuration overrideConfiguration, float scale) {
+        ResourcesKey(String resDir, int displayId, Configuration overrideConfiguration,
+                float scale, IBinder token) {
             mResDir = resDir;
             mDisplayId = displayId;
             if (overrideConfiguration != null) {
@@ -1621,6 +1627,12 @@ public final class ActivityThread {
             hash = 31 * hash + (mOverrideConfiguration != null
                     ? mOverrideConfiguration.hashCode() : 0);
             hash = 31 * hash + Float.floatToIntBits(mScale);
+            if (DEVELOPMENT_RESOURCES_DEPEND_ON_ACTIVITY_TOKEN) {
+                mToken = token;
+                hash = 31 * hash + (mToken == null ? 0 : mToken.hashCode());
+            } else {
+                mToken = null;
+            }
             mHash = hash;
         }
 
@@ -1693,9 +1705,13 @@ public final class ActivityThread {
         mDefaultDisplayMetrics.clear();
     }
 
-    DisplayMetrics getDisplayMetricsLocked(int displayId, CompatibilityInfo ci) {
+    DisplayMetrics getDisplayMetricsLocked(int displayId) {
+        return getDisplayMetricsLocked(displayId, DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
+    }
+
+    DisplayMetrics getDisplayMetricsLocked(int displayId, DisplayAdjustments daj) {
         boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
-        DisplayMetrics dm = isDefaultDisplay ? mDefaultDisplayMetrics.get(ci) : null;
+        DisplayMetrics dm = isDefaultDisplay ? mDefaultDisplayMetrics.get(daj) : null;
         if (dm != null) {
             return dm;
         }
@@ -1709,12 +1725,10 @@ public final class ActivityThread {
         }
 
         if (isDefaultDisplay) {
-            mDefaultDisplayMetrics.put(ci, dm);
+            mDefaultDisplayMetrics.put(daj, dm);
         }
 
-        CompatibilityInfoHolder cih = new CompatibilityInfoHolder();
-        cih.set(ci);
-        Display d = displayManager.getCompatibleDisplay(displayId, cih);
+        Display d = displayManager.getCompatibleDisplay(displayId, daj);
         if (d != null) {
             d.getMetrics(dm);
         } else {
@@ -1736,7 +1750,7 @@ public final class ActivityThread {
         if (config == null) {
             return null;
         }
-        if (compat != null && !compat.supportsScreen()) {
+        if (!compat.supportsScreen()) {
             mMainThreadConfig.setTo(config);
             config = mMainThreadConfig;
             compat.applyToConfiguration(displayDensity, config);
@@ -1748,21 +1762,19 @@ public final class ActivityThread {
      * Creates the top level Resources for applications with the given compatibility info.
      *
      * @param resDir the resource directory.
-     * @param compInfo the compability info. It will use the default compatibility info when it's
-     * null.
+     * @param compatInfo the compability info. Must not be null.
+     * @param token the application token for determining stack bounds.
      */
-    Resources getTopLevelResources(String resDir,
-            int displayId, Configuration overrideConfiguration,
-            CompatibilityInfo compInfo) {
-        ResourcesKey key = new ResourcesKey(resDir,
-                displayId, overrideConfiguration,
-                compInfo.applicationScale);
+    Resources getTopLevelResources(String resDir, int displayId,
+            Configuration overrideConfiguration, CompatibilityInfo compatInfo, IBinder token) {
+        final float scale = compatInfo.applicationScale;
+        ResourcesKey key = new ResourcesKey(resDir, displayId, overrideConfiguration, scale,
+                token);
         Resources r;
         synchronized (mPackages) {
             // Resources is app scale dependent.
             if (false) {
-                Slog.w(TAG, "getTopLevelResources: " + resDir + " / "
-                        + compInfo.applicationScale);
+                Slog.w(TAG, "getTopLevelResources: " + resDir + " / " + scale);
             }
             WeakReference<Resources> wr = mActiveResources.get(key);
             r = wr != null ? wr.get() : null;
@@ -1787,7 +1799,7 @@ public final class ActivityThread {
         }
 
         //Slog.i(TAG, "Resource: key=" + key + ", display metrics=" + metrics);
-        DisplayMetrics dm = getDisplayMetricsLocked(displayId, null);
+        DisplayMetrics dm = getDisplayMetricsLocked(displayId);
         Configuration config;
         boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
         if (!isDefaultDisplay || key.mOverrideConfiguration != null) {
@@ -1801,7 +1813,7 @@ public final class ActivityThread {
         } else {
             config = getConfiguration();
         }
-        r = new Resources(assets, dm, config, compInfo);
+        r = new Resources(assets, dm, config, compatInfo, token);
         if (false) {
             Slog.i(TAG, "Created app resources " + resDir + " " + r + ": "
                     + r.getConfiguration() + " appScale="
@@ -1831,7 +1843,7 @@ public final class ActivityThread {
             int displayId, Configuration overrideConfiguration,
             LoadedApk pkgInfo) {
         return getTopLevelResources(resDir, displayId, overrideConfiguration,
-                pkgInfo.mCompatibilityInfo.get());
+                pkgInfo.getCompatibilityInfo(), null);
     }
 
     final Handler getHandler() {
@@ -2005,10 +2017,8 @@ public final class ActivityThread {
                 LoadedApk info = new LoadedApk(this, "android", context, null,
                         CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO);
                 context.init(info, null, this);
-                context.getResources().updateConfiguration(
-                        getConfiguration(), getDisplayMetricsLocked(
-                                Display.DEFAULT_DISPLAY,
-                                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO));
+                context.getResources().updateConfiguration(getConfiguration(),
+                        getDisplayMetricsLocked(Display.DEFAULT_DISPLAY));
                 mSystemContext = context;
                 //Slog.i(TAG, "Created system resources " + context.getResources()
                 //        + ": " + context.getResources().getConfiguration());
@@ -2034,7 +2044,7 @@ public final class ActivityThread {
             dalvik.system.VMRuntime.getRuntime().startJitCompilation();
         }
     }
-    
+
     void scheduleGcIdler() {
         if (!mGcIdlerScheduled) {
             mGcIdlerScheduled = true;
@@ -2301,7 +2311,7 @@ public final class ActivityThread {
             DisplayManagerGlobal dm = DisplayManagerGlobal.getInstance();
             for (int displayId : dm.getDisplayIds()) {
                 if (displayId != Display.DEFAULT_DISPLAY) {
-                    Display display = dm.getRealDisplay(displayId);
+                    Display display = dm.getRealDisplay(displayId, r.token);
                     baseContext = appContext.createDisplayContext(display);
                     break;
                 }
@@ -3408,11 +3418,11 @@ public final class ActivityThread {
     private void handleUpdatePackageCompatibilityInfo(UpdateCompatibilityData data) {
         LoadedApk apk = peekPackageInfo(data.pkg, false);
         if (apk != null) {
-            apk.mCompatibilityInfo.set(data.info);
+            apk.setCompatibilityInfo(data.info);
         }
         apk = peekPackageInfo(data.pkg, true);
         if (apk != null) {
-            apk.mCompatibilityInfo.set(data.info);
+            apk.setCompatibilityInfo(data.info);
         }
         handleConfigurationChanged(mConfiguration, data.info);
         WindowManagerGlobal.getInstance().reportNewConfiguration(mConfiguration);
@@ -3844,8 +3854,9 @@ public final class ActivityThread {
                 for (ActivityClientRecord ar : mActivities.values()) {
                     Activity a = ar.activity;
                     if (a != null) {
-                        Configuration thisConfig = applyConfigCompatMainThread(mCurDefaultDisplayDpi,
-                                newConfig, ar.packageInfo.mCompatibilityInfo.getIfNeeded());
+                        Configuration thisConfig = applyConfigCompatMainThread(
+                                mCurDefaultDisplayDpi, newConfig,
+                                ar.packageInfo.getCompatibilityInfo());
                         if (!ar.activity.mFinished && (allActivities || !ar.paused)) {
                             // If the activity is currently resumed, its configuration
                             // needs to change right now.
@@ -3945,8 +3956,7 @@ public final class ActivityThread {
         }
         int changes = mResConfiguration.updateFrom(config);
         flushDisplayMetricsLocked();
-        DisplayMetrics defaultDisplayMetrics = getDisplayMetricsLocked(
-                Display.DEFAULT_DISPLAY, null);
+        DisplayMetrics defaultDisplayMetrics = getDisplayMetricsLocked(Display.DEFAULT_DISPLAY);
 
         if (compat != null && (mResCompatibilityInfo == null ||
                 !mResCompatibilityInfo.equals(compat))) {
@@ -3986,7 +3996,7 @@ public final class ActivityThread {
                     }
                     tmpConfig.setTo(config);
                     if (!isDefaultDisplay) {
-                        dm = getDisplayMetricsLocked(displayId, null);
+                        dm = getDisplayMetricsLocked(displayId);
                         applyNonDefaultDisplayMetricsToConfigurationLocked(dm, tmpConfig);
                     }
                     if (overrideConfig != null) {

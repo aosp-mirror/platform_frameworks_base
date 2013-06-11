@@ -39,7 +39,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
-import android.view.CompatibilityInfoHolder;
+import android.view.DisplayAdjustments;
 import android.view.Display;
 
 import java.io.File;
@@ -574,7 +574,7 @@ public class MockContext extends Context {
 
     /** @hide */
     @Override
-    public CompatibilityInfoHolder getCompatibilityInfo(int displayId) {
+    public DisplayAdjustments getDisplayAdjustments(int displayId) {
         throw new UnsupportedOperationException();
     }
 }
