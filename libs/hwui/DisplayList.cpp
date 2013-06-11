@@ -63,6 +63,7 @@ void DisplayList::destroyDisplayListDeferred(DisplayList* displayList) {
 
 void DisplayList::clearResources() {
     mDisplayListData = NULL;
+    mSize = 0; // TODO: shouldn't be needed, WAR possible use after delete
 
     mClipRectOp = NULL;
     mSaveLayerOp = NULL;
@@ -479,7 +480,7 @@ void DisplayList::replay(ReplayStateStruct& replayStruct, const int level) {
  */
 template <class T>
 void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level) {
-    if (mSize == 0 || mAlpha <= 0) {
+    if (mSize == 0 || mAlpha <= 0 || CC_UNLIKELY(!mSaveOp)) { // TODO: shouldn't need mSaveOp check
         DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", level * 2, "", this, mName.string());
         return;
     }
