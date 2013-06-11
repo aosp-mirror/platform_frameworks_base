@@ -27970,10 +27970,10 @@ package android.view.animation {
     method public void setAlpha(float);
     method public void setTransformationType(int);
     method public java.lang.String toShortString();
-    field public static int TYPE_ALPHA;
-    field public static int TYPE_BOTH;
-    field public static int TYPE_IDENTITY;
-    field public static int TYPE_MATRIX;
+    field public static final int TYPE_ALPHA = 1; // 0x1
+    field public static final int TYPE_BOTH = 3; // 0x3
+    field public static final int TYPE_IDENTITY = 0; // 0x0
+    field public static final int TYPE_MATRIX = 2; // 0x2
     field protected float mAlpha;
     field protected android.graphics.Matrix mMatrix;
     field protected int mTransformationType;
