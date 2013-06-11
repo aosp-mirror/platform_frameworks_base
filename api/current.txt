@@ -642,6 +642,7 @@ package android {
     field public static final int layout = 16842994; // 0x10100f2
     field public static final int layoutAnimation = 16842988; // 0x10100ec
     field public static final int layoutDirection = 16843698; // 0x10103b2
+    field public static final int layoutMode = 16843738; // 0x10103da
     field public static final int layout_above = 16843140; // 0x1010184
     field public static final int layout_alignBaseline = 16843142; // 0x1010186
     field public static final int layout_alignBottom = 16843146; // 0x101018a
