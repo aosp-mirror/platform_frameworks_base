@@ -119,6 +119,12 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/pm/IPackageMoveObserver.aidl \
 	core/java/android/content/pm/IPackageStatsObserver.aidl \
 	core/java/android/database/IContentObserver.aidl \
+	core/java/android/hardware/ICameraService.aidl \
+	core/java/android/hardware/ICameraServiceListener.aidl \
+	core/java/android/hardware/ICamera.aidl \
+	core/java/android/hardware/ICameraClient.aidl \
+	core/java/android/hardware/IProCameraUser.aidl \
+	core/java/android/hardware/IProCameraCallbacks.aidl \
 	core/java/android/hardware/ISerialManager.aidl \
 	core/java/android/hardware/display/IDisplayManager.aidl \
 	core/java/android/hardware/display/IDisplayManagerCallback.aidl \
