@@ -40,6 +40,33 @@ oneway interface IRemoteControlDisplay
     void setCurrentClientId(int clientGeneration, in PendingIntent clientMediaIntent,
             boolean clearing);
 
+    /**
+     * Sets the playback information (state, position and speed) of a client.
+     * @param generationId the current generation ID as known by this client
+     * @param state the current playback state, one of the following values:
+     *       {@link RemoteControlClient#PLAYSTATE_STOPPED},
+     *       {@link RemoteControlClient#PLAYSTATE_PAUSED},
+     *       {@link RemoteControlClient#PLAYSTATE_PLAYING},
+     *       {@link RemoteControlClient#PLAYSTATE_FAST_FORWARDING},
+     *       {@link RemoteControlClient#PLAYSTATE_REWINDING},
+     *       {@link RemoteControlClient#PLAYSTATE_SKIPPING_FORWARDS},
+     *       {@link RemoteControlClient#PLAYSTATE_SKIPPING_BACKWARDS},
+     *       {@link RemoteControlClient#PLAYSTATE_BUFFERING},
+     *       {@link RemoteControlClient#PLAYSTATE_ERROR}.
+     * @param stateChangeTimeMs the time at which the client reported the playback information
+     * @param currentPosMs a 0 or positive value for the current media position expressed in ms
+     *    Strictly negative values imply that position is not known:
+     *    a value of {@link RemoteControlClient#PLAYBACK_POSITION_INVALID} is intended to express
+     *    that an application doesn't know the position (e.g. listening to a live stream of a radio)
+     *    or that the position information is not applicable (e.g. when state
+     *    is {@link RemoteControlClient#PLAYSTATE_BUFFERING} and nothing had played yet);
+     *    a value of {@link RemoteControlClient#PLAYBACK_POSITION_ALWAYS_UNKNOWN} implies that the
+     *    application uses {@link RemoteControlClient#setPlaybackState(int)} (legacy API) and will
+     *    never pass a playback position.
+     * @param speed a value expressed as a ratio of 1x playback: 1.0f is normal playback,
+     *    2.0f is 2x, 0.5f is half-speed, -2.0f is rewind at 2x speed. 0.0f means nothing is
+     *    playing (e.g. when state is {@link RemoteControlClient#PLAYSTATE_ERROR}).
+     */
     void setPlaybackState(int generationId, int state, long stateChangeTimeMs, long currentPosMs,
             float speed);
 
