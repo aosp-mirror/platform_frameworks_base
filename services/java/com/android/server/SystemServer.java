@@ -540,7 +540,7 @@ class ServerThread {
              * AppWidget Provider. Make sure MountService is completely started
              * first before continuing.
              */
-            if (mountService != null) {
+            if (mountService != null && !onlyCore) {
                 mountService.waitForAsecScan();
             }
 
