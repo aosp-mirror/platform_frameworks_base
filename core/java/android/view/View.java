@@ -9546,9 +9546,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setPivotX(float pivotX) {
         ensureTransformationInfo();
-        mPrivateFlags |= PFLAG_PIVOT_EXPLICITLY_SET;
         final TransformationInfo info = mTransformationInfo;
-        if (info.mPivotX != pivotX) {
+        boolean pivotSet = (mPrivateFlags & PFLAG_PIVOT_EXPLICITLY_SET) ==
+                PFLAG_PIVOT_EXPLICITLY_SET;
+        if (info.mPivotX != pivotX || !pivotSet) {
+            mPrivateFlags |= PFLAG_PIVOT_EXPLICITLY_SET;
             invalidateViewProperty(true, false);
             info.mPivotX = pivotX;
             info.mMatrixDirty = true;
@@ -9596,9 +9598,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setPivotY(float pivotY) {
         ensureTransformationInfo();
-        mPrivateFlags |= PFLAG_PIVOT_EXPLICITLY_SET;
         final TransformationInfo info = mTransformationInfo;
-        if (info.mPivotY != pivotY) {
+        boolean pivotSet = (mPrivateFlags & PFLAG_PIVOT_EXPLICITLY_SET) ==
+                PFLAG_PIVOT_EXPLICITLY_SET;
+        if (info.mPivotY != pivotY || !pivotSet) {
+            mPrivateFlags |= PFLAG_PIVOT_EXPLICITLY_SET;
             invalidateViewProperty(true, false);
             info.mPivotY = pivotY;
             info.mMatrixDirty = true;
