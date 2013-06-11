@@ -21,6 +21,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.UnknownHostException;
 import java.util.Collection;
+import java.util.Locale;
 
 import android.util.Log;
 
@@ -223,7 +224,7 @@ public class NetworkUtils {
     public static InetAddress hexToInet6Address(String addrHexString)
             throws IllegalArgumentException {
         try {
-            return numericToInetAddress(String.format("%s:%s:%s:%s:%s:%s:%s:%s",
+            return numericToInetAddress(String.format(Locale.US, "%s:%s:%s:%s:%s:%s:%s:%s",
                     addrHexString.substring(0,4),   addrHexString.substring(4,8),
                     addrHexString.substring(8,12),  addrHexString.substring(12,16),
                     addrHexString.substring(16,20), addrHexString.substring(20,24),

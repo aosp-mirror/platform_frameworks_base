@@ -17,8 +17,8 @@
 package android.net;
 
 import android.app.Activity;
-import android.app.Service;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
@@ -30,10 +30,10 @@ import android.os.ServiceManager;
 
 import com.android.internal.net.VpnConfig;
 
-import java.net.InetAddress;
+import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
-import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -329,7 +329,8 @@ public class VpnService extends Service {
                 throw new IllegalArgumentException("Bad address");
             }
 
-            mAddresses.append(' ' + address.getHostAddress() + '/' +  prefixLength);
+            mAddresses.append(' ')
+                    .append(address.getHostAddress()).append('/').append(prefixLength);
             return this;
         }
 
@@ -364,7 +365,7 @@ public class VpnService extends Service {
                 }
             }
 
-            mRoutes.append(String.format(" %s/%d", address.getHostAddress(), prefixLength));
+            mRoutes.append(' ').append(address.getHostAddress()).append('/').append(prefixLength);
             return this;
         }
 

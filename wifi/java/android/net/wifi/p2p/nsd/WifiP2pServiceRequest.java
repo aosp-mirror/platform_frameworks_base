@@ -20,6 +20,8 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Locale;
+
 /**
  * A class for creating a service discovery request for use with
  * {@link WifiP2pManager#addServiceRequest} and {@link WifiP2pManager#removeServiceRequest}
@@ -134,10 +136,10 @@ public class WifiP2pServiceRequest implements Parcelable {
     public String getSupplicantQuery() {
         StringBuffer sb = new StringBuffer();
         // length is retained as little endian format.
-        sb.append(String.format("%02x", (mLength) & 0xff));
-        sb.append(String.format("%02x", (mLength >> 8) & 0xff));
-        sb.append(String.format("%02x", mProtocolType));
-        sb.append(String.format("%02x", mTransId));
+        sb.append(String.format(Locale.US, "%02x", (mLength) & 0xff));
+        sb.append(String.format(Locale.US, "%02x", (mLength >> 8) & 0xff));
+        sb.append(String.format(Locale.US, "%02x", mProtocolType));
+        sb.append(String.format(Locale.US, "%02x", mTransId));
         if (mQuery != null) {
             sb.append(mQuery);
         }
