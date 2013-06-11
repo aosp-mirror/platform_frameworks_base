@@ -375,7 +375,6 @@
     </div>
     <ul>
 
-
       <li class="nav-section">
         <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/connect-devices-wirelessly/index.html"
@@ -469,6 +468,12 @@
           </a>
           </li>
         </ul>
+        <li><a href="<?cs var:toroot ?>training/cloudsave/conflict-res.html"
+           description=
+           "How to design a robust conflict resolution strategy for apps that save data to the cloud."
+           >Resolving Cloud Save Conflicts
+          </a>
+          </li>
       </li>
     </ul>
   </li>
