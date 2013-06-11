@@ -16,8 +16,10 @@
 
 package android.app;
 
+import android.os.IBinder;
 import com.android.internal.app.IUsageStats;
 import com.android.internal.os.PkgUsageStats;
+import com.android.internal.os.TransferPipe;
 import com.android.internal.util.MemInfoReader;
 
 import android.content.ComponentName;
@@ -49,6 +51,9 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
 
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1709,7 +1714,7 @@ public class ActivityManager {
         public ComponentName importanceReasonComponent;
         
         /**
-         * When {@link importanceReasonPid} is non-0, this is the importance
+         * When {@link #importanceReasonPid} is non-0, this is the importance
          * of the other pid. @hide
          */
         public int importanceReasonImportance;
@@ -2179,6 +2184,56 @@ public class ActivityManager {
             return ActivityManagerNative.getDefault().isUserRunning(userid, false);
         } catch (RemoteException e) {
             return false;
+        }
+    }
+
+    /**
+     * Perform a system dump of various state associated with the given application
+     * package name.  This call blocks while the dump is being performed, so should
+     * not be done on a UI thread.  The data will be written to the given file
+     * descriptor as text.  An application must hold the
+     * {@link android.Manifest.permission#DUMP} permission to make this call.
+     * @param fd The file descriptor that the dump should be written to.
+     * @param packageName The name of the package that is to be dumped.
+     */
+    public void dumpPackageState(FileDescriptor fd, String packageName) {
+        dumpPackageStateStatic(fd, packageName);
+    }
+
+    /**
+     * @hide
+     */
+    public static void dumpPackageStateStatic(FileDescriptor fd, String packageName) {
+        FileOutputStream fout = new FileOutputStream(fd);
+        PrintWriter pw = new PrintWriter(fout);
+        dumpService(pw, fd, Context.ACTIVITY_SERVICE, new String[] { "package", packageName});
+        pw.println();
+        dumpService(pw, fd, "package", new String[] { packageName});
+        pw.println();
+        dumpService(pw, fd, "batteryinfo", new String[] { packageName});
+        pw.flush();
+    }
+
+    private static void dumpService(PrintWriter pw, FileDescriptor fd, String name, String[] args) {
+        pw.print("DUMP OF SERVICE "); pw.print(name); pw.println(":");
+        IBinder service = ServiceManager.checkService(name);
+        if (service == null) {
+            pw.println("  (Service not found)");
+            return;
+        }
+        TransferPipe tp = null;
+        try {
+            pw.flush();
+            tp = new TransferPipe();
+            tp.setBufferPrefix("  ");
+            service.dump(tp.getWriteFd().getFileDescriptor(), args);
+            tp.go(fd);
+        } catch (Throwable e) {
+            if (tp != null) {
+                tp.kill();
+            }
+            pw.println("Failure dumping service:");
+            e.printStackTrace(pw);
         }
     }
 }

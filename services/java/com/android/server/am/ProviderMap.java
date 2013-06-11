@@ -22,6 +22,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseArray;
+import com.android.internal.os.TransferPipe;
 
 import java.io.FileDescriptor;
 import java.io.IOException;

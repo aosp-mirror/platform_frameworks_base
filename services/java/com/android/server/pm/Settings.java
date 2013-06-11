@@ -2893,7 +2893,7 @@ final class Settings {
 
             if (!printedSomething) {
                 if (dumpState.onTitlePrinted())
-                    pw.println(" ");
+                    pw.println();
                 pw.println("Packages:");
                 printedSomething = true;
             }
@@ -2909,7 +2909,7 @@ final class Settings {
                 }
                 if (!printedSomething) {
                     if (dumpState.onTitlePrinted())
-                        pw.println(" ");
+                        pw.println();
                     pw.println("Renamed packages:");
                     printedSomething = true;
                 }
@@ -2929,7 +2929,7 @@ final class Settings {
                 }
                 if (!printedSomething) {
                     if (dumpState.onTitlePrinted())
-                        pw.println(" ");
+                        pw.println();
                     pw.println("Hidden system packages:");
                     printedSomething = true;
                 }
@@ -2946,7 +2946,7 @@ final class Settings {
             }
             if (!printedSomething) {
                 if (dumpState.onTitlePrinted())
-                    pw.println(" ");
+                    pw.println();
                 pw.println("Permissions:");
                 printedSomething = true;
             }
@@ -2980,7 +2980,7 @@ final class Settings {
             }
             if (!printedSomething) {
                 if (dumpState.onTitlePrinted())
-                    pw.println(" ");
+                    pw.println();
                 pw.println("Shared users:");
                 printedSomething = true;
             }

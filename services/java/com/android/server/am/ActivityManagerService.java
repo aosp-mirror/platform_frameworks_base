@@ -32,6 +32,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessStats;
+import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;

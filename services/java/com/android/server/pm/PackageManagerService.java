@@ -10041,6 +10041,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Is this a package name?
             if ("android".equals(cmd) || cmd.contains(".")) {
                 packageName = cmd;
+                // When dumping a single package, we always dump all of its
+                // filter information since the amount of data will be reasonable.
+                dumpState.setOptionEnabled(DumpState.OPTION_SHOW_FILTERS);
             } else if ("l".equals(cmd) || "libraries".equals(cmd)) {
                 dumpState.setDump(DumpState.DUMP_LIBS);
             } else if ("f".equals(cmd) || "features".equals(cmd)) {
@@ -10076,7 +10079,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             if (dumpState.isDumping(DumpState.DUMP_VERIFIERS) && packageName == null) {
                 if (dumpState.onTitlePrinted())
-                    pw.println(" ");
+                    pw.println();
                 pw.println("Verifiers:");
                 pw.print("  Required: ");
                 pw.print(mRequiredVerifierPackage);
@@ -10086,16 +10089,20 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (dumpState.isDumping(DumpState.DUMP_LIBS) && packageName == null) {
-                if (dumpState.onTitlePrinted())
-                    pw.println(" ");
-                pw.println("Libraries:");
+                boolean printedHeader = false;
                 final Iterator<String> it = mSharedLibraries.keySet().iterator();
                 while (it.hasNext()) {
                     String name = it.next();
+                    SharedLibraryEntry ent = mSharedLibraries.get(name);
+                    if (!printedHeader) {
+                        if (dumpState.onTitlePrinted())
+                            pw.println();
+                        pw.println("Libraries:");
+                        printedHeader = true;
+                    }
                     pw.print("  ");
                     pw.print(name);
                     pw.print(" -> ");
-                    SharedLibraryEntry ent = mSharedLibraries.get(name);
                     if (ent.path != null) {
                         pw.print("(jar) ");
                         pw.print(ent.path);
@@ -10109,7 +10116,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             if (dumpState.isDumping(DumpState.DUMP_FEATURES) && packageName == null) {
                 if (dumpState.onTitlePrinted())
-                    pw.println(" ");
+                    pw.println();
                 pw.println("Features:");
                 Iterator<String> it = mAvailableFeatures.keySet().iterator();
                 while (it.hasNext()) {
@@ -10185,7 +10192,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     if (!printedSomething) {
                         if (dumpState.onTitlePrinted())
-                            pw.println(" ");
+                            pw.println();
                         pw.println("Registered ContentProviders:");
                         printedSomething = true;
                     }
@@ -10200,7 +10207,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     if (!printedSomething) {
                         if (dumpState.onTitlePrinted())
-                            pw.println(" ");
+                            pw.println();
                         pw.println("ContentProvider Authorities:");
                         printedSomething = true;
                     }
@@ -10214,10 +10221,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (dumpState.isDumping(DumpState.DUMP_KEYSETS)) {
-                if (dumpState.onTitlePrinted()) {
-                    pw.println(" ");
-                }
-                mSettings.mKeySetManager.dump(pw);
+                mSettings.mKeySetManager.dump(pw, packageName, dumpState);
             }
 
             if (dumpState.isDumping(DumpState.DUMP_PACKAGES)) {
@@ -10230,10 +10234,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             if (dumpState.isDumping(DumpState.DUMP_MESSAGES) && packageName == null) {
                 if (dumpState.onTitlePrinted())
-                    pw.println(" ");
+                    pw.println();
                 mSettings.dumpReadMessagesLPr(pw, dumpState);
 
-                pw.println(" ");
+                pw.println();
                 pw.println("Package warning messages:");
                 final File fname = getSettingsProblemFile();
                 FileInputStream in = null;

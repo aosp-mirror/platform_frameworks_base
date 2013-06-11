@@ -399,24 +399,50 @@ public class KeySetManager {
         return new String(Base64.encode(k.getEncoded(), 0));
     }
 
-    public void dump(PrintWriter pw) {
+    public void dump(PrintWriter pw, String packageName,
+            PackageManagerService.DumpState dumpState) {
         synchronized (mLockObject) {
-            pw.println("  Dumping KeySetManager");
+            boolean printedHeader = false;
             for (Map.Entry<String, PackageSetting> e : mPackages.entrySet()) {
-                String packageName = e.getKey();
+                String keySetPackage = e.getKey();
+                if (packageName != null && !packageName.equals(keySetPackage)) {
+                    continue;
+                }
+                if (!printedHeader) {
+                    if (dumpState.onTitlePrinted())
+                        pw.println();
+                    pw.println("Key Set Manager:");
+                    printedHeader = true;
+                }
                 PackageSetting pkg = e.getValue();
-                pw.print("  ["); pw.print(packageName); pw.println("]");
+                pw.print("  ["); pw.print(keySetPackage); pw.println("]");
                 if (pkg.keySetData != null) {
-                    pw.print("      Defined KeySets:");
+                    boolean printedLabel = false;
                     for (long keySetId : pkg.keySetData.getDefinedKeySets()) {
-                        pw.print(" "); pw.print(Long.toString(keySetId));
+                        if (!printedLabel) {
+                            pw.print("      Defined KeySets: ");
+                            printedLabel = true;
+                        } else {
+                            pw.print(", ");
+                        }
+                        pw.print(Long.toString(keySetId));
                     }
-                    pw.println("");
-                    pw.print("      Signing KeySets:");
+                    if (printedLabel) {
+                        pw.println("");
+                    }
+                    printedLabel = false;
                     for (long keySetId : pkg.keySetData.getSigningKeySets()) {
+                        if (!printedLabel) {
+                            pw.print("      Signing KeySets:");
+                            printedLabel = true;
+                        } else {
+                            pw.print(", ");
+                        }
                         pw.print(" "); pw.print(Long.toString(keySetId));
                     }
-                    pw.println("");
+                    if (printedLabel) {
+                        pw.println("");
+                    }
                 }
             }
         }

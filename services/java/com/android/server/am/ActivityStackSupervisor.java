@@ -69,6 +69,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.app.HeavyWeightSwitcherActivity;
+import com.android.internal.os.TransferPipe;
 import com.android.server.am.ActivityManagerService.PendingActivityLaunch;
 import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.wm.StackBox;

@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.internal.os.TransferPipe;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.ActivityManagerService.NeededUriGrants;
 
