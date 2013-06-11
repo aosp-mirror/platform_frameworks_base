@@ -56,6 +56,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -240,7 +241,7 @@ public class UsbDeviceManager {
         for (int i = 0; i < serialLength; i++) {
             address[i % (ETH_ALEN - 1) + 1] ^= (int)serial.charAt(i);
         }
-        String addrString = String.format("%02X:%02X:%02X:%02X:%02X:%02X",
+        String addrString = String.format(Locale.US, "%02X:%02X:%02X:%02X:%02X:%02X",
             address[0], address[1], address[2], address[3], address[4], address[5]);
         try {
             FileUtils.stringToFile(RNDIS_ETH_ADDR_PATH, addrString);

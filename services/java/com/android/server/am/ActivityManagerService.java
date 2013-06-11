@@ -3422,7 +3422,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             File lastTracesFile = null;
             File curTracesFile = null;
             for (int i=9; i>=0; i--) {
-                String name = String.format("slow%02d.txt", i);
+                String name = String.format(Locale.US, "slow%02d.txt", i);
                 curTracesFile = new File(tracesDir, name);
                 if (curTracesFile.exists()) {
                     if (lastTracesFile != null) {

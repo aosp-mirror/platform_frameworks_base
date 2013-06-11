@@ -18,6 +18,8 @@ package android.net.wifi.p2p.nsd;
 
 import android.net.wifi.p2p.WifiP2pManager;
 
+import java.util.Locale;
+
 /**
  * A class for creating a Upnp service discovery request for use with
  * {@link WifiP2pManager#addServiceRequest} and {@link WifiP2pManager#removeServiceRequest}
@@ -73,7 +75,7 @@ public class WifiP2pUpnpServiceRequest extends WifiP2pServiceRequest {
             throw new IllegalArgumentException("search target cannot be null");
         }
         StringBuffer sb = new StringBuffer();
-        sb.append(String.format("%02x", WifiP2pUpnpServiceInfo.VERSION_1_0));
+        sb.append(String.format(Locale.US, "%02x", WifiP2pUpnpServiceInfo.VERSION_1_0));
         sb.append(WifiP2pServiceInfo.bin2HexStr(st.getBytes()));
         return new WifiP2pUpnpServiceRequest(sb.toString());
     }
