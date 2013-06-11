@@ -944,11 +944,11 @@
     <item quantity="other" msgid="3903706804349556379">"vor <xliff:g id="COUNT">%d</xliff:g> Sekunden"</item>
   </plurals>
   <plurals name="num_minutes_ago">
-    <item quantity="one" msgid="3306787433088810191">"Vor 1 Minute"</item>
+    <item quantity="one" msgid="3306787433088810191">"vor 1 Minute"</item>
     <item quantity="other" msgid="2176942008915455116">"vor <xliff:g id="COUNT">%d</xliff:g> Minuten"</item>
   </plurals>
   <plurals name="num_hours_ago">
-    <item quantity="one" msgid="9150797944610821849">"Vor 1 Stunde"</item>
+    <item quantity="one" msgid="9150797944610821849">"vor 1 Stunde"</item>
     <item quantity="other" msgid="2467273239587587569">"vor <xliff:g id="COUNT">%d</xliff:g> Stunden"</item>
   </plurals>
   <plurals name="last_num_days">
@@ -957,7 +957,7 @@
     <string name="last_month" msgid="3959346739979055432">"Letzter Monat"</string>
     <string name="older" msgid="5211975022815554840">"Älter"</string>
   <plurals name="num_days_ago">
-    <item quantity="one" msgid="861358534398115820">"Gestern"</item>
+    <item quantity="one" msgid="861358534398115820">"gestern"</item>
     <item quantity="other" msgid="2479586466153314633">"vor <xliff:g id="COUNT">%d</xliff:g> Tagen"</item>
   </plurals>
   <plurals name="in_num_seconds">
@@ -985,11 +985,11 @@
     <item quantity="other" msgid="851164968597150710">"vor <xliff:g id="COUNT">%d</xliff:g> Minuten"</item>
   </plurals>
   <plurals name="abbrev_num_hours_ago">
-    <item quantity="one" msgid="4796212039724722116">"Vor 1 Stunde"</item>
+    <item quantity="one" msgid="4796212039724722116">"vor 1 Stunde"</item>
     <item quantity="other" msgid="6889970745748538901">"vor <xliff:g id="COUNT">%d</xliff:g> Stunden"</item>
   </plurals>
   <plurals name="abbrev_num_days_ago">
-    <item quantity="one" msgid="8463161711492680309">"Gestern"</item>
+    <item quantity="one" msgid="8463161711492680309">"gestern"</item>
     <item quantity="other" msgid="3453342639616481191">"vor <xliff:g id="COUNT">%d</xliff:g> Tagen"</item>
   </plurals>
   <plurals name="abbrev_in_num_seconds">
