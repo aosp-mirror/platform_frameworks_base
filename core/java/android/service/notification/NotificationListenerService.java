@@ -164,11 +164,19 @@ public abstract class NotificationListenerService extends Service {
     private class INotificationListenerWrapper extends INotificationListener.Stub {
         @Override
         public void onNotificationPosted(StatusBarNotification sbn) {
-            NotificationListenerService.this.onNotificationPosted(sbn);
+            try {
+                NotificationListenerService.this.onNotificationPosted(sbn);
+            } catch (Throwable t) {
+                Log.w(TAG, "Error running onNotificationPosted", t);
+            }
         }
         @Override
         public void onNotificationRemoved(StatusBarNotification sbn) {
-            NotificationListenerService.this.onNotificationRemoved(sbn);
+            try {
+                NotificationListenerService.this.onNotificationRemoved(sbn);
+            } catch (Throwable t) {
+                Log.w(TAG, "Error running onNotificationRemoved", t);
+            }
         }
     }
 }
