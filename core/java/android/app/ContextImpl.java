@@ -91,6 +91,8 @@ import android.os.UserHandle;
 import android.os.SystemVibrator;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
+import android.print.IPrintManager;
+import android.print.PrintManager;
 import android.telephony.TelephonyManager;
 import android.content.ClipboardManager;
 import android.util.AndroidRuntimeException;
@@ -548,6 +550,15 @@ class ContextImpl extends Context {
         registerService(CAMERA_SERVICE, new StaticServiceFetcher() {
             public Object createStaticService() {
                 return new CameraManager();
+            }
+        });
+
+        registerService(PRINT_SERVICE, new ServiceFetcher() {
+            public Object createService(ContextImpl ctx) {
+                IBinder iBinder = ServiceManager.getService(Context.PRINT_SERVICE);
+                IPrintManager service = IPrintManager.Stub.asInterface(iBinder);
+                return new PrintManager(ctx.getOuterContext(), service, UserHandle.myUserId(),
+                        UserHandle.getAppId(Process.myUid()));
             }});
     }
 

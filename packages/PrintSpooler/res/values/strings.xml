@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2013 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+
+    <!-- Title of the PrintSpooler application. [CHAR LIMIT=16] -->
+    <string name="app_label">Print Spooler</string>
+
+    <!-- Title of the print dialog. [CHAR LIMIT=10] -->
+    <string name="print_job_config_dialog_title">Print</string>
+
+    <!-- Label of the print dialog's print button. [CHAR LIMIT=16] -->
+    <string name="print_button">Print</string>
+
+    <!-- Label of the print dialog's cancel button. [CHAR LIMIT=16] -->
+    <string name="cancel_button">Cancel</string>
+
+    <!-- Label of the destination spinner. [CHAR LIMIT=16] -->
+    <string name="label_destination">Destination</string>
+
+    <!-- Label of the copies count edit text. [CHAR LIMIT=16] -->
+    <string name="label_copies">Copies</string>
+
+    <!-- Label of the media size spinner. [CHAR LIMIT=16] -->
+    <string name="label_media_size">Media size</string>
+
+    <!-- Label of the resolution spinner. [CHAR LIMIT=16] -->
+    <string name="label_resolution">Resolution</string>
+
+    <!-- Label of the input tray spinner. [CHAR LIMIT=16] -->
+    <string name="label_input_tray">Input tray</string>
+
+    <!-- Label of the output tray spinner. [CHAR LIMIT=16] -->
+    <string name="label_output_tray">Output tray</string>
+
+    <!-- Label of the duplex mode spinner. [CHAR LIMIT=16] -->
+    <string name="label_duplex_mode">Duplex mode</string>
+
+    <!-- Label of the color mode spinner. [CHAR LIMIT=16] -->
+    <string name="label_color_mode">Color mode</string>
+
+    <!-- Label of the fitting mode spinner. [CHAR LIMIT=16] -->
+    <string name="label_fitting_mode">Fitting mode</string>
+
+    <!-- Label of the orientation spinner. [CHAR LIMIT=16] -->
+    <string name="label_orientation">Orientation</string>
+
+    <!-- Duplex mode labels. -->
+    <string-array name="duplex_mode_labels">
+        <!-- Duplex mode label: No duplexing. [CHAR LIMIT=20] -->
+        <item>None</item>
+        <!-- Duplex mode label: Turn a page along its long edge, e.g. like a book. [CHAR LIMIT=20] -->
+        <item>Long edge</item>
+        <!-- Duplex mode label: Turn a page along its short edge, e.g. like a notepad. [CHAR LIMIT=20] -->
+        <item>Short edge</item>
+    </string-array>
+
+    <!-- Color mode labels. -->
+    <string-array name="color_mode_labels">
+        <!-- Color modelabel: Monochrome color scheme, e.g. one color is used. [CHAR LIMIT=20] -->
+        <item>Monochrome</item>
+        <!-- Color mode label: Color color scheme, e.g. many colors are used. [CHAR LIMIT=20] -->
+        <item>Color</item>
+    </string-array>
+
+    <!-- Fitting mode labels. -->
+    <string-array name="fitting_mode_labels">
+        <!-- Fitting mode label: No fitting. [CHAR LIMIT=30] -->
+        <item>None</item>
+        <!-- Fitting mode label: Fit the content to the page. [CHAR LIMIT=30] -->
+        <item>Fit to page</item>
+    </string-array>
+
+    <!-- Orientation labels. -->
+    <string-array name="orientation_labels">
+        <!-- Orientation label: Portrait page orientation. [CHAR LIMIT=30] -->
+        <item>Portrait</item>
+        <!-- Orientation label: Landscape page orientation [CHAR LIMIT=30] -->
+        <item>Landscape</item>
+    </string-array>
+
+    <!-- Title of an application permission, listed so the user can choose
+         whether they want to allow the application to do this. -->
+    <string name="permlab_bindPrintSpoolerService">bind to a print spooler service</string>
+    <!-- Description of an application permission, listed so the user can
+         choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindPrintSpoolerService">Allows the holder to bind to the top-level
+        interface of a print spooler service. Should never be needed for normal apps.</string>
+
+</resources>

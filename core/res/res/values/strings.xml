@@ -970,6 +970,18 @@
         interface of an accessibility service. Should never be needed for normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindPrintService">bind to a print service</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindPrintService">Allows the holder to bind to the top-level
+        interface of a print service. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_accessAllPrintJobs">access all print jobs</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accessAllPrintJobs">Allows the holder to access print jobs
+        created by another app. Should never be needed for normal apps.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bindTextService">bind to a text service</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bindTextService">Allows the holder to bind to the top-level
@@ -4130,4 +4142,89 @@
     <!-- Message informing user that the requested activity could not be found [CHAR LIMIT=none] -->
     <string name="app_not_found">No application found to handle this action</string>
     <string name="revoke">Revoke</string>
+
+    <!-- Printing -->
+
+    <!-- ISO A0 media size: 33.11" × 46.81" -->
+    <string name="mediaSize_iso_a0">ISO A0</string>
+    <!-- ISO A1 media size: 23.39" × 33.11" -->
+    <string name="mediaSize_iso_a1">ISO A1</string>
+    <!-- ISO A2 media size: 16.54" x 23.39" -->
+    <string name="mediaSize_iso_a2">ISO A2</string>
+    <!-- ISO A3 media size: 11.69" x 16.54" -->
+    <string name="mediaSize_iso_a3">ISO A3</string>
+    <!-- ISO A4 media size: 8.27" x 11.69" -->
+    <string name="mediaSize_iso_a4">ISO A4</string>
+    <!-- ISO A5 media size: 5.83" x 8.27" -->
+    <string name="mediaSize_iso_a5">ISO A5</string>
+    <!-- ISO A6 media size: 4.13" x 5.83" -->
+    <string name="mediaSize_iso_a6">ISO A6</string>
+    <!-- ISO A7 media size: 2.91" x 4.13" -->
+    <string name="mediaSize_iso_a7">ISO A7</string>
+    <!-- ISO A8 media size: 2.05" x 2.91" -->
+    <string name="mediaSize_iso_a8">ISO A8</string>
+    <!-- ISO A9 media size: 1.46" x 2.05" -->
+    <string name="mediaSize_iso_a9">ISO A9</string>
+    <!-- ISO A10 media size: 1.02" x 1.46" -->
+    <string name="mediaSize_iso_a10">ISO A10</string>
+
+    <!-- ISO B0 media size: 39.37" x 55.67" -->
+    <string name="mediaSize_iso_b0">ISO B0</string>
+    <!-- ISO B1 media size: 27.83" x 39.37" -->
+    <string name="mediaSize_iso_b1">ISO B1</string>
+    <!-- ISO B2 media size - 19.69" x 27.83" -->
+    <string name="mediaSize_iso_b2">ISO B2</string>
+    <!-- ISO B3 media size: 13.90" x 19.69" -->
+    <string name="mediaSize_iso_b3">ISO B3</string>
+    <!-- ISO B4 media size: 9.84" x 13.90" -->
+    <string name="mediaSize_iso_b4">ISO B4</string>
+    <!-- ISO B5 media size: 6.93" x 9.84" -->
+    <string name="mediaSize_iso_b5">ISO B5</string>
+    <!-- ISO B6 media size: 4.92" x 6.93" -->
+    <string name="mediaSize_iso_b6">ISO B6</string>
+    <!-- ISO B7 media size: 3.46" x 4.92" -->
+    <string name="mediaSize_iso_b7">ISO B7</string>
+    <!-- ISO B8 media size: 2.44" x 3.46" -->
+    <string name="mediaSize_iso_b8">ISO B8</string>
+    <!-- ISO B9 media size: 1.73" x 2.44" -->
+    <string name="mediaSize_iso_b9">ISO B9</string>
+    <!-- ISO B10 media size: 1.22" x 1.73" -->
+    <string name="mediaSize_iso_b10">ISO B10</string>
+
+    <!-- ISO C0 media size: 36.10" x 51.06" -->
+    <string name="mediaSize_iso_c0">ISO C0</string>
+    <!-- ISO C1 media size: 25.51" x 36.10" -->
+    <string name="mediaSize_iso_c1">ISO C1</string>
+    <!-- ISO C2 media size: 18.03" x 25.51" -->
+    <string name="mediaSize_iso_c2">ISO C2</string>
+    <!-- ISO C3 media size: 12.76" x 18.03" -->
+    <string name="mediaSize_iso_c3">ISO C3</string>
+    <!-- ISO C4 media size: 9.02" x 12.76" -->
+    <string name="mediaSize_iso_c4">ISO C4</string>
+    <!-- ISO C5 media size: 6.38" x 9.02" -->
+    <string name="mediaSize_iso_c5">ISO C5</string>
+    <!-- ISO C6 media size: 4.49" x 6.38" -->
+    <string name="mediaSize_iso_c6">ISO C6</string>
+    <!-- ISO C7 media size: 3.19" x 4.49" -->
+    <string name="mediaSize_iso_c7">ISO C7</string>
+    <!-- ISO ISO C8 media size: 2.24" x 3.19" -->
+    <string name="mediaSize_iso_c8">ISO C8</string>
+    <!-- ISO ISO C9 media size: 1.57" x 2.24" -->
+    <string name="mediaSize_iso_c9">ISO C9</string>
+    <!-- ISO C10 media size: 1.10" x 1.57" -->
+    <string name="mediaSize_iso_c10">ISO C10</string>
+
+    <!-- North America Letter media size: 8.5" × 11" -->
+    <string name="mediaSize_na_letter">Letter</string>
+    <!-- North America Government Letter media size: 8.0" × 10.5" -->
+    <string name="mediaSize_na_gvrnmt_letter">Government Letter</string>
+    <!-- North America Legal media size: 8.5" × 14" -->
+    <string name="mediaSize_na_legal">Legal</string>
+    <!-- North America Junior Legal media size: 8.0" × 5.0" -->
+    <string name="mediaSize_na_junior_legal">Junior Legal</string>
+    <!-- North America Ledger media size: 17" × 11" -->
+    <string name="mediaSize_na_ledger">Ledger</string>
+    <!-- North America Tabloid media size: 11" × 17" -->
+    <string name="mediaSize_na_tabloid">Tabloid</string>
+
 </resources>

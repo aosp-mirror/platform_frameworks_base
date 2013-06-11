@@ -2562,6 +2562,21 @@
         <attr name="description" />
     </declare-styleable>
 
+    <!-- Use <code>print-service</code> as the root tag of the XML resource that
+         describes an {@link android.printservice.PrintService} service, which is
+         referenced from its {@link android.printservice.PrintService#SERVICE_META_DATA}
+         meta-data entry. -->
+    <declare-styleable name="PrintService">
+        <!-- Fully qualified class name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity" />
+        <!-- Fully qualified class name of an activity that allows the user to manually
+             add printers to this print service. -->
+        <attr name="addPrintersActivity" format="string"/>
+        <!-- The vendor name if this print service is vendor specific. -->
+        <attr name="vendor" format="string"/>
+    </declare-styleable>
+
     <declare-styleable name="ActionMenuItemView">
         <attr name="minWidth" />
     </declare-styleable>

@@ -45,7 +45,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 /**
  * Interface to global information about an application environment.  This is
@@ -2292,6 +2291,15 @@ public abstract class Context {
      * @see android.hardware.camera.CameraManager
      */
     public static final String CAMERA_SERVICE = "camera";
+
+    /**
+     * {@link android.print.PrintManager} for printing and managing
+     * printers and print taks.
+     *
+     * @see #getSystemService
+     * @see android.print.PrintManager
+     */
+    public static final String PRINT_SERVICE = "print";
 
     /**
      * Determine whether the given permission is allowed for a particular

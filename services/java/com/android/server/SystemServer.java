@@ -63,6 +63,7 @@ import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.UserManagerService;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
+import com.android.server.print.PrintManagerService;
 import com.android.server.search.SearchManagerService;
 import com.android.server.usb.UsbService;
 import com.android.server.wifi.WifiService;
@@ -788,6 +789,14 @@ class ServerThread {
                 new IdleMaintenanceService(context, battery);
             } catch (Throwable e) {
                 reportWtf("starting IdleMaintenanceService", e);
+            }
+
+            try {
+                Slog.i(TAG, "Print Service");
+                ServiceManager.addService(Context.PRINT_SERVICE,
+                        new PrintManagerService(context));
+            } catch (Throwable e) {
+                reportWtf("starting Print Service", e);
             }
         }
 

@@ -3508,6 +3508,13 @@ public final class Settings {
         public static final String LONG_PRESS_TIMEOUT = "long_press_timeout";
 
         /**
+         * List of the enabled print providers.
+         * @hide
+         */
+        public static final String ENABLED_PRINT_SERVICES =
+            "enabled_print_services";
+
+        /**
          * Setting to always use the default text-to-speech settings regardless
          * of the application settings.
          * 1 = override application settings,

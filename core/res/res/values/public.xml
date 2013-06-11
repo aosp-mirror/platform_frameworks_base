@@ -2066,5 +2066,7 @@
   <public type="attr" name="ssp" />
   <public type="attr" name="sspPrefix" />
   <public type="attr" name="sspPattern" />
+  <public type="attr" name="addPrintersActivity" />
+  <public type="attr" name="vendor" />
 
 </resources>

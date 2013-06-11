@@ -17,7 +17,6 @@
 package android.os;
 
 import android.os.ICancellationSignal;
-import android.os.ICancellationSignal.Stub;
 
 /**
  * Provides the ability to cancel an operation in progress.

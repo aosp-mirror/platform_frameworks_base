@@ -858,6 +858,45 @@
   <java-symbol type="string" name="action_bar_home_description_format" />
   <java-symbol type="string" name="action_bar_home_subtitle_description_format" />
   <java-symbol type="string" name="wireless_display_route_description" />
+  <java-symbol type="string" name="mediaSize_iso_a0" />
+  <java-symbol type="string" name="mediaSize_iso_a1" />
+  <java-symbol type="string" name="mediaSize_iso_a2" />
+  <java-symbol type="string" name="mediaSize_iso_a3" />
+  <java-symbol type="string" name="mediaSize_iso_a4" />
+  <java-symbol type="string" name="mediaSize_iso_a5" />
+  <java-symbol type="string" name="mediaSize_iso_a6" />
+  <java-symbol type="string" name="mediaSize_iso_a7" />
+  <java-symbol type="string" name="mediaSize_iso_a8" />
+  <java-symbol type="string" name="mediaSize_iso_a9" />
+  <java-symbol type="string" name="mediaSize_iso_a10" />
+  <java-symbol type="string" name="mediaSize_iso_b0" />
+  <java-symbol type="string" name="mediaSize_iso_b1" />
+  <java-symbol type="string" name="mediaSize_iso_b2" />
+  <java-symbol type="string" name="mediaSize_iso_b3" />
+  <java-symbol type="string" name="mediaSize_iso_b4" />
+  <java-symbol type="string" name="mediaSize_iso_b5" />
+  <java-symbol type="string" name="mediaSize_iso_b6" />
+  <java-symbol type="string" name="mediaSize_iso_b7" />
+  <java-symbol type="string" name="mediaSize_iso_b8" />
+  <java-symbol type="string" name="mediaSize_iso_b9" />
+  <java-symbol type="string" name="mediaSize_iso_b10" />
+  <java-symbol type="string" name="mediaSize_iso_c0" />
+  <java-symbol type="string" name="mediaSize_iso_c1" />
+  <java-symbol type="string" name="mediaSize_iso_c2" />
+  <java-symbol type="string" name="mediaSize_iso_c3" />
+  <java-symbol type="string" name="mediaSize_iso_c4" />
+  <java-symbol type="string" name="mediaSize_iso_c5" />
+  <java-symbol type="string" name="mediaSize_iso_c6" />
+  <java-symbol type="string" name="mediaSize_iso_c7" />
+  <java-symbol type="string" name="mediaSize_iso_c8" />
+  <java-symbol type="string" name="mediaSize_iso_c9" />
+  <java-symbol type="string" name="mediaSize_iso_c10" />
+  <java-symbol type="string" name="mediaSize_na_letter" />
+  <java-symbol type="string" name="mediaSize_na_gvrnmt_letter" />
+  <java-symbol type="string" name="mediaSize_na_legal" />
+  <java-symbol type="string" name="mediaSize_na_junior_legal" />
+  <java-symbol type="string" name="mediaSize_na_ledger" />
+  <java-symbol type="string" name="mediaSize_na_tabloid" />
 
   <java-symbol type="plurals" name="abbrev_in_num_days" />
   <java-symbol type="plurals" name="abbrev_in_num_hours" />
