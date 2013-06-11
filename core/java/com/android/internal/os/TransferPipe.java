@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.am;
+package com.android.internal.os;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -32,7 +32,7 @@ import android.util.Slog;
 /**
  * Helper for transferring data through a pipe from a client app.
  */
-final class TransferPipe implements Runnable {
+public final class TransferPipe implements Runnable {
     static final String TAG = "TransferPipe";
     static final boolean DEBUG = false;
 
@@ -53,7 +53,7 @@ final class TransferPipe implements Runnable {
                 String[] args) throws RemoteException;
     }
 
-    TransferPipe() throws IOException {
+    public TransferPipe() throws IOException {
         mThread = new Thread(this, "TransferPipe");
         mFds = ParcelFileDescriptor.createPipe();
     }
@@ -62,11 +62,11 @@ final class TransferPipe implements Runnable {
         return mFds[0];
     }
 
-    ParcelFileDescriptor getWriteFd() {
+    public ParcelFileDescriptor getWriteFd() {
         return mFds[1];
     }
 
-    void setBufferPrefix(String prefix) {
+    public void setBufferPrefix(String prefix) {
         mBufferPrefix = prefix;
     }
 
@@ -120,11 +120,11 @@ final class TransferPipe implements Runnable {
         }
     }
 
-    void go(FileDescriptor out) throws IOException {
+    public void go(FileDescriptor out) throws IOException {
         go(out, DEFAULT_TIMEOUT);
     }
 
-    void go(FileDescriptor out, long timeout) throws IOException {
+    public void go(FileDescriptor out, long timeout) throws IOException {
         try {
             synchronized (this) {
                 mOutFd = out;
@@ -173,7 +173,7 @@ final class TransferPipe implements Runnable {
         }
     }
 
-    void kill() {
+    public void kill() {
         closeFd(0);
         closeFd(1);
     }

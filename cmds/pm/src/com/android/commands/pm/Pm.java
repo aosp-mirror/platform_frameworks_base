@@ -16,8 +16,7 @@
 
 package com.android.commands.pm;
 
-import com.android.internal.content.PackageHelper;
-
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
@@ -46,6 +45,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.security.InvalidAlgorithmParameterException;
@@ -58,6 +58,8 @@ import java.util.WeakHashMap;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import com.android.internal.content.PackageHelper;
 
 public final class Pm {
     IPackageManager mPm;
@@ -102,6 +104,11 @@ public final class Pm {
 
         if ("path".equals(op)) {
             runPath();
+            return;
+        }
+
+        if ("dump".equals(op)) {
+            runDump();
             return;
         }
 
@@ -670,6 +677,15 @@ public final class Pm {
             return;
         }
         displayPackageFilePath(pkg);
+    }
+
+    private void runDump() {
+        String pkg = nextArg();
+        if (pkg == null) {
+            System.err.println("Error: no package specified");
+            return;
+        }
+        ActivityManager.dumpPackageStateStatic(FileDescriptor.out, pkg);
     }
 
     class PackageInstallObserver extends IPackageInstallObserver.Stub {
@@ -1456,6 +1472,7 @@ public final class Pm {
         System.err.println("       pm list libraries");
         System.err.println("       pm list users");
         System.err.println("       pm path PACKAGE");
+        System.err.println("       pm dump PACKAGE");
         System.err.println("       pm install [-l] [-r] [-t] [-i INSTALLER_PACKAGE_NAME] [-s] [-f]");
         System.err.println("                  [--algo <algorithm name> --key <key-in-hex> --iv <IV-in-hex>]");
         System.err.println("                  [--originating-uri <URI>] [--referrer <URI>] PATH");
@@ -1505,6 +1522,8 @@ public final class Pm {
         System.err.println("pm list users: prints all users on the system.");
         System.err.println("");
         System.err.println("pm path: print the path to the .apk of the given PACKAGE.");
+        System.err.println("");
+        System.err.println("pm dump: print system state associated w ith the given PACKAGE.");
         System.err.println("");
         System.err.println("pm install: installs a package to the system.  Options:");
         System.err.println("    -l: install the package with FORWARD_LOCK.");

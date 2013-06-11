@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.os.WorkSource;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
@@ -479,12 +480,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     
     private void dumpHelp(PrintWriter pw) {
         pw.println("Battery stats (batteryinfo) dump options:");
-        pw.println("  [--checkin] [--unplugged] [--reset] [--write] [-h]");
+        pw.println("  [--checkin] [--unplugged] [--reset] [--write] [-h] [<package.name>]");
         pw.println("  --checkin: format output for a checkin report.");
         pw.println("  --unplugged: only output data since last unplugged.");
         pw.println("  --reset: reset the stats, clearing all current data.");
         pw.println("  --write: force write current collected stats to disk.");
         pw.println("  -h: print this help text.");
+        pw.println("  <package.name>: optional name of package to filter output by.");
     }
 
     @Override
@@ -500,6 +502,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         boolean isCheckin = false;
         boolean isUnpluggedOnly = false;
         boolean noOutput = false;
+        int reqUid = -1;
         if (args != null) {
             for (String arg : args) {
                 if ("--checkin".equals(arg)) {
@@ -523,9 +526,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
                     return;
                 } else if ("-a".equals(arg)) {
                     // fall through
-                } else {
+                } else if (arg.length() > 0 && arg.charAt(0) == '-'){
                     pw.println("Unknown option: " + arg);
                     dumpHelp(pw);
+                    return;
+                } else {
+                    // Not an option, last argument must be a package name.
+                    try {
+                        reqUid = mContext.getPackageManager().getPackageUid(arg,
+                                UserHandle.getCallingUserId());
+                    } catch (PackageManager.NameNotFoundException e) {
+                        pw.println("Unknown package: " + arg);
+                        dumpHelp(pw);
+                        return;
+                    }
                 }
             }
         }
@@ -539,7 +553,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
             }
         } else {
             synchronized (mStats) {
-                mStats.dumpLocked(pw, isUnpluggedOnly);
+                mStats.dumpLocked(pw, isUnpluggedOnly, reqUid);
             }
         }
     }

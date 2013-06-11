@@ -6038,7 +6038,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         updateNetworkActivityLocked();
     }
 
-    public void dumpLocked(PrintWriter pw, boolean isUnpluggedOnly) {
+    public void dumpLocked(PrintWriter pw, boolean isUnpluggedOnly, int reqUid) {
         if (DEBUG) {
             Printer pr = new PrintWriterPrinter(pw);
             pr.println("*** Screen timer:");
@@ -6068,6 +6068,6 @@ public final class BatteryStatsImpl extends BatteryStats {
             pr.println("*** Bluetooth timer:");
             mBluetoothOnTimer.logState(pr, "  ");
         }
-        super.dumpLocked(pw, isUnpluggedOnly);
+        super.dumpLocked(pw, isUnpluggedOnly, reqUid);
     }
 }
