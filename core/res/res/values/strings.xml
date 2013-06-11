@@ -3970,6 +3970,9 @@
     <!-- Status message for remote routes that are not available for connection right now -->
     <string name="media_route_status_not_available">Not available</string>
 
+    <!-- Status message for a remote route that is in use (and thus unavailabe) right now -->
+    <string name="media_route_status_in_use">In use</string>
+
     <!-- Display manager service -->
 
     <!-- Name of the built-in display.  [CHAR LIMIT=50] -->

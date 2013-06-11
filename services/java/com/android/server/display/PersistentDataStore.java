@@ -106,7 +106,7 @@ final class PersistentDataStore {
             }
             if (!Objects.equal(display.getDeviceAlias(), alias)) {
                 return new WifiDisplay(display.getDeviceAddress(), display.getDeviceName(),
-                        alias, display.canConnect());
+                        alias, display.isAvailable(), display.canConnect(), display.isRemembered());
             }
         }
         return display;
@@ -260,7 +260,8 @@ final class PersistentDataStore {
                 }
 
                 mRememberedWifiDisplays.add(
-                        new WifiDisplay(deviceAddress, deviceName, deviceAlias));
+                        new WifiDisplay(deviceAddress, deviceName, deviceAlias,
+                                false, false, false));
             }
         }
     }
