@@ -30,7 +30,9 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-PatchCache::PatchCache(): mCache(LruCache<PatchDescription, Patch*>::kUnlimitedCapacity) {
+PatchCache::PatchCache():
+        mSize(0), mCache(LruCache<PatchDescription, Patch*>::kUnlimitedCapacity),
+        mMeshBuffer(0), mGenerationId(0) {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_PATCH_CACHE_SIZE, property, NULL) > 0) {
         INIT_LOGD("  Setting patch cache size to %skB", property);
@@ -39,8 +41,6 @@ PatchCache::PatchCache(): mCache(LruCache<PatchDescription, Patch*>::kUnlimitedC
         INIT_LOGD("  Using default patch cache size of %.2fkB", DEFAULT_PATCH_CACHE_SIZE);
         mMaxSize = KB(DEFAULT_PATCH_CACHE_SIZE);
     }
-    mSize = 0;
-    mMeshBuffer = 0;
 }
 
 PatchCache::~PatchCache() {
@@ -58,7 +58,7 @@ void PatchCache::init(Caches& caches) {
     caches.resetVertexPointers();
 
     if (created) {
-        glBufferData(GL_ARRAY_BUFFER, mMaxSize, NULL, GL_DYNAMIC_DRAW);
+        createVertexBuffer();
     }
 }
 
@@ -99,6 +99,12 @@ void PatchCache::clearCache() {
     mCache.clear();
 }
 
+void PatchCache::createVertexBuffer() {
+    glBufferData(GL_ARRAY_BUFFER, mMaxSize, NULL, GL_DYNAMIC_DRAW);
+    mSize = 0;
+    mGenerationId++;
+}
+
 const Patch* PatchCache::get(const AssetAtlas::Entry* entry,
         const uint32_t bitmapWidth, const uint32_t bitmapHeight,
         const float pixelWidth, const float pixelHeight, const Res_png_9patch* patch) {
@@ -127,8 +133,7 @@ const Patch* PatchCache::get(const AssetAtlas::Entry* entry,
             uint32_t size = newMesh->getSize();
             if (mSize + size > mMaxSize) {
                 clearCache();
-                glBufferData(GL_ARRAY_BUFFER, mMaxSize, NULL, GL_DYNAMIC_DRAW);
-                mSize = 0;
+                createVertexBuffer();
             }
 
             newMesh->offset = (GLintptr) mSize;
