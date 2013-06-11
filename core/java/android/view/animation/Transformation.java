@@ -29,19 +29,19 @@ public class Transformation {
     /**
      * Indicates a transformation that has no effect (alpha = 1 and identity matrix.)
      */
-    public static int TYPE_IDENTITY = 0x0;
+    public static final int TYPE_IDENTITY = 0x0;
     /**
      * Indicates a transformation that applies an alpha only (uses an identity matrix.)
      */
-    public static int TYPE_ALPHA = 0x1;
+    public static final int TYPE_ALPHA = 0x1;
     /**
      * Indicates a transformation that applies a matrix only (alpha = 1.)
      */
-    public static int TYPE_MATRIX = 0x2;
+    public static final int TYPE_MATRIX = 0x2;
     /**
      * Indicates a transformation that applies an alpha and a matrix.
      */
-    public static int TYPE_BOTH = TYPE_ALPHA | TYPE_MATRIX;
+    public static final int TYPE_BOTH = TYPE_ALPHA | TYPE_MATRIX;
 
     protected Matrix mMatrix;
     protected float mAlpha;
