@@ -37,7 +37,6 @@ public final class WebViewFactory {
     private static final String DEFAULT_WEBVIEW_FACTORY = "android.webkit.WebViewClassic$Factory";
     private static final String CHROMIUM_WEBVIEW_FACTORY =
             "com.android.webview.chromium.WebViewChromiumFactoryProvider";
-    private static final String CHROMIUM_WEBVIEW_JAR = "/system/framework/webviewchromium.jar";
 
     private static final String LOGTAG = "WebViewFactory";
 
@@ -49,7 +48,14 @@ public final class WebViewFactory {
     private static final Object sProviderLock = new Object();
 
     public static boolean isExperimentalWebViewAvailable() {
-        return Build.IS_DEBUGGABLE && (new java.io.File(CHROMIUM_WEBVIEW_JAR).exists());
+        try {
+            // Pass false so we don't initialize the class at this point, as this will be wasted if
+            // it's not enabled.
+            Class.forName(CHROMIUM_WEBVIEW_FACTORY, false, WebViewFactory.class.getClassLoader());
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 
     static WebViewFactoryProvider getProvider() {
@@ -61,7 +67,7 @@ public final class WebViewFactory {
             if (isExperimentalWebViewEnabled()) {
                 StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
                 try {
-                    sProviderInstance = loadChromiumProvider();
+                    sProviderInstance = getFactoryByName(CHROMIUM_WEBVIEW_FACTORY);
                     if (DEBUG) Log.v(LOGTAG, "Loaded Chromium provider: " + sProviderInstance);
                 } finally {
                     StrictMode.setThreadPolicy(oldPolicy);
@@ -71,8 +77,7 @@ public final class WebViewFactory {
             if (sProviderInstance == null) {
                 if (DEBUG) Log.v(LOGTAG, "Falling back to default provider: "
                         + DEFAULT_WEBVIEW_FACTORY);
-                sProviderInstance = getFactoryByName(DEFAULT_WEBVIEW_FACTORY,
-                        WebViewFactory.class.getClassLoader());
+                sProviderInstance = getFactoryByName(DEFAULT_WEBVIEW_FACTORY);
                 if (sProviderInstance == null) {
                     if (DEBUG) Log.v(LOGTAG, "Falling back to explicit linkage");
                     sProviderInstance = new WebViewClassic.Factory();
@@ -96,19 +101,10 @@ public final class WebViewFactory {
         return SystemProperties.getBoolean(WEBVIEW_EXPERIMENTAL_PROPERTY, false);
     }
 
-    // TODO: This allows us to have the legacy and Chromium WebView coexist for development
-    // and side-by-side testing. After transition, remove this when no longer required.
-    private static WebViewFactoryProvider loadChromiumProvider() {
-        ClassLoader clazzLoader = new PathClassLoader(CHROMIUM_WEBVIEW_JAR, null,
-                WebViewFactory.class.getClassLoader());
-        return getFactoryByName(CHROMIUM_WEBVIEW_FACTORY, clazzLoader);
-    }
-
-    private static WebViewFactoryProvider getFactoryByName(String providerName,
-            ClassLoader loader) {
+    private static WebViewFactoryProvider getFactoryByName(String providerName) {
         try {
             if (DEBUG) Log.v(LOGTAG, "attempt to load class " + providerName);
-            Class<?> c = Class.forName(providerName, true, loader);
+            Class<?> c = Class.forName(providerName);
             if (DEBUG) Log.v(LOGTAG, "instantiating factory");
             return (WebViewFactoryProvider) c.newInstance();
         } catch (ClassNotFoundException e) {
