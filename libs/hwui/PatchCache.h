@@ -70,8 +70,13 @@ public:
         return mMeshBuffer;
     }
 
+    uint32_t getGenerationId() const {
+        return mGenerationId;
+    }
+
 private:
     void clearCache();
+    void createVertexBuffer();
 
     struct PatchDescription {
         PatchDescription(): mPatch(NULL), mBitmapWidth(0), mBitmapHeight(0),
@@ -122,9 +127,11 @@ private:
     uint32_t mMaxSize;
     uint32_t mSize;
 
+    LruCache<PatchDescription, Patch*> mCache;
+
     GLuint mMeshBuffer;
 
-    LruCache<PatchDescription, Patch*> mCache;
+    uint32_t mGenerationId;
 }; // class PatchCache
 
 }; // namespace uirenderer

@@ -932,13 +932,22 @@ public:
     DrawPatchOp(SkBitmap* bitmap, Res_png_9patch* patch,
             float left, float top, float right, float bottom, int alpha, SkXfermode::Mode mode)
             : DrawBoundedOp(left, top, right, bottom, 0),
-            mBitmap(bitmap), mPatch(patch), mAlpha(alpha), mMode(mode) {
+            mBitmap(bitmap), mPatch(patch), mAlpha(alpha), mMode(mode),
+            mGenerationId(0), mMesh(NULL) {
         mEntry = Caches::getInstance().assetAtlas.getEntry(bitmap);
     };
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
-        // NOTE: not calling the virtual method, which takes a paint
-        return renderer.drawPatch(mBitmap, mPatch, mEntry, mLocalBounds.left, mLocalBounds.top,
+        if (!mMesh || renderer.getCaches().patchCache.getGenerationId() != mGenerationId) {
+            PatchCache& cache = renderer.getCaches().patchCache;
+            mMesh = cache.get(mEntry, mBitmap->width(), mBitmap->height(),
+                    mLocalBounds.right - mLocalBounds.left, mLocalBounds.bottom - mLocalBounds.top,
+                    mPatch);
+            mGenerationId = cache.getGenerationId();
+        }
+        // We're not calling the public variant of drawPatch() here
+        // This method won't perform the quickReject() since we've already done it at this point
+        return renderer.drawPatch(mBitmap, mMesh, mEntry, mLocalBounds.left, mLocalBounds.top,
                 mLocalBounds.right, mLocalBounds.bottom, mAlpha, mMode);
     }
 
@@ -957,8 +966,12 @@ public:
 private:
     SkBitmap* mBitmap;
     Res_png_9patch* mPatch;
+
     int mAlpha;
     SkXfermode::Mode mMode;
+
+    uint32_t mGenerationId;
+    const Patch* mMesh;
     AssetAtlas::Entry* mEntry;
 };
 

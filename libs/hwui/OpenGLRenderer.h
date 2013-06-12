@@ -266,7 +266,7 @@ public:
             float* vertices, int* colors, SkPaint* paint);
     virtual status_t drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
             float left, float top, float right, float bottom, SkPaint* paint);
-    status_t drawPatch(SkBitmap* bitmap, Res_png_9patch* patch, AssetAtlas::Entry* entry,
+    status_t drawPatch(SkBitmap* bitmap, const Patch* mesh, AssetAtlas::Entry* entry,
             float left, float top, float right, float bottom, int alpha, SkXfermode::Mode mode);
     virtual status_t drawColor(int color, SkXfermode::Mode mode);
     virtual status_t drawRect(float left, float top, float right, float bottom, SkPaint* paint);

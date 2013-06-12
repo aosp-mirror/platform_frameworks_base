@@ -467,7 +467,7 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
             mat4 texTransform(layer->getTexTransform());
 
             mat4 invert;
-            invert.translate(0.0f, 1.0f, 0.0f);
+            invert.translate(0.0f, 1.0f);
             invert.scale(1.0f, -1.0f, 1.0f);
             layer->getTexTransform().multiply(invert);
 

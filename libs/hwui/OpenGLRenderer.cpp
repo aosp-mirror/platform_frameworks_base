@@ -1407,7 +1407,7 @@ void OpenGLRenderer::setFullScreenClip() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::translate(float dx, float dy) {
-    currentTransform().translate(dx, dy, 0.0f);
+    currentTransform().translate(dx, dy);
 }
 
 void OpenGLRenderer::rotate(float degrees) {
@@ -2337,19 +2337,24 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    return drawPatch(bitmap, patch, mCaches.assetAtlas.getEntry(bitmap),
-            left, top, right, bottom, alpha, mode);
-}
-
-status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
-        AssetAtlas::Entry* entry, float left, float top, float right, float bottom,
-        int alpha, SkXfermode::Mode mode) {
     if (quickReject(left, top, right, bottom)) {
         return DrawGlInfo::kStatusDone;
     }
 
+    AssetAtlas::Entry* entry = mCaches.assetAtlas.getEntry(bitmap);
     const Patch* mesh = mCaches.patchCache.get(entry, bitmap->width(), bitmap->height(),
             right - left, bottom - top, patch);
+
+    return drawPatch(bitmap, mesh, entry, left, top, right, bottom, alpha, mode);
+}
+
+status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const Patch* mesh,
+        AssetAtlas::Entry* entry, float left, float top, float right, float bottom,
+        int alpha, SkXfermode::Mode mode) {
+
+    if (quickReject(left, top, right, bottom)) {
+        return DrawGlInfo::kStatusDone;
+    }
 
     if (CC_LIKELY(mesh && mesh->verticesCount > 0)) {
         mCaches.activeTexture(0);

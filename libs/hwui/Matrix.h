@@ -128,10 +128,27 @@ public:
 
     void multiply(float v);
 
-    void translate(float x, float y, float z) {
-        Matrix4 u;
-        u.loadTranslate(x, y, z);
-        multiply(u);
+    void translate(float x, float y) {
+        if ((getType() & sGeometryMask) == kTypeTranslate) {
+            data[kTranslateX] += x;
+            data[kTranslateY] += y;
+        } else {
+            // Doing a translation will only affect the translate bit of the type
+            // Save the type
+            uint32_t type = mType;
+
+            Matrix4 u;
+            u.loadTranslate(x, y, 0.0f);
+            multiply(u);
+
+            // Restore the type and fix the translate bit
+            mType = type;
+            if (data[kTranslateX] != 0.0f || data[kTranslateY] != 0.0f) {
+                mType |= kTypeTranslate;
+            } else {
+                mType &= ~kTypeTranslate;
+            }
+        }
     }
 
     void scale(float sx, float sy, float sz) {
