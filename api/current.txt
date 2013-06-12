@@ -954,6 +954,9 @@ package android {
     field public static final int spinnersShown = 16843595; // 0x101034b
     field public static final int splitMotionEvents = 16843503; // 0x10102ef
     field public static final int src = 16843033; // 0x1010119
+    field public static final int ssp = 16843744; // 0x10103e0
+    field public static final int sspPattern = 16843746; // 0x10103e2
+    field public static final int sspPrefix = 16843745; // 0x10103e1
     field public static final int stackFromBottom = 16843005; // 0x10100fd
     field public static final int starStyle = 16842882; // 0x1010082
     field public static final int startColor = 16843165; // 0x101019d
@@ -6322,6 +6325,7 @@ package android.content {
     method public final void addDataAuthority(java.lang.String, java.lang.String);
     method public final void addDataPath(java.lang.String, int);
     method public final void addDataScheme(java.lang.String);
+    method public final void addDataSchemeSpecificPart(java.lang.String, int);
     method public final void addDataType(java.lang.String) throws android.content.IntentFilter.MalformedMimeTypeException;
     method public final java.util.Iterator<android.content.IntentFilter.AuthorityEntry> authoritiesIterator();
     method public final java.util.Iterator<java.lang.String> categoriesIterator();
@@ -6329,6 +6333,7 @@ package android.content {
     method public final int countCategories();
     method public final int countDataAuthorities();
     method public final int countDataPaths();
+    method public final int countDataSchemeSpecificParts();
     method public final int countDataSchemes();
     method public final int countDataTypes();
     method public static android.content.IntentFilter create(java.lang.String, java.lang.String);
@@ -6339,6 +6344,7 @@ package android.content {
     method public final android.content.IntentFilter.AuthorityEntry getDataAuthority(int);
     method public final android.os.PatternMatcher getDataPath(int);
     method public final java.lang.String getDataScheme(int);
+    method public final android.os.PatternMatcher getDataSchemeSpecificPart(int);
     method public final java.lang.String getDataType(int);
     method public final int getPriority();
     method public final boolean hasAction(java.lang.String);
@@ -6346,6 +6352,7 @@ package android.content {
     method public final boolean hasDataAuthority(android.net.Uri);
     method public final boolean hasDataPath(java.lang.String);
     method public final boolean hasDataScheme(java.lang.String);
+    method public final boolean hasDataSchemeSpecificPart(java.lang.String);
     method public final boolean hasDataType(java.lang.String);
     method public final int match(android.content.ContentResolver, android.content.Intent, boolean, java.lang.String);
     method public final int match(java.lang.String, java.lang.String, java.lang.String, android.net.Uri, java.util.Set<java.lang.String>, java.lang.String);
@@ -6355,6 +6362,7 @@ package android.content {
     method public final int matchDataAuthority(android.net.Uri);
     method public final java.util.Iterator<android.os.PatternMatcher> pathsIterator();
     method public void readFromXml(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public final java.util.Iterator<android.os.PatternMatcher> schemeSpecificPartsIterator();
     method public final java.util.Iterator<java.lang.String> schemesIterator();
     method public final void setPriority(int);
     method public final java.util.Iterator<java.lang.String> typesIterator();
@@ -6369,6 +6377,7 @@ package android.content {
     field public static final int MATCH_CATEGORY_PATH = 5242880; // 0x500000
     field public static final int MATCH_CATEGORY_PORT = 4194304; // 0x400000
     field public static final int MATCH_CATEGORY_SCHEME = 2097152; // 0x200000
+    field public static final int MATCH_CATEGORY_SCHEME_SPECIFIC_PART = 5767168; // 0x580000
     field public static final int MATCH_CATEGORY_TYPE = 6291456; // 0x600000
     field public static final int NO_MATCH_ACTION = -3; // 0xfffffffd
     field public static final int NO_MATCH_CATEGORY = -4; // 0xfffffffc

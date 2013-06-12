@@ -2063,5 +2063,8 @@
   <public type="attr" name="fromScene" />
   <public type="attr" name="toScene" />
   <public type="attr" name="transition" />
+  <public type="attr" name="ssp" />
+  <public type="attr" name="sspPrefix" />
+  <public type="attr" name="sspPattern" />
 
 </resources>

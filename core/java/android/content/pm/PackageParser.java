@@ -3288,6 +3288,24 @@ public class PackageParser {
                     outInfo.addDataScheme(str);
                 }
 
+                str = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestData_ssp, 0);
+                if (str != null) {
+                    outInfo.addDataSchemeSpecificPart(str, PatternMatcher.PATTERN_LITERAL);
+                }
+
+                str = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestData_sspPrefix, 0);
+                if (str != null) {
+                    outInfo.addDataSchemeSpecificPart(str, PatternMatcher.PATTERN_PREFIX);
+                }
+
+                str = sa.getNonConfigurationString(
+                        com.android.internal.R.styleable.AndroidManifestData_sspPattern, 0);
+                if (str != null) {
+                    outInfo.addDataSchemeSpecificPart(str, PatternMatcher.PATTERN_SIMPLE_GLOB);
+                }
+
                 String host = sa.getNonConfigurationString(
                         com.android.internal.R.styleable.AndroidManifestData_host, 0);
                 String port = sa.getNonConfigurationString(
