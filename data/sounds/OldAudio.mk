@@ -12,7 +12,7 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/alarms/old/Alarm_Buzzer.ogg:system/media/audio/alarms/Alarm_Buzzer.ogg \
 	$(LOCAL_PATH)/alarms/old/Alarm_Classic.ogg:system/media/audio/alarms/Alarm_Classic.ogg \
 	$(LOCAL_PATH)/alarms/old/Alarm_Rooster_01.ogg:system/media/audio/alarms/Alarm_Rooster_01.ogg \
-	$(LOCAL_PATH)/alarms/old/Alarm_Rooster_02.ogg:system/media/audio/alarms/Alarm_Rooster_02.ogg \
+	$(LOCAL_PATH)/alarms/old/Alarm_Rooster_02.ogg:system/media/audio/alarms/Alarm_Rooster_02.ogg
 
 # Effects
 PRODUCT_COPY_FILES += \
@@ -27,7 +27,7 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/effects/old/LowBattery.ogg:system/media/audio/ui/LowBattery.ogg \
 	$(LOCAL_PATH)/effects/old/VideoRecord.ogg:system/media/audio/ui/VideoRecord.ogg \
 	$(LOCAL_PATH)/effects/old/Undock.ogg:system/media/audio/ui/Undock.ogg \
-	$(LOCAL_PATH)/effects/old/Unlock.ogg:system/media/audio/ui/Unlock.ogg \
+	$(LOCAL_PATH)/effects/old/Unlock.ogg:system/media/audio/ui/Unlock.ogg
 
 # Notifications
 PRODUCT_COPY_FILES += \
@@ -52,7 +52,7 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/notifications/old/Star_Struck.ogg:system/media/audio/notifications/Star_Struck.ogg \
 	$(LOCAL_PATH)/notifications/old/TaDa.ogg:system/media/audio/notifications/TaDa.ogg \
 	$(LOCAL_PATH)/notifications/old/Tinkerbell.ogg:system/media/audio/notifications/Tinkerbell.ogg \
-	$(LOCAL_PATH)/notifications/old/Tweeters.ogg:system/media/audio/notifications/Tweeters.ogg \
+	$(LOCAL_PATH)/notifications/old/Tweeters.ogg:system/media/audio/notifications/Tweeters.ogg
 
 # Ringtones
 PRODUCT_COPY_FILES += \
@@ -70,4 +70,4 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/ringtones/old/Ring_Synth_02.ogg:system/media/audio/ringtones/Ring_Synth_02.ogg \
 	$(LOCAL_PATH)/ringtones/old/Ring_Synth_03.ogg:system/media/audio/ringtones/Ring_Synth_03.ogg \
 	$(LOCAL_PATH)/ringtones/old/Ring_Synth_04.ogg:system/media/audio/ringtones/Ring_Synth_04.ogg \
-	$(LOCAL_PATH)/ringtones/old/Ring_Synth_05.ogg:system/media/audio/ringtones/Ring_Synth_05.ogg \
+	$(LOCAL_PATH)/ringtones/old/Ring_Synth_05.ogg:system/media/audio/ringtones/Ring_Synth_05.ogg
