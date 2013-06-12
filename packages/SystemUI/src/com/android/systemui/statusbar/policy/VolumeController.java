@@ -16,15 +16,9 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.content.ContentResolver;
 import android.content.Context;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.os.Vibrator;
 import android.media.AudioManager;
-import android.provider.Settings;
-import android.view.IWindowManager;
-import android.widget.CompoundButton;
+import android.os.Vibrator;
 
 import com.android.systemui.settings.ToggleSlider;
 

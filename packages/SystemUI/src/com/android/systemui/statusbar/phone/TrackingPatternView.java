@@ -17,13 +17,12 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
-import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
-import android.graphics.BitmapFactory;
-import android.graphics.Bitmap;
-import android.graphics.Paint;
-import android.graphics.Canvas;
 
 public class TrackingPatternView extends View {
     private Bitmap mTexture;

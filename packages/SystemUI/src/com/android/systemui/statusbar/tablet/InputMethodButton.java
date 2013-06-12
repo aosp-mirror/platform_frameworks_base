@@ -20,10 +20,10 @@ import android.content.Context;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
-import android.view.View;
 import android.widget.ImageView;
 
 import com.android.systemui.R;

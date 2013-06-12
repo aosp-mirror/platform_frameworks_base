@@ -16,17 +16,17 @@
 
 package com.android.systemui.statusbar.tablet;
 
-import com.android.systemui.R;
-import com.android.systemui.statusbar.BaseStatusBar;
-import com.android.systemui.statusbar.DelegateViewHelper;
-
 import android.content.Context;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.View;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.FrameLayout;
+
+import com.android.systemui.R;
+import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.DelegateViewHelper;
 
 public class TabletStatusBarView extends FrameLayout {
     private Handler mHandler;

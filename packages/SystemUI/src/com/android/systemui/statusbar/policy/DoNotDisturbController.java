@@ -16,14 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.RemoteException;
-import android.os.ServiceManager;
-import android.provider.Settings;
-import android.util.Log;
-import android.view.IWindowManager;
 import android.widget.CompoundButton;
 
 public class DoNotDisturbController implements CompoundButton.OnCheckedChangeListener,

@@ -16,11 +16,11 @@
 
 package com.android.systemui;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-
 import android.content.Context;
 import android.content.res.Configuration;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 public abstract class SystemUI {
     public Context mContext;

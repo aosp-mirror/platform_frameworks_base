@@ -16,9 +16,6 @@
 
 package com.android.systemui;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-
 import android.app.Service;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -27,6 +24,9 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 public class SystemUIService extends Service {
     static final String TAG = "SystemUIService";
