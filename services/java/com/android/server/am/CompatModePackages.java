@@ -300,7 +300,7 @@ public final class CompatModePackages {
             // Tell all processes that loaded this package about the change.
             for (int i=mService.mLruProcesses.size()-1; i>=0; i--) {
                 ProcessRecord app = mService.mLruProcesses.get(i);
-                if (!app.pkgList.contains(packageName)) {
+                if (!app.pkgList.containsKey(packageName)) {
                     continue;
                 }
                 try {

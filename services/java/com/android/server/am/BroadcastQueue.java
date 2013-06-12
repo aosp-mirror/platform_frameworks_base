@@ -795,7 +795,7 @@ public final class BroadcastQueue {
                     info.activityInfo.applicationInfo.uid);
             if (app != null && app.thread != null) {
                 try {
-                    app.addPackage(info.activityInfo.packageName);
+                    app.addPackage(info.activityInfo.packageName, mService.mProcessTracker);
                     processCurBroadcastLocked(r, app);
                     return;
                 } catch (RemoteException e) {

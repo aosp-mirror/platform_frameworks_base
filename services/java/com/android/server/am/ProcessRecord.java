@@ -51,9 +51,10 @@ final class ProcessRecord {
     final int uid;              // uid of process; may be different from 'info' if isolated
     final int userId;           // user of process.
     final String processName;   // name of the process
-    final ProcessTracker.ProcessState tracker; // tracking execution of process
+    final ProcessTracker.ProcessState baseProcessTracker;
     // List of packages running in the process
-    final HashSet<String> pkgList = new HashSet<String>();
+    final ArrayMap<String, ProcessTracker.ProcessState> pkgList
+            = new ArrayMap<String, ProcessTracker.ProcessState>();
     IApplicationThread thread;  // the actual proc...  may be null only if
                                 // 'persistent' is true (in which case we
                                 // are in the process of launching the app)
@@ -87,6 +88,7 @@ final class ProcessRecord {
     boolean hasAboveClient;     // Bound using BIND_ABOVE_CLIENT, so want to be lower
     boolean bad;                // True if disabled in the bad process list
     boolean killedBackground;   // True when proc has been killed due to too many bg
+    boolean setAdjChanged;      // Keep track of whether we changed 'setAdj'.
     String waitingToKill;       // Process is waiting to be killed when in the bg; reason
     IBinder forcingToForeground;// Token that is forcing this process to be foreground
     int adjSeq;                 // Sequence id for identifying oom_adj assignment cycles
@@ -327,15 +329,15 @@ final class ProcessRecord {
     
     ProcessRecord(BatteryStatsImpl.Uid.Proc _batteryStats, IApplicationThread _thread,
             ApplicationInfo _info, String _processName, int _uid,
-            ProcessTracker.ProcessState _tracker) {
+            ProcessTracker.ProcessState tracker) {
         batteryStats = _batteryStats;
         info = _info;
         isolated = _info.uid != _uid;
         uid = _uid;
         userId = UserHandle.getUserId(_uid);
         processName = _processName;
-        tracker = _tracker;
-        pkgList.add(_info.packageName);
+        baseProcessTracker = tracker;
+        pkgList.put(_info.packageName, tracker);
         thread = _thread;
         maxAdj = ProcessList.CACHED_APP_MAX_ADJ;
         cachedAdj = clientCachedAdj = emptyAdj = ProcessList.CACHED_APP_MIN_ADJ;
@@ -437,20 +439,33 @@ final class ProcessRecord {
     /*
      *  Return true if package has been added false if not
      */
-    public boolean addPackage(String pkg) {
-        if (!pkgList.contains(pkg)) {
-            pkgList.add(pkg);
+    public boolean addPackage(String pkg, ProcessTracker tracker) {
+        if (!pkgList.containsKey(pkg)) {
+            pkgList.put(pkg, tracker.getProcessStateLocked(pkg, info.uid, processName));
             return true;
         }
         return false;
     }
-    
+
+    public void setProcessTrackerState(ProcessRecord TOP_APP, int memFactor, long now,
+            ProcessList plist) {
+        int state = this == TOP_APP ? ProcessTracker.STATE_TOP
+                : plist.adjToTrackedState(setAdj);
+        for (int ip=pkgList.size()-1; ip>=0; ip--) {
+            pkgList.valueAt(ip).setState(state, memFactor, now);
+        }
+    }
+
     /*
      *  Delete all packages from list except the package indicated in info
      */
     public void resetPackageList() {
+        long now = SystemClock.uptimeMillis();
+        for (int i=0; i<pkgList.size(); i++) {
+            pkgList.valueAt(i).setState(ProcessTracker.STATE_NOTHING, 0, now);
+        }
         pkgList.clear();
-        pkgList.add(info.packageName);
+        pkgList.put(info.packageName, baseProcessTracker);
     }
     
     public String[] getPackageList() {
@@ -459,7 +474,9 @@ final class ProcessRecord {
             return null;
         }
         String list[] = new String[size];
-        pkgList.toArray(list);
+        for (int i=0; i<pkgList.size(); i++) {
+            list[i] = pkgList.keyAt(i);
+        }
         return list;
     }
 }
