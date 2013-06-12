@@ -870,7 +870,7 @@
     <string name="factorytest_not_system" msgid="4435201656767276723">"Tendo la JARIBIO_LA KIWANDA  linahimiliwa tu kwa furushi zilizosakinishwa katika /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Hakuna furushi lililopatikana ambalo linatoa tendo la JARIBIO_LA KIWANDA."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"Washa tena"</string>
-    <string name="js_dialog_title" msgid="1987483977834603872">"Ukurasa ulio \"<xliff:g id="TITLE">%s</xliff:g>\" unasema:"</string>
+    <string name="js_dialog_title" msgid="1987483977834603872">"Ukurasa wa \"<xliff:g id="TITLE">%s</xliff:g>\" unasema:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"HatiJava"</string>
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Thibitisha jinsi ya kuelekea"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Toka kwenye Ukurasa huu"</string>
