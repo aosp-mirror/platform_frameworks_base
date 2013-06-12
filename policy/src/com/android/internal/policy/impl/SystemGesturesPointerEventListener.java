@@ -17,19 +17,15 @@
 package com.android.internal.policy.impl;
 
 import android.content.Context;
-import android.os.Looper;
 import android.util.Slog;
-import android.view.InputChannel;
-import android.view.InputDevice;
-import android.view.InputEvent;
-import android.view.InputEventReceiver;
 import android.view.MotionEvent;
+import android.view.WindowManagerPolicy.PointerEventListener;
 
 /*
  * Listens for system-wide input gestures, firing callbacks when detected.
  * @hide
  */
-public class SystemGestures extends InputEventReceiver {
+public class SystemGesturesPointerEventListener implements PointerEventListener {
     private static final String TAG = "SystemGestures";
     private static final boolean DEBUG = false;
     private static final long SWIPE_TIMEOUT_MS = 500;
@@ -55,9 +51,7 @@ public class SystemGestures extends InputEventReceiver {
     private boolean mSwipeFireable;
     private boolean mDebugFireable;
 
-    public SystemGestures(InputChannel inputChannel, Looper looper,
-            Context context, Callbacks callbacks) {
-        super(inputChannel, looper);
+    public SystemGesturesPointerEventListener(Context context, Callbacks callbacks) {
         mCallbacks = checkNull("callbacks", callbacks);
         mSwipeStartThreshold = checkNull("context", context).getResources()
                 .getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
@@ -72,14 +66,7 @@ public class SystemGestures extends InputEventReceiver {
     }
 
     @Override
-    public void onInputEvent(InputEvent event) {
-        if (event instanceof MotionEvent && event.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
-            onPointerMotionEvent((MotionEvent) event);
-        }
-        finishInputEvent(event, false /*handled*/);
-    }
-
-    private void onPointerMotionEvent(MotionEvent event) {
+    public void onPointerEvent(MotionEvent event) {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 mSwipeFireable = true;

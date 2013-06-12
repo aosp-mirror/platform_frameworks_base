@@ -28,7 +28,6 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
-import android.view.InputChannel;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -101,11 +100,8 @@ class DisplayContent {
     /** Sorted most recent at top, oldest at [0]. */
     ArrayList<TaskStack> mStackHistory = new ArrayList<TaskStack>();
 
-    /** Forward motion events to mTapDetector. */
-    InputChannel mTapInputChannel;
-
     /** Detect user tapping outside of current focused stack bounds .*/
-    StackTapDetector mTapDetector;
+    StackTapPointerEventListener mTapDetector;
 
     /** Detect user tapping outside of current focused stack bounds .*/
     Region mTouchExcludeRegion = new Region();

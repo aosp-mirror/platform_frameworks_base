@@ -408,11 +408,6 @@ public interface WindowManagerPolicy {
         public int getLidState();
 
         /**
-         * Creates an input channel that will receive all input from the input dispatcher.
-         */
-        public InputChannel monitorInput(String name);
-
-        /**
          * Switch the keyboard layout for the given device.
          * Direction should be +1 or -1 to go to the next or previous keyboard layout.
          */
@@ -425,6 +420,21 @@ public interface WindowManagerPolicy {
          * Return the window manager lock needed to correctly call "Lw" methods.
          */
         public Object getWindowManagerLock();
+
+        /** Register a system listener for touch events */
+        void registerPointerEventListener(PointerEventListener listener);
+
+        /** Unregister a system listener for touch events */
+        void unregisterPointerEventListener(PointerEventListener listener);
+    }
+
+    public interface PointerEventListener {
+        /**
+         * 1. onPointerEvent will be called on the service.UiThread.
+         * 2. motionEvent will be recycled after onPointerEvent returns so if it is needed later a
+         * copy() must be made and the copy must be recycled.
+         **/
+        public void onPointerEvent(MotionEvent motionEvent);
     }
 
     /** Window has been added to the screen. */
