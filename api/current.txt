@@ -18370,22 +18370,6 @@ package android.preference {
 
 }
 
-package android.print.pdf {
-
-  public class PdfDocument {
-    ctor public PdfDocument();
-    method public boolean appendPage(android.print.pdf.PdfDocument.PdfPage);
-    method public android.print.pdf.PdfDocument.PdfPage createPage(android.graphics.Rect, android.graphics.Rect);
-    method public android.print.pdf.PdfDocument.PdfPage createPage(android.graphics.Rect, android.graphics.Rect, android.graphics.Matrix);
-    method public void finalize() throws java.lang.Throwable;
-    method public void write(java.io.OutputStream);
-  }
-
-  public class PdfDocument.PdfPage extends android.graphics.Canvas {
-  }
-
-}
-
 package android.provider {
 
   public final class AlarmClock {
