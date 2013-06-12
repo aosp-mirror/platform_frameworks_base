@@ -144,7 +144,7 @@ static jint getBatteryHealth(const char* status)
 
 static int readFromFile(const String8& path, char* buf, size_t size)
 {
-    if (!path)
+    if (path.isEmpty())
         return -1;
     int fd = open(path.string(), O_RDONLY, 0);
     if (fd == -1) {
