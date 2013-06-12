@@ -66,6 +66,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.Selection;
 import android.text.TextUtils;
+import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -1293,6 +1294,19 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     // WebViewProvider bindings
 
     static class Factory implements WebViewFactoryProvider,  WebViewFactoryProvider.Statics {
+        Factory() {
+            // Touch JniUtil and WebViewCore in case this is being called from
+            // WebViewFactory.Preloader, to ensure that the JNI libraries that they use are
+            // preloaded in the zygote.
+            try {
+                Class.forName("android.webkit.JniUtil");
+                Class.forName("android.webkit.WebViewCore");
+            } catch (ClassNotFoundException e) {
+                Log.e(LOGTAG, "failed to load JNI libraries");
+                throw new AndroidRuntimeException(e);
+            }
+        }
+
         @Override
         public String findAddress(String addr) {
             return WebViewClassic.findAddress(addr);

@@ -1220,7 +1220,6 @@ android.webkit.HTML5Audio
 android.webkit.HTML5VideoViewProxy
 android.webkit.JWebCoreJavaBridge
 android.webkit.JavascriptInterface
-android.webkit.JniUtil
 android.webkit.L10nUtils
 android.webkit.MockGeolocation
 android.webkit.OverScrollGlow
@@ -1269,7 +1268,6 @@ android.webkit.WebViewClassic$TitleBarDelegate
 android.webkit.WebViewClassic$TrustStorageListener
 android.webkit.WebViewClassic$ViewSizeData
 android.webkit.WebViewClient
-android.webkit.WebViewCore
 android.webkit.WebViewCore$AutoFillData
 android.webkit.WebViewCore$DrawData
 android.webkit.WebViewCore$EventHub
@@ -1283,6 +1281,7 @@ android.webkit.WebViewDatabase
 android.webkit.WebViewDatabaseClassic
 android.webkit.WebViewDatabaseClassic$1
 android.webkit.WebViewFactory
+android.webkit.WebViewFactory$Preloader
 android.webkit.WebViewFactoryProvider
 android.webkit.WebViewFactoryProvider$Statics
 android.webkit.WebViewInputDispatcher
