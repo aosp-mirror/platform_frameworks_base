@@ -76,7 +76,6 @@ import com.android.systemui.recent.RecentTasksLoader;
 import com.android.systemui.recent.RecentsActivity;
 import com.android.systemui.recent.TaskDescription;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
-import com.android.systemui.statusbar.tablet.StatusBarPanel;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -534,7 +533,6 @@ public abstract class BaseStatusBar extends SystemUI implements
                 mDisplay.getMetrics(dm);
                 // calculate it here, but consider moving it elsewhere
                 // first, determine which orientation you're in.
-                // todo: move the system_bar layouts to sw600dp ?
                 final Configuration config = res.getConfiguration();
                 int x, y;
 

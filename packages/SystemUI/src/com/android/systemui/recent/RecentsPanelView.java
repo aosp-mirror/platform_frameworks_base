@@ -61,21 +61,19 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.StatusBarPanel;
 import com.android.systemui.statusbar.phone.PhoneStatusBar;
-import com.android.systemui.statusbar.tablet.StatusBarPanel;
-import com.android.systemui.statusbar.tablet.TabletStatusBar;
 
 import java.util.ArrayList;
 
 public class RecentsPanelView extends FrameLayout implements OnItemClickListener, RecentsCallback,
         StatusBarPanel, Animator.AnimatorListener {
     static final String TAG = "RecentsPanelView";
-    static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
+    static final boolean DEBUG = PhoneStatusBar.DEBUG || false;
     private PopupMenu mPopup;
     private View mRecentsScrim;
     private View mRecentsNoApps;
     private ViewGroup mRecentsContainer;
-    private StatusBarTouchProxy mStatusBarTouchProxy;
 
     private boolean mShowing;
     private boolean mWaitingToShow;
@@ -289,14 +287,7 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
     }
 
     public boolean isInContentArea(int x, int y) {
-        if (pointInside(x, y, mRecentsContainer)) {
-            return true;
-        } else if (mStatusBarTouchProxy != null &&
-                pointInside(x, y, mStatusBarTouchProxy)) {
-            return true;
-        } else {
-            return false;
-        }
+        return pointInside(x, y, mRecentsContainer);
     }
 
     public void show(boolean show) {
@@ -430,12 +421,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         return mShowing;
     }
 
-    public void setStatusBarView(View statusBarView) {
-        if (mStatusBarTouchProxy != null) {
-            mStatusBarTouchProxy.setStatusBar(statusBarView);
-        }
-    }
-
     public void setRecentTasksLoader(RecentTasksLoader loader) {
         mRecentTasksLoader = loader;
     }
@@ -451,7 +436,6 @@ public class RecentsPanelView extends FrameLayout implements OnItemClickListener
         super.onFinishInflate();
 
         mRecentsContainer = (ViewGroup) findViewById(R.id.recents_container);
-        mStatusBarTouchProxy = (StatusBarTouchProxy) findViewById(R.id.status_bar_touch_proxy);
         mListAdapter = new TaskDescriptionAdapter(mContext);
         if (mRecentsContainer instanceof RecentsScrollView){
             RecentsScrollView scrollView

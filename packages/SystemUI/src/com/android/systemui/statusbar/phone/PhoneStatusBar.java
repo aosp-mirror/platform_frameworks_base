@@ -720,7 +720,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     protected void updateSearchPanel() {
         super.updateSearchPanel();
-        mSearchPanelView.setStatusBarView(mNavigationBarView);
         mNavigationBarView.setDelegateView(mSearchPanelView);
     }
 

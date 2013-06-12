@@ -29,10 +29,5 @@
     <drawable name="notification_item_background_legacy_color">#ffaaaaaa</drawable>
     <drawable name="intruder_bg_pressed">#ff33B5E5</drawable>
     <drawable name="notification_header_bg">#FF000000</drawable>
-
-    <!-- ==================== system bar only ==================== -->
-    <drawable name="system_bar_background">#ff000000</drawable>
-    <!-- the darkening filter applied to notifications -->
-    <drawable name="notification_icon_area_smoke">#aa000000</drawable>
     <color name="notification_panel_scrim_color">#B0000000</color>
 </resources>
