@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import com.android.internal.R;
 
 import android.content.Context;
@@ -148,6 +150,8 @@ public class ScrollView extends FrameLayout {
      * Used by {@link #mActivePointerId}.
      */
     private static final int INVALID_POINTER = -1;
+
+    private SavedState mSavedState;
 
     public ScrollView(Context context) {
         this(context, null);
@@ -1468,6 +1472,24 @@ public class ScrollView extends FrameLayout {
         }
         mChildToScrollTo = null;
 
+        // There is only one child
+        final View child = getChildAt(0);
+        final int childHeight = child.getMeasuredHeight();
+        if (!hasLayout()) {
+            final int scrollRange = Math.max(0,
+                    childHeight - (b - t - mPaddingBottom - mPaddingTop));
+            if (mSavedState != null) {
+                mScrollY = mSavedState.scrollPosition;
+                mSavedState = null;
+            } // mScrollY default value is "0"
+            // Don't forget to clamp
+            if (mScrollY > scrollRange) {
+                mScrollY = scrollRange;
+            } else if (mScrollY < 0) {
+                mScrollY = 0;
+            }
+        }
+
         // Calling this with the present values causes it to re-claim them
         scrollTo(mScrollX, mScrollY);
     }
@@ -1637,4 +1659,58 @@ public class ScrollView extends FrameLayout {
         }
         return n;
     }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        SavedState ss = (SavedState) state;
+        super.onRestoreInstanceState(ss.getSuperState());
+        mSavedState = ss;
+        requestLayout();
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+        SavedState ss = new SavedState(superState);
+        ss.scrollPosition = mScrollY;
+        return ss;
+    }
+
+    static class SavedState extends BaseSavedState {
+        public int scrollPosition;
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        public SavedState(Parcel source) {
+            super(source);
+            scrollPosition = source.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeInt(scrollPosition);
+        }
+
+        @Override
+        public String toString() {
+            return "HorizontalScrollView.SavedState{"
+                    + Integer.toHexString(System.identityHashCode(this))
+                    + " scrollPosition=" + scrollPosition + "}";
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR
+                = new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
 }
