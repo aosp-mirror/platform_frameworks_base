@@ -53,7 +53,7 @@
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Vumela insiza <xliff:g id="APPLICATION">%1$s</xliff:g> ukuthi ufinyelele ezintweni eziphuma ne-USB?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Vula <xliff:g id="ACTIVITY">%1$s</xliff:g> uma ledivayisi ye-USB ixhunyiwe?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Vula <xliff:g id="ACTIVITY">%1$s</xliff:g> uma le-accessory ye-USB ixhunyiwe"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Azikho izinsiza ezisebenze ngezinto ze-USB. Funda okwengeziwe ngalento kwi <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Azikho izinsiza ezisebenze ngezinto ze-USB. Funda okwengeziwe ngale into kwi <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"ama-accessory e-USB"</string>
     <string name="label_view" msgid="6304565553218192990">"Buka"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Sebenzisa ngokuzenzakalelayo yale divayisi ye-USB"</string>
@@ -100,12 +100,12 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Amabha amabili edatha"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Amabha amathathu edatha"</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Igcwele i-signal yedatha"</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"I-Wifi ivaliwe."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"I-Wifi ayixhunywanga."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Ibha elilodwa le-WiFi."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Amabha amabili we-WiFi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Amabha amathathu we-WiFi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Isiginali ye-WiFi igcwele."</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"I-Wi-Fi ivaliwe."</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"I-Wi-Fi ayixhunywanga."</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Ibha elilodwa le-Wi-Fi."</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Amabha amabili we-Wi-Fi."</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Amabha amathathu we-Wi-Fi."</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Isiginali ye-Wi-Fi igcwele."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Ayikho i-WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Ibha eyodwa ye-WiMAX."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"Amabha amabili we-WiMAX."</string>
@@ -127,6 +127,7 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"I-LTE"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Iyazulazula"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Ekucupheleni"</string>

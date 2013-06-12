@@ -100,12 +100,12 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"שני פסים של נתונים."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"שלושה פסים של נתונים."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"אות הנתונים מלא."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wifi כבוי."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wifi מנותק."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"פס אחד של Wifi."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"שני פסים של Wifi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"שלושה פסים של Wifi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"אות ה-Wifi מלא."</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi כבוי."</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi מנותק."</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"פס אחד של Wi-Fi."</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"שני פסים של Wi-Fi."</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"שלושה פסים של Wi-Fi."</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"אות ה-Wi-Fi מלא."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"ללא WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"פס אחד של WiMAX."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"שני פסים של WiMAX."</string>
@@ -127,6 +127,7 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"נדידה"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"קצה"</string>
@@ -174,7 +175,7 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"המסך נעול כעת לרוחב."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"המסך נעול כעת לאורך."</string>
     <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
-    <string name="start_dreams" msgid="7219575858348719790">"Daydream"</string>
+    <string name="start_dreams" msgid="7219575858348719790">"חלום בהקיץ"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"מצב טיסה"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"טוען (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
@@ -198,7 +199,7 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"אין רשת"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi כבוי"</string>
     <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"תצוגת Wi-Fi"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"תצוגת WiFi"</string>
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"תצוגת Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"בהירות"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"אוטומטי"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"הודעות מופיעות כאן"</string>

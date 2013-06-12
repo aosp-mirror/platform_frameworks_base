@@ -100,12 +100,12 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"إشارة البيانات تتكون من شريطين."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"إشارة البيانات تتكون من ثلاثة أشرطة."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"إشارة البيانات كاملة."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"تم إيقاف Wifi."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"تم قطع اتصال Wifi."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"إشارة WiFi تتكون من شريط واحد."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"إشارة WiFi تتكون من شريطين."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"إشارة WiFi تتكون من ثلاثة أشرطة."</string>
-    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"إشارة WiFi كاملة."</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"تم إيقاف Wi-Fi."</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"تم قطع اتصال Wi-Fi."</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"إشارة Wi-Fi تتكون من شريط واحد."</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"إشارة Wi-Fi تتكون من شريطين."</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"إشارة Wi-Fi تتكون من ثلاثة أشرطة."</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"إشارة Wi-Fi كاملة."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"ليس هناك WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"شريط WiMAX واحد."</string>
     <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"شريطا WiMAX."</string>
@@ -127,6 +127,7 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"شبكة الجيل الثالث"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"شبكة 3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"شبكة الجيل الرابع"</string>
+    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"تجوال"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -189,7 +190,7 @@
     <string name="quick_settings_location_label" msgid="3292451598267467545">"الموقع المستخدم"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"جهاز الوسائط"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"مكالمات الطوارئ فقط"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"مكالمات طوارئ فقط"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"الإعدادات"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"الوقت"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"أنا"</string>

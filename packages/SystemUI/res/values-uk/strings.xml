@@ -35,10 +35,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Поточні"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Сповіщення"</string>
     <string name="battery_low_title" msgid="2783104807551211639">"Підключіть зарядний пристрій"</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"Батарея виснажується."</string>
+    <string name="battery_low_subtitle" msgid="1752040062087829196">"Акумулятор розряджається."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"Залишилося <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Заряджання USB не підтримується."\n"Використовуйте лише наданий у комплекті зарядний пристрій."</string>
-    <string name="battery_low_why" msgid="7279169609518386372">"Викор. батареї"</string>
+    <string name="battery_low_why" msgid="7279169609518386372">"Використання акумулятора"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Налаштування"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Режим польоту"</string>
@@ -85,11 +85,11 @@
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Збільшення екрана."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth під’єднано."</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth від’єднано."</string>
-    <string name="accessibility_no_battery" msgid="358343022352820946">"Немає заряду батареї."</string>
-    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Одна смужка заряду батареї."</string>
-    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Дві смужки заряду батареї."</string>
-    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Три смужки заряду батареї."</string>
-    <string name="accessibility_battery_full" msgid="8909122401720158582">"Повний заряд батареї"</string>
+    <string name="accessibility_no_battery" msgid="358343022352820946">"Акумулятор розряджений."</string>
+    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Заряд акумулятора: одна смужка."</string>
+    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Заряд акумулятора: дві смужки."</string>
+    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Заряд акумулятора: три смужки."</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"Акумулятор заряджений."</string>
     <string name="accessibility_no_phone" msgid="4894708937052611281">"Немає сигналу телефону."</string>
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Одна смужка сигналу телефону."</string>
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Дві смужки сигналу телефону."</string>
@@ -100,11 +100,11 @@
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Дві смужки сигналу даних."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Три смужки сигналу даних."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Максимальний сигнал даних."</string>
-    <string name="accessibility_wifi_off" msgid="3177380296697933627">"WiFi вимкнено."</string>
-    <string name="accessibility_no_wifi" msgid="1425476551827924474">"WiFi від’єднано."</string>
-    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Одна смужка сигналу WiFi."</string>
-    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Дві смужки сигналу WiFi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Три смужки сигналу WiFi."</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wi-Fi вимкнено."</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"Wi-Fi від’єднано."</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Одна смужка сигналу Wi-Fi."</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Дві смужки сигналу Wi-Fi."</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"Три смужки сигналу Wi-Fi."</string>
     <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Максимальний сигнал Wi-Fi."</string>
     <string name="accessibility_no_wimax" msgid="4329180129727630368">"Немає сигналу WiMAX."</string>
     <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"Одна смужка сигналу WiMAX."</string>
@@ -127,6 +127,8 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <!-- no translation found for accessibility_data_connection_lte (5413468808637540658) -->
+    <skip />
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Роумінг"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -134,7 +136,7 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Немає SIM-карти."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Прив’язка Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Режим польоту."</string>
-    <string name="accessibility_battery_level" msgid="7451474187113371965">"Відсотків батареї: <xliff:g id="NUMBER">%d</xliff:g>."</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"Заряд акумулятора: <xliff:g id="NUMBER">%d</xliff:g>."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Налаштування системи."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Сповіщення."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Очистити сповіщення."</string>

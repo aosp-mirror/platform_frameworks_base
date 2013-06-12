@@ -127,6 +127,7 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Itinerància"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Vora"</string>
@@ -147,7 +148,7 @@
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Mode silenci."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"S\'ha omès <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notificació omesa."</string>
-    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Capa de notificació."</string>
+    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Àrea de notificacions"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Configuració ràpida."</string>
     <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"Aplicacions recents."</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Usuari <xliff:g id="USER">%s</xliff:g>."</string>
