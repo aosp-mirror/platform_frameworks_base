@@ -174,6 +174,11 @@ interface ITelephony {
     boolean setRadio(boolean turnOn);
 
     /**
+     * Set the radio to on or off unconditionally
+     */
+    boolean setRadioPower(boolean turnOn);
+
+    /**
      * Request to update location information in service state
      */
     void updateServiceLocation();
