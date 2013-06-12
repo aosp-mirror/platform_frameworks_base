@@ -80,7 +80,7 @@
     <string name="accessibility_home" msgid="8217216074895377641">"መነሻ"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"ምናሌ"</string>
     <string name="accessibility_recent" msgid="8571350598987952883">"የቅርብ ጊዜ  መተግበሪያዎች"</string>
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"የግቤት ሜተድ አዝራር ቀይር"</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"የግቤት ስልት አዝራር ቀይር"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"የተኳኋኝአጉላ አዝራር።"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"አነስተኛውን ማያ ወደ ትልቅ አጉላ።"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ብሉቱዝ ተያይዟል።"</string>
@@ -127,6 +127,7 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"ኤል ቲ ኢ"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"ውሂብን በማዛወር ላይ"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -185,7 +186,7 @@
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"ብሩህነት"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"ራስ-አዙር"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"አዙሪት ተቆልፏል"</string>
-    <string name="quick_settings_ime_label" msgid="7073463064369468429">"የግቤት ዘዴ"</string>
+    <string name="quick_settings_ime_label" msgid="7073463064369468429">"የግቤት ስልት"</string>
     <string name="quick_settings_location_label" msgid="3292451598267467545">"በስራ ላይ ያለው አካባቢ"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"የሚዲያ መሣሪያ"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>

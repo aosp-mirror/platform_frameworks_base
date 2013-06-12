@@ -58,7 +58,7 @@
     <string name="label_view" msgid="6304565553218192990">"Ver"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Se usa de forma predeterminada para este dispositivo USB."</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Se usa de forma predeterminada para este accesorio USB."</string>
-    <string name="usb_debugging_title" msgid="4513918393387141949">"¿Permitir depuración de USB?"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"¿Permitir depuración por USB?"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"La huella digital de tu clave RSA es:"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Permitir siempre desde esta computadora"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom para ocupar la pantalla"</string>
@@ -127,13 +127,15 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <!-- no translation found for accessibility_data_connection_lte (5413468808637540658) -->
+    <skip />
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Roaming"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"No hay tarjeta SIM."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"Sin tarjeta SIM"</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Conexión mediante Bluetooth"</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo de avión"</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo avión"</string>
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
     <skip />
@@ -154,7 +156,7 @@
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Móvil <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Batería <xliff:g id="STATE">%s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Modo de avión <xliff:g id="STATE">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Modo avión <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth <xliff:g id="STATE">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Alarma: <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Datos de 2G-3G inhabilitados"</string>
@@ -178,7 +180,7 @@
     <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Activar protector"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Modo de avión"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Modo avión"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"Cargando (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Cargada"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
