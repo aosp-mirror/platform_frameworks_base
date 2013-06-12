@@ -399,4 +399,7 @@ interface IPackageManager {
 
     /** Reflects current DeviceStorageMonitorService state */
     boolean isStorageLow();
+
+    boolean setApplicationBlockedSettingAsUser(String packageName, boolean blocked, int userId);
+    boolean getApplicationBlockedSettingAsUser(String packageName, int userId);
 }

@@ -1933,8 +1933,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                         getDataPathForPackage(packageName, 0).getPath();
                 pkg.applicationInfo.nativeLibraryDir = ps.nativeLibraryPathString;
             }
-            // pkg.mSetEnabled = ps.getEnabled(userId);
-            // pkg.mSetStopped = ps.getStopped(userId);
             return generatePackageInfo(pkg, flags, userId);
         }
         return null;
@@ -6149,6 +6147,120 @@ public class PackageManagerService extends IPackageManager.Stub {
         mHandler.sendMessage(msg);
     }
 
+    private void sendPackageAddedForUser(String packageName, PackageSetting pkgSetting, int userId) {
+        Bundle extras = new Bundle(1);
+        extras.putInt(Intent.EXTRA_UID, UserHandle.getUid(userId, pkgSetting.appId));
+
+        sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
+                packageName, extras, null, null, new int[] {userId});
+        try {
+            IActivityManager am = ActivityManagerNative.getDefault();
+            final boolean isSystem =
+                    isSystemApp(pkgSetting) || isUpdatedSystemApp(pkgSetting);
+            if (isSystem && am.isUserRunning(userId, false)) {
+                // The just-installed/enabled app is bundled on the system, so presumed
+                // to be able to run automatically without needing an explicit launch.
+                // Send it a BOOT_COMPLETED if it would ordinarily have gotten one.
+                Intent bcIntent = new Intent(Intent.ACTION_BOOT_COMPLETED)
+                        .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
+                        .setPackage(packageName);
+                am.broadcastIntent(null, bcIntent, null, null, 0, null, null, null,
+                        android.app.AppOpsManager.OP_NONE, false, false, userId);
+            }
+        } catch (RemoteException e) {
+            // shouldn't happen
+            Slog.w(TAG, "Unable to bootstrap installed package", e);
+        }
+    }
+
+    @Override
+    public boolean setApplicationBlockedSettingAsUser(String packageName, boolean blocked,
+            int userId) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
+        PackageSetting pkgSetting;
+        final int uid = Binder.getCallingUid();
+        if (UserHandle.getUserId(uid) != userId) {
+            mContext.enforceCallingPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    "setApplicationBlocked for user " + userId);
+        }
+
+        if (blocked && isPackageDeviceAdmin(packageName, userId)) {
+            Slog.w(TAG, "Not blocking package " + packageName + ": has active device admin");
+            return false;
+        }
+
+        long callingId = Binder.clearCallingIdentity();
+        try {
+            boolean sendAdded = false;
+            boolean sendRemoved = false;
+            // writer
+            synchronized (mPackages) {
+                pkgSetting = mSettings.mPackages.get(packageName);
+                if (pkgSetting == null) {
+                    return false;
+                }
+                if (pkgSetting.getBlocked(userId) != blocked) {
+                    pkgSetting.setBlocked(blocked, userId);
+                    mSettings.writePackageRestrictionsLPr(userId);
+                    if (blocked) {
+                        sendRemoved = true;
+                    } else {
+                        sendAdded = true;
+                    }
+                }
+            }
+            if (sendAdded) {
+                sendPackageAddedForUser(packageName, pkgSetting, userId);
+                return true;
+            }
+            if (sendRemoved) {
+                sendPackageBlockedForUser(packageName, pkgSetting, userId);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+        return false;
+    }
+
+    private void sendPackageBlockedForUser(String packageName, PackageSetting pkgSetting,
+            int userId) {
+        final PackageRemovedInfo info = new PackageRemovedInfo();
+        info.removedPackage = packageName;
+        info.removedUsers = new int[] {userId};
+        info.uid = UserHandle.getUid(userId, pkgSetting.appId);
+        info.sendBroadcast(false, false, false);
+    }
+
+    /**
+     * Returns true if application is not found or there was an error. Otherwise it returns
+     * the blocked state of the package for the given user.
+     */
+    @Override
+    public boolean getApplicationBlockedSettingAsUser(String packageName, int userId) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
+        PackageSetting pkgSetting;
+        final int uid = Binder.getCallingUid();
+        if (UserHandle.getUserId(uid) != userId) {
+            mContext.enforceCallingPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    "getApplicationBlocked for user " + userId);
+        }
+        long callingId = Binder.clearCallingIdentity();
+        try {
+            // writer
+            synchronized (mPackages) {
+                pkgSetting = mSettings.mPackages.get(packageName);
+                if (pkgSetting == null) {
+                    return true;
+                }
+                return pkgSetting.getBlocked(userId);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
     /**
      * @hide
      */
@@ -6180,33 +6292,14 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 if (!pkgSetting.getInstalled(userId)) {
                     pkgSetting.setInstalled(true, userId);
+                    pkgSetting.setBlocked(false, userId);
                     mSettings.writePackageRestrictionsLPr(userId);
-                    extras.putInt(Intent.EXTRA_UID, UserHandle.getUid(userId, pkgSetting.appId));
                     sendAdded = true;
                 }
             }
 
             if (sendAdded) {
-                sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED,
-                        packageName, extras, null, null, new int[] {userId});
-                try {
-                    IActivityManager am = ActivityManagerNative.getDefault();
-                    final boolean isSystem =
-                            isSystemApp(pkgSetting) || isUpdatedSystemApp(pkgSetting);
-                    if (isSystem && am.isUserRunning(userId, false)) {
-                        // The just-installed/enabled app is bundled on the system, so presumed
-                        // to be able to run automatically without needing an explicit launch.
-                        // Send it a BOOT_COMPLETED if it would ordinarily have gotten one.
-                        Intent bcIntent = new Intent(Intent.ACTION_BOOT_COMPLETED)
-                                .addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES)
-                                .setPackage(packageName);
-                        am.broadcastIntent(null, bcIntent, null, null, 0, null, null, null,
-                                android.app.AppOpsManager.OP_NONE, false, false, userId);
-                    }
-                } catch (RemoteException e) {
-                    // shouldn't happen
-                    Slog.w(TAG, "Unable to bootstrap installed package", e);
-                }
+                sendPackageAddedForUser(packageName, pkgSetting, userId);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -8697,6 +8790,19 @@ public class PackageManagerService extends IPackageManager.Stub {
         });
     }
 
+    private boolean isPackageDeviceAdmin(String packageName, int userId) {
+        IDevicePolicyManager dpm = IDevicePolicyManager.Stub.asInterface(
+                ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
+        try {
+            if (dpm != null && (dpm.packageHasActiveAdmins(packageName, userId)
+                    || dpm.isDeviceOwner(packageName))) {
+                return true;
+            }
+        } catch (RemoteException e) {
+        }
+        return false;
+    }
+
     /**
      *  This method is an internal method that could be get invoked either
      *  to delete an installed package or to clean up a failed installation.
@@ -8715,15 +8821,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         final PackageRemovedInfo info = new PackageRemovedInfo();
         final boolean res;
 
-        IDevicePolicyManager dpm = IDevicePolicyManager.Stub.asInterface(
-                ServiceManager.getService(Context.DEVICE_POLICY_SERVICE));
-        try {
-            if (dpm != null && (dpm.packageHasActiveAdmins(packageName, userId)
-                    || dpm.isDeviceOwner(packageName))) {
-                Slog.w(TAG, "Not removing package " + packageName + ": has active device admin");
-                return PackageManager.DELETE_FAILED_DEVICE_POLICY_MANAGER;
-            }
-        } catch (RemoteException e) {
+        if (isPackageDeviceAdmin(packageName, userId)) {
+            Slog.w(TAG, "Not removing package " + packageName + ": has active device admin");
+            return PackageManager.DELETE_FAILED_DEVICE_POLICY_MANAGER;
         }
 
         boolean removedForAllUsers = false;
@@ -9039,6 +9139,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         false, //installed
                         true,  //stopped
                         true,  //notLaunched
+                        false, //blocked
                         null, null, null);
                 if (!isSystemApp(ps)) {
                     if (ps.isAnyInstalled(sUserManager.getUserIds())) {

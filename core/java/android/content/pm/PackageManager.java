@@ -3083,6 +3083,23 @@ public abstract class PackageManager {
     public abstract int getApplicationEnabledSetting(String packageName);
 
     /**
+     * Puts the package in a blocked state, which is almost like an uninstalled state,
+     * making the package unavailable, but it doesn't remove the data or the actual
+     * package file.
+     * @hide
+     */
+    public abstract boolean setApplicationBlockedSettingAsUser(String packageName, boolean blocked,
+            UserHandle userHandle);
+
+    /**
+     * Returns the blocked state of a package.
+     * @see #setApplicationBlockedSettingAsUser(String, boolean, UserHandle)
+     * @hide
+     */
+    public abstract boolean getApplicationBlockedSettingAsUser(String packageName,
+            UserHandle userHandle);
+
+    /**
      * Return whether the device has been booted into safe mode.
      */
     public abstract boolean isSafeMode();

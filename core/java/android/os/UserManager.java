@@ -140,6 +140,13 @@ public class UserManager {
      */
     public static final String DISALLOW_REMOVE_USER = "no_remove_user";
 
+    /** @hide */
+    public static final int PIN_VERIFICATION_FAILED_INCORRECT = -3;
+    /** @hide */
+    public static final int PIN_VERIFICATION_FAILED_NOT_SET = -2;
+    /** @hide */
+    public static final int PIN_VERIFICATION_SUCCESS = -1;
+
     private static UserManager sInstance = null;
 
     /** @hide */
@@ -619,5 +626,56 @@ public class UserManager {
         } catch (RemoteException re) {
             Log.w(TAG, "Could not set application restrictions for user " + user.getIdentifier());
         }
+    }
+
+    /**
+     * @hide
+     * Sets a new restrictions PIN. This should only be called after verifying that there
+     * currently isn't a PIN set, or after the user successfully enters the current PIN.
+     * @param newPin
+     * @return Returns true if the PIN was changed successfully.
+     */
+    public boolean changeRestrictionsPin(String newPin) {
+        try {
+            return mService.changeRestrictionsPin(newPin);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not change restrictions pin");
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     * @param pin The PIN to verify, or null to get the number of milliseconds to wait for before
+     * allowing the user to enter the PIN.
+     * @return Returns a positive number (including zero) for how many milliseconds before
+     * you can accept another PIN, when the input is null or the input doesn't match the saved PIN.
+     * Returns {@link #PIN_VERIFICATION_SUCCESS} if the input matches the saved PIN. Returns
+     * {@link #PIN_VERIFICATION_FAILED_NOT_SET} if there is no PIN set.
+     */
+    public int checkRestrictionsPin(String pin) {
+        try {
+            return mService.checkRestrictionsPin(pin);
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not check restrictions pin");
+        }
+        return PIN_VERIFICATION_FAILED_INCORRECT;
+    }
+
+    /**
+     * Checks whether the user has restrictions that are PIN-protected. An application that
+     * participates in restrictions can check if the owner has requested a PIN challenge for
+     * any restricted operations. If there is a PIN in effect, the application should launch
+     * the PIN challenge activity {@link android.content.Intent#ACTION_RESTRICTIONS_PIN_CHALLENGE}.
+     * @see android.content.Intent#ACTION_RESTRICTIONS_PIN_CHALLENGE
+     * @return whether a restrictions PIN is in effect.
+     */
+    public boolean hasRestrictionsPin() {
+        try {
+            return mService.hasRestrictionsPin();
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not change restrictions pin");
+        }
+        return false;
     }
 }

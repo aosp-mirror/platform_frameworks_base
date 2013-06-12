@@ -2432,6 +2432,29 @@
                 android:process=":ui">
         </activity>
 
+        <activity android:name="com.android.internal.app.RestrictionsPinSetupActivity"
+                android:theme="@style/Theme.Holo.Dialog.Alert"
+                android:permission="android.permission.MANAGE_USERS"
+                android:excludeFromRecents="true"
+                android:windowSoftInputMode="adjustPan"
+                android:process=":ui">
+            <intent-filter android:priority="100">
+                <action android:name="android.intent.action.RESTRICTIONS_PIN_CREATE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="com.android.internal.app.RestrictionsPinActivity"
+                android:theme="@style/Theme.Holo.Dialog.Alert"
+                android:excludeFromRecents="true"
+                android:windowSoftInputMode="adjustPan"
+                android:process=":ui">
+            <intent-filter android:priority="100">
+                <action android:name="android.intent.action.RESTRICTIONS_PIN_CHALLENGE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <receiver android:name="com.android.server.BootReceiver"
                 android:primaryUserOnly="true">
             <intent-filter>
@@ -2470,9 +2493,9 @@
         </receiver>
 
         <receiver android:name="com.android.server.MasterClearReceiver"
-            android:permission="android.permission.MASTER_CLEAR"
-            android:priority="100" >
-            <intent-filter>
+            android:permission="android.permission.MASTER_CLEAR">
+            <intent-filter
+                    android:priority="100" >
                 <!-- For Checkin, Settings, etc.: action=MASTER_CLEAR -->
                 <action android:name="android.intent.action.MASTER_CLEAR" />
 

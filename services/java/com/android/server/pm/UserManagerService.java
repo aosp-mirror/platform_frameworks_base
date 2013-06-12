@@ -39,12 +39,15 @@ import android.os.Handler;
 import android.os.IUserManager;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AtomicFile;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.SparseLongArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
@@ -63,6 +66,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,6 +84,10 @@ public class UserManagerService extends IUserManager.Stub {
     private static final String ATTR_ID = "id";
     private static final String ATTR_CREATION_TIME = "created";
     private static final String ATTR_LAST_LOGGED_IN_TIME = "lastLoggedIn";
+    private static final String ATTR_SALT = "salt";
+    private static final String ATTR_PIN_HASH = "pinHash";
+    private static final String ATTR_FAILED_ATTEMPTS = "failedAttempts";
+    private static final String ATTR_LAST_RETRY_MS = "lastAttemptMs";
     private static final String ATTR_SERIAL_NO = "serialNumber";
     private static final String ATTR_NEXT_SERIAL_NO = "nextSerialNumber";
     private static final String ATTR_PARTIAL = "partial";
@@ -107,6 +117,13 @@ public class UserManagerService extends IUserManager.Stub {
 
     private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // ms
 
+    // Number of attempts before jumping to the next BACKOFF_TIMES slot
+    private static final int BACKOFF_INC_INTERVAL = 5;
+
+    // Amount of time to force the user to wait before entering the PIN again, after failing
+    // BACKOFF_INC_INTERVAL times.
+    private static final int[] BACKOFF_TIMES = { 0, 30*1000, 60*1000, 5*60*1000, 30*60*1000 };
+
     private final Context mContext;
     private final PackageManagerService mPm;
     private final Object mInstallLock;
@@ -120,6 +137,16 @@ public class UserManagerService extends IUserManager.Stub {
 
     private final SparseArray<UserInfo> mUsers = new SparseArray<UserInfo>();
     private final SparseArray<Bundle> mUserRestrictions = new SparseArray<Bundle>();
+
+    class RestrictionsPinState {
+        long salt;
+        String pinHash;
+        int failedAttempts;
+        long lastAttemptTime;
+    }
+
+    private final SparseArray<RestrictionsPinState> mRestrictionsPinStates =
+            new SparseArray<RestrictionsPinState>();
 
     /**
      * Set of user IDs being actively removed. Removed IDs linger in this set
@@ -604,6 +631,21 @@ public class UserManagerService extends IUserManager.Stub {
             serializer.attribute(null, ATTR_CREATION_TIME, Long.toString(userInfo.creationTime));
             serializer.attribute(null, ATTR_LAST_LOGGED_IN_TIME,
                     Long.toString(userInfo.lastLoggedInTime));
+            RestrictionsPinState pinState = mRestrictionsPinStates.get(userInfo.id);
+            if (pinState != null) {
+                if (pinState.salt != 0) {
+                    serializer.attribute(null, ATTR_SALT, Long.toString(pinState.salt));
+                }
+                if (pinState.pinHash != null) {
+                    serializer.attribute(null, ATTR_PIN_HASH, pinState.pinHash);
+                }
+                if (pinState.failedAttempts != 0) {
+                    serializer.attribute(null, ATTR_FAILED_ATTEMPTS,
+                            Integer.toString(pinState.failedAttempts));
+                    serializer.attribute(null, ATTR_LAST_RETRY_MS,
+                            Long.toString(pinState.lastAttemptTime));
+                }
+            }
             if (userInfo.iconPath != null) {
                 serializer.attribute(null,  ATTR_ICON_PATH, userInfo.iconPath);
             }
@@ -690,6 +732,10 @@ public class UserManagerService extends IUserManager.Stub {
         String iconPath = null;
         long creationTime = 0L;
         long lastLoggedInTime = 0L;
+        long salt = 0L;
+        String pinHash = null;
+        int failedAttempts = 0;
+        long lastAttemptTime = 0L;
         boolean partial = false;
         Bundle restrictions = new Bundle();
 
@@ -722,6 +768,10 @@ public class UserManagerService extends IUserManager.Stub {
                 iconPath = parser.getAttributeValue(null, ATTR_ICON_PATH);
                 creationTime = readLongAttribute(parser, ATTR_CREATION_TIME, 0);
                 lastLoggedInTime = readLongAttribute(parser, ATTR_LAST_LOGGED_IN_TIME, 0);
+                salt = readLongAttribute(parser, ATTR_SALT, 0L);
+                pinHash = parser.getAttributeValue(null, ATTR_PIN_HASH);
+                failedAttempts = readIntAttribute(parser, ATTR_FAILED_ATTEMPTS, 0);
+                lastAttemptTime = readLongAttribute(parser, ATTR_LAST_RETRY_MS, 0L);
                 String valueString = parser.getAttributeValue(null, ATTR_PARTIAL);
                 if ("true".equals(valueString)) {
                     partial = true;
@@ -761,6 +811,17 @@ public class UserManagerService extends IUserManager.Stub {
             userInfo.lastLoggedInTime = lastLoggedInTime;
             userInfo.partial = partial;
             mUserRestrictions.append(id, restrictions);
+            if (salt != 0L) {
+                RestrictionsPinState pinState = mRestrictionsPinStates.get(id);
+                if (pinState == null) {
+                    pinState = new RestrictionsPinState();
+                    mRestrictionsPinStates.put(id, pinState);
+                }
+                pinState.salt = salt;
+                pinState.pinHash = pinHash;
+                pinState.failedAttempts = failedAttempts;
+                pinState.lastAttemptTime = lastAttemptTime;
+            }
             return userInfo;
 
         } catch (IOException ioe) {
@@ -949,6 +1010,7 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }, MINUTE_IN_MILLIS);
 
+        mRestrictionsPinStates.remove(userHandle);
         // Remove user file
         AtomicFile userFile = new AtomicFile(new File(mUsersDir, userHandle + ".xml"));
         userFile.delete();
@@ -997,6 +1059,123 @@ public class UserManagerService extends IUserManager.Stub {
             // Write the restrictions to XML
             writeApplicationRestrictionsLocked(packageName, restrictions, userId);
         }
+    }
+
+    @Override
+    public boolean changeRestrictionsPin(String newPin) {
+        checkManageUsersPermission("Only system can modify the restrictions pin");
+        int userId = UserHandle.getCallingUserId();
+        synchronized (mPackagesLock) {
+            RestrictionsPinState pinState = mRestrictionsPinStates.get(userId);
+            if (pinState == null) {
+                pinState = new RestrictionsPinState();
+            }
+            if (newPin == null) {
+                pinState.salt = 0;
+                pinState.pinHash = null;
+            } else {
+                try {
+                    pinState.salt = SecureRandom.getInstance("SHA1PRNG").nextLong();
+                } catch (NoSuchAlgorithmException e) {
+                    pinState.salt = (long) (Math.random() * Long.MAX_VALUE);
+                }
+                pinState.pinHash = passwordToHash(newPin, pinState.salt);
+                pinState.failedAttempts = 0;
+            }
+            mRestrictionsPinStates.put(userId, pinState);
+            writeUserLocked(mUsers.get(userId));
+        }
+        return true;
+    }
+
+    @Override
+    public int checkRestrictionsPin(String pin) {
+        checkManageUsersPermission("Only system can verify the restrictions pin");
+        int userId = UserHandle.getCallingUserId();
+        synchronized (mPackagesLock) {
+            RestrictionsPinState pinState = mRestrictionsPinStates.get(userId);
+            // If there's no pin set, return error code
+            if (pinState == null || pinState.salt == 0 || pinState.pinHash == null) {
+                return UserManager.PIN_VERIFICATION_FAILED_NOT_SET;
+            } else if (pin == null) {
+                // If just checking if user can be prompted, return remaining time
+                int waitTime = getRemainingTimeForPinAttempt(pinState);
+                Slog.d(LOG_TAG, "Remaining waittime peek=" + waitTime);
+                return waitTime;
+            } else {
+                int waitTime = getRemainingTimeForPinAttempt(pinState);
+                Slog.d(LOG_TAG, "Remaining waittime=" + waitTime);
+                if (waitTime > 0) {
+                    return waitTime;
+                }
+                if (passwordToHash(pin, pinState.salt).equals(pinState.pinHash)) {
+                    pinState.failedAttempts = 0;
+                    writeUserLocked(mUsers.get(userId));
+                    return UserManager.PIN_VERIFICATION_SUCCESS;
+                } else {
+                    pinState.failedAttempts++;
+                    pinState.lastAttemptTime = System.currentTimeMillis();
+                    writeUserLocked(mUsers.get(userId));
+                    return waitTime;
+                }
+            }
+        }
+    }
+
+    private int getRemainingTimeForPinAttempt(RestrictionsPinState pinState) {
+        int backoffIndex = Math.min(pinState.failedAttempts / BACKOFF_INC_INTERVAL,
+                BACKOFF_TIMES.length - 1);
+        int backoffTime = (pinState.failedAttempts % BACKOFF_INC_INTERVAL) == 0 ?
+                BACKOFF_TIMES[backoffIndex] : 0;
+        return (int) Math.max(backoffTime + pinState.lastAttemptTime - System.currentTimeMillis(),
+                0);
+    }
+
+    @Override
+    public boolean hasRestrictionsPin() {
+        int userId = UserHandle.getCallingUserId();
+        synchronized (mPackagesLock) {
+            RestrictionsPinState pinState = mRestrictionsPinStates.get(userId);
+            if (pinState == null || pinState.salt == 0 || pinState.pinHash == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /*
+     * Generate a hash for the given password. To avoid brute force attacks, we use a salted hash.
+     * Not the most secure, but it is at least a second level of protection. First level is that
+     * the file is in a location only readable by the system process.
+     * @param password the password.
+     * @param salt the randomly generated salt
+     * @return the hash of the pattern in a String.
+     */
+    private String passwordToHash(String password, long salt) {
+        if (password == null) {
+            return null;
+        }
+        String algo = null;
+        String hashed = salt + password;
+        try {
+            byte[] saltedPassword = (password + salt).getBytes();
+            byte[] sha1 = MessageDigest.getInstance(algo = "SHA-1").digest(saltedPassword);
+            byte[] md5 = MessageDigest.getInstance(algo = "MD5").digest(saltedPassword);
+            hashed = toHex(sha1) + toHex(md5);
+        } catch (NoSuchAlgorithmException e) {
+            Log.w(LOG_TAG, "Failed to encode string because of missing algorithm: " + algo);
+        }
+        return hashed;
+    }
+
+    private static String toHex(byte[] ary) {
+        final String hex = "0123456789ABCDEF";
+        String ret = "";
+        for (int i = 0; i < ary.length; i++) {
+            ret += hex.charAt((ary[i] >> 4) & 0xf);
+            ret += hex.charAt(ary[i] & 0xf);
+        }
+        return ret;
     }
 
     private int getUidForPackage(String packageName) {
