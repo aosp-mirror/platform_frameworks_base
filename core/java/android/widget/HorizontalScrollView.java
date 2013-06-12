@@ -21,6 +21,8 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.FocusFinder;
@@ -132,6 +134,8 @@ public class HorizontalScrollView extends FrameLayout {
      * Used by {@link #mActivePointerId}.
      */
     private static final int INVALID_POINTER = -1;
+
+    private SavedState mSavedState;
 
     public HorizontalScrollView(Context context) {
         this(context, null);
@@ -1452,13 +1456,42 @@ public class HorizontalScrollView extends FrameLayout {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        super.onLayout(changed, l, t, r, b);
+        // There is only one child
+        final View child = getChildAt(0);
+        final int childWidth = child.getMeasuredWidth();
+        final LayoutParams childParams = (LayoutParams) child.getLayoutParams();
+        final int available = r - l - getPaddingLeftWithForeground() -
+                getPaddingRightWithForeground() - childParams.leftMargin - childParams.rightMargin;
+        final boolean forceLeftGravity = (childWidth > available);
+        layoutChildren(l, t, r, b, forceLeftGravity);
         mIsLayoutDirty = false;
         // Give a child focus if it needs it
         if (mChildToScrollTo != null && isViewDescendantOf(mChildToScrollTo, this)) {
                 scrollToChild(mChildToScrollTo);
         }
         mChildToScrollTo = null;
+
+        if (!hasLayout()) {
+            final int scrollRange = Math.max(0,
+                    childWidth - (r - l - mPaddingLeft - mPaddingRight));
+            if (mSavedState != null) {
+                if (isLayoutRtl() == mSavedState.isLayoutRtl) {
+                    mScrollX = mSavedState.scrollPosition;
+                } else {
+                    mScrollX = scrollRange - mSavedState.scrollPosition;
+                }
+            } else {
+                if (isLayoutRtl()) {
+                    mScrollX = scrollRange - mScrollX;
+                } // mScrollX default value is "0" for LTR
+            }
+            // Don't forget to clamp
+            if (mScrollX > scrollRange) {
+                mScrollX = scrollRange;
+            } else if (mScrollX < 0) {
+                mScrollX = 0;
+            }
+        }
 
         // Calling this with the present values causes it to re-claim them
         scrollTo(mScrollX, mScrollY);
@@ -1603,5 +1636,63 @@ public class HorizontalScrollView extends FrameLayout {
             return child - my;
         }
         return n;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        SavedState ss = (SavedState) state;
+        super.onRestoreInstanceState(ss.getSuperState());
+        mSavedState = ss;
+        requestLayout();
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+        SavedState ss = new SavedState(superState);
+        ss.scrollPosition = mScrollX;
+        ss.isLayoutRtl = isLayoutRtl();
+        return ss;
+    }
+
+    static class SavedState extends BaseSavedState {
+        public int scrollPosition;
+        public boolean isLayoutRtl;
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        public SavedState(Parcel source) {
+            super(source);
+            scrollPosition = source.readInt();
+            isLayoutRtl = (source.readInt() == 0) ? true : false;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeInt(scrollPosition);
+            dest.writeInt(isLayoutRtl ? 1 : 0);
+        }
+
+        @Override
+        public String toString() {
+            return "HorizontalScrollView.SavedState{"
+                    + Integer.toHexString(System.identityHashCode(this))
+                    + " scrollPosition=" + scrollPosition
+                    + " isLayoutRtl=" + isLayoutRtl + "}";
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR
+                = new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
     }
 }
