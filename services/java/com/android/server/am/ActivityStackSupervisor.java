@@ -987,7 +987,7 @@ public final class ActivityStackSupervisor {
 
         if (app != null && app.thread != null) {
             try {
-                app.addPackage(r.info.packageName);
+                app.addPackage(r.info.packageName, mService.mProcessTracker);
                 realStartActivityLocked(r, app, andResume, checkConfig);
                 return;
             } catch (RemoteException e) {

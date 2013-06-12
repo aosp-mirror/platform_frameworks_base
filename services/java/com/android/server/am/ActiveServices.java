@@ -1015,7 +1015,7 @@ public final class ActiveServices {
                 Slog.v(TAG_MU, "bringUpServiceLocked: appInfo.uid=" + r.appInfo.uid + " app=" + app);
             if (app != null && app.thread != null) {
                 try {
-                    app.addPackage(r.appInfo.packageName);
+                    app.addPackage(r.appInfo.packageName, mAm.mProcessTracker);
                     realStartServiceLocked(r, app);
                     return null;
                 } catch (RemoteException e) {
