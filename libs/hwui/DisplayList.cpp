@@ -44,13 +44,14 @@ void DisplayList::outputLogBuffer(int fd) {
 }
 
 DisplayList::DisplayList(const DisplayListRenderer& recorder) :
-    mTransformMatrix(NULL), mTransformCamera(NULL), mTransformMatrix3D(NULL),
+    mDestroyed(false), mTransformMatrix(NULL), mTransformCamera(NULL), mTransformMatrix3D(NULL),
     mStaticMatrix(NULL), mAnimationMatrix(NULL) {
 
     initFromDisplayListRenderer(recorder);
 }
 
 DisplayList::~DisplayList() {
+    mDestroyed = true;
     clearResources();
 }
 
@@ -63,7 +64,6 @@ void DisplayList::destroyDisplayListDeferred(DisplayList* displayList) {
 
 void DisplayList::clearResources() {
     mDisplayListData = NULL;
-    mSize = 0; // TODO: shouldn't be needed, WAR possible use after delete
 
     mClipRectOp = NULL;
     mSaveLayerOp = NULL;
@@ -169,6 +169,10 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
     mSaveLayerOp = new (alloc) SaveLayerOp();
     mSaveOp = new (alloc) SaveOp();
     mRestoreToCountOp = new (alloc) RestoreToCountOp();
+    if (CC_UNLIKELY(!mSaveOp)) { // temporary debug logging
+        ALOGW("Error: %s's SaveOp not allocated, size %d", getName(), mSize);
+        CRASH();
+    }
 
     mFunctorCount = recorder.getFunctorCount();
 
@@ -480,7 +484,11 @@ void DisplayList::replay(ReplayStateStruct& replayStruct, const int level) {
  */
 template <class T>
 void DisplayList::iterate(OpenGLRenderer& renderer, T& handler, const int level) {
-    if (mSize == 0 || mAlpha <= 0 || CC_UNLIKELY(!mSaveOp)) { // TODO: shouldn't need mSaveOp check
+    if (CC_UNLIKELY(mDestroyed)) { // temporary debug logging
+        ALOGW("Error: %s is drawing after destruction, size %d", getName(), mSize);
+        CRASH();
+    }
+    if (mSize == 0 || mAlpha <= 0) {
         DISPLAY_LIST_LOGD("%*sEmpty display list (%p, %s)", level * 2, "", this, mName.string());
         return;
     }
