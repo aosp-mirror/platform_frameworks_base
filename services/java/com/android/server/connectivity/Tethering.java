@@ -676,10 +676,14 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         mUpstreamIfaceTypes.add(HIPRI_TYPE);
                     }
                 }
-            }
-            if (mUpstreamIfaceTypes.contains(DUN_TYPE)) {
-                mPreferredUpstreamMobileApn = ConnectivityManager.TYPE_MOBILE_DUN;
+                /* if DUN is still available, make that a priority */
+                if (mUpstreamIfaceTypes.contains(DUN_TYPE)) {
+                    mPreferredUpstreamMobileApn = ConnectivityManager.TYPE_MOBILE_DUN;
+                } else {
+                    mPreferredUpstreamMobileApn = ConnectivityManager.TYPE_MOBILE_HIPRI;
+                }
             } else {
+                /* dun_required is not set, fall back to HIPRI in that case */
                 mPreferredUpstreamMobileApn = ConnectivityManager.TYPE_MOBILE_HIPRI;
             }
         }
@@ -1297,8 +1301,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 Log.d(TAG, "adding v6 interface " + iface);
                 try {
                     service.addUpstreamV6Interface(iface);
-                } catch (Exception e) {
-                    Log.e(TAG, "Unable to append v6 upstream interface", e);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to append v6 upstream interface");
                 }
             }
 
@@ -1309,8 +1313,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 Log.d(TAG, "removing v6 interface " + iface);
                 try {
                     service.removeUpstreamV6Interface(iface);
-                } catch (Exception e) {
-                    Log.e(TAG, "Unable to remove v6 upstream interface", e);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Unable to remove v6 upstream interface");
                 }
             }
 

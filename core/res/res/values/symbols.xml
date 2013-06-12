@@ -1530,6 +1530,7 @@
   <java-symbol type="string" name="config_geocoderProviderPackageName" />
   <java-symbol type="string" name="config_geofenceProviderPackageName" />
   <java-symbol type="string" name="config_networkLocationProviderPackageName" />
+  <java-symbol type="string" name="config_geofenceProvider" />
   <java-symbol type="string" name="config_wimaxManagerClassname" />
   <java-symbol type="string" name="config_wimaxNativeLibLocation" />
   <java-symbol type="string" name="config_wimaxServiceClassname" />

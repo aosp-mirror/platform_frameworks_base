@@ -20,6 +20,7 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.SHUTDOWN;
@@ -59,6 +60,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -141,7 +143,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         public static final int DnsProxyQueryResult       = 222;
         public static final int ClatdStatusResult         = 223;
         public static final int GetMarkResult             = 225;
-        public static final int V6RtrAdvResult            = 226;
+        public static final int V6RtrAdvResult            = 227;
 
         public static final int InterfaceChange           = 600;
         public static final int BandwidthControl          = 601;
@@ -596,10 +598,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         Slog.d(TAG, "removeUpstreamInterface(" + iface + ")");
 
         try {
-            final Command cmd = new Command("tether", "interface", "add_upstream");
+            final Command cmd = new Command("tether", "interface", "remove_upstream");
             cmd.appendArg(iface);
-            mConnector.execute(cmd);
-
             mConnector.execute(cmd);
         } catch (NativeDaemonConnectorException e) {
             throw new IllegalStateException("Cannot remove upstream interface");

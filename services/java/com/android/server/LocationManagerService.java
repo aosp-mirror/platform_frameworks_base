@@ -35,6 +35,7 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.GeocoderParams;
 import android.location.Geofence;
+import android.location.GeoFenceParams;
 import android.location.IGpsStatusListener;
 import android.location.IGpsStatusProvider;
 import android.location.ILocationListener;
@@ -68,6 +69,8 @@ import com.android.server.location.FusedProxy;
 import com.android.server.location.GeocoderProxy;
 import com.android.server.location.GeofenceProxy;
 import com.android.server.location.GeofenceManager;
+import com.android.server.location.GeoFencerBase;
+import com.android.server.location.GeoFencerProxy;
 import com.android.server.location.GpsLocationProvider;
 import com.android.server.location.LocationBlacklist;
 import com.android.server.location.LocationFudger;
@@ -139,6 +142,9 @@ public class LocationManagerService extends ILocationManager.Stub {
     // --- fields below are final after systemReady() ---
     private LocationFudger mLocationFudger;
     private GeofenceManager mGeofenceManager;
+    private String mGeoFencerPackageName;
+    private GeoFencerBase mGeoFencer;
+    private boolean mGeoFencerEnabled;
     private PackageManager mPackageManager;
     private PowerManager mPowerManager;
     private GeocoderProxy mGeocodeProvider;
@@ -197,6 +203,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         super();
         mContext = context;
         mAppOps = (AppOpsManager)context.getSystemService(Context.APP_OPS_SERVICE);
+        mGeoFencerEnabled = false;
 
         if (D) Log.d(TAG, "Constructed");
 
@@ -444,6 +451,17 @@ public class LocationManagerService extends ILocationManager.Stub {
                 flpHardwareProvider.getGeofenceHardware());
         if (provider == null) {
             Slog.e(TAG,  "no geofence provider found");
+        }
+
+        mGeoFencerPackageName = resources.getString(
+                com.android.internal.R.string.config_geofenceProvider);
+        if (mGeoFencerPackageName != null &&
+                mPackageManager.resolveService(new Intent(mGeoFencerPackageName), 0) != null) {
+            mGeoFencer = GeoFencerProxy.getGeoFencerProxy(mContext, mGeoFencerPackageName);
+            mGeoFencerEnabled = true;
+        } else {
+            mGeoFencer = null;
+            mGeoFencerEnabled = false;
         }
     }
 
@@ -1450,9 +1468,12 @@ public class LocationManagerService extends ILocationManager.Stub {
             checkLocationAccess(uid, packageName, allowedResolutionLevel);
 
             synchronized (mLock) {
-                Receiver recevier = checkListenerOrIntentLocked(listener, intent, pid, uid,
+                Receiver receiver = checkListenerOrIntentLocked(listener, intent, pid, uid,
                         packageName, workSource, hideFromAppOps);
-                requestLocationUpdatesLocked(sanitizedRequest, recevier, pid, uid, packageName);
+                if (receiver != null) {
+                        requestLocationUpdatesLocked(sanitizedRequest, receiver, pid,
+                                                     uid, packageName);
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -1511,7 +1532,9 @@ public class LocationManagerService extends ILocationManager.Stub {
             // providers may use public location API's, need to clear identity
             long identity = Binder.clearCallingIdentity();
             try {
-                removeUpdatesLocked(receiver);
+                if (receiver != null) {
+                    removeUpdatesLocked(receiver);
+                }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -1648,8 +1671,20 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
         long identity = Binder.clearCallingIdentity();
         try {
-            mGeofenceManager.addFence(sanitizedRequest, geofence, intent, allowedResolutionLevel,
-                    uid, packageName);
+            if (mGeoFencer != null && mGeoFencerEnabled) {
+                long expiration;
+                if (sanitizedRequest.getExpireAt() == Long.MAX_VALUE) {
+                    expiration = -1; // -1 means forever
+                } else {
+                    expiration = sanitizedRequest.getExpireAt() - SystemClock.elapsedRealtime();
+                }
+                mGeoFencer.add(new GeoFenceParams(uid, geofence.getLatitude(),
+                                                  geofence.getLongitude(), geofence.getRadius(),
+                                                  expiration, intent, packageName));
+            } else {
+                mGeofenceManager.addFence(sanitizedRequest, geofence, intent,
+                                          allowedResolutionLevel, uid, packageName);
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -1666,7 +1701,11 @@ public class LocationManagerService extends ILocationManager.Stub {
         // geo-fence manager uses the public location API, need to clear identity
         long identity = Binder.clearCallingIdentity();
         try {
-            mGeofenceManager.removeFence(geofence, intent);
+            if (mGeoFencer != null && mGeoFencerEnabled) {
+                mGeoFencer.remove(intent);
+            } else {
+                mGeofenceManager.removeFence(geofence, intent);
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -2080,6 +2119,53 @@ public class LocationManagerService extends ILocationManager.Stub {
         synchronized (mLock) {
             return mMockProviders.containsKey(provider);
         }
+
+    }
+
+    private Location screenLocationLocked(Location location, String provider) {
+
+        if (false == provider.equals(LocationManager.NETWORK_PROVIDER)) {
+            return location;
+        }
+
+        Bundle extras = location.getExtras();
+        if (extras == null) {
+            extras = new Bundle();
+        }
+
+        if (!extras.containsKey("com.qualcomm.location.nlp:ready")) {
+            // see if com.qualcomm.location is a passive listener
+            ArrayList<UpdateRecord> records =
+                mRecordsByProvider.get(LocationManager.PASSIVE_PROVIDER);
+            if (records != null) {
+                for (UpdateRecord r : records) {
+                    if (r.mReceiver.mPackageName.equals("com.qualcomm.location")) {
+                        extras.putBoolean("com.qualcomm.location.nlp:screen", true);
+                        // send location to com.qualcomm.location for screening
+                        if (!r.mReceiver.callLocationChangedLocked(location)) {
+                            Slog.w(TAG, "RemoteException calling onLocationChanged on "
+                                   + r.mReceiver);
+                        } else {
+                            if (D) {
+                                Log.d(TAG, "Sending location for screening");
+                            }
+                        }
+                        return null;
+                    }
+                }
+            }
+            if (D) {
+                Log.d(TAG, "Not screening locations");
+            }
+        } else {
+            if (D) {
+                Log.d(TAG, "This location is marked as ready for broadcast");
+            }
+            // clear the ready marker
+            extras.remove("com.qualcomm.location.nlp:ready");
+        }
+
+        return location;
     }
 
     private void handleLocationChanged(Location location, boolean passive) {
@@ -2098,6 +2184,10 @@ public class LocationManagerService extends ILocationManager.Stub {
         synchronized (mLock) {
             if (isAllowedByCurrentUserSettingsLocked(provider)) {
                 if (!passive) {
+                    location = screenLocationLocked(location, provider);
+                    if (location == null) {
+                        return;
+                    }
                     // notify passive provider of the new location
                     mPassiveProvider.updateLocation(myLocation);
                 }
@@ -2202,6 +2292,9 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (mProvidersByName.get(name) != null) {
                 throw new IllegalArgumentException("Provider \"" + name + "\" already exists");
             }
+
+            mGeoFencerEnabled = false;
+
             addProviderLocked(provider);
             mMockProviders.put(name, provider);
             mLastLocation.put(name, null);
@@ -2221,6 +2314,10 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
             long identity = Binder.clearCallingIdentity();
             removeProviderLocked(mProvidersByName.get(provider));
+
+            if (mGeoFencer != null) {
+                mGeoFencerEnabled = true;
+            }
 
             // reinstate real provider if available
             LocationProviderInterface realProvider = mRealProviders.get(provider);
@@ -2368,6 +2465,9 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
 
             mGeofenceManager.dump(pw);
+            if (mGeoFencer != null && mGeoFencerEnabled) {
+                mGeoFencer.dump(pw, "");
+            }
 
             if (mEnabledProviders.size() > 0) {
                 pw.println("  Enabled Providers:");

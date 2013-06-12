@@ -1,4 +1,6 @@
 /*
+ * Copyright (C) 2013 The Linux Foundation. All rights reserved
+ * Not a Contribution.
  * Copyright (C) 2009 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -1197,11 +1199,20 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.PAN) {
             BluetoothPan pan = new BluetoothPan(context, listener);
             return true;
+        } else if (profile == BluetoothProfile.SAP) {
+            BluetoothSap sap = new BluetoothSap(context, listener);
+            return true;
+        } else if (profile == BluetoothProfile.DUN) {
+            BluetoothDun dun = new BluetoothDun(context, listener);
+            return true;
         } else if (profile == BluetoothProfile.HEALTH) {
             BluetoothHealth health = new BluetoothHealth(context, listener);
             return true;
         } else if (profile == BluetoothProfile.MAP) {
             BluetoothMap map = new BluetoothMap(context, listener);
+            return true;
+        } else if (profile == BluetoothProfile.HANDSFREE_CLIENT) {
+            BluetoothHandsfreeClient hfpclient = new BluetoothHandsfreeClient(context, listener);
             return true;
         } else {
             return false;
@@ -1239,6 +1250,14 @@ public final class BluetoothAdapter {
                 BluetoothPan pan = (BluetoothPan)proxy;
                 pan.close();
                 break;
+            case BluetoothProfile.SAP:
+                BluetoothSap sap = (BluetoothSap)proxy;
+                sap.close();
+                break;
+            case BluetoothProfile.DUN:
+                BluetoothDun dun = (BluetoothDun)proxy;
+                dun.close();
+                break;
             case BluetoothProfile.HEALTH:
                 BluetoothHealth health = (BluetoothHealth)proxy;
                 health.close();
@@ -1254,6 +1273,10 @@ public final class BluetoothAdapter {
             case BluetoothProfile.MAP:
                 BluetoothMap map = (BluetoothMap)proxy;
                 map.close();
+                break;
+            case BluetoothProfile.HANDSFREE_CLIENT:
+                BluetoothHandsfreeClient hfpclient = (BluetoothHandsfreeClient)proxy;
+                hfpclient.close();
                 break;
         }
     }

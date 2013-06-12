@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2013, The Linux Foundation. All rights reserved.
  * Copyright (c) 2008-2009, Motorola, Inc.
  *
  * All rights reserved.
@@ -66,6 +67,8 @@ public final class ClientOperation implements Operation, BaseStream {
 
     private boolean mGetOperation;
 
+    private boolean mGetFinalFlag;
+
     private HeaderSet mRequestHeader;
 
     private HeaderSet mReplyHeader;
@@ -90,6 +93,7 @@ public final class ClientOperation implements Operation, BaseStream {
         mOperationDone = false;
         mMaxPacketSize = maxSize;
         mGetOperation = type;
+        mGetFinalFlag = false;
 
         mPrivateInputOpen = false;
         mPrivateOutputOpen = false;
@@ -128,6 +132,15 @@ public final class ClientOperation implements Operation, BaseStream {
                     4);
 
         }
+    }
+
+    /**
+     * Allows to set flag which will force GET to be always sent as single packet request with
+     * final flag set. This is to improve compatibility with some profiles, i.e. PBAP which
+     * require requests to be sent this way.
+     */
+    public void setGetFinalFlag(boolean flag) {
+        mGetFinalFlag = flag;
     }
 
     /**
@@ -551,15 +564,25 @@ public final class ClientOperation implements Operation, BaseStream {
 
         if (mGetOperation) {
             if (!mOperationDone) {
-                mReplyHeader.responseCode = ResponseCodes.OBEX_HTTP_CONTINUE;
-                while ((more) && (mReplyHeader.responseCode == ResponseCodes.OBEX_HTTP_CONTINUE)) {
-                    more = sendRequest(0x03);
-                }
+                if (!mGetFinalFlag) {
+                    mReplyHeader.responseCode = ResponseCodes.OBEX_HTTP_CONTINUE;
+                    while ((more) && (mReplyHeader.responseCode == ResponseCodes.OBEX_HTTP_CONTINUE)) {
+                        more = sendRequest(0x03);
+                    }
 
-                if (mReplyHeader.responseCode == ResponseCodes.OBEX_HTTP_CONTINUE) {
-                    mParent.sendRequest(0x83, null, mReplyHeader, mPrivateInput);
-                }
-                if (mReplyHeader.responseCode != ResponseCodes.OBEX_HTTP_CONTINUE) {
+                    if (mReplyHeader.responseCode == ResponseCodes.OBEX_HTTP_CONTINUE) {
+                        mParent.sendRequest(0x83, null, mReplyHeader, mPrivateInput);
+                    }
+                    if (mReplyHeader.responseCode != ResponseCodes.OBEX_HTTP_CONTINUE) {
+                        mOperationDone = true;
+                    }
+                } else {
+                    more = sendRequest(0x83);
+
+                    if (more) {
+                        throw new IOException("FINAL_GET forced but data did not fit into single packet!");
+                    }
+
                     mOperationDone = true;
                 }
             }
@@ -613,7 +636,16 @@ public final class ClientOperation implements Operation, BaseStream {
                 if (mPrivateInput == null) {
                     mPrivateInput = new PrivateInputStream(this);
                 }
-                sendRequest(0x03);
+
+                if (!mGetFinalFlag) {
+                    sendRequest(0x03);
+                } else {
+                    sendRequest(0x83);
+
+                    if (mReplyHeader.responseCode != ResponseCodes.OBEX_HTTP_CONTINUE) {
+                        mOperationDone = true;
+                    }
+                }
                 return true;
 
             } else if (mOperationDone) {
@@ -732,5 +764,8 @@ public final class ClientOperation implements Operation, BaseStream {
     }
 
     public void noBodyHeader(){
+    }
+    public void noEndofBody() {
+
     }
 }

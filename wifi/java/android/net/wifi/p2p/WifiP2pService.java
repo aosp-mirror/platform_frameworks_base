@@ -1778,6 +1778,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     if (DBG) logd(getName() + " remove group");
                     if (mWifiNative.p2pGroupRemove(mGroup.getInterface())) {
                         transitionTo(mOngoingGroupRemovalState);
+                        mWifiNative.p2pFlush();
                         replyToMessage(message, WifiP2pManager.REMOVE_GROUP_SUCCEEDED);
                     } else {
                         handleGroupRemoved();
@@ -2578,17 +2579,19 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.FAILED, null, null);
         sendP2pConnectionChangedBroadcast();
 
-        // Remove only the peer we failed to connect to so that other devices discovered
-        // that have not timed out still remain in list for connection
-        boolean peersChanged = mPeers.remove(mPeersLostDuringConnection);
-        if (mPeers.remove(mSavedPeerConfig.deviceAddress) != null) {
-            peersChanged = true;
-        }
-        if (peersChanged) {
-            sendPeersChangedBroadcast();
-        }
+        if (mAutonomousGroup == false) {
+            // Remove only the peer we failed to connect to so that other devices discovered
+            // that have not timed out still remain in list for connection
+            boolean peersChanged = mPeers.remove(mPeersLostDuringConnection);
+            if (mPeers.remove(mSavedPeerConfig.deviceAddress) != null) {
+                peersChanged = true;
+            }
+            if (peersChanged) {
+                sendPeersChangedBroadcast();
+            }
 
-        mPeersLostDuringConnection.clear();
+            mPeersLostDuringConnection.clear();
+        }
         mServiceDiscReqId = null;
         sendMessage(WifiP2pManager.DISCOVER_PEERS);
     }

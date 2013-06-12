@@ -213,6 +213,12 @@ public class MediaRecorder
          * @hide
          */
         protected static final int HOTWORD = 1999;
+
+        /** @hide */
+        public static final int FM_RX = 9;
+
+        /** @hide */
+        public static final int FM_RX_A2DP = 10;
     }
 
     /**
@@ -328,7 +334,7 @@ public class MediaRecorder
      * @see android.media.MediaRecorder.AudioSource
      */
     public static final int getAudioSourceMax() {
-        return AudioSource.REMOTE_SUBMIX;
+        return AudioSource.FM_RX_A2DP;
     }
 
     /**
@@ -363,7 +369,7 @@ public class MediaRecorder
              profile.quality <= CamcorderProfile.QUALITY_TIME_LAPSE_QVGA) {
             // Nothing needs to be done. Call to setCaptureRate() enables
             // time lapse video recording.
-        } else {
+        } else if (profile.audioCodec >= 0) {
             setAudioEncodingBitRate(profile.audioBitRate);
             setAudioChannels(profile.audioChannels);
             setAudioSamplingRate(profile.audioSampleRate);

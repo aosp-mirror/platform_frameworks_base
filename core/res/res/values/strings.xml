@@ -4494,4 +4494,7 @@
     <!-- Cling help message when hiding the navigation bar entering immersive mode [CHAR LIMIT=none] -->
     <string name="immersive_mode_confirmation" msgid="8554991488096662508">Swipe down from the top to exit full screen.</string>
 
+    <!-- Longer version of toast bar message when hiding the transient navigation bar (if room) -->
+    <string name="transient_navigation_confirmation_long">Swipe from edge of screen to reveal system bar</string>
+    <add-resource type="bool" name="config_hotswapCapable"></add-resource>
 </resources>

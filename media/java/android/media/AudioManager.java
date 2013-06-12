@@ -198,6 +198,28 @@ public class AudioManager {
     public static final String EXTRA_MASTER_VOLUME_MUTED =
         "android.media.EXTRA_MASTER_VOLUME_MUTED";
 
+
+    /**
+     * @hide Broadcast intent when RemoteControlClient list is updated.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String RCC_CHANGED_ACTION = "org.codeaurora.bluetooth.RCC_CHANGED_ACTION";
+
+    /**
+     * @hide Used for sharing the calling package name
+     */
+    public static final String EXTRA_CALLING_PACKAGE_NAME = "org.codeaurora.bluetooth.EXTRA_CALLING_PACKAGE_NAME";
+
+    /**
+     * @hide Used for sharing the focus changed value
+     */
+    public static final String EXTRA_FOCUS_CHANGED_VALUE = "org.codeaurora.bluetooth.EXTRA_FOCUS_CHANGED_VALUE";
+
+    /**
+     * @hide Used for sharing the availability changed value
+     */
+    public static final String EXTRA_AVAILABLITY_CHANGED_VALUE = "org.codeaurora.bluetooth.EXTRA_AVAILABLITY_CHANGED_VALUE";
+
     /** The audio stream for phone calls */
     public static final int STREAM_VOICE_CALL = AudioSystem.STREAM_VOICE_CALL;
     /** The audio stream for system sounds */

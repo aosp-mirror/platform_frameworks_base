@@ -162,6 +162,7 @@ public class BootReceiver extends BroadcastReceiver {
         if (db == null || !db.isTagEnabled(tag)) return;  // Logging disabled
 
         File file = new File(filename);
+        if (file.isDirectory()) return;  // Skip subdirectories (likely vendor-specific)
         long fileTime = file.lastModified();
         if (fileTime <= 0) return;  // File does not exist
 

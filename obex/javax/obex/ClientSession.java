@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2013, The Linux Foundation. All rights reserved.
  * Copyright (c) 2008-2009, Motorola, Inc.
  *
  * All rights reserved.
@@ -62,6 +63,7 @@ public final class ClientSession extends ObexSession {
 
     private final OutputStream mOutput;
 
+    private long mTotalSize = 0;
     public ClientSession(final ObexTransport trans) throws IOException {
         mInput = trans.openInputStream();
         mOutput = trans.openOutputStream();
@@ -476,10 +478,16 @@ public final class ClientSession extends ObexSession {
                 }
             }
 
-            byte[] body = ObexHelper.updateHeaderSet(header, data);
-            if ((privateInput != null) && (body != null)) {
-                privateInput.writeBytes(body, 1);
-            }
+                byte[] body = ObexHelper.updateHeaderSet(header, data);
+                if ((privateInput != null) && (body != null)) {
+                    privateInput.writeBytes(body, 1);
+                    mTotalSize += (long)(body.length - 1);
+                    if((body[0] == HeaderSet.END_OF_BODY) &&
+                                            (header.getHeader(HeaderSet.LENGTH) == null)){
+                        header.setHeader(HeaderSet.LENGTH, mTotalSize);
+                        mTotalSize = 0;
+                    }
+                }
 
             if (header.mConnectionID != null) {
                 mConnectionId = new byte[4];

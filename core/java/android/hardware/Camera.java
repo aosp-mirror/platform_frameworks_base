@@ -1803,6 +1803,17 @@ public class Camera {
     }
     private native final void native_sendMetaData();
 
+    /** @hide
+     * Configure longshot mode. Available only in ZSL.
+     *
+     * @param enable enable/disable this mode
+     */
+    public final void setLongshot(boolean enable)
+    {
+        native_setLongshot(enable);
+    }
+    private native final void native_setLongshot(boolean enable);
+
      /** @hide
      * Handles the Touch Co-ordinate.
      */

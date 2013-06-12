@@ -97,9 +97,12 @@ LOCAL_SRC_FILES += \
 	core/java/android/bluetooth/IBluetoothPbap.aidl \
 	core/java/android/bluetooth/IBluetoothMap.aidl \
 	core/java/android/bluetooth/IBluetoothStateChangeCallback.aidl \
+	core/java/android/bluetooth/IBluetoothHandsfreeClient.aidl \
 	core/java/android/bluetooth/IBluetoothGatt.aidl \
 	core/java/android/bluetooth/IBluetoothGattCallback.aidl \
 	core/java/android/bluetooth/IBluetoothGattServerCallback.aidl \
+	core/java/android/bluetooth/IBluetoothSap.aidl \
+	core/java/android/bluetooth/IBluetoothDun.aidl \
 	core/java/android/content/IClipboard.aidl \
 	core/java/android/content/IContentService.aidl \
 	core/java/android/content/IIntentReceiver.aidl \
@@ -239,6 +242,8 @@ LOCAL_SRC_FILES += \
 	location/java/android/location/IFusedProvider.aidl \
 	location/java/android/location/IGeocodeProvider.aidl \
 	location/java/android/location/IGeofenceProvider.aidl \
+        location/java/android/location/IGeoFencer.aidl \
+        location/java/android/location/IGeoFenceListener.aidl \
 	location/java/android/location/IGpsStatusListener.aidl \
 	location/java/android/location/IGpsStatusProvider.aidl \
 	location/java/android/location/ILocationListener.aidl \
