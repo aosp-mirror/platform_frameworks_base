@@ -3433,6 +3433,7 @@ public class ListView extends AbsListView {
      * @param headerDividersEnabled True to draw the headers, false otherwise.
      *
      * @see #setFooterDividersEnabled(boolean)
+     * @see #areHeaderDividersEnabled()
      * @see #addHeaderView(android.view.View)
      */
     public void setHeaderDividersEnabled(boolean headerDividersEnabled) {
@@ -3441,16 +3442,35 @@ public class ListView extends AbsListView {
     }
 
     /**
+     * @return Whether the drawing of the divider for header views is enabled
+     *
+     * @see #setHeaderDividersEnabled(boolean)
+     */
+    public boolean areHeaderDividersEnabled() {
+        return mHeaderDividersEnabled;
+    }
+
+    /**
      * Enables or disables the drawing of the divider for footer views.
      *
      * @param footerDividersEnabled True to draw the footers, false otherwise.
      *
      * @see #setHeaderDividersEnabled(boolean)
+     * @see #areFooterDividersEnabled()
      * @see #addFooterView(android.view.View)
      */
     public void setFooterDividersEnabled(boolean footerDividersEnabled) {
         mFooterDividersEnabled = footerDividersEnabled;
         invalidate();
+    }
+
+    /**
+     * @return Whether the drawing of the divider for footer views is enabled
+     *
+     * @see #setFooterDividersEnabled(boolean)
+     */
+    public boolean areFooterDividersEnabled() {
+        return mFooterDividersEnabled;
     }
     
     /**

@@ -30191,6 +30191,8 @@ package android.widget {
     method public void addFooterView(android.view.View);
     method public void addHeaderView(android.view.View, java.lang.Object, boolean);
     method public void addHeaderView(android.view.View);
+    method public boolean areFooterDividersEnabled();
+    method public boolean areHeaderDividersEnabled();
     method protected android.view.View findViewTraversal(int);
     method protected android.view.View findViewWithTagTraversal(java.lang.Object);
     method public android.widget.ListAdapter getAdapter();
