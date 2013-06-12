@@ -240,35 +240,39 @@ public class ListView extends AbsListView {
     }
 
     /**
-     * Add a fixed view to appear at the top of the list. If addHeaderView is
+     * Add a fixed view to appear at the top of the list. If this method is
      * called more than once, the views will appear in the order they were
      * added. Views added using this call can take focus if they want.
      * <p>
-     * NOTE: Call this before calling setAdapter. This is so ListView can wrap
-     * the supplied cursor with one that will also account for header and footer
-     * views.
+     * Note: When first introduced, this method could only be called before
+     * setting the adapter with {@link #setAdapter(ListAdapter)}. Starting with
+     * {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, this method may be
+     * called at any time. If the ListView's adapter does not extend
+     * {@link HeaderViewListAdapter}, it will be wrapped with a supporting
+     * instance of {@link WrapperListAdapter}.
      *
      * @param v The view to add.
      * @param data Data to associate with this view
      * @param isSelectable whether the item is selectable
      */
     public void addHeaderView(View v, Object data, boolean isSelectable) {
-
-        if (mAdapter != null && ! (mAdapter instanceof HeaderViewListAdapter)) {
-            throw new IllegalStateException(
-                    "Cannot add header view to list -- setAdapter has already been called.");
-        }
-
-        FixedViewInfo info = new FixedViewInfo();
+        final FixedViewInfo info = new FixedViewInfo();
         info.view = v;
         info.data = data;
         info.isSelectable = isSelectable;
         mHeaderViewInfos.add(info);
 
-        // in the case of re-adding a header view, or adding one later on,
-        // we need to notify the observer
-        if (mAdapter != null && mDataSetObserver != null) {
-            mDataSetObserver.onChanged();
+        // Wrap the adapter if it wasn't already wrapped.
+        if (mAdapter != null) {
+            if (!(mAdapter instanceof HeaderViewListAdapter)) {
+                mAdapter = new HeaderViewListAdapter(mHeaderViewInfos, mFooterViewInfos, mAdapter);
+            }
+
+            // In the case of re-adding a header view, or adding one later on,
+            // we need to notify the observer.
+            if (mDataSetObserver != null) {
+                mDataSetObserver.onChanged();
+            }
         }
     }
 
@@ -277,9 +281,12 @@ public class ListView extends AbsListView {
      * called more than once, the views will appear in the order they were
      * added. Views added using this call can take focus if they want.
      * <p>
-     * NOTE: Call this before calling setAdapter. This is so ListView can wrap
-     * the supplied cursor with one that will also account for header and footer
-     * views.
+     * Note: When first introduced, this method could only be called before
+     * setting the adapter with {@link #setAdapter(ListAdapter)}. Starting with
+     * {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, this method may be
+     * called at any time. If the ListView's adapter does not extend
+     * {@link HeaderViewListAdapter}, it will be wrapped with a supporting
+     * instance of {@link WrapperListAdapter}.
      *
      * @param v The view to add.
      */
@@ -330,41 +337,49 @@ public class ListView extends AbsListView {
      * called more than once, the views will appear in the order they were
      * added. Views added using this call can take focus if they want.
      * <p>
-     * NOTE: Call this before calling setAdapter. This is so ListView can wrap
-     * the supplied cursor with one that will also account for header and footer
-     * views.
+     * Note: When first introduced, this method could only be called before
+     * setting the adapter with {@link #setAdapter(ListAdapter)}. Starting with
+     * {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, this method may be
+     * called at any time. If the ListView's adapter does not extend
+     * {@link HeaderViewListAdapter}, it will be wrapped with a supporting
+     * instance of {@link WrapperListAdapter}.
      *
      * @param v The view to add.
      * @param data Data to associate with this view
      * @param isSelectable true if the footer view can be selected
      */
     public void addFooterView(View v, Object data, boolean isSelectable) {
-
-        // NOTE: do not enforce the adapter being null here, since unlike in
-        // addHeaderView, it was never enforced here, and so existing apps are
-        // relying on being able to add a footer and then calling setAdapter to
-        // force creation of the HeaderViewListAdapter wrapper
-
-        FixedViewInfo info = new FixedViewInfo();
+        final FixedViewInfo info = new FixedViewInfo();
         info.view = v;
         info.data = data;
         info.isSelectable = isSelectable;
         mFooterViewInfos.add(info);
 
-        // in the case of re-adding a footer view, or adding one later on,
-        // we need to notify the observer
-        if (mAdapter != null && mDataSetObserver != null) {
-            mDataSetObserver.onChanged();
+        // Wrap the adapter if it wasn't already wrapped.
+        if (mAdapter != null) {
+            if (!(mAdapter instanceof HeaderViewListAdapter)) {
+                mAdapter = new HeaderViewListAdapter(mHeaderViewInfos, mFooterViewInfos, mAdapter);
+            }
+
+            // In the case of re-adding a footer view, or adding one later on,
+            // we need to notify the observer.
+            if (mDataSetObserver != null) {
+                mDataSetObserver.onChanged();
+            }
         }
     }
 
     /**
-     * Add a fixed view to appear at the bottom of the list. If addFooterView is called more
-     * than once, the views will appear in the order they were added. Views added using
-     * this call can take focus if they want.
-     * <p>NOTE: Call this before calling setAdapter. This is so ListView can wrap the supplied
-     * cursor with one that will also account for header and footer views.
-     *
+     * Add a fixed view to appear at the bottom of the list. If addFooterView is
+     * called more than once, the views will appear in the order they were
+     * added. Views added using this call can take focus if they want.
+     * <p>
+     * Note: When first introduced, this method could only be called before
+     * setting the adapter with {@link #setAdapter(ListAdapter)}. Starting with
+     * {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, this method may be
+     * called at any time. If the ListView's adapter does not extend
+     * {@link HeaderViewListAdapter}, it will be wrapped with a supporting
+     * instance of {@link WrapperListAdapter}.
      *
      * @param v The view to add.
      */
