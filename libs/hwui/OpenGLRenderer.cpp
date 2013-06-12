@@ -33,6 +33,7 @@
 #include "OpenGLRenderer.h"
 #include "DeferredDisplayList.h"
 #include "DisplayListRenderer.h"
+#include "Fence.h"
 #include "PathTessellator.h"
 #include "Properties.h"
 #include "Vector.h"
@@ -552,6 +553,8 @@ void OpenGLRenderer::countOverdraw() {
 bool OpenGLRenderer::updateLayer(Layer* layer, bool inFrame) {
     if (layer->deferredUpdateScheduled && layer->renderer &&
             layer->displayList && layer->displayList->isRenderable()) {
+        ATRACE_CALL();
+
         Rect& dirty = layer->dirtyRect;
 
         if (inFrame) {
@@ -619,8 +622,11 @@ void OpenGLRenderer::flushLayers() {
             sprintf(layerName, "Layer #%d", i);
             startMark(layerName);
 
+            ATRACE_BEGIN("flushLayer");
             Layer* layer = mLayerUpdates.itemAt(i);
             layer->flush();
+            ATRACE_END();
+
             mCaches.resourceCache.decrementRefcount(layer);
 
             endMark();
@@ -659,6 +665,14 @@ void OpenGLRenderer::clearLayerUpdates() {
         mCaches.resourceCache.unlock();
         mLayerUpdates.clear();
     }
+}
+
+void OpenGLRenderer::flushLayerUpdates() {
+    syncState();
+    updateLayers();
+    flushLayers();
+    // Wait for all the layer updates to be executed
+    AutoFence fence;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

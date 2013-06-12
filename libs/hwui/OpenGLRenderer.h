@@ -208,6 +208,7 @@ public:
 
     ANDROID_API void pushLayerUpdate(Layer* layer);
     ANDROID_API void clearLayerUpdates();
+    ANDROID_API void flushLayerUpdates();
 
     ANDROID_API int getSaveCount() const;
     virtual int save(int flags);

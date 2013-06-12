@@ -163,6 +163,11 @@ class GLES20Canvas extends HardwareCanvas {
     }
 
     @Override
+    void flushLayerUpdates() {
+        nFlushLayerUpdates(mRenderer);
+    }
+
+    @Override
     void clearLayerUpdates() {
         nClearLayerUpdates(mRenderer);
     }
@@ -184,6 +189,7 @@ class GLES20Canvas extends HardwareCanvas {
     static native boolean nCopyLayer(int layerId, int bitmap);
 
     private static native void nClearLayerUpdates(int renderer);
+    private static native void nFlushLayerUpdates(int renderer);
     private static native void nPushLayerUpdate(int renderer, int layer);
 
     ///////////////////////////////////////////////////////////////////////////
