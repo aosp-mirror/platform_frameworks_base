@@ -16,8 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
-import java.util.ArrayList;
-
+import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -29,10 +28,9 @@ import android.location.LocationManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 
-// private NM API
-import android.app.INotificationManager;
-
 import com.android.systemui.R;
+
+import java.util.ArrayList;
 
 public class LocationController extends BroadcastReceiver {
     private static final String TAG = "StatusBar.LocationController";

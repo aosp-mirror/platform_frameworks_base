@@ -16,26 +16,25 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.service.notification.StatusBarNotification;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.text.StaticLayout;
+import android.service.notification.StatusBarNotification;
 import android.text.Layout.Alignment;
+import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.view.View;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageSwitcher;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
-import android.widget.ImageSwitcher;
-
-import java.util.ArrayList;
 
 import com.android.internal.statusbar.StatusBarIcon;
-
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusBarIconView;
+
+import java.util.ArrayList;
 
 public abstract class Ticker {
     private static final int TICKER_SEGMENT_DELAY = 3000;

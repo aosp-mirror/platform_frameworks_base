@@ -17,11 +17,8 @@
 package com.android.systemui.statusbar;
 
 import android.app.StatusBarManager;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 
 import com.android.systemui.statusbar.policy.Prefs;
 

@@ -16,11 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.ArrayDeque;
-import java.util.Iterator;
-
 import android.animation.ObjectAnimator;
 import android.animation.TimeAnimator;
 import android.animation.TimeAnimator.TimeListener;
@@ -33,6 +28,11 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.ArrayDeque;
+import java.util.Iterator;
 
 public class PanelView extends FrameLayout {
     public static final boolean DEBUG = PanelBar.DEBUG;

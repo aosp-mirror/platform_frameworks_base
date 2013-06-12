@@ -18,15 +18,11 @@ package com.android.systemui.statusbar.tablet;
 
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.res.TypedArray;
-import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 
 import com.android.systemui.R;
 

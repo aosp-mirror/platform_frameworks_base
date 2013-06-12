@@ -16,6 +16,12 @@
 
 package com.android.systemui.statusbar;
 
+import android.os.Handler;
+import android.os.Message;
+import android.os.SystemClock;
+import android.util.Log;
+import android.view.MotionEvent;
+
 import java.io.BufferedWriter;
 import java.io.FileDescriptor;
 import java.io.FileWriter;
@@ -23,12 +29,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.LinkedList;
-
-import android.os.Handler;
-import android.os.Message;
-import android.os.SystemClock;
-import android.util.Log;
-import android.view.MotionEvent;
 
 /**
  * Convenience class for capturing gestures for later analysis.

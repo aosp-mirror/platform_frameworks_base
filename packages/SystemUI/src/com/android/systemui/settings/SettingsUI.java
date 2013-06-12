@@ -16,9 +16,6 @@
 
 package com.android.systemui.settings;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -29,6 +26,9 @@ import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.systemui.SystemUI;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 public class SettingsUI extends SystemUI {
     private static final String TAG = "SettingsUI";

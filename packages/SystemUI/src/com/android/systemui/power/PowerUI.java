@@ -16,10 +16,6 @@
 
 package com.android.systemui.power;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.Arrays;
-
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -27,13 +23,13 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.UserHandle;
-import android.media.AudioManager;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -42,6 +38,10 @@ import android.widget.TextView;
 
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.Arrays;
 
 public class PowerUI extends SystemUI {
     static final String TAG = "PowerUI";

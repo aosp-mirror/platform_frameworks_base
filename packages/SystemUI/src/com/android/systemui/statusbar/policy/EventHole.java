@@ -17,26 +17,10 @@
 package com.android.systemui.statusbar.policy;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Region;
-import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.Drawable;
-import android.os.RemoteException;
-import android.os.SystemClock;
-import android.os.ServiceManager;
 import android.util.AttributeSet;
-import android.view.HapticFeedbackConstants;
-import android.view.IWindowManager;
-import android.view.InputDevice;
-import android.view.KeyCharacterMap;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver;
-import android.widget.RemoteViews.RemoteView;
-
-import com.android.systemui.R;
 
 public class EventHole extends View implements ViewTreeObserver.OnComputeInternalInsetsListener {
     private static final String TAG = "StatusBar.EventHole";

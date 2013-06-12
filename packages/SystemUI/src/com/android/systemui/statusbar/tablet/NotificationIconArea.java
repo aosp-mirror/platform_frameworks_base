@@ -17,14 +17,10 @@
 package com.android.systemui.statusbar.tablet;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.os.Handler;
 import android.util.AttributeSet;
-import android.view.View;
+import android.view.MotionEvent;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.ImageView;
-import android.view.MotionEvent;
 
 import com.android.systemui.R;
 

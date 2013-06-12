@@ -16,12 +16,9 @@
 
 package com.android.systemui.statusbar.tablet;
 
-import java.util.Arrays;
-
 import android.animation.LayoutTransition;
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.service.notification.StatusBarNotification;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.PixelFormat;
@@ -29,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -40,9 +38,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.statusbar.StatusBarIcon;
-
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusBarIconView;
+
+import java.util.Arrays;
 
 public class TabletTicker
         extends Handler

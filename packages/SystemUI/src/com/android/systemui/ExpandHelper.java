@@ -29,9 +29,9 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.View.OnClickListener;
 
 public class ExpandHelper implements Gefingerpoken, OnClickListener {
     public interface Callback {

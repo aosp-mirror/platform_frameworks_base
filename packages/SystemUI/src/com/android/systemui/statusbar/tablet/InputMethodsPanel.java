@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.tablet;
 
-import com.android.systemui.R;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +38,8 @@ import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.TextView;
+
+import com.android.systemui.R;
 
 import java.util.Comparator;
 import java.util.HashMap;

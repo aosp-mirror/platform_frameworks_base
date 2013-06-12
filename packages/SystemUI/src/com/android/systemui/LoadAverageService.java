@@ -16,8 +16,6 @@
 
 package com.android.systemui;
 
-import com.android.internal.os.ProcessStats;
-
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +28,8 @@ import android.os.Message;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
+
+import com.android.internal.os.ProcessStats;
 
 public class LoadAverageService extends Service {
     private View mView;

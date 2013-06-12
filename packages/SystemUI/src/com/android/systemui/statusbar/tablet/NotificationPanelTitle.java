@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.tablet;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -27,6 +25,8 @@ import android.view.accessibility.AccessibilityEvent;
 import android.widget.RelativeLayout;
 
 import com.android.systemui.R;
+
+import java.util.ArrayList;
 
 
 public class NotificationPanelTitle extends RelativeLayout implements View.OnClickListener {

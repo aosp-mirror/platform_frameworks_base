@@ -16,15 +16,15 @@
 
 package com.android.systemui.statusbar;
 
-import android.service.notification.StatusBarNotification;
 import android.os.IBinder;
+import android.service.notification.StatusBarNotification;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.android.systemui.R;
 
-import java.util.Comparator;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  * The list of currently displaying notifications.
