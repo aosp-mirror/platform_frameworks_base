@@ -25,11 +25,11 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Mostra notifiche"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Rimuovi dall\'elenco"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informazioni applicazione"</string>
-    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Nessuna applicazione recente"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Ignora applicazioni recenti"</string>
+    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Nessuna app recente"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Ignora app recenti"</string>
   <plurals name="status_bar_accessibility_recent_apps">
-    <item quantity="one" msgid="5854176083865845541">"1 applicazione recente"</item>
-    <item quantity="other" msgid="1040784359794890744">"Applicazioni recenti in %d"</item>
+    <item quantity="one" msgid="5854176083865845541">"1 app recente"</item>
+    <item quantity="other" msgid="1040784359794890744">"App recenti in %d"</item>
   </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Nessuna notifica"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"In corso"</string>
@@ -127,6 +127,7 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Roaming"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -149,7 +150,7 @@
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notifica eliminata."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Area notifiche."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Impostazioni rapide."</string>
-    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"Applicazioni recenti."</string>
+    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"App recenti"</string>
     <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Utente <xliff:g id="USER">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Cellulare: <xliff:g id="SIGNAL">%1$s</xliff:g>. <xliff:g id="TYPE">%2$s</xliff:g>. <xliff:g id="NETWORK">%3$s</xliff:g>."</string>

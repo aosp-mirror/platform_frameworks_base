@@ -23,7 +23,7 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Очистить"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Не беспокоить"</string>
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Показать уведомления"</string>
-    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Удаление из списка"</string>
+    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Удалить из списка"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"О приложении"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Список недавно использованных приложений пуст."</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Закрыть недавние приложения"</string>
@@ -77,7 +77,7 @@
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Установить как камеру (PTP)"</string>
     <string name="installer_cd_button_title" msgid="2312667578562201583">"Установить приложение"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Назад"</string>
-    <string name="accessibility_home" msgid="8217216074895377641">"Главная страница"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"Домой"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Меню"</string>
     <string name="accessibility_recent" msgid="8571350598987952883">"Недавние приложения"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Кнопка переключения способа ввода."</string>
@@ -118,8 +118,8 @@
     <string name="accessibility_two_bars" msgid="6437363648385206679">"два деления"</string>
     <string name="accessibility_three_bars" msgid="2648241415119396648">"три деления"</string>
     <string name="accessibility_signal_full" msgid="9122922886519676839">"надежный сигнал"</string>
-    <string name="accessibility_desc_on" msgid="2385254693624345265">"ВКЛ"</string>
-    <string name="accessibility_desc_off" msgid="6475508157786853157">"ВЫКЛ"</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"Вкл."</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"Выкл."</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"Подключено"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
@@ -127,6 +127,8 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <!-- no translation found for accessibility_data_connection_lte (5413468808637540658) -->
+    <skip />
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Роуминг"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -202,7 +204,7 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Нет сети"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi выкл."</string>
     <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Проектор Wi-Fi"</string>
-    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Беспроводной проектор"</string>
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Wi-Fi-монитор"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Яркость"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АВТОНАСТРОЙКА"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Это панель уведомлений"</string>
