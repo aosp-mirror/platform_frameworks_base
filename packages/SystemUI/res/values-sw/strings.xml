@@ -40,7 +40,7 @@
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Mipangilio"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Mtandao-Hewa"</string>
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Hali ya Ndege"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Zungusha otomatiki skrini"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Skrini ijizungushe kiotomatiki"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"PUUZA"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"KIOTOMATIKI"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Arifa"</string>
@@ -125,12 +125,14 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <!-- no translation found for accessibility_data_connection_lte (5413468808637540658) -->
+    <skip />
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Inatumia data nje mtandao wako"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Ukingo"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Hakuna SIM."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Ufungaji wa Bluetooth."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Shiriki intaneti kwa Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modi ya ndege."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Asilimia <xliff:g id="NUMBER">%d</xliff:g> ya betri"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Mipangilio ya mfumo."</string>
@@ -200,5 +202,5 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Ung\'avu"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"KIOTOMATIKI"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Arifa zitaonekana hapa"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"Wafikie wakati wowote kwa kupapasa chini."\n"Papasa chini tena kupata vidhibiti vya mfumo."</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"Zifikie wakati wowote kwa kutelezesha chini."\n"Telezesha chini tena kupata vidhibiti vya mfumo."</string>
 </resources>

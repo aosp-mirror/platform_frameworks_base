@@ -127,6 +127,7 @@
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Roaming"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -157,14 +158,14 @@
     <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Alarm ustawiony na <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Wyłączono transmisję danych 2G/3G"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Wyłączono transmisję danych 4G"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Wyłączono komórkową transmisję danych"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Transmisja danych została wyłączona"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Wyłączono transmisję danych"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Osiągnięto określony limit wykorzystania transmisji danych."\n\n"Jeśli ponownie włączysz przesyłanie danych, operator może naliczyć opłaty."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Ustawiony limit transmisji danych został osiągnięty."\n\n"Jeśli ponownie włączysz przesyłanie danych, operator może naliczyć dodatkowe opłaty."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Włącz transmisję danych"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Brak internetu"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: połączono"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Wyszukiwanie sygnału GPS"</string>
-    <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokalizacja ustawiona według GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokalizacja z GPSa"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Usuń wszystkie powiadomienia."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"O aplikacji"</string>
     <string name="close_universe" msgid="3736513750241754348">"Zamknij"</string>
