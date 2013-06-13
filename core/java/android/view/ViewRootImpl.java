@@ -2799,7 +2799,9 @@ public final class ViewRootImpl implements ViewParent,
 
         setAccessibilityFocus(null, null);
 
-        mView.assignParent(null);
+        if (mView != null) {
+            mView.assignParent(null);
+        }
         mView = null;
         mAttachInfo.mRootView = null;
         mAttachInfo.mSurface = null;
