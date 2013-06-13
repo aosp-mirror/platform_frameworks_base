@@ -50,8 +50,8 @@ import java.util.Set;
  * <em>action</em>, <em>data</em>, and <em>categories</em>.  For each of these
  * characteristics you can provide
  * multiple possible matching values (via {@link #addAction},
- * {@link #addDataType}, {@link #addDataScheme} {@link #addDataAuthority},
- * {@link #addDataPath}, and {@link #addCategory}, respectively).
+ * {@link #addDataType}, {@link #addDataScheme}, {@link #addDataSchemeSpecificPart},
+ * {@link #addDataAuthority}, {@link #addDataPath}, and {@link #addCategory}, respectively).
  * For actions, the field
  * will not be tested if no values have been given (treating it as a wildcard);
  * if no data characteristics are specified, however, then the filter will
@@ -106,8 +106,15 @@ import java.util.Set;
  * formal RFC schemes!</em>  You should thus always use lower case letters
  * for your schemes.
  *
+ * <p><strong>Data Scheme Specific Part</strong> matches if any of the given values match
+ * the Intent's data scheme specific part <em>and</em> one of the data schemes in the filter
+ * has matched the Intent, <em>or</em> no scheme specific parts were supplied in the filter.
+ * The Intent scheme specific part is determined by calling
+ * {@link Intent#getData} and {@link android.net.Uri#getSchemeSpecificPart} on that URI.
+ * <em>Note that scheme specific part matching is <b>case sensitive</b>.</em>
+ *
  * <p><strong>Data Authority</strong> matches if any of the given values match
- * the Intent's data authority <em>and</em> one of the data scheme's in the filter
+ * the Intent's data authority <em>and</em> one of the data schemes in the filter
  * has matched the Intent, <em>or</em> no authories were supplied in the filter.
  * The Intent authority is determined by calling
  * {@link Intent#getData} and {@link android.net.Uri#getAuthority} on that URI.
@@ -135,6 +142,7 @@ public class IntentFilter implements Parcelable {
     private static final String PORT_STR = "port";
     private static final String HOST_STR = "host";
     private static final String AUTH_STR = "auth";
+    private static final String SSP_STR = "ssp";
     private static final String SCHEME_STR = "scheme";
     private static final String TYPE_STR = "type";
     private static final String CAT_STR = "cat";
@@ -164,8 +172,8 @@ public class IntentFilter implements Parcelable {
     /**
      * The part of a match constant that describes the category of match
      * that occurred.  May be either {@link #MATCH_CATEGORY_EMPTY},
-     * {@link #MATCH_CATEGORY_SCHEME}, {@link #MATCH_CATEGORY_HOST},
-     * {@link #MATCH_CATEGORY_PORT},
+     * {@link #MATCH_CATEGORY_SCHEME}, {@link #MATCH_CATEGORY_SCHEME_SPECIFIC_PART},
+     * {@link #MATCH_CATEGORY_HOST}, {@link #MATCH_CATEGORY_PORT},
      * {@link #MATCH_CATEGORY_PATH}, or {@link #MATCH_CATEGORY_TYPE}.  Higher
      * values indicate a better match.
      */
@@ -210,6 +218,11 @@ public class IntentFilter implements Parcelable {
      */
     public static final int MATCH_CATEGORY_PATH = 0x0500000;
     /**
+     * The filter matched an intent with the same data URI scheme and
+     * scheme specific part.
+     */
+    public static final int MATCH_CATEGORY_SCHEME_SPECIFIC_PART = 0x0580000;
+    /**
      * The filter matched an intent with the same data MIME type.
      */
     public static final int MATCH_CATEGORY_TYPE = 0x0600000;
@@ -236,6 +249,7 @@ public class IntentFilter implements Parcelable {
     private final ArrayList<String> mActions;
     private ArrayList<String> mCategories = null;
     private ArrayList<String> mDataSchemes = null;
+    private ArrayList<PatternMatcher> mDataSchemeSpecificParts = null;
     private ArrayList<AuthorityEntry> mDataAuthorities = null;
     private ArrayList<PatternMatcher> mDataPaths = null;
     private ArrayList<String> mDataTypes = null;
@@ -394,6 +408,9 @@ public class IntentFilter implements Parcelable {
         }
         if (o.mDataSchemes != null) {
             mDataSchemes = new ArrayList<String>(o.mDataSchemes);
+        }
+        if (o.mDataSchemeSpecificParts != null) {
+            mDataSchemeSpecificParts = new ArrayList<PatternMatcher>(o.mDataSchemeSpecificParts);
         }
         if (o.mDataAuthorities != null) {
             mDataAuthorities = new ArrayList<AuthorityEntry>(o.mDataAuthorities);
@@ -699,6 +716,77 @@ public class IntentFilter implements Parcelable {
     };
 
     /**
+     * Add a new Intent data "scheme specific part" to match against.  The filter must
+     * include one or more schemes (via {@link #addDataScheme}) for the
+     * scheme specific part to be considered.  If any scheme specific parts are
+     * included in the filter, then an Intent's data must match one of
+     * them.  If no scheme specific parts are included, then only the scheme must match.
+     *
+     * @param ssp Either a raw string that must exactly match the scheme specific part
+     * path, or a simple pattern, depending on <var>type</var>.
+     * @param type Determines how <var>ssp</var> will be compared to
+     * determine a match: either {@link PatternMatcher#PATTERN_LITERAL},
+     * {@link PatternMatcher#PATTERN_PREFIX}, or
+     * {@link PatternMatcher#PATTERN_SIMPLE_GLOB}.
+     *
+     * @see #matchData
+     * @see #addDataScheme
+     */
+    public final void addDataSchemeSpecificPart(String ssp, int type) {
+        if (mDataSchemeSpecificParts == null) mDataSchemeSpecificParts =
+                new ArrayList<PatternMatcher>();
+        mDataSchemeSpecificParts.add(new PatternMatcher(ssp, type));
+    }
+
+    /**
+     * Return the number of data scheme specific parts in the filter.
+     */
+    public final int countDataSchemeSpecificParts() {
+        return mDataSchemeSpecificParts != null ? mDataSchemeSpecificParts.size() : 0;
+    }
+
+    /**
+     * Return a data scheme specific part in the filter.
+     */
+    public final PatternMatcher getDataSchemeSpecificPart(int index) {
+        return mDataSchemeSpecificParts.get(index);
+    }
+
+    /**
+     * Is the given data scheme specific part included in the filter?  Note that if the
+     * filter does not include any scheme specific parts, false will <em>always</em> be
+     * returned.
+     *
+     * @param data The scheme specific part that is being looked for.
+     *
+     * @return Returns true if the data string matches a scheme specific part listed in the
+     *         filter.
+     */
+    public final boolean hasDataSchemeSpecificPart(String data) {
+        if (mDataSchemeSpecificParts == null) {
+            return false;
+        }
+        final int numDataSchemeSpecificParts = mDataSchemeSpecificParts.size();
+        if (numDataSchemeSpecificParts <= 0) {
+            return false;
+        }
+        for (int i = 0; i < numDataSchemeSpecificParts; i++) {
+            final PatternMatcher pe = mDataSchemeSpecificParts.get(i);
+            if (pe.match(data)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return an iterator over the filter's data scheme specific parts.
+     */
+    public final Iterator<PatternMatcher> schemeSpecificPartsIterator() {
+        return mDataSchemeSpecificParts != null ? mDataSchemeSpecificParts.iterator() : null;
+    }
+
+    /**
      * Add a new Intent data authority to match against.  The filter must
      * include one or more schemes (via {@link #addDataScheme}) for the
      * authority to be considered.  If any authorities are
@@ -900,8 +988,6 @@ public class IntentFilter implements Parcelable {
     public final int matchData(String type, String scheme, Uri data) {
         final ArrayList<String> types = mDataTypes;
         final ArrayList<String> schemes = mDataSchemes;
-        final ArrayList<AuthorityEntry> authorities = mDataAuthorities;
-        final ArrayList<PatternMatcher> paths = mDataPaths;
 
         int match = MATCH_CATEGORY_EMPTY;
 
@@ -917,19 +1003,33 @@ public class IntentFilter implements Parcelable {
                 return NO_MATCH_DATA;
             }
 
-            if (authorities != null) {
-                int authMatch = matchDataAuthority(data);
-                if (authMatch >= 0) {
-                    if (paths == null) {
-                        match = authMatch;
-                    } else if (hasDataPath(data.getPath())) {
-                        match = MATCH_CATEGORY_PATH;
+            final ArrayList<PatternMatcher> schemeSpecificParts = mDataSchemeSpecificParts;
+            if (schemeSpecificParts != null) {
+                match = hasDataSchemeSpecificPart(data.getSchemeSpecificPart())
+                        ? MATCH_CATEGORY_SCHEME_SPECIFIC_PART : NO_MATCH_DATA;
+            }
+            if (match != MATCH_CATEGORY_SCHEME_SPECIFIC_PART) {
+                // If there isn't any matching ssp, we need to match an authority.
+                final ArrayList<AuthorityEntry> authorities = mDataAuthorities;
+                if (authorities != null) {
+                    int authMatch = matchDataAuthority(data);
+                    if (authMatch >= 0) {
+                        final ArrayList<PatternMatcher> paths = mDataPaths;
+                        if (paths == null) {
+                            match = authMatch;
+                        } else if (hasDataPath(data.getPath())) {
+                            match = MATCH_CATEGORY_PATH;
+                        } else {
+                            return NO_MATCH_DATA;
+                        }
                     } else {
                         return NO_MATCH_DATA;
                     }
-                } else {
-                    return NO_MATCH_DATA;
                 }
+            }
+            // If neither an ssp nor an authority matched, we're done.
+            if (match == NO_MATCH_DATA) {
+                return NO_MATCH_DATA;
             }
         } else {
             // Special case: match either an Intent with no data URI,
@@ -1173,6 +1273,23 @@ public class IntentFilter implements Parcelable {
             serializer.attribute(null, NAME_STR, mDataSchemes.get(i));
             serializer.endTag(null, SCHEME_STR);
         }
+        N = countDataSchemeSpecificParts();
+        for (int i=0; i<N; i++) {
+            serializer.startTag(null, SSP_STR);
+            PatternMatcher pe = mDataSchemeSpecificParts.get(i);
+            switch (pe.getType()) {
+                case PatternMatcher.PATTERN_LITERAL:
+                    serializer.attribute(null, LITERAL_STR, pe.getPath());
+                    break;
+                case PatternMatcher.PATTERN_PREFIX:
+                    serializer.attribute(null, PREFIX_STR, pe.getPath());
+                    break;
+                case PatternMatcher.PATTERN_SIMPLE_GLOB:
+                    serializer.attribute(null, SGLOB_STR, pe.getPath());
+                    break;
+            }
+            serializer.endTag(null, SSP_STR);
+        }
         N = countDataAuthorities();
         for (int i=0; i<N; i++) {
             serializer.startTag(null, AUTH_STR);
@@ -1238,6 +1355,15 @@ public class IntentFilter implements Parcelable {
                 if (name != null) {
                     addDataScheme(name);
                 }
+            } else if (tagName.equals(SSP_STR)) {
+                String ssp = parser.getAttributeValue(null, LITERAL_STR);
+                if (ssp != null) {
+                    addDataSchemeSpecificPart(ssp, PatternMatcher.PATTERN_LITERAL);
+                } else if ((ssp=parser.getAttributeValue(null, PREFIX_STR)) != null) {
+                    addDataSchemeSpecificPart(ssp, PatternMatcher.PATTERN_PREFIX);
+                } else if ((ssp=parser.getAttributeValue(null, SGLOB_STR)) != null) {
+                    addDataSchemeSpecificPart(ssp, PatternMatcher.PATTERN_SIMPLE_GLOB);
+                }
             } else if (tagName.equals(AUTH_STR)) {
                 String host = parser.getAttributeValue(null, HOST_STR);
                 String port = parser.getAttributeValue(null, PORT_STR);
@@ -1286,6 +1412,16 @@ public class IntentFilter implements Parcelable {
                 sb.setLength(0);
                 sb.append(prefix); sb.append("Scheme: \"");
                         sb.append(it.next()); sb.append("\"");
+                du.println(sb.toString());
+            }
+        }
+        if (mDataSchemeSpecificParts != null) {
+            Iterator<PatternMatcher> it = mDataSchemeSpecificParts.iterator();
+            while (it.hasNext()) {
+                PatternMatcher pe = it.next();
+                sb.setLength(0);
+                sb.append(prefix); sb.append("Ssp: \"");
+                        sb.append(pe); sb.append("\"");
                 du.println(sb.toString());
             }
         }
@@ -1363,6 +1499,15 @@ public class IntentFilter implements Parcelable {
         } else {
             dest.writeInt(0);
         }
+        if (mDataSchemeSpecificParts != null) {
+            final int N = mDataSchemeSpecificParts.size();
+            dest.writeInt(N);
+            for (int i=0; i<N; i++) {
+                mDataSchemeSpecificParts.get(i).writeToParcel(dest, 0);
+            }
+        } else {
+            dest.writeInt(0);
+        }
         if (mDataAuthorities != null) {
             final int N = mDataAuthorities.size();
             dest.writeInt(N);
@@ -1428,14 +1573,21 @@ public class IntentFilter implements Parcelable {
         }
         int N = source.readInt();
         if (N > 0) {
-            mDataAuthorities = new ArrayList<AuthorityEntry>();
+            mDataSchemeSpecificParts = new ArrayList<PatternMatcher>(N);
+            for (int i=0; i<N; i++) {
+                mDataSchemeSpecificParts.add(new PatternMatcher(source));
+            }
+        }
+        N = source.readInt();
+        if (N > 0) {
+            mDataAuthorities = new ArrayList<AuthorityEntry>(N);
             for (int i=0; i<N; i++) {
                 mDataAuthorities.add(new AuthorityEntry(source));
             }
         }
         N = source.readInt();
         if (N > 0) {
-            mDataPaths = new ArrayList<PatternMatcher>();
+            mDataPaths = new ArrayList<PatternMatcher>(N);
             for (int i=0; i<N; i++) {
                 mDataPaths.add(new PatternMatcher(source));
             }

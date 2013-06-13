@@ -1917,15 +1917,20 @@ final class Settings {
                     if (tmpPa.countDataSchemes() > 0) {
                         Uri.Builder builder = new Uri.Builder();
                         builder.scheme(tmpPa.getDataScheme(0));
-                        if (tmpPa.countDataAuthorities() > 0) {
-                            IntentFilter.AuthorityEntry auth = tmpPa.getDataAuthority(0);
-                            if (auth.getHost() != null) {
-                                builder.authority(auth.getHost());
+                        if (tmpPa.countDataSchemeSpecificParts() > 0) {
+                            PatternMatcher path = tmpPa.getDataSchemeSpecificPart(0);
+                            builder.opaquePart(path.getPath());
+                        } else {
+                            if (tmpPa.countDataAuthorities() > 0) {
+                                IntentFilter.AuthorityEntry auth = tmpPa.getDataAuthority(0);
+                                if (auth.getHost() != null) {
+                                    builder.authority(auth.getHost());
+                                }
                             }
-                        }
-                        if (tmpPa.countDataPaths() > 0) {
-                            PatternMatcher path = tmpPa.getDataPath(0);
-                            builder.path(path.getPath());
+                            if (tmpPa.countDataPaths() > 0) {
+                                PatternMatcher path = tmpPa.getDataPath(0);
+                                builder.path(path.getPath());
+                            }
                         }
                         intent.setData(builder.build());
                     } else if (tmpPa.countDataTypes() > 0) {

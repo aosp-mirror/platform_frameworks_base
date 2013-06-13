@@ -327,6 +327,17 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
 
                     // Look through the resolved filter to determine which part
                     // of it matched the original Intent.
+                    Iterator<PatternMatcher> pIt = ri.filter.schemeSpecificPartsIterator();
+                    if (pIt != null) {
+                        String ssp = data.getSchemeSpecificPart();
+                        while (ssp != null && pIt.hasNext()) {
+                            PatternMatcher p = pIt.next();
+                            if (p.match(ssp)) {
+                                filter.addDataSchemeSpecificPart(p.getPath(), p.getType());
+                                break;
+                            }
+                        }
+                    }
                     Iterator<IntentFilter.AuthorityEntry> aIt = ri.filter.authoritiesIterator();
                     if (aIt != null) {
                         while (aIt.hasNext()) {
@@ -339,7 +350,7 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
                             }
                         }
                     }
-                    Iterator<PatternMatcher> pIt = ri.filter.pathsIterator();
+                    pIt = ri.filter.pathsIterator();
                     if (pIt != null) {
                         String path = data.getPath();
                         while (path != null && pIt.hasNext()) {
