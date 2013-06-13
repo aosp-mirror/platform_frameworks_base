@@ -471,7 +471,9 @@ void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
 
     if (CC_LIKELY(mAvoidOverdraw) && mBatches.size() &&
             deferInfo.opaqueOverBounds && op->state.mBounds.contains(mBounds)) {
+        // avoid overdraw by resetting drawing state + discarding drawing ops
         discardDrawingBatches(mBatches.size() - 1);
+        resetBatchingState();
     }
 
     if (CC_UNLIKELY(renderer.getCaches().drawReorderDisabled)) {
@@ -551,10 +553,11 @@ void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
         } else {
             targetBatch = new DrawBatch(deferInfo);
             mBatchLookup[deferInfo.batchId] = targetBatch;
-            DEFER_LOGD("creating Batch %p, bid %x, at %d",
-                    targetBatch, deferInfo.batchId, insertBatchIndex);
         }
 
+        DEFER_LOGD("creating %singBatch %p, bid %x, at %d",
+                deferInfo.mergeable ? "Merg" : "Draw",
+                targetBatch, deferInfo.batchId, insertBatchIndex);
         mBatches.insertAt(targetBatch, insertBatchIndex);
     }
 
@@ -633,8 +636,9 @@ status_t DeferredDisplayList::flush(OpenGLRenderer& renderer, Rect& dirty) {
     return status;
 }
 
-void DeferredDisplayList::discardDrawingBatches(unsigned int maxIndex) {
+void DeferredDisplayList::discardDrawingBatches(const unsigned int maxIndex) {
     for (unsigned int i = mEarliestUnclearedIndex; i <= maxIndex; i++) {
+        // leave deferred state ops alone for simplicity (empty save restore pairs may now exist)
         if (mBatches[i] && mBatches[i]->purelyDrawBatch()) {
             DrawBatch* b = (DrawBatch*) mBatches[i];
             delete mBatches[i];
