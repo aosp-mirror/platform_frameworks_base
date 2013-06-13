@@ -264,11 +264,11 @@ public class StateListDrawable extends DrawableContainer {
     /** @hide */
     @Override
     public void setLayoutDirection(int layoutDirection) {
-        final int numStates = getStateCount();
-        for (int i = 0; i < numStates; i++) {
-            getStateDrawable(i).setLayoutDirection(layoutDirection);
-        }
         super.setLayoutDirection(layoutDirection);
+
+        // Let the container handle setting its own layout direction. Otherwise,
+        // we're accessing potentially unused states.
+        mStateListState.setLayoutDirection(layoutDirection);
     }
 
     static final class StateListState extends DrawableContainerState {
