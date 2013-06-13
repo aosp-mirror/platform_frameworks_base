@@ -24,7 +24,7 @@
 namespace android {
 namespace uirenderer {
 
-#define RECT_STRING "%4.2f %4.2f %4.2f %4.2f"
+#define RECT_STRING "%7.2f %7.2f %7.2f %7.2f"
 #define RECT_ARGS(r) \
     (r).left, (r).top, (r).right, (r).bottom
 

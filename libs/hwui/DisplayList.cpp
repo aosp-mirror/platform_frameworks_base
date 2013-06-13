@@ -356,22 +356,26 @@ void DisplayList::outputViewProperties(const int level) {
                     level * 2, "", mTransformMatrix, MATRIX_ARGS(mTransformMatrix));
         }
     }
+
+    bool clipToBoundsNeeded = mClipToBounds;
     if (mAlpha < 1) {
         if (mCaching) {
             ALOGD("%*sSetOverrideLayerAlpha %.2f", level * 2, "", mAlpha);
+            clipToBoundsNeeded = false; // clipping done by layer
         } else if (!mHasOverlappingRendering) {
             ALOGD("%*sScaleAlpha %.2f", level * 2, "", mAlpha);
         } else {
             int flags = SkCanvas::kHasAlphaLayer_SaveFlag;
-            if (mClipToBounds) {
+            if (clipToBoundsNeeded) {
                 flags |= SkCanvas::kClipToLayer_SaveFlag;
+                clipToBoundsNeeded = false; // clipping done by save layer
             }
             ALOGD("%*sSaveLayerAlpha %.2f, %.2f, %.2f, %.2f, %d, 0x%x", level * 2, "",
                     (float) 0, (float) 0, (float) mRight - mLeft, (float) mBottom - mTop,
                     (int)(mAlpha * 255), flags);
         }
     }
-    if (mClipToBounds && !mCaching) {
+    if (clipToBoundsNeeded) {
         ALOGD("%*sClipRect %.2f, %.2f, %.2f, %.2f", level * 2, "", 0.0f, 0.0f,
                 (float) mRight - mLeft, (float) mBottom - mTop);
     }
@@ -406,9 +410,11 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
             renderer.concatMatrix(mTransformMatrix);
         }
     }
+    bool clipToBoundsNeeded = mClipToBounds;
     if (mAlpha < 1) {
         if (mCaching) {
             renderer.setOverrideLayerAlpha(mAlpha);
+            clipToBoundsNeeded = false; // clipping done by layer
         } else if (!mHasOverlappingRendering) {
             renderer.scaleAlpha(mAlpha);
         } else {
@@ -416,15 +422,16 @@ void DisplayList::setViewProperties(OpenGLRenderer& renderer, T& handler,
             // have to pass it into this call. In fact, this information might be in the
             // location/size info that we store with the new native transform data.
             int saveFlags = SkCanvas::kHasAlphaLayer_SaveFlag;
-            if (mClipToBounds) {
+            if (clipToBoundsNeeded) {
                 saveFlags |= SkCanvas::kClipToLayer_SaveFlag;
+                clipToBoundsNeeded = false; // clipping done by saveLayer
             }
             handler(mSaveLayerOp->reinit(0, 0, mRight - mLeft, mBottom - mTop,
                     mAlpha * 255, SkXfermode::kSrcOver_Mode, saveFlags), PROPERTY_SAVECOUNT,
                     mClipToBounds);
         }
     }
-    if (mClipToBounds && !mCaching) {
+    if (clipToBoundsNeeded) {
         handler(mClipRectOp->reinit(0, 0, mRight - mLeft, mBottom - mTop, SkRegion::kIntersect_Op),
                 PROPERTY_SAVECOUNT, mClipToBounds);
     }

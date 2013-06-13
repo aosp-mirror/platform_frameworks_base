@@ -993,6 +993,10 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     const Rect& rect = layer->layer;
     const bool fboLayer = current->flags & Snapshot::kFlagIsFboLayer;
 
+    bool clipRequired = false;
+    quickRejectNoScissor(rect, &clipRequired); // safely ignore return, should never be rejected
+    mCaches.setScissorEnabled(mScissorOptimizationDisabled || clipRequired);
+
     if (fboLayer) {
         endTiling();
 
@@ -1568,8 +1572,9 @@ const Rect& OpenGLRenderer::getClipBounds() {
     return mSnapshot->getLocalClip();
 }
 
-bool OpenGLRenderer::quickRejectNoScissor(float left, float top, float right, float bottom) {
-    if (mSnapshot->isIgnored()) {
+bool OpenGLRenderer::quickRejectNoScissor(float left, float top, float right, float bottom,
+        bool* clipRequired) {
+    if (mSnapshot->isIgnored() || bottom <= top || right <= left) {
         return true;
     }
 
@@ -1580,23 +1585,10 @@ bool OpenGLRenderer::quickRejectNoScissor(float left, float top, float right, fl
     Rect clipRect(*mSnapshot->clipRect);
     clipRect.snapToPixelBoundaries();
 
-    return !clipRect.intersects(r);
-}
+    if (!clipRect.intersects(r)) return true;
 
-bool OpenGLRenderer::quickRejectNoScissor(float left, float top, float right, float bottom,
-        Rect& transformed, Rect& clip) {
-    if (mSnapshot->isIgnored()) {
-        return true;
-    }
-
-    transformed.set(left, top, right, bottom);
-    currentTransform().mapRect(transformed);
-    transformed.snapToPixelBoundaries();
-
-    clip.set(*mSnapshot->clipRect);
-    clip.snapToPixelBoundaries();
-
-    return !clip.intersects(transformed);
+    if (clipRequired) *clipRequired = !clipRect.contains(r);
+    return false;
 }
 
 bool OpenGLRenderer::quickRejectPreStroke(float left, float top, float right, float bottom,
@@ -1610,23 +1602,15 @@ bool OpenGLRenderer::quickRejectPreStroke(float left, float top, float right, fl
 }
 
 bool OpenGLRenderer::quickReject(float left, float top, float right, float bottom) {
-    if (mSnapshot->isIgnored() || bottom <= top || right <= left) {
+    bool clipRequired = false;
+    if (quickRejectNoScissor(left, top, right, bottom, &clipRequired)) {
         return true;
     }
 
-    Rect r(left, top, right, bottom);
-    currentTransform().mapRect(r);
-    r.snapToPixelBoundaries();
-
-    Rect clipRect(*mSnapshot->clipRect);
-    clipRect.snapToPixelBoundaries();
-
-    bool rejected = !clipRect.intersects(r);
-    if (!isDeferred() && !rejected) {
-        mCaches.setScissorEnabled(mScissorOptimizationDisabled || !clipRect.contains(r));
+    if (!isDeferred()) {
+        mCaches.setScissorEnabled(mScissorOptimizationDisabled || clipRequired);
     }
-
-    return rejected;
+    return false;
 }
 
 void OpenGLRenderer::debugClip() {
@@ -2162,6 +2146,9 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
     if (!vertices || mSnapshot->isIgnored()) {
         return DrawGlInfo::kStatusDone;
     }
+
+    // TODO: use quickReject on bounds from vertices
+    mCaches.enableScissor();
 
     float left = FLT_MAX;
     float top = FLT_MAX;
@@ -2829,6 +2816,8 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
         return DrawGlInfo::kStatusDone;
     }
 
+    mCaches.enableScissor();
+
     float x = 0.0f;
     float y = 0.0f;
     const bool pureTranslate = currentTransform().isPureTranslate();
@@ -2984,6 +2973,9 @@ status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int co
         return DrawGlInfo::kStatusDone;
     }
 
+    // TODO: avoid scissor by calculating maximum bounds using path bounds + font metrics
+    mCaches.enableScissor();
+
     FontRenderer& fontRenderer = mCaches.fontRenderer->getFontRenderer(paint);
     fontRenderer.setFont(paint, mat4::identity());
     fontRenderer.setTextureFiltering(true);
@@ -3059,10 +3051,9 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
         }
     }
 
-    Rect transformed;
-    Rect clip;
+    bool clipRequired = false;
     const bool rejected = quickRejectNoScissor(x, y,
-            x + layer->layer.getWidth(), y + layer->layer.getHeight(), transformed, clip);
+            x + layer->layer.getWidth(), y + layer->layer.getHeight(), &clipRequired);
 
     if (rejected) {
         if (transform && !transform->isIdentity()) {
@@ -3073,7 +3064,7 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
 
     updateLayer(layer, true);
 
-    mCaches.setScissorEnabled(mScissorOptimizationDisabled || !clip.contains(transformed));
+    mCaches.setScissorEnabled(mScissorOptimizationDisabled || clipRequired);
     mCaches.activeTexture(0);
 
     if (CC_LIKELY(!layer->region.isEmpty())) {
