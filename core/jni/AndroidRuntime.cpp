@@ -460,6 +460,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     char heapminfreeOptsBuf[sizeof("-XX:HeapMinFree=")-1 + PROPERTY_VALUE_MAX];
     char heapmaxfreeOptsBuf[sizeof("-XX:HeapMaxFree=")-1 + PROPERTY_VALUE_MAX];
     char heaptargetutilizationOptsBuf[sizeof("-XX:HeapTargetUtilization=")-1 + PROPERTY_VALUE_MAX];
+    char jitcodecachesizeOptsBuf[sizeof("-Xjitcodecachesize:")-1 + PROPERTY_VALUE_MAX];
     char extraOptsBuf[PROPERTY_VALUE_MAX];
     char* stackTraceFile = NULL;
     bool checkJni = false;
@@ -550,6 +551,14 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     // Increase the main thread's interpreter stack size for bug 6315322.
     opt.optionString = "-XX:mainThreadStackSize=24K";
     mOptions.add(opt);
+
+    // Set the max jit code cache size.  Note: size of 0 will disable the JIT.
+    strcpy(jitcodecachesizeOptsBuf, "-Xjitcodecachesize:");
+    property_get("dalvik.vm.jit.codecachesize", jitcodecachesizeOptsBuf+19,  NULL);
+    if (jitcodecachesizeOptsBuf[19] != '\0') {
+      opt.optionString = jitcodecachesizeOptsBuf;
+      mOptions.add(opt);
+    }
 
     strcpy(heapgrowthlimitOptsBuf, "-XX:HeapGrowthLimit=");
     property_get("dalvik.vm.heapgrowthlimit", heapgrowthlimitOptsBuf+20, "");
