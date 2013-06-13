@@ -2058,17 +2058,61 @@ public class ListView extends AbsListView {
                     position--;
                 }
             }
-
-            if (position < 0 || position >= count) {
-                return INVALID_POSITION;
-            }
-            return position;
-        } else {
-            if (position < 0 || position >= count) {
-                return INVALID_POSITION;
-            }
-            return position;
         }
+
+        if (position < 0 || position >= count) {
+            return INVALID_POSITION;
+        }
+
+        return position;
+    }
+
+    /**
+     * Find a position that can be selected (i.e., is not a separator). If there
+     * are no selectable positions in the specified direction from the starting
+     * position, searches in the opposite direction from the starting position
+     * to the current position.
+     *
+     * @param current the current position
+     * @param position the starting position
+     * @param lookDown whether to look down for other positions
+     * @return the next selectable position, or {@link #INVALID_POSITION} if
+     *         nothing can be found
+     */
+    int lookForSelectablePositionAfter(int current, int position, boolean lookDown) {
+        final ListAdapter adapter = mAdapter;
+        if (adapter == null || isInTouchMode()) {
+            return INVALID_POSITION;
+        }
+
+        // First check after the starting position in the specified direction.
+        final int after = lookForSelectablePosition(position, lookDown);
+        if (after != INVALID_POSITION) {
+            return after;
+        }
+
+        // Then check between the starting position and the current position.
+        final int count = adapter.getCount();
+        current = MathUtils.constrain(current, -1, count - 1);
+        if (lookDown) {
+            position = Math.min(position - 1, count - 1);
+            while ((position > current) && !adapter.isEnabled(position)) {
+                position--;
+            }
+            if (position <= current) {
+                return INVALID_POSITION;
+            }
+        } else {
+            position = Math.max(0, position + 1);
+            while ((position < current) && !adapter.isEnabled(position)) {
+                position++;
+            }
+            if (position >= current) {
+                return INVALID_POSITION;
+            }
+        }
+
+        return position;
     }
 
     /**
@@ -2281,27 +2325,30 @@ public class ListView extends AbsListView {
      * @return whether selection was moved
      */
     boolean pageScroll(int direction) {
-        int nextPage = -1;
-        boolean down = false;
+        final int nextPage;
+        final boolean down;
 
         if (direction == FOCUS_UP) {
             nextPage = Math.max(0, mSelectedPosition - getChildCount() - 1);
+            down = false;
         } else if (direction == FOCUS_DOWN) {
             nextPage = Math.min(mItemCount - 1, mSelectedPosition + getChildCount() - 1);
             down = true;
+        } else {
+            return false;
         }
 
         if (nextPage >= 0) {
-            int position = lookForSelectablePosition(nextPage, down);
+            final int position = lookForSelectablePositionAfter(mSelectedPosition, nextPage, down);
             if (position >= 0) {
                 mLayoutMode = LAYOUT_SPECIFIC;
                 mSpecificTop = mPaddingTop + getVerticalFadingEdgeLength();
 
-                if (down && position > mItemCount - getChildCount()) {
+                if (down && (position > (mItemCount - getChildCount()))) {
                     mLayoutMode = LAYOUT_FORCE_BOTTOM;
                 }
 
-                if (!down && position < getChildCount()) {
+                if (!down && (position < getChildCount())) {
                     mLayoutMode = LAYOUT_FORCE_TOP;
                 }
 
@@ -2319,18 +2366,18 @@ public class ListView extends AbsListView {
     }
 
     /**
-     * Go to the last or first item if possible (not worrying about panning across or navigating
-     * within the internal focus of the currently selected item.)
+     * Go to the last or first item if possible (not worrying about panning
+     * across or navigating within the internal focus of the currently selected
+     * item.)
      *
      * @param direction either {@link View#FOCUS_UP} or {@link View#FOCUS_DOWN}
-     *
      * @return whether selection was moved
      */
     boolean fullScroll(int direction) {
         boolean moved = false;
         if (direction == FOCUS_UP) {
             if (mSelectedPosition != 0) {
-                int position = lookForSelectablePosition(0, true);
+                final int position = lookForSelectablePositionAfter(mSelectedPosition, 0, true);
                 if (position >= 0) {
                     mLayoutMode = LAYOUT_FORCE_TOP;
                     setSelectionInt(position);
@@ -2339,8 +2386,10 @@ public class ListView extends AbsListView {
                 moved = true;
             }
         } else if (direction == FOCUS_DOWN) {
-            if (mSelectedPosition < mItemCount - 1) {
-                int position = lookForSelectablePosition(mItemCount - 1, true);
+            final int lastItem = (mItemCount - 1);
+            if (mSelectedPosition < lastItem) {
+                final int position = lookForSelectablePositionAfter(
+                        mSelectedPosition, lastItem, false);
                 if (position >= 0) {
                     mLayoutMode = LAYOUT_FORCE_BOTTOM;
                     setSelectionInt(position);
