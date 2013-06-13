@@ -30,7 +30,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.android.systemui.R;
-import com.android.systemui.statusbar.tablet.StatusBarPanel;
+import com.android.systemui.statusbar.StatusBarPanel;
 
 import java.util.List;
 

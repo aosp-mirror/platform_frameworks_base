@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.tablet;
+package com.android.systemui.statusbar;
 
 public interface StatusBarPanel {
     public boolean isInContentArea(int x, int y);
