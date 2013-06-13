@@ -100,7 +100,7 @@ private:
     int getStateOpDeferFlags() const;
     int getDrawOpDeferFlags() const;
 
-    void discardDrawingBatches(unsigned int maxIndex);
+    void discardDrawingBatches(const unsigned int maxIndex);
 
     // layer space bounds of rendering
     Rect mBounds;
