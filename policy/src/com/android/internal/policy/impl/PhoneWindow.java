@@ -139,8 +139,18 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private ActionMenuPresenterCallback mActionMenuPresenterCallback;
     private PanelMenuPresenterCallback mPanelMenuPresenterCallback;
 
+    // The icon resource has been explicitly set elsewhere
+    // and should not be overwritten with a default.
     static final int FLAG_RESOURCE_SET_ICON = 1 << 0;
+
+    // The logo resource has been explicitly set elsewhere
+    // and should not be overwritten with a default.
     static final int FLAG_RESOURCE_SET_LOGO = 1 << 1;
+
+    // The icon resource is currently configured to use the system fallback
+    // as no default was previously specified. Anything can override this.
+    static final int FLAG_RESOURCE_SET_ICON_FALLBACK = 1 << 2;
+
     int mResourcesSetFlags;
     int mIconRes;
     int mLogoRes;
@@ -1403,6 +1413,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     public void setIcon(int resId) {
         mIconRes = resId;
         mResourcesSetFlags |= FLAG_RESOURCE_SET_ICON;
+        mResourcesSetFlags &= ~FLAG_RESOURCE_SET_ICON_FALLBACK;
         if (mActionBar != null) {
             mActionBar.setIcon(resId);
         }
@@ -1414,8 +1425,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return;
         }
         mIconRes = resId;
-        if (mActionBar != null && !mActionBar.hasIcon()) {
-            mActionBar.setIcon(resId);
+        if (mActionBar != null && (!mActionBar.hasIcon() ||
+                (mResourcesSetFlags & FLAG_RESOURCE_SET_ICON_FALLBACK) != 0)) {
+            if (resId != 0) {
+                mActionBar.setIcon(resId);
+                mResourcesSetFlags &= ~FLAG_RESOURCE_SET_ICON_FALLBACK;
+            } else {
+                mActionBar.setIcon(getContext().getPackageManager().getDefaultActivityIcon());
+                mResourcesSetFlags |= FLAG_RESOURCE_SET_ICON_FALLBACK;
+            }
         }
     }
 
@@ -2995,6 +3013,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     if ((mResourcesSetFlags & FLAG_RESOURCE_SET_ICON) != 0 ||
                             (mIconRes != 0 && !mActionBar.hasIcon())) {
                         mActionBar.setIcon(mIconRes);
+                    } else if ((mResourcesSetFlags & FLAG_RESOURCE_SET_ICON) == 0 &&
+                            mIconRes == 0 && !mActionBar.hasIcon()) {
+                        mActionBar.setIcon(
+                                getContext().getPackageManager().getDefaultActivityIcon());
+                        mResourcesSetFlags |= FLAG_RESOURCE_SET_ICON_FALLBACK;
                     }
                     if ((mResourcesSetFlags & FLAG_RESOURCE_SET_LOGO) != 0 ||
                             (mLogoRes != 0 && !mActionBar.hasLogo())) {
