@@ -42,6 +42,10 @@ public:
     inline bool has4BitStencil() const { return mHas4BitStencil; }
     inline bool hasNvSystemTime() const { return mHasNvSystemTime; }
 
+    inline bool hasPixelBufferObjects() const { return mVersionMajor >= 3; }
+    inline bool hasOcclusionQueries() const { return mVersionMajor >= 3; }
+    inline bool hasFloatTextures() const { return mVersionMajor >= 3; }
+
     inline int getMajorGlVersion() const { return mVersionMajor; }
     inline int getMinorGlVersion() const { return mVersionMinor; }
 
