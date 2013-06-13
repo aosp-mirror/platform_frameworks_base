@@ -1480,6 +1480,7 @@ public class HorizontalScrollView extends FrameLayout {
                 } else {
                     mScrollX = scrollRange - mSavedState.scrollPosition;
                 }
+                mSavedState = null;
             } else {
                 if (isLayoutRtl()) {
                     mScrollX = scrollRange - mScrollX;
