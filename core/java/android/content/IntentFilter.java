@@ -733,8 +733,9 @@ public class IntentFilter implements Parcelable {
      * @see #addDataScheme
      */
     public final void addDataSchemeSpecificPart(String ssp, int type) {
-        if (mDataSchemeSpecificParts == null) mDataSchemeSpecificParts =
-                new ArrayList<PatternMatcher>();
+        if (mDataSchemeSpecificParts == null) {
+            mDataSchemeSpecificParts = new ArrayList<PatternMatcher>();
+        }
         mDataSchemeSpecificParts.add(new PatternMatcher(ssp, type));
     }
 
@@ -767,9 +768,6 @@ public class IntentFilter implements Parcelable {
             return false;
         }
         final int numDataSchemeSpecificParts = mDataSchemeSpecificParts.size();
-        if (numDataSchemeSpecificParts <= 0) {
-            return false;
-        }
         for (int i = 0; i < numDataSchemeSpecificParts; i++) {
             final PatternMatcher pe = mDataSchemeSpecificParts.get(i);
             if (pe.match(data)) {
@@ -1503,7 +1501,7 @@ public class IntentFilter implements Parcelable {
             final int N = mDataSchemeSpecificParts.size();
             dest.writeInt(N);
             for (int i=0; i<N; i++) {
-                mDataSchemeSpecificParts.get(i).writeToParcel(dest, 0);
+                mDataSchemeSpecificParts.get(i).writeToParcel(dest, flags);
             }
         } else {
             dest.writeInt(0);
@@ -1521,7 +1519,7 @@ public class IntentFilter implements Parcelable {
             final int N = mDataPaths.size();
             dest.writeInt(N);
             for (int i=0; i<N; i++) {
-                mDataPaths.get(i).writeToParcel(dest, 0);
+                mDataPaths.get(i).writeToParcel(dest, flags);
             }
         } else {
             dest.writeInt(0);
