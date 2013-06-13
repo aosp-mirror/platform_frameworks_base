@@ -84,7 +84,6 @@ LOCAL_SRC_FILES:= \
 	android_util_StringBlock.cpp \
 	android_util_XmlBlock.cpp \
 	android/graphics/AutoDecodeCancel.cpp \
-	android/graphics/Bitmap.cpp \
 	android/graphics/BitmapFactory.cpp \
 	android/graphics/Camera.cpp \
 	android/graphics/Canvas.cpp \
@@ -225,6 +224,20 @@ LOCAL_CFLAGS += -DHAVE_QC_TIME_SERVICES=1
 LOCAL_SHARED_LIBRARIES += libtime_genoff
 $(shell mkdir -p $(OUT)/obj/SHARED_LIBRARIES/libtime_genoff_intermediates/)
 $(shell touch $(OUT)/obj/SHARED_LIBRARIES/libtime_genoff_intermediates/export_includes)
+endif
+
+ifeq ($(TARGET_ARCH), arm)
+  ifeq ($(ARCH_ARM_HAVE_NEON),true)
+    TARGET_arm_CFLAGS += -DUSE_NEON_BITMAP_OPTS -mvectorize-with-neon-quad
+    LOCAL_SRC_FILES+= \
+		android/graphics/Bitmap.cpp.arm
+  else
+    LOCAL_SRC_FILES+= \
+		android/graphics/Bitmap.cpp
+  endif
+else
+    LOCAL_SRC_FILES+= \
+		android/graphics/Bitmap.cpp
 endif
 
 ifeq ($(USE_OPENGL_RENDERER),true)
