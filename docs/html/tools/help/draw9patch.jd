@@ -1,6 +1,5 @@
 page.title=Draw 9-patch
-parent.title=Tools
-parent.link=index.html
+page.tags="NinePatch"
 @jd:body
 
 <p>The Draw 9-patch tool allows you to easily create a 
