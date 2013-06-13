@@ -423,6 +423,8 @@ public final class ViewRootImpl implements ViewParent,
         synchronized (this) {
             if (mView == null) {
                 mView = view;
+                Slog.d(TAG, "setView: b9406261 setting mView to " + view + " mAdded=" + mAdded
+                        + " Callers=" + Debug.getCallers(4));
                 mViewLayoutDirectionInitial = mView.getRawLayoutDirection();
                 mFallbackEventHandler.setView(view);
                 mWindowAttributes.copyFrom(attrs);
@@ -478,6 +480,8 @@ public final class ViewRootImpl implements ViewParent,
                             = panelParentView.getApplicationWindowToken();
                 }
                 mAdded = true;
+                Slog.d(TAG, "setView: b9406261 setting mAdded=true mView=" + mView
+                        + " Callers=" + Debug.getCallers(4));
                 int res; /* = WindowManagerImpl.ADD_OKAY; */
 
                 // Schedule the first layout -before- adding to the window
@@ -503,6 +507,8 @@ public final class ViewRootImpl implements ViewParent,
                     mFallbackEventHandler.setView(null);
                     unscheduleTraversals();
                     setAccessibilityFocus(null, null);
+                    Slog.d(TAG, "setView: b9406261 threw exception e=" + e
+                            + " Callers=" + Debug.getCallers(4));
                     throw new RuntimeException("Adding window failed", e);
                 } finally {
                     if (restore) {
@@ -5159,6 +5165,8 @@ public final class ViewRootImpl implements ViewParent,
             }
             mRemoved = true;
             if (mAdded) {
+                Slog.d(TAG, "doDie: b9406261 mAdded==true mView=" + mView
+                    + " Callers=" + Debug.getCallers(4));
                 dispatchDetachedFromWindow();
             }
 
@@ -5186,6 +5194,8 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
 
+            Slog.d(TAG, "doDie: b9406261 setting mAdded=false mView=" + mView
+                + " Callers=" + Debug.getCallers(4));
             mAdded = false;
         }
         WindowManagerGlobal.getInstance().doRemoveView(this);
