@@ -413,4 +413,4 @@ a <code>PURCHASE_STATE_CHANGED</code> intent.</p>
 implemention. </p> -->
 
 <h3 id="http-api">REST API for subscriptions</h3>
-<p>Google Play offers an HTTP-based API that you can use to remotely query the validity of a specific subscription at any time or cancel a subscription. The API is designed to be used from your backend servers as a way of securely managing subscriptions, as well as extending and integrating subscriptions with other services. See <a href="{@docRoot}google/play/billing/v2/billing_subscriptions.html#play-dev-api"> Google Play Android Developer API</a> for more information.</p>
+<p>Google Play offers an HTTP-based API that you can use to remotely query the validity of a specific subscription at any time or cancel a subscription. The API is designed to be used from your backend servers as a way of securely managing subscriptions, as well as extending and integrating subscriptions with other services. See <a href="{@docRoot}google/play/billing/gp-purchase-status-api.html">Purchase Status API</a> for more information.</p>
