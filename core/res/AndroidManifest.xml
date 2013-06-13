@@ -29,8 +29,10 @@
     <protected-broadcast android:name="android.intent.action.SCREEN_OFF" />
     <protected-broadcast android:name="android.intent.action.SCREEN_ON" />
     <protected-broadcast android:name="android.intent.action.USER_PRESENT" />
+    <protected-broadcast android:name="android.intent.action.TIME_SET" />
     <protected-broadcast android:name="android.intent.action.TIME_TICK" />
     <protected-broadcast android:name="android.intent.action.TIMEZONE_CHANGED" />
+    <protected-broadcast android:name="android.intent.action.DATE_CHANGED" />
     <protected-broadcast android:name="android.intent.action.BOOT_COMPLETED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_INSTALL" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_ADDED" />
@@ -64,6 +66,9 @@
     <protected-broadcast android:name="android.intent.action.MASTER_CLEAR_NOTIFICATION" />
     <protected-broadcast android:name="android.intent.action.USER_ADDED" />
     <protected-broadcast android:name="android.intent.action.USER_REMOVED" />
+    <protected-broadcast android:name="android.intent.action.USER_STARTING" />
+    <protected-broadcast android:name="android.intent.action.USER_STARTED" />
+    <protected-broadcast android:name="android.intent.action.USER_STOPPING" />
     <protected-broadcast android:name="android.intent.action.USER_STOPPED" />
     <protected-broadcast android:name="android.intent.action.USER_BACKGROUND" />
     <protected-broadcast android:name="android.intent.action.USER_FOREGROUND" />
@@ -89,6 +94,8 @@
     <protected-broadcast android:name="android.bluetooth.adapter.action.DISCOVERY_FINISHED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.LOCAL_NAME_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.UUID" />
+    <protected-broadcast android:name="android.bluetooth.device.action.ALIAS_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.device.action.FOUND" />
     <protected-broadcast android:name="android.bluetooth.device.action.DISAPPEARED" />
     <protected-broadcast android:name="android.bluetooth.device.action.CLASS_CHANGED" />
@@ -131,11 +138,33 @@
     <protected-broadcast android:name="android.intent.action.USB_AUDIO_ACCESSORY_PLUG" />
     <protected-broadcast android:name="android.intent.action.USB_AUDIO_DEVICE_PLUG" />
 
+    <protected-broadcast android:name="android.media.AUDIO_BECOMING_NOISY" />
+    <protected-broadcast android:name="android.media.RINGER_MODE_CHANGED" />
+    <protected-broadcast android:name="android.media.VIBRATE_SETTING_CHANGED" />
+    <protected-broadcast android:name="android.media.VOLUME_CHANGED_ACTION" />
+    <protected-broadcast android:name="android.media.MASTER_VOLUME_CHANGED_ACTION" />
+    <protected-broadcast android:name="android.media.MASTER_MUTE_CHANGED_ACTION" />
+    <protected-broadcast android:name="android.media.SCO_AUDIO_STATE_CHANGED" />
+    <protected-broadcast android:name="android.media.ACTION_SCO_AUDIO_STATE_UPDATED" />
+
+    <protected-broadcast android:name="android.intent.action.MEDIA_REMOVED" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_UNMOUNTED" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_CHECKING" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_NOFS" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_MOUNTED" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_SHARED" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_UNSHARED" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_BAD_REMOVAL" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_UNMOUNTABLE" />
+    <protected-broadcast android:name="android.intent.action.MEDIA_EJECT" />
+
     <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE" />
     <protected-broadcast android:name="android.net.conn.CONNECTIVITY_CHANGE_IMMEDIATE" />
     <protected-broadcast android:name="android.net.conn.DATA_ACTIVITY_CHANGE" />
     <protected-broadcast android:name="android.net.conn.BACKGROUND_DATA_SETTING_CHANGED" />
     <protected-broadcast android:name="android.net.conn.CAPTIVE_PORTAL_TEST_COMPLETED" />
+
+    <protected-broadcast android:name="android.net.nsd.STATE_CHANGED" />
 
     <protected-broadcast android:name="android.nfc.action.LLCP_LINK_STATE_CHANGED" />
     <protected-broadcast android:name="com.android.nfc_extras.action.RF_FIELD_ON_DETECTED" />
@@ -179,6 +208,14 @@
 
     <protected-broadcast android:name="android.intent.action.ACTION_IDLE_MAINTENANCE_START" />
     <protected-broadcast android:name="android.intent.action.ACTION_IDLE_MAINTENANCE_END" />
+
+    <protected-broadcast android:name="android.intent.action.HDMI_PLUGGED" />
+
+    <protected-broadcast android:name="android.intent.action.PHONE_STATE" />
+
+    <protected-broadcast android:name="android.location.GPS_ENABLED_CHANGE" />
+    <protected-broadcast android:name="android.location.PROVIDERS_CHANGED" />
+    <protected-broadcast android:name="android.location.GPS_FIX_CHANGE" />
 
     <!-- ====================================== -->
     <!-- Permissions for things that cost money -->
