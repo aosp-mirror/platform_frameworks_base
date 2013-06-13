@@ -188,12 +188,6 @@ void Layer::allocateTexture() {
 }
 
 void Layer::defer() {
-    if (!deferredList) {
-        deferredList = new DeferredDisplayList;
-    }
-    DeferStateStruct deferredState(*deferredList, *renderer,
-            DisplayList::kReplayFlag_ClipChildren);
-
     const float width = layer.getWidth();
     const float height = layer.getHeight();
 
@@ -201,6 +195,14 @@ void Layer::defer() {
             dirtyRect.right >= width && dirtyRect.bottom >= height)) {
         dirtyRect.set(0, 0, width, height);
     }
+
+    if (deferredList) {
+        deferredList->reset(dirtyRect);
+    } else {
+        deferredList = new DeferredDisplayList(dirtyRect);
+    }
+    DeferStateStruct deferredState(*deferredList, *renderer,
+            DisplayList::kReplayFlag_ClipChildren);
 
     renderer->initViewport(width, height);
     renderer->setupFrameState(dirtyRect.left, dirtyRect.top,

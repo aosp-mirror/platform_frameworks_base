@@ -1360,15 +1360,26 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
         // state has bounds initialized in local coordinates
         if (!state.mBounds.isEmpty()) {
             currentMatrix.mapRect(state.mBounds);
-            state.mClipped = !currentClip.contains(state.mBounds);
-            if (!state.mBounds.intersect(currentClip)) {
+            Rect clippedBounds(state.mBounds);
+            if(!clippedBounds.intersect(currentClip)) {
                 // quick rejected
                 return true;
             }
+
+            state.mClipSideFlags = kClipSide_Unclipped;
+            if (!currentClip.contains(state.mBounds)) {
+                int& flags = state.mClipSideFlags;
+                // op partially clipped, so record which sides are clipped for clip-aware merging
+                if (currentClip.left > state.mBounds.left) flags |= kClipSide_Left;
+                if (currentClip.top > state.mBounds.top) flags |= kClipSide_Top;
+                if (currentClip.right < state.mBounds.right) flags |= kClipSide_Right;
+                if (currentClip.bottom < state.mBounds.bottom) flags |= kClipSide_Bottom;
+            }
+            state.mBounds.set(clippedBounds);
         } else {
             // If we don't have bounds, let's assume we're clipped
             // to prevent merging
-            state.mClipped = true;
+            state.mClipSideFlags = kClipSide_Full;
             state.mBounds.set(currentClip);
         }
     }
@@ -1392,14 +1403,27 @@ void OpenGLRenderer::restoreDisplayState(const DeferredDisplayState& state, bool
     mSnapshot->alpha = state.mAlpha;
 
     if (state.mClipValid && !skipClipRestore) {
-        mSnapshot->setClip(state.mClip.left, state.mClip.top, state.mClip.right, state.mClip.bottom);
+        mSnapshot->setClip(state.mClip.left, state.mClip.top,
+                state.mClip.right, state.mClip.bottom);
         dirtyClip();
     }
 }
 
-void OpenGLRenderer::setFullScreenClip() {
-    mSnapshot->setClip(0, 0, mWidth, mHeight);
+/**
+ * Merged multidraw (such as in drawText and drawBitmaps rely on the fact that no clipping is done
+ * in the draw path. Instead, clipping is done ahead of time - either as a single clip rect (when at
+ * least one op is clipped), or disabled entirely (because no merged op is clipped)
+ *
+ * This method should be called when restoreDisplayState() won't be restoring the clip
+ */
+void OpenGLRenderer::setupMergedMultiDraw(const Rect* clipRect) {
+    if (clipRect != NULL) {
+        mSnapshot->setClip(clipRect->left, clipRect->top, clipRect->right, clipRect->bottom);
+    } else {
+        mSnapshot->setClip(0, 0, mWidth, mHeight);
+    }
     dirtyClip();
+    mCaches.setScissorEnabled(clipRect != NULL || mScissorOptimizationDisabled);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1965,7 +1989,8 @@ status_t OpenGLRenderer::drawDisplayList(DisplayList* displayList, Rect& dirty,
             return status | replayStruct.mDrawGlStatus;
         }
 
-        DeferredDisplayList deferredList;
+        bool avoidOverdraw = !mCaches.debugOverdraw && !mCountOverdraw; // shh, don't tell devs!
+        DeferredDisplayList deferredList(*(mSnapshot->clipRect), avoidOverdraw);
         DeferStateStruct deferStruct(deferredList, *this, replayFlags);
         displayList->defer(deferStruct, 0);
 
@@ -2016,10 +2041,6 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, Sk
 
 status_t OpenGLRenderer::drawBitmaps(SkBitmap* bitmap, int bitmapCount, TextureVertex* vertices,
         bool transformed, const Rect& bounds, SkPaint* paint) {
-
-    // merged draw operations don't need scissor, but clip should still be valid
-    mCaches.setScissorEnabled(mScissorOptimizationDisabled);
-
     mCaches.activeTexture(0);
     Texture* texture = getTexture(bitmap);
     if (!texture) return DrawGlInfo::kStatusDone;
@@ -2860,16 +2881,13 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count, f
         const float* positions, SkPaint* paint, float totalAdvance, const Rect& bounds,
         DrawOpMode drawOpMode) {
 
-    if (drawOpMode == kDrawOpMode_Immediate &&
-            (text == NULL || count == 0 || mSnapshot->isIgnored() || canSkipText(paint))) {
-        return DrawGlInfo::kStatusDone;
-    }
-
     if (drawOpMode == kDrawOpMode_Immediate) {
-        if (quickReject(bounds)) return DrawGlInfo::kStatusDone;
-    } else {
-        // merged draw operations don't need scissor, but clip should still be valid
-        mCaches.setScissorEnabled(mScissorOptimizationDisabled);
+        // The checks for corner-case ignorable text and quick rejection is only done for immediate
+        // drawing as ops from DeferredDisplayList are already filtered for these
+        if (text == NULL || count == 0 || mSnapshot->isIgnored() || canSkipText(paint) ||
+                quickReject(bounds)) {
+            return DrawGlInfo::kStatusDone;
+        }
     }
 
     const float oldX = x;

@@ -80,6 +80,15 @@ enum DrawOpMode {
     kDrawOpMode_Flush
 };
 
+enum ClipSideFlags {
+    kClipSide_Unclipped = 0x0,
+    kClipSide_Left = 0x1,
+    kClipSide_Top = 0x2,
+    kClipSide_Right = 0x4,
+    kClipSide_Bottom = 0x8,
+    kClipSide_Full = 0xF
+};
+
 struct DeferredDisplayState {
     // global op bounds, mapped by mMatrix to be in screen space coordinates, clipped
     Rect mBounds;
@@ -87,6 +96,7 @@ struct DeferredDisplayState {
     // the below are set and used by the OpenGLRenderer at record and deferred playback
     bool mClipValid;
     Rect mClip;
+    int mClipSideFlags; // specifies which sides of the bounds are clipped, unclipped if cleared
     bool mClipped;
     mat4 mMatrix;
     DrawModifiers mDrawModifiers;
@@ -307,7 +317,7 @@ public:
 
     bool storeDisplayState(DeferredDisplayState& state, int stateDeferFlags);
     void restoreDisplayState(const DeferredDisplayState& state, bool skipClipRestore = false);
-    void setFullScreenClip();
+    void setupMergedMultiDraw(const Rect* clipRect);
 
     const DrawModifiers& getDrawModifiers() { return mDrawModifiers; }
     void setDrawModifiers(const DrawModifiers& drawModifiers) { mDrawModifiers = drawModifiers; }
