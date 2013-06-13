@@ -390,10 +390,15 @@ style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar.</p>
 
 <h2 id="Revisions">Revisions</h2>
 
+<p class="note"><strong>Note:</strong> Periodic updates are pushed to Android Studio
+without requiring you to update from here. To manually check for updates, select
+<strong>Help > Check for updates</strong> (on Mac, select <strong>Android Studio >
+Check for updates</strong>).</p>
+
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
-      alt=""/>Android Studio v0.1.1</a> <em>(May 2013)</em>
+      alt=""/>Android Studio v0.1.x</a> <em>(May 2013)</em>
   </p>
 
   <div class="toggle-content-toggleme">
@@ -445,7 +450,7 @@ style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar.</p>
   if (os) {
     /* set up primary ACE download button */
     $('#download-ide-button').show();
-    $('#download-ide-button').append("Download Android Studio <span class='small'>v0.1.1</span>"
+    $('#download-ide-button').append("Download Android Studio <span class='small'>v0.1.x</span>"
         + "<br/><span class='small'>for " + os + "</span>");
     $('#download-ide-button').click(function() {return onDownload(this,true);}).attr('href', bundlename);
 
@@ -489,8 +494,10 @@ style="vertical-align:bottom;margin:0;height:19px" /> in the toolbar.</p>
   function onDownloadForRealz(link) {
     if ($("input#agree").is(':checked')) {
       $("div.sdk-terms").slideUp();
-      $("#sdk-terms-form,.sdk-terms-intro").fadeOut('slow');
-      $("#main").fadeIn('slow');
+      $("#sdk-terms-form,.sdk-terms-intro").fadeOut('fast');
+      $("#main").fadeIn('fast', function() { 
+          location.hash = "Installing";
+          });
       return true;
     } else {
       $("label#agreeLabel,#bitpicker input").parent().stop().animate({color: "#258AAF"}, 200,
