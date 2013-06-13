@@ -22,9 +22,12 @@ import android.util.Log;
  * Writes trace events to the system trace buffer.  These trace events can be
  * collected and visualized using the Systrace tool.
  *
- * This tracing mechanism is independent of the method tracing mechanism
+ * <p>This tracing mechanism is independent of the method tracing mechanism
  * offered by {@link Debug#startMethodTracing}.  In particular, it enables
  * tracing of events that occur across multiple processes.
+ * <p>For information about using the Systrace tool, read <a
+ * href="{@docRoot}tools/debugging/systrace.html">Analyzing Display and Performance
+ * with Systrace</a>.
  */
 public final class Trace {
     /*
