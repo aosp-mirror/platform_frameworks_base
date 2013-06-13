@@ -449,8 +449,17 @@ public abstract class HardwareRenderer {
      * as soon as possible.
      * 
      * @param layer The hardware layer that needs an update
+     *
+     * @see #flushLayerUpdates()
      */
     abstract void pushLayerUpdate(HardwareLayer layer);
+
+    /**
+     * Forces all enqueued layer updates to be executed immediately.
+     *
+     * @see #pushLayerUpdate(HardwareLayer)
+     */
+    abstract void flushLayerUpdates();
 
     /**
      * Interface used to receive callbacks whenever a view is drawn by
@@ -2121,6 +2130,11 @@ public abstract class HardwareRenderer {
         @Override
         void pushLayerUpdate(HardwareLayer layer) {
             mGlCanvas.pushLayerUpdate(layer);
+        }
+
+        @Override
+        void flushLayerUpdates() {
+            mGlCanvas.flushLayerUpdates();
         }
 
         @Override

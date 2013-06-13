@@ -202,6 +202,15 @@ public abstract class HardwareCanvas extends Canvas {
     abstract void pushLayerUpdate(HardwareLayer layer);
 
     /**
+     * Immediately executes all enqueued layer updates.
+     *
+     * @see #pushLayerUpdate(HardwareLayer)
+     *
+     * @hide
+     */
+    abstract void flushLayerUpdates();
+
+    /**
      * Removes all enqueued layer updates.
      * 
      * @see #pushLayerUpdate(HardwareLayer)

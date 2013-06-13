@@ -12615,16 +12615,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void buildLayer() {
         if (mLayerType == LAYER_TYPE_NONE) return;
 
-        if (mAttachInfo == null) {
+        final AttachInfo attachInfo = mAttachInfo;
+        if (attachInfo == null) {
             throw new IllegalStateException("This view must be attached to a window first");
         }
 
         switch (mLayerType) {
             case LAYER_TYPE_HARDWARE:
-                if (mAttachInfo.mHardwareRenderer != null &&
-                        mAttachInfo.mHardwareRenderer.isEnabled() &&
-                        mAttachInfo.mHardwareRenderer.validate()) {
+                if (attachInfo.mHardwareRenderer != null &&
+                        attachInfo.mHardwareRenderer.isEnabled() &&
+                        attachInfo.mHardwareRenderer.validate()) {
                     getHardwareLayer();
+                    attachInfo.mViewRootImpl.dispatchFlushHardwareLayerUpdates();
                 }
                 break;
             case LAYER_TYPE_SOFTWARE:
