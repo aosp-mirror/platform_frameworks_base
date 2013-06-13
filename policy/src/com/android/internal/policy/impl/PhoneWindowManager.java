@@ -230,7 +230,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mHeadless;
     boolean mSafeMode;
     WindowState mStatusBar = null;
-    boolean mHasSystemNavBar;
     int mStatusBarHeight;
     WindowState mNavigationBar = null;
     boolean mHasNavigationBar = false;
@@ -1046,43 +1045,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / density;
 
         if (shortSizeDp < 600) {
-            // 0-599dp: "phone" UI with a separate status & navigation bar
-            mHasSystemNavBar = false;
+            // Allow the navigation bar to move on small devices (phones).
             mNavigationBarCanMove = true;
-        } else if (shortSizeDp < 720) {
-            // 600+dp: "phone" UI with modifications for larger screens
-            mHasSystemNavBar = false;
-            mNavigationBarCanMove = false;
         }
 
-        if (!mHasSystemNavBar) {
-            mHasNavigationBar = mContext.getResources().getBoolean(
-                    com.android.internal.R.bool.config_showNavigationBar);
-            // Allow a system property to override this. Used by the emulator.
-            // See also hasNavigationBar().
-            String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
-            if (! "".equals(navBarOverride)) {
-                if      (navBarOverride.equals("1")) mHasNavigationBar = false;
-                else if (navBarOverride.equals("0")) mHasNavigationBar = true;
-            }
-        } else {
+        mHasNavigationBar = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_showNavigationBar);
+        // Allow a system property to override this. Used by the emulator.
+        // See also hasNavigationBar().
+        String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
+        if ("1".equals(navBarOverride)) {
             mHasNavigationBar = false;
+        } else if ("0".equals(navBarOverride)) {
+            mHasNavigationBar = true;
         }
 
-        if (mHasSystemNavBar) {
-            // The system bar is always at the bottom.  If you are watching
-            // a video in landscape, we don't need to hide it if we can still
-            // show a 16:9 aspect ratio with it.
-            int longSizeDp = longSize * DisplayMetrics.DENSITY_DEFAULT / density;
-            int barHeightDp = mNavigationBarHeightForRotation[mLandscapeRotation]
-                    * DisplayMetrics.DENSITY_DEFAULT / density;
-            int aspect = ((shortSizeDp-barHeightDp) * 16) / longSizeDp;
-            // We have computed the aspect ratio with the bar height taken
-            // out to be 16:aspect.  If this is less than 9, then hiding
-            // the navigation bar will provide more useful space for wide
-            // screen movies.
-            mCanHideNavigationBar = aspect < 9;
-        } else if (mHasNavigationBar) {
+        if (mHasNavigationBar) {
             // The navigation bar is at the right in landscape; it seems always
             // useful to hide it for showing a video.
             mCanHideNavigationBar = true;
@@ -1496,10 +1474,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return windowTypeToLayerLw(TYPE_SYSTEM_ERROR);
     }
 
-    public boolean hasSystemNavBar() {
-        return mHasSystemNavBar;
-    }
-
     public int getNonDecorDisplayWidth(int fullWidth, int fullHeight, int rotation) {
         if (mHasNavigationBar) {
             // For a basic navigation bar, when we are in landscape mode we place
@@ -1512,10 +1486,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     public int getNonDecorDisplayHeight(int fullWidth, int fullHeight, int rotation) {
-        if (mHasSystemNavBar) {
-            // For the system navigation bar, we always place it at the bottom.
-            return fullHeight - mNavigationBarHeightForRotation[rotation];
-        }
         if (mHasNavigationBar) {
             // For a basic navigation bar, when we are in portrait mode we place
             // the navigation bar to the bottom.
@@ -1531,15 +1501,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     public int getConfigDisplayHeight(int fullWidth, int fullHeight, int rotation) {
-        // If we don't have a system nav bar, then there is a separate status
-        // bar at the top of the display.  We don't count that as part of the
-        // fixed decor, since it can hide; however, for purposes of configurations,
+        // There is a separate status bar at the top of the display.  We don't count that as part
+        // of the fixed decor, since it can hide; however, for purposes of configurations,
         // we do want to exclude it since applications can't generally use that part
         // of the screen.
-        if (!mHasSystemNavBar) {
-            return getNonDecorDisplayHeight(fullWidth, fullHeight, rotation) - mStatusBarHeight;
-        }
-        return getNonDecorDisplayHeight(fullWidth, fullHeight, rotation);
+        return getNonDecorDisplayHeight(fullWidth, fullHeight, rotation) - mStatusBarHeight;
     }
 
     @Override

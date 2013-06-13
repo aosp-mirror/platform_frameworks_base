@@ -7782,11 +7782,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @Override
-    public boolean hasSystemNavBar() {
-        return mPolicy.hasSystemNavBar();
-    }
-
     // -------------------------------------------------------------
     // Internals
     // -------------------------------------------------------------

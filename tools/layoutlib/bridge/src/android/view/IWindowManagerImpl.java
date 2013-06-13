@@ -49,15 +49,13 @@ public class IWindowManagerImpl implements IWindowManager {
     private final Configuration mConfig;
     private final DisplayMetrics mMetrics;
     private final int mRotation;
-    private final boolean mHasSystemNavBar;
     private final boolean mHasNavigationBar;
 
     public IWindowManagerImpl(Configuration config, DisplayMetrics metrics, int rotation,
-            boolean hasSystemNavBar, boolean hasNavigationBar) {
+            boolean hasNavigationBar) {
         mConfig = config;
         mMetrics = metrics;
         mRotation = rotation;
-        mHasSystemNavBar = hasSystemNavBar;
         mHasNavigationBar = hasNavigationBar;
     }
 
@@ -77,11 +75,6 @@ public class IWindowManagerImpl implements IWindowManager {
     @Override
     public boolean hasNavigationBar() {
         return mHasNavigationBar;
-    }
-
-    @Override
-    public boolean hasSystemNavBar() throws RemoteException {
-        return mHasSystemNavBar;
     }
 
     // ---- unused implementation of IWindowManager ----

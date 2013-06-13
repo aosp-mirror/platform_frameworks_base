@@ -192,11 +192,10 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         findNavigationBar(resources, metrics);
 
         // FIXME: find those out, and possibly add them to the render params
-        boolean hasSystemNavBar = true;
         boolean hasNavigationBar = true;
         IWindowManager iwm = new IWindowManagerImpl(getContext().getConfiguration(),
                 metrics, Surface.ROTATION_0,
-                hasSystemNavBar, hasNavigationBar);
+                hasNavigationBar);
         WindowManagerGlobal_Delegate.setWindowManagerService(iwm);
 
         // build the inflater and parser.

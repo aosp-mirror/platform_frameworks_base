@@ -578,12 +578,6 @@ public interface WindowManagerPolicy {
     public int getAboveUniverseLayer();
 
     /**
-     * Return true if the policy desires a full unified system nav bar.  Otherwise,
-     * it is a phone-style status bar with optional nav bar.
-     */
-    public boolean hasSystemNavBar();
-
-    /**
      * Return the display width available after excluding any screen
      * decorations that can never be removed.  That is, system bar or
      * button bar.
