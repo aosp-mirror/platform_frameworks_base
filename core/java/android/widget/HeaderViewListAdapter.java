@@ -79,8 +79,7 @@ public class HeaderViewListAdapter implements WrapperListAdapter, Filterable {
     }
 
     public boolean isEmpty() {
-        return (mAdapter == null || mAdapter.isEmpty())
-	        && getFootersCount() + getHeadersCount() == 0;
+        return mAdapter == null || mAdapter.isEmpty();
     }
 
     private boolean areAllListInfosSelectable(ArrayList<ListView.FixedViewInfo> infos) {
