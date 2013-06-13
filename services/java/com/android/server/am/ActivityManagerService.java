@@ -205,6 +205,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_BACKGROUND_BROADCAST = DEBUG_BROADCAST || false;
     static final boolean DEBUG_CLEANUP = localLOGV || false;
     static final boolean DEBUG_CONFIGURATION = localLOGV || false;
+    static final boolean DEBUG_FOCUS = true;
     static final boolean DEBUG_IMMERSIVE = localLOGV || false;
     static final boolean DEBUG_MU = localLOGV || false;
     static final boolean DEBUG_OOM_ADJ = localLOGV || false;
@@ -1984,6 +1985,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final void setFocusedActivityLocked(ActivityRecord r) {
         if (mFocusedActivity != r) {
+            if (DEBUG_FOCUS) Slog.d(TAG, "setFocusedActivitiyLocked: r=" + r);
             mFocusedActivity = r;
             mStackSupervisor.setFocusedStack(r);
             if (r != null) {
@@ -1995,6 +1997,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     @Override
     public void setFocusedStack(int stackId) {
+        if (DEBUG_FOCUS) Slog.d(TAG, "setFocusedStack: stackId=" + stackId);
         mHandler.obtainMessage(SET_FOCUSED_STACK, stackId, 0).sendToTarget();
     }
 
