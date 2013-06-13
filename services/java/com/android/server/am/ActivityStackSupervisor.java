@@ -22,6 +22,7 @@ import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static com.android.server.am.ActivityManagerService.localLOGV;
 import static com.android.server.am.ActivityManagerService.DEBUG_CONFIGURATION;
+import static com.android.server.am.ActivityManagerService.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerService.DEBUG_PAUSE;
 import static com.android.server.am.ActivityManagerService.DEBUG_RESULTS;
 import static com.android.server.am.ActivityManagerService.DEBUG_STACK;
@@ -1198,9 +1199,13 @@ public final class ActivityStackSupervisor {
                 // Time to create the first app stack for this user.
                 int stackId = mService.createStack(-1, HOME_STACK_ID,
                         StackBox.TASK_STACK_GOES_OVER, 1.0f);
+                if (DEBUG_FOCUS) Slog.d(TAG, "getCorrectStack: New stack r=" + r + " stackId="
+                        + stackId);
                 mFocusedStack = getStack(stackId);
             }
             if (task != null) {
+                if (DEBUG_FOCUS) Slog.d(TAG, "getCorrectStack: Setting focused stack to r=" +
+                        r + " task=" + task);
                 mFocusedStack = task.stack;
             }
             return mFocusedStack;
@@ -1214,13 +1219,15 @@ public final class ActivityStackSupervisor {
         }
         if (!r.isApplicationActivity() || (r.task != null && !r.task.isApplicationTask())) {
             if (mStackState != STACK_STATE_HOME_IN_FRONT) {
-                if (DEBUG_STACK) Slog.d(TAG, "setFocusedStack: mStackState old=" +
+                if (DEBUG_STACK || DEBUG_FOCUS) Slog.d(TAG, "setFocusedStack: mStackState old=" +
                         stackStateToString(mStackState) + " new=" +
                         stackStateToString(STACK_STATE_HOME_TO_FRONT) +
                         " Callers=" + Debug.getCallers(3));
                 mStackState = STACK_STATE_HOME_TO_FRONT;
             }
         } else {
+            if (DEBUG_FOCUS) Slog.d(TAG, "setFocusedStack: Setting focused stack to r=" +
+                    r + " task=" + r.task + " Callers=" + Debug.getCallers(3));
             mFocusedStack = r.task.stack;
             if (mStackState != STACK_STATE_HOME_IN_BACK) {
                 if (DEBUG_STACK) Slog.d(TAG, "setFocusedStack: mStackState old=" +
