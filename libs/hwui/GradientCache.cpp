@@ -78,7 +78,7 @@ GradientCache::GradientCache():
     mCache.setOnEntryRemovedListener(this);
 
     const Extensions& extensions = Extensions::getInstance();
-    mUseFloatTexture = extensions.getMajorGlVersion() >= 3;
+    mUseFloatTexture = extensions.hasFloatTextures();
     mHasNpot = extensions.hasNPot();
 }
 

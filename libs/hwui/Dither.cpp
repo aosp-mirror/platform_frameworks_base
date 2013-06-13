@@ -29,7 +29,7 @@ Dither::Dither(): mCaches(NULL), mInitialized(false), mDitherTexture(0) {
 
 void Dither::bindDitherTexture() {
     if (!mInitialized) {
-        bool useFloatTexture = Extensions::getInstance().getMajorGlVersion() >= 3;
+        bool useFloatTexture = Extensions::getInstance().hasFloatTextures();
 
         glGenTextures(1, &mDitherTexture);
         mCaches->bindTexture(mDitherTexture);
