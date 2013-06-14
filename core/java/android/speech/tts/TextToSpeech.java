@@ -54,7 +54,9 @@ import java.util.Set;
  * When you are done using the TextToSpeech instance, call the {@link #shutdown()} method
  * to release the native resources used by the TextToSpeech engine.
  *
+ * @deprecated Use @{link android.speech.tts.v2.TextToSpeechClient} instead
  */
+@Deprecated
 public class TextToSpeech {
 
     private static final String TAG = "TextToSpeech";
@@ -970,7 +972,7 @@ public class TextToSpeech {
             @Override
             public Integer run(ITextToSpeechService service) throws RemoteException {
                 return service.playSilence(getCallerIdentity(), durationInMs, queueMode,
-                        getParams(params));
+                        params == null ? null : params.get(Engine.KEY_PARAM_UTTERANCE_ID));
             }
         }, ERROR, "playSilence");
     }
@@ -1443,8 +1445,17 @@ public class TextToSpeech {
         private boolean mEstablished;
 
         private final ITextToSpeechCallback.Stub mCallback = new ITextToSpeechCallback.Stub() {
+            public void onStop(String utteranceId) throws RemoteException {
+                // do nothing
+            };
+
             @Override
-            public void onDone(String utteranceId) {
+            public void onFallback(String utteranceId) throws RemoteException {
+                // do nothing
+            }
+
+            @Override
+            public void onSuccess(String utteranceId) {
                 UtteranceProgressListener listener = mUtteranceProgressListener;
                 if (listener != null) {
                     listener.onDone(utteranceId);
@@ -1452,7 +1463,7 @@ public class TextToSpeech {
             }
 
             @Override
-            public void onError(String utteranceId) {
+            public void onError(String utteranceId, int errorCode) {
                 UtteranceProgressListener listener = mUtteranceProgressListener;
                 if (listener != null) {
                     listener.onError(utteranceId);
@@ -1465,6 +1476,11 @@ public class TextToSpeech {
                 if (listener != null) {
                     listener.onStart(utteranceId);
                 }
+            }
+
+            @Override
+            public void onVoicesInfoChange(List<VoiceInfo> voicesInfo) throws RemoteException {
+                // Ignore it
             }
         };
 

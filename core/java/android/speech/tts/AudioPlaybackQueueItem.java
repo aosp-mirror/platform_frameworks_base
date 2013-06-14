@@ -53,7 +53,7 @@ class AudioPlaybackQueueItem extends PlaybackQueueItem {
         dispatcher.dispatchOnStart();
         mPlayer = MediaPlayer.create(mContext, mUri);
         if (mPlayer == null) {
-            dispatcher.dispatchOnError();
+            dispatcher.dispatchOnError(TextToSpeechClient.Status.ERROR_OUTPUT);
             return;
         }
 
@@ -83,9 +83,9 @@ class AudioPlaybackQueueItem extends PlaybackQueueItem {
         }
 
         if (mFinished) {
-            dispatcher.dispatchOnDone();
+            dispatcher.dispatchOnSuccess();
         } else {
-            dispatcher.dispatchOnError();
+            dispatcher.dispatchOnStop();
         }
     }
 
@@ -99,7 +99,7 @@ class AudioPlaybackQueueItem extends PlaybackQueueItem {
     }
 
     @Override
-    void stop(boolean isError) {
+    void stop(int errorCode) {
         mDone.open();
     }
 }
