@@ -619,8 +619,9 @@ public class MediaPlayer
      *
      * @return A parcel suitable to hold a request for the native
      * player.
+     * {@hide}
      */
-    private Parcel newRequest() {
+    public Parcel newRequest() {
         Parcel parcel = Parcel.obtain();
         parcel.writeInterfaceToken(IMEDIA_PLAYER);
         return parcel;
@@ -638,8 +639,9 @@ public class MediaPlayer
      *
      * @param reply Output parcel with the data returned by the
      * native player.
+     * {@hide}
      */
-    private void invoke(Parcel request, Parcel reply) {
+    public void invoke(Parcel request, Parcel reply) {
         int retcode = native_invoke(request, reply);
         reply.setDataPosition(0);
         if (retcode != 0) {
