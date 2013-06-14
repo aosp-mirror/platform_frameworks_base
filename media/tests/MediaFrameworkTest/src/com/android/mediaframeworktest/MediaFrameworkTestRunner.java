@@ -19,6 +19,7 @@ package com.android.mediaframeworktest;
 import com.android.mediaframeworktest.functional.CameraTest;
 import com.android.mediaframeworktest.functional.MediaMetadataTest;
 import com.android.mediaframeworktest.functional.MediaMimeTest;
+import com.android.mediaframeworktest.functional.MediaPlayerInvokeTest;
 import com.android.mediaframeworktest.functional.mediaplayback.MediaPlayerApiTest;
 import com.android.mediaframeworktest.functional.mediarecorder.MediaRecorderTest;
 import com.android.mediaframeworktest.functional.audio.SimTonesTest;
@@ -66,6 +67,7 @@ public class MediaFrameworkTestRunner extends InstrumentationTestRunner {
         suite.addTestSuite(MediaRecorderTest.class);
         suite.addTestSuite(MediaAudioTrackTest.class);
         suite.addTestSuite(MediaMimeTest.class);
+        suite.addTestSuite(MediaPlayerInvokeTest.class);
         suite.addTestSuite(MediaAudioManagerTest.class);
         suite.addTestSuite(MediaAudioEffectTest.class);
         suite.addTestSuite(MediaBassBoostTest.class);
