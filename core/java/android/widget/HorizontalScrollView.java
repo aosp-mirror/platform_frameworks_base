@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1467,7 +1468,7 @@ public class HorizontalScrollView extends FrameLayout {
         mIsLayoutDirty = false;
         // Give a child focus if it needs it
         if (mChildToScrollTo != null && isViewDescendantOf(mChildToScrollTo, this)) {
-                scrollToChild(mChildToScrollTo);
+            scrollToChild(mChildToScrollTo);
         }
         mChildToScrollTo = null;
 
@@ -1641,6 +1642,12 @@ public class HorizontalScrollView extends FrameLayout {
 
     @Override
     protected void onRestoreInstanceState(Parcelable state) {
+        if (mContext.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            // Some old apps reused IDs in ways they shouldn't have.
+            // Don't break them, but they don't get scroll state restoration.
+            super.onRestoreInstanceState(state);
+            return;
+        }
         SavedState ss = (SavedState) state;
         super.onRestoreInstanceState(ss.getSuperState());
         mSavedState = ss;
@@ -1649,6 +1656,11 @@ public class HorizontalScrollView extends FrameLayout {
 
     @Override
     protected Parcelable onSaveInstanceState() {
+        if (mContext.getApplicationInfo().targetSdkVersion <= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            // Some old apps reused IDs in ways they shouldn't have.
+            // Don't break them, but they don't get scroll state restoration.
+            return super.onSaveInstanceState();
+        }
         Parcelable superState = super.onSaveInstanceState();
         SavedState ss = new SavedState(superState);
         ss.scrollPosition = mScrollX;
