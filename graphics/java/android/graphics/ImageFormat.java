@@ -73,6 +73,66 @@ public class ImageFormat {
     public static final int YV12 = 0x32315659;
 
     /**
+     * <p>Android Y8 format.</p>
+     *
+     * <p>Y8 is a YUV planar format comprised of a WxH Y plane only, with each pixel
+     * being represented by 8 bits. It is equivalent to just the Y plane from {@link #YV12}
+     * format.</p>
+     *
+     * <p>This format assumes
+     * <ul>
+     * <li>an even width</li>
+     * <li>an even height</li>
+     * <li>a horizontal stride multiple of 16 pixels</li>
+     * </ul>
+     * </p>
+     *
+     * <pre> y_size = stride * height </pre>
+     *
+     * <p>For example, the {@link android.media.Image} object can provide data
+     * in this format from a {@link android.hardware.photography.CameraDevice}
+     * through a {@link android.media.ImageReader} object if this format is
+     * supported by {@link android.hardware.photography.CameraDevice}.</p>
+     *
+     * @see android.media.Image
+     * @see android.media.ImageReader
+     * @see android.hardware.photography.CameraDevice
+     *
+     * @hide
+     */
+    public static final int Y8 = 0x20203859;
+
+    /**
+     * <p>Android Y16 format.</p>
+     *
+     * Y16 is a YUV planar format comprised of a WxH Y plane, with each pixel
+     * being represented by 16 bits. It is just like {@link #Y8}, but has 16
+     * bits per pixel (little endian).</p>
+     *
+     * <p>This format assumes
+     * <ul>
+     * <li>an even width</li>
+     * <li>an even height</li>
+     * <li>a horizontal stride multiple of 16 pixels</li>
+     * </ul>
+     * </p>
+     *
+     * <pre> y_size = stride * height </pre>
+     *
+     * <p>For example, the {@link android.media.Image} object can provide data
+     * in this format from a {@link android.hardware.photography.CameraDevice}
+     * through a {@link android.media.ImageReader} object if this format is
+     * supported by {@link android.hardware.photography.CameraDevice}.</p>
+     *
+     * @see android.media.Image
+     * @see android.media.ImageReader
+     * @see android.hardware.photography.CameraDevice
+     *
+     * @hide
+     */
+    public static final int Y16 = 0x20363159;
+
+    /**
      * YCbCr format, used for video. Whether this format is supported by the
      * camera hardware can be determined by
      * {@link android.hardware.Camera.Parameters#getSupportedPreviewFormats()}.
@@ -117,7 +177,7 @@ public class ImageFormat {
      *
      * @see android.media.Image
      * @see android.media.ImageReader
-     * @see android.hardware.camera.CameraDevice
+     * @see android.hardware.photography.CameraDevice
      */
     public static final int YUV_420_888 = 0x23;
 
@@ -132,7 +192,7 @@ public class ImageFormat {
      * the {@link android.hardware.photography.CameraDevice} which produced the
      * image.</p>
      */
-    public static final int RAW_SENSOR = 0x201;
+    public static final int RAW_SENSOR = 0x20;
 
     /**
      * Raw bayer format used for images, which is 10 bit precision samples
@@ -162,6 +222,10 @@ public class ImageFormat {
                 return 16;
             case YV12:
                 return 12;
+            case Y8:
+                return 8;
+            case Y16:
+                return 16;
             case NV21:
                 return 12;
             case YUV_420_888:
