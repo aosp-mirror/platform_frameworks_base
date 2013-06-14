@@ -525,14 +525,6 @@ android_media_MediaPlayer_setVolume(JNIEnv *env, jobject thiz, float leftVolume,
     process_media_player_call( env, thiz, mp->setVolume(leftVolume, rightVolume), NULL, NULL );
 }
 
-// FIXME: deprecated
-static jobject
-android_media_MediaPlayer_getFrameAt(JNIEnv *env, jobject thiz, jint msec)
-{
-    return NULL;
-}
-
-
 // Sends the request and reply parcels to the media player via the
 // binder interface.
 static jint
@@ -781,39 +773,6 @@ android_media_MediaPlayer_setRetransmitEndpoint(JNIEnv *env, jobject thiz,
     return ret;
 }
 
-static jboolean
-android_media_MediaPlayer_setParameter(JNIEnv *env, jobject thiz, jint key, jobject java_request)
-{
-    ALOGV("setParameter: key %d", key);
-    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL ) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return false;
-    }
-
-    Parcel *request = parcelForJavaObject(env, java_request);
-    status_t err = mp->setParameter(key, *request);
-    if (err == OK) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-static void
-android_media_MediaPlayer_getParameter(JNIEnv *env, jobject thiz, jint key, jobject java_reply)
-{
-    ALOGV("getParameter: key %d", key);
-    sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL ) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return;
-    }
-
-    Parcel *reply = parcelForJavaObject(env, java_reply);
-    process_media_player_call(env, thiz, mp->getParameter(key, reply), NULL, NULL );
-}
-
 static void
 android_media_MediaPlayer_setNextMediaPlayer(JNIEnv *env, jobject thiz, jobject java_player)
 {
@@ -912,7 +871,6 @@ static JNINativeMethod gMethods[] = {
     {"setLooping",          "(Z)V",                             (void *)android_media_MediaPlayer_setLooping},
     {"isLooping",           "()Z",                              (void *)android_media_MediaPlayer_isLooping},
     {"setVolume",           "(FF)V",                            (void *)android_media_MediaPlayer_setVolume},
-    {"getFrameAt",          "(I)Landroid/graphics/Bitmap;",     (void *)android_media_MediaPlayer_getFrameAt},
     {"native_invoke",       "(Landroid/os/Parcel;Landroid/os/Parcel;)I",(void *)android_media_MediaPlayer_invoke},
     {"native_setMetadataFilter", "(Landroid/os/Parcel;)I",      (void *)android_media_MediaPlayer_setMetadataFilter},
     {"native_getMetadata", "(ZZLandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer_getMetadata},
@@ -924,8 +882,6 @@ static JNINativeMethod gMethods[] = {
     {"setAuxEffectSendLevel", "(F)V",                           (void *)android_media_MediaPlayer_setAuxEffectSendLevel},
     {"attachAuxEffect",     "(I)V",                             (void *)android_media_MediaPlayer_attachAuxEffect},
     {"native_pullBatteryData", "(Landroid/os/Parcel;)I",        (void *)android_media_MediaPlayer_pullBatteryData},
-    {"setParameter",        "(ILandroid/os/Parcel;)Z",          (void *)android_media_MediaPlayer_setParameter},
-    {"getParameter",        "(ILandroid/os/Parcel;)V",          (void *)android_media_MediaPlayer_getParameter},
     {"native_setRetransmitEndpoint", "(Ljava/lang/String;I)I",  (void *)android_media_MediaPlayer_setRetransmitEndpoint},
     {"setNextMediaPlayer",  "(Landroid/media/MediaPlayer;)V",   (void *)android_media_MediaPlayer_setNextMediaPlayer},
     {"updateProxyConfig", "(Landroid/net/ProxyProperties;)V", (void *)android_media_MediaPlayer_updateProxyConfig},
