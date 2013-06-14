@@ -783,13 +783,15 @@ public final class StrictMode {
             BlockGuard.setThreadPolicy(BlockGuard.LAX_POLICY);
             return;
         }
-        BlockGuard.Policy policy = BlockGuard.getThreadPolicy();
-        if (!(policy instanceof AndroidBlockGuardPolicy)) {
-            BlockGuard.setThreadPolicy(new AndroidBlockGuardPolicy(policyMask));
+        final BlockGuard.Policy policy = BlockGuard.getThreadPolicy();
+        final AndroidBlockGuardPolicy androidPolicy;
+        if (policy instanceof AndroidBlockGuardPolicy) {
+            androidPolicy = (AndroidBlockGuardPolicy) policy;
         } else {
-            AndroidBlockGuardPolicy androidPolicy = (AndroidBlockGuardPolicy) policy;
-            androidPolicy.setPolicyMask(policyMask);
+            androidPolicy = threadAndroidPolicy.get();
+            BlockGuard.setThreadPolicy(androidPolicy);
         }
+        androidPolicy.setPolicyMask(policyMask);
     }
 
     // Sets up CloseGuard in Dalvik/libcore
@@ -1057,6 +1059,14 @@ public final class StrictMode {
     private static final ThreadLocal<Handler> threadHandler = new ThreadLocal<Handler>() {
         @Override protected Handler initialValue() {
             return new Handler();
+        }
+    };
+
+    private static final ThreadLocal<AndroidBlockGuardPolicy>
+            threadAndroidPolicy = new ThreadLocal<AndroidBlockGuardPolicy>() {
+        @Override
+        protected AndroidBlockGuardPolicy initialValue() {
+            return new AndroidBlockGuardPolicy(0);
         }
     };
 
