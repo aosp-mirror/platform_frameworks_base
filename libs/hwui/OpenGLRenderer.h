@@ -252,11 +252,31 @@ public:
     virtual void concatMatrix(SkMatrix* matrix);
 
     ANDROID_API const Rect& getClipBounds();
-    ANDROID_API bool quickReject(float left, float top, float right, float bottom);
+
+    /**
+     * Performs a quick reject but adjust the bounds to account for stroke width if necessary
+     */
+    bool quickRejectPreStroke(float left, float top, float right, float bottom, SkPaint* paint);
+
+    /**
+     * Returns false and sets scissor based upon bounds if drawing won't be clipped out
+     */
+    bool quickReject(float left, float top, float right, float bottom);
     bool quickReject(const Rect& bounds) {
         return quickReject(bounds.left, bounds.top, bounds.right, bounds.bottom);
     }
-    bool quickRejectNoScissor(float left, float top, float right, float bottom);
+
+    /**
+     * Same as quickReject, without the scissor, instead returning clipRequired through pointer.
+     * clipRequired will be only set if not rejected
+     */
+    ANDROID_API bool quickRejectNoScissor(float left, float top, float right, float bottom,
+            bool* clipRequired = NULL);
+    bool quickRejectNoScissor(const Rect& bounds, bool* clipRequired = NULL) {
+        return quickRejectNoScissor(bounds.left, bounds.top, bounds.right, bounds.bottom,
+                clipRequired);
+    }
+
     virtual bool clipRect(float left, float top, float right, float bottom, SkRegion::Op op);
     virtual bool clipPath(SkPath* path, SkRegion::Op op);
     virtual bool clipRegion(SkRegion* region, SkRegion::Op op);
@@ -602,18 +622,6 @@ private:
      * is defined by the current snapshot's clipRegion member.
      */
     void setStencilFromClip();
-
-    /**
-     * Performs a quick reject but does not affect the scissor. Returns
-     * the transformed rect to test and the current clip.
-     */
-    bool quickRejectNoScissor(float left, float top, float right, float bottom,
-            Rect& transformed, Rect& clip);
-
-    /**
-     * Performs a quick reject but adjust the bounds to account for stroke width if necessary
-     */
-    bool quickRejectPreStroke(float left, float top, float right, float bottom, SkPaint* paint);
 
     /**
      * Given the local bounds of the layer, calculates ...
