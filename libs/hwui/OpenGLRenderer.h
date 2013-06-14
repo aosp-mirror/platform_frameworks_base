@@ -81,7 +81,7 @@ enum DrawOpMode {
 };
 
 enum ClipSideFlags {
-    kClipSide_Unclipped = 0x0,
+    kClipSide_None = 0x0,
     kClipSide_Left = 0x1,
     kClipSide_Top = 0x2,
     kClipSide_Right = 0x4,
