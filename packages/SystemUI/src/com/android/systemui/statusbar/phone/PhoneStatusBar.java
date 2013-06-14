@@ -1959,13 +1959,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     private void setHideybarConfirmationVisible(boolean visible) {
         if (DEBUG) Log.d(TAG, "setHideybarConfirmationVisible " + visible);
         if (visible && mHideybarConfirmation == null && !mHideybarConfirmationDismissed) {
-            // create the confirmation toast bar with the correct message for this config
-            float widthDp = mCurrentDisplaySize.x /
-                    (mDisplayMetrics.densityDpi / (float) DisplayMetrics.DENSITY_DEFAULT);
-            int msg = mNavigationBarView.isVertical() ?
-                    R.string.hideybar_confirmation_message_right :
-                    widthDp < 600 ? R.string.hideybar_confirmation_message_bottom_short :
-                    R.string.hideybar_confirmation_message_bottom;
+            // create the confirmation toast bar
+            int msg = R.string.hideybar_confirmation_message;
             mHideybarConfirmation = Toast.makeBar(mContext, msg, Toast.LENGTH_INFINITE)
                     .setAction(com.android.internal.R.string.ok, mHideybarConfirmationAction);
             View v = mHideybarConfirmation.getView();
@@ -1975,13 +1970,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                 // dismiss on outside touch if globally confirmed
                 v.setOnTouchListener(mDismissHideybarConfirmationOnTouchOutside);
             }
-            // position at the bottom like normal toasts, but use top gravity
-            // to avoid jumping around when showing/hiding the nav bar
-            v.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
-            int offsetY = mContext.getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.toast_y_offset);
-            mHideybarConfirmation.setGravity(Gravity.TOP, 0,
-                    mCurrentDisplaySize.y - v.getMeasuredHeight() / 2 - offsetY);
             // show the confirmation
             mHideybarConfirmation.show();
         } else if (!visible) {

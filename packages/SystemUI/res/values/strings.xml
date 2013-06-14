@@ -517,12 +517,9 @@
     <!-- Body of help text shown when the notification panel is pulled down for the very first time. [CHAR LIMIT=NONE] -->
     <string name="status_bar_help_text">Access them anytime by swiping down.\nSwipe down again for system controls.</string>
 
-    <!-- Toast bar message when hiding the navigation bar on bottom -->
-    <string name="hideybar_confirmation_message_bottom">Swipe up from bottom of screen to reveal system bar</string>
+    <!-- Toast bar message when hiding the navigation bar -->
+    <string name="hideybar_confirmation_message">Swipe edge of screen to reveal bar</string>
 
-    <!-- Shorter version of toast bar message when hiding the navigation bar on bottom -->
-    <string name="hideybar_confirmation_message_bottom_short">Swipe bottom of screen to reveal bar</string>
-
-    <!-- Toast bar message when hiding the navigation bar on right -->
-    <string name="hideybar_confirmation_message_right">Swipe from right of screen to reveal system bar</string>
+    <!-- Longer version of toast bar message when hiding the navigation bar (if room) -->
+    <string name="hideybar_confirmation_message_long">Swipe from edge of screen to reveal system bar</string>
 </resources>
