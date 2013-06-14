@@ -34258,7 +34258,7 @@ package java.nio {
     method public java.nio.CharBuffer put(java.lang.String, int, int);
     method public int read(java.nio.CharBuffer) throws java.io.IOException;
     method public abstract java.nio.CharBuffer slice();
-    method public abstract java.lang.CharSequence subSequence(int, int);
+    method public abstract java.nio.CharBuffer subSequence(int, int);
     method public static java.nio.CharBuffer wrap(char[]);
     method public static java.nio.CharBuffer wrap(char[], int, int);
     method public static java.nio.CharBuffer wrap(java.lang.CharSequence);
