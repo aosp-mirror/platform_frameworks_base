@@ -24,6 +24,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.hardware.input.InputManager;
+import android.os.BatteryStats;
 import android.os.Handler;
 import android.os.IVibratorService;
 import android.os.PowerManager;
@@ -143,7 +144,8 @@ public class VibratorService extends IVibratorService.Stub
         mWakeLock.setReferenceCounted(true);
 
         mAppOpsService = IAppOpsService.Stub.asInterface(ServiceManager.getService(Context.APP_OPS_SERVICE));
-        mBatteryStatsService = IBatteryStats.Stub.asInterface(ServiceManager.getService("batteryinfo"));
+        mBatteryStatsService = IBatteryStats.Stub.asInterface(ServiceManager.getService(
+                BatteryStats.SERVICE_NAME));
 
         mVibrations = new LinkedList<Vibration>();
 

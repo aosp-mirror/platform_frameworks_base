@@ -43,6 +43,7 @@ import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
+import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.INetworkManagementService;
@@ -347,7 +348,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         if (mBandwidthControlEnabled) {
             try {
-                IBatteryStats.Stub.asInterface(ServiceManager.getService("batteryinfo"))
+                IBatteryStats.Stub.asInterface(ServiceManager.getService(BatteryStats.SERVICE_NAME))
                         .noteNetworkStatsEnabled();
             } catch (RemoteException e) {
             }

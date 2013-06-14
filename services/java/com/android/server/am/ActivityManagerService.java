@@ -7292,7 +7292,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (isolated) {
             int userId = UserHandle.getUserId(uid);
             int stepsLeft = Process.LAST_ISOLATED_UID - Process.FIRST_ISOLATED_UID + 1;
-            uid = 0;
             while (true) {
                 if (mNextIsolatedProcessUid < Process.FIRST_ISOLATED_UID
                         || mNextIsolatedProcessUid > Process.LAST_ISOLATED_UID) {
@@ -7314,7 +7313,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             ps = stats.getProcessStatsLocked(info.uid, proc);
         }
         return new ProcessRecord(ps, thread, info, proc, uid,
-                mProcessTracker.getProcessStateLocked(info.packageName, uid, proc));
+                mProcessTracker.getProcessStateLocked(info.packageName, info.uid, proc));
     }
 
     final ProcessRecord addAppLocked(ApplicationInfo info, boolean isolated) {
@@ -14193,7 +14192,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // are managing to keep around is less than half the maximum we desire;
         // if we are keeping a good number around, we'll let them use whatever
         // memory they want.
-        int memFactor = ProcessTracker.STATE_MEM_FACTOR_NORMAL_ADJ;
+        int memFactor = ProcessTracker.ADJ_MEM_FACTOR_NORMAL;
         if (numCached <= ProcessList.TRIM_CACHED_APPS
                 && numEmpty <= ProcessList.TRIM_EMPTY_APPS) {
             final int numCachedAndEmpty = numCached + numEmpty;
@@ -14207,13 +14206,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             int fgTrimLevel;
             if (numCachedAndEmpty <= ProcessList.TRIM_CRITICAL_THRESHOLD) {
                 fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
-                memFactor = ProcessTracker.STATE_MEM_FACTOR_CRITIAL_ADJ;
+                memFactor = ProcessTracker.ADJ_MEM_FACTOR_CRITICAL;
             } else if (numCachedAndEmpty <= ProcessList.TRIM_LOW_THRESHOLD) {
                 fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
-                memFactor = ProcessTracker.STATE_MEM_FACTOR_LOW_ADJ;
+                memFactor = ProcessTracker.ADJ_MEM_FACTOR_LOW;
             } else {
                 fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE;
-                memFactor = ProcessTracker.STATE_MEM_FACTOR_MODERATE_ADJ;
+                memFactor = ProcessTracker.ADJ_MEM_FACTOR_MODERATE;
             }
             int curLevel = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
             for (i=0; i<N; i++) {

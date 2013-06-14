@@ -22,6 +22,7 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -59,7 +60,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     
     public void publish(Context context) {
         mContext = context;
-        ServiceManager.addService("batteryinfo", asBinder());
+        ServiceManager.addService(BatteryStats.SERVICE_NAME, asBinder());
         mStats.setNumSpeedSteps(new PowerProfile(mContext).getNumSpeedSteps());
         mStats.setRadioScanningTimeout(mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_radioScanningTimeout)
@@ -77,7 +78,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
         if (sService != null) {
             return sService;
         }
-        IBinder b = ServiceManager.getService("batteryinfo");
+        IBinder b = ServiceManager.getService(BatteryStats.SERVICE_NAME);
         sService = asInterface(b);
         return sService;
     }
@@ -479,7 +480,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     }
     
     private void dumpHelp(PrintWriter pw) {
-        pw.println("Battery stats (batteryinfo) dump options:");
+        pw.println("Battery stats (batterystats) dump options:");
         pw.println("  [--checkin] [--unplugged] [--reset] [--write] [-h] [<package.name>]");
         pw.println("  --checkin: format output for a checkin report.");
         pw.println("  --unplugged: only output data since last unplugged.");
