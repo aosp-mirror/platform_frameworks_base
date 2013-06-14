@@ -493,9 +493,8 @@ Check for updates</strong>).</p>
 
   function onDownloadForRealz(link) {
     if ($("input#agree").is(':checked')) {
-      $("div.sdk-terms").slideUp();
-      $("#sdk-terms-form,.sdk-terms-intro").fadeOut('fast');
-      $("#main").fadeIn('fast', function() { 
+      $("div.sdk-terms,#sdk-terms-form,.sdk-terms-intro").hide();
+      $("#main").show(function() {
           location.hash = "Installing";
           });
       return true;
