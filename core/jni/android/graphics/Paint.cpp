@@ -113,7 +113,7 @@ public:
     static void setHinting(JNIEnv* env, jobject paint, jint mode) {
         NPE_CHECK_RETURN_VOID(env, paint);
         GraphicsJNI::getNativePaint(env, paint)->setHinting(
-                mode == 0 ? SkPaint::kNo_Hinting : SkPaint::kSlight_Hinting);
+                mode == 0 ? SkPaint::kNo_Hinting : SkPaint::kNormal_Hinting);
     }
 
     static void setAntiAlias(JNIEnv* env, jobject paint, jboolean aa) {
