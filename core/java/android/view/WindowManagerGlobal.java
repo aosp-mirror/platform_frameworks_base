@@ -26,6 +26,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 
@@ -111,6 +112,7 @@ public final class WindowManagerGlobal {
     private final ArrayList<ViewRootImpl> mRoots = new ArrayList<ViewRootImpl>();
     private final ArrayList<WindowManager.LayoutParams> mParams =
             new ArrayList<WindowManager.LayoutParams>();
+    private final ArraySet<View> mDyingViews = new ArraySet<View>();
     private boolean mNeedsEglTerminate;
 
     private Runnable mSystemPropertyUpdater;
@@ -220,8 +222,14 @@ public final class WindowManagerGlobal {
 
             int index = findViewLocked(view, false);
             if (index >= 0) {
-                throw new IllegalStateException("View " + view
-                        + " has already been added to the window manager.");
+                if (mDyingViews.contains(view)) {
+                    // Don't wait for MSG_DIE to make it's way through root's queue.
+                    mRoots.get(index).doDie();
+                } else {
+                    throw new IllegalStateException("View " + view
+                            + " has already been added to the window manager.");
+                }
+                // The previous removeView() had not completed executing. Now it has.
             }
 
             // If this is a panel window, then find the window it is being
@@ -334,9 +342,12 @@ public final class WindowManagerGlobal {
                 imm.windowDismissed(mViews.get(index).getWindowToken());
             }
         }
-        root.die(immediate);
+        boolean deferred = root.die(immediate);
         if (view != null) {
             view.assignParent(null);
+            if (deferred) {
+                mDyingViews.add(view);
+            }
         }
     }
 
@@ -345,8 +356,9 @@ public final class WindowManagerGlobal {
             final int index = mRoots.indexOf(root);
             if (index >= 0) {
                 mRoots.remove(index);
-                mViews.remove(index);
                 mParams.remove(index);
+                final View view = mViews.remove(index);
+                mDyingViews.remove(view);
             }
         }
     }

@@ -124,7 +124,7 @@ public final class ViewRootImpl implements ViewParent,
 
     static final ArrayList<Runnable> sFirstDrawHandlers = new ArrayList<Runnable>();
     static boolean sFirstDrawComplete = false;
-    
+
     static final ArrayList<ComponentCallbacks> sConfigCallbacks
             = new ArrayList<ComponentCallbacks>();
 
@@ -161,14 +161,14 @@ public final class ViewRootImpl implements ViewParent,
     // Set to true if the owner of this window is in the stopped state,
     // so the window should no longer be active.
     boolean mStopped = false;
-    
+
     boolean mLastInCompatMode = false;
 
     SurfaceHolder.Callback2 mSurfaceHolderCallback;
     BaseSurfaceHolder mSurfaceHolder;
     boolean mIsCreating;
     boolean mDrawingAllowed;
-    
+
     final Region mTransparentRegion;
     final Region mPreviousTransparentRegion;
 
@@ -313,6 +313,9 @@ public final class ViewRootImpl implements ViewParent,
 
     private int mViewLayoutDirectionInitial;
 
+    /** Set to true once doDie() has been called. */
+    private boolean mRemoved;
+
     /**
      * Consistency verifier for debugging purposes.
      */
@@ -420,8 +423,6 @@ public final class ViewRootImpl implements ViewParent,
         synchronized (this) {
             if (mView == null) {
                 mView = view;
-                Slog.d(TAG, "setView: b9406261 setting mView to " + view + " mAdded=" + mAdded
-                        + " Callers=" + Debug.getCallers(4));
                 mViewLayoutDirectionInitial = mView.getRawLayoutDirection();
                 mFallbackEventHandler.setView(view);
                 mWindowAttributes.copyFrom(attrs);
@@ -477,8 +478,6 @@ public final class ViewRootImpl implements ViewParent,
                             = panelParentView.getApplicationWindowToken();
                 }
                 mAdded = true;
-                Slog.d(TAG, "setView: b9406261 setting mAdded=true mView=" + mView
-                        + " Callers=" + Debug.getCallers(4));
                 int res; /* = WindowManagerImpl.ADD_OKAY; */
 
                 // Schedule the first layout -before- adding to the window
@@ -504,8 +503,6 @@ public final class ViewRootImpl implements ViewParent,
                     mFallbackEventHandler.setView(null);
                     unscheduleTraversals();
                     setAccessibilityFocus(null, null);
-                    Slog.d(TAG, "setView: b9406261 threw exception e=" + e
-                            + " Callers=" + Debug.getCallers(4));
                     throw new RuntimeException("Adding window failed", e);
                 } finally {
                     if (restore) {
@@ -845,6 +842,7 @@ public final class ViewRootImpl implements ViewParent,
         invalidateChildInParent(null, dirty);
     }
 
+    @Override
     public ViewParent invalidateChildInParent(int[] location, Rect dirty) {
         checkThread();
         if (DEBUG_DRAW) Log.v(TAG, "Invalidate child: " + dirty);
@@ -902,10 +900,12 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    @Override
     public ViewParent getParent() {
         return null;
     }
 
+    @Override
     public boolean getChildVisibleRect(View child, Rect r, android.graphics.Point offset) {
         if (child != mView) {
             throw new RuntimeException("child is not mine, honest!");
@@ -2805,9 +2805,7 @@ public final class ViewRootImpl implements ViewParent,
 
         setAccessibilityFocus(null, null);
 
-        if (mView != null) {
-            mView.assignParent(null);
-        }
+        mView.assignParent(null);
         mView = null;
         mAttachInfo.mRootView = null;
         mAttachInfo.mSurface = null;
@@ -5126,29 +5124,37 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    public void die(boolean immediate) {
+    /**
+     * @param immediate True, do now if not in traversal. False, put on queue and do later.
+     * @return True, request has been queued. False, request has been completed.
+     */
+    boolean die(boolean immediate) {
         // Make sure we do execute immediately if we are in the middle of a traversal or the damage
         // done by dispatchDetachedFromWindow will cause havoc on return.
         if (immediate && !mIsInTraversal) {
             doDie();
-        } else {
-            if (!mIsDrawing) {
-                destroyHardwareRenderer();
-            } else {
-                Log.e(TAG, "Attempting to destroy the window while drawing!\n" +
-                        "  window=" + this + ", title=" + mWindowAttributes.getTitle());
-            }
-            mHandler.sendEmptyMessage(MSG_DIE);
+            return false;
         }
+
+        if (!mIsDrawing) {
+            destroyHardwareRenderer();
+        } else {
+            Log.e(TAG, "Attempting to destroy the window while drawing!\n" +
+                    "  window=" + this + ", title=" + mWindowAttributes.getTitle());
+        }
+        mHandler.sendEmptyMessage(MSG_DIE);
+        return true;
     }
 
     void doDie() {
         checkThread();
         if (LOCAL_LOGV) Log.v(TAG, "DIE in " + this + " of " + mSurface);
         synchronized (this) {
+            if (mRemoved) {
+                return;
+            }
+            mRemoved = true;
             if (mAdded) {
-                Slog.d(TAG, "doDie: b9406261 mAdded==true mView=" + mView
-                    + " Callers=" + Debug.getCallers(4));
                 dispatchDetachedFromWindow();
             }
 
@@ -5171,13 +5177,11 @@ public final class ViewRootImpl implements ViewParent,
                         } catch (RemoteException e) {
                         }
                     }
-    
+
                     mSurface.release();
                 }
             }
 
-            Slog.d(TAG, "doDie: b9406261 setting mAdded=false mView=" + mView
-                + " Callers=" + Debug.getCallers(4));
             mAdded = false;
         }
         WindowManagerGlobal.getInstance().doRemoveView(this);
