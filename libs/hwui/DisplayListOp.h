@@ -33,7 +33,7 @@
 #include "utils/LinearAllocator.h"
 
 #define CRASH() do { \
-    *(int *)(uintptr_t)0xbbadbeef = 0; \
+    *(int *)(uintptr_t) 0xbbadbeef = 0; \
     ((void(*)())0)(); /* More reliable, but doesn't say BBADBEEF */ \
 } while(false)
 
@@ -947,10 +947,9 @@ public:
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {
         deferInfo.batchId = DeferredDisplayList::kOpBatch_Patch;
-        deferInfo.mergeId = (mergeid_t) mBitmap;
+        deferInfo.mergeId = mEntry ? (mergeid_t) &mEntry->atlas : (mergeid_t) mBitmap;
         deferInfo.mergeable = true;
-        deferInfo.opaqueOverBounds = isOpaqueOverBounds() &&
-                mBitmap->isOpaque();
+        deferInfo.opaqueOverBounds = isOpaqueOverBounds() && mBitmap->isOpaque();
     }
 
 private:
