@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.LinkProperties;
+import android.net.LinkAddress;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkInfo.State;
@@ -43,6 +44,8 @@ import com.android.internal.util.Preconditions;
 import com.android.server.ConnectivityService;
 import com.android.server.EventLogTags;
 import com.android.server.connectivity.Vpn;
+
+import java.util.List;
 
 /**
  * State tracker for lockdown mode. Watches for normal {@link NetworkInfo} to be
@@ -73,7 +76,7 @@ public class LockdownVpnTracker {
 
     private String mAcceptedEgressIface;
     private String mAcceptedIface;
-    private String mAcceptedSourceAddr;
+    private List<LinkAddress> mAcceptedSourceAddr;
 
     private int mErrorCount;
 
@@ -162,14 +165,15 @@ public class LockdownVpnTracker {
 
         } else if (vpnInfo.isConnected() && vpnConfig != null) {
             final String iface = vpnConfig.interfaze;
-            final String sourceAddr = vpnConfig.addresses;
+            final List<LinkAddress> sourceAddrs = vpnConfig.addresses;
 
             if (TextUtils.equals(iface, mAcceptedIface)
-                    && TextUtils.equals(sourceAddr, mAcceptedSourceAddr)) {
+                  && sourceAddrs.equals(mAcceptedSourceAddr)) {
                 return;
             }
 
-            Slog.d(TAG, "VPN connected using iface=" + iface + ", sourceAddr=" + sourceAddr);
+            Slog.d(TAG, "VPN connected using iface=" + iface +
+                    ", sourceAddr=" + sourceAddrs.toString());
             EventLogTags.writeLockdownVpnConnected(egressType);
             showNotification(R.string.vpn_lockdown_connected, R.drawable.vpn_connected);
 
@@ -177,11 +181,13 @@ public class LockdownVpnTracker {
                 clearSourceRulesLocked();
 
                 mNetService.setFirewallInterfaceRule(iface, true);
-                mNetService.setFirewallEgressSourceRule(sourceAddr, true);
+                for (LinkAddress addr : sourceAddrs) {
+                    mNetService.setFirewallEgressSourceRule(addr.toString(), true);
+                }
 
                 mErrorCount = 0;
                 mAcceptedIface = iface;
-                mAcceptedSourceAddr = sourceAddr;
+                mAcceptedSourceAddr = sourceAddrs;
             } catch (RemoteException e) {
                 throw new RuntimeException("Problem setting firewall rules", e);
             }
@@ -263,7 +269,9 @@ public class LockdownVpnTracker {
                 mAcceptedIface = null;
             }
             if (mAcceptedSourceAddr != null) {
-                mNetService.setFirewallEgressSourceRule(mAcceptedSourceAddr, false);
+                for (LinkAddress addr : mAcceptedSourceAddr) {
+                    mNetService.setFirewallEgressSourceRule(addr.toString(), false);
+                }
                 mAcceptedSourceAddr = null;
             }
         } catch (RemoteException e) {
