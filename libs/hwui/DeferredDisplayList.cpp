@@ -153,14 +153,32 @@ private:
 class MergingDrawBatch : public DrawBatch {
 public:
     MergingDrawBatch(DeferInfo& deferInfo, Rect viewport) :
-           DrawBatch(deferInfo), mClipRect(viewport), mClipSideFlags(kClipSide_Unclipped) {}
+           DrawBatch(deferInfo), mClipRect(viewport), mClipSideFlags(kClipSide_None) {}
+
+    /*
+     * Helper for determining if a new op can merge with a MergingDrawBatch based on their bounds
+     * and clip side flags. Positive bounds delta means new bounds fit in old.
+     */
+    static inline bool checkSide(const int currentFlags, const int newFlags, const int side,
+            float boundsDelta) {
+        bool currentClipExists = currentFlags & side;
+        bool newClipExists = newFlags & side;
+
+        // if current is clipped, we must be able to fit new bounds in current
+        if (boundsDelta > 0 && currentClipExists) return false;
+
+        // if new is clipped, we must be able to fit current bounds in new
+        if (boundsDelta < 0 && newClipExists) return false;
+
+        return true;
+    }
 
     /*
      * Checks if a (mergeable) op can be merged into this batch
      *
      * If true, the op's multiDraw must be guaranteed to handle both ops simultaneously, so it is
      * important to consider all paint attributes used in the draw calls in deciding both a) if an
-     * op tries to merge at all, and b) if the op
+     * op tries to merge at all, and b) if the op can merge with another set of ops
      *
      * False positives can lead to information from the paints of subsequent merged operations being
      * dropped, so we make simplifying qualifications on the ops that can merge, per op type.
@@ -179,23 +197,26 @@ public:
 
         if (NEQ_FALPHA(lhs.mAlpha, rhs.mAlpha)) return false;
 
-        // If colliding flags, ensure bounds are equal
-        // NOTE: only needed if op to be added is clipped *and* within old valid clip (per dimension)
-        int collidingClipSideFlags = mClipSideFlags & op->state.mClipSideFlags;
-        if (CC_UNLIKELY(collidingClipSideFlags)) {
-            // if multiple ops are clipped on the same side, they must be clipped at the same
-            // coordinate to be merged
-            if ((collidingClipSideFlags & kClipSide_Left) &&
-                    mClipRect.left != op->state.mClip.left) return false;
-            if ((collidingClipSideFlags & kClipSide_Top) &&
-                    mClipRect.top != op->state.mClip.top) return false;
-            if ((collidingClipSideFlags & kClipSide_Right) &&
-                    mClipRect.right != op->state.mClip.right) return false;
-            if ((collidingClipSideFlags & kClipSide_Bottom) &&
-                    mClipRect.bottom != op->state.mClip.bottom) return false;
+        /* Clipping compatibility check
+         *
+         * Exploits the fact that if a op or batch is clipped on a side, its bounds will equal its
+         * clip for that side.
+         */
+        const int currentFlags = mClipSideFlags;
+        const int newFlags = op->state.mClipSideFlags;
+        if (currentFlags != kClipSide_None || newFlags != kClipSide_None) {
+            const Rect& opBounds = op->state.mBounds;
+            float boundsDelta = mBounds.left - opBounds.left;
+            if (!checkSide(currentFlags, newFlags, kClipSide_Left, boundsDelta)) return false;
+            boundsDelta = mBounds.top - opBounds.top;
+            if (!checkSide(currentFlags, newFlags, kClipSide_Top, boundsDelta)) return false;
+
+            // right and bottom delta calculation reversed to account for direction
+            boundsDelta = opBounds.right - mBounds.right;
+            if (!checkSide(currentFlags, newFlags, kClipSide_Right, boundsDelta)) return false;
+            boundsDelta = opBounds.bottom - mBounds.bottom;
+            if (!checkSide(currentFlags, newFlags, kClipSide_Bottom, boundsDelta)) return false;
         }
-        // if op is outside of batch clip rect, it can't share its clip
-        if (!mClipRect.contains(op->state.mBounds)) return false;
 
         // if paints are equal, then modifiers + paint attribs don't need to be compared
         if (op->mPaint == mOps[0]->mPaint) return true;
