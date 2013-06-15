@@ -33,7 +33,9 @@ public final class WifiDisplay implements Parcelable {
     private final String mDeviceAddress;
     private final String mDeviceName;
     private final String mDeviceAlias;
+    private final boolean mIsAvailable;
     private final boolean mCanConnect;
+    private final boolean mIsRemembered;
 
     public static final WifiDisplay[] EMPTY_ARRAY = new WifiDisplay[0];
 
@@ -42,9 +44,11 @@ public final class WifiDisplay implements Parcelable {
             String deviceAddress = in.readString();
             String deviceName = in.readString();
             String deviceAlias = in.readString();
+            boolean isAvailable = (in.readInt() != 0);
             boolean canConnect = (in.readInt() != 0);
-            return new WifiDisplay(deviceAddress, deviceName,
-                    deviceAlias, canConnect);
+            boolean isRemembered = (in.readInt() != 0);
+            return new WifiDisplay(deviceAddress, deviceName, deviceAlias,
+                    isAvailable, canConnect, isRemembered);
         }
 
         public WifiDisplay[] newArray(int size) {
@@ -52,12 +56,8 @@ public final class WifiDisplay implements Parcelable {
         }
     };
 
-    public WifiDisplay(String deviceAddress, String deviceName, String deviceAlias) {
-        this(deviceAddress, deviceName, deviceAlias, false);
-    }
-
-    public WifiDisplay(String deviceAddress, String deviceName,
-                       String deviceAlias, boolean canConnect) {
+    public WifiDisplay(String deviceAddress, String deviceName, String deviceAlias,
+            boolean available, boolean canConnect, boolean remembered) {
         if (deviceAddress == null) {
             throw new IllegalArgumentException("deviceAddress must not be null");
         }
@@ -68,7 +68,9 @@ public final class WifiDisplay implements Parcelable {
         mDeviceAddress = deviceAddress;
         mDeviceName = deviceName;
         mDeviceAlias = deviceAlias;
+        mIsAvailable = available;
         mCanConnect = canConnect;
+        mIsRemembered = remembered;
     }
 
     /**
@@ -97,10 +99,24 @@ public final class WifiDisplay implements Parcelable {
     }
 
     /**
-     * Gets the availability of the Wifi display device.
+     * Returns true if device is available, false otherwise.
+     */
+    public boolean isAvailable() {
+        return mIsAvailable;
+    }
+
+    /**
+     * Returns true if device can be connected to (not in use), false otherwise.
      */
     public boolean canConnect() {
         return mCanConnect;
+    }
+
+    /**
+     * Returns true if device has been remembered, false otherwise.
+     */
+    public boolean isRemembered() {
+        return mIsRemembered;
     }
 
     /**
@@ -116,12 +132,15 @@ public final class WifiDisplay implements Parcelable {
         return o instanceof WifiDisplay && equals((WifiDisplay)o);
     }
 
+    /**
+     * Returns true if the two displays have the same identity (address, name and alias).
+     * This method does not compare the current status of the displays.
+     */
     public boolean equals(WifiDisplay other) {
         return other != null
                 && mDeviceAddress.equals(other.mDeviceAddress)
                 && mDeviceName.equals(other.mDeviceName)
-                && Objects.equal(mDeviceAlias, other.mDeviceAlias)
-                && (mCanConnect == other.mCanConnect);
+                && Objects.equal(mDeviceAlias, other.mDeviceAlias);
     }
 
     /**
@@ -144,7 +163,9 @@ public final class WifiDisplay implements Parcelable {
         dest.writeString(mDeviceAddress);
         dest.writeString(mDeviceName);
         dest.writeString(mDeviceAlias);
+        dest.writeInt(mIsAvailable ? 1 : 0);
         dest.writeInt(mCanConnect ? 1 : 0);
+        dest.writeInt(mIsRemembered ? 1 : 0);
     }
 
     @Override
@@ -159,7 +180,8 @@ public final class WifiDisplay implements Parcelable {
         if (mDeviceAlias != null) {
             result += ", alias " + mDeviceAlias;
         }
-        result += ", canConnect " + mCanConnect;
+        result += ", isAvailable " + mIsAvailable + ", canConnect " + mCanConnect
+                + ", isRemembered " + mIsRemembered;
         return result;
     }
 }

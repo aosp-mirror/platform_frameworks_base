@@ -876,44 +876,45 @@ public class MediaRouter {
         boolean wantScan = false;
         boolean blockScan = false;
         WifiDisplay[] oldDisplays = oldStatus != null ?
-                oldStatus.getRememberedDisplays() : WifiDisplay.EMPTY_ARRAY;
+                oldStatus.getDisplays() : WifiDisplay.EMPTY_ARRAY;
         WifiDisplay[] newDisplays;
-        WifiDisplay[] availableDisplays;
         WifiDisplay activeDisplay;
 
         if (newStatus.getFeatureState() == WifiDisplayStatus.FEATURE_STATE_ON) {
-            newDisplays = newStatus.getRememberedDisplays();
-            availableDisplays = newStatus.getAvailableDisplays();
+            newDisplays = newStatus.getDisplays();
             activeDisplay = newStatus.getActiveDisplay();
         } else {
-            newDisplays = availableDisplays = WifiDisplay.EMPTY_ARRAY;
+            newDisplays = WifiDisplay.EMPTY_ARRAY;
             activeDisplay = null;
         }
 
         for (int i = 0; i < newDisplays.length; i++) {
             final WifiDisplay d = newDisplays[i];
-            final boolean available = findMatchingDisplay(d, availableDisplays) != null;
-            RouteInfo route = findWifiDisplayRoute(d);
-            if (route == null) {
-                route = makeWifiDisplayRoute(d, available);
-                addRouteStatic(route);
-                wantScan = true;
-            } else {
-                updateWifiDisplayRoute(route, d, available, newStatus);
-            }
-            if (d.equals(activeDisplay)) {
-                selectRouteStatic(route.getSupportedTypes(), route);
+            if (d.isRemembered()) {
+                RouteInfo route = findWifiDisplayRoute(d);
+                if (route == null) {
+                    route = makeWifiDisplayRoute(d, newStatus);
+                    addRouteStatic(route);
+                    wantScan = true;
+                } else {
+                    updateWifiDisplayRoute(route, d, newStatus);
+                }
+                if (d.equals(activeDisplay)) {
+                    selectRouteStatic(route.getSupportedTypes(), route);
 
-                // Don't scan if we're already connected to a wifi display,
-                // the scanning process can cause a hiccup with some configurations.
-                blockScan = true;
+                    // Don't scan if we're already connected to a wifi display,
+                    // the scanning process can cause a hiccup with some configurations.
+                    blockScan = true;
+                }
             }
         }
         for (int i = 0; i < oldDisplays.length; i++) {
             final WifiDisplay d = oldDisplays[i];
-            final WifiDisplay newDisplay = findMatchingDisplay(d, newDisplays);
-            if (newDisplay == null) {
-                removeRoute(findWifiDisplayRoute(d));
+            if (d.isRemembered()) {
+                final WifiDisplay newDisplay = findMatchingDisplay(d, newDisplays);
+                if (newDisplay == null || !newDisplay.isRemembered()) {
+                    removeRoute(findWifiDisplayRoute(d));
+                }
             }
         }
 
@@ -924,42 +925,20 @@ public class MediaRouter {
         sStatic.mLastKnownWifiDisplayStatus = newStatus;
     }
 
-    static RouteInfo makeWifiDisplayRoute(WifiDisplay display, boolean available) {
-        final RouteInfo newRoute = new RouteInfo(sStatic.mSystemCategory);
-        newRoute.mDeviceAddress = display.getDeviceAddress();
-        newRoute.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO | ROUTE_TYPE_LIVE_VIDEO;
-        newRoute.mVolumeHandling = RouteInfo.PLAYBACK_VOLUME_FIXED;
-        newRoute.mPlaybackType = RouteInfo.PLAYBACK_TYPE_REMOTE;
-
-        newRoute.setStatusCode(available ?
-                RouteInfo.STATUS_AVAILABLE : RouteInfo.STATUS_CONNECTING);
-        newRoute.mEnabled = available;
-
-        newRoute.mName = display.getFriendlyDisplayName();
-        newRoute.mDescription = sStatic.mResources.getText(
-                com.android.internal.R.string.wireless_display_route_description);
-
-        newRoute.mPresentationDisplay = choosePresentationDisplayForRoute(newRoute,
-                sStatic.getAllPresentationDisplays());
-        return newRoute;
-    }
-
-    private static void updateWifiDisplayRoute(RouteInfo route, WifiDisplay display,
-            boolean available, WifiDisplayStatus wifiDisplayStatus) {
-        final boolean isScanning =
-                wifiDisplayStatus.getScanState() == WifiDisplayStatus.SCAN_STATE_SCANNING;
-
-        boolean changed = false;
+    static int getWifiDisplayStatusCode(WifiDisplay d, WifiDisplayStatus wfdStatus) {
         int newStatus = RouteInfo.STATUS_NONE;
 
-        if (available) {
-            newStatus = isScanning ? RouteInfo.STATUS_SCANNING : RouteInfo.STATUS_AVAILABLE;
+        if (wfdStatus.getScanState() == WifiDisplayStatus.SCAN_STATE_SCANNING) {
+            newStatus = RouteInfo.STATUS_SCANNING;
+        } else if (d.isAvailable()) {
+            newStatus = d.canConnect() ?
+                    RouteInfo.STATUS_AVAILABLE: RouteInfo.STATUS_IN_USE;
         } else {
             newStatus = RouteInfo.STATUS_NOT_AVAILABLE;
         }
 
-        if (display.equals(wifiDisplayStatus.getActiveDisplay())) {
-            final int activeState = wifiDisplayStatus.getActiveDisplayState();
+        if (d.equals(wfdStatus.getActiveDisplay())) {
+            final int activeState = wfdStatus.getActiveDisplayState();
             switch (activeState) {
                 case WifiDisplayStatus.DISPLAY_STATE_CONNECTED:
                     newStatus = RouteInfo.STATUS_NONE;
@@ -973,22 +952,51 @@ public class MediaRouter {
             }
         }
 
+        return newStatus;
+    }
+
+    static boolean isWifiDisplayEnabled(WifiDisplay d, WifiDisplayStatus wfdStatus) {
+        return d.isAvailable() && (d.canConnect() || d.equals(wfdStatus.getActiveDisplay()));
+    }
+
+    static RouteInfo makeWifiDisplayRoute(WifiDisplay display, WifiDisplayStatus wfdStatus) {
+        final RouteInfo newRoute = new RouteInfo(sStatic.mSystemCategory);
+        newRoute.mDeviceAddress = display.getDeviceAddress();
+        newRoute.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO | ROUTE_TYPE_LIVE_VIDEO;
+        newRoute.mVolumeHandling = RouteInfo.PLAYBACK_VOLUME_FIXED;
+        newRoute.mPlaybackType = RouteInfo.PLAYBACK_TYPE_REMOTE;
+
+        newRoute.setStatusCode(getWifiDisplayStatusCode(display, wfdStatus));
+        newRoute.mEnabled = isWifiDisplayEnabled(display, wfdStatus);
+        newRoute.mName = display.getFriendlyDisplayName();
+        newRoute.mDescription = sStatic.mResources.getText(
+                com.android.internal.R.string.wireless_display_route_description);
+
+        newRoute.mPresentationDisplay = choosePresentationDisplayForRoute(newRoute,
+                sStatic.getAllPresentationDisplays());
+        return newRoute;
+    }
+
+    private static void updateWifiDisplayRoute(
+            RouteInfo route, WifiDisplay display, WifiDisplayStatus wfdStatus) {
+        boolean changed = false;
         final String newName = display.getFriendlyDisplayName();
         if (!route.getName().equals(newName)) {
             route.mName = newName;
             changed = true;
         }
 
-        changed |= route.mEnabled != available;
-        route.mEnabled = available;
+        boolean enabled = isWifiDisplayEnabled(display, wfdStatus);
+        changed |= route.mEnabled != enabled;
+        route.mEnabled = enabled;
 
-        changed |= route.setStatusCode(newStatus);
+        changed |= route.setStatusCode(getWifiDisplayStatusCode(display, wfdStatus));
 
         if (changed) {
             dispatchRouteChanged(route);
         }
 
-        if (!available && route == sStatic.mSelectedRoute) {
+        if (!enabled && route == sStatic.mSelectedRoute) {
             // Oops, no longer available. Reselect the default.
             final RouteInfo defaultRoute = sStatic.mDefaultAudioVideo;
             selectRouteStatic(defaultRoute.getSupportedTypes(), defaultRoute);
@@ -1069,6 +1077,7 @@ public class MediaRouter {
         /** @hide */ public static final int STATUS_CONNECTING = 2;
         /** @hide */ public static final int STATUS_AVAILABLE = 3;
         /** @hide */ public static final int STATUS_NOT_AVAILABLE = 4;
+        /** @hide */ public static final int STATUS_IN_USE = 5;
 
         private Object mTag;
 
@@ -1179,6 +1188,9 @@ public class MediaRouter {
                         break;
                     case STATUS_NOT_AVAILABLE:
                         resId = com.android.internal.R.string.media_route_status_not_available;
+                        break;
+                    case STATUS_IN_USE:
+                        resId = com.android.internal.R.string.media_route_status_in_use;
                         break;
                 }
                 mStatus = resId != 0 ? sStatic.mResources.getText(resId) : null;
