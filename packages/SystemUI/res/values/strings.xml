@@ -24,17 +24,6 @@
          all of the currently visible notifications. [CHAR LIMIT=10]-->
     <string name="status_bar_clear_all_button">Clear</string>
 
-    <!-- The text for the button in the notification window-shade that turns
-         on do not disturb mode, where notifications no longer show their ticker,
-         no sound plays, and no icons are visible.  The windowshade continues to show
-         the notifications. [CHAR LIMIT=25]-->
-    <string name="status_bar_do_not_disturb_button">Do not disturb</string>
-
-    <!-- The text for the button in the notification window-shade that turns
-         off do not disturb mode.  After clicking this, notifications will be
-         shown again. [CHAR LIMIT=25] -->
-    <string name="status_bar_please_disturb_button">Show notifications</string>
-
     <!-- Title shown in recents popup for removing an application from the list -->
     <string name="status_bar_recent_remove_item_title">Remove from list</string>
 
@@ -435,13 +424,6 @@
     <!-- Title shown in notification popup for inspecting the responsible
          application -->
     <string name="status_bar_notification_inspect_item_title">App info</string>
-
-    <!-- Title for the pseudo-notification shown when notifications are disabled (do-not-disturb
-         mode) -->
-    <string name="notifications_off_title">Notifications off</string>
-
-    <!-- Content text for do-not-disturb mode notification -->
-    <string name="notifications_off_text">Tap here to turn notifications back on.</string>
 
     <!-- Description of the button in the phone-style notification panel that controls auto-rotation, when auto-rotation is on. [CHAR LIMIT=NONE] -->
     <string name="accessibility_rotation_lock_off">Screen will rotate automatically.</string>
