@@ -241,11 +241,14 @@ public final class ActiveServices {
         if (unscheduleServiceRestartLocked(r)) {
             if (DEBUG_SERVICE) Slog.v(TAG, "START SERVICE WHILE RESTART PENDING: " + r);
         }
+        r.lastActivity = SystemClock.uptimeMillis();
         r.startRequested = true;
+        if (r.tracker != null) {
+            r.tracker.setStarted(true, mAm.mProcessTracker.getMemFactor(), r.lastActivity);
+        }
         r.callStart = false;
         r.pendingStarts.add(new ServiceRecord.StartItem(r, false, r.makeNextStartId(),
                 service, neededGrants));
-        r.lastActivity = SystemClock.uptimeMillis();
         synchronized (r.stats.getBatteryStats()) {
             r.stats.startRunningLocked();
         }
@@ -261,8 +264,12 @@ public final class ActiveServices {
             service.stats.stopRunningLocked();
         }
         service.startRequested = false;
+        if (service.tracker != null) {
+            service.tracker.setStarted(false, mAm.mProcessTracker.getMemFactor(),
+                    SystemClock.uptimeMillis());
+        }
         service.callStart = false;
-        bringDownServiceLocked(service, false);
+        bringDownServiceIfNeededLocked(service, false, false);
     }
 
     int stopServiceLocked(IApplicationThread caller, Intent service,
@@ -355,11 +362,15 @@ public final class ActiveServices {
 
             synchronized (r.stats.getBatteryStats()) {
                 r.stats.stopRunningLocked();
-                r.startRequested = false;
-                r.callStart = false;
             }
+            r.startRequested = false;
+            if (r.tracker != null) {
+                r.tracker.setStarted(false, mAm.mProcessTracker.getMemFactor(),
+                        SystemClock.uptimeMillis());
+            }
+            r.callStart = false;
             final long origId = Binder.clearCallingIdentity();
-            bringDownServiceLocked(r, false);
+            bringDownServiceIfNeededLocked(r, false, false);
             Binder.restoreCallingIdentity(origId);
             return true;
         }
@@ -487,6 +498,17 @@ public final class ActiveServices {
             if (unscheduleServiceRestartLocked(s)) {
                 if (DEBUG_SERVICE) Slog.v(TAG, "BIND SERVICE WHILE RESTART PENDING: "
                         + s);
+            }
+
+            if ((flags&Context.BIND_AUTO_CREATE) != 0) {
+                s.lastActivity = SystemClock.uptimeMillis();
+                if (!s.hasAutoCreateConnections()) {
+                    // This is the first binding, let the tracker know.
+                    if (s.tracker != null) {
+                        s.tracker.setBound(true, mAm.mProcessTracker.getMemFactor(),
+                                s.lastActivity);
+                    }
+                }
             }
 
             AppBindRecord b = s.retrieveAppBindingLocked(service, callerApp);
@@ -748,7 +770,12 @@ public final class ActiveServices {
                                 sInfo.applicationInfo.uid, sInfo.packageName,
                                 sInfo.name);
                     }
-                    r = new ServiceRecord(mAm, ss, name, filter, sInfo, res);
+                    ProcessTracker.ServiceState tracker = null;
+                    if ((sInfo.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) == 0) {
+                        tracker = mAm.mProcessTracker.getServiceStateLocked(sInfo.packageName,
+                                sInfo.applicationInfo.uid, sInfo.name);
+                    }
+                    r = new ServiceRecord(mAm, ss, name, filter, sInfo, res, tracker);
                     res.setService(r);
                     mServiceMap.putServiceByName(name, UserHandle.getUserId(r.appInfo.uid), r);
                     mServiceMap.putServiceByIntent(filter, UserHandle.getUserId(r.appInfo.uid), r);
@@ -798,14 +825,19 @@ public final class ActiveServices {
         else if (DEBUG_SERVICE_EXECUTING) Log.v(TAG, ">>> EXECUTING "
                 + why + " of " + r.shortName);
         long now = SystemClock.uptimeMillis();
-        if (r.executeNesting == 0 && r.app != null) {
-            if (r.app.executingServices.size() == 0) {
-                Message msg = mAm.mHandler.obtainMessage(
-                        ActivityManagerService.SERVICE_TIMEOUT_MSG);
-                msg.obj = r.app;
-                mAm.mHandler.sendMessageAtTime(msg, now+SERVICE_TIMEOUT);
+        if (r.executeNesting == 0) {
+            if (r.tracker != null) {
+                r.tracker.setExecuting(true, mAm.mProcessTracker.getMemFactor(), now);
             }
-            r.app.executingServices.add(r);
+            if (r.app != null) {
+                if (r.app.executingServices.size() == 0) {
+                    Message msg = mAm.mHandler.obtainMessage(
+                            ActivityManagerService.SERVICE_TIMEOUT_MSG);
+                    msg.obj = r.app;
+                    mAm.mHandler.sendMessageAtTime(msg, now+SERVICE_TIMEOUT);
+                }
+                r.app.executingServices.add(r);
+            }
         }
         r.executeNesting++;
         r.executingStart = now;
@@ -991,7 +1023,7 @@ public final class ActiveServices {
                     + r.appInfo.uid + " for service "
                     + r.intent.getIntent() + ": user " + r.userId + " is stopped";
             Slog.w(TAG, msg);
-            bringDownServiceLocked(r, true);
+            bringDownServiceLocked(r);
             return msg;
         }
 
@@ -1045,7 +1077,7 @@ public final class ActiveServices {
                         + r.appInfo.uid + " for service "
                         + r.intent.getIntent() + ": process is bad";
                 Slog.w(TAG, msg);
-                bringDownServiceLocked(r, true);
+                bringDownServiceLocked(r);
                 return msg;
             }
             if (isolated) {
@@ -1167,26 +1199,29 @@ public final class ActiveServices {
         }
     }
 
-    private final void bringDownServiceLocked(ServiceRecord r, boolean force) {
+    private final void bringDownServiceIfNeededLocked(ServiceRecord r, boolean knowConn,
+            boolean hasConn) {
         //Slog.i(TAG, "Bring down service:");
         //r.dump("  ");
 
         // Does it still need to run?
-        if (!force && r.startRequested) {
+        if (r.startRequested) {
             return;
         }
-        if (!force) {
-            // XXX should probably keep a count of the number of auto-create
-            // connections directly in the service.
-            for (int conni=r.connections.size()-1; conni>=0; conni--) {
-                ArrayList<ConnectionRecord> cr = r.connections.valueAt(conni);
-                for (int i=0; i<cr.size(); i++) {
-                    if ((cr.get(i).flags&Context.BIND_AUTO_CREATE) != 0) {
-                        return;
-                    }
-                }
-            }
+
+        if (!knowConn) {
+            hasConn = r.hasAutoCreateConnections();
         }
+        if (hasConn) {
+            return;
+        }
+
+        bringDownServiceLocked(r);
+    }
+
+    private final void bringDownServiceLocked(ServiceRecord r) {
+        //Slog.i(TAG, "Bring down service:");
+        //r.dump("  ");
 
         // Report to all of the connections that the service is no longer
         // available.
@@ -1291,6 +1326,13 @@ public final class ActiveServices {
         if (r.restarter instanceof ServiceRestarter) {
            ((ServiceRestarter)r.restarter).setService(null);
         }
+
+        int memFactor = mAm.mProcessTracker.getMemFactor();
+        long now = SystemClock.uptimeMillis();
+        if (r.tracker != null) {
+            r.tracker.setStarted(false, memFactor, now);
+            r.tracker.setBound(false, memFactor, now);
+        }
     }
 
     void removeConnectionLocked(
@@ -1349,7 +1391,14 @@ public final class ActiveServices {
             }
 
             if ((c.flags&Context.BIND_AUTO_CREATE) != 0) {
-                bringDownServiceLocked(s, false);
+                boolean hasAutoCreate = s.hasAutoCreateConnections();
+                if (!hasAutoCreate) {
+                    if (s.tracker != null) {
+                        s.tracker.setBound(false, mAm.mProcessTracker.getMemFactor(),
+                                SystemClock.uptimeMillis());
+                    }
+                }
+                bringDownServiceIfNeededLocked(s, true, hasAutoCreate);
             }
         }
     }
@@ -1422,22 +1471,28 @@ public final class ActiveServices {
                 + ", inStopping=" + inStopping + ", app=" + r.app);
         else if (DEBUG_SERVICE_EXECUTING) Slog.v(TAG, "<<< DONE EXECUTING " + r.shortName);
         r.executeNesting--;
-        if (r.executeNesting <= 0 && r.app != null) {
-            if (DEBUG_SERVICE) Slog.v(TAG,
-                    "Nesting at 0 of " + r.shortName);
-            r.app.executingServices.remove(r);
-            if (r.app.executingServices.size() == 0) {
-                if (DEBUG_SERVICE || DEBUG_SERVICE_EXECUTING) Slog.v(TAG,
-                        "No more executingServices of " + r.shortName);
-                mAm.mHandler.removeMessages(ActivityManagerService.SERVICE_TIMEOUT_MSG, r.app);
-            }
-            if (inStopping) {
+        if (r.executeNesting <= 0) {
+            if (r.app != null) {
                 if (DEBUG_SERVICE) Slog.v(TAG,
-                        "doneExecuting remove stopping " + r);
-                mStoppingServices.remove(r);
-                r.bindings.clear();
+                        "Nesting at 0 of " + r.shortName);
+                r.app.executingServices.remove(r);
+                if (r.app.executingServices.size() == 0) {
+                    if (DEBUG_SERVICE || DEBUG_SERVICE_EXECUTING) Slog.v(TAG,
+                            "No more executingServices of " + r.shortName);
+                    mAm.mHandler.removeMessages(ActivityManagerService.SERVICE_TIMEOUT_MSG, r.app);
+                }
+                if (inStopping) {
+                    if (DEBUG_SERVICE) Slog.v(TAG,
+                            "doneExecuting remove stopping " + r);
+                    mStoppingServices.remove(r);
+                    r.bindings.clear();
+                }
+                mAm.updateOomAdjLocked(r.app);
             }
-            mAm.updateOomAdjLocked(r.app);
+            if (r.tracker != null) {
+                r.tracker.setExecuting(false, mAm.mProcessTracker.getMemFactor(),
+                        SystemClock.uptimeMillis());
+            }
         }
     }
 
@@ -1494,7 +1549,7 @@ public final class ActiveServices {
                 sr.isolatedProc = null;
                 mPendingServices.remove(i);
                 i--;
-                bringDownServiceLocked(sr, true);
+                bringDownServiceLocked(sr);
             }
         }
     }
@@ -1545,7 +1600,7 @@ public final class ActiveServices {
 
         int N = services.size();
         for (int i=0; i<N; i++) {
-            bringDownServiceLocked(services.get(i), true);
+            bringDownServiceLocked(services.get(i));
         }
         return didSomething;
     }
@@ -1628,6 +1683,10 @@ public final class ActiveServices {
                 sr.app = null;
                 sr.isolatedProc = null;
                 sr.executeNesting = 0;
+                if (sr.tracker != null) {
+                    sr.tracker.setExecuting(false, mAm.mProcessTracker.getMemFactor(),
+                            SystemClock.uptimeMillis());
+                }
                 if (mStoppingServices.remove(sr)) {
                     if (DEBUG_SERVICE) Slog.v(TAG, "killServices remove stopping " + sr);
                 }
@@ -1647,9 +1706,9 @@ public final class ActiveServices {
                             + " times, stopping: " + sr);
                     EventLog.writeEvent(EventLogTags.AM_SERVICE_CRASHED_TOO_MUCH,
                             sr.userId, sr.crashCount, sr.shortName, app.pid);
-                    bringDownServiceLocked(sr, true);
+                    bringDownServiceLocked(sr);
                 } else if (!allowRestart) {
-                    bringDownServiceLocked(sr, true);
+                    bringDownServiceLocked(sr);
                 } else {
                     boolean canceled = scheduleServiceRestartLocked(sr, true);
 
@@ -1659,9 +1718,13 @@ public final class ActiveServices {
                     if (sr.startRequested && (sr.stopIfKilled || canceled)) {
                         if (sr.pendingStarts.size() == 0) {
                             sr.startRequested = false;
-                            if (numClients > 0) {
+                            if (sr.tracker != null) {
+                                sr.tracker.setStarted(false, mAm.mProcessTracker.getMemFactor(),
+                                        SystemClock.uptimeMillis());
+                            }
+                            if (!sr.hasAutoCreateConnections()) {
                                 // Whoops, no reason to restart!
-                                bringDownServiceLocked(sr, true);
+                                bringDownServiceLocked(sr);
                             }
                         }
                     }

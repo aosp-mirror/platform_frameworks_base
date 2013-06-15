@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.os.BatteryStats;
 import android.os.IBinder;
 import com.android.internal.app.IUsageStats;
 import com.android.internal.os.PkgUsageStats;
@@ -2210,7 +2211,7 @@ public class ActivityManager {
         pw.println();
         dumpService(pw, fd, "package", new String[] { packageName});
         pw.println();
-        dumpService(pw, fd, "batteryinfo", new String[] { packageName});
+        dumpService(pw, fd, BatteryStats.SERVICE_NAME, new String[] { packageName});
         pw.flush();
     }
 

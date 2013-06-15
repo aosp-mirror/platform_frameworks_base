@@ -41,7 +41,10 @@ import android.util.TimeUtils;
 public abstract class BatteryStats implements Parcelable {
 
     private static final boolean LOCAL_LOGV = false;
-    
+
+    /** @hide */
+    public static final String SERVICE_NAME = "batterystats";
+
     /**
      * A constant indicating a partial wake lock timer.
      */

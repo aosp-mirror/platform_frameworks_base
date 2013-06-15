@@ -73,6 +73,7 @@ final class ServiceRecord extends Binder {
     final String dataDir;   // where activity data should go
     final boolean exported; // from ServiceInfo.exported
     final Runnable restarter; // used to schedule retries of starting the service
+    final ProcessTracker.ServiceState tracker; // tracking service execution, may be null
     final long createTime;  // when this service was created
     final ArrayMap<Intent.FilterComparison, IntentBindRecord> bindings
             = new ArrayMap<Intent.FilterComparison, IntentBindRecord>();
@@ -281,7 +282,8 @@ final class ServiceRecord extends Binder {
 
     ServiceRecord(ActivityManagerService ams,
             BatteryStatsImpl.Uid.Pkg.Serv servStats, ComponentName name,
-            Intent.FilterComparison intent, ServiceInfo sInfo, Runnable restarter) {
+            Intent.FilterComparison intent, ServiceInfo sInfo, Runnable restarter,
+            ProcessTracker.ServiceState tracker) {
         this.ams = ams;
         this.stats = servStats;
         this.name = name;
@@ -297,6 +299,7 @@ final class ServiceRecord extends Binder {
         dataDir = sInfo.applicationInfo.dataDir;
         exported = sInfo.exported;
         this.restarter = restarter;
+        this.tracker = tracker;
         createTime = SystemClock.elapsedRealtime();
         lastActivity = SystemClock.uptimeMillis();
         userId = UserHandle.getUserId(appInfo.uid);
@@ -317,6 +320,20 @@ final class ServiceRecord extends Binder {
         a = new AppBindRecord(this, i, app);
         i.apps.put(app, a);
         return a;
+    }
+
+    public boolean hasAutoCreateConnections() {
+        // XXX should probably keep a count of the number of auto-create
+        // connections directly in the service.
+        for (int conni=connections.size()-1; conni>=0; conni--) {
+            ArrayList<ConnectionRecord> cr = connections.valueAt(conni);
+            for (int i=0; i<cr.size(); i++) {
+                if ((cr.get(i).flags&Context.BIND_AUTO_CREATE) != 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public void resetRestartCounter() {

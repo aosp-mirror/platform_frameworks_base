@@ -41,6 +41,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -456,7 +457,8 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 Context.APP_OPS_SERVICE));
 
         // Battery statistics service to be notified when GPS turns on or off
-        mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService("batteryinfo"));
+        mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService(
+                BatteryStats.SERVICE_NAME));
 
         mProperties = new Properties();
         try {
