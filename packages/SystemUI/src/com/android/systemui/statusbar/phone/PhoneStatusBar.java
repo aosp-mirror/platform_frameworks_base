@@ -1964,12 +1964,20 @@ public class PhoneStatusBar extends BaseStatusBar {
             mHideybarConfirmation = Toast.makeBar(mContext, msg, Toast.LENGTH_INFINITE)
                     .setAction(com.android.internal.R.string.ok, mHideybarConfirmationAction);
             View v = mHideybarConfirmation.getView();
+            v.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
             boolean isGloballyConfirmed = Prefs.read(mContext)
                     .getBoolean(Prefs.HIDEYBAR_CONFIRMED, false);
             if (isGloballyConfirmed) {
                 // dismiss on outside touch if globally confirmed
                 v.setOnTouchListener(mDismissHideybarConfirmationOnTouchOutside);
             }
+            // position at the bottom like normal toasts, but use top gravity
+            // to avoid jumping around when showing/hiding the nav bar
+            v.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+            int offsetY = mContext.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.toast_y_offset);
+            mHideybarConfirmation.setGravity(Gravity.TOP,
+                    0, mCurrentDisplaySize.y - v.getMeasuredHeight() / 2 - offsetY);
             // show the confirmation
             mHideybarConfirmation.show();
         } else if (!visible) {
