@@ -163,6 +163,11 @@ class GLES20Canvas extends HardwareCanvas {
     }
 
     @Override
+    void cancelLayerUpdate(HardwareLayer layer) {
+        nCancelLayerUpdate(mRenderer, ((GLES20RenderLayer) layer).mLayer);
+    }
+
+    @Override
     void flushLayerUpdates() {
         nFlushLayerUpdates(mRenderer);
     }
@@ -191,6 +196,7 @@ class GLES20Canvas extends HardwareCanvas {
     private static native void nClearLayerUpdates(int renderer);
     private static native void nFlushLayerUpdates(int renderer);
     private static native void nPushLayerUpdate(int renderer, int layer);
+    private static native void nCancelLayerUpdate(int renderer, int layer);
 
     ///////////////////////////////////////////////////////////////////////////
     // Canvas management
