@@ -74,7 +74,7 @@ class GLES20RecordingCanvas extends GLES20Canvas {
         if (paint != null) {
             final Shader shader = paint.getShader();
             if (shader instanceof BitmapShader) {
-                mDisplayList.mBitmaps.add(((BitmapShader) shader).mBitmap);
+                mDisplayList.getBitmaps().add(((BitmapShader) shader).mBitmap);
             }
         }
     }
@@ -82,36 +82,36 @@ class GLES20RecordingCanvas extends GLES20Canvas {
     @Override
     public void drawPatch(NinePatch patch, RectF dst, Paint paint) {
         super.drawPatch(patch, dst, paint);
-        mDisplayList.mBitmaps.add(patch.getBitmap());
-        mDisplayList.mNinePatches.add(patch);
+        mDisplayList.getBitmaps().add(patch.getBitmap());
+        mDisplayList.getNinePatches().add(patch);
         // Shaders in the Paint are ignored when drawing a Bitmap
     }
 
     @Override
     public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
         super.drawBitmap(bitmap, left, top, paint);
-        mDisplayList.mBitmaps.add(bitmap);
+        mDisplayList.getBitmaps().add(bitmap);
         // Shaders in the Paint are ignored when drawing a Bitmap
     }
 
     @Override
     public void drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint) {
         super.drawBitmap(bitmap, matrix, paint);
-        mDisplayList.mBitmaps.add(bitmap);
+        mDisplayList.getBitmaps().add(bitmap);
         // Shaders in the Paint are ignored when drawing a Bitmap
     }
 
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint) {
         super.drawBitmap(bitmap, src, dst, paint);
-        mDisplayList.mBitmaps.add(bitmap);
+        mDisplayList.getBitmaps().add(bitmap);
         // Shaders in the Paint are ignored when drawing a Bitmap
     }
 
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, RectF dst, Paint paint) {
         super.drawBitmap(bitmap, src, dst, paint);
-        mDisplayList.mBitmaps.add(bitmap);
+        mDisplayList.getBitmaps().add(bitmap);
         // Shaders in the Paint are ignored when drawing a Bitmap
     }
 
@@ -134,7 +134,7 @@ class GLES20RecordingCanvas extends GLES20Canvas {
             int vertOffset, int[] colors, int colorOffset, Paint paint) {
         super.drawBitmapMesh(bitmap, meshWidth, meshHeight, verts, vertOffset,
                 colors, colorOffset, paint);
-        mDisplayList.mBitmaps.add(bitmap);
+        mDisplayList.getBitmaps().add(bitmap);
         // Shaders in the Paint are ignored when drawing a Bitmap
     }
 
@@ -147,7 +147,7 @@ class GLES20RecordingCanvas extends GLES20Canvas {
     @Override
     public int drawDisplayList(DisplayList displayList, Rect dirty, int flags) {
         int status = super.drawDisplayList(displayList, dirty, flags);
-        mDisplayList.mChildDisplayLists.add(displayList);
+        mDisplayList.getChildDisplayLists().add(displayList);
         return status;
     }
 

@@ -59,11 +59,11 @@ class GLES20Canvas extends HardwareCanvas {
     private int mWidth;
     private int mHeight;
     
-    private final float[] mPoint = new float[2];
-    private final float[] mLine = new float[4];
+    private float[] mPoint;
+    private float[] mLine;
     
-    private final Rect mClipBounds = new Rect();
-    private final RectF mPathBounds = new RectF();
+    private Rect mClipBounds;
+    private RectF mPathBounds;
 
     private DrawFilter mFilter;
 
@@ -443,6 +443,31 @@ class GLES20Canvas extends HardwareCanvas {
     private static native void nResume(int renderer);
 
     ///////////////////////////////////////////////////////////////////////////
+    // Support
+    ///////////////////////////////////////////////////////////////////////////
+
+    private Rect getInternalClipBounds() {
+        if (mClipBounds == null) mClipBounds = new Rect();
+        return mClipBounds;
+    }
+
+
+    private RectF getPathBounds() {
+        if (mPathBounds == null) mPathBounds = new RectF();
+        return mPathBounds;
+    }
+
+    private float[] getPointStorage() {
+        if (mPoint == null) mPoint = new float[2];
+        return mPoint;
+    }
+
+    private float[] getLineStorage() {
+        if (mLine == null) mLine = new float[4];
+        return mLine;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
     // Clipping
     ///////////////////////////////////////////////////////////////////////////
 
@@ -530,9 +555,10 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public boolean quickReject(Path path, EdgeType type) {
-        path.computeBounds(mPathBounds, true);
-        return nQuickReject(mRenderer, mPathBounds.left, mPathBounds.top,
-                mPathBounds.right, mPathBounds.bottom);
+        RectF pathBounds = getPathBounds();
+        path.computeBounds(pathBounds, true);
+        return nQuickReject(mRenderer, pathBounds.left, pathBounds.top,
+                pathBounds.right, pathBounds.bottom);
     }
 
     @Override
@@ -967,11 +993,12 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawLine(float startX, float startY, float stopX, float stopY, Paint paint) {
-        mLine[0] = startX;
-        mLine[1] = startY;
-        mLine[2] = stopX;
-        mLine[3] = stopY;
-        drawLines(mLine, 0, 4, paint);
+        float[] line = getLineStorage();
+        line[0] = startX;
+        line[1] = startY;
+        line[2] = stopX;
+        line[3] = stopY;
+        drawLines(line, 0, 4, paint);
     }
 
     @Override
@@ -1012,7 +1039,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawPaint(Paint paint) {
-        final Rect r = mClipBounds;
+        final Rect r = getInternalClipBounds();
         nGetClipBounds(mRenderer, r);
         drawRect(r.left, r.top, r.right, r.bottom, paint);
     }
@@ -1089,9 +1116,10 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawPoint(float x, float y, Paint paint) {
-        mPoint[0] = x;
-        mPoint[1] = y;
-        drawPoints(mPoint, 0, 2, paint);
+        float[] point = getPointStorage();
+        point[0] = x;
+        point[1] = y;
+        drawPoints(point, 0, 2, paint);
     }
 
     @Override
