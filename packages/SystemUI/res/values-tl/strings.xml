@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"UI ng System"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"I-clear"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Huwag gambalain"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Magpakita ng notification"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Alisin mula sa listahan"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Impormasyon ng app"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Walang kamakailang apps"</string>
@@ -168,8 +166,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokasyong itinatakda ng GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"I-clear ang lahat ng notification."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Impormasyon ng app"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"Naka-off ang mga notification"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"Tumapik dito upang muling i-on ang mga notification."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Awtomatikong iikot ang screen."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Naka-lock ang screen sa pahigang oryentasyon."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Naka-lock ang screen sa patayong oryentasyon."</string>
@@ -203,7 +199,8 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Dito lumalabas ang mga notification"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"I-access ang mga ito anumang oras sa pamamagitan ng pag-swipe pababa."\n"Muling mag-swipe pababa para sa mga kontrol ng system."</string>
-    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Mag-swipe pataas mula sa ibaba ng screen upang ipakita ang system bar"</string>
-    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Mag-swipe sa ibaba ng screen upang ipakita ang bar"</string>
-    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Mag-swipe mula sa kanan ng screen upang ipakita ang system bar"</string>
+    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
+    <skip />
+    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
+    <skip />
 </resources>

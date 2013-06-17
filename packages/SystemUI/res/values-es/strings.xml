@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"IU sistema"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Borrar"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"No molestar"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Mostrar notificaciones"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Eliminar de la lista"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Información de la aplicación"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"No hay aplicaciones recientes."</string>
@@ -168,8 +166,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Ubicación definida por GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Borrar todas las notificaciones"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Información de la aplicación"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"Notificaciones desactivadas"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"Toca aquí para volver a activar las notificaciones."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"La pantalla girará automáticamente."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"La pantalla está bloqueada en modo horizontal."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"La pantalla está bloqueada en modo vertical."</string>
@@ -203,7 +199,8 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Las notificaciones aparecen aquí"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Desliza el dedo hacia abajo para acceder al contenido."\n"Vuelve a deslizar el dedo hacia abajo para acceder a los controles del sistema."</string>
-    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Desliza la pantalla hacia arriba desde la parte inferior para mostrar la barra del sistema"</string>
-    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Desliza la parte inferior de la pantalla para mostrar la barra"</string>
-    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Desliza la pantalla desde la derecha para mostrar la barra del sistema"</string>
+    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
+    <skip />
+    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
+    <skip />
 </resources>

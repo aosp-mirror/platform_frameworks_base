@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"系統 UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"清除"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"勿干擾"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"顯示通知"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"從清單中移除"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"應用程式資訊"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"沒有最近使用的應用程式"</string>
@@ -170,8 +168,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS 已定位"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"清除所有通知。"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"應用程式資訊"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"關閉通知"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"輕按這裡即可重新開啟通知。"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"螢幕會自動旋轉。"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"螢幕已鎖定為橫向模式。"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"螢幕已鎖定為垂直模式。"</string>
@@ -205,7 +201,8 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自動"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"系統會在這裡顯示通知"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"向下滑動即可隨時存取通知。"\n"再次向下滑動即可使用系統控制項。"</string>
-    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"從螢幕底部向上滑動即可顯示系統列"</string>
-    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"從螢幕底部滑動即可顯示系統列"</string>
-    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"從螢幕右側滑動即可顯示系統列"</string>
+    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
+    <skip />
+    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
+    <skip />
 </resources>

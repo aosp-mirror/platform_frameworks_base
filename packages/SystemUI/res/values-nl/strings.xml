@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"Systeem-UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Wissen"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Niet storen"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Meldingen weergeven"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Verwijderen uit lijst"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"App-info"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Geen recente apps"</string>
@@ -168,8 +166,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Locatie bepaald met GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Alle meldingen wissen."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"App-info"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"Meldingen uit"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"Tik hier om meldingen weer in te schakelen."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Scherm wordt automatisch geroteerd."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Het scherm is nu vergrendeld in liggende stand."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Het scherm is nu vergrendeld in staande stand."</string>
@@ -203,7 +199,8 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATISCH"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Meldingen worden hier weergegeven"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"U kunt de meldingen op elk gewenst moment openen door met uw vinger omlaag te vegen."\n"Veeg nogmaals met uw vinger omlaag om de systeembesturingselementen weer te geven."</string>
-    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Veeg omhoog vanaf de onderkant van het scherm om de systeembalk weer te geven"</string>
-    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Veeg onderkant van scherm om balk weer te geven"</string>
-    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Veeg vanaf de rechterkant van het scherm om de systeembalk weer te geven"</string>
+    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
+    <skip />
+    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
+    <skip />
 </resources>

@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"رابط کاربر سیستم"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"پاک کردن"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"مزاحم نشوید"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"نمایش اعلان‌ها"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"حذف از لیست"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"اطلاعات برنامه"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"برنامه جدیدی موجود نیست"</string>
@@ -168,8 +166,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"مکان تنظیم شده توسط GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"پاک کردن تمام اعلان‌ها"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"اطلاعات برنامه"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"اعلان‌ها خاموش"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"برای روشن کردن مجدد اعلان‌ها، اینجا را ضربه بزنید."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"صفحه به صورت خودکار می‌چرخد."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"صفحه اکنون در جهت افقی قفل است."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"صفحه اکنون در جهت عمودی قفل است."</string>
@@ -203,7 +199,8 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"خودکار"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"اعلان‌ها در اینجا نمایش داده می‌شوند"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"با کشیدن انگشت به طرف پایین به آنها دسترسی پیدا کنید."\n"برای کنترل‌های سیستم دوباره انگشت خود را به سمت پایین بکشید."</string>
-    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"برای آشکارسازی نوار سیستم انگشت خود را از پایین صفحه به بالا بکشید"</string>
-    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"برای آشکارسازی نوار انگشت خود را روی پایین صفحه بکشید"</string>
-    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"برای آشکارسازی نوار سیستم انگشت خود را از سمت راست صفحه بکشید"</string>
+    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
+    <skip />
+    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
+    <skip />
 </resources>

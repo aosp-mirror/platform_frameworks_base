@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"UI sistem"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ștergeţi"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Nu deranjaţi"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Afişaţi notificări"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Eliminaţi din listă"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informaţii despre aplicaţie"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Nu există aplicaţii recente"</string>
@@ -168,8 +166,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Locaţie setată prin GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Ștergeţi toate notificările."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Informaţii despre aplicaţie"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"Notificările sunt dezactivate"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"Apăsaţi aici pentru a reactiva notificările."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ecranul se va roti în mod automat."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Ecranul este blocat în orientarea de tip peisaj."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Ecranul este blocat în orientarea de tip portret."</string>
@@ -203,7 +199,8 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMAT"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Notificările se afişează aici"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Accesaţi-le oricând glisând în jos."\n"Glisaţi în jos din nou pentru comenzile sistemului."</string>
-    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Glisați în sus din partea inferioară a ecranului pentru a afișa bara de sistem"</string>
-    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Glisați dinspre partea inferioară a ecranului pentru a afișa bara"</string>
-    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Glisați din partea dreaptă a ecranului pentru a afișa bara de sistem"</string>
+    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
+    <skip />
+    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
+    <skip />
 </resources>

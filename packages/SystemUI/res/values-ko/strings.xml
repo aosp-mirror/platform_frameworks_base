@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"시스템 UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"지우기"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"응답 거부"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"알림 표시"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"목록에서 삭제"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"앱 정보"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"최근에 사용한 앱 없음"</string>
@@ -168,8 +166,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS에서 위치 설정"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"모든 알림 지우기"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"앱 정보"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"알림 사용 안함"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"알림을 다시 사용하려면 여기를 터치하세요."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"화면이 자동으로 회전됩니다."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"화면이 가로 방향으로 잠겨 있습니다."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"화면이 세로 방향으로 잠겨 있습니다."</string>
@@ -203,7 +199,8 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"자동"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"알림이 여기에 표시됨"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"아래로 스와이프하여 언제든 액세스하세요."\n"한 번 더 아래로 스와이프하면 시스템 관리로 이동합니다."</string>
-    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"화면 하단에서 위로 스와이프하여 시스템 표시줄 표시"</string>
-    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"화면 하단에서 스와이프하여 표시줄 표시"</string>
-    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"화면 오른쪽에서 스와이프하여 시스템 표시줄 표시"</string>
+    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
+    <skip />
+    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
+    <skip />
 </resources>

@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"Sys.gr.snitt"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Fjern"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Ikke forstyrr"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Vis varslinger"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Fjern fra listen"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Info om app"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Ingen nylige apper"</string>
@@ -168,8 +166,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Posisjon angitt av GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Fjern alle varslinger."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Info om app"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"Varsler er deaktivert"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"Trykk her for å aktivere varsler på nytt."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skjermen roterer automatisk."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Skjermen er låst i liggende retning."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Skjermen er låst i stående retning."</string>
@@ -203,7 +199,8 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Varslene vises her"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Bruk dem når som helst ved å sveipe nedover."\n"Sveip nedover igjen for å gå til systemkontrollene."</string>
-    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Sveip opp fra bunnen av skjermen for å få frem systemfeltet"</string>
-    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Sveip på bunnen av skjermen for å få frem feltet"</string>
-    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Sveip fra høyre på skjermen for å få frem systemfeltet"</string>
+    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
+    <skip />
+    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
+    <skip />
 </resources>

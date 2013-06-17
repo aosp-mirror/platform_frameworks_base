@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"Stelsel-UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Maak skoon"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Moenie steur nie"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Wys kennisgewings"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Verwyder uit lys"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Program Info"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Geen onlangse programme nie"</string>
@@ -168,8 +166,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Ligging deur GPS gestel"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Verwyder alle kennisgewings."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Programinligting"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"Kennisgewings af"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"Tik hier om kennisgewings weer aan te skakel."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Die skerm sal outomaties draai."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Skerm is in landskapsoriëntasie gesluit."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Skerm is in portretoriëntasie gesluit."</string>
@@ -203,7 +199,8 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"OUTO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Kennisgewings verskyn hier"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Verkry enige tyd toegang tot hulle deur af te sleep."\n"Sleep weer af vir stelselkontroles."</string>
-    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Sleep op vanaf onderkant van skerm om stelselbalk te wys"</string>
-    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Sleep onderkant van skerm om balk te wys"</string>
-    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Sleep van regterkant van skerm af om stelselbalk te wys"</string>
+    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
+    <skip />
+    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
+    <skip />
 </resources>
