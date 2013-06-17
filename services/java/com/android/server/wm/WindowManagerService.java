@@ -4855,9 +4855,6 @@ public class WindowManagerService extends IWindowManager.Stub
             TaskStack stack = mStackIdToStack.get(stackId);
             stack.addTask(task, toTop);
             final DisplayContent displayContent = stack.getDisplayContent();
-            if (toTop) {
-                displayContent.moveHomeStackBox(stack.isHomeStack());
-            }
             displayContent.layoutNeeded = true;
             performLayoutAndPlaceSurfacesLocked();
         }
