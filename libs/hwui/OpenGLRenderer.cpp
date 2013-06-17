@@ -655,6 +655,18 @@ void OpenGLRenderer::pushLayerUpdate(Layer* layer) {
     }
 }
 
+void OpenGLRenderer::cancelLayerUpdate(Layer* layer) {
+    if (layer) {
+        for (int i = mLayerUpdates.size() - 1; i >= 0; i--) {
+            if (mLayerUpdates.itemAt(i) == layer) {
+                mLayerUpdates.removeAt(i);
+                mCaches.resourceCache.decrementRefcount(layer);
+                break;
+            }
+        }
+    }
+}
+
 void OpenGLRenderer::clearLayerUpdates() {
     size_t count = mLayerUpdates.size();
     if (count > 0) {

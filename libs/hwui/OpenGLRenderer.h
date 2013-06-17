@@ -217,6 +217,7 @@ public:
     virtual status_t callDrawGLFunction(Functor* functor, Rect& dirty);
 
     ANDROID_API void pushLayerUpdate(Layer* layer);
+    ANDROID_API void cancelLayerUpdate(Layer* layer);
     ANDROID_API void clearLayerUpdates();
     ANDROID_API void flushLayerUpdates();
 

@@ -911,6 +911,11 @@ static void android_view_GLES20Canvas_pushLayerUpdate(JNIEnv* env, jobject clazz
     renderer->pushLayerUpdate(layer);
 }
 
+static void android_view_GLES20Canvas_cancelLayerUpdate(JNIEnv* env, jobject clazz,
+        OpenGLRenderer* renderer, Layer* layer) {
+    renderer->cancelLayerUpdate(layer);
+}
+
 static void android_view_GLES20Canvas_clearLayerUpdates(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer) {
     renderer->clearLayerUpdates();
@@ -1095,6 +1100,7 @@ static JNINativeMethod gMethods[] = {
     { "nClearLayerUpdates",      "(I)V",       (void*) android_view_GLES20Canvas_clearLayerUpdates },
     { "nFlushLayerUpdates",      "(I)V",       (void*) android_view_GLES20Canvas_flushLayerUpdates },
     { "nPushLayerUpdate",        "(II)V",      (void*) android_view_GLES20Canvas_pushLayerUpdate },
+    { "nCancelLayerUpdate",      "(II)V",      (void*) android_view_GLES20Canvas_cancelLayerUpdate },
 
     { "nSetTextureLayerTransform", "(II)V",    (void*) android_view_GLES20Canvas_setTextureLayerTransform },
 

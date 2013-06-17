@@ -12709,6 +12709,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (info != null && info.mHardwareRenderer != null &&
                     info.mHardwareRenderer.isEnabled() &&
                     (valid || info.mHardwareRenderer.validate())) {
+
+                info.mHardwareRenderer.cancelLayerUpdate(mHardwareLayer);
                 mHardwareLayer.destroy();
                 mHardwareLayer = null;
 
