@@ -1911,10 +1911,6 @@ public final class ActivityStackSupervisor {
         }
         removeTask(task);
         stack.addTask(task, toTop);
-        if (toTop) {
-            moveHomeStack(stack.isHomeStack());
-            setFocusedStack(task.getTopActivity());
-        }
         mWindowManager.addTask(taskId, stackId, toTop);
         resumeTopActivitiesLocked();
     }
