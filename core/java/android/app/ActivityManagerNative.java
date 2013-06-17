@@ -648,6 +648,20 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_STACK_BOX_INFO_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int stackBoxId = data.readInt();
+            StackBoxInfo info = getStackBoxInfo(stackBoxId);
+            reply.writeNoException();
+            if (info != null) {
+                reply.writeInt(1);
+                info.writeToParcel(reply, 0);
+            } else {
+                reply.writeInt(0);
+            }
+            return true;
+        }
+
         case SET_FOCUSED_STACK_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int stackId = data.readInt();
@@ -2670,6 +2684,24 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
         return list;
+    }
+    @Override
+    public StackBoxInfo getStackBoxInfo(int stackBoxId) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(stackBoxId);
+        mRemote.transact(GET_STACK_BOX_INFO_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int res = reply.readInt();
+        StackBoxInfo info = null;
+        if (res != 0) {
+            info = StackBoxInfo.CREATOR.createFromParcel(reply);
+        }
+        data.recycle();
+        reply.recycle();
+        return info;
     }
     @Override
     public void setFocusedStack(int stackId) throws RemoteException
