@@ -40,7 +40,6 @@ import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManagerGlobal;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -3055,18 +3054,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private int[] mDrawableState = null;
 
     /**
-     * Set to true when drawing cache is enabled and cannot be created.
-     *
-     * @hide
-     */
-    public boolean mCachingFailed;
-
-    private Bitmap mDrawingCache;
-    private Bitmap mUnscaledDrawingCache;
-    private HardwareLayer mHardwareLayer;
-    DisplayList mDisplayList;
-
-    /**
      * When this view has focus and the next focus is {@link #FOCUS_LEFT},
      * the user may specify which view to go to next.
      */
@@ -3258,6 +3245,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     int mLayerType = LAYER_TYPE_NONE;
     Paint mLayerPaint;
     Rect mLocalDirtyRect;
+    private HardwareLayer mHardwareLayer;
+
+    /**
+     * Set to true when drawing cache is enabled and cannot be created.
+     *
+     * @hide
+     */
+    public boolean mCachingFailed;
+    private Bitmap mDrawingCache;
+    private Bitmap mUnscaledDrawingCache;
+
+    DisplayList mDisplayList;
 
     /**
      * Set to true when the view is sending hover accessibility events because it
@@ -3309,8 +3308,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mUserPaddingStart = UNDEFINED_PADDING;
         mUserPaddingEnd = UNDEFINED_PADDING;
 
-        if (!sUseBrokenMakeMeasureSpec && context.getApplicationInfo().targetSdkVersion <=
-                Build.VERSION_CODES.JELLY_BEAN_MR1 ) {
+        if (!sUseBrokenMakeMeasureSpec && context != null &&
+                context.getApplicationInfo().targetSdkVersion <= JELLY_BEAN_MR1) {
             // Older apps may need this compatibility hack for measurement.
             sUseBrokenMakeMeasureSpec = true;
         }
@@ -4872,7 +4871,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Note: Called from the default {@link AccessibilityDelegate}.
      */
     void onPopulateAccessibilityEventInternal(AccessibilityEvent event) {
-
     }
 
     /**
@@ -8598,8 +8596,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     void setFlags(int flags, int mask) {
         final boolean accessibilityEnabled =
                 AccessibilityManager.getInstance(mContext).isEnabled();
-        final boolean oldIncludeForAccessibility = accessibilityEnabled
-                ? includeForAccessibility() : false;
+        final boolean oldIncludeForAccessibility = accessibilityEnabled && includeForAccessibility();
 
         int old = mViewFlags;
         mViewFlags = (mViewFlags & ~mask) | (flags & mask);
