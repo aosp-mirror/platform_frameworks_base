@@ -280,13 +280,9 @@ public class DateFormat {
             }
         }
 
-        /*
-         * The setting is not set; use the default.
-         * We use a resource string here instead of just DateFormat.SHORT
-         * so that we get a four-digit year instead a two-digit year.
-         */
-        value = context.getString(R.string.numeric_date_format);
-        return value;
+        // The setting is not set; use the locale's default.
+        LocaleData d = LocaleData.get(context.getResources().getConfiguration().locale);
+        return d.shortDateFormat4;
     }
 
     /**
