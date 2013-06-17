@@ -491,6 +491,7 @@ void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
     deferInfo.mergeable &= !recordingComplexClip();
 
     if (CC_LIKELY(mAvoidOverdraw) && mBatches.size() &&
+            op->state.mClipSideFlags != kClipSide_ConservativeFull &&
             deferInfo.opaqueOverBounds && op->state.mBounds.contains(mBounds)) {
         // avoid overdraw by resetting drawing state + discarding drawing ops
         discardDrawingBatches(mBatches.size() - 1);
