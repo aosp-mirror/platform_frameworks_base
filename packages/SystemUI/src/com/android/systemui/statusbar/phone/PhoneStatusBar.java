@@ -2691,4 +2691,16 @@ public class PhoneStatusBar extends BaseStatusBar {
         public void setBounds(Rect bounds) {
         }
     }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        if (mStatusBarWindow != null) {
+            mWindowManager.removeViewImmediate(mStatusBarWindow);
+        }
+        if (mNavigationBarView != null) {
+            mWindowManager.removeViewImmediate(mNavigationBarView);
+        }
+        mContext.unregisterReceiver(mBroadcastReceiver);
+    }
 }

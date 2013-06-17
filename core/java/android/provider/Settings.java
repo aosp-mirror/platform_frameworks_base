@@ -4089,6 +4089,9 @@ public final class Settings {
          */
         public static final String DIALPAD_AUTOCOMPLETE = "dialpad_autocomplete";
 
+        /** @hide */
+        public static final String BAR_SERVICE_COMPONENT = "bar_service_component";
+
         /**
          * This are the settings to be backed up.
          *
