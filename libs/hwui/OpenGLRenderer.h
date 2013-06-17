@@ -86,7 +86,8 @@ enum ClipSideFlags {
     kClipSide_Top = 0x2,
     kClipSide_Right = 0x4,
     kClipSide_Bottom = 0x8,
-    kClipSide_Full = 0xF
+    kClipSide_Full = 0xF,
+    kClipSide_ConservativeFull = 0x1F
 };
 
 struct DeferredDisplayState {

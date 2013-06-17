@@ -1407,9 +1407,9 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
             }
             state.mBounds.set(clippedBounds);
         } else {
-            // If we don't have bounds, let's assume we're clipped
-            // to prevent merging
-            state.mClipSideFlags = kClipSide_Full;
+            // Empty bounds implies size unknown. Label op as conservatively clipped to disable
+            // overdraw avoidance (since we don't know what it overlaps)
+            state.mClipSideFlags = kClipSide_ConservativeFull;
             state.mBounds.set(currentClip);
         }
     }
