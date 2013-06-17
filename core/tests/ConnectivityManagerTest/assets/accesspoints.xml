@@ -23,6 +23,10 @@
     <dns1>192.168.14.1</dns1>
     <dns2>192.168.1.9</dns2>
   </accesspoint>
+<!-- TODO: This AP is outdated and only supports 2.4GHz.
+           Need to switch to a new dual-band AP.
+           Enable this test case again once the configuration is completed.
+     bug#: 9470594
   <accesspoint>
     <ssid>botnet</ssid>
     <security>EAP</security>
@@ -31,5 +35,6 @@
     <identity>donut</identity>
     <password>android</password>
   </accesspoint>
+-->
 </resources>
 
