@@ -1384,7 +1384,7 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
                 return true;
             }
 
-            state.mClipSideFlags = kClipSide_Unclipped;
+            state.mClipSideFlags = kClipSide_None;
             if (!currentClip.contains(state.mBounds)) {
                 int& flags = state.mClipSideFlags;
                 // op partially clipped, so record which sides are clipped for clip-aware merging
