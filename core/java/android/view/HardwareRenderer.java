@@ -451,8 +451,19 @@ public abstract class HardwareRenderer {
      * @param layer The hardware layer that needs an update
      *
      * @see #flushLayerUpdates()
+     * @see #cancelLayerUpdate(HardwareLayer)
      */
     abstract void pushLayerUpdate(HardwareLayer layer);
+
+    /**
+     * Cancels a queued layer update. If the specified layer was not
+     * queued for update, this method has no effect.
+     *
+     * @param layer The layer whose update to cancel
+     *
+     * @see #pushLayerUpdate(HardwareLayer)
+     */
+    abstract void cancelLayerUpdate(HardwareLayer layer);
 
     /**
      * Forces all enqueued layer updates to be executed immediately.
@@ -2130,6 +2141,11 @@ public abstract class HardwareRenderer {
         @Override
         void pushLayerUpdate(HardwareLayer layer) {
             mGlCanvas.pushLayerUpdate(layer);
+        }
+
+        @Override
+        void cancelLayerUpdate(HardwareLayer layer) {
+            mGlCanvas.cancelLayerUpdate(layer);
         }
 
         @Override

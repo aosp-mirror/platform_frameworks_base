@@ -213,6 +213,16 @@ void Layer::defer() {
     deferredUpdateScheduled = false;
 }
 
+void Layer::cancelDefer() {
+    renderer = NULL;
+    displayList = NULL;
+    deferredUpdateScheduled = false;
+    if (deferredList) {
+        delete deferredList;
+        deferredList = NULL;
+    }
+}
+
 void Layer::flush() {
     if (deferredList) {
         renderer->setViewport(layer.getWidth(), layer.getHeight());

@@ -245,6 +245,7 @@ struct Layer {
     }
 
     void defer();
+    void cancelDefer();
     void flush();
     void render();
 
