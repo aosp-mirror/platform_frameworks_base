@@ -23,6 +23,7 @@
 
 #include "JNIHelp.h"
 
+#include <string.h>
 #include <sys/errno.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -30,8 +31,50 @@
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <linux/msdos_fs.h>
+#include <blkid/blkid.h>
 
 namespace android {
+
+jint android_os_FileUtils_getVolumeUUID(JNIEnv* env, jobject clazz, jstring path)
+{
+    char *uuid = NULL;
+
+    if (path == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return -1;
+    }
+
+    const char *pathStr = env->GetStringUTFChars(path, NULL);
+    ALOGD("Trying to get UUID for %s \n", pathStr);
+
+    uuid = blkid_get_tag_value(NULL, "UUID", pathStr);
+    if (uuid) {
+        ALOGD("UUID for %s is %s\n", pathStr, uuid);
+
+        String8 s8uuid = (String8)uuid;
+        size_t len = s8uuid.length();
+        String8 result;
+
+        if (len > 0) {
+            for (int i = 0; i > len; i++)
+            {
+                if (strncmp((const char *)s8uuid[i], (const char *)"-", 1) != 0) {
+                    result.append((const char *)s8uuid[i]);
+                }
+            }
+            len = 0;
+        }
+
+        len = result.length();
+
+        if (len > 0) {
+            return atoi(s8uuid);
+        } else {
+            ALOGE("Couldn't get UUID for %s\n", pathStr);
+        }
+    }
+    return -1;
+}
 
 jint android_os_FileUtils_getFatVolumeId(JNIEnv* env, jobject clazz, jstring path)
 {
@@ -55,6 +98,7 @@ jint android_os_FileUtils_getFatVolumeId(JNIEnv* env, jobject clazz, jstring pat
 }
 
 static const JNINativeMethod methods[] = {
+    {"getVolumeUUID",  "(Ljava/lang/String;)I", (void*)android_os_FileUtils_getVolumeUUID},
     {"getFatVolumeId",  "(Ljava/lang/String;)I", (void*)android_os_FileUtils_getFatVolumeId},
 };
 
