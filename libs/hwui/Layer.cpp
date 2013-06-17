@@ -214,7 +214,8 @@ void Layer::defer() {
 }
 
 void Layer::flush() {
-    if (deferredList) {
+    // renderer is checked as layer may be destroyed/put in layer cache with flush scheduled
+    if (deferredList && renderer) {
         renderer->setViewport(layer.getWidth(), layer.getHeight());
         renderer->prepareDirty(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom,
                 !isBlend());
