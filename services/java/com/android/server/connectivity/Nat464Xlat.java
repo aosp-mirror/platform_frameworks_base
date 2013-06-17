@@ -147,17 +147,24 @@ public class Nat464Xlat extends BaseNetworkObserver {
                    " added, mIsRunning = " + mIsRunning + " -> true");
             mIsRunning = true;
 
-            // Get the network configuration of the clat interface, store it
-            // in our link properties, and stack it on top of the interface
-            // it's running on.
+            // Create the LinkProperties for the clat interface by fetching the
+            // IPv4 address for the interface and adding an IPv4 default route,
+            // then stack the LinkProperties on top of the link it's running on.
+            // Although the clat interface is a point-to-point tunnel, we don't
+            // point the route directly at the interface because some apps don't
+            // understand routes without gateways (see, e.g., http://b/9597256
+            // http://b/9597516). Instead, set the next hop of the route to the
+            // clat IPv4 address itself (for those apps, it doesn't matter what
+            // the IP of the gateway is, only that there is one).
             try {
                 InterfaceConfiguration config = mNMService.getInterfaceConfig(iface);
+                LinkAddress clatAddress = config.getLinkAddress();
                 mLP.clear();
                 mLP.setInterfaceName(iface);
-                RouteInfo ipv4Default = new RouteInfo(new LinkAddress(Inet4Address.ANY, 0), null,
-                                                      iface);
+                RouteInfo ipv4Default = new RouteInfo(new LinkAddress(Inet4Address.ANY, 0),
+                                                      clatAddress.getAddress(), iface);
                 mLP.addRoute(ipv4Default);
-                mLP.addLinkAddress(config.getLinkAddress());
+                mLP.addLinkAddress(clatAddress);
                 mTracker.addStackedLink(mLP);
                 Slog.i(TAG, "Adding stacked link. tracker LP: " +
                        mTracker.getLinkProperties());
