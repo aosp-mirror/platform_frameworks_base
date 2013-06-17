@@ -29,8 +29,11 @@ import dalvik.system.PathClassLoader;
  * @hide
  */
 public final class WebViewFactory {
+    public static final boolean DEFAULT_TO_EXPERIMENTAL_WEBVIEW = false;
     public static final String WEBVIEW_EXPERIMENTAL_PROPERTY = "persist.sys.webview.exp";
-    private static final String DEPRECATED_CHROMIUM_PROPERTY = "webview.use_chromium";
+    private static final String FORCE_PROVIDER_PROPERTY = "webview.force_provider";
+    private static final String FORCE_PROVIDER_PROPERTY_VALUE_CHROMIUM = "chromium";
+    private static final String FORCE_PROVIDER_PROPERTY_VALUE_CLASSIC = "classic";
 
     // Default Provider factory class name.
     // TODO: When the Chromium powered WebView is ready, it should be the default factory class.
@@ -91,14 +94,18 @@ public final class WebViewFactory {
     // experimtanl Chromium powered WebView. This enables us to switch between
     // implementations at runtime. For user (release) builds, don't allow this.
     private static boolean isExperimentalWebViewEnabled() {
-        if (!isExperimentalWebViewAvailable())
-            return false;
-        if (SystemProperties.getBoolean(DEPRECATED_CHROMIUM_PROPERTY, false)) {
-            Log.w(LOGTAG, String.format("The property %s has been deprecated. Please use %s.",
-                    DEPRECATED_CHROMIUM_PROPERTY, WEBVIEW_EXPERIMENTAL_PROPERTY));
-            return true;
-        }
-        return SystemProperties.getBoolean(WEBVIEW_EXPERIMENTAL_PROPERTY, false);
+        if (!isExperimentalWebViewAvailable()) return false;
+        boolean use_experimental_webview = SystemProperties.getBoolean(
+                WEBVIEW_EXPERIMENTAL_PROPERTY, DEFAULT_TO_EXPERIMENTAL_WEBVIEW);
+        String forceProviderName = SystemProperties.get(FORCE_PROVIDER_PROPERTY);
+        if (forceProviderName.isEmpty()) return use_experimental_webview;
+
+        Log.i(LOGTAG, String.format("Provider overridden by property: %s=%s",
+                FORCE_PROVIDER_PROPERTY, forceProviderName));
+        if (forceProviderName.equals(FORCE_PROVIDER_PROPERTY_VALUE_CHROMIUM)) return true;
+        if (forceProviderName.equals(FORCE_PROVIDER_PROPERTY_VALUE_CLASSIC)) return false;
+        Log.e(LOGTAG, String.format("Unrecognized provider: %s", forceProviderName));
+        return use_experimental_webview;
     }
 
     private static WebViewFactoryProvider getFactoryByName(String providerName) {
