@@ -306,7 +306,7 @@ public abstract class Context {
     }
 
     /**
-     * Remove a {@link ComponentCallbacks} objec that was previously registered
+     * Remove a {@link ComponentCallbacks} object that was previously registered
      * with {@link #registerComponentCallbacks(ComponentCallbacks)}.
      */
     public void unregisterComponentCallbacks(ComponentCallbacks callback) {
@@ -481,7 +481,7 @@ public abstract class Context {
      * is always on in apps targetting Gingerbread (Android 2.3) and below, and
      * off by default in later versions.
      *
-     * @return Returns the single SharedPreferences instance that can be used
+     * @return The single {@link SharedPreferences} instance that can be used
      *         to retrieve and modify the preference values.
      *
      * @see #MODE_PRIVATE
@@ -499,7 +499,7 @@ public abstract class Context {
      * @param name The name of the file to open; can not contain path
      *             separators.
      *
-     * @return FileInputStream Resulting input stream.
+     * @return The resulting {@link FileInputStream}.
      *
      * @see #openFileOutput
      * @see #fileList
@@ -520,7 +520,7 @@ public abstract class Context {
      * {@link #MODE_WORLD_READABLE} and {@link #MODE_WORLD_WRITEABLE} to control
      * permissions.
      *
-     * @return FileOutputStream Resulting output stream.
+     * @return The resulting {@link FileOutputStream}.
      *
      * @see #MODE_APPEND
      * @see #MODE_PRIVATE
@@ -541,8 +541,8 @@ public abstract class Context {
      * @param name The name of the file to delete; can not contain path
      *             separators.
      *
-     * @return True if the file was successfully deleted; else
-     *         false.
+     * @return {@code true} if the file was successfully deleted; else
+     *         {@code false}.
      *
      * @see #openFileInput
      * @see #openFileOutput
@@ -558,7 +558,7 @@ public abstract class Context {
      * @param name The name of the file for which you would like to get
      *          its path.
      *
-     * @return Returns an absolute path to the given file.
+     * @return An absolute path to the given file.
      *
      * @see #openFileOutput
      * @see #getFilesDir
@@ -570,7 +570,7 @@ public abstract class Context {
      * Returns the absolute path to the directory on the filesystem where
      * files created with {@link #openFileOutput} are stored.
      *
-     * @return Returns the path of the directory holding application files.
+     * @return The path of the directory holding application files.
      *
      * @see #openFileOutput
      * @see #getFileStreamPath
@@ -644,7 +644,7 @@ public abstract class Context {
      * {@link android.os.Environment#DIRECTORY_PICTURES}, or
      * {@link android.os.Environment#DIRECTORY_MOVIES}.
      *
-     * @return Returns the path of the directory holding application files
+     * @return The path of the directory holding application files
      * on external storage.  Returns null if external storage is not currently
      * mounted so it could not ensure the path exists; you will need to call
      * this method again when it is available.
@@ -677,7 +677,7 @@ public abstract class Context {
      * for the amount of space you consume with cache files, and prune those
      * files when exceeding that space.</strong>
      *
-     * @return Returns the path of the directory holding application cache files.
+     * @return The path of the directory holding application cache files.
      *
      * @see #openFileOutput
      * @see #getFileStreamPath
@@ -718,7 +718,7 @@ public abstract class Context {
      * <p>Writing to this path requires the
      * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission.</p>
      *
-     * @return Returns the path of the directory holding application cache files
+     * @return The path of the directory holding application cache files
      * on external storage.  Returns null if external storage is not currently
      * mounted so it could not ensure the path exists; you will need to call
      * this method again when it is available.
@@ -753,7 +753,7 @@ public abstract class Context {
      * default operation, {@link #MODE_WORLD_READABLE} and
      * {@link #MODE_WORLD_WRITEABLE} to control permissions.
      *
-     * @return Returns a File object for the requested directory.  The directory
+     * @return A {@link File} object for the requested directory.  The directory
      * will have been created if it does not already exist.
      *
      * @see #openFileOutput(String, int)
@@ -819,7 +819,7 @@ public abstract class Context {
      * @param name The name (unique in the application package) of the
      *             database.
      *
-     * @return True if the database was successfully deleted; else false.
+     * @return {@code true} if the database was successfully deleted; else {@code false}.
      *
      * @see #openOrCreateDatabase
      */
@@ -832,7 +832,7 @@ public abstract class Context {
      * @param name The name of the database for which you would like to get
      *          its path.
      *
-     * @return Returns an absolute path to the given database.
+     * @return An absolute path to the given database.
      *
      * @see #openOrCreateDatabase
      */
@@ -910,9 +910,9 @@ public abstract class Context {
      *
      * @param intent The description of the activity to start.
      *
-     * @throws ActivityNotFoundException
+     * @throws ActivityNotFoundException &nbsp;
      *
-     * @see {@link #startActivity(Intent, Bundle)}
+     * @see #startActivity(Intent, Bundle)
      * @see PackageManager#resolveActivity
      */
     public abstract void startActivity(Intent intent);
@@ -924,7 +924,7 @@ public abstract class Context {
      * the INTERACT_ACROSS_USERS_FULL permission.
      * @param intent The description of the activity to start.
      * @param user The UserHandle of the user to start this activity for.
-     * @throws ActivityNotFoundException
+     * @throws ActivityNotFoundException &nbsp;
      * @hide
      */
     public void startActivityAsUser(Intent intent, UserHandle user) {
@@ -951,7 +951,7 @@ public abstract class Context {
      * for how to build the Bundle supplied here; there are no supported definitions
      * for building it manually.
      *
-     * @throws ActivityNotFoundException
+     * @throws ActivityNotFoundException &nbsp;
      *
      * @see #startActivity(Intent)
      * @see PackageManager#resolveActivity
@@ -969,7 +969,7 @@ public abstract class Context {
      * for how to build the Bundle supplied here; there are no supported definitions
      * for building it manually.
      * @param user The UserHandle of the user to start this activity for.
-     * @throws ActivityNotFoundException
+     * @throws ActivityNotFoundException &nbsp;
      * @hide
      */
     public void startActivityAsUser(Intent intent, Bundle options, UserHandle userId) {
@@ -982,9 +982,9 @@ public abstract class Context {
      *
      * @param intents An array of Intents to be started.
      *
-     * @throws ActivityNotFoundException
+     * @throws ActivityNotFoundException &nbsp;
      *
-     * @see {@link #startActivities(Intent[], Bundle)}
+     * @see #startActivities(Intent[], Bundle)
      * @see PackageManager#resolveActivity
      */
     public abstract void startActivities(Intent[] intents);
@@ -1008,9 +1008,9 @@ public abstract class Context {
      * See {@link android.content.Context#startActivity(Intent, Bundle)
      * Context.startActivity(Intent, Bundle)} for more details.
      *
-     * @throws ActivityNotFoundException
+     * @throws ActivityNotFoundException &nbsp;
      *
-     * @see {@link #startActivities(Intent[])}
+     * @see #startActivities(Intent[])
      * @see PackageManager#resolveActivity
      */
     public abstract void startActivities(Intent[] intents, Bundle options);
@@ -1036,9 +1036,9 @@ public abstract class Context {
      * See {@link android.content.Context#startActivity(Intent, Bundle)
      * Context.startActivity(Intent, Bundle)} for more details.
      *
-     * @throws ActivityNotFoundException
+     * @throws ActivityNotFoundException &nbsp;
      *
-     * @see {@link #startActivities(Intent[])}
+     * @see #startActivities(Intent[])
      * @see PackageManager#resolveActivity
      */
     public void startActivitiesAsUser(Intent[] intents, Bundle options, UserHandle userHandle) {
@@ -1604,7 +1604,7 @@ public abstract class Context {
      * {@link ComponentName} of the actual service that was started is
      * returned; else if the service does not exist null is returned.
      *
-     * @throws SecurityException
+     * @throws SecurityException &nbsp;
      *
      * @see #stopService
      * @see #bindService
@@ -1632,9 +1632,9 @@ public abstract class Context {
      *      {@link IntentFilter} published by a service.
      *
      * @return If there is a service matching the given Intent that is already
-     * running, then it is stopped and true is returned; else false is returned.
+     * running, then it is stopped and {@code true} is returned; else {@code false} is returned.
      *
-     * @throws SecurityException
+     * @throws SecurityException &nbsp;
      *
      * @see #startService
      */
@@ -1685,11 +1685,11 @@ public abstract class Context {
      *          {@link #BIND_NOT_FOREGROUND}, {@link #BIND_ABOVE_CLIENT},
      *          {@link #BIND_ALLOW_OOM_MANAGEMENT}, or
      *          {@link #BIND_WAIVE_PRIORITY}.
-     * @return If you have successfully bound to the service, true is returned;
-     *         false is returned if the connection is not made so you will not
+     * @return If you have successfully bound to the service, {@code true} is returned;
+     *         {@code false} is returned if the connection is not made so you will not
      *         receive the service object.
      *
-     * @throws SecurityException
+     * @throws SecurityException &nbsp;
      *
      * @see #unbindService
      * @see #startService
@@ -1741,8 +1741,8 @@ public abstract class Context {
      * @param arguments Additional optional arguments to pass to the
      * instrumentation, or null.
      *
-     * @return Returns true if the instrumentation was successfully started,
-     * else false if it could not be found.
+     * @return {@code true} if the instrumentation was successfully started,
+     * else {@code false} if it could not be found.
      */
     public abstract boolean startInstrumentation(ComponentName className,
             String profileFile, Bundle arguments);
@@ -2217,7 +2217,7 @@ public abstract class Context {
      * and for controlling this device's behavior as a USB device.
      *
      * @see #getSystemService
-     * @see android.harware.usb.UsbManager
+     * @see android.hardware.usb.UsbManager
      */
     public static final String USB_SERVICE = "usb";
 
@@ -2310,7 +2310,7 @@ public abstract class Context {
      * @param uid The user ID being checked against.  A uid of 0 is the root
      * user, which will pass every permission check.
      *
-     * @return Returns {@link PackageManager#PERMISSION_GRANTED} if the given
+     * @return {@link PackageManager#PERMISSION_GRANTED} if the given
      * pid/uid is allowed that permission, or
      * {@link PackageManager#PERMISSION_DENIED} if it is not.
      *
@@ -2332,7 +2332,7 @@ public abstract class Context {
      *
      * @param permission The name of the permission being checked.
      *
-     * @return Returns {@link PackageManager#PERMISSION_GRANTED} if the calling
+     * @return {@link PackageManager#PERMISSION_GRANTED} if the calling
      * pid/uid is allowed that permission, or
      * {@link PackageManager#PERMISSION_DENIED} if it is not.
      *
@@ -2350,7 +2350,7 @@ public abstract class Context {
      *
      * @param permission The name of the permission being checked.
      *
-     * @return Returns {@link PackageManager#PERMISSION_GRANTED} if the calling
+     * @return {@link PackageManager#PERMISSION_GRANTED} if the calling
      * pid/uid is allowed that permission, or
      * {@link PackageManager#PERMISSION_DENIED} if it is not.
      *
@@ -2482,7 +2482,7 @@ public abstract class Context {
      * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION Intent.FLAG_GRANT_READ_URI_PERMISSION} or
      * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION Intent.FLAG_GRANT_WRITE_URI_PERMISSION}.
      *
-     * @return Returns {@link PackageManager#PERMISSION_GRANTED} if the given
+     * @return {@link PackageManager#PERMISSION_GRANTED} if the given
      * pid/uid is allowed to access that uri, or
      * {@link PackageManager#PERMISSION_DENIED} if it is not.
      *
@@ -2505,7 +2505,7 @@ public abstract class Context {
      * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION Intent.FLAG_GRANT_READ_URI_PERMISSION} or
      * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION Intent.FLAG_GRANT_WRITE_URI_PERMISSION}.
      *
-     * @return Returns {@link PackageManager#PERMISSION_GRANTED} if the caller
+     * @return {@link PackageManager#PERMISSION_GRANTED} if the caller
      * is allowed to access that uri, or
      * {@link PackageManager#PERMISSION_DENIED} if it is not.
      *
@@ -2524,7 +2524,7 @@ public abstract class Context {
      * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION Intent.FLAG_GRANT_READ_URI_PERMISSION} or
      * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION Intent.FLAG_GRANT_WRITE_URI_PERMISSION}.
      *
-     * @return Returns {@link PackageManager#PERMISSION_GRANTED} if the caller
+     * @return {@link PackageManager#PERMISSION_GRANTED} if the caller
      * is allowed to access that uri, or
      * {@link PackageManager#PERMISSION_DENIED} if it is not.
      *
@@ -2550,7 +2550,7 @@ public abstract class Context {
      * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION Intent.FLAG_GRANT_READ_URI_PERMISSION} or
      * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION Intent.FLAG_GRANT_WRITE_URI_PERMISSION}.
      *
-     * @return Returns {@link PackageManager#PERMISSION_GRANTED} if the caller
+     * @return {@link PackageManager#PERMISSION_GRANTED} if the caller
      * is allowed to access that uri or holds one of the given permissions, or
      * {@link PackageManager#PERMISSION_DENIED} if it is not.
      */
@@ -2694,11 +2694,11 @@ public abstract class Context {
      * @param flags Option flags, one of {@link #CONTEXT_INCLUDE_CODE}
      *              or {@link #CONTEXT_IGNORE_SECURITY}.
      *
-     * @return A Context for the application.
+     * @return A {@link Context} for the application.
      *
-     * @throws java.lang.SecurityException
+     * @throws SecurityException &nbsp;
      * @throws PackageManager.NameNotFoundException if there is no application with
-     * the given package name
+     * the given package name.
      */
     public abstract Context createPackageContext(String packageName,
             int flags) throws PackageManager.NameNotFoundException;
@@ -2735,7 +2735,7 @@ public abstract class Context {
      * orientation change), the resources of this context will also change except
      * for those that have been explicitly overridden with a value here.
      *
-     * @return A Context with the given configuration override.
+     * @return A {@link Context} with the given configuration override.
      */
     public abstract Context createConfigurationContext(Configuration overrideConfiguration);
 
@@ -2755,7 +2755,7 @@ public abstract class Context {
      * for whose metrics the Context's resources should be tailored and upon which
      * new windows should be shown.
      *
-     * @return A Context for the display.
+     * @return A {@link Context} for the display.
      */
     public abstract Context createDisplayContext(Display display);
 
@@ -2773,7 +2773,7 @@ public abstract class Context {
     /**
      * Indicates whether this Context is restricted.
      *
-     * @return True if this Context is restricted, false otherwise.
+     * @return {@code true} if this Context is restricted, {@code false} otherwise.
      *
      * @see #CONTEXT_RESTRICTED
      */

@@ -5689,7 +5689,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * which you would like to ensure are not being covered.
      *
      * <p>The default implementation of this method simply applies the content
-     * inset's to the view's padding, consuming that content (modifying the
+     * insets to the view's padding, consuming that content (modifying the
      * insets to be 0), and returning true.  This behavior is off by default, but can
      * be enabled through {@link #setFitsSystemWindows(boolean)}.
      *
@@ -5726,8 +5726,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * {@link android.os.Build.VERSION_CODES#JELLY_BEAN} you must not modify
      * the insets or else you and Android will be unhappy.
      *
-     * @return Return true if this view applied the insets and it should not
-     * continue propagating further down the hierarchy, false otherwise.
+     * @return {@code true} if this view applied the insets and it should not
+     * continue propagating further down the hierarchy, {@code false} otherwise.
      * @see #getFitsSystemWindows()
      * @see #setFitsSystemWindows(boolean) 
      * @see #setSystemUiVisibility(int)
@@ -5798,15 +5798,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Check for state of {@link #setFitsSystemWindows(boolean). If this method
-     * returns true, the default implementation of {@link #fitSystemWindows(Rect)}
+     * Check for state of {@link #setFitsSystemWindows(boolean)}. If this method
+     * returns {@code true}, the default implementation of {@link #fitSystemWindows(Rect)}
      * will be executed.
      *
-     * @return Returns true if the default implementation of
+     * @return {@code true} if the default implementation of
      * {@link #fitSystemWindows(Rect)} will be executed.
      *
      * @attr ref android.R.styleable#View_fitsSystemWindows
-     * @see #setFitsSystemWindows()
+     * @see #setFitsSystemWindows(boolean)
      * @see #fitSystemWindows(Rect)
      * @see #setSystemUiVisibility(int)
      */
@@ -16512,7 +16512,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Override to find out when the window's requested system UI visibility
      * has changed, that is the value returned by {@link #getWindowSystemUiVisibility()}.
-     * This is different from the callbacks recieved through
+     * This is different from the callbacks received through
      * {@link #setOnSystemUiVisibilityChangeListener(OnSystemUiVisibilityChangeListener)}
      * in that this is only telling you about the local request of the window,
      * not the actual values applied by the system.

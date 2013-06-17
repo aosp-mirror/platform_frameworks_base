@@ -1458,7 +1458,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast Action: The current time has changed.  Sent every
      * minute.  You can <em>not</em> receive this through components declared
-     * in manifests, only by exlicitly registering for it with
+     * in manifests, only by explicitly registering for it with
      * {@link Context#registerReceiver(BroadcastReceiver, IntentFilter)
      * Context.registerReceiver()}.
      *
@@ -2658,7 +2658,7 @@ public class Intent implements Parcelable, Cloneable {
      * Set if the activity should be an option for the default action
      * (center press) to perform on a piece of data.  Setting this will
      * hide from the user any activities without it set when performing an
-     * action on some data.  Note that this is normal -not- set in the
+     * action on some data.  Note that this is normally -not- set in the
      * Intent when initiating an action -- it is for use in intent filters
      * specified in packages.
      */
