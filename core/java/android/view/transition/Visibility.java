@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.view.transition;
 
 import android.animation.Animator;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 
 /**
  * This transition tracks changes to the visibility of target views in the
@@ -27,15 +29,27 @@ import android.view.ViewGroup;
  * utility for subclasses such as {@link Fade}, which use this visibility
  * information to determine the specific animations to run when visibility
  * changes occur. Subclasses should implement one or more of the methods
- * {@link #preAppear(ViewGroup, View, int, View, int)},
- * {@link #preDisappear(ViewGroup, View, int, View, int)},
- * {@link #appear(ViewGroup, View, int, View, int)}, and
- * {@link #disappear(ViewGroup, View, int, View, int)}.
+ * {@link #setupAppear(ViewGroup, TransitionValues, int, TransitionValues, int)},
+ * {@link #setupDisappear(ViewGroup, TransitionValues, int, TransitionValues, int)},
+ * {@link #appear(ViewGroup, TransitionValues, int, TransitionValues, int)}, and
+ * {@link #disappear(ViewGroup, TransitionValues, int, TransitionValues, int)}.
  */
 public abstract class Visibility extends Transition {
 
     private static final String PROPNAME_VISIBILITY = "android:visibility:visibility";
     private static final String PROPNAME_PARENT = "android:visibility:parent";
+
+    private static class VisibilityInfo {
+        boolean visibilityChange;
+        boolean fadeIn;
+        int startVisibility;
+        int endVisibility;
+        View startParent;
+        View endParent;
+    }
+
+    // Temporary structure, used in calculating state in setup() and play()
+    private VisibilityInfo mTmpVisibilityInfo = new VisibilityInfo();
 
     @Override
     protected void captureValues(TransitionValues values, boolean start) {
@@ -44,138 +58,121 @@ public abstract class Visibility extends Transition {
         values.values.put(PROPNAME_PARENT, values.view.getParent());
     }
 
-    @Override
-    protected boolean prePlay(ViewGroup sceneRoot, TransitionValues startValues,
+    private boolean isHierarchyVisibilityChanging(ViewGroup sceneRoot, ViewGroup view) {
+
+        if (view == sceneRoot) {
+            return false;
+        }
+        TransitionValues startValues = getTransitionValues(view, true);
+        TransitionValues endValues = getTransitionValues(view, false);
+
+        if (startValues == null || endValues == null) {
+            return true;
+        }
+        int startVisibility = (Integer) startValues.values.get(PROPNAME_VISIBILITY);
+        View startParent = (View) startValues.values.get(PROPNAME_PARENT);
+        int endVisibility = (Integer) endValues.values.get(PROPNAME_VISIBILITY);
+        View endParent = (View) endValues.values.get(PROPNAME_PARENT);
+        if (startVisibility != endVisibility || startParent != endParent) {
+            return true;
+        }
+
+        ViewParent parent = view.getParent();
+        if (parent instanceof ViewGroup && parent != sceneRoot) {
+            return isHierarchyVisibilityChanging(sceneRoot, (ViewGroup) parent);
+        }
+        return false;
+    }
+
+    private VisibilityInfo getVisibilityChangeInfo(TransitionValues startValues,
             TransitionValues endValues) {
-        boolean visibilityChange = false;
-        boolean fadeIn = false;
-        int startVisibility, endVisibility;
-        View startParent, endParent;
+        final VisibilityInfo visInfo = mTmpVisibilityInfo;
+        visInfo.visibilityChange = false;
+        visInfo.fadeIn = false;
         if (startValues != null) {
-            startVisibility = (Integer) startValues.values.get(PROPNAME_VISIBILITY);
-            startParent = (View) startValues.values.get(PROPNAME_PARENT);
+            visInfo.startVisibility = (Integer) startValues.values.get(PROPNAME_VISIBILITY);
+            visInfo.startParent = (View) startValues.values.get(PROPNAME_PARENT);
         } else {
-            startVisibility = -1;
-            startParent = null;
+            visInfo.startVisibility = -1;
+            visInfo.startParent = null;
         }
         if (endValues != null) {
-            endVisibility = (Integer) endValues.values.get(PROPNAME_VISIBILITY);
-            endParent = (View) endValues.values.get(PROPNAME_PARENT);
+            visInfo.endVisibility = (Integer) endValues.values.get(PROPNAME_VISIBILITY);
+            visInfo.endParent = (View) endValues.values.get(PROPNAME_PARENT);
         } else {
-            endVisibility = -1;
-            endParent = null;
+            visInfo.endVisibility = -1;
+            visInfo.endParent = null;
         }
-        boolean existenceChange = false;
         if (startValues != null && endValues != null) {
-            if (startVisibility == endVisibility && startParent == endParent) {
-                return false;
+            if (visInfo.startVisibility == visInfo.endVisibility &&
+                    visInfo.startParent == visInfo.endParent) {
+                return visInfo;
             } else {
-                if (startVisibility != endVisibility) {
-                    if (startVisibility == View.VISIBLE) {
-                        fadeIn = false;
-                        visibilityChange = true;
-                    } else if (endVisibility == View.VISIBLE) {
-                        fadeIn = true;
-                        visibilityChange = true;
+                if (visInfo.startVisibility != visInfo.endVisibility) {
+                    if (visInfo.startVisibility == View.VISIBLE) {
+                        visInfo.fadeIn = false;
+                        visInfo.visibilityChange = true;
+                    } else if (visInfo.endVisibility == View.VISIBLE) {
+                        visInfo.fadeIn = true;
+                        visInfo.visibilityChange = true;
                     }
                     // no visibilityChange if going between INVISIBLE and GONE
-                } else if (startParent != endParent) {
-                    existenceChange = true;
-                    if (endParent == null) {
-                        fadeIn = false;
-                        visibilityChange = true;
-                    } else if (startParent == null) {
-                        fadeIn = true;
-                        visibilityChange = true;
+                } else if (visInfo.startParent != visInfo.endParent) {
+                    if (visInfo.endParent == null) {
+                        visInfo.fadeIn = false;
+                        visInfo.visibilityChange = true;
+                    } else if (visInfo.startParent == null) {
+                        visInfo.fadeIn = true;
+                        visInfo.visibilityChange = true;
                     }
                 }
             }
         }
         if (startValues == null) {
-            existenceChange = true;
-            fadeIn = true;
-            visibilityChange = true;
+            visInfo.fadeIn = true;
+            visInfo.visibilityChange = true;
         } else if (endValues == null) {
-            existenceChange = true;
-            fadeIn = false;
-            visibilityChange = true;
+            visInfo.fadeIn = false;
+            visInfo.visibilityChange = true;
         }
-        if (visibilityChange) {
-            if (fadeIn) {
-                return preAppear(sceneRoot, existenceChange ? null : startValues.view,
-                        startVisibility, endValues.view, endVisibility);
-            } else {
-                return preDisappear(sceneRoot, startValues.view, startVisibility,
-                        existenceChange ? null : endValues.view, endVisibility);
+        return visInfo;
+    }
+
+    @Override
+    protected boolean setup(ViewGroup sceneRoot, TransitionValues startValues,
+            TransitionValues endValues) {
+        VisibilityInfo visInfo = getVisibilityChangeInfo(startValues, endValues);
+        // Ensure not in parent hierarchy that's also becoming visible/invisible
+        if (visInfo.visibilityChange) {
+            ViewGroup parent = (ViewGroup) ((visInfo.endParent != null) ?
+                    visInfo.endParent : visInfo.startParent);
+            if (parent != null) {
+                if (!isHierarchyVisibilityChanging(sceneRoot, parent)) {
+                    if (visInfo.fadeIn) {
+                        return setupAppear(sceneRoot, startValues, visInfo.startVisibility,
+                                endValues, visInfo.endVisibility);
+                    } else {
+                        return setupDisappear(sceneRoot, startValues, visInfo.startVisibility,
+                                endValues, visInfo.endVisibility
+                        );
+                    }
+                }
             }
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
     protected Animator play(ViewGroup sceneRoot, TransitionValues startValues,
             TransitionValues endValues) {
-        boolean visibilityChange = false;
-        boolean fadeIn = false;
-        int startVisibility, endVisibility;
-        View startParent, endParent;
-        if (startValues != null) {
-            startVisibility = (Integer) startValues.values.get(PROPNAME_VISIBILITY);
-            startParent = (View) startValues.values.get(PROPNAME_PARENT);
-        } else {
-            startVisibility = -1;
-            startParent = null;
-        }
-        if (endValues != null) {
-            endVisibility = (Integer) endValues.values.get(PROPNAME_VISIBILITY);
-            endParent = (View) endValues.values.get(PROPNAME_PARENT);
-        } else {
-            endVisibility = -1;
-            endParent = null;
-        }
-        boolean existenceChange = false;
-        if (startValues != null && endValues != null) {
-            if (startVisibility == endVisibility && startParent == endParent) {
-                return null;
+        VisibilityInfo visInfo = getVisibilityChangeInfo(startValues, endValues);
+        if (visInfo.visibilityChange) {
+            if (visInfo.fadeIn) {
+                return appear(sceneRoot, startValues, visInfo.startVisibility,
+                        endValues, visInfo.endVisibility);
             } else {
-                if (startVisibility != endVisibility) {
-                    if (startVisibility == View.VISIBLE) {
-                        fadeIn = false;
-                        visibilityChange = true;
-                    } else if (endVisibility == View.VISIBLE) {
-                        fadeIn = true;
-                        visibilityChange = true;
-                    }
-                    // no visibilityChange if going between INVISIBLE and GONE
-                } else if (startParent != endParent) {
-                    existenceChange = true;
-                    if (endParent == null) {
-                        fadeIn = false;
-                        visibilityChange = true;
-                    } else if (startParent == null) {
-                        fadeIn = true;
-                        visibilityChange = true;
-                    }
-                }
-            }
-        }
-        if (startValues == null) {
-            existenceChange = true;
-            fadeIn = true;
-            visibilityChange = true;
-        } else if (endValues == null) {
-            existenceChange = true;
-            fadeIn = false;
-            visibilityChange = true;
-        }
-        if (visibilityChange) {
-            if (fadeIn) {
-                return appear(sceneRoot, existenceChange ? null : startValues.view, startVisibility,
-                        endValues.view, endVisibility);
-            } else {
-                return disappear(sceneRoot, startValues.view, startVisibility,
-                        existenceChange ? null : endValues.view, endVisibility);
+                return disappear(sceneRoot, startValues, visInfo.startVisibility,
+                        endValues, visInfo.endVisibility);
             }
         }
         return null;
@@ -187,14 +184,15 @@ public abstract class Visibility extends Transition {
      * transition starting.
      *
      * @param sceneRoot
-     * @param startView
+     * @param startValues
      * @param startVisibility
-     * @param endView
+     * @param endValues
      * @param endVisibility
      * @return
      */
-    protected boolean preAppear(ViewGroup sceneRoot, View startView, int startVisibility,
-            View endView, int endVisibility) {
+    protected boolean setupAppear(ViewGroup sceneRoot,
+            TransitionValues startValues, int startVisibility,
+            TransitionValues endValues, int endVisibility) {
         return true;
     }
 
@@ -202,15 +200,17 @@ public abstract class Visibility extends Transition {
      * The default implementation of this method does nothing. Subclasses
      * should override if they need to set up anything prior to the
      * transition starting.
+     *
      * @param sceneRoot
-     * @param startView
+     * @param startValues
      * @param startVisibility
-     * @param endView
+     * @param endValues
      * @param endVisibility
      * @return
      */
-    protected boolean preDisappear(ViewGroup sceneRoot, View startView, int startVisibility,
-            View endView, int endVisibility) {
+    protected boolean setupDisappear(ViewGroup sceneRoot,
+            TransitionValues startValues, int startVisibility,
+            TransitionValues endValues, int endVisibility) {
         return true;
     }
 
@@ -219,25 +219,31 @@ public abstract class Visibility extends Transition {
      * should override if they need to do anything when target objects
      * appear during the scene change.
      * @param sceneRoot
-     * @param startView
+     * @param startValues
      * @param startVisibility
-     * @param endView
+     * @param endValues
      * @param endVisibility
      */
-    protected Animator appear(ViewGroup sceneRoot, View startView, int startVisibility,
-            View endView, int endVisibility) { return null; }
+    protected Animator appear(ViewGroup sceneRoot,
+            TransitionValues startValues, int startVisibility,
+            TransitionValues endValues, int endVisibility) {
+        return null;
+    }
 
     /**
      * The default implementation of this method does nothing. Subclasses
      * should override if they need to do anything when target objects
      * disappear during the scene change.
      * @param sceneRoot
-     * @param startView
+     * @param startValues
      * @param startVisibility
-     * @param endView
+     * @param endValues
      * @param endVisibility
      */
-    protected Animator disappear(ViewGroup sceneRoot, View startView, int startVisibility,
-            View endView, int endVisibility) { return null; }
+    protected Animator disappear(ViewGroup sceneRoot,
+            TransitionValues startValues, int startVisibility,
+            TransitionValues endValues, int endVisibility) {
+        return null;
+    }
 
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.view.transition;
 
 import android.animation.Animator;
@@ -36,8 +37,10 @@ public class Slide extends Visibility {
     private static final TimeInterpolator sDecelerator = new DecelerateInterpolator();
 
     @Override
-    protected Animator appear(ViewGroup sceneRoot, View startView, int startVisibility,
-            View endView, int endVisibility) {
+    protected Animator appear(ViewGroup sceneRoot,
+            TransitionValues startValues, int startVisibility,
+            TransitionValues endValues, int endVisibility) {
+        View endView = (endValues != null) ? endValues.view : null;
         ObjectAnimator anim = ObjectAnimator.ofFloat(endView, View.TRANSLATION_Y,
                 -2 * endView.getHeight(), 0);
         anim.setInterpolator(sDecelerator);
@@ -45,22 +48,28 @@ public class Slide extends Visibility {
     }
 
     @Override
-    protected boolean preAppear(ViewGroup sceneRoot, View startView, int startVisibility,
-            View endView, int endVisibility) {
+    protected boolean setupAppear(ViewGroup sceneRoot,
+            TransitionValues startValues, int startVisibility,
+            TransitionValues endValues, int endVisibility) {
+        View endView = (endValues != null) ? endValues.view : null;
         endView.setTranslationY(-2 * endView.getHeight());
         return true;
     }
 
     @Override
-    protected boolean preDisappear(ViewGroup sceneRoot, View startView, int startVisibility,
-            View endView, int endVisibility) {
+    protected boolean setupDisappear(ViewGroup sceneRoot,
+            TransitionValues startValues, int startVisibility,
+            TransitionValues endValues, int endVisibility) {
+        View startView = (startValues != null) ? startValues.view : null;
         startView.setTranslationY(0);
         return true;
     }
 
     @Override
-    protected Animator disappear(ViewGroup sceneRoot, View startView, int startVisibility,
-            View endView, int endVisibility) {
+    protected Animator disappear(ViewGroup sceneRoot,
+            TransitionValues startValues, int startVisibility,
+            TransitionValues endValues, int endVisibility) {
+        View startView = (startValues != null) ? startValues.view : null;
         ObjectAnimator anim = ObjectAnimator.ofFloat(startView, View.TRANSLATION_Y, 0,
                 -2 * startView.getHeight());
         anim.setInterpolator(sAccelerator);

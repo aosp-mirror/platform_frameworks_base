@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.view.transition;
 
 import android.util.ArrayMap;
@@ -36,7 +37,7 @@ import java.util.Map;
  * capture} phases of a scene change, once when the start values are captured
  * and again when the end values are captured. These start/end values are then
  * passed into the transitions during the play phase of the scene change,
- * for {@link Transition#prePlay(ViewGroup, TransitionValues, TransitionValues)} and
+ * for {@link Transition#setup(ViewGroup, TransitionValues, TransitionValues)} and
  * for {@link Transition#play(ViewGroup, TransitionValues, TransitionValues)}.</p>
  */
 public class TransitionValues {
@@ -55,7 +56,10 @@ public class TransitionValues {
     public String toString() {
         String returnValue = "TransitionValues@" + Integer.toHexString(hashCode()) + ":\n";
         returnValue += "    view = " + view + "\n";
-        returnValue += "    values = " + values + "\n";
+        returnValue += "    values:";
+        for (String s : values.keySet()) {
+            returnValue += "    " + s + ": " + values.get(s) + "\n";
+        }
         return returnValue;
     }
 }

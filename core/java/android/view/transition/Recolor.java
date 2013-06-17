@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.view.transition;
 
 import android.animation.Animator;
@@ -50,7 +51,7 @@ public class Recolor extends Transition {
     }
 
     @Override
-    protected boolean prePlay(ViewGroup sceneRoot, TransitionValues startValues,
+    protected boolean setup(ViewGroup sceneRoot, TransitionValues startValues,
             TransitionValues endValues) {
         if (startValues == null || endValues == null) {
             return false;

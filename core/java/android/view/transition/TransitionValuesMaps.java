@@ -16,20 +16,15 @@
 
 package android.view.transition;
 
-/**
- * Utility class for creating a default transition that automatically fades,
- * moves, and resizes views during a scene change.
- */
-public class AutoTransition extends TransitionGroup {
+import android.util.ArrayMap;
+import android.util.LongSparseArray;
+import android.util.SparseArray;
+import android.view.View;
 
-    /**
-     * Constructs an AutoTransition object, which is a TransitionGroup which
-     * first fades out disappearing targets, then moves and resizes existing
-     * targets, and finally fades in appearing targets.
-     *
-     */
-    public AutoTransition() {
-        setOrdering(SEQUENTIALLY);
-        addTransitions(new Fade(Fade.OUT), new Move(), new Fade(Fade.IN));
-    }
+class TransitionValuesMaps {
+    ArrayMap<View, TransitionValues> viewValues =
+            new ArrayMap<View, TransitionValues>();
+    SparseArray<TransitionValues> idValues = new SparseArray<TransitionValues>();
+    LongSparseArray<TransitionValues> itemIdValues =
+            new LongSparseArray<TransitionValues>();
 }

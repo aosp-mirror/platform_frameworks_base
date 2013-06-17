@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.view.transition;
 
 import android.animation.Animator;
@@ -32,6 +33,8 @@ import android.view.ViewGroup;
 public class Fade extends Visibility {
 
     private static final String LOG_TAG = "Fade";
+    private static final String PROPNAME_SCREEN_X = "android:fade:screenX";
+    private static final String PROPNAME_SCREEN_Y = "android:fade:screenY";
 
     /**
      * Fading mode used in {@link #Fade(int)} to make the transition
@@ -81,8 +84,19 @@ public class Fade extends Visibility {
     }
 
     @Override
-    protected boolean preAppear(ViewGroup sceneRoot, View startView, int startVisibility,
-            View endView, int endVisibility) {
+    protected void captureValues(TransitionValues values, boolean start) {
+        super.captureValues(values, start);
+        int[] loc = new int[2];
+        values.view.getLocationOnScreen(loc);
+        values.values.put(PROPNAME_SCREEN_X, loc[0]);
+        values.values.put(PROPNAME_SCREEN_Y, loc[1]);
+    }
+
+    @Override
+    protected boolean setupAppear(ViewGroup sceneRoot,
+            TransitionValues startValues, int startVisibility,
+            TransitionValues endValues, int endVisibility) {
+        View endView = (endValues != null) ? endValues.view : null;
         if ((mFadingMode & IN) != IN) {
             return false;
         }
@@ -91,27 +105,32 @@ public class Fade extends Visibility {
     }
 
     @Override
-    protected Animator appear(ViewGroup sceneRoot, View startView, int startVisibility,
-            View endView, int endVisibility) {
+    protected Animator appear(ViewGroup sceneRoot,
+            TransitionValues startValues, int startVisibility,
+            TransitionValues endValues, int endVisibility) {
+        View endView = (endValues != null) ? endValues.view : null;
         if ((mFadingMode & IN) != IN) {
             return null;
         }
-        // TODO: hack - retain original value from before preAppear
+        // TODO: hack - retain original value from before setupAppear
         return runAnimation(endView, 0, 1, null);
         // TODO: end listener to make sure we end at 1 no matter what
     }
 
     @Override
-    protected boolean preDisappear(ViewGroup sceneRoot, View startView, int startVisibility,
-            View endView, int endVisibility) {
+    protected boolean setupDisappear(ViewGroup sceneRoot,
+            TransitionValues startValues, int startVisibility,
+            TransitionValues endValues, int endVisibility) {
         if ((mFadingMode & OUT) != OUT) {
             return false;
         }
+        View view;
+        View startView = (startValues != null) ? startValues.view : null;
+        View endView = (endValues != null) ? endValues.view : null;
         if (Transition.DBG) {
             Log.d(LOG_TAG, "Fade.predisappear: startView, startVis, endView, endVis = " +
                         startView + ", " + startVisibility + ", " + endView + ", " + endVisibility);
         }
-        View view;
         View overlayView = null;
         View viewToKeep = null;
         if (endView == null) {
@@ -137,6 +156,12 @@ public class Fade extends Visibility {
         // TODO: add automatic facility to Visibility superclass for keeping views around
         if (overlayView != null) {
             // TODO: Need to do this for general case of adding to overlay
+            int screenX = (Integer) startValues.values.get(PROPNAME_SCREEN_X);
+            int screenY = (Integer) startValues.values.get(PROPNAME_SCREEN_Y);
+            int[] loc = new int[2];
+            sceneRoot.getLocationOnScreen(loc);
+            overlayView.offsetLeftAndRight((screenX - loc[0]) - overlayView.getLeft());
+            overlayView.offsetTopAndBottom((screenY - loc[1]) - overlayView.getTop());
             sceneRoot.getOverlay().add(overlayView);
             return true;
         }
@@ -150,11 +175,14 @@ public class Fade extends Visibility {
     }
 
     @Override
-    protected Animator disappear(ViewGroup sceneRoot, View startView, int startVisibility,
-            View endView, int endVisibility) {
+    protected Animator disappear(ViewGroup sceneRoot,
+            TransitionValues startValues, int startVisibility,
+            TransitionValues endValues, int endVisibility) {
         if ((mFadingMode & OUT) != OUT) {
             return null;
         }
+        View startView = (startValues != null) ? startValues.view : null;
+        View endView = (endValues != null) ? endValues.view : null;
         if (Transition.DBG) {
             Log.d(LOG_TAG, "Fade.disappear: startView, startVis, endView, endVis = " +
                 startView + ", " + startVisibility + ", " + endView + ", " + endVisibility);

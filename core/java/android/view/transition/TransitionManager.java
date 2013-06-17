@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.view.transition;
 
 import android.util.ArrayMap;
@@ -142,15 +143,18 @@ public class TransitionManager {
      * @param scene The scene being entered
      * @param transition The transition to play for this scene change
      */
-    private static void changeScene(Scene scene, final Transition transition) {
+    private static void changeScene(Scene scene, Transition transition) {
 
         final ViewGroup sceneRoot = scene.getSceneRoot();
 
-        sceneChangeSetup(sceneRoot, transition);
+        Transition transitionClone = transition.clone();
+        transitionClone.setSceneRoot(sceneRoot);
+
+        sceneChangeSetup(sceneRoot, transitionClone);
 
         scene.enter();
 
-        sceneChangeRunTransition(sceneRoot, transition);
+        sceneChangeRunTransition(sceneRoot, transitionClone);
     }
 
     private static void sceneChangeRunTransition(final ViewGroup sceneRoot,
@@ -169,7 +173,7 @@ public class TransitionManager {
                         }
                     });
                     transition.captureValues(sceneRoot, false);
-                    transition.play(sceneRoot);
+                    transition.playTransition(sceneRoot);
                     return true;
                 }
             });
@@ -317,7 +321,7 @@ public class TransitionManager {
             if (transition == null) {
                 transition = sDefaultTransition;
             }
-            final Transition finalTransition = transition;
+            final Transition finalTransition = transition.clone();
             sceneChangeSetup(sceneRoot, transition);
             sceneRoot.setCurrentScene(null);
             sceneRoot.postOnAnimation(new Runnable() {

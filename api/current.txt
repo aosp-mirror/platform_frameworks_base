@@ -28547,28 +28547,30 @@ package android.view.transition {
     method protected android.animation.Animator play(android.view.ViewGroup, android.view.transition.TransitionValues, android.view.transition.TransitionValues);
   }
 
-  public abstract class Transition {
+  public abstract class Transition implements java.lang.Cloneable {
     ctor public Transition();
     method public void addListener(android.view.transition.Transition.TransitionListener);
     method protected void cancelTransition();
     method protected abstract void captureValues(android.view.transition.TransitionValues, boolean);
+    method public android.view.transition.Transition clone();
     method public long getDuration();
     method public android.animation.TimeInterpolator getInterpolator();
     method public java.util.ArrayList<android.view.transition.Transition.TransitionListener> getListeners();
     method public long getStartDelay();
     method public int[] getTargetIds();
     method public android.view.View[] getTargets();
+    method protected android.view.transition.TransitionValues getTransitionValues(android.view.View, boolean);
     method protected void onTransitionCancel();
     method protected void onTransitionEnd();
     method protected void onTransitionStart();
     method protected abstract android.animation.Animator play(android.view.ViewGroup, android.view.transition.TransitionValues, android.view.transition.TransitionValues);
-    method protected boolean prePlay(android.view.ViewGroup, android.view.transition.TransitionValues, android.view.transition.TransitionValues);
     method public void removeListener(android.view.transition.Transition.TransitionListener);
     method public android.view.transition.Transition setDuration(long);
     method public void setInterpolator(android.animation.TimeInterpolator);
     method public void setStartDelay(long);
     method public android.view.transition.Transition setTargetIds(int...);
     method public android.view.transition.Transition setTargets(android.view.View...);
+    method protected boolean setup(android.view.ViewGroup, android.view.transition.TransitionValues, android.view.transition.TransitionValues);
   }
 
   public static abstract interface Transition.TransitionListener {
@@ -28618,12 +28620,12 @@ package android.view.transition {
 
   public abstract class Visibility extends android.view.transition.Transition {
     ctor public Visibility();
-    method protected android.animation.Animator appear(android.view.ViewGroup, android.view.View, int, android.view.View, int);
+    method protected android.animation.Animator appear(android.view.ViewGroup, android.view.transition.TransitionValues, int, android.view.transition.TransitionValues, int);
     method protected void captureValues(android.view.transition.TransitionValues, boolean);
-    method protected android.animation.Animator disappear(android.view.ViewGroup, android.view.View, int, android.view.View, int);
+    method protected android.animation.Animator disappear(android.view.ViewGroup, android.view.transition.TransitionValues, int, android.view.transition.TransitionValues, int);
     method protected android.animation.Animator play(android.view.ViewGroup, android.view.transition.TransitionValues, android.view.transition.TransitionValues);
-    method protected boolean preAppear(android.view.ViewGroup, android.view.View, int, android.view.View, int);
-    method protected boolean preDisappear(android.view.ViewGroup, android.view.View, int, android.view.View, int);
+    method protected boolean setupAppear(android.view.ViewGroup, android.view.transition.TransitionValues, int, android.view.transition.TransitionValues, int);
+    method protected boolean setupDisappear(android.view.ViewGroup, android.view.transition.TransitionValues, int, android.view.transition.TransitionValues, int);
   }
 
 }

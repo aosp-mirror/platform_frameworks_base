@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.view.transition;
 
 import android.animation.Animator;
 import android.util.AndroidRuntimeException;
-import android.util.ArrayMap;
-import android.util.LongSparseArray;
-import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -106,6 +104,7 @@ public class TransitionGroup extends Transition {
             int numTransitions = transitions.length;
             for (int i = 0; i < numTransitions; ++i) {
                 mTransitions.add(transitions[i]);
+                transitions[i].mParent = this;
                 if (mDuration >= 0) {
                     transitions[0].setDuration(mDuration);
                 }
@@ -139,6 +138,7 @@ public class TransitionGroup extends Transition {
      */
     public void removeTransition(Transition transition) {
         mTransitions.remove(transition);
+        transition.mParent = null;
     }
 
     /**
@@ -147,8 +147,9 @@ public class TransitionGroup extends Transition {
      * must finish first).
      */
     private void setupStartEndListeners() {
+        TransitionGroupListener listener = new TransitionGroupListener(this);
         for (Transition childTransition : mTransitions) {
-            childTransition.addListener(mListener);
+            childTransition.addListener(listener);
         }
         mCurrentListeners = mTransitions.size();
     }
@@ -157,41 +158,28 @@ public class TransitionGroup extends Transition {
      * This listener is used to detect when all child transitions are done, at
      * which point this transition group is also done.
      */
-    private TransitionListener mListener = new TransitionListenerAdapter() {
+    static class TransitionGroupListener extends TransitionListenerAdapter {
+        TransitionGroup mTransitionGroup;
+        TransitionGroupListener(TransitionGroup transitionGroup) {
+            mTransitionGroup = transitionGroup;
+        }
         @Override
         public void onTransitionStart(Transition transition) {
-            if (!mStarted) {
-                startTransition();
-                mStarted = true;
+            if (!mTransitionGroup.mStarted) {
+                mTransitionGroup.startTransition();
+                mTransitionGroup.mStarted = true;
             }
         }
 
         @Override
         public void onTransitionEnd(Transition transition) {
-            --mCurrentListeners;
-            if (mCurrentListeners == 0) {
+            --mTransitionGroup.mCurrentListeners;
+            if (mTransitionGroup.mCurrentListeners == 0) {
                 // All child trans
-                mStarted = false;
-                endTransition();
+                mTransitionGroup.mStarted = false;
+                mTransitionGroup.endTransition();
             }
             transition.removeListener(this);
-        }
-    };
-
-    /**
-     * @hide
-     */
-    @Override
-    protected void prePlay(ViewGroup sceneRoot,
-            ArrayMap<View, TransitionValues> startValues,
-            SparseArray<TransitionValues> startIdValues,
-            LongSparseArray<TransitionValues> startItemIdValues,
-            ArrayMap<View, TransitionValues> endValues,
-            SparseArray<TransitionValues> endIdValues,
-            LongSparseArray<TransitionValues> endItemIdValues) {
-        for (Transition childTransition : mTransitions) {
-            childTransition.prePlay(sceneRoot, startValues, startIdValues, startItemIdValues,
-                    endValues, endIdValues, endItemIdValues);
         }
     }
 
@@ -199,13 +187,18 @@ public class TransitionGroup extends Transition {
      * @hide
      */
     @Override
-    protected void play(ViewGroup sceneRoot,
-            final ArrayMap<View, TransitionValues> startValues,
-            final SparseArray<TransitionValues> startIdValues,
-            final LongSparseArray<TransitionValues> startItemIdValues,
-            final ArrayMap<View, TransitionValues> endValues,
-            final SparseArray<TransitionValues> endIdValues,
-            final LongSparseArray<TransitionValues> endItemIdValues) {
+    protected void setup(ViewGroup sceneRoot, TransitionValuesMaps startValues,
+            TransitionValuesMaps endValues) {
+        for (Transition childTransition : mTransitions) {
+            childTransition.setup(sceneRoot, startValues, endValues);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected void play(ViewGroup sceneRoot) {
         setupStartEndListeners();
         final ViewGroup finalSceneRoot = sceneRoot;
         if (!mPlayTogether) {
@@ -217,22 +210,18 @@ public class TransitionGroup extends Transition {
                 previousTransition.addListener(new TransitionListenerAdapter() {
                     @Override
                     public void onTransitionEnd(Transition transition) {
-                        nextTransition.play(finalSceneRoot,
-                                startValues, startIdValues, startItemIdValues,
-                                endValues, endIdValues, endItemIdValues);
+                        nextTransition.play(finalSceneRoot);
                         transition.removeListener(this);
                     }
                 });
             }
             Transition firstTransition = mTransitions.get(0);
             if (firstTransition != null) {
-                firstTransition.play(finalSceneRoot, startValues, startIdValues, startItemIdValues,
-                        endValues, endIdValues, endItemIdValues);
+                firstTransition.play(finalSceneRoot);
             }
         } else {
             for (Transition childTransition : mTransitions) {
-                childTransition.play(finalSceneRoot, startValues, startIdValues, startItemIdValues,
-                        endValues, endIdValues, endItemIdValues);
+                childTransition.play(finalSceneRoot);
             }
         }
     }
@@ -312,12 +301,32 @@ public class TransitionGroup extends Transition {
     }
 
     @Override
+    void setSceneRoot(ViewGroup sceneRoot) {
+        super.setSceneRoot(sceneRoot);
+        int numTransitions = mTransitions.size();
+        for (int i = 0; i < numTransitions; ++i) {
+            mTransitions.get(i).setSceneRoot(sceneRoot);
+        }
+    }
+
+    @Override
     String toString(String indent) {
         String result = super.toString(indent);
         for (int i = 0; i < mTransitions.size(); ++i) {
             result += "\n" + mTransitions.get(i).toString(indent + "  ");
         }
         return result;
+    }
+
+    @Override
+    public TransitionGroup clone() {
+        TransitionGroup clone = (TransitionGroup) super.clone();
+        clone.mTransitions = new ArrayList<Transition>();
+        int numTransitions = mTransitions.size();
+        for (int i = 0; i < numTransitions; ++i) {
+            clone.mTransitions.add((Transition) mTransitions.get(i).clone());
+        }
+        return clone;
     }
 
 }

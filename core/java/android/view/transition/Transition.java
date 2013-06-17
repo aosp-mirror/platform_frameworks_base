@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.view.transition;
 
 import android.animation.Animator;
@@ -52,7 +53,7 @@ import java.util.ArrayList;
  * with TextureView because they rely on {@link ViewOverlay} functionality,
  * which does not currently work with TextureView.</p>
  */
-public abstract class Transition {
+public abstract class Transition implements Cloneable {
 
     private static final String LOG_TAG = "Transition";
     static final boolean DBG = false;
@@ -62,18 +63,14 @@ public abstract class Transition {
     TimeInterpolator mInterpolator = null;
     int[] mTargetIds;
     View[] mTargets;
-    private ArrayMap<View, TransitionValues> mStartValues =
-            new ArrayMap<View, TransitionValues>();
-    private SparseArray<TransitionValues> mStartIdValues = new SparseArray<TransitionValues>();
-    private LongSparseArray<TransitionValues> mStartItemIdValues =
-            new LongSparseArray<TransitionValues>();
-    private ArrayMap<View, TransitionValues> mEndValues =
-            new ArrayMap<View, TransitionValues>();
-    private SparseArray<TransitionValues> mEndIdValues = new SparseArray<TransitionValues>();
-    private LongSparseArray<TransitionValues> mEndItemIdValues =
-            new LongSparseArray<TransitionValues>();
+    private TransitionValuesMaps mStartValues = new TransitionValuesMaps();
+    private TransitionValuesMaps mEndValues = new TransitionValuesMaps();
+    TransitionGroup mParent = null;
 
-    // Used to carry data between preplay() and play(), cleared before every scene transition
+    // Scene Root is set at play() time in the cloned Transition
+    ViewGroup mSceneRoot = null;
+
+    // Used to carry data between setup() and play(), cleared before every scene transition
     private ArrayList<TransitionValues> mPlayStartValuesList = new ArrayList<TransitionValues>();
     private ArrayList<TransitionValues> mPlayEndValuesList = new ArrayList<TransitionValues>();
 
@@ -185,7 +182,7 @@ public abstract class Transition {
      * actually starting the animation. This is necessary because the scene
      * change that triggers the Transition will automatically set the end-scene
      * on all target views, so a Transition that wants to animate from a
-     * different value should set that value in the preplay() method.
+     * different value should set that value in the setup() method.
      *
      * <p>Additionally, a Transition can perform logic to determine whether
      * the transition needs to run on the given target and start/end values.
@@ -206,19 +203,19 @@ public abstract class Transition {
      * TransitionValues, TransitionValues) play()} method should be called
      * during this scene change, false otherwise.
      */
-    protected boolean prePlay(ViewGroup sceneRoot, TransitionValues startValues,
+    protected boolean setup(ViewGroup sceneRoot, TransitionValues startValues,
             TransitionValues endValues) {
         return true;
     }
 
     /**
-     * This version of prePlay() is called with the entire set of start/end
+     * This version of setup() is called with the entire set of start/end
      * values. The implementation in Transition iterates through these lists
-     * and calls {@link #prePlay(ViewGroup, TransitionValues, TransitionValues)}
+     * and calls {@link #setup(ViewGroup, TransitionValues, TransitionValues)}
      * with each set of start/end values on this transition. The
      * TransitionGroup subclass overrides this method and delegates it to
      * each of its children in succession. The intention in splitting
-     * preplay() out from play() is to allow all Transitions in the tree to
+     * setup() out from play() is to allow all Transitions in the tree to
      * set up the appropriate start scene for their target objects prior to
      * any calls to play(), which is necessary when there is a sequential
      * Transition, where a child transition which is not the first may want to
@@ -226,32 +223,29 @@ public abstract class Transition {
      *
      * @hide
      */
-    protected void prePlay(ViewGroup sceneRoot, ArrayMap<View, TransitionValues> startValues,
-            SparseArray<TransitionValues> startIdValues,
-            LongSparseArray<TransitionValues> startItemIdValues,
-            ArrayMap<View, TransitionValues> endValues,
-            SparseArray<TransitionValues> endIdValues,
-            LongSparseArray<TransitionValues> endItemIdValues) {
+    protected void setup(ViewGroup sceneRoot, TransitionValuesMaps startValues,
+            TransitionValuesMaps endValues) {
         mPlayStartValuesList.clear();
         mPlayEndValuesList.clear();
-        ArrayMap<View, TransitionValues> endCopy = new ArrayMap<View, TransitionValues>(endValues);
+        ArrayMap<View, TransitionValues> endCopy =
+                new ArrayMap<View, TransitionValues>(endValues.viewValues);
         SparseArray<TransitionValues> endIdCopy =
-                new SparseArray<TransitionValues>(endIdValues.size());
-        for (int i = 0; i < endIdValues.size(); ++i) {
-            int id = endIdValues.keyAt(i);
-            endIdCopy.put(id, endIdValues.valueAt(i));
+                new SparseArray<TransitionValues>(endValues.idValues.size());
+        for (int i = 0; i < endValues.idValues.size(); ++i) {
+            int id = endValues.idValues.keyAt(i);
+            endIdCopy.put(id, endValues.idValues.valueAt(i));
         }
         LongSparseArray<TransitionValues> endItemIdCopy =
-                new LongSparseArray<TransitionValues>(endItemIdValues.size());
-        for (int i = 0; i < endItemIdValues.size(); ++i) {
-            long id = endItemIdValues.keyAt(i);
-            endItemIdCopy.put(id, endItemIdValues.valueAt(i));
+                new LongSparseArray<TransitionValues>(endValues.itemIdValues.size());
+        for (int i = 0; i < endValues.itemIdValues.size(); ++i) {
+            long id = endValues.itemIdValues.keyAt(i);
+            endItemIdCopy.put(id, endValues.itemIdValues.valueAt(i));
         }
         // Walk through the start values, playing everything we find
         // Remove from the end set as we go
         ArrayList<TransitionValues> startValuesList = new ArrayList<TransitionValues>();
         ArrayList<TransitionValues> endValuesList = new ArrayList<TransitionValues>();
-        for (View view : startValues.keySet()) {
+        for (View view : startValues.viewValues.keySet()) {
             TransitionValues start = null;
             TransitionValues end = null;
             boolean isInListView = false;
@@ -260,13 +254,13 @@ public abstract class Transition {
             }
             if (!isInListView) {
                 int id = view.getId();
-                start = startValues.get(view) != null ?
-                        startValues.get(view) : startIdValues.get(id);
-                if (endValues.get(view) != null) {
-                    end = endValues.get(view);
+                start = startValues.viewValues.get(view) != null ?
+                        startValues.viewValues.get(view) : startValues.idValues.get(id);
+                if (endValues.viewValues.get(view) != null) {
+                    end = endValues.viewValues.get(view);
                     endCopy.remove(view);
                 } else {
-                    end = endIdValues.get(id);
+                    end = endValues.idValues.get(id);
                     View removeView = null;
                     for (View viewToRemove : endCopy.keySet()) {
                         if (viewToRemove.getId() == id) {
@@ -287,7 +281,7 @@ public abstract class Transition {
                 if (parent.getAdapter().hasStableIds()) {
                     int position = parent.getPositionForView(view);
                     long itemId = parent.getItemIdAtPosition(position);
-                    start = startItemIdValues.get(itemId);
+                    start = startValues.itemIdValues.get(itemId);
                     endItemIdCopy.remove(itemId);
                     // TODO: deal with targetIDs for itemIDs for ListView items
                     startValuesList.add(start);
@@ -295,12 +289,12 @@ public abstract class Transition {
                 }
             }
         }
-        int startItemIdCopySize = startItemIdValues.size();
+        int startItemIdCopySize = startValues.itemIdValues.size();
         for (int i = 0; i < startItemIdCopySize; ++i) {
-            long id = startItemIdValues.keyAt(i);
+            long id = startValues.itemIdValues.keyAt(i);
             if (isValidTarget(null, id)) {
-                TransitionValues start = startItemIdValues.get(id);
-                TransitionValues end = endItemIdValues.get(id);
+                TransitionValues start = startValues.itemIdValues.get(id);
+                TransitionValues end = endValues.itemIdValues.get(id);
                 endItemIdCopy.remove(id);
                 startValuesList.add(start);
                 endValuesList.add(end);
@@ -310,8 +304,8 @@ public abstract class Transition {
         for (View view : endCopy.keySet()) {
             int id = view.getId();
             if (isValidTarget(view, id)) {
-                TransitionValues start = startValues.get(view) != null ?
-                        startValues.get(view) : startIdValues.get(id);
+                TransitionValues start = startValues.viewValues.get(view) != null ?
+                        startValues.viewValues.get(view) : startValues.idValues.get(id);
                 TransitionValues end = endCopy.get(view);
                 endIdCopy.remove(id);
                 startValuesList.add(start);
@@ -322,7 +316,7 @@ public abstract class Transition {
         for (int i = 0; i < endIdCopySize; ++i) {
             int id = endIdCopy.keyAt(i);
             if (isValidTarget(null, id)) {
-                TransitionValues start = startIdValues.get(id);
+                TransitionValues start = startValues.idValues.get(id);
                 TransitionValues end = endIdCopy.get(id);
                 startValuesList.add(start);
                 endValuesList.add(end);
@@ -332,7 +326,7 @@ public abstract class Transition {
         for (int i = 0; i < endItemIdCopySize; ++i) {
             long id = endItemIdCopy.keyAt(i);
             // TODO: Deal with targetIDs and itemIDs
-            TransitionValues start = startItemIdValues.get(id);
+            TransitionValues start = startValues.itemIdValues.get(id);
             TransitionValues end = endItemIdCopy.get(id);
             startValuesList.add(start);
             endValuesList.add(end);
@@ -341,7 +335,7 @@ public abstract class Transition {
             TransitionValues start = startValuesList.get(i);
             TransitionValues end = endValuesList.get(i);
             // TODO: what to do about targetIds and itemIds?
-            if (prePlay(sceneRoot, start, end)) {
+            if (setup(sceneRoot, start, end)) {
                 // Note: we've already done the check against targetIDs in these lists
                 mPlayStartValuesList.add(start);
                 mPlayEndValuesList.add(end);
@@ -390,13 +384,7 @@ public abstract class Transition {
      *
      * @hide
      */
-    protected void play(ViewGroup sceneRoot,
-            final ArrayMap<View, TransitionValues> startValues,
-            final SparseArray<TransitionValues> startIdValues,
-            final LongSparseArray<TransitionValues> startItemIdValues,
-            final ArrayMap<View, TransitionValues> endValues,
-            final SparseArray<TransitionValues> endIdValues,
-            final LongSparseArray<TransitionValues> endItemIdValues) {
+    protected void play(ViewGroup sceneRoot) {
 
         startTransition();
         // Now walk the list of TransitionValues, calling play for each pair
@@ -436,7 +424,7 @@ public abstract class Transition {
      * <code>start</code>. The main concern for an implementation is what the
      * properties are that the transition cares about and what the values are
      * for all of those properties. The start and end values will be compared
-     * later during the preplay and play() methods to determine what, if any,
+     * later during the setup() and play() methods to determine what, if any,
      * animations, should be run.
      *
      * @param transitionValues The holder any values that the Transition
@@ -553,14 +541,14 @@ public abstract class Transition {
                         values.view = view;
                         captureValues(values, start);
                         if (start) {
-                            mStartValues.put(view, values);
+                            mStartValues.viewValues.put(view, values);
                             if (id >= 0) {
-                                mStartIdValues.put(id, values);
+                                mStartValues.idValues.put(id, values);
                             }
                         } else {
-                            mEndValues.put(view, values);
+                            mEndValues.viewValues.put(view, values);
                             if (id >= 0) {
-                                mEndIdValues.put(id, values);
+                                mEndValues.idValues.put(id, values);
                             }
                         }
                     }
@@ -574,9 +562,9 @@ public abstract class Transition {
                         values.view = view;
                         captureValues(values, start);
                         if (start) {
-                            mStartValues.put(view, values);
+                            mStartValues.viewValues.put(view, values);
                         } else {
-                            mEndValues.put(view, values);
+                            mEndValues.viewValues.put(view, values);
                         }
                     }
                 }
@@ -622,21 +610,21 @@ public abstract class Transition {
         captureValues(values, start);
         if (start) {
             if (!isListViewItem) {
-                mStartValues.put(view, values);
+                mStartValues.viewValues.put(view, values);
                 if (id >= 0) {
-                    mStartIdValues.put((int) id, values);
+                    mStartValues.idValues.put((int) id, values);
                 }
             } else {
-                mStartItemIdValues.put(id, values);
+                mStartValues.itemIdValues.put(id, values);
             }
         } else {
             if (!isListViewItem) {
-                mEndValues.put(view, values);
+                mEndValues.viewValues.put(view, values);
                 if (id >= 0) {
-                    mEndIdValues.put((int) id, values);
+                    mEndValues.idValues.put((int) id, values);
                 }
             } else {
-                mEndItemIdValues.put(id, values);
+                mEndValues.itemIdValues.put(id, values);
             }
         }
         if (view instanceof ViewGroup) {
@@ -648,18 +636,45 @@ public abstract class Transition {
     }
 
     /**
+     * This method can be called by transitions to get the TransitionValues for
+     * any particular view during the transition-playing process. This might be
+     * necessary, for example, to query the before/after state of related views
+     * for a given transition.
+     */
+    protected TransitionValues getTransitionValues(View view, boolean start) {
+        if (mParent != null) {
+            return mParent.getTransitionValues(view, start);
+        }
+        TransitionValuesMaps valuesMaps = start ? mStartValues : mEndValues;
+        TransitionValues values = valuesMaps.viewValues.get(view);
+        if (values == null) {
+            int id = view.getId();
+            if (id >= 0) {
+                values = valuesMaps.idValues.get(id);
+            }
+            if (values == null && view.getParent() instanceof ListView) {
+                ListView listview = (ListView) view.getParent();
+                int position = listview.getPositionForView(view);
+                long itemId = listview.getItemIdAtPosition(position);
+                values = valuesMaps.itemIdValues.get(itemId);
+            }
+            // TODO: Doesn't handle the case where a view was parented to a
+            // ListView (with an itemId), but no longer is
+        }
+        return values;
+    }
+
+    /**
      * Called by TransitionManager to play the transition. This calls
-     * prePlay() and then play() with the full set of per-view
+     * setup() and then play() with the full set of per-view
      * transitionValues objects
      */
-    void play(ViewGroup sceneRoot) {
-        // prePlay() must be called on entire transition hierarchy and set of views
+    void playTransition(ViewGroup sceneRoot) {
+        // setup() must be called on entire transition hierarchy and set of views
         // before calling play() on anything; every transition needs a chance to set up
         // target views appropriately before transitions begin running
-        prePlay(sceneRoot, mStartValues, mStartIdValues, mStartItemIdValues,
-                mEndValues, mEndIdValues, mEndItemIdValues);
-        play(sceneRoot, mStartValues, mStartIdValues, mStartItemIdValues,
-                mEndValues, mEndIdValues, mEndItemIdValues);
+        setup(sceneRoot, mStartValues, mEndValues);
+        play(sceneRoot);
     }
 
     /**
@@ -766,26 +781,26 @@ public abstract class Transition {
                     tmpListeners.get(i).onTransitionEnd(this);
                 }
             }
-            for (int i = 0; i < mStartItemIdValues.size(); ++i) {
-                TransitionValues tv = mStartItemIdValues.valueAt(i);
+            for (int i = 0; i < mStartValues.itemIdValues.size(); ++i) {
+                TransitionValues tv = mStartValues.itemIdValues.valueAt(i);
                 View v = tv.view;
                 if (v.hasTransientState()) {
                     v.setHasTransientState(false);
                 }
             }
-            for (int i = 0; i < mEndItemIdValues.size(); ++i) {
-                TransitionValues tv = mEndItemIdValues.valueAt(i);
+            for (int i = 0; i < mEndValues.itemIdValues.size(); ++i) {
+                TransitionValues tv = mEndValues.itemIdValues.valueAt(i);
                 View v = tv.view;
                 if (v.hasTransientState()) {
                     v.setHasTransientState(false);
                 }
             }
-            mStartValues.clear();
-            mStartIdValues.clear();
-            mStartItemIdValues.clear();
-            mEndValues.clear();
-            mEndIdValues.clear();
-            mEndItemIdValues.clear();
+            mStartValues.viewValues.clear();
+            mStartValues.idValues.clear();
+            mStartValues.itemIdValues.clear();
+            mEndValues.viewValues.clear();
+            mEndValues.idValues.clear();
+            mEndValues.itemIdValues.clear();
             mCurrentAnimators.clear();
         }
     }
@@ -853,9 +868,23 @@ public abstract class Transition {
         return mListeners;
     }
 
+    void setSceneRoot(ViewGroup sceneRoot) {
+        mSceneRoot = sceneRoot;
+    }
+
     @Override
     public String toString() {
         return toString("");
+    }
+
+    @Override
+    public Transition clone() {
+        Transition clone = null;
+        try {
+            clone = (Transition) super.clone();
+        } catch (CloneNotSupportedException e) {}
+
+        return clone;
     }
 
     String toString(String indent) {
