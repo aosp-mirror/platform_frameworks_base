@@ -152,7 +152,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private boolean mChildAcceptsDrag;
 
     // Used during drag dispatch
-    private final PointF mLocalPoint = new PointF();
+    private PointF mLocalPoint;
 
     // Layout animation
     private LayoutAnimationController mLayoutAnimationController;
@@ -1129,6 +1129,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    private PointF getLocalPoint() {
+        if (mLocalPoint == null) mLocalPoint = new PointF();
+        return mLocalPoint;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -1142,6 +1147,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         ViewRootImpl root = getViewRootImpl();
 
         // Dispatch down the view hierarchy
+        final PointF localPoint = getLocalPoint();
+
         switch (event.mAction) {
         case DragEvent.ACTION_DRAG_STARTED: {
             // clear state to recalculate which views we drag over
@@ -1202,7 +1209,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         case DragEvent.ACTION_DRAG_LOCATION: {
             // Find the [possibly new] drag target
-            final View target = findFrontmostDroppableChildAt(event.mX, event.mY, mLocalPoint);
+            final View target = findFrontmostDroppableChildAt(event.mX, event.mY, localPoint);
 
             // If we've changed apparent drag target, tell the view root which view
             // we're over now [for purposes of the eventual drag-recipient-changed
@@ -1236,8 +1243,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             // Dispatch the actual drag location notice, localized into its coordinates
             if (target != null) {
-                event.mX = mLocalPoint.x;
-                event.mY = mLocalPoint.y;
+                event.mX = localPoint.x;
+                event.mY = localPoint.y;
 
                 retval = target.dispatchDragEvent(event);
 
@@ -1271,11 +1278,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         case DragEvent.ACTION_DROP: {
             if (ViewDebug.DEBUG_DRAG) Log.d(View.VIEW_LOG_TAG, "Drop event: " + event);
-            View target = findFrontmostDroppableChildAt(event.mX, event.mY, mLocalPoint);
+            View target = findFrontmostDroppableChildAt(event.mX, event.mY, localPoint);
             if (target != null) {
                 if (ViewDebug.DEBUG_DRAG) Log.d(View.VIEW_LOG_TAG, "   dispatch drop to " + target);
-                event.mX = mLocalPoint.x;
-                event.mY = mLocalPoint.y;
+                event.mX = localPoint.x;
+                event.mY = localPoint.y;
                 retval = target.dispatchDragEvent(event);
                 event.mX = tx;
                 event.mY = ty;
@@ -2776,8 +2783,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return (int) (dips * scale + 0.5f);
     }
 
-    private void drawRectCorners(Canvas canvas, int x1, int y1, int x2, int y2, Paint paint,
-                                 int lineLength, int lineWidth) {
+    private static void drawRectCorners(Canvas canvas, int x1, int y1, int x2, int y2, Paint paint,
+            int lineLength, int lineWidth) {
         drawCorner(canvas, paint, x1, y1, lineLength, lineLength, lineWidth);
         drawCorner(canvas, paint, x1, y2, lineLength, -lineLength, lineWidth);
         drawCorner(canvas, paint, x2, y1, -lineLength, lineLength, lineWidth);
@@ -6422,7 +6429,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     private static final class TouchTarget {
         private static final int MAX_RECYCLED = 32;
-        private static final Object sRecycleLock = new Object();
+        private static final Object sRecycleLock = new Object[0];
         private static TouchTarget sRecycleBin;
         private static int sRecycledCount;
 
@@ -6474,7 +6481,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /* Describes a hovered view. */
     private static final class HoverTarget {
         private static final int MAX_RECYCLED = 32;
-        private static final Object sRecycleLock = new Object();
+        private static final Object sRecycleLock = new Object[0];
         private static HoverTarget sRecycleBin;
         private static int sRecycledCount;
 
@@ -6693,8 +6700,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return sDebugPaint;
     }
 
-    private void drawRect(Canvas canvas, Paint paint, int x1, int y1, int x2, int y2) {
+    private static void drawRect(Canvas canvas, Paint paint, int x1, int y1, int x2, int y2) {
         if (sDebugLines== null) {
+            // TODO: This won't work with multiple UI threads in a single process
             sDebugLines = new float[16];
         }
 
