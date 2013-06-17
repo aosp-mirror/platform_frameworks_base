@@ -1295,7 +1295,6 @@ public:
             const float* positions, SkPaint* paint, float totalAdvance, const Rect& bounds)
             : DrawBoundedOp(bounds, paint), mText(text), mBytesCount(bytesCount), mCount(count),
             mX(x), mY(y), mPositions(positions), mTotalAdvance(totalAdvance) {
-        mLocalBounds.translate(x,y);
         memset(&mPrecacheTransform.data[0], 0xff, 16 * sizeof(float));
     }
 

@@ -602,6 +602,7 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
     int bytesCount = glyphsCount * sizeof(jchar);
     const SkRect& r = value->getBounds();
     android::uirenderer::Rect bounds(r.fLeft, r.fTop, r.fRight, r.fBottom);
+    bounds.translate(x, y);
 
     renderer->drawText((const char*) glyphs, bytesCount, glyphsCount,
             x + xOffsetForTextAlign(paint, totalAdvance), y, positions,
@@ -637,6 +638,7 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
     int bytesCount = glyphsCount * sizeof(jchar);
     const SkRect& r = value->getBounds();
     android::uirenderer::Rect bounds(r.fLeft, r.fTop, r.fRight, r.fBottom);
+    bounds.translate(x, y);
 
     renderer->drawText((const char*) glyphs, bytesCount, glyphsCount,
             x + xOffsetForTextAlign(paint, totalAdvance), y, positions,
