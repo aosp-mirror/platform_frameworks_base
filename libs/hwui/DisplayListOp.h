@@ -129,7 +129,10 @@ public:
             return;
         }
 
-        if (!getLocalBounds(state.mBounds)) {
+        if (getLocalBounds(state.mBounds)) {
+            // valid empty bounds, don't bother deferring
+            if (state.mBounds.isEmpty()) return;
+        } else {
             // empty bounds signify bounds can't be calculated
             state.mBounds.setEmpty();
         }
