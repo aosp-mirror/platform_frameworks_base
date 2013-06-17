@@ -30,9 +30,9 @@ class GLES20DisplayList extends DisplayList {
     // alive as long as the DisplayList is alive.  The Bitmap and DisplayList lists
     // are populated by the GLES20RecordingCanvas during appropriate drawing calls and are
     // cleared at the start of a new drawing frame or when the view is detached from the window.
-    final ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>(10);
-    final ArrayList<NinePatch> mNinePatches = new ArrayList<NinePatch>(10);
-    final ArrayList<DisplayList> mChildDisplayLists = new ArrayList<DisplayList>();
+    private ArrayList<Bitmap> mBitmaps;
+    private ArrayList<NinePatch> mNinePatches;
+    private ArrayList<DisplayList> mChildDisplayLists;
 
     private GLES20RecordingCanvas mCanvas;
     private boolean mValid;
@@ -89,9 +89,24 @@ class GLES20DisplayList extends DisplayList {
     }
 
     void clearReferences() {
-        mBitmaps.clear();
-        mNinePatches.clear();
-        mChildDisplayLists.clear();
+        if (mBitmaps != null) mBitmaps.clear();
+        if (mNinePatches != null) mNinePatches.clear();
+        if (mChildDisplayLists != null) mChildDisplayLists.clear();
+    }
+
+    ArrayList<Bitmap> getBitmaps() {
+        if (mBitmaps == null) mBitmaps = new ArrayList<Bitmap>(5);
+        return mBitmaps;
+    }
+
+    ArrayList<NinePatch> getNinePatches() {
+        if (mNinePatches == null) mNinePatches = new ArrayList<NinePatch>(5);
+        return mNinePatches;
+    }
+
+    ArrayList<DisplayList> getChildDisplayLists() {
+        if (mChildDisplayLists == null) mChildDisplayLists = new ArrayList<DisplayList>();
+        return mChildDisplayLists;
     }
 
     @Override
