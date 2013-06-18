@@ -27578,13 +27578,17 @@ package android.view.accessibility {
     method public android.view.accessibility.AccessibilityNodeInfo getChild(int);
     method public int getChildCount();
     method public java.lang.CharSequence getClassName();
+    method public android.view.accessibility.AccessibilityNodeInfo.CollectionInfo getCollectionInfo();
+    method public android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo getCollectionItemInfo();
     method public java.lang.CharSequence getContentDescription();
     method public int getInputType();
     method public android.view.accessibility.AccessibilityNodeInfo getLabelFor();
     method public android.view.accessibility.AccessibilityNodeInfo getLabeledBy();
     method public int getMovementGranularities();
+    method public boolean getOpensPopup();
     method public java.lang.CharSequence getPackageName();
     method public android.view.accessibility.AccessibilityNodeInfo getParent();
+    method public android.view.accessibility.AccessibilityNodeInfo.RangeInfo getRangeInfo();
     method public java.lang.CharSequence getText();
     method public int getTextSelectionEnd();
     method public int getTextSelectionStart();
@@ -27594,11 +27598,17 @@ package android.view.accessibility {
     method public boolean isCheckable();
     method public boolean isChecked();
     method public boolean isClickable();
+    method public boolean isContentInvalid();
+    method public boolean isDismissable();
     method public boolean isEditable();
     method public boolean isEnabled();
+    method public boolean isExpandable();
+    method public boolean isExpanded();
     method public boolean isFocusable();
     method public boolean isFocused();
+    method public boolean isLiveRegion();
     method public boolean isLongClickable();
+    method public boolean isMultiLine();
     method public boolean isPassword();
     method public boolean isScrollable();
     method public boolean isSelected();
@@ -27618,9 +27628,15 @@ package android.view.accessibility {
     method public void setChecked(boolean);
     method public void setClassName(java.lang.CharSequence);
     method public void setClickable(boolean);
+    method public void setCollectionInfo(android.view.accessibility.AccessibilityNodeInfo.CollectionInfo);
+    method public void setCollectionItemInfo(android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo);
     method public void setContentDescription(java.lang.CharSequence);
+    method public void setContentInvalid(boolean);
+    method public void setDismissable(boolean);
     method public void setEditable(boolean);
     method public void setEnabled(boolean);
+    method public void setExpandable(boolean);
+    method public void setExpanded(boolean);
     method public void setFocusable(boolean);
     method public void setFocused(boolean);
     method public void setInputType(int);
@@ -27628,12 +27644,16 @@ package android.view.accessibility {
     method public void setLabelFor(android.view.View, int);
     method public void setLabeledBy(android.view.View);
     method public void setLabeledBy(android.view.View, int);
+    method public void setLiveRegion(boolean);
     method public void setLongClickable(boolean);
     method public void setMovementGranularities(int);
+    method public void setMultiLine(boolean);
+    method public void setOpensPopup(boolean);
     method public void setPackageName(java.lang.CharSequence);
     method public void setParent(android.view.View);
     method public void setParent(android.view.View, int);
     method public void setPassword(boolean);
+    method public void setRangeInfo(android.view.accessibility.AccessibilityNodeInfo.RangeInfo);
     method public void setScrollable(boolean);
     method public void setSelected(boolean);
     method public void setSource(android.view.View);
@@ -27653,8 +27673,11 @@ package android.view.accessibility {
     field public static final int ACTION_CLEAR_FOCUS = 2; // 0x2
     field public static final int ACTION_CLEAR_SELECTION = 8; // 0x8
     field public static final int ACTION_CLICK = 16; // 0x10
+    field public static final int ACTION_COLLAPSE = 524288; // 0x80000
     field public static final int ACTION_COPY = 16384; // 0x4000
     field public static final int ACTION_CUT = 65536; // 0x10000
+    field public static final int ACTION_DISMISS = 1048576; // 0x100000
+    field public static final int ACTION_EXPAND = 262144; // 0x40000
     field public static final int ACTION_FOCUS = 1; // 0x1
     field public static final int ACTION_LONG_CLICK = 32; // 0x20
     field public static final int ACTION_NEXT_AT_MOVEMENT_GRANULARITY = 256; // 0x100
@@ -27674,6 +27697,33 @@ package android.view.accessibility {
     field public static final int MOVEMENT_GRANULARITY_PAGE = 16; // 0x10
     field public static final int MOVEMENT_GRANULARITY_PARAGRAPH = 8; // 0x8
     field public static final int MOVEMENT_GRANULARITY_WORD = 2; // 0x2
+  }
+
+  public static final class AccessibilityNodeInfo.CollectionInfo {
+    method public int getHorizontalSize();
+    method public int getVerticalSize();
+    method public boolean isHierarchical();
+    method public static android.view.accessibility.AccessibilityNodeInfo.CollectionInfo obtain(int, int, boolean);
+  }
+
+  public static final class AccessibilityNodeInfo.CollectionItemInfo {
+    method public int getHorizontalPosition();
+    method public int getHorizontalSpan();
+    method public int getVerticalPosition();
+    method public int getVerticalSpan();
+    method public boolean isHeading();
+    method public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(int, int, int, int, boolean);
+  }
+
+  public static final class AccessibilityNodeInfo.RangeInfo {
+    method public float getCurrent();
+    method public float getMax();
+    method public float getMin();
+    method public int getType();
+    method public static android.view.accessibility.AccessibilityNodeInfo.RangeInfo obtain(int, float, float, float);
+    field public static final int RANGE_TYPE_FLOAT = 1; // 0x1
+    field public static final int RANGE_TYPE_INT = 0; // 0x0
+    field public static final int RANGE_TYPE_PERCENT = 2; // 0x2
   }
 
   public abstract class AccessibilityNodeProvider {
