@@ -2577,7 +2577,7 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Class with information if a node is a range. Use
-     * {@link #obtain(int, float, float, float)} to get an instance.
+     * {@link RangeInfo#obtain(int, float, float, float) to get an instance.
      */
     public static final class RangeInfo {
         private static final int MAX_POOL_SIZE = 10;
@@ -2683,7 +2683,7 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Class with information if a node is a collection. Use
-     * {@link #obtain(int, float, float, float)} to an instance.
+     * {@link CollectionInfo#obtain(int, int, boolean) to an instance.
      */
     public static final class CollectionInfo {
         private static final int MAX_POOL_SIZE = 20;
@@ -2767,7 +2767,7 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Class with information if a node is a collection item. Use
-     * {@link #obtain(int, int, boolean)} to get an instance.
+     * {@link CollectionItemInfo#obtain(int, int, int, int, boolean) to get an instance.
      */
     public static final class CollectionItemInfo {
         private static final int MAX_POOL_SIZE = 20;
