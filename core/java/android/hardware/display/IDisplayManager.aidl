@@ -20,6 +20,7 @@ import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.WifiDisplay;
 import android.hardware.display.WifiDisplayStatus;
 import android.view.DisplayInfo;
+import android.view.Surface;
 
 /** @hide */
 interface IDisplayManager {
@@ -46,4 +47,11 @@ interface IDisplayManager {
 
     // No permissions required.
     WifiDisplayStatus getWifiDisplayStatus();
+
+    // No permissions required.
+    int createPrivateVirtualDisplay(IBinder token, String packageName,
+            String name, int width, int height, int densityDpi, in Surface surface);
+
+    // No permissions required but must be same Uid as the creator.
+    void releaseVirtualDisplay(in IBinder token);
 }

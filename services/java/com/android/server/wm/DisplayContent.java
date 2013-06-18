@@ -140,6 +140,13 @@ class DisplayContent {
         return mDisplayInfo;
     }
 
+    /**
+     * Returns true if the specified UID has access to this display.
+     */
+    public boolean hasAccess(int uid) {
+        return mDisplay.hasAccess(uid);
+    }
+
     boolean homeOnTop() {
         return mStackBoxes.get(0).mStack != mHomeStack;
     }

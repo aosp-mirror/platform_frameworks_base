@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.Surface;
 
 import java.util.ArrayList;
 
@@ -134,6 +135,7 @@ public final class DisplayManager {
                     addMatchingDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_WIFI);
                     addMatchingDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_HDMI);
                     addMatchingDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_OVERLAY);
+                    addMatchingDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_VIRTUAL);
                 }
                 return mTempDisplays.toArray(new Display[mTempDisplays.size()]);
             } finally {
@@ -272,6 +274,41 @@ public final class DisplayManager {
      */
     public WifiDisplayStatus getWifiDisplayStatus() {
         return mGlobal.getWifiDisplayStatus();
+    }
+
+    /**
+     * Creates a private virtual display.
+     * <p>
+     * The content of a virtual display is rendered to a {@link Surface} provided
+     * by the application that created the virtual display.
+     * </p><p>
+     * Only the application that created a private virtual display is allowed to
+     * place windows upon it.  The private virtual display also does not participate
+     * in display mirroring: it will neither receive mirrored content from another
+     * display nor allow its own content to be mirrored elsewhere.  More precisely,
+     * the only processes that are allowed to enumerate or interact with a private
+     * display are those that have the same UID as the application that originally
+     * created the private virtual display.
+     * </p><p>
+     * The private virtual display should be {@link VirtualDisplay#release released}
+     * when no longer needed.  Because a private virtual display renders to a surface
+     * provided by the application, it will be released automatically when the
+     * process terminates and all remaining windows on it will be forcibly removed.
+     * </p>
+     *
+     * @param name The name of the virtual display, must be non-empty.
+     * @param width The width of the virtual display in pixels, must be greater than 0.
+     * @param height The height of the virtual display in pixels, must be greater than 0.
+     * @param densityDpi The density of the virtual display in dpi, must be greater than 0.
+     * @param surface The surface to which the content of the virtual display should
+     * be rendered, must be non-null.
+     * @return The newly created virtual display, or null if the application could
+     * not create the virtual display.
+     */
+    public VirtualDisplay createPrivateVirtualDisplay(String name,
+            int width, int height, int densityDpi, Surface surface) {
+        return mGlobal.createPrivateVirtualDisplay(mContext,
+                name, width, height, densityDpi, surface);
     }
 
     /**

@@ -2105,6 +2105,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
             if (displayContent == null) {
+                Slog.w(TAG, "Attempted to add window to a display that does not exist: "
+                        + displayId + ".  Aborting.");
+                return WindowManagerGlobal.ADD_INVALID_DISPLAY;
+            }
+            if (!displayContent.hasAccess(session.mUid)) {
+                Slog.w(TAG, "Attempted to add window to a display for which the application "
+                        + "does not have access: " + displayId + ".  Aborting.");
                 return WindowManagerGlobal.ADD_INVALID_DISPLAY;
             }
 
@@ -7521,7 +7528,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public void getInitialDisplaySize(int displayId, Point size) {
         synchronized (mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent != null) {
+            if (displayContent != null && displayContent.hasAccess(Binder.getCallingUid())) {
                 synchronized(displayContent.mDisplaySizeLock) {
                     size.x = displayContent.mInitialDisplayWidth;
                     size.y = displayContent.mInitialDisplayHeight;
@@ -7534,7 +7541,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public void getBaseDisplaySize(int displayId, Point size) {
         synchronized (mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent != null) {
+            if (displayContent != null && displayContent.hasAccess(Binder.getCallingUid())) {
                 synchronized(displayContent.mDisplaySizeLock) {
                     size.x = displayContent.mBaseDisplayWidth;
                     size.y = displayContent.mBaseDisplayHeight;
@@ -7649,7 +7656,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public int getInitialDisplayDensity(int displayId) {
         synchronized (mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent != null) {
+            if (displayContent != null && displayContent.hasAccess(Binder.getCallingUid())) {
                 synchronized(displayContent.mDisplaySizeLock) {
                     return displayContent.mInitialDisplayDensity;
                 }
@@ -7662,7 +7669,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public int getBaseDisplayDensity(int displayId) {
         synchronized (mWindowMap) {
             final DisplayContent displayContent = getDisplayContentLocked(displayId);
-            if (displayContent != null) {
+            if (displayContent != null && displayContent.hasAccess(Binder.getCallingUid())) {
                 synchronized(displayContent.mDisplaySizeLock) {
                     return displayContent.mBaseDisplayDensity;
                 }

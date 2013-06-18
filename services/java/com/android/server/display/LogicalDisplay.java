@@ -202,6 +202,9 @@ final class LogicalDisplay {
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_SECURE) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_SECURE;
             }
+            if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_PRIVATE) != 0) {
+                mBaseDisplayInfo.flags |= Display.FLAG_PRIVATE;
+            }
             mBaseDisplayInfo.type = deviceInfo.type;
             mBaseDisplayInfo.address = deviceInfo.address;
             mBaseDisplayInfo.name = deviceInfo.name;
@@ -218,6 +221,8 @@ final class LogicalDisplay {
             mBaseDisplayInfo.smallestNominalAppHeight = deviceInfo.height;
             mBaseDisplayInfo.largestNominalAppWidth = deviceInfo.width;
             mBaseDisplayInfo.largestNominalAppHeight = deviceInfo.height;
+            mBaseDisplayInfo.ownerUid = deviceInfo.ownerUid;
+            mBaseDisplayInfo.ownerPackageName = deviceInfo.ownerPackageName;
 
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo = null;
