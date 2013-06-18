@@ -2336,7 +2336,7 @@ final class Settings {
                 } else if (tagName.equals("signing-keyset")) {
                     long id = Long.parseLong(parser.getAttributeValue(null, "identifier"));
                     packageSetting.keySetData.addSigningKeySet(id);
-                    Slog.e(TAG, "Adding signing keyset " + Long.toString(id) + " to " + name);
+                    Slog.d(TAG, "Adding signing keyset " + Long.toString(id) + " to " + name);
                 } else if (tagName.equals("defined-keyset")) {
                     long id = Long.parseLong(parser.getAttributeValue(null, "identifier"));
                     String alias = parser.getAttributeValue(null, "alias");
