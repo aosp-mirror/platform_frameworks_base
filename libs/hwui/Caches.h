@@ -58,7 +58,8 @@ namespace uirenderer {
 // GL ES 2.0 defines that at least 16 texture units must be supported
 #define REQUIRED_TEXTURE_UNITS_COUNT 3
 
-#define REGION_MESH_QUAD_COUNT 512
+// Maximum number of quads that pre-allocated meshes can draw
+static const uint32_t gMaxNumberOfQuads = 2048;
 
 // Generates simple and textured vertices
 #define FV(x, y, u, v) { { x, y }, { u, v } }
@@ -181,7 +182,7 @@ public:
 
     /**
      * Binds a global indices buffer that can draw up to
-     * REGION_MESH_QUAD_COUNT quads.
+     * gMaxNumberOfQuads quads.
      */
     bool bindIndicesBuffer();
     bool bindIndicesBuffer(const GLuint buffer);

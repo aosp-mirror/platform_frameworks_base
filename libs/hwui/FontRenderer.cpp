@@ -64,8 +64,6 @@ FontRenderer::FontRenderer() :
 
     mLinearFiltering = false;
 
-    mIndexBufferID = 0;
-
     mSmallCacheWidth = DEFAULT_TEXT_SMALL_CACHE_WIDTH;
     mSmallCacheHeight = DEFAULT_TEXT_SMALL_CACHE_HEIGHT;
     mLargeCacheWidth = DEFAULT_TEXT_LARGE_CACHE_WIDTH;
@@ -110,12 +108,6 @@ FontRenderer::~FontRenderer() {
         delete mCacheTextures[i];
     }
     mCacheTextures.clear();
-
-    if (mInitialized) {
-        // Unbinding the buffer shouldn't be necessary but it crashes with some drivers
-        Caches::getInstance().unbindIndicesBuffer();
-        glDeleteBuffers(1, &mIndexBufferID);
-    }
 
     LruCache<Font::FontDescription, Font*>::Iterator it(mActiveFonts);
     while (it.next()) {
@@ -319,33 +311,6 @@ void FontRenderer::initTextTexture() {
     mCurrentCacheTexture = mCacheTextures[0];
 }
 
-// Avoid having to reallocate memory and render quad by quad
-void FontRenderer::initVertexArrayBuffers() {
-    uint32_t numIndices = gMaxNumberOfQuads * 6;
-    uint32_t indexBufferSizeBytes = numIndices * sizeof(uint16_t);
-    uint16_t* indexBufferData = (uint16_t*) malloc(indexBufferSizeBytes);
-
-    // Four verts, two triangles , six indices per quad
-    for (uint32_t i = 0; i < gMaxNumberOfQuads; i++) {
-        int i6 = i * 6;
-        int i4 = i * 4;
-
-        indexBufferData[i6 + 0] = i4 + 0;
-        indexBufferData[i6 + 1] = i4 + 1;
-        indexBufferData[i6 + 2] = i4 + 2;
-
-        indexBufferData[i6 + 3] = i4 + 0;
-        indexBufferData[i6 + 4] = i4 + 2;
-        indexBufferData[i6 + 5] = i4 + 3;
-    }
-
-    glGenBuffers(1, &mIndexBufferID);
-    Caches::getInstance().bindIndicesBuffer(mIndexBufferID);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBufferSizeBytes, indexBufferData, GL_STATIC_DRAW);
-
-    free(indexBufferData);
-}
-
 // We don't want to allocate anything unless we actually draw text
 void FontRenderer::checkInit() {
     if (mInitialized) {
@@ -353,7 +318,6 @@ void FontRenderer::checkInit() {
     }
 
     initTextTexture();
-    initVertexArrayBuffers();
 
     mInitialized = true;
 }
@@ -416,7 +380,7 @@ void FontRenderer::issueDrawCommand() {
                 if (mFunctor) (*mFunctor)(0, NULL);
 
                 checkTextureUpdate();
-                caches.bindIndicesBuffer(mIndexBufferID);
+                caches.bindIndicesBuffer();
 
                 if (!mDrawn) {
                     // If returns true, a VBO was bound and we must

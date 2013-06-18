@@ -151,9 +151,9 @@ public:
             float x3, float y3, float u3, float v3,
             float x4, float y4, float u4, float v4) {
         TextureVertex* mesh = mMesh + mCurrentQuad * 4;
-        TextureVertex::set(mesh++, x1, y1, u1, v1);
         TextureVertex::set(mesh++, x2, y2, u2, v2);
         TextureVertex::set(mesh++, x3, y3, u3, v3);
+        TextureVertex::set(mesh++, x1, y1, u1, v1);
         TextureVertex::set(mesh++, x4, y4, u4, v4);
         mCurrentQuad++;
     }

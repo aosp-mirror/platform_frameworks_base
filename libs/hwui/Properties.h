@@ -76,6 +76,12 @@ enum DebugLevel {
 #define PROPERTY_DEBUG_OVERDRAW "debug.hwui.overdraw"
 
 /**
+ * Used to enable/disable PerfHUD ES profiling. The accepted values
+ * are "true" and "false". The default value is "false".
+ */
+#define PROPERTY_DEBUG_NV_PROFILING "debug.hwui.nv_profiling"
+
+/**
  * Used to enable/disable non-rectangular clipping debugging.
  *
  * The accepted values are:
