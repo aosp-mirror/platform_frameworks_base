@@ -159,7 +159,7 @@ status_t InputChannel::sendMessage(const InputMessage* msg) {
         if (error == EAGAIN || error == EWOULDBLOCK) {
             return WOULD_BLOCK;
         }
-        if (error == EPIPE || error == ENOTCONN) {
+        if (error == EPIPE || error == ENOTCONN || error == ECONNREFUSED || error == ECONNRESET) {
             return DEAD_OBJECT;
         }
         return -error;
@@ -193,7 +193,7 @@ status_t InputChannel::receiveMessage(InputMessage* msg) {
         if (error == EAGAIN || error == EWOULDBLOCK) {
             return WOULD_BLOCK;
         }
-        if (error == EPIPE || error == ENOTCONN) {
+        if (error == EPIPE || error == ENOTCONN || error == ECONNREFUSED) {
             return DEAD_OBJECT;
         }
         return -error;
