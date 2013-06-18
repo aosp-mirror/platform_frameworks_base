@@ -6442,15 +6442,18 @@ public final class ViewRootImpl implements ViewParent,
 
         public void runOrPost(View source) {
             if (mSource != null) {
-                mSource = getCommonPredecessor(mSource, source);
+                // If there is no common predecessor, then mSource points to
+                // a removed view, hence in this case always prefer the source.
+                View predecessor = getCommonPredecessor(mSource, source);
+                mSource = (predecessor != null) ? predecessor : source;
                 return;
             }
             mSource = source;
             final long timeSinceLastMillis = SystemClock.uptimeMillis() - mLastEventTimeMillis;
             final long minEventIntevalMillis =
                     ViewConfiguration.getSendRecurringAccessibilityEventsInterval();
-            mSource.removeCallbacks(this);
             if (timeSinceLastMillis >= minEventIntevalMillis) {
+                mSource.removeCallbacks(this);
                 run();
             } else {
                 mSource.postDelayed(this, minEventIntevalMillis - timeSinceLastMillis);
