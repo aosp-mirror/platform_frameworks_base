@@ -6449,8 +6449,8 @@ public final class ViewRootImpl implements ViewParent,
             final long timeSinceLastMillis = SystemClock.uptimeMillis() - mLastEventTimeMillis;
             final long minEventIntevalMillis =
                     ViewConfiguration.getSendRecurringAccessibilityEventsInterval();
+            mSource.removeCallbacks(this);
             if (timeSinceLastMillis >= minEventIntevalMillis) {
-                mSource.removeCallbacks(this);
                 run();
             } else {
                 mSource.postDelayed(this, minEventIntevalMillis - timeSinceLastMillis);
