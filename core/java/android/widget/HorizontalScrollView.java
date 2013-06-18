@@ -1457,14 +1457,22 @@ public class HorizontalScrollView extends FrameLayout {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        // There is only one child
-        final View child = getChildAt(0);
-        final int childWidth = child.getMeasuredWidth();
-        final LayoutParams childParams = (LayoutParams) child.getLayoutParams();
+        int childWidth = 0;
+        int childMargins = 0;
+
+        if (getChildCount() > 0) {
+            childWidth = getChildAt(0).getMeasuredWidth();
+            LayoutParams childParams = (LayoutParams) getChildAt(0).getLayoutParams();
+            childMargins = childParams.leftMargin + childParams.rightMargin;
+        }
+
         final int available = r - l - getPaddingLeftWithForeground() -
-                getPaddingRightWithForeground() - childParams.leftMargin - childParams.rightMargin;
+                getPaddingRightWithForeground() - childMargins;
+
         final boolean forceLeftGravity = (childWidth > available);
+
         layoutChildren(l, t, r, b, forceLeftGravity);
+
         mIsLayoutDirty = false;
         // Give a child focus if it needs it
         if (mChildToScrollTo != null && isViewDescendantOf(mChildToScrollTo, this)) {
