@@ -103,10 +103,11 @@ public class Am extends BaseCommand {
                 "       am to-intent-uri [INTENT]\n" +
                 "       am switch-user <USER_ID>\n" +
                 "       am stop-user <USER_ID>\n" +
-                "       am stack create <TASK_ID> <RELATIVE_STACK_ID> <POSITION> <WEIGHT>\n" +
+                "       am stack create <TASK_ID> <RELATIVE_STACK_BOX_ID> <POSITION> <WEIGHT>\n" +
                 "       am stack movetask <STACK_ID> <TASK_ID> [true|false]\n" +
                 "       am stack resize <STACK_ID> <WEIGHT>\n" +
                 "       am stack boxes\n" +
+                "       am stack box <STACK_BOX_ID>\n" +
                 "\n" +
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
@@ -194,8 +195,12 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am stack create: create a new stack relative to an existing one.\n" +
                 "   <TASK_ID>: the task to populate the new stack with. Must exist.\n" +
-                "   <RELATIVE_STACK_ID>: existing stack's id.\n" +
-                "   <POSITION>: 0: to left of, 1: to right of, 2: above, 3: below\n" +
+                "   <RELATIVE_STACK_BOX_ID>: existing stack box's id.\n" +
+                "   <POSITION>: 0: before <RELATIVE_STACK_BOX_ID>, per RTL/LTR configuration,\n" +
+                "               1: after <RELATIVE_STACK_BOX_ID>, per RTL/LTR configuration,\n" +
+                "               2: to left of <RELATIVE_STACK_BOX_ID>,\n" +
+                "               3: to right of <RELATIVE_STACK_BOX_ID>," +
+                "               4: above <RELATIVE_STACK_BOX_ID>, 5: below <RELATIVE_STACK_BOX_ID>\n" +
                 "   <WEIGHT>: float between 0.2 and 0.8 inclusive.\n" +
                 "\n" +
                 "am stack movetask: move <TASK_ID> from its current stack to the top (true) or" +
@@ -204,6 +209,8 @@ public class Am extends BaseCommand {
                 "am stack resize: change <STACK_ID> relative size to new <WEIGHT>.\n" +
                 "\n" +
                 "am stack boxes: list the hierarchy of stack boxes and their contents.\n" +
+                "\n" +
+                "am stack box: list the hierarchy of stack boxes rooted at <STACK_BOX_ID>.\n" +
                 "\n" +
                 "<INTENT> specifications include these flags and arguments:\n" +
                 "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
@@ -1488,6 +1495,8 @@ public class Am extends BaseCommand {
             runStackBoxResize();
         } else if (op.equals("boxes")) {
             runStackBoxes();
+        } else if (op.equals("box")) {
+            runStackBoxInfo();
         } else {
             showError("Error: unknown command '" + op + "'");
             return;
@@ -1551,6 +1560,16 @@ public class Am extends BaseCommand {
             for (StackBoxInfo info : stackBoxes) {
                 System.out.println(info);
             }
+        } catch (RemoteException e) {
+        }
+    }
+
+    private void runStackBoxInfo() throws Exception {
+        try {
+            String stackBoxIdStr = nextArgRequired();
+            int stackBoxId = Integer.valueOf(stackBoxIdStr);
+            StackBoxInfo stackBoxInfo = mAm.getStackBoxInfo(stackBoxId); 
+            System.out.println(stackBoxInfo);
         } catch (RemoteException e) {
         }
     }

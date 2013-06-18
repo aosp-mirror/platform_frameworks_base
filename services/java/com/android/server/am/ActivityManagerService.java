@@ -6450,6 +6450,22 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
+    public StackBoxInfo getStackBoxInfo(int stackBoxId) {
+        List<StackBoxInfo> stackBoxInfos = mWindowManager.getStackBoxInfos();
+        StackBoxInfo info = null;
+        synchronized (this) {
+            List<StackInfo> stackInfos = getStacks();
+            for (StackBoxInfo stackBoxInfo : stackBoxInfos) {
+                addStackInfoToStackBoxInfo(stackBoxInfo, stackInfos);
+                if (stackBoxInfo.stackBoxId == stackBoxId) {
+                    info = stackBoxInfo;
+                }
+            }
+        }
+        return info;
+    }
+
+    @Override
     public int getTaskForActivity(IBinder token, boolean onlyRoot) {
         synchronized(this) {
             return ActivityRecord.getTaskForActivityLocked(token, onlyRoot);
