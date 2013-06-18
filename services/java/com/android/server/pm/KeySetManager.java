@@ -99,7 +99,7 @@ public class KeySetManager {
     public void addDefinedKeySetToPackage(String packageName,
             Set<PublicKey> keys, String alias) {
         if ((packageName == null) || (keys == null) || (alias == null)) {
-            Log.e(TAG, "Got null argument for a defined keyset, ignoring!");
+            Log.d(TAG, "Got null argument for a defined keyset, ignoring!");
             return;
         }
         synchronized (mLockObject) {
@@ -120,7 +120,7 @@ public class KeySetManager {
     public void addSigningKeySetToPackage(String packageName,
             Set<PublicKey> signingKeys) {
         if ((packageName == null) || (signingKeys == null)) {
-            Log.e(TAG, "Got null argument for a signing keyset, ignoring!");
+            Log.d(TAG, "Got null argument for a signing keyset, ignoring!");
             return;
         }
         synchronized (mLockObject) {
