@@ -1186,7 +1186,8 @@ public final class ActivityStackSupervisor {
     }
 
     ActivityStack getCorrectStack(ActivityRecord r) {
-        if (r.isApplicationActivity() || (r.task != null && r.task.isApplicationTask())) {
+        final TaskRecord task = r.task;
+        if (r.isApplicationActivity() || (task != null && task.isApplicationTask())) {
             int stackNdx;
             for (stackNdx = mStacks.size() - 1; stackNdx > 0; --stackNdx) {
                 if (mStacks.get(stackNdx).mCurrentUser == mCurrentUser) {
@@ -1198,6 +1199,9 @@ public final class ActivityStackSupervisor {
                 int stackId = mService.createStack(-1, HOME_STACK_ID,
                         StackBox.TASK_STACK_GOES_OVER, 1.0f);
                 mFocusedStack = getStack(stackId);
+            }
+            if (task != null) {
+                mFocusedStack = task.stack;
             }
             return mFocusedStack;
         }
@@ -1649,6 +1653,7 @@ public final class ActivityStackSupervisor {
         ActivityStack.logStartActivity(EventLogTags.AM_CREATE_ACTIVITY, r, r.task);
         setLaunchHomeTaskNextFlag(sourceRecord, r, targetStack);
         targetStack.startActivityLocked(r, newTask, doResume, keepCurTransition, options);
+        mService.setFocusedActivityLocked(r);
         return ActivityManager.START_SUCCESS;
     }
 
@@ -1867,6 +1872,8 @@ public final class ActivityStackSupervisor {
     void findTaskToMoveToFrontLocked(int taskId, int flags, Bundle options) {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             if (mStacks.get(stackNdx).findTaskToMoveToFrontLocked(taskId, flags, options)) {
+                if (DEBUG_STACK) Slog.d(TAG, "findTaskToMoveToFront: moved to front of stack=" + 
+                        mStacks.get(stackNdx));
                 return;
             }
         }
@@ -2053,7 +2060,6 @@ public final class ActivityStackSupervisor {
         final ActivityStack stack = r.task.stack;
         if (isFrontStack(stack)) {
             mService.updateUsageStats(r, true);
-            mService.setFocusedActivityLocked(r);
         }
         if (allResumedActivitiesComplete()) {
             ensureActivitiesVisibleLocked(null, 0);

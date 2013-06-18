@@ -198,32 +198,32 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final String TAG_MU = "ActivityManagerServiceMU";
     static final boolean DEBUG = false;
     static final boolean localLOGV = DEBUG;
+    static final boolean DEBUG_BACKUP = localLOGV || false;
+    static final boolean DEBUG_BROADCAST = localLOGV || false;
+    static final boolean DEBUG_BROADCAST_LIGHT = DEBUG_BROADCAST || false;
+    static final boolean DEBUG_BACKGROUND_BROADCAST = DEBUG_BROADCAST || false;
+    static final boolean DEBUG_CLEANUP = localLOGV || false;
+    static final boolean DEBUG_CONFIGURATION = localLOGV || false;
+    static final boolean DEBUG_IMMERSIVE = localLOGV || false;
+    static final boolean DEBUG_MU = localLOGV || false;
+    static final boolean DEBUG_OOM_ADJ = localLOGV || false;
+    static final boolean DEBUG_PAUSE = localLOGV || false;
+    static final boolean DEBUG_POWER = localLOGV || false;
+    static final boolean DEBUG_POWER_QUICK = DEBUG_POWER || false;
+    static final boolean DEBUG_PROCESS_OBSERVERS = localLOGV || false;
+    static final boolean DEBUG_PROCESSES = localLOGV || false;
+    static final boolean DEBUG_PROVIDER = localLOGV || false;
+    static final boolean DEBUG_RESULTS = localLOGV || false;
+    static final boolean DEBUG_SERVICE = localLOGV || false;
+    static final boolean DEBUG_SERVICE_EXECUTING = localLOGV || false;
+    static final boolean DEBUG_STACK = localLOGV || false;
     static final boolean DEBUG_SWITCH = localLOGV || false;
     static final boolean DEBUG_TASKS = localLOGV || false;
     static final boolean DEBUG_THUMBNAILS = localLOGV || false;
-    static final boolean DEBUG_PAUSE = localLOGV || false;
-    static final boolean DEBUG_OOM_ADJ = localLOGV || false;
     static final boolean DEBUG_TRANSITION = localLOGV || false;
-    static final boolean DEBUG_BROADCAST = localLOGV || false;
-    static final boolean DEBUG_BACKGROUND_BROADCAST = DEBUG_BROADCAST || false;
-    static final boolean DEBUG_BROADCAST_LIGHT = DEBUG_BROADCAST || false;
-    static final boolean DEBUG_SERVICE = localLOGV || false;
-    static final boolean DEBUG_SERVICE_EXECUTING = localLOGV || false;
-    static final boolean DEBUG_VISBILITY = localLOGV || false;
-    static final boolean DEBUG_PROCESSES = localLOGV || false;
-    static final boolean DEBUG_PROCESS_OBSERVERS = localLOGV || false;
-    static final boolean DEBUG_CLEANUP = localLOGV || false;
-    static final boolean DEBUG_PROVIDER = localLOGV || false;
     static final boolean DEBUG_URI_PERMISSION = localLOGV || false;
     static final boolean DEBUG_USER_LEAVING = localLOGV || false;
-    static final boolean DEBUG_RESULTS = localLOGV || false;
-    static final boolean DEBUG_BACKUP = localLOGV || false;
-    static final boolean DEBUG_CONFIGURATION = localLOGV || false;
-    static final boolean DEBUG_POWER = localLOGV || false;
-    static final boolean DEBUG_POWER_QUICK = DEBUG_POWER || false;
-    static final boolean DEBUG_MU = localLOGV || false;
-    static final boolean DEBUG_IMMERSIVE = localLOGV || false;
-    static final boolean DEBUG_STACK = localLOGV || true;
+    static final boolean DEBUG_VISBILITY = localLOGV || false;
     static final boolean VALIDATE_TOKENS = true;
     static final boolean SHOW_ACTIVITY_START_TIME = true;
 
@@ -6281,6 +6281,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         enforceCallingPermission(android.Manifest.permission.REORDER_TASKS,
                 "moveTaskToFront()");
 
+        if (DEBUG_STACK) Slog.d(TAG, "moveTaskToFront: moving task=" + task);
         synchronized(this) {
             if (!checkAppSwitchAllowedLocked(Binder.getCallingPid(),
                     Binder.getCallingUid(), "Task to front")) {
@@ -6305,6 +6306,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized(this) {
             TaskRecord tr = recentTaskForIdLocked(taskId);
             if (tr != null) {
+                if (DEBUG_STACK) Slog.d(TAG, "moveTaskToBack: moving task=" + tr);
                 ActivityStack stack = tr.stack;
                 if (stack.mResumedActivity != null && stack.mResumedActivity.task == tr) {
                     if (!checkAppSwitchAllowedLocked(Binder.getCallingPid(),
@@ -6383,6 +6385,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                     new RuntimeException("here").fillInStackTrace());
         }
         synchronized (this) {
+            if (DEBUG_STACK) Slog.d(TAG, "moveTaskToStack: moving task=" + taskId + " to stackId="
+                    + stackId + " toTop=" + toTop);
             mStackSupervisor.moveTaskToStack(taskId, stackId, toTop);
         }
     }
