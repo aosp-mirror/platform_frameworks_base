@@ -94,6 +94,7 @@ import android.os.storage.StorageManager;
 import android.telephony.TelephonyManager;
 import android.content.ClipboardManager;
 import android.util.AndroidRuntimeException;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 import android.view.CompatibilityInfoHolder;
@@ -170,8 +171,10 @@ class ContextImpl extends Context {
     private final static String TAG = "ContextImpl";
     private final static boolean DEBUG = false;
 
-    private static final HashMap<String, SharedPreferencesImpl> sSharedPrefs =
-            new HashMap<String, SharedPreferencesImpl>();
+    /**
+     * Map from package name, to preference name, to cached preferences.
+     */
+    private static ArrayMap<String, ArrayMap<String, SharedPreferencesImpl>> sSharedPrefs;
 
     /*package*/ LoadedApk mPackageInfo;
     private String mBasePackageName;
@@ -677,12 +680,23 @@ class ContextImpl extends Context {
     @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
         SharedPreferencesImpl sp;
-        synchronized (sSharedPrefs) {
-            sp = sSharedPrefs.get(name);
+        synchronized (mSync) {
+            if (sSharedPrefs == null) {
+                sSharedPrefs = new ArrayMap<String, ArrayMap<String, SharedPreferencesImpl>>();
+            }
+
+            final String packageName = getPackageName();
+            ArrayMap<String, SharedPreferencesImpl> packagePrefs = sSharedPrefs.get(packageName);
+            if (packagePrefs == null) {
+                packagePrefs = new ArrayMap<String, SharedPreferencesImpl>();
+                sSharedPrefs.put(packageName, packagePrefs);
+            }
+
+            sp = packagePrefs.get(name);
             if (sp == null) {
                 File prefsFile = getSharedPrefsFile(name);
                 sp = new SharedPreferencesImpl(prefsFile, mode);
-                sSharedPrefs.put(name, sp);
+                packagePrefs.put(name, sp);
                 return sp;
             }
         }
