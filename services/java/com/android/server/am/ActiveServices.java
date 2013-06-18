@@ -1511,6 +1511,7 @@ public final class ActiveServices {
 
                     mPendingServices.remove(i);
                     i--;
+                    proc.addPackage(sr.appInfo.packageName, mAm.mProcessTracker);
                     realStartServiceLocked(sr, proc);
                     didSomething = true;
                 }
