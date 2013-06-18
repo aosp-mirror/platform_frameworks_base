@@ -97,6 +97,8 @@ import static android.os.Build.VERSION_CODES.JELLY_BEAN_MR1;
  * @attr ref android.R.styleable#ViewGroup_addStatesFromChildren
  * @attr ref android.R.styleable#ViewGroup_descendantFocusability
  * @attr ref android.R.styleable#ViewGroup_animateLayoutChanges
+ * @attr ref android.R.styleable#ViewGroup_splitMotionEvents
+ * @attr ref android.R.styleable#ViewGroup_layoutMode
  */
 public abstract class ViewGroup extends View implements ViewParent, ViewManager {
     private static final String TAG = "ViewGroup";
@@ -2249,6 +2251,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @param split <code>true</code> to allow MotionEvents to be split and dispatched to multiple
      *              child views. <code>false</code> to only allow one child view to be the target of
      *              any MotionEvent received by this ViewGroup.
+     * @attr ref android.R.styleable#ViewGroup_splitMotionEvents
      */
     public void setMotionEventSplittingEnabled(boolean split) {
         // TODO Applications really shouldn't change this setting mid-touch event,
@@ -4816,6 +4819,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @param layoutMode the layout mode to use during layout operations
      *
      * @see #getLayoutMode()
+     * @attr ref android.R.styleable#ViewGroup_layoutMode
      */
     public void setLayoutMode(int layoutMode) {
         if (mLayoutMode != layoutMode) {
