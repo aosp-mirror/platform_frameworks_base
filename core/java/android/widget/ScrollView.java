@@ -1472,16 +1472,16 @@ public class ScrollView extends FrameLayout {
         }
         mChildToScrollTo = null;
 
-        // There is only one child
-        final View child = getChildAt(0);
-        final int childHeight = child.getMeasuredHeight();
         if (!hasLayout()) {
-            final int scrollRange = Math.max(0,
-                    childHeight - (b - t - mPaddingBottom - mPaddingTop));
             if (mSavedState != null) {
                 mScrollY = mSavedState.scrollPosition;
                 mSavedState = null;
             } // mScrollY default value is "0"
+
+            final int childHeight = (getChildCount() > 0) ? getChildAt(0).getMeasuredHeight() : 0;
+            final int scrollRange = Math.max(0,
+                    childHeight - (b - t - mPaddingBottom - mPaddingTop));
+
             // Don't forget to clamp
             if (mScrollY > scrollRange) {
                 mScrollY = scrollRange;
