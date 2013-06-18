@@ -3239,8 +3239,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (taskNdx >= 0 || t >= 0) {
                 Slog.w(TAG, "validateAppTokens: Mismatch! ActivityManager=" + tasks);
-                Slog.w(TAG, "validateAppTokens: Mismatch! WindowManager="
-                        + displayContent.getTasks());
+                Slog.w(TAG, "validateAppTokens: Mismatch! WindowManager=" + localTasks);
                 Slog.w(TAG, "validateAppTokens: Mismatch! Callers=" + Debug.getCallers(4));
             }
         }
@@ -4845,6 +4844,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             Task task = mTaskIdToTask.get(taskId);
             if (task == null) {
+                if (DEBUG_STACK) Slog.i(TAG, "removeTask: could not find taskId=" + taskId);
                 return;
             }
             final TaskStack stack = task.mStack;
