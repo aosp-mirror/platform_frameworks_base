@@ -19,6 +19,7 @@ package com.android.server.content;
 import android.Manifest;
 import android.accounts.Account;
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IContentService;
@@ -26,6 +27,7 @@ import android.content.ISyncStatusObserver;
 import android.content.PeriodicSync;
 import android.content.SyncAdapterType;
 import android.content.SyncInfo;
+import android.content.SyncRequest;
 import android.content.SyncStatusInfo;
 import android.database.IContentObserver;
 import android.database.sqlite.SQLiteException;
@@ -39,6 +41,7 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseIntArray;
 
@@ -312,6 +315,7 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
+    @Override
     public void requestSync(Account account, String authority, Bundle extras) {
         ContentResolver.validateSyncExtrasBundle(extras);
         int userId = UserHandle.getCallingUserId();
@@ -323,8 +327,80 @@ public final class ContentService extends IContentService.Stub {
         try {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
-                syncManager.scheduleSync(account, userId, uId, authority, extras, 0 /* no delay */,
+                syncManager.scheduleSync(account, userId, uId, authority, extras,
+                        0 /* no delay */, 0 /* no delay */,
                         false /* onlyThoseWithUnkownSyncableState */);
+            }
+        } finally {
+            restoreCallingIdentity(identityToken);
+        }
+    }
+
+    /**
+     * Request a sync with a generic {@link android.content.SyncRequest} object. This will be
+     * either:
+     *   periodic OR one-off sync.
+     * and
+     *   anonymous OR provider sync.
+     * Depending on the request, we enqueue to suit in the SyncManager.
+     * @param request
+     */
+    @Override
+    public void sync(SyncRequest request) {
+        Bundle extras = request.getBundle();
+        ContentResolver.validateSyncExtrasBundle(extras);
+
+        long flextime = request.getSyncFlexTime();
+        long runAtTime = request.getSyncRunTime();
+        int userId = UserHandle.getCallingUserId();
+        int uId = Binder.getCallingUid();
+
+        // This makes it so that future permission checks will be in the context of this
+        // process rather than the caller's process. We will restore this before returning.
+        long identityToken = clearCallingIdentity();
+        try {
+            SyncManager syncManager = getSyncManager();
+            if (syncManager != null) {
+                if (request.hasAuthority()) {
+                    // Sync Adapter registered with the system - old API.
+                    final  Account account = request.getProviderInfo().first;
+                    final String provider = request.getProviderInfo().second;
+                    if (request.isPeriodic()) {
+                        mContext.enforceCallingOrSelfPermission(
+                                Manifest.permission.WRITE_SYNC_SETTINGS,
+                                "no permission to write the sync settings");
+                        if (runAtTime < 60) {
+                            Slog.w(TAG, "Requested poll frequency of " + runAtTime
+                                    + " seconds being rounded up to 60 seconds.");
+                            runAtTime = 60;
+                        }
+                        PeriodicSync syncToAdd =
+                                new PeriodicSync(account, provider, extras, runAtTime, flextime);
+                        getSyncManager().getSyncStorageEngine().addPeriodicSync(syncToAdd, userId);
+                    } else {
+                        long beforeRuntimeMillis = (flextime) * 1000;
+                        long runtimeMillis = runAtTime * 1000;
+                        syncManager.scheduleSync(
+                                account, userId, uId, provider, extras,
+                                beforeRuntimeMillis, runtimeMillis,
+                                false /* onlyThoseWithUnknownSyncableState */);
+                    }
+                } else {
+                    // Anonymous sync - new API.
+                    final ComponentName syncService = request.getService();
+                    if (request.isPeriodic()) {
+                        throw new RuntimeException("Periodic anonymous syncs not implemented yet.");
+                    } else {
+                        long beforeRuntimeMillis = (flextime) * 1000;
+                        long runtimeMillis = runAtTime * 1000;
+                        syncManager.scheduleSync(
+                              syncService, userId, uId, extras,
+                              beforeRuntimeMillis,
+                              runtimeMillis,
+                              false /* onlyThoseWithUnknownSyncableState */); // Empty function.
+                        throw new RuntimeException("One-off anonymous syncs not implemented yet.");
+                    }
+                }
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -337,6 +413,7 @@ public final class ContentService extends IContentService.Stub {
      * @param account filter the pending and active syncs to cancel using this account
      * @param authority filter the pending and active syncs to cancel using this authority
      */
+    @Override
     public void cancelSync(Account account, String authority) {
         int userId = UserHandle.getCallingUserId();
 
@@ -358,6 +435,7 @@ public final class ContentService extends IContentService.Stub {
      * Get information about the SyncAdapters that are known to the system.
      * @return an array of SyncAdapters that have registered with the system
      */
+    @Override
     public SyncAdapterType[] getSyncAdapterTypes() {
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
@@ -371,6 +449,7 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
+    @Override
     public boolean getSyncAutomatically(Account account, String providerName) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
@@ -389,6 +468,7 @@ public final class ContentService extends IContentService.Stub {
         return false;
     }
 
+    @Override
     public void setSyncAutomatically(Account account, String providerName, boolean sync) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
@@ -406,6 +486,10 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
+    /**
+     * Old API. Schedule periodic sync with default flex time.
+     */
+    @Override
     public void addPeriodicSync(Account account, String authority, Bundle extras,
             long pollFrequency) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
@@ -420,13 +504,18 @@ public final class ContentService extends IContentService.Stub {
 
         long identityToken = clearCallingIdentity();
         try {
-            getSyncManager().getSyncStorageEngine().addPeriodicSync(
-                    account, userId, authority, extras, pollFrequency);
+            // Add default flex time to this sync.
+            PeriodicSync syncToAdd =
+                    new PeriodicSync(account, authority, extras,
+                            pollFrequency,
+                            SyncStorageEngine.calculateDefaultFlexTime(pollFrequency));
+            getSyncManager().getSyncStorageEngine().addPeriodicSync(syncToAdd, userId);
         } finally {
             restoreCallingIdentity(identityToken);
         }
     }
 
+    @Override
     public void removePeriodicSync(Account account, String authority, Bundle extras) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
@@ -434,13 +523,23 @@ public final class ContentService extends IContentService.Stub {
 
         long identityToken = clearCallingIdentity();
         try {
-            getSyncManager().getSyncStorageEngine().removePeriodicSync(account, userId, authority,
-                    extras);
+            PeriodicSync syncToRemove = new PeriodicSync(account, authority, extras,
+                    0 /* Not read for removal */, 0 /* Not read for removal */);
+            getSyncManager().getSyncStorageEngine().removePeriodicSync(syncToRemove, userId);
         } finally {
             restoreCallingIdentity(identityToken);
         }
     }
 
+    /**
+     * TODO: Implement.
+     * @param request Sync to remove.
+     */
+    public void removeSync(SyncRequest request) {
+
+    }
+
+    @Override
     public List<PeriodicSync> getPeriodicSyncs(Account account, String providerName) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
@@ -473,6 +572,7 @@ public final class ContentService extends IContentService.Stub {
         return -1;
     }
 
+    @Override
     public void setIsSyncable(Account account, String providerName, int syncable) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
@@ -490,6 +590,7 @@ public final class ContentService extends IContentService.Stub {
         }
     }
 
+    @Override
     public boolean getMasterSyncAutomatically() {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
@@ -507,6 +608,7 @@ public final class ContentService extends IContentService.Stub {
         return false;
     }
 
+    @Override
     public void setMasterSyncAutomatically(boolean flag) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");

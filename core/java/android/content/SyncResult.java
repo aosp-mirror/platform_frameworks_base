@@ -181,7 +181,7 @@ public final class SyncResult implements Parcelable {
      * <li> {@link SyncStats#numIoExceptions} > 0
      * <li> {@link #syncAlreadyInProgress}
      * </ul>
-     * @return true if a hard error is indicated
+     * @return true if a soft error is indicated
      */
     public boolean hasSoftError() {
         return syncAlreadyInProgress || stats.numIoExceptions > 0;
@@ -195,6 +195,11 @@ public final class SyncResult implements Parcelable {
         return hasSoftError() || hasHardError();
     }
 
+    /**
+     * Convenience method for determining if the Sync should be rescheduled after failing for some
+     * reason.
+     * @return true if the SyncManager should reschedule this sync.
+     */
     public boolean madeSomeProgress() {
         return ((stats.numDeletes > 0) && !tooManyDeletions)
                 || stats.numInserts > 0

@@ -44,6 +44,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Pair;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -130,6 +131,19 @@ public abstract class ContentResolver {
      * See {@link SyncResult#tooManyDeletions}
      */
     public static final String SYNC_EXTRAS_DISCARD_LOCAL_DELETIONS = "discard_deletions";
+
+    /* Extensions to API. TODO: Not clear if we will keep these as public flags. */
+    /** {@hide} User-specified flag for expected upload size. */
+    public static final String SYNC_EXTRAS_EXPECTED_UPLOAD = "expected_upload";
+
+    /** {@hide} User-specified flag for expected download size. */
+    public static final String SYNC_EXTRAS_EXPECTED_DOWNLOAD = "expected_download";
+
+    /** {@hide} Priority of this sync with respect to other syncs scheduled for this application. */
+    public static final String SYNC_EXTRAS_PRIORITY = "sync_priority";
+
+    /** {@hide} Flag to allow sync to occur on metered network. */
+    public static final String SYNC_EXTRAS_ALLOW_METERED = "allow_metered";
 
     /**
      * Set by the SyncManager to request that the SyncAdapter initialize itself for
@@ -1385,6 +1399,8 @@ public abstract class ContentResolver {
      * <li>Float</li>
      * <li>Double</li>
      * <li>String</li>
+     * <li>Account</li>
+     * <li>null</li>
      * </ul>
      *
      * @param uri the uri of the provider to sync or null to sync all providers.
@@ -1416,6 +1432,8 @@ public abstract class ContentResolver {
      * <li>Float</li>
      * <li>Double</li>
      * <li>String</li>
+     * <li>Account</li>
+     * <li>null</li>
      * </ul>
      *
      * @param account which account should be synced
@@ -1423,10 +1441,24 @@ public abstract class ContentResolver {
      * @param extras any extras to pass to the SyncAdapter.
      */
     public static void requestSync(Account account, String authority, Bundle extras) {
-        validateSyncExtrasBundle(extras);
+        SyncRequest request =
+            new SyncRequest.Builder()
+                .setSyncAdapter(account, authority)
+                .setExtras(extras)
+                .syncOnce(0, 0)     // Immediate sync.
+                .build();
+        requestSync(request);
+    }
+
+    /**
+     * Register a sync with the SyncManager. These requests are built using the
+     * {@link SyncRequest.Builder}.
+     */
+    public static void requestSync(SyncRequest request) {
         try {
-            getContentService().requestSync(account, authority, extras);
-        } catch (RemoteException e) {
+            getContentService().sync(request);
+        } catch(RemoteException e) {
+            // Shouldn't happen.
         }
     }
 
@@ -1586,7 +1618,7 @@ public abstract class ContentResolver {
             throw new IllegalArgumentException("illegal extras were set");
         }
         try {
-            getContentService().addPeriodicSync(account, authority, extras, pollFrequency);
+             getContentService().addPeriodicSync(account, authority, extras, pollFrequency);
         } catch (RemoteException e) {
             // exception ignored; if this is thrown then it means the runtime is in the midst of
             // being restarted
@@ -1616,6 +1648,22 @@ public abstract class ContentResolver {
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }
+    }
+
+    /**
+     * Remove the specified sync. This will remove any syncs that have been scheduled to run, but
+     * will not cancel any running syncs.
+     * <p>This method requires the caller to hold the permission</p>
+     * If the request is for a periodic sync this will cancel future occurrences of the sync.
+     *
+     * It is possible to cancel a sync using a SyncRequest object that is different from the object
+     * with which you requested the sync. Do so by building a SyncRequest with exactly the same
+     * service/adapter, frequency, <b>and</b> extras bundle.
+     *
+     * @param request SyncRequest object containing information about sync to cancel.
+     */
+    public static void cancelSync(SyncRequest request) {
+        // TODO: Finish this implementation.
     }
 
     /**
