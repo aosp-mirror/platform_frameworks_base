@@ -321,8 +321,8 @@ var playlists = {
   'bizdevbytes' : {
     'ids': ["PLWz5rJ2EKKc8-Osr0TuHyTMEhKV0xJ6ql"]
   },
-  'developersstrikeback' : {
-    'ids': ["PLWz5rJ2EKKc8nhhIOieejm1PxYHmPkIPh"]
+  'thisweek' : {
+    'ids': ["PLWz5rJ2EKKc9Wam5jE-9oY8l6RpeAx-XM"]
   },
   'googleio' : {
     'ids': ["PLWz5rJ2EKKc9WGUwq2gQ-coU3fSyexgOx"]
