@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 
-<title>rs_allocation.rsh Source File</title>
+<title>/usr/local/google/home/srhines/android_trees/jb-mr2-dev/frameworks/rs/scriptc/rs_allocation.rsh Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 
@@ -24,7 +24,7 @@
   </div>
 <div class="header">
   <div class="headertitle">
-<div class="title">rs_allocation.rsh</div>  </div>
+<div class="title">/usr/local/google/home/srhines/android_trees/jb-mr2-dev/frameworks/rs/scriptc/rs_allocation.rsh</div>  </div>
 </div>
 <div class="contents">
 <a href="rs__allocation_8rsh.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
@@ -46,81 +46,221 @@
 <a name="l00023"></a>00023 <span class="preprocessor">#ifndef __RS_ALLOCATION_RSH__</span>
 <a name="l00024"></a>00024 <span class="preprocessor"></span><span class="preprocessor">#define __RS_ALLOCATION_RSH__</span>
 <a name="l00025"></a>00025 <span class="preprocessor"></span>
-<a name="l00031"></a>00031 <span class="keyword">extern</span> <a class="code" href="structrs__allocation.html" title="Opaque handle to a Renderscript allocation.">rs_allocation</a> __attribute__((overloadable))
-<a name="l00032"></a>00032     <a class="code" href="rs__allocation_8rsh.html#aadad7654929c451be299df125061c9ba">rsGetAllocation</a>(const <span class="keywordtype">void</span> *);
-<a name="l00033"></a>00033 
-<a name="l00039"></a>00039 extern <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
-<a name="l00040"></a>00040     <a class="code" href="rs__allocation_8rsh.html#a3ca7f505a97d5b7f477bc65b9e77dafb">rsAllocationGetDimX</a>(<a class="code" href="structrs__allocation.html" title="Opaque handle to a Renderscript allocation.">rs_allocation</a>);
-<a name="l00041"></a>00041 
-<a name="l00047"></a>00047 extern <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
-<a name="l00048"></a>00048     <a class="code" href="rs__allocation_8rsh.html#ac889b866b465580eb313e5d2a9fcac3d">rsAllocationGetDimY</a>(rs_allocation);
-<a name="l00049"></a>00049 
-<a name="l00055"></a>00055 extern <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
-<a name="l00056"></a>00056     <a class="code" href="rs__allocation_8rsh.html#acd6f1a2b2443e6ea39e6154577645d2c">rsAllocationGetDimZ</a>(rs_allocation);
-<a name="l00057"></a>00057 
-<a name="l00063"></a>00063 extern <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
-<a name="l00064"></a>00064     <a class="code" href="rs__allocation_8rsh.html#ac42a07c079d6b3c6bb21975170d4e11c">rsAllocationGetDimLOD</a>(rs_allocation);
-<a name="l00065"></a>00065 
-<a name="l00071"></a>00071 extern <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
-<a name="l00072"></a>00072     <a class="code" href="rs__allocation_8rsh.html#ac85f7ed88f38b35482c6d63b56d470fe">rsAllocationGetDimFaces</a>(rs_allocation);
-<a name="l00073"></a>00073 
-<a name="l00074"></a>00074 <span class="preprocessor">#if (defined(RS_VERSION) &amp;&amp; (RS_VERSION &gt;= 14))</span>
-<a name="l00075"></a>00075 <span class="preprocessor"></span>
-<a name="l00089"></a>00089 <span class="keyword">extern</span> <span class="keywordtype">void</span> __attribute__((overloadable))
-<a name="l00090"></a>00090     rsAllocationCopy1DRange(rs_allocation dstAlloc,
-<a name="l00091"></a>00091                             <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> dstOff, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> dstMip,
-<a name="l00092"></a>00092                             <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> count,
-<a name="l00093"></a>00093                             rs_allocation srcAlloc,
-<a name="l00094"></a>00094                             <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> srcOff, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> srcMip);
-<a name="l00095"></a>00095 
-<a name="l00117"></a>00117 extern <span class="keywordtype">void</span> __attribute__((overloadable))
-<a name="l00118"></a>00118     rsAllocationCopy2DRange(rs_allocation dstAlloc,
-<a name="l00119"></a>00119                             <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> dstXoff, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> dstYoff,
-<a name="l00120"></a>00120                             <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> dstMip,
-<a name="l00121"></a>00121                             rs_allocation_cubemap_face dstFace,
-<a name="l00122"></a>00122                             <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> width, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> height,
-<a name="l00123"></a>00123                             rs_allocation srcAlloc,
-<a name="l00124"></a>00124                             <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> srcXoff, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> srcYoff,
-<a name="l00125"></a>00125                             <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> srcMip,
-<a name="l00126"></a>00126                             rs_allocation_cubemap_face srcFace);
-<a name="l00127"></a>00127 
-<a name="l00128"></a>00128 <span class="preprocessor">#endif //defined(RS_VERSION) &amp;&amp; (RS_VERSION &gt;= 14)</span>
-<a name="l00129"></a>00129 <span class="preprocessor"></span>
-<a name="l00133"></a>00133 <span class="keyword">extern</span> <span class="keyword">const</span> <span class="keywordtype">void</span> * __attribute__((overloadable))
-<a name="l00134"></a>00134     <a class="code" href="rs__allocation_8rsh.html#a3fd30b4388748601e025bb3566ce0cbc">rsGetElementAt</a>(rs_allocation, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x);
-<a name="l00138"></a>00138 extern const <span class="keywordtype">void</span> * __attribute__((overloadable))
-<a name="l00139"></a>00139     <a class="code" href="rs__allocation_8rsh.html#a3fd30b4388748601e025bb3566ce0cbc">rsGetElementAt</a>(rs_allocation, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> y);
-<a name="l00143"></a>00143 extern const <span class="keywordtype">void</span> * __attribute__((overloadable))
-<a name="l00144"></a>00144     <a class="code" href="rs__allocation_8rsh.html#a3fd30b4388748601e025bb3566ce0cbc">rsGetElementAt</a>(rs_allocation, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> y, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> z);
-<a name="l00145"></a>00145 
-<a name="l00146"></a>00146 <span class="comment">// New API&#39;s</span>
-<a name="l00147"></a>00147 <span class="preprocessor">#if (defined(RS_VERSION) &amp;&amp; (RS_VERSION &gt;= 16))</span>
-<a name="l00148"></a>00148 <span class="preprocessor"></span>
-<a name="l00153"></a>00153 <span class="keyword">extern</span> <span class="keyword">const</span> <span class="keywordtype">void</span> __attribute__((overloadable))
-<a name="l00154"></a>00154     rsAllocationIoSend(rs_allocation a);
-<a name="l00155"></a>00155 
-<a name="l00160"></a>00160 extern const <span class="keywordtype">void</span> __attribute__((overloadable))
-<a name="l00161"></a>00161     rsAllocationIoReceive(rs_allocation a);
-<a name="l00162"></a>00162 
-<a name="l00163"></a>00163 
-<a name="l00169"></a>00169 extern <a class="code" href="structrs__element.html" title="Opaque handle to a Renderscript element.">rs_element</a> __attribute__((overloadable))
-<a name="l00170"></a>00170     rsAllocationGetElement(rs_allocation a);
-<a name="l00171"></a>00171 
-<a name="l00178"></a>00178 extern const <a class="code" href="rs__types_8rsh.html#adb5162dc168ddd471d948faa60b37c5e">float4</a> __attribute__((overloadable))
-<a name="l00179"></a>00179     rsSample(rs_allocation a, <a class="code" href="structrs__sampler.html" title="Opaque handle to a Renderscript sampler object.">rs_sampler</a> s, <span class="keywordtype">float</span> location);
-<a name="l00189"></a>00189 extern const <a class="code" href="rs__types_8rsh.html#adb5162dc168ddd471d948faa60b37c5e">float4</a> __attribute__((overloadable))
-<a name="l00190"></a>00190     rsSample(rs_allocation a, <a class="code" href="structrs__sampler.html" title="Opaque handle to a Renderscript sampler object.">rs_sampler</a> s, <span class="keywordtype">float</span> location, <span class="keywordtype">float</span> lod);
-<a name="l00191"></a>00191 
-<a name="l00198"></a>00198 extern const <a class="code" href="rs__types_8rsh.html#adb5162dc168ddd471d948faa60b37c5e">float4</a> __attribute__((overloadable))
-<a name="l00199"></a>00199     rsSample(rs_allocation a, <a class="code" href="structrs__sampler.html" title="Opaque handle to a Renderscript sampler object.">rs_sampler</a> s, <a class="code" href="rs__types_8rsh.html#a5086d0fcb71f916c936af486ccf0dd41">float2</a> location);
-<a name="l00200"></a>00200 
-<a name="l00210"></a>00210 extern const <a class="code" href="rs__types_8rsh.html#adb5162dc168ddd471d948faa60b37c5e">float4</a> __attribute__((overloadable))
-<a name="l00211"></a>00211     rsSample(rs_allocation a, <a class="code" href="structrs__sampler.html" title="Opaque handle to a Renderscript sampler object.">rs_sampler</a> s, <a class="code" href="rs__types_8rsh.html#a5086d0fcb71f916c936af486ccf0dd41">float2</a> location, <span class="keywordtype">float</span> lod);
-<a name="l00212"></a>00212 
-<a name="l00213"></a>00213 <span class="preprocessor">#endif // (defined(RS_VERSION) &amp;&amp; (RS_VERSION &gt;= 16))</span>
-<a name="l00214"></a>00214 <span class="preprocessor"></span>
-<a name="l00215"></a>00215 <span class="preprocessor">#endif</span>
+<a name="l00034"></a>00034 <span class="keyword">extern</span> <a class="code" href="structrs__allocation.html" title="Opaque handle to a RenderScript allocation.">rs_allocation</a> __attribute__((overloadable))
+<a name="l00035"></a>00035     <a class="code" href="rs__allocation_8rsh.html#aadad7654929c451be299df125061c9ba">rsGetAllocation</a>(const <span class="keywordtype">void</span> *);
+<a name="l00036"></a>00036 
+<a name="l00042"></a>00042 extern <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
+<a name="l00043"></a>00043     <a class="code" href="rs__allocation_8rsh.html#a3ca7f505a97d5b7f477bc65b9e77dafb">rsAllocationGetDimX</a>(<a class="code" href="structrs__allocation.html" title="Opaque handle to a RenderScript allocation.">rs_allocation</a>);
+<a name="l00044"></a>00044 
+<a name="l00050"></a>00050 extern <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
+<a name="l00051"></a>00051     <a class="code" href="rs__allocation_8rsh.html#ac889b866b465580eb313e5d2a9fcac3d">rsAllocationGetDimY</a>(rs_allocation);
+<a name="l00052"></a>00052 
+<a name="l00058"></a>00058 extern <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
+<a name="l00059"></a>00059     <a class="code" href="rs__allocation_8rsh.html#acd6f1a2b2443e6ea39e6154577645d2c">rsAllocationGetDimZ</a>(rs_allocation);
+<a name="l00060"></a>00060 
+<a name="l00066"></a>00066 extern <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
+<a name="l00067"></a>00067     <a class="code" href="rs__allocation_8rsh.html#ac42a07c079d6b3c6bb21975170d4e11c">rsAllocationGetDimLOD</a>(rs_allocation);
+<a name="l00068"></a>00068 
+<a name="l00074"></a>00074 extern <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
+<a name="l00075"></a>00075     <a class="code" href="rs__allocation_8rsh.html#ac85f7ed88f38b35482c6d63b56d470fe">rsAllocationGetDimFaces</a>(rs_allocation);
+<a name="l00076"></a>00076 
+<a name="l00077"></a>00077 <span class="preprocessor">#if (defined(RS_VERSION) &amp;&amp; (RS_VERSION &gt;= 14))</span>
+<a name="l00078"></a>00078 <span class="preprocessor"></span>
+<a name="l00092"></a>00092 <span class="keyword">extern</span> <span class="keywordtype">void</span> __attribute__((overloadable))
+<a name="l00093"></a>00093     <a class="code" href="rs__allocation_8rsh.html#a3a1098a3ea3a5106955dd4398b8904e1">rsAllocationCopy1DRange</a>(rs_allocation dstAlloc,
+<a name="l00094"></a>00094                             <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> dstOff, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> dstMip,
+<a name="l00095"></a>00095                             <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> count,
+<a name="l00096"></a>00096                             rs_allocation srcAlloc,
+<a name="l00097"></a>00097                             <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> srcOff, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> srcMip);
+<a name="l00098"></a>00098 
+<a name="l00120"></a>00120 extern <span class="keywordtype">void</span> __attribute__((overloadable))
+<a name="l00121"></a>00121     <a class="code" href="rs__allocation_8rsh.html#a7f7e2369b3ed7d7db31729b6db7ba07e">rsAllocationCopy2DRange</a>(rs_allocation dstAlloc,
+<a name="l00122"></a>00122                             <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> dstXoff, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> dstYoff,
+<a name="l00123"></a>00123                             <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> dstMip,
+<a name="l00124"></a>00124                             <a class="code" href="rs__types_8rsh.html#acc6f9a94176656c73fd74f789cfa2229" title="Enum for selecting cube map faces.">rs_allocation_cubemap_face</a> dstFace,
+<a name="l00125"></a>00125                             <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> width, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> height,
+<a name="l00126"></a>00126                             rs_allocation srcAlloc,
+<a name="l00127"></a>00127                             <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> srcXoff, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> srcYoff,
+<a name="l00128"></a>00128                             <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> srcMip,
+<a name="l00129"></a>00129                             <a class="code" href="rs__types_8rsh.html#acc6f9a94176656c73fd74f789cfa2229" title="Enum for selecting cube map faces.">rs_allocation_cubemap_face</a> srcFace);
+<a name="l00130"></a>00130 
+<a name="l00131"></a>00131 <span class="preprocessor">#endif //defined(RS_VERSION) &amp;&amp; (RS_VERSION &gt;= 14)</span>
+<a name="l00132"></a>00132 <span class="preprocessor"></span>
+<a name="l00136"></a>00136 <span class="keyword">extern</span> <span class="keyword">const</span> <span class="keywordtype">void</span> * __attribute__((overloadable))
+<a name="l00137"></a>00137     <a class="code" href="rs__allocation_8rsh.html#a56157b6ddef754b36833ca1f8e66aec2">rsGetElementAt</a>(rs_allocation a, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x);
+<a name="l00141"></a>00141 extern const <span class="keywordtype">void</span> * __attribute__((overloadable))
+<a name="l00142"></a>00142     <a class="code" href="rs__allocation_8rsh.html#a56157b6ddef754b36833ca1f8e66aec2">rsGetElementAt</a>(rs_allocation a, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> y);
+<a name="l00146"></a>00146 extern const <span class="keywordtype">void</span> * __attribute__((overloadable))
+<a name="l00147"></a>00147     <a class="code" href="rs__allocation_8rsh.html#a56157b6ddef754b36833ca1f8e66aec2">rsGetElementAt</a>(rs_allocation a, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> y, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> z);
+<a name="l00148"></a>00148 
+<a name="l00149"></a>00149 
+<a name="l00150"></a>00150 <span class="preprocessor">#if (defined(RS_VERSION) &amp;&amp; (RS_VERSION &gt;= 18))</span>
+<a name="l00151"></a>00151 <span class="preprocessor"></span><span class="preprocessor">    #define GET_ELEMENT_AT(T) \</span>
+<a name="l00152"></a>00152 <span class="preprocessor">    extern T __attribute__((overloadable)) \</span>
+<a name="l00153"></a>00153 <span class="preprocessor">            rsGetElementAt_##T(rs_allocation a, uint32_t x); \</span>
+<a name="l00154"></a>00154 <span class="preprocessor">    extern T __attribute__((overloadable)) \</span>
+<a name="l00155"></a>00155 <span class="preprocessor">            rsGetElementAt_##T(rs_allocation a, uint32_t x, uint32_t y);  \</span>
+<a name="l00156"></a>00156 <span class="preprocessor">    extern T __attribute__((overloadable)) \</span>
+<a name="l00157"></a>00157 <span class="preprocessor">            rsGetElementAt_##T(rs_allocation a, uint32_t x, uint32_t y, uint32_t z);</span>
+<a name="l00158"></a>00158 <span class="preprocessor"></span><span class="preprocessor">#else</span>
+<a name="l00159"></a>00159 <span class="preprocessor"></span><span class="preprocessor">    #define GET_ELEMENT_AT(T) \</span>
+<a name="l00160"></a>00160 <span class="preprocessor">    static inline T __attribute__((overloadable)) \</span>
+<a name="l00161"></a>00161 <span class="preprocessor">            rsGetElementAt_##T(rs_allocation a, uint32_t x) {  \</span>
+<a name="l00162"></a>00162 <span class="preprocessor">        return ((T *)rsGetElementAt(a, x))[0]; \</span>
+<a name="l00163"></a>00163 <span class="preprocessor">    } \</span>
+<a name="l00164"></a>00164 <span class="preprocessor">    static inline T __attribute__((overloadable)) \</span>
+<a name="l00165"></a>00165 <span class="preprocessor">            rsGetElementAt_##T(rs_allocation a, uint32_t x, uint32_t y) {  \</span>
+<a name="l00166"></a>00166 <span class="preprocessor">        return ((T *)rsGetElementAt(a, x, y))[0]; \</span>
+<a name="l00167"></a>00167 <span class="preprocessor">    } \</span>
+<a name="l00168"></a>00168 <span class="preprocessor">    static inline T __attribute__((overloadable)) \</span>
+<a name="l00169"></a>00169 <span class="preprocessor">            rsGetElementAt_##T(rs_allocation a, uint32_t x, uint32_t y, uint32_t z) {  \</span>
+<a name="l00170"></a>00170 <span class="preprocessor">        return ((T *)rsGetElementAt(a, x, y, z))[0]; \</span>
+<a name="l00171"></a>00171 <span class="preprocessor">    }</span>
+<a name="l00172"></a>00172 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00173"></a>00173 <span class="preprocessor"></span>
+<a name="l00174"></a>00174 GET_ELEMENT_AT(<span class="keywordtype">char</span>)
+<a name="l00175"></a>00175 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ac532b4c1895c8bd4fb75dc370c484351">char2</a>)
+<a name="l00176"></a>00176 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a4617fb31f4c03402515efee0a9b56210">char3</a>)
+<a name="l00177"></a>00177 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#aecb498648daac97c7cc5f31c242dfa03">char4</a>)
+<a name="l00178"></a>00178 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a27c902d5ca78afa82d5ed75554d5cedc">uchar</a>)
+<a name="l00179"></a>00179 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#aff5eb7cd53a34bb01924bf64485296de">uchar2</a>)
+<a name="l00180"></a>00180 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a247b5eacf2b662849668cbc33120343f">uchar3</a>)
+<a name="l00181"></a>00181 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ae6ed52a87d4ff920c303b13b00f7396d">uchar4</a>)
+<a name="l00182"></a>00182 GET_ELEMENT_AT(<span class="keywordtype">short</span>)
+<a name="l00183"></a>00183 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a303d3ad18aaeacfcfeda2b8580b98796">short2</a>)
+<a name="l00184"></a>00184 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a3f4967691ae2b249511b5f3dd9e18793">short3</a>)
+<a name="l00185"></a>00185 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a198219da0b1d51c8d7f8f12aad7e502d">short4</a>)
+<a name="l00186"></a>00186 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a9e58a7bf060b7a5fbf6a401d3020adca">ushort</a>)
+<a name="l00187"></a>00187 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a24a9d78cfc32475e2c6eb1cdec239bf2">ushort2</a>)
+<a name="l00188"></a>00188 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ab78391445785d2ca0276392a9c97fcba">ushort3</a>)
+<a name="l00189"></a>00189 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a77a09fa01d7fc721bbc44c32aac2d487">ushort4</a>)
+<a name="l00190"></a>00190 GET_ELEMENT_AT(<span class="keywordtype">int</span>)
+<a name="l00191"></a>00191 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a6bc1fa1354fe2145b8f12b4bbfafcf4c">int2</a>)
+<a name="l00192"></a>00192 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ad5512266b63fd06dcf450f6c9d5326c8">int3</a>)
+<a name="l00193"></a>00193 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a897deab71f679999ed99d4153c797e70">int4</a>)
+<a name="l00194"></a>00194 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a4f5fce8c1ef282264f9214809524d836">uint</a>)
+<a name="l00195"></a>00195 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#aaf90cd1f01a121e824fc6e1b927e7683">uint2</a>)
+<a name="l00196"></a>00196 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ae80e36ac834c891aa76b09a220344e78">uint3</a>)
+<a name="l00197"></a>00197 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ad92f0ec6c2cdc1f11a6d7fe321047462">uint4</a>)
+<a name="l00198"></a>00198 GET_ELEMENT_AT(<span class="keywordtype">long</span>)
+<a name="l00199"></a>00199 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#afd55d62cee0785034b73375acd0df9da">long2</a>)
+<a name="l00200"></a>00200 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ad9cedbf4050fad14138d1dcb3428ec18">long3</a>)
+<a name="l00201"></a>00201 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ae177e4918f36e5c9da36d524cdb7a2e7">long4</a>)
+<a name="l00202"></a>00202 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ab46637ef82283186e57f54756fe67203">ulong</a>)
+<a name="l00203"></a>00203 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a56988b12ab16acf753356f7a5c70565a">ulong2</a>)
+<a name="l00204"></a>00204 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ac623a569c28935fbedd3a8ed27ae0696">ulong3</a>)
+<a name="l00205"></a>00205 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a3029c54b8e1779a1ddbdfe875432d137">ulong4</a>)
+<a name="l00206"></a>00206 GET_ELEMENT_AT(<span class="keywordtype">float</span>)
+<a name="l00207"></a>00207 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a5086d0fcb71f916c936af486ccf0dd41">float2</a>)
+<a name="l00208"></a>00208 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a0046fa0f208d0899adbcf1f8b5aafadd">float3</a>)
+<a name="l00209"></a>00209 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#adb5162dc168ddd471d948faa60b37c5e">float4</a>)
+<a name="l00210"></a>00210 GET_ELEMENT_AT(<span class="keywordtype">double</span>)
+<a name="l00211"></a>00211 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a75ef868cedebc2a6eeb1bc6ca6ca49c3">double2</a>)
+<a name="l00212"></a>00212 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#aa3c90d5a23d674185a13e95402eda7eb">double3</a>)
+<a name="l00213"></a>00213 GET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a60f4b04e076f0dd0ecc99c365fc4ca21">double4</a>)
+<a name="l00214"></a>00214 
+<a name="l00215"></a>00215 <span class="preprocessor">#undef GET_ELEMENT_AT</span>
 <a name="l00216"></a>00216 <span class="preprocessor"></span>
+<a name="l00217"></a>00217 <span class="comment">// Jelly Bean</span>
+<a name="l00218"></a>00218 <span class="preprocessor">#if (defined(RS_VERSION) &amp;&amp; (RS_VERSION &gt;= 16))</span>
+<a name="l00219"></a>00219 <span class="preprocessor"></span>
+<a name="l00224"></a>00224 <span class="keyword">extern</span> <span class="keyword">const</span> <span class="keywordtype">void</span> __attribute__((overloadable))
+<a name="l00225"></a>00225     <a class="code" href="rs__allocation_8rsh.html#afe9ebb2f89c6366c59f5e05ee4849c0a">rsAllocationIoSend</a>(rs_allocation a);
+<a name="l00226"></a>00226 
+<a name="l00231"></a>00231 extern const <span class="keywordtype">void</span> __attribute__((overloadable))
+<a name="l00232"></a>00232     <a class="code" href="rs__allocation_8rsh.html#a05f7391230a92d239fdb619d791162b5">rsAllocationIoReceive</a>(rs_allocation a);
+<a name="l00233"></a>00233 
+<a name="l00234"></a>00234 
+<a name="l00240"></a>00240 extern <a class="code" href="structrs__element.html" title="Opaque handle to a RenderScript element.">rs_element</a> __attribute__((overloadable))
+<a name="l00241"></a>00241     <a class="code" href="rs__allocation_8rsh.html#a6a3b6512bc269f6b369bdc54d12a45ff">rsAllocationGetElement</a>(rs_allocation a);
+<a name="l00242"></a>00242 
+<a name="l00249"></a>00249 extern const <a class="code" href="rs__types_8rsh.html#adb5162dc168ddd471d948faa60b37c5e">float4</a> __attribute__((overloadable))
+<a name="l00250"></a>00250     <a class="code" href="rs__allocation_8rsh.html#a1ed04c0bfab4044b875bb31577b53407">rsSample</a>(rs_allocation a, <a class="code" href="structrs__sampler.html" title="Opaque handle to a RenderScript sampler object.">rs_sampler</a> s, <span class="keywordtype">float</span> location);
+<a name="l00260"></a>00260 extern const <a class="code" href="rs__types_8rsh.html#adb5162dc168ddd471d948faa60b37c5e">float4</a> __attribute__((overloadable))
+<a name="l00261"></a>00261     <a class="code" href="rs__allocation_8rsh.html#a1ed04c0bfab4044b875bb31577b53407">rsSample</a>(rs_allocation a, <a class="code" href="structrs__sampler.html" title="Opaque handle to a RenderScript sampler object.">rs_sampler</a> s, <span class="keywordtype">float</span> location, <span class="keywordtype">float</span> lod);
+<a name="l00262"></a>00262 
+<a name="l00269"></a>00269 extern const <a class="code" href="rs__types_8rsh.html#adb5162dc168ddd471d948faa60b37c5e">float4</a> __attribute__((overloadable))
+<a name="l00270"></a>00270     <a class="code" href="rs__allocation_8rsh.html#a1ed04c0bfab4044b875bb31577b53407">rsSample</a>(rs_allocation a, <a class="code" href="structrs__sampler.html" title="Opaque handle to a RenderScript sampler object.">rs_sampler</a> s, <a class="code" href="rs__types_8rsh.html#a5086d0fcb71f916c936af486ccf0dd41">float2</a> location);
+<a name="l00271"></a>00271 
+<a name="l00281"></a>00281 extern const <a class="code" href="rs__types_8rsh.html#adb5162dc168ddd471d948faa60b37c5e">float4</a> __attribute__((overloadable))
+<a name="l00282"></a>00282     <a class="code" href="rs__allocation_8rsh.html#a1ed04c0bfab4044b875bb31577b53407">rsSample</a>(rs_allocation a, <a class="code" href="structrs__sampler.html" title="Opaque handle to a RenderScript sampler object.">rs_sampler</a> s, <a class="code" href="rs__types_8rsh.html#a5086d0fcb71f916c936af486ccf0dd41">float2</a> location, <span class="keywordtype">float</span> lod);
+<a name="l00283"></a>00283 
+<a name="l00284"></a>00284 <span class="preprocessor">#endif // (defined(RS_VERSION) &amp;&amp; (RS_VERSION &gt;= 16))</span>
+<a name="l00285"></a>00285 <span class="preprocessor"></span>
+<a name="l00286"></a>00286 <span class="preprocessor">#if (defined(RS_VERSION) &amp;&amp; (RS_VERSION &gt;= 18))</span>
+<a name="l00287"></a>00287 <span class="preprocessor"></span>
+<a name="l00291"></a>00291 <span class="keyword">extern</span> <span class="keywordtype">void</span> __attribute__((overloadable))
+<a name="l00292"></a>00292     <a class="code" href="rs__allocation_8rsh.html#a36ef1e609e360a9a5a5ff5dce13b5100">rsSetElementAt</a>(rs_allocation a, <span class="keywordtype">void</span>* ptr, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x);
+<a name="l00293"></a>00293 
+<a name="l00297"></a>00297 extern <span class="keywordtype">void</span> __attribute__((overloadable))
+<a name="l00298"></a>00298     <a class="code" href="rs__allocation_8rsh.html#a36ef1e609e360a9a5a5ff5dce13b5100">rsSetElementAt</a>(rs_allocation a, <span class="keywordtype">void</span>* ptr, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> y);
+<a name="l00299"></a>00299 
+<a name="l00300"></a>00300 <span class="preprocessor">#define SET_ELEMENT_AT(T)                                               \</span>
+<a name="l00301"></a>00301 <span class="preprocessor">    extern void __attribute__((overloadable))                           \</span>
+<a name="l00302"></a>00302 <span class="preprocessor">    rsSetElementAt_##T(rs_allocation a, T val, uint32_t x);             \</span>
+<a name="l00303"></a>00303 <span class="preprocessor">    extern void __attribute__((overloadable))                           \</span>
+<a name="l00304"></a>00304 <span class="preprocessor">    rsSetElementAt_##T(rs_allocation a, T val, uint32_t x, uint32_t y); \</span>
+<a name="l00305"></a>00305 <span class="preprocessor">    extern void __attribute__((overloadable))                           \</span>
+<a name="l00306"></a>00306 <span class="preprocessor">    rsSetElementAt_##T(rs_allocation a, T val, uint32_t x, uint32_t y, uint32_t z);</span>
+<a name="l00307"></a>00307 <span class="preprocessor"></span>
+<a name="l00308"></a>00308 
+<a name="l00309"></a>00309 SET_ELEMENT_AT(<span class="keywordtype">char</span>)
+<a name="l00310"></a>00310 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ac532b4c1895c8bd4fb75dc370c484351">char2</a>)
+<a name="l00311"></a>00311 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a4617fb31f4c03402515efee0a9b56210">char3</a>)
+<a name="l00312"></a>00312 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#aecb498648daac97c7cc5f31c242dfa03">char4</a>)
+<a name="l00313"></a>00313 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a27c902d5ca78afa82d5ed75554d5cedc">uchar</a>)
+<a name="l00314"></a>00314 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#aff5eb7cd53a34bb01924bf64485296de">uchar2</a>)
+<a name="l00315"></a>00315 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a247b5eacf2b662849668cbc33120343f">uchar3</a>)
+<a name="l00316"></a>00316 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ae6ed52a87d4ff920c303b13b00f7396d">uchar4</a>)
+<a name="l00317"></a>00317 SET_ELEMENT_AT(<span class="keywordtype">short</span>)
+<a name="l00318"></a>00318 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a303d3ad18aaeacfcfeda2b8580b98796">short2</a>)
+<a name="l00319"></a>00319 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a3f4967691ae2b249511b5f3dd9e18793">short3</a>)
+<a name="l00320"></a>00320 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a198219da0b1d51c8d7f8f12aad7e502d">short4</a>)
+<a name="l00321"></a>00321 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a9e58a7bf060b7a5fbf6a401d3020adca">ushort</a>)
+<a name="l00322"></a>00322 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a24a9d78cfc32475e2c6eb1cdec239bf2">ushort2</a>)
+<a name="l00323"></a>00323 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ab78391445785d2ca0276392a9c97fcba">ushort3</a>)
+<a name="l00324"></a>00324 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a77a09fa01d7fc721bbc44c32aac2d487">ushort4</a>)
+<a name="l00325"></a>00325 SET_ELEMENT_AT(<span class="keywordtype">int</span>)
+<a name="l00326"></a>00326 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a6bc1fa1354fe2145b8f12b4bbfafcf4c">int2</a>)
+<a name="l00327"></a>00327 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ad5512266b63fd06dcf450f6c9d5326c8">int3</a>)
+<a name="l00328"></a>00328 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a897deab71f679999ed99d4153c797e70">int4</a>)
+<a name="l00329"></a>00329 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a4f5fce8c1ef282264f9214809524d836">uint</a>)
+<a name="l00330"></a>00330 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#aaf90cd1f01a121e824fc6e1b927e7683">uint2</a>)
+<a name="l00331"></a>00331 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ae80e36ac834c891aa76b09a220344e78">uint3</a>)
+<a name="l00332"></a>00332 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ad92f0ec6c2cdc1f11a6d7fe321047462">uint4</a>)
+<a name="l00333"></a>00333 SET_ELEMENT_AT(<span class="keywordtype">long</span>)
+<a name="l00334"></a>00334 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#afd55d62cee0785034b73375acd0df9da">long2</a>)
+<a name="l00335"></a>00335 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ad9cedbf4050fad14138d1dcb3428ec18">long3</a>)
+<a name="l00336"></a>00336 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ae177e4918f36e5c9da36d524cdb7a2e7">long4</a>)
+<a name="l00337"></a>00337 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ab46637ef82283186e57f54756fe67203">ulong</a>)
+<a name="l00338"></a>00338 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a56988b12ab16acf753356f7a5c70565a">ulong2</a>)
+<a name="l00339"></a>00339 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#ac623a569c28935fbedd3a8ed27ae0696">ulong3</a>)
+<a name="l00340"></a>00340 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a3029c54b8e1779a1ddbdfe875432d137">ulong4</a>)
+<a name="l00341"></a>00341 SET_ELEMENT_AT(<span class="keywordtype">float</span>)
+<a name="l00342"></a>00342 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a5086d0fcb71f916c936af486ccf0dd41">float2</a>)
+<a name="l00343"></a>00343 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a0046fa0f208d0899adbcf1f8b5aafadd">float3</a>)
+<a name="l00344"></a>00344 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#adb5162dc168ddd471d948faa60b37c5e">float4</a>)
+<a name="l00345"></a>00345 SET_ELEMENT_AT(<span class="keywordtype">double</span>)
+<a name="l00346"></a>00346 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a75ef868cedebc2a6eeb1bc6ca6ca49c3">double2</a>)
+<a name="l00347"></a>00347 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#aa3c90d5a23d674185a13e95402eda7eb">double3</a>)
+<a name="l00348"></a>00348 SET_ELEMENT_AT(<a class="code" href="rs__types_8rsh.html#a60f4b04e076f0dd0ecc99c365fc4ca21">double4</a>)
+<a name="l00349"></a>00349 
+<a name="l00350"></a>00350 <span class="preprocessor">#undef SET_ELEMENT_AT</span>
+<a name="l00351"></a>00351 <span class="preprocessor"></span>
+<a name="l00352"></a>00352 
+<a name="l00356"></a>00356 <span class="keyword">extern</span> <span class="keyword">const</span> <a class="code" href="rs__types_8rsh.html#a27c902d5ca78afa82d5ed75554d5cedc">uchar</a> __attribute__((overloadable))
+<a name="l00357"></a>00357     <a class="code" href="rs__allocation_8rsh.html#ad7ffa1aa16511a75b4bc2c05bd0e0a75">rsGetElementAtYuv_uchar_Y</a>(rs_allocation a, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> y);
+<a name="l00358"></a>00358 
+<a name="l00364"></a>00364 extern const <a class="code" href="rs__types_8rsh.html#a27c902d5ca78afa82d5ed75554d5cedc">uchar</a> __attribute__((overloadable))
+<a name="l00365"></a>00365     <a class="code" href="rs__allocation_8rsh.html#a41f61be02113ee22c039ea51fdedb20e">rsGetElementAtYuv_uchar_U</a>(rs_allocation a, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> y);
+<a name="l00366"></a>00366 
+<a name="l00372"></a>00372 extern const <a class="code" href="rs__types_8rsh.html#a27c902d5ca78afa82d5ed75554d5cedc">uchar</a> __attribute__((overloadable))
+<a name="l00373"></a>00373     <a class="code" href="rs__allocation_8rsh.html#af03cadb582fa80bbf7f39177d96df17e">rsGetElementAtYuv_uchar_V</a>(rs_allocation a, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> x, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> y);
+<a name="l00374"></a>00374 
+<a name="l00375"></a>00375 <span class="preprocessor">#endif // (defined(RS_VERSION) &amp;&amp; (RS_VERSION &gt;= 18))</span>
+<a name="l00376"></a>00376 <span class="preprocessor"></span>
+<a name="l00377"></a>00377 <span class="preprocessor">#endif</span>
+<a name="l00378"></a>00378 <span class="preprocessor"></span>
 </pre></div></div>
 </div>
 
