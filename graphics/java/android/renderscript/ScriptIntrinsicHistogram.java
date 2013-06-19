@@ -37,15 +37,18 @@ public final class ScriptIntrinsicHistogram extends ScriptIntrinsic {
      * or uchar4 image.
      *
      * Supported elements types are {@link Element#U8_4, @link
-     * Element#U8}
+     * Element#U8_3, @link Element#U8_2, @link Element#U8}
      *
      * @param rs The RenderScript context
-     * @param e Element type for inputs and outputs
+     * @param e Element type for inputs
      *
      * @return ScriptIntrinsicHistogram
      */
     public static ScriptIntrinsicHistogram create(RenderScript rs, Element e) {
-        if ((!e.isCompatible(Element.U8_4(rs))) && (!e.isCompatible(Element.U8(rs)))) {
+        if ((!e.isCompatible(Element.U8_4(rs))) &&
+            (!e.isCompatible(Element.U8_3(rs))) &&
+            (!e.isCompatible(Element.U8_2(rs))) &&
+            (!e.isCompatible(Element.U8(rs)))) {
             throw new RSIllegalArgumentException("Unsuported element type.");
         }
         int id = rs.nScriptIntrinsicCreate(9, e.getID(rs));
@@ -53,12 +56,25 @@ public final class ScriptIntrinsicHistogram extends ScriptIntrinsic {
         return sib;
     }
 
+    /**
+     * Process an input buffer and place the histogram into the
+     * output allocation. The output allocation may be a narrower
+     * vector size than the input. In this case the vector size of
+     * the output is used to determine how many of the input
+     * channels are used in the computation. This is useful if you
+     * have an RGBA input buffer but only want the histogram for
+     * RGB.
+     *
+     * 1D and 2D input allocations are supported.
+     *
+     * @param ain The input image
+     */
     public void forEach(Allocation ain) {
         if (ain.getType().getElement().getVectorSize() <
             mOut.getType().getElement().getVectorSize()) {
 
             throw new RSIllegalArgumentException(
-                "Input vector sizse must be >= output vector size.");
+                "Input vector size must be >= output vector size.");
         }
         if (ain.getType().getElement().isCompatible(Element.U8(mRS)) &&
             ain.getType().getElement().isCompatible(Element.U8_4(mRS))) {
@@ -68,6 +84,17 @@ public final class ScriptIntrinsicHistogram extends ScriptIntrinsic {
         forEach(0, ain, null, null);
     }
 
+    /**
+     * Set the coefficients used for the RGBA to Luminocity
+     * calculation. The default is {0.299f, 0.587f, 0.114f, 0.f}.
+     *
+     * Coefficients must be >= 0 and sum to 1.0 or less.
+     *
+     * @param r Red coefficient
+     * @param g Green coefficient
+     * @param b Blue coefficient
+     * @param a Alpha coefficient
+     */
     public void setDotCoefficients(float r, float g, float b, float a) {
         if ((r < 0.f) || (g < 0.f) || (b < 0.f) || (a < 0.f)) {
             throw new RSIllegalArgumentException("Coefficient may not be negative.");
@@ -85,9 +112,10 @@ public final class ScriptIntrinsicHistogram extends ScriptIntrinsic {
     }
 
     /**
-     * Set the output of the histogram.
+     * Set the output of the histogram.  32 bit integer types are
+     * supported.
      *
-     * @param ain The input allocation
+     * @param aout The output allocation
      */
     public void setOutput(Allocation aout) {
         mOut = aout;
@@ -112,6 +140,16 @@ public final class ScriptIntrinsicHistogram extends ScriptIntrinsic {
         setVar(1, aout);
     }
 
+    /**
+     * Process an input buffer and place the histogram into the
+     * output allocation. The dot product of the input channel and
+     * the coefficients from 'setDotCoefficients' are used to
+     * calculate the output values.
+     *
+     * 1D and 2D input allocations are supported.
+     *
+     * @param ain The input image
+     */
     public void forEach_dot(Allocation ain) {
         if (mOut.getType().getElement().getVectorSize() != 1) {
             throw new RSIllegalArgumentException("Output vector size must be one.");
