@@ -68,8 +68,8 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
-import android.util.LruCache;
 import android.text.TextUtils;
+import android.util.LruCache;
 
 import com.android.internal.R;
 import com.android.internal.app.IBatteryStats;
@@ -1339,7 +1339,6 @@ public class WifiStateMachine extends StateMachine {
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
-    private static final String ID_STR = "id=";
     private static final String BSSID_STR = "bssid=";
     private static final String FREQ_STR = "freq=";
     private static final String LEVEL_STR = "level=";
@@ -1351,8 +1350,6 @@ public class WifiStateMachine extends StateMachine {
 
     /**
      * Format:
-     *
-     * id=1
      * bssid=68:7f:76:d7:1a:6e
      * freq=2412
      * level=-44
@@ -1360,7 +1357,6 @@ public class WifiStateMachine extends StateMachine {
      * flags=[WPA2-PSK-CCMP][WPS][ESS]
      * ssid=zfdy
      * ====
-     * id=2
      * bssid=68:5f:74:d7:1a:6f
      * freq=5180
      * level=-73
@@ -1369,43 +1365,16 @@ public class WifiStateMachine extends StateMachine {
      * ssid=zuby
      * ====
      */
-    private void setScanResults() {
+    private void setScanResults(String scanResults) {
         String bssid = "";
         int level = 0;
         int freq = 0;
         long tsf = 0;
         String flags = "";
         WifiSsid wifiSsid = null;
-        String scanResults;
-        String tmpResults;
-        StringBuffer scanResultsBuf = new StringBuffer();
-        int sid = 0;
 
-        while (true) {
-            tmpResults = mWifiNative.scanResults(sid);
-            if (TextUtils.isEmpty(tmpResults)) break;
-            scanResultsBuf.append(tmpResults);
-            scanResultsBuf.append("\n");
-            String[] lines = tmpResults.split("\n");
-            sid = -1;
-            for (int i=lines.length - 1; i >= 0; i--) {
-                if (lines[i].startsWith(END_STR)) {
-                    break;
-                } else if (lines[i].startsWith(ID_STR)) {
-                    try {
-                        sid = Integer.parseInt(lines[i].substring(ID_STR.length())) + 1;
-                    } catch (NumberFormatException e) {
-                        // Nothing to do
-                    }
-                    break;
-                }
-            }
-            if (sid == -1) break;
-        }
-
-        scanResults = scanResultsBuf.toString();
-        if (TextUtils.isEmpty(scanResults)) {
-           return;
+        if (scanResults == null) {
+            return;
         }
 
         synchronized(mScanResultCache) {
@@ -2232,7 +2201,7 @@ public class WifiStateMachine extends StateMachine {
                     sendMessageDelayed(CMD_START_SUPPLICANT, SUPPLICANT_RESTART_INTERVAL_MSECS);
                     break;
                 case WifiMonitor.SCAN_RESULTS_EVENT:
-                    setScanResults();
+                    setScanResults(mWifiNative.scanResults());
                     sendScanResultsAvailableBroadcast();
                     mScanResultIsPending = false;
                     break;
