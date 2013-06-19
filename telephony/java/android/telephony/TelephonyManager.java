@@ -1252,7 +1252,7 @@ public class TelephonyManager {
     public void listen(PhoneStateListener listener, int events) {
         String pkgForDebug = mContext != null ? mContext.getPackageName() : "<unknown>";
         try {
-            Boolean notifyNow = (getITelephony() != null);
+            Boolean notifyNow = true;
             sRegistry.listen(pkgForDebug, listener.callback, events, notifyNow);
         } catch (RemoteException ex) {
             // system process dead
