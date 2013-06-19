@@ -105,8 +105,6 @@ public:
 private:
     friend class Font;
 
-    static const uint32_t gMaxNumberOfQuads = 2048;
-
     const uint8_t* mGammaTable;
 
     void allocateTextureMemory(CacheTexture* cacheTexture);
@@ -118,7 +116,6 @@ private:
     CacheTexture* cacheBitmapInTexture(const SkGlyph& glyph, uint32_t* startX, uint32_t* startY);
 
     void flushAllAndInvalidate();
-    void initVertexArrayBuffers();
 
     void checkInit();
     void initRender(const Rect* clip, Rect* bounds, Functor* functor);
@@ -159,8 +156,6 @@ private:
     CacheTexture* mCurrentCacheTexture;
 
     bool mUploadTexture;
-
-    uint32_t mIndexBufferID;
 
     Functor* mFunctor;
     const Rect* mClip;

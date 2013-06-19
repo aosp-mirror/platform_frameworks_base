@@ -26,6 +26,7 @@
 
 #include "Debug.h"
 #include "Extensions.h"
+#include "Properties.h"
 
 namespace android {
 
@@ -63,7 +64,13 @@ Extensions::Extensions(): Singleton<Extensions>() {
 
     // Query EGL extensions
     findExtensions(eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS), mEglExtensionList);
-    mHasNvSystemTime = hasEglExtension("EGL_NV_system_time");
+
+    char property[PROPERTY_VALUE_MAX];
+    if (property_get(PROPERTY_DEBUG_NV_PROFILING, property, NULL) > 0) {
+        mHasNvSystemTime = !strcmp(property, "true") && hasEglExtension("EGL_NV_system_time");
+    } else {
+        mHasNvSystemTime = false;
+    }
 
     const char* version = (const char*) glGetString(GL_VERSION);
 

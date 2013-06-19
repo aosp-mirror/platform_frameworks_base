@@ -1230,7 +1230,7 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
 
             numQuads++;
 
-            if (numQuads >= REGION_MESH_QUAD_COUNT) {
+            if (numQuads >= gMaxNumberOfQuads) {
                 DRAW_DOUBLE_STENCIL(glDrawElements(GL_TRIANGLES, numQuads * 6,
                                 GL_UNSIGNED_SHORT, NULL));
                 numQuads = 0;

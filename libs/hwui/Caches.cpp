@@ -386,8 +386,8 @@ bool Caches::bindIndicesBuffer(const GLuint buffer) {
 
 bool Caches::bindIndicesBuffer() {
     if (!mMeshIndices) {
-        uint16_t* regionIndices = new uint16_t[REGION_MESH_QUAD_COUNT * 6];
-        for (int i = 0; i < REGION_MESH_QUAD_COUNT; i++) {
+        uint16_t* regionIndices = new uint16_t[gMaxNumberOfQuads * 6];
+        for (uint32_t i = 0; i < gMaxNumberOfQuads; i++) {
             uint16_t quad = i * 4;
             int index = i * 6;
             regionIndices[index    ] = quad;       // top-left
@@ -400,7 +400,7 @@ bool Caches::bindIndicesBuffer() {
 
         glGenBuffers(1, &mMeshIndices);
         bool force = bindIndicesBuffer(mMeshIndices);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, REGION_MESH_QUAD_COUNT * 6 * sizeof(uint16_t),
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, gMaxNumberOfQuads * 6 * sizeof(uint16_t),
                 regionIndices, GL_STATIC_DRAW);
 
         delete[] regionIndices;
@@ -638,7 +638,7 @@ void Caches::unregisterFunctors(uint32_t functorCount) {
 TextureVertex* Caches::getRegionMesh() {
     // Create the mesh, 2 triangles and 4 vertices per rectangle in the region
     if (!mRegionMesh) {
-        mRegionMesh = new TextureVertex[REGION_MESH_QUAD_COUNT * 4];
+        mRegionMesh = new TextureVertex[gMaxNumberOfQuads * 4];
     }
 
     return mRegionMesh;
