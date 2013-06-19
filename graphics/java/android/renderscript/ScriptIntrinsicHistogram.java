@@ -54,9 +54,11 @@ public final class ScriptIntrinsicHistogram extends ScriptIntrinsic {
     }
 
     public void forEach(Allocation ain) {
-        int vecSize = mOut.getType().getElement().getVectorSize();
-        if (ain.getType().getElement().getVectorSize() != vecSize) {
-            throw new RSIllegalArgumentException("Vector sizes must match.");
+        if (ain.getType().getElement().getVectorSize() <
+            mOut.getType().getElement().getVectorSize()) {
+
+            throw new RSIllegalArgumentException(
+                "Input vector sizse must be >= output vector size.");
         }
         if (ain.getType().getElement().isCompatible(Element.U8(mRS)) &&
             ain.getType().getElement().isCompatible(Element.U8_4(mRS))) {
@@ -90,9 +92,11 @@ public final class ScriptIntrinsicHistogram extends ScriptIntrinsic {
     public void setOutput(Allocation aout) {
         mOut = aout;
         if (mOut.getType().getElement() != Element.U32(mRS) &&
+            mOut.getType().getElement() != Element.U32_2(mRS) &&
             mOut.getType().getElement() != Element.U32_3(mRS) &&
             mOut.getType().getElement() != Element.U32_4(mRS) &&
             mOut.getType().getElement() != Element.I32(mRS) &&
+            mOut.getType().getElement() != Element.I32_2(mRS) &&
             mOut.getType().getElement() != Element.I32_3(mRS) &&
             mOut.getType().getElement() != Element.I32_4(mRS)) {
 
