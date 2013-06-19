@@ -36,8 +36,9 @@ public final class ScriptIntrinsicHistogram extends ScriptIntrinsic {
      * Create an intrinsic for calculating the histogram of an uchar
      * or uchar4 image.
      *
-     * Supported elements types are {@link Element#U8_4, @link
-     * Element#U8_3, @link Element#U8_2, @link Element#U8}
+     * Supported elements types are
+     * {@link Element#U8_4}, {@link Element#U8_3},
+     * {@link Element#U8_2}, {@link Element#U8}
      *
      * @param rs The RenderScript context
      * @param e Element type for inputs
