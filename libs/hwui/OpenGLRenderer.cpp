@@ -1061,7 +1061,7 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
 }
 
 void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
-    float alpha = layer->getAlpha() / 255.0f * mSnapshot->alpha;
+    float alpha = getLayerAlpha(layer);
 
     setupDraw();
     if (layer->getRenderTarget() == GL_TEXTURE_2D) {
