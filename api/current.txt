@@ -21333,6 +21333,16 @@ package android.renderscript {
     method public void setInput(android.renderscript.Allocation);
   }
 
+  public final class ScriptIntrinsicHistogram extends android.renderscript.ScriptIntrinsic {
+    method public static android.renderscript.ScriptIntrinsicHistogram create(android.renderscript.RenderScript, android.renderscript.Element);
+    method public void forEach(android.renderscript.Allocation);
+    method public void forEach_dot(android.renderscript.Allocation);
+    method public android.renderscript.Script.FieldID getFieldID_Input();
+    method public android.renderscript.Script.KernelID getKernelID_seperate();
+    method public void setDotCoefficients(float, float, float, float);
+    method public void setOutput(android.renderscript.Allocation);
+  }
+
   public final class ScriptIntrinsicLUT extends android.renderscript.ScriptIntrinsic {
     method public static android.renderscript.ScriptIntrinsicLUT create(android.renderscript.RenderScript, android.renderscript.Element);
     method public void forEach(android.renderscript.Allocation, android.renderscript.Allocation);
