@@ -195,6 +195,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private int mCurrentUserId = UserHandle.USER_OWNER;
 
+    //TODO: Remove this hack
+    private boolean mInitialized;
+
     private UserState getCurrentUserStateLocked() {
         return getUserStateLocked(mCurrentUserId);
     }
@@ -771,6 +774,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
     private void switchUser(int userId) {
         synchronized (mLock) {
+            if (mCurrentUserId == userId && mInitialized) {
+                return;
+            }
+
             // Disconnect from services for the old user.
             UserState oldUserState = getUserStateLocked(mCurrentUserId);
             oldUserState.onSwitchToAnotherUser();
@@ -1283,6 +1290,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
     }
 
     private void onUserStateChangedLocked(UserState userState) {
+        // TODO: Remove this hack
+        mInitialized = true;
         updateLegacyCapabilities(userState);
         updateServicesLocked(userState);
         updateFilterKeyEventsLocked(userState);
