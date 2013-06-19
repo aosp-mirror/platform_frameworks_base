@@ -72,7 +72,13 @@ public abstract class ContentResolver {
      */
     @Deprecated
     public static final String SYNC_EXTRAS_ACCOUNT = "account";
+
+    /**
+     * If this extra is set to true, the sync request will be scheduled
+     * at the front of the sync request queue and without any delay
+     */
     public static final String SYNC_EXTRAS_EXPEDITED = "expedited";
+
     /**
      * @deprecated instead use
      * {@link #SYNC_EXTRAS_MANUAL}
@@ -104,8 +110,25 @@ public abstract class ContentResolver {
      */
     public static final String SYNC_EXTRAS_MANUAL = "force";
 
+    /**
+     * Indicates that this sync is intended to only upload local changes to the server.
+     * For example, this will be set to true if the sync is initiated by a call to
+     * {@link ContentResolver#notifyChange(android.net.Uri, android.database.ContentObserver, boolean)}
+     */
     public static final String SYNC_EXTRAS_UPLOAD = "upload";
+
+    /**
+     * Indicates that the sync adapter should proceed with the delete operations,
+     * even if it determines that there are too many.
+     * See {@link SyncResult#tooManyDeletions}
+     */
     public static final String SYNC_EXTRAS_OVERRIDE_TOO_MANY_DELETIONS = "deletions_override";
+
+    /**
+     * Indicates that the sync adapter should not proceed with the delete operations,
+     * if it determines that there are too many.
+     * See {@link SyncResult#tooManyDeletions}
+     */
     public static final String SYNC_EXTRAS_DISCARD_LOCAL_DELETIONS = "discard_deletions";
 
     /**
