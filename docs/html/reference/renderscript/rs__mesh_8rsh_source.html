@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 
-<title>rs_mesh.rsh Source File</title>
+<title>/usr/local/google/home/srhines/android_trees/jb-mr2-dev/frameworks/rs/scriptc/rs_mesh.rsh Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 
@@ -24,7 +24,7 @@
   </div>
 <div class="header">
   <div class="headertitle">
-<div class="title">rs_mesh.rsh</div>  </div>
+<div class="title">/usr/local/google/home/srhines/android_trees/jb-mr2-dev/frameworks/rs/scriptc/rs_mesh.rsh</div>  </div>
 </div>
 <div class="contents">
 <a href="rs__mesh_8rsh.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
@@ -50,19 +50,19 @@
 <a name="l00027"></a>00027 <span class="preprocessor">#if (defined(RS_VERSION) &amp;&amp; (RS_VERSION &gt;= 16))</span>
 <a name="l00028"></a>00028 <span class="preprocessor"></span>
 <a name="l00037"></a>00037 <span class="keyword">extern</span> <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
-<a name="l00038"></a>00038     rsgMeshGetVertexAllocationCount(<a class="code" href="structrs__mesh.html" title="Opaque handle to a Renderscript mesh object.">rs_mesh</a> m);
+<a name="l00038"></a>00038     <a class="code" href="rs__mesh_8rsh.html#a7578d6d93154ac881715ab511449fab9">rsgMeshGetVertexAllocationCount</a>(<a class="code" href="structrs__mesh.html" title="Opaque handle to a RenderScript mesh object.">rs_mesh</a> m);
 <a name="l00039"></a>00039 
 <a name="l00049"></a>00049 extern <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> __attribute__((overloadable))
-<a name="l00050"></a>00050     rsgMeshGetPrimitiveCount(<a class="code" href="structrs__mesh.html" title="Opaque handle to a Renderscript mesh object.">rs_mesh</a> m);
+<a name="l00050"></a>00050     <a class="code" href="rs__mesh_8rsh.html#ae0a0178cc02508517013486be4500d7f">rsgMeshGetPrimitiveCount</a>(<a class="code" href="structrs__mesh.html" title="Opaque handle to a RenderScript mesh object.">rs_mesh</a> m);
 <a name="l00051"></a>00051 
-<a name="l00060"></a>00060 extern <a class="code" href="structrs__allocation.html" title="Opaque handle to a Renderscript allocation.">rs_allocation</a> __attribute__((overloadable))
-<a name="l00061"></a>00061     rsgMeshGetVertexAllocation(<a class="code" href="structrs__mesh.html" title="Opaque handle to a Renderscript mesh object.">rs_mesh</a> m, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> index);
+<a name="l00060"></a>00060 extern <a class="code" href="structrs__allocation.html" title="Opaque handle to a RenderScript allocation.">rs_allocation</a> __attribute__((overloadable))
+<a name="l00061"></a>00061     <a class="code" href="rs__mesh_8rsh.html#a43e1d84147176cb0a1659552fa8da49f">rsgMeshGetVertexAllocation</a>(<a class="code" href="structrs__mesh.html" title="Opaque handle to a RenderScript mesh object.">rs_mesh</a> m, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> index);
 <a name="l00062"></a>00062 
-<a name="l00071"></a>00071 extern <a class="code" href="structrs__allocation.html" title="Opaque handle to a Renderscript allocation.">rs_allocation</a> __attribute__((overloadable))
-<a name="l00072"></a>00072     rsgMeshGetIndexAllocation(<a class="code" href="structrs__mesh.html" title="Opaque handle to a Renderscript mesh object.">rs_mesh</a> m, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> index);
+<a name="l00071"></a>00071 extern <a class="code" href="structrs__allocation.html" title="Opaque handle to a RenderScript allocation.">rs_allocation</a> __attribute__((overloadable))
+<a name="l00072"></a>00072     <a class="code" href="rs__mesh_8rsh.html#a05257c9252e7804397d6a6f7549bae5a">rsgMeshGetIndexAllocation</a>(<a class="code" href="structrs__mesh.html" title="Opaque handle to a RenderScript mesh object.">rs_mesh</a> m, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> index);
 <a name="l00073"></a>00073 
-<a name="l00082"></a>00082 extern rs_primitive __attribute__((overloadable))
-<a name="l00083"></a>00083     rsgMeshGetPrimitive(<a class="code" href="structrs__mesh.html" title="Opaque handle to a Renderscript mesh object.">rs_mesh</a> m, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> index);
+<a name="l00082"></a>00082 extern <a class="code" href="rs__types_8rsh.html#aaaa4ecd4a284cf9cccc6e06407229951">rs_primitive</a> __attribute__((overloadable))
+<a name="l00083"></a>00083     <a class="code" href="rs__mesh_8rsh.html#af467f1c21cc9221071334f8234c29466">rsgMeshGetPrimitive</a>(<a class="code" href="structrs__mesh.html" title="Opaque handle to a RenderScript mesh object.">rs_mesh</a> m, <a class="code" href="rs__types_8rsh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> index);
 <a name="l00084"></a>00084 
 <a name="l00085"></a>00085 <span class="preprocessor">#endif // (defined(RS_VERSION) &amp;&amp; (RS_VERSION &gt;= 16))</span>
 <a name="l00086"></a>00086 <span class="preprocessor"></span>

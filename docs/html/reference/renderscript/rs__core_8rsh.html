@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 
-<title>rs_core.rsh File Reference</title>
+<title>/usr/local/google/home/srhines/android_trees/jb-mr2-dev/frameworks/rs/scriptc/rs_core.rsh File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 
@@ -30,7 +30,7 @@
 <a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">rs_core.rsh File Reference</div>  </div>
+<div class="title">/usr/local/google/home/srhines/android_trees/jb-mr2-dev/frameworks/rs/scriptc/rs_core.rsh File Reference</div>  </div>
 </div>
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="rs__types_8rsh_source.html">rs_types.rsh</a>&quot;</code><br/>
@@ -61,11 +61,13 @@ Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__core_8rsh.html#a508003cadad2d37d41e2de7e9226f859">rsSendToClient</a> (int cmdID, const void *data, <a class="el" href="rs__types_8rsh.html#a4f5fce8c1ef282264f9214809524d836">uint</a> len)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__core_8rsh.html#a6e4ff6388e8c6978ed17447214f2a2e2">rsSendToClientBlocking</a> (int cmdID)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__core_8rsh.html#afc93b00be08f58512a6ab6a87feb9515">rsSendToClientBlocking</a> (int cmdID, const void *data, <a class="el" href="rs__types_8rsh.html#a4f5fce8c1ef282264f9214809524d836">uint</a> len)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__core_8rsh.html#a95ebbf7a8923193df144649c066daae6">rsForEach</a> (<a class="el" href="structrs__script.html">rs_script</a> script, <a class="el" href="structrs__allocation.html">rs_allocation</a> input, <a class="el" href="structrs__allocation.html">rs_allocation</a> output, const void *usrData, const <a class="el" href="rs__core_8rsh.html#ae8756b32e23445f287960b9d0ffb449c">rs_script_call_t</a> *sc)</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__core_8rsh.html#ae62dc9d507e0e62c064217c71cc94101">rsForEach</a> (<a class="el" href="structrs__script.html">rs_script</a> script, <a class="el" href="structrs__allocation.html">rs_allocation</a> input, <a class="el" href="structrs__allocation.html">rs_allocation</a> output, const void *usrData)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__core_8rsh.html#a64271d266928b06ebd82ec90b756eb23">rsForEach</a> (<a class="el" href="structrs__script.html">rs_script</a> script, <a class="el" href="structrs__allocation.html">rs_allocation</a> input, <a class="el" href="structrs__allocation.html">rs_allocation</a> output, const void *usrData, <a class="el" href="rs__types_8rsh.html#a29d85914ddff32967d85ada69854206d">size_t</a> usrDataLen, const <a class="el" href="rs__core_8rsh.html#ae8756b32e23445f287960b9d0ffb449c">rs_script_call_t</a> *)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__core_8rsh.html#a38c803ed805dd1362442977eae70c41d">rsForEach</a> (<a class="el" href="structrs__script.html">rs_script</a> script, <a class="el" href="structrs__allocation.html">rs_allocation</a> input, <a class="el" href="structrs__allocation.html">rs_allocation</a> output, const void *usrData, <a class="el" href="rs__types_8rsh.html#a29d85914ddff32967d85ada69854206d">size_t</a> usrDataLen)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__core_8rsh.html#a6c541fa49b6fb9b528c2a147eaf764da">rsForEach</a> (<a class="el" href="structrs__script.html">rs_script</a> script, <a class="el" href="structrs__allocation.html">rs_allocation</a> input, <a class="el" href="structrs__allocation.html">rs_allocation</a> output)</td></tr>
 </table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
-<div class="textblock">
+<div class="textblock"><p>todo-jsams </p>
+
 <p>Definition in file <a class="el" href="rs__core_8rsh_source.html">rs_core.rsh</a>.</p>
 </div><hr/><h2>Typedef Documentation</h2>
 <a class="anchor" id="ae8756b32e23445f287960b9d0ffb449c"></a><!-- doxytag: member="rs_core.rsh::rs_script_call_t" ref="ae8756b32e23445f287960b9d0ffb449c" args="" -->
@@ -96,12 +98,12 @@ Functions</h2></td></tr>
 <p>Launch order hint for rsForEach calls. This provides a hint to the system to determine in which order the root function of the target is called with each cell of the allocation.</p>
 <p>This is a hint and implementations may not obey the order. </p>
 
-<p>Definition at line <a class="el" href="rs__core_8rsh_source.html#l00092">92</a> of file <a class="el" href="rs__core_8rsh_source.html">rs_core.rsh</a>.</p>
+<p>Definition at line <a class="el" href="rs__core_8rsh_source.html#l00096">96</a> of file <a class="el" href="rs__core_8rsh_source.html">rs_core.rsh</a>.</p>
 
 </div>
 </div>
 <hr/><h2>Function Documentation</h2>
-<a class="anchor" id="a95ebbf7a8923193df144649c066daae6"></a><!-- doxytag: member="rs_core.rsh::rsForEach" ref="a95ebbf7a8923193df144649c066daae6" args="(rs_script script, rs_allocation input, rs_allocation output, const void *usrData, const rs_script_call_t *sc)" -->
+<a class="anchor" id="a64271d266928b06ebd82ec90b756eb23"></a><!-- doxytag: member="rs_core.rsh::rsForEach" ref="a64271d266928b06ebd82ec90b756eb23" args="(rs_script script, rs_allocation input, rs_allocation output, const void *usrData, size_t usrDataLen, const rs_script_call_t *)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -132,8 +134,14 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a29d85914ddff32967d85ada69854206d">size_t</a>&#160;</td>
+          <td class="paramname"><em>usrDataLen</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">const <a class="el" href="rs__core_8rsh.html#ae8756b32e23445f287960b9d0ffb449c">rs_script_call_t</a> *&#160;</td>
-          <td class="paramname"><em>sc</em>&#160;</td>
+          <td class="paramname">&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -150,6 +158,12 @@ Functions</h2></td></tr>
     <tr><td class="paramname">input</td><td>The allocation to source data from </td></tr>
     <tr><td class="paramname">output</td><td>the allocation to write date into </td></tr>
     <tr><td class="paramname">usrData</td><td>The user definied params to pass to the root script. May be NULL. </td></tr>
+    <tr><td class="paramname">sc</td><td>Extra control infomation used to select a sub-region of the allocation to be processed or suggest a walking strategy. May be NULL. Make a script to script call to launch work. One of the input or output is required to be a valid object. The input and output must be of the same dimensions. API 14+</td></tr>
+    <tr><td class="paramname">script</td><td>The target script to call </td></tr>
+    <tr><td class="paramname">input</td><td>The allocation to source data from </td></tr>
+    <tr><td class="paramname">output</td><td>the allocation to write date into </td></tr>
+    <tr><td class="paramname">usrData</td><td>The user definied params to pass to the root script. May be NULL. </td></tr>
+    <tr><td class="paramname">usrDataLen</td><td>The size of the userData structure. This will be used to perform a shallow copy of the data if necessary. </td></tr>
     <tr><td class="paramname">sc</td><td>Extra control infomation used to select a sub-region of the allocation to be processed or suggest a walking strategy. May be NULL. </td></tr>
   </table>
   </dd>
@@ -157,7 +171,7 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a class="anchor" id="ae62dc9d507e0e62c064217c71cc94101"></a><!-- doxytag: member="rs_core.rsh::rsForEach" ref="ae62dc9d507e0e62c064217c71cc94101" args="(rs_script script, rs_allocation input, rs_allocation output, const void *usrData)" -->
+<a class="anchor" id="a38c803ed805dd1362442977eae70c41d"></a><!-- doxytag: member="rs_core.rsh::rsForEach" ref="a38c803ed805dd1362442977eae70c41d" args="(rs_script script, rs_allocation input, rs_allocation output, const void *usrData, size_t usrDataLen)" -->
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
@@ -183,7 +197,47 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const void *&#160;</td>
-          <td class="paramname"><em>usrData</em>&#160;</td>
+          <td class="paramname"><em>usrData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="rs__types_8rsh.html#a29d85914ddff32967d85ada69854206d">size_t</a>&#160;</td>
+          <td class="paramname"><em>usrDataLen</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts. </p>
+
+</div>
+</div>
+<a class="anchor" id="a6c541fa49b6fb9b528c2a147eaf764da"></a><!-- doxytag: member="rs_core.rsh::rsForEach" ref="a6c541fa49b6fb9b528c2a147eaf764da" args="(rs_script script, rs_allocation input, rs_allocation output)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void rsForEach </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__script.html">rs_script</a>&#160;</td>
+          <td class="paramname"><em>script</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
+          <td class="paramname"><em>input</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structrs__allocation.html">rs_allocation</a>&#160;</td>
+          <td class="paramname"><em>output</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
