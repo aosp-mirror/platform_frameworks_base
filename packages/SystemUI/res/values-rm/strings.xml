@@ -22,10 +22,6 @@
     <!-- no translation found for app_label (7164937344850004466) -->
     <skip />
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Stizzar"</string>
-    <!-- no translation found for status_bar_do_not_disturb_button (5812628897510997853) -->
-    <skip />
-    <!-- no translation found for status_bar_please_disturb_button (3345398298841572813) -->
-    <skip />
     <!-- no translation found for status_bar_recent_remove_item_title (6026395868129852968) -->
     <skip />
     <!-- no translation found for status_bar_recent_inspect_item_title (7793624864528818569) -->
@@ -306,10 +302,6 @@
     <skip />
     <!-- no translation found for status_bar_notification_inspect_item_title (1163547729015390250) -->
     <skip />
-    <!-- no translation found for notifications_off_title (8936620513608443224) -->
-    <skip />
-    <!-- no translation found for notifications_off_text (2529001315769385273) -->
-    <skip />
     <!-- no translation found for accessibility_rotation_lock_off (4062780228931590069) -->
     <skip />
     <!-- no translation found for accessibility_rotation_lock_on_landscape (6731197337665366273) -->
@@ -376,10 +368,8 @@
     <skip />
     <!-- no translation found for status_bar_help_text (7874607155052076323) -->
     <skip />
-    <!-- no translation found for hideybar_confirmation_message_bottom (4678097945183429216) -->
+    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
     <skip />
-    <!-- no translation found for hideybar_confirmation_message_bottom_short (4014207345313478943) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_right (5359586491708388067) -->
+    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
     <skip />
 </resources>

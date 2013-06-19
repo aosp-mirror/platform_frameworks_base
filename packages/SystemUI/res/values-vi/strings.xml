@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"Giao diện người dùng hệ thống"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Xóa"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Không làm phiền"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Hiển thị thông báo"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Xóa khỏi danh sách"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Thông tin về ứng dụng"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Không có ứng dụng nào gần đây"</string>
@@ -168,8 +166,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Vị trí đặt bởi GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Xóa tất cả thông báo."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Thông tin về ứng dụng"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"Tắt thông báo"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"Chạm vào đây để bật lại thông báo."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Màn hình sẽ xoay tự động."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Màn hình hiện bị khóa theo hướng ngang."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Màn hình hiện bị khóa theo hướng dọc."</string>
@@ -203,7 +199,8 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"TỰ ĐỘNG"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Thông báo xuất hiện tại đây"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Truy cập vào chúng bất kỳ lúc nào bằng cách vuốt xuống."\n"Vuốt lại xuống để hiển thị các điều khiển hệ thống."</string>
-    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Vuốt lên từ cuối màn hình để hiển thị thanh hệ thống"</string>
-    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Vuốt cuối màn hình để hiển thị thanh"</string>
-    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Vuốt từ bên phải màn hình để hiển thị thanh hệ thống"</string>
+    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
+    <skip />
+    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
+    <skip />
 </resources>

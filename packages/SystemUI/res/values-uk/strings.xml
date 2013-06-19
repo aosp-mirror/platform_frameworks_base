@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"Інтерфейс системи"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Очист."</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Не турбувати"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Показувати сповіщення"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Видалити зі списку"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Інформація про програму"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Немає останніх програм"</string>
@@ -168,8 +166,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Місцезнаходження встановлено за допомогою GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Очистити всі сповіщення."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Інформація про програму"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"Сповіщення вимкнено"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"Торкніться тут, щоб знову ввімкнути сповіщення."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Екран обертатиметься автоматично."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Екран заблоковано в альбомній орієнтації."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Екран заблоковано в книжковій орієнтації."</string>
@@ -203,7 +199,8 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АВТО"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Сповіщення з’являються тут"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Отримуйте до них доступ будь-коли, провівши пальцем униз."\n"Знову проведіть униз, щоб відкрити елементи керування системи."</string>
-    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Проведіть пальцем угору від низу екрана, щоб з’явився системний рядок"</string>
-    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Проведіть від низу екрана, щоб з’явився рядок"</string>
-    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Проведіть пальцем справа наліво на екрані, щоб з’явився системний рядок"</string>
+    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
+    <skip />
+    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
+    <skip />
 </resources>

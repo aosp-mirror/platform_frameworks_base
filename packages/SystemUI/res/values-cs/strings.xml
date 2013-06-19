@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"UI systému"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Vymazat"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Nerušit"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Zobrazit upozornění"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Odebrat ze seznamu"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informace o aplikaci"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Žádné nové aplikace"</string>
@@ -170,8 +168,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Poloha nastavena pomocí systému GPS"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Vymazat všechna oznámení."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Informace o aplikaci"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"Oznámení jsou vypnuta"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"Chcete-li oznámení znovu zapnout, klepněte sem."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Obrazovka se automaticky otočí."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Obrazovka je uzamčena v orientaci na šířku."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Obrazovka je uzamčena v orientaci na výšku."</string>
@@ -205,7 +201,6 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATICKY"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Zde se zobrazují oznámení"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Můžete je kdykoli zobrazit tím, že přejedete prstem dolů."\n"Přejedete-li prstem dolů ještě jednou, zobrazí se ovládací prvky systému."</string>
-    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Systémový panel zobrazíte přejetím ze spodní části obrazovky nahoru"</string>
-    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Panel zobrazíte přejetím zdola nahoru"</string>
-    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Systémový panel zobrazíte přejetím z pravé strany obrazovky"</string>
+    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Panel zobrazíte přejetím přes okraj obrazovky"</string>
+    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Systémový panel zobrazíte přejetím přes okraj obrazovky"</string>
 </resources>

@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"Sistēmas UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Notīrīt"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Netraucēt"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Rādīt paziņojumus"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Noņemšana no saraksta"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Lietotnes informācija"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Nav nesen izmantotu lietotņu."</string>
@@ -168,8 +166,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS iestatītā atrašanās vieta"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Notīrīt visus paziņojumus"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Informācija par lietotni"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"Paziņojumi ir izslēgti"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"Pieskarieties šeit, lai atkal ieslēgtu paziņojumus."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ekrāns tiks pagriezts automātiski."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Ekrāns tagad ir bloķēts ainavas orientācijā."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Ekrāns tagad ir bloķēts portreta orientācijā."</string>
@@ -203,7 +199,8 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMĀTISKI"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Šeit tiek rādīti paziņojumi"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Piekļūstiet tiem jebkurā laikā, velkot uz leju."\n"Vēlreiz velciet, lai tiktu parādītas sistēmas vadīklas."</string>
-    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Velciet augšup no ekrāna apakšdaļas, lai tiktu parādīta sistēmas josla."</string>
-    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Velciet no ekrāna apakšdaļas, lai tiktu parādīta josla."</string>
-    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Velciet no ekrāna labās malas, lai tiktu parādīta sistēmas josla."</string>
+    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
+    <skip />
+    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
+    <skip />
 </resources>

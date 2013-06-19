@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"系统用户界面"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"清除"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"请勿打扰"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"显示通知"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"从列表中删除"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"应用信息"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"最近没有运行任何应用"</string>
@@ -170,8 +168,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"已通过 GPS 确定位置"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"清除所有通知。"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"应用信息"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"通知功能已停用"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"点按此处可重新启用通知功能。"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"屏幕会自动旋转。"</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"屏幕锁定为横向模式。"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"屏幕锁定为纵向模式。"</string>
@@ -205,7 +201,8 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自动"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"通知会显示在这里"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"向下滑动可随时查看通知。"\n"再次向下滑动可使用系统控制功能。"</string>
-    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"从屏幕底部向上滑动即可显示系统栏"</string>
-    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"从底部向上滑可显示系统栏"</string>
-    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"从屏幕右侧向左滑动即可显示系统栏"</string>
+    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
+    <skip />
+    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
+    <skip />
 </resources>

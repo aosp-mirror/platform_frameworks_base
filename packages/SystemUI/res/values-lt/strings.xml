@@ -21,8 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"Sistemos NS"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Išvalyti"</string>
-    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Netrukdyti"</string>
-    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Rodyti pranešimus"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Pašalinti iš sąrašo"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Programos informacija"</string>
     <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Nėra naujausių programų"</string>
@@ -168,8 +166,6 @@
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS nustatyta vieta"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Išvalyti visus pranešimus."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Programos informacija"</string>
-    <string name="notifications_off_title" msgid="8936620513608443224">"Pranešimai išjungti"</string>
-    <string name="notifications_off_text" msgid="2529001315769385273">"Jei norite vėl įjungti pranešimus, palieskite čia."</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ekranas bus sukamas automatiškai."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Užrakintas ekranas yra horizontalios orientacijos."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Užrakintas ekranas yra vertikalios orientacijos."</string>
@@ -203,7 +199,8 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATINIS"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Pranešimai rodomi čia"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Perbraukę žemyn bet kuriuo metu pasieksite pranešimus."\n"Jei norite naudoti sistemos valdiklius, perbraukite žemyn dar kartą."</string>
-    <string name="hideybar_confirmation_message_bottom" msgid="4678097945183429216">"Jei norite, kad būtų rodoma sistemos juosta, perbraukite aukštyn iš ekrano apačios"</string>
-    <string name="hideybar_confirmation_message_bottom_short" msgid="4014207345313478943">"Jei norite, kad būtų rodoma juosta, perbraukite ekrano apačioje"</string>
-    <string name="hideybar_confirmation_message_right" msgid="5359586491708388067">"Jei norite, kad būtų rodoma sistemos juosta, perbraukite iš ekrano dešinės"</string>
+    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
+    <skip />
+    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
+    <skip />
 </resources>
