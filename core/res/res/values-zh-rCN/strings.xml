@@ -1446,8 +1446,7 @@
     <string name="media_route_status_connecting" msgid="6422571716007825440">"正在连接..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"可连接"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"无法连接"</string>
-    <!-- no translation found for media_route_status_in_use (4533786031090198063) -->
-    <skip />
+    <string name="media_route_status_in_use" msgid="4533786031090198063">"正在使用"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"内置屏幕"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI 屏幕"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"叠加视图 #<xliff:g id="ID">%1$d</xliff:g>"</string>
