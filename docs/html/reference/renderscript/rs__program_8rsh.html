@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 
-<title>rs_program.rsh File Reference</title>
+<title>/usr/local/google/home/srhines/android_trees/jb-mr2-dev/frameworks/rs/scriptc/rs_program.rsh File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
 
@@ -24,15 +24,297 @@
   </div>
 </div>
 <div class="header">
+  <div class="summary">
+<a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">rs_program.rsh File Reference</div>  </div>
+<div class="title">/usr/local/google/home/srhines/android_trees/jb-mr2-dev/frameworks/rs/scriptc/rs_program.rsh File Reference</div>  </div>
 </div>
 <div class="contents">
+<table class="memberdecls">
+<tr><td colspan="2"><h2><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="rs__types_8rsh.html#a03e91ad8ebfc283ba20f7443dea4a4bf">rs_depth_func</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__program_8rsh.html#a6a9c06c54d230f61edc0667a091aac77">rsgProgramStoreGetDepthFunc</a> (<a class="el" href="structrs__program__store.html">rs_program_store</a> ps)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__program_8rsh.html#afa27fa6103c9e29f5e098e2d99663f0b">rsgProgramStoreIsDepthMaskEnabled</a> (<a class="el" href="structrs__program__store.html">rs_program_store</a> ps)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__program_8rsh.html#a4a50df1d2495567536dd6f394d38ee5d">rsgProgramStoreIsColorMaskRedEnabled</a> (<a class="el" href="structrs__program__store.html">rs_program_store</a> ps)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__program_8rsh.html#a1a57f706bc42ce49b545021c8403964c">rsgProgramStoreIsColorMaskGreenEnabled</a> (<a class="el" href="structrs__program__store.html">rs_program_store</a> ps)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__program_8rsh.html#a279ad1b4611aca268053337f6719a22c">rsgProgramStoreIsColorMaskBlueEnabled</a> (<a class="el" href="structrs__program__store.html">rs_program_store</a> ps)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__program_8rsh.html#ab038edb7399044a3ea96ebb17d7b6601">rsgProgramStoreIsColorMaskAlphaEnabled</a> (<a class="el" href="structrs__program__store.html">rs_program_store</a> ps)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">rs_blend_src_func&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__program_8rsh.html#afb38256c5804cdb9b410419c43ce03ab">rsgProgramStoreGetBlendSrcFunc</a> (<a class="el" href="structrs__program__store.html">rs_program_store</a> ps)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">rs_blend_dst_func&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__program_8rsh.html#a0ad38d595e35712f24c384ef20b69025">rsgProgramStoreGetBlendDstFunc</a> (<a class="el" href="structrs__program__store.html">rs_program_store</a> ps)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__program_8rsh.html#abe7c55547a72dd291e0996de050bb749">rsgProgramStoreIsDitherEnabled</a> (<a class="el" href="structrs__program__store.html">rs_program_store</a> ps)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__program_8rsh.html#a86aeccd846ed2cd2c9498ab57e2535f3">rsgProgramRasterIsPointSpriteEnabled</a> (<a class="el" href="structrs__program__raster.html">rs_program_raster</a> pr)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">rs_cull_mode&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="rs__program_8rsh.html#a633d6dbdec98ef89c2b70c92ea707502">rsgProgramRasterGetCullMode</a> (<a class="el" href="structrs__program__raster.html">rs_program_raster</a> pr)</td></tr>
+</table>
 <hr/><a name="details" id="details"></a><h2>Detailed Description</h2>
 <div class="textblock"><p>Program object routines. </p>
 
 <p>Definition in file <a class="el" href="rs__program_8rsh_source.html">rs_program.rsh</a>.</p>
-</div></div>
+</div><hr/><h2>Function Documentation</h2>
+<a class="anchor" id="a633d6dbdec98ef89c2b70c92ea707502"></a><!-- doxytag: member="rs_program.rsh::rsgProgramRasterGetCullMode" ref="a633d6dbdec98ef89c2b70c92ea707502" args="(rs_program_raster pr)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">rs_cull_mode rsgProgramRasterGetCullMode </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__program__raster.html">rs_program_raster</a>&#160;</td>
+          <td class="paramname"><em>pr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Get program raster cull mode</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pr</td><td>program raster to query </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a86aeccd846ed2cd2c9498ab57e2535f3"></a><!-- doxytag: member="rs_program.rsh::rsgProgramRasterIsPointSpriteEnabled" ref="a86aeccd846ed2cd2c9498ab57e2535f3" args="(rs_program_raster pr)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool rsgProgramRasterIsPointSpriteEnabled </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__program__raster.html">rs_program_raster</a>&#160;</td>
+          <td class="paramname"><em>pr</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Get program raster point sprite state</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">pr</td><td>program raster to query </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a0ad38d595e35712f24c384ef20b69025"></a><!-- doxytag: member="rs_program.rsh::rsgProgramStoreGetBlendDstFunc" ref="a0ad38d595e35712f24c384ef20b69025" args="(rs_program_store ps)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">rs_blend_dst_func rsgProgramStoreGetBlendDstFunc </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__program__store.html">rs_program_store</a>&#160;</td>
+          <td class="paramname"><em>ps</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Get program store blend destination function</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ps</td><td>program store to query </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="afb38256c5804cdb9b410419c43ce03ab"></a><!-- doxytag: member="rs_program.rsh::rsgProgramStoreGetBlendSrcFunc" ref="afb38256c5804cdb9b410419c43ce03ab" args="(rs_program_store ps)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">rs_blend_src_func rsgProgramStoreGetBlendSrcFunc </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__program__store.html">rs_program_store</a>&#160;</td>
+          <td class="paramname"><em>ps</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Get program store blend source function</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ps</td><td>program store to query </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a6a9c06c54d230f61edc0667a091aac77"></a><!-- doxytag: member="rs_program.rsh::rsgProgramStoreGetDepthFunc" ref="a6a9c06c54d230f61edc0667a091aac77" args="(rs_program_store ps)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="rs__types_8rsh.html#a03e91ad8ebfc283ba20f7443dea4a4bf">rs_depth_func</a> rsgProgramStoreGetDepthFunc </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__program__store.html">rs_program_store</a>&#160;</td>
+          <td class="paramname"><em>ps</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Get program store depth function</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ps</td><td>program store to query </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="ab038edb7399044a3ea96ebb17d7b6601"></a><!-- doxytag: member="rs_program.rsh::rsgProgramStoreIsColorMaskAlphaEnabled" ref="ab038edb7399044a3ea96ebb17d7b6601" args="(rs_program_store ps)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool rsgProgramStoreIsColorMaskAlphaEnabled </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__program__store.html">rs_program_store</a>&#160;</td>
+          <td class="paramname"><em>ps</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Get program store alpha component color mask</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ps</td><td>program store to query </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a279ad1b4611aca268053337f6719a22c"></a><!-- doxytag: member="rs_program.rsh::rsgProgramStoreIsColorMaskBlueEnabled" ref="a279ad1b4611aca268053337f6719a22c" args="(rs_program_store ps)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool rsgProgramStoreIsColorMaskBlueEnabled </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__program__store.html">rs_program_store</a>&#160;</td>
+          <td class="paramname"><em>ps</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Get program store blur component color mask</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ps</td><td>program store to query </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a1a57f706bc42ce49b545021c8403964c"></a><!-- doxytag: member="rs_program.rsh::rsgProgramStoreIsColorMaskGreenEnabled" ref="a1a57f706bc42ce49b545021c8403964c" args="(rs_program_store ps)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool rsgProgramStoreIsColorMaskGreenEnabled </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__program__store.html">rs_program_store</a>&#160;</td>
+          <td class="paramname"><em>ps</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Get program store green component color mask</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ps</td><td>program store to query </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="a4a50df1d2495567536dd6f394d38ee5d"></a><!-- doxytag: member="rs_program.rsh::rsgProgramStoreIsColorMaskRedEnabled" ref="a4a50df1d2495567536dd6f394d38ee5d" args="(rs_program_store ps)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool rsgProgramStoreIsColorMaskRedEnabled </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__program__store.html">rs_program_store</a>&#160;</td>
+          <td class="paramname"><em>ps</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Get program store red component color mask</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ps</td><td>program store to query </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="afa27fa6103c9e29f5e098e2d99663f0b"></a><!-- doxytag: member="rs_program.rsh::rsgProgramStoreIsDepthMaskEnabled" ref="afa27fa6103c9e29f5e098e2d99663f0b" args="(rs_program_store ps)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool rsgProgramStoreIsDepthMaskEnabled </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__program__store.html">rs_program_store</a>&#160;</td>
+          <td class="paramname"><em>ps</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Get program store depth mask</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ps</td><td>program store to query </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a class="anchor" id="abe7c55547a72dd291e0996de050bb749"></a><!-- doxytag: member="rs_program.rsh::rsgProgramStoreIsDitherEnabled" ref="abe7c55547a72dd291e0996de050bb749" args="(rs_program_store ps)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool rsgProgramStoreIsDitherEnabled </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structrs__program__store.html">rs_program_store</a>&#160;</td>
+          <td class="paramname"><em>ps</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Get program store dither state</p>
+<dl><dt><b>Parameters:</b></dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ps</td><td>program store to query </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+</div>
 
 </body>
 </html>
