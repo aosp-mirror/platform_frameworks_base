@@ -152,6 +152,13 @@ final class NativeCrashListener extends Thread {
                                 Slog.d(TAG, "Exception writing ack: " + e.getMessage());
                             }
                         }
+                        try {
+                            Libcore.os.close(peerFd);
+                        } catch (ErrnoException e) {
+                            if (MORE_DEBUG) {
+                                Slog.d(TAG, "Exception closing socket: " + e.getMessage());
+                            }
+                        }
                     }
                 }
             }
