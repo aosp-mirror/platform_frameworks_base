@@ -48,6 +48,13 @@ public final class ScriptIntrinsicConvolve5x5 extends ScriptIntrinsic {
      * @return ScriptIntrinsicConvolve5x5
      */
     public static ScriptIntrinsicConvolve5x5 create(RenderScript rs, Element e) {
+        if (!e.isCompatible(Element.U8(rs)) &&
+            !e.isCompatible(Element.U8_4(rs)) &&
+            !e.isCompatible(Element.F32(rs)) &&
+            !e.isCompatible(Element.F32_4(rs))) {
+            throw new RSIllegalArgumentException("Unsuported element type.");
+        }
+
         int id = rs.nScriptIntrinsicCreate(4, e.getID(rs));
         return new ScriptIntrinsicConvolve5x5(id, rs);
 
