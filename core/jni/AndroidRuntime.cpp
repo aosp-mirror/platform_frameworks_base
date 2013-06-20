@@ -33,6 +33,7 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
+#include "JniInvocation.h"
 #include "android_util_Binder.h"
 
 #include <stdio.h>
@@ -840,6 +841,8 @@ void AndroidRuntime::start(const char* className, const char* options)
     //ALOGD("Found LD_ASSUME_KERNEL='%s'\n", kernelHack);
 
     /* start the virtual machine */
+    JniInvocation jni_invocation;
+    jni_invocation.Init(NULL);
     JNIEnv* env;
     if (startVm(&mJavaVM, &env) != 0) {
         return;
