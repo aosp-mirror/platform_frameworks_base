@@ -871,7 +871,7 @@
     <string name="factorytest_no_action" msgid="872991874799998561">"Hakuna furushi lililopatikana ambalo linatoa tendo la JARIBIO_LA KIWANDA."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"Washa tena"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"Ukurasa wa \"<xliff:g id="TITLE">%s</xliff:g>\" unasema:"</string>
-    <string name="js_dialog_title_default" msgid="6961903213729667573">"HatiJava"</string>
+    <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Thibitisha jinsi ya kuelekea"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Toka kwenye Ukurasa huu"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Bakia kwenye Ukurasa huu"</string>
@@ -1446,8 +1446,7 @@
     <string name="media_route_status_connecting" msgid="6422571716007825440">"Inaunganisha..."</string>
     <string name="media_route_status_available" msgid="6983258067194649391">"Inapatikana"</string>
     <string name="media_route_status_not_available" msgid="6739899962681886401">"Haipatikani"</string>
-    <!-- no translation found for media_route_status_in_use (4533786031090198063) -->
-    <skip />
+    <string name="media_route_status_in_use" msgid="4533786031090198063">"Inatumika"</string>
     <string name="display_manager_built_in_display_name" msgid="2583134294292563941">"Skrini Iliyojengwa ndani"</string>
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Skrini ya HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Uwekeleaji #<xliff:g id="ID">%1$d</xliff:g>"</string>
