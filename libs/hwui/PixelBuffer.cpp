@@ -19,6 +19,7 @@
 #include <utils/Log.h>
 
 #include "Caches.h"
+#include "Debug.h"
 #include "Extensions.h"
 #include "PixelBuffer.h"
 #include "Properties.h"
@@ -113,6 +114,14 @@ uint8_t* GpuPixelBuffer::map(AccessMode mode) {
     if (mAccessMode == kAccessMode_None) {
         mCaches.bindPixelBuffer(mBuffer);
         mMappedPointer = (uint8_t*) glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, getSize(), mode);
+#if DEBUG_OPENGL
+        if (!mMappedPointer) {
+            GLenum status = GL_NO_ERROR;
+            while ((status = glGetError()) != GL_NO_ERROR) {
+                ALOGE("Could not map GPU pixel buffer: 0x%x", status);
+            }
+        }
+#endif
         mAccessMode = mode;
     }
 
