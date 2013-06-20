@@ -544,6 +544,10 @@ public class DateUtils
         initFormatStrings();
         if (hours > 0) {
             return f.format(sElapsedFormatHMMSS, hours, minutes, seconds).toString();
+        } else if (minutes < 10) {
+            /* For MR1 Holo CTS, the minutes can't be zero-padded */
+            String FAST_FORMAT_MMSS = "%1$d:%2$02d";
+            return f.format(FAST_FORMAT_MMSS, hours, minutes, seconds).toString();
         } else {
             return f.format(sElapsedFormatMMSS, minutes, seconds).toString();
         }
