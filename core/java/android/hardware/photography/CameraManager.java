@@ -94,7 +94,13 @@ public final class CameraManager {
      */
     public String[] getDeviceIdList() throws CameraAccessException {
         synchronized (mLock) {
-            return (String[]) getOrCreateDeviceIdListLocked().toArray();
+            try {
+                return getOrCreateDeviceIdListLocked().toArray(new String[0]);
+            } catch(CameraAccessException e) {
+                // this should almost never happen, except if mediaserver crashes
+                throw new IllegalStateException(
+                        "Failed to query camera service for device ID list", e);
+            }
         }
     }
 
@@ -179,17 +185,32 @@ public final class CameraManager {
     public CameraDevice openCamera(String cameraId) throws CameraAccessException {
 
         try {
-            IProCameraUser cameraUser;
 
             synchronized (mLock) {
-                // TODO: Use ICameraDevice or some such instead of this...
-                cameraUser = mCameraService.connectPro(null,
+
+                ICameraDeviceUser cameraUser;
+
+                android.hardware.photography.impl.CameraDevice device =
+                        new android.hardware.photography.impl.CameraDevice(cameraId);
+
+                cameraUser = mCameraService.connectDevice(device.getCallbacks(),
                         Integer.parseInt(cameraId),
                         mContext.getPackageName(), USE_CALLING_UID);
 
+                // TODO: change ICameraService#connectDevice to return status_t
+                if (cameraUser == null) {
+                    // TEMPORARY CODE.
+                    // catch-all exception since we aren't yet getting the actual error code
+                    throw new IllegalStateException("Failed to open camera device");
+                }
+
+                // TODO: factor out listener to be non-nested, then move setter to constructor
+                device.setRemoteDevice(cameraUser);
+
+                return device;
+
             }
 
-            return new CameraDevice(cameraUser.asBinder());
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Expected cameraId to be numeric, but it was: "
                     + cameraId);
@@ -306,7 +327,7 @@ public final class CameraManager {
 
         @Override
         public void onStatusChanged(int status, int cameraId) throws RemoteException {
-            synchronized(CameraManager.this) {
+            synchronized(CameraManager.this.mLock) {
 
                 Log.v(TAG,
                         String.format("Camera id %d has status changed to 0x%x", cameraId, status));

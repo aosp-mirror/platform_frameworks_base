@@ -20,6 +20,8 @@ import android.hardware.ICamera;
 import android.hardware.ICameraClient;
 import android.hardware.IProCameraUser;
 import android.hardware.IProCameraCallbacks;
+import android.hardware.photography.ICameraDeviceUser;
+import android.hardware.photography.ICameraDeviceCallbacks;
 import android.hardware.ICameraServiceListener;
 import android.hardware.CameraInfo;
 
@@ -40,6 +42,10 @@ interface ICameraService
                     int clientUid);
 
     IProCameraUser connectPro(IProCameraCallbacks callbacks, int cameraId,
+                              String clientPackageName,
+                              int clientUid);
+
+    ICameraDeviceUser connectDevice(ICameraDeviceCallbacks callbacks, int cameraId,
                               String clientPackageName,
                               int clientUid);
 

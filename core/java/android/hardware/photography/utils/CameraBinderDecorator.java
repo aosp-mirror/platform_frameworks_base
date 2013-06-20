@@ -67,6 +67,8 @@ public class CameraBinderDecorator {
                     case PERMISSION_DENIED:
                         throw new SecurityException("Lacking privileges to access camera service");
                     case ALREADY_EXISTS:
+                        // This should be handled at the call site. Typically this isn't bad,
+                        // just means we tried to do an operation that already completed.
                         return;
                     case BAD_VALUE:
                         throw new IllegalArgumentException("Bad argument passed to camera service");
