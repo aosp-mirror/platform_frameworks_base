@@ -84,24 +84,21 @@ public class Move extends Transition {
         if (startValues == null || endValues == null) {
             return null;
         }
-        final View view = endValues.view;
-        if (view.getParent() == null) {
-            // TODO: Might want to make it possible to Move an disappearing view.
-            // This workaround is here because if a parallel Fade is not running on the view
-            // Then it won't get added to the hierarchy and the animator below will not fire,
-            // causing the transition to not end
-            return null;
-        }
-        // TODO: need to handle non-VG case?
-        ViewGroup startParent = (ViewGroup) startValues.values.get(PROPNAME_PARENT);
-        ViewGroup endParent = (ViewGroup) endValues.values.get(PROPNAME_PARENT);
+        Map<String, Object> startParentVals = startValues.values;
+        Map<String, Object> endParentVals = endValues.values;
+        ViewGroup startParent = (ViewGroup) startParentVals.get(PROPNAME_PARENT);
+        ViewGroup endParent = (ViewGroup) endParentVals.get(PROPNAME_PARENT);
         if (startParent == null || endParent == null) {
             return null;
         }
+        final View view = endValues.view;
         boolean parentsEqual = (startParent == endParent) ||
                 (startParent.getId() == endParent.getId());
+        // TODO: Might want reparenting to be separate/subclass transition, or at least
+        // triggered by a property on Move. Otherwise, we're forcing the requirement that
+        // all parents in layouts have IDs to avoid layout-inflation resulting in a side-effect
+        // of reparenting the views.
         if (!mReparent || parentsEqual) {
-            // Common case - view belongs to the same layout before/after. Just animate its bounds
             Rect startBounds = (Rect) startValues.values.get(PROPNAME_BOUNDS);
             Rect endBounds = (Rect) endValues.values.get(PROPNAME_BOUNDS);
             int startLeft = startBounds.left;
@@ -118,13 +115,6 @@ public class Move extends Transition {
             int endHeight = endBottom - endTop;
             int numChanges = 0;
             if (startWidth != 0 && startHeight != 0 && endWidth != 0 && endHeight != 0) {
-                if (Transition.DBG) {
-                    Log.v(LOG_TAG, "Target = " + endValues.view);
-                    Log.v(LOG_TAG, "    start bounds: " + startLeft + ", " + startTop + ", " +
-                            startRight + ", " + startBottom);
-                    Log.v(LOG_TAG, "    end bounds: " + endLeft + ", " + endTop + ", " +
-                            endRight + ", " + endBottom);
-                }
                 if (startLeft != endLeft) ++numChanges;
                 if (startTop != endTop) ++numChanges;
                 if (startRight != endRight) ++numChanges;
@@ -134,6 +124,10 @@ public class Move extends Transition {
                 if (!mResizeClip) {
                     PropertyValuesHolder pvh[] = new PropertyValuesHolder[numChanges];
                     int pvhIndex = 0;
+                    if (startLeft != endLeft) view.setLeft(startLeft);
+                    if (startTop != endTop) view.setTop(startTop);
+                    if (startRight != endRight) view.setRight(startRight);
+                    if (startBottom != endBottom) view.setBottom(startBottom);
                     if (startLeft != endLeft) {
                         pvh[pvhIndex++] = PropertyValuesHolder.ofInt("left", startLeft, endLeft);
                     }
@@ -161,6 +155,13 @@ public class Move extends Transition {
                     }
                     return anim;
                 } else {
+                    if (startWidth != endWidth) view.setRight(endLeft +
+                            Math.max(startWidth, endWidth));
+                    if (startHeight != endHeight) view.setBottom(endTop +
+                            Math.max(startHeight, endHeight));
+                    // TODO: don't clobber TX/TY
+                    if (startLeft != endLeft) view.setTranslationX(startLeft - endLeft);
+                    if (startTop != endTop) view.setTranslationY(startTop - endTop);
                     // Animate location with translationX/Y and size with clip bounds
                     float transXDelta = endLeft - startLeft;
                     float transYDelta = endTop - startTop;
@@ -207,71 +208,6 @@ public class Move extends Transition {
                 }
             }
         } else {
-            return (ObjectAnimator) endValues.values.get("drawableAnim");
-        }
-        return null;
-    }
-
-    @Override
-    protected boolean setup(final ViewGroup sceneRoot, TransitionValues startValues,
-            TransitionValues endValues) {
-        if (startValues == null || endValues == null) {
-            return false;
-        }
-        Map<String, Object> startParentVals = startValues.values;
-        Map<String, Object> endParentVals = endValues.values;
-        ViewGroup startParent = (ViewGroup) startParentVals.get(PROPNAME_PARENT);
-        ViewGroup endParent = (ViewGroup) endParentVals.get(PROPNAME_PARENT);
-        if (startParent == null || endParent == null) {
-            return false;
-        }
-        final View view = endValues.view;
-        boolean parentsEqual = (startParent == endParent) ||
-                (startParent.getId() == endParent.getId());
-        // TODO: Might want reparenting to be separate/subclass transition, or at least
-        // triggered by a property on Move. Otherwise, we're forcing the requirement that
-        // all parents in layouts have IDs to avoid layout-inflation resulting in a side-effect
-        // of reparenting the views.
-        if (!mReparent || parentsEqual) {
-            Rect startBounds = (Rect) startValues.values.get(PROPNAME_BOUNDS);
-            Rect endBounds = (Rect) endValues.values.get(PROPNAME_BOUNDS);
-            int startLeft = startBounds.left;
-            int endLeft = endBounds.left;
-            int startTop = startBounds.top;
-            int endTop = endBounds.top;
-            int startRight = startBounds.right;
-            int endRight = endBounds.right;
-            int startBottom = startBounds.bottom;
-            int endBottom = endBounds.bottom;
-            int startWidth = startRight - startLeft;
-            int startHeight = startBottom - startTop;
-            int endWidth = endRight - endLeft;
-            int endHeight = endBottom - endTop;
-            int numChanges = 0;
-            if (startWidth != 0 && startHeight != 0 && endWidth != 0 && endHeight != 0) {
-                if (startLeft != endLeft) ++numChanges;
-                if (startTop != endTop) ++numChanges;
-                if (startRight != endRight) ++numChanges;
-                if (startBottom != endBottom) ++numChanges;
-            }
-            if (numChanges > 0) {
-                if (!mResizeClip) {
-                    if (startLeft != endLeft) view.setLeft(startLeft);
-                    if (startTop != endTop) view.setTop(startTop);
-                    if (startRight != endRight) view.setRight(startRight);
-                    if (startBottom != endBottom) view.setBottom(startBottom);
-                } else {
-                    if (startWidth != endWidth) view.setRight(endLeft +
-                            Math.max(startWidth, endWidth));
-                    if (startHeight != endHeight) view.setBottom(endTop +
-                            Math.max(startHeight, endHeight));
-                    // TODO: don't clobber TX/TY
-                    if (startLeft != endLeft) view.setTranslationX(startLeft - endLeft);
-                    if (startTop != endTop) view.setTranslationY(startTop - endTop);
-                }
-                return true;
-            }
-        } else {
             int startX = (Integer) startValues.values.get(PROPNAME_WINDOW_X);
             int startY = (Integer) startValues.values.get(PROPNAME_WINDOW_Y);
             int endX = (Integer) endValues.values.get(PROPNAME_WINDOW_X);
@@ -286,14 +222,14 @@ public class Move extends Transition {
                 final BitmapDrawable drawable = new BitmapDrawable(bitmap);
                 view.setVisibility(View.INVISIBLE);
                 sceneRoot.getOverlay().add(drawable);
-                Rect startBounds = new Rect(startX - tempLocation[0], startY - tempLocation[1],
+                Rect startBounds1 = new Rect(startX - tempLocation[0], startY - tempLocation[1],
                         startX - tempLocation[0] + view.getWidth(),
                         startY - tempLocation[1] + view.getHeight());
-                Rect endBounds = new Rect(endX - tempLocation[0], endY - tempLocation[1],
+                Rect endBounds1 = new Rect(endX - tempLocation[0], endY - tempLocation[1],
                         endX - tempLocation[0] + view.getWidth(),
                         endY - tempLocation[1] + view.getHeight());
                 ObjectAnimator anim = ObjectAnimator.ofObject(drawable, "bounds",
-                        sRectEvaluator, startBounds, endBounds);
+                        sRectEvaluator, startBounds1, endBounds1);
                 anim.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
@@ -301,10 +237,9 @@ public class Move extends Transition {
                         view.setVisibility(View.VISIBLE);
                     }
                 });
-                endParentVals.put("drawableAnim", anim);
-                return true;
+                return anim;
             }
         }
-        return false;
+        return null;
     }
 }

@@ -18389,7 +18389,6 @@ package android.print.pdf {
 
   public final class PdfDocument {
     method public void close();
-    method protected final void finalize() throws java.lang.Throwable;
     method public void finishPage(android.print.pdf.PdfDocument.Page);
     method public java.util.List<android.print.pdf.PdfDocument.PageInfo> getPages();
     method public static android.print.pdf.PdfDocument open();
@@ -28524,7 +28523,6 @@ package android.view.transition {
     method protected void captureValues(android.view.transition.TransitionValues, boolean);
     method public int getFadeBehavior();
     method public int getResizeBehavior();
-    method protected android.animation.Animator play(android.view.ViewGroup, android.view.transition.TransitionValues, android.view.transition.TransitionValues);
     method public void setFadeBehavior(int);
     method public void setResizeBehavior(int);
     field public static final int FADE_BEHAVIOR_CROSSFADE = 0; // 0x0
@@ -28543,7 +28541,6 @@ package android.view.transition {
   public class Move extends android.view.transition.Transition {
     ctor public Move();
     method protected void captureValues(android.view.transition.TransitionValues, boolean);
-    method protected android.animation.Animator play(android.view.ViewGroup, android.view.transition.TransitionValues, android.view.transition.TransitionValues);
     method public void setReparent(boolean);
     method public void setResizeClip(boolean);
   }
@@ -28551,13 +28548,11 @@ package android.view.transition {
   public class Recolor extends android.view.transition.Transition {
     ctor public Recolor();
     method protected void captureValues(android.view.transition.TransitionValues, boolean);
-    method protected android.animation.Animator play(android.view.ViewGroup, android.view.transition.TransitionValues, android.view.transition.TransitionValues);
   }
 
   public class Rotate extends android.view.transition.Transition {
     ctor public Rotate();
     method protected void captureValues(android.view.transition.TransitionValues, boolean);
-    method protected android.animation.Animator play(android.view.ViewGroup, android.view.transition.TransitionValues, android.view.transition.TransitionValues);
   }
 
   public final class Scene {
@@ -28578,7 +28573,6 @@ package android.view.transition {
   public class TextChange extends android.view.transition.Transition {
     ctor public TextChange();
     method protected void captureValues(android.view.transition.TransitionValues, boolean);
-    method protected android.animation.Animator play(android.view.ViewGroup, android.view.transition.TransitionValues, android.view.transition.TransitionValues);
   }
 
   public abstract class Transition implements java.lang.Cloneable {
@@ -28597,14 +28591,13 @@ package android.view.transition {
     method protected void onTransitionCancel();
     method protected void onTransitionEnd();
     method protected void onTransitionStart();
-    method protected abstract android.animation.Animator play(android.view.ViewGroup, android.view.transition.TransitionValues, android.view.transition.TransitionValues);
+    method protected android.animation.Animator play(android.view.ViewGroup, android.view.transition.TransitionValues, android.view.transition.TransitionValues);
     method public void removeListener(android.view.transition.Transition.TransitionListener);
     method public android.view.transition.Transition setDuration(long);
     method public void setInterpolator(android.animation.TimeInterpolator);
     method public void setStartDelay(long);
     method public android.view.transition.Transition setTargetIds(int...);
     method public android.view.transition.Transition setTargets(android.view.View...);
-    method protected boolean setup(android.view.ViewGroup, android.view.transition.TransitionValues, android.view.transition.TransitionValues);
   }
 
   public static abstract interface Transition.TransitionListener {
@@ -28618,7 +28611,6 @@ package android.view.transition {
     ctor public TransitionGroup(int);
     method public void addTransitions(android.view.transition.Transition...);
     method protected void captureValues(android.view.transition.TransitionValues, boolean);
-    method protected android.animation.Animator play(android.view.ViewGroup, android.view.transition.TransitionValues, android.view.transition.TransitionValues);
     method public void removeTransition(android.view.transition.Transition);
     method public void setOrdering(int);
     field public static final int SEQUENTIALLY = 1; // 0x1
@@ -28657,9 +28649,6 @@ package android.view.transition {
     method protected android.animation.Animator appear(android.view.ViewGroup, android.view.transition.TransitionValues, int, android.view.transition.TransitionValues, int);
     method protected void captureValues(android.view.transition.TransitionValues, boolean);
     method protected android.animation.Animator disappear(android.view.ViewGroup, android.view.transition.TransitionValues, int, android.view.transition.TransitionValues, int);
-    method protected android.animation.Animator play(android.view.ViewGroup, android.view.transition.TransitionValues, android.view.transition.TransitionValues);
-    method protected boolean setupAppear(android.view.ViewGroup, android.view.transition.TransitionValues, int, android.view.transition.TransitionValues, int);
-    method protected boolean setupDisappear(android.view.ViewGroup, android.view.transition.TransitionValues, int, android.view.transition.TransitionValues, int);
   }
 
 }

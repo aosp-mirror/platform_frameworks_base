@@ -43,4 +43,10 @@
     <string name="state2">State 2</string>
     <string name="state3">State 3</string>
     <string name="state4">State 4</string>
+    <string name="button0">Button 0</string>
+    <string name="button1">Button 1</string>
+    <string name="button2">Button 2</string>
+    <string name="button3">Button 3</string>
+    <string name="button4">Button 4</string>
+    <string name="button5">Button 5</string>
 </resources>

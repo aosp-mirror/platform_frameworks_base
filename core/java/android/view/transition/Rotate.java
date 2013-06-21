@@ -35,22 +35,6 @@ public class Rotate extends Transition {
     }
 
     @Override
-    protected boolean setup(ViewGroup sceneRoot, TransitionValues startValues,
-            TransitionValues endValues) {
-        if (startValues == null || endValues == null) {
-            return false;
-        }
-        final View view = endValues.view;
-        float startRotation = (Float) startValues.values.get(PROPNAME_ROTATION);
-        float endRotation = (Float) endValues.values.get(PROPNAME_ROTATION);
-        if (startRotation != endRotation) {
-            view.setRotation(startRotation);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     protected Animator play(ViewGroup sceneRoot, TransitionValues startValues,
             TransitionValues endValues) {
         if (startValues == null || endValues == null) {
@@ -60,6 +44,7 @@ public class Rotate extends Transition {
         float startRotation = (Float) startValues.values.get(PROPNAME_ROTATION);
         float endRotation = (Float) endValues.values.get(PROPNAME_ROTATION);
         if (startRotation != endRotation) {
+            view.setRotation(startRotation);
             return ObjectAnimator.ofFloat(view, View.ROTATION,
                     startRotation, endRotation);
         }

@@ -36,9 +36,9 @@ import java.util.Map;
  * {@link Transition#captureValues(TransitionValues, boolean)}
  * capture} phases of a scene change, once when the start values are captured
  * and again when the end values are captured. These start/end values are then
- * passed into the transitions during the play phase of the scene change,
- * for {@link Transition#setup(ViewGroup, TransitionValues, TransitionValues)} and
- * for {@link Transition#play(ViewGroup, TransitionValues, TransitionValues)}.</p>
+ * passed into the transitions via the
+ * for {@link Transition#play(ViewGroup, TransitionValues, TransitionValues)}
+ * method.</p>
  */
 public class TransitionValues {
 

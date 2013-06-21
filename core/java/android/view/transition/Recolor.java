@@ -51,10 +51,10 @@ public class Recolor extends Transition {
     }
 
     @Override
-    protected boolean setup(ViewGroup sceneRoot, TransitionValues startValues,
+    protected Animator play(ViewGroup sceneRoot, TransitionValues startValues,
             TransitionValues endValues) {
         if (startValues == null || endValues == null) {
-            return false;
+            return null;
         }
         final View view = endValues.view;
         Drawable startBackground = (Drawable) startValues.values.get(PROPNAME_BACKGROUND);
@@ -66,6 +66,8 @@ public class Recolor extends Transition {
             if (startColor.getColor() != endColor.getColor()) {
                 endColor.setColor(startColor.getColor());
                 changed = true;
+                return ObjectAnimator.ofObject(endBackground, "color",
+                        new ArgbEvaluator(), startColor.getColor(), endColor.getColor());
             }
         }
         if (view instanceof TextView) {
@@ -75,46 +77,10 @@ public class Recolor extends Transition {
             if (start != end) {
                 textView.setTextColor(end);
                 changed = true;
-            }
-        }
-        return changed;
-    }
-
-    @Override
-    protected Animator play(ViewGroup sceneRoot, TransitionValues startValues,
-            TransitionValues endValues) {
-        if (startValues == null || endValues == null) {
-            return null;
-        }
-        ObjectAnimator anim = null;
-        final View view = endValues.view;
-        Map<String, Object> startVals = startValues.values;
-        Map<String, Object> endVals = endValues.values;
-        Drawable startBackground = (Drawable) startVals.get(PROPNAME_BACKGROUND);
-        Drawable endBackground = (Drawable) endVals.get(PROPNAME_BACKGROUND);
-        if (startBackground instanceof ColorDrawable && endBackground instanceof ColorDrawable) {
-            ColorDrawable startColor = (ColorDrawable) startBackground;
-            ColorDrawable endColor = (ColorDrawable) endBackground;
-            if (startColor.getColor() != endColor.getColor()) {
-                anim = ObjectAnimator.ofObject(endBackground, "color",
-                        new ArgbEvaluator(), startColor.getColor(), endColor.getColor());
-                if (getStartDelay() > 0) {
-                    endColor.setColor(startColor.getColor());
-                }
-            }
-        }
-        if (view instanceof TextView) {
-            TextView textView = (TextView) view;
-            int start = (Integer) startValues.values.get(PROPNAME_TEXT_COLOR);
-            int end = (Integer) endValues.values.get(PROPNAME_TEXT_COLOR);
-            if (start != end) {
-                anim = ObjectAnimator.ofObject(textView, "textColor",
+                return ObjectAnimator.ofObject(textView, "textColor",
                         new ArgbEvaluator(), start, end);
-                if (getStartDelay() > 0) {
-                    textView.setTextColor(end);
-                }
             }
         }
-        return anim;
+        return null;
     }
 }

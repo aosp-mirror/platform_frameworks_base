@@ -140,18 +140,20 @@ public class Crossfade extends Transition {
     }
 
     @Override
-    protected boolean setup(ViewGroup sceneRoot, TransitionValues startValues,
+    protected Animator play(ViewGroup sceneRoot, TransitionValues startValues,
             TransitionValues endValues) {
         if (startValues == null || endValues == null) {
-            return false;
+            return null;
         }
         final View view = endValues.view;
         Map<String, Object> startVals = startValues.values;
         Map<String, Object> endVals = endValues.values;
+        Rect startBounds = (Rect) startVals.get(PROPNAME_BOUNDS);
+        Rect endBounds = (Rect) endVals.get(PROPNAME_BOUNDS);
         Bitmap startBitmap = (Bitmap) startVals.get(PROPNAME_BITMAP);
         Bitmap endBitmap = (Bitmap) endVals.get(PROPNAME_BITMAP);
-        Drawable startDrawable = (Drawable) startVals.get(PROPNAME_DRAWABLE);
-        Drawable endDrawable = (Drawable) endVals.get(PROPNAME_DRAWABLE);
+        final BitmapDrawable startDrawable = (BitmapDrawable) startVals.get(PROPNAME_DRAWABLE);
+        final BitmapDrawable endDrawable = (BitmapDrawable) endVals.get(PROPNAME_DRAWABLE);
         if (Transition.DBG) {
             Log.d(LOG_TAG, "StartBitmap.sameAs(endBitmap) = " + startBitmap.sameAs(endBitmap) +
                     " for start, end: " + startBitmap + ", " + endBitmap);
@@ -163,80 +165,62 @@ public class Crossfade extends Transition {
                 overlay.add(endDrawable);
             }
             overlay.add(startDrawable);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    protected Animator play(ViewGroup sceneRoot, TransitionValues startValues,
-            TransitionValues endValues) {
-        if (startValues == null || endValues == null) {
-            return null;
-        }
-        Map<String, Object> startVals = startValues.values;
-        Map<String, Object> endVals = endValues.values;
-
-        final View view = endValues.view;
-        Rect startBounds = (Rect) startVals.get(PROPNAME_BOUNDS);
-        Rect endBounds = (Rect) endVals.get(PROPNAME_BOUNDS);
-        final BitmapDrawable startDrawable = (BitmapDrawable) startVals.get(PROPNAME_DRAWABLE);
-        final BitmapDrawable endDrawable = (BitmapDrawable) endVals.get(PROPNAME_DRAWABLE);
-
-        // The transition works by placing the end drawable under the start drawable and
-        // gradually fading out the start drawable. So it's not really a cross-fade, but rather
-        // a reveal of the end scene over time. Also, animate the bounds of both drawables
-        // to mimic the change in the size of the view itself between scenes.
-        ObjectAnimator anim = ObjectAnimator.ofInt(startDrawable, "alpha", 0);
-        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                // TODO: some way to auto-invalidate views based on drawable changes? callbacks?
-                view.invalidate(startDrawable.getBounds());
+            // The transition works by placing the end drawable under the start drawable and
+            // gradually fading out the start drawable. So it's not really a cross-fade, but rather
+            // a reveal of the end scene over time. Also, animate the bounds of both drawables
+            // to mimic the change in the size of the view itself between scenes.
+            ObjectAnimator anim = ObjectAnimator.ofInt(startDrawable, "alpha", 0);
+            anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    // TODO: some way to auto-invalidate views based on drawable changes? callbacks?
+                    view.invalidate(startDrawable.getBounds());
+                }
+            });
+            ObjectAnimator anim1 = null;
+            if (mFadeBehavior == FADE_BEHAVIOR_CROSSFADE) {
+                anim1 = ObjectAnimator.ofFloat(view, View.ALPHA, 0, 1);
             }
-        });
-        ObjectAnimator anim1 = null;
-        if (mFadeBehavior == FADE_BEHAVIOR_CROSSFADE) {
-            anim1 = ObjectAnimator.ofFloat(view, View.ALPHA, 0, 1);
-        }
-        if (Transition.DBG) {
-            Log.d(LOG_TAG, "Crossfade: created anim " + anim + " for start, end values " +
-                    startValues + ", " + endValues);
-        }
-        anim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                ViewOverlay overlay = (mFadeBehavior == FADE_BEHAVIOR_REVEAL) ?
-                        view.getOverlay() : ((ViewGroup) view.getParent()).getOverlay();
-                overlay.remove(startDrawable);
-                if (mFadeBehavior == FADE_BEHAVIOR_REVEAL) {
-                    overlay.remove(endDrawable);
+            if (Transition.DBG) {
+                Log.d(LOG_TAG, "Crossfade: created anim " + anim + " for start, end values " +
+                        startValues + ", " + endValues);
+            }
+            anim.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    ViewOverlay overlay = (mFadeBehavior == FADE_BEHAVIOR_REVEAL) ?
+                            view.getOverlay() : ((ViewGroup) view.getParent()).getOverlay();
+                    overlay.remove(startDrawable);
+                    if (mFadeBehavior == FADE_BEHAVIOR_REVEAL) {
+                        overlay.remove(endDrawable);
+                    }
+                }
+            });
+            AnimatorSet set = new AnimatorSet();
+            set.playTogether(anim);
+            if (anim1 != null) {
+                set.playTogether(anim1);
+            }
+            if (mResizeBehavior == RESIZE_BEHAVIOR_SCALE && !startBounds.equals(endBounds)) {
+                if (Transition.DBG) {
+                    Log.d(LOG_TAG, "animating from startBounds to endBounds: " +
+                            startBounds + ", " + endBounds);
+                }
+                Animator anim2 = ObjectAnimator.ofObject(startDrawable, "bounds",
+                        sRectEvaluator, startBounds, endBounds);
+                set.playTogether(anim2);
+                if (mResizeBehavior == RESIZE_BEHAVIOR_SCALE) {
+                    // TODO: How to handle resizing with a CROSSFADE (vs. REVEAL) effect
+                    // when we are animating the view directly?
+                    Animator anim3 = ObjectAnimator.ofObject(endDrawable, "bounds",
+                            sRectEvaluator, startBounds, endBounds);
+                    set.playTogether(anim3);
                 }
             }
-        });
-        AnimatorSet set = new AnimatorSet();
-        set.playTogether(anim);
-        if (anim1 != null) {
-            set.playTogether(anim1);
+            return set;
+        } else {
+            return null;
         }
-        if (mResizeBehavior == RESIZE_BEHAVIOR_SCALE && !startBounds.equals(endBounds)) {
-            if (Transition.DBG) {
-                Log.d(LOG_TAG, "animating from startBounds to endBounds: " +
-                        startBounds + ", " + endBounds);
-            }
-            Animator anim2 = ObjectAnimator.ofObject(startDrawable, "bounds",
-                    sRectEvaluator, startBounds, endBounds);
-            set.playTogether(anim2);
-            if (mResizeBehavior == RESIZE_BEHAVIOR_SCALE) {
-                // TODO: How to handle resizing with a CROSSFADE (vs. REVEAL) effect
-                // when we are animating the view directly?
-                Animator anim3 = ObjectAnimator.ofObject(endDrawable, "bounds",
-                        sRectEvaluator, startBounds, endBounds);
-                set.playTogether(anim3);
-            }
-        }
-        return set;
     }
 
     @Override

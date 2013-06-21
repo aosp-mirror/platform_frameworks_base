@@ -16,9 +16,7 @@
 
 package android.view.transition;
 
-import android.animation.Animator;
 import android.util.AndroidRuntimeException;
-import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
@@ -187,10 +185,10 @@ public class TransitionGroup extends Transition {
      * @hide
      */
     @Override
-    protected void setup(ViewGroup sceneRoot, TransitionValuesMaps startValues,
+    protected void play(ViewGroup sceneRoot, TransitionValuesMaps startValues,
             TransitionValuesMaps endValues) {
         for (Transition childTransition : mTransitions) {
-            childTransition.setup(sceneRoot, startValues, endValues);
+            childTransition.play(sceneRoot, startValues, endValues);
         }
     }
 
@@ -198,9 +196,8 @@ public class TransitionGroup extends Transition {
      * @hide
      */
     @Override
-    protected void play(ViewGroup sceneRoot) {
+    protected void runAnimations() {
         setupStartEndListeners();
-        final ViewGroup finalSceneRoot = sceneRoot;
         if (!mPlayTogether) {
             // Setup sequence with listeners
             // TODO: Need to add listeners in such a way that we can remove them later if canceled
@@ -210,75 +207,20 @@ public class TransitionGroup extends Transition {
                 previousTransition.addListener(new TransitionListenerAdapter() {
                     @Override
                     public void onTransitionEnd(Transition transition) {
-                        nextTransition.play(finalSceneRoot);
+                        nextTransition.runAnimations();
                         transition.removeListener(this);
                     }
                 });
             }
             Transition firstTransition = mTransitions.get(0);
             if (firstTransition != null) {
-                firstTransition.play(finalSceneRoot);
+                firstTransition.runAnimations();
             }
         } else {
             for (Transition childTransition : mTransitions) {
-                childTransition.play(finalSceneRoot);
+                childTransition.runAnimations();
             }
         }
-    }
-
-    @Override
-    protected Animator play(ViewGroup sceneRoot,
-            TransitionValues startValues, TransitionValues endValues) {
-        final View view = (endValues != null) ? endValues.view :
-                (startValues != null) ? startValues.view : null;
-        final int targetId = (view != null) ? view.getId() : -1;
-        // TODO: not sure this is a valid check - what about auto-targets? No need for ids.
-        if (targetId < 0) {
-            return null;
-        }
-        setupStartEndListeners();
-        if (!mPlayTogether) {
-            final ViewGroup finalSceneRoot = sceneRoot;
-            final TransitionValues finalStartValues = startValues;
-            final TransitionValues finalEndValues = endValues;
-            // Setup sequence with listeners
-            // TODO: Need to add listeners in such a way that we can remove them later if canceled
-            for (int i = 1; i < mTransitions.size(); ++i) {
-                Transition previousTransition = mTransitions.get(i - 1);
-                final Transition nextTransition = mTransitions.get(i);
-                previousTransition.addListener(new TransitionListenerAdapter() {
-                    @Override
-                    public void onTransitionEnd(Transition transition) {
-                        nextTransition.startTransition();
-                        if (nextTransition.isValidTarget(view, targetId)) {
-                            animate(nextTransition.play(finalSceneRoot, finalStartValues,
-                                    finalEndValues));
-                        } else {
-                            nextTransition.endTransition();
-                        }
-                    }
-                });
-            }
-            Transition firstTransition = mTransitions.get(0);
-            if (firstTransition != null) {
-                firstTransition.startTransition();
-                if (firstTransition.isValidTarget(view, targetId)) {
-                    animate(firstTransition.play(finalSceneRoot, finalStartValues, finalEndValues));
-                } else {
-                    firstTransition.endTransition();
-                }
-            }
-        } else {
-            for (Transition childTransition : mTransitions) {
-                childTransition.startTransition();
-                if (childTransition.isValidTarget(view, targetId)) {
-                    animate(childTransition.play(sceneRoot, startValues, endValues));
-                } else {
-                    childTransition.endTransition();
-                }
-            }
-        }
-        return null;
     }
 
     @Override

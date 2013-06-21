@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
 import android.util.ArrayMap;
 import android.util.LongSparseArray;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.view.SurfaceView;
 import android.view.TextureView;
@@ -149,49 +150,32 @@ public abstract class Transition implements Cloneable {
     /**
      * This method is called by the transition's parent (all the way up to the
      * topmost Transition in the hierarchy) with the sceneRoot and start/end
-     * values that the transition may need to run animations on its target
-     * views. The method is called for every applicable target object, which
-     * is stored in the {@link TransitionValues#view} field. When the method
-     * results in an animation needing to be run, the transition will construct
-     * the appropriate {@link Animator} object and return it. The transition
-     * mechanism will apply any applicable duration, startDelay, and interpolator
-     * to that animation and start it. Returning null from the method tells the
-     * transition engine that there is no animation to be played (TransitionGroup
-     * will return null because any applicable animations were started on its child
-     * transitions already and there is no animation to be run on the group itself).
-     *
-     * @param sceneRoot
-     * @param startValues
-     * @param endValues
-     * @return Animator The animation to run.
-     */
-    protected abstract Animator play(ViewGroup sceneRoot, TransitionValues startValues,
-            TransitionValues endValues);
-
-    /**
-     * This method is called by the transition's parent (all the way up to the
-     * topmost Transition in the hierarchy) with the sceneRoot and start/end
-     * values that the transition may need to set things up at the start of a
-     * Transition. For example, if an overall Transition consists of several
+     * values that the transition may need to set up initial target values
+     * and construct an appropriate animation. For example, if an overall
+     * Transition is a {@link TransitionGroup} consisting of several
      * child transitions in sequence, then some of the child transitions may
      * want to set initial values on target views prior to the overall
-     * Transition commencing, to put them in an appropriate scene for the
+     * Transition commencing, to put them in an appropriate state for the
      * delay between that start and the child Transition start time. For
      * example, a transition that fades an item in may wish to set the starting
      * alpha value to 0, to avoid it blinking in prior to the transition
      * actually starting the animation. This is necessary because the scene
      * change that triggers the Transition will automatically set the end-scene
      * on all target views, so a Transition that wants to animate from a
-     * different value should set that value in the setup() method.
+     * different value should set that value prior to returning from this method.
      *
      * <p>Additionally, a Transition can perform logic to determine whether
      * the transition needs to run on the given target and start/end values.
      * For example, a transition that resizes objects on the screen may wish
      * to avoid running for views which are not present in either the start
-     * or end scenes. A return value of <code>false</code> indicates that
-     * the transition should not run, and there will be no ensuing call to the
-     * {@link #play(ViewGroup, TransitionValues, TransitionValues)} method during
-     * this scene change. The default implementation returns true.</p>
+     * or end scenes. A return value of <code>null</code> indicates that
+     * no animation should run. The default implementation returns null.</p>
+     *
+     * <p>If there is an animator created and returned from this method, the
+     * transition mechanism will apply any applicable duration, startDelay,
+     * and interpolator to that animation and start it. A return value of
+     * <code>null</code> indicates that no animation should run. The default
+     * implementation returns null.</p>
      *
      * <p>The method is called for every applicable target object, which is
      * stored in the {@link TransitionValues#view} field.</p>
@@ -199,31 +183,25 @@ public abstract class Transition implements Cloneable {
      * @param sceneRoot
      * @param startValues
      * @param endValues
-     * @return True if the Transition's {@link #play(ViewGroup,
-     * TransitionValues, TransitionValues) play()} method should be called
-     * during this scene change, false otherwise.
+     * @return A non-null Animator to be started at the appropriate time in the
+     * overall transition for this scene change, null otherwise.
      */
-    protected boolean setup(ViewGroup sceneRoot, TransitionValues startValues,
+    protected Animator play(ViewGroup sceneRoot, TransitionValues startValues,
             TransitionValues endValues) {
-        return true;
+        return null;
     }
 
     /**
-     * This version of setup() is called with the entire set of start/end
+     * This version of play() is called with the entire set of start/end
      * values. The implementation in Transition iterates through these lists
-     * and calls {@link #setup(ViewGroup, TransitionValues, TransitionValues)}
+     * and calls {@link #play(ViewGroup, TransitionValues, TransitionValues)}
      * with each set of start/end values on this transition. The
      * TransitionGroup subclass overrides this method and delegates it to
-     * each of its children in succession. The intention in splitting
-     * setup() out from play() is to allow all Transitions in the tree to
-     * set up the appropriate start scene for their target objects prior to
-     * any calls to play(), which is necessary when there is a sequential
-     * Transition, where a child transition which is not the first may want to
-     * set up a target's scene prior to the overall Transition start.
+     * each of its children in succession.
      *
      * @hide
      */
-    protected void setup(ViewGroup sceneRoot, TransitionValuesMaps startValues,
+    protected void play(ViewGroup sceneRoot, TransitionValuesMaps startValues,
             TransitionValuesMaps endValues) {
         mPlayStartValuesList.clear();
         mPlayEndValuesList.clear();
@@ -335,13 +313,18 @@ public abstract class Transition implements Cloneable {
             TransitionValues start = startValuesList.get(i);
             TransitionValues end = endValuesList.get(i);
             // TODO: what to do about targetIds and itemIds?
-            if (setup(sceneRoot, start, end)) {
+            Animator animator = play(sceneRoot, start, end);
+            if (animator != null) {
+                mAnimatorMap.put(new Pair(start, end), animator);
                 // Note: we've already done the check against targetIDs in these lists
                 mPlayStartValuesList.add(start);
                 mPlayEndValuesList.add(end);
             }
         }
     }
+
+    ArrayMap<Pair<TransitionValues, TransitionValues>, Animator> mAnimatorMap =
+            new ArrayMap<Pair<TransitionValues, TransitionValues>, Animator>();
 
     /**
      * Internal utility method for checking whether a given view/id
@@ -375,16 +358,12 @@ public abstract class Transition implements Cloneable {
     }
 
     /**
-     * This version of play() is called with the entire set of start/end
-     * values. The implementation in Transition iterates through these lists
-     * and calls {@link #play(ViewGroup, TransitionValues, TransitionValues)}
-     * with each set of start/end values on this transition. The
-     * TransitionGroup subclass overrides this method and delegates it to
-     * each of its children in succession.
+     * This is called internally once all animations have been set up by the
+     * transition hierarchy. \
      *
      * @hide
      */
-    protected void play(ViewGroup sceneRoot) {
+    protected void runAnimations() {
 
         startTransition();
         // Now walk the list of TransitionValues, calling play for each pair
@@ -392,10 +371,11 @@ public abstract class Transition implements Cloneable {
             TransitionValues start = mPlayStartValuesList.get(i);
             TransitionValues end = mPlayEndValuesList.get(i);
             startTransition();
-            runAnimator(play(sceneRoot, start, end));
+            runAnimator(mAnimatorMap.get(new Pair(start, end)));
         }
         mPlayStartValuesList.clear();
         mPlayEndValuesList.clear();
+        mAnimatorMap.clear();
         endTransition();
     }
 
@@ -424,19 +404,18 @@ public abstract class Transition implements Cloneable {
      * <code>start</code>. The main concern for an implementation is what the
      * properties are that the transition cares about and what the values are
      * for all of those properties. The start and end values will be compared
-     * later during the setup() and play() methods to determine what, if any,
-     * animations, should be run.
+     * later during the
+     * {@link #play(android.view.ViewGroup, TransitionValues, TransitionValues)}
+     * method to determine what, if any, animations, should be run.
      *
-     * @param transitionValues The holder any values that the Transition
-     * wishes to store. Values are stored in the fields of this
-     * TransitionValues object, according to their type, and are keyed from
-     * a String value. For example, to start a view's rotation value,
-     * a Transition might call
-     * <code>transitionValues.floatValues.put("rotation", view.getRotation())
-     * </code>. The target <code>View</code> will already be stored in
-     * the transitionValues structure when this method is called. The other
-     * fields in TransitionValues, e.g. <code>floatValues</code>,
-     * may need to be instantiated if they have not yet been created.
+     * @param transitionValues The holder for any values that the Transition
+     * wishes to store. Values are stored in the <code>values</code> field
+     * of this TransitionValues object and are keyed from
+     * a String value. For example, to store a view's rotation value,
+     * a transition might call
+     * <code>transitionValues.values.put("appname:transitionname:rotation",
+     * view.getRotation())</code>. The target view will already be stored in
+     * the transitionValues structure when this method is called.
      */
     protected abstract void captureValues(TransitionValues transitionValues, boolean start);
 
@@ -666,15 +645,15 @@ public abstract class Transition implements Cloneable {
 
     /**
      * Called by TransitionManager to play the transition. This calls
-     * setup() and then play() with the full set of per-view
-     * transitionValues objects
+     * play() to set things up and create all of the animations and then
+     * runAnimations() to actually start the animations.
      */
     void playTransition(ViewGroup sceneRoot) {
         // setup() must be called on entire transition hierarchy and set of views
         // before calling play() on anything; every transition needs a chance to set up
         // target views appropriately before transitions begin running
-        setup(sceneRoot, mStartValues, mEndValues);
-        play(sceneRoot);
+        play(sceneRoot, mStartValues, mEndValues);
+        runAnimations();
     }
 
     /**

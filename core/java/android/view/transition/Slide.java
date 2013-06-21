@@ -41,6 +41,7 @@ public class Slide extends Visibility {
             TransitionValues startValues, int startVisibility,
             TransitionValues endValues, int endVisibility) {
         View endView = (endValues != null) ? endValues.view : null;
+        endView.setTranslationY(-2 * endView.getHeight());
         ObjectAnimator anim = ObjectAnimator.ofFloat(endView, View.TRANSLATION_Y,
                 -2 * endView.getHeight(), 0);
         anim.setInterpolator(sDecelerator);
@@ -48,28 +49,11 @@ public class Slide extends Visibility {
     }
 
     @Override
-    protected boolean setupAppear(ViewGroup sceneRoot,
-            TransitionValues startValues, int startVisibility,
-            TransitionValues endValues, int endVisibility) {
-        View endView = (endValues != null) ? endValues.view : null;
-        endView.setTranslationY(-2 * endView.getHeight());
-        return true;
-    }
-
-    @Override
-    protected boolean setupDisappear(ViewGroup sceneRoot,
-            TransitionValues startValues, int startVisibility,
-            TransitionValues endValues, int endVisibility) {
-        View startView = (startValues != null) ? startValues.view : null;
-        startView.setTranslationY(0);
-        return true;
-    }
-
-    @Override
     protected Animator disappear(ViewGroup sceneRoot,
             TransitionValues startValues, int startVisibility,
             TransitionValues endValues, int endVisibility) {
         View startView = (startValues != null) ? startValues.view : null;
+        startView.setTranslationY(0);
         ObjectAnimator anim = ObjectAnimator.ofFloat(startView, View.TRANSLATION_Y, 0,
                 -2 * startView.getHeight());
         anim.setInterpolator(sAccelerator);

@@ -47,24 +47,6 @@ public class TextChange extends Transition {
     }
 
     @Override
-    protected boolean setup(ViewGroup sceneRoot, TransitionValues startValues,
-            TransitionValues endValues) {
-        if (startValues == null || endValues == null || !(endValues.view instanceof TextView)) {
-            return false;
-        }
-        final TextView view = (TextView) endValues.view;
-        Map<String, Object> startVals = startValues.values;
-        Map<String, Object> endVals = endValues.values;
-        String startText = (String) startVals.get(PROPNAME_TEXT);
-        String endText = (String) endVals.get(PROPNAME_TEXT);
-        if (!startText.equals(endText)) {
-            view.setText(startText);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
     protected Animator play(ViewGroup sceneRoot, TransitionValues startValues,
             TransitionValues endValues) {
         if (startValues == null || endValues == null || !(endValues.view instanceof TextView)) {
@@ -73,11 +55,10 @@ public class TextChange extends Transition {
         final TextView view = (TextView) endValues.view;
         Map<String, Object> startVals = startValues.values;
         Map<String, Object> endVals = endValues.values;
-        final String startText = (String) startVals.get(PROPNAME_TEXT);
+        String startText = (String) startVals.get(PROPNAME_TEXT);
         final String endText = (String) endVals.get(PROPNAME_TEXT);
         if (!startText.equals(endText)) {
-            // This noop animation is just used to keep the text in its start state
-            // until the transition ends
+            view.setText(startText);
             ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
             anim.addListener(new AnimatorListenerAdapter() {
                 @Override

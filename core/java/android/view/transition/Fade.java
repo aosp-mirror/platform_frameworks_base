@@ -93,18 +93,6 @@ public class Fade extends Visibility {
     }
 
     @Override
-    protected boolean setupAppear(ViewGroup sceneRoot,
-            TransitionValues startValues, int startVisibility,
-            TransitionValues endValues, int endVisibility) {
-        View endView = (endValues != null) ? endValues.view : null;
-        if ((mFadingMode & IN) != IN) {
-            return false;
-        }
-        endView.setAlpha(0);
-        return true;
-    }
-
-    @Override
     protected Animator appear(ViewGroup sceneRoot,
             TransitionValues startValues, int startVisibility,
             TransitionValues endValues, int endVisibility) {
@@ -112,17 +100,16 @@ public class Fade extends Visibility {
         if ((mFadingMode & IN) != IN) {
             return null;
         }
-        // TODO: hack - retain original value from before setupAppear
+        endView.setAlpha(0);
         return runAnimation(endView, 0, 1, null);
-        // TODO: end listener to make sure we end at 1 no matter what
     }
 
     @Override
-    protected boolean setupDisappear(ViewGroup sceneRoot,
+    protected Animator disappear(ViewGroup sceneRoot,
             TransitionValues startValues, int startVisibility,
             TransitionValues endValues, int endVisibility) {
         if ((mFadingMode & OUT) != OUT) {
-            return false;
+            return null;
         }
         View view;
         View startView = (startValues != null) ? startValues.view : null;
@@ -153,6 +140,7 @@ public class Fade extends Visibility {
                 }
             }
         }
+        final int finalVisibility = endVisibility;
         // TODO: add automatic facility to Visibility superclass for keeping views around
         if (overlayView != null) {
             // TODO: Need to do this for general case of adding to overlay
@@ -163,75 +151,55 @@ public class Fade extends Visibility {
             overlayView.offsetLeftAndRight((screenX - loc[0]) - overlayView.getLeft());
             overlayView.offsetTopAndBottom((screenY - loc[1]) - overlayView.getTop());
             sceneRoot.getOverlay().add(overlayView);
-            return true;
+            // TODO: add automatic facility to Visibility superclass for keeping views around
+            final float startAlpha = view.getAlpha();
+            float endAlpha = 0;
+            final View finalView = view;
+            final View finalOverlayView = overlayView;
+            final View finalViewToKeep = viewToKeep;
+            final ViewGroup finalSceneRoot = sceneRoot;
+            final Animator.AnimatorListener endListener = new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    finalView.setAlpha(startAlpha);
+                    // TODO: restore view offset from overlay repositioning
+                    if (finalViewToKeep != null) {
+                        finalViewToKeep.setVisibility(finalVisibility);
+                    }
+                    if (finalOverlayView != null) {
+                        finalSceneRoot.getOverlay().remove(finalOverlayView);
+                    }
+                }
+            };
+            return runAnimation(view, startAlpha, endAlpha, endListener);
         }
         if (viewToKeep != null) {
             // TODO: find a different way to do this, like just changing the view to be
             // VISIBLE for the duration of the transition
             viewToKeep.setVisibility((View.VISIBLE));
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    protected Animator disappear(ViewGroup sceneRoot,
-            TransitionValues startValues, int startVisibility,
-            TransitionValues endValues, int endVisibility) {
-        if ((mFadingMode & OUT) != OUT) {
-            return null;
-        }
-        View startView = (startValues != null) ? startValues.view : null;
-        View endView = (endValues != null) ? endValues.view : null;
-        if (Transition.DBG) {
-            Log.d(LOG_TAG, "Fade.disappear: startView, startVis, endView, endVis = " +
-                startView + ", " + startVisibility + ", " + endView + ", " + endVisibility);
-        }
-        View view;
-        View overlayView = null;
-        View viewToKeep = null;
-        final int finalVisibility = endVisibility;
-        if (endView == null) {
-            // view was removed: add the start view to the Overlay
-            view = startView;
-            overlayView = view;
-        } else {
-            // visibility change
-            if (endVisibility == View.INVISIBLE) {
-                view = endView;
-                viewToKeep = view;
-            } else {
-                // Becoming GONE
-                if (startView == endView) {
-                    view = endView;
-                    viewToKeep = view;
-                } else {
-                    view = startView;
-                    overlayView = view;
+            // TODO: add automatic facility to Visibility superclass for keeping views around
+            final float startAlpha = view.getAlpha();
+            float endAlpha = 0;
+            final View finalView = view;
+            final View finalOverlayView = overlayView;
+            final View finalViewToKeep = viewToKeep;
+            final ViewGroup finalSceneRoot = sceneRoot;
+            final Animator.AnimatorListener endListener = new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    finalView.setAlpha(startAlpha);
+                    // TODO: restore view offset from overlay repositioning
+                    if (finalViewToKeep != null) {
+                        finalViewToKeep.setVisibility(finalVisibility);
+                    }
+                    if (finalOverlayView != null) {
+                        finalSceneRoot.getOverlay().remove(finalOverlayView);
+                    }
                 }
-            }
+            };
+            return runAnimation(view, startAlpha, endAlpha, endListener);
         }
-        // TODO: add automatic facility to Visibility superclass for keeping views around
-        final float startAlpha = view.getAlpha();
-        float endAlpha = 0;
-        final View finalView = view;
-        final View finalOverlayView = overlayView;
-        final View finalViewToKeep = viewToKeep;
-        final ViewGroup finalSceneRoot = sceneRoot;
-        final Animator.AnimatorListener endListener = new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                finalView.setAlpha(startAlpha);
-                // TODO: restore view offset from overlay repositioning
-                if (finalViewToKeep != null) {
-                    finalViewToKeep.setVisibility(finalVisibility);
-                }
-                if (finalOverlayView != null) {
-                    finalSceneRoot.getOverlay().remove(finalOverlayView);
-                }
-            }
-        };
-        return runAnimation(view, startAlpha, endAlpha, endListener);
+        return null;
     }
 
 }
