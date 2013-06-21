@@ -1,11 +1,6 @@
 page.title=Making the Most of Google Cloud Messaging
-parent.title=Syncing to the Cloud
-parent.link=index.html
 
 trainingnavtop=true
-
-previous.title=Using the Backup API
-previous.link=backupapi.html
 
 @jd:body
 
