@@ -451,8 +451,8 @@ final class ProcessRecord {
             ProcessList plist) {
         int state = this == TOP_APP ? ProcessTracker.STATE_TOP
                 : plist.adjToTrackedState(setAdj);
-        for (int ip=pkgList.size()-1; ip>=0; ip--) {
-            pkgList.valueAt(ip).setState(state, memFactor, now);
+        if (pkgList.size() > 0) {
+            pkgList.valueAt(0).setState(state, memFactor, now, pkgList);
         }
     }
 
@@ -461,8 +461,8 @@ final class ProcessRecord {
      */
     public void resetPackageList() {
         long now = SystemClock.uptimeMillis();
-        for (int i=0; i<pkgList.size(); i++) {
-            pkgList.valueAt(i).setState(ProcessTracker.STATE_NOTHING, 0, now);
+        if (pkgList.size() > 0) {
+            pkgList.valueAt(0).setState(ProcessTracker.STATE_NOTHING, 0, now, pkgList);
         }
         pkgList.clear();
         pkgList.put(info.packageName, baseProcessTracker);

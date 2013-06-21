@@ -406,7 +406,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Tracking long-term execution of processes to look for abuse and other
      * bad app behavior.
      */
-    final ProcessTracker mProcessTracker = new ProcessTracker();
+    ProcessTracker mProcessTracker;
 
     /**
      * The currently running isolated processes.
@@ -1547,6 +1547,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         m.mContext = context;
         m.mFactoryTest = factoryTest;
         m.mIntentFirewall = new IntentFirewall(m.new IntentFirewallInterface());
+        m.mProcessTracker = new ProcessTracker(context);
 
         m.mStackSupervisor = new ActivityStackSupervisor(m, context, thr.mLooper);
 
@@ -10173,12 +10174,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         String[] newArgs = new String[args.length - opti];
-        if (args.length > 2) System.arraycopy(args, opti, newArgs, 0, args.length - opti);
+        System.arraycopy(args, opti, newArgs, 0, args.length - opti);
 
         TaskRecord lastTask = null;
         boolean needSep = false;
         for (int i=activities.size()-1; i>=0; i--) {
-            ActivityRecord r = (ActivityRecord)activities.get(i);
+            ActivityRecord r = activities.get(i);
             if (needSep) {
                 pw.println();
             }

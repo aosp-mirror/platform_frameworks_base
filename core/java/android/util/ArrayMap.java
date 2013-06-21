@@ -550,6 +550,43 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation composes a string by iterating over its mappings. If
+     * this map contains itself as a key or a value, the string "(this Map)"
+     * will appear in its place.
+     */
+    @Override
+    public String toString() {
+        if (isEmpty()) {
+            return "{}";
+        }
+
+        StringBuilder buffer = new StringBuilder(mSize * 28);
+        buffer.append('{');
+        for (int i=0; i<mSize; i++) {
+            if (i > 0) {
+                buffer.append(", ");
+            }
+            Object key = keyAt(i);
+            if (key != this) {
+                buffer.append(key);
+            } else {
+                buffer.append("(this Map)");
+            }
+            buffer.append('=');
+            Object value = valueAt(i);
+            if (value != this) {
+                buffer.append(value);
+            } else {
+                buffer.append("(this Map)");
+            }
+        }
+        buffer.append('}');
+        return buffer.toString();
+    }
+
     // ------------------------------------------------------------------------
     // Interop with traditional Java containers.  Not as efficient as using
     // specialized collection APIs.
