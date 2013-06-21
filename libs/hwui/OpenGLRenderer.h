@@ -360,6 +360,9 @@ public:
         return mSnapshot->clipRegion->isEmpty();
     }
 
+    int getViewportWidth() { return getSnapshot()->viewport.getWidth(); }
+    int getViewportHeight() { return getSnapshot()->viewport.getHeight(); }
+
     /**
      * Scales the alpha on the current snapshot. This alpha value will be modulated
      * with other alpha values when drawing primitives.

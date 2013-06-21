@@ -827,6 +827,7 @@ int OpenGLRenderer::saveLayerDeferred(float left, float top, float right, float 
         if (!mSnapshot->isIgnored()) {
             mSnapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
             mSnapshot->resetClip(clip.left, clip.top, clip.right, clip.bottom);
+            mSnapshot->viewport.set(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
         }
     }
 

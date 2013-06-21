@@ -152,8 +152,9 @@ private:
 
 class MergingDrawBatch : public DrawBatch {
 public:
-    MergingDrawBatch(DeferInfo& deferInfo, Rect viewport) :
-           DrawBatch(deferInfo), mClipRect(viewport), mClipSideFlags(kClipSide_None) {}
+    MergingDrawBatch(DeferInfo& deferInfo, int width, int height) :
+            DrawBatch(deferInfo), mClipRect(width, height),
+            mClipSideFlags(kClipSide_None) {}
 
     /*
      * Helper for determining if a new op can merge with a MergingDrawBatch based on their bounds
@@ -489,6 +490,7 @@ void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
     // complex clip has a complex set of expectations on the renderer state - for now, avoid taking
     // the merge path in those cases
     deferInfo.mergeable &= !recordingComplexClip();
+    deferInfo.opaqueOverBounds &= !recordingComplexClip() && mSaveStack.isEmpty();
 
     if (CC_LIKELY(mAvoidOverdraw) && mBatches.size() &&
             op->state.mClipSideFlags != kClipSide_ConservativeFull &&
@@ -570,7 +572,8 @@ void DeferredDisplayList::addDrawOp(OpenGLRenderer& renderer, DrawOp* op) {
 
     if (!targetBatch) {
         if (deferInfo.mergeable) {
-            targetBatch = new MergingDrawBatch(deferInfo, mBounds);
+            targetBatch = new MergingDrawBatch(deferInfo,
+                    renderer.getViewportWidth(), renderer.getViewportHeight());
             mMergingBatches[deferInfo.batchId].put(deferInfo.mergeId, targetBatch);
         } else {
             targetBatch = new DrawBatch(deferInfo);
