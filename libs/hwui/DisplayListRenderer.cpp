@@ -318,6 +318,7 @@ status_t DisplayListRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, in
 status_t DisplayListRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
         float left, float top, float right, float bottom, SkPaint* paint) {
     bitmap = refBitmap(bitmap);
+    paint = refPaint(paint);
 
     addDrawOp(new (alloc()) DrawPatchOp(bitmap, patch, left, top, right, bottom, paint));
     return DrawGlInfo::kStatusDone;
