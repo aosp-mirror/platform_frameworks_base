@@ -201,10 +201,8 @@ $(document).ready(function() {
           onchange="changeBadgeLang()">
     <option title="Afrikaans"
             value="af">Afrikaans</option>
-<!--
     <option title="Arabic"
             value="ar">العربية</option>
--->
     <option title="Belarusian"
             value="be">Беларуская</option>
     <option title="Bulgarian"
