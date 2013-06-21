@@ -923,9 +923,14 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void disposeResizeBuffer() {
-        if (mResizeBuffer != null) {
-            mResizeBuffer.destroy();
-            mResizeBuffer = null;
+        if (mResizeBuffer != null && mAttachInfo.mHardwareRenderer != null) {
+            mAttachInfo.mHardwareRenderer.safelyRun(new Runnable() {
+                @Override
+                public void run() {
+                    mResizeBuffer.destroy();
+                    mResizeBuffer = null;
+                }
+            });
         }
     }
 
@@ -1466,8 +1471,7 @@ public final class ViewRootImpl implements ViewParent,
                             if (mResizeBuffer != null) {
                                 mResizeBuffer.end(hwRendererCanvas);
                                 if (!completed) {
-                                    mResizeBuffer.destroy();
-                                    mResizeBuffer = null;
+                                    disposeResizeBuffer();
                                 }
                             }
                         }
