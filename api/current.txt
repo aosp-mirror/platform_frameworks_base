@@ -18385,6 +18385,40 @@ package android.preference {
 
 }
 
+package android.print.pdf {
+
+  public final class PdfDocument {
+    method public void close();
+    method protected final void finalize() throws java.lang.Throwable;
+    method public void finishPage(android.print.pdf.PdfDocument.Page);
+    method public java.util.List<android.print.pdf.PdfDocument.PageInfo> getPages();
+    method public static android.print.pdf.PdfDocument open();
+    method public android.print.pdf.PdfDocument.Page startPage(android.print.pdf.PdfDocument.PageInfo);
+    method public void writeTo(java.io.OutputStream);
+  }
+
+  public static final class PdfDocument.Page {
+    method public android.graphics.Canvas getCanvas();
+    method public android.print.pdf.PdfDocument.PageInfo getInfo();
+  }
+
+  public static final class PdfDocument.PageInfo {
+    method public android.graphics.Rect getContentSize();
+    method public int getDesity();
+    method public android.graphics.Matrix getInitialTransform();
+    method public int getPageNumber();
+    method public android.graphics.Rect getPageSize();
+  }
+
+  public static final class PdfDocument.PageInfo.Builder {
+    ctor public PdfDocument.PageInfo.Builder(android.graphics.Rect, int, int);
+    method public android.print.pdf.PdfDocument.PageInfo create();
+    method public android.print.pdf.PdfDocument.PageInfo.Builder setContentSize(android.graphics.Rect);
+    method public android.print.pdf.PdfDocument.PageInfo.Builder setInitialTransform(android.graphics.Matrix);
+  }
+
+}
+
 package android.provider {
 
   public final class AlarmClock {
