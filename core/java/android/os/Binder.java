@@ -17,6 +17,7 @@
 package android.os;
 
 import android.util.Log;
+import com.android.internal.util.FastPrintWriter;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -288,7 +289,7 @@ public class Binder implements IBinder {
      */
     public void dump(FileDescriptor fd, String[] args) {
         FileOutputStream fout = new FileOutputStream(fd);
-        PrintWriter pw = new PrintWriter(fout);
+        PrintWriter pw = new FastPrintWriter(fout);
         try {
             final String disabled;
             synchronized (Binder.class) {
@@ -310,7 +311,7 @@ public class Binder implements IBinder {
      */
     public void dumpAsync(final FileDescriptor fd, final String[] args) {
         final FileOutputStream fout = new FileOutputStream(fd);
-        final PrintWriter pw = new PrintWriter(fout);
+        final PrintWriter pw = new FastPrintWriter(fout);
         Thread thr = new Thread("Binder.dumpAsync") {
             public void run() {
                 try {
