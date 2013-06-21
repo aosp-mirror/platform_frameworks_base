@@ -32,7 +32,7 @@ namespace uirenderer {
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-Patch::Patch(): verticesCount(0), indexCount(0), hasEmptyQuads(false) {
+Patch::Patch(): vertices(NULL), verticesCount(0), indexCount(0), hasEmptyQuads(false) {
 }
 
 Patch::~Patch() {
@@ -47,14 +47,14 @@ uint32_t Patch::getSize() const {
 }
 
 TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeight,
-        float left, float top, float right, float bottom, const Res_png_9patch* patch) {
+        float width, float height, const Res_png_9patch* patch) {
     UvMapper mapper;
-    return createMesh(bitmapWidth, bitmapHeight, left, top, right, bottom, mapper, patch);
+    return createMesh(bitmapWidth, bitmapHeight, width, height, mapper, patch);
 }
 
 TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeight,
-        float left, float top, float right, float bottom,
-        const UvMapper& mapper, const Res_png_9patch* patch) {
+        float width, float height, const UvMapper& mapper, const Res_png_9patch* patch) {
+    if (vertices) return vertices;
 
     const uint32_t* colors = &patch->colors[0];
     const int8_t numColors = patch->numColors;
@@ -79,7 +79,7 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
     uint32_t maxVertices = ((xCount + 1) * (yCount + 1) - emptyQuads) * 4;
     if (maxVertices == 0) return NULL;
 
-    TextureVertex* vertices = new TextureVertex[maxVertices];
+    vertices = new TextureVertex[maxVertices];
     TextureVertex* vertex = vertices;
 
     const int32_t* xDivs = patch->xDivs;
@@ -101,9 +101,9 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
         }
         const float xStretchTex = stretchSize;
         const float fixed = bitmapWidth - stretchSize;
-        const float xStretch = fmaxf(right - left - fixed, 0.0f);
+        const float xStretch = fmaxf(width - fixed, 0.0f);
         stretchX = xStretch / xStretchTex;
-        rescaleX = fixed == 0.0f ? 0.0f : fminf(fmaxf(right - left, 0.0f) / fixed, 1.0f);
+        rescaleX = fixed == 0.0f ? 0.0f : fminf(fmaxf(width, 0.0f) / fixed, 1.0f);
     }
 
     if (yStretchCount > 0) {
@@ -113,9 +113,9 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
         }
         const float yStretchTex = stretchSize;
         const float fixed = bitmapHeight - stretchSize;
-        const float yStretch = fmaxf(bottom - top - fixed, 0.0f);
+        const float yStretch = fmaxf(height - fixed, 0.0f);
         stretchY = yStretch / yStretchTex;
-        rescaleY = fixed == 0.0f ? 0.0f : fminf(fmaxf(bottom - top, 0.0f) / fixed, 1.0f);
+        rescaleY = fixed == 0.0f ? 0.0f : fminf(fmaxf(height, 0.0f) / fixed, 1.0f);
     }
 
     uint32_t quadCount = 0;
@@ -144,7 +144,7 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
 
         if (stepY > 0.0f) {
             generateRow(xDivs, xCount, vertex, y1, y2, v1, v2, stretchX, rescaleX,
-                    right - left, bitmapWidth, quadCount);
+                    width, bitmapWidth, quadCount);
         }
 
         y1 = y2;
@@ -154,9 +154,9 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
     }
 
     if (previousStepY != bitmapHeight) {
-        y2 = bottom - top;
+        y2 = height;
         generateRow(xDivs, xCount, vertex, y1, y2, v1, 1.0f, stretchX, rescaleX,
-                right - left, bitmapWidth, quadCount);
+                width, bitmapWidth, quadCount);
     }
 
     return vertices;

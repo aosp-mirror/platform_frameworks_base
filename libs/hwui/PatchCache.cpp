@@ -118,10 +118,10 @@ const Patch* PatchCache::get(const AssetAtlas::Entry* entry,
 
         if (entry) {
             vertices = newMesh->createMesh(bitmapWidth, bitmapHeight,
-                    0.0f, 0.0f, pixelWidth, pixelHeight, entry->uvMapper, patch);
+                    pixelWidth, pixelHeight, entry->uvMapper, patch);
         } else {
             vertices = newMesh->createMesh(bitmapWidth, bitmapHeight,
-                    0.0f, 0.0f, pixelWidth, pixelHeight, patch);
+                    pixelWidth, pixelHeight, patch);
         }
 
         if (vertices) {
@@ -141,8 +141,6 @@ const Patch* PatchCache::get(const AssetAtlas::Entry* entry,
             mSize += size;
 
             glBufferSubData(GL_ARRAY_BUFFER, newMesh->offset, size, vertices);
-
-            delete[] vertices;
         }
 
         mCache.put(description, newMesh);

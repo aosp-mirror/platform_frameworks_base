@@ -132,7 +132,10 @@ void GpuPixelBuffer::unmap() {
     if (mAccessMode != kAccessMode_None) {
         if (mMappedPointer) {
             mCaches.bindPixelBuffer(mBuffer);
-            glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+            GLboolean status = glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+            if (status == GL_FALSE) {
+                ALOGE("Corrupted GPU pixel buffer");
+            }
         }
         mAccessMode = kAccessMode_None;
         mMappedPointer = NULL;

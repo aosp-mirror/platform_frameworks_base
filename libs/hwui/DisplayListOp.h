@@ -751,12 +751,18 @@ public:
     TextureVertex::set(ptr++, posRect.xDim - offsetRect.left, posRect.yDim - offsetRect.top, \
             texCoordsRect.xDim, texCoordsRect.yDim)
 
+    /**
+     * This multi-draw operation builds a mesh on the stack by generating a quad
+     * for each bitmap in the batch. This method is also responsible for dirtying
+     * the current layer, if any.
+     */
     virtual status_t multiDraw(OpenGLRenderer& renderer, Rect& dirty,
             const Vector<DrawOp*>& ops, const Rect& bounds) {
         renderer.restoreDisplayState(state, true); // restore all but the clip
         TextureVertex vertices[6 * ops.size()];
         TextureVertex* vertex = &vertices[0];
 
+        const bool hasLayer = renderer.hasLayer();
         bool transformed = false;
 
         // TODO: manually handle rect clip for bitmaps by adjusting texCoords per op,
@@ -778,6 +784,11 @@ public:
             SET_TEXTURE(vertex, opBounds, bounds, texCoords, left, bottom);
             SET_TEXTURE(vertex, opBounds, bounds, texCoords, right, top);
             SET_TEXTURE(vertex, opBounds, bounds, texCoords, right, bottom);
+
+            if (hasLayer) {
+                const Rect& dirty = ops[i]->state.mBounds;
+                renderer.dirtyLayer(dirty.left, dirty.top, dirty.right, dirty.bottom);
+            }
         }
 
         return renderer.drawBitmaps(mBitmap, ops.size(), &vertices[0],
@@ -921,25 +932,104 @@ private:
 class DrawPatchOp : public DrawBoundedOp {
 public:
     DrawPatchOp(SkBitmap* bitmap, Res_png_9patch* patch,
-            float left, float top, float right, float bottom, int alpha, SkXfermode::Mode mode)
-            : DrawBoundedOp(left, top, right, bottom, 0),
-            mBitmap(bitmap), mPatch(patch), mAlpha(alpha), mMode(mode),
-            mGenerationId(0), mMesh(NULL) {
+            float left, float top, float right, float bottom, SkPaint* paint)
+            : DrawBoundedOp(left, top, right, bottom, paint),
+            mBitmap(bitmap), mPatch(patch), mGenerationId(0), mMesh(NULL) {
         mEntry = Caches::getInstance().assetAtlas.getEntry(bitmap);
     };
 
-    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
+    const Patch* getMesh(OpenGLRenderer& renderer) {
         if (!mMesh || renderer.getCaches().patchCache.getGenerationId() != mGenerationId) {
             PatchCache& cache = renderer.getCaches().patchCache;
             mMesh = cache.get(mEntry, mBitmap->width(), mBitmap->height(),
-                    mLocalBounds.right - mLocalBounds.left, mLocalBounds.bottom - mLocalBounds.top,
-                    mPatch);
+                    mLocalBounds.getWidth(), mLocalBounds.getHeight(), mPatch);
             mGenerationId = cache.getGenerationId();
         }
+        return mMesh;
+    }
+
+    /**
+     * This multi-draw operation builds an indexed mesh on the stack by copying
+     * and transforming the vertices of each 9-patch in the batch. This method
+     * is also responsible for dirtying the current layer, if any.
+     */
+    virtual status_t multiDraw(OpenGLRenderer& renderer, Rect& dirty,
+            const Vector<DrawOp*>& ops, const Rect& bounds) {
+        renderer.restoreDisplayState(state, true);
+
+        // Batches will usually contain a small number of items so it's
+        // worth performing a first iteration to count the exact number
+        // of vertices we need in the new mesh
+        uint32_t totalVertices = 0;
+        for (unsigned int i = 0; i < ops.size(); i++) {
+            totalVertices += ((DrawPatchOp*) ops[i])->getMesh(renderer)->verticesCount;
+        }
+
+        const bool hasLayer = renderer.hasLayer();
+
+        uint32_t indexCount = 0;
+
+        TextureVertex vertices[totalVertices];
+        TextureVertex* vertex = &vertices[0];
+
+        // Create a mesh that contains the transformed vertices for all the
+        // 9-patch objects that are part of the batch. Note that onDefer()
+        // enforces ops drawn by this function to have a pure translate or
+        // identity matrix
+        for (unsigned int i = 0; i < ops.size(); i++) {
+            DrawPatchOp* patchOp = (DrawPatchOp*) ops[i];
+            const Patch* opMesh = patchOp->getMesh(renderer);
+            uint32_t vertexCount = opMesh->verticesCount;
+            if (vertexCount == 0) continue;
+
+            // We use the bounds to know where to translate our vertices
+            // Using patchOp->state.mBounds wouldn't work because these
+            // bounds are clipped
+            const float tx = (int) floorf(patchOp->state.mMatrix.getTranslateX() +
+                    patchOp->mLocalBounds.left + 0.5f);
+            const float ty = (int) floorf(patchOp->state.mMatrix.getTranslateY() +
+                    patchOp->mLocalBounds.top + 0.5f);
+
+            // Copy & transform all the vertices for the current operation
+            TextureVertex* opVertices = opMesh->vertices;
+            for (uint32_t j = 0; j < vertexCount; j++, opVertices++) {
+                TextureVertex::set(vertex++,
+                        opVertices->position[0] + tx, opVertices->position[1] + ty,
+                        opVertices->texture[0], opVertices->texture[1]);
+            }
+
+            // Dirty the current layer if possible. When the 9-patch does not
+            // contain empty quads we can take a shortcut and simply set the
+            // dirty rect to the object's bounds.
+            if (hasLayer) {
+                if (!opMesh->hasEmptyQuads) {
+                    renderer.dirtyLayer(tx, ty,
+                            tx + patchOp->mLocalBounds.getWidth(),
+                            ty + patchOp->mLocalBounds.getHeight());
+                } else {
+                    const size_t count = opMesh->quads.size();
+                    for (size_t i = 0; i < count; i++) {
+                        const Rect& quadBounds = opMesh->quads[i];
+                        const float x = tx + quadBounds.left;
+                        const float y = ty + quadBounds.top;
+                        renderer.dirtyLayer(x, y,
+                                x + quadBounds.getWidth(), y + quadBounds.getHeight());
+                    }
+                }
+            }
+
+            indexCount += opMesh->indexCount;
+        }
+
+        return renderer.drawPatches(mBitmap, mEntry, &vertices[0], indexCount, getPaint(renderer));
+    }
+
+    virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
         // We're not calling the public variant of drawPatch() here
         // This method won't perform the quickReject() since we've already done it at this point
-        return renderer.drawPatch(mBitmap, mMesh, mEntry, mLocalBounds.left, mLocalBounds.top,
-                mLocalBounds.right, mLocalBounds.bottom, mAlpha, mMode);
+        return renderer.drawPatch(mBitmap, getMesh(renderer), mEntry,
+                mLocalBounds.left, mLocalBounds.top, mLocalBounds.right, mLocalBounds.bottom,
+                getPaint(renderer));
     }
 
     virtual void output(int level, uint32_t logFlags) {
@@ -951,7 +1041,8 @@ public:
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {
         deferInfo.batchId = DeferredDisplayList::kOpBatch_Patch;
         deferInfo.mergeId = mEntry ? (mergeid_t) &mEntry->atlas : (mergeid_t) mBitmap;
-        deferInfo.mergeable = true;
+        deferInfo.mergeable = state.mMatrix.isPureTranslate() &&
+                OpenGLRenderer::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode;
         deferInfo.opaqueOverBounds = isOpaqueOverBounds() && mBitmap->isOpaque();
     }
 
@@ -959,11 +1050,9 @@ private:
     SkBitmap* mBitmap;
     Res_png_9patch* mPatch;
 
-    int mAlpha;
-    SkXfermode::Mode mMode;
-
     uint32_t mGenerationId;
     const Patch* mMesh;
+
     AssetAtlas::Entry* mEntry;
 };
 
