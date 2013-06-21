@@ -124,7 +124,7 @@ public:
 
     void loadOrtho(float left, float right, float bottom, float top, float near, float far);
 
-    uint32_t getType() const;
+    uint8_t getType() const;
 
     void multiply(const Matrix4& v) {
         Matrix4 u;
@@ -135,13 +135,13 @@ public:
     void multiply(float v);
 
     void translate(float x, float y) {
-        if ((getType() & sGeometryMask) == kTypeTranslate) {
+        if ((getType() & sGeometryMask) <= kTypeTranslate) {
             data[kTranslateX] += x;
             data[kTranslateY] += y;
         } else {
             // Doing a translation will only affect the translate bit of the type
             // Save the type
-            uint32_t type = mType;
+            uint8_t type = mType;
 
             Matrix4 u;
             u.loadTranslate(x, y, 0.0f);
@@ -202,7 +202,7 @@ public:
     static const Matrix4& identity();
 
 private:
-    mutable uint32_t mType;
+    mutable uint8_t mType;
 
     inline float get(int i, int j) const {
         return data[i * 4 + j];
@@ -212,7 +212,7 @@ private:
         data[i * 4 + j] = v;
     }
 
-    uint32_t getGeometryType() const;
+    uint8_t getGeometryType() const;
 
 }; // class Matrix4
 

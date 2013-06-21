@@ -72,7 +72,7 @@ static bool isZero(float f) {
     return fabs(f) <= EPSILON;
 }
 
-uint32_t Matrix4::getType() const {
+uint8_t Matrix4::getType() const {
     if (mType & kTypeUnknown) {
         mType = kTypeIdentity;
 
@@ -114,7 +114,7 @@ uint32_t Matrix4::getType() const {
     return mType;
 }
 
-uint32_t Matrix4::getGeometryType() const {
+uint8_t Matrix4::getGeometryType() const {
     return getType() & sGeometryMask;
 }
 
@@ -127,7 +127,7 @@ bool Matrix4::changesBounds() const {
 }
 
 bool Matrix4::isPureTranslate() const {
-    return getGeometryType() == kTypeTranslate;
+    return getGeometryType() <= kTypeTranslate;
 }
 
 bool Matrix4::isSimple() const {
