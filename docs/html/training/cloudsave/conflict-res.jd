@@ -1,0 +1,597 @@
+page.title=Resolving Cloud Save Conflicts
+page.tags="cloud"
+
+page.article=true
+@jd:body
+
+<style type="text/css">
+.new-value {
+	color: #00F;
+}
+.conflict {
+	color: #F00;
+}
+</style>
+
+<div id="tb-wrapper">
+  <div id="tb">
+    <h2>In this document</h2>
+    <ol class="nolist">
+      <li><a href="#conflict">Get Notified of Conflicts</a></li>
+      <li><a href="#simple">Handle the Simple Cases</a></li>
+      <li><a href="#complicated">Design a Strategy for More Complex Cases</a>
+      <ol class="nolist">
+        <li><a href="#attempt-1">First Attempt: Store Only the Total</a></li>
+        <li><a href="#attempt-2">Second Attempt: Store the Total and the Delta</a></li>
+        <li><a href="#solution">Solution: Store the Sub-totals per Device</a></li>
+      </ol>
+      </li>
+      <li><a href="#cleanup">Clean Up Your Data</a></li>
+    </ol>
+    <h2>You should also read</h2>
+    <ul>
+      <li><a href="http://developers.google.com/games/services/common/concepts/cloudsave">Cloud Save</a></li>
+      <li><a href="https://developers.google.com/games/services/android/cloudsave">Cloud Save in Android</a></li>
+    </ul>
+  </div>
+</div>
+
+<p>This article describes how to design a robust conflict resolution strategy for
+apps that save data to the cloud using the
+<a href="http://developers.google.com/games/services/common/concepts/cloudsave">
+Cloud Save service</a>. The Cloud Save service
+allows you to store application data for each user of an application on Google's
+servers. Your application can retrieve and update this user data from Android
+devices, iOS devices, or web applications by using the Cloud Save APIs.</p>
+
+<p>Saving and loading progress in Cloud Save is straightforward: it's just a matter
+of serializing the player's data to and from byte arrays and storing those arrays
+in the cloud. However, when your user has multiple devices and two or more of them attempt
+to save data to the cloud, the saves might conflict, and you must decide how to
+resolve it. The structure of your cloud save data largely dictates how robust
+your conflict resolution can be, so you must design your data carefully in order
+to allow your conflict resolution logic to handle each case correctly.</p>
+
+<p>The article starts by describing a few flawed approaches
+and explains where they fall short. Then it presents a solution for avoiding
+conflicts. The discussion focuses on games, but you can
+apply the same principles to any app that saves data to the cloud.</p>
+
+<h2 id="conflict">Get Notified of Conflicts</h2>
+
+<p>The
+<a href="{@docRoot}reference/com/google/android/gms/appstate/OnStateLoadedListener.html">{@code OnStateLoadedListener}</a>
+methods are responsible for loading an application's state data from Google's servers.
+The callback <a href="{@docRoot}reference/com/google/android/gms/appstate/OnStateLoadedListener.html#onStateConflict">
+{@code OnStateLoadedListener.onStateConflict}</a> provides a mechanism
+for your application to resolve conflicts between the local state on a user's
+device and the state stored in the cloud:</p>
+
+<pre style="clear:right">&#64;Override
+public void onStateConflict(int stateKey, String resolvedVersion,
+    byte[] localData, byte[] serverData) {
+    // resolve conflict, then call mAppStateClient.resolveConflict()
+ ...
+}</pre>
+
+<p>At this point your application must choose which one of the data sets should
+be kept, or it can submit a new data set that represents the merged data. It is
+up to you to implement this conflict resolution logic.</p>
+
+<p>It's important to realize that the Cloud Save service synchronizes
+data in the background. Therefore, you should ensure that your app is prepared
+to receive that callback outside of the context where you originally generated
+the data. Specifically, if the Google Play services application detects a conflict
+in the background, the callback will be called the next time you attempt to load the
+data, which might not happen until the next time the user starts the app.</p>
+
+<p>Therefore, design of your cloud save data and conflict resolution code must be
+<em>context-independent</em>: given two conflicting save states, you must be able
+to resolve the conflict using only the data available within the data sets, without
+consulting any external context. </p>
+
+<h2 id="simple">Handle the Simple Cases</h2>
+
+<p>Here are some simple cases of conflict resolution. For many apps, it is
+sufficient to adopt a variant of one of these strategies:</p>
+
+<ul>
+  <li> <strong>New is better than old</strong>. In some cases, new data should
+always replace old data. For example, if the data represents the player's choice
+for a character's shirt color, then a more recent choice should override an
+older choice. In this case, you would probably choose to store the timestamp in the cloud
+save data. When resolving the conflict, pick the data set with the most recent
+timestamp (remember to use a reliable clock, and be careful about time zone
+differences).</li>
+
+  <li> <strong>One set of data is clearly better than the other</strong>. In other
+cases, it will always be clear which data can be defined as &quot;best&quot;. For
+example, if the data represents the player's best time in a racing game, then it's
+clear that, in case of conflicts, you should keep the best (smallest) time.</li>
+
+  <li> <strong>Merge by union</strong>. It may be possible to resolve the conflict
+by computing a union of the two conflicting sets. For example, if your data
+represents the set of levels that player has unlocked, then the resolved data is
+simply the union of the two conflicting sets. This way, players won't lose any
+levels they have unlocked. The
+<a href="https://github.com/playgameservices/android-samples/tree/master/CollectAllTheStars">
+CollectAllTheStars</a> sample game uses a variant of this strategy.</li>
+</ul>
+
+<h2 id="complicated">Design a Strategy for More Complex Cases</h2>
+
+<p>A more complicated case happens when your game allows the player to collect
+fungible items or units, such as gold coins or experience points. Let's
+consider a hypothetical game, called Coin Run, an infinite runner where the goal
+is to collect coins and become very, very rich. Each coin collected gets added to
+the player's piggy bank.</p>
+
+<p>The following sections describe three strategies for resolving sync conflicts
+between multiple devices: two that sound good but ultimately fail to successfully
+resolve all scenarios, and one final solution that can manage conflicts between
+any number of devices.</p>
+
+<h3 id="attempt-1">First Attempt: Store Only the Total</h3>
+
+<p>At first thought, it might seem that the cloud save data should simply be the
+number of coins in the bank. But if that data is all that's available, conflict
+resolution will be severely limited. The best you could do would be to pick the largest of
+the two numbers in case of a conflict.</p>
+
+<p>Consider the scenario illustrated in Table 1. Suppose the player initially
+has 20 coins, and then collects 10 coins on device A and 15 coins on device B.
+Then device B saves the state to the cloud. When device A attempts to save, a
+conflict is detected. The "store only the total" conflict resolution algorithm would resolve
+the conflict by writing 35 (the largest of the two numbers).</p>
+
+<p class="table-caption"><strong>Table 1.</strong> Storing only the total number
+of coins (failed strategy).</p>
+
+<table border="1">
+  <tr>
+    <th>Event</th>
+    <th>Data on Device A</th>
+    <th>Data on Device B</th>
+    <th>Data on Cloud</th>
+    <th>Actual Total</th>
+  </tr>
+  <tr>
+    <td>Starting conditions</td>
+    <td>20</td>
+    <td>20</td>
+    <td>20</td>
+    <td>20</td>
+  </tr>
+  <tr>
+    <td>Player collects 10 coins on device A</td>
+    <td class="new-value">30</td>
+    <td>20</td>
+    <td>20</td>
+    <td>30</td>
+  </tr>
+  <tr>
+    <td>Player collects 15 coins on device B</td>
+    <td>30</td>
+    <td class="new-value">35</td>
+    <td>20</td>
+    <td>45</td>
+  </tr>
+  <tr>
+    <td>Device B saves state to cloud</td>
+    <td>30</td>
+    <td>35</td>
+    <td class="new-value">35</td>
+    <td>45</td>
+  </tr>
+  <tr>
+    <td>Device A tries to save state to cloud.<br />
+    <span class="conflict">Conflict detected.</span></td>
+    <td class="conflict">30</td>
+    <td>35</td>
+    <td class="conflict">35</td>
+    <td>45</td>
+  </tr>
+  <tr>
+    <td>Device A resolves conflict by picking largest of the two numbers.</td>
+    <td class="new-value">35</td>
+    <td>35</td>
+    <td class="new-value">35</td>
+    <td>45</td>
+  </tr>
+</table>
+
+<p>This strategy would fail&mdash;the player's bank has gone from 20
+to 35, when the user actually collected a total of 25 coins (10 on device A and 15 on
+device B). So 10 coins were lost. Storing only the total number of coins in the
+cloud save is not enough to implement a robust conflict resolution algorithm.</p>
+
+<h3 id="attempt-2">Second Attempt: Store the Total and the Delta</h3>
+
+<p>A different approach is to include an additional field in
+the save data: the number of coins added (the delta) since the last commit. In
+this approach the save data can be represented by a tuple <em>(T,d)</em> where <em>T</em> is
+the total number of coins and <em>d</em> is the number of coins that you just
+added.</p>
+
+<p>With this structure, your conflict resolution algorithm has room to be more
+robust, as illustrated below. But this approach still doesn't give your app
+a reliable picture of the player's overall state.</p>
+
+<p>Here is the conflict resolution algorithm for including the delta:</p>
+
+<ul>
+  <li><strong>Local data:</strong> (T, d)</li>
+  <li><strong>Cloud data:</strong> (T', d')</li>
+  <li><strong>Resolved data:</strong> (T' + d, d)</li>
+</ul>
+
+<p>For example, when you get a conflict between the local state <em>(T,d)</em>
+and the cloud state <em>(T',d')</em>, you can resolve it as <em>(T'+d, d)</em>.
+What this means is that you are taking the delta from your local data and
+incorporating it into the cloud data, hoping that this will correctly account for
+any gold coins that were collected on the other device.</p>
+
+<p>This approach might sound promising, but it breaks down in a dynamic mobile
+environment:</p>
+<ul>
+<li>Users might save state when the device is offline. These changes will be
+queued up for submission when the device comes back online.</li>
+
+<li>The way that sync works is that
+the most recent change overwrites any previous changes. In other words, the
+second write is the only one that gets sent to the cloud (this happens
+when the device eventually comes online), and the delta in the first
+write is ignored.</li>
+</ul>
+
+<p>To illustrate, consider the scenario illustrated by Table 2. After the
+series of operations shown in the table, the cloud state
+will be (130, +5). This means the resolved state would be (140, +10). This is
+incorrect because in total, the user has collected 110 coins on device A and
+120 coins on device B. The total should be 250 coins.</p>
+
+<p class="table-caption"><strong>Table 2.</strong>  Failure case for total+delta
+strategy.</p>
+
+<table border="1">
+  <tr>
+    <th>Event</th>
+    <th>Data on Device A</th>
+    <th>Data on Device B</th>
+    <th>Data on Cloud</th>
+    <th>Actual Total</th>
+  </tr>
+  <tr>
+    <td>Starting conditions</td>
+    <td>(20, x)</td>
+    <td>(20, x)</td>
+    <td>(20, x)</td>
+    <td>20</td>
+  </tr>
+  <tr>
+    <td>Player collects 100 coins on device A</td>
+    <td class="test2">(120, +100)</td>
+    <td>(20, x)</td>
+    <td>(20, x)</td>
+    <td>120</td>
+  </tr>
+  <tr>
+    <td>Player collects 10 more coins on device A</td>
+    <td class="new-value" style="white-space:nowrap">(130, +10)</td>
+    <td>(20, x)</td>
+    <td>(20, x)</td>
+    <td>130</td>
+  </tr>
+  <tr>
+    <td>Player collects 115 coins on device B</td>
+    <td>(130, +10)</td>
+    <td class="new-value" style="white-space:nowrap">(125, +115)</td>
+    <td>(20, x)</td>
+    <td>245</td>
+  </tr>
+  <tr>
+    <td>Player collects 5 more coins on device B</td>
+    <td>(130, +10)</td>
+    <td class="new-value">
+(130, +5)</td>
+    <td>
+(20, x)</td>
+    <td>250</td>
+  </tr>
+  <tr>
+    <td>Device B uploads its data to the cloud
+      </td>
+    <td>(130, +10)</td>
+    <td>(130, +5)</td>
+    <td class="new-value">
+(130, +5)</td>
+    <td>250</td>
+  </tr>
+  <tr>
+    <td>Device A tries to upload its data to the cloud.
+    <br />
+    <span class="conflict">Conflict detected.</span></td>
+    <td class="conflict">(130, +10)</td>
+    <td>(130, +5)</td>
+    <td class="conflict">(130, +5)</td>
+    <td>250</td>
+  </tr>
+  <tr>
+    <td>Device A resolves the conflict by applying the local delta to the cloud total.
+      </td>
+    <td class="new-value" style="white-space:nowrap">(140, +10)</td>
+    <td>(130, +5)</td>
+    <td class="new-value" style="white-space:nowrap">(140, +10)</td>
+    <td>250</td>
+  </tr>
+</table>
+<p><em>(*): x represents data that is irrelevant to our scenario.</em></p>
+
+<p>You might try to fix the problem by not resetting the delta after each save,
+so that the second save on each device accounts for all the coins collected thus far.
+With that change the second save made by device A would be<em> (130, +110)</em> instead of
+<em>(130, +10)</em>. However, you would then run into the problem illustrated in Table 3.</p>
+
+<p class="table-caption"><strong>Table 3.</strong>  Failure case for the modified
+algorithm.</p>
+<table border="1">
+  <tr>
+    <th>Event</th>
+    <th>Data on Device A</th>
+    <th>Data on Device B</th>
+    <th>Data on Cloud</th>
+    <th>Actual Total</th>
+  </tr>
+  <tr>
+    <td>Starting conditions</td>
+    <td>(20, x)</td>
+    <td>(20, x)</td>
+    <td>(20, x)</td>
+    <td>20</td>
+  </tr>
+  <tr>
+    <td>Player collects 100 coins on device A
+      </td>
+    <td class="new-value">(120, +100)</td>
+    <td>(20, x)</td>
+    <td>(20, x)</td>
+    <td>120</td>
+  </tr>
+  <tr>
+    <td>Device A saves state to cloud</td>
+    <td>(120, +100)</td>
+    <td>(20, x)</td>
+    <td class="new-value">(120, +100)</td>
+    <td>120</td>
+  </tr>
+  <tr>
+    <td>Player collects 10 more coins on device A
+      </td>
+    <td class="new-value">(130, +110)</td>
+    <td>
+(20, x)</td>
+    <td>(120, +100)</td>
+    <td>130</td>
+  </tr>
+  <tr>
+    <td>Player collects 1 coin on device B
+
+      </td>
+    <td>(130, +110)</td>
+    <td class="new-value">(21, +1)</td>
+    <td>(120, +100)</td>
+    <td>131</td>
+  </tr>
+  <tr>
+    <td>Device B attempts to save state to cloud.
+    <br />
+    Conflict detected.
+      </td>
+    <td>(130, +110)</td>
+    <td class="conflict">(21, +1)</td>
+    <td class="conflict">
+(120, +100)</td>
+    <td>131</td>
+  </tr>
+  <tr>
+    <td>Device B solves conflict by applying local delta to cloud total.
+
+      </td>
+    <td>(130, +110)</td>
+    <td>(121, +1)</td>
+    <td>(121, +1)</td>
+    <td>131</td>
+  </tr>
+  <tr>
+    <td>Device A tries to upload its data to the cloud.
+    <br />
+    <span class="conflict">Conflict detected. </span></td>
+    <td class="conflict">(130, +110)</td>
+    <td>(121, +1)</td>
+    <td class="conflict">(121, +1)</td>
+    <td>131</td>
+  </tr>
+  <tr>
+    <td>Device A resolves the conflict by applying the local delta to the cloud total.
+
+      </td>
+    <td class="new-value" style="white-space:nowrap">(231, +110)</td>
+    <td>(121, +1)</td>
+    <td class="new-value" style="white-space:nowrap">(231, +110)</td>
+    <td>131</td>
+  </tr>
+</table>
+<p><em>(*): x represents data that is irrelevant to our scenario.</em></p>
+
+<p>Now you have the opposite problem: you are giving the player too many coins.
+The player has gained 211 coins, when in fact she has collected only 111 coins.</p>
+
+<h3 id="solution">Solution: Store the Sub-totals per Device</h3>
+
+<p>Analyzing the previous attempts, it seems that what those strategies
+fundamentally miss is the ability to know which coins have already been counted
+and which coins have not been counted yet, especially in the presence of multiple
+consecutive commits coming from different devices.</p>
+
+<p>The solution to the problem is to change the structure of your cloud save to
+be a dictionary that maps strings to integers. Each key-value pair in this
+dictionary represents a &quot;drawer&quot; that contains coins, and the total
+number of coins in the save is the sum of the values of all entries.
+The fundamental principle of this design is that each device has its own
+drawer, and only the device itself can put coins into that drawer.</p>
+
+<p>The structure of the dictionary is <em>(A:a, B:b, C:c, ...)</em>, where
+<em>a</em> is the total number of coins in the drawer A, <em>b</em> is
+the total number of coins in drawer B, and so on.</p>
+
+<p>The new conflict resolution algorithm for the "drawer" solution is as follows:</p>
+
+  <ul>
+    <li><strong>Local data:</strong> (A:a, B:b, C:c, ...)</li>
+    <li><strong>Cloud data:</strong> (A:a', B:b', C:c', ...)</li>
+    <li><strong>Resolved data:</strong> (A:<em>max</em>(a,a'), B:<em>max</em>(b,b'),
+        C:<em>max</em>(c,c'), ...)</li>
+  </ul>
+
+<p>For example, if the local data is <em>(A:20, B:4, C:7)</em> and the cloud data
+is <em>(B:10, C:2, D:14)</em>, then the resolved data will be
+<em>(A:20, B:10, C:7, D:14)</em>. Note that how you apply  conflict resolution
+logic to this dictionary data may vary depending on your app. For example, for
+some apps you might want to take the lower value.</p>
+
+<p>To test this new algorithm, apply it to any of the test scenarios
+mentioned above. You will see that it arrives at the correct result.</p>
+
+Table 4 illustrates this, based on the scenario from Table 3. Note the following:</p>
+
+<ul>
+  <li>In the initial state, the player has 20 coins. This is accurately reflected
+  on each device and the cloud. This value is represented as a dictionary (X:20),
+  where the value of X isn't significant&mdash;we don't care where this initial data came from.</li>
+  <li>When the player collects 100 coins on device A, this change
+  is packaged as a dictionary and saved to the cloud. The dictionary's value is 100 because
+  that is the number of coins that the player collected on device A. There is no
+  calculation being performed on the data at this point&mdash;device A is simply
+  reporting the number of coins the player collected on it.</li>
+  <li>Each new
+  submission of coins is packaged as a dictionary associated with the device
+  that saved it to the cloud. When the player collects 10 more coins on device A,
+  for example, the device A dictionary value is updated to be 110.</li>
+
+  <li>The net result is that the app knows the total number of coins
+  the player has collected on each device. Thus it can easily calculate the total.</li>
+</ul>
+
+<p class="table-caption"><strong>Table 4.</strong> Successful application of the
+key-value pair strategy.</p>
+
+<table border="1">
+  <tr>
+    <th>Event</th>
+    <th>Data on Device A</th>
+    <th>Data on Device B</th>
+    <th>Data on Cloud</th>
+    <th>Actual Total</th>
+  </tr>
+  <tr>
+    <td>Starting conditions</td>
+    <td>(X:20, x)</td>
+    <td>(X:20, x)</td>
+    <td>(X:20, x)</td>
+    <td>20</td>
+  </tr>
+  <tr>
+    <td>Player collects 100 coins on device A
+
+      </td>
+    <td class="new-value">(X:20, A:100)</td>
+    <td>(X:20)</td>
+    <td>(X:20)</td>
+    <td>120</td>
+  </tr>
+  <tr>
+    <td>Device A saves state to cloud
+
+      </td>
+    <td>(X:20, A:100)</td>
+    <td>(X:20)</td>
+    <td class="new-value">(X:20, A:100)</td>
+    <td>120</td>
+  </tr>
+  <tr>
+    <td>Player collects 10 more coins on device A
+            </td>
+    <td class="new-value">(X:20, A:110)</td>
+    <td>(X:20)</td>
+    <td>(X:20, A:100)</td>
+    <td>130</td>
+  </tr>
+  <tr>
+    <td>Player collects 1 coin on device B</td>
+    <td>(X:20, A:110)</td>
+    <td class="new-value">
+(X:20, B:1)</td>
+    <td>
+(X:20, A:100)</td>
+    <td>131</td>
+  </tr>
+  <tr>
+    <td>Device B attempts to save state to cloud.
+    <br />
+    <span class="conflict">Conflict detected. </span></td>
+    <td>(X:20, A:110)</td>
+    <td class="conflict">(X:20, B:1)</td>
+    <td class="conflict">
+(X:20, A:100)</td>
+    <td>131</td>
+  </tr>
+  <tr>
+    <td>Device B solves conflict
+
+      </td>
+    <td>(X:20, A:110)</td>
+    <td class="new-value">(X:20, A:100, B:1)</td>
+    <td class="new-value">(X:20, A:100, B:1)</td>
+    <td>131</td>
+  </tr>
+  <tr>
+    <td>Device A tries to upload its data to the cloud. <br />
+      <span class="conflict">Conflict detected.</span></td>
+    <td class="conflict">(X:20, A:110)</td>
+    <td>(X:20, A:100, B:1)</td>
+    <td class="conflict">
+(X:20, A:100, B:1)</td>
+    <td>131</td>
+  </tr>
+  <tr>
+    <td>Device A resolves the conflict
+
+      </td>
+    <td class="new-value" style="white-space:nowrap">(X:20, A:110, B:1)</td>
+    <td style="white-space:nowrap">(X:20, A:100, B:1)</td>
+    <td class="new-value" style="white-space:nowrap">(X:20, A:110, B:1)
+      <br />
+    <em>total 131</em></td>
+    <td>131</td>
+  </tr>
+</table>
+
+
+<h2 id="cleanup">Clean Up Your Data</h2>
+<p>There is a limit to the size of cloud save data, so in following the strategy
+outlined in this article, take care not to create arbitrarily large dictionaries. At first
+glance it may seem that the dictionary will have only one entry per device, and even
+the very enthusiastic user is unlikely to have thousands of them. However,
+obtaining a device ID is difficult and considered a bad practice, so instead you should
+use an installation ID, which is easier to obtain and more reliable. This means
+that the dictionary might have one entry for each time the user installed the
+application on each device. Assuming each key-value pair takes 32 bytes, and
+since an individual cloud save buffer can be
+up to 128K in size, you are safe if you have up to 4,096 entries.</p>
+
+<p>In real-life situations, your data will probably be more complex than a number
+of coins. In this case, the number of entries in this dictionary may be much more
+limited. Depending on your implementation, it might make sense to store the
+timestamp for when each entry in the dictionary was modified. When you detect that a
+given entry has not been modified in the last several weeks or months, it is
+probably safe to transfer the coins into another entry and delete the old entry.</p>
