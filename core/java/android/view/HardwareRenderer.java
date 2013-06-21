@@ -1301,7 +1301,10 @@ public abstract class HardwareRenderer {
 
         void destroySurface() {
             if (mEglSurface != null && mEglSurface != EGL_NO_SURFACE) {
-                sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+                if (mEglSurface.equals(sEgl.eglGetCurrentSurface(EGL_DRAW))) {
+                    sEgl.eglMakeCurrent(sEglDisplay,
+                            EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+                }
                 sEgl.eglDestroySurface(sEglDisplay, mEglSurface);
                 mEglSurface = null;
             }
