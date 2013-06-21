@@ -25,17 +25,14 @@ import android.util.Log;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-
 public class SystemUIService extends Service {
-    static final String TAG = "SystemUIService";
+    private static final String TAG = "SystemUIService";
 
     /**
-     * The class names of the stuff to start.
+     * The classes of the stuff to start.
      */
-    final Object[] SERVICES = new Object[] {
-            R.string.config_statusBarComponent,
+    private final Class<?>[] SERVICES = new Class[] {
+            com.android.systemui.statusbar.SystemBars.class,
             com.android.systemui.power.PowerUI.class,
             com.android.systemui.media.RingtonePlayer.class,
             com.android.systemui.settings.SettingsUI.class,
@@ -44,29 +41,13 @@ public class SystemUIService extends Service {
     /**
      * Hold a reference on the stuff we start.
      */
-    SystemUI[] mServices;
-
-    private Class chooseClass(Object o) {
-        if (o instanceof Integer) {
-            final String cl = getString((Integer)o);
-            try {
-                return getClassLoader().loadClass(cl);
-            } catch (ClassNotFoundException ex) {
-                throw new RuntimeException(ex);
-            }
-        } else if (o instanceof Class) {
-            return (Class)o;
-        } else {
-            throw new RuntimeException("Unknown system ui service: " + o);
-        }
-    }
+    private final SystemUI[] mServices = new SystemUI[SERVICES.length];
 
     @Override
     public void onCreate() {
         final int N = SERVICES.length;
-        mServices = new SystemUI[N];
         for (int i=0; i<N; i++) {
-            Class cl = chooseClass(SERVICES[i]);
+            Class<?> cl = SERVICES[i];
             Log.d(TAG, "loading: " + cl);
             try {
                 mServices[i] = (SystemUI)cl.newInstance();

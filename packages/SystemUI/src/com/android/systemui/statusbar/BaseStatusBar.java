@@ -194,6 +194,18 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     };
 
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                mCurrentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                if (true) Log.v(TAG, "userId " + mCurrentUserId + " is in the house");
+                userSwitched(mCurrentUserId);
+            }
+        }
+    };
+
     public void start() {
         mWindowManager = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
         mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
@@ -271,16 +283,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_SWITCHED);
-        mContext.registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                String action = intent.getAction();
-                if (Intent.ACTION_USER_SWITCHED.equals(action)) {
-                    mCurrentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                    if (true) Log.v(TAG, "userId " + mCurrentUserId + " is in the house");
-                    userSwitched(mCurrentUserId);
-                }
-            }}, filter);
+        mContext.registerReceiver(mBroadcastReceiver, filter);
 
         mLocale = mContext.getResources().getConfiguration().locale;
     }
@@ -1176,5 +1179,12 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     public void resumeAutohide() {
         // hook for subclasses
+    }
+
+    public void destroy() {
+        if (mSearchPanelView != null) {
+            mWindowManager.removeViewImmediate(mSearchPanelView);
+        }
+        mContext.unregisterReceiver(mBroadcastReceiver);
     }
 }
