@@ -45,6 +45,7 @@ struct Patch {
      */
     uint32_t getSize() const;
 
+    TextureVertex* vertices;
     uint32_t verticesCount;
     uint32_t indexCount;
     bool hasEmptyQuads;
@@ -54,11 +55,9 @@ struct Patch {
     GLintptr textureOffset;
 
     TextureVertex* createMesh(const float bitmapWidth, const float bitmapHeight,
-            float left, float top, float right, float bottom,
-            const Res_png_9patch* patch);
+            float width, float height, const Res_png_9patch* patch);
     TextureVertex* createMesh(const float bitmapWidth, const float bitmapHeight,
-            float left, float top, float right, float bottom,
-            const UvMapper& mapper, const Res_png_9patch* patch);
+            float width, float height, const UvMapper& mapper, const Res_png_9patch* patch);
 
 private:
     void generateRow(const int32_t* xDivs, uint32_t xCount, TextureVertex*& vertex,

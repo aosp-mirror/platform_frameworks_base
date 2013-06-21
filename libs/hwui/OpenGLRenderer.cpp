@@ -1191,7 +1191,7 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         // after we setup drawing in case we need to mess with the
         // stencil buffer in setupDraw()
         TextureVertex* mesh = mCaches.getRegionMesh();
-        GLsizei numQuads = 0;
+        uint32_t numQuads = 0;
 
         setupDrawWithTexture();
         setupDrawColor(alpha, alpha, alpha, alpha);
@@ -2049,6 +2049,11 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, Sk
             GL_TRIANGLE_STRIP, gMeshCount, ignoreTransform);
 }
 
+/**
+ * Important note: this method is intended to draw batches of bitmaps and
+ * will not set the scissor enable or dirty the current layer, if any.
+ * The caller is responsible for properly dirtying the current layer.
+ */
 status_t OpenGLRenderer::drawBitmaps(SkBitmap* bitmap, int bitmapCount, TextureVertex* vertices,
         bool transformed, const Rect& bounds, SkPaint* paint) {
     mCaches.activeTexture(0);
@@ -2071,12 +2076,12 @@ status_t OpenGLRenderer::drawBitmaps(SkBitmap* bitmap, int bitmapCount, TextureV
         drawAlpha8TextureMesh(x, y, x + bounds.getWidth(), y + bounds.getHeight(),
                 texture->id, paint != NULL, color, alpha, mode,
                 &vertices[0].position[0], &vertices[0].texture[0],
-                GL_TRIANGLES, bitmapCount * 6, true, true);
+                GL_TRIANGLES, bitmapCount * 6, true, true, false);
     } else {
         drawTextureMesh(x, y, x + bounds.getWidth(), y + bounds.getHeight(),
                 texture->id, alpha / 255.0f, mode, texture->blend,
                 &vertices[0].position[0], &vertices[0].texture[0],
-                GL_TRIANGLES, bitmapCount * 6, false, true, 0, true);
+                GL_TRIANGLES, bitmapCount * 6, false, true, 0, true, false);
     }
 
     return DrawGlInfo::kStatusDrew;
@@ -2367,10 +2372,6 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
 
 status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
         float left, float top, float right, float bottom, SkPaint* paint) {
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
-
     if (quickReject(left, top, right, bottom)) {
         return DrawGlInfo::kStatusDone;
     }
@@ -2379,13 +2380,11 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
     const Patch* mesh = mCaches.patchCache.get(entry, bitmap->width(), bitmap->height(),
             right - left, bottom - top, patch);
 
-    return drawPatch(bitmap, mesh, entry, left, top, right, bottom, alpha, mode);
+    return drawPatch(bitmap, mesh, entry, left, top, right, bottom, paint);
 }
 
-status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const Patch* mesh,
-        AssetAtlas::Entry* entry, float left, float top, float right, float bottom,
-        int alpha, SkXfermode::Mode mode) {
-
+status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const Patch* mesh, AssetAtlas::Entry* entry,
+        float left, float top, float right, float bottom, SkPaint* paint) {
     if (quickReject(left, top, right, bottom)) {
         return DrawGlInfo::kStatusDone;
     }
@@ -2398,6 +2397,10 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const Patch* mesh,
 
         texture->setWrap(GL_CLAMP_TO_EDGE, true);
         texture->setFilter(GL_LINEAR, true);
+
+        int alpha;
+        SkXfermode::Mode mode;
+        getAlphaAndMode(paint, &alpha, &mode);
 
         const bool pureTranslate = currentTransform().isPureTranslate();
         // Mark the current layer dirty where we are going to draw the patch
@@ -2418,8 +2421,6 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const Patch* mesh,
             }
         }
 
-        alpha *= mSnapshot->alpha;
-
         if (CC_LIKELY(pureTranslate)) {
             const float x = (int) floorf(left + currentTransform().getTranslateX() + 0.5f);
             const float y = (int) floorf(top + currentTransform().getTranslateY() + 0.5f);
@@ -2437,6 +2438,32 @@ status_t OpenGLRenderer::drawPatch(SkBitmap* bitmap, const Patch* mesh,
                     mCaches.patchCache.getMeshBuffer(), true, !mesh->hasEmptyQuads);
         }
     }
+
+    return DrawGlInfo::kStatusDrew;
+}
+
+/**
+ * Important note: this method is intended to draw batches of 9-patch objects and
+ * will not set the scissor enable or dirty the current layer, if any.
+ * The caller is responsible for properly dirtying the current layer.
+ */
+status_t OpenGLRenderer::drawPatches(SkBitmap* bitmap, AssetAtlas::Entry* entry,
+        TextureVertex* vertices, uint32_t indexCount, SkPaint* paint) {
+    mCaches.activeTexture(0);
+    Texture* texture = entry ? entry->texture : mCaches.textureCache.get(bitmap);
+    if (!texture) return DrawGlInfo::kStatusDone;
+    const AutoTexture autoCleanup(texture);
+
+    texture->setWrap(GL_CLAMP_TO_EDGE, true);
+    texture->setFilter(GL_LINEAR, true);
+
+    int alpha;
+    SkXfermode::Mode mode;
+    getAlphaAndMode(paint, &alpha, &mode);
+
+    drawIndexedTextureMesh(0.0f, 0.0f, 1.0f, 1.0f, texture->id, alpha / 255.0f,
+            mode, texture->blend, &vertices[0].position[0], &vertices[0].texture[0],
+            GL_TRIANGLES, indexCount, false, true, 0, true, false);
 
     return DrawGlInfo::kStatusDrew;
 }

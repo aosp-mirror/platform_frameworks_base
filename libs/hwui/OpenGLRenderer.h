@@ -297,10 +297,12 @@ public:
     virtual status_t drawBitmapData(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual status_t drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHeight,
             float* vertices, int* colors, SkPaint* paint);
+    status_t drawPatches(SkBitmap* bitmap, AssetAtlas::Entry* entry,
+            TextureVertex* vertices, uint32_t indexCount, SkPaint* paint);
     virtual status_t drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
             float left, float top, float right, float bottom, SkPaint* paint);
     status_t drawPatch(SkBitmap* bitmap, const Patch* mesh, AssetAtlas::Entry* entry,
-            float left, float top, float right, float bottom, int alpha, SkXfermode::Mode mode);
+            float left, float top, float right, float bottom, SkPaint* paint);
     virtual status_t drawColor(int color, SkXfermode::Mode mode);
     virtual status_t drawRect(float left, float top, float right, float bottom, SkPaint* paint);
     virtual status_t drawRoundRect(float left, float top, float right, float bottom,
@@ -1115,6 +1117,8 @@ private:
     friend class DisplayListRenderer;
     friend class Layer;
     friend class TextSetupFunctor;
+    friend class DrawBitmapOp;
+    friend class DrawPatchOp;
 
 }; // class OpenGLRenderer
 
