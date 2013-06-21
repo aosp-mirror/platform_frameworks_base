@@ -244,7 +244,8 @@ final class ProcessList {
     }
 
     int adjToTrackedState(int adj) {
-        return adj >= FOREGROUND_APP_ADJ ? mAdjToTrackedState[adj] : ProcessTracker.STATE_NOTHING;
+        return adj >= FOREGROUND_APP_ADJ
+                ? mAdjToTrackedState[adj] : ProcessTracker.STATE_PERSISTENT;
     }
 
     private void writeFile(String path, String data) {

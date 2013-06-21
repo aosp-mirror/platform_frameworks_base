@@ -493,6 +493,36 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         return result;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation composes a string by iterating over its values. If
+     * this set contains itself as a value, the string "(this Set)"
+     * will appear in its place.
+     */
+    @Override
+    public String toString() {
+        if (isEmpty()) {
+            return "{}";
+        }
+
+        StringBuilder buffer = new StringBuilder(mSize * 14);
+        buffer.append('{');
+        for (int i=0; i<mSize; i++) {
+            if (i > 0) {
+                buffer.append(", ");
+            }
+            Object value = valueAt(i);
+            if (value != this) {
+                buffer.append(value);
+            } else {
+                buffer.append("(this Set)");
+            }
+        }
+        buffer.append('}');
+        return buffer.toString();
+    }
+
     // ------------------------------------------------------------------------
     // Interop with traditional Java containers.  Not as efficient as using
     // specialized collection APIs.
