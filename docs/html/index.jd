@@ -13,6 +13,20 @@ page.metaDescription=The official site for Android developers. Provides the Andr
         <div class="frame">
             <ul>
                 <li class="item carousel-home">
+                    <div class="content-left col-9">
+                        <a href="{@docRoot}about/versions/jelly-bean.html"><img src="{@docRoot}images/home/android-jellybean.png" ></a>
+                    </div>
+                    <div class="content-right col-6">
+                    <h1>More Jelly Beans!</h1>
+                    <p>Android 4.3 is now available with a variety of performance improvements
+                    and new developer features. </p>
+                    <p>With this release, Android now supports Bluetooth Low Energy for battery
+                    savings with wireless peripherals, OpenGL ES 3.0 for the most advanced mobile 3D
+                    graphics, MPEG DASH support for high quality media streaming, and much more.</p>
+                    <p><a href="{@docRoot}about/versions/jelly-bean.html" class="button">Learn More</a></p>
+                    </div>
+                </li>
+                <li class="item carousel-home">
                     <div class="content-left col-11" style="padding-top:10px;">
                         <a href="{@docRoot}channels/io2013.html">
                           <img src="{@docRoot}images/home/io-videos-2013.png" style="margin:60px 0 0;
@@ -73,17 +87,6 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                     <div class="content-right col-4">
                     <h1 style="white-space:nowrap;line-height:1.2em;">Developer Story: <br />redBus.in</h1>
                     <p>Bangalore-based developers redBus.in talk about how Android is helping them deliver a superior booking and travel experience to millions of daily bus riders in India.</p>
-                    </div>
-                </li>
-                <li class="item carousel-home">
-                    <div class="content-left col-9">
-                        <a href="{@docRoot}about/versions/jelly-bean.html"><img src="{@docRoot}images/home/android-jellybean.png" ></a>
-                    </div>
-                    <div class="content-right col-6">
-                    <h1>Android 4.2 Jelly Bean!</h1>
-                    <p>The latest version of Jelly Bean is here, with performance optimizations, a refreshed UI, and great new features for developers. </p>
-                    <p>Android 4.2 includes APIs for developing lock sceen widgets and Daydream screensavers, using external displays, creating RTL layouts, building flexible UI with nested Fragments, and much more.</p>
-                    <p><a href="{@docRoot}about/versions/jelly-bean.html" class="button">Learn More</a></p>
                     </div>
                 </li>
                 <li class="item carousel-home">
