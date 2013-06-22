@@ -505,9 +505,6 @@ public class KeySetManager {
                 readKeysLPw(parser);
             } else if (tagName.equals("keysets")) {
                 readKeySetListLPw(parser);
-            } else {
-                PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Could not read KeySets for KeySetManager!");
             }
         }
     }
@@ -528,9 +525,6 @@ public class KeySetManager {
                 lastIssuedKeyId = Long.parseLong(parser.getAttributeValue(null, "value"));
             } else if (tagName.equals("lastIssuedKeySetId")) {
                 lastIssuedKeySetId = Long.parseLong(parser.getAttributeValue(null, "value"));
-            } else {
-                PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Could not read keys for KeySetManager!");
             }
         }
     }
@@ -553,9 +547,6 @@ public class KeySetManager {
             } else if (tagName.equals("key-id")) {
                 long id = readIdentifierLPw(parser);
                 mKeySetMapping.get(currentKeySetId).add(id);
-            } else {
-                PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Could not read KeySets for KeySetManager!");
             }
         }
     }
@@ -571,10 +562,7 @@ public class KeySetManager {
         long identifier = Long.parseLong(encodedID);
         String encodedPublicKey = parser.getAttributeValue(null, "value");
         PublicKey pub = PackageParser.parsePublicKey(encodedPublicKey);
-        if (pub == null) {
-            PackageManagerService.reportSettingsProblem(Log.WARN,
-                    "Could not read public key for KeySetManager!");
-        } else {
+        if (pub != null) {
             mPublicKeys.put(identifier, pub);
         }
     }
