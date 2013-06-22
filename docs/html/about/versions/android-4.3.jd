@@ -312,7 +312,7 @@ if (restrictions.getBoolean(UserManager.DISALLOW_MODIFY_ACCOUNTS, false)) {
    // cannot add accounts, disable some functionality
 }
 </pre>
-<p class="note"><strong>Note:</strong>In this scenario, you should <em>not</em> declare 
+<p class="note"><strong>Note:</strong> In this scenario, you should <em>not</em> declare 
 any new attributes in your manifest file.</p>
 </li>
 
