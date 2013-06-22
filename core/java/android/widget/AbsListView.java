@@ -1280,12 +1280,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
-     * If fast scroll is visible, then don't draw the vertical scrollbar.
+     * If fast scroll is enabled, then don't draw the vertical scrollbar.
      * @hide
      */
     @Override
     protected boolean isVerticalScrollBarHidden() {
-        return mFastScroller != null && mFastScroller.isVisible();
+        return mFastScrollEnabled;
     }
 
     /**
@@ -1337,7 +1337,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     void invokeOnItemScrollListener() {
         if (mFastScroller != null) {
-            mFastScroller.onScroll(this, mFirstPosition, getChildCount(), mItemCount);
+            mFastScroller.onScroll(mFirstPosition, getChildCount(), mItemCount);
         }
         if (mOnScrollListener != null) {
             mOnScrollListener.onScroll(this, mFirstPosition, getChildCount(), mItemCount);
@@ -2009,7 +2009,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
             mRecycler.markChildrenDirty();
         }
-        
+
         if (mFastScroller != null && mItemCount != mOldItemCount) {
             mFastScroller.onItemCountChanged(mOldItemCount, mItemCount);
         }
@@ -3752,18 +3752,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 canvas.restoreToCount(restoreCount);
             }
         }
-        if (mFastScroller != null) {
-            final int scrollY = mScrollY;
-            if (scrollY != 0) {
-                // Pin to the top/bottom during overscroll
-                int restoreCount = canvas.save();
-                canvas.translate(0, scrollY);
-                mFastScroller.draw(canvas);
-                canvas.restoreToCount(restoreCount);
-            } else {
-                mFastScroller.draw(canvas);
-            }
-        }
     }
 
     /**
@@ -3820,11 +3808,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             return false;
         }
 
-        if (mFastScroller != null) {
-            boolean intercepted = mFastScroller.onInterceptTouchEvent(ev);
-            if (intercepted) {
-                return true;
-            }
+        if (mFastScroller != null && mFastScroller.onInterceptTouchEvent(ev)) {
+            return true;
         }
 
         switch (action & MotionEvent.ACTION_MASK) {
@@ -5672,78 +5657,96 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             return mDefInputConnection.sendKeyEvent(event);
         }
 
+        @Override
         public CharSequence getTextBeforeCursor(int n, int flags) {
             if (mTarget == null) return "";
             return mTarget.getTextBeforeCursor(n, flags);
         }
 
+        @Override
         public CharSequence getTextAfterCursor(int n, int flags) {
             if (mTarget == null) return "";
             return mTarget.getTextAfterCursor(n, flags);
         }
 
+        @Override
         public CharSequence getSelectedText(int flags) {
             if (mTarget == null) return "";
             return mTarget.getSelectedText(flags);
         }
 
+        @Override
         public int getCursorCapsMode(int reqModes) {
             if (mTarget == null) return InputType.TYPE_TEXT_FLAG_CAP_SENTENCES;
             return mTarget.getCursorCapsMode(reqModes);
         }
 
+        @Override
         public ExtractedText getExtractedText(ExtractedTextRequest request, int flags) {
             return getTarget().getExtractedText(request, flags);
         }
 
+        @Override
         public boolean deleteSurroundingText(int beforeLength, int afterLength) {
             return getTarget().deleteSurroundingText(beforeLength, afterLength);
         }
 
+        @Override
         public boolean setComposingText(CharSequence text, int newCursorPosition) {
             return getTarget().setComposingText(text, newCursorPosition);
         }
 
+        @Override
         public boolean setComposingRegion(int start, int end) {
             return getTarget().setComposingRegion(start, end);
         }
 
+        @Override
         public boolean finishComposingText() {
             return mTarget == null || mTarget.finishComposingText();
         }
 
+        @Override
         public boolean commitText(CharSequence text, int newCursorPosition) {
             return getTarget().commitText(text, newCursorPosition);
         }
 
+        @Override
         public boolean commitCompletion(CompletionInfo text) {
             return getTarget().commitCompletion(text);
         }
 
+        @Override
         public boolean commitCorrection(CorrectionInfo correctionInfo) {
             return getTarget().commitCorrection(correctionInfo);
         }
 
+        @Override
         public boolean setSelection(int start, int end) {
             return getTarget().setSelection(start, end);
         }
 
+        @Override
         public boolean performContextMenuAction(int id) {
             return getTarget().performContextMenuAction(id);
         }
 
+        @Override
         public boolean beginBatchEdit() {
             return getTarget().beginBatchEdit();
         }
 
+        @Override
         public boolean endBatchEdit() {
             return getTarget().endBatchEdit();
         }
 
+        @Override
         public boolean clearMetaKeyStates(int states) {
             return getTarget().clearMetaKeyStates(states);
         }
 
+        @Override
         public boolean performPrivateCommand(String action, Bundle data) {
             return getTarget().performPrivateCommand(action, data);
         }
@@ -6037,9 +6040,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     /**
      * Sets up the onClickHandler to be used by the RemoteViewsAdapter when inflating RemoteViews
-     * 
+     *
      * @param handler The OnClickHandler to use when inflating RemoteViews.
-     * 
+     *
      * @hide
      */
     public void setRemoteViewsOnClickHandler(OnClickHandler handler) {
