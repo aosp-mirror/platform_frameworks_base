@@ -2137,6 +2137,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
+            if (type == TYPE_PRIVATE_PRESENTATION && !displayContent.isPrivate()) {
+                Slog.w(TAG, "Attempted to add private presentation window to a non-private display.  Aborting.");
+                return WindowManagerGlobal.ADD_PERMISSION_DENIED;
+            }
+
             boolean addToken = false;
             WindowToken token = mTokenMap.get(attrs.token);
             if (token == null) {

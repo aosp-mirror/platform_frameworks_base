@@ -27836,6 +27836,7 @@ package android.view {
     field public static final int TYPE_KEYGUARD_DIALOG = 2009; // 0x7d9
     field public static final int TYPE_PHONE = 2002; // 0x7d2
     field public static final int TYPE_PRIORITY_PHONE = 2007; // 0x7d7
+    field public static final int TYPE_PRIVATE_PRESENTATION = 2030; // 0x7ee
     field public static final int TYPE_SEARCH_BAR = 2001; // 0x7d1
     field public static final int TYPE_STATUS_BAR = 2000; // 0x7d0
     field public static final int TYPE_STATUS_BAR_PANEL = 2014; // 0x7de

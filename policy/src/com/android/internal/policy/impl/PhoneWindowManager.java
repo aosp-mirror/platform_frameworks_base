@@ -1232,6 +1232,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_DREAM:
             case TYPE_INPUT_METHOD:
             case TYPE_WALLPAPER:
+            case TYPE_PRIVATE_PRESENTATION:
                 // The window manager will check these.
                 break;
             case TYPE_PHONE:
@@ -1294,6 +1295,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case TYPE_SYSTEM_DIALOG:
             case TYPE_UNIVERSE_BACKGROUND:
             case TYPE_VOLUME_OVERLAY:
+            case TYPE_PRIVATE_PRESENTATION:
                 break;
         }
 
@@ -1366,6 +1368,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         switch (type) {
         case TYPE_UNIVERSE_BACKGROUND:
             return 1;
+        case TYPE_PRIVATE_PRESENTATION:
+            return 2;
         case TYPE_WALLPAPER:
             // wallpaper is at the bottom, though the window manager may move it.
             return 2;
