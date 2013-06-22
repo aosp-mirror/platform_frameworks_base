@@ -157,6 +157,15 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IUserManager.aidl \
 	core/java/android/os/IVibratorService.aidl \
 	core/java/android/service/notification/INotificationListener.aidl \
+	core/java/android/print/IPrinterDiscoveryObserver.aidl \
+	core/java/android/print/IPrintAdapter.aidl \
+	core/java/android/print/IPrintClient.aidl \
+	core/java/android/print/IPrintProgressListener.aidl \
+	core/java/android/print/IPrintManager.aidl \
+	core/java/android/print/IPrintSpoolerService.aidl \
+	core/java/android/print/IPrintSpoolerServiceCallbacks.aidl \
+	core/java/android/printservice/IPrintService.aidl \
+	core/java/android/printservice/IPrintServiceClient.aidl \
 	core/java/android/service/dreams/IDreamManager.aidl \
 	core/java/android/service/dreams/IDreamService.aidl \
 	core/java/android/service/wallpaper/IWallpaperConnection.aidl \

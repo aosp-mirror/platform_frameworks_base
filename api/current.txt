@@ -23,6 +23,7 @@ package android {
     field public static final java.lang.String BIND_DEVICE_ADMIN = "android.permission.BIND_DEVICE_ADMIN";
     field public static final java.lang.String BIND_INPUT_METHOD = "android.permission.BIND_INPUT_METHOD";
     field public static final java.lang.String BIND_NOTIFICATION_LISTENER_SERVICE = "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE";
+    field public static final java.lang.String BIND_PRINT_SERVICE = "android.permission.BIND_PRINT_SERVICE";
     field public static final java.lang.String BIND_REMOTEVIEWS = "android.permission.BIND_REMOTEVIEWS";
     field public static final java.lang.String BIND_TEXT_SERVICE = "android.permission.BIND_TEXT_SERVICE";
     field public static final java.lang.String BIND_VPN_SERVICE = "android.permission.BIND_VPN_SERVICE";
@@ -254,6 +255,7 @@ package android {
     field public static final int activityCloseExitAnimation = 16842939; // 0x10100bb
     field public static final int activityOpenEnterAnimation = 16842936; // 0x10100b8
     field public static final int activityOpenExitAnimation = 16842937; // 0x10100b9
+    field public static final int addPrintersActivity = 16843747; // 0x10103e3
     field public static final int addStatesFromChildren = 16842992; // 0x10100f0
     field public static final int adjustViewBounds = 16843038; // 0x101011e
     field public static final int alertDialogIcon = 16843605; // 0x1010355
@@ -1142,6 +1144,7 @@ package android {
     field public static final int valueTo = 16843487; // 0x10102df
     field public static final int valueType = 16843488; // 0x10102e0
     field public static final int variablePadding = 16843157; // 0x1010195
+    field public static final int vendor = 16843748; // 0x10103e4
     field public static final int versionCode = 16843291; // 0x101021b
     field public static final int versionName = 16843292; // 0x101021c
     field public static final int verticalCorrection = 16843322; // 0x101023a
@@ -5766,6 +5769,7 @@ package android.content {
     field public static final java.lang.String NOTIFICATION_SERVICE = "notification";
     field public static final java.lang.String NSD_SERVICE = "servicediscovery";
     field public static final java.lang.String POWER_SERVICE = "power";
+    field public static final java.lang.String PRINT_SERVICE = "print";
     field public static final java.lang.String SEARCH_SERVICE = "search";
     field public static final java.lang.String SENSOR_SERVICE = "sensor";
     field public static final java.lang.String STORAGE_SERVICE = "storage";
@@ -18385,6 +18389,237 @@ package android.preference {
 
 }
 
+package android.print {
+
+  public final class PageRange implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getEnd();
+    method public int getStart();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.print.PageRange ALL_PAGES;
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public abstract class PrintAdapter {
+    ctor public PrintAdapter();
+    method public abstract android.print.PrintAdapterInfo getInfo();
+    method public void onFinish();
+    method public abstract void onPrint(java.util.List<android.print.PageRange>, java.io.FileDescriptor, android.os.CancellationSignal, android.print.PrintAdapter.PrintProgressCallback);
+    method public boolean onPrintAttributesChanged(android.print.PrintAttributes);
+    method public void onStart();
+  }
+
+  public static abstract class PrintAdapter.PrintProgressCallback {
+    method public void onPrintFailed(java.lang.CharSequence);
+    method public void onPrintFinished(java.util.List<android.print.PageRange>);
+  }
+
+  public final class PrintAdapterInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getFlags();
+    method public int getPageCount();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int PAGE_COUNT_UNKNOWN = -1; // 0xffffffff
+  }
+
+  public static final class PrintAdapterInfo.Builder {
+    ctor public PrintAdapterInfo.Builder();
+    method public android.print.PrintAdapterInfo create();
+    method public android.print.PrintAdapterInfo.Builder setFlags(int);
+    method public android.print.PrintAdapterInfo.Builder setPageCount(int);
+  }
+
+  public final class PrintAttributes implements android.os.Parcelable {
+    method public void clear();
+    method public int describeContents();
+    method public int getColorMode();
+    method public int getCopies();
+    method public int getDuplexMode();
+    method public int getFittingMode();
+    method public android.print.PrintAttributes.Tray getInputTray();
+    method public android.print.PrintAttributes.Margins getMargins();
+    method public android.print.PrintAttributes.MediaSize getMediaSize();
+    method public int getOrientation();
+    method public android.print.PrintAttributes.Tray getOutputTray();
+    method public android.print.PrintAttributes.Resolution getResolution();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int COLOR_MODE_COLOR = 2; // 0x2
+    field public static final int COLOR_MODE_MONOCHROME = 1; // 0x1
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int DUPLEX_MODE_LONG_EDGE = 2; // 0x2
+    field public static final int DUPLEX_MODE_NONE = 1; // 0x1
+    field public static final int DUPLEX_MODE_SHORT_EDGE = 4; // 0x4
+    field public static final int FITTING_MODE_FIT_TO_PAGE = 2; // 0x2
+    field public static final int FITTING_MODE_NONE = 1; // 0x1
+    field public static final int ORIENTATION_LANDSCAPE = 2; // 0x2
+    field public static final int ORIENTATION_PORTRAIT = 1; // 0x1
+  }
+
+  public static final class PrintAttributes.Builder {
+    ctor public PrintAttributes.Builder();
+    method public android.print.PrintAttributes create();
+    method public android.print.PrintAttributes.Builder setColorMode(int);
+    method public android.print.PrintAttributes.Builder setCopyCount(int);
+    method public android.print.PrintAttributes.Builder setDuplexMode(int);
+    method public android.print.PrintAttributes.Builder setFittingMode(int);
+    method public android.print.PrintAttributes.Builder setInputTray(android.print.PrintAttributes.Tray);
+    method public android.print.PrintAttributes.Builder setMargins(android.print.PrintAttributes.Margins);
+    method public android.print.PrintAttributes.Builder setMediaSize(android.print.PrintAttributes.MediaSize);
+    method public android.print.PrintAttributes.Builder setOrientation(int);
+    method public android.print.PrintAttributes.Builder setOutputTray(android.print.PrintAttributes.Tray);
+    method public android.print.PrintAttributes.Builder setResolution(android.print.PrintAttributes.Resolution);
+  }
+
+  public static final class PrintAttributes.Margins {
+    ctor public PrintAttributes.Margins(int, int, int, int);
+    method public int getBottomMils();
+    method public int getLeftMils();
+    method public int getRightMils();
+    method public int getTopMils();
+  }
+
+  public static final class PrintAttributes.MediaSize {
+    ctor public PrintAttributes.MediaSize(java.lang.String, java.lang.String, int, int, int);
+    method public int getHeightMils();
+    method public java.lang.String getId();
+    method public java.lang.CharSequence getLabel(android.content.pm.PackageManager);
+    method public int getWidthMils();
+    field public static final android.print.PrintAttributes.MediaSize ISO_A0;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A1;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A10;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A2;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A3;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A4;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A5;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A6;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A7;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A8;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A9;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B0;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B1;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B10;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B2;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B3;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B4;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B5;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B6;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B7;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B8;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B9;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C0;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C1;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C10;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C2;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C3;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C4;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C5;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C6;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C7;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C8;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C9;
+    field public static final android.print.PrintAttributes.MediaSize NA_GOVT_LETTER;
+    field public static final android.print.PrintAttributes.MediaSize NA_JUNIOR_LEGAL;
+    field public static final android.print.PrintAttributes.MediaSize NA_LEDGER;
+    field public static final android.print.PrintAttributes.MediaSize NA_LEGAL;
+    field public static final android.print.PrintAttributes.MediaSize NA_LETTER;
+    field public static final android.print.PrintAttributes.MediaSize NA_TBLOID;
+  }
+
+  public static final class PrintAttributes.Resolution {
+    ctor public PrintAttributes.Resolution(java.lang.String, java.lang.String, int, int, int);
+    method public int getHorizontalDpi();
+    method public java.lang.String getId();
+    method public java.lang.CharSequence getLabel(android.content.pm.PackageManager);
+    method public int getVerticalDpi();
+  }
+
+  public static final class PrintAttributes.Tray {
+    ctor public PrintAttributes.Tray(java.lang.String, java.lang.String, int);
+    method public java.lang.String getId();
+    method public java.lang.CharSequence getLabel(android.content.pm.PackageManager);
+  }
+
+  public final class PrintJob {
+    method public void cancel();
+    method public int getId();
+    method public android.print.PrintJobInfo getInfo();
+  }
+
+  public final class PrintJobInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.print.PrintAttributes getAttributes();
+    method public int getId();
+    method public java.lang.CharSequence getLabel();
+    method public android.print.PageRange[] getPageRanges();
+    method public android.print.PrinterId getPrinterId();
+    method public int getState();
+    method public java.lang.String getTag();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int PRINT_JOB_ID_UNDEFINED = -1; // 0xffffffff
+    field public static final int STATE_CANCELED = 6; // 0x6
+    field public static final int STATE_COMPLETED = 4; // 0x4
+    field public static final int STATE_CREATED = 1; // 0x1
+    field public static final int STATE_FAILED = 5; // 0x5
+    field public static final int STATE_QUEUED = 2; // 0x2
+    field public static final int STATE_STARTED = 3; // 0x3
+  }
+
+  public final class PrintManager {
+    method public java.util.List<android.print.PrintJob> getPrintJobs();
+    method public android.print.PrintJob print(java.lang.String, java.io.File, android.print.PrintAttributes);
+    method public android.print.PrintJob print(java.lang.String, android.print.PrintAdapter, android.print.PrintAttributes);
+  }
+
+  public static abstract interface PrintManager.PrintJobStateListener {
+    method public abstract void onStateChanged(int);
+  }
+
+  public final class PrinterId implements android.os.Parcelable {
+    method public int describeContents();
+    method public java.lang.String getLocalId();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class PrinterInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getColorModes();
+    method public void getDefaults(android.print.PrintAttributes);
+    method public int getDuplexModes();
+    method public int getFittingModes();
+    method public android.print.PrinterId getId();
+    method public java.util.List<android.print.PrintAttributes.Tray> getInputTrays();
+    method public java.lang.CharSequence getLabel();
+    method public java.util.List<android.print.PrintAttributes.MediaSize> getMediaSizes();
+    method public android.print.PrintAttributes.Margins getMinMargins();
+    method public int getOrientations();
+    method public java.util.List<android.print.PrintAttributes.Tray> getOutputTrays();
+    method public java.util.List<android.print.PrintAttributes.Resolution> getResolutions();
+    method public int getStatus();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int STATUS_READY = 1; // 0x1
+  }
+
+  public static final class PrinterInfo.Builder {
+    ctor public PrinterInfo.Builder(android.print.PrinterId, java.lang.CharSequence);
+    method public android.print.PrinterInfo.Builder addInputTray(android.print.PrintAttributes.Tray, boolean);
+    method public android.print.PrinterInfo.Builder addMediaSize(android.print.PrintAttributes.MediaSize, boolean);
+    method public android.print.PrinterInfo.Builder addOutputTray(android.print.PrintAttributes.Tray, boolean);
+    method public android.print.PrinterInfo.Builder addResolution(android.print.PrintAttributes.Resolution, boolean);
+    method public android.print.PrinterInfo create();
+    method public android.print.PrinterInfo.Builder setColorModes(int, int);
+    method public android.print.PrinterInfo.Builder setDuplexModes(int, int);
+    method public android.print.PrinterInfo.Builder setFittingModes(int, int);
+    method public android.print.PrinterInfo.Builder setMinMargins(android.print.PrintAttributes.Margins, android.print.PrintAttributes.Margins);
+    method public android.print.PrinterInfo.Builder setOrientations(int, int);
+    method public android.print.PrinterInfo.Builder setStatus(int);
+  }
+
+}
+
 package android.print.pdf {
 
   public final class PdfDocument {
@@ -18414,6 +18649,40 @@ package android.print.pdf {
     method public android.print.pdf.PdfDocument.PageInfo create();
     method public android.print.pdf.PdfDocument.PageInfo.Builder setContentSize(android.graphics.Rect);
     method public android.print.pdf.PdfDocument.PageInfo.Builder setInitialTransform(android.graphics.Matrix);
+  }
+
+}
+
+package android.printservice {
+
+  public final class PrintJob {
+    method public boolean cancel();
+    method public boolean complete();
+    method public boolean fail(java.lang.CharSequence);
+    method public final java.io.FileDescriptor getData();
+    method public int getId();
+    method public android.print.PrintJobInfo getInfo();
+    method public boolean isQueued();
+    method public boolean isStarted();
+    method public boolean setTag(java.lang.String);
+    method public boolean start();
+  }
+
+  public abstract class PrintService extends android.app.Service {
+    ctor public PrintService();
+    method public final void addDiscoveredPrinters(java.util.List<android.print.PrinterInfo>);
+    method public final android.print.PrinterId generatePrinterId(java.lang.String);
+    method public final java.util.List<android.printservice.PrintJob> getPrintJobs();
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method protected void onConnected();
+    method protected void onDisconnected();
+    method protected abstract void onPrintJobQueued(android.printservice.PrintJob);
+    method protected void onRequestCancelPrintJob(android.printservice.PrintJob);
+    method protected abstract void onStartPrinterDiscovery();
+    method protected abstract void onStopPrinterDiscovery();
+    method public final void removeDiscoveredPrinters(java.util.List<android.print.PrinterId>);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.printservice.PrintService";
+    field public static final java.lang.String SERVICE_META_DATA = "android.printservice";
   }
 
 }
