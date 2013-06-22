@@ -18551,7 +18551,7 @@ package android.print {
     method public android.print.PrintAttributes getAttributes();
     method public int getId();
     method public java.lang.CharSequence getLabel();
-    method public android.print.PageRange[] getPageRanges();
+    method public android.print.PageRange[] getPages();
     method public android.print.PrinterId getPrinterId();
     method public int getState();
     method public java.lang.String getTag();
@@ -18570,10 +18570,6 @@ package android.print {
     method public java.util.List<android.print.PrintJob> getPrintJobs();
     method public android.print.PrintJob print(java.lang.String, java.io.File, android.print.PrintAttributes);
     method public android.print.PrintJob print(java.lang.String, android.print.PrintAdapter, android.print.PrintAttributes);
-  }
-
-  public static abstract interface PrintManager.PrintJobStateListener {
-    method public abstract void onStateChanged(int);
   }
 
   public final class PrinterId implements android.os.Parcelable {

@@ -261,22 +261,22 @@ public final class PrintJobInfo implements Parcelable {
     }
 
     /**
-     * Gets the included page ranges.
+     * Gets the included pages.
      *
-     * @return The included page ranges or <code>null</code> if not set.
+     * @return The included pages or <code>null</code> if not set.
      */
-    public PageRange[] getPageRanges() {
+    public PageRange[] getPages() {
         return mPageRanges;
     }
 
     /**
-     * Sets the included page ranges.
+     * Sets the included pages.
      *
-     * @return The included page ranges.
+     * @return The included pages.
      *
      * @hide
      */
-    public void setPageRanges(PageRange[] pageRanges) {
+    public void setPages(PageRange[] pageRanges) {
         mPageRanges = pageRanges;
     }
 

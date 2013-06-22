@@ -70,13 +70,6 @@ public final class PrintManager {
     private final Handler mHandler;
 
     /**
-     * Listener for the state of a print job.
-     */
-    public static interface PrintJobStateListener {
-        public void onStateChanged(int state);
-    }
-
-    /**
      * Creates a new instance.
      *
      * @param context The current context in which to operate.
