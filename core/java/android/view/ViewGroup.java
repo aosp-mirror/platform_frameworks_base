@@ -4426,8 +4426,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * Quick invalidation method that simply transforms the dirty rect into the parent's
      * coordinate system, pruning the invalidation if the parent has already been invalidated.
+     *
+     * @hide
      */
-    private ViewParent invalidateChildInParentFast(int left, int top, final Rect dirty) {
+    protected ViewParent invalidateChildInParentFast(int left, int top, final Rect dirty) {
         if ((mPrivateFlags & PFLAG_DRAWN) == PFLAG_DRAWN ||
                 (mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == PFLAG_DRAWING_CACHE_VALID) {
             dirty.offset(left - mScrollX, top - mScrollY);
