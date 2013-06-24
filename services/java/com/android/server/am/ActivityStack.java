@@ -3298,13 +3298,16 @@ final class ActivityStack {
         if (mLastPausedActivity != null && mLastPausedActivity.app == app) {
             mLastPausedActivity = null;
         }
+        final ActivityRecord top = topRunningActivityLocked(null);
+        final boolean launchHomeTaskNext =
+                top != null && top.app == app && top.mLaunchHomeTaskNext;
 
         // Remove this application's activities from active lists.
         boolean hasVisibleActivities = removeHistoryRecordsForAppLocked(app);
 
         if (!restarting) {
             ActivityStack stack = mStackSupervisor.getFocusedStack();
-            if (stack == null) {
+            if (stack == null || launchHomeTaskNext) {
                 mStackSupervisor.resumeHomeActivity(null);
             } else if (!mStackSupervisor.resumeTopActivitiesLocked(stack, null, null)) {
                 // If there was nothing to resume, and we are not already
