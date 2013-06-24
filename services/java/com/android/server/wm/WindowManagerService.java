@@ -3776,7 +3776,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 changed = mFocusedApp != newFocus;
                 mFocusedApp = newFocus;
-                moveTaskToTop(newFocus.groupId);
                 if (DEBUG_FOCUS) Slog.v(TAG, "Set focused app to: " + mFocusedApp
                         + " moveFocusNow=" + moveFocusNow);
                 if (changed) {

@@ -2170,29 +2170,31 @@ public final class ActivityStackSupervisor {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             final ActivityStack stack = mStacks.get(stackNdx);
             final ActivityRecord r = stack.topRunningActivityLocked(null);
+            final ActivityState state = r == null ? ActivityState.DESTROYED : r.state;
             if (isFrontStack(stack)) {
                 if (r == null) {
                     Slog.e(TAG, "validateTop...: null top activity, stack=" + stack);
                 } else {
-                    if (stack.mPausingActivity != null) {
+                    final ActivityRecord pausing = stack.mPausingActivity;
+                    if (pausing != null && pausing == r) {
                         Slog.e(TAG, "validateTop...: top stack has pausing activity r=" + r +
-                            " state=" + r.state);
+                            " state=" + state);
                     }
-                    if (r.state != ActivityState.INITIALIZING &&
-                            r.state != ActivityState.RESUMED) {
+                    if (state != ActivityState.INITIALIZING && state != ActivityState.RESUMED) {
                         Slog.e(TAG, "validateTop...: activity in front not resumed r=" + r +
-                                " state=" + r.state);
+                                " state=" + state);
                     }
                 }
             } else {
-                if (stack.mResumedActivity != null) {
+                final ActivityRecord resumed = stack.mResumedActivity;
+                if (resumed != null && resumed == r) {
                     Slog.e(TAG, "validateTop...: back stack has resumed activity r=" + r +
-                        " state=" + r.state);
+                        " state=" + state);
                 }
-                if (r != null && (r.state == ActivityState.INITIALIZING
-                        || r.state == ActivityState.RESUMED)) {
+                if (r != null && (state == ActivityState.INITIALIZING
+                        || state == ActivityState.RESUMED)) {
                     Slog.e(TAG, "validateTop...: activity in back resumed r=" + r +
-                            " state=" + r.state);
+                            " state=" + state);
                 }
             }
         }
