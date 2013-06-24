@@ -100,16 +100,9 @@ public class NinePatch {
      * @param location  Where to draw the bitmap.
      */
     public void draw(Canvas canvas, RectF location) {
-        if (canvas.isHardwareAccelerated()) {
-            canvas.drawPatch(this, location, mPaint);
-        } else {
-            nativeDraw(canvas.mNativeCanvas, location,
-                       mBitmap.ni(), mChunk,
-                       mPaint != null ? mPaint.mNativePaint : 0,
-                       canvas.mDensity, mBitmap.mDensity);
-        }
+        canvas.drawPatch(this, location, mPaint);
     }
-    
+
     /** 
      * Draw a bitmap of nine patches.
      *
@@ -117,14 +110,7 @@ public class NinePatch {
      * @param location  Where to draw the bitmap.
      */
     public void draw(Canvas canvas, Rect location) {
-        if (canvas.isHardwareAccelerated()) {
-            canvas.drawPatch(this, location, mPaint);
-        } else {
-            nativeDraw(canvas.mNativeCanvas, location,
-                        mBitmap.ni(), mChunk,
-                        mPaint != null ? mPaint.mNativePaint : 0,
-                        canvas.mDensity, mBitmap.mDensity);
-        }
+        canvas.drawPatch(this, location, mPaint);
     }
 
     /** 
@@ -135,13 +121,23 @@ public class NinePatch {
      * @param paint     The Paint to draw through.
      */
     public void draw(Canvas canvas, Rect location, Paint paint) {
-        if (canvas.isHardwareAccelerated()) {
-            canvas.drawPatch(this, location, paint);
-        } else {
-            nativeDraw(canvas.mNativeCanvas, location,
-                    mBitmap.ni(), mChunk, paint != null ? paint.mNativePaint : 0,
-                    canvas.mDensity, mBitmap.mDensity);
-        }
+        canvas.drawPatch(this, location, paint);
+    }
+
+    /**
+     * @hide
+     */
+    void drawSoftware(Canvas canvas, RectF location, Paint paint) {
+        nativeDraw(canvas.mNativeCanvas, location, mBitmap.ni(), mChunk,
+                paint != null ? paint.mNativePaint : 0, canvas.mDensity, mBitmap.mDensity);
+    }
+
+    /**
+     * @hide
+     */
+    void drawSoftware(Canvas canvas, Rect location, Paint paint) {
+        nativeDraw(canvas.mNativeCanvas, location, mBitmap.ni(), mChunk,
+                paint != null ? paint.mNativePaint : 0, canvas.mDensity, mBitmap.mDensity);
     }
 
     /**
