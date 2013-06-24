@@ -480,11 +480,7 @@ public final class ProcessTracker {
                     time += now - curStartTime;
                 }
                 pw.print(sep);
-                if (time != 0) {
-                    pw.print(time);
-                } else {
-                    pw.print("0");
-                }
+                pw.print(time);
             }
         }
     }
@@ -681,11 +677,7 @@ public final class ProcessTracker {
                         }
                     }
                     pw.print(CSV_SEP);
-                    if (totalTime != 0) {
-                        pw.print(totalTime);
-                    } else {
-                        pw.print("0");
-                    }
+                    pw.print(totalTime);
                 }
             }
         }
@@ -783,11 +775,7 @@ public final class ProcessTracker {
                         }
                     } else {
                         pw.print(",");
-                        if (time != 0) {
-                            pw.print(time);
-                        } else {
-                            pw.print("0");
-                        }
+                        pw.print(time);
                     }
                 }
             }

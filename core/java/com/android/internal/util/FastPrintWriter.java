@@ -1,7 +1,5 @@
 package com.android.internal.util;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -17,12 +15,35 @@ import java.nio.charset.CodingErrorAction;
 public class FastPrintWriter extends PrintWriter {
     private static final int BUFFER_LEN = 8192;
 
+    private static Writer sDummyWriter = new Writer() {
+        @Override
+        public void close() throws IOException {
+            UnsupportedOperationException ex
+                    = new UnsupportedOperationException("Shouldn't be here");
+            throw ex;
+        }
+
+        @Override
+        public void flush() throws IOException {
+            close();
+        }
+
+        @Override
+        public void write(char[] buf, int offset, int count) throws IOException {
+            close();
+        }
+    };
+
     private final char[] mText = new char[BUFFER_LEN];
     private int mPos;
 
     final private OutputStream mOutputStream;
+    final private Writer mWriter;
+    final private boolean mAutoFlush;
+    final private String mSeparator;
     private CharsetEncoder mCharset;
     final private ByteBuffer mBytes = ByteBuffer.allocate(BUFFER_LEN);
+    private boolean mIoError;
 
     /**
      * Constructs a new {@code PrintWriter} with {@code out} as its target
@@ -35,8 +56,11 @@ public class FastPrintWriter extends PrintWriter {
      *             if {@code out} is {@code null}.
      */
     public FastPrintWriter(OutputStream out) {
-        super(out);
+        super(sDummyWriter);
         mOutputStream = out;
+        mWriter = null;
+        mAutoFlush = false;
+        mSeparator = System.lineSeparator();
         initDefaultEncoder();
     }
 
@@ -55,8 +79,11 @@ public class FastPrintWriter extends PrintWriter {
      *             if {@code out} is {@code null}.
      */
     public FastPrintWriter(OutputStream out, boolean autoFlush) {
-        super(out, autoFlush);
+        super(sDummyWriter, autoFlush);
         mOutputStream = out;
+        mWriter = null;
+        mAutoFlush = autoFlush;
+        mSeparator = System.lineSeparator();
         initDefaultEncoder();
     }
 
@@ -71,8 +98,11 @@ public class FastPrintWriter extends PrintWriter {
      *             if {@code wr} is {@code null}.
      */
     public FastPrintWriter(Writer wr) {
-        super(wr);
+        super(sDummyWriter);
         mOutputStream = null;
+        mWriter = wr;
+        mAutoFlush = false;
+        mSeparator = System.lineSeparator();
         initDefaultEncoder();
     }
 
@@ -91,97 +121,12 @@ public class FastPrintWriter extends PrintWriter {
      *             if {@code out} is {@code null}.
      */
     public FastPrintWriter(Writer wr, boolean autoFlush) {
-        super(wr, autoFlush);
+        super(sDummyWriter, autoFlush);
         mOutputStream = null;
+        mWriter = wr;
+        mAutoFlush = autoFlush;
+        mSeparator = System.lineSeparator();
         initDefaultEncoder();
-    }
-
-    /**
-     * Constructs a new {@code PrintWriter} with {@code file} as its target. The
-     * VM's default character set is used for character encoding.
-     * The print writer does not automatically flush its contents to the target
-     * file when a newline is encountered. The output to the file is buffered.
-     *
-     * @param file
-     *            the target file. If the file already exists, its contents are
-     *            removed, otherwise a new file is created.
-     * @throws java.io.FileNotFoundException
-     *             if an error occurs while opening or creating the target file.
-     */
-    public FastPrintWriter(File file) throws FileNotFoundException {
-        super(file);
-        mOutputStream = null;
-        initDefaultEncoder();
-    }
-
-    /**
-     * Constructs a new {@code PrintWriter} with {@code file} as its target. The
-     * character set named {@code csn} is used for character encoding.
-     * The print writer does not automatically flush its contents to the target
-     * file when a newline is encountered. The output to the file is buffered.
-     *
-     * @param file
-     *            the target file. If the file already exists, its contents are
-     *            removed, otherwise a new file is created.
-     * @param csn
-     *            the name of the character set used for character encoding.
-     * @throws FileNotFoundException
-     *             if an error occurs while opening or creating the target file.
-     * @throws NullPointerException
-     *             if {@code csn} is {@code null}.
-     * @throws java.io.UnsupportedEncodingException
-     *             if the encoding specified by {@code csn} is not supported.
-     */
-    public FastPrintWriter(File file, String csn) throws FileNotFoundException,
-            UnsupportedEncodingException {
-        super(file, csn);
-        mOutputStream = null;
-        initEncoder(csn);
-    }
-
-    /**
-     * Constructs a new {@code PrintWriter} with the file identified by {@code
-     * fileName} as its target. The VM's default character set is
-     * used for character encoding. The print writer does not automatically
-     * flush its contents to the target file when a newline is encountered. The
-     * output to the file is buffered.
-     *
-     * @param fileName
-     *            the target file's name. If the file already exists, its
-     *            contents are removed, otherwise a new file is created.
-     * @throws FileNotFoundException
-     *             if an error occurs while opening or creating the target file.
-     */
-    public FastPrintWriter(String fileName) throws FileNotFoundException {
-        super(fileName);
-        mOutputStream = null;
-        initDefaultEncoder();
-    }
-
-     /**
-     * Constructs a new {@code PrintWriter} with the file identified by {@code
-     * fileName} as its target. The character set named {@code csn} is used for
-     * character encoding. The print writer does not automatically flush its
-     * contents to the target file when a newline is encountered. The output to
-     * the file is buffered.
-     *
-     * @param fileName
-     *            the target file's name. If the file already exists, its
-     *            contents are removed, otherwise a new file is created.
-     * @param csn
-     *            the name of the character set used for character encoding.
-     * @throws FileNotFoundException
-     *             if an error occurs while opening or creating the target file.
-     * @throws NullPointerException
-     *             if {@code csn} is {@code null}.
-     * @throws UnsupportedEncodingException
-     *             if the encoding specified by {@code csn} is not supported.
-     */
-    public FastPrintWriter(String fileName, String csn)
-            throws FileNotFoundException, UnsupportedEncodingException {
-        super(fileName, csn);
-        mOutputStream = null;
-        initEncoder(csn);
     }
 
     private final void initEncoder(String csn) throws UnsupportedEncodingException {
@@ -194,61 +139,95 @@ public class FastPrintWriter extends PrintWriter {
         mCharset.onUnmappableCharacter(CodingErrorAction.REPLACE);
     }
 
+    /**
+     * Flushes this writer and returns the value of the error flag.
+     *
+     * @return {@code true} if either an {@code IOException} has been thrown
+     *         previously or if {@code setError()} has been called;
+     *         {@code false} otherwise.
+     * @see #setError()
+     */
+    public boolean checkError() {
+        flush();
+        synchronized (lock) {
+            return mIoError;
+        }
+    }
+
+    /**
+     * Sets the error state of the stream to false.
+     * @since 1.6
+     */
+    protected void clearError() {
+        synchronized (lock) {
+            mIoError = false;
+        }
+    }
+
+    /**
+     * Sets the error flag of this writer to true.
+     */
+    protected void setError() {
+        synchronized (lock) {
+            mIoError = true;
+        }
+    }
+
     private final void initDefaultEncoder() {
         mCharset = Charset.defaultCharset().newEncoder();
         mCharset.onMalformedInput(CodingErrorAction.REPLACE);
         mCharset.onUnmappableCharacter(CodingErrorAction.REPLACE);
     }
 
-    private void appendInner(char c) throws IOException {
+    private void appendLocked(char c) throws IOException {
         int pos = mPos;
         if (pos >= (BUFFER_LEN-1)) {
-            flush();
+            flushLocked();
             pos = mPos;
         }
         mText[pos] = c;
         mPos = pos+1;
     }
 
-    private void appendInner(String str, int i, final int length) throws IOException {
+    private void appendLocked(String str, int i, final int length) throws IOException {
         if (length > BUFFER_LEN) {
             final int end = i + length;
             while (i < end) {
                 int next = i + BUFFER_LEN;
-                appendInner(str, i, next<end ? BUFFER_LEN : (end-i));
+                appendLocked(str, i, next < end ? BUFFER_LEN : (end - i));
                 i = next;
             }
             return;
         }
         int pos = mPos;
         if ((pos+length) > BUFFER_LEN) {
-            flush();
+            flushLocked();
             pos = mPos;
         }
         str.getChars(i, i + length, mText, pos);
         mPos = pos + length;
     }
 
-    private void appendInner(char[] buf, int i, final int length) throws IOException {
+    private void appendLocked(char[] buf, int i, final int length) throws IOException {
         if (length > BUFFER_LEN) {
             final int end = i + length;
             while (i < end) {
                 int next = i + BUFFER_LEN;
-                appendInner(buf, i, next < end ? BUFFER_LEN : (end - i));
+                appendLocked(buf, i, next < end ? BUFFER_LEN : (end - i));
                 i = next;
             }
             return;
         }
         int pos = mPos;
         if ((pos+length) > BUFFER_LEN) {
-            flush();
+            flushLocked();
             pos = mPos;
         }
         System.arraycopy(buf, i, mText, pos, length);
         mPos = pos + length;
     }
 
-    private void flushBytesInner() throws IOException {
+    private void flushBytesLocked() throws IOException {
         int position;
         if ((position = mBytes.position()) > 0) {
             mBytes.flip();
@@ -257,7 +236,7 @@ public class FastPrintWriter extends PrintWriter {
         }
     }
 
-    private void flushInner() throws IOException {
+    private void flushLocked() throws IOException {
         //Log.i("PackageManager", "flush mPos=" + mPos);
         if (mPos > 0) {
             if (mOutputStream != null) {
@@ -267,17 +246,17 @@ public class FastPrintWriter extends PrintWriter {
                     if (result.isError()) {
                         throw new IOException(result.toString());
                     } else if (result.isOverflow()) {
-                        flushBytesInner();
+                        flushBytesLocked();
                         result = mCharset.encode(charBuffer, mBytes, true);
                         continue;
                     }
                     break;
                 }
-                flushBytesInner();
+                flushBytesLocked();
                 mOutputStream.flush();
             } else {
-                out.write(mText, 0, mPos);
-                out.flush();
+                mWriter.write(mText, 0, mPos);
+                mWriter.flush();
             }
             mPos = 0;
         }
@@ -290,11 +269,34 @@ public class FastPrintWriter extends PrintWriter {
      */
     @Override
     public void flush() {
-        try {
-            flushInner();
-        } catch (IOException e) {
+        synchronized (lock) {
+            try {
+                flushLocked();
+                if (mOutputStream != null) {
+                    mOutputStream.flush();
+                } else {
+                    mWriter.flush();
+                }
+            } catch (IOException e) {
+                setError();
+            }
         }
-        super.flush();
+    }
+
+    @Override
+    public void close() {
+        synchronized (lock) {
+            try {
+                flushLocked();
+                if (mOutputStream != null) {
+                    mOutputStream.close();
+                } else {
+                    mWriter.close();
+                }
+            } catch (IOException e) {
+                setError();
+            }
+        }
     }
 
     /**
@@ -306,9 +308,11 @@ public class FastPrintWriter extends PrintWriter {
      * @see #print(String)
      */
     public void print(char[] charArray) {
-        try {
-            appendInner(charArray, 0, charArray.length);
-        } catch (IOException e) {
+        synchronized (lock) {
+            try {
+                appendLocked(charArray, 0, charArray.length);
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -321,9 +325,11 @@ public class FastPrintWriter extends PrintWriter {
      * @see #print(String)
      */
     public void print(char ch) {
-        try {
-            appendInner(ch);
-        } catch (IOException e) {
+        synchronized (lock) {
+            try {
+                appendLocked(ch);
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -342,9 +348,65 @@ public class FastPrintWriter extends PrintWriter {
         if (str == null) {
             str = String.valueOf((Object) null);
         }
-        try {
-            appendInner(str, 0, str.length());
-        } catch (IOException e) {
+        synchronized (lock) {
+            try {
+                appendLocked(str, 0, str.length());
+            } catch (IOException e) {
+                setError();
+            }
+        }
+    }
+
+
+    @Override
+    public void print(int inum) {
+        if (inum == 0) {
+            print("0");
+        } else {
+            super.print(inum);
+        }
+    }
+
+    @Override
+    public void print(long lnum) {
+        if (lnum == 0) {
+            print("0");
+        } else {
+            super.print(lnum);
+        }
+    }
+
+    /**
+     * Prints a newline. Flushes this writer if the autoFlush flag is set to {@code true}.
+     */
+    public void println() {
+        synchronized (lock) {
+            try {
+                appendLocked(mSeparator, 0, mSeparator.length());
+                if (mAutoFlush) {
+                    flushLocked();
+                }
+            } catch (IOException e) {
+                setError();
+            }
+        }
+    }
+
+    @Override
+    public void println(int inum) {
+        if (inum == 0) {
+            println("0");
+        } else {
+            super.println(inum);
+        }
+    }
+
+    @Override
+    public void println(long lnum) {
+        if (lnum == 0) {
+            println("0");
+        } else {
+            super.print(lnum);
         }
     }
 
@@ -385,9 +447,11 @@ public class FastPrintWriter extends PrintWriter {
      */
     @Override
     public void write(char[] buf, int offset, int count) {
-        try {
-            appendInner(buf, offset, count);
-        } catch (IOException e) {
+        synchronized (lock) {
+            try {
+                appendLocked(buf, offset, count);
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -403,9 +467,11 @@ public class FastPrintWriter extends PrintWriter {
      */
     @Override
     public void write(int oneChar) {
-        try {
-            appendInner((char) oneChar);
-        } catch (IOException e) {
+        synchronized (lock) {
+            try {
+                appendLocked((char) oneChar);
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -417,9 +483,11 @@ public class FastPrintWriter extends PrintWriter {
      */
     @Override
     public void write(String str) {
-        try {
-            appendInner(str, 0, str.length());
-        } catch (IOException e) {
+        synchronized (lock) {
+            try {
+                appendLocked(str, 0, str.length());
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -439,9 +507,11 @@ public class FastPrintWriter extends PrintWriter {
      */
     @Override
     public void write(String str, int offset, int count) {
-        try {
-            appendInner(str, offset, count);
-        } catch (IOException e) {
+        synchronized (lock) {
+            try {
+                appendLocked(str, offset, count);
+            } catch (IOException e) {
+            }
         }
     }
 
