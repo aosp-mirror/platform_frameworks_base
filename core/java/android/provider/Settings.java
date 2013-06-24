@@ -3983,6 +3983,14 @@ public final class Settings {
          */
         public static final String VOICE_RECOGNITION_SERVICE = "voice_recognition_service";
 
+        /**
+         * Stores whether an user has consented to have apps verified through PAM.
+         * The value is boolean (1 or 0).
+         *
+         * @hide
+         */
+        public static final String PACKAGE_VERIFIER_USER_CONSENT =
+            "package_verifier_user_consent";
 
         /**
          * The {@link ComponentName} string of the selected spell checker service which is
