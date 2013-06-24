@@ -228,26 +228,26 @@ appeal process and links in the weeks to come.</p>
 available, but will be available soon.</p>
 
 
-<h2 id="program">Google Play for Education Pilot Program</h2>
+<h2 id="program">Including Your Apps in the Pilot Program</h2>
 
-<p>Leading up to the full launch in Fall 2013, Google Play for Education will be
-available to participating schools across the United States as part of a pilot
-program. Educators in participating schools can browse for apps and purchase
-them in bulk, then deploy them instantly to teacher and student devices. </p>
+<p>Leading up to the Fall 2013 launch, the Google Play for Education team is
+conducting an extensive series of pilots that include schools and students across
+the United States. Educators in participating schools can browse for apps and
+purchase them in bulk, then deploy them instantly to teacher and student
+devices. </p>
 
-<h3 id="pilot-apps">Including your apps in the pilot</h3>
-
+<h3 id="pilot">Early opt-in and publishing</h3>
 <p>As an app developer, you can take part in the pilot program, getting your app
 into the hands of schools and key influencers in the education technology
-community. It's a great way to get early feedback on your educational app. To
-offer your app in the pilot program, just prepare the app, ensure that it meets the
-<a href="{@docRoot}distribute/googleplay/edu/guidelines.html">Guidelines for
-Apps</a>, and then opt-in to Google Play for Education, as described above.  </p>
+community. It's a great way to get early feedback on your educational app. </p>
 
-<p>Once your app is approved during review by our third-party educator network,
-it will be made available to educators in the pilot program right away. Note
-that, during the pilot program, the review and approval process may take longer
-than usual.</p>
+<p>To offer your app in the pilot program, prepare the app and ensure that it meets
+the <a href="{@docRoot}distribute/googleplay/edu/guidelines.html">Guidelines
+for Apps</a>. Then opt-in to Google Play for Education and publish as soon
+as you are ready. Once your app is approved during review by our third-party
+educator network, it will be made available to educators in the pilot program
+right away. Note that during the pilot program, the review and approval process
+may take longer than usual.</p>
 
 <h3 id="launch">Full launch to US schools</h3>
 <p>The initial launch of Google Play for Education is planned for Fall 2013. The
@@ -256,3 +256,9 @@ with support for schools in other countries to follow. </p>
 
 <p>At this time, you should include your app in Google Play for Education only
 if it is targeting the US K-12 market. </p>
+
+<h3 id="more">More information</h3>
+
+<p>If you'd like to be notified by email of the latest information about Google Play
+for Education, visit the <a href="{@docRoot}distribute/googleplay/edu/contact.html">
+Sign Up</a> page and fill out the form. </p>
