@@ -16899,7 +16899,7 @@ package android.opengl {
   }
 
   public class Matrix {
-    ctor public Matrix();
+    ctor public deprecated Matrix();
     method public static void frustumM(float[], int, float, float, float, float, float, float);
     method public static boolean invertM(float[], int, float[], int);
     method public static float length(float, float, float);
