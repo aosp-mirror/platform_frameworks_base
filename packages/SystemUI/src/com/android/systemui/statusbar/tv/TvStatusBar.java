@@ -97,12 +97,6 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
-    protected WindowManager.LayoutParams getRecentsLayoutParams(
-            LayoutParams layoutParams) {
-        return null;
-    }
-
-    @Override
     protected WindowManager.LayoutParams getSearchLayoutParams(
             LayoutParams layoutParams) {
         return null;
