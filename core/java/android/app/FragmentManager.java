@@ -36,6 +36,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import com.android.internal.util.FastPrintWriter;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -445,12 +446,13 @@ final class FragmentManagerImpl extends FragmentManager {
     private void throwException(RuntimeException ex) {
         Log.e(TAG, ex.getMessage());
         LogWriter logw = new LogWriter(Log.ERROR, TAG);
-        PrintWriter pw = new PrintWriter(logw);
+        PrintWriter pw = new FastPrintWriter(logw, false, 1024);
         if (mActivity != null) {
             Log.e(TAG, "Activity state:");
             try {
                 mActivity.dump("  ", null, pw, new String[] { });
             } catch (Exception e) {
+                pw.flush();
                 Log.e(TAG, "Failed dumping state", e);
             }
         } else {
@@ -458,9 +460,11 @@ final class FragmentManagerImpl extends FragmentManager {
             try {
                 dump("  ", null, pw, new String[] { });
             } catch (Exception e) {
+                pw.flush();
                 Log.e(TAG, "Failed dumping state", e);
             }
         }
+        pw.flush();
         throw ex;
     }
 
@@ -1806,8 +1810,9 @@ final class FragmentManagerImpl extends FragmentManager {
                     Log.v(TAG, "restoreAllState: back stack #" + i
                         + " (index " + bse.mIndex + "): " + bse);
                     LogWriter logw = new LogWriter(Log.VERBOSE, TAG);
-                    PrintWriter pw = new PrintWriter(logw);
+                    PrintWriter pw = new FastPrintWriter(logw, false, 1024);
                     bse.dump("  ", pw, false);
+                    pw.flush();
                 }
                 mBackStack.add(bse);
                 if (bse.mIndex >= 0) {

@@ -17,6 +17,7 @@
 package com.android.internal.logging;
 
 import android.util.Log;
+import com.android.internal.util.FastPrintWriter;
 import dalvik.system.DalvikLogging;
 import dalvik.system.DalvikLogHandler;
 
@@ -91,7 +92,7 @@ public class AndroidHandler extends Handler implements DalvikLogHandler {
             Throwable thrown = r.getThrown();
             if (thrown != null) {
                 StringWriter sw = new StringWriter();
-                PrintWriter pw = new PrintWriter(sw);
+                PrintWriter pw = new FastPrintWriter(sw, false, 256);
                 sw.write(r.getMessage());
                 sw.write("\n");
                 thrown.printStackTrace(pw);

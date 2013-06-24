@@ -93,6 +93,7 @@ import android.security.AndroidKeyStoreProvider;
 import com.android.internal.os.BinderInternal;
 import com.android.internal.os.RuntimeInit;
 import com.android.internal.os.SamplingProfilerIntegration;
+import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.Objects;
 import com.android.org.conscrypt.OpenSSLSocketImpl;
 
@@ -899,7 +900,7 @@ public final class ActivityThread {
         public Debug.MemoryInfo dumpMemInfo(FileDescriptor fd, boolean checkin,
                 boolean dumpInfo, boolean dumpDalvik, String[] args) {
             FileOutputStream fout = new FileOutputStream(fd);
-            PrintWriter pw = new PrintWriter(fout);
+            PrintWriter pw = new FastPrintWriter(fout);
             try {
                 return dumpMemInfo(pw, checkin, dumpInfo, dumpDalvik);
             } finally {
@@ -1176,7 +1177,7 @@ public final class ActivityThread {
 
         @Override
         public void dumpDbInfo(FileDescriptor fd, String[] args) {
-            PrintWriter pw = new PrintWriter(new FileOutputStream(fd));
+            PrintWriter pw = new FastPrintWriter(new FileOutputStream(fd));
             PrintWriterPrinter printer = new PrintWriterPrinter(pw);
             SQLiteDebug.dump(printer, args);
             pw.flush();
@@ -2730,7 +2731,8 @@ public final class ActivityThread {
         try {
             Service s = mServices.get(info.token);
             if (s != null) {
-                PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd.getFileDescriptor()));
+                PrintWriter pw = new FastPrintWriter(new FileOutputStream(
+                        info.fd.getFileDescriptor()));
                 s.dump(info.fd.getFileDescriptor(), pw, info.args);
                 pw.flush();
             }
@@ -2745,7 +2747,8 @@ public final class ActivityThread {
         try {
             ActivityClientRecord r = mActivities.get(info.token);
             if (r != null && r.activity != null) {
-                PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd.getFileDescriptor()));
+                PrintWriter pw = new FastPrintWriter(new FileOutputStream(
+                        info.fd.getFileDescriptor()));
                 r.activity.dump(info.prefix, info.fd.getFileDescriptor(), pw, info.args);
                 pw.flush();
             }
@@ -2760,7 +2763,8 @@ public final class ActivityThread {
         try {
             ProviderClientRecord r = mLocalProviders.get(info.token);
             if (r != null && r.mLocalProvider != null) {
-                PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd.getFileDescriptor()));
+                PrintWriter pw = new FastPrintWriter(new FileOutputStream(
+                        info.fd.getFileDescriptor()));
                 r.mLocalProvider.dump(info.fd.getFileDescriptor(), pw, info.args);
                 pw.flush();
             }

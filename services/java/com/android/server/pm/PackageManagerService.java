@@ -35,6 +35,7 @@ import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
+import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
 import com.android.server.DeviceStorageMonitorService;
@@ -3363,7 +3364,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         try {
             File fname = getSettingsProblemFile();
             FileOutputStream out = new FileOutputStream(fname, true);
-            PrintWriter pw = new PrintWriter(out);
+            PrintWriter pw = new FastPrintWriter(out);
             SimpleDateFormat formatter = new SimpleDateFormat();
             String dateString = formatter.format(new Date(System.currentTimeMillis()));
             pw.println(dateString + ": " + msg);

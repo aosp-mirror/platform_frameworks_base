@@ -29,6 +29,7 @@ import android.util.AndroidRuntimeException;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
+import com.android.internal.util.FastPrintWriter;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -414,7 +415,7 @@ public final class WindowManagerGlobal {
 
     public void dumpGfxInfo(FileDescriptor fd) {
         FileOutputStream fout = new FileOutputStream(fd);
-        PrintWriter pw = new PrintWriter(fout);
+        PrintWriter pw = new FastPrintWriter(fout);
         try {
             synchronized (mLock) {
                 final int count = mViews.size();

@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.os.BatteryStats;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.am.BatteryStatsService;
 
@@ -89,7 +90,6 @@ public final class BatteryService extends Binder {
 
     private static final int DUMP_MAX_LENGTH = 24 * 1024;
     private static final String[] DUMPSYS_ARGS = new String[] { "--checkin", "--unplugged" };
-    private static final String BATTERY_STATS_SERVICE_NAME = "batteryinfo";
 
     private static final String DUMPSYS_DATA_PATH = "/data/system/";
 
@@ -509,7 +509,7 @@ public final class BatteryService extends Binder {
     }
 
     private void logBatteryStatsLocked() {
-        IBinder batteryInfoService = ServiceManager.getService(BATTERY_STATS_SERVICE_NAME);
+        IBinder batteryInfoService = ServiceManager.getService(BatteryStats.SERVICE_NAME);
         if (batteryInfoService == null) return;
 
         DropBoxManager db = (DropBoxManager) mContext.getSystemService(Context.DROPBOX_SERVICE);
@@ -519,7 +519,7 @@ public final class BatteryService extends Binder {
         FileOutputStream dumpStream = null;
         try {
             // dump the service to a file
-            dumpFile = new File(DUMPSYS_DATA_PATH + BATTERY_STATS_SERVICE_NAME + ".dump");
+            dumpFile = new File(DUMPSYS_DATA_PATH + BatteryStats.SERVICE_NAME + ".dump");
             dumpStream = new FileOutputStream(dumpFile);
             batteryInfoService.dump(dumpStream.getFD(), DUMPSYS_ARGS);
             FileUtils.sync(dumpStream);
