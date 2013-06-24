@@ -97,6 +97,7 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.am.BatteryStatsService;
+import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.connectivity.Nat464Xlat;
 import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
@@ -346,6 +347,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     // the set of network types that can only be enabled by system/sig apps
     List mProtectedNetworks;
 
+    private DataConnectionStats mDataConnectionStats;
+
     public ConnectivityService(Context context, INetworkManagementService netd,
             INetworkStatsService statsService, INetworkPolicyManager policyManager) {
         // Currently, omitting a NetworkFactory will create one internally
@@ -574,6 +577,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         mCaptivePortalTracker = CaptivePortalTracker.makeCaptivePortalTracker(mContext, this);
         loadGlobalProxy();
+
+        mDataConnectionStats = new DataConnectionStats(mContext);
+        mDataConnectionStats.startMonitoring();
     }
 
     /**

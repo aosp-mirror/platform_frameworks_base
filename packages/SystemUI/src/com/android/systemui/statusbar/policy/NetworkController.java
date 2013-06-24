@@ -27,11 +27,9 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wimax.WimaxManagerConstants;
-import android.os.Binder;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.RemoteException;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
@@ -42,12 +40,10 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.internal.app.IBatteryStats;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.internal.util.AsyncChannel;
-import com.android.server.am.BatteryStatsService;
 import com.android.systemui.R;
 
 import java.io.FileDescriptor;
@@ -166,9 +162,6 @@ public class NetworkController extends BroadcastReceiver {
 
     boolean mDataAndWifiStacked = false;
 
-    // yuck -- stop doing this here and put it in the framework
-    IBatteryStats mBatteryStats;
-
     public interface SignalCluster {
         void setWifiIndicators(boolean visible, int strengthIcon, int activityIcon,
                 String contentDescription);
@@ -252,9 +245,6 @@ public class NetworkController extends BroadcastReceiver {
 
         // AIRPLANE_MODE_CHANGED is sent at boot; we've probably already missed it
         updateAirplaneMode();
-
-        // yuck
-        mBatteryStats = BatteryStatsService.getService();
 
         mLastLocale = mContext.getResources().getConfiguration().locale;
     }
@@ -790,15 +780,6 @@ public class NetworkController extends BroadcastReceiver {
                 iconId = 0;
                 visible = false;
             }
-        }
-
-        // yuck - this should NOT be done by the status bar
-        long ident = Binder.clearCallingIdentity();
-        try {
-            mBatteryStats.notePhoneDataConnectionState(mPhone.getNetworkType(), visible);
-        } catch (RemoteException e) {
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
 
         mDataDirectionIconId = iconId;
