@@ -17,7 +17,7 @@
 package android.print;
 
 import android.os.ParcelFileDescriptor;
-import android.print.IPrintProgressListener;
+import android.print.IPrintResultCallback;
 import android.print.PageRange;
 import android.print.PrintAttributes;
 
@@ -30,6 +30,6 @@ oneway interface IPrintAdapter {
     void start();
     void printAttributesChanged(in PrintAttributes attributes);
     void print(in List<PageRange> pages, in ParcelFileDescriptor fd,
-            IPrintProgressListener progressListener);
+            IPrintResultCallback callback);
     void finish();
 }

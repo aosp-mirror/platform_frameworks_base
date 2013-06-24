@@ -18404,12 +18404,12 @@ package android.print {
     ctor public PrintAdapter();
     method public abstract android.print.PrintAdapterInfo getInfo();
     method public void onFinish();
-    method public abstract void onPrint(java.util.List<android.print.PageRange>, java.io.FileDescriptor, android.os.CancellationSignal, android.print.PrintAdapter.PrintProgressCallback);
+    method public abstract void onPrint(java.util.List<android.print.PageRange>, java.io.FileDescriptor, android.os.CancellationSignal, android.print.PrintAdapter.PrintResultCallback);
     method public boolean onPrintAttributesChanged(android.print.PrintAttributes);
     method public void onStart();
   }
 
-  public static abstract class PrintAdapter.PrintProgressCallback {
+  public static abstract class PrintAdapter.PrintResultCallback {
     method public void onPrintFailed(java.lang.CharSequence);
     method public void onPrintFinished(java.util.List<android.print.PageRange>);
   }

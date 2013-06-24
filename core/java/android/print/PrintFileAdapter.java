@@ -53,9 +53,9 @@ class PrintFileAdapter extends PrintAdapter {
 
     @Override
     public void onPrint(List<PageRange> pages, FileDescriptor destination,
-            CancellationSignal cancellationSignal, PrintProgressCallback progressListener) {
+            CancellationSignal cancellationSignal, PrintResultCallback callback) {
         mWriteFileAsyncTask = new WriteFileAsyncTask(mFile, destination, cancellationSignal,
-                progressListener);
+                callback);
         mWriteFileAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
                 (Void[]) null);
         
@@ -73,15 +73,15 @@ class PrintFileAdapter extends PrintAdapter {
 
         private final FileDescriptor mDestination;
 
-        private final PrintProgressCallback mProgressListener;
+        private final PrintResultCallback mResultCallback;
 
         private final CancellationSignal mCancellationSignal;
 
         public WriteFileAsyncTask(File source, FileDescriptor destination,
-                CancellationSignal cancellationSignal, PrintProgressCallback progressListener) {
+                CancellationSignal cancellationSignal, PrintResultCallback callback) {
             mSource = source;
             mDestination = destination;
-            mProgressListener = progressListener;
+            mResultCallback = callback;
             mCancellationSignal = cancellationSignal; 
             mCancellationSignal.setOnCancelListener(new OnCancelListener() {
                 @Override
@@ -113,9 +113,9 @@ class PrintFileAdapter extends PrintAdapter {
                 if (!isCancelled()) {
                     List<PageRange> pages = new ArrayList<PageRange>();
                     pages.add(PageRange.ALL_PAGES);
-                    mProgressListener.onPrintFinished(pages);
+                    mResultCallback.onPrintFinished(pages);
                 } else {
-                    mProgressListener.onPrintFailed("Cancelled");
+                    mResultCallback.onPrintFailed("Cancelled");
                 }
             }
             return null;

@@ -21,7 +21,7 @@ import android.os.Parcelable;
 
 /**
  * Represents a range of pages. The start and end page indices of
- * the range are zero based and are inclusive.
+ * the range are zero based and inclusive.
  */
 public final class PageRange implements Parcelable {
 

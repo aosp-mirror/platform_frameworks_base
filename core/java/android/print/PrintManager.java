@@ -26,7 +26,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.print.PrintAdapter.PrintProgressCallback;
+import android.print.PrintAdapter.PrintResultCallback;
 import android.util.Log;
 
 import com.android.internal.os.SomeArgs;
@@ -162,6 +162,8 @@ public final class PrintManager {
      * @param pdfFile The PDF file to print.
      * @param attributes The default print job attributes.
      * @return The created print job.
+     *
+     * @see PrintJob
      */
     public PrintJob print(String printJobName, File pdfFile, PrintAttributes attributes) {
         PrintFileAdapter printable = new PrintFileAdapter(pdfFile);
@@ -176,6 +178,8 @@ public final class PrintManager {
      * @param printAdapter The printable adapter to print.
      * @param attributes The default print job attributes.
      * @return The created print job.
+     *
+     * @see PrintJob
      */
     public PrintJob print(String printJobName, PrintAdapter printAdapter,
             PrintAttributes attributes) {
@@ -252,7 +256,7 @@ public final class PrintManager {
 
         @Override
         public void print(List<PageRange> pages, ParcelFileDescriptor fd,
-                IPrintProgressListener progressListener) {
+                IPrintResultCallback callback) {
             synchronized (mLock) {
                 if (isFinishedLocked()) {
                     return;
@@ -261,7 +265,7 @@ public final class PrintManager {
                 args.arg1 = mPrintAdapter;
                 args.arg2 = pages;
                 args.arg3 = fd.getFileDescriptor();
-                args.arg4 = progressListener;
+                args.arg4 = callback;
                 mHandler.obtainMessage(MyHandler.MESSAGE_PRINT, args).sendToTarget();
             }
         }
@@ -318,16 +322,16 @@ public final class PrintManager {
                         @SuppressWarnings("unchecked")
                         List<PageRange> pages = (List<PageRange>) args.arg2;
                         final FileDescriptor fd = (FileDescriptor) args.arg3;
-                        IPrintProgressListener listener = (IPrintProgressListener) args.arg4;
+                        IPrintResultCallback callback = (IPrintResultCallback) args.arg4;
                         args.recycle();
                         try {
                             ICancellationSignal remoteSignal = CancellationSignal.createTransport();
-                            listener.onWriteStarted(adapter.getInfo(), remoteSignal);
+                            callback.onPrintStarted(adapter.getInfo(), remoteSignal);
 
                             CancellationSignal localSignal = CancellationSignal.fromTransport(
                                     remoteSignal);
                             adapter.onPrint(pages, fd, localSignal,
-                                    new PrintProgressListenerWrapper(listener) {
+                                    new PrintResultCallbackWrapper(callback) {
                                         @Override
                                         public void onPrintFinished(List<PageRange> pages) {
                                             IoUtils.closeQuietly(fd);
@@ -363,29 +367,29 @@ public final class PrintManager {
         }
     }
 
-    private static abstract class PrintProgressListenerWrapper extends PrintProgressCallback {
+    private static abstract class PrintResultCallbackWrapper extends PrintResultCallback {
 
-        private final IPrintProgressListener mWrappedListener;
+        private final IPrintResultCallback mWrappedCallback;
 
-        public PrintProgressListenerWrapper(IPrintProgressListener listener) {
-            mWrappedListener = listener;
+        public PrintResultCallbackWrapper(IPrintResultCallback callback) {
+            mWrappedCallback = callback;
         }
 
         @Override
         public void onPrintFinished(List<PageRange> pages) {
             try {
-                mWrappedListener.onWriteFinished(pages);
+                mWrappedCallback.onPrintFinished(pages);
             } catch (RemoteException re) {
-                Log.e(LOG_TAG, "Error calling onWriteFinished", re);
+                Log.e(LOG_TAG, "Error calling onPrintFinished", re);
             }
         }
 
         @Override
         public void onPrintFailed(CharSequence error) {
             try {
-                mWrappedListener.onWriteFailed(error);
+                mWrappedCallback.onPrintFailed(error);
             } catch (RemoteException re) {
-                Log.e(LOG_TAG, "Error calling onWriteFailed", re);
+                Log.e(LOG_TAG, "Error calling onPrintFailed", re);
             }
         }
     }

@@ -16,11 +16,10 @@
 
 package android.print;
 
-import java.io.FileDescriptor;
-import java.io.IOException;
-import java.util.List;
-
 import android.os.CancellationSignal;
+
+import java.io.FileDescriptor;
+import java.util.List;
 
 /**
  * Base class that provides data to be printed.
@@ -33,19 +32,23 @@ import android.os.CancellationSignal;
  * This callback can be used to allocate resources.
  * </li>
  * <li>
- * Next you will get one or more calls to the pair
- *  {@link #onPrintAttributesChanged(PrintAttributes)} and {@link #onPrint(List,
- * FileDescriptor, CancellationSignal, PrintProgressCallback)}. The first callback
- * informs you that the print attributes (page size, density, etc) changed giving
- * you an opportunity to re-layout the content. The second method asks you to write
- * a PDF file with the content for specific pages.
+ * Next you will get one or more calls to {@link #onPrintAttributesChanged(
+ * PrintAttributes) to informs you that the print attributes (page size, density,
+ * etc) changed giving you an opportunity to re-layout the content.
+ * </li>
+ * <li>
+ * After every {@link #onPrintAttributesChanged(PrintAttributes) you will receive
+ * one or more calls to {@link #onPrint(List, FileDescriptor, CancellationSignal,
+ * PrintResultCallback)} asking you to write a PDF file with the content for
+ * specific pages.
  * </li>
  * <li>
  * Finally, you will receive a call on {@link #onFinish()} right after printing.
  * You can use this callback to release resources.
  * </li>
  * <li>
- * You can receive calls to {@link #getInfo()} at any point which should return
+ * You can receive calls to {@link #getInfo()} at any point after a call to
+ * {@link #onPrintAttributesChanged(PrintAttributes)} which should return
  * a {@link PrintAdapterInfo} describing your {@link PrintAdapter}.
  * </li>
  * </ul>
@@ -83,29 +86,28 @@ public abstract class PrintAdapter {
     /**
      * Called when specific pages of the content have to be printed in the from of
      * a PDF file to the given file descriptor. You should <strong>not</strong>
-     * close the file descriptor instead you have to invoke {@link PrintProgressCallback
-     * #onWriteFinished()} or {@link PrintProgressCallback#onPrintFailed(CharSequence)}.
+     * close the file descriptor instead you have to invoke {@link PrintResultCallback
+     * #onPrintFinished()} or {@link PrintResultCallback#onPrintFailed(CharSequence)}.
      * <p>
      * <strong>Note:</strong> If the printed content is large, it is a  good
      * practice to schedule writing it on a dedicated thread and register a
-     * callback in the provided {@link CancellationSignal} upon which to stop
-     * writing data. The cancellation callback will not be made on the main
-     * thread.
+     * callback in the provided {@link CancellationSignal} upon invocation of
+     * which you should stop writing data. The cancellation callback will not
+     * be made on the main thread.
      * </p>
      * <p>
      * <strong>Note:</strong> Invoked on the main thread.
      * </p>
-     * <p>
      *
-     * @param pages The pages whose content to write.
+     * @param pages The pages whose content to print.
      * @param destination The destination file descriptor to which to start writing.
-     * @param cancellationSignal Signal for observing cancel write requests.
+     * @param cancellationSignal Signal for observing cancel print requests.
      * @param progressListener Callback to inform the system with the write progress.
      *
      * @see CancellationSignal
      */
     public abstract void onPrint(List<PageRange> pages, FileDescriptor destination,
-            CancellationSignal cancellationSignal, PrintProgressCallback progressListener);
+            CancellationSignal cancellationSignal, PrintResultCallback progressListener);
 
     /**
      * Called when printing finished. You can use this callback to release
@@ -132,12 +134,12 @@ public abstract class PrintAdapter {
     public abstract PrintAdapterInfo getInfo();
 
     /**
-     * Base class for implementing a listener for the printing progress
+     * Base class for implementing a listener for the print result
      * of a {@link PrintAdapter}.
      */
-    public static abstract class PrintProgressCallback {
+    public static abstract class PrintResultCallback {
 
-        PrintProgressCallback() {
+        PrintResultCallback() {
             /* do nothing - hide constructor */
         }
 

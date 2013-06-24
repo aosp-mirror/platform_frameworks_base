@@ -62,7 +62,7 @@ public final class PrintJob {
      * <p>
      * <strong>Node:</strong>The returned info object is a snapshot of the
      * current print job state. Every call to this method returns a fresh
-     * info object that reflects the current print jobs state.
+     * info object that reflects the current print job state.
      * </p>
      *
      * @return The print job info.
@@ -100,7 +100,7 @@ public final class PrintJob {
      *
      * @see #complete()
      * @see #cancel()
-     * @see #fail()
+     * @see #fail(CharSequence)
      */
     public boolean isStarted() {
         return  getInfo().getState() == PrintJobInfo.STATE_STARTED;
@@ -140,7 +140,8 @@ public final class PrintJob {
      * Fails the print job. You should call this method if {@link
      * #isStarted()} returns true you filed while printing.
      *
-     * @return Whether the job as failed.
+     * @param error The reason for the failure.
+     * @return Whether the job was failed.
      *
      * @see #isStarted()
      */
@@ -191,6 +192,9 @@ public final class PrintJob {
      * Gets the data associated with this print job. It is a responsibility of
      * the print service to open a stream to the returned file descriptor
      * and fully read the content.
+     * <p>
+     * <strong>Note:</strong> It is your responsibility to close the file descriptor.
+     * </p>
      *
      * @return A file descriptor for reading the data or <code>null</code>.
      */
