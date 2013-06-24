@@ -300,6 +300,17 @@ public class ViewOverlay {
             }
         }
 
+        /**
+         * @hide
+         */
+        @Override
+        protected ViewParent invalidateChildInParentFast(int left, int top, Rect dirty) {
+            if (mHostView instanceof ViewGroup) {
+                return ((ViewGroup) mHostView).invalidateChildInParentFast(left, top, dirty);
+            }
+            return null;
+        }
+
         @Override
         public ViewParent invalidateChildInParent(int[] location, Rect dirty) {
             if (mHostView != null) {
