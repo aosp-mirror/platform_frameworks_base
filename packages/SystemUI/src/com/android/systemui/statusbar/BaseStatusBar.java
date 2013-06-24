@@ -442,9 +442,6 @@ public abstract class BaseStatusBar extends SystemUI implements
         mHandler.sendEmptyMessage(msg);
     }
 
-    protected abstract WindowManager.LayoutParams getRecentsLayoutParams(
-            LayoutParams layoutParams);
-
     protected abstract WindowManager.LayoutParams getSearchLayoutParams(
             LayoutParams layoutParams);
 

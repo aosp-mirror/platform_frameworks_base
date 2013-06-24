@@ -670,31 +670,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     @Override
-    protected WindowManager.LayoutParams getRecentsLayoutParams(LayoutParams layoutParams) {
-        boolean opaque = false;
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                layoutParams.width,
-                layoutParams.height,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
-                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
-                (opaque ? PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT));
-        if (ActivityManager.isHighEndGfx()) {
-            lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-        } else {
-            lp.flags |= WindowManager.LayoutParams.FLAG_DIM_BEHIND;
-            lp.dimAmount = 0.75f;
-        }
-        lp.gravity = Gravity.BOTTOM | Gravity.START;
-        lp.setTitle("RecentsPanel");
-        lp.windowAnimations = com.android.internal.R.style.Animation_RecentApplications;
-        lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
-        | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
-        return lp;
-    }
-
-    @Override
     protected WindowManager.LayoutParams getSearchLayoutParams(LayoutParams layoutParams) {
         boolean opaque = false;
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
