@@ -16,7 +16,12 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowManagerService.DEBUG_TASK_MOVEMENT;
+import static com.android.server.wm.WindowManagerService.TAG;
+
 import android.graphics.Rect;
+import android.os.Debug;
+import android.util.Slog;
 import android.util.TypedValue;
 
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
@@ -88,6 +93,7 @@ public class TaskStack {
      * @param toTop Whether to add it to the top or bottom.
      */
     boolean addTask(Task task, boolean toTop) {
+        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "addTask: task=" + task + " toTop=" + toTop);
         mStackBox.makeDirty();
         mTasks.add(toTop ? mTasks.size() : 0, task);
         task.mStack = this;
@@ -95,11 +101,14 @@ public class TaskStack {
     }
 
     boolean moveTaskToTop(Task task) {
+        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "moveTaskToTop: task=" + task + " Callers="
+                + Debug.getCallers(6));
         mTasks.remove(task);
         return addTask(task, true);
     }
 
     boolean moveTaskToBottom(Task task) {
+        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "moveTaskToBottom: task=" + task);
         mTasks.remove(task);
         return addTask(task, false);
     }
@@ -110,6 +119,7 @@ public class TaskStack {
      * @param task The Task to delete.
      */
     void removeTask(Task task) {
+        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "removeTask: task=" + task);
         mStackBox.makeDirty();
         mTasks.remove(task);
     }
