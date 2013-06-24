@@ -160,7 +160,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/print/IPrinterDiscoveryObserver.aidl \
 	core/java/android/print/IPrintAdapter.aidl \
 	core/java/android/print/IPrintClient.aidl \
-	core/java/android/print/IPrintProgressListener.aidl \
+	core/java/android/print/IPrintResultCallback.aidl \
 	core/java/android/print/IPrintManager.aidl \
 	core/java/android/print/IPrintSpoolerService.aidl \
 	core/java/android/print/IPrintSpoolerServiceCallbacks.aidl \

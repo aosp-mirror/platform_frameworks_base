@@ -20,7 +20,7 @@ import android.os.ICancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.print.IPrintAdapter;
-import android.print.IPrintProgressListener;
+import android.print.IPrintResultCallback;
 import android.print.PageRange;
 import android.print.PrintAdapterInfo;
 import android.print.PrintAttributes;
@@ -50,7 +50,7 @@ final class RemotePrintAdapter {
 
     private final File mFile;
 
-    private final IPrintProgressListener mIPrintProgressListener;
+    private final IPrintResultCallback mIPrintProgressListener;
 
     private PrintAdapterInfo mInfo;
 
@@ -61,12 +61,12 @@ final class RemotePrintAdapter {
     public RemotePrintAdapter(IPrintAdapter printAdatper, File file) {
         mRemoteInterface = printAdatper;
         mFile = file;
-        mIPrintProgressListener = new IPrintProgressListener.Stub() {
+        mIPrintProgressListener = new IPrintResultCallback.Stub() {
             @Override
-            public void onWriteStarted(PrintAdapterInfo info,
+            public void onPrintStarted(PrintAdapterInfo info,
                     ICancellationSignal cancellationSignal) {
                 if (DEBUG) {
-                    Log.i(LOG_TAG, "IPrintProgressListener#onWriteStarted()");
+                    Log.i(LOG_TAG, "IPrintProgressListener#onPrintStarted()");
                 }
                 synchronized (mLock) {
                     mInfo = info;
@@ -75,9 +75,9 @@ final class RemotePrintAdapter {
             }
 
             @Override
-            public void onWriteFinished(List<PageRange> pages) {
+            public void onPrintFinished(List<PageRange> pages) {
                 if (DEBUG) {
-                    Log.i(LOG_TAG, "IPrintProgressListener#onWriteFinished(" + pages + ")");
+                    Log.i(LOG_TAG, "IPrintProgressListener#onPrintFinished(" + pages + ")");
                 }
                 synchronized (mLock) {
                     if (isPrintingLocked()) {
@@ -88,9 +88,9 @@ final class RemotePrintAdapter {
             }
 
             @Override
-            public void onWriteFailed(CharSequence error) {
+            public void onPrintFailed(CharSequence error) {
                 if (DEBUG) {
-                    Log.i(LOG_TAG, "IPrintProgressListener#onWriteFailed(" + error + ")");
+                    Log.i(LOG_TAG, "IPrintProgressListener#onPrintFailed(" + error + ")");
                 }
                 synchronized (mLock) {
                     if (isPrintingLocked()) {

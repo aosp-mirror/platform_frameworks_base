@@ -26,8 +26,8 @@ import android.print.PrintAdapterInfo;
  *
  * @hide
  */
-oneway interface IPrintProgressListener {
-    void onWriteStarted(in PrintAdapterInfo info, ICancellationSignal cancellationSignal);
-    void onWriteFinished(in List<PageRange> pages);
-    void onWriteFailed(CharSequence error);
+oneway interface IPrintResultCallback {
+    void onPrintStarted(in PrintAdapterInfo info, ICancellationSignal cancellationSignal);
+    void onPrintFinished(in List<PageRange> pages);
+    void onPrintFailed(CharSequence error);
 }

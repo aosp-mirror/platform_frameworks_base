@@ -52,7 +52,7 @@ import java.util.List;
  * Calls to {@link #addDiscoveredPrinters(List)} and
  * {@link #removeDiscoveredPrinters(List)} before a call to
  * {@link #onStartPrinterDiscovery()} and after a call to
- * {@link #onStopPrinterDiscovery()} is a no-op.
+ * {@link #onStopPrinterDiscovery()} are a no-op.
  * </p>
  * <p>
  * For every printer discovery period all printers have to be added. Each
@@ -68,7 +68,7 @@ import java.util.List;
  * service may handle it immediately or schedule that for an appropriate
  * time in the future. The list of all print jobs for this service
  * are be available by calling {@link #getPrintJobs()}. A queued print
- * job is in a {@link PrintJobInfo#STATE_QUEUED} state.
+ * job is one whose {@link PrintJob#isQueued()} return true.
  * </p>
  * <p>
  * A print service is responsible for setting the print job state as
@@ -200,7 +200,7 @@ public abstract class PrintService extends Service {
     /**
      * Callback requesting from this service to start printer discovery.
      * At the end of the printer discovery period the system will call
-     * {@link #onStopPrinterDiscovery(). Discovered printers should be
+     * {@link #onStopPrinterDiscovery()}. Discovered printers should be
      * reported by calling #addDiscoveredPrinters(List) and reported ones
      * that disappear should be reported by calling
      * {@link #removeDiscoveredPrinters(List)}.
@@ -299,8 +299,7 @@ public abstract class PrintService extends Service {
     /**
      * Called when canceling of a print job is requested. The service
      * should do best effort to fulfill the request. After the print
-     * job is canceled it state has to be set to
-     * {@link PrintJobInfo#STATE_CANCELED}.
+     * job is canceled by calling {@link PrintJob#cancel()}.
      *
      * @param printJob The print job to be canceled.
      */

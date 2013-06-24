@@ -105,7 +105,7 @@ public final class PdfDocument {
      * is created you can draw arbitrary content on the page's canvas which
      * you can get by calling {@link Page#getCanvas()}. After you are done
      * drawing the content you should finish the page by calling
-     * {@link #finishPage(Page). After the page is finished you should
+     * {@link #finishPage(Page)}. After the page is finished you should
      * no longer access the page or its canvas.
      * <p>
      * <strong>Note:</strong> Do not call this method after {@link #close()}.
