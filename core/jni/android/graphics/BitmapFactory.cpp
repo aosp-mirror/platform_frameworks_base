@@ -296,22 +296,10 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     SkAutoTDelete<SkBitmap> adb(outputBitmap == NULL ? new SkBitmap : NULL);
     if (outputBitmap == NULL) outputBitmap = adb.get();
 
-    SkAutoTDelete<SkImageDecoder> add(decoder);
-
     NinePatchPeeker peeker(decoder);
     decoder->setPeeker(&peeker);
 
-    AutoDecoderCancel adc(options, decoder);
-
-    // To fix the race condition in case "requestCancelDecode"
-    // happens earlier than AutoDecoderCancel object is added
-    // to the gAutoDecoderCancelMutex linked list.
-    if (options != NULL && env->GetBooleanField(options, gOptions_mCancelID)) {
-        return nullObjectReturn("gOptions_mCancelID");
-    }
-
     SkImageDecoder::Mode decodeMode = isPurgeable ? SkImageDecoder::kDecodeBounds_Mode : mode;
-
 
     JavaPixelAllocator javaAllocator(env);
     RecyclingPixelAllocator recyclingAllocator(outputBitmap->pixelRef(), existingBufferSize);
@@ -326,6 +314,20 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
             // only to find the scaled result too large to fit in the allocation
             decoder->setAllocator(&scaleCheckingAllocator);
         }
+    }
+
+    // Only setup the decoder to be deleted after its stack-based, refcounted
+    // components (allocators, peekers, etc) are declared. This prevents RefCnt
+    // asserts from firing due to the order objects are deleted from the stack.
+    SkAutoTDelete<SkImageDecoder> add(decoder);
+
+    AutoDecoderCancel adc(options, decoder);
+
+    // To fix the race condition in case "requestCancelDecode"
+    // happens earlier than AutoDecoderCancel object is added
+    // to the gAutoDecoderCancelMutex linked list.
+    if (options != NULL && env->GetBooleanField(options, gOptions_mCancelID)) {
+        return nullObjectReturn("gOptions_mCancelID");
     }
 
     SkBitmap decodingBitmap;
