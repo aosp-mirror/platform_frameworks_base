@@ -2857,6 +2857,8 @@ final class ActivityStack {
             return;
         }
 
+        mStackSupervisor.moveHomeStack(isHomeStack());
+
         // Shift all activities with this task up to the top
         // of the stack, keeping them in the same internal order.
         mTaskHistory.remove(tr);
