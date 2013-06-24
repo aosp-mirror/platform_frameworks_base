@@ -239,7 +239,7 @@ public final class ViewRootImpl implements ViewParent,
     boolean mAdded;
     boolean mAddedTouchMode;
 
-    final CompatibilityInfoHolder mCompatibilityInfo;
+    final DisplayAdjustments mDisplayAdjustments;
 
     // These are accessed by multiple threads.
     final Rect mWinFrame; // frame given by window manager.
@@ -336,8 +336,7 @@ public final class ViewRootImpl implements ViewParent,
         mDisplay = display;
         mBasePackageName = context.getBasePackageName();
 
-        CompatibilityInfoHolder cih = display.getCompatibilityInfo();
-        mCompatibilityInfo = cih != null ? cih : new CompatibilityInfoHolder();
+        mDisplayAdjustments = display.getDisplayAdjustments();
 
         mThread = Thread.currentThread();
         mLocation = new WindowLeaked(null);
@@ -444,8 +443,9 @@ public final class ViewRootImpl implements ViewParent,
                     }
                 }
 
-                CompatibilityInfo compatibilityInfo = mCompatibilityInfo.get();
+                CompatibilityInfo compatibilityInfo = mDisplayAdjustments.getCompatibilityInfo();
                 mTranslator = compatibilityInfo.getTranslator();
+                mDisplayAdjustments.setActivityToken(attrs.token);
 
                 // If the application owns the surface, don't enable hardware acceleration
                 if (mSurfaceHolder == null) {
@@ -1136,7 +1136,7 @@ public final class ViewRootImpl implements ViewParent,
             surfaceChanged = true;
             params = lp;
         }
-        CompatibilityInfo compatibilityInfo = mCompatibilityInfo.get();
+        CompatibilityInfo compatibilityInfo = mDisplayAdjustments.getCompatibilityInfo();
         if (compatibilityInfo.supportsScreen() == mLastInCompatMode) {
             params = lp;
             mFullRedrawNeeded = true;
@@ -2847,8 +2847,8 @@ public final class ViewRootImpl implements ViewParent,
                 + mWindowAttributes.getTitle()
                 + ": " + config);
 
-        CompatibilityInfo ci = mCompatibilityInfo.getIfNeeded();
-        if (ci != null) {
+        CompatibilityInfo ci = mDisplayAdjustments.getCompatibilityInfo();
+        if (!ci.equals(CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO)) {
             config = new Configuration(config);
             ci.applyToConfiguration(mNoncompatDensity, config);
         }

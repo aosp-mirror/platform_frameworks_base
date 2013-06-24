@@ -40,7 +40,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.util.AndroidRuntimeException;
 import android.util.Slog;
-import android.view.CompatibilityInfoHolder;
+import android.view.DisplayAdjustments;
 import android.view.Display;
 
 import java.io.File;
@@ -84,7 +84,7 @@ public final class LoadedApk {
     private final ClassLoader mBaseClassLoader;
     private final boolean mSecurityViolation;
     private final boolean mIncludeCode;
-    public final CompatibilityInfoHolder mCompatibilityInfo = new CompatibilityInfoHolder();
+    private final DisplayAdjustments mDisplayAdjustments = new DisplayAdjustments();
     Resources mResources;
     private ClassLoader mClassLoader;
     private Application mApplication;
@@ -132,7 +132,7 @@ public final class LoadedApk {
         mBaseClassLoader = baseLoader;
         mSecurityViolation = securityViolation;
         mIncludeCode = includeCode;
-        mCompatibilityInfo.set(compatInfo);
+        mDisplayAdjustments.setCompatibilityInfo(compatInfo);
 
         if (mAppDir == null) {
             if (ActivityThread.mSystemContext == null) {
@@ -141,7 +141,7 @@ public final class LoadedApk {
                 ActivityThread.mSystemContext.getResources().updateConfiguration(
                          mainThread.getConfiguration(),
                          mainThread.getDisplayMetricsLocked(
-                                 Display.DEFAULT_DISPLAY, compatInfo),
+                                 Display.DEFAULT_DISPLAY, mDisplayAdjustments),
                          compatInfo);
                 //Slog.i(TAG, "Created system resources "
                 //        + mSystemContext.getResources() + ": "
@@ -169,7 +169,7 @@ public final class LoadedApk {
         mIncludeCode = true;
         mClassLoader = systemContext.getClassLoader();
         mResources = systemContext.getResources();
-        mCompatibilityInfo.set(compatInfo);
+        mDisplayAdjustments.setCompatibilityInfo(compatInfo);
     }
 
     public String getPackageName() {
@@ -182,6 +182,14 @@ public final class LoadedApk {
 
     public boolean isSecurityViolation() {
         return mSecurityViolation;
+    }
+
+    public CompatibilityInfo getCompatibilityInfo() {
+        return mDisplayAdjustments.getCompatibilityInfo();
+    }
+
+    public void setCompatibilityInfo(CompatibilityInfo compatInfo) {
+        mDisplayAdjustments.setCompatibilityInfo(compatInfo);
     }
 
     /**

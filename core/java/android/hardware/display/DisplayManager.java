@@ -159,7 +159,7 @@ public final class DisplayManager {
         Display display = mDisplays.get(displayId);
         if (display == null) {
             display = mGlobal.getCompatibleDisplay(displayId,
-                    mContext.getCompatibilityInfo(displayId));
+                    mContext.getDisplayAdjustments(displayId));
             if (display != null) {
                 mDisplays.put(displayId, display);
             }

@@ -35,7 +35,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.view.CompatibilityInfoHolder;
+import android.view.DisplayAdjustments;
 import android.view.Display;
 
 import java.io.File;
@@ -646,7 +646,7 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
-    public CompatibilityInfoHolder getCompatibilityInfo(int displayId) {
-        return mBase.getCompatibilityInfo(displayId);
+    public DisplayAdjustments getDisplayAdjustments(int displayId) {
+        return mBase.getDisplayAdjustments(displayId);
     }
 }

@@ -99,7 +99,7 @@ import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
-import android.view.CompatibilityInfoHolder;
+import android.view.DisplayAdjustments;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.WindowManagerImpl;
@@ -204,6 +204,8 @@ class ContextImpl extends Context {
     private File mExternalCacheDir;
 
     private static final String[] EMPTY_FILE_LIST = {};
+
+    final private DisplayAdjustments mDisplayAdjustments = new DisplayAdjustments();
 
     /**
      * Override this class when the system service constructor needs a
@@ -1830,10 +1832,8 @@ class ContextImpl extends Context {
 
         ContextImpl c = new ContextImpl();
         c.init(mPackageInfo, null, mMainThread);
-        c.mResources = mMainThread.getTopLevelResources(
-                mPackageInfo.getResDir(),
-                getDisplayId(), overrideConfiguration,
-                mResources.getCompatibilityInfo());
+        c.mResources = mMainThread.getTopLevelResources(mPackageInfo.getResDir(), getDisplayId(),
+                overrideConfiguration, mResources.getCompatibilityInfo(), mActivityToken);
         return c;
     }
 
@@ -1844,17 +1844,13 @@ class ContextImpl extends Context {
         }
 
         int displayId = display.getDisplayId();
-        CompatibilityInfo ci = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
-        CompatibilityInfoHolder cih = getCompatibilityInfo(displayId);
-        if (cih != null) {
-            ci = cih.get();
-        }
 
         ContextImpl context = new ContextImpl();
         context.init(mPackageInfo, null, mMainThread);
         context.mDisplay = display;
-        context.mResources = mMainThread.getTopLevelResources(
-                mPackageInfo.getResDir(), displayId, null, ci);
+        DisplayAdjustments daj = getDisplayAdjustments(displayId);
+        context.mResources = mMainThread.getTopLevelResources(mPackageInfo.getResDir(), displayId,
+                null, daj.getCompatibilityInfo(), null);
         return context;
     }
 
@@ -1868,8 +1864,8 @@ class ContextImpl extends Context {
     }
 
     @Override
-    public CompatibilityInfoHolder getCompatibilityInfo(int displayId) {
-        return displayId == Display.DEFAULT_DISPLAY ? mPackageInfo.mCompatibilityInfo : null;
+    public DisplayAdjustments getDisplayAdjustments(int displayId) {
+        return mDisplayAdjustments;
     }
 
     private File getDataDirFile() {
@@ -1921,6 +1917,7 @@ class ContextImpl extends Context {
         mUser = context.mUser;
         mDisplay = context.mDisplay;
         mOuterContext = this;
+        mDisplayAdjustments.setCompatibilityInfo(mPackageInfo.getCompatibilityInfo());
     }
 
     final void init(LoadedApk packageInfo, IBinder activityToken, ActivityThread mainThread) {
@@ -1933,16 +1930,26 @@ class ContextImpl extends Context {
         mBasePackageName = basePackageName != null ? basePackageName : packageInfo.mPackageName;
         mResources = mPackageInfo.getResources(mainThread);
 
-        if (mResources != null && container != null
-                && container.getCompatibilityInfo().applicationScale !=
-                        mResources.getCompatibilityInfo().applicationScale) {
+        CompatibilityInfo compatInfo =
+                container == null ? null : container.getCompatibilityInfo();
+        if (mResources != null &&
+                ((compatInfo != null && compatInfo.applicationScale !=
+                        mResources.getCompatibilityInfo().applicationScale)
+                || activityToken != null)) {
             if (DEBUG) {
                 Log.d(TAG, "loaded context has different scaling. Using container's" +
                         " compatiblity info:" + container.getDisplayMetrics());
             }
-            mResources = mainThread.getTopLevelResources(
-                    mPackageInfo.getResDir(), Display.DEFAULT_DISPLAY,
-                    null, container.getCompatibilityInfo());
+            if (compatInfo == null) {
+                compatInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
+            }
+            mDisplayAdjustments.setCompatibilityInfo(compatInfo);
+            mDisplayAdjustments.setActivityToken(activityToken);
+            mResources = mainThread.getTopLevelResources(mPackageInfo.getResDir(),
+                    Display.DEFAULT_DISPLAY, null, compatInfo, activityToken);
+        } else {
+            mDisplayAdjustments.setCompatibilityInfo(packageInfo.getCompatibilityInfo());
+            mDisplayAdjustments.setActivityToken(activityToken);
         }
         mMainThread = mainThread;
         mActivityToken = activityToken;
