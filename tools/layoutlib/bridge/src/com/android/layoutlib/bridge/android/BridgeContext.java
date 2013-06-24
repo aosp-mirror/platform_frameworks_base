@@ -67,8 +67,8 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.BridgeInflater;
-import android.view.CompatibilityInfoHolder;
 import android.view.Display;
+import android.view.DisplayAdjustments;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -1394,7 +1394,7 @@ public final class BridgeContext extends Context {
     }
 
     @Override
-    public CompatibilityInfoHolder getCompatibilityInfo(int displayId) {
+    public DisplayAdjustments getDisplayAdjustments(int displayId) {
         // pass
         return null;
     }
