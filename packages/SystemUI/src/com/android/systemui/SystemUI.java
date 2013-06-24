@@ -21,9 +21,11 @@ import android.content.res.Configuration;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Map;
 
 public abstract class SystemUI {
     public Context mContext;
+    public Map<Class<?>, Object> mComponents;
 
     public abstract void start();
     
@@ -31,5 +33,16 @@ public abstract class SystemUI {
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getComponent(Class<T> interfaceType) {
+        return (T) (mComponents != null ? mComponents.get(interfaceType) : null);
+    }
+
+    public <T, C extends T> void putComponent(Class<T> interfaceType, C component) {
+        if (mComponents != null) {
+            mComponents.put(interfaceType, component);
+        }
     }
 }

@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2010 The Android Open Source Project
  *
@@ -19,11 +18,9 @@ package com.android.systemui.statusbar;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
-import android.app.ActivityOptions;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,10 +28,7 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.graphics.Bitmap;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
@@ -47,7 +41,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.IWindowManager;
@@ -70,11 +63,9 @@ import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.widget.SizeAdaptiveLayout;
 import com.android.systemui.R;
+import com.android.systemui.RecentsComponent;
 import com.android.systemui.SearchPanelView;
 import com.android.systemui.SystemUI;
-import com.android.systemui.recent.RecentTasksLoader;
-import com.android.systemui.recent.RecentsActivity;
-import com.android.systemui.recent.TaskDescription;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 
 import java.util.ArrayList;
@@ -141,6 +132,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected Display mDisplay;
 
     private boolean mDeviceProvisioned = false;
+
+    private RecentsComponent mRecents;
 
     public IStatusBarService getStatusBarService() {
         return mBarService;
@@ -218,6 +211,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+
+        mRecents = getComponent(RecentsComponent.class);
 
         mLocale = mContext.getResources().getConfiguration().locale;
         mLayoutDirection = TextUtils.getLayoutDirectionFromLocale(mLocale);
@@ -488,140 +483,6 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected abstract View getStatusBarView();
 
-    protected void toggleRecentsActivity() {
-        try {
-
-            TaskDescription firstTask = RecentTasksLoader.getInstance(mContext).getFirstTask();
-
-            Intent intent = new Intent(RecentsActivity.TOGGLE_RECENTS_INTENT);
-            intent.setClassName("com.android.systemui",
-                    "com.android.systemui.recent.RecentsActivity");
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-
-            if (firstTask == null) {
-                if (RecentsActivity.forceOpaqueBackground(mContext)) {
-                    ActivityOptions opts = ActivityOptions.makeCustomAnimation(mContext,
-                            R.anim.recents_launch_from_launcher_enter,
-                            R.anim.recents_launch_from_launcher_exit);
-                    mContext.startActivityAsUser(intent, opts.toBundle(), new UserHandle(
-                            UserHandle.USER_CURRENT));
-                } else {
-                    // The correct window animation will be applied via the activity's style
-                    mContext.startActivityAsUser(intent, new UserHandle(
-                            UserHandle.USER_CURRENT));
-                }
-
-            } else {
-                Bitmap first = firstTask.getThumbnail();
-                final Resources res = mContext.getResources();
-
-                float thumbWidth = res
-                        .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_width);
-                float thumbHeight = res
-                        .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_height);
-                if (first == null) {
-                    throw new RuntimeException("Recents thumbnail is null");
-                }
-                if (first.getWidth() != thumbWidth || first.getHeight() != thumbHeight) {
-                    first = Bitmap.createScaledBitmap(first, (int) thumbWidth, (int) thumbHeight,
-                            true);
-                    if (first == null) {
-                        throw new RuntimeException("Recents thumbnail is null");
-                    }
-                }
-
-
-                DisplayMetrics dm = new DisplayMetrics();
-                mDisplay.getMetrics(dm);
-                // calculate it here, but consider moving it elsewhere
-                // first, determine which orientation you're in.
-                final Configuration config = res.getConfiguration();
-                int x, y;
-
-                if (config.orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    float appLabelLeftMargin = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_app_label_left_margin);
-                    float appLabelWidth = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_app_label_width);
-                    float thumbLeftMargin = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_left_margin);
-                    float thumbBgPadding = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_bg_padding);
-
-                    float width = appLabelLeftMargin +
-                            +appLabelWidth
-                            + thumbLeftMargin
-                            + thumbWidth
-                            + 2 * thumbBgPadding;
-
-                    x = (int) ((dm.widthPixels - width) / 2f + appLabelLeftMargin + appLabelWidth
-                            + thumbBgPadding + thumbLeftMargin);
-                    y = (int) (dm.heightPixels
-                            - res.getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_height) - thumbBgPadding);
-                    if (mLayoutDirection == View.LAYOUT_DIRECTION_RTL) {
-                        x = dm.widthPixels - x - res
-                                .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_width);
-                    }
-
-                } else { // if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                    float thumbTopMargin = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_top_margin);
-                    float thumbBgPadding = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_bg_padding);
-                    float textPadding = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_text_description_padding);
-                    float labelTextSize = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_app_label_text_size);
-                    Paint p = new Paint();
-                    p.setTextSize(labelTextSize);
-                    float labelTextHeight = p.getFontMetricsInt().bottom
-                            - p.getFontMetricsInt().top;
-                    float descriptionTextSize = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_app_description_text_size);
-                    p.setTextSize(descriptionTextSize);
-                    float descriptionTextHeight = p.getFontMetricsInt().bottom
-                            - p.getFontMetricsInt().top;
-
-                    float statusBarHeight = res
-                            .getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
-                    float recentsItemTopPadding = statusBarHeight;
-
-                    float height = thumbTopMargin
-                            + thumbHeight
-                            + 2 * thumbBgPadding + textPadding + labelTextHeight
-                            + recentsItemTopPadding + textPadding + descriptionTextHeight;
-                    float recentsItemRightPadding = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_item_padding);
-                    float recentsScrollViewRightPadding = res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_right_glow_margin);
-                    x = (int) (dm.widthPixels - res
-                            .getDimensionPixelSize(R.dimen.status_bar_recents_thumbnail_width)
-                            - thumbBgPadding - recentsItemRightPadding - recentsScrollViewRightPadding);
-                    y = (int) ((dm.heightPixels - statusBarHeight - height) / 2f + thumbTopMargin
-                            + recentsItemTopPadding + thumbBgPadding + statusBarHeight);
-                }
-
-                ActivityOptions opts = ActivityOptions.makeThumbnailScaleDownAnimation(
-                        getStatusBarView(),
-                        first, x, y,
-                        new ActivityOptions.OnAnimationStartedListener() {
-                            public void onAnimationStarted() {
-                                Intent intent = new Intent(RecentsActivity.WINDOW_ANIMATION_START_INTENT);
-                                intent.setPackage("com.android.systemui");
-                                mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
-                            }
-                        });
-                intent.putExtra(RecentsActivity.WAITING_FOR_WINDOW_ANIMATION_PARAM, true);
-                mContext.startActivityAsUser(intent, opts.toBundle(), new UserHandle(
-                        UserHandle.USER_CURRENT));
-            }
-            return;
-        } catch (ActivityNotFoundException e) {
-            Log.e(TAG, "Failed to launch RecentAppsIntent", e);
-        }
-    }
-
     protected View.OnTouchListener mRecentsPreloadOnTouchListener = new View.OnTouchListener() {
         // additional optimization when we have software system buttons - start loading the recent
         // tasks on touch down
@@ -642,24 +503,28 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     };
 
-    protected void preloadRecentTasksList() {
-        if (DEBUG) Log.d(TAG, "preloading recents");
-        Intent intent = new Intent(RecentsActivity.PRELOAD_INTENT);
-        intent.setClassName("com.android.systemui",
-                "com.android.systemui.recent.RecentsPreloadReceiver");
-        mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+    protected void toggleRecentsActivity() {
+        if (mRecents != null) {
+            mRecents.toggleRecents(mDisplay, mLayoutDirection, getStatusBarView());
+        }
+    }
 
-        RecentTasksLoader.getInstance(mContext).preloadFirstTask();
+    protected void preloadRecentTasksList() {
+        if (mRecents != null) {
+            mRecents.preloadRecentTasksList();
+        }
     }
 
     protected void cancelPreloadingRecentTasksList() {
-        if (DEBUG) Log.d(TAG, "cancel preloading recents");
-        Intent intent = new Intent(RecentsActivity.CANCEL_PRELOAD_INTENT);
-        intent.setClassName("com.android.systemui",
-                "com.android.systemui.recent.RecentsPreloadReceiver");
-        mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+        if (mRecents != null) {
+            mRecents.cancelPreloadingRecentTasksList();
+        }
+    }
 
-        RecentTasksLoader.getInstance(mContext).cancelPreloadingFirstTask();
+    protected void closeRecents() {
+        if (mRecents != null) {
+            mRecents.closeRecents();
+        }
     }
 
     protected class H extends Handler {
@@ -667,14 +532,10 @@ public abstract class BaseStatusBar extends SystemUI implements
             Intent intent;
             switch (m.what) {
              case MSG_TOGGLE_RECENTS_PANEL:
-                 if (DEBUG) Log.d(TAG, "toggle recents panel");
                  toggleRecentsActivity();
                  break;
              case MSG_CLOSE_RECENTS_PANEL:
-                 if (DEBUG) Log.d(TAG, "closing recents panel");
-                 intent = new Intent(RecentsActivity.CLOSE_RECENTS_INTENT);
-                 intent.setPackage("com.android.systemui");
-                 mContext.sendBroadcastAsUser(intent, new UserHandle(UserHandle.USER_CURRENT));
+                 closeRecents();
                  break;
              case MSG_PRELOAD_RECENT_APPS:
                   preloadRecentTasksList();

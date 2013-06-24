@@ -84,6 +84,7 @@ public class SystemBars extends SystemUI implements ServiceMonitor.Callbacks {
             throw andLog("Error creating status bar component: " + clsName, t);
         }
         mStatusBar.mContext = mContext;
+        mStatusBar.mComponents = mComponents;
         mStatusBar.start();
         if (DEBUG) Log.d(TAG, "started " + mStatusBar.getClass().getSimpleName());
     }

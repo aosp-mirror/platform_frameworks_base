@@ -24,6 +24,7 @@ import android.util.Log;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.HashMap;
 
 public class SystemUIService extends Service {
     private static final String TAG = "SystemUIService";
@@ -32,6 +33,7 @@ public class SystemUIService extends Service {
      * The classes of the stuff to start.
      */
     private final Class<?>[] SERVICES = new Class[] {
+            com.android.systemui.recent.Recents.class,
             com.android.systemui.statusbar.SystemBars.class,
             com.android.systemui.power.PowerUI.class,
             com.android.systemui.media.RingtonePlayer.class,
@@ -45,6 +47,7 @@ public class SystemUIService extends Service {
 
     @Override
     public void onCreate() {
+        HashMap<Class<?>, Object> components = new HashMap<Class<?>, Object>();
         final int N = SERVICES.length;
         for (int i=0; i<N; i++) {
             Class<?> cl = SERVICES[i];
@@ -57,6 +60,7 @@ public class SystemUIService extends Service {
                 throw new RuntimeException(ex);
             }
             mServices[i].mContext = this;
+            mServices[i].mComponents = components;
             Log.d(TAG, "running: " + mServices[i]);
             mServices[i].start();
         }
