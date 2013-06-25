@@ -17,8 +17,10 @@
 package android.hardware.photography;
 
 import android.graphics.ImageFormat;
+import android.os.IBinder;
 import android.renderscript.Allocation;
 import android.renderscript.RenderScript;
+import android.util.Log;
 import android.view.Surface;
 
 import java.lang.AutoCloseable;
@@ -100,6 +102,8 @@ public final class CameraDevice implements AutoCloseable {
      * @see #createCaptureRequest
      */
     public static final int TEMPLATE_MANUAL = 5;
+
+    private static final String TAG = "CameraDevice";
 
     /**
      * Get the static properties for this camera. These are identical to the
@@ -451,6 +455,7 @@ public final class CameraDevice implements AutoCloseable {
      * the camera device interface will throw a {@link IllegalStateException},
      * except for calls to close().
      */
+    @Override
     public void close() {
     }
 
@@ -550,6 +555,13 @@ public final class CameraDevice implements AutoCloseable {
          * @param error The error code, one of the ErrorListener.ERROR_ values.
          */
         public void onCameraDeviceError(CameraDevice camera, int error);
+    }
+
+    /**
+     * @hide
+     */
+    public CameraDevice(IBinder binder) {
+        Log.e(TAG, "CameraDevice constructor not implemented yet");
     }
 
 }

@@ -10653,7 +10653,7 @@ package android.hardware.location {
 
 package android.hardware.photography {
 
-  public class CameraAccessException extends java.lang.Exception {
+  public class CameraAccessException extends android.util.AndroidException {
     ctor public CameraAccessException(int);
     ctor public CameraAccessException(int, java.lang.String);
     ctor public CameraAccessException(int, java.lang.String, java.lang.Throwable);
@@ -10666,7 +10666,6 @@ package android.hardware.photography {
   }
 
   public final class CameraDevice implements java.lang.AutoCloseable {
-    ctor public CameraDevice();
     method public void capture(android.hardware.photography.CaptureRequest, android.hardware.photography.CameraDevice.CaptureListener) throws android.hardware.photography.CameraAccessException;
     method public void captureBurst(java.util.List<android.hardware.photography.CaptureRequest>, android.hardware.photography.CameraDevice.CaptureListener) throws android.hardware.photography.CameraAccessException;
     method public void close();
@@ -10699,7 +10698,7 @@ package android.hardware.photography {
 
   public final class CameraManager {
     method public android.hardware.photography.CameraProperties getCameraProperties(java.lang.String) throws android.hardware.photography.CameraAccessException;
-    method public java.lang.String[] getDeviceIdList();
+    method public java.lang.String[] getDeviceIdList() throws android.hardware.photography.CameraAccessException;
     method public android.hardware.photography.CameraDevice openCamera(java.lang.String) throws android.hardware.photography.CameraAccessException;
     method public void registerCameraListener(android.hardware.photography.CameraManager.CameraListener);
     method public void unregisterCameraListener(android.hardware.photography.CameraManager.CameraListener);
