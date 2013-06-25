@@ -356,6 +356,14 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لأسلوب الإدخال. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"الالتزام بخدمة إمكانية الدخول"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لخدمة إمكانية الدخول. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
+    <!-- no translation found for permlab_bindPrintService (8462815179572748761) -->
+    <skip />
+    <!-- no translation found for permdesc_bindPrintService (7960067623209111135) -->
+    <skip />
+    <!-- no translation found for permlab_accessAllPrintJobs (1120792468465711159) -->
+    <skip />
+    <!-- no translation found for permdesc_accessAllPrintJobs (2978185311041864762) -->
+    <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"الالتزام بخدمة إدخال النصوص"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لخدمة إدخال النصوص (على سبيل المثال، SpellCheckerService). لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"الالتزام بخدمة VPN"</string>
@@ -1502,4 +1510,82 @@
     <string name="app_no_restricted_accounts" msgid="5739463249673727736">"لا يتوافق هذا التطبيق مع حسابات الملفات الشخصية المقيدة"</string>
     <string name="app_not_found" msgid="3429141853498927379">"لم يتم العثور على تطبيق يمكنه التعامل مع هذا الإجراء."</string>
     <string name="revoke" msgid="5404479185228271586">"إلغاء"</string>
+    <!-- no translation found for mediaSize_iso_a0 (7875427489420821793) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_a1 (3760734499050875356) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_a2 (5973266378020144382) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_a3 (1373407105687300884) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_a4 (6689772807982597254) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_a5 (5353549652015741040) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_a6 (8585038048674911907) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_a7 (6641836716963839119) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_a8 (7571139437465693355) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_a9 (1378455891957115079) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_a10 (2480747457429475344) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_b0 (3965935097661108039) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_b1 (2505753285010115437) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_b2 (8763874709859458453) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_b3 (4210506688191764076) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_b4 (5749404165888526034) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_b5 (7640627414621904733) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_b6 (7342988864712748544) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_b7 (5069844065235382429) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_b8 (7316818922278779774) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_b9 (5414727094026532341) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_b10 (5251253731832048185) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_c0 (4003138342671964217) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_c1 (1935188063393553008) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_c2 (3197307969712069904) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_c3 (4335826087321913508) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_c4 (3745639598281015005) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_c5 (8269457765822791013) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_c6 (566666105260346930) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_c7 (8678413180782608498) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_c8 (8392376206627041730) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_c9 (9191613372324845405) -->
+    <skip />
+    <!-- no translation found for mediaSize_iso_c10 (7327709699184920822) -->
+    <skip />
+    <!-- no translation found for mediaSize_na_letter (4191805615829472953) -->
+    <skip />
+    <!-- no translation found for mediaSize_na_gvrnmt_letter (7853382192649405507) -->
+    <skip />
+    <!-- no translation found for mediaSize_na_legal (6697982988283823150) -->
+    <skip />
+    <!-- no translation found for mediaSize_na_junior_legal (3727743969902758948) -->
+    <skip />
+    <!-- no translation found for mediaSize_na_ledger (281871464896601236) -->
+    <skip />
+    <!-- no translation found for mediaSize_na_tabloid (5775966416333578127) -->
+    <skip />
 </resources>
