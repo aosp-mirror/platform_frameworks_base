@@ -291,6 +291,7 @@ package android {
     field public static final int autoAdvanceViewId = 16843535; // 0x101030f
     field public static final int autoCompleteTextViewStyle = 16842859; // 0x101006b
     field public static final int autoLink = 16842928; // 0x10100b0
+    field public static final int autoMirrored = 16843752; // 0x10103e8
     field public static final int autoStart = 16843445; // 0x10102b5
     field public static final deprecated int autoText = 16843114; // 0x101016a
     field public static final int autoUrlDetect = 16843404; // 0x101028c
@@ -9891,6 +9892,7 @@ package android.graphics.drawable {
     method public android.graphics.Shader.TileMode getTileModeY();
     method public boolean hasAntiAlias();
     method public boolean hasMipMap();
+    method public final boolean isAutoMirrored();
     method public void setAlpha(int);
     method public void setAntiAlias(boolean);
     method public void setColorFilter(android.graphics.ColorFilter);
@@ -9957,6 +9959,7 @@ package android.graphics.drawable {
     method public android.graphics.Region getTransparentRegion();
     method public void inflate(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public void invalidateSelf();
+    method public boolean isAutoMirrored();
     method public boolean isStateful();
     method public final boolean isVisible();
     method public void jumpToCurrentState();
@@ -9967,6 +9970,7 @@ package android.graphics.drawable {
     method public static int resolveOpacity(int, int);
     method public void scheduleSelf(java.lang.Runnable, long);
     method public abstract void setAlpha(int);
+    method public void setAutoMirrored(boolean);
     method public void setBounds(int, int, int, int);
     method public void setBounds(android.graphics.Rect);
     method public final void setCallback(android.graphics.drawable.Drawable.Callback);
@@ -25136,6 +25140,13 @@ package android.util {
     method public android.util.JsonWriter value(double) throws java.io.IOException;
     method public android.util.JsonWriter value(long) throws java.io.IOException;
     method public android.util.JsonWriter value(java.lang.Number) throws java.io.IOException;
+  }
+
+  public abstract interface LayoutDirection {
+    field public static final int INHERIT = 2; // 0x2
+    field public static final int LOCALE = 3; // 0x3
+    field public static final int LTR = 0; // 0x0
+    field public static final int RTL = 1; // 0x1
   }
 
   public final class Log {
