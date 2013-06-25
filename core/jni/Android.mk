@@ -131,6 +131,7 @@ LOCAL_SRC_FILES:= \
 	android_media_RemoteDisplay.cpp \
 	android_media_ToneGenerator.cpp \
 	android_hardware_Camera.cpp \
+	android_hardware_photography_CameraMetadata.cpp \
 	android_hardware_SensorManager.cpp \
 	android_hardware_SerialPort.cpp \
 	android_hardware_UsbDevice.cpp \
@@ -164,6 +165,7 @@ LOCAL_C_INCLUDES += \
 	$(call include-path-for, libhardware)/hardware \
 	$(call include-path-for, libhardware_legacy)/hardware_legacy \
 	$(TOP)/frameworks/av/include \
+	$(TOP)/system/media/camera/include \
 	external/skia/src/core \
 	external/skia/src/pdf \
 	external/skia/src/images \

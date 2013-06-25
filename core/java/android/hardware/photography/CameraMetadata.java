@@ -18,6 +18,8 @@ package android.hardware.photography;
 
 import android.os.Parcelable;
 import android.os.Parcel;
+import android.util.Log;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,26 +34,33 @@ import java.util.Map;
  * @see CameraManager
  * @see CameraProperties
  **/
-public class CameraMetadata implements Parcelable {
+public class CameraMetadata implements Parcelable, AutoCloseable {
 
     public CameraMetadata() {
         mMetadataMap = new HashMap<Key<?>, Object>();
-    }
 
-    private CameraMetadata(Parcel in) {
-
+        mMetadataPtr = nativeAllocate();
+        if (mMetadataPtr == 0) {
+            throw new OutOfMemoryError("Failed to allocate native CameraMetadata");
+        }
     }
 
     public static final Parcelable.Creator<CameraMetadata> CREATOR =
             new Parcelable.Creator<CameraMetadata>() {
+        @Override
         public CameraMetadata createFromParcel(Parcel in) {
-            return new CameraMetadata(in);
+            CameraMetadata metadata = new CameraMetadata();
+            metadata.readFromParcel(in);
+            return metadata;
         }
 
+        @Override
         public CameraMetadata[] newArray(int size) {
             return new CameraMetadata[size];
         }
     };
+
+    private static final String TAG = "CameraMetadataJV";
 
     /**
      * Set a camera metadata field to a value. The field definitions can be
@@ -63,6 +72,8 @@ public class CameraMetadata implements Parcelable {
      * type to the key.
      */
     public <T> void set(Key<T> key, T value) {
+        Log.e(TAG, "Not fully implemented yet");
+
         mMetadataMap.put(key, value);
     }
 
@@ -76,6 +87,8 @@ public class CameraMetadata implements Parcelable {
      */
     @SuppressWarnings("unchecked")
     public <T> T get(Key<T> key) {
+        Log.e(TAG, "Not fully implemented yet");
+
         return (T) mMetadataMap.get(key);
     }
 
@@ -86,7 +99,15 @@ public class CameraMetadata implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        nativeWriteToParcel(dest);
+    }
 
+    /**
+     * Expand this object from a Parcel.
+     * @param in The Parcel from which the object should be read
+     */
+    public void readFromParcel(Parcel in) {
+        nativeReadFromParcel(in);
     }
 
     public static class Key<T> {
@@ -125,5 +146,88 @@ public class CameraMetadata implements Parcelable {
         private final String mName;
     }
 
-    private Map<Key<?>, Object> mMetadataMap;
+    private final Map<Key<?>, Object> mMetadataMap;
+
+    /**
+     * @hide
+     */
+    private long mMetadataPtr; // native CameraMetadata*
+
+    private native long nativeAllocate();
+    private native synchronized void nativeWriteToParcel(Parcel dest);
+    private native synchronized void nativeReadFromParcel(Parcel source);
+    private native synchronized void nativeSwap(CameraMetadata other) throws NullPointerException;
+    private native synchronized void nativeClose();
+    private native synchronized boolean nativeIsEmpty();
+    private native synchronized int nativeGetEntryCount();
+    private static native void nativeClassInit();
+
+    /**
+     * <p>Perform a 0-copy swap of the internal metadata with another object.</p>
+     *
+     * <p>Useful to convert a CameraMetadata into e.g. a CaptureRequest.</p>
+     *
+     * @param other metadata to swap with
+     * @throws NullPointerException if other was null
+     * @hide
+     */
+    public void swap(CameraMetadata other) {
+        nativeSwap(other);
+    }
+
+    /**
+     * @hide
+     */
+    public int getEntryCount() {
+        return nativeGetEntryCount();
+    }
+
+    /**
+     * Does this metadata contain at least 1 entry?
+     *
+     * @hide
+     */
+    public boolean isEmpty() {
+        return nativeIsEmpty();
+    }
+
+    /**
+     * <p>Closes this object, and releases all native resources associated with it.</p>
+     *
+     * <p>Calling any other public method after this will result in an IllegalStateException
+     * being thrown.</p>
+     */
+    @Override
+    public void close() throws Exception {
+        // this sets mMetadataPtr to 0
+        nativeClose();
+        mMetadataPtr = 0; // set it to 0 again to prevent eclipse from making this field final
+    }
+
+    /**
+     * Whether or not {@link #close} has already been called (at least once) on this object.
+     * @hide
+     */
+    public boolean isClosed() {
+        synchronized (this) {
+            return mMetadataPtr == 0;
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            close();
+        } finally {
+            super.finalize();
+        }
+    }
+
+    /**
+     * We use a class initializer to allow the native code to cache some field offsets
+     */
+    static {
+        System.loadLibrary("media_jni");
+        nativeClassInit();
+    }
 }
