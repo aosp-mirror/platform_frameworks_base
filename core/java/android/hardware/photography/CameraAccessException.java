@@ -16,8 +16,6 @@
 
 package android.hardware.photography;
 
-import android.util.AndroidException;
-
 /**
  * <p><code>CameraAccessException</code> is thrown if a camera device could not
  * be queried or opened by the {@link CameraManager}, or if the connection to an
@@ -26,7 +24,7 @@ import android.util.AndroidException;
  * @see CameraManager
  * @see CameraDevice
  */
-public class CameraAccessException extends AndroidException {
+public class CameraAccessException extends Exception {
     /**
      * The camera device is in use already
      */
@@ -53,10 +51,7 @@ public class CameraAccessException extends AndroidException {
      */
     public static final int CAMERA_DISCONNECTED = 4;
 
-    // Make the eclipse warning about serializable exceptions go away
-    private static final long serialVersionUID = 5630338637471475675L; // randomly generated
-
-    private final int mReason;
+    private int mReason;
 
     /**
      * The reason for the failure to access the camera.
@@ -71,7 +66,6 @@ public class CameraAccessException extends AndroidException {
     }
 
     public CameraAccessException(int problem) {
-        super(getDefaultMessage(problem));
         mReason = problem;
     }
 
@@ -86,25 +80,7 @@ public class CameraAccessException extends AndroidException {
     }
 
     public CameraAccessException(int problem, Throwable cause) {
-        super(getDefaultMessage(problem), cause);
+        super(cause);
         mReason = problem;
-    }
-
-    private static String getDefaultMessage(int problem) {
-        switch (problem) {
-            case CAMERA_IN_USE:
-                return "The camera device is in use already";
-            case MAX_CAMERAS_IN_USE:
-                return "The system-wide limit for number of open cameras has been reached, " +
-                       "and more camera devices cannot be opened until previous instances " +
-                       "are closed.";
-            case CAMERA_DISABLED:
-                return "The camera is disabled due to a device policy, and cannot be opened.";
-            case CAMERA_DISCONNECTED:
-                return "The camera device is removable and has been disconnected from the Android" +
-                       " device, or the camera service has shut down the connection due to a " +
-                       "higher-priority access request for the camera device.";
-        }
-        return null;
     }
 }
