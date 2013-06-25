@@ -18498,54 +18498,55 @@ package android.print {
   }
 
   public static final class PrintAttributes.MediaSize {
-    ctor public PrintAttributes.MediaSize(java.lang.String, java.lang.String, int, int, int);
+    ctor public PrintAttributes.MediaSize(java.lang.String, java.lang.CharSequence, int, int);
+    method public static android.print.PrintAttributes.MediaSize createMediaSize(android.content.pm.PackageManager, int);
     method public int getHeightMils();
     method public java.lang.String getId();
-    method public java.lang.CharSequence getLabel(android.content.pm.PackageManager);
+    method public java.lang.CharSequence getLabel();
     method public int getWidthMils();
-    field public static final android.print.PrintAttributes.MediaSize ISO_A0;
-    field public static final android.print.PrintAttributes.MediaSize ISO_A1;
-    field public static final android.print.PrintAttributes.MediaSize ISO_A10;
-    field public static final android.print.PrintAttributes.MediaSize ISO_A2;
-    field public static final android.print.PrintAttributes.MediaSize ISO_A3;
-    field public static final android.print.PrintAttributes.MediaSize ISO_A4;
-    field public static final android.print.PrintAttributes.MediaSize ISO_A5;
-    field public static final android.print.PrintAttributes.MediaSize ISO_A6;
-    field public static final android.print.PrintAttributes.MediaSize ISO_A7;
-    field public static final android.print.PrintAttributes.MediaSize ISO_A8;
-    field public static final android.print.PrintAttributes.MediaSize ISO_A9;
-    field public static final android.print.PrintAttributes.MediaSize ISO_B0;
-    field public static final android.print.PrintAttributes.MediaSize ISO_B1;
-    field public static final android.print.PrintAttributes.MediaSize ISO_B10;
-    field public static final android.print.PrintAttributes.MediaSize ISO_B2;
-    field public static final android.print.PrintAttributes.MediaSize ISO_B3;
-    field public static final android.print.PrintAttributes.MediaSize ISO_B4;
-    field public static final android.print.PrintAttributes.MediaSize ISO_B5;
-    field public static final android.print.PrintAttributes.MediaSize ISO_B6;
-    field public static final android.print.PrintAttributes.MediaSize ISO_B7;
-    field public static final android.print.PrintAttributes.MediaSize ISO_B8;
-    field public static final android.print.PrintAttributes.MediaSize ISO_B9;
-    field public static final android.print.PrintAttributes.MediaSize ISO_C0;
-    field public static final android.print.PrintAttributes.MediaSize ISO_C1;
-    field public static final android.print.PrintAttributes.MediaSize ISO_C10;
-    field public static final android.print.PrintAttributes.MediaSize ISO_C2;
-    field public static final android.print.PrintAttributes.MediaSize ISO_C3;
-    field public static final android.print.PrintAttributes.MediaSize ISO_C4;
-    field public static final android.print.PrintAttributes.MediaSize ISO_C5;
-    field public static final android.print.PrintAttributes.MediaSize ISO_C6;
-    field public static final android.print.PrintAttributes.MediaSize ISO_C7;
-    field public static final android.print.PrintAttributes.MediaSize ISO_C8;
-    field public static final android.print.PrintAttributes.MediaSize ISO_C9;
-    field public static final android.print.PrintAttributes.MediaSize NA_GOVT_LETTER;
-    field public static final android.print.PrintAttributes.MediaSize NA_JUNIOR_LEGAL;
-    field public static final android.print.PrintAttributes.MediaSize NA_LEDGER;
-    field public static final android.print.PrintAttributes.MediaSize NA_LEGAL;
-    field public static final android.print.PrintAttributes.MediaSize NA_LETTER;
-    field public static final android.print.PrintAttributes.MediaSize NA_TBLOID;
+    field public static final int ISO_A0 = 1; // 0x1
+    field public static final int ISO_A1 = 2; // 0x2
+    field public static final int ISO_A10 = 11; // 0xb
+    field public static final int ISO_A2 = 3; // 0x3
+    field public static final int ISO_A3 = 4; // 0x4
+    field public static final int ISO_A4 = 5; // 0x5
+    field public static final int ISO_A5 = 6; // 0x6
+    field public static final int ISO_A6 = 7; // 0x7
+    field public static final int ISO_A7 = 8; // 0x8
+    field public static final int ISO_A8 = 9; // 0x9
+    field public static final int ISO_A9 = 10; // 0xa
+    field public static final int ISO_B0 = 100; // 0x64
+    field public static final int ISO_B1 = 101; // 0x65
+    field public static final int ISO_B10 = 110; // 0x6e
+    field public static final int ISO_B2 = 102; // 0x66
+    field public static final int ISO_B3 = 103; // 0x67
+    field public static final int ISO_B4 = 104; // 0x68
+    field public static final int ISO_B5 = 105; // 0x69
+    field public static final int ISO_B6 = 106; // 0x6a
+    field public static final int ISO_B7 = 107; // 0x6b
+    field public static final int ISO_B8 = 108; // 0x6c
+    field public static final int ISO_B9 = 109; // 0x6d
+    field public static final int ISO_C0 = 200; // 0xc8
+    field public static final int ISO_C1 = 201; // 0xc9
+    field public static final int ISO_C10 = 210; // 0xd2
+    field public static final int ISO_C2 = 202; // 0xca
+    field public static final int ISO_C3 = 203; // 0xcb
+    field public static final int ISO_C4 = 204; // 0xcc
+    field public static final int ISO_C5 = 205; // 0xcd
+    field public static final int ISO_C6 = 206; // 0xce
+    field public static final int ISO_C7 = 207; // 0xcf
+    field public static final int ISO_C8 = 208; // 0xd0
+    field public static final int ISO_C9 = 209; // 0xd1
+    field public static final int NA_GOVT_LETTER = 301; // 0x12d
+    field public static final int NA_JUNIOR_LEGAL = 303; // 0x12f
+    field public static final int NA_LEDGER = 304; // 0x130
+    field public static final int NA_LEGAL = 302; // 0x12e
+    field public static final int NA_LETTER = 300; // 0x12c
+    field public static final int NA_TBLOID = 305; // 0x131
   }
 
   public static final class PrintAttributes.Resolution {
-    ctor public PrintAttributes.Resolution(java.lang.String, java.lang.String, int, int, int);
+    ctor public PrintAttributes.Resolution(java.lang.String, java.lang.CharSequence, int, int);
     method public int getHorizontalDpi();
     method public java.lang.String getId();
     method public java.lang.CharSequence getLabel(android.content.pm.PackageManager);
@@ -18553,7 +18554,7 @@ package android.print {
   }
 
   public static final class PrintAttributes.Tray {
-    ctor public PrintAttributes.Tray(java.lang.String, java.lang.String, int);
+    ctor public PrintAttributes.Tray(java.lang.String, java.lang.CharSequence);
     method public java.lang.String getId();
     method public java.lang.CharSequence getLabel(android.content.pm.PackageManager);
   }

@@ -356,7 +356,7 @@ public class PrintJobConfigActivity extends Activity {
         for (int i = 0; i < mediaSizeCount; i++) {
             MediaSize mediaSize = mediaSizes.get(i);
             mMediaSizeSpinnerAdapter.add(new SpinnerItem<MediaSize>(
-                    mediaSize, mediaSize.getLabel(getPackageManager())));
+                    mediaSize, mediaSize.getLabel()));
         }
         final int selectedMediaSizeIndex = mediaSizes.indexOf(
                 mPrintAttributes.getMediaSize());
@@ -393,28 +393,32 @@ public class PrintJobConfigActivity extends Activity {
         // Input tray.
         mInputTraySpinnerAdapter.clear();
         List<Tray> inputTrays = printer.getInputTrays();
-        final int inputTrayCount = inputTrays.size();
-        for (int i = 0; i < inputTrayCount; i++) {
-            Tray inputTray = inputTrays.get(i);
-            mInputTraySpinnerAdapter.add(new SpinnerItem<Tray>(
-                    inputTray, inputTray.getLabel(getPackageManager())));
+        if (inputTrays != null) {
+            final int inputTrayCount = inputTrays.size();
+            for (int i = 0; i < inputTrayCount; i++) {
+                Tray inputTray = inputTrays.get(i);
+                mInputTraySpinnerAdapter.add(new SpinnerItem<Tray>(
+                        inputTray, inputTray.getLabel(getPackageManager())));
+            }
+            final int selectedInputTrayIndex = inputTrays.indexOf(
+                    mPrintAttributes.getInputTray());
+            mInputTraySpinner.setSelection(selectedInputTrayIndex);
         }
-        final int selectedInputTrayIndex = inputTrays.indexOf(
-                mPrintAttributes.getInputTray());
-        mInputTraySpinner.setSelection(selectedInputTrayIndex);
 
         // Output tray.
         mOutputTraySpinnerAdapter.clear();
         List<Tray> outputTrays = printer.getOutputTrays();
-        final int outputTrayCount = outputTrays.size();
-        for (int i = 0; i < outputTrayCount; i++) {
-            Tray outputTray = outputTrays.get(i);
-            mOutputTraySpinnerAdapter.add(new SpinnerItem<Tray>(
-                    outputTray, outputTray.getLabel(getPackageManager())));
+        if (outputTrays != null) {
+            final int outputTrayCount = outputTrays.size();
+            for (int i = 0; i < outputTrayCount; i++) {
+                Tray outputTray = outputTrays.get(i);
+                mOutputTraySpinnerAdapter.add(new SpinnerItem<Tray>(
+                        outputTray, outputTray.getLabel(getPackageManager())));
+            }
+            final int selectedOutputTrayIndex = outputTrays.indexOf(
+                    mPrintAttributes.getOutputTray());
+            mOutputTraySpinner.setSelection(selectedOutputTrayIndex);
         }
-        final int selectedOutputTrayIndex = outputTrays.indexOf(
-                mPrintAttributes.getOutputTray());
-        mOutputTraySpinner.setSelection(selectedOutputTrayIndex);
 
         // Duplex mode.
         final int duplexModes = printer.getDuplexModes();

@@ -907,6 +907,8 @@
   <java-symbol type="string" name="mediaSize_na_ledger" />
   <java-symbol type="string" name="mediaSize_na_tabloid" />
   <java-symbol type="string" name="restr_pin_enter_pin" />
+  <java-symbol type="string" name="write_fail_reason_cancelled" />
+  <java-symbol type="string" name="write_fail_reason_cannot_write" />
 
   <java-symbol type="plurals" name="abbrev_in_num_days" />
   <java-symbol type="plurals" name="abbrev_in_num_hours" />

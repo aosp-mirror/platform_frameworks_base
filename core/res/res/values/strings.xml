@@ -4251,6 +4251,11 @@
     <!-- North America Tabloid media (paper) size: 11" × 17" -->
     <string name="mediaSize_na_tabloid">Tabloid</string>
 
+    <!-- Write fail reason: printing was cancelled.[CHAR LIMIT=none] -->
+    <string name="write_fail_reason_cancelled">Cancelled</string>
+    <!-- Write fail reason: couldn't write the printed content. [CHAR LIMIT=none] -->
+    <string name="write_fail_reason_cannot_write">Error writing content</string>
+
     <!-- PIN creation dialog message [CHAR LIMIT=none] -->
     <string name="restr_pin_create_pin">Create a PIN for modifying restrictions</string>
     <!-- PIN entry dialog label for PIN [CHAR LIMIT=none] -->
@@ -4267,4 +4272,5 @@
         <item quantity="one">Incorrect PIN. Try again in 1 second.</item>
         <item quantity="other">Incorrect PIN. Try again in <xliff:g id="count">%d</xliff:g> seconds.</item>
     </plurals>
+
 </resources>

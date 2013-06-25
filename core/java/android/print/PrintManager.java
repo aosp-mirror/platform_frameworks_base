@@ -166,7 +166,7 @@ public final class PrintManager {
      * @see PrintJob
      */
     public PrintJob print(String printJobName, File pdfFile, PrintAttributes attributes) {
-        FileDocumentAdapter documentAdapter = new FileDocumentAdapter(pdfFile);
+        FileDocumentAdapter documentAdapter = new FileDocumentAdapter(mContext, pdfFile);
         return print(printJobName, documentAdapter, attributes);
     }
 
