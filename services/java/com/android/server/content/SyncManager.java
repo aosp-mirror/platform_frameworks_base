@@ -75,6 +75,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.accounts.AccountManagerService;
+import com.android.server.content.SyncStorageEngine.AuthorityInfo;
 import com.android.server.content.SyncStorageEngine.OnSyncRequestListener;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
@@ -1248,10 +1249,11 @@ public class SyncManager {
                     continue;
                 }
                 int row = table.getNumRows();
-                SyncStorageEngine.AuthorityInfo settings =
-                        mSyncStorageEngine.getOrCreateAuthority(
+                Pair<AuthorityInfo, SyncStatusInfo> syncAuthoritySyncStatus = 
+                        mSyncStorageEngine.getCopyOfAuthorityWithSyncStatus(
                                 account.account, account.userId, syncAdapterType.type.authority);
-                SyncStatusInfo status = mSyncStorageEngine.getOrCreateSyncStatus(settings);
+                SyncStorageEngine.AuthorityInfo settings = syncAuthoritySyncStatus.first;
+                SyncStatusInfo status = syncAuthoritySyncStatus.second;
 
                 String authority = settings.authority;
                 if (authority.length() > 50) {
@@ -1269,10 +1271,10 @@ public class SyncManager {
 
 
                 for (int i = 0; i < settings.periodicSyncs.size(); i++) {
-                    final Pair<Bundle, Long> pair = settings.periodicSyncs.get(0);
+                    final Pair<Bundle, Long> pair = settings.periodicSyncs.get(i);
                     final String period = String.valueOf(pair.second);
                     final String extras = pair.first.size() > 0 ? pair.first.toString() : "";
-                    final String next = formatTime(status.getPeriodicSyncTime(0)
+                    final String next = formatTime(status.getPeriodicSyncTime(i)
                             + pair.second * 1000);
                     table.set(row + i * 2, 12, period + extras);
                     table.set(row + i * 2 + 1, 12, next);
@@ -1942,30 +1944,36 @@ public class SyncManager {
 
             final long nowAbsolute = System.currentTimeMillis();
             final long shiftedNowAbsolute = (0 < nowAbsolute - mSyncRandomOffsetMillis)
-                                               ? (nowAbsolute  - mSyncRandomOffsetMillis) : 0;
+                    ? (nowAbsolute - mSyncRandomOffsetMillis) : 0;
 
-            ArrayList<SyncStorageEngine.AuthorityInfo> infos = mSyncStorageEngine.getAuthorities();
-            for (SyncStorageEngine.AuthorityInfo info : infos) {
-                // skip the sync if the account of this operation no longer exists
-                if (!containsAccountAndUser(accounts, info.account, info.userId)) {
+            ArrayList<Pair<AuthorityInfo, SyncStatusInfo>> infos = mSyncStorageEngine
+                    .getCopyOfAllAuthoritiesWithSyncStatus();
+            for (Pair<AuthorityInfo, SyncStatusInfo> info : infos) {
+                final AuthorityInfo authorityInfo = info.first;
+                final SyncStatusInfo status = info.second;
+                // skip the sync if the account of this operation no longer
+                // exists
+                if (!containsAccountAndUser(
+                        accounts, authorityInfo.account, authorityInfo.userId)) {
                     continue;
                 }
 
-                if (!mSyncStorageEngine.getMasterSyncAutomatically(info.userId)
-                        || !mSyncStorageEngine.getSyncAutomatically(info.account, info.userId,
-                                info.authority)) {
+                if (!mSyncStorageEngine.getMasterSyncAutomatically(authorityInfo.userId)
+                        || !mSyncStorageEngine.getSyncAutomatically(
+                                authorityInfo.account, authorityInfo.userId,
+                                authorityInfo.authority)) {
                     continue;
                 }
 
-                if (getIsSyncable(info.account, info.userId, info.authority)
+                if (getIsSyncable(
+                        authorityInfo.account, authorityInfo.userId, authorityInfo.authority)
                         == 0) {
                     continue;
                 }
 
-                SyncStatusInfo status = mSyncStorageEngine.getOrCreateSyncStatus(info);
-                for (int i = 0, N = info.periodicSyncs.size(); i < N; i++) {
-                    final Bundle extras = info.periodicSyncs.get(i).first;
-                    final Long periodInMillis = info.periodicSyncs.get(i).second * 1000;
+                for (int i = 0, N = authorityInfo.periodicSyncs.size(); i < N; i++) {
+                    final Bundle extras = authorityInfo.periodicSyncs.get(i).first;
+                    final Long periodInMillis = authorityInfo.periodicSyncs.get(i).second * 1000;
                     // Skip if the period is invalid
                     if (periodInMillis <= 0) {
                         continue;
@@ -1974,51 +1982,56 @@ public class SyncManager {
                     final long lastPollTimeAbsolute = status.getPeriodicSyncTime(i);
 
                     long remainingMillis
-                            = periodInMillis - (shiftedNowAbsolute % periodInMillis);
+                    = periodInMillis - (shiftedNowAbsolute % periodInMillis);
 
                     /*
-                     * Sync scheduling strategy:
-                     *    Set the next periodic sync based on a random offset (in seconds).
-                     *
-                     *    Also sync right now if any of the following cases hold
-                     *    and mark it as having been scheduled
-                     *
-                     * Case 1:  This sync is ready to run now.
-                     * Case 2:  If the lastPollTimeAbsolute is in the future,
-                     *          sync now and reinitialize. This can happen for
-                     *          example if the user changed the time, synced and
-                     *          changed back.
-                     * Case 3:  If we failed to sync at the last scheduled time
+                     * Sync scheduling strategy: Set the next periodic sync
+                     * based on a random offset (in seconds). Also sync right
+                     * now if any of the following cases hold and mark it as
+                     * having been scheduled
+                     * Case 1: This sync is ready to run
+                     * now.
+                     * Case 2: If the lastPollTimeAbsolute is in the
+                     * future, sync now and reinitialize. This can happen for
+                     * example if the user changed the time, synced and changed
+                     * back.
+                     * Case 3: If we failed to sync at the last scheduled
+                     * time
                      */
-                    if (remainingMillis == periodInMillis  // Case 1
+                    if (remainingMillis == periodInMillis // Case 1
                             || lastPollTimeAbsolute > nowAbsolute // Case 2
                             || (nowAbsolute - lastPollTimeAbsolute
                                     >= periodInMillis)) { // Case 3
                         // Sync now
                         final Pair<Long, Long> backoff = mSyncStorageEngine.getBackoff(
-                                info.account, info.userId, info.authority);
+                                authorityInfo.account, authorityInfo.userId,
+                                authorityInfo.authority);
                         final RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo;
                         syncAdapterInfo = mSyncAdapters.getServiceInfo(
-                                SyncAdapterType.newKey(info.authority, info.account.type),
-                                info.userId);
+                                SyncAdapterType.newKey(
+                                        authorityInfo.authority, authorityInfo.account.type),
+                                authorityInfo.userId);
                         if (syncAdapterInfo == null) {
                             continue;
                         }
                         scheduleSyncOperation(
-                                new SyncOperation(info.account, info.userId,
+                                new SyncOperation(authorityInfo.account, authorityInfo.userId,
                                         SyncOperation.REASON_PERIODIC,
                                         SyncStorageEngine.SOURCE_PERIODIC,
-                                        info.authority, extras, 0 /* delay */,
-                                        backoff != null ? backoff.first : 0,
+                                        authorityInfo.authority, extras, 0 /* delay */,
+                                                backoff != null ? backoff.first : 0,
                                         mSyncStorageEngine.getDelayUntilTime(
-                                                info.account, info.userId, info.authority),
+                                                authorityInfo.account, authorityInfo.userId,
+                                                authorityInfo.authority),
                                         syncAdapterInfo.type.allowParallelSyncs()));
-                        status.setPeriodicSyncTime(i, nowAbsolute);
+                        mSyncStorageEngine.setPeriodicSyncTime(authorityInfo.ident,
+                                authorityInfo.periodicSyncs.get(i), nowAbsolute);
                     }
                     // Compute when this periodic sync should next run
                     final long nextPollTimeAbsolute = nowAbsolute + remainingMillis;
 
-                    // remember this time if it is earlier than earliestFuturePollTime
+                    // remember this time if it is earlier than
+                    // earliestFuturePollTime
                     if (nextPollTimeAbsolute < earliestFuturePollTime) {
                         earliestFuturePollTime = nextPollTimeAbsolute;
                     }
@@ -2032,8 +2045,8 @@ public class SyncManager {
             // convert absolute time to elapsed time
             return SystemClock.elapsedRealtime()
                     + ((earliestFuturePollTime < nowAbsolute)
-                      ? 0
-                      : (earliestFuturePollTime - nowAbsolute));
+                            ? 0
+                            : (earliestFuturePollTime - nowAbsolute));
         }
 
         private long maybeStartNextSyncLocked() {

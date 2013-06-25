@@ -44,6 +44,7 @@ import android.util.Xml;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.server.content.SyncStorageEngine.AuthorityInfo;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -813,14 +814,6 @@ public class SyncStorageEngine extends Handler {
         }
     }
 
-    public AuthorityInfo getOrCreateAuthority(Account account, int userId, String authority) {
-        synchronized (mAuthorities) {
-            return getOrCreateAuthorityLocked(account, userId, authority,
-                    -1 /* assign a new identifier if creating a new authority */,
-                    true /* write to storage if this results in a change */);
-        }
-    }
-
     public void removeAuthority(Account account, int userId, String authority) {
         synchronized (mAuthorities) {
             removeAuthorityLocked(account, userId, authority, true /* doWrite */);
@@ -1238,17 +1231,27 @@ public class SyncStorageEngine extends Handler {
     }
 
     /**
-     * Return an array of the current authorities. Note
-     * that the objects inside the array are the real, live objects,
-     * so be careful what you do with them.
+     * Return a copy of the specified authority with the corresponding sync status
      */
-    public ArrayList<AuthorityInfo> getAuthorities() {
+    public Pair<AuthorityInfo, SyncStatusInfo> getCopyOfAuthorityWithSyncStatus(
+            Account account, int userId, String authority) {
         synchronized (mAuthorities) {
-            final int N = mAuthorities.size();
-            ArrayList<AuthorityInfo> infos = new ArrayList<AuthorityInfo>(N);
-            for (int i=0; i<N; i++) {
-                // Make deep copy because AuthorityInfo syncs are liable to change.
-                infos.add(new AuthorityInfo(mAuthorities.valueAt(i)));
+            AuthorityInfo authorityInfo = getOrCreateAuthorityLocked(account, userId, authority,
+                    -1 /* assign a new identifier if creating a new authority */,
+                    true /* write to storage if this results in a change */);
+            return createCopyPairOfAuthorityWithSyncStatusLocked(authorityInfo);
+        }
+    }
+
+    /**
+     * Return a copy of all authorities with their corresponding sync status
+     */
+    public ArrayList<Pair<AuthorityInfo, SyncStatusInfo>> getCopyOfAllAuthoritiesWithSyncStatus() {
+        synchronized (mAuthorities) {
+            ArrayList<Pair<AuthorityInfo, SyncStatusInfo>> infos =
+                    new ArrayList<Pair<AuthorityInfo, SyncStatusInfo>>(mAuthorities.size());
+            for (int i = 0; i < mAuthorities.size(); i++) {
+                infos.add(createCopyPairOfAuthorityWithSyncStatusLocked(mAuthorities.valueAt(i)));
             }
             return infos;
         }
@@ -1335,6 +1338,12 @@ public class SyncStorageEngine extends Handler {
             System.arraycopy(mDayStats, 0, ds, 0, ds.length);
             return ds;
         }
+    }
+
+    private Pair<AuthorityInfo, SyncStatusInfo> createCopyPairOfAuthorityWithSyncStatusLocked(
+            AuthorityInfo authorityInfo) {
+        SyncStatusInfo syncStatusInfo = getOrCreateSyncStatusLocked(authorityInfo.ident);
+        return Pair.create(new AuthorityInfo(authorityInfo), new SyncStatusInfo(syncStatusInfo));
     }
 
     private int getCurrentDayLocked() {
@@ -1427,9 +1436,22 @@ public class SyncStorageEngine extends Handler {
         }
     }
 
-    public SyncStatusInfo getOrCreateSyncStatus(AuthorityInfo authority) {
+    /**
+     * Updates (in a synchronized way) the periodic sync time of the specified
+     * authority id and target periodic sync
+     */
+    public void setPeriodicSyncTime(
+            int authorityId, Pair<Bundle, Long> targetPeriodicSync, long when) {
         synchronized (mAuthorities) {
-            return getOrCreateSyncStatusLocked(authority.ident);
+            final AuthorityInfo authority = mAuthorities.get(authorityId);
+            for (int i = 0; i < authority.periodicSyncs.size(); i++) {
+                Pair<Bundle, Long> periodicSync = authority.periodicSyncs.get(i);
+                if (periodicSync.first == targetPeriodicSync.first
+                        && periodicSync.second == targetPeriodicSync.second) {
+                    mSyncStatus.get(authorityId).setPeriodicSyncTime(i, when);
+                    break;
+                }
+            }
         }
     }
 
