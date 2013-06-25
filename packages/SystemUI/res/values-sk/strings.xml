@@ -201,8 +201,6 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATICKY"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Tu sa zobrazujú upozornenia"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Môžete ich kedykoľvek zobraziť tak, že posuniete prstom nadol."\n"Ak posuniete prstom nadol ešte raz, zobrazia sa ovládacie prvky systému."</string>
-    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
-    <skip />
+    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Panel zobrazíte posunutím cez okraj obrazovky"</string>
+    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Systémový panel zobrazíte posunutím cez okraj obrazovky"</string>
 </resources>

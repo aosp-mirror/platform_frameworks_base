@@ -199,8 +199,6 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"تلقائي"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"تظهر الإشعارات هنا"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"يمكنك الدخول إليها في أي وقت بالتمرير السريع إلى أسفل."\n"يمكنك التمرير السريع إلى أسفل مرة أخرى للوصول إلى عناصر تحكم النظام."</string>
-    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
-    <skip />
+    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"مرر سريعًا لحافة الشاشة لإظهار الشريط"</string>
+    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"مرر سريعًا من حافة الشاشة لإظهار شريط النظام"</string>
 </resources>
