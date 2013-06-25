@@ -256,8 +256,12 @@ void Caches::dumpMemoryUsage(String8 &log) {
     log.appendFormat("  PatchCache           %8d / %8d\n",
             patchCache.getSize(), patchCache.getMaxSize());
     for (uint32_t i = 0; i < fontRenderer->getFontRendererCount(); i++) {
-        const uint32_t size = fontRenderer->getFontRendererSize(i);
-        log.appendFormat("  FontRenderer %d       %8d / %8d\n", i, size, size);
+        const uint32_t sizeA8 = fontRenderer->getFontRendererSize(i, GL_ALPHA);
+        const uint32_t sizeRGBA = fontRenderer->getFontRendererSize(i, GL_RGBA);
+        log.appendFormat("  FontRenderer %d A8    %8d / %8d\n", i, sizeA8, sizeA8);
+        log.appendFormat("  FontRenderer %d RGBA  %8d / %8d\n", i, sizeRGBA, sizeRGBA);
+        log.appendFormat("  FontRenderer %d total %8d / %8d\n", i, sizeA8 + sizeRGBA,
+                sizeA8 + sizeRGBA);
     }
     log.appendFormat("Other:\n");
     log.appendFormat("  FboCache             %8d / %8d\n",
@@ -272,7 +276,8 @@ void Caches::dumpMemoryUsage(String8 &log) {
     total += dropShadowCache.getSize();
     total += patchCache.getSize();
     for (uint32_t i = 0; i < fontRenderer->getFontRendererCount(); i++) {
-        total += fontRenderer->getFontRendererSize(i);
+        total += fontRenderer->getFontRendererSize(i, GL_ALPHA);
+        total += fontRenderer->getFontRendererSize(i, GL_RGBA);
     }
 
     log.appendFormat("Total memory usage:\n");

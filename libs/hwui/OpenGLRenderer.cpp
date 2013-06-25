@@ -2825,48 +2825,6 @@ bool OpenGLRenderer::canSkipText(const SkPaint* paint) const {
     return alpha == 0.0f && getXfermode(paint->getXfermode()) == SkXfermode::kSrcOver_Mode;
 }
 
-class TextSetupFunctor: public Functor {
-public:
-    TextSetupFunctor(OpenGLRenderer& renderer, float x, float y, bool pureTranslate,
-            int alpha, SkXfermode::Mode mode, SkPaint* paint): Functor(),
-            renderer(renderer), x(x), y(y), pureTranslate(pureTranslate),
-            alpha(alpha), mode(mode), paint(paint) {
-    }
-    ~TextSetupFunctor() { }
-
-    status_t operator ()(int what, void* data) {
-        renderer.setupDraw();
-        renderer.setupDrawTextGamma(paint);
-        renderer.setupDrawDirtyRegionsDisabled();
-        renderer.setupDrawWithTexture(true);
-        renderer.setupDrawAlpha8Color(paint->getColor(), alpha);
-        renderer.setupDrawColorFilter();
-        renderer.setupDrawShader();
-        renderer.setupDrawBlending(true, mode);
-        renderer.setupDrawProgram();
-        renderer.setupDrawModelView(x, y, x, y, pureTranslate, true);
-        // Calling setupDrawTexture with the name 0 will enable the
-        // uv attributes and increase the texture unit count
-        // texture binding will be performed by the font renderer as
-        // needed
-        renderer.setupDrawTexture(0);
-        renderer.setupDrawPureColorUniforms();
-        renderer.setupDrawColorFilterUniforms();
-        renderer.setupDrawShaderUniforms(pureTranslate);
-        renderer.setupDrawTextGammaUniforms();
-
-        return NO_ERROR;
-    }
-
-    OpenGLRenderer& renderer;
-    float x;
-    float y;
-    bool pureTranslate;
-    int alpha;
-    SkXfermode::Mode mode;
-    SkPaint* paint;
-};
-
 status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count,
         const float* positions, SkPaint* paint) {
     if (text == NULL || count == 0 || mSnapshot->isIgnored() || canSkipText(paint)) {
@@ -2912,7 +2870,7 @@ status_t OpenGLRenderer::drawPosText(const char* text, int bytesCount, int count
 
     const bool hasActiveLayer = hasLayer();
 
-    TextSetupFunctor functor(*this, x, y, pureTranslate, alpha, mode, paint);
+    TextSetupFunctor functor(this, x, y, pureTranslate, alpha, mode, paint);
     if (fontRenderer.renderPosText(paint, clip, text, 0, bytesCount, count, x, y,
             positions, hasActiveLayer ? &bounds : NULL, &functor)) {
         if (hasActiveLayer) {
@@ -3003,7 +2961,7 @@ status_t OpenGLRenderer::drawText(const char* text, int bytesCount, int count, f
     Rect layerBounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
 
     bool status;
-    TextSetupFunctor functor(*this, x, y, pureTranslate, alpha, mode, paint);
+    TextSetupFunctor functor(this, x, y, pureTranslate, alpha, mode, paint);
 
     // don't call issuedrawcommand, do it at end of batch
     bool forceFinish = (drawOpMode != kDrawOpMode_Defer);
@@ -3045,26 +3003,7 @@ status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int co
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
-
-    setupDraw();
-    setupDrawTextGamma(paint);
-    setupDrawDirtyRegionsDisabled();
-    setupDrawWithTexture(true);
-    setupDrawAlpha8Color(paint->getColor(), alpha);
-    setupDrawColorFilter();
-    setupDrawShader();
-    setupDrawBlending(true, mode);
-    setupDrawProgram();
-    setupDrawModelView(0.0f, 0.0f, 0.0f, 0.0f, false, true);
-    // Calling setupDrawTexture with the name 0 will enable the
-    // uv attributes and increase the texture unit count
-    // texture binding will be performed by the font renderer as
-    // needed
-    setupDrawTexture(0);
-    setupDrawPureColorUniforms();
-    setupDrawColorFilterUniforms();
-    setupDrawShaderUniforms(false);
-    setupDrawTextGammaUniforms();
+    TextSetupFunctor functor(this, 0.0f, 0.0f, false, alpha, mode, paint);
 
     const Rect* clip = &mSnapshot->getLocalClip();
     Rect bounds(FLT_MAX / 2.0f, FLT_MAX / 2.0f, FLT_MIN / 2.0f, FLT_MIN / 2.0f);
@@ -3072,7 +3011,7 @@ status_t OpenGLRenderer::drawTextOnPath(const char* text, int bytesCount, int co
     const bool hasActiveLayer = hasLayer();
 
     if (fontRenderer.renderTextOnPath(paint, clip, text, 0, bytesCount, count, path,
-            hOffset, vOffset, hasActiveLayer ? &bounds : NULL)) {
+            hOffset, vOffset, hasActiveLayer ? &bounds : NULL, &functor)) {
         if (hasActiveLayer) {
             currentTransform().mapRect(bounds);
             dirtyLayerUnchecked(bounds, getRegion());

@@ -31,6 +31,9 @@
 #define DEFAULT_TEXT_LARGE_CACHE_HEIGHT 512
 
 #define TEXTURE_BORDER_SIZE 1
+#if TEXTURE_BORDER_SIZE != 1
+# error TEXTURE_BORDER_SIZE other than 1 is not currently supported
+#endif
 
 #define CACHE_BLOCK_ROUNDING_SIZE 4
 

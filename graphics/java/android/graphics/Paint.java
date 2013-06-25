@@ -105,9 +105,17 @@ public class Paint {
     public static final int SUBPIXEL_TEXT_FLAG  = 0x80;
     /** bit mask for the flag enabling device kerning for text */
     public static final int DEV_KERN_TEXT_FLAG  = 0x100;
+    /** @hide bit mask for the flag enabling subpixel glyph rendering for text */
+    public static final int LCD_RENDER_TEXT_FLAG = 0x200;
+    /** bit mask for the flag enabling embedded bitmap strikes for text */
+    public static final int EMBEDDED_BITMAP_TEXT_FLAG = 0x400;
+    /** @hide bit mask for the flag forcing freetype's autohinter on for text */
+    public static final int AUTO_HINTING_TEXT_FLAG = 0x800;
+    /** @hide bit mask for the flag enabling vertical rendering for text */
+    public static final int VERTICAL_TEXT_FLAG = 0x1000;
 
     // we use this when we first create a paint
-    static final int DEFAULT_PAINT_FLAGS = DEV_KERN_TEXT_FLAG;
+    static final int DEFAULT_PAINT_FLAGS = DEV_KERN_TEXT_FLAG | EMBEDDED_BITMAP_TEXT_FLAG;
 
     /**
      * Option for {@link #setHinting}: disable hinting.

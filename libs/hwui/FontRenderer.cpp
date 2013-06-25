@@ -21,7 +21,6 @@
 
 #include <cutils/properties.h>
 
-#include <utils/Functor.h>
 #include <utils/Log.h>
 
 #ifdef ANDROID_ENABLE_RENDERSCRIPT
@@ -35,6 +34,7 @@
 #include "Debug.h"
 #include "Extensions.h"
 #include "FontRenderer.h"
+#include "OpenGLRenderer.h"
 #include "PixelBuffer.h"
 #include "Rect.h"
 
@@ -43,6 +43,52 @@ namespace uirenderer {
 
 // blur inputs smaller than this constant will bypass renderscript
 #define RS_MIN_INPUT_CUTOFF 10000
+
+///////////////////////////////////////////////////////////////////////////////
+// TextSetupFunctor
+///////////////////////////////////////////////////////////////////////////////
+status_t TextSetupFunctor::operator ()(int what, void* data) {
+    Data* typedData = reinterpret_cast<Data*>(data);
+    GLenum glyphFormat = typedData ? typedData->glyphFormat : GL_ALPHA;
+
+    renderer->setupDraw();
+    renderer->setupDrawTextGamma(paint);
+    renderer->setupDrawDirtyRegionsDisabled();
+    renderer->setupDrawWithTexture(glyphFormat == GL_ALPHA);
+    switch (glyphFormat) {
+        case GL_ALPHA: {
+            renderer->setupDrawAlpha8Color(paint->getColor(), alpha);
+            break;
+        }
+        case GL_RGBA: {
+            float floatAlpha = alpha / 255.0f;
+            renderer->setupDrawColor(floatAlpha, floatAlpha, floatAlpha, floatAlpha);
+            break;
+        }
+        default: {
+#if DEBUG_FONT_RENDERER
+            ALOGD("TextSetupFunctor: called with unknown glyph format %x", glyphFormat);
+#endif
+            break;
+        }
+    }
+    renderer->setupDrawColorFilter();
+    renderer->setupDrawShader();
+    renderer->setupDrawBlending(true, mode);
+    renderer->setupDrawProgram();
+    renderer->setupDrawModelView(x, y, x, y, pureTranslate, true);
+    // Calling setupDrawTexture with the name 0 will enable the
+    // uv attributes and increase the texture unit count
+    // texture binding will be performed by the font renderer as
+    // needed
+    renderer->setupDrawTexture(0);
+    renderer->setupDrawPureColorUniforms();
+    renderer->setupDrawColorFilterUniforms();
+    renderer->setupDrawShaderUniforms(pureTranslate);
+    renderer->setupDrawTextGammaUniforms();
+
+    return NO_ERROR;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // FontRenderer
@@ -103,11 +149,16 @@ FontRenderer::FontRenderer() :
     sLogFontRendererCreate = false;
 }
 
-FontRenderer::~FontRenderer() {
-    for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
-        delete mCacheTextures[i];
+void clearCacheTextures(Vector<CacheTexture*>& cacheTextures) {
+    for (uint32_t i = 0; i < cacheTextures.size(); i++) {
+        delete cacheTextures[i];
     }
-    mCacheTextures.clear();
+    cacheTextures.clear();
+}
+
+FontRenderer::~FontRenderer() {
+    clearCacheTextures(mACacheTextures);
+    clearCacheTextures(mRGBACacheTextures);
 
     LruCache<Font::FontDescription, Font*>::Iterator it(mActiveFonts);
     while (it.next()) {
@@ -124,15 +175,19 @@ void FontRenderer::flushAllAndInvalidate() {
         it.value()->invalidateTextureCache();
     }
 
-    for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
-        mCacheTextures[i]->init();
+    for (uint32_t i = 0; i < mACacheTextures.size(); i++) {
+        mACacheTextures[i]->init();
+    }
+
+    for (uint32_t i = 0; i < mRGBACacheTextures.size(); i++) {
+        mRGBACacheTextures[i]->init();
     }
 }
 
-void FontRenderer::flushLargeCaches() {
+void FontRenderer::flushLargeCaches(Vector<CacheTexture*>& cacheTextures) {
     // Start from 1; don't deallocate smallest/default texture
-    for (uint32_t i = 1; i < mCacheTextures.size(); i++) {
-        CacheTexture* cacheTexture = mCacheTextures[i];
+    for (uint32_t i = 1; i < cacheTextures.size(); i++) {
+        CacheTexture* cacheTexture = cacheTextures[i];
         if (cacheTexture->getPixelBuffer()) {
             cacheTexture->init();
             LruCache<Font::FontDescription, Font*>::Iterator it(mActiveFonts);
@@ -144,11 +199,16 @@ void FontRenderer::flushLargeCaches() {
     }
 }
 
-CacheTexture* FontRenderer::cacheBitmapInTexture(const SkGlyph& glyph,
-        uint32_t* startX, uint32_t* startY) {
-    for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
-        if (mCacheTextures[i]->fitBitmap(glyph, startX, startY)) {
-            return mCacheTextures[i];
+void FontRenderer::flushLargeCaches() {
+    flushLargeCaches(mACacheTextures);
+    flushLargeCaches(mRGBACacheTextures);
+}
+
+CacheTexture* FontRenderer::cacheBitmapInTexture(Vector<CacheTexture*>& cacheTextures,
+        const SkGlyph& glyph, uint32_t* startX, uint32_t* startY) {
+    for (uint32_t i = 0; i < cacheTextures.size(); i++) {
+        if (cacheTextures[i]->fitBitmap(glyph, startX, startY)) {
+            return cacheTextures[i];
         }
     }
     // Could not fit glyph into current cache textures
@@ -169,9 +229,26 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
 
     cachedGlyph->mIsValid = false;
 
+    // choose an appropriate cache texture list for this glyph format
+    SkMask::Format format = static_cast<SkMask::Format>(glyph.fMaskFormat);
+    Vector<CacheTexture*>* cacheTextures = NULL;
+    switch (format) {
+        case SkMask::kA8_Format:
+            cacheTextures = &mACacheTextures;
+            break;
+        case SkMask::kARGB32_Format:
+            cacheTextures = &mRGBACacheTextures;
+            break;
+        default:
+#if DEBUG_FONT_RENDERER
+            ALOGD("getCacheTexturesForFormat: unknown SkMask format %x", format);
+#endif
+        return;
+    }
+
     // If the glyph is too tall, don't cache it
     if (glyph.fHeight + TEXTURE_BORDER_SIZE * 2 >
-                mCacheTextures[mCacheTextures.size() - 1]->getHeight()) {
+                (*cacheTextures)[cacheTextures->size() - 1]->getHeight()) {
         ALOGE("Font size too large to fit in cache. width, height = %i, %i",
                 (int) glyph.fWidth, (int) glyph.fHeight);
         return;
@@ -181,14 +258,14 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
     uint32_t startX = 0;
     uint32_t startY = 0;
 
-    CacheTexture* cacheTexture = cacheBitmapInTexture(glyph, &startX, &startY);
+    CacheTexture* cacheTexture = cacheBitmapInTexture(*cacheTextures, glyph, &startX, &startY);
 
     if (!cacheTexture) {
         if (!precaching) {
             // If the new glyph didn't fit and we are not just trying to precache it,
             // clear out the cache and try again
             flushAllAndInvalidate();
-            cacheTexture = cacheBitmapInTexture(glyph, &startX, &startY);
+            cacheTexture = cacheBitmapInTexture(*cacheTextures, glyph, &startX, &startY);
         }
 
         if (!cacheTexture) {
@@ -216,24 +293,21 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
         cacheTexture->allocateMesh();
     }
 
-    // Tells us whether the glyphs is B&W (1 bit per pixel)
-    // or anti-aliased (8 bits per pixel)
-    SkMask::Format format = static_cast<SkMask::Format>(glyph.fMaskFormat);
-
     uint8_t* cacheBuffer = cacheTexture->getPixelBuffer()->map();
-    uint32_t cacheX = 0, bX = 0, cacheY = 0, bY = 0;
+    uint8_t* bitmapBuffer = (uint8_t*) glyph.fImage;
+    int srcStride = glyph.rowBytes();
 
     // Copy the glyph image, taking the mask format into account
-    uint8_t* bitmapBuffer = (uint8_t*) glyph.fImage;
-    int stride = glyph.rowBytes();
-
-    uint32_t row = (startY - TEXTURE_BORDER_SIZE) * cacheWidth + startX - TEXTURE_BORDER_SIZE;
-    memset(&cacheBuffer[row], 0, glyph.fWidth + 2 * TEXTURE_BORDER_SIZE);
-
     switch (format) {
         case SkMask::kA8_Format: {
+            uint32_t cacheX = 0, bX = 0, cacheY = 0, bY = 0;
+            uint32_t row = (startY - TEXTURE_BORDER_SIZE) * cacheWidth + startX
+                    - TEXTURE_BORDER_SIZE;
+            // write leading border line
+            memset(&cacheBuffer[row], 0, glyph.fWidth + 2 * TEXTURE_BORDER_SIZE);
+            // write glyph data
             if (mGammaTable) {
-                for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY += stride) {
+                for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY += srcStride) {
                     row = cacheY * cacheWidth;
                     cacheBuffer[row + startX - TEXTURE_BORDER_SIZE] = 0;
                     for (cacheX = startX, bX = 0; cacheX < endX; cacheX++, bX++) {
@@ -243,21 +317,55 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
                     cacheBuffer[row + endX + TEXTURE_BORDER_SIZE - 1] = 0;
                 }
             } else {
-                for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY += stride) {
+                for (cacheY = startY, bY = 0; cacheY < endY; cacheY++, bY += srcStride) {
                     row = cacheY * cacheWidth;
                     memcpy(&cacheBuffer[row + startX], &bitmapBuffer[bY], glyph.fWidth);
                     cacheBuffer[row + startX - TEXTURE_BORDER_SIZE] = 0;
                     cacheBuffer[row + endX + TEXTURE_BORDER_SIZE - 1] = 0;
                 }
             }
+            // write trailing border line
+            row = (endY + TEXTURE_BORDER_SIZE - 1) * cacheWidth + startX - TEXTURE_BORDER_SIZE;
+            memset(&cacheBuffer[row], 0, glyph.fWidth + 2 * TEXTURE_BORDER_SIZE);
+            break;
+        }
+        case SkMask::kARGB32_Format: {
+            // prep data lengths
+            const size_t formatSize = PixelBuffer::formatSize(GL_RGBA);
+            const size_t borderSize = formatSize * TEXTURE_BORDER_SIZE;
+            size_t rowSize = formatSize * glyph.fWidth;
+            // prep advances
+            size_t dstStride = formatSize * cacheWidth;
+            // prep indices
+            // - we actually start one row early, and then increment before first copy
+            uint8_t* src = &bitmapBuffer[0 - srcStride];
+            uint8_t* dst = &cacheBuffer[cacheTexture->getOffset(startX, startY - 1)];
+            uint8_t* dstEnd = &cacheBuffer[cacheTexture->getOffset(startX, endY - 1)];
+            uint8_t* dstL = dst - borderSize;
+            uint8_t* dstR = dst + rowSize;
+            // write leading border line
+            memset(dstL, 0, rowSize + 2 * borderSize);
+            // write glyph data
+            while (dst < dstEnd) {
+                memset(dstL += dstStride, 0, borderSize); // leading border column
+                memcpy(dst += dstStride, src += srcStride, rowSize); // glyph data
+                memset(dstR += dstStride, 0, borderSize); // trailing border column
+            }
+            // write trailing border line
+            memset(dstL, 0, rowSize + 2 * borderSize);
             break;
         }
         case SkMask::kBW_Format: {
+            uint32_t cacheX = 0, bX = 0, cacheY = 0, bY = 0;
+            uint32_t row = (startY - TEXTURE_BORDER_SIZE) * cacheWidth + startX
+                    - TEXTURE_BORDER_SIZE;
             static const uint8_t COLORS[2] = { 0, 255 };
-
+            // write leading border line
+            memset(&cacheBuffer[row], 0, glyph.fWidth + 2 * TEXTURE_BORDER_SIZE);
+            // write glyph data
             for (cacheY = startY; cacheY < endY; cacheY++) {
                 cacheX = startX;
-                int rowBytes = stride;
+                int rowBytes = srcStride;
                 uint8_t* buffer = bitmapBuffer;
 
                 row = cacheY * cacheWidth;
@@ -270,23 +378,24 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
                 }
                 cacheBuffer[row + endX + TEXTURE_BORDER_SIZE - 1] = 0;
 
-                bitmapBuffer += stride;
+                bitmapBuffer += srcStride;
             }
+            // write trailing border line
+            row = (endY + TEXTURE_BORDER_SIZE - 1) * cacheWidth + startX - TEXTURE_BORDER_SIZE;
+            memset(&cacheBuffer[row], 0, glyph.fWidth + 2 * TEXTURE_BORDER_SIZE);
             break;
         }
         default:
-            ALOGW("Unkown glyph format: 0x%x", format);
+            ALOGW("Unknown glyph format: 0x%x", format);
             break;
     }
-
-    row = (endY + TEXTURE_BORDER_SIZE - 1) * cacheWidth + startX - TEXTURE_BORDER_SIZE;
-    memset(&cacheBuffer[row], 0, glyph.fWidth + 2 * TEXTURE_BORDER_SIZE);
 
     cachedGlyph->mIsValid = true;
 }
 
-CacheTexture* FontRenderer::createCacheTexture(int width, int height, bool allocate) {
-    CacheTexture* cacheTexture = new CacheTexture(width, height, gMaxNumberOfQuads);
+CacheTexture* FontRenderer::createCacheTexture(int width, int height, GLenum format,
+        bool allocate) {
+    CacheTexture* cacheTexture = new CacheTexture(width, height, format, gMaxNumberOfQuads);
 
     if (allocate) {
         Caches::getInstance().activeTexture(0);
@@ -298,17 +407,23 @@ CacheTexture* FontRenderer::createCacheTexture(int width, int height, bool alloc
 }
 
 void FontRenderer::initTextTexture() {
-    for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
-        delete mCacheTextures[i];
-    }
-    mCacheTextures.clear();
+    clearCacheTextures(mACacheTextures);
+    clearCacheTextures(mRGBACacheTextures);
 
     mUploadTexture = false;
-    mCacheTextures.push(createCacheTexture(mSmallCacheWidth, mSmallCacheHeight, true));
-    mCacheTextures.push(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight >> 1, false));
-    mCacheTextures.push(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight >> 1, false));
-    mCacheTextures.push(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight, false));
-    mCurrentCacheTexture = mCacheTextures[0];
+    mACacheTextures.push(createCacheTexture(mSmallCacheWidth, mSmallCacheHeight,
+            GL_ALPHA, true));
+    mACacheTextures.push(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight >> 1,
+            GL_ALPHA, false));
+    mACacheTextures.push(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight >> 1,
+            GL_ALPHA, false));
+    mACacheTextures.push(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight,
+            GL_ALPHA, false));
+    mRGBACacheTextures.push(createCacheTexture(mSmallCacheWidth, mSmallCacheHeight,
+            GL_RGBA, false));
+    mRGBACacheTextures.push(createCacheTexture(mLargeCacheWidth, mLargeCacheHeight >> 1,
+            GL_RGBA, false));
+    mCurrentCacheTexture = mACacheTextures[0];
 }
 
 // We don't want to allocate anything unless we actually draw text
@@ -320,6 +435,24 @@ void FontRenderer::checkInit() {
     initTextTexture();
 
     mInitialized = true;
+}
+
+void checkTextureUpdateForCache(Caches& caches, Vector<CacheTexture*>& cacheTextures,
+        bool& resetPixelStore, GLuint& lastTextureId) {
+    for (uint32_t i = 0; i < cacheTextures.size(); i++) {
+        CacheTexture* cacheTexture = cacheTextures[i];
+        if (cacheTexture->isDirty() && cacheTexture->getPixelBuffer()) {
+            if (cacheTexture->getTextureId() != lastTextureId) {
+                lastTextureId = cacheTexture->getTextureId();
+                caches.activeTexture(0);
+                caches.bindTexture(lastTextureId);
+            }
+
+            if (cacheTexture->upload()) {
+                resetPixelStore = true;
+            }
+        }
+    }
 }
 
 void FontRenderer::checkTextureUpdate() {
@@ -334,25 +467,8 @@ void FontRenderer::checkTextureUpdate() {
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     // Iterate over all the cache textures and see which ones need to be updated
-    for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
-        CacheTexture* cacheTexture = mCacheTextures[i];
-        if (cacheTexture->isDirty() && cacheTexture->getPixelBuffer()) {
-            if (cacheTexture->getTextureId() != lastTextureId) {
-                lastTextureId = cacheTexture->getTextureId();
-                caches.activeTexture(0);
-                caches.bindTexture(lastTextureId);
-            }
-
-            if (cacheTexture->upload()) {
-                resetPixelStore = true;
-            }
-
-#if DEBUG_FONT_RENDERER
-            ALOGD("glTexSubimage for cacheTexture %d: x, y, width height = %d, %d, %d, %d",
-                    i, x, y, width, height);
-#endif
-        }
-    }
+    checkTextureUpdateForCache(caches, mACacheTextures, resetPixelStore, lastTextureId);
+    checkTextureUpdateForCache(caches, mRGBACacheTextures, resetPixelStore, lastTextureId);
 
     // Unbind any PBO we might have used to update textures
     caches.unbindPixelBuffer();
@@ -366,18 +482,18 @@ void FontRenderer::checkTextureUpdate() {
     mUploadTexture = false;
 }
 
-void FontRenderer::issueDrawCommand() {
+void FontRenderer::issueDrawCommand(Vector<CacheTexture*>& cacheTextures) {
+    Caches& caches = Caches::getInstance();
     bool first = true;
     bool force = false;
-
-    GLuint lastId = 0;
-    Caches& caches = Caches::getInstance();
-
-    for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
-        CacheTexture* texture = mCacheTextures[i];
+    for (uint32_t i = 0; i < cacheTextures.size(); i++) {
+        CacheTexture* texture = cacheTextures[i];
         if (texture->canDraw()) {
             if (first) {
-                if (mFunctor) (*mFunctor)(0, NULL);
+                if (mFunctor) {
+                    TextSetupFunctor::Data functorData(texture->getFormat());
+                    (*mFunctor)(0, &functorData);
+                }
 
                 checkTextureUpdate();
                 caches.bindIndicesBuffer();
@@ -407,6 +523,11 @@ void FontRenderer::issueDrawCommand() {
             texture->resetMesh();
         }
     }
+}
+
+void FontRenderer::issueDrawCommand() {
+    issueDrawCommand(mACacheTextures);
+    issueDrawCommand(mRGBACacheTextures);
 
     mDrawn = true;
 }
@@ -582,13 +703,13 @@ bool FontRenderer::renderPosText(SkPaint* paint, const Rect* clip, const char *t
 
 bool FontRenderer::renderTextOnPath(SkPaint* paint, const Rect* clip, const char *text,
         uint32_t startIndex, uint32_t len, int numGlyphs, SkPath* path,
-        float hOffset, float vOffset, Rect* bounds) {
+        float hOffset, float vOffset, Rect* bounds, Functor* functor) {
     if (!mCurrentFont) {
         ALOGE("No font set");
         return false;
     }
 
-    initRender(clip, bounds, NULL);
+    initRender(clip, bounds, functor);
     mCurrentFont->render(paint, text, startIndex, len, numGlyphs, path, hOffset, vOffset);
     finishRender();
 
@@ -646,15 +767,29 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, int
     delete[] scratch;
 }
 
-uint32_t FontRenderer::getCacheSize() const {
+static uint32_t calculateCacheSize(const Vector<CacheTexture*>& cacheTextures) {
     uint32_t size = 0;
-    for (uint32_t i = 0; i < mCacheTextures.size(); i++) {
-        CacheTexture* cacheTexture = mCacheTextures[i];
+    for (uint32_t i = 0; i < cacheTextures.size(); i++) {
+        CacheTexture* cacheTexture = cacheTextures[i];
         if (cacheTexture && cacheTexture->getPixelBuffer()) {
             size += cacheTexture->getPixelBuffer()->getSize();
         }
     }
     return size;
+}
+
+uint32_t FontRenderer::getCacheSize(GLenum format) const {
+    switch (format) {
+        case GL_ALPHA: {
+            return calculateCacheSize(mACacheTextures);
+        }
+        case GL_RGBA: {
+            return calculateCacheSize(mRGBACacheTextures);
+        }
+        default: {
+            return 0;
+        }
+    }
 }
 
 }; // namespace uirenderer
