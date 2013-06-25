@@ -16,6 +16,11 @@
 
 package android.hardware.photography;
 
+import android.graphics.ImageFormat;
+import android.os.IBinder;
+import android.renderscript.Allocation;
+import android.renderscript.RenderScript;
+import android.util.Log;
 import android.view.Surface;
 
 import java.lang.AutoCloseable;
@@ -44,7 +49,7 @@ import java.util.List;
  * @see CameraManager#openCamera
  * @see android.Manifest.permission#CAMERA
  */
-public interface CameraDevice extends AutoCloseable {
+public final class CameraDevice implements AutoCloseable {
 
     /**
      * Create a request suitable for a camera preview window. Specifically, this
@@ -98,6 +103,8 @@ public interface CameraDevice extends AutoCloseable {
      */
     public static final int TEMPLATE_MANUAL = 5;
 
+    private static final String TAG = "CameraDevice";
+
     /**
      * Get the static properties for this camera. These are identical to the
      * properties returned by {@link CameraManager#getCameraProperties}.
@@ -108,7 +115,10 @@ public interface CameraDevice extends AutoCloseable {
      *
      * @see CameraManager#getCameraProperties
      */
-    public CameraProperties getProperties() throws CameraAccessException;
+    public CameraProperties getProperties() throws CameraAccessException {
+        return null;
+    }
+
     /**
      * <p>Set up a new output set of Surfaces for the camera device.</p>
      *
@@ -190,7 +200,8 @@ public interface CameraDevice extends AutoCloseable {
      * @throws IllegalStateException if the camera device is not idle, or has
      * encountered a fatal error
      */
-    public void configureOutputs(List<Surface> outputs) throws CameraAccessException;
+    public void configureOutputs(List<Surface> outputs) {
+    }
 
     /**
      * <p>Create a {@link CaptureRequest} initialized with template for a target
@@ -216,7 +227,9 @@ public interface CameraDevice extends AutoCloseable {
      * @see #TEMPLATE_MANUAL
      */
     public CaptureRequest createCaptureRequest(int templateType)
-            throws CameraAccessException;
+            throws CameraAccessException {
+        return null;
+    }
 
     /**
      * <p>Submit a request for an image to be captured by this CameraDevice.</p>
@@ -248,7 +261,8 @@ public interface CameraDevice extends AutoCloseable {
      * @see #setRepeatingBurst
      */
     public void capture(CaptureRequest request, CaptureListener listener)
-            throws CameraAccessException;
+            throws CameraAccessException {
+    }
 
     /**
      * <p>Submit a list of requests to be captured in sequence as a burst. The
@@ -279,7 +293,8 @@ public interface CameraDevice extends AutoCloseable {
      * @see #setRepeatingBurst
      */
     public void captureBurst(List<CaptureRequest> requests,
-            CaptureListener listener) throws CameraAccessException;
+            CaptureListener listener) throws CameraAccessException {
+    }
 
     /**
      * <p>Request endlessly repeating capture of images by this
@@ -321,7 +336,8 @@ public interface CameraDevice extends AutoCloseable {
      * @see #setRepeatingBurst
      */
     public void setRepeatingRequest(CaptureRequest request, CaptureListener listener)
-            throws CameraAccessException;
+            throws CameraAccessException {
+    }
 
     /**
      * <p>Request endlessly repeating capture of a sequence of images by this
@@ -365,7 +381,8 @@ public interface CameraDevice extends AutoCloseable {
      * @see #setRepeatingRequest
      */
     public void setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener)
-            throws CameraAccessException;
+            throws CameraAccessException {
+    }
 
     /**
      * <p>Cancel any ongoing repeating capture set by either
@@ -391,7 +408,8 @@ public interface CameraDevice extends AutoCloseable {
      * device has encountered a fatal error, or if there is an active repeating
      * request or burst.
      */
-    public void stopRepeating() throws CameraAccessException;
+    public void stopRepeating() throws CameraAccessException {
+    }
 
     /**
      * <p>Wait until all the submitted requests have finished processing</p>
@@ -416,7 +434,8 @@ public interface CameraDevice extends AutoCloseable {
      * device has encountered a fatal error, or if there is an active repeating
      * request or burst.
      */
-    public void waitUntilIdle() throws CameraAccessException;
+    public void waitUntilIdle() throws CameraAccessException {
+    }
 
     /**
      * Set the error listener object to call when an asynchronous error
@@ -428,17 +447,17 @@ public interface CameraDevice extends AutoCloseable {
      * notifications to. Setting this to null will stop notifications about
      * asynchronous errors.
      */
-    public void setErrorListener(ErrorListener listener);
+    public void setErrorListener(ErrorListener listener) {
+    }
 
     /**
      * Close the connection to this camera device. After this call, all calls to
      * the camera device interface will throw a {@link IllegalStateException},
      * except for calls to close().
-     * @throws Exception
      */
     @Override
-    public void close() throws Exception;
-    // TODO: We should decide on the behavior of in-flight requests should be on close.
+    public void close() {
+    }
 
     /**
      * A listener for receiving metadata about completed image captures. The
@@ -537,4 +556,12 @@ public interface CameraDevice extends AutoCloseable {
          */
         public void onCameraDeviceError(CameraDevice camera, int error);
     }
+
+    /**
+     * @hide
+     */
+    public CameraDevice(IBinder binder) {
+        Log.e(TAG, "CameraDevice constructor not implemented yet");
+    }
+
 }

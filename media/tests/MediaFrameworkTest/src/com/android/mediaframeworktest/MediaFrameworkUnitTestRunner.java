@@ -62,7 +62,6 @@ public class MediaFrameworkUnitTestRunner extends InstrumentationTestRunner {
         suite.addTestSuite(CameraUtilsRuntimeExceptionTest.class);
         suite.addTestSuite(CameraUtilsUncheckedThrowTest.class);
         suite.addTestSuite(CameraUtilsBinderDecoratorTest.class);
-        suite.addTestSuite(CameraMetadataTest.class);
     }
 
     // Running all unit tests checking the state machine may be time-consuming.
