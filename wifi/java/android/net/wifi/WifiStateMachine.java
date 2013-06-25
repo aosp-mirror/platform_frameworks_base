@@ -141,6 +141,8 @@ public class WifiStateMachine extends StateMachine {
     */
     private int mOperationalMode = CONNECT_MODE;
     private boolean mScanResultIsPending = false;
+    private WorkSource mScanWorkSource = null;
+    private static final int UNKNOWN_SCAN_SOURCE = -1;
     /* Tracks if state machine has received any screen state change broadcast yet.
      * We can miss one of these at boot.
      */
@@ -601,7 +603,7 @@ public class WifiStateMachine extends StateMachine {
                 new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        startScan();
+                        startScan(UNKNOWN_SCAN_SOURCE);
                     }
                 },
                 new IntentFilter(ACTION_START_SCAN));
@@ -694,6 +696,11 @@ public class WifiStateMachine extends StateMachine {
 
         //start the state machine
         start();
+
+        final Intent intent = new Intent(WifiManager.WIFI_SCAN_AVAILABLE);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        intent.putExtra(WifiManager.EXTRA_SCAN_AVAILABLE, WIFI_STATE_DISABLED);
+        mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
 
     /*********************************************************
@@ -716,8 +723,31 @@ public class WifiStateMachine extends StateMachine {
     /**
      * TODO: doc
      */
-    public void startScan() {
-        sendMessage(CMD_START_SCAN);
+    public void startScan(int callingUid) {
+        sendMessage(CMD_START_SCAN, callingUid);
+    }
+
+    private void noteScanStart(int callingUid) {
+        if (mScanWorkSource == null && callingUid != UNKNOWN_SCAN_SOURCE) {
+            mScanWorkSource = new WorkSource(callingUid);
+            try {
+                mBatteryStats.noteWifiScanStartedFromSource(mScanWorkSource);
+            } catch (RemoteException e) {
+                log(e.toString());
+            }
+        }
+    }
+
+    private void noteScanEnd() {
+        if (mScanWorkSource != null) {
+            try {
+                mBatteryStats.noteWifiScanStoppedFromSource(mScanWorkSource);
+            } catch (RemoteException e) {
+                log(e.toString());
+            } finally {
+                mScanWorkSource = null;
+            }
+        }
     }
 
     private void startScanNative(int type) {
@@ -1544,6 +1574,7 @@ public class WifiStateMachine extends StateMachine {
     }
 
     private void sendScanResultsAvailableBroadcast() {
+        noteScanEnd();
         Intent intent = new Intent(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
@@ -1888,6 +1919,7 @@ public class WifiStateMachine extends StateMachine {
                     }
                     break;
                     /* Discard */
+                case CMD_START_SCAN:
                 case CMD_START_SUPPLICANT:
                 case CMD_STOP_SUPPLICANT:
                 case CMD_STOP_SUPPLICANT_FAILED:
@@ -1902,7 +1934,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_STOP_AP:
                 case CMD_TETHER_STATE_CHANGE:
                 case CMD_TETHER_NOTIFICATION_TIMED_OUT:
-                case CMD_START_SCAN:
                 case CMD_DISCONNECT:
                 case CMD_RECONNECT:
                 case CMD_REASSOCIATE:
@@ -2405,11 +2436,18 @@ public class WifiStateMachine extends StateMachine {
             mWifiNative.setPowerSave(true);
 
             if (mP2pSupported) mWifiP2pChannel.sendMessage(WifiStateMachine.CMD_ENABLE_P2P);
+
+            final Intent intent = new Intent(WifiManager.WIFI_SCAN_AVAILABLE);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+            intent.putExtra(WifiManager.EXTRA_SCAN_AVAILABLE, WIFI_STATE_ENABLED);
+            mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
         }
+
         @Override
         public boolean processMessage(Message message) {
             switch(message.what) {
                 case CMD_START_SCAN:
+                    noteScanStart(message.arg1);
                     startScanNative(WifiNative.SCAN_WITH_CONNECTION_SETUP);
                     break;
                 case CMD_SET_COUNTRY_CODE:
@@ -2530,6 +2568,12 @@ public class WifiStateMachine extends StateMachine {
             mIsRunning = false;
             updateBatteryWorkSource(null);
             mScanResults = new ArrayList<ScanResult>();
+
+            final Intent intent = new Intent(WifiManager.WIFI_SCAN_AVAILABLE);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+            intent.putExtra(WifiManager.EXTRA_SCAN_AVAILABLE, WIFI_STATE_DISABLED);
+            mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
+            noteScanEnd(); // wrap up any pending request.
         }
     }
 
@@ -2680,6 +2724,7 @@ public class WifiStateMachine extends StateMachine {
                 // Handle scan. All the connection related commands are
                 // handled only in ConnectModeState
                 case CMD_START_SCAN:
+                    noteScanStart(message.arg1);
                     startScanNative(WifiNative.SCAN_WITHOUT_CONNECTION_SETUP);
                     break;
                 default:
@@ -2943,6 +2988,7 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case CMD_START_SCAN:
                     /* Do not attempt to connect when we are already connected */
+                    noteScanStart(message.arg1);
                     startScanNative(WifiNative.SCAN_WITHOUT_CONNECTION_SETUP);
                     break;
                     /* Ignore connection to same network */
@@ -3260,7 +3306,7 @@ public class WifiStateMachine extends StateMachine {
                     if (mP2pConnected.get()) break;
                     if (message.arg1 == mPeriodicScanToken &&
                             mWifiConfigStore.getConfiguredNetworks().size() == 0) {
-                        sendMessage(CMD_START_SCAN);
+                        sendMessage(CMD_START_SCAN, UNKNOWN_SCAN_SOURCE);
                         sendMessageDelayed(obtainMessage(CMD_NO_NETWORKS_PERIODIC_SCAN,
                                     ++mPeriodicScanToken, 0), mSupplicantScanIntervalMs);
                     }

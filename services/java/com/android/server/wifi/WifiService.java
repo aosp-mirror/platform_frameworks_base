@@ -114,10 +114,6 @@ public final class WifiService extends IWifiManager.Stub {
     /* Tracks the persisted states for wi-fi & airplane mode */
     final WifiSettingsStore mSettingsStore;
 
-    /* The work source (UID) that triggered the current WIFI scan, synchronized
-     * on this */
-    private WorkSource mScanWorkSource;
-
     /**
      * Asynchronous channel to WifiStateMachine
      */
@@ -255,17 +251,6 @@ public final class WifiService extends IWifiManager.Stub {
                 },
                 new IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED));
 
-        mContext.registerReceiver(
-                new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        if (intent.getAction().equals(
-                                WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)) {
-                            noteScanEnd();
-                        }
-                    }
-                }, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
-
         // Adding optimizations of only receiving broadcasts when wifi is enabled
         // can result in race conditions when apps toggle wifi in the background
         // without active user involvement. Always receive broadcasts.
@@ -273,44 +258,6 @@ public final class WifiService extends IWifiManager.Stub {
     }
 
     private WifiController mWifiController;
-
-    /** Tell battery stats about a new WIFI scan */
-    private void noteScanStart() {
-        WorkSource scanWorkSource = null;
-        synchronized (WifiService.this) {
-            if (mScanWorkSource != null) {
-                // Scan already in progress, don't add this one to battery stats
-                return;
-            }
-            scanWorkSource = new WorkSource(Binder.getCallingUid());
-            mScanWorkSource = scanWorkSource;
-        }
-
-        long id = Binder.clearCallingIdentity();
-        try {
-            mBatteryStats.noteWifiScanStartedFromSource(scanWorkSource);
-        } catch (RemoteException e) {
-            Log.w(TAG, e);
-        } finally {
-            Binder.restoreCallingIdentity(id);
-        }
-    }
-
-    /** Tell battery stats that the current WIFI scan has completed */
-    private void noteScanEnd() {
-        WorkSource scanWorkSource = null;
-        synchronized (WifiService.this) {
-            scanWorkSource = mScanWorkSource;
-            mScanWorkSource = null;
-        }
-        if (scanWorkSource != null) {
-            try {
-                mBatteryStats.noteWifiScanStoppedFromSource(scanWorkSource);
-            } catch (RemoteException e) {
-                Log.w(TAG, e);
-            }
-        }
-    }
 
     /**
      * Check if Wi-Fi needs to be enabled and start
@@ -352,8 +299,7 @@ public final class WifiService extends IWifiManager.Stub {
      */
     public void startScan() {
         enforceChangePermission();
-        mWifiStateMachine.startScan();
-        noteScanStart();
+        mWifiStateMachine.startScan(Binder.getCallingUid());
     }
 
     private void enforceAccessPermission() {
