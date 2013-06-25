@@ -48,8 +48,6 @@ import java.io.IOException;
  */
 public final class PrintServiceInfo implements Parcelable {
 
-    private static final boolean DEBUG = false;
-
     private static final String LOG_TAG = PrintServiceInfo.class.getSimpleName();
 
     private static final String TAG_PRINT_SERVICE = "print-service";
@@ -97,7 +95,6 @@ public final class PrintServiceInfo implements Parcelable {
      * @param context Context for accessing resources.
      * @throws XmlPullParserException If a XML parsing error occurs.
      * @throws IOException If a I/O error occurs.
-     * @hide
      */
     public static PrintServiceInfo create(ResolveInfo resolveInfo, Context context) {
         String settingsActivityName = null;
@@ -117,7 +114,7 @@ public final class PrintServiceInfo implements Parcelable {
                 String nodeName = parser.getName();
                 if (!TAG_PRINT_SERVICE.equals(nodeName)) {
                     throw new XmlPullParserException(
-                            "Meta-data does not start with" + TAG_PRINT_SERVICE + " tag");
+                            "Meta-data does not start with " + TAG_PRINT_SERVICE + " tag");
                 }
 
                 Resources resources = packageManager.getResourcesForApplication(
@@ -213,7 +210,7 @@ public final class PrintServiceInfo implements Parcelable {
 
     @Override
     public int hashCode() {
-        return 31 * 1 + ((mId == null) ? 0 : mId.hashCode());
+        return 31 + ((mId == null) ? 0 : mId.hashCode());
     }
 
     @Override
@@ -244,12 +241,8 @@ public final class PrintServiceInfo implements Parcelable {
         builder.append("PrintServiceInfo{");
         builder.append("id:").append(mId).append(", ");
         builder.append("resolveInfo:").append(mResolveInfo).append(", ");
-        if (DEBUG) {
-            builder.append("settingsActivityName:").append(mSettingsActivityName);
-            builder.append("addPrintersActivityName:").append(mAddPrintersActivityName);
-        } else if (mSettingsActivityName != null || mAddPrintersActivityName != null) {
-            builder.append("<has meta-data>");
-        }
+        builder.append("settingsActivityName:").append(mSettingsActivityName);
+        builder.append("addPrintersActivityName:").append(mAddPrintersActivityName);
         builder.append("}");
         return builder.toString();
     }

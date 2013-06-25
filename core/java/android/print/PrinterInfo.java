@@ -86,6 +86,31 @@ public final class PrinterInfo implements Parcelable {
         mDefaults.put(PROPERTY_ORIENTATION, DEFAULT_UNDEFINED);
     }
 
+    private PrinterInfo(PrinterInfo prototype) {
+        mId = prototype.mId;
+        mLabel = prototype.mLabel;
+        mStatus = prototype.mStatus;
+
+        mMinMargins = prototype.mMinMargins;
+        mMediaSizes.addAll(prototype.mMediaSizes);
+        mResolutions.addAll(prototype.mResolutions);
+        mInputTrays = (prototype.mInputTrays != null)
+                ? new ArrayList<Tray>(prototype.mInputTrays) : null;
+        mOutputTrays = (prototype.mOutputTrays != null)
+                ? new ArrayList<Tray>(prototype.mOutputTrays) : null;
+
+        mDuplexModes = prototype.mDuplexModes;
+        mColorModes = prototype.mColorModes;
+        mFittingModes = prototype.mFittingModes;
+        mOrientations = prototype.mOrientations;
+
+        final int defaultCount = prototype.mDefaults.size();
+        for (int i = 0; i < defaultCount; i++) {
+            mDefaults.put(prototype.mDefaults.keyAt(i), prototype.mDefaults.valueAt(i));
+        }
+        mDefaultMargins = prototype.mDefaultMargins;
+    }
+
     /**
      * Get the globally unique printer id.
      *
@@ -437,7 +462,7 @@ public final class PrinterInfo implements Parcelable {
      * </p>
      */
     public static final class Builder {
-        private final PrinterInfo mPrinterInfo;
+        private final PrinterInfo mPrototype;
 
         /**
          * Creates a new instance.
@@ -455,9 +480,9 @@ public final class PrinterInfo implements Parcelable {
             if (TextUtils.isEmpty(label)) {
                 throw new IllegalArgumentException("label cannot be empty.");
             }
-            mPrinterInfo = new PrinterInfo();
-            mPrinterInfo.mLabel = label;
-            mPrinterInfo.mId = printerId;
+            mPrototype = new PrinterInfo();
+            mPrototype.mLabel = label;
+            mPrototype.mId = printerId;
         }
 
         /**
@@ -470,7 +495,7 @@ public final class PrinterInfo implements Parcelable {
          * @return This builder.
          */
         public Builder setStatus(int status) {
-            mPrinterInfo.mStatus = status;
+            mPrototype.mStatus = status;
             return this;
         }
 
@@ -489,11 +514,11 @@ public final class PrinterInfo implements Parcelable {
          * @see PrintAttributes.MediaSize
          */
         public Builder addMediaSize(MediaSize mediaSize, boolean isDefault) {
-            final int insertionIndex = mPrinterInfo.mMediaSizes.size();
-            mPrinterInfo.mMediaSizes.add(mediaSize);
+            final int insertionIndex = mPrototype.mMediaSizes.size();
+            mPrototype.mMediaSizes.add(mediaSize);
             if (isDefault) {
                 throwIfDefaultAlreadySpecified(PROPERTY_MEDIA_SIZE);
-                mPrinterInfo.mDefaults.put(PROPERTY_MEDIA_SIZE, insertionIndex);
+                mPrototype.mDefaults.put(PROPERTY_MEDIA_SIZE, insertionIndex);
             }
             return this;
         }
@@ -514,11 +539,11 @@ public final class PrinterInfo implements Parcelable {
          * @see PrintAttributes.Resolution
          */
         public Builder addResolution(Resolution resolution, boolean isDefault) {
-            final int insertionIndex = mPrinterInfo.mResolutions.size();
-            mPrinterInfo.mResolutions.add(resolution);
+            final int insertionIndex = mPrototype.mResolutions.size();
+            mPrototype.mResolutions.add(resolution);
             if (isDefault) {
                 throwIfDefaultAlreadySpecified(PROPERTY_RESOLUTION);
-                mPrinterInfo.mDefaults.put(PROPERTY_RESOLUTION, insertionIndex);
+                mPrototype.mDefaults.put(PROPERTY_RESOLUTION, insertionIndex);
             }
             return this;
         }
@@ -543,8 +568,8 @@ public final class PrinterInfo implements Parcelable {
                 throw new IllegalArgumentException("Default margins"
                     + " cannot be outside of the min margins.");
             }
-            mPrinterInfo.mMinMargins = margins;
-            mPrinterInfo.mDefaultMargins = defaultMargins;
+            mPrototype.mMinMargins = margins;
+            mPrototype.mDefaultMargins = defaultMargins;
             return this;
         }
 
@@ -564,14 +589,14 @@ public final class PrinterInfo implements Parcelable {
          * @see PrintAttributes.Tray
          */
         public Builder addInputTray(Tray inputTray, boolean isDefault) {
-            if (mPrinterInfo.mInputTrays == null) {
-                mPrinterInfo.mInputTrays = new ArrayList<Tray>();
+            if (mPrototype.mInputTrays == null) {
+                mPrototype.mInputTrays = new ArrayList<Tray>();
             }
-            final int insertionIndex = mPrinterInfo.mInputTrays.size();
-            mPrinterInfo.mInputTrays.add(inputTray);
+            final int insertionIndex = mPrototype.mInputTrays.size();
+            mPrototype.mInputTrays.add(inputTray);
             if (isDefault) {
                 throwIfDefaultAlreadySpecified(PROPERTY_INPUT_TRAY);
-                mPrinterInfo.mDefaults.put(PROPERTY_INPUT_TRAY, insertionIndex);
+                mPrototype.mDefaults.put(PROPERTY_INPUT_TRAY, insertionIndex);
             }
             return this;
         }
@@ -592,14 +617,14 @@ public final class PrinterInfo implements Parcelable {
          * @see PrintAttributes.Tray
          */
         public Builder addOutputTray(Tray outputTray, boolean isDefault) {
-            if (mPrinterInfo.mOutputTrays == null) {
-                mPrinterInfo.mOutputTrays = new ArrayList<Tray>();
+            if (mPrototype.mOutputTrays == null) {
+                mPrototype.mOutputTrays = new ArrayList<Tray>();
             }
-            final int insertionIndex = mPrinterInfo.mOutputTrays.size();
-            mPrinterInfo.mOutputTrays.add(outputTray);
+            final int insertionIndex = mPrototype.mOutputTrays.size();
+            mPrototype.mOutputTrays.add(outputTray);
             if (isDefault) {
                 throwIfDefaultAlreadySpecified(PROPERTY_OUTPUT_TRAY);
-                mPrinterInfo.mDefaults.put(PROPERTY_OUTPUT_TRAY, insertionIndex);
+                mPrototype.mDefaults.put(PROPERTY_OUTPUT_TRAY, insertionIndex);
             }
             return this;
         }
@@ -631,8 +656,8 @@ public final class PrinterInfo implements Parcelable {
                 throw new IllegalArgumentException("Default color mode not in color modes.");
             }
             PrintAttributes.enforceValidColorMode(colorModes);
-            mPrinterInfo.mColorModes = colorModes;
-            mPrinterInfo.mDefaults.put(PROPERTY_COLOR_MODE, defaultColorMode);
+            mPrototype.mColorModes = colorModes;
+            mPrototype.mDefaults.put(PROPERTY_COLOR_MODE, defaultColorMode);
             return this;
         }
 
@@ -664,8 +689,8 @@ public final class PrinterInfo implements Parcelable {
                 throw new IllegalArgumentException("Default duplex mode not in duplex modes.");
             }
             PrintAttributes.enforceValidDuplexMode(defaultDuplexMode);
-            mPrinterInfo.mDuplexModes = duplexModes;
-            mPrinterInfo.mDefaults.put(PROPERTY_DUPLEX_MODE, defaultDuplexMode);
+            mPrototype.mDuplexModes = duplexModes;
+            mPrototype.mDefaults.put(PROPERTY_DUPLEX_MODE, defaultDuplexMode);
             return this;
         }
 
@@ -696,8 +721,8 @@ public final class PrinterInfo implements Parcelable {
                 throw new IllegalArgumentException("Default fitting mode not in fiting modes.");
             }
             PrintAttributes.enfoceValidFittingMode(defaultFittingMode);
-            mPrinterInfo.mFittingModes = fittingModes;
-            mPrinterInfo.mDefaults.put(PROPERTY_FITTING_MODE, defaultFittingMode);
+            mPrototype.mFittingModes = fittingModes;
+            mPrototype.mDefaults.put(PROPERTY_FITTING_MODE, defaultFittingMode);
             return this;
         }
 
@@ -728,8 +753,8 @@ public final class PrinterInfo implements Parcelable {
                 throw new IllegalArgumentException("Default orientation not in orientations.");
             }
             PrintAttributes.enforceValidOrientation(defaultOrientation);
-            mPrinterInfo.mOrientations = orientations;
-            mPrinterInfo.mDefaults.put(PROPERTY_ORIENTATION, defaultOrientation);
+            mPrototype.mOrientations = orientations;
+            mPrototype.mDefaults.put(PROPERTY_ORIENTATION, defaultOrientation);
             return this;
         }
 
@@ -743,41 +768,41 @@ public final class PrinterInfo implements Parcelable {
          * @throws IllegalStateException If a required attribute was not specified.
          */
         public PrinterInfo create() {
-            if (mPrinterInfo.mMediaSizes == null || mPrinterInfo.mMediaSizes.isEmpty()) {
+            if (mPrototype.mMediaSizes == null || mPrototype.mMediaSizes.isEmpty()) {
                 throw new IllegalStateException("No media size specified.");
             }
-            if (mPrinterInfo.mDefaults.valueAt(PROPERTY_MEDIA_SIZE) == DEFAULT_UNDEFINED) {
+            if (mPrototype.mDefaults.valueAt(PROPERTY_MEDIA_SIZE) == DEFAULT_UNDEFINED) {
                 throw new IllegalStateException("No default media size specified.");
             }
-            if (mPrinterInfo.mResolutions == null || mPrinterInfo.mResolutions.isEmpty()) {
+            if (mPrototype.mResolutions == null || mPrototype.mResolutions.isEmpty()) {
                 throw new IllegalStateException("No resolution specified.");
             }
-            if (mPrinterInfo.mDefaults.valueAt(PROPERTY_RESOLUTION) == DEFAULT_UNDEFINED) {
+            if (mPrototype.mDefaults.valueAt(PROPERTY_RESOLUTION) == DEFAULT_UNDEFINED) {
                 throw new IllegalStateException("No default resolution specified.");
             }
-            if (mPrinterInfo.mColorModes == 0) {
+            if (mPrototype.mColorModes == 0) {
                 throw new IllegalStateException("No color mode specified.");
             }
-            if (mPrinterInfo.mDefaults.valueAt(PROPERTY_COLOR_MODE) == DEFAULT_UNDEFINED) {
+            if (mPrototype.mDefaults.valueAt(PROPERTY_COLOR_MODE) == DEFAULT_UNDEFINED) {
                 throw new IllegalStateException("No default color mode specified.");
             }
-            if (mPrinterInfo.mOrientations == 0) {
+            if (mPrototype.mOrientations == 0) {
                 throw new IllegalStateException("No oprientation specified.");
             }
-            if (mPrinterInfo.mDefaults.valueAt(PROPERTY_ORIENTATION) == DEFAULT_UNDEFINED) {
+            if (mPrototype.mDefaults.valueAt(PROPERTY_ORIENTATION) == DEFAULT_UNDEFINED) {
                 throw new IllegalStateException("No default orientation specified.");
             }
-            if (mPrinterInfo.mMinMargins == null) {
-                mPrinterInfo.mMinMargins  = new Margins(0, 0, 0, 0);
+            if (mPrototype.mMinMargins == null) {
+                mPrototype.mMinMargins  = new Margins(0, 0, 0, 0);
             }
-            if (mPrinterInfo.mDefaultMargins == null) {
-                mPrinterInfo.mDefaultMargins = mPrinterInfo.mMinMargins;
+            if (mPrototype.mDefaultMargins == null) {
+                mPrototype.mDefaultMargins = mPrototype.mMinMargins;
             }
-            return mPrinterInfo;
+            return new PrinterInfo(mPrototype);
         }
 
         private void throwIfDefaultAlreadySpecified(int propertyIndex) {
-            if (mPrinterInfo.mDefaults.get(propertyIndex) != DEFAULT_UNDEFINED) {
+            if (mPrototype.mDefaults.get(propertyIndex) != DEFAULT_UNDEFINED) {
                 throw new IllegalArgumentException("Default already specified.");
             }
         }

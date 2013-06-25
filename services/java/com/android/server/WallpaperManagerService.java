@@ -449,7 +449,7 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
         }
     }
 
-    public void systemReady() {
+    public void systemRunning() {
         if (DEBUG) Slog.v(TAG, "systemReady");
         WallpaperData wallpaper = mWallpaperMap.get(UserHandle.USER_OWNER);
         switchWallpaper(wallpaper, null);

@@ -73,7 +73,7 @@ public final class DreamManagerService extends IDreamManager.Stub {
         mPowerManager = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
     }
 
-    public void systemReady() {
+    public void systemRunning() {
         mContext.registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {

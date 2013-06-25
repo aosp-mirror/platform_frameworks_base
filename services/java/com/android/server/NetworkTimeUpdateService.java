@@ -108,7 +108,7 @@ public class NetworkTimeUpdateService {
     }
 
     /** Initialize the receivers and initiate the first NTP request */
-    public void systemReady() {
+    public void systemRunning() {
         registerForTelephonyIntents();
         registerForAlarms();
         registerForConnectivityIntents();

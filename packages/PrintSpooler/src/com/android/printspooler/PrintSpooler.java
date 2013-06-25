@@ -16,30 +16,18 @@
 
 package com.android.printspooler;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.print.IPrintClient;
-import android.print.IPrintManager;
+import android.print.IPrintSpoolerClient;
+import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintAttributes;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
+import android.print.PrintDocumentInfo;
 import android.print.PrinterId;
 import android.util.AtomicFile;
 import android.util.Log;
@@ -47,6 +35,22 @@ import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
+
+import libcore.io.IoUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class PrintSpooler {
 
@@ -64,9 +68,9 @@ public class PrintSpooler {
 
     private static final Object sLock = new Object();
 
-    private final Object mLock = new Object();
-
     private static PrintSpooler sInstance;
+
+    private final Object mLock = new Object();
 
     private final List<PrintJobInfo> mPrintJobs = new ArrayList<PrintJobInfo>();
 
@@ -74,7 +78,7 @@ public class PrintSpooler {
 
     private final Context mContext;
 
-    private final IPrintManager mPrintManager;
+    public IPrintSpoolerClient mClient;
 
     public static PrintSpooler getInstance(Context context) {
         synchronized (sLock) {
@@ -89,8 +93,40 @@ public class PrintSpooler {
         mContext = context;
         mPersistanceManager = new PersistenceManager();
         mPersistanceManager.readStateLocked();
-        mPrintManager = IPrintManager.Stub.asInterface(
-                ServiceManager.getService("print"));
+    }
+
+    public void setCleint(IPrintSpoolerClient client) {
+        synchronized (mLock) {
+            mClient = client;
+        }
+    }
+
+    public void startPrinterDiscovery(IPrinterDiscoveryObserver observer) {
+        IPrintSpoolerClient client = null;
+        synchronized (mLock) {
+            client = mClient;
+        }
+        if (client != null) {
+            try {
+                client.onStartPrinterDiscovery(observer);
+            } catch (RemoteException re) {
+                Log.e(LOG_TAG, "Error notifying start printer discovery.", re);
+            }
+        }
+    }
+
+    public void stopPrinterDiscovery() {
+        IPrintSpoolerClient client = null;
+        synchronized (mLock) {
+            client = mClient;
+        }
+        if (client != null) {
+            try {
+                client.onStopPrinterDiscovery();
+            } catch (RemoteException re) {
+                Log.e(LOG_TAG, "Error notifying stop printer discovery.", re);
+            }
+        }
     }
 
     public List<PrintJobInfo> getPrintJobs(ComponentName componentName, int state, int appId) {
@@ -102,7 +138,7 @@ public class PrintSpooler {
                 PrinterId printerId = printJob.getPrinterId();
                 final boolean sameComponent = (componentName == null
                         || (printerId != null
-                        && componentName.equals(printerId.getServiceComponentName())));
+                        && componentName.equals(printerId.getService())));
                 final boolean sameAppId = appId == PrintManager.APP_ID_ANY
                         || printJob.getAppId() == appId;
                 final boolean sameState = state == PrintJobInfo.STATE_ANY
@@ -137,15 +173,10 @@ public class PrintSpooler {
             PrintJobInfo printJob = getPrintJob(printJobId, appId);
             if (printJob != null) {
                 switch (printJob.getState()) {
-                    case PrintJobInfo.STATE_CREATED: {
-                        removePrintJobLocked(printJob);
-                    } return true;
+                    case PrintJobInfo.STATE_CREATED:
                     case PrintJobInfo.STATE_QUEUED: {
-                        removePrintJobLocked(printJob);
+                        setPrintJobState(printJobId, PrintJobInfo.STATE_CANCELED);
                     } return true;
-                    default: {
-                        return false;
-                    }
                 }
             }
             return false;
@@ -166,6 +197,72 @@ public class PrintSpooler {
             setPrintJobState(printJobId, PrintJobInfo.STATE_CREATED);
 
             return printJob;
+        }
+    }
+
+    public void notifyClientForActivteJobs() {
+        IPrintSpoolerClient client = null;
+        Map<ComponentName, List<PrintJobInfo>> activeJobsPerServiceMap =
+                new HashMap<ComponentName, List<PrintJobInfo>>();
+
+        synchronized(mLock) {
+            if (mClient == null) {
+                throw new IllegalStateException("Client cannot be null.");
+            }
+            client = mClient;
+
+            final int printJobCount = mPrintJobs.size();
+            for (int i = 0; i < printJobCount; i++) {
+                PrintJobInfo printJob = mPrintJobs.get(i);
+                switch (printJob.getState()) {
+                    case PrintJobInfo.STATE_CREATED: {
+                        /* skip - not ready to be handled by a service */
+                    } break;
+
+                    case PrintJobInfo.STATE_QUEUED:
+                    case PrintJobInfo.STATE_STARTED: {
+                        ComponentName service = printJob.getPrinterId().getService();
+                        List<PrintJobInfo> jobsPerService = activeJobsPerServiceMap.get(service);
+                        if (jobsPerService == null) {
+                            jobsPerService = new ArrayList<PrintJobInfo>();
+                            activeJobsPerServiceMap.put(service, jobsPerService);
+                        }
+                        jobsPerService.add(printJob);
+                    } break;
+
+                    default: {
+                        ComponentName service = printJob.getPrinterId().getService();
+                        if (!activeJobsPerServiceMap.containsKey(service)) {
+                            activeJobsPerServiceMap.put(service, null);
+                        }
+                    }
+                }
+            }
+        }
+
+        boolean allPrintJobsHandled = true;
+
+        for (Map.Entry<ComponentName, List<PrintJobInfo>> entry
+                : activeJobsPerServiceMap.entrySet()) {
+            ComponentName service = entry.getKey();
+            List<PrintJobInfo> printJobs = entry.getValue();
+
+            if (printJobs != null) {
+                allPrintJobsHandled = false;
+                final int printJobCount = printJobs.size();
+                for (int i = 0; i < printJobCount; i++) {
+                    PrintJobInfo printJob = printJobs.get(i);
+                    if (printJob.getState() == PrintJobInfo.STATE_QUEUED) {
+                        callOnPrintJobQueuedQuietly(client, printJob);
+                    }
+                }
+            } else {
+                callOnAllPrintJobsForServiceHandledQuietly(client, service);
+            }
+        }
+
+        if (allPrintJobsHandled) {
+            callOnAllPrintJobsHandledQuietly(client);
         }
     }
 
@@ -213,22 +310,12 @@ public class PrintSpooler {
             } catch (IOException ioe) {
                 Log.e(LOG_TAG, "Error writing print job data!", ioe);
             } finally {
-                closeIfNotNullNoException(in);
-                closeIfNotNullNoException(out);
-                closeIfNotNullNoException(fd);
+                IoUtils.closeQuietly(in);
+                IoUtils.closeQuietly(out);
+                IoUtils.closeQuietly(fd);
             }
         }
         return false;
-    }
-
-    private void closeIfNotNullNoException(Closeable closeable) {
-        if (closeable != null) {
-            try {
-                closeable.close();
-            } catch (IOException ioe) {
-                /* ignore */;
-            }
-        }
     }
 
     public File generateFileForPrintJob(int printJobId) {
@@ -254,9 +341,20 @@ public class PrintSpooler {
 
     public boolean setPrintJobState(int printJobId, int state) {
         boolean success = false;
+
+        boolean allPrintJobsHandled = false;
+        boolean allPrintJobsForServiceHandled = false;
+
+        IPrintSpoolerClient client = null;
         PrintJobInfo queuedPrintJob = null;
+        PrintJobInfo removedPrintJob = null;
 
         synchronized (mLock) {
+            if (mClient == null) {
+                throw new IllegalStateException("Client cannot be null.");
+            }
+            client = mClient;
+
             PrintJobInfo printJob = getPrintJob(printJobId, PrintManager.APP_ID_ANY);
             if (printJob != null && printJob.getState() < state) {
                 success = true;
@@ -265,8 +363,23 @@ public class PrintSpooler {
                 switch (state) {
                     case PrintJobInfo.STATE_COMPLETED:
                     case PrintJobInfo.STATE_CANCELED: {
+                        removedPrintJob = printJob;
                         removePrintJobLocked(printJob);
+
+                        // No printer means creation of a print job was cancelled,
+                        // therefore the state of the spooler did not change and no
+                        // notifications are needed. We also do not need to persist
+                        // the state.
+                        PrinterId printerId = printJob.getPrinterId();
+                        if (printerId == null) {
+                            return true;
+                        }
+
+                        allPrintJobsHandled = !hasActivePrintJobsLocked();
+                        allPrintJobsForServiceHandled = !hasActivePrintJobsForServiceLocked(
+                                printerId.getService());
                     } break;
+
                     case PrintJobInfo.STATE_QUEUED: {
                         queuedPrintJob = new PrintJobInfo(printJob);
                     } break;
@@ -279,15 +392,75 @@ public class PrintSpooler {
         }
 
         if (queuedPrintJob != null) {
-            try {
-                mPrintManager.onPrintJobQueued(queuedPrintJob.getPrinterId(),
-                        queuedPrintJob);
-            } catch (RemoteException re) {
-                /* ignore */
-            }
+            callOnPrintJobQueuedQuietly(client, queuedPrintJob);
+        }
+
+        if (allPrintJobsForServiceHandled) {
+            callOnAllPrintJobsForServiceHandledQuietly(client,
+                        removedPrintJob.getPrinterId().getService());
+        }
+
+        if (allPrintJobsHandled) {
+            callOnAllPrintJobsHandledQuietly(client);
         }
 
         return success;
+    }
+
+    private void callOnPrintJobQueuedQuietly(IPrintSpoolerClient client,
+            PrintJobInfo printJob) {
+        try {
+            client.onPrintJobQueued(printJob);
+        } catch (RemoteException re) {
+            Slog.e(LOG_TAG, "Error notify for a queued print job.", re);
+        }
+    }
+
+    private void callOnAllPrintJobsForServiceHandledQuietly(IPrintSpoolerClient client,
+            ComponentName service) {
+        try {
+            client.onAllPrintJobsForServiceHandled(service);
+        } catch (RemoteException re) {
+            Slog.e(LOG_TAG, "Error notify for all print jobs per service handled.", re);
+        }
+    }
+
+    private void callOnAllPrintJobsHandledQuietly(IPrintSpoolerClient client) {
+        try {
+            client.onAllPrintJobsHandled();
+        } catch (RemoteException re) {
+            Slog.e(LOG_TAG, "Error notify for all print job handled.", re);
+        }
+    }
+
+    private boolean hasActivePrintJobsLocked() {
+        final int printJobCount = mPrintJobs.size();
+        for (int i = 0; i < printJobCount; i++) {
+            PrintJobInfo printJob = mPrintJobs.get(i);
+            switch (printJob.getState()) {
+                case PrintJobInfo.STATE_QUEUED:
+                case PrintJobInfo.STATE_STARTED: {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean hasActivePrintJobsForServiceLocked(ComponentName service) {
+        final int printJobCount = mPrintJobs.size();
+        for (int i = 0; i < printJobCount; i++) {
+            PrintJobInfo printJob = mPrintJobs.get(i);
+            switch (printJob.getState()) {
+                case PrintJobInfo.STATE_QUEUED:
+                case PrintJobInfo.STATE_STARTED: {
+                    if (printJob.getPrinterId().getService().equals(service)) {
+                        return true;
+                    }
+                } break;
+            }
+        }
+        return false;
     }
 
     public boolean setPrintJobTag(int printJobId, String tag) {
@@ -295,6 +468,18 @@ public class PrintSpooler {
             PrintJobInfo printJob = getPrintJob(printJobId, PrintManager.APP_ID_ANY);
             if (printJob != null) {
                 printJob.setTag(tag);
+                mPersistanceManager.writeStateLocked();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public final boolean setPrintJobPrintDocumentInfo(int printJobId, PrintDocumentInfo info) {
+        synchronized (mLock) {
+            PrintJobInfo printJob = getPrintJob(printJobId, PrintManager.APP_ID_ANY);
+            if (printJob != null) {
+                printJob.setDocumentInfo(info);
                 mPersistanceManager.writeStateLocked();
                 return true;
             }

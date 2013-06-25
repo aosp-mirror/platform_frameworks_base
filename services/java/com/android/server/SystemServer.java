@@ -351,6 +351,7 @@ class ServerThread {
         LockSettingsService lockSettings = null;
         DreamManagerService dreamy = null;
         AssetAtlasService atlas = null;
+        PrintManagerService printManager = null;
 
         // Bring up services needed for UI.
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
@@ -793,8 +794,8 @@ class ServerThread {
 
             try {
                 Slog.i(TAG, "Print Service");
-                ServiceManager.addService(Context.PRINT_SERVICE,
-                        new PrintManagerService(context));
+                printManager = new PrintManagerService(context);
+                ServiceManager.addService(Context.PRINT_SERVICE, printManager);
             } catch (Throwable e) {
                 reportWtf("starting Print Service", e);
             }
@@ -909,6 +910,7 @@ class ServerThread {
         final AssetAtlasService atlasF = atlas;
         final InputManagerService inputManagerF = inputManager;
         final TelephonyRegistry telephonyRegistryF = telephonyRegistry;
+        final PrintManagerService printManagerF = printManager;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -988,66 +990,73 @@ class ServerThread {
                 // third party code...
 
                 try {
-                    if (appWidgetF != null) appWidgetF.systemReady(safeMode);
+                    if (appWidgetF != null) appWidgetF.systemRunning(safeMode);
                 } catch (Throwable e) {
-                    reportWtf("making App Widget Service ready", e);
+                    reportWtf("Notifying AppWidgetService running", e);
                 }
                 try {
-                    if (wallpaperF != null) wallpaperF.systemReady();
+                    if (wallpaperF != null) wallpaperF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making Wallpaper Service ready", e);
+                    reportWtf("Notifying WallpaperService running", e);
                 }
                 try {
-                    if (immF != null) immF.systemReady(statusBarF);
+                    if (immF != null) immF.systemRunning(statusBarF);
                 } catch (Throwable e) {
-                    reportWtf("making Input Method Service ready", e);
+                    reportWtf("Notifying InputMethodService running", e);
                 }
                 try {
-                    if (locationF != null) locationF.systemReady();
+                    if (locationF != null) locationF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making Location Service ready", e);
+                    reportWtf("Notifying Location Service running", e);
                 }
                 try {
-                    if (countryDetectorF != null) countryDetectorF.systemReady();
+                    if (countryDetectorF != null) countryDetectorF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making Country Detector Service ready", e);
+                    reportWtf("Notifying CountryDetectorService running", e);
                 }
                 try {
-                    if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemReady();
+                    if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making Network Time Service ready", e);
+                    reportWtf("Notifying NetworkTimeService running", e);
                 }
                 try {
-                    if (commonTimeMgmtServiceF != null) commonTimeMgmtServiceF.systemReady();
+                    if (commonTimeMgmtServiceF != null) commonTimeMgmtServiceF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making Common time management service ready", e);
+                    reportWtf("Notifying CommonTimeManagementService running", e);
                 }
                 try {
-                    if (textServiceManagerServiceF != null) textServiceManagerServiceF.systemReady();
+                    if (textServiceManagerServiceF != null)
+                        textServiceManagerServiceF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making Text Services Manager Service ready", e);
+                    reportWtf("Notifying TextServicesManagerService running", e);
                 }
                 try {
-                    if (dreamyF != null) dreamyF.systemReady();
+                    if (dreamyF != null) dreamyF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making DreamManagerService ready", e);
+                    reportWtf("Notifying DreamManagerService running", e);
                 }
                 try {
-                    if (atlasF != null) atlasF.systemReady();
+                    if (atlasF != null) atlasF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making AssetAtlasService ready", e);
+                    reportWtf("Notifying AssetAtlasService running", e);
                 }
                 try {
                     // TODO(BT) Pass parameter to input manager
-                    if (inputManagerF != null) inputManagerF.systemReady();
+                    if (inputManagerF != null) inputManagerF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making InputManagerService ready", e);
+                    reportWtf("Notifying InputManagerService running", e);
                 }
 
                 try {
-                    if (telephonyRegistryF != null) telephonyRegistryF.systemReady();
+                    if (telephonyRegistryF != null) telephonyRegistryF.systemRunning();
                 } catch (Throwable e) {
-                    reportWtf("making TelephonyRegistry ready", e);
+                    reportWtf("Notifying TelephonyRegistry running", e);
+                }
+
+                try {
+                    if (printManagerF != null) printManagerF.systemRuning();
+                } catch (Throwable e) {
+                    reportWtf("Notifying PrintManagerService running", e);
                 }
             }
         });

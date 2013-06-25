@@ -16,21 +16,22 @@
 
 package android.print;
 
-import android.print.PrintJobInfo;
-import java.util.List;
+import android.os.ParcelFileDescriptor;
+import android.print.ILayoutResultCallback;
+import android.print.IWriteResultCallback;
+import android.print.PageRange;
+import android.print.PrintAttributes;
 
 /**
- * Callbacks for communication with the print spooler service.
- *
- * @see android.print.IPrintSpoolerService
+ * Interface for communication with the print adapter object.
  *
  * @hide
  */
-oneway interface IPrintSpoolerServiceCallbacks {
-    void onGetPrintJobsResult(in List<PrintJobInfo> printJob, int sequence);
-    void onGetPrintJobInfoResult(in PrintJobInfo printJob, int sequence);
-    void onCreatePrintJobResult(in PrintJobInfo printJob, int sequence);
-    void onCancelPrintJobResult(boolean canceled, int sequence);
-    void onSetPrintJobStateResult(boolean success, int sequence);
-    void onSetPrintJobTagResult(boolean success, int sequence);
+oneway interface IPrintDocumentAdapter {
+    void start();
+    void layout(in PrintAttributes oldAttributes, in PrintAttributes newAttributes,
+            ILayoutResultCallback callback);
+    void write(in List<PageRange> pages, in ParcelFileDescriptor fd,
+            IWriteResultCallback callback);
+    void finish();
 }

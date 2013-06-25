@@ -26,7 +26,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.print.PrintAdapter.PrintResultCallback;
+import android.print.PrintDocumentAdapter.LayoutResultCallback;
+import android.print.PrintDocumentAdapter.WriteResultCallback;
 import android.util.Log;
 
 import com.android.internal.os.SomeArgs;
@@ -103,7 +104,7 @@ public final class PrintManager {
      * Creates an instance that can access all print jobs.
      *
      * @param userId The user id for which to get all print jobs.
-     * @return An instance of the caller has the permission to access
+     * @return An instance if the caller has the permission to access
      * all print jobs, null otherwise.
      *
      * @hide
@@ -112,11 +113,11 @@ public final class PrintManager {
         return new PrintManager(mContext, mService, userId, APP_ID_ANY);
     }
 
-    PrintJobInfo getPrintJob(int printJobId) {
+    PrintJobInfo getPrintJobInfo(int printJobId) {
         try {
-            return mService.getPrintJob(printJobId, mAppId, mUserId);
+            return mService.getPrintJobInfo(printJobId, mAppId, mUserId);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error getting print job:" + printJobId, re);
+            Log.e(LOG_TAG, "Error getting a print job info:" + printJobId, re);
         }
         return null;
     }
@@ -130,7 +131,7 @@ public final class PrintManager {
      */
     public List<PrintJob> getPrintJobs() {
         try {
-            List<PrintJobInfo> printJobInfos = mService.getPrintJobs(mAppId, mUserId);
+            List<PrintJobInfo> printJobInfos = mService.getPrintJobInfos(mAppId, mUserId);
             if (printJobInfos == null) {
                 return Collections.emptyList();
             }
@@ -141,18 +142,17 @@ public final class PrintManager {
             }
             return printJobs;
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error getting print jobs!", re);
+            Log.e(LOG_TAG, "Error getting print jobs", re);
         }
         return Collections.emptyList();
     }
 
-    ICancellationSignal cancelPrintJob(int printJobId) {
+    void cancelPrintJob(int printJobId) {
         try {
             mService.cancelPrintJob(printJobId, mAppId, mUserId);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error cancleing a print job:" + printJobId, re);
+            Log.e(LOG_TAG, "Error cancleing a print job: " + printJobId, re);
         }
-        return null;
     }
 
     /**
@@ -166,24 +166,24 @@ public final class PrintManager {
      * @see PrintJob
      */
     public PrintJob print(String printJobName, File pdfFile, PrintAttributes attributes) {
-        PrintFileAdapter printable = new PrintFileAdapter(pdfFile);
-        return print(printJobName, printable, attributes);
+        FileDocumentAdapter documentAdapter = new FileDocumentAdapter(pdfFile);
+        return print(printJobName, documentAdapter, attributes);
     }
 
     /**
-     * Creates a print job for printing a {@link PrintAdapter} with default print
+     * Creates a print job for printing a {@link PrintDocumentAdapter} with default print
      * attributes.
      *
      * @param printJobName A name for the new print job.
-     * @param printAdapter The printable adapter to print.
+     * @param documentAdapter An adapter that emits the document to print.
      * @param attributes The default print job attributes.
      * @return The created print job.
      *
      * @see PrintJob
      */
-    public PrintJob print(String printJobName, PrintAdapter printAdapter,
+    public PrintJob print(String printJobName, PrintDocumentAdapter documentAdapter,
             PrintAttributes attributes) {
-        PrintAdapterDelegate delegate = new PrintAdapterDelegate(printAdapter,
+        PrintDocumentAdapterDelegate delegate = new PrintDocumentAdapterDelegate(documentAdapter,
                 mContext.getMainLooper());
         try {
             PrintJobInfo printJob = mService.print(printJobName, mPrintClient, delegate,
@@ -217,145 +217,118 @@ public final class PrintManager {
         }
     }
 
-    private static final class PrintAdapterDelegate extends IPrintAdapter.Stub {
-        private final Object mLock = new Object();
+    private static final class PrintDocumentAdapterDelegate extends IPrintDocumentAdapter.Stub {
+        private PrintDocumentAdapter mDocumentAdapter; // Strong reference OK - cleared in finish()
 
-        private PrintAdapter mPrintAdapter;
+        private Handler mHandler; // Strong reference OK - cleared in finish()
 
-        private Handler mHandler;
-
-        public PrintAdapterDelegate(PrintAdapter printAdapter, Looper looper) {
-            mPrintAdapter = printAdapter;
+        public PrintDocumentAdapterDelegate(PrintDocumentAdapter documentAdapter, Looper looper) {
+            mDocumentAdapter = documentAdapter;
             mHandler = new MyHandler(looper);
         }
 
         @Override
         public void start() {
-            synchronized (mLock) {
-                if (isFinishedLocked()) {
-                    return;
-                }
-                mHandler.obtainMessage(MyHandler.MESSAGE_START,
-                        mPrintAdapter).sendToTarget();
-            }
+            mHandler.sendEmptyMessage(MyHandler.MSG_START);
         }
 
         @Override
-        public void printAttributesChanged(PrintAttributes attributes) {
-            synchronized (mLock) {
-                if (isFinishedLocked()) {
-                    return;
-                }
-                SomeArgs args = SomeArgs.obtain();
-                args.arg1 = mPrintAdapter;
-                args.arg2 = attributes;
-                mHandler.obtainMessage(MyHandler.MESSAGE_PRINT_ATTRIBUTES_CHANGED,
-                        args).sendToTarget();
-            }
+        public void layout(PrintAttributes oldAttributes,
+            PrintAttributes newAttributes, ILayoutResultCallback callback) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = oldAttributes;
+            args.arg2 = newAttributes;
+            args.arg3 = callback;
+            mHandler.obtainMessage(MyHandler.MSG_LAYOUT, args).sendToTarget();
         }
 
         @Override
-        public void print(List<PageRange> pages, ParcelFileDescriptor fd,
-                IPrintResultCallback callback) {
-            synchronized (mLock) {
-                if (isFinishedLocked()) {
-                    return;
-                }
-                SomeArgs args = SomeArgs.obtain();
-                args.arg1 = mPrintAdapter;
-                args.arg2 = pages;
-                args.arg3 = fd.getFileDescriptor();
-                args.arg4 = callback;
-                mHandler.obtainMessage(MyHandler.MESSAGE_PRINT, args).sendToTarget();
-            }
+        public void write(List<PageRange> pages, ParcelFileDescriptor fd,
+            IWriteResultCallback callback) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = pages;
+            args.arg2 = fd.getFileDescriptor();
+            args.arg3 = callback;
+            mHandler.obtainMessage(MyHandler.MSG_WRITE, args).sendToTarget();
         }
 
         @Override
         public void finish() {
-            synchronized (mLock) {
-                if (isFinishedLocked()) {
-                    return;
-                }
-                mHandler.obtainMessage(MyHandler.MESSAGE_FINIS,
-                        mPrintAdapter).sendToTarget();
-            }
+            mHandler.sendEmptyMessage(MyHandler.MSG_FINISH);
         }
 
-        private boolean isFinishedLocked() {
-            return mPrintAdapter == null;
+        private boolean isFinished() {
+            return mDocumentAdapter == null;
         }
 
-        private void finishLocked() {
-            mPrintAdapter = null;
+        private void doFinish() {
+            mDocumentAdapter = null;
             mHandler = null;
         }
 
         private final class MyHandler extends Handler {
-            public static final int MESSAGE_START = 1;
-            public static final int MESSAGE_PRINT_ATTRIBUTES_CHANGED = 2;
-            public static final int MESSAGE_PRINT = 3;
-            public static final int MESSAGE_FINIS = 4;
+            public static final int MSG_START = 1;
+            public static final int MSG_LAYOUT = 2;
+            public static final int MSG_WRITE = 3;
+            public static final int MSG_FINISH = 4;
 
             public MyHandler(Looper looper) {
                 super(looper, null, true);
             }
 
             @Override
+            @SuppressWarnings("unchecked")
             public void handleMessage(Message message) {
+                if (isFinished()) {
+                    return;
+                }
                 switch (message.what) {
-                    case MESSAGE_START: {
-                        PrintAdapter adapter = (PrintAdapter) message.obj;
-                        adapter.onStart();
+                    case MSG_START: {
+                        mDocumentAdapter.onStart();
                     } break;
 
-                    case MESSAGE_PRINT_ATTRIBUTES_CHANGED: {
+                    case MSG_LAYOUT: {
                         SomeArgs args = (SomeArgs) message.obj;
-                        PrintAdapter adapter = (PrintAdapter) args.arg1;
-                        PrintAttributes attributes = (PrintAttributes) args.arg2;
+                        PrintAttributes oldAttributes = (PrintAttributes) args.arg1;
+                        PrintAttributes newAttributes = (PrintAttributes) args.arg2;
+                        ILayoutResultCallback callback = (ILayoutResultCallback) args.arg3;
                         args.recycle();
-                        adapter.onPrintAttributesChanged(attributes);
-                    } break;
 
-                    case MESSAGE_PRINT: {
-                        SomeArgs args = (SomeArgs) message.obj;
-                        PrintAdapter adapter = (PrintAdapter) args.arg1;
-                        @SuppressWarnings("unchecked")
-                        List<PageRange> pages = (List<PageRange>) args.arg2;
-                        final FileDescriptor fd = (FileDescriptor) args.arg3;
-                        IPrintResultCallback callback = (IPrintResultCallback) args.arg4;
-                        args.recycle();
                         try {
                             ICancellationSignal remoteSignal = CancellationSignal.createTransport();
-                            callback.onPrintStarted(adapter.getInfo(), remoteSignal);
+                            callback.onLayoutStarted(remoteSignal);
 
-                            CancellationSignal localSignal = CancellationSignal.fromTransport(
-                                    remoteSignal);
-                            adapter.onPrint(pages, fd, localSignal,
-                                    new PrintResultCallbackWrapper(callback) {
-                                        @Override
-                                        public void onPrintFinished(List<PageRange> pages) {
-                                            IoUtils.closeQuietly(fd);
-                                            super.onPrintFinished(pages);
-                                        }
+                            mDocumentAdapter.onLayout(oldAttributes, newAttributes,
+                                    CancellationSignal.fromTransport(remoteSignal),
+                                    new LayoutResultCallbackWrapper(callback));
+                        } catch (RemoteException re) {
+                            Log.e(LOG_TAG, "Error printing", re);
+                        }
+                    } break;
 
-                                        @Override
-                                        public void onPrintFailed(CharSequence error) {
-                                            IoUtils.closeQuietly(fd);
-                                            super.onPrintFailed(error);
-                                        }
-                                    });
+                    case MSG_WRITE: {
+                        SomeArgs args = (SomeArgs) message.obj;
+                        List<PageRange> pages = (List<PageRange>) args.arg1;
+                        FileDescriptor fd = (FileDescriptor) args.arg2;
+                        IWriteResultCallback callback = (IWriteResultCallback) args.arg3;
+                        args.recycle();
+
+                        try {
+                            ICancellationSignal remoteSignal = CancellationSignal.createTransport();
+                            callback.onWriteStarted(remoteSignal);
+
+                            mDocumentAdapter.onWrite(pages, fd,
+                                    CancellationSignal.fromTransport(remoteSignal),
+                                    new WriteResultCallbackWrapper(callback, fd));
                         } catch (RemoteException re) {
                             Log.e(LOG_TAG, "Error printing", re);
                             IoUtils.closeQuietly(fd);
                         }
                     } break;
 
-                    case MESSAGE_FINIS: {
-                        PrintAdapter adapter = (PrintAdapter) message.obj;
-                        adapter.onFinish();
-                        synchronized (mLock) {
-                            finishLocked();
-                        }
+                    case MSG_FINISH: {
+                        mDocumentAdapter.onFinish();
+                        doFinish();
                     } break;
 
                     default: {
@@ -367,29 +340,65 @@ public final class PrintManager {
         }
     }
 
-    private static abstract class PrintResultCallbackWrapper extends PrintResultCallback {
+    private static final class WriteResultCallbackWrapper extends WriteResultCallback {
 
-        private final IPrintResultCallback mWrappedCallback;
+        private final IWriteResultCallback mWrappedCallback;
+        private final FileDescriptor mFd;
 
-        public PrintResultCallbackWrapper(IPrintResultCallback callback) {
+        public WriteResultCallbackWrapper(IWriteResultCallback callback,
+                FileDescriptor fd) {
             mWrappedCallback = callback;
+            mFd = fd;
         }
 
         @Override
-        public void onPrintFinished(List<PageRange> pages) {
+        public void onWriteFinished(List<PageRange> pages) {
             try {
-                mWrappedCallback.onPrintFinished(pages);
+                // Close before notifying the other end. We want
+                // to be ready by the time we announce it.
+                IoUtils.closeQuietly(mFd);
+                mWrappedCallback.onWriteFinished(pages);
             } catch (RemoteException re) {
-                Log.e(LOG_TAG, "Error calling onPrintFinished", re);
+                Log.e(LOG_TAG, "Error calling onWriteFinished", re);
             }
         }
 
         @Override
-        public void onPrintFailed(CharSequence error) {
+        public void onWriteFailed(CharSequence error) {
             try {
-                mWrappedCallback.onPrintFailed(error);
+                // Close before notifying the other end. We want
+                // to be ready by the time we announce it.
+                IoUtils.closeQuietly(mFd);
+                mWrappedCallback.onWriteFailed(error);
             } catch (RemoteException re) {
-                Log.e(LOG_TAG, "Error calling onPrintFailed", re);
+                Log.e(LOG_TAG, "Error calling onWriteFailed", re);
+            }
+        }
+    }
+
+    private static final class LayoutResultCallbackWrapper extends LayoutResultCallback {
+
+        private final ILayoutResultCallback mWrappedCallback;
+
+        public LayoutResultCallbackWrapper(ILayoutResultCallback callback) {
+            mWrappedCallback = callback;
+        }
+
+        @Override
+        public void onLayoutFinished(PrintDocumentInfo info, boolean changed) {
+            try {
+                mWrappedCallback.onLayoutFinished(info, changed);
+            } catch (RemoteException re) {
+                Log.e(LOG_TAG, "Error calling onLayoutFinished", re);
+            }
+        }
+
+        @Override
+        public void onLayoutFailed(CharSequence error) {
+            try {
+                mWrappedCallback.onLayoutFailed(error);
+            } catch (RemoteException re) {
+                Log.e(LOG_TAG, "Error calling onLayoutFailed", re);
             }
         }
     }

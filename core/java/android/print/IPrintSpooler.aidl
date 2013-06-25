@@ -18,32 +18,35 @@ package android.print;
 
 import android.content.ComponentName;
 import android.os.ParcelFileDescriptor;
-import android.print.IPrintAdapter;
+import android.print.IPrintDocumentAdapter;
 import android.print.IPrintClient;
-import android.print.IPrintSpoolerServiceCallbacks;
+import android.print.IPrintSpoolerClient;
+import android.print.IPrintSpoolerCallbacks;
 import android.print.PrinterInfo;
 import android.print.PrintAttributes;
 
 /**
  * Interface for communication with the print spooler service.
  *
- * @see android.print.IPrintSpoolerServiceCallbacks
+ * @see android.print.IPrintSpoolerCallbacks
  *
  * @hide
  */
-oneway interface IPrintSpoolerService {
-    void getPrintJobs(IPrintSpoolerServiceCallbacks callback, in ComponentName componentName,
+oneway interface IPrintSpooler {
+    void getPrintJobInfos(IPrintSpoolerCallbacks callback, in ComponentName componentName,
             int state, int appId, int sequence);
-    void getPrintJob(int printJobId, IPrintSpoolerServiceCallbacks callback,
+    void getPrintJobInfo(int printJobId, IPrintSpoolerCallbacks callback,
             int appId, int sequence);
-    void createPrintJob(String printJobName, in IPrintClient client, in IPrintAdapter printAdapter,
-            in PrintAttributes attributes, IPrintSpoolerServiceCallbacks callback, int appId,
-            int sequence);
-    void cancelPrintJob(int printJobId, IPrintSpoolerServiceCallbacks callback,
+    void createPrintJob(String printJobName, in IPrintClient client,
+            in IPrintDocumentAdapter printAdapter, in PrintAttributes attributes,
+            IPrintSpoolerCallbacks callback, int appId, int sequence);
+    void cancelPrintJob(int printJobId, IPrintSpoolerCallbacks callback,
             int appId, int sequence);
-    void setPrintJobState(int printJobId, int status, IPrintSpoolerServiceCallbacks callback,
+    void setPrintJobState(int printJobId, int status, IPrintSpoolerCallbacks callback,
             int sequence);
-    void setPrintJobTag(int printJobId, String tag, IPrintSpoolerServiceCallbacks callback,
+    void setPrintJobTag(int printJobId, String tag, IPrintSpoolerCallbacks callback,
             int sequence);
     void writePrintJobData(in ParcelFileDescriptor fd, int printJobId);
+    void setClient(IPrintSpoolerClient client);
+    void notifyClientForActivteJobs();
 }

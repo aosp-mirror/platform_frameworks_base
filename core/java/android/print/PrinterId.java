@@ -54,7 +54,7 @@ public final class PrinterId implements Parcelable {
      *
      * @hide
      */
-    public ComponentName getServiceComponentName() {
+    public ComponentName getService() {
         return mServiceComponentName;
     }
 

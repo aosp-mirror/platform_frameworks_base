@@ -153,7 +153,7 @@ class CommonTimeManagementService extends Binder {
         mContext = context;
     }
 
-    void systemReady() {
+    void systemRunning() {
         if (ServiceManager.checkService(CommonTimeConfig.SERVICE_NAME) == null) {
             Log.i(TAG, "No common time service detected on this platform.  " +
                        "Common time services will be unavailable.");

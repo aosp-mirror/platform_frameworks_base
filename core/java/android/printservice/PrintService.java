@@ -25,6 +25,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintJobInfo;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
@@ -47,7 +48,7 @@ import java.util.List;
  * {@link #onStartPrinterDiscovery()} and ends with a call to
  * {@link #onStopPrinterDiscovery()}. During a printer discovery
  * period the print service reports newly discovered printers by
- * calling {@link #addDiscoveredPrinters(List)} and added printers
+ * calling {@link #addDiscoveredPrinters(List)} and reports added printers
  * that disappeared by calling {@link #removeDiscoveredPrinters(List)}.
  * Calls to {@link #addDiscoveredPrinters(List)} and
  * {@link #removeDiscoveredPrinters(List)} before a call to
@@ -67,26 +68,30 @@ import java.util.List;
  * a call to {@link #onPrintJobQueued(PrintJob)} is made and the print
  * service may handle it immediately or schedule that for an appropriate
  * time in the future. The list of all print jobs for this service
- * are be available by calling {@link #getPrintJobs()}. A queued print
- * job is one whose {@link PrintJob#isQueued()} return true.
+ * are be available by calling {@link #getPrintJobs()}.
  * </p>
  * <p>
  * A print service is responsible for setting the print job state as
  * appropriate while processing it. Initially, a print job is in a
  * {@link PrintJobInfo#STATE_QUEUED} state which means that the data to
  * be printed is spooled by the system and the print service can obtain
- * that data by calling {@link PrintJob#getData()}. After the print
- * service starts printing the data it should set the print job state
- * to {@link PrintJobInfo#STATE_STARTED}. Upon successful completion, the
- * print job state has to be set to {@link PrintJobInfo#STATE_COMPLETED}.
- * In a case of a failure, the print job state should be set to
- * {@link PrintJobInfo#STATE_FAILED}. If a print job is in a
- * {@link PrintJobInfo#STATE_STARTED} state and the user requests to
- * cancel it, the print service will receive a call to
- * {@link #onRequestCancelPrintJob(PrintJob)} which requests from the
- * service to do a best effort in canceling the job. In case the job
- * is successfully canceled, its state has to be set to
- * {@link PrintJobInfo#STATE_CANCELED}.
+ * that data by calling {@link PrintJob#getDocument()}. A queued print
+ * job's {@link PrintJob#isQueued()} method returns true.
+ * </p>
+ * <p>
+ * After the print service starts printing the data it should set the
+ * print job state to {@link PrintJobInfo#STATE_STARTED} by calling
+ * {@link PrintJob#start()}. Upon successful completion, the print job
+ * state has to be set to {@link PrintJobInfo#STATE_COMPLETED} by calling
+ * {@link PrintJob#complete()}. In case of a failure, the print job
+ * state should be set to {@link PrintJobInfo#STATE_FAILED} by calling
+ * {@link PrintJob#fail(CharSequence)}. If a print job is in a
+ * {@link PrintJobInfo#STATE_STARTED} state, i.e. {@link PrintJob#isStarted()}
+ * return true, and the user requests to cancel it, the print service will
+ * receive a call to {@link #onRequestCancelPrintJob(PrintJob)} which
+ * requests from the service to do a best effort in canceling the job. In
+ * case the job is successfully canceled, its state has to be set to
+ * {@link PrintJobInfo#STATE_CANCELED}. by calling {@link PrintJob#cancel()}.
  * </p>
  * <h3>Lifecycle</h3>
  * <p>
@@ -124,9 +129,9 @@ import java.util.List;
  * <p>
  * A print service can be configured by specifying an optional settings
  * activity which exposes service specific options, an optional add
- * prints activity which is used for manual addition of printers, etc.
- * It is a responsibility of the system to launch the settings and add
- * printers activities when appropriate.
+ * prints activity which is used for manual addition of printers, vendor
+ * name ,etc. It is a responsibility of the system to launch the settings
+ * and add printers activities when appropriate.
  * </p>
  * <p>
  * A print service is configured by providing a
@@ -148,7 +153,7 @@ import java.util.List;
  */
 public abstract class PrintService extends Service {
 
-    private static final String LOG_TAG = PrintService.class.getSimpleName();
+    private static final String LOG_TAG = "PrintService";
 
     /**
      * The {@link Intent} action that must be declared as handled by a service
@@ -162,6 +167,7 @@ public abstract class PrintService extends Service {
      * <code>&lt;{@link android.R.styleable#PrintService print-service}&gt;</code>
      * tag. This is a a sample XML file configuring a print service:
      * <pre> &lt;print-service
+     *     android:vendor="SomeVendor"
      *     android:settingsActivity="foo.bar.MySettingsActivity"
      *     andorid:addPrintersActivity="foo.bar.MyAddPrintersActivity."
      *     . . .
@@ -175,7 +181,7 @@ public abstract class PrintService extends Service {
 
     private IPrintServiceClient mClient;
 
-    private boolean mDiscoveringPrinters;
+    private IPrinterDiscoveryObserver mDiscoveryObserver;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -230,29 +236,29 @@ public abstract class PrintService extends Service {
      * printers have to be added. You can call this method as many times as
      * necessary during the discovery period but should not pass in already
      * added printers. If a printer is already added in the same printer
-     * discovery period, it will be ignored.
+     * discovery period, it will be ignored. If you want to update an already
+     * added printer, you should removed it and then re-add it.
      * </p>
      *
      * @param printers A list with discovered printers.
      *
-     * @throws IllegalStateException If this service is not connected.
-     *
      * @see #removeDiscoveredPrinters(List)
      * @see #onStartPrinterDiscovery()
      * @see #onStopPrinterDiscovery()
+     *
+     * @throws IllegalStateException If this service is not connected.
      */
     public final void addDiscoveredPrinters(List<PrinterInfo> printers) {
+        final IPrinterDiscoveryObserver observer;
         synchronized (mLock) {
-            if (mClient == null) {
-                throw new IllegalStateException("Print serivice not connected!");
-            }
-            if (mDiscoveringPrinters) {
-                try {
-                    // Calling with a lock into the system is fine.
-                    mClient.addDiscoveredPrinters(printers);
-                } catch (RemoteException re) {
-                    Log.e(LOG_TAG, "Error adding discovered printers!", re);
-                }
+            throwIfNotConnectedLocked();
+            observer = mDiscoveryObserver;
+        }
+        if (observer != null) {
+            try {
+                observer.addDiscoveredPrinters(printers);
+            } catch (RemoteException re) {
+                Log.e(LOG_TAG, "Error adding discovered printers", re);
             }
         }
     }
@@ -269,37 +275,38 @@ public abstract class PrintService extends Service {
      * this method as many times as necessary during the discovery period
      * but should not pass in already removed printer ids. If a printer with
      * a given id is already removed in the same discovery period, it will
-     * be ignored.
+     * be ignored. If you want to update an already added printer, you should
+     * removed it and then re-add it.
      * </p>
      *
      * @param printerIds A list with disappeared printer ids.
      *
-     * @throws IllegalStateException If this service is not connected.
-     *
      * @see #addDiscoveredPrinters(List)
      * @see #onStartPrinterDiscovery()
      * @see #onStopPrinterDiscovery()
+     *
+     * @throws IllegalStateException If this service is not connected.
      */
     public final void removeDiscoveredPrinters(List<PrinterId> printerIds) {
+        final IPrinterDiscoveryObserver observer;
         synchronized (mLock) {
-            if (mClient == null) {
-                throw new IllegalStateException("Print serivice not connected!");
-            }
-            if (mDiscoveringPrinters) {
-                try {
-                    // Calling with a lock into the system is fine.
-                    mClient.removeDiscoveredPrinters(printerIds);
-                } catch (RemoteException re) {
-                    Log.e(LOG_TAG, "Error removing discovered printers!", re);
-                }
+            throwIfNotConnectedLocked();
+            observer = mDiscoveryObserver;
+        }
+        if (observer != null) {
+            try {
+                observer.removeDiscoveredPrinters(printerIds);
+            } catch (RemoteException re) {
+                Log.e(LOG_TAG, "Error removing discovered printers", re);
             }
         }
     }
 
     /**
      * Called when canceling of a print job is requested. The service
-     * should do best effort to fulfill the request. After the print
-     * job is canceled by calling {@link PrintJob#cancel()}.
+     * should do best effort to fulfill the request. After the cancellation
+     * is performed, the print job should be set to a cancelled state by
+     * calling {@link PrintJob#cancel()}.
      *
      * @param printJob The print job to be canceled.
      */
@@ -310,11 +317,12 @@ public abstract class PrintService extends Service {
      * Called when there is a queued print job for one of the printers
      * managed by this print service. A queued print job is ready for
      * processing by a print service which can get the data to be printed
-     * by calling {@link PrintJob#getData()}. This service may start
+     * by calling {@link PrintJob#getDocument()}. This service may start
      * processing the passed in print job or schedule handling of queued
      * print jobs at a convenient time. The service can get the print
      * jobs by a call to {@link #getPrintJobs()} and examine their state
-     * to find the ones with state {@link PrintJobInfo#STATE_QUEUED}.
+     * to find the ones with state {@link PrintJobInfo#STATE_QUEUED} by
+     * calling {@link PrintJob#isQueued()}.
      *
      * @param printJob The new queued print job.
      *
@@ -330,28 +338,31 @@ public abstract class PrintService extends Service {
      * @throws IllegalStateException If this service is not connected.
      */
     public final List<PrintJob> getPrintJobs() {
+        final IPrintServiceClient client;
         synchronized (mLock) {
-            if (mClient == null) {
-                throw new IllegalStateException("Print serivice not connected!");
-            }
-            try {
-                List<PrintJob> printJobs = null;
-                List<PrintJobInfo> printJobInfos = mClient.getPrintJobs();
-                if (printJobInfos != null) {
-                    final int printJobInfoCount = printJobInfos.size();
-                    printJobs = new ArrayList<PrintJob>(printJobInfoCount);
-                    for (int i = 0; i < printJobInfoCount; i++) {
-                        printJobs.add(new PrintJob(printJobInfos.get(i), mClient));
-                    }
-                }
-                if (printJobs != null) {
-                    return printJobs;
-                }
-            } catch (RemoteException re) {
-                Log.e(LOG_TAG, "Error calling getPrintJobs()", re);
-            }
+            throwIfNotConnectedLocked();
+            client = mClient;
+        }
+        if (client == null) {
             return Collections.emptyList();
         }
+        try {
+            List<PrintJob> printJobs = null;
+            List<PrintJobInfo> printJobInfos = client.getPrintJobInfos();
+            if (printJobInfos != null) {
+                final int printJobInfoCount = printJobInfos.size();
+                printJobs = new ArrayList<PrintJob>(printJobInfoCount);
+                for (int i = 0; i < printJobInfoCount; i++) {
+                    printJobs.add(new PrintJob(printJobInfos.get(i), client));
+                }
+            }
+            if (printJobs != null) {
+                return printJobs;
+            }
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error calling getPrintJobs()", re);
+        }
+        return Collections.emptyList();
     }
 
     /**
@@ -375,8 +386,9 @@ public abstract class PrintService extends Service {
             }
 
             @Override
-            public void startPrinterDiscovery() {
-                mHandler.sendEmptyMessage(MyHandler.MESSAGE_START_PRINTER_DISCOVERY);
+            public void startPrinterDiscovery(IPrinterDiscoveryObserver observer) {
+                mHandler.obtainMessage(MyHandler.MESSAGE_START_PRINTER_DISCOVERY,
+                        observer).sendToTarget();
             }
 
             @Override
@@ -385,16 +397,23 @@ public abstract class PrintService extends Service {
             }
 
             @Override
-            public void requestCancelPrintJob(PrintJobInfo printJob) {
-                mHandler.obtainMessage(MyHandler.MESSAGE_CANCEL_PRINTJOB, printJob).sendToTarget();
+            public void requestCancelPrintJob(PrintJobInfo printJobInfo) {
+                mHandler.obtainMessage(MyHandler.MESSAGE_CANCEL_PRINTJOB,
+                        printJobInfo).sendToTarget();
             }
 
             @Override
-            public void onPrintJobQueued(PrintJobInfo printJob) {
+            public void onPrintJobQueued(PrintJobInfo printJobInfo) {
                 mHandler.obtainMessage(MyHandler.MESSAGE_ON_PRINTJOB_QUEUED,
-                        printJob).sendToTarget();
+                        printJobInfo).sendToTarget();
             }
         };
+    }
+
+    private void throwIfNotConnectedLocked() {
+        if (mClient == null) {
+            throw new IllegalStateException("Print serivice not connected");
+        }
     }
 
     private final class MyHandler extends Handler {
@@ -414,26 +433,26 @@ public abstract class PrintService extends Service {
             switch (action) {
                 case MESSAGE_START_PRINTER_DISCOVERY: {
                     synchronized (mLock) {
-                        mDiscoveringPrinters = true;
+                        mDiscoveryObserver = (IPrinterDiscoveryObserver) message.obj;
                     }
                     onStartPrinterDiscovery();
                 } break;
 
                 case MESSAGE_STOP_PRINTER_DISCOVERY: {
                     synchronized (mLock) {
-                        mDiscoveringPrinters = false;
+                        mDiscoveryObserver = null;
                     }
                     onStopPrinterDiscovery();
                 } break;
 
                 case MESSAGE_CANCEL_PRINTJOB: {
-                    PrintJobInfo printJob = (PrintJobInfo) message.obj;
-                    onRequestCancelPrintJob(new PrintJob(printJob, mClient));
+                    PrintJobInfo printJobInfo = (PrintJobInfo) message.obj;
+                    onRequestCancelPrintJob(new PrintJob(printJobInfo, mClient));
                 } break;
 
                 case MESSAGE_ON_PRINTJOB_QUEUED: {
-                    PrintJobInfo printJob = (PrintJobInfo) message.obj;
-                    onPrintJobQueued(new PrintJob(printJob, mClient));
+                    PrintJobInfo printJobInfo = (PrintJobInfo) message.obj;
+                    onPrintJobQueued(new PrintJob(printJobInfo, mClient));
                 } break;
 
                 case MESSAGE_SET_CLEINT: {
@@ -441,13 +460,12 @@ public abstract class PrintService extends Service {
                     synchronized (mLock) {
                         mClient = client;
                         if (client == null) {
-                            mDiscoveringPrinters = false;
+                            mDiscoveryObserver = null;
                         }
                     }
                     if (client != null) {
                         onConnected();
                      } else {
-                        onStopPrinterDiscovery();
                         onDisconnected();
                     }
                 } break;

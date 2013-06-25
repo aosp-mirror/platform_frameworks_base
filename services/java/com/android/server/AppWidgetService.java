@@ -70,7 +70,7 @@ class AppWidgetService extends IAppWidgetService.Stub
         mAppWidgetServices.append(0, primary);
     }
 
-    public void systemReady(boolean safeMode) {
+    public void systemRunning(boolean safeMode) {
         mSafeMode = safeMode;
 
         mAppWidgetServices.get(0).systemReady(safeMode);

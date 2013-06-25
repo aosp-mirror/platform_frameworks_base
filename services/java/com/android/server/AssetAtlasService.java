@@ -186,7 +186,7 @@ public class AssetAtlasService extends IAssetAtlas.Stub {
      * Callback invoked by the server thread to indicate we can now run
      * 3rd party code.
      */
-    public void systemReady() {
+    public void systemRunning() {
     }
 
     /**

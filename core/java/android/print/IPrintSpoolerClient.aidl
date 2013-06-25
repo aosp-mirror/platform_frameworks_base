@@ -16,18 +16,20 @@
 
 package android.print;
 
-import android.os.ICancellationSignal;
-import android.print.PageRange;
-import android.print.PrintAdapterInfo;
+import android.content.ComponentName;
+import android.print.IPrinterDiscoveryObserver;
+import android.print.PrintJobInfo;
+
 
 /**
- * Callbacks for observing the print progress (writing of printed content)
- * of a PrintAdapter.
+ * Interface for receiving interesting state updates from the print spooler.
  *
  * @hide
  */
-oneway interface IPrintResultCallback {
-    void onPrintStarted(in PrintAdapterInfo info, ICancellationSignal cancellationSignal);
-    void onPrintFinished(in List<PageRange> pages);
-    void onPrintFailed(CharSequence error);
+oneway interface IPrintSpoolerClient {
+    void onPrintJobQueued(in PrintJobInfo printJob);
+    void onStartPrinterDiscovery(IPrinterDiscoveryObserver observer);
+    void onStopPrinterDiscovery();
+    void onAllPrintJobsForServiceHandled(in ComponentName printService);
+    void onAllPrintJobsHandled();
 }
