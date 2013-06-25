@@ -153,7 +153,7 @@ public class Am extends BaseCommand {
                 "        test runners.\n" +
                 "    --user <USER_ID> | current: Specify user instrumentation runs in;\n" +
                 "        current user if not specified.\n" +
-                "    --no-window-animation: turn off window animations will running.\n" +
+                "    --no-window-animation: turn off window animations while running.\n" +
                 "\n" +
                 "am profile: start and stop profiler on a process.  The given <PROCESS> argument\n" +
                 "  may be either a process name or pid.  Options are:\n" +
