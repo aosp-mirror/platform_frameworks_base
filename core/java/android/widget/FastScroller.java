@@ -274,9 +274,14 @@ class FastScroller {
 
         mPreviewPadding = res.getDimensionPixelSize(R.dimen.fastscroll_overlay_padding);
 
+        final int textMinSize = Math.max(0, previewSize - mPreviewPadding);
         mPrimaryText = createPreviewTextView(context, ta);
+        mPrimaryText.setMinimumWidth(textMinSize);
+        mPrimaryText.setMinimumHeight(textMinSize);
         mOverlay.add(mPrimaryText);
         mSecondaryText = createPreviewTextView(context, ta);
+        mSecondaryText.setMinimumWidth(textMinSize);
+        mSecondaryText.setMinimumHeight(textMinSize);
         mOverlay.add(mSecondaryText);
 
         mPreviewResId[PREVIEW_LEFT] = ta.getResourceId(PREVIEW_BACKGROUND_LEFT, 0);
@@ -598,7 +603,11 @@ class FastScroller {
                 transitionToVisible();
                 break;
             case STATE_DRAGGING:
-                transitionToDragging();
+                if (transitionPreviewLayout(mCurrentSection)) {
+                    transitionToDragging();
+                } else {
+                    transitionToVisible();
+                }
                 break;
         }
 
@@ -673,10 +682,6 @@ class FastScroller {
         mDecorAnimation = new AnimatorSet();
         mDecorAnimation.playTogether(fadeIn, slideIn);
         mDecorAnimation.start();
-
-        // Ensure the preview text is correct.
-        final String previewText = getPreviewText();
-        transitionPreviewLayout(previewText);
     }
 
     private boolean isLongList(int visibleItemCount, int totalItemCount) {
@@ -853,42 +858,35 @@ class FastScroller {
             sectionIndex = -1;
         }
 
-        if (sectionIndex >= 0 && sectionIndex < sections.length) {
-            // If we moved sections, display section.
-            if (mCurrentSection != sectionIndex) {
-                mCurrentSection = sectionIndex;
-                final String section = sections[sectionIndex].toString();
+        if (mCurrentSection != sectionIndex) {
+            mCurrentSection = sectionIndex;
+
+            if (transitionPreviewLayout(sectionIndex)) {
                 transitionToDragging();
-                transitionPreviewLayout(section);
+            } else {
+                transitionToVisible();
             }
-        } else {
-            // No current section, transition out of preview.
-            transitionPreviewLayout(null);
-            transitionToVisible();
         }
-    }
-
-    private String getPreviewText() {
-        final Object[] sections = mSections;
-        if (sections == null) {
-            return null;
-        }
-
-        final int sectionIndex = mCurrentSection;
-        if (sectionIndex < 0 || sectionIndex >= sections.length) {
-            return null;
-        }
-
-        return sections[sectionIndex].toString();
     }
 
     /**
-     * Transitions the preview text to a new value. Handles animation,
-     * measurement, and layout.
+     * Transitions the preview text to a new section. Handles animation,
+     * measurement, and layout. If the new preview text is empty, returns false.
      *
-     * @param text The preview text to transition to.
+     * @param sectionIndex The section index to which the preview should
+     *            transition.
+     * @return False if the new preview text is empty.
      */
-    private void transitionPreviewLayout(CharSequence text) {
+    private boolean transitionPreviewLayout(int sectionIndex) {
+        final Object[] sections = mSections;
+        String text = null;
+        if (sections != null && sectionIndex >= 0 && sectionIndex < sections.length) {
+            final Object section = sections[sectionIndex];
+            if (section != null) {
+                text = section.toString();
+            }
+        }
+
         final Rect bounds = mTempBounds;
         final ImageView preview = mPreviewImage;
         final TextView showing;
@@ -952,6 +950,8 @@ class FastScroller {
         }
 
         mPreviewAnimation.start();
+
+        return (text != null && text.length() > 0);
     }
 
     /**
@@ -1012,26 +1012,46 @@ class FastScroller {
         final boolean hasSections = mSectionIndexer != null && mSections != null
                 && mSections.length > 0;
         if (!hasSections || !mMatchDragPosition) {
-            return firstVisibleItem / (totalItemCount - visibleItemCount);
+            return (float) firstVisibleItem / (totalItemCount - visibleItemCount);
         }
 
+        // Ignore headers.
         firstVisibleItem -= mHeaderCount;
         if (firstVisibleItem < 0) {
             return 0;
         }
-
         totalItemCount -= mHeaderCount;
 
+        // Hidden portion of the first visible row.
+        final View child = mList.getChildAt(0);
+        final float incrementalPos;
+        if (child == null || child.getHeight() == 0) {
+            incrementalPos = 0;
+        } else {
+            incrementalPos = (float) (mList.getPaddingTop() - child.getTop()) / child.getHeight();
+        }
+
+        // Number of rows in this section.
         final int section = mSectionIndexer.getSectionForPosition(firstVisibleItem);
         final int sectionPos = mSectionIndexer.getPositionForSection(section);
-        final int nextSectionPos = mSectionIndexer.getPositionForSection(section + 1);
         final int sectionCount = mSections.length;
-        final int positionsInSection = Math.max(1, nextSectionPos - sectionPos);
+        final int positionsInSection;
+        if (section < sectionCount - 1) {
+            final int nextSectionPos = mSectionIndexer.getPositionForSection(section + 1);
+            positionsInSection = nextSectionPos - sectionPos;
+        } else {
+            positionsInSection = totalItemCount - sectionPos;
+        }
 
-        final View child = mList.getChildAt(0);
-        final float incrementalPos = child == null ? 0 : firstVisibleItem +
-                (float) (mList.getPaddingTop() - child.getTop()) / Math.max(1, child.getHeight());
-        final float posWithinSection = (incrementalPos - sectionPos) / positionsInSection;
+        // Position within this section.
+        final float posWithinSection;
+        if (positionsInSection == 0) {
+            posWithinSection = 0;
+        } else {
+            posWithinSection = (firstVisibleItem + incrementalPos - sectionPos)
+                    / positionsInSection;
+        }
+
         return (section + posWithinSection) / sectionCount;
     }
 
