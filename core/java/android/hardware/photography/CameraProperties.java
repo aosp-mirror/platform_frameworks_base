@@ -39,7 +39,7 @@ public final class CameraProperties extends CameraMetadata {
      * {@link #INFO_IDENTIFIER} can be used to distinguish between multiple
      * removable cameras of the same model.
      */
-    public static final Key<String> INFO_MODEL =
+    public static final Key INFO_MODEL =
             new Key<String>("android.info.model");
 
     /**
@@ -48,7 +48,7 @@ public final class CameraProperties extends CameraMetadata {
      * same model and manufacturer. For non-removable cameras, the
      * identifier is equal to the the device's id.
      */
-    public static final Key<String> INFO_IDENTIFIER =
+    public static final Key INFO_IDENTIFIER =
             new Key<String>("android.info.identifier");
 
     /**
@@ -58,7 +58,7 @@ public final class CameraProperties extends CameraMetadata {
      * to be disconnected during use. Use the {@link #INFO_IDENTIFIER} field to
      * determine if this camera is a match for a camera device seen earlier.</p>
      */
-    public static final Key<Boolean> INFO_REMOVABLE =
+    public static final Key INFO_REMOVABLE =
             new Key<Boolean>("android.info.isRemovable");
 
     /**
@@ -99,7 +99,7 @@ public final class CameraProperties extends CameraMetadata {
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_FULL
      */
-    public static final Key<Integer> INFO_SUPPORTED_HARDWARE_LEVEL =
+    public static final Key INFO_SUPPORTED_HARDWARE_LEVEL =
             new Key<Integer>("android.info.supportedHardwareLevel");
 
     /**
@@ -164,7 +164,7 @@ public final class CameraProperties extends CameraMetadata {
      * {@link android.graphics.ImageFormat#YUV_420_888} are guaranteed to be
      * supported.</p>
      */
-    public static final Key<Integer[]> SCALER_AVAILABLE_FORMATS =
+    public static final Key SCALER_AVAILABLE_FORMATS =
             new Key<Integer[]>("android.scaler.availableFormats");
 
     /**
@@ -173,7 +173,7 @@ public final class CameraProperties extends CameraMetadata {
      * target, the ImageReader must be configured to use one of these sizes
      * when using format {@link android.graphics.ImageFormat#JPEG}.</p>
      */
-    public static final Key<Size[]> SCALER_AVAILABLE_JPEG_SIZES =
+    public static final Key SCALER_AVAILABLE_JPEG_SIZES =
             new Key<Size[]>("android.scaler.availableJpegSizes");
 
     /**
@@ -193,7 +193,7 @@ public final class CameraProperties extends CameraMetadata {
      * when using format {@link android.graphics.ImageFormat#YUV_420_888}.</p>
      *
      */
-    public static final Key<Size[]> SCALER_AVAILABLE_PROCESSED_SIZES =
+    public static final Key SCALER_AVAILABLE_PROCESSED_SIZES =
             new Key<Size[]>("android.scaler.availableProcessedSizes");
 
     /**
@@ -206,7 +206,7 @@ public final class CameraProperties extends CameraMetadata {
      * target, the ImageReader must be configured to use one of these sizes
      * when using image format {@link android.graphics.ImageFormat#RAW_SENSOR}.</p>
      */
-    public static final Key<Size[]> SCALER_AVAILABLE_RAW_SIZES =
+    public static final Key SCALER_AVAILABLE_RAW_SIZES =
             new Key<Size[]>("android.scaler.availableRawSizes");
 
     /**
@@ -229,7 +229,7 @@ public final class CameraProperties extends CameraMetadata {
      * a coordinate system based on the active array dimensions, with (0,0)
      * being the top-left corner of the active array.</p>
      */
-    public static final Key<Rect> SENSOR_ACTIVE_ARRAY_SIZE =
+    public static final Key SENSOR_ACTIVE_ARRAY_SIZE =
             new Key<Rect>("android.sensor.activeArraySize");
 
     /**
@@ -239,7 +239,7 @@ public final class CameraProperties extends CameraMetadata {
      * this. If raw sensor capture is supported by this device, this is one of
      * the supported capture sizes.</p>
      */
-    public static final Key<Size> SENSOR_PIXEL_ARRAY_SIZE =
+    public static final Key SENSOR_PIXEL_ARRAY_SIZE =
             new Key<Size>("android.sensor.activeArraySize");
 
     // TODO: Many more of these.

@@ -101,10 +101,7 @@ public final class CaptureResult extends CameraMetadata {
 
     // TODO: Many many more
 
-    /**
-     * @hide
-     */
-    public CaptureResult() {
+    CaptureResult() {
     }
 
     /**

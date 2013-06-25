@@ -16,11 +16,9 @@
 
 package android.hardware.photography;
 
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.view.Surface;
 
-import java.util.HashSet;
+import java.util.List;
 
 
 /**
@@ -49,30 +47,24 @@ import java.util.HashSet;
  * @see CameraDevice#setRepeatingRequest
  * @see CameraDevice#createRequest
  */
-public final class CaptureRequest extends CameraMetadata implements Parcelable {
-
-    private final Object mLock = new Object();
-    private final HashSet<Surface> mSurfaceSet = new HashSet<Surface>();
+public final class CaptureRequest extends CameraMetadata {
 
     /**
      * The exposure time for this capture, in nanoseconds.
      */
-    public static final Key<Long> SENSOR_EXPOSURE_TIME =
+    public static final Key SENSOR_EXPOSURE_TIME =
             new Key<Long>("android.sensor.exposureTime");
 
     /**
      * The sensor sensitivity (gain) setting for this camera.
      * This is represented as an ISO sensitivity value
      */
-    public static final Key<Integer> SENSOR_SENSITIVITY =
+    public static final Key SENSOR_SENSITIVITY =
             new Key<Integer>("android.sensor.sensitivity");
 
     // Many more settings
 
-    /**
-     * @hide
-     */
-    public CaptureRequest() {
+    CaptureRequest() {
     }
 
     /**
@@ -80,76 +72,14 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      *
      * <p>The Surface added must be one of the surfaces included in the last
      * call to {@link CameraDevice#configureOutputs}.</p>
-     *
-     * <p>Adding a target more than once has no effect.</p>
-     *
-     * @param outputTarget surface to use as an output target for this request
      */
     public void addTarget(Surface outputTarget) {
-        synchronized (mLock) {
-            mSurfaceSet.add(outputTarget);
-        }
     }
 
     /**
      * <p>Remove a surface from the list of targets for this request.</p>
-     *
-     * <p>Removing a target that is not currently added has no effect.</p>
-     *
-     * @param outputTarget surface to use as an output target for this request
      */
     public void removeTarget(Surface outputTarget) {
-        synchronized (mLock) {
-            mSurfaceSet.remove(outputTarget);
-        }
-    }
-
-    public static final Parcelable.Creator<CaptureRequest> CREATOR =
-            new Parcelable.Creator<CaptureRequest>() {
-        @Override
-        public CaptureRequest createFromParcel(Parcel in) {
-            CaptureRequest request = new CaptureRequest();
-            request.readFromParcel(in);
-            return request;
-        }
-
-        @Override
-        public CaptureRequest[] newArray(int size) {
-            return new CaptureRequest[size];
-        }
-    };
-
-    /**
-     * Expand this object from a Parcel.
-     * @param in The parcel from which the object should be read
-     */
-    @Override
-    public void readFromParcel(Parcel in) {
-        synchronized (mLock) {
-            super.readFromParcel(in);
-
-            mSurfaceSet.clear();
-
-            Parcelable[] parcelableArray = in.readParcelableArray(Surface.class.getClassLoader());
-
-            if (parcelableArray == null) {
-                return;
-            }
-
-            for (Parcelable p : parcelableArray) {
-                Surface s = (Surface) p;
-                mSurfaceSet.add(s);
-            }
-        }
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        synchronized (mLock) {
-            super.writeToParcel(dest, flags);
-
-            dest.writeParcelableArray(mSurfaceSet.toArray(new Surface[mSurfaceSet.size()]), flags);
-        }
     }
 
 }

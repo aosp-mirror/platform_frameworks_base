@@ -19,10 +19,8 @@ package com.android.mediaframeworktest;
 import android.os.Bundle;
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
-import android.util.Log;
 
 import com.android.mediaframeworktest.integration.CameraBinderTest;
-import com.android.mediaframeworktest.integration.CameraDeviceBinderTest;
 
 import junit.framework.TestSuite;
 
@@ -36,15 +34,11 @@ import junit.framework.TestSuite;
 
 public class MediaFrameworkIntegrationTestRunner extends InstrumentationTestRunner {
 
-    private static final String TAG = "MediaFrameworkIntegrationTestRunner";
-
-    public static int mCameraId = 0;
 
     @Override
     public TestSuite getAllTests() {
         TestSuite suite = new InstrumentationTestSuite(this);
         suite.addTestSuite(CameraBinderTest.class);
-        suite.addTestSuite(CameraDeviceBinderTest.class);
         return suite;
     }
 
@@ -56,17 +50,5 @@ public class MediaFrameworkIntegrationTestRunner extends InstrumentationTestRunn
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-
-        String cameraId = (String) icicle.get("camera_id");
-        if (cameraId != null) {
-            try {
-                Log.v(TAG,
-                        String.format("Reading camera_id from icicle: '%s'", cameraId));
-                mCameraId = Integer.parseInt(cameraId);
-            }
-            catch (NumberFormatException e) {
-                Log.e(TAG, String.format("Failed to convert camera_id to integer"));
-            }
-        }
     }
 }

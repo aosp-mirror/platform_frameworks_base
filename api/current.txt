@@ -10665,18 +10665,18 @@ package android.hardware.photography {
     field public static final int MAX_CAMERAS_IN_USE = 2; // 0x2
   }
 
-  public abstract interface CameraDevice implements java.lang.AutoCloseable {
-    method public abstract void capture(android.hardware.photography.CaptureRequest, android.hardware.photography.CameraDevice.CaptureListener) throws android.hardware.photography.CameraAccessException;
-    method public abstract void captureBurst(java.util.List<android.hardware.photography.CaptureRequest>, android.hardware.photography.CameraDevice.CaptureListener) throws android.hardware.photography.CameraAccessException;
-    method public abstract void close() throws java.lang.Exception;
-    method public abstract void configureOutputs(java.util.List<android.view.Surface>) throws android.hardware.photography.CameraAccessException;
-    method public abstract android.hardware.photography.CaptureRequest createCaptureRequest(int) throws android.hardware.photography.CameraAccessException;
-    method public abstract android.hardware.photography.CameraProperties getProperties() throws android.hardware.photography.CameraAccessException;
-    method public abstract void setErrorListener(android.hardware.photography.CameraDevice.ErrorListener);
-    method public abstract void setRepeatingBurst(java.util.List<android.hardware.photography.CaptureRequest>, android.hardware.photography.CameraDevice.CaptureListener) throws android.hardware.photography.CameraAccessException;
-    method public abstract void setRepeatingRequest(android.hardware.photography.CaptureRequest, android.hardware.photography.CameraDevice.CaptureListener) throws android.hardware.photography.CameraAccessException;
-    method public abstract void stopRepeating() throws android.hardware.photography.CameraAccessException;
-    method public abstract void waitUntilIdle() throws android.hardware.photography.CameraAccessException;
+  public final class CameraDevice implements java.lang.AutoCloseable {
+    method public void capture(android.hardware.photography.CaptureRequest, android.hardware.photography.CameraDevice.CaptureListener) throws android.hardware.photography.CameraAccessException;
+    method public void captureBurst(java.util.List<android.hardware.photography.CaptureRequest>, android.hardware.photography.CameraDevice.CaptureListener) throws android.hardware.photography.CameraAccessException;
+    method public void close();
+    method public void configureOutputs(java.util.List<android.view.Surface>);
+    method public android.hardware.photography.CaptureRequest createCaptureRequest(int) throws android.hardware.photography.CameraAccessException;
+    method public android.hardware.photography.CameraProperties getProperties() throws android.hardware.photography.CameraAccessException;
+    method public void setErrorListener(android.hardware.photography.CameraDevice.ErrorListener);
+    method public void setRepeatingBurst(java.util.List<android.hardware.photography.CaptureRequest>, android.hardware.photography.CameraDevice.CaptureListener) throws android.hardware.photography.CameraAccessException;
+    method public void setRepeatingRequest(android.hardware.photography.CaptureRequest, android.hardware.photography.CameraDevice.CaptureListener) throws android.hardware.photography.CameraAccessException;
+    method public void stopRepeating() throws android.hardware.photography.CameraAccessException;
+    method public void waitUntilIdle() throws android.hardware.photography.CameraAccessException;
     field public static final int TEMPLATE_MANUAL = 5; // 0x5
     field public static final int TEMPLATE_PREVIEW = 1; // 0x1
     field public static final int TEMPLATE_RECORD = 2; // 0x2
@@ -10709,12 +10709,10 @@ package android.hardware.photography {
     method public abstract void onCameraUnavailable(java.lang.String);
   }
 
-  public class CameraMetadata implements java.lang.AutoCloseable android.os.Parcelable {
+  public class CameraMetadata implements android.os.Parcelable {
     ctor public CameraMetadata();
-    method public void close() throws java.lang.Exception;
     method public int describeContents();
     method public T get(android.hardware.photography.CameraMetadata.Key<T>);
-    method public void readFromParcel(android.os.Parcel);
     method public void set(android.hardware.photography.CameraMetadata.Key<T>, T);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
@@ -10743,10 +10741,9 @@ package android.hardware.photography {
     field public static final android.hardware.photography.CameraMetadata.Key SENSOR_PIXEL_ARRAY_SIZE;
   }
 
-  public final class CaptureRequest extends android.hardware.photography.CameraMetadata implements android.os.Parcelable {
+  public final class CaptureRequest extends android.hardware.photography.CameraMetadata {
     method public void addTarget(android.view.Surface);
     method public void removeTarget(android.view.Surface);
-    field public static final android.os.Parcelable.Creator CREATOR;
     field public static final android.hardware.photography.CameraMetadata.Key SENSOR_EXPOSURE_TIME;
     field public static final android.hardware.photography.CameraMetadata.Key SENSOR_SENSITIVITY;
   }
