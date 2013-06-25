@@ -24,7 +24,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.os.Handler;
-import android.os.storage.StorageManager;
 import android.util.Log;
 
 import com.android.internal.telephony.IccCardConstants;
@@ -56,10 +55,6 @@ public class PhoneStatusBarPolicy {
     private final Context mContext;
     private final StatusBarManager mService;
     private final Handler mHandler = new Handler();
-
-    // storage
-    private StorageManager mStorageManager;
-
 
     // Assume it's all good unless we hear otherwise.  We don't always seem
     // to get broadcasts that it *is* there.
@@ -135,11 +130,6 @@ public class PhoneStatusBarPolicy {
         filter.addAction(TelephonyIntents.ACTION_SIM_STATE_CHANGED);
         filter.addAction(TtyIntent.TTY_ENABLED_CHANGE_ACTION);
         mContext.registerReceiver(mIntentReceiver, filter, null, mHandler);
-
-        // storage
-        mStorageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
-        mStorageManager.registerListener(
-                new com.android.systemui.usb.StorageNotification(context));
 
         // TTY status
         mService.setIcon("tty",  R.drawable.stat_sys_tty_mode, 0, null);
