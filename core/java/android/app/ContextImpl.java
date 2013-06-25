@@ -549,9 +549,9 @@ class ContextImpl extends Context {
                 return new AppOpsManager(ctx, service);
             }});
 
-        registerService(CAMERA_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                return new CameraManager(ctx);
+        registerService(CAMERA_SERVICE, new StaticServiceFetcher() {
+            public Object createStaticService() {
+                return new CameraManager();
             }
         });
 
