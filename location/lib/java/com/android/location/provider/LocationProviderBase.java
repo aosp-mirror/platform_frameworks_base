@@ -35,6 +35,7 @@ import android.util.Log;
 import com.android.internal.location.ILocationProvider;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
+import com.android.internal.util.FastPrintWriter;
 
 /**
  * Base class for location providers implemented as unbundled services.
@@ -106,7 +107,7 @@ public abstract class LocationProviderBase {
         }
         @Override
         public void dump(FileDescriptor fd, String[] args) {
-            PrintWriter pw = new PrintWriter(new FileOutputStream(fd));
+            PrintWriter pw = new FastPrintWriter(new FileOutputStream(fd));
             onDump(fd, pw, args);
             pw.flush();
         }

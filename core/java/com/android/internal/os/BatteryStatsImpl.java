@@ -47,6 +47,7 @@ import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.NetworkStatsFactory;
+import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.JournaledFile;
 import com.google.android.collect.Sets;
 
@@ -4461,12 +4462,13 @@ public final class BatteryStatsImpl extends BatteryStats {
                 Slog.w(TAG, "New history ends before old history!");
             } else if (!out.same(mHistoryReadTmp)) {
                 long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
-                PrintWriter pw = new PrintWriter(new LogWriter(android.util.Log.WARN, TAG));
+                PrintWriter pw = new FastPrintWriter(new LogWriter(android.util.Log.WARN, TAG));
                 pw.println("Histories differ!");
                 pw.println("Old history:");
                 (new HistoryPrinter()).printNextItem(pw, out, now);
                 pw.println("New history:");
                 (new HistoryPrinter()).printNextItem(pw, mHistoryReadTmp, now);
+                pw.flush();
             }
         }
         return true;

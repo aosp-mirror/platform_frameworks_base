@@ -33,6 +33,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessStats;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
@@ -1367,9 +1368,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                         StringBuilder dropBuilder = new StringBuilder(1024);
                         StringBuilder logBuilder = new StringBuilder(1024);
                         StringWriter oomSw = new StringWriter();
-                        PrintWriter oomPw = new PrintWriter(oomSw);
+                        PrintWriter oomPw = new FastPrintWriter(oomSw, false, 256);
                         StringWriter catSw = new StringWriter();
-                        PrintWriter catPw = new PrintWriter(catSw);
+                        PrintWriter catPw = new FastPrintWriter(catSw, false, 256);
                         String[] emptyArgs = new String[] { };
                         StringBuilder tag = new StringBuilder(128);
                         StringBuilder stack = new StringBuilder(128);
@@ -1379,6 +1380,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         dropBuilder.append(stack);
                         dropBuilder.append('\n');
                         dropBuilder.append('\n');
+                        oomPw.flush();
                         String oomString = oomSw.toString();
                         dropBuilder.append(oomString);
                         dropBuilder.append('\n');
@@ -1414,6 +1416,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             catPw.println();
                             dumpActivitiesLocked(null, catPw, emptyArgs, 0, false, false, null);
                         }
+                        catPw.flush();
                         dropBuilder.append(catSw.toString());
                         addErrorToDropBox("lowmem", null, "system_server", null,
                                 null, tag.toString(), dropBuilder.toString(), null, null);

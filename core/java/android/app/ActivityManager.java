@@ -21,6 +21,7 @@ import android.os.IBinder;
 import com.android.internal.app.IUsageStats;
 import com.android.internal.os.PkgUsageStats;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.MemInfoReader;
 
 import android.content.ComponentName;
@@ -2206,12 +2207,14 @@ public class ActivityManager {
      */
     public static void dumpPackageStateStatic(FileDescriptor fd, String packageName) {
         FileOutputStream fout = new FileOutputStream(fd);
-        PrintWriter pw = new PrintWriter(fout);
-        dumpService(pw, fd, Context.ACTIVITY_SERVICE, new String[] { "package", packageName});
+        PrintWriter pw = new FastPrintWriter(fout);
+        dumpService(pw, fd, Context.ACTIVITY_SERVICE, new String[] { "package", packageName });
         pw.println();
-        dumpService(pw, fd, "package", new String[] { packageName});
+        dumpService(pw, fd, "procstats", new String[] { packageName });
         pw.println();
-        dumpService(pw, fd, BatteryStats.SERVICE_NAME, new String[] { packageName});
+        dumpService(pw, fd, "package", new String[] { packageName });
+        pw.println();
+        dumpService(pw, fd, BatteryStats.SERVICE_NAME, new String[] { packageName });
         pw.flush();
     }
 

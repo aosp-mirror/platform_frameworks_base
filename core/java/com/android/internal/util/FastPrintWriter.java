@@ -13,8 +13,6 @@ import java.nio.charset.CoderResult;
 import java.nio.charset.CodingErrorAction;
 
 public class FastPrintWriter extends PrintWriter {
-    private static final int BUFFER_LEN = 8192;
-
     private static Writer sDummyWriter = new Writer() {
         @Override
         public void close() throws IOException {
@@ -34,15 +32,19 @@ public class FastPrintWriter extends PrintWriter {
         }
     };
 
-    private final char[] mText = new char[BUFFER_LEN];
+    private final int mBufferLen;
+    private final char[] mText;
     private int mPos;
 
     final private OutputStream mOutputStream;
-    final private Writer mWriter;
     final private boolean mAutoFlush;
     final private String mSeparator;
+
+    final private Writer mWriter;
+
     private CharsetEncoder mCharset;
-    final private ByteBuffer mBytes = ByteBuffer.allocate(BUFFER_LEN);
+    final private ByteBuffer mBytes;
+
     private boolean mIoError;
 
     /**
@@ -56,12 +58,7 @@ public class FastPrintWriter extends PrintWriter {
      *             if {@code out} is {@code null}.
      */
     public FastPrintWriter(OutputStream out) {
-        super(sDummyWriter);
-        mOutputStream = out;
-        mWriter = null;
-        mAutoFlush = false;
-        mSeparator = System.lineSeparator();
-        initDefaultEncoder();
+        this(out, false, 8192);
     }
 
     /**
@@ -79,7 +76,34 @@ public class FastPrintWriter extends PrintWriter {
      *             if {@code out} is {@code null}.
      */
     public FastPrintWriter(OutputStream out, boolean autoFlush) {
+        this(out, autoFlush, 8192);
+    }
+
+    /**
+     * Constructs a new {@code PrintWriter} with {@code out} as its target
+     * stream and a custom buffer size. The parameter {@code autoFlush} determines
+     * if the print writer automatically flushes its contents to the target stream
+     * when a newline is encountered.
+     *
+     * @param out
+     *            the target output stream.
+     * @param autoFlush
+     *            indicates whether contents are flushed upon encountering a
+     *            newline sequence.
+     * @param bufferLen
+     *            specifies the size of the FastPrintWriter's internal buffer; the
+     *            default is 8192.
+     * @throws NullPointerException
+     *             if {@code out} is {@code null}.
+     */
+    public FastPrintWriter(OutputStream out, boolean autoFlush, int bufferLen) {
         super(sDummyWriter, autoFlush);
+        if (out == null) {
+            throw new NullPointerException("out is null");
+        }
+        mBufferLen = bufferLen;
+        mText = new char[bufferLen];
+        mBytes = ByteBuffer.allocate(mBufferLen);
         mOutputStream = out;
         mWriter = null;
         mAutoFlush = autoFlush;
@@ -92,18 +116,17 @@ public class FastPrintWriter extends PrintWriter {
      * writer. By default, the new print writer does not automatically flush its
      * contents to the target writer when a newline is encountered.
      *
+     * <p>NOTE: Unlike PrintWriter, this version will still do buffering inside of
+     * FastPrintWriter before sending data to the Writer.  This means you must call
+     * flush() before retrieving any data from the Writer.</p>
+     *
      * @param wr
      *            the target writer.
      * @throws NullPointerException
      *             if {@code wr} is {@code null}.
      */
     public FastPrintWriter(Writer wr) {
-        super(sDummyWriter);
-        mOutputStream = null;
-        mWriter = wr;
-        mAutoFlush = false;
-        mSeparator = System.lineSeparator();
-        initDefaultEncoder();
+        this(wr, false, 8192);
     }
 
     /**
@@ -121,7 +144,34 @@ public class FastPrintWriter extends PrintWriter {
      *             if {@code out} is {@code null}.
      */
     public FastPrintWriter(Writer wr, boolean autoFlush) {
+        this(wr, autoFlush, 8192);
+    }
+
+    /**
+     * Constructs a new {@code PrintWriter} with {@code out} as its target
+     * writer and a custom buffer size. The parameter {@code autoFlush} determines
+     * if the print writer automatically flushes its contents to the target writer
+     * when a newline is encountered.
+     *
+     * @param wr
+     *            the target writer.
+     * @param autoFlush
+     *            indicates whether to flush contents upon encountering a
+     *            newline sequence.
+     * @param bufferLen
+     *            specifies the size of the FastPrintWriter's internal buffer; the
+     *            default is 8192.
+     * @throws NullPointerException
+     *             if {@code wr} is {@code null}.
+     */
+    public FastPrintWriter(Writer wr, boolean autoFlush, int bufferLen) {
         super(sDummyWriter, autoFlush);
+        if (wr == null) {
+            throw new NullPointerException("wr is null");
+        }
+        mBufferLen = bufferLen;
+        mText = new char[bufferLen];
+        mBytes = null;
         mOutputStream = null;
         mWriter = wr;
         mAutoFlush = autoFlush;
@@ -181,7 +231,7 @@ public class FastPrintWriter extends PrintWriter {
 
     private void appendLocked(char c) throws IOException {
         int pos = mPos;
-        if (pos >= (BUFFER_LEN-1)) {
+        if (pos >= (mBufferLen-1)) {
             flushLocked();
             pos = mPos;
         }
@@ -190,6 +240,7 @@ public class FastPrintWriter extends PrintWriter {
     }
 
     private void appendLocked(String str, int i, final int length) throws IOException {
+        final int BUFFER_LEN = mBufferLen;
         if (length > BUFFER_LEN) {
             final int end = i + length;
             while (i < end) {
@@ -209,6 +260,7 @@ public class FastPrintWriter extends PrintWriter {
     }
 
     private void appendLocked(char[] buf, int i, final int length) throws IOException {
+        final int BUFFER_LEN = mBufferLen;
         if (length > BUFFER_LEN) {
             final int end = i + length;
             while (i < end) {

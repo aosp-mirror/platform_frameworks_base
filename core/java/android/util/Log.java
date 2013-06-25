@@ -17,6 +17,7 @@
 package android.util;
 
 import com.android.internal.os.RuntimeInit;
+import com.android.internal.util.FastPrintWriter;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -315,8 +316,9 @@ public final class Log {
         }
 
         StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
+        PrintWriter pw = new FastPrintWriter(sw, false, 256);
         tr.printStackTrace(pw);
+        pw.flush();
         return sw.toString();
     }
 
