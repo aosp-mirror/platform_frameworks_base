@@ -2697,6 +2697,7 @@ package android.app {
     method public void addContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public void closeContextMenu();
     method public void closeOptionsMenu();
+    method public void convertToOpaque();
     method public android.app.PendingIntent createPendingResult(int, android.content.Intent, int);
     method public final deprecated void dismissDialog(int);
     method public boolean dispatchGenericMotionEvent(android.view.MotionEvent);

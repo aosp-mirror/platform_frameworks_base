@@ -301,6 +301,8 @@ public interface IActivityManager extends IInterface {
 
     public void finishHeavyWeightApp() throws RemoteException;
 
+    public void convertToOpaque(IBinder token) throws RemoteException;
+
     public void setImmersive(IBinder token, boolean immersive) throws RemoteException;
     public boolean isImmersive(IBinder token) throws RemoteException;
     public boolean isTopActivityImmersive() throws RemoteException;
@@ -666,4 +668,5 @@ public interface IActivityManager extends IInterface {
     int GET_STACK_BOXES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+170;
     int SET_FOCUSED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+171;
     int GET_STACK_BOX_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+172;
+    int CONVERT_TO_OPAQUE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+173;
 }
