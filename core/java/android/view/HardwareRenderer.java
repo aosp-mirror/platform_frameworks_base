@@ -1360,7 +1360,7 @@ public abstract class HardwareRenderer {
 
         @Override
         boolean validate() {
-            return checkCurrent() != SURFACE_STATE_ERROR;
+            return checkRenderContext() != SURFACE_STATE_ERROR;
         }
 
         @Override
@@ -1413,8 +1413,7 @@ public abstract class HardwareRenderer {
                     return;
                 }
 
-                final int surfaceState = checkCurrent();
-                if (surfaceState != SURFACE_STATE_ERROR) {
+                if (checkRenderContext() != SURFACE_STATE_ERROR) {
                     int status = mCanvas.invokeFunctors(mRedrawClip);
                     handleFunctorStatus(attachInfo, status);
                 }
@@ -1433,7 +1432,8 @@ public abstract class HardwareRenderer {
 
                 view.mPrivateFlags |= View.PFLAG_DRAWN;
 
-                final int surfaceState = checkCurrent();
+                // We are already on the correct thread
+                final int surfaceState = checkRenderContextUnsafe();
                 if (surfaceState != SURFACE_STATE_ERROR) {
                     HardwareCanvas canvas = mCanvas;
                     attachInfo.mHardwareCanvas = canvas;
@@ -1445,6 +1445,13 @@ public abstract class HardwareRenderer {
                     dirty = beginFrame(canvas, dirty, surfaceState);
 
                     DisplayList displayList = buildDisplayList(view, canvas);
+
+                    // buildDisplayList() calls into user code which can cause
+                    // an eglMakeCurrent to happen with a different surface/context.
+                    // We must therefore check again here.
+                    if (checkRenderContextUnsafe() == SURFACE_STATE_ERROR) {
+                        return;
+                    }
 
                     int saveCount = 0;
                     int status = DisplayList.STATUS_DONE;
@@ -1500,9 +1507,6 @@ public abstract class HardwareRenderer {
                 HardwareCanvas canvas, DisplayList displayList) {
 
             if (mDebugOverdraw == OVERDRAW_TYPE_COUNT) {
-                // TODO: Use an alpha layer allocated from a GraphicBuffer
-                // The alpha format will help with rendering performance and
-                // the GraphicBuffer will let us skip the read pixels step
                 if (mDebugOverdrawLayer == null) {
                     mDebugOverdrawLayer = createHardwareLayer(mWidth, mHeight, true);
                 } else if (mDebugOverdrawLayer.getWidth() != mWidth ||
@@ -1725,21 +1729,39 @@ public abstract class HardwareRenderer {
         }
 
         /**
-         * Ensures the current EGL context is the one we expect.
+         * Ensures the current EGL context and surface are the ones we expect.
+         * This method throws an IllegalStateException if invoked from a thread
+         * that did not initialize EGL.
          * 
          * @return {@link #SURFACE_STATE_ERROR} if the correct EGL context cannot be made current,
          *         {@link #SURFACE_STATE_UPDATED} if the EGL context was changed or
          *         {@link #SURFACE_STATE_SUCCESS} if the EGL context was the correct one
+         *
+         * @see #checkRenderContextUnsafe()
          */
-        int checkCurrent() {
+        int checkRenderContext() {
             if (mEglThread != Thread.currentThread()) {
                 throw new IllegalStateException("Hardware acceleration can only be used with a " +
                         "single UI thread.\nOriginal thread: " + mEglThread + "\n" +
                         "Current thread: " + Thread.currentThread());
             }
 
-            if (!mEglContext.equals(sEgl.eglGetCurrentContext()) ||
-                    !mEglSurface.equals(sEgl.eglGetCurrentSurface(EGL_DRAW))) {
+            return checkRenderContextUnsafe();
+        }
+
+        /**
+         * Ensures the current EGL context and surface are the ones we expect.
+         * This method does not check the current thread.
+         *
+         * @return {@link #SURFACE_STATE_ERROR} if the correct EGL context cannot be made current,
+         *         {@link #SURFACE_STATE_UPDATED} if the EGL context was changed or
+         *         {@link #SURFACE_STATE_SUCCESS} if the EGL context was the correct one
+         *
+         * @see #checkRenderContext()
+         */
+        private int checkRenderContextUnsafe() {
+            if (!mEglSurface.equals(sEgl.eglGetCurrentSurface(EGL_DRAW)) ||
+                    !mEglContext.equals(sEgl.eglGetCurrentContext())) {
                 if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
                     Log.e(LOG_TAG, "eglMakeCurrent failed " +
                             GLUtils.getEGLErrorString(sEgl.eglGetError()));
@@ -2193,8 +2215,7 @@ public abstract class HardwareRenderer {
 
         @Override
         boolean safelyRun(Runnable action) {
-            boolean needsContext = true;
-            if (isEnabled() && checkCurrent() != SURFACE_STATE_ERROR) needsContext = false;
+            boolean needsContext = !isEnabled() || checkRenderContext() == SURFACE_STATE_ERROR;
 
             if (needsContext) {
                 Gl20RendererEglContext managedContext =
