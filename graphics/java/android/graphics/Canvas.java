@@ -61,6 +61,7 @@ public class Canvas {
     protected int mScreenDensity = Bitmap.DENSITY_NONE;
     
     // Used by native code
+    @SuppressWarnings("UnusedDeclaration")
     private int mSurfaceFormat;
 
     /**
@@ -381,8 +382,8 @@ public class Canvas {
      */
     public int saveLayer(RectF bounds, Paint paint, int saveFlags) {
         return native_saveLayer(mNativeCanvas, bounds,
-                                paint != null ? paint.mNativePaint : 0,
-                                saveFlags);
+                paint != null ? paint.mNativePaint : 0,
+                saveFlags);
     }
     
     /**
@@ -391,8 +392,8 @@ public class Canvas {
     public int saveLayer(float left, float top, float right, float bottom, Paint paint,
             int saveFlags) {
         return native_saveLayer(mNativeCanvas, left, top, right, bottom,
-                                paint != null ? paint.mNativePaint : 0,
-                                saveFlags);
+                paint != null ? paint.mNativePaint : 0,
+                saveFlags);
     }
 
     /**
@@ -1039,7 +1040,7 @@ public class Canvas {
             throw new NullPointerException();
         }
         native_drawArc(mNativeCanvas, oval, startAngle, sweepAngle,
-                       useCenter, paint.mNativePaint);
+                useCenter, paint.mNativePaint);
     }
 
     /**
@@ -1079,8 +1080,6 @@ public class Canvas {
     /**
      * Draws the specified bitmap as an N-patch (most often, a 9-patches.)
      *
-     * Note: Only supported by hardware accelerated canvas at the moment.
-     *
      * @param patch The ninepatch object to render
      * @param dst The destination rectangle.
      * @param paint The paint to draw the bitmap with. may be null
@@ -1088,12 +1087,11 @@ public class Canvas {
      * @hide
      */
     public void drawPatch(NinePatch patch, Rect dst, Paint paint) {
+        patch.drawSoftware(this, dst, paint);
     }
 
     /**
      * Draws the specified bitmap as an N-patch (most often, a 9-patches.)
-     *
-     * Note: Only supported by hardware accelerated canvas at the moment.
      *
      * @param patch The ninepatch object to render
      * @param dst The destination rectangle.
@@ -1102,6 +1100,7 @@ public class Canvas {
      * @hide
      */
     public void drawPatch(NinePatch patch, RectF dst, Paint paint) {
+        patch.drawSoftware(this, dst, paint);
     }
 
     /**
@@ -1188,7 +1187,7 @@ public class Canvas {
         }
         throwIfRecycled(bitmap);
         native_drawBitmap(mNativeCanvas, bitmap.ni(), src, dst,
-                          paint != null ? paint.mNativePaint : 0, mScreenDensity, bitmap.mDensity);
+                paint != null ? paint.mNativePaint : 0, mScreenDensity, bitmap.mDensity);
     }
     
     /**
@@ -1309,8 +1308,8 @@ public class Canvas {
             checkRange(colors.length, colorOffset, count);
         }
         nativeDrawBitmapMesh(mNativeCanvas, bitmap.ni(), meshWidth, meshHeight,
-                             verts, vertOffset, colors, colorOffset,
-                             paint != null ? paint.mNativePaint : 0);
+                verts, vertOffset, colors, colorOffset,
+                paint != null ? paint.mNativePaint : 0);
     }
 
     public enum VertexMode {
@@ -1372,8 +1371,8 @@ public class Canvas {
             checkRange(indices.length, indexOffset, indexCount);
         }
         nativeDrawVertices(mNativeCanvas, mode.nativeInt, vertexCount, verts,
-                           vertOffset, texs, texOffset, colors, colorOffset,
-                          indices, indexOffset, indexCount, paint.mNativePaint);
+                vertOffset, texs, texOffset, colors, colorOffset,
+                indices, indexOffset, indexCount, paint.mNativePaint);
     }
     
     /**
@@ -1444,10 +1443,10 @@ public class Canvas {
         if (text instanceof String || text instanceof SpannedString ||
             text instanceof SpannableString) {
             native_drawText(mNativeCanvas, text.toString(), start, end, x, y,
-                            paint.mBidiFlags, paint.mNativePaint);
+                    paint.mBidiFlags, paint.mNativePaint);
         } else if (text instanceof GraphicsOperations) {
             ((GraphicsOperations) text).drawText(this, start, end, x, y,
-                                                     paint);
+                    paint);
         } else {
             char[] buf = TemporaryBuffer.obtain(end - start);
             TextUtils.getChars(text, start, end, buf, 0);
@@ -1568,7 +1567,7 @@ public class Canvas {
             throw new IndexOutOfBoundsException();
         }
         native_drawPosText(mNativeCanvas, text, index, count, pos,
-                           paint.mNativePaint);
+                paint.mNativePaint);
     }
 
     /**
@@ -1609,8 +1608,8 @@ public class Canvas {
             throw new ArrayIndexOutOfBoundsException();
         }
         native_drawTextOnPath(mNativeCanvas, text, index, count,
-                              path.ni(), hOffset, vOffset,
-                              paint.mBidiFlags, paint.mNativePaint);
+                path.ni(), hOffset, vOffset,
+                paint.mBidiFlags, paint.mNativePaint);
     }
 
     /**

@@ -79,8 +79,8 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
     uint32_t maxVertices = ((xCount + 1) * (yCount + 1) - emptyQuads) * 4;
     if (maxVertices == 0) return NULL;
 
-    vertices = new TextureVertex[maxVertices];
-    TextureVertex* vertex = vertices;
+    TextureVertex* tempVertices = new TextureVertex[maxVertices];
+    TextureVertex* vertex = tempVertices;
 
     const int32_t* xDivs = patch->xDivs;
     const int32_t* yDivs = patch->yDivs;
@@ -157,6 +157,14 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
         y2 = height;
         generateRow(xDivs, xCount, vertex, y1, y2, v1, 1.0f, stretchX, rescaleX,
                 width, bitmapWidth, quadCount);
+    }
+
+    if (verticesCount == maxVertices) {
+        vertices = tempVertices;
+    } else {
+        vertices = new TextureVertex[verticesCount];
+        memcpy(vertices, tempVertices, verticesCount * sizeof(TextureVertex));
+        delete[] tempVertices;
     }
 
     return vertices;
