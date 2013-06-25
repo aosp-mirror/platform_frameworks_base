@@ -199,8 +199,6 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Varslene vises her"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Bruk dem når som helst ved å sveipe nedover."\n"Sveip nedover igjen for å gå til systemkontrollene."</string>
-    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
-    <skip />
-    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
-    <skip />
+    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Sveip på kanten av skjermen for å få frem feltet"</string>
+    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Sveip fra kanten på skjermen for å få frem systemfeltet"</string>
 </resources>
