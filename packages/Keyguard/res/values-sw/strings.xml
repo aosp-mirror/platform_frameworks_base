@@ -104,7 +104,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM sasa imelemazwa. Ingiza msimbo wa PUK ili kuendelea. Wasiliana na mtoa huduma kwa maelezo."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Ingiza msimbo wa PIN unaopendelewa"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"Thibitisha msimbo wa PIN unaopendelewa"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Inafungua kadi ya SIM..."</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"Inafungua SIM kadi..."</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"Msimbo wa PIN usio sahihi."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"Charaza PIN iliyo na tarakimu kati ya 4 na 8."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="7553388325654369575">"Msimbo wa PUK unafaa kuwa na nambari 8 au zaidi."</string>
