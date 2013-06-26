@@ -45,6 +45,8 @@ import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Binder;
+import android.os.UserHandle;
 
 import java.util.List;
 
@@ -579,6 +581,23 @@ public class MockPackageManager extends PackageManager {
             IPackageInstallObserver observer, int flags, String installerPackageName,
             VerificationParams verificationParams, ContainerEncryptionParams encryptionParams) {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean setApplicationBlockedSettingAsUser(String packageName, boolean blocked,
+            UserHandle user) {
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean getApplicationBlockedSettingAsUser(String packageName, UserHandle user) {
+        return false;
     }
 
     /**

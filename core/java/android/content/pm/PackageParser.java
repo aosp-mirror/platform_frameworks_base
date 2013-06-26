@@ -159,7 +159,8 @@ public class PackageParser {
     private static WeakReference<byte[]> mReadBuffer;
 
     private static boolean sCompatibilityModeEnabled = true;
-    private static final int PARSE_DEFAULT_INSTALL_LOCATION = PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
+    private static final int PARSE_DEFAULT_INSTALL_LOCATION =
+            PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
 
     static class ParsePackageItemArgs {
         final Package owner;
@@ -274,15 +275,20 @@ public class PackageParser {
                 grantedPermissions, state, UserHandle.getCallingUserId());
     }
 
-    private static boolean checkUseInstalled(int flags, PackageUserState state) {
-        return state.installed || ((flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0);
+    /**
+     * Returns true if the package is installed and not blocked, or if the caller
+     * explicitly wanted all uninstalled and blocked packages as well.
+     */
+    private static boolean checkUseInstalledOrBlocked(int flags, PackageUserState state) {
+        return (state.installed && !state.blocked)
+                || (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
     }
 
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
             int gids[], int flags, long firstInstallTime, long lastUpdateTime,
             HashSet<String> grantedPermissions, PackageUserState state, int userId) {
 
-        if (!checkUseInstalled(flags, state)) {
+        if (!checkUseInstalledOrBlocked(flags, state)) {
             return null;
         }
         PackageInfo pi = new PackageInfo();
@@ -3724,7 +3730,7 @@ public class PackageParser {
                 return true;
             }
         }
-        if (!state.installed) {
+        if (!state.installed || state.blocked) {
             return true;
         }
         if (state.stopped) {
@@ -3757,6 +3763,11 @@ public class PackageParser {
         } else {
             ai.flags &= ~ApplicationInfo.FLAG_INSTALLED;
         }
+        if (state.blocked) {
+            ai.flags |= ApplicationInfo.FLAG_BLOCKED;
+        } else {
+            ai.flags &= ~ApplicationInfo.FLAG_BLOCKED;
+        }
         if (state.enabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
             ai.enabled = true;
         } else if (state.enabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED) {
@@ -3771,7 +3782,7 @@ public class PackageParser {
     public static ApplicationInfo generateApplicationInfo(Package p, int flags,
             PackageUserState state, int userId) {
         if (p == null) return null;
-        if (!checkUseInstalled(flags, state)) {
+        if (!checkUseInstalledOrBlocked(flags, state)) {
             return null;
         }
         if (!copyNeeded(flags, p, state, null, userId)
@@ -3855,7 +3866,7 @@ public class PackageParser {
     public static final ActivityInfo generateActivityInfo(Activity a, int flags,
             PackageUserState state, int userId) {
         if (a == null) return null;
-        if (!checkUseInstalled(flags, state)) {
+        if (!checkUseInstalledOrBlocked(flags, state)) {
             return null;
         }
         if (!copyNeeded(flags, a.owner, state, a.metaData, userId)) {
@@ -3892,7 +3903,7 @@ public class PackageParser {
     public static final ServiceInfo generateServiceInfo(Service s, int flags,
             PackageUserState state, int userId) {
         if (s == null) return null;
-        if (!checkUseInstalled(flags, state)) {
+        if (!checkUseInstalledOrBlocked(flags, state)) {
             return null;
         }
         if (!copyNeeded(flags, s.owner, state, s.metaData, userId)) {
@@ -3937,7 +3948,7 @@ public class PackageParser {
     public static final ProviderInfo generateProviderInfo(Provider p, int flags,
             PackageUserState state, int userId) {
         if (p == null) return null;
-        if (!checkUseInstalled(flags, state)) {
+        if (!checkUseInstalledOrBlocked(flags, state)) {
             return null;
         }
         if (!copyNeeded(flags, p.owner, state, p.metaData, userId)

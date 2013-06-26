@@ -1296,6 +1296,28 @@ final class ApplicationPackageManager extends PackageManager {
         return PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
     }
 
+    @Override
+    public boolean setApplicationBlockedSettingAsUser(String packageName, boolean blocked,
+            UserHandle user) {
+        try {
+            return mPM.setApplicationBlockedSettingAsUser(packageName, blocked,
+                    user.getIdentifier());
+        } catch (RemoteException re) {
+            // Should never happen!
+        }
+        return false;
+    }
+
+    @Override
+    public boolean getApplicationBlockedSettingAsUser(String packageName, UserHandle user) {
+        try {
+            return mPM.getApplicationBlockedSettingAsUser(packageName, user.getIdentifier());
+        } catch (RemoteException re) {
+            // Should never happen!
+        }
+        return false;
+    }
+
     /**
      * @hide
      */

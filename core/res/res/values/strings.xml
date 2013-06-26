@@ -4018,7 +4018,7 @@
     <!-- Message shown when user enters wrong PIN -->
     <string name="kg_wrong_pin">Wrong PIN</string>
     <!-- Countdown message shown after too many failed unlock attempts -->
-    <string name="kg_too_many_failed_attempts_countdown">Try again in <xliff:g id="number">%d</xliff:g> seconds.</string>
+    <string name="kg_too_many_failed_attempts_countdown">Try again in <xliff:g id="number">%1$d</xliff:g> seconds.</string>
     <!-- Instructions for using the pattern unlock screen -->
     <string name="kg_pattern_instructions">Draw your pattern</string>
     <!-- Instructions for using the SIM PIN unlock screen -->
@@ -4227,4 +4227,20 @@
     <!-- North America Tabloid media size: 11" × 17" -->
     <string name="mediaSize_na_tabloid">Tabloid</string>
 
+    <!-- PIN creation dialog message [CHAR LIMIT=none] -->
+    <string name="restr_pin_create_pin">Create a PIN for modifying restrictions</string>
+    <!-- PIN entry dialog label for PIN [CHAR LIMIT=none] -->
+    <string name="restr_pin_enter_pin">Enter PIN</string>
+    <!-- PIN entry dialog label for PIN confirmation [CHAR LIMIT=none] -->
+    <string name="restr_pin_confirm_pin">Confirm PIN</string>
+    <!-- PIN entry dialog error when PINs are not the same [CHAR LIMIT=none] -->
+    <string name="restr_pin_error_doesnt_match">PINs don\'t match. Try again.</string>
+    <!-- PIN entry dialog error when PIN is too short [CHAR LIMIT=none] -->
+    <string name="restr_pin_error_too_short">PIN is too short. Must be at least 4 digits.</string>
+    <!-- PIN entry dialog countdown message for next chance to enter the PIN [CHAR LIMIT=none] -->
+    <!-- Phrase describing a time duration using seconds [CHAR LIMIT=16] -->
+    <plurals name="restr_pin_countdown">
+        <item quantity="one">Incorrect PIN. Try again in 1 second.</item>
+        <item quantity="other">Incorrect PIN. Try again in <xliff:g id="count">%d</xliff:g> seconds.</item>
+    </plurals>
 </resources>

@@ -109,6 +109,7 @@ final class Settings {
     private static final String ATTR_ENABLED = "enabled";
     private static final String ATTR_ENABLED_CALLER = "enabledCaller";
     private static final String ATTR_STOPPED = "stopped";
+    private static final String ATTR_BLOCKED = "blocked";
     private static final String ATTR_INSTALLED = "inst";
 
     private final File mSettingsFilename;
@@ -462,6 +463,7 @@ final class Settings {
                                     installed,
                                     true, // stopped,
                                     true, // notLaunched
+                                    false, // blocked
                                     null, null, null);
                             writePackageRestrictionsLPr(user.id);
                         }
@@ -860,6 +862,7 @@ final class Settings {
                                 true,   // installed
                                 false,  // stopped
                                 false,  // notLaunched
+                                false,  // blocked
                                 null, null, null);
                     }
                     return;
@@ -913,6 +916,9 @@ final class Settings {
                     final String stoppedStr = parser.getAttributeValue(null, ATTR_STOPPED);
                     final boolean stopped = stoppedStr == null
                             ? false : Boolean.parseBoolean(stoppedStr);
+                    final String blockedStr = parser.getAttributeValue(null, ATTR_BLOCKED);
+                    final boolean blocked = blockedStr == null
+                            ? false : Boolean.parseBoolean(blockedStr);
                     final String notLaunchedStr = parser.getAttributeValue(null, ATTR_NOT_LAUNCHED);
                     final boolean notLaunched = stoppedStr == null
                             ? false : Boolean.parseBoolean(notLaunchedStr);
@@ -936,7 +942,7 @@ final class Settings {
                         }
                     }
 
-                    ps.setUserState(userId, enabled, installed, stopped, notLaunched,
+                    ps.setUserState(userId, enabled, installed, stopped, notLaunched, blocked,
                             enabledCaller, enabledComponents, disabledComponents);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
@@ -1044,6 +1050,7 @@ final class Settings {
                 PackageUserState ustate = pkg.readUserState(userId);
                 if (ustate.stopped || ustate.notLaunched || !ustate.installed
                         || ustate.enabled != COMPONENT_ENABLED_STATE_DEFAULT
+                        || ustate.blocked
                         || (ustate.enabledComponents != null
                                 && ustate.enabledComponents.size() > 0)
                         || (ustate.disabledComponents != null
@@ -1060,6 +1067,9 @@ final class Settings {
                     }
                     if (ustate.notLaunched) {
                         serializer.attribute(null, ATTR_NOT_LAUNCHED, "true");
+                    }
+                    if (ustate.blocked) {
+                        serializer.attribute(null, ATTR_BLOCKED, "true");
                     }
                     if (ustate.enabled != COMPONENT_ENABLED_STATE_DEFAULT) {
                         serializer.attribute(null, ATTR_ENABLED,
@@ -2847,6 +2857,8 @@ final class Settings {
             pw.print(prefix); pw.print("  User "); pw.print(user.id); pw.print(": ");
             pw.print(" installed=");
             pw.print(ps.getInstalled(user.id));
+            pw.print(" blocked=");
+            pw.print(ps.getBlocked(user.id));
             pw.print(" stopped=");
             pw.print(ps.getStopped(user.id));
             pw.print(" notLaunched=");

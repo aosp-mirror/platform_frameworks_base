@@ -6155,6 +6155,7 @@ package android.content {
     field public static final java.lang.String ACTION_PROVIDER_CHANGED = "android.intent.action.PROVIDER_CHANGED";
     field public static final java.lang.String ACTION_QUICK_CLOCK = "android.intent.action.QUICK_CLOCK";
     field public static final java.lang.String ACTION_REBOOT = "android.intent.action.REBOOT";
+    field public static final java.lang.String ACTION_RESTRICTIONS_PIN_CHALLENGE = "android.intent.action.RESTRICTIONS_PIN_CHALLENGE";
     field public static final java.lang.String ACTION_RUN = "android.intent.action.RUN";
     field public static final java.lang.String ACTION_SCREEN_OFF = "android.intent.action.SCREEN_OFF";
     field public static final java.lang.String ACTION_SCREEN_ON = "android.intent.action.SCREEN_ON";
@@ -17964,6 +17965,7 @@ package android.os {
     method public java.lang.String getUserName();
     method public android.os.Bundle getUserRestrictions();
     method public android.os.Bundle getUserRestrictions(android.os.UserHandle);
+    method public boolean hasRestrictionsPin();
     method public boolean isUserAGoat();
     method public boolean isUserRunning(android.os.UserHandle);
     method public boolean isUserRunningOrStopping(android.os.UserHandle);

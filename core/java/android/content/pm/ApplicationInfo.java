@@ -346,6 +346,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public static final int FLAG_CANT_SAVE_STATE = 1<<28;
 
     /**
+     * Value for {@link #flags}: true if the application is blocked via restrictions and for
+     * most purposes is considered as not installed.
+     * {@hide}
+     */
+    public static final int FLAG_BLOCKED = 1<<27;
+
+    /**
      * Flags associated with the application.  Any combination of
      * {@link #FLAG_SYSTEM}, {@link #FLAG_DEBUGGABLE}, {@link #FLAG_HAS_CODE},
      * {@link #FLAG_PERSISTENT}, {@link #FLAG_FACTORY_TEST}, and
@@ -359,7 +366,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * {@link #FLAG_INSTALLED}.
      */
     public int flags = 0;
-    
+
     /**
      * The required smallest screen width the application can run on.  If 0,
      * nothing has been specified.  Comes from

@@ -260,14 +260,24 @@ class PackageSettingBase extends GrantedPermissions {
         modifyUserState(userId).notLaunched = stop;
     }
 
+    boolean getBlocked(int userId) {
+        return readUserState(userId).blocked;
+    }
+
+    void setBlocked(boolean blocked, int userId) {
+        modifyUserState(userId).blocked = blocked;
+    }
+
     void setUserState(int userId, int enabled, boolean installed, boolean stopped,
-            boolean notLaunched, String lastDisableAppCaller, HashSet<String> enabledComponents,
+            boolean notLaunched, boolean blocked,
+            String lastDisableAppCaller, HashSet<String> enabledComponents,
             HashSet<String> disabledComponents) {
         PackageUserState state = modifyUserState(userId);
         state.enabled = enabled;
         state.installed = installed;
         state.stopped = stopped;
         state.notLaunched = notLaunched;
+        state.blocked = blocked;
         state.lastDisableAppCaller = lastDisableAppCaller;
         state.enabledComponents = enabledComponents;
         state.disabledComponents = disabledComponents;

@@ -147,6 +147,16 @@ public final class Pm {
             return;
         }
 
+        if ("block".equals(op)) {
+            runSetBlockedSetting(true);
+            return;
+        }
+
+        if ("unblock".equals(op)) {
+            runSetBlockedSetting(false);
+            return;
+        }
+
         if ("grant".equals(op)) {
             runGrantRevokePermission(true);
             return;
@@ -1256,6 +1266,36 @@ public final class Pm {
         }
     }
 
+    private void runSetBlockedSetting(boolean state) {
+        int userId = 0;
+        String option = nextOption();
+        if (option != null && option.equals("--user")) {
+            String optionData = nextOptionData();
+            if (optionData == null || !isNumber(optionData)) {
+                System.err.println("Error: no USER_ID specified");
+                showUsage();
+                return;
+            } else {
+                userId = Integer.parseInt(optionData);
+            }
+        }
+
+        String pkg = nextArg();
+        if (pkg == null) {
+            System.err.println("Error: no package or component specified");
+            showUsage();
+            return;
+        }
+        try {
+            mPm.setApplicationBlockedSettingAsUser(pkg, state, userId);
+            System.err.println("Package " + pkg + " new blocked state: "
+                    + mPm.getApplicationBlockedSettingAsUser(pkg, userId));
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+        }
+    }
+
     private void runGrantRevokePermission(boolean grant) {
         String pkg = nextArg();
         if (pkg == null) {
@@ -1482,6 +1522,8 @@ public final class Pm {
         System.err.println("       pm disable [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable-user [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable-until-used [--user USER_ID] PACKAGE_OR_COMPONENT");
+        System.err.println("       pm block [--user USER_ID] PACKAGE_OR_COMPONENT");
+        System.err.println("       pm unblock [--user USER_ID] PACKAGE_OR_COMPONENT");
         System.err.println("       pm grant PACKAGE PERMISSION");
         System.err.println("       pm revoke PACKAGE PERMISSION");
         System.err.println("       pm set-install-location [0/auto] [1/internal] [2/external]");
