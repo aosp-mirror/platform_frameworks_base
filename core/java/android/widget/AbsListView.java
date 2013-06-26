@@ -3369,68 +3369,62 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private void onTouchDown(MotionEvent ev) {
-        View v;
-        switch (mTouchMode) {
-        case TOUCH_MODE_OVERFLING: {
+        mActivePointerId = ev.getPointerId(0);
+
+        if (mTouchMode == TOUCH_MODE_OVERFLING) {
+            // Stopped the fling. It is a scroll.
             mFlingRunnable.endFling();
             if (mPositionScroller != null) {
                 mPositionScroller.stop();
             }
             mTouchMode = TOUCH_MODE_OVERSCROLL;
             mMotionX = (int) ev.getX();
-            mMotionY = mLastY = (int) ev.getY();
+            mMotionY = (int) ev.getY();
+            mLastY = mMotionY;
             mMotionCorrection = 0;
-            mActivePointerId = ev.getPointerId(0);
             mDirection = 0;
-            break;
-        }
-
-        default: {
-            mActivePointerId = ev.getPointerId(0);
+        } else {
             final int x = (int) ev.getX();
             final int y = (int) ev.getY();
             int motionPosition = pointToPosition(x, y);
+
             if (!mDataChanged) {
-                if ((mTouchMode != TOUCH_MODE_FLING) && (motionPosition >= 0)
-                        && (getAdapter().isEnabled(motionPosition))) {
-                    // User clicked on an actual view (and was not stopping a fling).
-                    // It might be a click or a scroll. Assume it is a click until
-                    // proven otherwise
+                if (mTouchMode == TOUCH_MODE_FLING) {
+                    // Stopped a fling. It is a scroll.
+                    createScrollingCache();
+                    mTouchMode = TOUCH_MODE_SCROLL;
+                    mMotionCorrection = 0;
+                    motionPosition = findMotionRow(y);
+                    mFlingRunnable.flywheelTouch();
+                } else if ((motionPosition >= 0) && getAdapter().isEnabled(motionPosition)) {
+                    // User clicked on an actual view (and was not stopping a
+                    // fling). It might be a click or a scroll. Assume it is a
+                    // click until proven otherwise.
                     mTouchMode = TOUCH_MODE_DOWN;
+
                     // FIXME Debounce
                     if (mPendingCheckForTap == null) {
                         mPendingCheckForTap = new CheckForTap();
                     }
+
                     postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());
-                } else {
-                    if (mTouchMode == TOUCH_MODE_FLING) {
-                        // Stopped a fling. It is a scroll.
-                        createScrollingCache();
-                        mTouchMode = TOUCH_MODE_SCROLL;
-                        mMotionCorrection = 0;
-                        motionPosition = findMotionRow(y);
-                        mFlingRunnable.flywheelTouch();
-                    }
                 }
             }
 
             if (motionPosition >= 0) {
                 // Remember where the motion event started
-                v = getChildAt(motionPosition - mFirstPosition);
+                final View v = getChildAt(motionPosition - mFirstPosition);
                 mMotionViewOriginalTop = v.getTop();
             }
+
             mMotionX = x;
             mMotionY = y;
             mMotionPosition = motionPosition;
             mLastY = Integer.MIN_VALUE;
-            break;
-        }
         }
 
-        if (performButtonActionOnTouchDown(ev)) {
-            if (mTouchMode == TOUCH_MODE_DOWN) {
-                removeCallbacks(mPendingCheckForTap);
-            }
+        if (performButtonActionOnTouchDown(ev) && (mTouchMode == TOUCH_MODE_DOWN)) {
+            removeCallbacks(mPendingCheckForTap);
         }
     }
 
@@ -3460,10 +3454,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 }
                 // Otherwise, check containment within list bounds. If we're
                 // outside bounds, cancel any active presses.
-                final float x = ev.getX();
-                final boolean inList = (x > mListPadding.left)
-                        && (x < getWidth() - mListPadding.right);
-                if (!inList) {
+                final float x = ev.getX(pointerIndex);
+                if (!pointInView(x, y, mTouchSlop)) {
                     setPressed(false);
                     final View motionView = getChildAt(mMotionPosition - mFirstPosition);
                     if (motionView != null) {

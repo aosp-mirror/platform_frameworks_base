@@ -10063,8 +10063,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * is inside the view, where the area of the view is expanded by the slop factor.
      * This method is called while processing touch-move events to determine if the event
      * is still within the view.
+     *
+     * @hide
      */
-    private boolean pointInView(float localX, float localY, float slop) {
+    public boolean pointInView(float localX, float localY, float slop) {
         return localX >= -slop && localY >= -slop && localX < ((mRight - mLeft) + slop) &&
                 localY < ((mBottom - mTop) + slop);
     }
