@@ -1596,6 +1596,14 @@
     <string name="permdesc_wakeLock" product="default">Allows the app to prevent the phone from going to sleep.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_transmitIr">transmit infrared</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_transmitIr" product="tablet">Allows the app to use the tablet\'s infrared transmitter.</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_transmitIr" product="default">Allows the app to use the phone\'s infrared transmitter.</string>
+
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_devicePower" product="tablet">power tablet on or off</string>
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_devicePower" product="default">power phone on or off</string>

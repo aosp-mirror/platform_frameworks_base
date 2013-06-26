@@ -2394,6 +2394,16 @@ public abstract class Context {
     public static final String PRINT_SERVICE = "print";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a
+     * {@link android.hardware.ConsumerIrManager} for transmitting infrared
+     * signals from the device.
+     *
+     * @see #getSystemService
+     * @see android.hardware.ConsumerIrManager
+     */
+    public static final String CONSUMER_IR_SERVICE = "consumer_ir";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
