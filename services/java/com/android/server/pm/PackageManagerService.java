@@ -8276,6 +8276,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         boolean updatedSettings = false;
         parseFlags |= PackageManager.INSTALL_REPLACE_EXISTING |
                 PackageParser.PARSE_IS_SYSTEM;
+        if ((deletedPackage.applicationInfo.flags&ApplicationInfo.FLAG_PRIVILEGED) != 0) {
+            parseFlags |= PackageParser.PARSE_IS_PRIVILEGED;
+        }
         String packageName = deletedPackage.packageName;
         res.returnCode = PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE;
         if (packageName == null) {
