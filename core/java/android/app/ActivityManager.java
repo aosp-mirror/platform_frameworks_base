@@ -1400,7 +1400,18 @@ public class ActivityManager {
             return false;
         }
     }
-    
+
+    /**
+     * Permits an application to erase its own data from disk.  This is equivalent to
+     * the user choosing to clear the app's data from within the device settings UI.
+     *
+     * @return {@code true} if the application successfully requested that the application's
+     *     data be erased; {@code false} otherwise.
+     */
+    public boolean clearApplicationUserData() {
+        return clearApplicationUserData(mContext.getPackageName(), null);
+    }
+
     /**
      * Information you can retrieve about any processes that are in an error condition.
      */

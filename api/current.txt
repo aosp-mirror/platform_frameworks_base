@@ -2890,6 +2890,7 @@ package android.app {
   }
 
   public class ActivityManager {
+    method public boolean clearApplicationUserData();
     method public void dumpPackageState(java.io.FileDescriptor, java.lang.String);
     method public android.content.pm.ConfigurationInfo getDeviceConfigurationInfo();
     method public int getLargeMemoryClass();
