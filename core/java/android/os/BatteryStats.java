@@ -1208,13 +1208,13 @@ public abstract class BatteryStats implements Parcelable {
         pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
         pw.print(uid); pw.print(',');
         pw.print(category); pw.print(',');
-        pw.print(type); 
+        pw.print(type);
         
         for (Object arg : args) {  
-            pw.print(','); 
-            pw.print(arg); 
+            pw.print(',');
+            pw.print(arg);
         }
-        pw.print('\n');
+        pw.println();
     }
     
     /**
@@ -1407,7 +1407,11 @@ public abstract class BatteryStats implements Parcelable {
                     
                     // Only log if we had at lease one wakelock...
                     if (sb.length() > 0) {
-                       dumpLine(pw, uid, category, WAKELOCK_DATA, ent.getKey(), sb.toString());
+                        String name = ent.getKey();
+                        if (name.indexOf(',') >= 0) {
+                            name = name.replace(',', '_');
+                        }
+                        dumpLine(pw, uid, category, WAKELOCK_DATA, name, sb.toString());
                     }
                 }
             }
@@ -2274,6 +2278,30 @@ public abstract class BatteryStats implements Parcelable {
             }
             oldState = rec.states;
         }
+
+        public void printNextItemCheckin(PrintWriter pw, HistoryItem rec, long now) {
+            pw.print(rec.time-now);
+            pw.print(",");
+            if (rec.cmd == HistoryItem.CMD_START) {
+                pw.print("start");
+            } else if (rec.cmd == HistoryItem.CMD_OVERFLOW) {
+                pw.print("overflow");
+            } else {
+                pw.print(rec.batteryLevel);
+                pw.print(",");
+                pw.print(rec.states);
+                pw.print(",");
+                pw.print(rec.batteryStatus);
+                pw.print(",");
+                pw.print(rec.batteryHealth);
+                pw.print(",");
+                pw.print(rec.batteryPlugType);
+                pw.print(",");
+                pw.print((int)rec.batteryTemperature);
+                pw.print(",");
+                pw.print((int)rec.batteryVoltage);
+            }
+        }
     }
 
     /**
@@ -2351,6 +2379,21 @@ public abstract class BatteryStats implements Parcelable {
             PrintWriter pw, List<ApplicationInfo> apps, boolean isUnpluggedOnly) {
         prepareForDumpLocked();
         
+        long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
+
+        final HistoryItem rec = new HistoryItem();
+        if (startIteratingHistoryLocked()) {
+            HistoryPrinter hprinter = new HistoryPrinter();
+            while (getNextHistoryLocked(rec)) {
+                pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
+                pw.print(0); pw.print(',');
+                pw.print("h"); pw.print(',');
+                hprinter.printNextItemCheckin(pw, rec, now);
+                pw.println();
+            }
+            finishIteratingHistoryLocked();
+        }
+
         if (apps != null) {
             SparseArray<ArrayList<String>> uids = new SparseArray<ArrayList<String>>();
             for (int i=0; i<apps.size(); i++) {

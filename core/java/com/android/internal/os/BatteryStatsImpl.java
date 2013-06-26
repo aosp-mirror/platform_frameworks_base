@@ -302,7 +302,8 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static int sKernelWakelockUpdateVersion = 0;
 
     private static final int[] PROC_WAKELOCKS_FORMAT = new int[] {
-        Process.PROC_TAB_TERM|Process.PROC_OUT_STRING,                // 0: name
+        Process.PROC_TAB_TERM|Process.PROC_OUT_STRING|                // 0: name
+                              Process.PROC_QUOTES,
         Process.PROC_TAB_TERM|Process.PROC_OUT_LONG,                  // 1: count
         Process.PROC_TAB_TERM,
         Process.PROC_TAB_TERM,

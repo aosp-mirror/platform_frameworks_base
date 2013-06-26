@@ -678,6 +678,7 @@ enum {
     PROC_SPACE_TERM = ' ',
     PROC_COMBINE = 0x100,
     PROC_PARENS = 0x200,
+    PROC_QUOTES = 0x400,
     PROC_OUT_STRING = 0x1000,
     PROC_OUT_LONG = 0x2000,
     PROC_OUT_FLOAT = 0x4000,
@@ -719,9 +720,15 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
     jboolean res = JNI_TRUE;
 
     for (jsize fi=0; fi<NF; fi++) {
-        const jint mode = formatData[fi];
+        jint mode = formatData[fi];
         if ((mode&PROC_PARENS) != 0) {
             i++;
+        } else if ((mode&PROC_QUOTES != 0)) {
+            if (buffer[i] == '"') {
+                i++;
+            } else {
+                mode &= ~PROC_QUOTES;
+            }
         }
         const char term = (char)(mode&PROC_TERM_MASK);
         const jsize start = i;
@@ -733,6 +740,12 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
         jsize end = -1;
         if ((mode&PROC_PARENS) != 0) {
             while (buffer[i] != ')' && i < endIndex) {
+                i++;
+            }
+            end = i;
+            i++;
+        } else if ((mode&PROC_QUOTES) != 0) {
+            while (buffer[i] != '"' && i < endIndex) {
                 i++;
             }
             end = i;

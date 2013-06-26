@@ -10933,6 +10933,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                             r.processName, myTotalPss, 0);
                     procMems.add(pssItem);
 
+                    synchronized (this) {
+                        r.baseProcessTracker.addPss(myTotalPss);
+                    }
+
                     nativePss += mi.nativePss;
                     dalvikPss += mi.dalvikPss;
                     otherPss += mi.otherPss;
