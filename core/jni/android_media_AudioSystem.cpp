@@ -271,6 +271,17 @@ android_media_AudioSystem_getPrimaryOutputFrameCount(JNIEnv *env, jobject clazz)
     return (jint) AudioSystem::getPrimaryOutputFrameCount();
 }
 
+static jint
+android_media_AudioSystem_getOutputLatency(JNIEnv *env, jobject clazz, jint stream)
+{
+    uint32_t afLatency;
+    if (AudioSystem::getOutputLatency(&afLatency, static_cast <audio_stream_type_t>(stream))
+            != NO_ERROR) {
+        afLatency = -1;
+    }
+    return (jint) afLatency;
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -296,6 +307,7 @@ static JNINativeMethod gMethods[] = {
     {"getDevicesForStream", "(I)I",     (void *)android_media_AudioSystem_getDevicesForStream},
     {"getPrimaryOutputSamplingRate", "()I", (void *)android_media_AudioSystem_getPrimaryOutputSamplingRate},
     {"getPrimaryOutputFrameCount",   "()I", (void *)android_media_AudioSystem_getPrimaryOutputFrameCount},
+    {"getOutputLatency",    "(I)I",     (void *)android_media_AudioSystem_getOutputLatency},
 };
 
 int register_android_media_AudioSystem(JNIEnv *env)
