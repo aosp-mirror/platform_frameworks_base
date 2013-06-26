@@ -850,7 +850,7 @@ public final class ProcessTracker {
                             pw.print(prefix);
                             pw.print("PSS (");
                             pw.print(proc.mPssTableSize);
-                            pw.println(" entrues):");
+                            pw.println(" entries):");
                             printedHeader = true;
                         }
                         pw.print(prefix);

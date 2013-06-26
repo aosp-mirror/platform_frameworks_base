@@ -123,6 +123,17 @@
          of them.  This should not normally be modified. -->
     <bool name="config_closeDialogWhenTouchOutside">true</bool>
 
+    <!-- Device configuration indicating this is a device with limited RAM, so heavier-weight
+         features should be turned off. -->
+    <bool name="config_lowRamDevice">false</bool>
+
+    <!-- Device configuration indicating whether we should avoid using accelerated graphics
+         in certain places to reduce RAM footprint.  This is ignored if config_lowRamDevice
+         is true (in that case this is assumed true as well).  It can allow you to tune down
+         your device's memory use without going to the point of causing applications to turn
+         off features. -->
+    <bool name="config_avoidGfxAccel">false</bool>
+
     <!-- The duration (in milliseconds) that the radio will scan for a signal
          when there's no network connection. If the scan doesn't timeout, use zero -->
     <integer name="config_radioScanningTimeout">0</integer>

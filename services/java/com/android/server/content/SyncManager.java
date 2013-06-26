@@ -113,7 +113,7 @@ public class SyncManager {
     private static final long MAX_TIME_PER_SYNC;
 
     static {
-        final boolean isLargeRAM = ActivityManager.isLargeRAM();
+        final boolean isLargeRAM = !ActivityManager.isLowRamDeviceStatic();
         int defaultMaxInitSyncs = isLargeRAM ? 5 : 2;
         int defaultMaxRegularSyncs = isLargeRAM ? 2 : 1;
         MAX_SIMULTANEOUS_INITIALIZATION_SYNCS =

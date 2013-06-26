@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.R;
 import android.os.BatteryStats;
 import android.os.IBinder;
 import com.android.internal.app.IUsageStats;
@@ -377,7 +378,23 @@ public class ActivityManager {
         String vmHeapSize = SystemProperties.get("dalvik.vm.heapsize", "16m");
         return Integer.parseInt(vmHeapSize.substring(0, vmHeapSize.length()-1));
     }
-    
+
+    /**
+     * Returns true if this is a low-RAM device.  Exactly whether a device is low-RAM
+     * is ultimately up to the device configuration, but currently it generally means
+     * something in the class of a 512MB device with about a 800x480 or less screen.
+     * This is mostly intended to be used by apps to determine whether they should turn
+     * off certain features that require more RAM.
+     */
+    public boolean isLowRamDevice() {
+        return isLowRamDeviceStatic();
+    }
+
+    /** @hide */
+    public static boolean isLowRamDeviceStatic() {
+        return Resources.getSystem().getBoolean(com.android.internal.R.bool.config_lowRamDevice);
+    }
+
     /**
      * Used by persistent processes to determine if they are running on a
      * higher-end device so should be okay using hardware drawing acceleration
@@ -385,43 +402,8 @@ public class ActivityManager {
      * @hide
      */
     static public boolean isHighEndGfx() {
-        MemInfoReader reader = new MemInfoReader();
-        reader.readMemInfo();
-        if (reader.getTotalSize() >= (512*1024*1024)) {
-            // If the device has at least 512MB RAM available to the kernel,
-            // we can afford the overhead of graphics acceleration.
-            return true;
-        }
-
-        Display display = DisplayManagerGlobal.getInstance().getRealDisplay(
-                Display.DEFAULT_DISPLAY);
-        Point p = new Point();
-        display.getRealSize(p);
-        int pixels = p.x * p.y;
-        if (pixels >= (1024*600)) {
-            // If this is a sufficiently large screen, then there are enough
-            // pixels on it that we'd really like to use hw drawing.
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Use to decide whether the running device can be considered a "large
-     * RAM" device.  Exactly what memory limit large RAM is will vary, but
-     * it essentially means there is plenty of RAM to have lots of background
-     * processes running under decent loads.
-     * @hide
-     */
-    static public boolean isLargeRAM() {
-        MemInfoReader reader = new MemInfoReader();
-        reader.readMemInfo();
-        if (reader.getTotalSize() >= (640*1024*1024)) {
-            // Currently 640MB RAM available to the kernel is the point at
-            // which we have plenty of RAM to spare.
-            return true;
-        }
-        return false;
+        return !isLowRamDeviceStatic() &&
+                !Resources.getSystem().getBoolean(com.android.internal.R.bool.config_avoidGfxAccel);
     }
 
     /**
