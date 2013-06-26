@@ -1758,7 +1758,8 @@ public class SyncManager {
             final Pair<Account, String> wakeLockKey = Pair.create(account, authority);
             PowerManager.WakeLock wakeLock = mWakeLocks.get(wakeLockKey);
             if (wakeLock == null) {
-                final String name = SYNC_WAKE_LOCK_PREFIX + "_" + authority + "_" + account;
+                final String name = SYNC_WAKE_LOCK_PREFIX + "/" + authority + "/" + account.type
+                        + "/" + account.name;
                 wakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, name);
                 wakeLock.setReferenceCounted(false);
                 mWakeLocks.put(wakeLockKey, wakeLock);
