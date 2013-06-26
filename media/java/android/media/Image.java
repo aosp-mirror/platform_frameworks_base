@@ -44,7 +44,7 @@ import java.lang.AutoCloseable;
  *
  * @see ImageReader
  */
-public abstract class Image implements AutoCloseable {
+public interface Image extends AutoCloseable {
     /**
      * Get the format for this image. This format determines the number of
      * ByteBuffers needed to represent the image, and the general layout of the
@@ -87,25 +87,19 @@ public abstract class Image implements AutoCloseable {
      *
      * @see android.graphics.ImageFormat
      */
-    public int getFormat() {
-        return ImageFormat.UNKNOWN;
-    }
+    public int getFormat();
 
     /**
      * The width of the image in pixels. For formats where some color channels
      * are subsampled, this is the width of the largest-resolution plane.
      */
-    public int getWidth() {
-        return 0;
-    }
+    public int getWidth();
 
     /**
      * The height of the image in pixels. For formats where some color channels
      * are subsampled, this is the height of the largest-resolution plane.
      */
-    public int getHeight() {
-        return 0;
-    }
+    public int getHeight();
 
     /**
      * Get the timestamp associated with this frame. The timestamp is measured
@@ -113,17 +107,13 @@ public abstract class Image implements AutoCloseable {
      * and whether the timestamp can be compared against other sources of time
      * or images depend on the source of this image.
      */
-    public long getTimestamp() {
-        return 0;
-    }
+    public long getTimestamp();
 
     /**
      * Get the array of pixel planes for this Image. The number of planes is
      * determined by the format of the Image.
      */
-    public Plane[] getPlanes() {
-        return null;
-    }
+    public Plane[] getPlanes();
 
     /**
      * Free up this frame for reuse. After calling this method, calling any
@@ -131,11 +121,7 @@ public abstract class Image implements AutoCloseable {
      * attempting to read from ByteBuffers returned by an earlier
      * {@code Plane#getBuffer} call will have undefined behavior.
      */
-    public abstract void close();
-
-    protected final void finalize() {
-        close();
-    }
+    public void close();
 
     /**
      * <p>A single color plane of image data.</p>
@@ -148,17 +134,14 @@ public abstract class Image implements AutoCloseable {
      *
      * @see #getFormat
      */
-    public static final class Plane {
+    public interface Plane {
         /**
          * <p>The row stride for this color plane, in bytes.
          *
          * <p>This is the distance between the start of two consecutive rows of
          * pixels in the image.</p>
          */
-        public int getRowStride() {
-            return 0;
-        }
-
+        public int getRowStride();
         /**
          * <p>The distance between adjacent pixel samples, in bytes.</p>
          *
@@ -166,19 +149,14 @@ public abstract class Image implements AutoCloseable {
          * of pixels. It may be larger than the size of a single pixel to
          * account for interleaved image data or padded formats.</p>
          */
-        public int getPixelStride() {
-            return 0;
-        }
-
+        public int getPixelStride();
         /**
          * <p>Get a set of direct {@link java.nio.ByteBuffer byte buffers}
          * containing the frame data.</p>
          *
          * @return the byte buffer containing the image data for this plane.
          */
-        public ByteBuffer getBuffer() {
-            return null;
-        }
+        public ByteBuffer getBuffer();
     }
 
 }

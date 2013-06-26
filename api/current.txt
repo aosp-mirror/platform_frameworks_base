@@ -11817,26 +11817,24 @@ package android.media {
     field public static final int EULER_Z = 2; // 0x2
   }
 
-  public abstract class Image implements java.lang.AutoCloseable {
-    ctor public Image();
+  public abstract interface Image implements java.lang.AutoCloseable {
     method public abstract void close();
-    method protected final void finalize();
-    method public int getFormat();
-    method public int getHeight();
-    method public android.media.Image.Plane[] getPlanes();
-    method public long getTimestamp();
-    method public int getWidth();
+    method public abstract int getFormat();
+    method public abstract int getHeight();
+    method public abstract android.media.Image.Plane[] getPlanes();
+    method public abstract long getTimestamp();
+    method public abstract int getWidth();
   }
 
-  public static final class Image.Plane {
-    ctor public Image.Plane();
-    method public java.nio.ByteBuffer getBuffer();
-    method public int getPixelStride();
-    method public int getRowStride();
+  public static abstract interface Image.Plane {
+    method public abstract java.nio.ByteBuffer getBuffer();
+    method public abstract int getPixelStride();
+    method public abstract int getRowStride();
   }
 
-  public final class ImageReader {
+  public final class ImageReader implements java.lang.AutoCloseable {
     ctor public ImageReader(int, int, int, int);
+    method public void close();
     method public int getHeight();
     method public int getImageFormat();
     method public int getMaxImages();
@@ -11844,7 +11842,7 @@ package android.media {
     method public android.view.Surface getSurface();
     method public int getWidth();
     method public void releaseImage(android.media.Image);
-    method public void setOnImageAvailableListener(android.media.ImageReader.OnImageAvailableListener);
+    method public void setImageAvailableListener(android.media.ImageReader.OnImageAvailableListener, android.os.Handler);
   }
 
   public static abstract interface ImageReader.OnImageAvailableListener {
