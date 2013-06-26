@@ -862,7 +862,7 @@ public class DefaultContainerService extends IntentService {
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
             final StatFs sdStats = new StatFs(Environment.getExternalStorageDirectory().getPath());
             final int blocksToMb = (1 << 20) / sdStats.getBlockSize();
-            availSdMb = sdStats.getAvailableBlocks() * blocksToMb;
+            availSdMb = sdStats.getAvailableBlocks() / blocksToMb;
         } else {
             availSdMb = -1;
         }
