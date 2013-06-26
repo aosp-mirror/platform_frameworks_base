@@ -384,27 +384,6 @@ public class KeyguardViewManager {
     }
 
     /**
-     * A key has woken the device.  We use this to potentially adjust the state
-     * of the lock screen based on the key.
-     *
-     * The 'Tq' suffix is per the documentation in {@link android.view.WindowManagerPolicy}.
-     * Be sure not to take any action that takes a long time; any significant
-     * action should be posted to a handler.
-     *
-     * @param keyCode The wake key.  May be {@link KeyEvent#KEYCODE_UNKNOWN} if waking
-     * for a reason other than a key press.
-     */
-    public boolean wakeWhenReadyTq(int keyCode) {
-        if (DEBUG) Log.d(TAG, "wakeWhenReady(" + keyCode + ")");
-        if (mKeyguardView != null) {
-            mKeyguardView.wakeWhenReadyTq(keyCode);
-            return true;
-        }
-        Log.w(TAG, "mKeyguardView is null in wakeWhenReadyTq");
-        return false;
-    }
-
-    /**
      * Hides the keyguard view
      */
     public synchronized void hide() {

@@ -30,8 +30,6 @@ interface IKeyguardService {
     oneway void keyguardDone(boolean authenticated, boolean wakeup);
     oneway void setHidden(boolean isHidden);
     oneway void dismiss();
-    oneway void onWakeKeyWhenKeyguardShowing(int keyCode);
-    oneway void onWakeMotionWhenKeyguardShowing();
     oneway void onDreamingStarted();
     oneway void onDreamingStopped();
     oneway void onScreenTurnedOff(int reason);

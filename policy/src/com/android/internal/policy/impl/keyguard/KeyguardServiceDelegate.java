@@ -12,6 +12,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -21,7 +22,6 @@ import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardShowCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.policy.impl.KeyguardServiceWrapper;
 
 /**
  * A local class that keeps a cache of keyguard state that can be restored in the event
@@ -176,18 +176,6 @@ public class KeyguardServiceDelegate {
             mKeyguardState.secure = mKeyguardService.isSecure();
         }
         return mKeyguardState.secure;
-    }
-
-    public void onWakeKeyWhenKeyguardShowingTq(int keycodePower) {
-        if (mKeyguardService != null) {
-            mKeyguardService.onWakeKeyWhenKeyguardShowing(keycodePower);
-        }
-    }
-
-    public void onWakeMotionWhenKeyguardShowing() {
-        if (mKeyguardService != null) {
-            mKeyguardService.onWakeMotionWhenKeyguardShowing();
-        }
     }
 
     public void onDreamingStarted() {

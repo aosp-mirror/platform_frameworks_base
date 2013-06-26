@@ -90,11 +90,6 @@ public abstract class KeyguardViewBase extends FrameLayout {
     }
 
     /**
-     * Called when you need to reset the state of your view.
-     */
-    abstract public void reset();
-
-    /**
      * Called when the screen turned off.
      */
     abstract public void onScreenTurnedOff();
@@ -108,21 +103,6 @@ public abstract class KeyguardViewBase extends FrameLayout {
      * Called when the view needs to be shown.
      */
     abstract public void show();
-
-    /**
-     * Called when a key has woken the device to give us a chance to adjust our
-     * state according the the key.  We are responsible for waking the device
-     * (by poking the wake lock) once we are ready.
-     *
-     * The 'Tq' suffix is per the documentation in {@link android.view.WindowManagerPolicy}.
-     * Be sure not to take any action that takes a long time; any significant
-     * action should be posted to a handler.
-     *
-     * @param keyCode The wake key, which may be relevant for configuring the
-     *   keyguard.  May be {@link KeyEvent#KEYCODE_UNKNOWN} if waking for a reason
-     *   other than a key press.
-     */
-    abstract public void wakeWhenReadyTq(int keyCode);
 
     /**
      * Verify that the user can get past the keyguard securely.  This is called,

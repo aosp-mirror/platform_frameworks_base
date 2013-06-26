@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.policy.impl;
+package com.android.internal.policy.impl.keyguard;
 
 import android.os.Bundle;
 import android.os.IBinder;
@@ -110,22 +110,6 @@ public class KeyguardServiceWrapper implements IKeyguardService {
     public void dismiss() {
         try {
             mService.dismiss();
-        } catch (RemoteException e) {
-            Slog.w(TAG , "Remote Exception", e);
-        }
-    }
-
-    public void onWakeKeyWhenKeyguardShowing(int keyCode) {
-        try {
-            mService.onWakeKeyWhenKeyguardShowing(keyCode);
-        } catch (RemoteException e) {
-            Slog.w(TAG , "Remote Exception", e);
-        }
-    }
-
-    public void onWakeMotionWhenKeyguardShowing() {
-        try {
-            mService.onWakeMotionWhenKeyguardShowing();
         } catch (RemoteException e) {
             Slog.w(TAG , "Remote Exception", e);
         }

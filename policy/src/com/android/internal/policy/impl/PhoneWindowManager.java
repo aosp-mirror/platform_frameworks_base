@@ -3523,11 +3523,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         updateRotation(true);
 
         if (lidOpen) {
-            if (keyguardIsShowingTq()) {
-                mKeyguardDelegate.onWakeKeyWhenKeyguardShowingTq(KeyEvent.KEYCODE_POWER);
-            } else {
-                mPowerManager.wakeUp(SystemClock.uptimeMillis());
-            }
+            mPowerManager.wakeUp(SystemClock.uptimeMillis());
         } else if (!mLidControlsSleep) {
             mPowerManager.userActivity(SystemClock.uptimeMillis(), false);
         }
@@ -3745,13 +3741,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // to wake the device but don't pass the key to the application.
             result = 0;
             if (down && isWakeKey && isWakeKeyWhenScreenOff(keyCode)) {
-                if (keyguardActive) {
-                    // If the keyguard is showing, let it wake the device when ready.
-                    mKeyguardDelegate.onWakeKeyWhenKeyguardShowingTq(keyCode);
-                } else {
-                    // Otherwise, wake the device ourselves.
-                    result |= ACTION_WAKE_UP;
-                }
+                result |= ACTION_WAKE_UP;
             }
         }
 
@@ -4017,13 +4007,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean isWakeMotion = (policyFlags
                 & (WindowManagerPolicy.FLAG_WAKE | WindowManagerPolicy.FLAG_WAKE_DROPPED)) != 0;
         if (isWakeMotion) {
-            if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()) {
-                // If the keyguard is showing, let it decide what to do with the wake motion.
-                mKeyguardDelegate.onWakeMotionWhenKeyguardShowing();
-            } else {
-                // Otherwise, wake the device ourselves.
-                result |= ACTION_WAKE_UP;
-            }
+            result |= ACTION_WAKE_UP;
         }
         return result;
     }
