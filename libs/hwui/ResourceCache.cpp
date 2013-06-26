@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "OpenGLRenderer"
+
 #include <SkPixelRef.h>
 #include "ResourceCache.h"
 #include "Caches.h"
@@ -79,6 +81,10 @@ void ResourceCache::incrementRefcount(SkiaColorFilter* filterResource) {
     incrementRefcount((void*) filterResource, kColorFilter);
 }
 
+void ResourceCache::incrementRefcount(Res_png_9patch* patchResource) {
+    incrementRefcount((void*) patchResource, kNinePatch);
+}
+
 void ResourceCache::incrementRefcount(Layer* layerResource) {
     incrementRefcount((void*) layerResource, kLayer);
 }
@@ -113,6 +119,10 @@ void ResourceCache::incrementRefcountLocked(SkiaColorFilter* filterResource) {
     incrementRefcountLocked((void*) filterResource, kColorFilter);
 }
 
+void ResourceCache::incrementRefcountLocked(Res_png_9patch* patchResource) {
+    incrementRefcountLocked((void*) patchResource, kNinePatch);
+}
+
 void ResourceCache::incrementRefcountLocked(Layer* layerResource) {
     incrementRefcountLocked((void*) layerResource, kLayer);
 }
@@ -140,6 +150,10 @@ void ResourceCache::decrementRefcount(SkiaShader* shaderResource) {
 void ResourceCache::decrementRefcount(SkiaColorFilter* filterResource) {
     SkSafeUnref(filterResource->getSkColorFilter());
     decrementRefcount((void*) filterResource);
+}
+
+void ResourceCache::decrementRefcount(Res_png_9patch* patchResource) {
+    decrementRefcount((void*) patchResource);
 }
 
 void ResourceCache::decrementRefcount(Layer* layerResource) {
@@ -177,6 +191,10 @@ void ResourceCache::decrementRefcountLocked(SkiaShader* shaderResource) {
 void ResourceCache::decrementRefcountLocked(SkiaColorFilter* filterResource) {
     SkSafeUnref(filterResource->getSkColorFilter());
     decrementRefcountLocked((void*) filterResource);
+}
+
+void ResourceCache::decrementRefcountLocked(Res_png_9patch* patchResource) {
+    decrementRefcountLocked((void*) patchResource);
 }
 
 void ResourceCache::decrementRefcountLocked(Layer* layerResource) {
@@ -265,6 +283,30 @@ void ResourceCache::destructorLocked(SkiaColorFilter* resource) {
     }
 }
 
+void ResourceCache::destructor(Res_png_9patch* resource) {
+    Mutex::Autolock _l(mLock);
+    destructorLocked(resource);
+}
+
+void ResourceCache::destructorLocked(Res_png_9patch* resource) {
+    ssize_t index = mCache->indexOfKey(resource);
+    ResourceReference* ref = index >= 0 ? mCache->valueAt(index) : NULL;
+    if (ref == NULL) {
+        if (Caches::hasInstance()) {
+            Caches::getInstance().patchCache.removeDeferred(resource);
+        }
+        // If we're not tracking this resource, just delete it
+        // A Res_png_9patch is actually an array of byte that's larger
+        // than sizeof(Res_png_9patch). It must be freed as an array.
+        delete[] (int8_t*) resource;
+        return;
+    }
+    ref->destroyed = true;
+    if (ref->refCount == 0) {
+        deleteResourceReferenceLocked(resource, ref);
+    }
+}
+
 /**
  * Return value indicates whether resource was actually recycled, which happens when RefCnt
  * reaches 0.
@@ -333,6 +375,16 @@ void ResourceCache::deleteResourceReferenceLocked(void* resource, ResourceRefere
             case kColorFilter: {
                 SkiaColorFilter* filter = (SkiaColorFilter*) resource;
                 delete filter;
+            }
+            break;
+            case kNinePatch: {
+                if (Caches::hasInstance()) {
+                    Caches::getInstance().patchCache.removeDeferred((Res_png_9patch*) resource);
+                }
+                // A Res_png_9patch is actually an array of byte that's larger
+                // than sizeof(Res_png_9patch). It must be freed as an array.
+                int8_t* patch = (int8_t*) resource;
+                delete[] patch;
             }
             break;
             case kLayer: {

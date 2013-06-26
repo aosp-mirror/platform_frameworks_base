@@ -781,7 +781,7 @@ class GLES20Canvas extends HardwareCanvas {
         int modifier = paint != null ? setupColorFilter(paint) : MODIFIER_NONE;
         try {
             final int nativePaint = paint == null ? 0 : paint.mNativePaint;
-            nDrawPatch(mRenderer, bitmap.mNativeBitmap, patch.mChunk,
+            nDrawPatch(mRenderer, bitmap.mNativeBitmap, patch.mNativeChunk,
                     dst.left, dst.top, dst.right, dst.bottom, nativePaint);
         } finally {
             if (modifier != MODIFIER_NONE) nResetModifiers(mRenderer, modifier);
@@ -796,14 +796,14 @@ class GLES20Canvas extends HardwareCanvas {
         int modifier = paint != null ? setupColorFilter(paint) : MODIFIER_NONE;
         try {
             final int nativePaint = paint == null ? 0 : paint.mNativePaint;
-            nDrawPatch(mRenderer, bitmap.mNativeBitmap, patch.mChunk,
+            nDrawPatch(mRenderer, bitmap.mNativeBitmap, patch.mNativeChunk,
                     dst.left, dst.top, dst.right, dst.bottom, nativePaint);
         } finally {
             if (modifier != MODIFIER_NONE) nResetModifiers(mRenderer, modifier);
         }
     }
 
-    private static native void nDrawPatch(int renderer, int bitmap, byte[] chunks,
+    private static native void nDrawPatch(int renderer, int bitmap, int chunk,
             float left, float top, float right, float bottom, int paint);
 
     @Override

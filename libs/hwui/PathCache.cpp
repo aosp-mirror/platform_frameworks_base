@@ -350,8 +350,7 @@ void PathCache::PathProcessor::onProcess(const sp<Task<SkBitmap*> >& task) {
 // Paths
 ///////////////////////////////////////////////////////////////////////////////
 
-void PathCache::remove(const path_pair_t& pair) {
-    Vector<PathDescription> pathsToRemove;
+void PathCache::remove(Vector<PathDescription>& pathsToRemove, const path_pair_t& pair) {
     LruCache<PathDescription, PathTexture*>::Iterator i(mCache);
 
     while (i.next()) {
@@ -362,10 +361,6 @@ void PathCache::remove(const path_pair_t& pair) {
             pathsToRemove.push(key);
         }
     }
-
-    for (size_t i = 0; i < pathsToRemove.size(); i++) {
-        mCache.remove(pathsToRemove.itemAt(i));
-    }
 }
 
 void PathCache::removeDeferred(SkPath* path) {
@@ -374,12 +369,20 @@ void PathCache::removeDeferred(SkPath* path) {
 }
 
 void PathCache::clearGarbage() {
-    Mutex::Autolock l(mLock);
-    size_t count = mGarbage.size();
-    for (size_t i = 0; i < count; i++) {
-        remove(mGarbage.itemAt(i));
+    Vector<PathDescription> pathsToRemove;
+
+    { // scope for the mutex
+        Mutex::Autolock l(mLock);
+        size_t count = mGarbage.size();
+        for (size_t i = 0; i < count; i++) {
+            remove(pathsToRemove, mGarbage.itemAt(i));
+        }
+        mGarbage.clear();
     }
-    mGarbage.clear();
+
+    for (size_t i = 0; i < pathsToRemove.size(); i++) {
+        mCache.remove(pathsToRemove.itemAt(i));
+    }
 }
 
 /**

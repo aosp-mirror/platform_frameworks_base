@@ -26,6 +26,7 @@
 #include "AssetAtlas.h"
 #include "Debug.h"
 #include "Patch.h"
+#include "utils/Pair.h"
 
 namespace android {
 namespace uirenderer {
@@ -74,10 +75,20 @@ public:
         return mGenerationId;
     }
 
-private:
-    void clearCache();
-    void createVertexBuffer();
+    /**
+     * Removes the entries associated with the specified 9-patch. This is meant
+     * to be called from threads that are not the EGL context thread (GC thread
+     * on the VM side for instance.)
+     */
+    void removeDeferred(Res_png_9patch* patch);
 
+    /**
+     * Process deferred removals.
+     */
+    void clearGarbage();
+
+
+private:
     struct PatchDescription {
         PatchDescription(): mPatch(NULL), mBitmapWidth(0), mBitmapHeight(0),
                 mPixelWidth(0), mPixelHeight(0) {
@@ -90,6 +101,8 @@ private:
         }
 
         hash_t hash() const;
+
+        const Res_png_9patch* getPatch() const { return mPatch; }
 
         static int compare(const PatchDescription& lhs, const PatchDescription& rhs);
 
@@ -124,14 +137,50 @@ private:
 
     }; // struct PatchDescription
 
+    /**
+     * A buffer block represents an empty range in the mesh buffer
+     * that can be used to store vertices.
+     *
+     * The patch cache maintains a linked-list of buffer blocks
+     * to track available regions of memory in the VBO.
+     */
+    struct BufferBlock {
+        BufferBlock(uint32_t offset, uint32_t size): offset(offset), size(size), next(NULL) {
+        }
+
+        uint32_t offset;
+        uint32_t size;
+
+        BufferBlock* next;
+    }; // struct BufferBlock
+
+    typedef Pair<const PatchDescription*, Patch*> patch_pair_t;
+
+    void clearCache();
+    void createVertexBuffer();
+
+    void setupMesh(Patch* newMesh, TextureVertex* vertices);
+
+    void remove(Vector<patch_pair_t>& patchesToRemove, Res_png_9patch* patch);
+
+#if DEBUG_PATCHES
+    void dumpFreeBlocks(const char* prefix);
+#endif
+
     uint32_t mMaxSize;
     uint32_t mSize;
 
     LruCache<PatchDescription, Patch*> mCache;
 
     GLuint mMeshBuffer;
+    // First available free block inside the mesh buffer
+    BufferBlock* mFreeBlocks;
 
     uint32_t mGenerationId;
+
+    // Garbage tracking, required to handle GC events on the VM side
+    Vector<Res_png_9patch*> mGarbage;
+    mutable Mutex mLock;
 }; // class PatchCache
 
 }; // namespace uirenderer

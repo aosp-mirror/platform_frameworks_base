@@ -100,6 +100,10 @@ void DisplayList::clearResources() {
         caches.resourceCache.decrementRefcountLocked(mFilterResources.itemAt(i));
     }
 
+    for (size_t i = 0; i < mPatchResources.size(); i++) {
+        caches.resourceCache.decrementRefcountLocked(mPatchResources.itemAt(i));
+    }
+
     for (size_t i = 0; i < mShaders.size(); i++) {
         caches.resourceCache.decrementRefcountLocked(mShaders.itemAt(i));
         caches.resourceCache.destructorLocked(mShaders.itemAt(i));
@@ -134,6 +138,7 @@ void DisplayList::clearResources() {
     mBitmapResources.clear();
     mOwnedBitmapResources.clear();
     mFilterResources.clear();
+    mPatchResources.clear();
     mShaders.clear();
     mSourcePaths.clear();
     mPaints.clear();
@@ -198,6 +203,13 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
     for (size_t i = 0; i < filterResources.size(); i++) {
         SkiaColorFilter* resource = filterResources.itemAt(i);
         mFilterResources.add(resource);
+        caches.resourceCache.incrementRefcountLocked(resource);
+    }
+
+    const Vector<Res_png_9patch*>& patchResources = recorder.getPatchResources();
+    for (size_t i = 0; i < patchResources.size(); i++) {
+        Res_png_9patch* resource = patchResources.itemAt(i);
+        mPatchResources.add(resource);
         caches.resourceCache.incrementRefcountLocked(resource);
     }
 

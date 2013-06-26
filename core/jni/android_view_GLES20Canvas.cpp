@@ -432,15 +432,9 @@ static void android_view_GLES20Canvas_drawBitmapMesh(JNIEnv* env, jobject clazz,
 }
 
 static void android_view_GLES20Canvas_drawPatch(JNIEnv* env, jobject clazz,
-        OpenGLRenderer* renderer, SkBitmap* bitmap, jbyteArray chunks,
+        OpenGLRenderer* renderer, SkBitmap* bitmap, Res_png_9patch* patch,
         float left, float top, float right, float bottom, SkPaint* paint) {
-    jbyte* storage = env->GetByteArrayElements(chunks, NULL);
-    Res_png_9patch* patch = reinterpret_cast<Res_png_9patch*>(storage);
-    Res_png_9patch::deserialize(patch);
-
     renderer->drawPatch(bitmap, patch, left, top, right, bottom, paint);
-
-    env->ReleaseByteArrayElements(chunks, storage, 0);
 }
 
 static void android_view_GLES20Canvas_drawColor(JNIEnv* env, jobject clazz,
@@ -1031,7 +1025,7 @@ static JNINativeMethod gMethods[] = {
 
     { "nDrawBitmapMesh",    "(IIII[FI[III)V",  (void*) android_view_GLES20Canvas_drawBitmapMesh },
 
-    { "nDrawPatch",         "(II[BFFFFI)V",    (void*) android_view_GLES20Canvas_drawPatch },
+    { "nDrawPatch",         "(IIIFFFFI)V",     (void*) android_view_GLES20Canvas_drawPatch },
 
     { "nDrawColor",         "(III)V",          (void*) android_view_GLES20Canvas_drawColor },
     { "nDrawRect",          "(IFFFFI)V",       (void*) android_view_GLES20Canvas_drawRect },
