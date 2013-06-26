@@ -70,6 +70,18 @@ public class WifiManager {
     public static final int ERROR_AUTHENTICATING = 1;
 
     /**
+     * Broadcast intent action indicating whether Wi-Fi scanning is allowed currently
+     * @hide
+     */
+    public static final String WIFI_SCAN_AVAILABLE = "wifi_scan_available";
+
+    /**
+     * Extra int indicating scan availability, WIFI_STATE_ENABLED and WIFI_STATE_DISABLED
+     * @hide
+     */
+     public static final String EXTRA_SCAN_AVAILABLE = "scan_enabled";
+
+    /**
      * Broadcast intent action indicating that Wi-Fi has been enabled, disabled,
      * enabling, disabling, or unknown. One extra provides this state as an int.
      * Another extra provides the previous state, if available.
