@@ -7910,12 +7910,33 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public void unregisterProcessObserver(IProcessObserver observer) {
         synchronized (this) {
             mProcessObservers.unregister(observer);
         }
     }
 
+    @Override
+    public void convertToOpaque(IBinder token) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+                if (r == null) {
+                    return;
+                }
+                if (r.convertToOpaque()) {
+                    mWindowManager.setAppFullscreen(token);
+                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
     public void setImmersive(IBinder token, boolean immersive) {
         synchronized(this) {
             final ActivityRecord r = ActivityRecord.isInStackLocked(token);
@@ -7934,6 +7955,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
     public boolean isImmersive(IBinder token) {
         synchronized (this) {
             ActivityRecord r = ActivityRecord.isInStackLocked(token);
@@ -8006,7 +8028,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         String reason = (pReason == null) ? "Unknown" : pReason;
         // XXX Note: don't acquire main activity lock here, because the window
         // manager calls in with its locks held.
-        
+
         boolean killed = false;
         synchronized (mPidsSelfLocked) {
             int[] types = new int[pids.length];
@@ -8021,7 +8043,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
             }
-            
+
             // If the worst oom_adj is somewhere in the cached proc LRU range,
             // then constrain it so we will kill all cached procs.
             if (worstType < ProcessList.CACHED_APP_MAX_ADJ
@@ -8188,7 +8210,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // no need to synchronize(this) just to read & return the value
         return mSystemReady;
     }
-    
+
     private static File getCalledPreBootReceiversFile() {
         File dataDir = Environment.getDataDirectory();
         File systemDir = new File(dataDir, "system");

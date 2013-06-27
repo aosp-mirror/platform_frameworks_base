@@ -1088,11 +1088,25 @@ final class ActivityStack {
                         r.visible = false;
                         try {
                             mWindowManager.setAppVisibility(r.appToken, false);
-                            if ((r.state == ActivityState.STOPPING
-                                    || r.state == ActivityState.STOPPED)
-                                    && r.app != null && r.app.thread != null) {
-                                if (DEBUG_VISBILITY) Slog.v(TAG, "Scheduling invisibility: " + r);
-                                r.app.thread.scheduleWindowVisibility(r.appToken, false);
+                            switch (r.state) {
+                                case STOPPING:
+                                case STOPPED:
+                                    if (r.app != null && r.app.thread != null) {
+                                        if (DEBUG_VISBILITY) Slog.v(
+                                                TAG, "Scheduling invisibility: " + r);
+                                        r.app.thread.scheduleWindowVisibility(r.appToken, false);
+                                    }
+                                    break;
+
+                                case INITIALIZING:
+                                case RESUMED:
+                                case PAUSING:
+                                case PAUSED:
+                                    stopActivityLocked(r);
+                                    break;
+
+                                default:
+                                    break;
                             }
                         } catch (Exception e) {
                             // Just skip on any failure; we'll make it

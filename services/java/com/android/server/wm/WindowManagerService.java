@@ -98,7 +98,6 @@ import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.view.Choreographer;
 import android.view.Display;
-import android.view.DisplayAdjustments;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IApplicationToken;
@@ -4115,6 +4114,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             wtoken.willBeHidden = true;
+        }
+    }
+
+    public void setAppFullscreen(IBinder token) {
+        AppWindowToken atoken = findAppWindowToken(token);
+        if (atoken != null) {
+            atoken.appFullscreen = true;
         }
     }
 

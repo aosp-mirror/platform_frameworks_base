@@ -71,7 +71,7 @@ final class ActivityRecord {
     final String processName; // process where this component wants to run
     final String taskAffinity; // as per ActivityInfo.taskAffinity
     final boolean stateNotNeeded; // As per ActivityInfo.flags
-    final boolean fullscreen; // covers the full screen?
+    boolean fullscreen; // covers the full screen?
     final boolean noDisplay;  // activity is not displayed?
     final boolean componentSpecified;  // did caller specifiy an explicit component?
 
@@ -501,6 +501,21 @@ final class ActivityRecord {
         } else {
             thumbHolder = newThumbHolder;
         }
+    }
+
+    boolean convertToOpaque() {
+        if (fullscreen) {
+            return false;
+        }
+
+        AttributeCache.Entry ent = AttributeCache.instance().get(packageName,
+                realTheme, com.android.internal.R.styleable.Window);
+        if (ent != null && !ent.array.getBoolean(
+                com.android.internal.R.styleable.Window_windowIsFloating, false)) {
+            fullscreen = true;
+            ++task.numFullscreen;
+        }
+        return fullscreen;
     }
 
     void putInHistory() {

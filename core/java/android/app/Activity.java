@@ -4862,6 +4862,25 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
+     * Convert a translucent themed Activity {@link android.R.attr#windowIsTranslucent} to a
+     * fullscreen opaque Activity.
+     *
+     * Call this whenever the background of a translucent Activity has changed to become opaque.
+     * Doing so will allow the previously visible Activity behind this one to be stopped. Stopped
+     * apps consume no CPU cycles and are eligible for removal when reclaiming memory.
+     *
+     * This call has no effect on non-translucent activities or on activities with the
+     * {@link android.R.attr#windowIsFloating} attribute.
+     */
+    public void convertToOpaque() {
+        try {
+            ActivityManagerNative.getDefault().convertToOpaque(mToken);
+        } catch (RemoteException e) {
+            // pass
+        }
+    }
+
+    /**
      * Adjust the current immersive mode setting.
      *
      * Note that changing this value will have no effect on the activity's
