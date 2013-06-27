@@ -97,7 +97,7 @@ public:
         friend class AssetAtlas;
     };
 
-    AssetAtlas(): mTexture(NULL), mImage(NULL) { }
+    AssetAtlas(): mTexture(NULL), mImage(NULL), mGenerationId(0) { }
     ~AssetAtlas() { terminate(); }
 
     /**
@@ -158,11 +158,20 @@ public:
      */
     Texture* getEntryTexture(SkBitmap* const bitmap) const;
 
+    /**
+     * Returns the current generation id of the atlas.
+     */
+    uint32_t getGenerationId() const {
+        return mGenerationId;
+    }
+
 private:
     void createEntries(Caches& caches, int* map, int count);
 
     Texture* mTexture;
     Image* mImage;
+
+    uint32_t mGenerationId;
 
     KeyedVector<SkBitmap*, Entry*> mEntries;
 }; // class AssetAtlas

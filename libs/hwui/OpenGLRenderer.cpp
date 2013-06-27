@@ -1168,8 +1168,6 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         return;
     }
 
-    // TODO: See LayerRenderer.cpp::generateMesh() for important
-    //       information about this implementation
     if (CC_LIKELY(!layer->region.isEmpty())) {
         size_t count;
         const android::Rect* rects;
@@ -2055,10 +2053,10 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, Sk
  * will not set the scissor enable or dirty the current layer, if any.
  * The caller is responsible for properly dirtying the current layer.
  */
-status_t OpenGLRenderer::drawBitmaps(SkBitmap* bitmap, int bitmapCount, TextureVertex* vertices,
-        bool transformed, const Rect& bounds, SkPaint* paint) {
+status_t OpenGLRenderer::drawBitmaps(SkBitmap* bitmap, AssetAtlas::Entry* entry, int bitmapCount,
+        TextureVertex* vertices, bool transformed, const Rect& bounds, SkPaint* paint) {
     mCaches.activeTexture(0);
-    Texture* texture = getTexture(bitmap);
+    Texture* texture = entry ? entry->texture : mCaches.textureCache.get(bitmap);
     if (!texture) return DrawGlInfo::kStatusDone;
 
     const AutoTexture autoCleanup(texture);

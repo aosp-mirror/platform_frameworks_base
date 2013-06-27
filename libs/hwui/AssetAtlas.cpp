@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "OpenGLRenderer"
+
 #include "AssetAtlas.h"
 #include "Caches.h"
 
@@ -49,6 +51,8 @@ void AssetAtlas::init(sp<GraphicBuffer> buffer, int* map, int count) {
         mImage = NULL;
         mTexture = NULL;
     }
+
+    mGenerationId++;
 }
 
 void AssetAtlas::terminate() {
