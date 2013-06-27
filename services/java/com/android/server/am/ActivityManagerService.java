@@ -7578,8 +7578,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         synchronized(this) {
-            mLockScreenShown = shown;
-            comeOutOfSleepIfNeededLocked();
+            long ident = Binder.clearCallingIdentity();
+            try {
+                mLockScreenShown = shown;
+                comeOutOfSleepIfNeededLocked();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
         }
     }
 
@@ -7637,33 +7642,36 @@ public final class ActivityManagerService extends ActivityManagerNative
         enforceCallingPermission(android.Manifest.permission.SET_DEBUG_APP,
                 "setDebugApp()");
 
-        // Note that this is not really thread safe if there are multiple
-        // callers into it at the same time, but that's not a situation we
-        // care about.
-        if (persistent) {
-            final ContentResolver resolver = mContext.getContentResolver();
-            Settings.Global.putString(
-                resolver, Settings.Global.DEBUG_APP,
-                packageName);
-            Settings.Global.putInt(
-                resolver, Settings.Global.WAIT_FOR_DEBUGGER,
-                waitForDebugger ? 1 : 0);
-        }
+        long ident = Binder.clearCallingIdentity();
+        try {
+            // Note that this is not really thread safe if there are multiple
+            // callers into it at the same time, but that's not a situation we
+            // care about.
+            if (persistent) {
+                final ContentResolver resolver = mContext.getContentResolver();
+                Settings.Global.putString(
+                    resolver, Settings.Global.DEBUG_APP,
+                    packageName);
+                Settings.Global.putInt(
+                    resolver, Settings.Global.WAIT_FOR_DEBUGGER,
+                    waitForDebugger ? 1 : 0);
+            }
 
-        synchronized (this) {
-            if (!persistent) {
-                mOrigDebugApp = mDebugApp;
-                mOrigWaitForDebugger = mWaitForDebugger;
+            synchronized (this) {
+                if (!persistent) {
+                    mOrigDebugApp = mDebugApp;
+                    mOrigWaitForDebugger = mWaitForDebugger;
+                }
+                mDebugApp = packageName;
+                mWaitForDebugger = waitForDebugger;
+                mDebugTransient = !persistent;
+                if (packageName != null) {
+                    forceStopPackageLocked(packageName, -1, false, false, true, true,
+                            UserHandle.USER_ALL, "set debug app");
+                }
             }
-            mDebugApp = packageName;
-            mWaitForDebugger = waitForDebugger;
-            mDebugTransient = !persistent;
-            if (packageName != null) {
-                final long origId = Binder.clearCallingIdentity();
-                forceStopPackageLocked(packageName, -1, false, false, true, true,
-                        UserHandle.USER_ALL, "set debug app");
-                Binder.restoreCallingIdentity(origId);
-            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
