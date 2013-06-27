@@ -98,6 +98,11 @@ public class ServiceMonitor {
 
         public void onChange(boolean selfChange, Uri uri) {
             if (mDebug) Log.d(mTag, "onChange selfChange=" + selfChange + " uri=" + uri);
+            ComponentName cn = getComponentNameFromSetting();
+            if (cn == null && mServiceName == null || cn != null && cn.equals(mServiceName)) {
+                if (mDebug) Log.d(mTag, "skipping no-op restart");
+                return;
+            }
             if (mBound) {
                 mHandler.sendEmptyMessage(MSG_STOP_SERVICE);
             }
@@ -178,6 +183,12 @@ public class ServiceMonitor {
         mHandler.sendEmptyMessage(MSG_START_SERVICE);
     }
 
+    private ComponentName getComponentNameFromSetting() {
+        String cn = Settings.Secure.getStringForUser(mContext.getContentResolver(),
+                mSettingKey, UserHandle.USER_CURRENT);
+        return cn == null ? null : ComponentName.unflattenFromString(cn);
+    }
+
     // everything below is called on the handler
 
     private void packageIntent(Intent intent) {
@@ -210,9 +221,7 @@ public class ServiceMonitor {
     }
 
     private void startService() {
-        String cn = Settings.Secure.getStringForUser(mContext.getContentResolver(),
-                mSettingKey, UserHandle.USER_CURRENT);
-        mServiceName = cn == null ? null : ComponentName.unflattenFromString(cn);
+        mServiceName = getComponentNameFromSetting();
         if (mDebug) Log.d(mTag, "startService mServiceName=" + mServiceName);
         if (mServiceName == null) {
             mBound = false;
