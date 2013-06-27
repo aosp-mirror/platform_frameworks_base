@@ -642,15 +642,25 @@ public final class BatteryService extends Binder {
                         update = false;
                     }
                     if (update) {
-                        mUpdatesStopped = true;
-                        processValuesLocked();
+                        long ident = Binder.clearCallingIdentity();
+                        try {
+                            mUpdatesStopped = true;
+                            processValuesLocked();
+                        } finally {
+                            Binder.restoreCallingIdentity(ident);
+                        }
                     }
                 } catch (NumberFormatException ex) {
                     pw.println("Bad value: " + value);
                 }
             } else if (args.length == 1 && "reset".equals(args[0])) {
-                mUpdatesStopped = false;
-                updateLocked();
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    mUpdatesStopped = false;
+                    updateLocked();
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             } else {
                 pw.println("Dump current battery state, or:");
                 pw.println("  set ac|usb|wireless|status|level|invalid <value>");

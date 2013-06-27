@@ -18,6 +18,7 @@ package com.android.internal.os;
 
 import static android.os.Process.*;
 
+import android.os.FileUtils;
 import android.os.Process;
 import android.os.StrictMode;
 import android.os.SystemClock;
@@ -174,12 +175,15 @@ public class ProcessStats {
 
     public static class Stats {
         public final int pid;
+        public final int uid;
         final String statFile;
         final String cmdlineFile;
         final String threadsDir;
         final ArrayList<Stats> threadStats;
         final ArrayList<Stats> workingThreads;
-        
+
+        public BatteryStatsImpl.Uid.Proc batteryStats;
+
         public boolean interesting;
 
         public String baseName;
@@ -229,6 +233,7 @@ public class ProcessStats {
                 threadStats = null;
                 workingThreads = null;
             }
+            uid = FileUtils.getUid(statFile.toString());
         }
     }
 
