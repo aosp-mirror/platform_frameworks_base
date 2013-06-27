@@ -86,15 +86,17 @@ LOCAL_C_INCLUDES += external/zlib
 LOCAL_CFLAGS += -DSTATIC_ANDROIDFW_FOR_TOOLS
 LOCAL_CFLAGS += -Wno-non-virtual-dtor
 
+LOCAL_SHARED_LIBRARIES := \
+        libpng \
+        libz
+
 LOCAL_STATIC_LIBRARIES := \
         libstlport_static \
         libandroidfw \
         libutils \
         libcutils \
         libexpat_static \
-        libpng \
-        liblog \
-        libz
+        liblog
 
 include $(BUILD_EXECUTABLE)
 endif
