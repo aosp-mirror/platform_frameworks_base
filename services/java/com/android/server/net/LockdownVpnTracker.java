@@ -148,8 +148,13 @@ public class LockdownVpnTracker {
                 showNotification(R.string.vpn_lockdown_connecting, R.drawable.vpn_disconnected);
 
                 mAcceptedEgressIface = egressProp.getInterfaceName();
-                mVpn.startLegacyVpn(mProfile, KeyStore.getInstance(), egressProp);
-
+                try {
+                    mVpn.startLegacyVpn(mProfile, KeyStore.getInstance(), egressProp);
+                } catch (IllegalStateException e) {
+                    mAcceptedEgressIface = null;
+                    Slog.e(TAG, "Failed to start VPN", e);
+                    showNotification(R.string.vpn_lockdown_error, R.drawable.vpn_disconnected);
+                }
             } else {
                 Slog.e(TAG, "Invalid VPN profile; requires IP-based server and DNS");
                 showNotification(R.string.vpn_lockdown_error, R.drawable.vpn_disconnected);
