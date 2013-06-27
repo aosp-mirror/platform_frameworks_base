@@ -2069,7 +2069,7 @@
     <!-- QQ IM protocol type -->
     <string name="imProtocolQq">QQ</string>
     <!-- Google Talk IM protocol type -->
-    <string name="imProtocolGoogleTalk">Google Talk</string>
+    <string name="imProtocolGoogleTalk">Hangouts</string>
     <!-- ICQ IM protocol type -->
     <string name="imProtocolIcq">ICQ</string>
     <!-- Jabber IM protocol type -->
