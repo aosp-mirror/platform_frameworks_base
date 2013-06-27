@@ -262,8 +262,7 @@ status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float left, float top
     bitmap = refBitmap(bitmap);
     paint = refPaint(paint);
 
-    const AssetAtlas::Entry* entry = mCaches.assetAtlas.getEntry(bitmap);
-    addDrawOp(new (alloc()) DrawBitmapOp(bitmap, left, top, paint, entry));
+    addDrawOp(new (alloc()) DrawBitmapOp(bitmap, left, top, paint));
     return DrawGlInfo::kStatusDone;
 }
 
@@ -287,8 +286,7 @@ status_t DisplayListRenderer::drawBitmap(SkBitmap* bitmap, float srcLeft, float 
             (srcBottom - srcTop == dstBottom - dstTop) &&
             (srcRight - srcLeft == dstRight - dstLeft)) {
         // transform simple rect to rect drawing case into position bitmap ops, since they merge
-        const AssetAtlas::Entry* entry = mCaches.assetAtlas.getEntry(bitmap);
-        addDrawOp(new (alloc()) DrawBitmapOp(bitmap, dstLeft, dstTop, paint, entry));
+        addDrawOp(new (alloc()) DrawBitmapOp(bitmap, dstLeft, dstTop, paint));
         return DrawGlInfo::kStatusDone;
     }
 
