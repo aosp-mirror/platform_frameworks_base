@@ -108,6 +108,7 @@ public class TextureView extends View {
     private HardwareLayer mLayer;
     private SurfaceTexture mSurface;
     private SurfaceTextureListener mListener;
+    private boolean mHadSurface;
 
     private boolean mOpaque = true;
 
@@ -202,6 +203,11 @@ public class TextureView extends View {
             Log.w(LOG_TAG, "A TextureView or a subclass can only be "
                     + "used with hardware acceleration enabled.");
         }
+
+        if (mHadSurface) {
+            invalidate(true);
+            mHadSurface = false;
+        }
     }
 
     @Override
@@ -241,6 +247,8 @@ public class TextureView extends View {
             if (shouldRelease) mSurface.release();
             mSurface = null;
             mLayer = null;
+
+            mHadSurface = true;
         }
     }
 
