@@ -156,6 +156,10 @@ public:
         return mFilterResources;
     }
 
+    const Vector<Res_png_9patch*>& getPatchResources() const {
+        return mPatchResources;
+    }
+
     const Vector<SkiaShader*>& getShaders() const {
         return mShaders;
     }
@@ -315,9 +319,16 @@ private:
         return colorFilter;
     }
 
+    inline Res_png_9patch* refPatch(Res_png_9patch* patch) {
+        mPatchResources.add(patch);
+        mCaches.resourceCache.incrementRefcount(patch);
+        return patch;
+    }
+
     Vector<SkBitmap*> mBitmapResources;
     Vector<SkBitmap*> mOwnedBitmapResources;
     Vector<SkiaColorFilter*> mFilterResources;
+    Vector<Res_png_9patch*> mPatchResources;
 
     Vector<SkPaint*> mPaints;
     DefaultKeyedVector<SkPaint*, SkPaint*> mPaintMap;

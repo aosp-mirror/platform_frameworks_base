@@ -9156,8 +9156,11 @@ package android.graphics {
     method public void draw(android.graphics.Canvas, android.graphics.RectF);
     method public void draw(android.graphics.Canvas, android.graphics.Rect);
     method public void draw(android.graphics.Canvas, android.graphics.Rect, android.graphics.Paint);
+    method public android.graphics.Bitmap getBitmap();
     method public int getDensity();
     method public int getHeight();
+    method public java.lang.String getName();
+    method public android.graphics.Paint getPaint();
     method public final android.graphics.Region getTransparentRegion(android.graphics.Rect);
     method public int getWidth();
     method public final boolean hasAlpha();

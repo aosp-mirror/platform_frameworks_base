@@ -286,6 +286,7 @@ void Caches::dumpMemoryUsage(String8 &log) {
 void Caches::clearGarbage() {
     textureCache.clearGarbage();
     pathCache.clearGarbage();
+    patchCache.clearGarbage();
 
     Vector<DisplayList*> displayLists;
     Vector<Layer*> layers;

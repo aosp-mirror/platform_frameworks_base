@@ -30,7 +30,10 @@
 #include <utils/SortedVector.h>
 #include <utils/String8.h>
 #include <utils/Vector.h>
+
 #include <cutils/compiler.h>
+
+#include <androidfw/ResourceTypes.h>
 
 #include "utils/LinearAllocator.h"
 
@@ -484,6 +487,7 @@ private:
     Vector<SkBitmap*> mBitmapResources;
     Vector<SkBitmap*> mOwnedBitmapResources;
     Vector<SkiaColorFilter*> mFilterResources;
+    Vector<Res_png_9patch*> mPatchResources;
 
     Vector<SkPaint*> mPaints;
     Vector<SkPath*> mPaths;

@@ -57,6 +57,10 @@ void DisplayListRenderer::reset() {
         mCaches.resourceCache.decrementRefcountLocked(mFilterResources.itemAt(i));
     }
 
+    for (size_t i = 0; i < mPatchResources.size(); i++) {
+        mCaches.resourceCache.decrementRefcountLocked(mPatchResources.itemAt(i));
+    }
+
     for (size_t i = 0; i < mShaders.size(); i++) {
         mCaches.resourceCache.decrementRefcountLocked(mShaders.itemAt(i));
     }
@@ -74,6 +78,7 @@ void DisplayListRenderer::reset() {
     mBitmapResources.clear();
     mOwnedBitmapResources.clear();
     mFilterResources.clear();
+    mPatchResources.clear();
     mSourcePaths.clear();
 
     mShaders.clear();
@@ -318,6 +323,7 @@ status_t DisplayListRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, in
 status_t DisplayListRenderer::drawPatch(SkBitmap* bitmap, Res_png_9patch* patch,
         float left, float top, float right, float bottom, SkPaint* paint) {
     bitmap = refBitmap(bitmap);
+    patch = refPatch(patch);
     paint = refPaint(paint);
 
     addDrawOp(new (alloc()) DrawPatchOp(bitmap, patch, left, top, right, bottom, paint));

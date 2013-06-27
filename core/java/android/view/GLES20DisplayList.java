@@ -16,9 +16,7 @@
 
 package android.view;
 
-import android.graphics.Bitmap;
 import android.graphics.Matrix;
-import android.graphics.NinePatch;
 
 import java.util.ArrayList;
 
@@ -26,12 +24,6 @@ import java.util.ArrayList;
  * An implementation of display list for OpenGL ES 2.0.
  */
 class GLES20DisplayList extends DisplayList {
-    // These lists ensure that any Bitmaps and DisplayLists recorded by a DisplayList are kept
-    // alive as long as the DisplayList is alive.  The Bitmap and DisplayList lists
-    // are populated by the GLES20RecordingCanvas during appropriate drawing calls and are
-    // cleared at the start of a new drawing frame or when the view is detached from the window.
-    private ArrayList<Bitmap> mBitmaps;
-    private ArrayList<NinePatch> mNinePatches;
     private ArrayList<DisplayList> mChildDisplayLists;
 
     private GLES20RecordingCanvas mCanvas;
@@ -89,19 +81,7 @@ class GLES20DisplayList extends DisplayList {
     }
 
     void clearReferences() {
-        if (mBitmaps != null) mBitmaps.clear();
-        if (mNinePatches != null) mNinePatches.clear();
         if (mChildDisplayLists != null) mChildDisplayLists.clear();
-    }
-
-    ArrayList<Bitmap> getBitmaps() {
-        if (mBitmaps == null) mBitmaps = new ArrayList<Bitmap>(5);
-        return mBitmaps;
-    }
-
-    ArrayList<NinePatch> getNinePatches() {
-        if (mNinePatches == null) mNinePatches = new ArrayList<NinePatch>(5);
-        return mNinePatches;
     }
 
     ArrayList<DisplayList> getChildDisplayLists() {
