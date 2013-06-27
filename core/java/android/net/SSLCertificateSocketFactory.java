@@ -89,6 +89,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     private TrustManager[] mTrustManagers = null;
     private KeyManager[] mKeyManagers = null;
     private byte[] mNpnProtocols = null;
+    private byte[] mAlpnProtocols = null;
     private PrivateKey mChannelIdPrivateKey = null;
 
     private final int mHandshakeTimeoutMillis;
@@ -268,19 +269,42 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *     must be non-empty and of length less than 256.
      */
     public void setNpnProtocols(byte[][] npnProtocols) {
-        this.mNpnProtocols = toNpnProtocolsList(npnProtocols);
+        this.mNpnProtocols = toLengthPrefixedList(npnProtocols);
+    }
+
+    /**
+     * Sets the
+     * <a href="http://tools.ietf.org/html/draft-ietf-tls-applayerprotoneg-01">
+     * Application Layer Protocol Negotiation (ALPN)</a> protocols that this peer
+     * is interested in.
+     *
+     * <p>For servers this is the sequence of protocols to advertise as
+     * supported, in order of preference. This list is sent unencrypted to
+     * all clients that support ALPN.
+     *
+     * <p>For clients this is a list of supported protocols to match against the
+     * server's list. If there is no protocol supported by both client and
+     * server then the first protocol in the client's list will be selected.
+     * The order of the client's protocols is otherwise insignificant.
+     *
+     * @param protocols a non-empty list of protocol byte arrays. All arrays
+     *     must be non-empty and of length less than 256.
+     * @hide
+     */
+    public void setAlpnProtocols(byte[][] protocols) {
+        this.mAlpnProtocols = toLengthPrefixedList(protocols);
     }
 
     /**
      * Returns an array containing the concatenation of length-prefixed byte
      * strings.
      */
-    static byte[] toNpnProtocolsList(byte[]... npnProtocols) {
-        if (npnProtocols.length == 0) {
-            throw new IllegalArgumentException("npnProtocols.length == 0");
+    static byte[] toLengthPrefixedList(byte[]... items) {
+        if (items.length == 0) {
+            throw new IllegalArgumentException("items.length == 0");
         }
         int totalLength = 0;
-        for (byte[] s : npnProtocols) {
+        for (byte[] s : items) {
             if (s.length == 0 || s.length > 255) {
                 throw new IllegalArgumentException("s.length == 0 || s.length > 255: " + s.length);
             }
@@ -288,7 +312,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         }
         byte[] result = new byte[totalLength];
         int pos = 0;
-        for (byte[] s : npnProtocols) {
+        for (byte[] s : items) {
             result[pos++] = (byte) s.length;
             for (byte b : s) {
                 result[pos++] = b;
@@ -307,6 +331,20 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      */
     public byte[] getNpnSelectedProtocol(Socket socket) {
         return castToOpenSSLSocket(socket).getNpnSelectedProtocol();
+    }
+
+    /**
+     * Returns the
+     * <a href="http://tools.ietf.org/html/draft-ietf-tls-applayerprotoneg-01">Application
+     * Layer Protocol Negotiation (ALPN)</a> protocol selected by client and server, or null
+     * if no protocol was negotiated.
+     *
+     * @param socket a socket created by this factory.
+     * @throws IllegalArgumentException if the socket was not created by this factory.
+     * @hide
+     */
+    public byte[] getAlpnSelectedProtocol(Socket socket) {
+        return castToOpenSSLSocket(socket).getAlpnSelectedProtocol();
     }
 
     /**
@@ -393,6 +431,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     public Socket createSocket(Socket k, String host, int port, boolean close) throws IOException {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(k, host, port, close);
         s.setNpnProtocols(mNpnProtocols);
+        s.setAlpnProtocols(mAlpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
         s.setChannelIdPrivateKey(mChannelIdPrivateKey);
         if (mSecure) {
@@ -413,6 +452,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     public Socket createSocket() throws IOException {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket();
         s.setNpnProtocols(mNpnProtocols);
+        s.setAlpnProtocols(mAlpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
         s.setChannelIdPrivateKey(mChannelIdPrivateKey);
         return s;
@@ -431,6 +471,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(
                 addr, port, localAddr, localPort);
         s.setNpnProtocols(mNpnProtocols);
+        s.setAlpnProtocols(mAlpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
         s.setChannelIdPrivateKey(mChannelIdPrivateKey);
         return s;
@@ -447,6 +488,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     public Socket createSocket(InetAddress addr, int port) throws IOException {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(addr, port);
         s.setNpnProtocols(mNpnProtocols);
+        s.setAlpnProtocols(mAlpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
         s.setChannelIdPrivateKey(mChannelIdPrivateKey);
         return s;
@@ -464,6 +506,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(
                 host, port, localAddr, localPort);
         s.setNpnProtocols(mNpnProtocols);
+        s.setAlpnProtocols(mAlpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
         s.setChannelIdPrivateKey(mChannelIdPrivateKey);
         if (mSecure) {
@@ -482,6 +525,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
     public Socket createSocket(String host, int port) throws IOException {
         OpenSSLSocketImpl s = (OpenSSLSocketImpl) getDelegate().createSocket(host, port);
         s.setNpnProtocols(mNpnProtocols);
+        s.setAlpnProtocols(mAlpnProtocols);
         s.setHandshakeTimeout(mHandshakeTimeoutMillis);
         s.setChannelIdPrivateKey(mChannelIdPrivateKey);
         if (mSecure) {
