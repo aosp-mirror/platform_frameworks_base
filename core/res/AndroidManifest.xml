@@ -1222,6 +1222,13 @@
         android:label="@string/permlab_removeTasks"
         android:description="@string/permdesc_removeTasks" />
 
+    <!-- @hide Allows an application to create/manage/remove stacks -->
+    <permission android:name="android.permission.MANAGE_ACTIVITY_STACKS"
+        android:permissionGroup="android.permission-group.APP_INFO"
+        android:protectionLevel="signature"
+        android:label="@string/permlab_manageActivityStacks"
+        android:description="@string/permdesc_manageActivityStacks" />
+
     <!-- Allows an application to start any activity, regardless of permission
          protection or exported state. @hide -->
     <permission android:name="android.permission.START_ANY_ACTIVITY"

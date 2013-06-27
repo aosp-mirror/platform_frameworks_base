@@ -55,6 +55,24 @@ jint android_os_FileUtils_setPermissions(JNIEnv* env, jobject clazz,
     return chmod(file8.string(), mode) == 0 ? 0 : errno;
 }
 
+jint android_os_FileUtils_getUid(JNIEnv* env, jobject clazz, jstring file)
+{
+    struct stat stats;
+    const jchar* str = env->GetStringCritical(file, 0);
+    String8 file8;
+    if (str) {
+        file8 = String8(str, env->GetStringLength(file));
+        env->ReleaseStringCritical(file, str);
+    }
+    if (file8.size() <= 0) {
+        return ENOENT;
+    }
+    if (stat(file8.string(), &stats) < 0) {
+        return -1;
+    }
+    return stats.st_uid;
+}
+
 jint android_os_FileUtils_getFatVolumeId(JNIEnv* env, jobject clazz, jstring path)
 {
     if (path == NULL) {
@@ -78,6 +96,7 @@ jint android_os_FileUtils_getFatVolumeId(JNIEnv* env, jobject clazz, jstring pat
 
 static const JNINativeMethod methods[] = {
     {"setPermissions",  "(Ljava/lang/String;III)I", (void*)android_os_FileUtils_setPermissions},
+    {"getUid",          "(Ljava/lang/String;)I", (void*)android_os_FileUtils_getUid},
     {"getFatVolumeId",  "(Ljava/lang/String;)I", (void*)android_os_FileUtils_getFatVolumeId},
 };
 

@@ -712,6 +712,15 @@
         tasks and kill their apps. Malicious apps may disrupt
         the behavior of other apps.</string>
 
+    <!-- [CHAR LIMIT=NONE] Title of an application permission, allowing an application to create,
+         change, remove activity stacks. -->
+    <string name="permlab_manageActivityStacks">manage activity stacks</string>
+    <!-- [CHAR LIMIT=NONE] Description of an application permission, allowing an application to create,
+             change, remove activity stacks. -->
+    <string name="permdesc_manageActivityStacks">Allows the app to add, remove, and
+        modify the activity stacks in which other apps run.  Malicious apps may disrupt
+        the behavior of other apps.</string>
+
     <!-- Title of an application permission, allowing an application to start any activity, regardless of permission protection or exported state. -->
     <string name="permlab_startAnyActivity">start any activity</string>
     <!-- Description of an application permission, allowing an application to start any activity, regardless of permission protection or exported state. -->
