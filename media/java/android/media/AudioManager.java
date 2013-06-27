@@ -1996,7 +1996,7 @@ public class AudioManager {
         IAudioService service = getService();
         try {
             service.requestAudioFocus(streamType, durationHint, mICallBack, null,
-                    AudioService.IN_VOICE_COMM_FOCUS_ID,
+                    MediaFocusControl.IN_VOICE_COMM_FOCUS_ID,
                     mContext.getBasePackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Can't call requestAudioFocusForCall() on AudioService due to "+e);
@@ -2012,7 +2012,7 @@ public class AudioManager {
     public void abandonAudioFocusForCall() {
         IAudioService service = getService();
         try {
-            service.abandonAudioFocus(null, AudioService.IN_VOICE_COMM_FOCUS_ID);
+            service.abandonAudioFocus(null, MediaFocusControl.IN_VOICE_COMM_FOCUS_ID);
         } catch (RemoteException e) {
             Log.e(TAG, "Can't call abandonAudioFocusForCall() on AudioService due to "+e);
         }
