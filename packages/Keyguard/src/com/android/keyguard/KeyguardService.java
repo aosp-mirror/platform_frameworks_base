@@ -93,14 +93,6 @@ public class KeyguardService extends Service {
         public void dismiss() {
             mKeyguardViewMediator.dismiss();
         }
-        public void onWakeKeyWhenKeyguardShowing(int keyCode) {
-            checkPermission();
-            mKeyguardViewMediator.onWakeKeyWhenKeyguardShowing(keyCode);
-        }
-        public void onWakeMotionWhenKeyguardShowing() {
-            checkPermission();
-            mKeyguardViewMediator.onWakeMotionWhenKeyguardShowing();
-        }
         public void onDreamingStarted() {
             checkPermission();
             mKeyguardViewMediator.onDreamingStarted();

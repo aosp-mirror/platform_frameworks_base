@@ -114,7 +114,6 @@ public class KeyguardViewMediator {
     private static final int VERIFY_UNLOCK = 5;
     private static final int NOTIFY_SCREEN_OFF = 6;
     private static final int NOTIFY_SCREEN_ON = 7;
-    private static final int WAKE_WHEN_READY = 8;
     private static final int KEYGUARD_DONE = 9;
     private static final int KEYGUARD_DONE_DRAWING = 10;
     private static final int KEYGUARD_DONE_AUTHENTICATING = 11;
@@ -179,14 +178,6 @@ public class KeyguardViewMediator {
      * we sleep.
      */
     private PowerManager.WakeLock mShowKeyguardWakeLock;
-
-    /**
-     * Does not turn on screen, held while a call to {@link KeyguardViewManager#wakeWhenReadyTq(int)}
-     * is called to make sure the device doesn't sleep before it has a chance to poke
-     * the wake lock.
-     * @see #wakeWhenReady(int)
-     */
-    private PowerManager.WakeLock mWakeAndHandOff;
 
     private KeyguardViewManager mKeyguardViewManager;
 
@@ -268,12 +259,6 @@ public class KeyguardViewMediator {
      * various things.
      */
     public interface ViewMediatorCallback {
-
-        /**
-         * Wake the device immediately.
-         */
-        void wakeUp();
-
         /**
          * Reports user activity and requests that the screen stay on.
          */
@@ -439,10 +424,6 @@ public class KeyguardViewMediator {
     };
 
     ViewMediatorCallback mViewMediatorCallback = new ViewMediatorCallback() {
-        public void wakeUp() {
-            KeyguardViewMediator.this.wakeUp();
-        }
-
         public void userActivity() {
             KeyguardViewMediator.this.userActivity();
         }
@@ -475,10 +456,6 @@ public class KeyguardViewMediator {
         }
     };
 
-    public void wakeUp() {
-        mPM.wakeUp(SystemClock.uptimeMillis());
-    }
-
     private void userActivity() {
         userActivity(AWAKE_INTERVAL_DEFAULT_MS);
     }
@@ -500,9 +477,6 @@ public class KeyguardViewMediator {
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mShowKeyguardWakeLock = mPM.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "show keyguard");
         mShowKeyguardWakeLock.setReferenceCounted(false);
-
-        mWakeAndHandOff = mPM.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "keyguardWakeAndHandOff");
-        mWakeAndHandOff.setReferenceCounted(false);
 
         mContext.registerReceiver(mBroadcastReceiver, new IntentFilter(DELAYED_KEYGUARD_ACTION));
 
@@ -981,27 +955,6 @@ public class KeyguardViewMediator {
     }
 
     /**
-     * Send message to keyguard telling it about a wake key so it can adjust
-     * its state accordingly and then poke the wake lock when it is ready.
-     * @param keyCode The wake key.
-     * @see #handleWakeWhenReady
-     * @see #onWakeKeyWhenKeyguardShowing(int)
-     */
-    private void wakeWhenReady(int keyCode) {
-        if (DBG_WAKE) Log.d(TAG, "wakeWhenReady(" + keyCode + ")");
-
-        /**
-         * acquire the handoff lock that will keep the cpu running.  this will
-         * be released once the keyguard has set itself up and poked the other wakelock
-         * in {@link #handleWakeWhenReady(int)}
-         */
-        mWakeAndHandOff.acquire();
-
-        Message msg = mHandler.obtainMessage(WAKE_WHEN_READY, keyCode, 0);
-        mHandler.sendMessage(msg);
-    }
-
-    /**
      * Send message to keyguard telling it to show itself
      * @see #handleShow()
      */
@@ -1056,74 +1009,14 @@ public class KeyguardViewMediator {
         }
     };
 
-    /**
-     * When a key is received when the screen is off and the keyguard is showing,
-     * we need to decide whether to actually turn on the screen, and if so, tell
-     * the keyguard to prepare itself and poke the wake lock when it is ready.
-     *
-     * The 'Tq' suffix is per the documentation in {@link WindowManagerPolicy}.
-     * Be sure not to take any action that takes a long time; any significant
-     * action should be posted to a handler.
-     *
-     * @param keyCode The keycode of the key that woke the device
-     */
-    public void onWakeKeyWhenKeyguardShowing(int keyCode) {
-        if (DEBUG) Log.d(TAG, "onWakeKeyWhenKeyguardShowing(" + keyCode + ")");
-
-        // give the keyguard view manager a chance to adjust the state of the
-        // keyguard based on the key that woke the device before poking
-        // the wake lock
-        wakeWhenReady(keyCode);
-    }
-
-    /**
-     * When a wake motion such as an external mouse movement is received when the screen
-     * is off and the keyguard is showing, we need to decide whether to actually turn
-     * on the screen, and if so, tell the keyguard to prepare itself and poke the wake
-     * lock when it is ready.
-     *
-     * The 'Tq' suffix is per the documentation in {@link WindowManagerPolicy}.
-     * Be sure not to take any action that takes a long time; any significant
-     * action should be posted to a handler.
-     */
-    public void onWakeMotionWhenKeyguardShowing() {
-        if (DEBUG) Log.d(TAG, "onWakeMotionWhenKeyguardShowing()");
-
-        // give the keyguard view manager a chance to adjust the state of the
-        // keyguard based on the key that woke the device before poking
-        // the wake lock
-        wakeWhenReady(KeyEvent.KEYCODE_UNKNOWN);
-    }
-
     public void keyguardDone(boolean authenticated, boolean wakeup) {
         mKeyguardDonePending = false;
         synchronized (this) {
             EventLog.writeEvent(70000, 2);
             if (DEBUG) Log.d(TAG, "keyguardDone(" + authenticated + ")");
-            Message msg = mHandler.obtainMessage(KEYGUARD_DONE);
-            msg.arg1 = wakeup ? 1 : 0;
+            Message msg = mHandler.obtainMessage(KEYGUARD_DONE, authenticated ? 1 : 0,
+                    wakeup ? 1 : 0);
             mHandler.sendMessage(msg);
-
-            if (authenticated) {
-                mUpdateMonitor.clearFailedUnlockAttempts();
-            }
-
-            if (mExitSecureCallback != null) {
-                try {
-                    mExitSecureCallback.onKeyguardExitResult(authenticated);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Failed to call onKeyguardExitResult(" + authenticated + ")", e);
-                }
-
-                mExitSecureCallback = null;
-
-                if (authenticated) {
-                    // after succesfully exiting securely, no need to reshow
-                    // the keyguard when they've released the lock
-                    mExternallyEnabled = true;
-                    mNeedToReshowWhenReenabled = false;
-                }
-            }
         }
     }
 
@@ -1156,11 +1049,8 @@ public class KeyguardViewMediator {
                 case NOTIFY_SCREEN_ON:
                     handleNotifyScreenOn((IKeyguardShowCallback) msg.obj);
                     return;
-                case WAKE_WHEN_READY:
-                    handleWakeWhenReady(msg.arg1);
-                    return;
                 case KEYGUARD_DONE:
-                    handleKeyguardDone(msg.arg1 != 0);
+                    handleKeyguardDone(msg.arg1 != 0, msg.arg2 != 0);
                     return;
                 case KEYGUARD_DONE_DRAWING:
                     handleKeyguardDoneDrawing();
@@ -1187,13 +1077,31 @@ public class KeyguardViewMediator {
      * @see #keyguardDone
      * @see #KEYGUARD_DONE
      */
-    private void handleKeyguardDone(boolean wakeup) {
+    private void handleKeyguardDone(boolean authenticated, boolean wakeup) {
         if (DEBUG) Log.d(TAG, "handleKeyguardDone");
-        handleHide();
-        if (wakeup) {
-            wakeUp();
+
+        if (authenticated) {
+            mUpdateMonitor.clearFailedUnlockAttempts();
         }
 
+        if (mExitSecureCallback != null) {
+            try {
+                mExitSecureCallback.onKeyguardExitResult(authenticated);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to call onKeyguardExitResult(" + authenticated + ")", e);
+            }
+
+            mExitSecureCallback = null;
+
+            if (authenticated) {
+                // after succesfully exiting securely, no need to reshow
+                // the keyguard when they've released the lock
+                mExternallyEnabled = true;
+                mNeedToReshowWhenReenabled = false;
+            }
+        }
+
+        handleHide();
         sendUserPresentBroadcast();
     }
 
@@ -1296,10 +1204,6 @@ public class KeyguardViewMediator {
     private void handleHide() {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleHide");
-            if (mWakeAndHandOff.isHeld()) {
-                Log.w(TAG, "attempt to hide the keyguard while waking, ignored");
-                return;
-            }
 
             // only play "unlock" noises if not on a call (since the incall UI
             // disables the keyguard)
@@ -1371,31 +1275,6 @@ public class KeyguardViewMediator {
             if (!(mContext instanceof Activity)) {
                 mStatusBarManager.disable(flags);
             }
-        }
-    }
-
-    /**
-     * Handle message sent by {@link #wakeWhenReady(int)}
-     * @param keyCode The key that woke the device.
-     * @see #WAKE_WHEN_READY
-     */
-    private void handleWakeWhenReady(int keyCode) {
-        synchronized (KeyguardViewMediator.this) {
-            if (DBG_WAKE) Log.d(TAG, "handleWakeWhenReady(" + keyCode + ")");
-
-            // this should result in a call to 'poke wakelock' which will set a timeout
-            // on releasing the wakelock
-            if (!mKeyguardViewManager.wakeWhenReadyTq(keyCode)) {
-                // poke wakelock ourselves if keyguard is no longer active
-                Log.w(TAG, "mKeyguardViewManager.wakeWhenReadyTq did not poke wake lock, so poke it ourselves");
-                userActivity();
-            }
-
-            /**
-             * Now that the keyguard is ready and has poked the wake lock, we can
-             * release the handoff wakelock
-             */
-            mWakeAndHandOff.release();
         }
     }
 

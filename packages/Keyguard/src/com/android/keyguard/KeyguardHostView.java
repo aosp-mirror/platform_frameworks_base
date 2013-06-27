@@ -119,6 +119,8 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     protected int mClientGeneration;
 
+    protected boolean mShowSecurityWhenReturn;
+
     /*package*/ interface UserSwitcherCallback {
         void hideSecurityView(int duration);
         void showSecurityView();
@@ -872,14 +874,6 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
     };
 
-    protected boolean mShowSecurityWhenReturn;
-
-    @Override
-    public void reset() {
-        mIsVerifyUnlockOnly = false;
-        mAppWidgetContainer.setCurrentPage(getWidgetPosition(R.id.keyguard_status_view));
-    }
-
     /**
      * Sets an action to perform when keyguard is dismissed.
      * @param action
@@ -1027,39 +1021,6 @@ public class KeyguardHostView extends KeyguardViewBase {
     public void show() {
         if (DEBUG) Log.d(TAG, "show()");
         showPrimarySecurityScreen(false);
-    }
-
-    private boolean isSecure() {
-        SecurityMode mode = mSecurityModel.getSecurityMode();
-        switch (mode) {
-            case Pattern:
-                return mLockPatternUtils.isLockPatternEnabled();
-            case Password:
-            case PIN:
-                return mLockPatternUtils.isLockPasswordEnabled();
-            case SimPin:
-            case SimPuk:
-            case Account:
-                return true;
-            case None:
-                return false;
-            default:
-                throw new IllegalStateException("Unknown security mode " + mode);
-        }
-    }
-
-    @Override
-    public void wakeWhenReadyTq(int keyCode) {
-        if (DEBUG) Log.d(TAG, "onWakeKey");
-        if (keyCode == KeyEvent.KEYCODE_MENU && isSecure()) {
-            if (DEBUG) Log.d(TAG, "switching screens to unlock screen because wake key was MENU");
-            showSecurityScreen(SecurityMode.None);
-        } else {
-            if (DEBUG) Log.d(TAG, "poking wake lock immediately");
-        }
-        if (mViewMediatorCallback != null) {
-            mViewMediatorCallback.wakeUp();
-        }
     }
 
     @Override
