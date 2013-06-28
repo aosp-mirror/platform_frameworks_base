@@ -75,6 +75,9 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Toast;
 
+import com.android.internal.R;
+
+import com.android.internal.notification.NotificationScorer;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -198,6 +201,8 @@ public class NotificationManagerService extends INotificationManager.Stub
     private static final String TAG_BLOCKED_PKGS = "blocked-packages";
     private static final String TAG_PACKAGE = "package";
     private static final String ATTR_NAME = "name";
+
+    private final ArrayList<NotificationScorer> mScorers = new ArrayList<NotificationScorer>();
 
     private class NotificationListenerInfo implements DeathRecipient {
         INotificationListener listener;
@@ -707,7 +712,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             intent.setComponent(name);
 
             intent.putExtra(Intent.EXTRA_CLIENT_LABEL,
-                    com.android.internal.R.string.notification_listener_binding_label);
+                    R.string.notification_listener_binding_label);
             intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
                     mContext, 0, new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS), 0));
 
@@ -1297,19 +1302,19 @@ public class NotificationManagerService extends INotificationManager.Stub
 
         Resources resources = mContext.getResources();
         mDefaultNotificationColor = resources.getColor(
-                com.android.internal.R.color.config_defaultNotificationColor);
+                R.color.config_defaultNotificationColor);
         mDefaultNotificationLedOn = resources.getInteger(
-                com.android.internal.R.integer.config_defaultNotificationLedOn);
+                R.integer.config_defaultNotificationLedOn);
         mDefaultNotificationLedOff = resources.getInteger(
-                com.android.internal.R.integer.config_defaultNotificationLedOff);
+                R.integer.config_defaultNotificationLedOff);
 
         mDefaultVibrationPattern = getLongArray(resources,
-                com.android.internal.R.array.config_defaultNotificationVibePattern,
+                R.array.config_defaultNotificationVibePattern,
                 VIBRATE_PATTERN_MAXLEN,
                 DEFAULT_VIBRATE_PATTERN);
 
         mFallbackVibrationPattern = getLongArray(resources,
-                com.android.internal.R.array.config_notificationFallbackVibePattern,
+                R.array.config_notificationFallbackVibePattern,
                 VIBRATE_PATTERN_MAXLEN,
                 DEFAULT_VIBRATE_PATTERN);
 
@@ -1344,6 +1349,24 @@ public class NotificationManagerService extends INotificationManager.Stub
 
         mSettingsObserver = new SettingsObserver(mHandler);
         mSettingsObserver.observe();
+
+        // spin up NotificationScorers
+        String[] notificationScorerNames = resources.getStringArray(
+                R.array.config_notificationScorers);
+        for (String scorerName : notificationScorerNames) {
+            try {
+                Class<?> scorerClass = mContext.getClassLoader().loadClass(scorerName);
+                NotificationScorer scorer = (NotificationScorer) scorerClass.newInstance();
+                scorer.initialize(mContext);
+                mScorers.add(scorer);
+            } catch (ClassNotFoundException e) {
+                Slog.w(TAG, "Couldn't find scorer " + scorerName + ".", e);
+            } catch (InstantiationException e) {
+                Slog.w(TAG, "Couldn't instantiate scorer " + scorerName + ".", e);
+            } catch (IllegalAccessException e) {
+                Slog.w(TAG, "Problem accessing scorer " + scorerName + ".", e);
+            }
+        }
     }
 
     /**
@@ -1682,6 +1705,23 @@ public class NotificationManagerService extends INotificationManager.Stub
                 // 2. Consult external heuristics (TBD)
 
                 // 3. Apply local rules
+
+                int initialScore = score;
+                if (!mScorers.isEmpty()) {
+                    if (DBG) Slog.v(TAG, "Initial score is " + score + ".");
+                    for (NotificationScorer scorer : mScorers) {
+                        try {
+                            score = scorer.getScore(notification, score);
+                        } catch (Throwable t) {
+                            Slog.w(TAG, "Scorer threw on .getScore.", t);
+                        }
+                    }
+                    if (DBG) Slog.v(TAG, "Final score is " + score + ".");
+                }
+
+                // add extra to indicate score modified by NotificationScorer
+                notification.extras.putBoolean(Notification.EXTRA_SCORE_MODIFIED,
+                        score != initialScore);
 
                 // blocked apps
                 if (ENABLE_BLOCKED_NOTIFICATIONS && !noteNotificationOp(pkg, callingUid)) {

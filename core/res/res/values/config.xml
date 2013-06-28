@@ -1153,4 +1153,8 @@
         <item>com.android.inputmethod.latin</item>
     </string-array>
 
+    <string-array name="config_notificationScorers">
+        <item>com.android.internal.notification.DemoContactNotificationScorer</item>
+    </string-array>
+
 </resources>
