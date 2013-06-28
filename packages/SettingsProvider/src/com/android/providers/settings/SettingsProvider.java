@@ -43,6 +43,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.DropBoxManager;
 import android.os.FileObserver;
 import android.os.ParcelFileDescriptor;
 import android.os.SystemProperties;
@@ -106,6 +107,9 @@ public class SettingsProvider extends ContentProvider {
      */
     static final HashSet<String> sSecureGlobalKeys;
     static final HashSet<String> sSystemGlobalKeys;
+
+    private static final String DROPBOX_TAG_USERLOG = "restricted_profile_ssaid";
+
     static {
         // Keys (name column) from the 'secure' table that are now in the owner user's 'global'
         // table, shared across all users
@@ -485,6 +489,16 @@ public class SettingsProvider extends ContentProvider {
                 }
                 Slog.d(TAG, "Generated and saved new ANDROID_ID [" + newAndroidIdValue
                         + "] for user " + userHandle);
+                // Write a dropbox entry if it's a restricted profile
+                if (mUserManager.getUserInfo(userHandle).isRestricted()) {
+                    DropBoxManager dbm = (DropBoxManager)
+                            getContext().getSystemService(Context.DROPBOX_SERVICE);
+                    if (dbm != null && dbm.isTagEnabled(DROPBOX_TAG_USERLOG)) {
+                        dbm.addText(DROPBOX_TAG_USERLOG, System.currentTimeMillis()
+                                + ",restricted_profile_ssaid,"
+                                + newAndroidIdValue + "\n");
+                    }
+                }
             }
             return true;
         } finally {
