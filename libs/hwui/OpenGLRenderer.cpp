@@ -930,14 +930,17 @@ bool OpenGLRenderer::createLayer(float left, float top, float right, float botto
         layer->bindTexture();
         if (!bounds.isEmpty()) {
             if (layer->isEmpty()) {
-                glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                        bounds.left, mSnapshot->height - bounds.bottom,
-                        layer->getWidth(), layer->getHeight(), 0);
+                // Workaround for some GL drivers. When reading pixels lying outside
+                // of the window we should get undefined values for those pixels.
+                // Unfortunately some drivers will turn the entire target texture black
+                // when reading outside of the window.
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, layer->getWidth(), layer->getHeight(),
+                        0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
                 layer->setEmpty(false);
-            } else {
-                glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left,
-                        mSnapshot->height - bounds.bottom, bounds.getWidth(), bounds.getHeight());
             }
+
+            glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left,
+                    mSnapshot->height - bounds.bottom, bounds.getWidth(), bounds.getHeight());
 
             // Enqueue the buffer coordinates to clear the corresponding region later
             mLayers.push(new Rect(bounds));
