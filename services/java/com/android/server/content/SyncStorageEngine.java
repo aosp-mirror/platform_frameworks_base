@@ -1442,16 +1442,24 @@ public class SyncStorageEngine extends Handler {
      */
     public void setPeriodicSyncTime(
             int authorityId, Pair<Bundle, Long> targetPeriodicSync, long when) {
+        boolean found = false;
+        final AuthorityInfo authorityInfo;
         synchronized (mAuthorities) {
-            final AuthorityInfo authority = mAuthorities.get(authorityId);
-            for (int i = 0; i < authority.periodicSyncs.size(); i++) {
-                Pair<Bundle, Long> periodicSync = authority.periodicSyncs.get(i);
-                if (periodicSync.first == targetPeriodicSync.first
+            authorityInfo = mAuthorities.get(authorityId);
+            for (int i = 0; i < authorityInfo.periodicSyncs.size(); i++) {
+                Pair<Bundle, Long> periodicSync = authorityInfo.periodicSyncs.get(i);
+                if (PeriodicSync.syncExtrasEquals(periodicSync.first, targetPeriodicSync.first)
                         && periodicSync.second == targetPeriodicSync.second) {
                     mSyncStatus.get(authorityId).setPeriodicSyncTime(i, when);
+                    found = true;
                     break;
                 }
             }
+        }
+
+        if (!found) {
+            Log.w(TAG, "Ignoring setPeriodicSyncTime request for a sync that does not exist. " +
+                    "Authority: " + authorityInfo.authority);
         }
     }
 
