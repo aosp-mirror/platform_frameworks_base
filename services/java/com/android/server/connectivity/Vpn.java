@@ -69,7 +69,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.nio.charset.Charsets;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import libcore.io.IoUtils;
@@ -477,15 +477,15 @@ public class Vpn extends BaseNetworkStateTracker {
         if (!profile.ipsecUserCert.isEmpty()) {
             privateKey = Credentials.USER_PRIVATE_KEY + profile.ipsecUserCert;
             byte[] value = keyStore.get(Credentials.USER_CERTIFICATE + profile.ipsecUserCert);
-            userCert = (value == null) ? null : new String(value, Charsets.UTF_8);
+            userCert = (value == null) ? null : new String(value, StandardCharsets.UTF_8);
         }
         if (!profile.ipsecCaCert.isEmpty()) {
             byte[] value = keyStore.get(Credentials.CA_CERTIFICATE + profile.ipsecCaCert);
-            caCert = (value == null) ? null : new String(value, Charsets.UTF_8);
+            caCert = (value == null) ? null : new String(value, StandardCharsets.UTF_8);
         }
         if (!profile.ipsecServerCert.isEmpty()) {
             byte[] value = keyStore.get(Credentials.USER_CERTIFICATE + profile.ipsecServerCert);
-            serverCert = (value == null) ? null : new String(value, Charsets.UTF_8);
+            serverCert = (value == null) ? null : new String(value, StandardCharsets.UTF_8);
         }
         if (privateKey == null || userCert == null || caCert == null || serverCert == null) {
             throw new IllegalStateException("Cannot load credentials");
@@ -756,7 +756,7 @@ public class Vpn extends BaseNetworkStateTracker {
                     // Send over the arguments.
                     OutputStream out = mSockets[i].getOutputStream();
                     for (String argument : arguments) {
-                        byte[] bytes = argument.getBytes(Charsets.UTF_8);
+                        byte[] bytes = argument.getBytes(StandardCharsets.UTF_8);
                         if (bytes.length >= 0xFFFF) {
                             throw new IllegalArgumentException("Argument is too large");
                         }

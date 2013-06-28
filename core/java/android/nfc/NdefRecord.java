@@ -22,7 +22,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charsets;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -311,7 +311,7 @@ public final class NdefRecord implements Parcelable {
         if (packageName.length() == 0) throw new IllegalArgumentException("packageName is empty");
 
         return new NdefRecord(TNF_EXTERNAL_TYPE, RTD_ANDROID_APP, null,
-                packageName.getBytes(Charsets.UTF_8));
+                packageName.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -350,7 +350,7 @@ public final class NdefRecord implements Parcelable {
                 break;
             }
         }
-        byte[] uriBytes = uriString.getBytes(Charsets.UTF_8);
+        byte[] uriBytes = uriString.getBytes(StandardCharsets.UTF_8);
         byte[] recordBytes = new byte[uriBytes.length + 1];
         recordBytes[0] = prefix;
         System.arraycopy(uriBytes, 0, recordBytes, 1, uriBytes.length);
@@ -422,7 +422,7 @@ public final class NdefRecord implements Parcelable {
         // missing '/' is allowed
 
         // MIME RFCs suggest ASCII encoding for content-type
-        byte[] typeBytes = mimeType.getBytes(Charsets.US_ASCII);
+        byte[] typeBytes = mimeType.getBytes(StandardCharsets.US_ASCII);
         return new NdefRecord(TNF_MIME_MEDIA, typeBytes, null, mimeData);
     }
 
@@ -462,8 +462,8 @@ public final class NdefRecord implements Parcelable {
         if (domain.length() == 0) throw new IllegalArgumentException("domain is empty");
         if (type.length() == 0) throw new IllegalArgumentException("type is empty");
 
-        byte[] byteDomain = domain.getBytes(Charsets.UTF_8);
-        byte[] byteType = type.getBytes(Charsets.UTF_8);
+        byte[] byteDomain = domain.getBytes(StandardCharsets.UTF_8);
+        byte[] byteType = type.getBytes(StandardCharsets.UTF_8);
         byte[] b = new byte[byteDomain.length + 1 + byteType.length];
         System.arraycopy(byteDomain, 0, b, 0, byteDomain.length);
         b[byteDomain.length] = ':';
@@ -643,7 +643,7 @@ public final class NdefRecord implements Parcelable {
                 }
                 break;
             case NdefRecord.TNF_MIME_MEDIA:
-                String mimeType = new String(mType, Charsets.US_ASCII);
+                String mimeType = new String(mType, StandardCharsets.US_ASCII);
                 return Intent.normalizeMimeType(mimeType);
         }
         return null;
@@ -694,14 +694,14 @@ public final class NdefRecord implements Parcelable {
                 break;
 
             case TNF_ABSOLUTE_URI:
-                Uri uri = Uri.parse(new String(mType, Charsets.UTF_8));
+                Uri uri = Uri.parse(new String(mType, StandardCharsets.UTF_8));
                 return uri.normalizeScheme();
 
             case TNF_EXTERNAL_TYPE:
                 if (inSmartPoster) {
                     break;
                 }
-                return Uri.parse("vnd.android.nfc://ext/" + new String(mType, Charsets.US_ASCII));
+                return Uri.parse("vnd.android.nfc://ext/" + new String(mType, StandardCharsets.US_ASCII));
         }
         return null;
     }
@@ -723,7 +723,7 @@ public final class NdefRecord implements Parcelable {
         }
         String prefix = URI_PREFIX_MAP[prefixIndex];
         String suffix = new String(Arrays.copyOfRange(mPayload, 1, mPayload.length),
-                Charsets.UTF_8);
+                StandardCharsets.UTF_8);
         return Uri.parse(prefix + suffix);
     }
 

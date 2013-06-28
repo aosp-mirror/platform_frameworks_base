@@ -31,7 +31,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.nio.charset.Charsets;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
@@ -127,7 +127,7 @@ public class Credentials {
     public static byte[] convertToPem(Certificate... objects)
             throws IOException, CertificateEncodingException {
         ByteArrayOutputStream bao = new ByteArrayOutputStream();
-        Writer writer = new OutputStreamWriter(bao, Charsets.US_ASCII);
+        Writer writer = new OutputStreamWriter(bao, StandardCharsets.US_ASCII);
         PemWriter pw = new PemWriter(writer);
         for (Certificate o : objects) {
             pw.writeObject(new PemObject("CERTIFICATE", o.getEncoded()));
@@ -142,7 +142,7 @@ public class Credentials {
     public static List<X509Certificate> convertFromPem(byte[] bytes)
             throws IOException, CertificateException {
         ByteArrayInputStream bai = new ByteArrayInputStream(bytes);
-        Reader reader = new InputStreamReader(bai, Charsets.US_ASCII);
+        Reader reader = new InputStreamReader(bai, StandardCharsets.US_ASCII);
         PemReader pr = new PemReader(reader);
 
         CertificateFactory cf = CertificateFactory.getInstance("X509");

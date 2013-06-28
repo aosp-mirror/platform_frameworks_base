@@ -7,7 +7,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.Charsets;
+import java.nio.charset.StandardCharsets;
 import java.nio.ShortBuffer;
 
 import java.util.ArrayList;
@@ -540,7 +540,7 @@ abstract class DhcpPacket {
     private static String readAsciiString(ByteBuffer buf, int byteCount) {
         byte[] bytes = new byte[byteCount];
         buf.get(bytes);
-        return new String(bytes, 0, bytes.length, Charsets.US_ASCII);
+        return new String(bytes, 0, bytes.length, StandardCharsets.US_ASCII);
     }
 
     /**

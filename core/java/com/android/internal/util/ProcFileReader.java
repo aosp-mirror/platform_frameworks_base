@@ -19,13 +19,13 @@ package com.android.internal.util;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charsets;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Reader that specializes in parsing {@code /proc/} files quickly. Walks
  * through the stream using a single space {@code ' '} as token separator, and
  * requires each line boundary to be explicitly acknowledged using
- * {@link #finishLine()}. Assumes {@link Charsets#US_ASCII} encoding.
+ * {@link #finishLine()}. Assumes {@link StandardCharsets#US_ASCII} encoding.
  * <p>
  * Currently doesn't support formats based on {@code \0}, tabs, or repeated
  * delimiters.
@@ -144,7 +144,7 @@ public class ProcFileReader implements Closeable {
      */
     public String nextString() throws IOException {
         final int tokenIndex = nextTokenIndex();
-        final String s = new String(mBuffer, 0, tokenIndex, Charsets.US_ASCII);
+        final String s = new String(mBuffer, 0, tokenIndex, StandardCharsets.US_ASCII);
         consumeBuf(tokenIndex + 1);
         return s;
     }
@@ -179,7 +179,7 @@ public class ProcFileReader implements Closeable {
 
     private NumberFormatException invalidLong(int tokenIndex) {
         return new NumberFormatException(
-                "invalid long: " + new String(mBuffer, 0, tokenIndex, Charsets.US_ASCII));
+                "invalid long: " + new String(mBuffer, 0, tokenIndex, StandardCharsets.US_ASCII));
     }
 
     /**
