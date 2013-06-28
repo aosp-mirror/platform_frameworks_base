@@ -57,6 +57,15 @@ public interface CameraDevice extends AutoCloseable {
     public static final int TEMPLATE_PREVIEW = 1;
 
     /**
+     * Create a request suitable for still image capture. Specifically, this
+     * means prioritizing image quality over frame rate. These requests would
+     * commonly be used with the {@link #capture} method.
+     *
+     * @see #createCaptureRequest
+     */
+    public static final int TEMPLATE_STILL_CAPTURE = 2;
+
+    /**
      * Create a request suitable for video recording. Specifically, this means
      * that a stable frame rate is used, and post-processing is set for
      * recording quality. These requests would commonly be used with the
@@ -64,16 +73,7 @@ public interface CameraDevice extends AutoCloseable {
      *
      * @see #createCaptureRequest
      */
-    public static final int TEMPLATE_RECORD  = 2;
-
-    /**
-     * Create a request suitable for still image capture. Specifically, this
-     * means prioritizing image quality over frame rate. These requests would
-     * commonly be used with the {@link #capture} method.
-     *
-     * @see #createCaptureRequest
-     */
-    public static final int TEMPLATE_STILL_CAPTURE = 3;
+    public static final int TEMPLATE_RECORD  = 3;
 
     /**
      * Create a request suitable for still image capture while recording
