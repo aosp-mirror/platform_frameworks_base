@@ -551,6 +551,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         // System.out.println("Open panel: isOpen=" + st.isOpen);
 
         // Already open, return
+        Slog.d(TAG, "openPanel: b9404689 entry, st=" + st + " decorView=" + st.decorView);
         if (st.isOpen || isDestroyed()) {
             return;
         }
@@ -645,6 +646,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
         }
 
+        Slog.d(TAG, "openPanel: b9404689 setting isOpen true, st=" + st + " decorView="
+                + st.decorView);
         st.isOpen = true;
         st.isHandled = false;
 
@@ -693,9 +696,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      */
     public final void closePanel(PanelFeatureState st, boolean doCallback) {
         // System.out.println("Close panel: isOpen=" + st.isOpen);
+        Slog.d(TAG, "closePanel: b9404689 entry, st=" + st + " decorView=" + st.decorView);
         if (doCallback && st.featureId == FEATURE_OPTIONS_PANEL &&
                 mActionBar != null && mActionBar.isOverflowMenuShowing()) {
             checkCloseActionMenu(st.menu);
+            Slog.d(TAG, "closePanel: b9404689 early return");
             return;
         }
 
@@ -1100,6 +1105,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      */
     protected boolean initializePanelDecor(PanelFeatureState st) {
         st.decorView = new DecorView(getContext(), st.featureId);
+        Slog.d(TAG, "initializePanelDecor: b9404689 st=" + st + " decorView=" + st.decorView);
         st.gravity = Gravity.CENTER | Gravity.BOTTOM;
         st.setStyle(getContext());
 
