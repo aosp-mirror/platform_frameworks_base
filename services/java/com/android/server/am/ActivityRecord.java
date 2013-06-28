@@ -222,7 +222,7 @@ final class ActivityRecord {
                 if (lastLaunchTime == 0) pw.print("0");
                 else TimeUtils.formatDuration(lastLaunchTime, now, pw);
                 pw.println();
-        pw.print(prefix); pw.print(" haveState="); pw.print(haveState);
+        pw.print(prefix); pw.print("haveState="); pw.print(haveState);
                 pw.print(" icicle="); pw.println(icicle);
         pw.print(prefix); pw.print("state="); pw.print(state);
                 pw.print(" stopped="); pw.print(stopped);

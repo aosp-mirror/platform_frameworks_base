@@ -62,6 +62,7 @@ final class ProcessRecord {
     boolean starting;           // True if the process is being started
     long lastActivityTime;      // For managing the LRU list
     long lruWeight;             // Weight for ordering in LRU list
+    long lastPssTime;           // Last time we requested PSS data
     int maxAdj;                 // Maximum OOM adjustment for this process
     int cachedAdj;              // If cached, this is the adjustment to use
     int clientCachedAdj;        // If empty but cached client, this is the adjustment to use
@@ -112,7 +113,6 @@ final class ProcessRecord {
     boolean reportLowMemory;    // Set to true when waiting to report low mem
     boolean empty;              // Is this an empty background process?
     boolean cached;             // Is this a cached process?
-    int lastPss;                // Last pss size reported by app.
     String adjType;             // Debugging: primary thing impacting oom_adj.
     int adjTypeCode;            // Debugging: adj code to report to app.
     Object adjSource;           // Debugging: option dependent object.
@@ -180,7 +180,12 @@ final class ProcessRecord {
         pw.print(prefix); pw.print("dir="); pw.print(info.sourceDir);
                 pw.print(" publicDir="); pw.print(info.publicSourceDir);
                 pw.print(" data="); pw.println(info.dataDir);
-        pw.print(prefix); pw.print("packageList="); pw.println(pkgList);
+        pw.print(prefix); pw.print("packageList={");
+        for (int i=0; i<pkgList.size(); i++) {
+            if (i > 0) pw.print(", ");
+            pw.print(pkgList.keyAt(i));
+        }
+        pw.println("}");
         pw.print(prefix); pw.print("compat="); pw.println(compat);
         if (instrumentationClass != null || instrumentationProfileFile != null
                 || instrumentationArguments != null) {
@@ -198,7 +203,7 @@ final class ProcessRecord {
         }
         pw.print(prefix); pw.print("thread="); pw.println(thread);
         pw.print(prefix); pw.print("pid="); pw.print(pid); pw.print(" starting=");
-                pw.print(starting); pw.print(" lastPss="); pw.println(lastPss);
+                pw.println(starting);
         pw.print(prefix); pw.print("lastActivityTime=");
                 TimeUtils.formatDuration(lastActivityTime, now, pw);
                 pw.print(" lruWeight="); pw.print(lruWeight);
@@ -220,7 +225,8 @@ final class ProcessRecord {
                 pw.print(" systemNoUi="); pw.print(systemNoUi);
                 pw.print(" trimMemoryLevel="); pw.println(trimMemoryLevel);
         pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
-                pw.print(" lruSeq="); pw.println(lruSeq);
+                pw.print(" lruSeq="); pw.print(lruSeq);
+                pw.print(" lastPssTime="); pw.println(lastPssTime);
         if (hasShownUi || pendingUiClean || hasAboveClient) {
             pw.print(prefix); pw.print("hasShownUi="); pw.print(hasShownUi);
                     pw.print(" pendingUiClean="); pw.print(pendingUiClean);
@@ -345,6 +351,7 @@ final class ProcessRecord {
         curAdj = setAdj = -100;
         persistent = false;
         removed = false;
+        lastPssTime = SystemClock.uptimeMillis();
     }
 
     public void setPid(int _pid) {
@@ -451,21 +458,20 @@ final class ProcessRecord {
             ProcessList plist) {
         int state = this == TOP_APP ? ProcessTracker.STATE_TOP
                 : plist.adjToTrackedState(setAdj);
-        if (pkgList.size() > 0) {
-            pkgList.valueAt(0).setState(state, memFactor, now, pkgList);
-        }
+        baseProcessTracker.setState(state, memFactor, now, pkgList);
     }
 
     /*
      *  Delete all packages from list except the package indicated in info
      */
-    public void resetPackageList() {
+    public void resetPackageList(ProcessTracker tracker) {
         long now = SystemClock.uptimeMillis();
-        if (pkgList.size() > 0) {
-            pkgList.valueAt(0).setState(ProcessTracker.STATE_NOTHING, 0, now, pkgList);
+        baseProcessTracker.setState(ProcessTracker.STATE_NOTHING, 0, now, pkgList);
+        if (pkgList.size() != 1) {
+            pkgList.clear();
+            pkgList.put(info.packageName, tracker.getProcessStateLocked(
+                    info.packageName, info.uid, processName));
         }
-        pkgList.clear();
-        pkgList.put(info.packageName, baseProcessTracker);
     }
     
     public String[] getPackageList() {
