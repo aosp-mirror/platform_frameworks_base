@@ -35956,6 +35956,15 @@ package java.nio.charset {
     method public int getInputLength();
   }
 
+  public final class StandardCharsets {
+    field public static final java.nio.charset.Charset ISO_8859_1;
+    field public static final java.nio.charset.Charset US_ASCII;
+    field public static final java.nio.charset.Charset UTF_16;
+    field public static final java.nio.charset.Charset UTF_16BE;
+    field public static final java.nio.charset.Charset UTF_16LE;
+    field public static final java.nio.charset.Charset UTF_8;
+  }
+
   public class UnmappableCharacterException extends java.nio.charset.CharacterCodingException {
     ctor public UnmappableCharacterException(int);
     method public int getInputLength();
