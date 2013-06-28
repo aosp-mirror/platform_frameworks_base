@@ -30,6 +30,7 @@ import android.util.ArrayMap;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessStats;
 import com.android.internal.os.TransferPipe;
@@ -266,6 +267,20 @@ public final class ActivityManagerService extends ActivityManagerNative
     // The minimum amount of time between successive GC requests for a process.
     static final int GC_MIN_INTERVAL = 60*1000;
 
+    // The minimum amount of time between successive PSS requests for a process.
+    static final int PSS_MIN_INTERVAL = 2*60*1000;
+
+    // The amount of time we will sample PSS of the current top process while the
+    // screen is on.
+    static final int PSS_TOP_INTERVAL = 5*60*1000;
+
+    // The maximum amount of time for a process to be around until we will take
+    // a PSS snapshot on its next oom change.
+    static final int PSS_MAX_INTERVAL = 30*60*1000;
+
+    // The minimum amount of time between successive PSS requests for a process.
+    static final int FULL_PSS_MIN_INTERVAL = 10*60*1000;
+
     // The rate at which we check for apps using excessive power -- 15 mins.
     static final int POWER_CHECK_DELAY = (DEBUG_POWER_QUICK ? 2 : 15) * 60*1000;
 
@@ -495,8 +510,17 @@ public final class ActivityManagerService extends ActivityManagerNative
     /**
      * List of processes that should gc as soon as things are idle.
      */
-    final ArrayList<ProcessRecord> mProcessesToGc
-            = new ArrayList<ProcessRecord>();
+    final ArrayList<ProcessRecord> mProcessesToGc = new ArrayList<ProcessRecord>();
+
+    /**
+     * Processes we want to collect PSS data from.
+     */
+    final ArrayList<ProcessRecord> mPendingPssProcesses = new ArrayList<ProcessRecord>();
+
+    /**
+     * Last time we requested PSS data of all processes.
+     */
+    long mLastFullPssTime = SystemClock.uptimeMillis();
 
     /**
      * This is the process holding what we currently consider to be
@@ -1475,6 +1499,51 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
                 break;
+            }
+            }
+        }
+    };
+
+    static final int COLLECT_PSS_BG_MSG = 1;
+
+    final Handler mBgHandler = new Handler(BackgroundThread.getHandler().getLooper()) {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case COLLECT_PSS_BG_MSG: {
+                int i=0;
+                long start = SystemClock.uptimeMillis();
+                do {
+                    ProcessRecord proc;
+                    int oomAdj;
+                    int pid;
+                    synchronized (ActivityManagerService.this) {
+                        if (i >= mPendingPssProcesses.size()) {
+                            Slog.i(TAG, "Collected PSS of " + i + " processes in "
+                                    + (SystemClock.uptimeMillis()-start) + "ms");
+                            mPendingPssProcesses.clear();
+                            return;
+                        }
+                        proc = mPendingPssProcesses.get(i);
+                        if (proc.thread != null) {
+                            oomAdj = proc.setAdj;
+                            pid = proc.pid;
+                            i++;
+                        } else {
+                            proc = null;
+                            oomAdj = 0;
+                            pid = 0;
+                        }
+                    }
+                    if (proc != null) {
+                        long pss = Debug.getPss(pid);
+                        synchronized (ActivityManagerService.this) {
+                            if (proc.thread != null && proc.setAdj == oomAdj && proc.pid == pid) {
+                                proc.baseProcessTracker.addPss(pss, true);
+                            }
+                        }
+                    }
+                } while (true);
             }
             }
         }
@@ -3906,8 +3975,24 @@ public final class ActivityManagerService extends ActivityManagerNative
         enforceNotIsolatedCaller("getProcessMemoryInfo");
         Debug.MemoryInfo[] infos = new Debug.MemoryInfo[pids.length];
         for (int i=pids.length-1; i>=0; i--) {
+            ProcessRecord proc;
+            int oomAdj;
+            synchronized (this) {
+                synchronized (mPidsSelfLocked) {
+                    proc = mPidsSelfLocked.get(pids[i]);
+                    oomAdj = proc != null ? proc.setAdj : 0;
+                }
+            }
             infos[i] = new Debug.MemoryInfo();
             Debug.getMemoryInfo(pids[i], infos[i]);
+            if (proc != null) {
+                synchronized (this) {
+                    if (proc.thread != null && proc.setAdj == oomAdj) {
+                        // Record this for posterity if the process has been stable.
+                        proc.baseProcessTracker.addPss(infos[i].getTotalPss(), false);
+                    }
+                }
+            }
         }
         return infos;
     }
@@ -3917,7 +4002,23 @@ public final class ActivityManagerService extends ActivityManagerNative
         enforceNotIsolatedCaller("getProcessPss");
         long[] pss = new long[pids.length];
         for (int i=pids.length-1; i>=0; i--) {
+            ProcessRecord proc;
+            int oomAdj;
+            synchronized (this) {
+                synchronized (mPidsSelfLocked) {
+                    proc = mPidsSelfLocked.get(pids[i]);
+                    oomAdj = proc != null ? proc.setAdj : 0;
+                }
+            }
             pss[i] = Debug.getPss(pids[i]);
+            if (proc != null) {
+                synchronized (this) {
+                    if (proc.thread != null && proc.setAdj == oomAdj) {
+                        // Record this for posterity if the process has been stable.
+                        proc.baseProcessTracker.addPss(pss[i], false);
+                    }
+                }
+            }
         }
         return pss;
     }
@@ -4350,7 +4451,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             thread.asBinder().linkToDeath(adr, 0);
             app.deathRecipient = adr;
         } catch (RemoteException e) {
-            app.resetPackageList();
+            app.resetPackageList(mProcessTracker);
             startProcessLocked(app, "link fail", processName);
             return false;
         }
@@ -4442,7 +4543,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // an infinite loop of restarting processes...
             Slog.w(TAG, "Exception thrown during bind!", e);
 
-            app.resetPackageList();
+            app.resetPackageList(mProcessTracker);
             app.unlinkDeathRecipient();
             startProcessLocked(app, "bind fail", processName);
             return false;
@@ -4630,8 +4731,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                         final int userId = mStartedUsers.keyAt(i);
                         Intent intent = new Intent(Intent.ACTION_BOOT_COMPLETED, null);
                         intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-                        broadcastIntentLocked(null, null, intent,
-                                null, null, 0, null, null,
+                        broadcastIntentLocked(null, null, intent, null,
+                                new IIntentReceiver.Stub() {
+                                    @Override
+                                    public void performReceive(Intent intent, int resultCode,
+                                            String data, Bundle extras, boolean ordered,
+                                            boolean sticky, int sendingUser) {
+                                        synchronized (ActivityManagerService.this) {
+                                            requestPssAllProcsLocked(SystemClock.uptimeMillis(),
+                                                    true);
+                                        }
+                                    }
+                                },
+                                0, null, null,
                                 android.Manifest.permission.RECEIVE_BOOT_COMPLETED,
                                 AppOpsManager.OP_NONE, false, false, MY_PID, Process.SYSTEM_UID,
                                 userId);
@@ -10934,7 +11046,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         long uptime = SystemClock.uptimeMillis();
         long realtime = SystemClock.elapsedRealtime();
 
-        if (procs.size() == 1 || isCheckinRequest) {
+        if (!brief && !oomOnly && (procs.size() == 1 || isCheckinRequest)) {
             dumpDetails = true;
         }
 
@@ -10960,17 +11072,24 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         long totalPss = 0;
 
+        Debug.MemoryInfo mi = null;
         for (int i = procs.size() - 1 ; i >= 0 ; i--) {
             ProcessRecord r = procs.get(i);
-            if (r.thread != null) {
+            IApplicationThread thread;
+            int oomAdj;
+            synchronized (this) {
+                thread = r.thread;
+                oomAdj = r.setAdj;
+            }
+            if (thread != null) {
                 if (!isCheckinRequest && dumpDetails) {
                     pw.println("\n** MEMINFO in pid " + r.pid + " [" + r.processName + "] **");
                     pw.flush();
                 }
-                Debug.MemoryInfo mi = null;
                 if (dumpDetails) {
                     try {
-                        mi = r.thread.dumpMemInfo(fd, isCheckinRequest, true, dumpDalvik, innerArgs);
+                        mi = null;
+                        mi = thread.dumpMemInfo(fd, isCheckinRequest, true, dumpDalvik, innerArgs);
                     } catch (RemoteException e) {
                         if (!isCheckinRequest) {
                             pw.println("Got RemoteException!");
@@ -10978,20 +11097,30 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
                 } else {
-                    mi = new Debug.MemoryInfo();
-                    Debug.getMemoryInfo(r.pid, mi);
+                    if (mi == null) {
+                        mi = new Debug.MemoryInfo();
+                    }
+                    if (!brief && !oomOnly) {
+                        Debug.getMemoryInfo(r.pid, mi);
+                    } else {
+                        mi.dalvikPss = (int)Debug.getPss(r.pid);
+                    }
+                }
+
+                final long myTotalPss = mi.getTotalPss();
+
+                synchronized (this) {
+                    if (r.thread != null && oomAdj == r.setAdj) {
+                        // Record this for posterity if the process has been stable.
+                        r.baseProcessTracker.addPss(myTotalPss, true);
+                    }
                 }
 
                 if (!isCheckinRequest && mi != null) {
-                    long myTotalPss = mi.getTotalPss();
                     totalPss += myTotalPss;
                     MemItem pssItem = new MemItem(r.processName + " (pid " + r.pid + ")",
                             r.processName, myTotalPss, 0);
                     procMems.add(pssItem);
-
-                    synchronized (this) {
-                        r.baseProcessTracker.addPss(myTotalPss);
-                    }
 
                     nativePss += mi.nativePss;
                     dalvikPss += mi.dalvikPss;
@@ -11070,7 +11199,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             }
                         }
                         for (int j=0; j<miCat.subitems.size(); j++) {
-                            MemItem mi = miCat.subitems.get(j);
+                            MemItem memi = miCat.subitems.get(j);
                             if (j > 0) {
                                 if (outTag != null) {
                                     outTag.append(" ");
@@ -11080,10 +11209,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 }
                             }
                             if (outTag != null && miCat.id <= ProcessList.FOREGROUND_APP_ADJ) {
-                                appendMemBucket(outTag, mi.pss, mi.shortLabel, false);
+                                appendMemBucket(outTag, memi.pss, memi.shortLabel, false);
                             }
                             if (outStack != null) {
-                                appendMemBucket(outStack, mi.pss, mi.shortLabel, true);
+                                appendMemBucket(outStack, memi.pss, memi.shortLabel, true);
                             }
                         }
                         if (outStack != null && miCat.id >= ProcessList.FOREGROUND_APP_ADJ) {
@@ -11109,7 +11238,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             pw.println("Total PSS by OOM adjustment:");
             dumpMemItems(pw, "  ", oomMems, false);
-            if (!oomOnly) {
+            if (!brief && !oomOnly) {
                 PrintWriter out = categoryPw != null ? categoryPw : pw;
                 out.println();
                 out.println("Total PSS by category:");
@@ -11117,29 +11246,31 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             pw.println();
             pw.print("Total PSS: "); pw.print(totalPss); pw.println(" kB");
-            final int[] SINGLE_LONG_FORMAT = new int[] {
-                Process.PROC_SPACE_TERM|Process.PROC_OUT_LONG
-            };
-            long[] longOut = new long[1];
-            Process.readProcFile("/sys/kernel/mm/ksm/pages_shared",
-                    SINGLE_LONG_FORMAT, null, longOut, null);
-            long shared = longOut[0] * ProcessList.PAGE_SIZE / 1024;
-            longOut[0] = 0;
-            Process.readProcFile("/sys/kernel/mm/ksm/pages_sharing",
-                    SINGLE_LONG_FORMAT, null, longOut, null);
-            long sharing = longOut[0] * ProcessList.PAGE_SIZE / 1024;
-            longOut[0] = 0;
-            Process.readProcFile("/sys/kernel/mm/ksm/pages_unshared",
-                    SINGLE_LONG_FORMAT, null, longOut, null);
-            long unshared = longOut[0] * ProcessList.PAGE_SIZE / 1024;
-            longOut[0] = 0;
-            Process.readProcFile("/sys/kernel/mm/ksm/pages_volatile",
-                    SINGLE_LONG_FORMAT, null, longOut, null);
-            long voltile = longOut[0] * ProcessList.PAGE_SIZE / 1024;
-            pw.print("      KSM: "); pw.print(sharing); pw.print(" kB saved from shared ");
-                    pw.print(shared); pw.println(" kB");
-            pw.print("           "); pw.print(unshared); pw.print(" kB unshared; ");
-                    pw.print(voltile); pw.println(" kB volatile");
+            if (!brief) {
+                final int[] SINGLE_LONG_FORMAT = new int[] {
+                    Process.PROC_SPACE_TERM|Process.PROC_OUT_LONG
+                };
+                long[] longOut = new long[1];
+                Process.readProcFile("/sys/kernel/mm/ksm/pages_shared",
+                        SINGLE_LONG_FORMAT, null, longOut, null);
+                long shared = longOut[0] * ProcessList.PAGE_SIZE / 1024;
+                longOut[0] = 0;
+                Process.readProcFile("/sys/kernel/mm/ksm/pages_sharing",
+                        SINGLE_LONG_FORMAT, null, longOut, null);
+                long sharing = longOut[0] * ProcessList.PAGE_SIZE / 1024;
+                longOut[0] = 0;
+                Process.readProcFile("/sys/kernel/mm/ksm/pages_unshared",
+                        SINGLE_LONG_FORMAT, null, longOut, null);
+                long unshared = longOut[0] * ProcessList.PAGE_SIZE / 1024;
+                longOut[0] = 0;
+                Process.readProcFile("/sys/kernel/mm/ksm/pages_volatile",
+                        SINGLE_LONG_FORMAT, null, longOut, null);
+                long voltile = longOut[0] * ProcessList.PAGE_SIZE / 1024;
+                pw.print("      KSM: "); pw.print(sharing); pw.print(" kB saved from shared ");
+                        pw.print(shared); pw.println(" kB");
+                pw.print("           "); pw.print(unshared); pw.print(" kB unshared; ");
+                        pw.print(voltile); pw.println(" kB volatile");
+            }
         }
     }
 
@@ -11236,6 +11367,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         mProcessesToGc.remove(app);
+        mPendingPssProcesses.remove(app);
         
         // Dismiss any open dialogs.
         if (app.crashDialog != null && !app.forceCrashReport) {
@@ -11254,7 +11386,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.crashing = false;
         app.notResponding = false;
         
-        app.resetPackageList();
+        app.resetPackageList(mProcessTracker);
         app.unlinkDeathRecipient();
         app.thread = null;
         app.forcingToForeground = null;
@@ -13749,6 +13881,41 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     /**
+     * Schedule PSS collection of a process.
+     */
+    void requestPssLocked(ProcessRecord proc, long now, boolean always) {
+        if (!always && now < (proc.lastPssTime+PSS_MIN_INTERVAL)) {
+            return;
+        }
+        if (mPendingPssProcesses.contains(proc)) {
+            return;
+        }
+        proc.lastPssTime = now;
+        if (mPendingPssProcesses.size() == 0) {
+            mBgHandler.sendEmptyMessage(COLLECT_PSS_BG_MSG);
+        }
+        mPendingPssProcesses.add(proc);
+    }
+
+    /**
+     * Schedule PSS collection of all processes.
+     */
+    void requestPssAllProcsLocked(long now, boolean always) {
+        if (!always && now < (mLastFullPssTime+FULL_PSS_MIN_INTERVAL)) {
+            return;
+        }
+        mLastFullPssTime = now;
+        mPendingPssProcesses.ensureCapacity(mLruProcesses.size());
+        mPendingPssProcesses.clear();
+        for (int i=mLruProcesses.size()-1; i>=0; i--) {
+            ProcessRecord app = mLruProcesses.get(i);
+            app.lastPssTime = now;
+            mPendingPssProcesses.add(app);
+        }
+        mBgHandler.sendEmptyMessage(COLLECT_PSS_BG_MSG);
+    }
+
+    /**
      * Ask a given process to GC right now.
      */
     final void performAppGcLocked(ProcessRecord app) {
@@ -13959,6 +14126,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             + " during " + realtimeSince);
                     EventLog.writeEvent(EventLogTags.AM_KILL, app.userId, app.pid,
                             app.processName, app.setAdj, "excessive wake lock");
+                    app.baseProcessTracker.reportExcessiveWake(app.pkgList);
                     Process.killProcessQuiet(app.pid);
                 } else if (doCpuKills && uptimeSince > 0
                         && ((cputimeUsed*100)/uptimeSince) >= 50) {
@@ -13971,6 +14139,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                             + " during " + uptimeSince);
                     EventLog.writeEvent(EventLogTags.AM_KILL, app.userId, app.pid,
                             app.processName, app.setAdj, "excessive cpu");
+                    app.baseProcessTracker.reportExcessiveCpu(app.pkgList);
                     Process.killProcessQuiet(app.pid);
                 } else {
                     app.lastWakeTime = wtime;
@@ -14012,11 +14181,23 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.setRawAdj = app.curRawAdj;
         }
 
+        if (app == TOP_APP && now > (app.lastPssTime+PSS_TOP_INTERVAL)) {
+            requestPssLocked(app, now, true);
+        }
+
         if (app.curAdj != app.setAdj) {
             if (Process.setOomAdj(app.pid, app.curAdj)) {
                 if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(
                     TAG, "Set " + app.pid + " " + app.processName +
                     " adj " + app.curAdj + ": " + app.adjType);
+                if (app.setAdj == ProcessList.SERVICE_ADJ
+                        && app.curAdj == ProcessList.SERVICE_B_ADJ) {
+                    // If a service is dropping to the B list, it has been running for
+                    // a while, take a PSS snapshot.
+                    requestPssLocked(app, now, false);
+                } else if (now > (app.lastPssTime+PSS_MAX_INTERVAL)) {
+                    requestPssLocked(app, now, true);
+                }
                 app.setAdj = app.curAdj;
                 app.setAdjChanged = true;
                 if (!doingAll) {
@@ -14405,6 +14586,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.setProcessTrackerState(TOP_APP, memFactor, now, mProcessList);
                 }
             }
+        }
+        if (allChanged) {
+            requestPssAllProcsLocked(now, false);
         }
 
         if (DEBUG_OOM_ADJ) {

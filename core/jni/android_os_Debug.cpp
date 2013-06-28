@@ -394,12 +394,16 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid)
     if (fp == 0) return 0;
 
     while (true) {
-        if (fgets(line, 1024, fp) == 0) {
+        if (fgets(line, 1024, fp) == NULL) {
             break;
         }
 
-        if (sscanf(line, "Pss: %d kB", &temp) == 1) {
-            pss += temp;
+        if (strncmp(line, "Pss: ", 5) == 0) {
+            char* c = line + 5;
+            while (*c != 0 && (*c < '0' || *c > '9')) {
+                c++;
+            }
+            pss += atoi(c);
         }
     }
 

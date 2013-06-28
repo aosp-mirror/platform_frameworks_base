@@ -1707,6 +1707,7 @@ public final class ActivityStackSupervisor {
                 r.idle = true;
                 if (allResumedActivitiesIdle()) {
                     mService.scheduleAppGcsLocked();
+                    mService.requestPssLocked(r.app, SystemClock.uptimeMillis(), false);
                 }
                 if (r.thumbnailNeeded && r.app != null && r.app.thread != null) {
                     sendThumbnail = r.app.thread;

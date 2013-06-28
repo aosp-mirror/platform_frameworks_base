@@ -552,7 +552,7 @@ public final class ActivityThread {
         private static final String DB_INFO_FORMAT = "  %8s %8s %14s %14s  %s";
 
         // Formatting for checkin service - update version if row format changes
-        private static final int ACTIVITY_THREAD_CHECKIN_VERSION = 2;
+        private static final int ACTIVITY_THREAD_CHECKIN_VERSION = 3;
 
         private void updatePendingConfiguration(Configuration config) {
             synchronized (mPackages) {
@@ -972,43 +972,48 @@ public final class ActivityThread {
                 pw.print(memInfo.nativePss); pw.print(',');
                 pw.print(memInfo.dalvikPss); pw.print(',');
                 pw.print(memInfo.otherPss); pw.print(',');
-                pw.print(memInfo.nativePss + memInfo.dalvikPss + memInfo.otherPss); pw.print(',');
+                pw.print(memInfo.getTotalPss()); pw.print(',');
 
-                // Heap info - proportional set size
+                // Heap info - swappable set size
                 pw.print(memInfo.nativeSwappablePss); pw.print(',');
                 pw.print(memInfo.dalvikSwappablePss); pw.print(',');
                 pw.print(memInfo.otherSwappablePss); pw.print(',');
-                pw.print(memInfo.nativeSwappablePss + memInfo.dalvikSwappablePss + memInfo.otherSwappablePss); pw.print(',');
+                pw.print(memInfo.getTotalSwappablePss()); pw.print(',');
 
                 // Heap info - shared dirty
                 pw.print(memInfo.nativeSharedDirty); pw.print(',');
                 pw.print(memInfo.dalvikSharedDirty); pw.print(',');
                 pw.print(memInfo.otherSharedDirty); pw.print(',');
-                pw.print(memInfo.nativeSharedDirty + memInfo.dalvikSharedDirty
-                        + memInfo.otherSharedDirty); pw.print(',');
+                pw.print(memInfo.getTotalSharedDirty()); pw.print(',');
 
                 // Heap info - shared clean
                 pw.print(memInfo.nativeSharedClean); pw.print(',');
                 pw.print(memInfo.dalvikSharedClean); pw.print(',');
                 pw.print(memInfo.otherSharedClean); pw.print(',');
-                pw.print(memInfo.nativeSharedClean + memInfo.dalvikSharedClean
-                        + memInfo.otherSharedClean); pw.print(',');
+                pw.print(memInfo.getTotalSharedClean()); pw.print(',');
 
                 // Heap info - private Dirty
                 pw.print(memInfo.nativePrivateDirty); pw.print(',');
                 pw.print(memInfo.dalvikPrivateDirty); pw.print(',');
                 pw.print(memInfo.otherPrivateDirty); pw.print(',');
-                pw.print(memInfo.nativePrivateDirty + memInfo.dalvikPrivateDirty
-                        + memInfo.otherPrivateDirty); pw.print(',');
-
+                pw.print(memInfo.getTotalPrivateDirty()); pw.print(',');
 
                 // Heap info - private Clean
                 pw.print(memInfo.nativePrivateClean); pw.print(',');
                 pw.print(memInfo.dalvikPrivateClean); pw.print(',');
                 pw.print(memInfo.otherPrivateClean); pw.print(',');
-                pw.print(memInfo.nativePrivateClean + memInfo.dalvikPrivateClean
-                        + memInfo.otherPrivateClean); pw.print(',');
+                pw.print(memInfo.getTotalPrivateClean()); pw.print(',');
 
+                // Heap info - other areas
+                for (int i=0; i<Debug.MemoryInfo.NUM_OTHER_STATS; i++) {
+                    pw.print(Debug.MemoryInfo.getOtherLabel(i)); pw.print(',');
+                    pw.print(memInfo.getOtherPss(i)); pw.print(',');
+                    pw.print(memInfo.getOtherSwappablePss(i)); pw.print(',');
+                    pw.print(memInfo.getOtherSharedDirty(i)); pw.print(',');
+                    pw.print(memInfo.getOtherSharedClean(i)); pw.print(',');
+                    pw.print(memInfo.getOtherPrivateDirty(i)); pw.print(',');
+                    pw.print(memInfo.getOtherPrivateClean(i)); pw.print(',');
+                }
 
                 // Object counts
                 pw.print(viewInstanceCount); pw.print(',');
