@@ -171,8 +171,6 @@ public class KeyguardViewManager {
 
     private void maybeCreateKeyguardLocked(boolean enableScreenRotation, boolean force,
             Bundle options) {
-        final boolean isActivity = (mContext instanceof Activity); // for test activity
-
         if (mKeyguardHost != null) {
             mKeyguardHost.saveHierarchyState(mStateContainer);
         }
@@ -190,9 +188,6 @@ public class KeyguardViewManager {
             if (!mNeedsInput) {
                 flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
             }
-            if (ActivityManager.isHighEndGfx()) {
-                flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-            }
 
             final int stretch = ViewGroup.LayoutParams.MATCH_PARENT;
             final int type = WindowManager.LayoutParams.TYPE_KEYGUARD;
@@ -209,11 +204,8 @@ public class KeyguardViewManager {
                         WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_HARDWARE_ACCELERATED;
             }
             lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SET_NEEDS_MENU_KEY;
-            if (isActivity) {
-                lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-            }
             lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_DISABLE_USER_ACTIVITY;
-            lp.setTitle(isActivity ? "KeyguardMock" : "Keyguard");
+            lp.setTitle("Keyguard");
             mWindowLayoutParams = lp;
             mViewManager.addView(mKeyguardHost, lp);
         }
@@ -233,9 +225,6 @@ public class KeyguardViewManager {
         if (v != null) {
             mKeyguardHost.removeView(v);
         }
-        // TODO: Remove once b/7094175 is fixed
-        if (false) Slog.d(TAG, "inflateKeyguardView: b/7094175 mContext.config="
-                + mContext.getResources().getConfiguration());
         final LayoutInflater inflater = LayoutInflater.from(mContext);
         View view = inflater.inflate(R.layout.keyguard_host_view, mKeyguardHost, true);
         mKeyguardView = (KeyguardHostView) view.findViewById(R.id.keyguard_host_view);
