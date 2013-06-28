@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.app.Notification;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -27,14 +28,13 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.RemoteViews;
 
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.statusbar.BaseStatusBar;
 
-public class IntruderAlertView extends LinearLayout implements SwipeHelper.Callback {
-    private static final String TAG = "IntruderAlertView";
+public class HeadsUpNotificationView extends LinearLayout implements SwipeHelper.Callback {
+    private static final String TAG = "HeadsUpNotificationView";
     private static final boolean DEBUG = false;
 
     Rect mTmpRect = new Rect();
@@ -44,14 +44,14 @@ public class IntruderAlertView extends LinearLayout implements SwipeHelper.Callb
     BaseStatusBar mBar;
     private ViewGroup mContentHolder;
     
-    private RemoteViews mIntruderRemoteViews;
+    private Notification mHeadsUp;
     private OnClickListener mOnClickListener;
 
-    public IntruderAlertView(Context context, AttributeSet attrs) {
+    public HeadsUpNotificationView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public IntruderAlertView(Context context, AttributeSet attrs, int defStyle) {
+    public HeadsUpNotificationView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
         setOrientation(LinearLayout.VERTICAL);
@@ -64,9 +64,9 @@ public class IntruderAlertView extends LinearLayout implements SwipeHelper.Callb
         mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
         
         mContentHolder = (ViewGroup) findViewById(R.id.contentHolder);
-        if (mIntruderRemoteViews != null) {
+        if (mHeadsUp != null) {
             // whoops, we're on already!
-            applyIntruderContent(mIntruderRemoteViews, mOnClickListener);
+            applyContent(mHeadsUp, mOnClickListener);
         }
     }
     
@@ -92,8 +92,8 @@ public class IntruderAlertView extends LinearLayout implements SwipeHelper.Callb
     }
 
     public void onChildDismissed(View v) {
-        Log.v(TAG, "User swiped intruder to dismiss");
-        mBar.dismissIntruder();
+        Log.v(TAG, "User swiped heads up to dismiss");
+        mBar.dismissHeadsUp();
     }
 
     public void onBeginDrag(View v) {
@@ -134,33 +134,34 @@ public class IntruderAlertView extends LinearLayout implements SwipeHelper.Callb
         }
     }
 
-    public void applyIntruderContent(RemoteViews intruderView, OnClickListener listener) {
-        if (DEBUG) {
-            Log.v(TAG, "applyIntruderContent: view=" + intruderView + " listener=" + listener);
-        }
-        mIntruderRemoteViews = intruderView;
+    public boolean applyContent(Notification headsUp, OnClickListener listener) {
+        mHeadsUp = headsUp;
         mOnClickListener = listener;
-        if (mContentHolder == null) { 
+        if (mContentHolder == null) {
             // too soon!
-            return;
+            return false;
+        }
+        if (headsUp.contentView == null) {
+            // bad data
+            return false;
         }
         mContentHolder.setX(0);
         mContentHolder.setVisibility(View.VISIBLE);
         mContentHolder.setAlpha(1f);
         mContentHolder.removeAllViews();
-        final View content = intruderView.apply(getContext(), mContentHolder);
+        final View content = headsUp.contentView.apply(getContext(), mContentHolder);
         if (listener != null) {
             content.setOnClickListener(listener);
-            
-            //content.setBackgroundResource(R.drawable.intruder_row_bg);
-            Drawable bg = getResources().getDrawable(R.drawable.intruder_row_bg);
+
+            Drawable bg = getResources().getDrawable(R.drawable.heads_up_notification_row_bg);
             if (bg == null) {
-                Log.e(TAG, String.format("Can't find background drawable id=0x%08x", R.drawable.intruder_row_bg));
+                Log.e(TAG, String.format("Can't find background drawable id=0x%08x",
+                        R.drawable.heads_up_notification_row_bg));
             } else {
                 content.setBackgroundDrawable(bg);
             }
         }
         mContentHolder.addView(content);
-        
+        return true;
     }
 }

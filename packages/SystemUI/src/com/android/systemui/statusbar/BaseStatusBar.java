@@ -35,10 +35,13 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.dreams.DreamService;
+import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
@@ -83,16 +86,19 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected static final int MSG_CANCEL_PRELOAD_RECENT_APPS = 1023;
     protected static final int MSG_OPEN_SEARCH_PANEL = 1024;
     protected static final int MSG_CLOSE_SEARCH_PANEL = 1025;
-    protected static final int MSG_SHOW_INTRUDER = 1026;
-    protected static final int MSG_HIDE_INTRUDER = 1027;
+    protected static final int MSG_SHOW_HEADS_UP = 1026;
+    protected static final int MSG_HIDE_HEADS_UP = 1027;
 
-    protected static final boolean ENABLE_INTRUDERS = false;
+    protected static final boolean ENABLE_HEADS_UP = true;
+    // scores above this threshold should be displayed in heads up mode.
+    private static final int INTERRUPTION_THRESHOLD = 10;
 
     // Should match the value in PhoneWindowManager
     public static final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
 
     public static final int EXPANDED_LEAVE_ALONE = -10000;
     public static final int EXPANDED_FULL_OPEN = -10001;
+    private static final String SETTING_HEADS_UP = "heads_up_enabled";
 
     protected CommandQueue mCommandQueue;
     protected IStatusBarService mBarService;
@@ -102,7 +108,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected NotificationData mNotificationData = new NotificationData();
     protected NotificationRowLayout mPile;
 
-    protected StatusBarNotification mCurrentlyIntrudingNotification;
+    protected StatusBarNotification mCurrentlyInterruptingNotification;
 
     // used to notify status bar for suppressing notification LED
     protected boolean mPanelSlightlyVisible;
@@ -116,6 +122,11 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected int mLayoutDirection;
     private Locale mLocale;
+    protected boolean mUseHeadsUp = true;
+
+    protected IDreamManager mDreamManager;
+    KeyguardManager mKeyguardManager;
+    PowerManager mPowerManager;
 
     // UI-specific methods
 
@@ -151,6 +162,19 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (provisioned != mDeviceProvisioned) {
                 mDeviceProvisioned = provisioned;
                 updateNotificationIcons();
+            }
+        }
+    };
+
+    final private ContentObserver mHeadsUpObserver = new ContentObserver(mHandler) {
+        @Override
+        public void onChange(boolean selfChange) {
+            mUseHeadsUp = ENABLE_HEADS_UP && 0 != Settings.Global.getInt(
+                    mContext.getContentResolver(), SETTING_HEADS_UP, 0);
+            Log.d(TAG, "heads up is " + (mUseHeadsUp ? "enabled" : "disabled"));
+            if (!mUseHeadsUp) {
+                Log.d(TAG, "dismissing any existing heads up notification on disable event");
+                mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
             }
         }
     };
@@ -204,10 +228,20 @@ public abstract class BaseStatusBar extends SystemUI implements
         mWindowManagerService = WindowManagerGlobal.getWindowManagerService();
         mDisplay = mWindowManager.getDefaultDisplay();
 
+        mDreamManager = IDreamManager.Stub.asInterface(
+                ServiceManager.checkService(DreamService.DREAM_SERVICE));
+        mKeyguardManager = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
+        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+
         mProvisioningObserver.onChange(false); // set up
         mContext.getContentResolver().registerContentObserver(
                 Settings.Global.getUriFor(Settings.Global.DEVICE_PROVISIONED), true,
                 mProvisioningObserver);
+
+        mHeadsUpObserver.onChange(false); // set up
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(SETTING_HEADS_UP), true,
+                mHeadsUpObserver);
 
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
@@ -398,7 +432,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    public void dismissIntruder() {
+    public void dismissHeadsUp() {
         // pass
     }
 
@@ -677,13 +711,13 @@ public abstract class BaseStatusBar extends SystemUI implements
         return new NotificationClicker(intent, pkg, tag, id);
     }
 
-    private class NotificationClicker implements View.OnClickListener {
+    protected class NotificationClicker implements View.OnClickListener {
         private PendingIntent mIntent;
         private String mPkg;
         private String mTag;
         private int mId;
 
-        NotificationClicker(PendingIntent intent, String pkg, String tag, int id) {
+        public NotificationClicker(PendingIntent intent, String pkg, String tag, int id) {
             mIntent = intent;
             mPkg = pkg;
             mTag = tag;
@@ -730,9 +764,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             // close the shade if it was open
             animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_NONE);
             visibilityChanged(false);
-
-            // If this click was on the intruder alert, hide that instead
-//            mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
         }
     }
     /**
@@ -997,16 +1028,28 @@ public abstract class BaseStatusBar extends SystemUI implements
         setAreThereNotifications();
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
 
-        // See if we need to update the intruder.
-        if (ENABLE_INTRUDERS && oldNotification == mCurrentlyIntrudingNotification) {
-            if (DEBUG) Log.d(TAG, "updating the current intruder:" + notification);
+        // See if we need to update the heads up.
+        if (ENABLE_HEADS_UP && oldNotification == mCurrentlyInterruptingNotification) {
+            if (DEBUG) Log.d(TAG, "updating the current heads up:" + notification);
             // XXX: this is a hack for Alarms. The real implementation will need to *update*
-            // the intruder.
-            if (notification.getNotification().fullScreenIntent == null) { // TODO(dsandler): consistent logic with add()
-                if (DEBUG) Log.d(TAG, "no longer intrudes!");
-                mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
+            // the heads up.
+            if (!shouldInterrupt(notification)) {
+                if (DEBUG) Log.d(TAG, "no longer interrupts!");
+                mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
             }
         }
+    }
+
+    protected boolean shouldInterrupt(StatusBarNotification notification) {
+        boolean interrupt = notification.getNotification().fullScreenIntent == null
+                && notification.getScore() >= INTERRUPTION_THRESHOLD
+                && mPowerManager.isScreenOn() && !mKeyguardManager.isKeyguardLocked();
+        try {
+            interrupt = interrupt && !mDreamManager.isDreaming();
+        } catch (RemoteException e) {
+            Log.d(TAG, "failed to query dream manager", e);
+        }
+        return interrupt;
     }
 
     // Q: What kinds of notifications should show during setup?
