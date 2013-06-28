@@ -199,6 +199,16 @@ interface INetworkManagementService
     void disableNat(String internalInterface, String externalInterface);
 
     /**
+     * Add an upstream IPv6 interface
+     */
+    void addUpstreamV6Interface(String iface);
+
+    /**
+     * Remove an upstream IPv6 interface
+     */
+    void removeUpstreamV6Interface(String iface);
+
+    /**
      ** PPPD
      **/
 
