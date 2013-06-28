@@ -40239,6 +40239,18 @@ package java.util {
     ctor public NoSuchElementException(java.lang.String);
   }
 
+  public final class Objects {
+    method public static int compare(T, T, java.util.Comparator<? super T>);
+    method public static boolean deepEquals(java.lang.Object, java.lang.Object);
+    method public static boolean equals(java.lang.Object, java.lang.Object);
+    method public static int hash(java.lang.Object...);
+    method public static int hashCode(java.lang.Object);
+    method public static T requireNonNull(T);
+    method public static T requireNonNull(T, java.lang.String);
+    method public static java.lang.String toString(java.lang.Object);
+    method public static java.lang.String toString(java.lang.Object, java.lang.String);
+  }
+
   public class Observable {
     ctor public Observable();
     method public void addObserver(java.util.Observer);
