@@ -42436,7 +42436,9 @@ package java.util.zip {
 
   public class GZIPOutputStream extends java.util.zip.DeflaterOutputStream {
     ctor public GZIPOutputStream(java.io.OutputStream) throws java.io.IOException;
+    ctor public GZIPOutputStream(java.io.OutputStream, boolean) throws java.io.IOException;
     ctor public GZIPOutputStream(java.io.OutputStream, int) throws java.io.IOException;
+    ctor public GZIPOutputStream(java.io.OutputStream, int, boolean) throws java.io.IOException;
     field protected java.util.zip.CRC32 crc;
   }
 
