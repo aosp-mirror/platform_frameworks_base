@@ -37,6 +37,10 @@ public class DisplayAdjustments {
         mActivityToken = token;
     }
 
+    public DisplayAdjustments(DisplayAdjustments daj) {
+        this (daj.getCompatibilityInfo(), daj.getActivityToken());
+    }
+
     public DisplayAdjustments(CompatibilityInfo compatInfo, IBinder token) {
         setCompatibilityInfo(compatInfo);
         mActivityToken = token;

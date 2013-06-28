@@ -208,7 +208,7 @@ public final class Display {
         mGlobal = global;
         mDisplayId = displayId;
         mDisplayInfo = displayInfo;
-        mDisplayAdjustments = daj;
+        mDisplayAdjustments = new DisplayAdjustments(daj);
         mIsValid = true;
 
         // Cache properties that cannot change as long as the display is valid.
