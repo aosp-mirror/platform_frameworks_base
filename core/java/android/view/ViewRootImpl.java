@@ -5164,7 +5164,7 @@ public final class ViewRootImpl implements ViewParent,
                 return;
             }
             mRemoved = true;
-            Slog.d(TAG, "doDie: b9404689 mAdded==true mView=" + mView
+            Slog.d(TAG, "doDie: b9404689 mAdded=" + mAdded + " mView=" + mView
                     + " Callers=" + Debug.getCallers(4));
             if (mAdded) {
                 dispatchDetachedFromWindow();
