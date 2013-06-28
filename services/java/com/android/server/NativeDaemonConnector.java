@@ -28,12 +28,12 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.google.android.collect.Lists;
 
-import java.nio.charset.Charsets;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -142,7 +142,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                 for (int i = 0; i < count; i++) {
                     if (buffer[i] == 0) {
                         final String rawEvent = new String(
-                                buffer, start, i - start, Charsets.UTF_8);
+                                buffer, start, i - start, StandardCharsets.UTF_8);
                         log("RCV <- {" + rawEvent + "}");
 
                         try {
@@ -163,7 +163,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                     }
                 }
                 if (start == 0) {
-                    final String rawEvent = new String(buffer, start, count, Charsets.UTF_8);
+                    final String rawEvent = new String(buffer, start, count, StandardCharsets.UTF_8);
                     log("RCV incomplete <- {" + rawEvent + "}");
                 }
 
@@ -319,7 +319,7 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
                 throw new NativeDaemonConnectorException("missing output stream");
             } else {
                 try {
-                    mOutputStream.write(sentCmd.getBytes(Charsets.UTF_8));
+                    mOutputStream.write(sentCmd.getBytes(StandardCharsets.UTF_8));
                 } catch (IOException e) {
                     throw new NativeDaemonConnectorException("problem sending command", e);
                 }
