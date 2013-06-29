@@ -42529,6 +42529,7 @@ package java.util.zip {
     ctor public ZipFile(java.io.File, int) throws java.io.IOException;
     method public void close() throws java.io.IOException;
     method public java.util.Enumeration<? extends java.util.zip.ZipEntry> entries();
+    method public java.lang.String getComment();
     method public java.util.zip.ZipEntry getEntry(java.lang.String);
     method public java.io.InputStream getInputStream(java.util.zip.ZipEntry) throws java.io.IOException;
     method public java.lang.String getName();
