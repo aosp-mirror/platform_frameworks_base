@@ -16,8 +16,10 @@
 
 package com.android.server.am;
 
+import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -25,8 +27,10 @@ import android.os.IBinder;
 import android.os.FileUtils;
 import android.os.Parcel;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
@@ -93,10 +97,10 @@ public final class UsageStatsService extends IUsageStats.Stub {
     static IUsageStats sService;
     private Context mContext;
     // structure used to maintain statistics since the last checkin.
-    final private Map<String, PkgUsageStatsExtended> mStats;
+    final private ArrayMap<String, PkgUsageStatsExtended> mStats;
 
     // Maintains the last time any component was resumed, for all time.
-    final private Map<String, Map<String, Long>> mLastResumeTimes;
+    final private ArrayMap<String, ArrayMap<String, Long>> mLastResumeTimes;
 
     // To remove last-resume time stats when a pacakge is removed.
     private PackageMonitor mPackageMonitor;
@@ -242,8 +246,8 @@ public final class UsageStatsService extends IUsageStats.Stub {
     }
     
     UsageStatsService(String dir) {
-        mStats = new HashMap<String, PkgUsageStatsExtended>();
-        mLastResumeTimes = new HashMap<String, Map<String, Long>>();
+        mStats = new ArrayMap<String, PkgUsageStatsExtended>();
+        mLastResumeTimes = new ArrayMap<String, ArrayMap<String, Long>>();
         mStatsLock = new Object();
         mFileLock = new Object();
         mDir = new File(dir);
@@ -386,9 +390,9 @@ public final class UsageStatsService extends IUsageStats.Stub {
                                 try {
                                     long lastResumeTime = Long.parseLong(lastResumeTimeStr);
                                     synchronized (mStatsLock) {
-                                        Map<String, Long> lrt = mLastResumeTimes.get(pkg);
+                                        ArrayMap<String, Long> lrt = mLastResumeTimes.get(pkg);
                                         if (lrt == null) {
-                                            lrt = new HashMap<String, Long>();
+                                            lrt = new ArrayMap<String, Long>();
                                             mLastResumeTimes.put(pkg, lrt);
                                         }
                                         lrt.put(comp, lastResumeTime);
@@ -591,14 +595,15 @@ public final class UsageStatsService extends IUsageStats.Stub {
     /** Filter out stats for any packages which aren't present anymore. */
     private void filterHistoryStats() {
         synchronized (mStatsLock) {
-            // Copy and clear the last resume times map, then copy back stats
-            // for all installed packages.
-            Map<String, Map<String, Long>> tmpLastResumeTimes =
-                new HashMap<String, Map<String, Long>>(mLastResumeTimes);
-            mLastResumeTimes.clear();
-            for (PackageInfo info : mContext.getPackageManager().getInstalledPackages(0)) {
-                if (tmpLastResumeTimes.containsKey(info.packageName)) {
-                    mLastResumeTimes.put(info.packageName, tmpLastResumeTimes.get(info.packageName));
+            IPackageManager pm = AppGlobals.getPackageManager();
+            for (int i=0; i<mLastResumeTimes.size(); i++) {
+                String pkg = mLastResumeTimes.keyAt(i);
+                try {
+                    if (pm.getPackageUid(pkg, 0) < 0) {
+                        mLastResumeTimes.removeAt(i);
+                        i--;
+                    }
+                } catch (RemoteException e) {
                 }
             }
         }
@@ -614,13 +619,14 @@ public final class UsageStatsService extends IUsageStats.Stub {
             out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
             out.startTag(null, "usage-history");
             synchronized (mStatsLock) {
-                for (Map.Entry<String, Map<String, Long>> pkgEntry : mLastResumeTimes.entrySet()) {
+                for (int i=0; i<mLastResumeTimes.size(); i++) {
                     out.startTag(null, "pkg");
-                    out.attribute(null, "name", pkgEntry.getKey());
-                    for (Map.Entry<String, Long> compEntry : pkgEntry.getValue().entrySet()) {
+                    out.attribute(null, "name", mLastResumeTimes.keyAt(i));
+                    ArrayMap<String, Long> comp = mLastResumeTimes.valueAt(i);
+                    for (int j=0; j<comp.size(); j++) {
                         out.startTag(null, "comp");
-                        out.attribute(null, "name", compEntry.getKey());
-                        out.attribute(null, "lrt", compEntry.getValue().toString());
+                        out.attribute(null, "name", comp.keyAt(j));
+                        out.attribute(null, "lrt", comp.valueAt(j).toString());
                         out.endTag(null, "comp");
                     }
                     out.endTag(null, "pkg");
@@ -718,9 +724,9 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 pus.addLaunchCount(mLastResumedComp);
             }
 
-            Map<String, Long> componentResumeTimes = mLastResumeTimes.get(pkgName);
+            ArrayMap<String, Long> componentResumeTimes = mLastResumeTimes.get(pkgName);
             if (componentResumeTimes == null) {
-                componentResumeTimes = new HashMap<String, Long>();
+                componentResumeTimes = new ArrayMap<String, Long>();
                 mLastResumeTimes.put(pkgName, componentResumeTimes);
             }
             componentResumeTimes.put(mLastResumedComp, System.currentTimeMillis());
@@ -814,9 +820,8 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 return null;
             }
             PkgUsageStats retArr[] = new PkgUsageStats[size];
-            int i = 0;
-            for (Map.Entry<String, Map<String, Long>> entry : mLastResumeTimes.entrySet()) {
-                String pkg = entry.getKey();
+            for (int i=0; i<size; i++) {
+                String pkg = mLastResumeTimes.keyAt(i);
                 long usageTime = 0;
                 int launchCount = 0;
 
@@ -825,8 +830,8 @@ public final class UsageStatsService extends IUsageStats.Stub {
                     usageTime = pus.mUsageTime;
                     launchCount = pus.mLaunchCount;
                 }
-                retArr[i] = new PkgUsageStats(pkg, launchCount, usageTime, entry.getValue());
-                i++;
+                retArr[i] = new PkgUsageStats(pkg, launchCount, usageTime,
+                        mLastResumeTimes.valueAt(i));
             }
             return retArr;
         }
@@ -866,6 +871,11 @@ public final class UsageStatsService extends IUsageStats.Stub {
             }
             File dFile = new File(mDir, file);
             String dateStr = file.substring(FILE_PREFIX.length());
+            if (dateStr.length() > 0 && (dateStr.charAt(0) <= '0' || dateStr.charAt(0) >= '9')) {
+                // If the remainder does not start with a number, it is not a date,
+                // so we should ignore it for purposes here.
+                continue;
+            }
             try {
                 Parcel in = getParcelForFile(dFile);
                 collectDumpInfoFromParcelFLOCK(in, pw, dateStr, isCompactOutput,

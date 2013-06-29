@@ -613,7 +613,6 @@ public final class BatteryStatsImpl extends BatteryStats {
          * Constructs from a parcel.
          * @param type
          * @param unpluggables
-         * @param powerType
          * @param in
          */
         Timer(int type, ArrayList<Unpluggable> unpluggables, Parcel in) {

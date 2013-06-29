@@ -16,25 +16,37 @@
 
 package com.android.server.am;
 
-import android.content.Context;
-import android.content.pm.PackageManager;
+import android.app.AppGlobals;
+import android.content.pm.IPackageManager;
+import android.os.Parcel;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.AtomicFile;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.ProcessMap;
 
+import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.concurrent.locks.ReentrantLock;
 
 public final class ProcessTracker {
+    static final String TAG = "ProcessTracker";
+
     public static final int STATE_NOTHING = -1;
     public static final int STATE_PERSISTENT = 0;
     public static final int STATE_TOP = 1;
@@ -118,14 +130,23 @@ public final class ProcessTracker {
     };
 
     static final String[] STATE_TAGS = new String[] {
-            "p", "t", "f", "v", "t",
-            "b", "s", "h", "r", "c"
+            "y", "t", "f", "v", "r",
+            "b", "s", "h", "p", "c"
     };
 
     static final String CSV_SEP = "\t";
 
-    final Context mContext;
+    static long WRITE_PERIOD = 30*60*1000;      // Write file every 30 minutes or so.
+
+    final File mBaseDir;
+    final AtomicFile mFile;
     final State mState = new State();
+    long mLastWriteTime;
+    boolean mShuttingDown;
+
+    final Object mPendingWriteLock = new Object();
+    Parcel mPendingWrite;
+    final ReentrantLock mWriteLock = new ReentrantLock();
 
     public static final class ProcessState {
         final State mState;
@@ -184,38 +205,88 @@ public final class ProcessTracker {
         ProcessState clone(String pkg, long now) {
             ProcessState pnew = new ProcessState(this, pkg, mUid, mName, now);
             if (mDurationsTable != null) {
-                mState.mFindTable = new int[mDurationsTable.length];
-                mState.mFindTableSize = 0;
+                mState.mAddLongTable = new int[mDurationsTable.length];
+                mState.mAddLongTableSize = 0;
                 for (int i=0; i<mDurationsTableSize; i++) {
                     int origEnt = mDurationsTable[i];
                     int type = (origEnt>>OFFSET_TYPE_SHIFT)&OFFSET_TYPE_MASK;
                     int newOff = mState.addLongData(i, type, 1);
-                    mState.mFindTable[i] = newOff | type;
+                    mState.mAddLongTable[i] = newOff | type;
                     mState.setLong(newOff, 0, mState.getLong(origEnt, 0));
                 }
-                pnew.mDurationsTable = mState.mFindTable;
-                pnew.mDurationsTableSize = mState.mFindTableSize;
+                pnew.mDurationsTable = mState.mAddLongTable;
+                pnew.mDurationsTableSize = mState.mAddLongTableSize;
             }
             /*
             if (mPssTable != null) {
-                mState.mFindTable = new int[mPssTable.length];
-                mState.mFindTableSize = 0;
+                mState.mAddLongTable = new int[mPssTable.length];
+                mState.mAddLongTableSize = 0;
                 for (int i=0; i<mPssTableSize; i++) {
                     int origEnt = mPssTable[i];
                     int type = (origEnt>>OFFSET_TYPE_SHIFT)&OFFSET_TYPE_MASK;
                     int newOff = mState.addLongData(i, type, PSS_COUNT);
-                    mState.mFindTable[i] = newOff | type;
+                    mState.mAddLongTable[i] = newOff | type;
                     for (int j=0; j<PSS_COUNT; j++) {
                         mState.setLong(newOff, j, mState.getLong(origEnt, j));
                     }
                 }
-                pnew.mPssTable = mState.mFindTable;
-                pnew.mPssTableSize = mState.mFindTableSize;
+                pnew.mPssTable = mState.mAddLongTable;
+                pnew.mPssTableSize = mState.mAddLongTableSize;
             }
             */
             pnew.mNumExcessiveWake = mNumExcessiveWake;
             pnew.mNumExcessiveCpu = mNumExcessiveCpu;
             return pnew;
+        }
+
+        void writeToParcel(Parcel out, long now) {
+            commitStateTime(now);
+            out.writeInt(mMultiPackage ? 1 : 0);
+            out.writeInt(mDurationsTableSize);
+            for (int i=0; i<mDurationsTableSize; i++) {
+                out.writeInt(mDurationsTable[i]);
+            }
+            out.writeInt(mPssTableSize);
+            for (int i=0; i<mPssTableSize; i++) {
+                out.writeInt(mPssTable[i]);
+            }
+            out.writeInt(mNumExcessiveWake);
+            out.writeInt(mNumExcessiveCpu);
+        }
+
+        private int[] readTable(Parcel in, String what) {
+            int size = in.readInt();
+            if (size < 0) {
+                Slog.w(TAG, "Ignoring existing stats; bad " + what + " table size: " + size);
+                return null;
+            }
+            int[] table = new int[size];
+            for (int i=0; i<size; i++) {
+                table[i] = in.readInt();
+                if (!mState.validateLongOffset(table[i])) {
+                    Slog.w(TAG, "Ignoring existing stats; bad " + what + " table entry: 0x"
+                            + Integer.toHexString(table[i]));
+                    return null;
+                }
+            }
+            return table;
+        }
+
+        boolean readFromParcel(Parcel in) {
+            mMultiPackage = in.readInt() != 0;
+            mDurationsTable = readTable(in, "durations");
+            if (mDurationsTable == null) {
+                return false;
+            }
+            mDurationsTableSize = mDurationsTable.length;
+            mPssTable = readTable(in, "pss");
+            if (mPssTable == null) {
+                return false;
+            }
+            mPssTableSize = mPssTable.length;
+            mNumExcessiveWake = in.readInt();
+            mNumExcessiveCpu = in.readInt();
+            return true;
         }
 
         public void setState(int state, int memFactor, long now,
@@ -239,25 +310,29 @@ public final class ProcessTracker {
 
         void setState(int state, long now) {
             if (mCurState != state) {
-                if (mCurState != STATE_NOTHING) {
-                    long dur = now - mStartTime;
-                    int idx = State.binarySearch(mDurationsTable, mDurationsTableSize, mCurState);
-                    int off;
-                    if (idx >= 0) {
-                        off = mDurationsTable[idx];
-                    } else {
-                        mState.mFindTable = mDurationsTable;
-                        mState.mFindTableSize = mDurationsTableSize;
-                        off = mState.addLongData(~idx, mCurState, 1);
-                        mDurationsTable = mState.mFindTable;
-                        mDurationsTableSize = mState.mFindTableSize;
-                    }
-                    long[] longs = mState.mLongs.get((off>>OFFSET_ARRAY_SHIFT)&OFFSET_ARRAY_MASK);
-                    longs[(off>>OFFSET_INDEX_SHIFT)&OFFSET_INDEX_MASK] += dur;
-                }
+                commitStateTime(now);
                 mCurState = state;
-                mStartTime = now;
             }
+        }
+
+        void commitStateTime(long now) {
+            if (mCurState != STATE_NOTHING) {
+                long dur = now - mStartTime;
+                int idx = State.binarySearch(mDurationsTable, mDurationsTableSize, mCurState);
+                int off;
+                if (idx >= 0) {
+                    off = mDurationsTable[idx];
+                } else {
+                    mState.mAddLongTable = mDurationsTable;
+                    mState.mAddLongTableSize = mDurationsTableSize;
+                    off = mState.addLongData(~idx, mCurState, 1);
+                    mDurationsTable = mState.mAddLongTable;
+                    mDurationsTableSize = mState.mAddLongTableSize;
+                }
+                long[] longs = mState.mLongs.get((off>>OFFSET_ARRAY_SHIFT)&OFFSET_ARRAY_MASK);
+                longs[(off>>OFFSET_INDEX_SHIFT)&OFFSET_INDEX_MASK] += dur;
+            }
+            mStartTime = now;
         }
 
         public void addPss(long pss, boolean always) {
@@ -275,11 +350,11 @@ public final class ProcessTracker {
                 if (idx >= 0) {
                     off = mPssTable[idx];
                 } else {
-                    mState.mFindTable = mPssTable;
-                    mState.mFindTableSize = mPssTableSize;
+                    mState.mAddLongTable = mPssTable;
+                    mState.mAddLongTableSize = mPssTableSize;
                     off = mState.addLongData(~idx, mCurState, PSS_COUNT);
-                    mPssTable = mState.mFindTable;
-                    mPssTableSize = mState.mFindTableSize;
+                    mPssTable = mState.mAddLongTable;
+                    mPssTableSize = mState.mAddLongTableSize;
                 }
                 long[] longs = mState.mLongs.get((off>>OFFSET_ARRAY_SHIFT)&OFFSET_ARRAY_MASK);
                 idx = (off>>OFFSET_INDEX_SHIFT)&OFFSET_INDEX_MASK;
@@ -388,6 +463,37 @@ public final class ProcessTracker {
         int mExecState = STATE_NOTHING;
         long mExecStartTime;
 
+        void writeToParcel(Parcel out, long now) {
+            if (mStartedState != STATE_NOTHING) {
+                mStartedDurations[mStartedState] += now - mStartedStartTime;
+                mStartedStartTime = now;
+            }
+            if (mBoundState != STATE_NOTHING) {
+                mBoundDurations[mBoundState] += now - mBoundStartTime;
+                mBoundStartTime = now;
+            }
+            if (mExecState != STATE_NOTHING) {
+                mExecDurations[mExecState] += now - mExecStartTime;
+                mExecStartTime = now;
+            }
+            out.writeLongArray(mStartedDurations);
+            out.writeInt(mStartedCount);
+            out.writeLongArray(mBoundDurations);
+            out.writeInt(mBoundCount);
+            out.writeLongArray(mExecDurations);
+            out.writeInt(mExecCount);
+        }
+
+        boolean readFromParcel(Parcel in) {
+            in.readLongArray(mStartedDurations);
+            mStartedCount = in.readInt();
+            in.readLongArray(mBoundDurations);
+            mBoundCount = in.readInt();
+            in.readLongArray(mExecDurations);
+            mExecCount = in.readInt();
+            return true;
+        }
+
         public void setStarted(boolean started, int memFactor, long now) {
             int state = started ? memFactor : STATE_NOTHING;
             if (mStartedState != state) {
@@ -439,6 +545,14 @@ public final class ProcessTracker {
     }
 
     static final class State {
+        // Current version of the parcel format.
+        public static final int PARCEL_VERSION = 1;
+        // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
+        private static final int MAGIC = 0x50535453;
+
+        long mTimePeriodStart;
+        long mTimePeriodEnd;
+
         final ProcessMap<PackageState> mPackages = new ProcessMap<PackageState>();
         final ProcessMap<ProcessState> mProcesses = new ProcessMap<ProcessState>();
         final long[] mMemFactorDurations = new long[ADJ_COUNT];
@@ -449,26 +563,286 @@ public final class ProcessTracker {
         final ArrayList<long[]> mLongs = new ArrayList<long[]>();
         int mNextLong;
 
-        int[] mFindTable;
-        int mFindTableSize;
+        int[] mAddLongTable;
+        int mAddLongTableSize;
+
+        State() {
+            reset();
+        }
+
+        void reset() {
+            mTimePeriodStart = mTimePeriodEnd = System.currentTimeMillis();
+            mPackages.getMap().clear();
+            mProcesses.getMap().clear();
+            mLongs.clear();
+            mLongs.add(new long[LONGS_SIZE]);
+            mNextLong = 0;
+            Arrays.fill(mMemFactorDurations, 0);
+            mMemFactor = STATE_NOTHING;
+            mStartTime = 0;
+        }
+
+        void writeToParcel(Parcel out) {
+            long now = SystemClock.uptimeMillis();
+            out.writeInt(MAGIC);
+            out.writeInt(PARCEL_VERSION);
+            out.writeInt(STATE_COUNT);
+            out.writeInt(ADJ_COUNT);
+            out.writeInt(PSS_COUNT);
+            out.writeInt(LONGS_SIZE);
+
+            out.writeLong(mTimePeriodStart);
+            out.writeLong(mTimePeriodEnd);
+
+            out.writeInt(mLongs.size());
+            out.writeInt(mNextLong);
+            for (int i=0; i<(mLongs.size()-1); i++) {
+                out.writeLongArray(mLongs.get(i));
+            }
+            long[] lastLongs = mLongs.get(mLongs.size()-1);
+            for (int i=0; i<mNextLong; i++) {
+                out.writeLong(lastLongs[i]);
+            }
+
+            if (mMemFactor != STATE_NOTHING) {
+                mMemFactorDurations[mMemFactor] += now - mStartTime;
+                mStartTime = now;
+            }
+            out.writeLongArray(mMemFactorDurations);
+
+            ArrayMap<String, SparseArray<ProcessState>> procMap = mProcesses.getMap();
+            final int NPROC = procMap.size();
+            out.writeInt(NPROC);
+            for (int ip=0; ip<NPROC; ip++) {
+                out.writeString(procMap.keyAt(ip));
+                SparseArray<ProcessState> uids = procMap.valueAt(ip);
+                final int NUID = uids.size();
+                out.writeInt(NUID);
+                for (int iu=0; iu<NUID; iu++) {
+                    out.writeInt(uids.keyAt(iu));
+                    ProcessState proc = uids.valueAt(iu);
+                    out.writeString(proc.mPackage);
+                    proc.writeToParcel(out, now);
+                }
+            }
+            ArrayMap<String, SparseArray<PackageState>> pkgMap = mPackages.getMap();
+            final int NPKG = pkgMap.size();
+            out.writeInt(NPKG);
+            for (int ip=0; ip<NPKG; ip++) {
+                out.writeString(pkgMap.keyAt(ip));
+                SparseArray<PackageState> uids = pkgMap.valueAt(ip);
+                final int NUID = uids.size();
+                out.writeInt(NUID);
+                for (int iu=0; iu<NUID; iu++) {
+                    out.writeInt(uids.keyAt(iu));
+                    PackageState pkgState = uids.valueAt(iu);
+                    final int NPROCS = pkgState.mProcesses.size();
+                    out.writeInt(NPROCS);
+                    for (int iproc=0; iproc<NPROCS; iproc++) {
+                        out.writeString(pkgState.mProcesses.keyAt(iproc));
+                        ProcessState proc = pkgState.mProcesses.valueAt(iproc);
+                        if (proc.mCommonProcess == proc) {
+                            // This is the same as the common process we wrote above.
+                            out.writeInt(0);
+                        } else {
+                            // There is separate data for this package's process.
+                            out.writeInt(1);
+                            proc.writeToParcel(out, now);
+                        }
+                    }
+                    final int NSRVS = pkgState.mServices.size();
+                    out.writeInt(NSRVS);
+                    for (int isvc=0; isvc<NSRVS; isvc++) {
+                        out.writeString(pkgState.mServices.keyAt(isvc));
+                        ServiceState svc = pkgState.mServices.valueAt(isvc);
+                        svc.writeToParcel(out, now);
+                    }
+                }
+            }
+        }
+
+        private boolean readCheckedInt(Parcel in, int val, String what) {
+            int got;
+            if ((got=in.readInt()) != val) {
+                Slog.w(TAG, "Ignoring existing stats; bad " + ": " + got);
+                return false;
+            }
+            return true;
+        }
+
+        void readFromParcel(Parcel in) {
+            reset();
+            if (!readCheckedInt(in, MAGIC, "magic number")) {
+                return;
+            }
+            if (!readCheckedInt(in, PARCEL_VERSION, "version")) {
+                return;
+            }
+            if (!readCheckedInt(in, STATE_COUNT, "state count")) {
+                return;
+            }
+            if (!readCheckedInt(in, ADJ_COUNT, "adj count")) {
+                return;
+            }
+            if (!readCheckedInt(in, PSS_COUNT, "pss count")) {
+                return;
+            }
+            if (!readCheckedInt(in, LONGS_SIZE, "longs size")) {
+                return;
+            }
+
+            mTimePeriodStart = in.readLong();
+            mTimePeriodEnd = in.readLong();
+
+            int NLONGS = in.readInt();
+            int NEXTLONG = in.readInt();
+            for (int i=0; i<(NLONGS-1); i++) {
+                while (i >= mLongs.size()) {
+                    mLongs.add(new long[LONGS_SIZE]);
+                }
+                in.readLongArray(mLongs.get(i));
+            }
+            long[] longs = new long[LONGS_SIZE];
+            mNextLong = NEXTLONG;
+            for (int i=0; i<NEXTLONG; i++) {
+                longs[i] = in.readLong();
+            }
+            mLongs.add(longs);
+
+            in.readLongArray(mMemFactorDurations);
+
+            int NPROC = in.readInt();
+            if (NPROC < 0) {
+                Slog.w(TAG, "Ignoring existing stats; bad process count: " + NPROC);
+                return;
+            }
+            while (NPROC > 0) {
+                NPROC--;
+                String procName = in.readString();
+                if (procName == null) {
+                    Slog.w(TAG, "Ignoring existing stats; bad process name");
+                    return;
+                }
+                int NUID = in.readInt();
+                if (NUID < 0) {
+                    Slog.w(TAG, "Ignoring existing stats; bad uid count: " + NUID);
+                    return;
+                }
+                while (NUID > 0) {
+                    NUID--;
+                    int uid = in.readInt();
+                    if (uid < 0) {
+                        Slog.w(TAG, "Ignoring existing stats; bad uid: " + uid);
+                        return;
+                    }
+                    String pkgName = in.readString();
+                    if (pkgName == null) {
+                        Slog.w(TAG, "Ignoring existing stats; bad process package name");
+                        return;
+                    }
+                    ProcessState proc = new ProcessState(this, pkgName, uid, procName);
+                    if (!proc.readFromParcel(in)) {
+                        return;
+                    }
+                    mProcesses.put(procName, uid, proc);
+                }
+            }
+
+            int NPKG = in.readInt();
+            if (NPKG < 0) {
+                Slog.w(TAG, "Ignoring existing stats; bad package count: " + NPKG);
+                return;
+            }
+            while (NPKG > 0) {
+                NPKG--;
+                String pkgName = in.readString();
+                if (pkgName == null) {
+                    Slog.w(TAG, "Ignoring existing stats; bad package name");
+                    return;
+                }
+                int NUID = in.readInt();
+                if (NUID < 0) {
+                    Slog.w(TAG, "Ignoring existing stats; bad uid count: " + NUID);
+                    return;
+                }
+                while (NUID > 0) {
+                    NUID--;
+                    int uid = in.readInt();
+                    if (uid < 0) {
+                        Slog.w(TAG, "Ignoring existing stats; bad uid: " + uid);
+                        return;
+                    }
+                    PackageState pkgState = new PackageState(uid);
+                    int NPROCS = in.readInt();
+                    if (NPROCS < 0) {
+                        Slog.w(TAG, "Ignoring existing stats; bad package process count: " + NPROCS);
+                        return;
+                    }
+                    while (NPROCS > 0) {
+                        NPROCS--;
+                        String procName = in.readString();
+                        if (procName == null) {
+                            Slog.w(TAG, "Ignoring existing stats; bad package process name");
+                            return;
+                        }
+                        int hasProc = in.readInt();
+                        if (hasProc != 0) {
+                            // The process for this package is unique to the package; we
+                            // need to load it.  We don't need to do anything about it if
+                            // it is not unique because if someone later looks for it
+                            // they will find and use it from the global procs.
+                            ProcessState commonProc = mProcesses.get(procName, uid);
+                            if (commonProc == null) {
+                                Slog.w(TAG, "Ignoring existing stats; no common proc: " + procName);
+                                return;
+                            }
+                            ProcessState proc = new ProcessState(commonProc, pkgName, uid,
+                                    procName, 0);
+                            if (!proc.readFromParcel(in)) {
+                                return;
+                            }
+                            pkgState.mProcesses.put(procName, proc);
+                        }
+                    }
+                    int NSRVS = in.readInt();
+                    if (NSRVS < 0) {
+                        Slog.w(TAG, "Ignoring existing stats; bad package service count: " + NSRVS);
+                        return;
+                    }
+                    while (NSRVS > 0) {
+                        NSRVS--;
+                        String serviceName = in.readString();
+                        if (serviceName == null) {
+                            Slog.w(TAG, "Ignoring existing stats; bad package service name");
+                            return;
+                        }
+                        ServiceState serv = new ServiceState();
+                        if (!serv.readFromParcel(in)) {
+                            return;
+                        }
+                        pkgState.mServices.put(serviceName, serv);
+                    }
+                }
+            }
+        }
 
         int addLongData(int index, int type, int num) {
-            int tableLen = mFindTable != null ? mFindTable.length : 0;
-            if (mFindTableSize >= tableLen) {
+            int tableLen = mAddLongTable != null ? mAddLongTable.length : 0;
+            if (mAddLongTableSize >= tableLen) {
                 int newSize = ArrayUtils.idealIntArraySize(tableLen + 1);
                 int[] newTable = new int[newSize];
                 if (tableLen > 0) {
-                    System.arraycopy(mFindTable, 0, newTable, 0, tableLen);
+                    System.arraycopy(mAddLongTable, 0, newTable, 0, tableLen);
                 }
-                mFindTable = newTable;
+                mAddLongTable = newTable;
             }
-            if (mFindTableSize > 0 && mFindTableSize - index != 0) {
-                System.arraycopy(mFindTable, index, mFindTable, index + 1,
-                        mFindTableSize - index);
+            if (mAddLongTableSize > 0 && mAddLongTableSize - index != 0) {
+                System.arraycopy(mAddLongTable, index, mAddLongTable, index + 1,
+                        mAddLongTableSize - index);
             }
             int off = allocLongData(num);
-            mFindTable[index] = type | off;
-            mFindTableSize++;
+            mAddLongTable[index] = type | off;
+            mAddLongTableSize++;
             return off;
         }
 
@@ -484,6 +858,18 @@ public final class ProcessTracker {
             int off = (whichLongs<<OFFSET_ARRAY_SHIFT) | (mNextLong<<OFFSET_INDEX_SHIFT);
             mNextLong += num;
             return off;
+        }
+
+        boolean validateLongOffset(int off) {
+            int arr = (off>>OFFSET_ARRAY_SHIFT)&OFFSET_ARRAY_MASK;
+            if (arr >= mLongs.size()) {
+                return false;
+            }
+            int idx = (off>>OFFSET_INDEX_SHIFT)&OFFSET_INDEX_MASK;
+            if (idx >= LONGS_SIZE) {
+                return false;
+            }
+            return true;
         }
 
         void setLong(int off, int index, long value) {
@@ -563,24 +949,266 @@ public final class ProcessTracker {
             return ps;
         }
 
-        State() {
-            reset();
+        void dump(PrintWriter pw, String reqPackage, boolean dumpAll) {
+            final long now = SystemClock.uptimeMillis();
+            ArrayMap<String, SparseArray<PackageState>> pkgMap = mPackages.getMap();
+            boolean printedHeader = false;
+            for (int ip=0; ip<pkgMap.size(); ip++) {
+                String pkgName = pkgMap.keyAt(ip);
+                if (reqPackage != null && !reqPackage.equals(pkgName)) {
+                    continue;
+                }
+                SparseArray<PackageState> uids = pkgMap.valueAt(ip);
+                for (int iu=0; iu<uids.size(); iu++) {
+                    int uid = uids.keyAt(iu);
+                    PackageState pkgState = uids.valueAt(iu);
+                    final int NPROCS = pkgState.mProcesses.size();
+                    final int NSRVS = pkgState.mServices.size();
+                    if (NPROCS > 0 || NSRVS > 0) {
+                        if (!printedHeader) {
+                            pw.println("Per-Package Process Stats:");
+                            printedHeader = true;
+                        }
+                        pw.print("  * "); pw.print(pkgName); pw.print(" / ");
+                                UserHandle.formatUid(pw, uid); pw.println(":");
+                    }
+                    for (int iproc=0; iproc<NPROCS; iproc++) {
+                        ProcessState proc = pkgState.mProcesses.valueAt(iproc);
+                        pw.print("      Process ");
+                        pw.print(pkgState.mProcesses.keyAt(iproc));
+                        pw.print(" (");
+                        pw.print(proc.mDurationsTableSize);
+                        pw.print(" entries)");
+                        pw.println(":");
+                        dumpProcessState(pw, "        ", proc, ALL_SCREEN_ADJ, ALL_MEM_ADJ,
+                                ALL_PROC_STATES, now);
+                        dumpProcessPss(pw, "        ", proc, ALL_SCREEN_ADJ, ALL_MEM_ADJ,
+                                ALL_PROC_STATES);
+                    }
+                    for (int isvc=0; isvc<NSRVS; isvc++) {
+                        pw.print("      Service ");
+                        pw.print(pkgState.mServices.keyAt(isvc));
+                        pw.println(":");
+                        ServiceState svc = pkgState.mServices.valueAt(isvc);
+                        if (svc.mStartedCount != 0) {
+                            pw.print("        Started op count "); pw.print(svc.mStartedCount);
+                            pw.println(":");
+                            dumpSingleTime(pw, "          ", svc.mStartedDurations, svc.mStartedState,
+                                    svc.mStartedStartTime, now);
+                        }
+                        if (svc.mBoundCount != 0) {
+                            pw.print("        Bound op count "); pw.print(svc.mBoundCount);
+                            pw.println(":");
+                            dumpSingleTime(pw, "          ", svc.mBoundDurations, svc.mBoundState,
+                                    svc.mBoundStartTime, now);
+                        }
+                        if (svc.mExecCount != 0) {
+                            pw.print("        Executing op count "); pw.print(svc.mExecCount);
+                            pw.println(":");
+                            dumpSingleTime(pw, "          ", svc.mExecDurations, svc.mExecState,
+                                    svc.mExecStartTime, now);
+                        }
+                    }
+                }
+            }
+
+            dumpFilteredProcesses(pw, "Processes running while critical mem:", "  ",
+                    new int[] {ADJ_SCREEN_OFF, ADJ_SCREEN_ON},
+                    new int[] {ADJ_MEM_FACTOR_CRITICAL},
+                    new int[] {STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
+                            STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME, STATE_PREVIOUS},
+                    now, reqPackage);
+            dumpFilteredProcesses(pw, "Processes running while low mem:", "  ",
+                    new int[] {ADJ_SCREEN_OFF, ADJ_SCREEN_ON},
+                    new int[] {ADJ_MEM_FACTOR_LOW},
+                    new int[] {STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
+                            STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME, STATE_PREVIOUS},
+                    now, reqPackage);
+            dumpFilteredProcesses(pw, "Processes running while moderate mem:", "  ",
+                    new int[] {ADJ_SCREEN_OFF, ADJ_SCREEN_ON},
+                    new int[] {ADJ_MEM_FACTOR_MODERATE},
+                    new int[] {STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
+                            STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME, STATE_PREVIOUS},
+                    now, reqPackage);
+            dumpFilteredProcesses(pw, "Processes running while normal mem:", "  ",
+                    new int[] {ADJ_SCREEN_OFF, ADJ_SCREEN_ON},
+                    new int[] {ADJ_MEM_FACTOR_NORMAL},
+                    new int[] {STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
+                            STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME, STATE_PREVIOUS},
+                    now, reqPackage);
+            pw.println();
+            pw.println("Run time Stats:");
+            dumpSingleTime(pw, "  ", mMemFactorDurations, mMemFactor, mStartTime, now);
+            if (dumpAll) {
+                pw.println();
+                pw.println("Internal state:");
+                pw.print("  Num long arrays: "); pw.println(mLongs.size());
+                pw.print("  Next long entry: "); pw.println(mNextLong);
+            }
         }
 
-        void reset() {
-            mPackages.getMap().clear();
-            mProcesses.getMap().clear();
-            mLongs.clear();
-            mLongs.add(new long[LONGS_SIZE]);
-            mNextLong = 0;
-            Arrays.fill(mMemFactorDurations, 0);
-            mMemFactor = STATE_NOTHING;
-            mStartTime = 0;
+        void dumpFilteredProcesses(PrintWriter pw, String header, String prefix,
+                int[] screenStates, int[] memStates, int[] procStates, long now, String reqPackage) {
+            ArrayList<ProcessState> procs = collectProcessesLocked(screenStates, memStates,
+                    procStates, now, reqPackage);
+            if (procs.size() > 0) {
+                pw.println();
+                pw.println(header);
+                dumpProcessList(pw, prefix, procs, screenStates, memStates, procStates, now);
+            }
+        }
+
+        ArrayList<ProcessState> collectProcessesLocked(int[] screenStates, int[] memStates,
+                int[] procStates, long now, String reqPackage) {
+            ArraySet<ProcessState> foundProcs = new ArraySet<ProcessState>();
+            ArrayMap<String, SparseArray<PackageState>> pkgMap = mPackages.getMap();
+            for (int ip=0; ip<pkgMap.size(); ip++) {
+                if (reqPackage != null && !reqPackage.equals(pkgMap.keyAt(ip))) {
+                    continue;
+                }
+                SparseArray<PackageState> procs = pkgMap.valueAt(ip);
+                for (int iu=0; iu<procs.size(); iu++) {
+                    PackageState state = procs.valueAt(iu);
+                    for (int iproc=0; iproc<state.mProcesses.size(); iproc++) {
+                        ProcessState proc = state.mProcesses.valueAt(iproc);
+                        foundProcs.add(proc.mCommonProcess);
+                    }
+                }
+            }
+            ArrayList<ProcessState> outProcs = new ArrayList<ProcessState>(foundProcs.size());
+            for (int i=0; i<foundProcs.size(); i++) {
+                ProcessState proc = foundProcs.valueAt(i);
+                if (computeProcessTimeLocked(proc, screenStates, memStates,
+                        procStates, now) > 0) {
+                    outProcs.add(proc);
+                }
+            }
+            Collections.sort(outProcs, new Comparator<ProcessState>() {
+                @Override
+                public int compare(ProcessState lhs, ProcessState rhs) {
+                    if (lhs.mTmpTotalTime < rhs.mTmpTotalTime) {
+                        return -1;
+                    } else if (lhs.mTmpTotalTime > rhs.mTmpTotalTime) {
+                        return 1;
+                    }
+                    return 0;
+                }
+            });
+            return outProcs;
+        }
+
+        void dumpCheckin(PrintWriter pw, String reqPackage) {
+            final long now = SystemClock.uptimeMillis();
+            ArrayMap<String, SparseArray<PackageState>> pkgMap = mPackages.getMap();
+            pw.println("vers,1");
+            for (int ip=0; ip<pkgMap.size(); ip++) {
+                String pkgName = pkgMap.keyAt(ip);
+                if (reqPackage != null && !reqPackage.equals(pkgName)) {
+                    continue;
+                }
+                SparseArray<PackageState> uids = pkgMap.valueAt(ip);
+                for (int iu=0; iu<uids.size(); iu++) {
+                    int uid = uids.keyAt(iu);
+                    PackageState pkgState = uids.valueAt(iu);
+                    final int NPROCS = pkgState.mProcesses.size();
+                    final int NSRVS = pkgState.mServices.size();
+                    for (int iproc=0; iproc<NPROCS; iproc++) {
+                        ProcessState proc = pkgState.mProcesses.valueAt(iproc);
+                        pw.print("pkgproc,");
+                        pw.print(pkgName);
+                        pw.print(",");
+                        pw.print(uid);
+                        pw.print(",");
+                        pw.print(pkgState.mProcesses.keyAt(iproc));
+                        dumpAllProcessStateCheckin(pw, proc, now);
+                        pw.println();
+                        if (proc.mPssTableSize > 0) {
+                            pw.print("pkgpss,");
+                            pw.print(pkgName);
+                            pw.print(",");
+                            pw.print(uid);
+                            pw.print(",");
+                            pw.print(pkgState.mProcesses.keyAt(iproc));
+                            dumpAllProcessPssCheckin(pw, proc);
+                            pw.println();
+                        }
+                        if (proc.mNumExcessiveWake > 0 || proc.mNumExcessiveCpu > 0) {
+                            pw.print("pkgkills,");
+                            pw.print(pkgName);
+                            pw.print(",");
+                            pw.print(uid);
+                            pw.print(",");
+                            pw.print(pkgState.mProcesses.keyAt(iproc));
+                            pw.print(",");
+                            pw.print(proc.mNumExcessiveWake);
+                            pw.print(",");
+                            pw.print(proc.mNumExcessiveCpu);
+                            pw.println();
+                        }
+                    }
+                    for (int isvc=0; isvc<NSRVS; isvc++) {
+                        String serviceName = pkgState.mServices.keyAt(isvc);
+                        ServiceState svc = pkgState.mServices.valueAt(isvc);
+                        dumpServiceTimeCheckin(pw, "pkgsvc-start", pkgName, uid, serviceName,
+                                svc, svc.mStartedCount, svc.mStartedDurations, svc.mStartedState,
+                                svc.mStartedStartTime, now);
+                        dumpServiceTimeCheckin(pw, "pkgsvc-bound", pkgName, uid, serviceName,
+                                svc, svc.mBoundCount, svc.mBoundDurations, svc.mBoundState,
+                                svc.mBoundStartTime, now);
+                        dumpServiceTimeCheckin(pw, "pkgsvc-exec", pkgName, uid, serviceName,
+                                svc, svc.mExecCount, svc.mExecDurations, svc.mExecState,
+                                svc.mExecStartTime, now);
+                    }
+                }
+            }
+
+            ArrayMap<String, SparseArray<ProcessState>> procMap = mProcesses.getMap();
+            for (int ip=0; ip<procMap.size(); ip++) {
+                String procName = procMap.keyAt(ip);
+                SparseArray<ProcessState> uids = procMap.valueAt(ip);
+                for (int iu=0; iu<uids.size(); iu++) {
+                    int uid = uids.keyAt(iu);
+                    ProcessState procState = uids.valueAt(iu);
+                    if (procState.mDurationsTableSize > 0) {
+                        pw.print("proc,");
+                        pw.print(procName);
+                        pw.print(",");
+                        pw.print(uid);
+                        dumpAllProcessStateCheckin(pw, procState, now);
+                        pw.println();
+                    }
+                    if (procState.mPssTableSize > 0) {
+                        pw.print("pss,");
+                        pw.print(procName);
+                        pw.print(",");
+                        pw.print(uid);
+                        dumpAllProcessPssCheckin(pw, procState);
+                        pw.println();
+                    }
+                    if (procState.mNumExcessiveWake > 0 || procState.mNumExcessiveCpu > 0) {
+                        pw.print("kills,");
+                        pw.print(procName);
+                        pw.print(",");
+                        pw.print(uid);
+                        pw.print(",");
+                        pw.print(procState.mNumExcessiveWake);
+                        pw.print(",");
+                        pw.print(procState.mNumExcessiveCpu);
+                        pw.println();
+                    }
+                }
+            }
+            pw.print("total");
+            dumpAdjTimesCheckin(pw, ",", mMemFactorDurations, mMemFactor,
+                    mStartTime, now);
+            pw.println();
         }
     }
 
-    public ProcessTracker(Context context) {
-        mContext = context;
+    public ProcessTracker(File file) {
+        mBaseDir = file;
+        mBaseDir.mkdirs();
+        mFile = new AtomicFile(new File(file, "current.bin"));
     }
 
     public ProcessState getProcessStateLocked(String packageName, int uid, String processName) {
@@ -598,7 +1226,7 @@ public final class ProcessTracker {
         return ss;
     }
 
-    public boolean setMemFactor(int memFactor, boolean screenOn, long now) {
+    public boolean setMemFactorLocked(int memFactor, boolean screenOn, long now) {
         if (screenOn) {
             memFactor += ADJ_SCREEN_ON;
         }
@@ -630,8 +1258,117 @@ public final class ProcessTracker {
         return false;
     }
 
-    public int getMemFactor() {
+    public int getMemFactorLocked() {
         return mState.mMemFactor != STATE_NOTHING ? mState.mMemFactor : 0;
+    }
+
+    static byte[] readFully(FileInputStream stream) throws java.io.IOException {
+        int pos = 0;
+        int avail = stream.available();
+        byte[] data = new byte[avail];
+        while (true) {
+            int amt = stream.read(data, pos, data.length-pos);
+            //Log.i("foo", "Read " + amt + " bytes at " + pos
+            //        + " of avail " + data.length);
+            if (amt <= 0) {
+                //Log.i("foo", "**** FINISHED READING: pos=" + pos
+                //        + " len=" + data.length);
+                return data;
+            }
+            pos += amt;
+            avail = stream.available();
+            if (avail > data.length-pos) {
+                byte[] newData = new byte[pos+avail];
+                System.arraycopy(data, 0, newData, 0, pos);
+                data = newData;
+            }
+        }
+    }
+
+    public void readLocked() {
+        try {
+            FileInputStream stream = mFile.openRead();
+
+            byte[] raw = readFully(stream);
+            Parcel in = Parcel.obtain();
+            in.unmarshall(raw, 0, raw.length);
+            in.setDataPosition(0);
+            stream.close();
+
+            mState.readFromParcel(in);
+        } catch(Throwable e) {
+            Slog.e(TAG, "Error reading process statistics", e);
+        }
+
+    }
+
+    public boolean shouldWriteNowLocked(long now) {
+        return now > (mLastWriteTime+WRITE_PERIOD);
+    }
+
+    public void shutdownLocked() {
+        Slog.w(TAG, "Writing process stats before shutdown...");
+        writeStateSyncLocked();
+        mShuttingDown = true;
+    }
+
+    public void writeStateAsyncLocked() {
+        writeStateLocked(false);
+    }
+
+    public void writeStateSyncLocked() {
+        writeStateLocked(true);
+    }
+
+    private void writeStateLocked(boolean sync) {
+        if (mShuttingDown) {
+            return;
+        }
+
+        synchronized (mPendingWriteLock) {
+            long now = SystemClock.uptimeMillis();
+            mPendingWrite = Parcel.obtain();
+            mState.mTimePeriodEnd = System.currentTimeMillis();
+            mState.writeToParcel(mPendingWrite);
+            mLastWriteTime = SystemClock.uptimeMillis();
+            Slog.i(TAG, "Prepared write state in " + (SystemClock.uptimeMillis()-now) + "ms");
+            if (!sync) {
+                BackgroundThread.getHandler().post(new Runnable() {
+                    @Override public void run() {
+                        commitWriteState();
+                    }
+                });
+                return;
+            }
+        }
+
+        commitWriteState();
+    }
+
+    void commitWriteState() {
+        Parcel data;
+        synchronized (mPendingWriteLock) {
+            data = mPendingWrite;
+            if (data == null) {
+                return;
+            }
+            mPendingWrite = null;
+            mWriteLock.lock();
+        }
+
+        FileOutputStream stream = null;
+        try {
+            stream = mFile.startWrite();
+            stream.write(data.marshall());
+            stream.flush();
+            mFile.finishWrite(stream);
+        } catch (IOException e) {
+            Slog.w(TAG, "Error writing process statistics", e);
+            mFile.failWrite(stream);
+        } finally {
+            data.recycle();
+            mWriteLock.unlock();
+        }
     }
 
     static private void printScreenLabel(PrintWriter pw, int offset) {
@@ -792,45 +1529,6 @@ public final class ProcessTracker {
         }
         proc.mTmpTotalTime = totalTime;
         return totalTime;
-    }
-
-    ArrayList<ProcessState> collectProcessesLocked(int[] screenStates, int[] memStates,
-            int[] procStates, long now, String reqPackage) {
-        ArraySet<ProcessState> foundProcs = new ArraySet<ProcessState>();
-        ArrayMap<String, SparseArray<PackageState>> pkgMap = mState.mPackages.getMap();
-        for (int ip=0; ip<pkgMap.size(); ip++) {
-            if (reqPackage != null && !reqPackage.equals(pkgMap.keyAt(ip))) {
-                continue;
-            }
-            SparseArray<PackageState> procs = pkgMap.valueAt(ip);
-            for (int iu=0; iu<procs.size(); iu++) {
-                PackageState state = procs.valueAt(iu);
-                for (int iproc=0; iproc<state.mProcesses.size(); iproc++) {
-                    ProcessState proc = state.mProcesses.valueAt(iproc);
-                    foundProcs.add(proc.mCommonProcess);
-                }
-            }
-        }
-        ArrayList<ProcessState> outProcs = new ArrayList<ProcessState>(foundProcs.size());
-        for (int i=0; i<foundProcs.size(); i++) {
-            ProcessState proc = foundProcs.valueAt(i);
-            if (computeProcessTimeLocked(proc, screenStates, memStates,
-                    procStates, now) > 0) {
-                outProcs.add(proc);
-            }
-        }
-        Collections.sort(outProcs, new Comparator<ProcessState>() {
-            @Override
-            public int compare(ProcessState lhs, ProcessState rhs) {
-                if (lhs.mTmpTotalTime < rhs.mTmpTotalTime) {
-                    return -1;
-                } else if (lhs.mTmpTotalTime > rhs.mTmpTotalTime) {
-                    return 1;
-                }
-                return 0;
-            }
-        });
-        return outProcs;
     }
 
     static void dumpProcessState(PrintWriter pw, String prefix, ProcessState proc,
@@ -1043,21 +1741,10 @@ public final class ProcessTracker {
         }
     }
 
-    void dumpFilteredProcesses(PrintWriter pw, String header, String prefix,
-            int[] screenStates, int[] memStates, int[] procStates, long now, String reqPackage) {
-        ArrayList<ProcessState> procs = collectProcessesLocked(screenStates, memStates,
-                procStates, now, reqPackage);
-        if (procs.size() > 0) {
-            pw.println();
-            pw.println(header);
-            dumpProcessList(pw, prefix, procs, screenStates, memStates, procStates, now);
-        }
-    }
-
     boolean dumpFilteredProcessesCsv(PrintWriter pw, String header,
             boolean sepScreenStates, int[] screenStates, boolean sepMemStates, int[] memStates,
             boolean sepProcStates, int[] procStates, long now, String reqPackage) {
-        ArrayList<ProcessState> procs = collectProcessesLocked(screenStates, memStates,
+        ArrayList<ProcessState> procs = mState.collectProcessesLocked(screenStates, memStates,
                 procStates, now, reqPackage);
         if (procs.size() > 0) {
             if (header != null) {
@@ -1088,7 +1775,7 @@ public final class ProcessTracker {
 
     static void printAdjTag(PrintWriter pw, int state) {
         state = printArrayEntry(pw, ADJ_SCREEN_TAGS,  state, ADJ_SCREEN_MOD);
-        printArrayEntry(pw, ADJ_MEM_TAGS,  state, 1);
+        printArrayEntry(pw, ADJ_MEM_TAGS, state, 1);
     }
 
     static void printProcStateTagAndValue(PrintWriter pw, int state, long value) {
@@ -1117,7 +1804,7 @@ public final class ProcessTracker {
             }
             printProcStateTagAndValue(pw, type, time);
         }
-        if (!didCurState) {
+        if (!didCurState && proc.mCurState != STATE_NOTHING) {
             printProcStateTagAndValue(pw, proc.mCurState, now - proc.mStartTime);
         }
     }
@@ -1187,7 +1874,7 @@ public final class ProcessTracker {
     static private void dumpHelp(PrintWriter pw) {
         pw.println("Process stats (procstats) dump options:");
         pw.println("    [--checkin|--csv] [csv-screen] [csv-proc] [csv-mem]");
-        pw.println("    [--reset] [-h] [<package.name>]");
+        pw.println("    [--reset] [--write] [-h] [<package.name>]");
         pw.println("  --checkin: format output for a checkin report.");
         pw.println("  --csv: output data suitable for putting in a spreadsheet.");
         pw.println("  --csv-screen: on, off.");
@@ -1195,6 +1882,7 @@ public final class ProcessTracker {
         pw.println("  --csv-proc: pers, top, fore, vis, precept, backup,");
         pw.println("    service, home, prev, cached");
         pw.println("  --reset: reset the stats, clearing all current data.");
+        pw.println("  --write: write current in-memory stats to disk.");
         pw.println("  -a: print everything.");
         pw.println("  -h: print this help text.");
         pw.println("  <package.name>: optional name of package to filter output by.");
@@ -1276,6 +1964,10 @@ public final class ProcessTracker {
                     mState.reset();
                     pw.println("Process stats reset.");
                     return;
+                } else if ("--write".equals(arg)) {
+                    writeStateSyncLocked();
+                    pw.println("Process stats written.");
+                    return;
                 } else if ("-h".equals(arg)) {
                     dumpHelp(pw);
                     return;
@@ -1288,10 +1980,13 @@ public final class ProcessTracker {
                 } else {
                     // Not an option, last argument must be a package name.
                     try {
-                        mContext.getPackageManager().getPackageUid(arg,
-                                UserHandle.getCallingUserId());
-                        reqPackage = arg;
-                    } catch (PackageManager.NameNotFoundException e) {
+                        IPackageManager pm = AppGlobals.getPackageManager();
+                        if (pm.getPackageUid(arg, UserHandle.getCallingUserId()) >= 0) {
+                            reqPackage = arg;
+                        }
+                    } catch (RemoteException e) {
+                    }
+                    if (reqPackage == null) {
                         pw.println("Unknown package: " + arg);
                         dumpHelp(pw);
                         return;
@@ -1344,196 +2039,10 @@ public final class ProcessTracker {
             return;
         }
 
-        ArrayMap<String, SparseArray<PackageState>> pkgMap = mState.mPackages.getMap();
-        boolean printedHeader = false;
         if (isCheckin) {
-            pw.println("vers,1");
-        }
-        for (int ip=0; ip<pkgMap.size(); ip++) {
-            String pkgName = pkgMap.keyAt(ip);
-            if (reqPackage != null && !reqPackage.equals(pkgName)) {
-                continue;
-            }
-            SparseArray<PackageState> uids = pkgMap.valueAt(ip);
-            for (int iu=0; iu<uids.size(); iu++) {
-                int uid = uids.keyAt(iu);
-                PackageState state = uids.valueAt(iu);
-                final int NPROCS = state.mProcesses.size();
-                final int NSRVS = state.mServices.size();
-                if (!isCheckin) {
-                    if (NPROCS > 0 || NSRVS > 0) {
-                        if (!printedHeader) {
-                            pw.println("Per-Package Process Stats:");
-                            printedHeader = true;
-                        }
-                        pw.print("  * "); pw.print(pkgName); pw.print(" / ");
-                                UserHandle.formatUid(pw, uid); pw.println(":");
-                    }
-                }
-                for (int iproc=0; iproc<NPROCS; iproc++) {
-                    ProcessState proc = state.mProcesses.valueAt(iproc);
-                    if (!isCheckin) {
-                        pw.print("      Process ");
-                        pw.print(state.mProcesses.keyAt(iproc));
-                        pw.print(" (");
-                        pw.print(proc.mDurationsTableSize);
-                        pw.print(" entries)");
-                        pw.println(":");
-                        dumpProcessState(pw, "        ", proc, ALL_SCREEN_ADJ, ALL_MEM_ADJ,
-                                ALL_PROC_STATES, now);
-                        dumpProcessPss(pw, "        ", proc, ALL_SCREEN_ADJ, ALL_MEM_ADJ,
-                                ALL_PROC_STATES);
-                    } else {
-                        pw.print("pkgproc,");
-                        pw.print(pkgName);
-                        pw.print(",");
-                        pw.print(uid);
-                        pw.print(",");
-                        pw.print(state.mProcesses.keyAt(iproc));
-                        dumpAllProcessStateCheckin(pw, proc, now);
-                        pw.println();
-                        if (proc.mPssTableSize > 0) {
-                            pw.print("pkgpss,");
-                            pw.print(pkgName);
-                            pw.print(",");
-                            pw.print(uid);
-                            pw.print(",");
-                            pw.print(state.mProcesses.keyAt(iproc));
-                            dumpAllProcessPssCheckin(pw, proc);
-                            pw.println();
-                        }
-                        if (proc.mNumExcessiveWake > 0 || proc.mNumExcessiveCpu > 0) {
-                            pw.print("pkgkills,");
-                            pw.print(pkgName);
-                            pw.print(",");
-                            pw.print(uid);
-                            pw.print(",");
-                            pw.print(state.mProcesses.keyAt(iproc));
-                            pw.print(",");
-                            pw.print(proc.mNumExcessiveWake);
-                            pw.print(",");
-                            pw.print(proc.mNumExcessiveCpu);
-                            pw.println();
-                        }
-                    }
-                }
-                for (int isvc=0; isvc<NSRVS; isvc++) {
-                    if (!isCheckin) {
-                        pw.print("      Service ");
-                        pw.print(state.mServices.keyAt(isvc));
-                        pw.println(":");
-                        ServiceState svc = state.mServices.valueAt(isvc);
-                        if (svc.mStartedCount != 0) {
-                            pw.print("        Started op count "); pw.print(svc.mStartedCount);
-                            pw.println(":");
-                            dumpSingleTime(pw, "          ", svc.mStartedDurations, svc.mStartedState,
-                                    svc.mStartedStartTime, now);
-                        }
-                        if (svc.mBoundCount != 0) {
-                            pw.print("        Bound op count "); pw.print(svc.mBoundCount);
-                            pw.println(":");
-                            dumpSingleTime(pw, "          ", svc.mBoundDurations, svc.mBoundState,
-                                    svc.mBoundStartTime, now);
-                        }
-                        if (svc.mExecCount != 0) {
-                            pw.print("        Executing op count "); pw.print(svc.mExecCount);
-                            pw.println(":");
-                            dumpSingleTime(pw, "          ", svc.mExecDurations, svc.mExecState,
-                                    svc.mExecStartTime, now);
-                        }
-                    } else {
-                        String serviceName = state.mServices.keyAt(isvc);
-                        ServiceState svc = state.mServices.valueAt(isvc);
-                        dumpServiceTimeCheckin(pw, "pkgsvc-start", pkgName, uid, serviceName,
-                                svc, svc.mStartedCount, svc.mStartedDurations, svc.mStartedState,
-                                svc.mStartedStartTime, now);
-                        dumpServiceTimeCheckin(pw, "pkgsvc-bound", pkgName, uid, serviceName,
-                                svc, svc.mBoundCount, svc.mBoundDurations, svc.mBoundState,
-                                svc.mBoundStartTime, now);
-                        dumpServiceTimeCheckin(pw, "pkgsvc-exec", pkgName, uid, serviceName,
-                                svc, svc.mExecCount, svc.mExecDurations, svc.mExecState,
-                                svc.mExecStartTime, now);
-                    }
-                }
-            }
-        }
-
-        if (!isCheckin) {
-            dumpFilteredProcesses(pw, "Processes running while critical mem:", "  ",
-                    new int[] {ADJ_SCREEN_OFF, ADJ_SCREEN_ON},
-                    new int[] {ADJ_MEM_FACTOR_CRITICAL},
-                    new int[] {STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
-                            STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME, STATE_PREVIOUS},
-                    now, reqPackage);
-            dumpFilteredProcesses(pw, "Processes running while low mem:", "  ",
-                    new int[] {ADJ_SCREEN_OFF, ADJ_SCREEN_ON},
-                    new int[] {ADJ_MEM_FACTOR_LOW},
-                    new int[] {STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
-                            STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME, STATE_PREVIOUS},
-                    now, reqPackage);
-            dumpFilteredProcesses(pw, "Processes running while moderate mem:", "  ",
-                    new int[] {ADJ_SCREEN_OFF, ADJ_SCREEN_ON},
-                    new int[] {ADJ_MEM_FACTOR_MODERATE},
-                    new int[] {STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
-                            STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME, STATE_PREVIOUS},
-                    now, reqPackage);
-            dumpFilteredProcesses(pw, "Processes running while normal mem:", "  ",
-                    new int[] {ADJ_SCREEN_OFF, ADJ_SCREEN_ON},
-                    new int[] {ADJ_MEM_FACTOR_NORMAL},
-                    new int[] {STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
-                            STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME, STATE_PREVIOUS},
-                    now, reqPackage);
-            pw.println();
-            pw.println("Run time Stats:");
-            dumpSingleTime(pw, "  ", mState.mMemFactorDurations, mState.mMemFactor,
-                    mState.mStartTime, now);
-            if (dumpAll) {
-                pw.println();
-                pw.println("Internal state:");
-                pw.print("  Num long arrays: "); pw.println(mState.mLongs.size());
-                pw.print("  Next long entry: "); pw.println(mState.mNextLong);
-            }
+            mState.dumpCheckin(pw, reqPackage);
         } else {
-            ArrayMap<String, SparseArray<ProcessState>> procMap = mState.mProcesses.getMap();
-            for (int ip=0; ip<procMap.size(); ip++) {
-                String procName = procMap.keyAt(ip);
-                SparseArray<ProcessState> uids = procMap.valueAt(ip);
-                for (int iu=0; iu<uids.size(); iu++) {
-                    int uid = uids.keyAt(iu);
-                    ProcessState state = uids.valueAt(iu);
-                    if (state.mDurationsTableSize > 0) {
-                        pw.print("proc,");
-                        pw.print(procName);
-                        pw.print(",");
-                        pw.print(uid);
-                        dumpAllProcessStateCheckin(pw, state, now);
-                        pw.println();
-                    }
-                    if (state.mPssTableSize > 0) {
-                        pw.print("pss,");
-                        pw.print(procName);
-                        pw.print(",");
-                        pw.print(uid);
-                        dumpAllProcessPssCheckin(pw, state);
-                        pw.println();
-                    }
-                    if (state.mNumExcessiveWake > 0 || state.mNumExcessiveCpu > 0) {
-                        pw.print("kills,");
-                        pw.print(uid);
-                        pw.print(",");
-                        pw.print(procName);
-                        pw.print(",");
-                        pw.print(state.mNumExcessiveWake);
-                        pw.print(",");
-                        pw.print(state.mNumExcessiveCpu);
-                        pw.println();
-                    }
-                }
-            }
-            pw.print("total");
-            dumpAdjTimesCheckin(pw, ",", mState.mMemFactorDurations, mState.mMemFactor,
-                    mState.mStartTime, now);
-            pw.println();
+            mState.dump(pw, reqPackage, dumpAll);
         }
     }
 }
