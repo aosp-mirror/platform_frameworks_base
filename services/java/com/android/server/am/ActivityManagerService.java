@@ -272,7 +272,11 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     // The amount of time we will sample PSS of the current top process while the
     // screen is on.
-    static final int PSS_TOP_INTERVAL = 5*60*1000;
+    static final int PSS_TOP_INTERVAL = 2*60*1000;
+
+    // The amount of time we will sample PSS of any processes that more at least as
+    // important as perceptible while the screen is on.
+    static final int PSS_PERCEPTIBLE_INTERVAL = 10*60*1000;
 
     // The maximum amount of time for a process to be around until we will take
     // a PSS snapshot on its next oom change.
@@ -423,7 +427,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Tracking long-term execution of processes to look for abuse and other
      * bad app behavior.
      */
-    ProcessTracker mProcessTracker;
+    final ProcessTracker mProcessTracker;
 
     /**
      * The currently running isolated processes.
@@ -1528,12 +1532,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                         if (proc.thread != null) {
                             oomAdj = proc.setAdj;
                             pid = proc.pid;
-                            i++;
                         } else {
                             proc = null;
                             oomAdj = 0;
                             pid = 0;
                         }
+                        i++;
                     }
                     if (proc != null) {
                         long pss = Debug.getPss(pid);
@@ -1620,7 +1624,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         m.mContext = context;
         m.mFactoryTest = factoryTest;
         m.mIntentFirewall = new IntentFirewall(m.new IntentFirewallInterface());
-        m.mProcessTracker = new ProcessTracker(context);
 
         m.mStackSupervisor = new ActivityStackSupervisor(m, context, thr.mLooper);
 
@@ -1817,8 +1820,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 : mBatteryStatsService.getActiveStatistics().getIsOnBattery();
         mBatteryStatsService.getActiveStatistics().setCallback(this);
 
-        mUsageStatsService = new UsageStatsService(new File(
-                systemDir, "usagestats").toString());
+        mProcessTracker = new ProcessTracker(new File(systemDir, "procstats"));
+        mProcessTracker.readLocked();
+
+        mUsageStatsService = new UsageStatsService(new File(systemDir, "usagestats").toString());
         mAppOpsService = new AppOpsService(new File(systemDir, "appops.xml"));
 
         mGrantFile = new AtomicFile(new File(systemDir, "urigrants.xml"));
@@ -7636,6 +7641,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         mAppOpsService.shutdown();
         mUsageStatsService.shutdown();
         mBatteryStatsService.shutdown();
+        synchronized (this) {
+            mProcessTracker.shutdownLocked();
+        }
 
         return timedout;
     }
@@ -14203,8 +14211,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.setRawAdj = app.curRawAdj;
         }
 
-        if (app == TOP_APP && now > (app.lastPssTime+PSS_TOP_INTERVAL)) {
-            requestPssLocked(app, now, true);
+        if (!mSleeping) {
+            if (app == TOP_APP && now > (app.lastPssTime+PSS_TOP_INTERVAL)) {
+                // For the current top application we will very aggressively collect
+                // PSS data to have a good measure of memory use while in the foreground.
+                requestPssLocked(app, now, true);
+            } else if (app.curAdj <= ProcessList.PERCEPTIBLE_APP_ADJ
+                    && now > (app.lastPssTime+PSS_TOP_INTERVAL)) {
+                // For any unkillable processes, we will more regularly collect their PSS
+                // since they have a significant impact on the memory state of the device.
+                requestPssLocked(app, now, true);
+            }
         }
 
         if (app.curAdj != app.setAdj) {
@@ -14223,7 +14240,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 app.setAdj = app.curAdj;
                 app.setAdjChanged = true;
                 if (!doingAll) {
-                    app.setProcessTrackerState(TOP_APP, mProcessTracker.getMemFactor(),
+                    app.setProcessTrackerState(TOP_APP, mProcessTracker.getMemFactorLocked(),
                             now, mProcessList);
                 }
             } else {
@@ -14599,9 +14616,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             mStackSupervisor.scheduleDestroyAllActivities(null, "always-finish");
         }
 
-        boolean allChanged = mProcessTracker.setMemFactor(memFactor, !mSleeping, now);
+        boolean allChanged = mProcessTracker.setMemFactorLocked(memFactor, !mSleeping, now);
         if (changed || allChanged) {
-            memFactor = mProcessTracker.getMemFactor();
+            memFactor = mProcessTracker.getMemFactorLocked();
             for (i=mLruProcesses.size()-1; i>=0; i--) {
                 ProcessRecord app = mLruProcesses.get(i);
                 if (allChanged || app.setAdjChanged) {
@@ -14611,6 +14628,16 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         if (allChanged) {
             requestPssAllProcsLocked(now, false);
+        }
+
+        if (mProcessTracker.shouldWriteNowLocked(now)) {
+            mHandler.post(new Runnable() {
+                @Override public void run() {
+                    synchronized (ActivityManagerService.this) {
+                        mProcessTracker.writeStateAsyncLocked();
+                    }
+                }
+            });
         }
 
         if (DEBUG_OOM_ADJ) {

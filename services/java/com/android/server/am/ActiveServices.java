@@ -244,7 +244,7 @@ public final class ActiveServices {
         r.lastActivity = SystemClock.uptimeMillis();
         r.startRequested = true;
         if (r.tracker != null) {
-            r.tracker.setStarted(true, mAm.mProcessTracker.getMemFactor(), r.lastActivity);
+            r.tracker.setStarted(true, mAm.mProcessTracker.getMemFactorLocked(), r.lastActivity);
         }
         r.callStart = false;
         r.pendingStarts.add(new ServiceRecord.StartItem(r, false, r.makeNextStartId(),
@@ -265,7 +265,7 @@ public final class ActiveServices {
         }
         service.startRequested = false;
         if (service.tracker != null) {
-            service.tracker.setStarted(false, mAm.mProcessTracker.getMemFactor(),
+            service.tracker.setStarted(false, mAm.mProcessTracker.getMemFactorLocked(),
                     SystemClock.uptimeMillis());
         }
         service.callStart = false;
@@ -365,7 +365,7 @@ public final class ActiveServices {
             }
             r.startRequested = false;
             if (r.tracker != null) {
-                r.tracker.setStarted(false, mAm.mProcessTracker.getMemFactor(),
+                r.tracker.setStarted(false, mAm.mProcessTracker.getMemFactorLocked(),
                         SystemClock.uptimeMillis());
             }
             r.callStart = false;
@@ -505,7 +505,7 @@ public final class ActiveServices {
                 if (!s.hasAutoCreateConnections()) {
                     // This is the first binding, let the tracker know.
                     if (s.tracker != null) {
-                        s.tracker.setBound(true, mAm.mProcessTracker.getMemFactor(),
+                        s.tracker.setBound(true, mAm.mProcessTracker.getMemFactorLocked(),
                                 s.lastActivity);
                     }
                 }
@@ -827,7 +827,7 @@ public final class ActiveServices {
         long now = SystemClock.uptimeMillis();
         if (r.executeNesting == 0) {
             if (r.tracker != null) {
-                r.tracker.setExecuting(true, mAm.mProcessTracker.getMemFactor(), now);
+                r.tracker.setExecuting(true, mAm.mProcessTracker.getMemFactorLocked(), now);
             }
             if (r.app != null) {
                 if (r.app.executingServices.size() == 0) {
@@ -1327,7 +1327,7 @@ public final class ActiveServices {
            ((ServiceRestarter)r.restarter).setService(null);
         }
 
-        int memFactor = mAm.mProcessTracker.getMemFactor();
+        int memFactor = mAm.mProcessTracker.getMemFactorLocked();
         long now = SystemClock.uptimeMillis();
         if (r.tracker != null) {
             r.tracker.setStarted(false, memFactor, now);
@@ -1394,7 +1394,7 @@ public final class ActiveServices {
                 boolean hasAutoCreate = s.hasAutoCreateConnections();
                 if (!hasAutoCreate) {
                     if (s.tracker != null) {
-                        s.tracker.setBound(false, mAm.mProcessTracker.getMemFactor(),
+                        s.tracker.setBound(false, mAm.mProcessTracker.getMemFactorLocked(),
                                 SystemClock.uptimeMillis());
                     }
                 }
@@ -1490,7 +1490,7 @@ public final class ActiveServices {
                 mAm.updateOomAdjLocked(r.app);
             }
             if (r.tracker != null) {
-                r.tracker.setExecuting(false, mAm.mProcessTracker.getMemFactor(),
+                r.tracker.setExecuting(false, mAm.mProcessTracker.getMemFactorLocked(),
                         SystemClock.uptimeMillis());
             }
         }
@@ -1685,7 +1685,7 @@ public final class ActiveServices {
                 sr.isolatedProc = null;
                 sr.executeNesting = 0;
                 if (sr.tracker != null) {
-                    sr.tracker.setExecuting(false, mAm.mProcessTracker.getMemFactor(),
+                    sr.tracker.setExecuting(false, mAm.mProcessTracker.getMemFactorLocked(),
                             SystemClock.uptimeMillis());
                 }
                 if (mStoppingServices.remove(sr)) {
@@ -1720,7 +1720,7 @@ public final class ActiveServices {
                         if (sr.pendingStarts.size() == 0) {
                             sr.startRequested = false;
                             if (sr.tracker != null) {
-                                sr.tracker.setStarted(false, mAm.mProcessTracker.getMemFactor(),
+                                sr.tracker.setStarted(false, mAm.mProcessTracker.getMemFactorLocked(),
                                         SystemClock.uptimeMillis());
                             }
                             if (!sr.hasAutoCreateConnections()) {
