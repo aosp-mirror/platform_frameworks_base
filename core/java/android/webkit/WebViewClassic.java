@@ -90,7 +90,6 @@ import android.view.ViewRootImpl;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
@@ -1767,11 +1766,6 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         }
 
         return mWebViewPrivate.super_performAccessibilityAction(action, arguments);
-    }
-
-    @Override
-    public AccessibilityNodeProvider getAccessibilityNodeProvider() {
-      return null;
     }
 
     @Override

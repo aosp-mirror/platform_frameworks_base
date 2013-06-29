@@ -41,7 +41,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.widget.AbsoluteLayout;
@@ -2051,13 +2050,6 @@ public class WebView extends AbsoluteLayout
         return mProvider.getViewDelegate().onKeyShortcut(keyCode, event);
     }
     */
-
-    @Override
-    public AccessibilityNodeProvider getAccessibilityNodeProvider() {
-        AccessibilityNodeProvider provider =
-                mProvider.getViewDelegate().getAccessibilityNodeProvider();
-        return provider == null ? super.getAccessibilityNodeProvider() : provider;
-    }
 
     @Deprecated
     @Override
