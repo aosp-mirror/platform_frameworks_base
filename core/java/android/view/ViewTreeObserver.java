@@ -243,9 +243,9 @@ public final class ViewTreeObserver {
 
         @Override
         public int hashCode() {
-            int result = contentInsets != null ? contentInsets.hashCode() : 0;
-            result = 31 * result + (visibleInsets != null ? visibleInsets.hashCode() : 0);
-            result = 31 * result + (touchableRegion != null ? touchableRegion.hashCode() : 0);
+            int result = contentInsets.hashCode();
+            result = 31 * result + visibleInsets.hashCode();
+            result = 31 * result + touchableRegion.hashCode();
             result = 31 * result + mTouchableInsets;
             return result;
         }
@@ -811,6 +811,13 @@ public final class ViewTreeObserver {
                 listeners.end();
             }
         }
+    }
+
+    /**
+     * Returns whether there are listeners for on pre-draw events.
+     */
+    final boolean hasOnPreDrawListeners() {
+        return mOnPreDrawListeners != null && mOnPreDrawListeners.size() > 0;
     }
 
     /**

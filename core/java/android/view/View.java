@@ -6976,6 +6976,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public boolean includeForAccessibility() {
+        //noinspection SimplifiableIfStatement
         if (mAttachInfo != null) {
             return (mAttachInfo.mAccessibilityFetchFlags
                     & AccessibilityNodeInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS) != 0
@@ -7564,8 +7565,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return True if the event was handled by the view, false otherwise.
      */
     protected boolean dispatchHoverEvent(MotionEvent event) {
-        //noinspection SimplifiableIfStatement
         ListenerInfo li = mListenerInfo;
+        //noinspection SimplifiableIfStatement
         if (li != null && li.mOnHoverListener != null
                 && (mViewFlags & ENABLED_MASK) == ENABLED
                 && li.mOnHoverListener.onHover(this, event)) {
@@ -12625,7 +12626,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         attachInfo.mHardwareRenderer.isEnabled() &&
                         attachInfo.mHardwareRenderer.validate()) {
                     getHardwareLayer();
-                    attachInfo.mViewRootImpl.dispatchFlushHardwareLayerUpdates();
+                    // TODO: We need a better way to handle this case
+                    // If views have registered pre-draw listeners they need
+                    // to be notified before we build the layer. Those listeners
+                    // may however rely on other events to happen first so we
+                    // cannot just invoke them here until they don't cancel the
+                    // current frame
+                    if (!attachInfo.mTreeObserver.hasOnPreDrawListeners()) {
+                        attachInfo.mViewRootImpl.dispatchFlushHardwareLayerUpdates();
+                    }
                 }
                 break;
             case LAYER_TYPE_SOFTWARE:
@@ -15251,6 +15260,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param selected true if the view must be selected, false otherwise
      */
     public void setSelected(boolean selected) {
+        //noinspection DoubleNegation
         if (((mPrivateFlags & PFLAG_SELECTED) != 0) != selected) {
             mPrivateFlags = (mPrivateFlags & ~PFLAG_SELECTED) | (selected ? PFLAG_SELECTED : 0);
             if (!selected) resetPressedState();
@@ -15295,6 +15305,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param activated true if the view must be activated, false otherwise
      */
     public void setActivated(boolean activated) {
+        //noinspection DoubleNegation
         if (((mPrivateFlags & PFLAG_ACTIVATED) != 0) != activated) {
             mPrivateFlags = (mPrivateFlags & ~PFLAG_ACTIVATED) | (activated ? PFLAG_ACTIVATED : 0);
             invalidate(true);
@@ -16804,8 +16815,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * </p>
      */
     public boolean dispatchDragEvent(DragEvent event) {
-        //noinspection SimplifiableIfStatement
         ListenerInfo li = mListenerInfo;
+        //noinspection SimplifiableIfStatement
         if (li != null && li.mOnDragListener != null && (mViewFlags & ENABLED_MASK) == ENABLED
                 && li.mOnDragListener.onDrag(this, event)) {
             return true;
