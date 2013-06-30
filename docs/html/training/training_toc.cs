@@ -475,6 +475,37 @@
           </a>
           </li>
       </li>
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/sync-adapters/index.html"
+             description="How to transfer data between the cloud and the device using the Android
+             sync adapter framework"
+             >Transferring Data Using Sync Adapters</a>
+        </div>
+        <ul>
+            <li>
+                <a href="<?cs var:toroot ?>training/sync-adapters/creating-authenticator.html">
+                Creating a Stub Authenticator
+                </a>
+            </li>
+            <li>
+                <a href="<?cs var:toroot ?>training/sync-adapters/creating-stub-provider.html">
+                Creating a Stub Content Provider
+                </a>
+            </li>
+            <li>
+                <a href="<?cs var:toroot ?>training/sync-adapters/creating-sync-adapter.html">
+                Creating a Sync Adapter
+                </a>
+            </li>
+            <li>
+                <a href="<?cs var:toroot ?>training/sync-adapters/running-sync-adapter.html">
+                Running a Sync Adapter
+                </a>
+            </li>
+        </ul>
+      </li>
+
     </ul>
   </li>
   <!-- End connectivity and cloud -->
