@@ -15,16 +15,5 @@
 -->
 
 <resources>
-    <string name="app_label">Documents</string>
-
-    <string name="title_open">Open</string>
-    <string name="title_save">Save</string>
-
-    <string name="menu_create_dir">Create folder</string>
-    <string name="menu_grid">Grid view</string>
-    <string name="menu_list">List view</string>
-    <string name="menu_sort">Sort by</string>
-
-    <string name="btn_save">Save</string>
-
+    <color name="chip">#ddd</color>
 </resources>

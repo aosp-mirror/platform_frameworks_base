@@ -14,17 +14,20 @@
      limitations under the License.
 -->
 
-<resources>
-    <string name="app_label">Documents</string>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <string name="title_open">Open</string>
-    <string name="title_save">Save</string>
+    <FrameLayout
+        android:id="@+id/directory"
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1" />
 
-    <string name="menu_create_dir">Create folder</string>
-    <string name="menu_grid">Grid view</string>
-    <string name="menu_list">List view</string>
-    <string name="menu_sort">Sort by</string>
+    <FrameLayout
+        android:id="@+id/save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
-    <string name="btn_save">Save</string>
-
-</resources>
+</LinearLayout>

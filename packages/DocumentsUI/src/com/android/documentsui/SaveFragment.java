@@ -1,0 +1,98 @@
+/*
+ * Copyright (C) 2013 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.documentsui;
+
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.content.Context;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+
+/**
+ * Display document title editor and save button.
+ */
+public class SaveFragment extends Fragment {
+    public static final String TAG = "SaveFragment";
+
+    private EditText mDisplayName;
+    private Button mSave;
+
+    private static final String EXTRA_MIME_TYPE = "mime_type";
+    private static final String EXTRA_DISPLAY_NAME = "display_name";
+
+    public static void show(FragmentManager fm, String mimeType, String displayName) {
+        final Bundle args = new Bundle();
+        args.putString(EXTRA_MIME_TYPE, mimeType);
+        args.putString(EXTRA_DISPLAY_NAME, displayName);
+
+        final SaveFragment fragment = new SaveFragment();
+        fragment.setArguments(args);
+
+        final FragmentTransaction ft = fm.beginTransaction();
+        ft.replace(R.id.save, fragment, TAG);
+        ft.commitAllowingStateLoss();
+    }
+
+    public static SaveFragment get(FragmentManager fm) {
+        return (SaveFragment) fm.findFragmentByTag(TAG);
+    }
+
+    @Override
+    public View onCreateView(
+            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        final Context context = inflater.getContext();
+
+        final View view = inflater.inflate(R.layout.fragment_save, container, false);
+
+        final ImageView icon = (ImageView) view.findViewById(android.R.id.icon);
+        icon.setImageDrawable(DocumentsActivity.resolveDocumentIcon(
+                context, getArguments().getString(EXTRA_MIME_TYPE)));
+
+        mDisplayName = (EditText) view.findViewById(android.R.id.title);
+        mDisplayName.setText(getArguments().getString(EXTRA_DISPLAY_NAME));
+
+        mSave = (Button) view.findViewById(android.R.id.button1);
+        mSave.setOnClickListener(mSaveListener);
+        mSave.setEnabled(false);
+
+        return view;
+    }
+
+    private View.OnClickListener mSaveListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            final String mimeType = getArguments().getString(EXTRA_MIME_TYPE);
+            final String displayName = getArguments().getString(EXTRA_DISPLAY_NAME);
+            ((DocumentsActivity) getActivity()).onSaveRequested(mimeType, displayName);
+        }
+    };
+
+    public void setDisplayName(String displayName) {
+        getArguments().putString(EXTRA_DISPLAY_NAME, displayName);
+        mDisplayName.setText(displayName);
+    }
+
+    public void setSaveEnabled(boolean enabled) {
+        mSave.setEnabled(enabled);
+    }
+}
