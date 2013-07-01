@@ -494,6 +494,19 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     }
 
     /**
+     * Eanble/disable FailFast
+     *
+     * @param enabled is DctConstants.ENABLED/DISABLED
+     */
+    public void setEnableFailFastMobileData(int enabled) {
+        if (DBG) log("setEnableFailFastMobileData(enabled=" + enabled + ")");
+        final AsyncChannel channel = mDataConnectionTrackerAc;
+        if (channel != null) {
+            channel.sendMessage(DctConstants.CMD_SET_ENABLE_FAIL_FAST_MOBILE_DATA, enabled);
+        }
+    }
+
+    /**
      * carrier dependency is met/unmet
      * @param met
      */
