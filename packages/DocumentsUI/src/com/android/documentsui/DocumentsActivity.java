@@ -24,6 +24,8 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentManager.BackStackEntry;
 import android.app.FragmentManager.OnBackStackChangedListener;
+import android.content.ClipData;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -44,6 +46,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class DocumentsActivity extends Activity {
     private static final String TAG = "Documents";
 
@@ -54,6 +59,9 @@ public class DocumentsActivity extends Activity {
     private static final int MODE_CREATE = 2;
 
     private int mMode;
+    private boolean mAllowMultiple;
+    private String[] mAcceptMimes;
+
     private boolean mIgnoreNextNavigation;
 
     private Uri mCurrentDir;
@@ -63,11 +71,20 @@ public class DocumentsActivity extends Activity {
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
-        final String action = getIntent().getAction();
+        final Intent intent = getIntent();
+        final String action = intent.getAction();
         if (Intent.ACTION_OPEN_DOCUMENT.equals(action)) {
             mMode = MODE_OPEN;
+            mAllowMultiple = intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE, false);
         } else if (Intent.ACTION_CREATE_DOCUMENT.equals(action)) {
             mMode = MODE_CREATE;
+            mAllowMultiple = false;
+        }
+
+        if (intent.hasExtra(Intent.EXTRA_MIME_TYPES)) {
+            mAcceptMimes = intent.getStringArrayExtra(Intent.EXTRA_MIME_TYPES);
+        } else {
+            mAcceptMimes = new String[] { intent.getType() };
         }
 
         setResult(Activity.RESULT_CANCELED);
@@ -208,14 +225,14 @@ public class DocumentsActivity extends Activity {
         final Uri uri = DocumentsContract.buildDocumentUri(
                 info.authority, DocumentsContract.ROOT_GUID);
         final CharSequence displayName = info.loadLabel(getPackageManager());
-        DirectoryFragment.show(getFragmentManager(), uri, displayName.toString());
+        DirectoryFragment.show(getFragmentManager(), uri, displayName.toString(), mAllowMultiple);
     }
 
     public void onDocumentPicked(Document doc) {
         final FragmentManager fm = getFragmentManager();
         if (DocumentsContract.MIME_TYPE_DIRECTORY.equals(doc.mimeType)) {
             // Nested directory picked, recurse using new fragment
-            DirectoryFragment.show(fm, doc.uri, doc.displayName);
+            DirectoryFragment.show(fm, doc.uri, doc.displayName, mAllowMultiple);
         } else if (mMode == MODE_OPEN) {
             // Explicit file picked, return
             onFinished(doc.uri);
@@ -225,16 +242,35 @@ public class DocumentsActivity extends Activity {
         }
     }
 
-    public void onSaveRequested(String mimeType, String displayName) {
-        // TODO: create file, confirming before overwriting
-        onFinished(null);
+    public void onDocumentsPicked(List<Document> docs) {
+        final int size = docs.size();
+        final Uri[] uris = new Uri[size];
+        for (int i = 0; i < size; i++) {
+            uris[i] = docs.get(i).uri;
+        }
+        onFinished(uris);
     }
 
-    private void onFinished(Uri uri) {
-        Log.d(TAG, "onFinished() " + uri);
+    public void onSaveRequested(String mimeType, String displayName) {
+        // TODO: create file, confirming before overwriting
+        final Uri uri = null;
+        onFinished(uri);
+    }
+
+    private void onFinished(Uri... uris) {
+        Log.d(TAG, "onFinished() " + Arrays.toString(uris));
 
         final Intent intent = new Intent();
-        intent.setData(uri);
+        if (uris.length == 1) {
+            intent.setData(uris[0]);
+        } else if (uris.length > 1) {
+            final ContentResolver resolver = getContentResolver();
+            final ClipData clipData = new ClipData(null, mAcceptMimes, new ClipData.Item(uris[0]));
+            for (int i = 1; i < uris.length; i++) {
+                clipData.addItem(new ClipData.Item(uris[i]));
+            }
+            intent.setClipData(clipData);
+        }
 
         intent.addFlags(
                 Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_PERSIST_GRANT_URI_PERMISSION);

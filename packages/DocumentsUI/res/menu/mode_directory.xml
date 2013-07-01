@@ -14,20 +14,9 @@
      limitations under the License.
 -->
 
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label">Documents</string>
-
-    <string name="title_open">Open</string>
-    <string name="title_save">Save</string>
-
-    <string name="menu_create_dir">Create folder</string>
-    <string name="menu_grid">Grid view</string>
-    <string name="menu_list">List view</string>
-    <string name="menu_sort">Sort by</string>
-
-    <string name="menu_open">Open</string>
-    <string name="menu_save">Save</string>
-
-    <string name="mode_selected_count"><xliff:g id="count" example="3">%1$d</xliff:g> selected</string>
-
-</resources>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_open"
+        android:title="@string/menu_open"
+        android:showAsAction="always" />
+</menu>
