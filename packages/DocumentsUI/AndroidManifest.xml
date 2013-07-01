@@ -7,13 +7,15 @@
         <activity
             android:name=".DocumentsActivity"
             android:finishOnCloseSystemDialogs="true"
-            android:excludeFromRecents="true">
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Holo.Light">
             <intent-filter android:priority="100">
                 <action android:name="android.intent.action.OPEN_DOCUMENT" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <intent-filter android:priority="100">
                 <action android:name="android.intent.action.CREATE_DOCUMENT" />
+                <data android:mimeType="*/*"/>
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

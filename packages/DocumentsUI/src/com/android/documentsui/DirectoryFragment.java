@@ -16,9 +16,9 @@
 
 package com.android.documentsui;
 
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.app.ListFragment;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.content.CursorLoader;
@@ -28,34 +28,67 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.DocumentColumns;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CursorAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class DirectoryFragment extends ListFragment {
+import com.android.documentsui.DocumentsActivity.Document;
+
+/**
+ * Display the documents inside a single directory.
+ */
+public class DirectoryFragment extends Fragment {
+
+    // TODO: show storage backend in item views when requested
+    // TODO: implement sorting dialog
+    // TODO: support multiple selection with actionmode
+
+    private ListView mListView;
+    private GridView mGridView;
+
     private DocumentsAdapter mAdapter;
     private LoaderCallbacks<Cursor> mCallbacks;
 
+    private int mFlags;
+
     private static final String EXTRA_URI = "uri";
+    private static final String EXTRA_MODE = "display_mode";
+
+    private static final int MODE_LIST = 1;
+    private static final int MODE_GRID = 2;
 
     private static final int LOADER_DOCUMENTS = 2;
 
-    public static void show(FragmentManager fm, Uri uri, CharSequence title) {
+    public static void show(FragmentManager fm, Uri uri, String displayName) {
         final Bundle args = new Bundle();
         args.putParcelable(EXTRA_URI, uri);
+        args.putInt(EXTRA_MODE, MODE_LIST);
 
         final DirectoryFragment fragment = new DirectoryFragment();
         fragment.setArguments(args);
 
         final FragmentTransaction ft = fm.beginTransaction();
-        ft.replace(android.R.id.content, fragment);
-        ft.addToBackStack(title.toString());
-        ft.setBreadCrumbTitle(title);
+        ft.replace(R.id.directory, fragment);
+        ft.addToBackStack(displayName);
+        ft.setBreadCrumbTitle(displayName);
         ft.commitAllowingStateLoss();
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -63,14 +96,26 @@ public class DirectoryFragment extends ListFragment {
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final Context context = inflater.getContext();
 
+        final View view = inflater.inflate(R.layout.fragment_directory, container, false);
+
+        mListView = (ListView) view.findViewById(R.id.list);
+        mListView.setOnItemClickListener(mItemListener);
+
+        mGridView = (GridView) view.findViewById(R.id.grid);
+        mGridView.setOnItemClickListener(mItemListener);
+
         mAdapter = new DocumentsAdapter(context);
-        setListAdapter(mAdapter);
+        updateMode();
+
+        // TODO: migrate flags query to loader
+        final Uri uri = getArguments().getParcelable(EXTRA_URI);
+        mFlags = getDocumentFlags(context, uri);
 
         mCallbacks = new LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                final Uri uri = args.getParcelable(EXTRA_URI);
-                return new CursorLoader(context, uri, null, null, null, null);
+                final Uri contentsUri = DocumentsContract.buildContentsUri(uri);
+                return new CursorLoader(context, contentsUri, null, null, null, null);
             }
 
             @Override
@@ -84,13 +129,17 @@ public class DirectoryFragment extends ListFragment {
             }
         };
 
-        return super.onCreateView(inflater, container, savedInstanceState);
+        return view;
     }
 
     @Override
     public void onStart() {
         super.onStart();
         getLoaderManager().restartLoader(LOADER_DOCUMENTS, getArguments(), mCallbacks);
+
+        // TODO: clean up tracking of current directory
+        final Uri uri = getArguments().getParcelable(EXTRA_URI);
+        ((DocumentsActivity) getActivity()).onDirectoryChanged(uri, mFlags);
     }
 
     @Override
@@ -100,24 +149,68 @@ public class DirectoryFragment extends ListFragment {
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        final Cursor cursor = (Cursor) mAdapter.getItem(position);
-        final String guid = getCursorString(cursor, DocumentColumns.GUID);
-        final String mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.directory, menu);
+    }
 
-        final Uri uri = getArguments().getParcelable(EXTRA_URI);
-        final Uri childUri = DocumentsContract.buildDocumentUri(uri.getAuthority(), guid);
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        final int mode = getMode();
+        menu.findItem(R.id.menu_grid).setVisible(mode != MODE_GRID);
+        menu.findItem(R.id.menu_list).setVisible(mode != MODE_LIST);
+    }
 
-        if (DocumentsContract.MIME_TYPE_DIRECTORY.equals(mimeType)) {
-            // Nested directory picked, recurse using new fragment
-            final Uri childContentsUri = DocumentsContract.buildContentsUri(childUri);
-            final String displayName = cursor.getString(
-                    cursor.getColumnIndex(DocumentColumns.DISPLAY_NAME));
-            DirectoryFragment.show(getFragmentManager(), childContentsUri, displayName);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        final int id = item.getItemId();
+        if (id == R.id.menu_grid) {
+            getArguments().putInt(EXTRA_MODE, MODE_GRID);
+            updateMode();
+            return true;
+        } else if (id == R.id.menu_list) {
+            getArguments().putInt(EXTRA_MODE, MODE_LIST);
+            updateMode();
+            return true;
         } else {
-            // Explicit file picked, return
-            ((DocumentsActivity) getActivity()).onDocumentPicked(childUri);
+            return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void updateMode() {
+        final int mode = getMode();
+
+        mListView.setVisibility(mode == MODE_LIST ? View.VISIBLE : View.GONE);
+        mGridView.setVisibility(mode == MODE_GRID ? View.VISIBLE : View.GONE);
+
+        if (mode == MODE_GRID) {
+            mListView.setAdapter(null);
+            mGridView.setAdapter(mAdapter);
+            mGridView.setNumColumns(GridView.AUTO_FIT);
+        } else {
+            mGridView.setAdapter(null);
+            mListView.setAdapter(mAdapter);
+        }
+    }
+
+    private OnItemClickListener mItemListener = new OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            final Cursor cursor = (Cursor) mAdapter.getItem(position);
+
+            final Uri uri = getArguments().getParcelable(EXTRA_URI);
+            final Document doc = Document.fromCursor(uri.getAuthority(), cursor);
+            ((DocumentsActivity) getActivity()).onDocumentPicked(doc);
+        }
+    };
+
+    private boolean getSupportsCreate() {
+        return (mFlags & DocumentsContract.FLAG_SUPPORTS_CREATE) != 0;
+    }
+
+    private int getMode() {
+        return getArguments().getInt(EXTRA_MODE, MODE_LIST);
     }
 
     private class DocumentsAdapter extends CursorAdapter {
@@ -127,8 +220,15 @@ public class DirectoryFragment extends ListFragment {
 
         @Override
         public View newView(Context context, Cursor cursor, ViewGroup parent) {
-            return LayoutInflater.from(context)
-                    .inflate(com.android.internal.R.layout.preference, parent, false);
+            final LayoutInflater inflater = LayoutInflater.from(context);
+            final int mode = getMode();
+            if (mode == MODE_LIST) {
+                return inflater.inflate(R.layout.item_doc_list, parent, false);
+            } else if (mode == MODE_GRID) {
+                return inflater.inflate(R.layout.item_doc_grid, parent, false);
+            } else {
+                throw new IllegalStateException();
+            }
         }
 
         @Override
@@ -137,12 +237,10 @@ public class DirectoryFragment extends ListFragment {
             final TextView summary = (TextView) view.findViewById(android.R.id.summary);
             final ImageView icon = (ImageView) view.findViewById(android.R.id.icon);
 
-            icon.setMaxWidth(128);
-            icon.setMaxHeight(128);
-
             final String guid = getCursorString(cursor, DocumentColumns.GUID);
             final String displayName = getCursorString(cursor, DocumentColumns.DISPLAY_NAME);
             final String mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
+            final long lastModified = getCursorLong(cursor, DocumentColumns.LAST_MODIFIED);
             final int flags = getCursorInt(cursor, DocumentColumns.FLAGS);
 
             if ((flags & DocumentsContract.FLAG_SUPPORTS_THUMBNAIL) != 0) {
@@ -150,19 +248,39 @@ public class DirectoryFragment extends ListFragment {
                 final Uri childUri = DocumentsContract.buildDocumentUri(uri.getAuthority(), guid);
                 icon.setImageURI(childUri);
             } else {
-                icon.setImageURI(null);
+                icon.setImageDrawable(DocumentsActivity.resolveDocumentIcon(context, mimeType));
             }
 
             title.setText(displayName);
-            summary.setText(mimeType);
+            if (summary != null) {
+                summary.setText(DateUtils.getRelativeTimeSpanString(lastModified));
+            }
         }
     }
-    
-    private static String getCursorString(Cursor cursor, String columnName) {
+
+    private static int getDocumentFlags(Context context, Uri uri) {
+        final Cursor cursor = context.getContentResolver().query(uri, new String[] {
+                DocumentColumns.FLAGS }, null, null, null);
+        try {
+            if (cursor.moveToFirst()) {
+                return getCursorInt(cursor, DocumentColumns.FLAGS);
+            } else {
+                return 0;
+            }
+        } finally {
+            cursor.close();
+        }
+    }
+
+    public static String getCursorString(Cursor cursor, String columnName) {
         return cursor.getString(cursor.getColumnIndex(columnName));
     }
 
-    private static int getCursorInt(Cursor cursor, String columnName) {
+    public static long getCursorLong(Cursor cursor, String columnName) {
+        return cursor.getLong(cursor.getColumnIndex(columnName));
+    }
+
+    public static int getCursorInt(Cursor cursor, String columnName) {
         return cursor.getInt(cursor.getColumnIndex(columnName));
     }
 }
