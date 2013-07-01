@@ -24,6 +24,7 @@
 
 #include <gui/CpuConsumer.h>
 #include <gui/Surface.h>
+#include <camera3.h>
 
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_view_Surface.h>
@@ -268,6 +269,29 @@ static int Image_getPixelFormat(JNIEnv* env, int format)
     return format;
 }
 
+static uint32_t Image_getJpegSize(CpuConsumer::LockedBuffer* buffer)
+{
+    ALOG_ASSERT(buffer != NULL, "Input buffer is NULL!!!");
+    uint32_t size = 0;
+    uint32_t width = buffer->width;
+    uint8_t* jpegBuffer = buffer->data;
+
+    // First check for JPEG transport header at the end of the buffer
+    uint8_t* header = jpegBuffer + (width - sizeof(struct camera3_jpeg_blob));
+    struct camera3_jpeg_blob *blob = (struct camera3_jpeg_blob*)(header);
+    if (blob->jpeg_blob_id == CAMERA3_JPEG_BLOB_ID) {
+        size = blob->jpeg_size;
+        ALOGV("%s: Jpeg size = %d", __FUNCTION__, size);
+    }
+
+    // failed to find size, default to whole buffer
+    if (size == 0) {
+        size = width;
+    }
+
+    return size;
+}
+
 static void Image_getLockedBufferInfo(JNIEnv* env, CpuConsumer::LockedBuffer* buffer, int idx,
                                 uint8_t **base, uint32_t *size)
 {
@@ -353,7 +377,7 @@ static void Image_getLockedBufferInfo(JNIEnv* env, CpuConsumer::LockedBuffer* bu
             ALOG_ASSERT(buffer->height == 1, "JPEG should has height value %d", buffer->height);
 
             pData = buffer->data;
-            dataSize = buffer->width;
+            dataSize = Image_getJpegSize(buffer);
             break;
         case HAL_PIXEL_FORMAT_RAW_SENSOR:
             // Single plane 16bpp bayer data.
@@ -624,8 +648,17 @@ static jboolean ImageReader_imageSetup(JNIEnv* env, jobject thiz,
 
     // Check if the producer buffer configurations match what ImageReader configured.
     // We want to fail for the very first image because this case is too bad.
-    int outputWidth = buffer->crop.getWidth() + 1;
-    int outputHeight = buffer->crop.getHeight() + 1;
+    int outputWidth = buffer->width;
+    int outputHeight = buffer->height;
+
+    // Correct with/height when crop is set.
+    if (buffer->crop.getWidth() > 0) {
+        outputWidth = buffer->crop.getWidth() + 1;
+    }
+    if (buffer->crop.getHeight() > 0) {
+        outputHeight = buffer->crop.getHeight() + 1;
+    }
+
     int imageReaderWidth = ctx->getBufferWidth();
     int imageReaderHeight = ctx->getBufferHeight();
     if ((imageReaderWidth != outputWidth) ||
