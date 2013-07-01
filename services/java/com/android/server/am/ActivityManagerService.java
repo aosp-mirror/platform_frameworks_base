@@ -2007,7 +2007,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     ps.addCpuTimeLocked(st.rel_utime-otherUTime,
                                             st.rel_stime-otherSTime);
                                     ps.addSpeedStepTimes(cpuSpeedTimes);
-                                    pr.curCpuTime += (st.rel_utime+st.rel_stime) * 10;
                                 } else {
                                     BatteryStatsImpl.Uid.Proc ps =
                                             bstats.getProcessStatsLocked(st.name, st.pid);
