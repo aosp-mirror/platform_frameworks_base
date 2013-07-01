@@ -738,7 +738,8 @@
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <string name="imProtocolGoogleTalk" msgid="3808393979157698766">"„Google“ pokalbiai"</string>
+    <!-- no translation found for imProtocolGoogleTalk (493902321140277304) -->
+    <skip />
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"„Jabber“"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
