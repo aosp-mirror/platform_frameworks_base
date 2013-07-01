@@ -646,9 +646,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
         }
 
-        Slog.d(TAG, "openPanel: b9404689 setting isOpen true, st=" + st + " decorView="
-                + st.decorView);
-        st.isOpen = true;
         st.isHandled = false;
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
@@ -666,8 +663,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         lp.windowAnimations = st.windowAnimations;
-        
+
         wm.addView(st.decorView, lp);
+        Slog.d(TAG, "openPanel: b9404689 setting isOpen true, st=" + st + " decorView="
+                + st.decorView);
+        st.isOpen = true;
         // Log.v(TAG, "Adding main menu to window manager.");
     }
 
@@ -696,7 +696,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      */
     public final void closePanel(PanelFeatureState st, boolean doCallback) {
         // System.out.println("Close panel: isOpen=" + st.isOpen);
-        Slog.d(TAG, "closePanel: b9404689 entry, st=" + st + " decorView=" + st.decorView);
+        Slog.d(TAG, "closePanel: b9404689 entry, st=" + st + " isOpen=" + st.isOpen
+                + " decorView=" + st.decorView + " Callers=" + Debug.getCallers(4));
         if (doCallback && st.featureId == FEATURE_OPTIONS_PANEL &&
                 mActionBar != null && mActionBar.isOverflowMenuShowing()) {
             checkCloseActionMenu(st.menu);
@@ -717,6 +718,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (doCallback) {
                 callOnPanelClosed(st.featureId, st, null);
             }
+        } else {
+            Slog.d(TAG, "closePanel: b9404689 not removing wm=" + wm);
         }
 
         st.isPrepared = false;
