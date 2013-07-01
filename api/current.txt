@@ -31423,6 +31423,7 @@ package java.lang {
     method public static int getType(char);
     method public static int getType(int);
     method public static char highSurrogate(int);
+    method public static boolean isAlphabetic(int);
     method public static boolean isBmpCodePoint(int);
     method public static boolean isDefined(char);
     method public static boolean isDefined(int);
@@ -31433,6 +31434,7 @@ package java.lang {
     method public static boolean isISOControl(int);
     method public static boolean isIdentifierIgnorable(char);
     method public static boolean isIdentifierIgnorable(int);
+    method public static boolean isIdeographic(int);
     method public static boolean isJavaIdentifierPart(char);
     method public static boolean isJavaIdentifierPart(int);
     method public static boolean isJavaIdentifierStart(char);
