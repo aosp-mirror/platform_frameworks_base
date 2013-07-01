@@ -414,6 +414,10 @@
     <skip />
     <!-- no translation found for permdesc_removeTasks (1394714352062635493) -->
     <skip />
+    <!-- no translation found for permlab_manageActivityStacks (7391191384027303065) -->
+    <skip />
+    <!-- no translation found for permdesc_manageActivityStacks (1615881933034084440) -->
+    <skip />
     <!-- no translation found for permlab_startAnyActivity (2918768238045206456) -->
     <skip />
     <!-- no translation found for permdesc_startAnyActivity (997823695343584001) -->
@@ -1198,7 +1202,8 @@
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <string name="imProtocolGoogleTalk" msgid="3808393979157698766">"Google Talk"</string>
+    <!-- no translation found for imProtocolGoogleTalk (493902321140277304) -->
+    <skip />
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
@@ -2529,4 +2534,16 @@
     <skip />
     <!-- no translation found for mediaSize_na_tabloid (5775966416333578127) -->
     <skip />
+    <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
+    <skip />
+    <!-- no translation found for restr_pin_enter_pin (3395953421368476103) -->
+    <skip />
+    <!-- no translation found for restr_pin_confirm_pin (2891475237150965991) -->
+    <skip />
+    <!-- no translation found for restr_pin_error_doesnt_match (2224214190906994548) -->
+    <skip />
+    <!-- no translation found for restr_pin_error_too_short (8173982756265777792) -->
+    <skip />
+    <!-- no translation found for restr_pin_countdown:one (4835639969503729874) -->
+    <!-- no translation found for restr_pin_countdown:other (8030607343223287654) -->
 </resources>

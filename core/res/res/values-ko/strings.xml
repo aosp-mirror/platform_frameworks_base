@@ -279,6 +279,10 @@
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"앱이 사용자의 입력 없이 작업을 포그라운드나 백그라운드로 이동할 수 있도록 허용합니다."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"실행 중인 앱 중지"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"애플리케이션이 작업을 삭제하거나 다른 애플리케이션을 중지시킬 수 있도록 허용합니다. 이 경우 악성 애플리케이션이 다른 애플리케이션의 동작을 멈추게 할 수 있습니다."</string>
+    <!-- no translation found for permlab_manageActivityStacks (7391191384027303065) -->
+    <skip />
+    <!-- no translation found for permdesc_manageActivityStacks (1615881933034084440) -->
+    <skip />
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"원하는 활동 시작"</string>
     <string name="permdesc_startAnyActivity" msgid="997823695343584001">"권한 보호나 내보낸 상태에 관계없이 앱이 활동을 시작하도록 합니다."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"화면 호환성 설정"</string>
@@ -748,7 +752,8 @@
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <string name="imProtocolGoogleTalk" msgid="3808393979157698766">"Google 토크"</string>
+    <!-- no translation found for imProtocolGoogleTalk (493902321140277304) -->
+    <skip />
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
@@ -1467,7 +1472,7 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"잘못된 패턴"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"잘못된 비밀번호"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"잘못된 PIN"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"<xliff:g id="NUMBER">%1$d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"패턴 그리기"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"SIM PIN 입력"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"PIN 입력"</string>
@@ -1588,4 +1593,16 @@
     <skip />
     <!-- no translation found for mediaSize_na_tabloid (5775966416333578127) -->
     <skip />
+    <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
+    <skip />
+    <!-- no translation found for restr_pin_enter_pin (3395953421368476103) -->
+    <skip />
+    <!-- no translation found for restr_pin_confirm_pin (2891475237150965991) -->
+    <skip />
+    <!-- no translation found for restr_pin_error_doesnt_match (2224214190906994548) -->
+    <skip />
+    <!-- no translation found for restr_pin_error_too_short (8173982756265777792) -->
+    <skip />
+    <!-- no translation found for restr_pin_countdown:one (4835639969503729874) -->
+    <!-- no translation found for restr_pin_countdown:other (8030607343223287654) -->
 </resources>

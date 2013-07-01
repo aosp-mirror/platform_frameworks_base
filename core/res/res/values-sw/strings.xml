@@ -207,7 +207,7 @@
     <string name="permgrouplab_wallpaper" msgid="3850280158041175998">"Taswira"</string>
     <string name="permgroupdesc_wallpaper" msgid="5630417854750540154">"Badilisha mipangilio taswira ya kifaa."</string>
     <string name="permgrouplab_systemClock" msgid="406535759236612992">"Saa"</string>
-    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Badilisha muda wa kifaa au ukanda wa saa."</string>
+    <string name="permgroupdesc_systemClock" msgid="3944359833624094992">"Badilisha saa za kifaa au za eneo."</string>
     <string name="permgrouplab_statusBar" msgid="2095862568113945398">"Hali Upau"</string>
     <string name="permgroupdesc_statusBar" msgid="6242593432226807171">"Badilisha mipangilio ya upau wa hali ya kifaa."</string>
     <string name="permgrouplab_syncSettings" msgid="3341990986147826541">"Mipangilio ya Upatanishi"</string>
@@ -279,6 +279,10 @@
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Inaruhusu programu kusongesha kazi hadi kwenye mandhari-mbele na mandari nyuma. Programu inaweza kufanya haya bila ya maingizo yako."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"Komesha programu zinazoendeshwa"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Huruhusu programu kuondoa majukumu na kuua programu zao. Programu hasidi zinaweza kutatiza tabia ya programu zingine."</string>
+    <!-- no translation found for permlab_manageActivityStacks (7391191384027303065) -->
+    <skip />
+    <!-- no translation found for permdesc_manageActivityStacks (1615881933034084440) -->
+    <skip />
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"anzisha shughuli yoyote"</string>
     <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Huruhusu programu kuanzisha shughuli yoyote, pasi kujali ulinzi wa idhini au hali ya nje."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"weka utangamano wa skrini"</string>
@@ -549,7 +553,7 @@
     <string name="permlab_setTime" msgid="2021614829591775646">"weka muda"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Inaruhusu programu kubadilisha wakati wa saa ya kompyuta kibao."</string>
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Inaruhusu programu kubadilisha wakati wa saa ya simu."</string>
-    <string name="permlab_setTimeZone" msgid="2945079801013077340">"weka ukanda wa saa"</string>
+    <string name="permlab_setTimeZone" msgid="2945079801013077340">"weka saa za eneo"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Inaruhusu programu kubadilisha  majira ya saa ya kompyuta kibao."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Inaruhusu programu kubadilisha  majira ya saa ya simu."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"tenda kama Huduma ya Meneja wa Akaunti"</string>
@@ -748,7 +752,8 @@
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <string name="imProtocolGoogleTalk" msgid="3808393979157698766">"Google Talk"</string>
+    <!-- no translation found for imProtocolGoogleTalk (493902321140277304) -->
+    <skip />
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
@@ -1467,7 +1472,7 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"Mchoro Usio sahihi"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"Nenosiri Lisilo sahihi"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN isiyo sahihi"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Jaribu tena baada ya sekunde <xliff:g id="NUMBER">%d</xliff:g>."</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"Jaribu tena baada ya sekunde <xliff:g id="NUMBER">%1$d</xliff:g>."</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Chora ruwaza yako"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Ingiza PIN ya SIM"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"Ingiza PIN"</string>
@@ -1588,4 +1593,16 @@
     <skip />
     <!-- no translation found for mediaSize_na_tabloid (5775966416333578127) -->
     <skip />
+    <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
+    <skip />
+    <!-- no translation found for restr_pin_enter_pin (3395953421368476103) -->
+    <skip />
+    <!-- no translation found for restr_pin_confirm_pin (2891475237150965991) -->
+    <skip />
+    <!-- no translation found for restr_pin_error_doesnt_match (2224214190906994548) -->
+    <skip />
+    <!-- no translation found for restr_pin_error_too_short (8173982756265777792) -->
+    <skip />
+    <!-- no translation found for restr_pin_countdown:one (4835639969503729874) -->
+    <!-- no translation found for restr_pin_countdown:other (8030607343223287654) -->
 </resources>
