@@ -1,6 +1,4 @@
 <ul id="nav">
-
-
   <li class="nav-section">
     <div class="nav-section-header">
       <a href="<?cs var:toroot ?>training/index.html">
@@ -1074,6 +1072,29 @@ include the action bar on devices running Android 2.1 or higher."
           </li>
           <li><a href="<?cs var:toroot ?>training/keyboard-input/commands.html">
             Handling Keyboard Actions
+          </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/game-controllers/index.html"
+             description=
+             "How to write apps that support game controllers."
+            >Supporting Game Controllers</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/game-controllers/controller-input.html">
+            Handling Controller Actions
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/game-controllers/compatibility.html">
+            Supporting Controllers Across Android Versions
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/game-controllers/multiple-controllers.html">
+            Supporting Multiple Game Controllers
           </a>
           </li>
         </ul>
