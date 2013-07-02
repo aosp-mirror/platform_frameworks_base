@@ -41,6 +41,7 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     libui \
     libinput \
+    libinputservice \
     libskia \
     libgui \
     libusbhost \

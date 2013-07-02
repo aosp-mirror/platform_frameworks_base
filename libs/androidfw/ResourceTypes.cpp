@@ -5323,13 +5323,12 @@ bool ResTable::getIdmapInfo(const void* idmap, size_t sizeBytes,
 }
 
 
-#ifdef STATIC_ANDROIDFW_FOR_TOOLS
 #define CHAR16_TO_CSTR(c16, len) (String8(String16(c16,len)).string())
 
 #define CHAR16_ARRAY_EQ(constant, var, len) \
         ((len == (sizeof(constant)/sizeof(constant[0]))) && (0 == memcmp((var), (constant), (len))))
 
-void print_complex(uint32_t complex, bool isFraction)
+static void print_complex(uint32_t complex, bool isFraction)
 {
     const float MANTISSA_MULT =
         1.0f / (1<<Res_value::COMPLEX_MANTISSA_SHIFT);
@@ -5619,7 +5618,5 @@ void ResTable::print(bool inclValues) const
         }
     }
 }
-
-#endif // STATIC_ANDROIDFW_FOR_TOOLS
 
 }   // namespace android

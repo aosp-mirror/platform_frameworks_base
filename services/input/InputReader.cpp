@@ -42,8 +42,8 @@
 #include "InputReader.h"
 
 #include <cutils/log.h>
-#include <androidfw/Keyboard.h>
-#include <androidfw/VirtualKeyMap.h>
+#include <input/Keyboard.h>
+#include <input/VirtualKeyMap.h>
 
 #include <stddef.h>
 #include <stdlib.h>

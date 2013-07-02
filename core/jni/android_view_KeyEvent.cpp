@@ -20,7 +20,7 @@
 
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
-#include <androidfw/Input.h>
+#include <input/Input.h>
 #include "android_view_KeyEvent.h"
 
 namespace android {

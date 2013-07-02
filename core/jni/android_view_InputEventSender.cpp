@@ -29,7 +29,7 @@
 #include <utils/Looper.h>
 #include <utils/threads.h>
 #include <utils/KeyedVector.h>
-#include <androidfw/InputTransport.h>
+#include <input/InputTransport.h>
 #include "android_os_MessageQueue.h"
 #include "android_view_InputChannel.h"
 #include "android_view_KeyEvent.h"

@@ -194,6 +194,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libnetutils \
 	libui \
 	libgui \
+	libinput \
 	libcamera_client \
 	libskia \
 	libsqlite \

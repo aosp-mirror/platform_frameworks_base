@@ -21,9 +21,9 @@
 #include "PointerController.h"
 #include "InputListener.h"
 
-#include <androidfw/Input.h>
-#include <androidfw/VelocityControl.h>
-#include <androidfw/VelocityTracker.h>
+#include <input/Input.h>
+#include <input/VelocityControl.h>
+#include <input/VelocityTracker.h>
 #include <utils/KeyedVector.h>
 #include <utils/threads.h>
 #include <utils/Timers.h>

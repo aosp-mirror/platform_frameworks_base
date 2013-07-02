@@ -16,8 +16,8 @@
 
 #include <android_runtime/AndroidRuntime.h>
 
-#include <androidfw/KeyCharacterMap.h>
-#include <androidfw/Input.h>
+#include <input/KeyCharacterMap.h>
+#include <input/Input.h>
 #include <binder/Parcel.h>
 
 #include <nativehelper/jni.h>

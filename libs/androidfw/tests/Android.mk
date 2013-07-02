@@ -4,9 +4,6 @@ include $(CLEAR_VARS)
 
 # Build the unit tests.
 test_src_files := \
-    InputChannel_test.cpp \
-    InputEvent_test.cpp \
-    InputPublisherAndConsumer_test.cpp \
     ObbFile_test.cpp \
     ZipFileRO_test.cpp
 
@@ -14,10 +11,8 @@ shared_libraries := \
     libandroidfw \
     libcutils \
     libutils \
-    libbinder \
     libui \
-    libstlport \
-    libskia
+    libstlport
 
 static_libraries := \
     libgtest \
