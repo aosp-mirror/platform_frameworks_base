@@ -49,4 +49,5 @@ interface IUserManager {
     boolean changeRestrictionsPin(in String newPin);
     int checkRestrictionsPin(in String pin);
     boolean hasRestrictionsPin();
+    void removeRestrictions();
 }

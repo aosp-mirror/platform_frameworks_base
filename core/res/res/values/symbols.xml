@@ -214,8 +214,9 @@
   <java-symbol type="id" name="breadcrumb_section" />
   <java-symbol type="id" name="action_bar_spinner" />
   <java-symbol type="id" name="pin_message" />
-  <java-symbol type="id" name="pin1_text" />
-  <java-symbol type="id" name="pin2_text" />
+  <java-symbol type="id" name="pin_text" />
+  <java-symbol type="id" name="pin_new_text" />
+  <java-symbol type="id" name="pin_confirm_text" />
   <java-symbol type="id" name="pin_error_message" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
@@ -1157,7 +1158,8 @@
   <java-symbol type="layout" name="sms_short_code_confirmation_dialog" />
   <java-symbol type="layout" name="action_bar_up_container" />
   <java-symbol type="layout" name="app_not_authorized" />
-  <java-symbol type="layout" name="pin_challenge" />
+  <java-symbol type="layout" name="restrictions_pin_challenge" />
+  <java-symbol type="layout" name="restrictions_pin_setup" />
 
   <java-symbol type="anim" name="slide_in_child_bottom" />
   <java-symbol type="anim" name="slide_in_right" />

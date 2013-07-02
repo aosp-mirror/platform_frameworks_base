@@ -6189,9 +6189,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         PackageSetting pkgSetting;
         final int uid = Binder.getCallingUid();
         if (UserHandle.getUserId(uid) != userId) {
-            mContext.enforceCallingPermission(
+            mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
-                    "setApplicationBlocked for user " + userId);
+                    "setApplicationBlockedSetting for user " + userId);
         }
 
         if (blocked && isPackageDeviceAdmin(packageName, userId)) {
@@ -6224,6 +6224,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return true;
             }
             if (sendRemoved) {
+                killApplication(packageName, UserHandle.getUid(userId, pkgSetting.appId),
+                        "blocking pkg");
                 sendPackageBlockedForUser(packageName, pkgSetting, userId);
             }
         } finally {
@@ -10016,6 +10018,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
         }
+        sUserManager.systemReady();
     }
 
     public boolean isSafeMode() {
