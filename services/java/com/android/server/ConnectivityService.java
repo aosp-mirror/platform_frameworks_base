@@ -3564,6 +3564,16 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             timeOutMs = CheckMp.MAX_TIMEOUT_MS;
         }
 
+        // Check that mobile networks are supported
+        if (!isNetworkSupported(ConnectivityManager.TYPE_MOBILE)
+                || !isNetworkSupported(ConnectivityManager.TYPE_MOBILE_HIPRI)) {
+            log("checkMobileProvisioning: X no mobile network");
+            if (resultReceiver != null) {
+                resultReceiver.send(ConnectivityManager.CMP_RESULT_CODE_NO_CONNECTION, null);
+            }
+            return timeOutMs;
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             CheckMp checkMp = new CheckMp(mContext, this);
