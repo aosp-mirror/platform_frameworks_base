@@ -5,31 +5,12 @@ parent.link=index.html
 <style>
     h4.jd-details-title {background-color: #DEE8F1;}
 </style>
-<p>A UiObject is a representation of a user interface (UI) element. It is not in any way directly bound to a
- UI element as an object reference. A UiObject holds information to help it
- locate a matching UI element at runtime based on the <code><a href="UiSelector.html">UiSelector</a></code> properties specified in
- its constructor. Since a UiObject is a representative for a UI element, it can
- be reused for different views with matching UI elements.
-</p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="jd-descr">
-
+<p>A <code><a href="#">UiObject</a></code> is a representation of a view. It is
+not in any way directly bound to a view as an object reference. A <code><a href="#">UiObject</a></code>
+contains information to help it locate a matching view at runtime based on the
+<code><a href="#UiSelector.html">UiSelector</a></code> properties specified in
+its constructor. Once you create an instance of a UiObject, it can be reused for
+different views that match the selector criteria.</p>
 
 <h2>Summary</h2>
 
@@ -43,6 +24,63 @@ parent.link=index.html
 
 
 
+
+
+<!-- =========== ENUM CONSTANT SUMMARY =========== -->
+<table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="#FINGER_TOUCH_HALF_WIDTH">FINGER_TOUCH_HALF_WIDTH</a></td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="api" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="#SWIPE_MARGIN_LIMIT">SWIPE_MARGIN_LIMIT</a></td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="api" >
+        <td class="jd-typecol">long</td>
+        <td class="jd-linkcol"><a href="#WAIT_FOR_EVENT_TMEOUT">WAIT_FOR_EVENT_TMEOUT</a></td>
+        <td class="jd-descrcol" width="100%"><em>
+      This constant is deprecated.
+    use <code><a href="Configurator.html#setScrollAcknowledgmentTimeout(long)">setScrollAcknowledgmentTimeout(long)</a></code>
+</em></td>
+    </tr>
+
+
+    <tr class="api" >
+        <td class="jd-typecol">long</td>
+        <td class="jd-linkcol"><a href="#WAIT_FOR_SELECTOR_POLL">WAIT_FOR_SELECTOR_POLL</a></td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="api" >
+        <td class="jd-typecol">long</td>
+        <td class="jd-linkcol"><a href="#WAIT_FOR_SELECTOR_TIMEOUT">WAIT_FOR_SELECTOR_TIMEOUT</a></td>
+        <td class="jd-descrcol" width="100%"><em>
+      This constant is deprecated.
+    use <code><a href="Configurator.html#setWaitForSelectorTimeout(long)">setWaitForSelectorTimeout(long)</a></code>
+</em></td>
+    </tr>
+
+
+    <tr class="api" >
+        <td class="jd-typecol">long</td>
+        <td class="jd-linkcol"><a href="#WAIT_FOR_WINDOW_TMEOUT">WAIT_FOR_WINDOW_TMEOUT</a></td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+
+</table>
 
 
 
@@ -60,22 +98,22 @@ parent.link=index.html
 
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            </nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#UiObject(com.android.uiautomator.core.UiSelector)">UiObject</a></span>(<a href="UiSelector.html">UiSelector</a> selector)
-        
-        <div class="jd-descrdiv">Constructs a UiObject to represent a specific UI element matched by the specified
- <code><a href="UiSelector.html">UiSelector</a></code> selector properties.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#UiObject(com.android.uiautomator.core.UiSelector)">UiObject</a></span>(<a href="UiSelector.html">UiSelector</a> selector)</nobr>
+
+        <div class="jd-descrdiv">Constructs a UiObject to represent a view that matches the specified
+ selector criteria.</div>
+
   </td></tr>
 
 
@@ -92,642 +130,766 @@ parent.link=index.html
 
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            void
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#clearTextField()">clearTextField</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#clearTextField()">clearTextField</a></span>()</nobr>
+
         <div class="jd-descrdiv">Clears the existing text contents in an editable field.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#click()">click</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#click()">click</a></span>()</nobr>
+
         <div class="jd-descrdiv">Performs a click at the center of the visible bounds of the UI element represented
  by this UiObject.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#clickAndWaitForNewWindow(long)">clickAndWaitForNewWindow</a></span>(long timeout)
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#clickAndWaitForNewWindow(long)">clickAndWaitForNewWindow</a></span>(long timeout)</nobr>
+
         <div class="jd-descrdiv">Performs a click at the center of the visible bounds of the UI element represented
  by this UiObject and waits for window transitions.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#clickAndWaitForNewWindow()">clickAndWaitForNewWindow</a></span>()
-        
-        <div class="jd-descrdiv">See <code><a href="#clickAndWaitForNewWindow(long)">clickAndWaitForNewWindow(long)</a></code>
- This method is intended to reliably wait for window transitions that would typically take
- longer than the usual default timeouts.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#clickAndWaitForNewWindow()">clickAndWaitForNewWindow</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Waits for window transitions that would typically take longer than the
+ usual default timeouts.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#clickBottomRight()">clickBottomRight</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#clickBottomRight()">clickBottomRight</a></span>()</nobr>
+
         <div class="jd-descrdiv">Clicks the bottom and right corner of the UI element</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#clickTopLeft()">clickTopLeft</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#clickTopLeft()">clickTopLeft</a></span>()</nobr>
+
         <div class="jd-descrdiv">Clicks the top and left corner of the UI element</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#exists()">exists</a></span>()
-        
-        <div class="jd-descrdiv">Check if UI element exists.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#dragTo(com.android.uiautomator.core.UiObject, int)">dragTo</a></span>(<a href="#">UiObject</a> destObj, int steps)</nobr>
+
+        <div class="jd-descrdiv">Drags this object to a destination UiObject.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            Rect
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#getBounds()">getBounds</a></span>()
-        
-        <div class="jd-descrdiv">Returns the UI element's <code>bounds</code> property.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#dragTo(int, int, int)">dragTo</a></span>(int destX, int destY, int steps)</nobr>
+
+        <div class="jd-descrdiv">Drags this object to arbitrary coordinates.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            <a href="UiObject.html">UiObject</a>
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#getChild(com.android.uiautomator.core.UiSelector)">getChild</a></span>(<a href="UiSelector.html">UiSelector</a> selector)
-        
-        <div class="jd-descrdiv">Creates a new UiObject representing a child UI element of the element currently represented
- by this UiObject.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#exists()">exists</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Check if view exists.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            int
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            Rect</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#getChildCount()">getChildCount</a></span>()
-        
-        <div class="jd-descrdiv">Counts the child UI elements immediately under the UI element currently represented by
- this UiObject.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getBounds()">getBounds</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Returns the view's <code>bounds</code> property.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            String
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="#">UiObject</a></nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#getContentDescription()">getContentDescription</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getChild(com.android.uiautomator.core.UiSelector)">getChild</a></span>(<a href="UiSelector.html">UiSelector</a> selector)</nobr>
+
+        <div class="jd-descrdiv">Creates a new UiObject for a child view that is under the present UiObject.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getChildCount()">getChildCount</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Counts the child views immediately under the present UiObject.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getClassName()">getClassName</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Retrieves the <code>className</code> property of the UI element.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getContentDescription()">getContentDescription</a></span>()</nobr>
+
         <div class="jd-descrdiv">Reads the <code>content_desc</code> property of the UI element</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            <a href="UiObject.html">UiObject</a>
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="#">UiObject</a></nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#getFromParent(com.android.uiautomator.core.UiSelector)">getFromParent</a></span>(<a href="UiSelector.html">UiSelector</a> selector)
-        
-        <div class="jd-descrdiv">Creates a new UiObject representing a child UI element from the parent element currently
- represented by this object.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getFromParent(com.android.uiautomator.core.UiSelector)">getFromParent</a></span>(<a href="UiSelector.html">UiSelector</a> selector)</nobr>
+
+        <div class="jd-descrdiv">Creates a new UiObject for a sibling view or a child of the sibling view,
+ relative to the present UiObject.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            String
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#getPackageName()">getPackageName</a></span>()
-        
-        <div class="jd-descrdiv">Reads the UI element's <code>package</code> property</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getPackageName()">getPackageName</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Reads the view's <code>package</code> property</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
+        <td class="jd-typecol"><nobr>
+
+
             final
-            
-            
-            <a href="UiSelector.html">UiSelector</a>
+
+
+            <a href="UiSelector.html">UiSelector</a></nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#getSelector()">getSelector</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getSelector()">getSelector</a></span>()</nobr>
+
         <div class="jd-descrdiv">Debugging helper.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            String
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#getText()">getText</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getText()">getText</a></span>()</nobr>
+
         <div class="jd-descrdiv">Reads the <code>text</code> property of the UI element</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            Rect
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            Rect</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#getVisibleBounds()">getVisibleBounds</a></span>()
-        
-        <div class="jd-descrdiv">Returns the visible bounds of the UI element.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getVisibleBounds()">getVisibleBounds</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Returns the visible bounds of the view.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#isCheckable()">isCheckable</a></span>()
-        
-        <div class="jd-descrdiv">Check if the UI element's <code>checkable</code> property is currently true</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#isCheckable()">isCheckable</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Checks if the UI element's <code>checkable</code> property is currently true.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#isChecked()">isChecked</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#isChecked()">isChecked</a></span>()</nobr>
+
         <div class="jd-descrdiv">Check if the UI element's <code>checked</code> property is currently true</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#isClickable()">isClickable</a></span>()
-        
-        <div class="jd-descrdiv">Check if the UI element's <code>clickable</code> property is currently true</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#isClickable()">isClickable</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Checks if the UI element's <code>clickable</code> property is currently true.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#isEnabled()">isEnabled</a></span>()
-        
-        <div class="jd-descrdiv">Check if the UI element's <code>enabled</code> property is currently true</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#isEnabled()">isEnabled</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Checks if the UI element's <code>enabled</code> property is currently true.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#isFocusable()">isFocusable</a></span>()
-        
-        <div class="jd-descrdiv">Check if the UI element's <code>focusable</code> property is currently true</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#isFocusable()">isFocusable</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Check if the UI element's <code>focusable</code> property is currently true.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#isFocused()">isFocused</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#isFocused()">isFocused</a></span>()</nobr>
+
         <div class="jd-descrdiv">Check if the UI element's <code>focused</code> property is currently true</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#isLongClickable()">isLongClickable</a></span>()
-        
-        <div class="jd-descrdiv">Check if the UI element's <code>long-clickable</code> property is currently true</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#isLongClickable()">isLongClickable</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Check if the view's <code>long-clickable</code> property is currently true</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#isScrollable()">isScrollable</a></span>()
-        
-        <div class="jd-descrdiv">Check if the UI element's <code>scrollable</code> property is currently true</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#isScrollable()">isScrollable</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Check if the view's <code>scrollable</code> property is currently true</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#isSelected()">isSelected</a></span>()
-        
-        <div class="jd-descrdiv">Check if the UI element's <code>selected</code> property is currently true</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#isSelected()">isSelected</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Checks if the UI element's <code>selected</code> property is currently true.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#longClick()">longClick</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#longClick()">longClick</a></span>()</nobr>
+
         <div class="jd-descrdiv">Long clicks the center of the visible bounds of the UI element</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#longClickBottomRight()">longClickBottomRight</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#longClickBottomRight()">longClickBottomRight</a></span>()</nobr>
+
         <div class="jd-descrdiv">Long clicks bottom and right corner of the UI element</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#longClickTopLeft()">longClickTopLeft</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#longClickTopLeft()">longClickTopLeft</a></span>()</nobr>
+
         <div class="jd-descrdiv">Long clicks on the top and left corner of the UI element</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#setText(java.lang.String)">setText</a></span>(String text)
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#performMultiPointerGesture(android.view.MotionEvent.PointerCoords[]...)">performMultiPointerGesture</a></span>(PointerCoords... touches)</nobr>
+
+        <div class="jd-descrdiv">Performs a multi-touch gesture.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#performTwoPointerGesture(android.graphics.Point, android.graphics.Point, android.graphics.Point, android.graphics.Point, int)">performTwoPointerGesture</a></span>(Point startPoint1, Point startPoint2, Point endPoint1, Point endPoint2, int steps)</nobr>
+
+        <div class="jd-descrdiv">Generates a two-pointer gesture with arbitrary starting and ending points.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#pinchIn(int, int)">pinchIn</a></span>(int percent, int steps)</nobr>
+
+        <div class="jd-descrdiv">Performs a two-pointer gesture, where each pointer moves diagonally
+ toward the other, from the edges to the center of this UiObject .</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#pinchOut(int, int)">pinchOut</a></span>(int percent, int steps)</nobr>
+
+        <div class="jd-descrdiv">Performs a two-pointer gesture, where each pointer moves diagonally
+ opposite across the other, from the center out towards the edges of the
+ this UiObject.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#setText(java.lang.String)">setText</a></span>(String text)</nobr>
+
         <div class="jd-descrdiv">Sets the text in an editable field, after clearing the field's content.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#swipeDown(int)">swipeDown</a></span>(int steps)
-        
-        <div class="jd-descrdiv">Perform the action on the UI element that is represented by this object, Also see
- #scrollToBeginning(int), #scrollToEnd(int), #scrollBackward(),
- #scrollForward().</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#swipeDown(int)">swipeDown</a></span>(int steps)</nobr>
+
+        <div class="jd-descrdiv">Performs the swipe down action on the UiObject.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#swipeLeft(int)">swipeLeft</a></span>(int steps)
-        
-        <div class="jd-descrdiv">Perform the action on the UI element that is represented by this object.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#swipeLeft(int)">swipeLeft</a></span>(int steps)</nobr>
+
+        <div class="jd-descrdiv">Performs the swipe left action on the UiObject.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#swipeRight(int)">swipeRight</a></span>(int steps)
-        
-        <div class="jd-descrdiv">Perform the action on the UI element that is represented by this object.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#swipeRight(int)">swipeRight</a></span>(int steps)</nobr>
+
+        <div class="jd-descrdiv">Performs the swipe right action on the UiObject.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#swipeUp(int)">swipeUp</a></span>(int steps)
-        
-        <div class="jd-descrdiv">Perform the action on the UI element that is represented by this UiObject.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#swipeUp(int)">swipeUp</a></span>(int steps)</nobr>
+
+        <div class="jd-descrdiv">Performs the swipe up action on the UiObject.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#waitForExists(long)">waitForExists</a></span>(long timeout)
-        
-        <div class="jd-descrdiv">Waits a specified length of time for a UI element to become visible.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#waitForExists(long)">waitForExists</a></span>(long timeout)</nobr>
+
+        <div class="jd-descrdiv">Waits a specified length of time for a view to become visible.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#waitUntilGone(long)">waitUntilGone</a></span>(long timeout)
-        
-        <div class="jd-descrdiv">Waits a specified length of time for a UI element to become undetectable.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#waitUntilGone(long)">waitUntilGone</a></span>(long timeout)</nobr>
+
+        <div class="jd-descrdiv">Waits a specified length of time for a view to become undetectable.</div>
+
   </td></tr>
 
 
@@ -735,6 +897,34 @@ parent.link=index.html
 </table>
 
 
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="promethods" class="jd-sumtable"><tr><th colspan="12">Protected Methods</th></tr>
+
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            AccessibilityNodeInfo</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#findAccessibilityNodeInfo(long)">findAccessibilityNodeInfo</a></span>(long timeout)</nobr>
+
+        <div class="jd-descrdiv">Finds a matching UI element in the accessibility hierarchy, by
+ using the selector for this UiObject.</div>
+
+  </td></tr>
+
+
+
+</table>
 
 
 
@@ -746,7 +936,7 @@ parent.link=index.html
   <div style="clear:left;">Inherited Methods</div></th></tr>
 
 
-<tr class="api apilevel-" >
+<tr class="api" >
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
           ><img id="inherited-methods-java.lang.Object-trigger"
@@ -762,150 +952,182 @@ From class
   </div>
   <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
     <table class="jd-sumtable-expando">
-    
 
 
-	 
+
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            Object</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad">equals</span>(Object arg0)
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">clone</span>()</nobr>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">finalize</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
             final
-            
-            
-            Class&lt;?&gt;
+
+
+            Class&lt;?&gt;</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad">getClass</span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getClass</span>()</nobr>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            int
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            int</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad">hashCode</span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">hashCode</span>()</nobr>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
+        <td class="jd-typecol"><nobr>
+
+
             final
-            
-            
-            void
+
+
+            void</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad">notify</span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notify</span>()</nobr>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
+        <td class="jd-typecol"><nobr>
+
+
             final
-            
-            
-            void
+
+
+            void</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad">notifyAll</span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notifyAll</span>()</nobr>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            String
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad">toString</span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">toString</span>()</nobr>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
+        <td class="jd-typecol"><nobr>
+
+
             final
-            
-            
-            void
+
+
+            void</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad">wait</span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>()</nobr>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
+        <td class="jd-typecol"><nobr>
+
+
             final
-            
-            
-            void
+
+
+            void</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad">wait</span>(long arg0, int arg1)
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
+        <td class="jd-typecol"><nobr>
+
+
             final
-            
-            
-            void
+
+
+            void</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad">wait</span>(long arg0)
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0)</nobr>
+
   </td></tr>
 
 
@@ -938,6 +1160,251 @@ From class
 <!-- Constants -->
 
 
+<!-- ========= ENUM CONSTANTS DETAIL ======== -->
+<h2>Constants</h2>
+
+
+
+
+<A NAME="FINGER_TOUCH_HALF_WIDTH"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected
+        static
+        final
+        int
+      </span>
+        FINGER_TOUCH_HALF_WIDTH
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                20
+                (0x00000014)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="SWIPE_MARGIN_LIMIT"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected
+        static
+        final
+        int
+      </span>
+        SWIPE_MARGIN_LIMIT
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                5
+                (0x00000005)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="WAIT_FOR_EVENT_TMEOUT"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected
+        static
+        final
+        long
+      </span>
+        WAIT_FOR_EVENT_TMEOUT
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+      <p>
+  <p class="caution"><strong>
+      This constant is deprecated.</strong><br/>
+    use <code><a href="Configurator.html#setScrollAcknowledgmentTimeout(long)">setScrollAcknowledgmentTimeout(long)</a></code>
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                3000
+                (0x0000000000000bb8)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="WAIT_FOR_SELECTOR_POLL"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected
+        static
+        final
+        long
+      </span>
+        WAIT_FOR_SELECTOR_POLL
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                1000
+                (0x00000000000003e8)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="WAIT_FOR_SELECTOR_TIMEOUT"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected
+        static
+        final
+        long
+      </span>
+        WAIT_FOR_SELECTOR_TIMEOUT
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+      <p>
+  <p class="caution"><strong>
+      This constant is deprecated.</strong><br/>
+    use <code><a href="Configurator.html#setWaitForSelectorTimeout(long)">setWaitForSelectorTimeout(long)</a></code>
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                10000
+                (0x0000000000002710)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+<A NAME="WAIT_FOR_WINDOW_TMEOUT"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected
+        static
+        final
+        long
+      </span>
+        WAIT_FOR_WINDOW_TMEOUT
+    </h4>
+      <div class="api-level">
+
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+
+                5500
+                (0x000000000000157c)
+
+        </span>
+        </div>
+
+    </div>
+</div>
+
+
+
+
 <!-- Fields -->
 
 
@@ -949,33 +1416,31 @@ From class
 
 
 
-<a id="UiObject(com.android.uiautomator.core.UiSelector)"></a>
+<A NAME="UiObject(com.android.uiautomator.core.UiSelector)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
-        
+        public
+
+
+
+
+
       </span>
       <span class="sympad">UiObject</span>
       <span class="normal">(<a href="UiSelector.html">UiSelector</a> selector)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Constructs a UiObject to represent a specific UI element matched by the specified
- <code><a href="UiSelector.html">UiSelector</a></code> selector properties.</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Constructs a UiObject to represent a view that matches the specified
+ selector criteria.</p></div>
 
     </div>
 </div>
@@ -996,31 +1461,29 @@ From class
 
 
 
-<a id="clearTextField()"></a>
+<A NAME="clearTextField()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         void
       </span>
       <span class="sympad">clearTextField</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Clears the existing text contents in an editable field.
 
  The <code><a href="UiSelector.html">UiSelector</a></code> of this object must reference a UI element that is editable.
@@ -1037,7 +1500,8 @@ From class
  Also, not all editable fields support the long-press functionality.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1049,31 +1513,29 @@ From class
 </div>
 
 
-<a id="click()"></a>
+<A NAME="click()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">click</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Performs a click at the center of the visible bounds of the UI element represented
  by this UiObject.</p></div>
   <div class="jd-tagdata">
@@ -1082,7 +1544,8 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1094,31 +1557,29 @@ From class
 </div>
 
 
-<a id="clickAndWaitForNewWindow(long)"></a>
+<A NAME="clickAndWaitForNewWindow(long)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">clickAndWaitForNewWindow</span>
       <span class="normal">(long timeout)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Performs a click at the center of the visible bounds of the UI element represented
  by this UiObject and waits for window transitions.
 
@@ -1131,7 +1592,7 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>timeout</th>
+          <th>timeout</td>
           <td>timeout before giving up on waiting for a new window</td>
         </tr>
       </table>
@@ -1142,7 +1603,8 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1154,41 +1616,40 @@ From class
 </div>
 
 
-<a id="clickAndWaitForNewWindow()"></a>
+<A NAME="clickAndWaitForNewWindow()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">clickAndWaitForNewWindow</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>See <code><a href="#clickAndWaitForNewWindow(long)">clickAndWaitForNewWindow(long)</a></code>
- This method is intended to reliably wait for window transitions that would typically take
- longer than the usual default timeouts.</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Waits for window transitions that would typically take longer than the
+ usual default timeouts.
+ See <code><a href="#clickAndWaitForNewWindow(long)">clickAndWaitForNewWindow(long)</a></code></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>true if the event was triggered, else false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1200,31 +1661,29 @@ From class
 </div>
 
 
-<a id="clickBottomRight()"></a>
+<A NAME="clickBottomRight()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">clickBottomRight</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Clicks the bottom and right corner of the UI element</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1232,11 +1691,8 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
-        <tr>
-            <th>Exception</td>
-            <td></td>
-        </tr>  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1248,31 +1704,29 @@ From class
 </div>
 
 
-<a id="clickTopLeft()"></a>
+<A NAME="clickTopLeft()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">clickTopLeft</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Clicks the top and left corner of the UI element</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1280,11 +1734,8 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
-        <tr>
-            <th>Exception</td>
-            <td></td>
-        </tr>  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1296,134 +1747,243 @@ From class
 </div>
 
 
-<a id="exists()"></a>
+<A NAME="dragTo(com.android.uiautomator.core.UiObject, int)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">dragTo</span>
+      <span class="normal">(<a href="#">UiObject</a> destObj, int steps)</span>
+    </h4>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Drags this object to a destination UiObject.
+ The number of steps specified in your input parameter can influence the
+ drag speed, and varying speeds may impact the results. Consider
+ evaluating different speeds when using this method in your tests.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>destObj</td>
+          <td>the destination UiObject.</td>
+        </tr>
+        <tr>
+          <th>steps</td>
+          <td>usually 40 steps. You can increase or decrease the steps to change the speed.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+
+        <tr>
+            <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+ <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 18</li></ul>
+  </div>
+    </div>
+</div>
+
+
+<A NAME="dragTo(int, int, int)"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">dragTo</span>
+      <span class="normal">(int destX, int destY, int steps)</span>
+    </h4>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Drags this object to arbitrary coordinates.
+ The number of steps specified in your input parameter can influence the
+ drag speed, and varying speeds may impact the results. Consider
+ evaluating different speeds when using this method in your tests.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>destX</td>
+          <td>the X-axis coordinate.</td>
+        </tr>
+        <tr>
+          <th>destY</td>
+          <td>the Y-axis coordinate.</td>
+        </tr>
+        <tr>
+          <th>steps</td>
+          <td>usually 40 steps. You can increase or decrease the steps to change the speed.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if successful</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+
+        <tr>
+            <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 18</li></ul>
+  </div>
+    </div>
+</div>
+
+
+<A NAME="exists()"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">exists</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Check if UI element exists.
+
+  <div class="jd-tagdata jd-tagdescr"><p>Check if view exists.
 
  This methods performs a <code><a href="#waitForExists(long)">waitForExists(long)</a></code> with zero timeout. This
- basically returns immediately whether the UI element represented by this UiObject
- exists or not. If you need to wait longer for this UI element, then see
+ basically returns immediately whether the view represented by this UiObject
+ exists or not. If you need to wait longer for this view, then see
  <code><a href="#waitForExists(long)">waitForExists(long)</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if the UI element represented by this UiObject does exist
-</li></ul>
+      <ul class="nolist"><li>true if the view represented by this UiObject does exist</li></ul>
   </div>
 
     </div>
 </div>
 
 
-<a id="getBounds()"></a>
+<A NAME="getBounds()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         Rect
       </span>
       <span class="sympad">getBounds</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the UI element's <code>bounds</code> property. See <code><a href="#getVisibleBounds()">getVisibleBounds()</a></code></p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the view's <code>bounds</code> property. See <code><a href="#getVisibleBounds()">getVisibleBounds()</a></code></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>Rect</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
         </tr>
       </table>
   </div>
+
     </div>
 </div>
 
 
-<a id="getChild(com.android.uiautomator.core.UiSelector)"></a>
+<A NAME="getChild(com.android.uiautomator.core.UiSelector)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
-        <a href="UiObject.html">UiObject</a>
+        public
+
+
+
+
+        <a href="#">UiObject</a>
       </span>
       <span class="sympad">getChild</span>
       <span class="normal">(<a href="UiSelector.html">UiSelector</a> selector)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Creates a new UiObject representing a child UI element of the element currently represented
- by this UiObject.</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Creates a new UiObject for a child view that is under the present UiObject.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>selector</th>
-          <td>for UI element to match</td>
+          <th>selector</td>
+          <td>for child view to match</td>
         </tr>
       </table>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>a new UiObject representing the matched UI element
-</li></ul>
+      <ul class="nolist"><li>a new UiObject representing the child view</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1435,40 +1995,38 @@ From class
 </div>
 
 
-<a id="getChildCount()"></a>
+<A NAME="getChildCount()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         int
       </span>
       <span class="sympad">getChildCount</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Counts the child UI elements immediately under the UI element currently represented by
- this UiObject.</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Counts the child views immediately under the present UiObject.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>the count of child UI elements.</li></ul>
+      <ul class="nolist"><li>the count of child views.</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1480,31 +2038,68 @@ From class
 </div>
 
 
-<a id="getContentDescription()"></a>
+<A NAME="getClassName()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
+        String
+      </span>
+      <span class="sympad">getClassName</span>
+      <span class="normal">()</span>
+    </h4>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves the <code>className</code> property of the UI element.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>class name of the current node represented by this UiObject</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
+            <td>if no match was found</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 18</li></ul>
+  </div>
+    </div>
+</div>
+
+
+<A NAME="getContentDescription()"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
         String
       </span>
       <span class="sympad">getContentDescription</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Reads the <code>content_desc</code> property of the UI element</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1512,7 +2107,8 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1524,51 +2120,48 @@ From class
 </div>
 
 
-<a id="getFromParent(com.android.uiautomator.core.UiSelector)"></a>
+<A NAME="getFromParent(com.android.uiautomator.core.UiSelector)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
-        <a href="UiObject.html">UiObject</a>
+        public
+
+
+
+
+        <a href="#">UiObject</a>
       </span>
       <span class="sympad">getFromParent</span>
       <span class="normal">(<a href="UiSelector.html">UiSelector</a> selector)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Creates a new UiObject representing a child UI element from the parent element currently
- represented by this object. Essentially this is starting the search from the parent
- element and can also be used to find sibling UI elements to the one currently represented
- by this UiObject.</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Creates a new UiObject for a sibling view or a child of the sibling view,
+ relative to the present UiObject.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>selector</th>
-          <td>for the UI element to match</td>
+          <th>selector</td>
+          <td>for a sibling view or children of the sibling view</td>
         </tr>
       </table>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>a new UiObject representing the matched UI element</li></ul>
+      <ul class="nolist"><li>a new UiObject representing the matched view</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1580,39 +2173,38 @@ From class
 </div>
 
 
-<a id="getPackageName()"></a>
+<A NAME="getPackageName()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         String
       </span>
       <span class="sympad">getPackageName</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Reads the UI element's <code>package</code> property</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Reads the view's <code>package</code> property</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>true if it is else false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1624,68 +2216,63 @@ From class
 </div>
 
 
-<a id="getSelector()"></a>
+<A NAME="getSelector()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-        final 
-         
-         
+        public
+
+        final
+
+
         <a href="UiSelector.html">UiSelector</a>
       </span>
       <span class="sympad">getSelector</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Debugging helper. A test can dump the properties of a selector as a string
  to its logs if needed. <code>getSelector().toString();</code></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li><code><a href="UiSelector.html">UiSelector</a></code>
-</li></ul>
+      <ul class="nolist"><li><code><a href="UiSelector.html">UiSelector</a></code></li></ul>
   </div>
 
     </div>
 </div>
 
 
-<a id="getText()"></a>
+<A NAME="getText()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         String
       </span>
       <span class="sympad">getText</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Reads the <code>text</code> property of the UI element</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1693,11 +2280,10 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
-            <td>if no match could be found
-</td>
+            <td>if no match could be found</td>
         </tr>
       </table>
   </div>
@@ -1706,34 +2292,26 @@ From class
 </div>
 
 
-<a id="getVisibleBounds()"></a>
+<A NAME="getVisibleBounds()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         Rect
       </span>
       <span class="sympad">getVisibleBounds</span>
       <span class="normal">()</span>
     </h4>
-      <div class="api-level">
-        <div>
-
-</div>
-        
-  
-
-      </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the visible bounds of the UI element.
 
- If a portion of the UI element is visible, only the bounds of the visible portion are
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the visible bounds of the view.
+
+ If a portion of the view is visible, only the bounds of the visible portion are
  reported.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -1741,58 +2319,59 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
-        <tr>
-            <th></td>
-            <td>UiObjectNotFoundException</td>
-        </tr>  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
         </tr>
       </table>
   </div>
-   <div class="jd-tagdata">
-  <h5 class="jd-tagtitle">Since</h5>
-  <ul class="nolist"><li>Android API Level 17</li></ul>
-</div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">See Also</h5>
+      <ul class="nolist"><li><code><a href="#getBounds()">getBounds()</a></code></li>
+      </ul>
+  </div>
+  <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 17</li></ul>
+  </div>
     </div>
 </div>
 
 
-<a id="isCheckable()"></a>
+<A NAME="isCheckable()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">isCheckable</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Check if the UI element's <code>checkable</code> property is currently true</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Checks if the UI element's <code>checkable</code> property is currently true.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>true if it is else false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1804,40 +2383,37 @@ From class
 </div>
 
 
-<a id="isChecked()"></a>
+<A NAME="isChecked()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">isChecked</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Check if the UI element's <code>checked</code> property is currently true</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if it is else false
-</li></ul>
+      <ul class="nolist"><li>true if it is else false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1849,39 +2425,38 @@ From class
 </div>
 
 
-<a id="isClickable()"></a>
+<A NAME="isClickable()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">isClickable</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Check if the UI element's <code>clickable</code> property is currently true</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Checks if the UI element's <code>clickable</code> property is currently true.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>true if it is else false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1893,39 +2468,38 @@ From class
 </div>
 
 
-<a id="isEnabled()"></a>
+<A NAME="isEnabled()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">isEnabled</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Check if the UI element's <code>enabled</code> property is currently true</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Checks if the UI element's <code>enabled</code> property is currently true.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>true if it is else false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1937,39 +2511,38 @@ From class
 </div>
 
 
-<a id="isFocusable()"></a>
+<A NAME="isFocusable()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">isFocusable</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Check if the UI element's <code>focusable</code> property is currently true</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Check if the UI element's <code>focusable</code> property is currently true.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>true if it is else false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1981,31 +2554,29 @@ From class
 </div>
 
 
-<a id="isFocused()"></a>
+<A NAME="isFocused()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">isFocused</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Check if the UI element's <code>focused</code> property is currently true</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2013,7 +2584,8 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2025,39 +2597,38 @@ From class
 </div>
 
 
-<a id="isLongClickable()"></a>
+<A NAME="isLongClickable()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">isLongClickable</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Check if the UI element's <code>long-clickable</code> property is currently true</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Check if the view's <code>long-clickable</code> property is currently true</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>true if it is else false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2069,39 +2640,38 @@ From class
 </div>
 
 
-<a id="isScrollable()"></a>
+<A NAME="isScrollable()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">isScrollable</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Check if the UI element's <code>scrollable</code> property is currently true</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Check if the view's <code>scrollable</code> property is currently true</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>true if it is else false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2113,39 +2683,38 @@ From class
 </div>
 
 
-<a id="isSelected()"></a>
+<A NAME="isSelected()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">isSelected</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Check if the UI element's <code>selected</code> property is currently true</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Checks if the UI element's <code>selected</code> property is currently true.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>true if it is else false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2157,31 +2726,29 @@ From class
 </div>
 
 
-<a id="longClick()"></a>
+<A NAME="longClick()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">longClick</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Long clicks the center of the visible bounds of the UI element</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2189,7 +2756,8 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2201,31 +2769,29 @@ From class
 </div>
 
 
-<a id="longClickBottomRight()"></a>
+<A NAME="longClickBottomRight()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">longClickBottomRight</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Long clicks bottom and right corner of the UI element</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2233,7 +2799,8 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2245,31 +2812,29 @@ From class
 </div>
 
 
-<a id="longClickTopLeft()"></a>
+<A NAME="longClickTopLeft()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">longClickTopLeft</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Long clicks on the top and left corner of the UI element</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
@@ -2277,7 +2842,8 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2289,31 +2855,254 @@ From class
 </div>
 
 
-<a id="setText(java.lang.String)"></a>
+<A NAME="performMultiPointerGesture(android.view.MotionEvent.PointerCoords[]...)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">performMultiPointerGesture</span>
+      <span class="normal">(PointerCoords... touches)</span>
+    </h4>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs a multi-touch gesture. You must specify touch coordinates for
+ at least 2 pointers. Each pointer must have all of its touch steps
+ defined in an array of <code><a href="../../../../../reference/android/view/MotionEvent.PointerCoords.html">MotionEvent.PointerCoords</a></code>. You can use this method to
+ specify complex gestures, like circles and irregular shapes, where each
+ pointer may take a different path.
+
+ To create a single point on a pointer's touch path:
+ <code>
+       PointerCoords p = new PointerCoords();
+       p.x = stepX;
+       p.y = stepY;
+       p.pressure = 1;
+       p.size = 1;
+ </code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>touches</td>
+          <td>represents the pointers' paths. Each <code><a href="../../../../../reference/android/view/MotionEvent.PointerCoords.html">MotionEvent.PointerCoords</a></code>
+ array represents a different pointer. Each <code><a href="../../../../../reference/android/view/MotionEvent.PointerCoords.html">MotionEvent.PointerCoords</a></code> in an
+ array element represents a touch point on a pointer's path.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li><code>true</code> if all touch events for this gesture are injected successfully,
+         <code>false</code> otherwise</li></ul>
+  </div>
+  <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 18</li></ul>
+  </div>
+    </div>
+</div>
+
+
+<A NAME="performTwoPointerGesture(android.graphics.Point, android.graphics.Point, android.graphics.Point, android.graphics.Point, int)"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">performTwoPointerGesture</span>
+      <span class="normal">(Point startPoint1, Point startPoint2, Point endPoint1, Point endPoint2, int steps)</span>
+    </h4>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Generates a two-pointer gesture with arbitrary starting and ending points.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>startPoint1</td>
+          <td>start point of pointer 1</td>
+        </tr>
+        <tr>
+          <th>startPoint2</td>
+          <td>start point of pointer 2</td>
+        </tr>
+        <tr>
+          <th>endPoint1</td>
+          <td>end point of pointer 1</td>
+        </tr>
+        <tr>
+          <th>endPoint2</td>
+          <td>end point of pointer 2</td>
+        </tr>
+        <tr>
+          <th>steps</td>
+          <td>the number of steps for the gesture. Steps are injected
+ about 5 milliseconds apart, so 100 steps may take around 0.5 seconds to complete.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li><code>true</code> if all touch events for this gesture are injected successfully,
+         <code>false</code> otherwise</li></ul>
+  </div>
+  <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 18</li></ul>
+  </div>
+    </div>
+</div>
+
+
+<A NAME="pinchIn(int, int)"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">pinchIn</span>
+      <span class="normal">(int percent, int steps)</span>
+    </h4>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs a two-pointer gesture, where each pointer moves diagonally
+ toward the other, from the edges to the center of this UiObject .</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>percent</td>
+          <td>percentage of the object's diagonal length for the pinch gesture</td>
+        </tr>
+        <tr>
+          <th>steps</td>
+          <td>the number of steps for the gesture. Steps are injected
+ about 5 milliseconds apart, so 100 steps may take around 0.5 seconds to complete.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li><code>true</code> if all touch events for this gesture are injected successfully,
+         <code>false</code> otherwise</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+
+        <tr>
+            <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 18</li></ul>
+  </div>
+    </div>
+</div>
+
+
+<A NAME="pinchOut(int, int)"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">pinchOut</span>
+      <span class="normal">(int percent, int steps)</span>
+    </h4>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs a two-pointer gesture, where each pointer moves diagonally
+ opposite across the other, from the center out towards the edges of the
+ this UiObject.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>percent</td>
+          <td>percentage of the object's diagonal length for the pinch gesture</td>
+        </tr>
+        <tr>
+          <th>steps</td>
+          <td>the number of steps for the gesture. Steps are injected
+ about 5 milliseconds apart, so 100 steps may take around 0.5 seconds to complete.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li><code>true</code> if all touch events for this gesture are injected successfully,
+         <code>false</code> otherwise</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+
+        <tr>
+            <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 18</li></ul>
+  </div>
+    </div>
+</div>
+
+
+<A NAME="setText(java.lang.String)"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">setText</span>
       <span class="normal">(String text)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
+
   <div class="jd-tagdata jd-tagdescr"><p>Sets the text in an editable field, after clearing the field's content.
 
  The <code><a href="UiSelector.html">UiSelector</a></code> selector of this object must reference a UI element that is editable.
@@ -2328,7 +3117,7 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>text</th>
+          <th>text</td>
           <td>string to set</td>
         </tr>
       </table>
@@ -2339,7 +3128,8 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2351,41 +3141,44 @@ From class
 </div>
 
 
-<a id="swipeDown(int)"></a>
+<A NAME="swipeDown(int)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">swipeDown</span>
       <span class="normal">(int steps)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Perform the action on the UI element that is represented by this object, Also see
- #scrollToBeginning(int), #scrollToEnd(int), #scrollBackward(),
- #scrollForward(). This method will perform the swipe gesture over any
- surface. The targeted UI element does not need to have the attribute
- <code>scrollable</code> set to <code>true</code> for this operation to be performed.</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs the swipe down action on the UiObject.
+ The swipe gesture can be performed over any surface. The targeted
+ UI element does not need to be scrollable.
+ See also:
+ <ul>
+ <li><code><a href="UiScrollable.html#scrollToBeginning(int)">scrollToBeginning(int)</a></code></li>
+ <li><code><a href="UiScrollable.html#scrollToEnd(int)">scrollToEnd(int)</a></code></li>
+ <li><code><a href="UiScrollable.html#scrollBackward()">scrollBackward()</a></code></li>
+ <li><code><a href="UiScrollable.html#scrollForward()">scrollForward()</a></code></li>
+ </ul></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>steps</th>
+          <th>steps</td>
           <td>indicates the number of injected move steps into the system. Steps are
  injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.</td>
         </tr>
@@ -2397,7 +3190,8 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2409,41 +3203,44 @@ From class
 </div>
 
 
-<a id="swipeLeft(int)"></a>
+<A NAME="swipeLeft(int)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">swipeLeft</span>
       <span class="normal">(int steps)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Perform the action on the UI element that is represented by this object. Also see
- #scrollToBeginning(int), #scrollToEnd(int), #scrollBackward(),
- #scrollForward(). This method will perform the swipe gesture over any
- surface. The targeted UI element does not need to have the attribute
- <code>scrollable</code> set to <code>true</code> for this operation to be performed.</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs the swipe left action on the UiObject.
+ The swipe gesture can be performed over any surface. The targeted
+ UI element does not need to be scrollable.
+ See also:
+ <ul>
+ <li><code><a href="UiScrollable.html#scrollToBeginning(int)">scrollToBeginning(int)</a></code></li>
+ <li><code><a href="UiScrollable.html#scrollToEnd(int)">scrollToEnd(int)</a></code></li>
+ <li><code><a href="UiScrollable.html#scrollBackward()">scrollBackward()</a></code></li>
+ <li><code><a href="UiScrollable.html#scrollForward()">scrollForward()</a></code></li>
+ </ul></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>steps</th>
+          <th>steps</td>
           <td>indicates the number of injected move steps into the system. Steps are
  injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.</td>
         </tr>
@@ -2455,7 +3252,8 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2467,41 +3265,44 @@ From class
 </div>
 
 
-<a id="swipeRight(int)"></a>
+<A NAME="swipeRight(int)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">swipeRight</span>
       <span class="normal">(int steps)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Perform the action on the UI element that is represented by this object. Also see
- #scrollToBeginning(int), #scrollToEnd(int), #scrollBackward(),
- #scrollForward(). This method will perform the swipe gesture over any
- surface. The targeted UI element does not need to have the attribute
- <code>scrollable</code> set to <code>true</code> for this operation to be performed.</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs the swipe right action on the UiObject.
+ The swipe gesture can be performed over any surface. The targeted
+ UI element does not need to be scrollable.
+ See also:
+ <ul>
+ <li><code><a href="UiScrollable.html#scrollToBeginning(int)">scrollToBeginning(int)</a></code></li>
+ <li><code><a href="UiScrollable.html#scrollToEnd(int)">scrollToEnd(int)</a></code></li>
+ <li><code><a href="UiScrollable.html#scrollBackward()">scrollBackward()</a></code></li>
+ <li><code><a href="UiScrollable.html#scrollForward()">scrollForward()</a></code></li>
+ </ul></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>steps</th>
+          <th>steps</td>
           <td>indicates the number of injected move steps into the system. Steps are
  injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.</td>
         </tr>
@@ -2513,7 +3314,8 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2525,39 +3327,42 @@ From class
 </div>
 
 
-<a id="swipeUp(int)"></a>
+<A NAME="swipeUp(int)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">swipeUp</span>
       <span class="normal">(int steps)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Perform the action on the UI element that is represented by this UiObject. Also see
- #scrollToBeginning(int), #scrollToEnd(int), #scrollBackward(),
- #scrollForward().</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs the swipe up action on the UiObject.
+ See also:
+ <ul>
+ <li><code><a href="UiScrollable.html#scrollToBeginning(int)">scrollToBeginning(int)</a></code></li>
+ <li><code><a href="UiScrollable.html#scrollToEnd(int)">scrollToEnd(int)</a></code></li>
+ <li><code><a href="UiScrollable.html#scrollBackward()">scrollBackward()</a></code></li>
+ <li><code><a href="UiScrollable.html#scrollForward()">scrollForward()</a></code></li>
+ </ul></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>steps</th>
+          <th>steps</td>
           <td>indicates the number of injected move steps into the system. Steps are
  injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.</td>
         </tr>
@@ -2569,7 +3374,8 @@ From class
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2581,86 +3387,81 @@ From class
 </div>
 
 
-<a id="waitForExists(long)"></a>
+<A NAME="waitForExists(long)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">waitForExists</span>
       <span class="normal">(long timeout)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Waits a specified length of time for a UI element to become visible.
 
- This method waits until the UI element becomes visible on the display, or
+  <div class="jd-tagdata jd-tagdescr"><p>Waits a specified length of time for a view to become visible.
+
+ This method waits until the view becomes visible on the display, or
  until the timeout has elapsed. You can use this method in situations where
  the content that you want to select is not immediately displayed.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>timeout</th>
+          <th>timeout</td>
           <td>the amount of time to wait (in milliseconds)</td>
         </tr>
       </table>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if the UI element is displayed, else false if timeout elapsed while waiting
-</li></ul>
+      <ul class="nolist"><li>true if the view is displayed, else false if timeout elapsed while waiting</li></ul>
   </div>
 
     </div>
 </div>
 
 
-<a id="waitUntilGone(long)"></a>
+<A NAME="waitUntilGone(long)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">waitUntilGone</span>
       <span class="normal">(long timeout)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Waits a specified length of time for a UI element to become undetectable.
 
- This method waits until a UI element is no longer matchable, or until the
+  <div class="jd-tagdata jd-tagdescr"><p>Waits a specified length of time for a view to become undetectable.
+
+ This method waits until a view is no longer matchable, or until the
  timeout has elapsed.
 
- A UI element becomes undetectable when the <code><a href="UiSelector.html">UiSelector</a></code> of the object is
+ A view becomes undetectable when the <code><a href="UiSelector.html">UiSelector</a></code> of the object is
  unable to find a match because the element has either changed its state or is no
  longer displayed.
 
@@ -2670,7 +3471,7 @@ From class
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>timeout</th>
+          <th>timeout</td>
           <td>time to wait (in milliseconds)</td>
         </tr>
       </table>
@@ -2678,10 +3479,65 @@ From class
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>true if the element is gone before timeout elapsed, else false if timeout elapsed
- but a matching element is still found.
-</li></ul>
+ but a matching element is still found.</li></ul>
   </div>
 
     </div>
 </div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+<h2>Protected Methods</h2>
+
+
+
+<A NAME="findAccessibilityNodeInfo(long)"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected
+
+
+
+
+        AccessibilityNodeInfo
+      </span>
+      <span class="sympad">findAccessibilityNodeInfo</span>
+      <span class="normal">(long timeout)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Finds a matching UI element in the accessibility hierarchy, by
+ using the selector for this UiObject.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>timeout</td>
+          <td>in milliseconds</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>AccessibilityNodeInfo if found else null</li></ul>
+  </div>
+
+    </div>
+
+
+
+
+
 
