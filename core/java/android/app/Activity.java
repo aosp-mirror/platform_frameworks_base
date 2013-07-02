@@ -686,6 +686,7 @@ public class Activity extends ContextThemeWrapper
     boolean mFinished;
     boolean mStartedActivity;
     private boolean mDestroyed;
+    private boolean mDoReportFullyDrawn = true;
     /** true if the activity is going through a transient pause */
     /*package*/ boolean mTemporaryPause = false;
     /** true if the activity is being destroyed in order to recreate it with a new configuration */
@@ -1446,6 +1447,27 @@ public class Activity extends ContextThemeWrapper
         }
 
         getApplication().dispatchActivityDestroyed(this);
+    }
+
+    /**
+     * Report to the system that your app is now fully drawn.  This is only used
+     * to help instrument app launch times, so that the app can report when it is
+     * fully in a usable state; without this, all the system can determine is when
+     * its window is first drawn and displayed.  To participate in app launch time
+     * measurement, you should always call this method after first launch (when
+     * {@link #onCreate(android.os.Bundle)} is called) at the point where you have
+     * entirely drawn your UI and populated with all of the significant data.  You
+     * can safely call this method any time after first launch as well, in which case
+     * it will simply be ignored.
+     */
+    public void reportFullyDrawn() {
+        if (mDoReportFullyDrawn) {
+            mDoReportFullyDrawn = false;
+            try {
+                ActivityManagerNative.getDefault().reportActivityFullyDrawn(mToken);
+            } catch (RemoteException e) {
+            }
+        }
     }
 
     /**
@@ -5252,6 +5274,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     final void performPause() {
+        mDoReportFullyDrawn = false;
         mFragments.dispatchPause();
         mCalled = false;
         onPause();
@@ -5271,6 +5294,7 @@ public class Activity extends ContextThemeWrapper
     }
     
     final void performStop() {
+        mDoReportFullyDrawn = false;
         if (mLoadersStarted) {
             mLoadersStarted = false;
             if (mLoaderManager != null) {

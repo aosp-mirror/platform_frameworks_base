@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.os.Trace;
 import com.android.internal.app.ResolverActivity;
 import com.android.server.AttributeCache;
 import com.android.server.am.ActivityStack.ActivityState;
@@ -92,7 +93,8 @@ final class ActivityRecord {
     int windowFlags;        // custom window flags for preview window.
     TaskRecord task;        // the task this is in.
     ThumbnailHolder thumbHolder; // where our thumbnails should go.
-    long launchTime;        // when we starting launching this activity
+    long displayStartTime;  // when we started launching this activity
+    long fullyDrawnStartTime; // when we started launching this activity
     long startTime;         // last time this activity was started
     long lastVisibleTime;   // last time this activity became visible
     long cpuTimeAtResume;   // the cpu time of host process at the time of resuming activity
@@ -247,10 +249,10 @@ final class ActivityRecord {
                     pw.print(" desc="); pw.print(thumbHolder.lastDescription);
                 }
                 pw.println();
-        if (launchTime != 0 || startTime != 0) {
-            pw.print(prefix); pw.print("launchTime=");
-                    if (launchTime == 0) pw.print("0");
-                    else TimeUtils.formatDuration(launchTime, now, pw);
+        if (displayStartTime != 0 || startTime != 0) {
+            pw.print(prefix); pw.print("displayStartTime=");
+                    if (displayStartTime == 0) pw.print("0");
+                    else TimeUtils.formatDuration(displayStartTime, now, pw);
                     pw.print(" startTime=");
                     if (startTime == 0) pw.print("0");
                     else TimeUtils.formatDuration(startTime, now, pw);
@@ -807,37 +809,77 @@ final class ActivityRecord {
         }
     }
 
+    public void reportFullyDrawnLocked() {
+        final long curTime = SystemClock.uptimeMillis();
+        if (displayStartTime != 0) {
+            reportLaunchTimeLocked(curTime);
+        }
+        if (fullyDrawnStartTime != 0) {
+            final ActivityStack stack = task.stack;
+            final long thisTime = curTime - fullyDrawnStartTime;
+            final long totalTime = stack.mFullyDrawnStartTime != 0
+                    ? (curTime - stack.mFullyDrawnStartTime) : thisTime;
+            if (ActivityManagerService.SHOW_ACTIVITY_START_TIME) {
+                Trace.traceCounter(Trace.TRACE_TAG_ACTIVITY_MANAGER, "fully-drawn", (int)totalTime);
+                EventLog.writeEvent(EventLogTags.AM_ACTIVITY_FULLY_DRAWN_TIME,
+                        userId, System.identityHashCode(this), shortComponentName,
+                        thisTime, totalTime);
+                StringBuilder sb = service.mStringBuilder;
+                sb.setLength(0);
+                sb.append("Fully drawn ");
+                sb.append(shortComponentName);
+                sb.append(": ");
+                TimeUtils.formatDuration(thisTime, sb);
+                if (thisTime != totalTime) {
+                    sb.append(" (total ");
+                    TimeUtils.formatDuration(totalTime, sb);
+                    sb.append(")");
+                }
+                Log.i(ActivityManagerService.TAG, sb.toString());
+            }
+            if (totalTime > 0) {
+                service.mUsageStatsService.noteFullyDrawnTime(realActivity, (int) totalTime);
+            }
+            fullyDrawnStartTime = 0;
+            stack.mFullyDrawnStartTime = 0;
+        }
+    }
+
+    private void reportLaunchTimeLocked(final long curTime) {
+        final ActivityStack stack = task.stack;
+        final long thisTime = curTime - displayStartTime;
+        final long totalTime = stack.mLaunchStartTime != 0
+                ? (curTime - stack.mLaunchStartTime) : thisTime;
+        if (ActivityManagerService.SHOW_ACTIVITY_START_TIME) {
+            Trace.traceCounter(Trace.TRACE_TAG_ACTIVITY_MANAGER, "launch", (int)totalTime);
+            EventLog.writeEvent(EventLogTags.AM_ACTIVITY_LAUNCH_TIME,
+                    userId, System.identityHashCode(this), shortComponentName,
+                    thisTime, totalTime);
+            StringBuilder sb = service.mStringBuilder;
+            sb.setLength(0);
+            sb.append("Displayed ");
+            sb.append(shortComponentName);
+            sb.append(": ");
+            TimeUtils.formatDuration(thisTime, sb);
+            if (thisTime != totalTime) {
+                sb.append(" (total ");
+                TimeUtils.formatDuration(totalTime, sb);
+                sb.append(")");
+            }
+            Log.i(ActivityManagerService.TAG, sb.toString());
+        }
+        mStackSupervisor.reportActivityLaunchedLocked(false, this, thisTime, totalTime);
+        if (totalTime > 0) {
+            service.mUsageStatsService.noteLaunchTime(realActivity, (int)totalTime);
+        }
+        displayStartTime = 0;
+        stack.mLaunchStartTime = 0;
+    }
+
     public void windowsDrawn() {
         synchronized(service) {
-            if (launchTime != 0) {
-                final ActivityStack stack = task.stack;
-                final long curTime = SystemClock.uptimeMillis();
-                final long thisTime = curTime - launchTime;
-                final long totalTime = stack.mInitialStartTime != 0
-                        ? (curTime - stack.mInitialStartTime) : thisTime;
-                if (ActivityManagerService.SHOW_ACTIVITY_START_TIME) {
-                    EventLog.writeEvent(EventLogTags.AM_ACTIVITY_LAUNCH_TIME,
-                            userId, System.identityHashCode(this), shortComponentName,
-                            thisTime, totalTime);
-                    StringBuilder sb = service.mStringBuilder;
-                    sb.setLength(0);
-                    sb.append("Displayed ");
-                    sb.append(shortComponentName);
-                    sb.append(": ");
-                    TimeUtils.formatDuration(thisTime, sb);
-                    if (thisTime != totalTime) {
-                        sb.append(" (total ");
-                        TimeUtils.formatDuration(totalTime, sb);
-                        sb.append(")");
-                    }
-                    Log.i(ActivityManagerService.TAG, sb.toString());
-                }
-                mStackSupervisor.reportActivityLaunchedLocked(false, this, thisTime, totalTime);
-                if (totalTime > 0) {
-                    service.mUsageStatsService.noteLaunchTime(realActivity, (int)totalTime);
-                }
-                launchTime = 0;
-                stack.mInitialStartTime = 0;
+            if (displayStartTime != 0) {
+                reportLaunchTimeLocked(SystemClock.uptimeMillis());
             }
             startTime = 0;
             finishLaunchTickingLocked();
