@@ -279,6 +279,10 @@
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"允許應用程式將工作移至前景或背景。應用程式可以自行處理，不待您操作。"</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"停止執行中的應用程式"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"允許應用程式移除工作並終止執行工作的應用程式。請注意，惡意應用程式可能利用此功能干擾其他應用程式的行為。"</string>
+    <!-- no translation found for permlab_manageActivityStacks (7391191384027303065) -->
+    <skip />
+    <!-- no translation found for permdesc_manageActivityStacks (1615881933034084440) -->
+    <skip />
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"啟動任何活動"</string>
     <string name="permdesc_startAnyActivity" msgid="997823695343584001">"不論權限保護或匯出狀態為何，一律允許應用程式啟動任何活動。"</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"設定螢幕相容性"</string>
@@ -748,7 +752,8 @@
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <string name="imProtocolGoogleTalk" msgid="3808393979157698766">"Google Talk"</string>
+    <!-- no translation found for imProtocolGoogleTalk (493902321140277304) -->
+    <skip />
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"網路會議"</string>
@@ -1467,7 +1472,7 @@
     <string name="kg_wrong_pattern" msgid="1850806070801358830">"圖形錯誤"</string>
     <string name="kg_wrong_password" msgid="2333281762128113157">"密碼錯誤"</string>
     <string name="kg_wrong_pin" msgid="1131306510833563801">"PIN 錯誤"</string>
-    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"請在 <xliff:g id="NUMBER">%d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_too_many_failed_attempts_countdown" msgid="6358110221603297548">"請在 <xliff:g id="NUMBER">%1$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"畫出圖形"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"輸入 SIM PIN"</string>
     <string name="kg_pin_instructions" msgid="2377242233495111557">"輸入 PIN"</string>
@@ -1588,4 +1593,16 @@
     <skip />
     <!-- no translation found for mediaSize_na_tabloid (5775966416333578127) -->
     <skip />
+    <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
+    <skip />
+    <!-- no translation found for restr_pin_enter_pin (3395953421368476103) -->
+    <skip />
+    <!-- no translation found for restr_pin_confirm_pin (2891475237150965991) -->
+    <skip />
+    <!-- no translation found for restr_pin_error_doesnt_match (2224214190906994548) -->
+    <skip />
+    <!-- no translation found for restr_pin_error_too_short (8173982756265777792) -->
+    <skip />
+    <!-- no translation found for restr_pin_countdown:one (4835639969503729874) -->
+    <!-- no translation found for restr_pin_countdown:other (8030607343223287654) -->
 </resources>
