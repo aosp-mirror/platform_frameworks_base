@@ -53,7 +53,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -69,6 +69,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
     private static final int ELAPSED_REALTIME_WAKEUP_MASK = 1 << AlarmManager.ELAPSED_REALTIME_WAKEUP; 
     private static final int ELAPSED_REALTIME_MASK = 1 << AlarmManager.ELAPSED_REALTIME;
     private static final int TIME_CHANGED_MASK = 1 << 16;
+    private static final int IS_WAKEUP_MASK = RTC_WAKEUP_MASK|ELAPSED_REALTIME_WAKEUP_MASK;
 
     // Alignment quantum for inexact repeating alarms
     private static final long QUANTUM = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
@@ -82,6 +83,8 @@ class AlarmManagerService extends IAlarmManager.Stub {
     private static final Intent mBackgroundIntent
             = new Intent().addFlags(Intent.FLAG_FROM_BACKGROUND);
     
+    private static final boolean WAKEUP_STATS = true;
+
     private final Context mContext;
 
     private final LocalLog mLog = new LocalLog(TAG);
@@ -105,6 +108,21 @@ class AlarmManagerService extends IAlarmManager.Stub {
     private final ResultReceiver mResultReceiver = new ResultReceiver();
     private final PendingIntent mTimeTickSender;
     private final PendingIntent mDateChangeSender;
+
+    class WakeupEvent {
+        public long when;
+        public int uid;
+        public String action;
+
+        public WakeupEvent(long theTime, int theUid, String theAction) {
+            when = theTime;
+            uid = theUid;
+            action = theAction;
+        }
+    }
+
+    private final LinkedList<WakeupEvent> mRecentWakeups = new LinkedList<WakeupEvent>();
+    private final long RECENT_WAKEUP_PERIOD = 1000L * 60 * 60 * 24; // one day
 
     private static final class InFlight extends Intent {
         final PendingIntent mPendingIntent;
@@ -640,6 +658,27 @@ class AlarmManagerService extends IAlarmManager.Stub {
                             pw.println();
                 }
             }
+
+            if (WAKEUP_STATS) {
+                pw.println();
+                pw.println("  Recent Wakeup History:");
+                final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd-HH:mm:ss.SSS");
+                long last = -1;
+                for (WakeupEvent event : mRecentWakeups) {
+                    pw.print("    "); pw.print(sdf.format(new Date(event.when)));
+                    pw.print('|');
+                    if (last < 0) {
+                        pw.print('0');
+                    } else {
+                        pw.print(event.when - last);
+                    }
+                    last = event.when;
+                    pw.print('|'); pw.print(event.uid);
+                    pw.print('|'); pw.print(event.action);
+                    pw.println();
+                }
+                pw.println();
+            }
         }
     }
 
@@ -775,7 +814,20 @@ class AlarmManagerService extends IAlarmManager.Stub {
             pw.print(prefix); pw.print("operation="); pw.println(operation);
         }
     }
-    
+
+    void recordWakeupAlarms(ArrayList<Alarm> alarms, long now, long skewToRTC) {
+        for (Alarm a : alarms) {
+            if (a.when > now) {
+                break;
+            }
+
+            WakeupEvent e = new WakeupEvent(now + skewToRTC,
+                    a.operation.getCreatorUid(),
+                    a.operation.getIntent().getAction());
+            mRecentWakeups.add(e);
+        }
+    }
+
     private class AlarmThread extends Thread
     {
         public AlarmThread()
@@ -808,6 +860,27 @@ class AlarmManagerService extends IAlarmManager.Stub {
                     if (localLOGV) Slog.v(
                         TAG, "Checking for alarms... rtc=" + nowRTC
                         + ", elapsed=" + nowELAPSED);
+
+                    if (WAKEUP_STATS) {
+                        if ((result & IS_WAKEUP_MASK) != 0) {
+                            long newEarliest = nowRTC - RECENT_WAKEUP_PERIOD;
+                            int n = 0;
+                            for (WakeupEvent event : mRecentWakeups) {
+                                if (event.when > newEarliest) break;
+                                n++; // number of now-stale entries at the list head
+                            }
+                            for (int i = 0; i < n; i++) {
+                                mRecentWakeups.remove();
+                            }
+
+                            recordWakeupAlarms(mRtcWakeupAlarms,
+                                    nowRTC,
+                                    0);
+                            recordWakeupAlarms(mElapsedRealtimeWakeupAlarms,
+                                    nowELAPSED,
+                                    nowRTC - nowELAPSED);
+                        }
+                    }
 
                     if ((result & RTC_WAKEUP_MASK) != 0)
                         triggerAlarmsLocked(mRtcWakeupAlarms, triggerList, nowRTC);
