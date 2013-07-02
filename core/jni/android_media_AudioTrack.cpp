@@ -728,6 +728,19 @@ static jint android_media_AudioTrack_get_position(JNIEnv *env,  jobject thiz) {
 
 
 // ----------------------------------------------------------------------------
+static jint android_media_AudioTrack_get_latency(JNIEnv *env,  jobject thiz) {
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+
+    if (lpTrack == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+            "Unable to retrieve AudioTrack pointer for latency()");
+        return AUDIOTRACK_ERROR;
+    }
+    return (jint)lpTrack->latency();
+}
+
+
+// ----------------------------------------------------------------------------
 static jint android_media_AudioTrack_set_loop(JNIEnv *env,  jobject thiz,
         jint loopStart, jint loopEnd, jint loopCount) {
     sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
@@ -854,6 +867,7 @@ static JNINativeMethod gMethods[] = {
                              "()I",      (void *)android_media_AudioTrack_get_pos_update_period},
     {"native_set_position",  "(I)I",     (void *)android_media_AudioTrack_set_position},
     {"native_get_position",  "()I",      (void *)android_media_AudioTrack_get_position},
+    {"native_get_latency",   "()I",      (void *)android_media_AudioTrack_get_latency},
     {"native_set_loop",      "(III)I",   (void *)android_media_AudioTrack_set_loop},
     {"native_reload_static", "()I",      (void *)android_media_AudioTrack_reload},
     {"native_get_output_sample_rate",
