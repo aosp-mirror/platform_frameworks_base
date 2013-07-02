@@ -62,7 +62,7 @@ void ResourceCache::incrementRefcount(void* resource, ResourceType resourceType)
 }
 
 void ResourceCache::incrementRefcount(SkBitmap* bitmapResource) {
-    SkSafeRef(bitmapResource->pixelRef());
+    bitmapResource->pixelRef()->globalRef();
     SkSafeRef(bitmapResource->getColorTable());
     incrementRefcount((void*) bitmapResource, kBitmap);
 }
@@ -100,7 +100,7 @@ void ResourceCache::incrementRefcountLocked(void* resource, ResourceType resourc
 }
 
 void ResourceCache::incrementRefcountLocked(SkBitmap* bitmapResource) {
-    SkSafeRef(bitmapResource->pixelRef());
+    bitmapResource->pixelRef()->globalRef();
     SkSafeRef(bitmapResource->getColorTable());
     incrementRefcountLocked((void*) bitmapResource, kBitmap);
 }
@@ -133,7 +133,7 @@ void ResourceCache::decrementRefcount(void* resource) {
 }
 
 void ResourceCache::decrementRefcount(SkBitmap* bitmapResource) {
-    SkSafeUnref(bitmapResource->pixelRef());
+    bitmapResource->pixelRef()->globalUnref();
     SkSafeUnref(bitmapResource->getColorTable());
     decrementRefcount((void*) bitmapResource);
 }
@@ -174,7 +174,7 @@ void ResourceCache::decrementRefcountLocked(void* resource) {
 }
 
 void ResourceCache::decrementRefcountLocked(SkBitmap* bitmapResource) {
-    SkSafeUnref(bitmapResource->pixelRef());
+    bitmapResource->pixelRef()->globalUnref();
     SkSafeUnref(bitmapResource->getColorTable());
     decrementRefcountLocked((void*) bitmapResource);
 }
