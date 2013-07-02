@@ -118,6 +118,10 @@ final class ActivityStack {
     // is being started.
     static final boolean SHOW_APP_STARTING_PREVIEW = true;
 
+    // How long to wait for all background Activities to redraw following a call to
+    // convertToTranslucent().
+    static final long TRANSLUCENT_CONVERSION_TIMEOUT = 2000;
+
     enum ActivityState {
         INITIALIZING,
         RESUMED,
@@ -184,6 +188,16 @@ final class ActivityStack {
      */
     ActivityRecord mLastStartedActivity = null;
 
+    // The topmost Activity passed to convertToTranslucent(). When non-null it means we are
+    // waiting for all Activities in mUndrawnActivitiesBelowTopTranslucent to be removed as they
+    // are drawn. When the last member of mUndrawnActivitiesBelowTopTranslucent is removed the
+    // Activity in mTranslucentActivityWaiting is notified via
+    // Activity.onTranslucentConversionComplete(false). If a timeout occurs prior to the last
+    // background activity being drawn then the same call will be made with a true value.
+    ActivityRecord mTranslucentActivityWaiting = null;
+    ArrayList<ActivityRecord> mUndrawnActivitiesBelowTopTranslucent =
+            new ArrayList<ActivityRecord>();
+
     /**
      * Set when we know we are going to be calling updateConfiguration()
      * soon, so want to skip intermediate config checks.
@@ -215,6 +229,7 @@ final class ActivityStack {
     static final int LAUNCH_TICK_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 3;
     static final int STOP_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 4;
     static final int DESTROY_ACTIVITIES_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 5;
+    static final int TRANSLUCENT_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 6;
 
     static class ScheduleDestroyArgs {
         final ProcessRecord mOwner;
@@ -285,7 +300,12 @@ final class ActivityStack {
                     synchronized (mService) {
                         destroyActivitiesLocked(args.mOwner, args.mOomAdj, args.mReason);
                     }
-                }
+                } break;
+                case TRANSLUCENT_TIMEOUT_MSG: {
+                    synchronized (mService) {
+                        notifyActivityDrawnLocked(null);
+                    }
+                } break;
             }
         }
     }
@@ -952,6 +972,16 @@ final class ActivityStack {
                 TAG, "ensureActivitiesVisible behind " + top
                 + " configChanges=0x" + Integer.toHexString(configChanges));
 
+        if (mTranslucentActivityWaiting != top) {
+            mUndrawnActivitiesBelowTopTranslucent.clear();
+            if (mTranslucentActivityWaiting != null) {
+                // Call the callback with a timeout indication.
+                notifyActivityDrawnLocked(null);
+                mTranslucentActivityWaiting = null;
+            }
+            mHandler.removeMessages(TRANSLUCENT_TIMEOUT_MSG);
+        }
+
         // If the top activity is not fullscreen, then we need to
         // make sure any activities under it are now visible.
         boolean aboveTop = true;
@@ -1018,6 +1048,9 @@ final class ActivityStack {
                             if (DEBUG_VISBILITY) Slog.v(
                                     TAG, "Making visible and scheduling visibility: " + r);
                             try {
+                                if (mTranslucentActivityWaiting != null) {
+                                    mUndrawnActivitiesBelowTopTranslucent.add(r);
+                                }
                                 mWindowManager.setAppVisibility(r.appToken, true);
                                 r.sleeping = false;
                                 r.app.pendingUiClean = true;
@@ -1089,6 +1122,42 @@ final class ActivityStack {
             }
         }
         return showHomeBehindStack;
+    }
+
+    void convertToTranslucent(ActivityRecord r) {
+        mTranslucentActivityWaiting = r;
+        mUndrawnActivitiesBelowTopTranslucent.clear();
+        mHandler.sendEmptyMessageDelayed(TRANSLUCENT_TIMEOUT_MSG, TRANSLUCENT_CONVERSION_TIMEOUT);
+    }
+
+    /**
+     * Called as activities below the top translucent activity are redrawn. When the last one is
+     * redrawn notify the top activity by calling
+     * {@link Activity#onTranslucentConversionComplete}.
+     *
+     * @param r The most recent background activity to be drawn. Or, if r is null then a timeout
+     * occurred and the activity will be notified immediately.
+     */
+    void notifyActivityDrawnLocked(ActivityRecord r) {
+        if ((r == null)
+                || (mUndrawnActivitiesBelowTopTranslucent.remove(r) &&
+                        mUndrawnActivitiesBelowTopTranslucent.isEmpty())) {
+            // The last undrawn activity below the top has just been drawn. If there is an
+            // opaque activity at the top, notify it that it can become translucent safely now.
+            final ActivityRecord waitingActivity = mTranslucentActivityWaiting;
+            mTranslucentActivityWaiting = null;
+            mUndrawnActivitiesBelowTopTranslucent.clear();
+            mHandler.removeMessages(TRANSLUCENT_TIMEOUT_MSG);
+
+            if (waitingActivity != null && waitingActivity.app != null &&
+                    waitingActivity.app.thread != null) {
+                try {
+                    waitingActivity.app.thread.scheduleTranslucentConversionComplete(
+                            waitingActivity.appToken, r != null);
+                } catch (RemoteException e) {
+                }
+            }
+        }
     }
 
     /**

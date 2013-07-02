@@ -1222,6 +1222,9 @@ public final class ActivityThread {
             queueOrSendMessage(H.TRIM_MEMORY, null, level);
         }
 
+        public void scheduleTranslucentConversionComplete(IBinder token, boolean drawComplete) {
+            queueOrSendMessage(H.TRANSLUCENT_CONVERSION_COMPLETE, token, drawComplete ? 1 : 0);
+        }
     }
 
     private class H extends Handler {
@@ -1269,6 +1272,7 @@ public final class ActivityThread {
         public static final int DUMP_PROVIDER           = 141;
         public static final int UNSTABLE_PROVIDER_DIED  = 142;
         public static final int REQUEST_ACTIVITY_EXTRAS = 143;
+        public static final int TRANSLUCENT_CONVERSION_COMPLETE = 144;
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
                 switch (code) {
@@ -1316,6 +1320,7 @@ public final class ActivityThread {
                     case DUMP_PROVIDER: return "DUMP_PROVIDER";
                     case UNSTABLE_PROVIDER_DIED: return "UNSTABLE_PROVIDER_DIED";
                     case REQUEST_ACTIVITY_EXTRAS: return "REQUEST_ACTIVITY_EXTRAS";
+                    case TRANSLUCENT_CONVERSION_COMPLETE: return "TRANSLUCENT_CONVERSION_COMPLETE";
                 }
             }
             return Integer.toString(code);
@@ -1529,6 +1534,9 @@ public final class ActivityThread {
                     break;
                 case REQUEST_ACTIVITY_EXTRAS:
                     handleRequestActivityExtras((RequestActivityExtras)msg.obj);
+                    break;
+                case TRANSLUCENT_CONVERSION_COMPLETE:
+                    handleTranslucentConversionComplete((IBinder)msg.obj, msg.arg1 == 1);
                     break;
             }
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + codeToString(msg.what));
@@ -2452,7 +2460,14 @@ public final class ActivityThread {
         } catch (RemoteException e) {
         }
     }
-    
+
+    public void handleTranslucentConversionComplete(IBinder token, boolean drawComplete) {
+        ActivityClientRecord r = mActivities.get(token);
+        if (r != null) {
+            r.activity.onTranslucentConversionComplete(drawComplete);
+        }
+    }
+
     private static final ThreadLocal<Intent> sCurrentBroadcastIntent = new ThreadLocal<Intent>();
 
     /**

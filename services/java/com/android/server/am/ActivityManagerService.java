@@ -1000,7 +1000,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int USER_SWITCH_TIMEOUT_MSG = 36;
     static final int IMMERSIVE_MODE_LOCK_MSG = 37;
     static final int PERSIST_URI_GRANTS = 38;
-    static final int SET_FOCUSED_STACK = 39;
 
     static final int FIRST_ACTIVITY_STACK_MSG = 100;
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
@@ -1491,18 +1490,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             case PERSIST_URI_GRANTS: {
                 writeGrantedUriPermissions();
-                break;
-            }
-            case SET_FOCUSED_STACK: {
-                synchronized (ActivityManagerService.this) {
-                    ActivityStack stack = mStackSupervisor.getStack(msg.arg1);
-                    if (stack != null) {
-                        ActivityRecord r = stack.topRunningActivityLocked(null);
-                        if (r != null) {
-                            setFocusedActivityLocked(r);
-                        }
-                    }
-                }
                 break;
             }
             }
@@ -2081,7 +2068,26 @@ public final class ActivityManagerService extends ActivityManagerNative
     @Override
     public void setFocusedStack(int stackId) {
         if (DEBUG_FOCUS) Slog.d(TAG, "setFocusedStack: stackId=" + stackId);
-        mHandler.obtainMessage(SET_FOCUSED_STACK, stackId, 0).sendToTarget();
+        synchronized (ActivityManagerService.this) {
+            ActivityStack stack = mStackSupervisor.getStack(stackId);
+            if (stack != null) {
+                ActivityRecord r = stack.topRunningActivityLocked(null);
+                if (r != null) {
+                    setFocusedActivityLocked(r);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void notifyActivityDrawn(IBinder token) {
+        if (DEBUG_VISBILITY) Slog.d(TAG, "notifyActivityDrawn: token=" + token);
+        synchronized (this) {
+            ActivityRecord r= mStackSupervisor.isInAnyStackLocked(token);
+            if (r != null) {
+                r.task.stack.notifyActivityDrawnLocked(r);
+            }
+        }
     }
 
     final void applyUpdateLockStateLocked(ActivityRecord r) {
@@ -8048,7 +8054,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void convertToOpaque(IBinder token) {
+    public void convertFromTranslucent(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -8056,8 +8062,28 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (r == null) {
                     return;
                 }
-                if (r.convertToOpaque()) {
-                    mWindowManager.setAppFullscreen(token);
+                if (r.changeWindowTranslucency(true)) {
+                    mWindowManager.setAppFullscreen(token, true);
+                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public void convertToTranslucent(IBinder token) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+                if (r == null) {
+                    return;
+                }
+                if (r.changeWindowTranslucency(false)) {
+                    r.task.stack.convertToTranslucent(r);
+                    mWindowManager.setAppFullscreen(token, false);
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
                 }
             }

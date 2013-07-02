@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import android.os.Trace;
+import com.android.internal.R.styleable;
 import com.android.internal.app.ResolverActivity;
 import com.android.server.AttributeCache;
 import com.android.server.am.ActivityStack.ActivityState;
@@ -505,19 +506,23 @@ final class ActivityRecord {
         }
     }
 
-    boolean convertToOpaque() {
-        if (fullscreen) {
+    boolean changeWindowTranslucency(boolean toOpaque) {
+        if (fullscreen == toOpaque) {
+            return false;
+        }
+        AttributeCache.Entry ent =
+                AttributeCache.instance().get(packageName, realTheme, styleable.Window);
+        if (ent == null
+                || !ent.array.getBoolean(styleable.Window_windowIsTranslucent, false)
+                || ent.array.getBoolean(styleable.Window_windowIsFloating, false)) {
             return false;
         }
 
-        AttributeCache.Entry ent = AttributeCache.instance().get(packageName,
-                realTheme, com.android.internal.R.styleable.Window);
-        if (ent != null && !ent.array.getBoolean(
-                com.android.internal.R.styleable.Window_windowIsFloating, false)) {
-            fullscreen = true;
-            ++task.numFullscreen;
-        }
-        return fullscreen;
+        // Keep track of the number of fullscreen activities in this task.
+        task.numFullscreen += toOpaque ? +1 : -1;
+
+        fullscreen = toOpaque;
+        return true;
     }
 
     void putInHistory() {
