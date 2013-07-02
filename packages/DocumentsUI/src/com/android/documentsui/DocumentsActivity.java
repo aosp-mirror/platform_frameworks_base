@@ -55,12 +55,13 @@ public class DocumentsActivity extends Activity {
     // TODO: fragment to show recently opened documents
     // TODO: pull actionbar icon from current backend
 
-    private static final int MODE_OPEN = 1;
-    private static final int MODE_CREATE = 2;
+    private static final int ACTION_OPEN = 1;
+    private static final int ACTION_CREATE = 2;
 
-    private int mMode;
-    private boolean mAllowMultiple;
+    private int mAction;
     private String[] mAcceptMimes;
+
+    private final DisplayState mDisplayState = new DisplayState();
 
     private boolean mIgnoreNextNavigation;
 
@@ -74,17 +75,23 @@ public class DocumentsActivity extends Activity {
         final Intent intent = getIntent();
         final String action = intent.getAction();
         if (Intent.ACTION_OPEN_DOCUMENT.equals(action)) {
-            mMode = MODE_OPEN;
-            mAllowMultiple = intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE, false);
+            mAction = ACTION_OPEN;
+            mDisplayState.allowMultiple = intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE, false);
         } else if (Intent.ACTION_CREATE_DOCUMENT.equals(action)) {
-            mMode = MODE_CREATE;
-            mAllowMultiple = false;
+            mAction = ACTION_CREATE;
+            mDisplayState.allowMultiple = false;
         }
 
         if (intent.hasExtra(Intent.EXTRA_MIME_TYPES)) {
             mAcceptMimes = intent.getStringArrayExtra(Intent.EXTRA_MIME_TYPES);
         } else {
             mAcceptMimes = new String[] { intent.getType() };
+        }
+
+        if (mimeMatches("image/*", mAcceptMimes)) {
+            mDisplayState.mode = DisplayState.MODE_GRID;
+        } else {
+            mDisplayState.mode = DisplayState.MODE_LIST;
         }
 
         setResult(Activity.RESULT_CANCELED);
@@ -95,7 +102,7 @@ public class DocumentsActivity extends Activity {
 
         updateActionBar();
 
-        if (mMode == MODE_CREATE) {
+        if (mAction == ACTION_CREATE) {
             final String mimeType = getIntent().getType();
             final String title = getIntent().getStringExtra(Intent.EXTRA_TITLE);
             SaveFragment.show(getFragmentManager(), mimeType, title);
@@ -120,9 +127,9 @@ public class DocumentsActivity extends Activity {
             actionBar.setDisplayShowHomeEnabled(false);
             actionBar.setDisplayHomeAsUpEnabled(false);
 
-            if (mMode == MODE_OPEN) {
+            if (mAction == ACTION_OPEN) {
                 actionBar.setTitle(R.string.title_open);
-            } else if (mMode == MODE_CREATE) {
+            } else if (mAction == ACTION_CREATE) {
                 actionBar.setTitle(R.string.title_save);
             }
         }
@@ -140,7 +147,7 @@ public class DocumentsActivity extends Activity {
         super.onPrepareOptionsMenu(menu);
 
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
-        createDir.setVisible(mMode == MODE_CREATE);
+        createDir.setVisible(mAction == ACTION_CREATE);
         createDir.setEnabled(mCurrentSupportsCreate);
 
         return true;
@@ -209,11 +216,15 @@ public class DocumentsActivity extends Activity {
         }
     };
 
+    public DisplayState getDisplayState() {
+        return mDisplayState;
+    }
+
     public void onDirectoryChanged(Uri uri, int flags) {
         mCurrentDir = uri;
         mCurrentSupportsCreate = (flags & DocumentsContract.FLAG_SUPPORTS_CREATE) != 0;
 
-        if (mMode == MODE_CREATE) {
+        if (mAction == ACTION_CREATE) {
             final FragmentManager fm = getFragmentManager();
             SaveFragment.get(fm).setSaveEnabled(mCurrentSupportsCreate);
         }
@@ -225,18 +236,18 @@ public class DocumentsActivity extends Activity {
         final Uri uri = DocumentsContract.buildDocumentUri(
                 info.authority, DocumentsContract.ROOT_GUID);
         final CharSequence displayName = info.loadLabel(getPackageManager());
-        DirectoryFragment.show(getFragmentManager(), uri, displayName.toString(), mAllowMultiple);
+        DirectoryFragment.show(getFragmentManager(), uri, displayName.toString());
     }
 
     public void onDocumentPicked(Document doc) {
         final FragmentManager fm = getFragmentManager();
         if (DocumentsContract.MIME_TYPE_DIRECTORY.equals(doc.mimeType)) {
             // Nested directory picked, recurse using new fragment
-            DirectoryFragment.show(fm, doc.uri, doc.displayName, mAllowMultiple);
-        } else if (mMode == MODE_OPEN) {
+            DirectoryFragment.show(fm, doc.uri, doc.displayName);
+        } else if (mAction == ACTION_OPEN) {
             // Explicit file picked, return
             onFinished(doc.uri);
-        } else if (mMode == MODE_CREATE) {
+        } else if (mAction == ACTION_CREATE) {
             // Overwrite current filename
             SaveFragment.get(fm).setDisplayName(doc.displayName);
         }
@@ -274,12 +285,24 @@ public class DocumentsActivity extends Activity {
 
         intent.addFlags(
                 Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_PERSIST_GRANT_URI_PERMISSION);
-        if (mMode == MODE_CREATE) {
+        if (mAction == ACTION_CREATE) {
             intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         }
 
         setResult(Activity.RESULT_OK, intent);
         finish();
+    }
+
+    public static class DisplayState {
+        public int mode;
+        public int sortBy;
+        public boolean allowMultiple;
+
+        public static final int MODE_LIST = 0;
+        public static final int MODE_GRID = 1;
+
+        public static final int SORT_BY_NAME = 0;
+        public static final int SORT_BY_DATE = 1;
     }
 
     public static class Document {
@@ -294,6 +317,27 @@ public class DocumentsActivity extends Activity {
             doc.mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
             doc.displayName = getCursorString(cursor, DocumentColumns.DISPLAY_NAME);
             return doc;
+        }
+    }
+
+    public static boolean mimeMatches(String filter, String[] tests) {
+        for (String test : tests) {
+            if (mimeMatches(filter, test)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean mimeMatches(String filter, String test) {
+        if (filter.equals(test)) {
+            return true;
+        } else if ("*/*".equals(filter)) {
+            return true;
+        } else if (filter.endsWith("/*")) {
+            return filter.regionMatches(0, test, 0, filter.indexOf('/'));
+        } else {
+            return false;
         }
     }
 

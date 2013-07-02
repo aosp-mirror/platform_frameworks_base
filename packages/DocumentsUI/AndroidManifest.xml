@@ -12,11 +12,21 @@
             <intent-filter android:priority="100">
                 <action android:name="android.intent.action.OPEN_DOCUMENT" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
             </intent-filter>
             <intent-filter android:priority="100">
                 <action android:name="android.intent.action.CREATE_DOCUMENT" />
-                <data android:mimeType="*/*"/>
                 <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="*/*" />
+            </intent-filter>
+        </activity>
+
+        <!-- TODO: remove when we have real clients -->
+        <activity android:name=".TestActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>

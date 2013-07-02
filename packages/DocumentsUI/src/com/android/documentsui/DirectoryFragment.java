@@ -16,12 +16,17 @@
 
 package com.android.documentsui;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
@@ -47,6 +52,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.android.documentsui.DocumentsActivity.DisplayState;
 import com.android.documentsui.DocumentsActivity.Document;
 import com.google.android.collect.Lists;
 
@@ -58,7 +64,8 @@ import java.util.ArrayList;
 public class DirectoryFragment extends Fragment {
 
     // TODO: show storage backend in item views when requested
-    // TODO: implement sorting dialog
+
+    private static final String TAG_SORT = "sort";
 
     private ListView mListView;
     private GridView mGridView;
@@ -71,20 +78,12 @@ public class DirectoryFragment extends Fragment {
     private int mFlags;
 
     private static final String EXTRA_URI = "uri";
-    private static final String EXTRA_MODE = "display_mode";
-    private static final String EXTRA_ALLOW_MULTIPLE = "allow_multiple";
-
-    private static final int MODE_LIST = 1;
-    private static final int MODE_GRID = 2;
 
     private static final int LOADER_DOCUMENTS = 2;
 
-    public static void show(
-            FragmentManager fm, Uri uri, String displayName, boolean allowMultiple) {
+    public static void show(FragmentManager fm, Uri uri, String displayName) {
         final Bundle args = new Bundle();
         args.putParcelable(EXTRA_URI, uri);
-        args.putInt(EXTRA_MODE, MODE_LIST);
-        args.putBoolean(EXTRA_ALLOW_MULTIPLE, allowMultiple);
 
         final DirectoryFragment fragment = new DirectoryFragment();
         fragment.setArguments(args);
@@ -127,8 +126,18 @@ public class DirectoryFragment extends Fragment {
         mCallbacks = new LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                final DisplayState state = getDisplayState(DirectoryFragment.this);
+                final String sortOrder;
+                if (state.sortBy == DisplayState.SORT_BY_NAME) {
+                    sortOrder = DocumentColumns.DISPLAY_NAME + " ASC";
+                } else if (state.sortBy == DisplayState.SORT_BY_DATE) {
+                    sortOrder = DocumentColumns.LAST_MODIFIED + " DESC";
+                } else {
+                    sortOrder = null;
+                }
+
                 final Uri contentsUri = DocumentsContract.buildContentsUri(uri);
-                return new CursorLoader(context, contentsUri, null, null, null, null);
+                return new CursorLoader(context, contentsUri, null, null, null, sortOrder);
             }
 
             @Override
@@ -170,21 +179,27 @@ public class DirectoryFragment extends Fragment {
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        final int mode = getMode();
-        menu.findItem(R.id.menu_grid).setVisible(mode != MODE_GRID);
-        menu.findItem(R.id.menu_list).setVisible(mode != MODE_LIST);
+        final DisplayState state = getDisplayState(this);
+        menu.findItem(R.id.menu_grid).setVisible(state.mode != DisplayState.MODE_GRID);
+        menu.findItem(R.id.menu_list).setVisible(state.mode != DisplayState.MODE_LIST);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        final DisplayState state = getDisplayState(this);
         final int id = item.getItemId();
         if (id == R.id.menu_grid) {
-            getArguments().putInt(EXTRA_MODE, MODE_GRID);
+            state.mode = DisplayState.MODE_GRID;
             updateMode();
+            getFragmentManager().invalidateOptionsMenu();
             return true;
         } else if (id == R.id.menu_list) {
-            getArguments().putInt(EXTRA_MODE, MODE_LIST);
+            state.mode = DisplayState.MODE_LIST;
             updateMode();
+            getFragmentManager().invalidateOptionsMenu();
+            return true;
+        } else if (id == R.id.menu_sort) {
+            SortFragment.show(this);
             return true;
         } else {
             return super.onOptionsItemSelected(item);
@@ -192,19 +207,19 @@ public class DirectoryFragment extends Fragment {
     }
 
     private void updateMode() {
-        final int mode = getMode();
+        final DisplayState state = getDisplayState(this);
 
-        mListView.setVisibility(mode == MODE_LIST ? View.VISIBLE : View.GONE);
-        mGridView.setVisibility(mode == MODE_GRID ? View.VISIBLE : View.GONE);
+        mListView.setVisibility(state.mode == DisplayState.MODE_LIST ? View.VISIBLE : View.GONE);
+        mGridView.setVisibility(state.mode == DisplayState.MODE_GRID ? View.VISIBLE : View.GONE);
 
         final int choiceMode;
-        if (getArguments().getBoolean(EXTRA_ALLOW_MULTIPLE)) {
+        if (state.allowMultiple) {
             choiceMode = ListView.CHOICE_MODE_MULTIPLE_MODAL;
         } else {
             choiceMode = ListView.CHOICE_MODE_NONE;
         }
 
-        if (mode == MODE_GRID) {
+        if (state.mode == DisplayState.MODE_GRID) {
             mListView.setAdapter(null);
             mListView.setChoiceMode(ListView.CHOICE_MODE_NONE);
             mGridView.setAdapter(mAdapter);
@@ -212,13 +227,19 @@ public class DirectoryFragment extends Fragment {
             mGridView.setNumColumns(GridView.AUTO_FIT);
             mGridView.setChoiceMode(choiceMode);
             mCurrentView = mGridView;
-        } else {
+        } else if (state.mode == DisplayState.MODE_LIST) {
             mGridView.setAdapter(null);
             mGridView.setChoiceMode(ListView.CHOICE_MODE_NONE);
             mListView.setAdapter(mAdapter);
             mListView.setChoiceMode(choiceMode);
             mCurrentView = mListView;
+        } else {
+            throw new IllegalStateException();
         }
+    }
+
+    private void updateSortBy() {
+        getLoaderManager().restartLoader(LOADER_DOCUMENTS, getArguments(), mCallbacks);
     }
 
     private OnItemClickListener mItemListener = new OnItemClickListener() {
@@ -288,12 +309,8 @@ public class DirectoryFragment extends Fragment {
         }
     };
 
-    private boolean getSupportsCreate() {
-        return (mFlags & DocumentsContract.FLAG_SUPPORTS_CREATE) != 0;
-    }
-
-    private int getMode() {
-        return getArguments().getInt(EXTRA_MODE, MODE_LIST);
+    private static DisplayState getDisplayState(Fragment fragment) {
+        return ((DocumentsActivity) fragment.getActivity()).getDisplayState();
     }
 
     private class DocumentsAdapter extends CursorAdapter {
@@ -304,10 +321,10 @@ public class DirectoryFragment extends Fragment {
         @Override
         public View newView(Context context, Cursor cursor, ViewGroup parent) {
             final LayoutInflater inflater = LayoutInflater.from(context);
-            final int mode = getMode();
-            if (mode == MODE_LIST) {
+            final DisplayState state = getDisplayState(DirectoryFragment.this);
+            if (state.mode == DisplayState.MODE_LIST) {
                 return inflater.inflate(R.layout.item_doc_list, parent, false);
-            } else if (mode == MODE_GRID) {
+            } else if (state.mode == DisplayState.MODE_GRID) {
                 return inflater.inflate(R.layout.item_doc_grid, parent, false);
             } else {
                 throw new IllegalStateException();
@@ -338,6 +355,38 @@ public class DirectoryFragment extends Fragment {
             if (summary != null) {
                 summary.setText(DateUtils.getRelativeTimeSpanString(lastModified));
             }
+        }
+    }
+
+    public static class SortFragment extends DialogFragment {
+        public static void show(DirectoryFragment parent) {
+            if (!parent.isAdded()) return;
+
+            final SortFragment dialog = new SortFragment();
+            dialog.setTargetFragment(parent, 0);
+            dialog.show(parent.getFragmentManager(), TAG_SORT);
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Context context = getActivity();
+            final DisplayState state = getDisplayState(this);
+
+            final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle(R.string.menu_sort);
+            builder.setSingleChoiceItems(new CharSequence[] {
+                    getText(R.string.sort_name),
+                    getText(R.string.sort_date),
+            }, state.sortBy, new OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    state.sortBy = which;
+                    ((DirectoryFragment) getTargetFragment()).updateSortBy();
+                    dismiss();
+                }
+            });
+
+            return builder.create();
         }
     }
 
