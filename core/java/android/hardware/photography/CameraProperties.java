@@ -40,7 +40,7 @@ public final class CameraProperties extends CameraMetadata {
      * removable cameras of the same model.
      */
     public static final Key<String> INFO_MODEL =
-            new Key<String>("android.info.model");
+            new Key<String>("android.info.model", String.class);
 
     /**
      * A unique identifier for this camera. For removable cameras, every
@@ -49,7 +49,7 @@ public final class CameraProperties extends CameraMetadata {
      * identifier is equal to the the device's id.
      */
     public static final Key<String> INFO_IDENTIFIER =
-            new Key<String>("android.info.identifier");
+            new Key<String>("android.info.identifier", String.class);
 
     /**
      * <p>Whether this camera is removable or not.</p>
@@ -59,7 +59,7 @@ public final class CameraProperties extends CameraMetadata {
      * determine if this camera is a match for a camera device seen earlier.</p>
      */
     public static final Key<Boolean> INFO_REMOVABLE =
-            new Key<Boolean>("android.info.isRemovable");
+            new Key<Boolean>("android.info.isRemovable", Boolean.TYPE);
 
     /**
      * <p>The hardware operational model of this device. One of the
@@ -100,7 +100,7 @@ public final class CameraProperties extends CameraMetadata {
      * @see #INFO_SUPPORTED_HARDWARE_LEVEL_FULL
      */
     public static final Key<Integer> INFO_SUPPORTED_HARDWARE_LEVEL =
-            new Key<Integer>("android.info.supportedHardwareLevel");
+            new Key<Integer>("android.info.supportedHardwareLevel", Integer.TYPE);
 
     /**
      * <p>The type reported by limited-capability camera devices.</p>
@@ -164,8 +164,8 @@ public final class CameraProperties extends CameraMetadata {
      * {@link android.graphics.ImageFormat#YUV_420_888} are guaranteed to be
      * supported.</p>
      */
-    public static final Key<Integer[]> SCALER_AVAILABLE_FORMATS =
-            new Key<Integer[]>("android.scaler.availableFormats");
+    public static final Key<int[]> SCALER_AVAILABLE_FORMATS =
+            new Key<int[]>("android.scaler.availableFormats", int[].class);
 
     /**
      * <p>The available output sizes for JPEG buffers from this camera
@@ -174,7 +174,7 @@ public final class CameraProperties extends CameraMetadata {
      * when using format {@link android.graphics.ImageFormat#JPEG}.</p>
      */
     public static final Key<Size[]> SCALER_AVAILABLE_JPEG_SIZES =
-            new Key<Size[]>("android.scaler.availableJpegSizes");
+            new Key<Size[]>("android.scaler.availableJpegSizes", Size[].class);
 
     /**
      * <p>The available sizes for output buffers from this camera device, when
@@ -194,7 +194,7 @@ public final class CameraProperties extends CameraMetadata {
      *
      */
     public static final Key<Size[]> SCALER_AVAILABLE_PROCESSED_SIZES =
-            new Key<Size[]>("android.scaler.availableProcessedSizes");
+            new Key<Size[]>("android.scaler.availableProcessedSizes", Size[].class);
 
     /**
      * <p>The available sizes for output buffers from this camera device, when
@@ -207,7 +207,7 @@ public final class CameraProperties extends CameraMetadata {
      * when using image format {@link android.graphics.ImageFormat#RAW_SENSOR}.</p>
      */
     public static final Key<Size[]> SCALER_AVAILABLE_RAW_SIZES =
-            new Key<Size[]>("android.scaler.availableRawSizes");
+            new Key<Size[]>("android.scaler.availableRawSizes", Size[].class);
 
     /**
      * <p>The coordinates of the sensor's active pixel array, relative to its
@@ -230,7 +230,7 @@ public final class CameraProperties extends CameraMetadata {
      * being the top-left corner of the active array.</p>
      */
     public static final Key<Rect> SENSOR_ACTIVE_ARRAY_SIZE =
-            new Key<Rect>("android.sensor.activeArraySize");
+            new Key<Rect>("android.sensor.activeArraySize", Rect.class);
 
     /**
      * <p>The size of the sensor's total pixel array available for readout. Some
@@ -240,7 +240,7 @@ public final class CameraProperties extends CameraMetadata {
      * the supported capture sizes.</p>
      */
     public static final Key<Size> SENSOR_PIXEL_ARRAY_SIZE =
-            new Key<Size>("android.sensor.activeArraySize");
+            new Key<Size>("android.sensor.activeArraySize", Size.class);
 
     // TODO: Many more of these.
 

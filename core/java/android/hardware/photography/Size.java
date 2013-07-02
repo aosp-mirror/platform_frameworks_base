@@ -24,12 +24,12 @@ public final class Size {
     /**
      * Create a new immutable Size instance
      *
-     * @param w The width to store in the Size instance
-     * @param h The height to store in the Size instance
+     * @param width The width to store in the Size instance
+     * @param height The height to store in the Size instance
      */
-    Size(int w, int h) {
-        mWidth = w;
-        mHeight = h;
+    Size(int width, int height) {
+        mWidth = width;
+        mHeight = height;
     }
 
     public final int getWidth() {

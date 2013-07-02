@@ -196,6 +196,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libgui \
 	libinput \
 	libcamera_client \
+	libcamera_metadata \
 	libskia \
 	libsqlite \
 	libEGL \
