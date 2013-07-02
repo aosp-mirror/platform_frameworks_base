@@ -379,6 +379,9 @@ class WifiController extends StateMachine {
 
         @Override
         public void enter() {
+
+            if (DBG) logd("Going to disabled without scan state");
+
             mWifiStateMachine.setSupplicantRunning(false);
             // Supplicant can't restart right away, so not the time we switched off
             mDisabledTimestamp = SystemClock.elapsedRealtime();
@@ -496,6 +499,9 @@ class WifiController extends StateMachine {
 
         @Override
         public void enter() {
+
+            if (DBG) logd("Enabling disabled with scan state");
+
             mWifiStateMachine.setSupplicantRunning(true);
             mWifiStateMachine.setOperationalMode(WifiStateMachine.SCAN_ONLY_WITH_WIFI_OFF_MODE);
             mWifiStateMachine.setDriverStart(true);
