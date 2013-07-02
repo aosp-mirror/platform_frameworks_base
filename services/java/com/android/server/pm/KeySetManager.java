@@ -368,7 +368,7 @@ public class KeySetManager {
 
             // Now remove them from the KeySets known to each package
             for (String pkgName : mPackages.keySet()) {
-                PackageSetting p = mPackages.get(packageName);
+                PackageSetting p = mPackages.get(pkgName);
                 for (Long ks : deletableKeySets) {
                     p.keySetData.removeSigningKeySet(ks);
                     p.keySetData.removeDefinedKeySet(ks);
