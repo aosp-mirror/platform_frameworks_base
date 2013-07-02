@@ -17,7 +17,7 @@
 #ifndef _ANDROID_VIEW_INPUTQUEUE_H
 #define _ANDROID_VIEW_INPUTQUEUE_H
 
-#include <androidfw/Input.h>
+#include <input/Input.h>
 #include <utils/Looper.h>
 #include <utils/TypeHelpers.h>
 #include <utils/Vector.h>

@@ -25,7 +25,7 @@
 #include <android_runtime/android_util_AssetManager.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/AndroidRuntime.h>
-#include <androidfw/InputTransport.h>
+#include <input/InputTransport.h>
 
 #include <gui/Surface.h>
 

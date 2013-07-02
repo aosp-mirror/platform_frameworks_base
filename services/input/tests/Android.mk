@@ -17,7 +17,8 @@ shared_libraries := \
     libui \
     libskia \
     libstlport \
-    libinput
+    libinput \
+    libinputservice
 
 static_libraries := \
     libgtest \

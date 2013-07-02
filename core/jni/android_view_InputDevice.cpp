@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <androidfw/Input.h>
+#include <input/Input.h>
 
 #include <android_runtime/AndroidRuntime.h>
 #include <nativehelper/jni.h>

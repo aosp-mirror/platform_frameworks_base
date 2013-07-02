@@ -23,7 +23,7 @@
 #include <android/input.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_view_InputQueue.h>
-#include <androidfw/Input.h>
+#include <input/Input.h>
 #include <utils/Looper.h>
 #include <utils/TypeHelpers.h>
 #include <ScopedLocalRef.h>

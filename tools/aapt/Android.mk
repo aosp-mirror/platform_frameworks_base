@@ -83,20 +83,19 @@ LOCAL_C_INCLUDES += external/stlport/stlport
 LOCAL_C_INCLUDES += external/libpng
 LOCAL_C_INCLUDES += external/zlib
 
-LOCAL_CFLAGS += -DSTATIC_ANDROIDFW_FOR_TOOLS
 LOCAL_CFLAGS += -Wno-non-virtual-dtor
 
 LOCAL_SHARED_LIBRARIES := \
+        libandroidfw \
+        libutils \
+        libcutils \
         libpng \
+        liblog \
         libz
 
 LOCAL_STATIC_LIBRARIES := \
         libstlport_static \
-        libandroidfw \
-        libutils \
-        libcutils \
-        libexpat_static \
-        liblog
+        libexpat_static
 
 include $(BUILD_EXECUTABLE)
 endif
