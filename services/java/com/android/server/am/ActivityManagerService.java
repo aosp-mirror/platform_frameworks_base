@@ -36,6 +36,7 @@ import com.android.internal.os.ProcessStats;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.MemInfoReader;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.IntentResolver;
@@ -2986,6 +2987,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             mRecentTasks.remove(N-1);
         }
         mRecentTasks.add(0, task);
+    }
+
+    @Override
+    public void reportActivityFullyDrawn(IBinder token) {
+        synchronized (this) {
+            ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            if (r == null) {
+                return;
+            }
+            r.reportFullyDrawnLocked();
+        }
     }
 
     @Override
@@ -11100,6 +11112,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 new ArrayList[DUMP_MEM_OOM_LABEL.length];
 
         long totalPss = 0;
+        long cachedPss = 0;
 
         Debug.MemoryInfo mi = null;
         for (int i = procs.size() - 1 ; i >= 0 ; i--) {
@@ -11108,7 +11121,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             int oomAdj;
             synchronized (this) {
                 thread = r.thread;
-                oomAdj = r.setAdj;
+                oomAdj = r.getSetAdjWithServices();
             }
             if (thread != null) {
                 if (!isCheckinRequest && dumpDetails) {
@@ -11139,7 +11152,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 final long myTotalPss = mi.getTotalPss();
 
                 synchronized (this) {
-                    if (r.thread != null && oomAdj == r.setAdj) {
+                    if (r.thread != null && oomAdj == r.getSetAdjWithServices()) {
                         // Record this for posterity if the process has been stable.
                         r.baseProcessTracker.addPss(myTotalPss, true);
                     }
@@ -11158,6 +11171,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                         long mem = mi.getOtherPss(j);
                         miscPss[j] += mem;
                         otherPss -= mem;
+                    }
+
+                    if (oomAdj >= ProcessList.CACHED_APP_MIN_ADJ) {
+                        cachedPss += myTotalPss;
                     }
 
                     for (int oomIndex=0; oomIndex<oomPss.length; oomIndex++) {
@@ -11274,7 +11291,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 dumpMemItems(out, "  ", catMems, true);
             }
             pw.println();
-            pw.print("Total PSS: "); pw.print(totalPss); pw.println(" kB");
+            if (!brief) {
+                MemInfoReader memInfo = new MemInfoReader();
+                memInfo.readMemInfo();
+                pw.print("Total RAM: "); pw.print(memInfo.getTotalSize()/1024); pw.println(" kB");
+                pw.print(" Free RAM: "); pw.print(cachedPss + (memInfo.getCachedSize()/1024)
+                        + (memInfo.getFreeSize()/1024)); pw.println(" kB");
+            }
+            pw.print(" Used PSS: "); pw.print(totalPss - cachedPss); pw.println(" kB");
             if (!brief) {
                 final int[] SINGLE_LONG_FORMAT = new int[] {
                     Process.PROC_SPACE_TERM|Process.PROC_OUT_LONG
@@ -11295,10 +11319,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Process.readProcFile("/sys/kernel/mm/ksm/pages_volatile",
                         SINGLE_LONG_FORMAT, null, longOut, null);
                 long voltile = longOut[0] * ProcessList.PAGE_SIZE / 1024;
-                pw.print("      KSM: "); pw.print(sharing); pw.print(" kB saved from shared ");
-                        pw.print(shared); pw.println(" kB");
-                pw.print("           "); pw.print(unshared); pw.print(" kB unshared; ");
-                        pw.print(voltile); pw.println(" kB volatile");
+                if (sharing != 0 || shared != 0 || unshared != 0 || voltile != 0) {
+                    pw.print("      KSM: "); pw.print(sharing); pw.print(" kB saved from shared ");
+                            pw.print(shared); pw.println(" kB");
+                    pw.print("           "); pw.print(unshared); pw.print(" kB unshared; ");
+                            pw.print(voltile); pw.println(" kB volatile");
+                }
             }
         }
     }
@@ -13469,6 +13495,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // infinite recursion.
         app.adjSeq = mAdjSeq;
         app.curRawAdj = app.nonStoppingAdj = adj;
+        app.hasStartedServices = false;
 
         if (mBackupTarget != null && app == mBackupTarget.app) {
             // If possible we want to avoid killing apps while they're being backed up
@@ -13489,6 +13516,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             while (jt.hasNext() && adj > ProcessList.FOREGROUND_APP_ADJ) {
                 ServiceRecord s = jt.next();
                 if (s.startRequested) {
+                    app.hasStartedServices = true;
                     if (app.hasShownUi && app != mHomeProcess) {
                         // If this process has shown some UI, let it immediately
                         // go to the LRU list because it may be pretty heavy with
@@ -14333,7 +14361,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             emptyProcessLimit = 1;
             cachedProcessLimit = 0;
         } else {
-            emptyProcessLimit = (mProcessLimit*2)/3;
+            emptyProcessLimit = ProcessList.computeEmptyProcessLimit(mProcessLimit);
             cachedProcessLimit = mProcessLimit - emptyProcessLimit;
         }
 

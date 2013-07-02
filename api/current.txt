@@ -2821,6 +2821,7 @@ package android.app {
     method public void recreate();
     method public void registerForContextMenu(android.view.View);
     method public final deprecated void removeDialog(int);
+    method public void reportFullyDrawn();
     method public final boolean requestWindowFeature(int);
     method public final void runOnUiThread(java.lang.Runnable);
     method public void setContentView(int);

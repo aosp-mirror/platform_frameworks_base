@@ -81,6 +81,7 @@ final class ProcessRecord {
     boolean setIsForeground;    // Running foreground UI when last set?
     boolean hasActivities;      // Are there any activities running in this process?
     boolean hasClientActivities;  // Are there any client services with activities?
+    boolean hasStartedServices; // Are there any started services running in this process?
     boolean foregroundServices; // Running any services that are foreground?
     boolean foregroundActivities; // Running any activities that are foreground?
     boolean systemNoUi;         // This is a system process, but not currently showing UI.
@@ -245,6 +246,9 @@ final class ProcessRecord {
             pw.print(prefix); pw.print("hasActivities="); pw.print(hasActivities);
                     pw.print(" hasClientActivities="); pw.print(hasClientActivities);
                     pw.print(" foregroundActivities="); pw.println(foregroundActivities);
+        }
+        if (hasStartedServices) {
+            pw.print(prefix); pw.print("hasStartedServices="); pw.println(hasStartedServices);
         }
         if (!keeping) {
             long wtime;
@@ -454,10 +458,17 @@ final class ProcessRecord {
         return false;
     }
 
+    public int getSetAdjWithServices() {
+        if (setAdj >= ProcessList.CACHED_APP_MIN_ADJ && hasStartedServices) {
+            return ProcessList.SERVICE_B_ADJ;
+        }
+        return setAdj;
+    }
+
     public void setProcessTrackerState(ProcessRecord TOP_APP, int memFactor, long now,
             ProcessList plist) {
         int state = this == TOP_APP ? ProcessTracker.STATE_TOP
-                : plist.adjToTrackedState(setAdj);
+                : plist.adjToTrackedState(getSetAdjWithServices());
         baseProcessTracker.setState(state, memFactor, now, pkgList);
     }
 

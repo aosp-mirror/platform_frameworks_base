@@ -392,6 +392,8 @@ public interface IActivityManager extends IInterface {
 
     public void hang(IBinder who, boolean allowRestart) throws RemoteException;
 
+    public void reportActivityFullyDrawn(IBinder token) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -669,4 +671,5 @@ public interface IActivityManager extends IInterface {
     int SET_FOCUSED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+171;
     int GET_STACK_BOX_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+172;
     int CONVERT_TO_OPAQUE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+173;
+    int REPORT_ACTIVITY_FULLY_DRAWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+174;
 }

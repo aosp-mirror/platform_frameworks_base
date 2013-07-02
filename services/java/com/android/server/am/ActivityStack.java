@@ -205,7 +205,8 @@ final class ActivityStack {
      */
     boolean mConfigWillChange;
 
-    long mInitialStartTime = 0;
+    long mLaunchStartTime = 0;
+    long mFullyDrawnStartTime = 0;
 
     /**
      * Save the most recent screenshot for reuse. This keeps Recents from taking two identical
@@ -595,14 +596,18 @@ final class ActivityStack {
     }
 
     void setLaunchTime(ActivityRecord r) {
-        if (r.launchTime == 0) {
-            r.launchTime = SystemClock.uptimeMillis();
-            if (mInitialStartTime == 0) {
-                mInitialStartTime = r.launchTime;
+        if (r.displayStartTime == 0) {
+            r.fullyDrawnStartTime = r.displayStartTime = SystemClock.uptimeMillis();
+            if (mLaunchStartTime == 0) {
+                mLaunchStartTime = mFullyDrawnStartTime = r.displayStartTime;
             }
-        } else if (mInitialStartTime == 0) {
-            mInitialStartTime = SystemClock.uptimeMillis();
+        } else if (mLaunchStartTime == 0) {
+            mLaunchStartTime = mFullyDrawnStartTime = SystemClock.uptimeMillis();
         }
+    }
+
+    void clearLaunchTime(ActivityRecord r) {
+        r.displayStartTime = r.fullyDrawnStartTime = 0;
     }
 
     void stopIfSleepingLocked() {
@@ -710,6 +715,7 @@ final class ActivityStack {
         mLastPausedActivity = prev;
         prev.state = ActivityState.PAUSING;
         prev.task.touchActiveTime();
+        clearLaunchTime(prev);
         prev.updateThumbnail(screenshotActivities(prev), null);
 
         mService.updateCpuStats();

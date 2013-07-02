@@ -98,21 +98,30 @@ final class ProcessList {
     // without empty apps being able to push them out of memory.
     static final int MIN_CACHED_APPS = 2;
 
-    // The maximum number of cached processes we will keep around before
-    // killing them; this is just a control to not let us go too crazy with
-    // keeping around processes on devices with large amounts of RAM.
+    // The maximum number of cached processes we will keep around before killing them.
+    // NOTE: this constant is *only* a control to not let us go too crazy with
+    // keeping around processes on devices with large amounts of RAM.  For devices that
+    // are tighter on RAM, the out of memory killer is responsible for killing background
+    // processes as RAM is needed, and we should *never* be relying on this limit to
+    // kill them.  Also note that this limit only applies to cached background processes;
+    // we have no limit on the number of service, visible, foreground, or other such
+    // processes and the number of those processes does not count against the cached
+    // process limit.
     static final int MAX_CACHED_APPS = 24;
 
     // We allow empty processes to stick around for at most 30 minutes.
     static final long MAX_EMPTY_TIME = 30*60*1000;
 
-    // The number of cached at which we don't consider it necessary to do
-    // memory trimming.
-    static final int TRIM_CACHED_APPS = 3;
+    // The maximum number of empty app processes we will let sit around.
+    private static final int MAX_EMPTY_APPS = computeEmptyProcessLimit(MAX_CACHED_APPS);
 
     // The number of empty apps at which we don't consider it necessary to do
     // memory trimming.
-    static final int TRIM_EMPTY_APPS = 3;
+    static final int TRIM_EMPTY_APPS = MAX_EMPTY_APPS/2;
+
+    // The number of cached at which we don't consider it necessary to do
+    // memory trimming.
+    static final int TRIM_CACHED_APPS = (MAX_CACHED_APPS-MAX_EMPTY_APPS)/2;
 
     // Threshold of number of cached+empty where we consider memory critical.
     static final int TRIM_CRITICAL_THRESHOLD = 3;
@@ -232,6 +241,10 @@ final class ProcessList {
         }
         // GB: 2048,3072,4096,6144,7168,8192
         // HC: 8192,10240,12288,14336,16384,20480
+    }
+
+    public static int computeEmptyProcessLimit(int totalProcessLimit) {
+        return (totalProcessLimit*2)/3;
     }
 
     long getMemLevel(int adjustment) {

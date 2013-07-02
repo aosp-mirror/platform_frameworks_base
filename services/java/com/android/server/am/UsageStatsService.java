@@ -77,7 +77,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
     private static final String TAG = "UsageStats";
     
     // Current on-disk Parcel version
-    private static final int VERSION = 1007;
+    private static final int VERSION = 1008;
 
     private static final int CHECKIN_VERSION = 4;
     
@@ -166,8 +166,10 @@ public final class UsageStatsService extends IUsageStats.Stub {
     }
     
     private class PkgUsageStatsExtended {
-        final HashMap<String, TimeStats> mLaunchTimes
-                = new HashMap<String, TimeStats>();
+        final ArrayMap<String, TimeStats> mLaunchTimes
+                = new ArrayMap<String, TimeStats>();
+        final ArrayMap<String, TimeStats> mFullyDrawnTimes
+                = new ArrayMap<String, TimeStats>();
         int mLaunchCount;
         long mUsageTime;
         long mPausedTime;
@@ -184,13 +186,24 @@ public final class UsageStatsService extends IUsageStats.Stub {
             if (localLOGV) Slog.v(TAG, "Launch count: " + mLaunchCount
                     + ", Usage time:" + mUsageTime);
             
-            final int numTimeStats = in.readInt();
-            if (localLOGV) Slog.v(TAG, "Reading comps: " + numTimeStats);
-            for (int i=0; i<numTimeStats; i++) {
+            final int numLaunchTimeStats = in.readInt();
+            if (localLOGV) Slog.v(TAG, "Reading launch times: " + numLaunchTimeStats);
+            mLaunchTimes.ensureCapacity(numLaunchTimeStats);
+            for (int i=0; i<numLaunchTimeStats; i++) {
                 String comp = in.readString();
                 if (localLOGV) Slog.v(TAG, "Component: " + comp);
                 TimeStats times = new TimeStats(in);
                 mLaunchTimes.put(comp, times);
+            }
+
+            final int numFullyDrawnTimeStats = in.readInt();
+            if (localLOGV) Slog.v(TAG, "Reading fully drawn times: " + numFullyDrawnTimeStats);
+            mFullyDrawnTimes.ensureCapacity(numFullyDrawnTimeStats);
+            for (int i=0; i<numFullyDrawnTimeStats; i++) {
+                String comp = in.readString();
+                if (localLOGV) Slog.v(TAG, "Component: " + comp);
+                TimeStats times = new TimeStats(in);
+                mFullyDrawnTimes.put(comp, times);
             }
         }
 
@@ -223,23 +236,36 @@ public final class UsageStatsService extends IUsageStats.Stub {
             }
             times.add(millis);
         }
-        
+
+        void addFullyDrawnTime(String comp, int millis) {
+            TimeStats times = mFullyDrawnTimes.get(comp);
+            if (times == null) {
+                times = new TimeStats();
+                mFullyDrawnTimes.put(comp, times);
+            }
+            times.add(millis);
+        }
+
         void writeToParcel(Parcel out) {
             out.writeInt(mLaunchCount);
             out.writeLong(mUsageTime);
-            final int numTimeStats = mLaunchTimes.size();
-            out.writeInt(numTimeStats);
-            if (numTimeStats > 0) {
-                for (Map.Entry<String, TimeStats> ent : mLaunchTimes.entrySet()) {
-                    out.writeString(ent.getKey());
-                    TimeStats times = ent.getValue();
-                    times.writeToParcel(out);
-                }
+            final int numLaunchTimeStats = mLaunchTimes.size();
+            out.writeInt(numLaunchTimeStats);
+            for (int i=0; i<numLaunchTimeStats; i++) {
+                out.writeString(mLaunchTimes.keyAt(i));
+                mLaunchTimes.valueAt(i).writeToParcel(out);
+            }
+            final int numFullyDrawnTimeStats = mFullyDrawnTimes.size();
+            out.writeInt(numFullyDrawnTimeStats);
+            for (int i=0; i<numFullyDrawnTimeStats; i++) {
+                out.writeString(mFullyDrawnTimes.keyAt(i));
+                mFullyDrawnTimes.valueAt(i).writeToParcel(out);
             }
         }
         
         void clear() {
             mLaunchTimes.clear();
+            mFullyDrawnTimes.clear();
             mLaunchCount = 0;
             mUsageTime = 0;
         }
@@ -783,6 +809,25 @@ public final class UsageStatsService extends IUsageStats.Stub {
         }
     }
     
+    public void noteFullyDrawnTime(ComponentName componentName, int millis) {
+        enforceCallingPermission();
+        String pkgName;
+        if ((componentName == null) ||
+                ((pkgName = componentName.getPackageName()) == null)) {
+            return;
+        }
+
+        // Persist current data to file if needed.
+        writeStatsToFile(false, false);
+
+        synchronized (mStatsLock) {
+            PkgUsageStatsExtended pus = mStats.get(pkgName);
+            if (pus != null) {
+                pus.addFullyDrawnTime(componentName.getClassName(), millis);
+            }
+        }
+    }
+
     public void enforceCallingPermission() {
         if (Binder.getCallingPid() == Process.myPid()) {
             return;
@@ -935,29 +980,33 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 sb.append(',');
                 sb.append(pus.mUsageTime);
                 sb.append('\n');
-                final int NC = pus.mLaunchTimes.size();
-                if (NC > 0) {
-                    for (Map.Entry<String, TimeStats> ent : pus.mLaunchTimes.entrySet()) {
-                        sb.append("A:");
-                        String activity = ent.getKey();
-                        if (activity.startsWith(pkgName)) {
-                            sb.append('*');
-                            sb.append(activity.substring(
-                                    pkgName.length(), activity.length()));
-                        } else {
-                            sb.append(activity);
-                        }
-                        TimeStats times = ent.getValue();
-                        sb.append(',');
-                        sb.append(times.count);
-                        for (int i=0; i<NUM_LAUNCH_TIME_BINS; i++) {
-                            sb.append(",");
-                            sb.append(times.times[i]);
-                        }
-                        sb.append('\n');
+                final int NLT = pus.mLaunchTimes.size();
+                for (int i=0; i<NLT; i++) {
+                    sb.append("A:");
+                    String activity = pus.mLaunchTimes.keyAt(i);
+                    sb.append(activity);
+                    TimeStats times = pus.mLaunchTimes.valueAt(i);
+                    sb.append(',');
+                    sb.append(times.count);
+                    for (int j=0; j<NUM_LAUNCH_TIME_BINS; j++) {
+                        sb.append(",");
+                        sb.append(times.times[j]);
                     }
+                    sb.append('\n');
                 }
-                
+                final int NFDT = pus.mFullyDrawnTimes.size();
+                for (int i=0; i<NFDT; i++) {
+                    sb.append("A:");
+                    String activity = pus.mFullyDrawnTimes.keyAt(i);
+                    sb.append(activity);
+                    TimeStats times = pus.mFullyDrawnTimes.valueAt(i);
+                    for (int j=0; j<NUM_LAUNCH_TIME_BINS; j++) {
+                        sb.append(",");
+                        sb.append(times.times[j]);
+                    }
+                    sb.append('\n');
+                }
+
             } else {
                 sb.append("  ");
                 sb.append(pkgName);
@@ -967,36 +1016,68 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 sb.append(pus.mUsageTime);
                 sb.append(" ms");
                 sb.append('\n');
-                final int NC = pus.mLaunchTimes.size();
-                if (NC > 0) {
-                    for (Map.Entry<String, TimeStats> ent : pus.mLaunchTimes.entrySet()) {
-                        sb.append("    ");
-                        sb.append(ent.getKey());
-                        TimeStats times = ent.getValue();
-                        sb.append(": ");
-                        sb.append(times.count);
-                        sb.append(" starts");
-                        int lastBin = 0;
-                        for (int i=0; i<NUM_LAUNCH_TIME_BINS-1; i++) {
-                            if (times.times[i] != 0) {
-                                sb.append(", ");
-                                sb.append(lastBin);
-                                sb.append('-');
-                                sb.append(LAUNCH_TIME_BINS[i]);
-                                sb.append("ms=");
-                                sb.append(times.times[i]);
-                            }
-                            lastBin = LAUNCH_TIME_BINS[i];
-                        }
-                        if (times.times[NUM_LAUNCH_TIME_BINS-1] != 0) {
+                final int NLT = pus.mLaunchTimes.size();
+                for (int i=0; i<NLT; i++) {
+                    sb.append("    ");
+                    sb.append(pus.mLaunchTimes.keyAt(i));
+                    TimeStats times = pus.mLaunchTimes.valueAt(i);
+                    sb.append(": ");
+                    sb.append(times.count);
+                    sb.append(" starts");
+                    int lastBin = 0;
+                    for (int j=0; j<NUM_LAUNCH_TIME_BINS-1; j++) {
+                        if (times.times[j] != 0) {
                             sb.append(", ");
-                            sb.append(">=");
                             sb.append(lastBin);
+                            sb.append('-');
+                            sb.append(LAUNCH_TIME_BINS[j]);
                             sb.append("ms=");
-                            sb.append(times.times[NUM_LAUNCH_TIME_BINS-1]);
+                            sb.append(times.times[j]);
                         }
-                        sb.append('\n');
+                        lastBin = LAUNCH_TIME_BINS[j];
                     }
+                    if (times.times[NUM_LAUNCH_TIME_BINS-1] != 0) {
+                        sb.append(", ");
+                        sb.append(">=");
+                        sb.append(lastBin);
+                        sb.append("ms=");
+                        sb.append(times.times[NUM_LAUNCH_TIME_BINS-1]);
+                    }
+                    sb.append('\n');
+                }
+                final int NFDT = pus.mFullyDrawnTimes.size();
+                for (int i=0; i<NFDT; i++) {
+                    sb.append("    ");
+                    sb.append(pus.mFullyDrawnTimes.keyAt(i));
+                    TimeStats times = pus.mFullyDrawnTimes.valueAt(i);
+                    sb.append(": fully drawn ");
+                    boolean needComma = false;
+                    int lastBin = 0;
+                    for (int j=0; j<NUM_LAUNCH_TIME_BINS-1; j++) {
+                        if (times.times[j] != 0) {
+                            if (needComma) {
+                                sb.append(", ");
+                            } else {
+                                needComma = true;
+                            }
+                            sb.append(lastBin);
+                            sb.append('-');
+                            sb.append(LAUNCH_TIME_BINS[j]);
+                            sb.append("ms=");
+                            sb.append(times.times[j]);
+                        }
+                        lastBin = LAUNCH_TIME_BINS[j];
+                    }
+                    if (times.times[NUM_LAUNCH_TIME_BINS-1] != 0) {
+                        if (needComma) {
+                            sb.append(", ");
+                        }
+                        sb.append(">=");
+                        sb.append(lastBin);
+                        sb.append("ms=");
+                        sb.append(times.times[NUM_LAUNCH_TIME_BINS-1]);
+                    }
+                    sb.append('\n');
                 }
             }
             
