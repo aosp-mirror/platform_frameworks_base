@@ -401,5 +401,6 @@ public class AudioSystem
     // helpers for android.media.AudioManager.getProperty(), see description there for meaning
     public static native int getPrimaryOutputSamplingRate();
     public static native int getPrimaryOutputFrameCount();
+    public static native int getOutputLatency(int stream);
 
 }

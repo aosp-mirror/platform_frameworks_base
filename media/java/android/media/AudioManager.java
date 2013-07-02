@@ -2553,4 +2553,15 @@ public class AudioManager {
         }
     }
 
+    /**
+     * Returns the estimated latency for the given stream type in milliseconds.
+     *
+     * DO NOT UNHIDE. The existing approach for doing A/V sync has too many problems. We need
+     * a better solution.
+     * @hide
+     */
+    public int getOutputLatency(int streamType) {
+        return AudioSystem.getOutputLatency(streamType);
+    }
+
 }
