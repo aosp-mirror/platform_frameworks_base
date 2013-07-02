@@ -628,6 +628,18 @@ public class AudioTrack
     }
 
     /**
+     * Returns this track's estimated latency in milliseconds. This includes the latency due
+     * to AudioTrack buffer size, AudioMixer (if any) and audio hardware driver.
+     *
+     * DO NOT UNHIDE. The existing approach for doing A/V sync has too many problems. We need
+     * a better solution.
+     * @hide
+     */
+    public int getLatency() {
+        return native_get_latency();
+    }
+
+    /**
      *  Returns the hardware output sample rate
      */
     static public int getNativeOutputSampleRate(int streamType) {
@@ -1255,6 +1267,8 @@ public class AudioTrack
 
     private native final int native_set_position(int position);
     private native final int native_get_position();
+
+    private native final int native_get_latency();
 
     private native final int native_set_loop(int start, int end, int loopCount);
 
