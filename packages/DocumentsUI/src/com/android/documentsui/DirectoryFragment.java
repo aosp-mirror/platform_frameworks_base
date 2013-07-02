@@ -29,12 +29,16 @@ import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.DocumentColumns;
 import android.text.format.DateUtils;
+import android.util.SparseBooleanArray;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CursorAdapter;
@@ -44,6 +48,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.documentsui.DocumentsActivity.Document;
+import com.google.android.collect.Lists;
+
+import java.util.ArrayList;
 
 /**
  * Display the documents inside a single directory.
@@ -52,10 +59,11 @@ public class DirectoryFragment extends Fragment {
 
     // TODO: show storage backend in item views when requested
     // TODO: implement sorting dialog
-    // TODO: support multiple selection with actionmode
 
     private ListView mListView;
     private GridView mGridView;
+
+    private AbsListView mCurrentView;
 
     private DocumentsAdapter mAdapter;
     private LoaderCallbacks<Cursor> mCallbacks;
@@ -64,16 +72,19 @@ public class DirectoryFragment extends Fragment {
 
     private static final String EXTRA_URI = "uri";
     private static final String EXTRA_MODE = "display_mode";
+    private static final String EXTRA_ALLOW_MULTIPLE = "allow_multiple";
 
     private static final int MODE_LIST = 1;
     private static final int MODE_GRID = 2;
 
     private static final int LOADER_DOCUMENTS = 2;
 
-    public static void show(FragmentManager fm, Uri uri, String displayName) {
+    public static void show(
+            FragmentManager fm, Uri uri, String displayName, boolean allowMultiple) {
         final Bundle args = new Bundle();
         args.putParcelable(EXTRA_URI, uri);
         args.putInt(EXTRA_MODE, MODE_LIST);
+        args.putBoolean(EXTRA_ALLOW_MULTIPLE, allowMultiple);
 
         final DirectoryFragment fragment = new DirectoryFragment();
         fragment.setArguments(args);
@@ -100,9 +111,11 @@ public class DirectoryFragment extends Fragment {
 
         mListView = (ListView) view.findViewById(R.id.list);
         mListView.setOnItemClickListener(mItemListener);
+        mListView.setMultiChoiceModeListener(mMultiListener);
 
         mGridView = (GridView) view.findViewById(R.id.grid);
         mGridView.setOnItemClickListener(mItemListener);
+        mGridView.setMultiChoiceModeListener(mMultiListener);
 
         mAdapter = new DocumentsAdapter(context);
         updateMode();
@@ -184,13 +197,27 @@ public class DirectoryFragment extends Fragment {
         mListView.setVisibility(mode == MODE_LIST ? View.VISIBLE : View.GONE);
         mGridView.setVisibility(mode == MODE_GRID ? View.VISIBLE : View.GONE);
 
+        final int choiceMode;
+        if (getArguments().getBoolean(EXTRA_ALLOW_MULTIPLE)) {
+            choiceMode = ListView.CHOICE_MODE_MULTIPLE_MODAL;
+        } else {
+            choiceMode = ListView.CHOICE_MODE_NONE;
+        }
+
         if (mode == MODE_GRID) {
             mListView.setAdapter(null);
+            mListView.setChoiceMode(ListView.CHOICE_MODE_NONE);
             mGridView.setAdapter(mAdapter);
+            mGridView.setColumnWidth(getResources().getDimensionPixelSize(R.dimen.grid_width));
             mGridView.setNumColumns(GridView.AUTO_FIT);
+            mGridView.setChoiceMode(choiceMode);
+            mCurrentView = mGridView;
         } else {
             mGridView.setAdapter(null);
+            mGridView.setChoiceMode(ListView.CHOICE_MODE_NONE);
             mListView.setAdapter(mAdapter);
+            mListView.setChoiceMode(choiceMode);
+            mCurrentView = mListView;
         }
     }
 
@@ -198,10 +225,66 @@ public class DirectoryFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             final Cursor cursor = (Cursor) mAdapter.getItem(position);
-
             final Uri uri = getArguments().getParcelable(EXTRA_URI);
             final Document doc = Document.fromCursor(uri.getAuthority(), cursor);
             ((DocumentsActivity) getActivity()).onDocumentPicked(doc);
+        }
+    };
+
+    private MultiChoiceModeListener mMultiListener = new MultiChoiceModeListener() {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mode.getMenuInflater().inflate(R.menu.mode_directory, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return true;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            if (item.getItemId() == R.id.menu_open) {
+                final Uri uri = getArguments().getParcelable(EXTRA_URI);
+                final SparseBooleanArray checked = mCurrentView.getCheckedItemPositions();
+                final ArrayList<Document> docs = Lists.newArrayList();
+
+                final int size = checked.size();
+                for (int i = 0; i < size; i++) {
+                    if (checked.valueAt(i)) {
+                        final Cursor cursor = (Cursor) mAdapter.getItem(checked.keyAt(i));
+                        docs.add(Document.fromCursor(uri.getAuthority(), cursor));
+                    }
+                }
+
+                ((DocumentsActivity) getActivity()).onDocumentsPicked(docs);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            // ignored
+        }
+
+        @Override
+        public void onItemCheckedStateChanged(
+                ActionMode mode, int position, long id, boolean checked) {
+            if (checked) {
+                final Cursor cursor = (Cursor) mAdapter.getItem(position);
+                final String mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
+
+                // Directories cannot be checked
+                if (DocumentsContract.MIME_TYPE_DIRECTORY.equals(mimeType)) {
+                    mCurrentView.setItemChecked(position, false);
+                }
+            }
+
+            mode.setTitle(getResources()
+                    .getString(R.string.mode_selected_count, mCurrentView.getCheckedItemCount()));
         }
     };
 

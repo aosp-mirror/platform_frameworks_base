@@ -18,5 +18,6 @@
     <item
         android:id="@+id/menu_create_dir"
         android:title="@string/menu_create_dir"
-        android:icon="@drawable/ic_menu_create_dir" />
+        android:icon="@drawable/ic_menu_create_dir"
+        android:showAsAction="always" />
 </menu>
