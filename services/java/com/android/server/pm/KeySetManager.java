@@ -418,6 +418,21 @@ public class KeySetManager {
                 pw.print("  ["); pw.print(keySetPackage); pw.println("]");
                 if (pkg.keySetData != null) {
                     boolean printedLabel = false;
+                    for (Entry<String, Long> entry : pkg.keySetData.getAliases().entrySet()) {
+                        if (!printedLabel) {
+                            pw.print("      KeySets Aliases: ");
+                            printedLabel = true;
+                        } else {
+                            pw.print(", ");
+                        }
+                        pw.print(entry.getKey());
+                        pw.print('=');
+                        pw.print(Long.toString(entry.getValue()));
+                    }
+                    if (printedLabel) {
+                        pw.println("");
+                    }
+                    printedLabel = false;
                     for (long keySetId : pkg.keySetData.getDefinedKeySets()) {
                         if (!printedLabel) {
                             pw.print("      Defined KeySets: ");
@@ -433,12 +448,12 @@ public class KeySetManager {
                     printedLabel = false;
                     for (long keySetId : pkg.keySetData.getSigningKeySets()) {
                         if (!printedLabel) {
-                            pw.print("      Signing KeySets:");
+                            pw.print("      Signing KeySets: ");
                             printedLabel = true;
                         } else {
                             pw.print(", ");
                         }
-                        pw.print(" "); pw.print(Long.toString(keySetId));
+                        pw.print(Long.toString(keySetId));
                     }
                     if (printedLabel) {
                         pw.println("");
