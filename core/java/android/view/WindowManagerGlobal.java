@@ -227,7 +227,6 @@ public final class WindowManagerGlobal {
             if (index >= 0) {
                 if (mDyingViews.contains(view)) {
                     // Don't wait for MSG_DIE to make it's way through root's queue.
-                    Slog.d(TAG, "addView: b9404689 mDying contains view=" + view);
                     mRoots.get(index).doDie();
                 } else {
                     throw new IllegalStateException("View " + view
@@ -252,7 +251,6 @@ public final class WindowManagerGlobal {
 
             view.setLayoutParams(wparams);
 
-            Slog.d(TAG, "addView: b9404689 adding view=" + view + " root=" + root);
             mViews.add(view);
             mRoots.add(root);
             mParams.add(wparams);
@@ -351,8 +349,6 @@ public final class WindowManagerGlobal {
         if (view != null) {
             view.assignParent(null);
             if (deferred) {
-                Slog.d(TAG, "removeViewLocked: b9404689 mDyingViews adding view=" + view
-                        + " root=" + root + " Callers=" + Debug.getCallers(4));
                 mDyingViews.add(view);
             }
         }
@@ -362,15 +358,10 @@ public final class WindowManagerGlobal {
         synchronized (mLock) {
             final int index = mRoots.indexOf(root);
             if (index >= 0) {
-                Slog.d(TAG, "doRemoveView: b9404689 removing view=" + mViews.get(index)
-                    + " Callers=" + Debug.getCallers(4));
                 mRoots.remove(index);
                 mParams.remove(index);
                 final View view = mViews.remove(index);
                 mDyingViews.remove(view);
-            } else {
-                Slog.d(TAG, "doRemoveView: b9404689 couldn't find root=" + root
-                    + " Callers=" + Debug.getCallers(4));
             }
         }
     }
