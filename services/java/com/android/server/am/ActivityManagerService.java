@@ -1822,7 +1822,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         mBatteryStatsService.getActiveStatistics().setCallback(this);
 
         mProcessTracker = new ProcessTracker(new File(systemDir, "procstats"));
-        mProcessTracker.readLocked();
 
         mUsageStatsService = new UsageStatsService(new File(systemDir, "usagestats").toString());
         mAppOpsService = new AppOpsService(new File(systemDir, "appops.xml"));
