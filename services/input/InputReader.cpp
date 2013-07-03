@@ -4650,6 +4650,14 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                 mCurrentFingerIdBits, positions);
     }
 
+    // If the gesture ever enters a mode other than TAP, HOVER or TAP_DRAG, without first returning
+    // to NEUTRAL, then we should not generate tap event.
+    if (mPointerGesture.lastGestureMode != PointerGesture::HOVER
+            && mPointerGesture.lastGestureMode != PointerGesture::TAP
+            && mPointerGesture.lastGestureMode != PointerGesture::TAP_DRAG) {
+        mPointerGesture.resetTap();
+    }
+
     // Pick a new active touch id if needed.
     // Choose an arbitrary pointer that just went down, if there is one.
     // Otherwise choose an arbitrary remaining pointer.
@@ -4858,8 +4866,12 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                 }
             } else {
 #if DEBUG_GESTURES
-                ALOGD("Gestures: Not a TAP, %0.3fms since down",
-                        (when - mPointerGesture.tapDownTime) * 0.000001f);
+                if (mPointerGesture.tapDownTime != LLONG_MIN) {
+                    ALOGD("Gestures: Not a TAP, %0.3fms since down",
+                            (when - mPointerGesture.tapDownTime) * 0.000001f);
+                } else {
+                    ALOGD("Gestures: Not a TAP, incompatible mode transitions");
+                }
 #endif
             }
         }
