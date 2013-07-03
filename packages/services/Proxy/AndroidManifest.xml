@@ -1,0 +1,25 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
+        package="com.android.proxyhandler"
+        coreApp="true">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:persistent="true"
+        android:label="@string/app_label"
+        android:process="com.android.proxyhandler">
+
+        <service android:name=".ProxyService"
+            android:exported="true">
+        </service>
+
+        <receiver android:name=".ProxyServiceReceiver">
+
+            <intent-filter>
+                <action android:name="android.intent.action.PROXY_CHANGE" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+</manifest>
