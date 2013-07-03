@@ -1,0 +1,960 @@
+page.title=Configurator
+parent.title=uiautomator
+parent.link=index.html
+
+@jd:body
+<style>
+    h4.jd-details-title {background-color: #DEE8F1;}
+</style>
+
+<div id="api-info-block">
+<div class="api-level" style="margin:-95px 0 0;">
+Since <a href="/guide/topics/manifest/uses-sdk-element.html#ApiLevels">API level 18</a>
+</div>
+</div>
+
+<p>Allows you to set key parameters for running uiautomator tests. The new
+settings take effect immediately and can be changed any time during a test run.
+To modify parameters using <code><a href="#">Configurator</a></code>, first
+obtain an instance by calling <code><a href="#getInstance()">getInstance()</a></code>.
+As a best practice, make sure you always save the original value of any
+parameter that you are modifying. After running your tests with the modified
+parameters, make sure to also restore the original parameter values, otherwise
+this will impact other tests cases.</p>
+
+
+<h2>Summary</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
+
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            long</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getActionAcknowledgmentTimeout()">getActionAcknowledgmentTimeout</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Gets the current timeout for waiting for an acknowledgment of generic
+ uiautomator actions, such as clicks, text setting, and menu presses.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+            static
+
+            <a href="#">Configurator</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getInstance()">getInstance</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Retrieves a singleton instance of Configurator.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            long</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getKeyInjectionDelay()">getKeyInjectionDelay</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Gets the current delay between key presses when injecting text input.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            long</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getScrollAcknowledgmentTimeout()">getScrollAcknowledgmentTimeout</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Gets the timeout for waiting for an acknowledgement of an
+ uiautomtor scroll swipe action.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            long</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getWaitForIdleTimeout()">getWaitForIdleTimeout</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Gets the current timeout used for waiting for the user interface to go
+ into an idle state.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            long</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getWaitForSelectorTimeout()">getWaitForSelectorTimeout</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Gets the current timeout for waiting for a widget to become visible in
+ the user interface so that it can be matched by a selector.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="#">Configurator</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#setActionAcknowledgmentTimeout(long)">setActionAcknowledgmentTimeout</a></span>(long timeout)</nobr>
+
+        <div class="jd-descrdiv">Sets the timeout for waiting for an acknowledgment of generic uiautomator
+ actions, such as clicks, text setting, and menu presses.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="#">Configurator</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#setKeyInjectionDelay(long)">setKeyInjectionDelay</a></span>(long delay)</nobr>
+
+        <div class="jd-descrdiv">Sets a delay between key presses when injecting text input.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="#">Configurator</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#setScrollAcknowledgmentTimeout(long)">setScrollAcknowledgmentTimeout</a></span>(long timeout)</nobr>
+
+        <div class="jd-descrdiv">Sets the timeout for waiting for an acknowledgement of an
+ uiautomtor scroll swipe action.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="#">Configurator</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#setWaitForIdleTimeout(long)">setWaitForIdleTimeout</a></span>(long timeout)</nobr>
+
+        <div class="jd-descrdiv">Sets the timeout for waiting for the user interface to go into an idle
+ state before starting a uiautomator action.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="#">Configurator</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#setWaitForSelectorTimeout(long)">setWaitForSelectorTimeout</a></span>(long timeout)</nobr>
+
+        <div class="jd-descrdiv">Sets the timeout for waiting for a widget to become visible in the user
+ interface so that it can be matched by a selector.</div>
+
+  </td></tr>
+
+
+
+</table>
+
+
+
+
+
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="inhmethods" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Methods</div></th></tr>
+
+
+<tr class="api" >
+<td colspan="12">
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
+          ><img id="inherited-methods-java.lang.Object-trigger"
+          src="../../../../../assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>
+From class
+
+  java.lang.Object
+
+<div id="inherited-methods-java.lang.Object">
+  <div id="inherited-methods-java.lang.Object-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            Object</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">clone</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">finalize</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            Class&lt;?&gt;</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getClass</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">hashCode</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notify</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notifyAll</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">toString</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+            final
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0)</nobr>
+
+  </td></tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+</table>
+
+
+</div><!-- jd-descr (summary) -->
+
+<!-- Details -->
+
+
+
+
+
+
+
+
+<!-- XML Attributes -->
+
+
+<!-- Enum Values -->
+
+
+<!-- Constants -->
+
+
+<!-- Fields -->
+
+
+<!-- Public ctors -->
+
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<!-- Protected ctors -->
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+<!-- Public methdos -->
+
+<h2>Public Methods</h2>
+
+
+
+<A NAME="getActionAcknowledgmentTimeout()"></A>
+
+<div class="jd-details api apilevel-18">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        long
+      </span>
+      <span class="sympad">getActionAcknowledgmentTimeout</span>
+      <span class="normal">()</span>
+    </h4>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the current timeout for waiting for an acknowledgment of generic
+ uiautomator actions, such as clicks, text setting, and menu presses.
+
+ The acknowledgment is an <a href="http://developer.android.com/reference/android/view/accessibility/AccessibilityEvent.html">AccessibilityEvent</a>,
+ corresponding to an action, that lets the framework determine if the
+ action was successful. Generally, this timeout should not be modified.
+ See <code><a href="UiObject.html">UiObject</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>current timeout in milliseconds</li></ul>
+  </div>
+  <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 18</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getInstance()"></A>
+
+<div class="jd-details api apilevel-18">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+        static
+
+
+
+        <a href="#">Configurator</a>
+      </span>
+      <span class="sympad">getInstance</span>
+      <span class="normal">()</span>
+    </h4>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieves a singleton instance of Configurator.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Configurator instance</li></ul>
+  </div>
+  <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 18</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getKeyInjectionDelay()"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        long
+      </span>
+      <span class="sympad">getKeyInjectionDelay</span>
+      <span class="normal">()</span>
+    </h4>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the current delay between key presses when injecting text input.
+ See <code><a href="UiObject.html#setText(java.lang.String)">setText(String)</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>current delay in milliseconds</li></ul>
+  </div>
+  <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 18</li></ul>
+  </div>
+    </div>
+</div>
+
+
+<A NAME="getScrollAcknowledgmentTimeout()"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        long
+      </span>
+      <span class="sympad">getScrollAcknowledgmentTimeout</span>
+      <span class="normal">()</span>
+    </h4>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the timeout for waiting for an acknowledgement of an
+ uiautomtor scroll swipe action.
+
+ The acknowledgment is an <a href="http://developer.android.com/reference/android/view/accessibility/AccessibilityEvent.html">AccessibilityEvent</a>,
+ corresponding to the scroll action, that lets the framework determine if
+ the scroll action was successful. Generally, this timeout should not be modified.
+ See <code><a href="UiScrollable.html">UiScrollable</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>current timeout in milliseconds</li></ul>
+  </div>
+  <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 18</li></ul>
+  </div>
+    </div>
+</div>
+
+
+<A NAME="getWaitForIdleTimeout()"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        long
+      </span>
+      <span class="sympad">getWaitForIdleTimeout</span>
+      <span class="normal">()</span>
+    </h4>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the current timeout used for waiting for the user interface to go
+ into an idle state.
+
+ By default, all core uiautomator objects except <code><a href="UiDevice.html">UiDevice</a></code> will perform
+ this wait before starting to search for the widget specified by the
+ object's <code><a href="UiSelector.html">UiSelector</a></code>. Once the idle state is detected or the
+ timeout elapses (whichever occurs first), the object will start to wait
+ for the selector to find a match.
+ See <code><a href="#setWaitForSelectorTimeout(long)">setWaitForSelectorTimeout(long)</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Current timeout value in milliseconds</li></ul>
+  </div>
+  <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 18</li></ul>
+  </div>
+    </div>
+</div>
+
+
+<A NAME="getWaitForSelectorTimeout()"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        long
+      </span>
+      <span class="sympad">getWaitForSelectorTimeout</span>
+      <span class="normal">()</span>
+    </h4>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the current timeout for waiting for a widget to become visible in
+ the user interface so that it can be matched by a selector.
+
+ Because user interface content is dynamic, sometimes a widget may not
+ be visible immediately and won't be detected by a selector. This timeout
+ allows the uiautomator framework to wait for a match to be found, up until
+ the timeout elapses.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Current timeout value in milliseconds</li></ul>
+  </div>
+  <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 18</li></ul>
+  </div>
+    </div>
+</div>
+
+
+<A NAME="setActionAcknowledgmentTimeout(long)"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="#">Configurator</a>
+      </span>
+      <span class="sympad">setActionAcknowledgmentTimeout</span>
+      <span class="normal">(long timeout)</span>
+    </h4>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the timeout for waiting for an acknowledgment of generic uiautomator
+ actions, such as clicks, text setting, and menu presses.
+
+ The acknowledgment is an <a href="http://developer.android.com/reference/android/view/accessibility/AccessibilityEvent.html">AccessibilityEvent</a>,
+ corresponding to an action, that lets the framework determine if the
+ action was successful. Generally, this timeout should not be modified.
+ See <code><a href="UiObject.html">UiObject</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>timeout</td>
+          <td>Timeout value in milliseconds</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>self</li></ul>
+  </div>
+  <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 18</li></ul>
+  </div>
+    </div>
+</div>
+
+
+<A NAME="setKeyInjectionDelay(long)"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="#">Configurator</a>
+      </span>
+      <span class="sympad">setKeyInjectionDelay</span>
+      <span class="normal">(long delay)</span>
+    </h4>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Sets a delay between key presses when injecting text input.
+ See <code><a href="UiObject.html#setText(java.lang.String)">setText(String)</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>delay</td>
+          <td>Delay value in milliseconds</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>self</li></ul>
+  </div>
+  <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 18</li></ul>
+  </div>
+    </div>
+</div>
+
+
+<A NAME="setScrollAcknowledgmentTimeout(long)"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="#">Configurator</a>
+      </span>
+      <span class="sympad">setScrollAcknowledgmentTimeout</span>
+      <span class="normal">(long timeout)</span>
+    </h4>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the timeout for waiting for an acknowledgement of an
+ uiautomtor scroll swipe action.
+
+ The acknowledgment is an <a href="http://developer.android.com/reference/android/view/accessibility/AccessibilityEvent.html">AccessibilityEvent</a>,
+ corresponding to the scroll action, that lets the framework determine if
+ the scroll action was successful. Generally, this timeout should not be modified.
+ See <code><a href="UiScrollable.html">UiScrollable</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>timeout</td>
+          <td>Timeout value in milliseconds</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>self</li></ul>
+  </div>
+  <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 18</li></ul>
+  </div>
+    </div>
+</div>
+
+
+<A NAME="setWaitForIdleTimeout(long)"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="#">Configurator</a>
+      </span>
+      <span class="sympad">setWaitForIdleTimeout</span>
+      <span class="normal">(long timeout)</span>
+    </h4>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the timeout for waiting for the user interface to go into an idle
+ state before starting a uiautomator action.
+
+ By default, all core uiautomator objects except <code><a href="UiDevice.html">UiDevice</a></code> will perform
+ this wait before starting to search for the widget specified by the
+ object's <code><a href="UiSelector.html">UiSelector</a></code>. Once the idle state is detected or the
+ timeout elapses (whichever occurs first), the object will start to wait
+ for the selector to find a match.
+ See <code><a href="#setWaitForSelectorTimeout(long)">setWaitForSelectorTimeout(long)</a></code></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>timeout</td>
+          <td>Timeout value in milliseconds</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>self</li></ul>
+  </div>
+  <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 18</li></ul>
+  </div>
+    </div>
+</div>
+
+
+<A NAME="setWaitForSelectorTimeout(long)"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
+        <a href="#">Configurator</a>
+      </span>
+      <span class="sympad">setWaitForSelectorTimeout</span>
+      <span class="normal">(long timeout)</span>
+    </h4>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the timeout for waiting for a widget to become visible in the user
+ interface so that it can be matched by a selector.
+
+ Because user interface content is dynamic, sometimes a widget may not
+ be visible immediately and won't be detected by a selector. This timeout
+ allows the uiautomator framework to wait for a match to be found, up until
+ the timeout elapses.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>timeout</td>
+          <td>Timeout value in milliseconds.</td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>self</li></ul>
+  </div>
+  <div class="jd-tagdata">
+     <h5 class="jd-tagtitle">Since</h5>
+     <ul class="nolist"><li>Android API Level 18</li></ul>
+  </div>
+    </div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+
+
+

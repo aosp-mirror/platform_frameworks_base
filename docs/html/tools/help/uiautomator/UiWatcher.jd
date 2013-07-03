@@ -9,9 +9,6 @@ parent.link=index.html
 <p>Represents a conditional watcher on the target device. To learn how to register a conditional 
  watcher, see <code><a href="UiDevice.html#registerWatcher(java.lang.String, com.android.uiautomator.core.UiWatcher)">UiDevice.registerWatcher()</a></code>.
 </p>
-
-<div class="jd-descr">
-
 <h2>Summary</h2>
 
 <!-- ========== METHOD SUMMARY =========== -->
@@ -75,4 +72,3 @@ parent.link=index.html
   </div>
 
     </div>
-</div>

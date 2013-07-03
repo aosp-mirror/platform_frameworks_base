@@ -26,7 +26,7 @@ parent.link=index.html
 <h2 id="syntax">Syntax</h2>
 <p>To run your testcases on the target device, you can use the {@code adb shell} command to invoke the {@code uiautomator} tool.  The syntax is:
 <pre>
-adb shell uiautomator runtest &lt;jar&gt; -c &lt;test_class_or_method&gt; [options]
+adb shell uiautomator runtest &lt;JARS&gt; -c &lt;CLASSES&gt; [options]
 </pre>
 </p>
 <p>Here’s an example:</p>
@@ -45,19 +45,26 @@ adb shell uiautomator runtest &lt;jar&gt; -c &lt;test_class_or_method&gt; [optio
 </tr>
 
 <tr>
-<td rowspan="6"><code>runtest</code></td>
-<td><nobr>{@code &lt;jar&gt;}</nobr></td>
-<td><strong>Required</strong>. The {@code &lt;jar&gt;} argument is the name of one or more JAR files that you deployed to the target device which contain your uiautomator testcases. You can list more than one JAR file by using a space as a separator.</td>
+<td rowspan="7"><code>runtest</code></td>
+<td><nobr>{@code &lt;JARS&gt;}</nobr></td>
+<td><strong>Required</strong>. The {@code &lt;JARS&gt;} argument is the name of one or more JAR files that you deployed to the target device which contain your uiautomator testcases. You can list more than one JAR file by using a space as a separator.</td>
 </tr>
 
 <tr>
-<td><nobr><code>-c &lt;test_class_or_method&gt; </code></nobr></td>
-<td><strong>Required</strong>. The {@code &lt;test_class_or_method&gt;} argument is a list of one or more specific test classes or test methods from the JARs that you want {@code uiautomator} to run. <p>Each class or method must be fully qualified with the package name, in one of these formats:
+<td><nobr><code>-c &lt;CLASSES&gt; </code></nobr></td>
+<td><strong>Required (API 17 or lower)</strong>.The {@code &lt;CLASSES&gt;} 
+argument is a list of test classes or test methods in {@code &lt;JARS&gt;} to run. 
+<p>Each class or method must be fully 
+qualified with the package name, in one of these formats:
 <ul>
 <li>{@code package_name.class_name}</li>
 <li>{@code package_name.class_name#method_name}</li>
 </ul>
-You can list multiple classes or methods by using a space as a separator.</p></td>
+You can list multiple classes or methods by using a space as a separator.</p>
+<p class="note"><strong>Note:</strong>This argument is not required for API 18 
+and higher. If not specified, all test cases in {@code &lt;JARS&gt;} will be run.
+</p>
+</td>
 </tr>
 
 <tr>
@@ -76,9 +83,13 @@ You can list multiple classes or methods by using a space as a separator.</p></t
 </tr>
 
 <tr>
-<td><code>dump</code></td>
-<td><code>[file]</code></td>
+<td><code>dump [file]</code></td>
 <td>Generate an XML file with a dump of the current UI hierarchy. If a filepath is not specified, by default, the generated dump file is stored on the device in this location {@code /storage/sdcard0/window_dump.xml}.</td>
+</tr>
+
+<tr>
+<td><nobr><code>-e outputFormat simple | -s</code></nobr></td>
+<td>Enables less verbose JUnit style output.</td>
 </tr>
 
 <tr>
@@ -121,6 +132,11 @@ You can list multiple classes or methods by using a space as a separator.</p></t
 <tr>
 <td><nobr><a href="{@docRoot}tools/help/uiautomator/UiSelector.html">{@code com.android.uiautomator.core.UiSelector}</a></nobr></td>
 <td>Represents a query for one or more target UI elements on a device screen. </td>
+</tr>
+
+<tr>
+<td><nobr><a href="{@docRoot}tools/help/uiautomator/Configurator.html">{@code com.android.uiautomator.core.Configurator}</a></nobr></td>
+<td>Allows you to set key parameters for running uiautomator tests.</td>
 </tr>
 
 </table>
