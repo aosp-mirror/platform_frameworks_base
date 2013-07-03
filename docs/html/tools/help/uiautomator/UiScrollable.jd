@@ -5,33 +5,9 @@ parent.link=index.html
 <style>
     h4.jd-details-title {background-color: #DEE8F1;}
 </style>
-<p>UiScrollable is a <code><a href="UiCollection.html">UiCollection</a></code> and provides support for searching for items in a
- scrollable user interface (UI) elements. This class can be used with horizontally or vertically scrollable controls..
-</p>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="jd-descr">
-
-
+<p>A <code><a href="UiCollection.html">UiCollection</a></code>
+that supports searching for items in scrollable layout elements. This class can
+be used with horizontally or vertically scrollable controls.</p>
 <h2>Summary</h2>
 
 
@@ -49,6 +25,90 @@ parent.link=index.html
 
 
 
+<!-- =========== ENUM CONSTANT SUMMARY =========== -->
+<table id="inhconstants" class="jd-sumtable"><tr><th>
+  <a href="#" class="toggle-all" onclick="return toggleAllInherited(this, null)">[Expand]</a>
+  <div style="clear:left;">Inherited Constants</div></th></tr>
+
+
+
+
+<tr class="api" >
+<td colspan="12">
+
+  <a href="#" onclick="return toggleInherited(this, null)" id="inherited-constants-com.android.uiautomator.core.UiObject" class="jd-expando-trigger closed"
+          ><img id="inherited-constants-com.android.uiautomator.core.UiObject-trigger"
+          src="../../../../../assets/images/triangle-closed.png"
+          class="jd-expando-trigger-img" /></a>From class
+<a href="UiObject.html">com.android.uiautomator.core.UiObject</a>
+<div id="inherited-constants-com.android.uiautomator.core.UiObject">
+  <div id="inherited-constants-com.android.uiautomator.core.UiObject-list"
+        class="jd-inheritedlinks">
+  </div>
+  <div id="inherited-constants-com.android.uiautomator.core.UiObject-summary" style="display: none;">
+    <table class="jd-sumtable-expando">
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="UiObject.html#FINGER_TOUCH_HALF_WIDTH">FINGER_TOUCH_HALF_WIDTH</a></td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="api" >
+        <td class="jd-typecol">int</td>
+        <td class="jd-linkcol"><a href="UiObject.html#SWIPE_MARGIN_LIMIT">SWIPE_MARGIN_LIMIT</a></td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="api" >
+        <td class="jd-typecol">long</td>
+        <td class="jd-linkcol"><a href="UiObject.html#WAIT_FOR_EVENT_TMEOUT">WAIT_FOR_EVENT_TMEOUT</a></td>
+        <td class="jd-descrcol" width="100%"><em>
+      This constant is deprecated.
+    use <code><a href="Configurator.html#setScrollAcknowledgmentTimeout(long)">setScrollAcknowledgmentTimeout(long)</a></code>
+</em></td>
+    </tr>
+
+
+    <tr class="api" >
+        <td class="jd-typecol">long</td>
+        <td class="jd-linkcol"><a href="UiObject.html#WAIT_FOR_SELECTOR_POLL">WAIT_FOR_SELECTOR_POLL</a></td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+    <tr class="api" >
+        <td class="jd-typecol">long</td>
+        <td class="jd-linkcol"><a href="UiObject.html#WAIT_FOR_SELECTOR_TIMEOUT">WAIT_FOR_SELECTOR_TIMEOUT</a></td>
+        <td class="jd-descrcol" width="100%"><em>
+      This constant is deprecated.
+    use <code><a href="Configurator.html#setWaitForSelectorTimeout(long)">setWaitForSelectorTimeout(long)</a></code>
+</em></td>
+    </tr>
+
+
+    <tr class="api" >
+        <td class="jd-typecol">long</td>
+        <td class="jd-linkcol"><a href="UiObject.html#WAIT_FOR_WINDOW_TMEOUT">WAIT_FOR_WINDOW_TMEOUT</a></td>
+        <td class="jd-descrcol" width="100%"></td>
+    </tr>
+
+
+</table>
+  </div>
+</div>
+</td></tr>
+
+
+
+
+</table>
+
+
 
 
 
@@ -61,22 +121,21 @@ parent.link=index.html
 
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            </nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#UiScrollable(com.android.uiautomator.core.UiSelector)">UiScrollable</a></span>(<a href="UiSelector.html">UiSelector</a> container)
-        
-        <div class="jd-descrdiv">UiScrollable is a <code><a href="UiCollection.html">UiCollection</a></code> and as such requires a <code><a href="UiSelector.html">UiSelector</a></code> to
- identify the container UI element of the scrollable collection.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#UiScrollable(com.android.uiautomator.core.UiSelector)">UiScrollable</a></span>(<a href="UiSelector.html">UiSelector</a> container)</nobr>
+
+        <div class="jd-descrdiv">Constructor.</div>
+
   </td></tr>
 
 
@@ -93,480 +152,500 @@ parent.link=index.html
 
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#flingBackward()">flingBackward</a></span>()
-        
-        <div class="jd-descrdiv">See <code><a href="#scrollBackward(int)">scrollBackward(int)</a></code></div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#flingBackward()">flingBackward</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Performs a backwards fling action with the default number of fling
+ steps (5).</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#flingForward()">flingForward</a></span>()
-        
-        <div class="jd-descrdiv">A convenience version of <code><a href="#scrollForward(int)">scrollForward(int)</a></code>, performs a fling</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#flingForward()">flingForward</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Performs a forward fling with the default number of fling steps (5).</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#flingToBeginning(int)">flingToBeginning</a></span>(int maxSwipes)
-        
-        <div class="jd-descrdiv">See <code><a href="#scrollToBeginning(int, int)">scrollToBeginning(int, int)</a></code></div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#flingToBeginning(int)">flingToBeginning</a></span>(int maxSwipes)</nobr>
+
+        <div class="jd-descrdiv">Performs a fling gesture to reach the beginning of a scrollable layout element.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#flingToEnd(int)">flingToEnd</a></span>(int maxSwipes)
-        
-        <div class="jd-descrdiv">See <code><a href="#scrollToEnd(int, int)">scrollToEnd(int, int)</a></code></div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#flingToEnd(int)">flingToEnd</a></span>(int maxSwipes)</nobr>
+
+        <div class="jd-descrdiv">Performs a fling gesture to reach the end of a scrollable layout element.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            <a href="UiObject.html">UiObject</a>
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="UiObject.html">UiObject</a></nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String, boolean)">getChildByDescription</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, String text, boolean allowScrollSearch)
-        
-        <div class="jd-descrdiv">See <code><a href="#getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String)">getChildByDescription(UiSelector, String)</a></code></div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String, boolean)">getChildByDescription</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, String text, boolean allowScrollSearch)</nobr>
+
+        <div class="jd-descrdiv">Searches for a child element in the present scrollable container.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            <a href="UiObject.html">UiObject</a>
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="UiObject.html">UiObject</a></nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String)">getChildByDescription</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, String text)
-        
-        <div class="jd-descrdiv">Searches for child UI element within the constraints of this UiScrollable <code><a href="UiSelector.html">UiSelector</a></code>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String)">getChildByDescription</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, String text)</nobr>
+
+        <div class="jd-descrdiv">Searches for a child element in the present scrollable container.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="UiObject.html">UiObject</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getChildByInstance(com.android.uiautomator.core.UiSelector, int)">getChildByInstance</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, int instance)</nobr>
+
+        <div class="jd-descrdiv">Searches for a child element in the present scrollable container that
+ matches the selector you provided.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="UiObject.html">UiObject</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getChildByText(com.android.uiautomator.core.UiSelector, java.lang.String, boolean)">getChildByText</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, String text, boolean allowScrollSearch)</nobr>
+
+        <div class="jd-descrdiv">Searches for a child element in the present scrollable container.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="UiObject.html">UiObject</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getChildByText(com.android.uiautomator.core.UiSelector, java.lang.String)">getChildByText</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, String text)</nobr>
+
+        <div class="jd-descrdiv">Searches for a child element in the present scrollable
  container.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            <a href="UiObject.html">UiObject</a>
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            int</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#getChildByInstance(com.android.uiautomator.core.UiSelector, int)">getChildByInstance</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, int instance)
-        
-        <div class="jd-descrdiv">Searches for child UI element within the constraints of this UiScrollable <code><a href="UiSelector.html">UiSelector</a></code>
- selector.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getMaxSearchSwipes()">getMaxSearchSwipes</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Gets the maximum number of scrolls allowed when performing a
+ scroll action in search of a child element.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            <a href="UiObject.html">UiObject</a>
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            double</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#getChildByText(com.android.uiautomator.core.UiSelector, java.lang.String, boolean)">getChildByText</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, String text, boolean allowScrollSearch)
-        
-        <div class="jd-descrdiv">See <code><a href="#getChildByText(com.android.uiautomator.core.UiSelector, java.lang.String)">getChildByText(UiSelector, String)</a></code></div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#getSwipeDeadZonePercentage()">getSwipeDeadZonePercentage</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Returns the percentage of a widget's size that's considered as a no-touch
+ zone when swiping.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            <a href="UiObject.html">UiObject</a>
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#getChildByText(com.android.uiautomator.core.UiSelector, java.lang.String)">getChildByText</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, String text)
-        
-        <div class="jd-descrdiv">Searches for child UI element within the constraints of this UiScrollable <code><a href="UiSelector.html">UiSelector</a></code>
- container.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#scrollBackward(int)">scrollBackward</a></span>(int steps)</nobr>
+
+        <div class="jd-descrdiv">Performs a backward scroll.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            int
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#getMaxSearchSwipes()">getMaxSearchSwipes</a></span>()
-        
-        <div class="jd-descrdiv">#getChildByDescription(String, boolean) and #getChildByText(String, boolean)
- use an arguments that specifies if scrolling is allowed while searching for the UI element.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#scrollBackward()">scrollBackward</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Performs a backward scroll with the default number of scroll steps (55).</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            double
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#getSwipeDeadZonePercentage()">getSwipeDeadZonePercentage</a></span>()
-        
-        <div class="jd-descrdiv">Returns the percentage of a widget's size that's considered as a no touch zone when swiping.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#scrollDescriptionIntoView(java.lang.String)">scrollDescriptionIntoView</a></span>(String text)</nobr>
+
+        <div class="jd-descrdiv">Performs a forward scroll action on the scrollable layout element until
+ the content-description is found, or until swipe attempts have been exhausted.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#scrollBackward(int)">scrollBackward</a></span>(int steps)
-        
-        <div class="jd-descrdiv">Perform a scroll backward.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#scrollForward()">scrollForward</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Performs a forward scroll with the default number of scroll steps (55).</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#scrollBackward()">scrollBackward</a></span>()
-        
-        <div class="jd-descrdiv">See <code><a href="#scrollBackward(int)">scrollBackward(int)</a></code></div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#scrollForward(int)">scrollForward</a></span>(int steps)</nobr>
+
+        <div class="jd-descrdiv">Performs a forward scroll.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#scrollDescriptionIntoView(java.lang.String)">scrollDescriptionIntoView</a></span>(String text)
-        
-        <div class="jd-descrdiv">Performs a swipe Up on the UI element until the requested content-description
- is visible or until swipe attempts have been exhausted.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#scrollIntoView(com.android.uiautomator.core.UiSelector)">scrollIntoView</a></span>(<a href="UiSelector.html">UiSelector</a> selector)</nobr>
+
+        <div class="jd-descrdiv">Perform a scroll forward action to move through the scrollable layout
+ element until a visible item that matches the selector is found.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#scrollForward()">scrollForward</a></span>()
-        
-        <div class="jd-descrdiv">A convenience version of <code><a href="#scrollForward(int)">scrollForward(int)</a></code>, performs a regular scroll</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#scrollIntoView(com.android.uiautomator.core.UiObject)">scrollIntoView</a></span>(<a href="UiObject.html">UiObject</a> obj)</nobr>
+
+        <div class="jd-descrdiv">Perform a forward scroll action to move through the scrollable layout element until
+ a visible item that matches the <code><a href="UiObject.html">UiObject</a></code> is found.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#scrollForward(int)">scrollForward</a></span>(int steps)
-        
-        <div class="jd-descrdiv">Perform a scroll forward.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#scrollTextIntoView(java.lang.String)">scrollTextIntoView</a></span>(String text)</nobr>
+
+        <div class="jd-descrdiv">Performs a forward scroll action on the scrollable layout element until
+ the text you provided is visible, or until swipe attempts have been exhausted.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#scrollIntoView(com.android.uiautomator.core.UiSelector)">scrollIntoView</a></span>(<a href="UiSelector.html">UiSelector</a> selector)
-        
-        <div class="jd-descrdiv">Perform a scroll search for a UI element matching the <code><a href="UiSelector.html">UiSelector</a></code> selector argument.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#scrollToBeginning(int)">scrollToBeginning</a></span>(int maxSwipes)</nobr>
+
+        <div class="jd-descrdiv">Scrolls to the beginning of a scrollable layout element.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#scrollTextIntoView(java.lang.String)">scrollTextIntoView</a></span>(String text)
-        
-        <div class="jd-descrdiv">Performs a swipe up on the UI element until the requested text is visible
- or until swipe attempts have been exhausted.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#scrollToBeginning(int, int)">scrollToBeginning</a></span>(int maxSwipes, int steps)</nobr>
+
+        <div class="jd-descrdiv">Scrolls to the beginning of a scrollable layout element.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#scrollToBeginning(int)">scrollToBeginning</a></span>(int maxSwipes)
-        
-        <div class="jd-descrdiv">See <code><a href="#scrollToBeginning(int, int)">scrollToBeginning(int, int)</a></code></div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#scrollToEnd(int, int)">scrollToEnd</a></span>(int maxSwipes, int steps)</nobr>
+
+        <div class="jd-descrdiv">Scrolls to the end of a scrollable layout element.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#scrollToBeginning(int, int)">scrollToBeginning</a></span>(int maxSwipes, int steps)
-        
-        <div class="jd-descrdiv">Scrolls to the beginning of a scrollable UI element.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#scrollToEnd(int)">scrollToEnd</a></span>(int maxSwipes)</nobr>
+
+        <div class="jd-descrdiv">Scrolls to the end of a scrollable layout element.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="#">UiScrollable</a></nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#scrollToEnd(int, int)">scrollToEnd</a></span>(int maxSwipes, int steps)
-        
-        <div class="jd-descrdiv">Scrolls to the end of a scrollable UI element.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#setAsHorizontalList()">setAsHorizontalList</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Set the direction of swipes to be horizontal when performing scroll actions.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="#">UiScrollable</a></nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#scrollToEnd(int)">scrollToEnd</a></span>(int maxSwipes)
-        
-        <div class="jd-descrdiv">See {@link UiScrollable#scrollToEnd(int, int)</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#setAsVerticalList()">setAsVerticalList</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Set the direction of swipes to be vertical when performing scroll actions.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            void
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="#">UiScrollable</a></nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#setAsHorizontalList()">setAsHorizontalList</a></span>()
-        
-        <div class="jd-descrdiv">Set the direction of swipes when performing scroll search
-</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#setMaxSearchSwipes(int)">setMaxSearchSwipes</a></span>(int swipes)</nobr>
+
+        <div class="jd-descrdiv">Sets the maximum number of scrolls allowed when performing a
+ scroll action in search of a child element.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            void
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="#">UiScrollable</a></nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#setAsVerticalList()">setAsVerticalList</a></span>()
-        
-        <div class="jd-descrdiv">Set the direction of swipes when performing scroll search
-</div>
-  
-  </td></tr>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#setSwipeDeadZonePercentage(double)">setSwipeDeadZonePercentage</a></span>(double swipeDeadZonePercentage)</nobr>
 
+        <div class="jd-descrdiv">Sets the percentage of a widget's size that's considered as no-touch
+ zone when swiping.</div>
 
-	 
-    <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            void
-        </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#setMaxSearchSwipes(int)">setMaxSearchSwipes</a></span>(int swipes)
-        
-        <div class="jd-descrdiv">#getChildByDescription(String, boolean) and #getChildByText(String, boolean)
- use an arguments that specifies if scrolling is allowed while searching for the UI element.</div>
-  
-  </td></tr>
-
-
-	 
-    <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            void
-        </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="#setSwipeDeadZonePercentage(double)">setSwipeDeadZonePercentage</a></span>(double swipeDeadZonePercentage)
-        
-        <div class="jd-descrdiv">Sets the percentage of a widget's size that's considered as a no touch zone when swiping.</div>
-  
   </td></tr>
 
 
@@ -574,6 +653,34 @@ parent.link=index.html
 </table>
 
 
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="promethods" class="jd-sumtable"><tr><th colspan="12">Protected Methods</th></tr>
+
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="#exists(com.android.uiautomator.core.UiSelector)">exists</a></span>(<a href="UiSelector.html">UiSelector</a> selector)</nobr>
+
+        <div class="jd-descrdiv">Used privately when performing swipe searches to decide if an element has become
+ visible or not.</div>
+
+  </td></tr>
+
+
+
+</table>
 
 
 
@@ -585,7 +692,7 @@ parent.link=index.html
   <div style="clear:left;">Inherited Methods</div></th></tr>
 
 
-<tr class="api apilevel-" >
+<tr class="api" >
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.android.uiautomator.core.UiCollection" class="jd-expando-trigger closed"
           ><img id="inherited-methods-com.android.uiautomator.core.UiCollection-trigger"
@@ -601,82 +708,82 @@ From class
   </div>
   <div id="inherited-methods-com.android.uiautomator.core.UiCollection-summary" style="display: none;">
     <table class="jd-sumtable-expando">
-    
 
 
-	 
+
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            <a href="UiObject.html">UiObject</a>
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="UiObject.html">UiObject</a></nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiCollection.html#getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String)">getChildByDescription</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, String text)
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiCollection.html#getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String)">getChildByDescription</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, String text)</nobr>
+
         <div class="jd-descrdiv">Searches for child UI element within the constraints of this UiCollection <code><a href="UiSelector.html">UiSelector</a></code>
  selector.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            <a href="UiObject.html">UiObject</a>
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="UiObject.html">UiObject</a></nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiCollection.html#getChildByInstance(com.android.uiautomator.core.UiSelector, int)">getChildByInstance</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, int instance)
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiCollection.html#getChildByInstance(com.android.uiautomator.core.UiSelector, int)">getChildByInstance</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, int instance)</nobr>
+
         <div class="jd-descrdiv">Searches for child UI element within the constraints of this UiCollection <code><a href="UiSelector.html">UiSelector</a></code>
  selector.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            <a href="UiObject.html">UiObject</a>
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="UiObject.html">UiObject</a></nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiCollection.html#getChildByText(com.android.uiautomator.core.UiSelector, java.lang.String)">getChildByText</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, String text)
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiCollection.html#getChildByText(com.android.uiautomator.core.UiSelector, java.lang.String)">getChildByText</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern, String text)</nobr>
+
         <div class="jd-descrdiv">Searches for child UI element within the constraints of this UiCollection <code><a href="UiSelector.html">UiSelector</a></code>
  selector.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            int
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            int</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiCollection.html#getChildCount(com.android.uiautomator.core.UiSelector)">getChildCount</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern)
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiCollection.html#getChildCount(com.android.uiautomator.core.UiSelector)">getChildCount</a></span>(<a href="UiSelector.html">UiSelector</a> childPattern)</nobr>
+
         <div class="jd-descrdiv">Counts child UI element instances matching the <code>childPattern</code>
  argument.</div>
-  
+
   </td></tr>
 
 
@@ -687,7 +794,7 @@ From class
 
 
 
-<tr class="api apilevel-" >
+<tr class="api" >
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-com.android.uiautomator.core.UiObject" class="jd-expando-trigger closed"
           ><img id="inherited-methods-com.android.uiautomator.core.UiObject-trigger"
@@ -703,645 +810,788 @@ From class
   </div>
   <div id="inherited-methods-com.android.uiautomator.core.UiObject-summary" style="display: none;">
     <table class="jd-sumtable-expando">
-    
 
 
-	 
+
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            void
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#clearTextField()">clearTextField</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#clearTextField()">clearTextField</a></span>()</nobr>
+
         <div class="jd-descrdiv">Clears the existing text contents in an editable field.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#click()">click</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#click()">click</a></span>()</nobr>
+
         <div class="jd-descrdiv">Performs a click at the center of the visible bounds of the UI element represented
  by this UiObject.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#clickAndWaitForNewWindow(long)">clickAndWaitForNewWindow</a></span>(long timeout)
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#clickAndWaitForNewWindow(long)">clickAndWaitForNewWindow</a></span>(long timeout)</nobr>
+
         <div class="jd-descrdiv">Performs a click at the center of the visible bounds of the UI element represented
  by this UiObject and waits for window transitions.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#clickAndWaitForNewWindow()">clickAndWaitForNewWindow</a></span>()
-        
-        <div class="jd-descrdiv">See <code><a href="UiObject.html#clickAndWaitForNewWindow(long)">clickAndWaitForNewWindow(long)</a></code>
- This method is intended to reliably wait for window transitions that would typically take
- longer than the usual default timeouts.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#clickAndWaitForNewWindow()">clickAndWaitForNewWindow</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Waits for window transitions that would typically take longer than the
+ usual default timeouts.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#clickBottomRight()">clickBottomRight</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#clickBottomRight()">clickBottomRight</a></span>()</nobr>
+
         <div class="jd-descrdiv">Clicks the bottom and right corner of the UI element</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#clickTopLeft()">clickTopLeft</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#clickTopLeft()">clickTopLeft</a></span>()</nobr>
+
         <div class="jd-descrdiv">Clicks the top and left corner of the UI element</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#exists()">exists</a></span>()
-        
-        <div class="jd-descrdiv">Check if UI element exists.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#dragTo(com.android.uiautomator.core.UiObject, int)">dragTo</a></span>(<a href="UiObject.html">UiObject</a> destObj, int steps)</nobr>
+
+        <div class="jd-descrdiv">Drags this object to a destination UiObject.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            Rect
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#getBounds()">getBounds</a></span>()
-        
-        <div class="jd-descrdiv">Returns the UI element's <code>bounds</code> property.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#dragTo(int, int, int)">dragTo</a></span>(int destX, int destY, int steps)</nobr>
+
+        <div class="jd-descrdiv">Drags this object to arbitrary coordinates.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            <a href="UiObject.html">UiObject</a>
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#getChild(com.android.uiautomator.core.UiSelector)">getChild</a></span>(<a href="UiSelector.html">UiSelector</a> selector)
-        
-        <div class="jd-descrdiv">Creates a new UiObject representing a child UI element of the element currently represented
- by this UiObject.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#exists()">exists</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Check if view exists.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            int
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            AccessibilityNodeInfo</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#getChildCount()">getChildCount</a></span>()
-        
-        <div class="jd-descrdiv">Counts the child UI elements immediately under the UI element currently represented by
- this UiObject.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#findAccessibilityNodeInfo(long)">findAccessibilityNodeInfo</a></span>(long timeout)</nobr>
+
+        <div class="jd-descrdiv">Finds a matching UI element in the accessibility hierarchy, by
+ using the selector for this UiObject.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            String
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            Rect</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#getContentDescription()">getContentDescription</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#getBounds()">getBounds</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Returns the view's <code>bounds</code> property.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="UiObject.html">UiObject</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#getChild(com.android.uiautomator.core.UiSelector)">getChild</a></span>(<a href="UiSelector.html">UiSelector</a> selector)</nobr>
+
+        <div class="jd-descrdiv">Creates a new UiObject for a child view that is under the present UiObject.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#getChildCount()">getChildCount</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Counts the child views immediately under the present UiObject.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#getClassName()">getClassName</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Retrieves the <code>className</code> property of the UI element.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#getContentDescription()">getContentDescription</a></span>()</nobr>
+
         <div class="jd-descrdiv">Reads the <code>content_desc</code> property of the UI element</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            <a href="UiObject.html">UiObject</a>
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            <a href="UiObject.html">UiObject</a></nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#getFromParent(com.android.uiautomator.core.UiSelector)">getFromParent</a></span>(<a href="UiSelector.html">UiSelector</a> selector)
-        
-        <div class="jd-descrdiv">Creates a new UiObject representing a child UI element from the parent element currently
- represented by this object.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#getFromParent(com.android.uiautomator.core.UiSelector)">getFromParent</a></span>(<a href="UiSelector.html">UiSelector</a> selector)</nobr>
+
+        <div class="jd-descrdiv">Creates a new UiObject for a sibling view or a child of the sibling view,
+ relative to the present UiObject.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            String
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#getPackageName()">getPackageName</a></span>()
-        
-        <div class="jd-descrdiv">Reads the UI element's <code>package</code> property</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#getPackageName()">getPackageName</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Reads the view's <code>package</code> property</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
+        <td class="jd-typecol"><nobr>
+
+
             final
-            
-            
-            <a href="UiSelector.html">UiSelector</a>
+
+
+            <a href="UiSelector.html">UiSelector</a></nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#getSelector()">getSelector</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#getSelector()">getSelector</a></span>()</nobr>
+
         <div class="jd-descrdiv">Debugging helper.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            String
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#getText()">getText</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#getText()">getText</a></span>()</nobr>
+
         <div class="jd-descrdiv">Reads the <code>text</code> property of the UI element</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            Rect
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            Rect</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#getVisibleBounds()">getVisibleBounds</a></span>()
-        
-        <div class="jd-descrdiv">Returns the visible bounds of the UI element.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#getVisibleBounds()">getVisibleBounds</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Returns the visible bounds of the view.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#isCheckable()">isCheckable</a></span>()
-        
-        <div class="jd-descrdiv">Check if the UI element's <code>checkable</code> property is currently true</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#isCheckable()">isCheckable</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Checks if the UI element's <code>checkable</code> property is currently true.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#isChecked()">isChecked</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#isChecked()">isChecked</a></span>()</nobr>
+
         <div class="jd-descrdiv">Check if the UI element's <code>checked</code> property is currently true</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#isClickable()">isClickable</a></span>()
-        
-        <div class="jd-descrdiv">Check if the UI element's <code>clickable</code> property is currently true</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#isClickable()">isClickable</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Checks if the UI element's <code>clickable</code> property is currently true.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#isEnabled()">isEnabled</a></span>()
-        
-        <div class="jd-descrdiv">Check if the UI element's <code>enabled</code> property is currently true</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#isEnabled()">isEnabled</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Checks if the UI element's <code>enabled</code> property is currently true.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#isFocusable()">isFocusable</a></span>()
-        
-        <div class="jd-descrdiv">Check if the UI element's <code>focusable</code> property is currently true</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#isFocusable()">isFocusable</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Check if the UI element's <code>focusable</code> property is currently true.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#isFocused()">isFocused</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#isFocused()">isFocused</a></span>()</nobr>
+
         <div class="jd-descrdiv">Check if the UI element's <code>focused</code> property is currently true</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#isLongClickable()">isLongClickable</a></span>()
-        
-        <div class="jd-descrdiv">Check if the UI element's <code>long-clickable</code> property is currently true</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#isLongClickable()">isLongClickable</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Check if the view's <code>long-clickable</code> property is currently true</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#isScrollable()">isScrollable</a></span>()
-        
-        <div class="jd-descrdiv">Check if the UI element's <code>scrollable</code> property is currently true</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#isScrollable()">isScrollable</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Check if the view's <code>scrollable</code> property is currently true</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#isSelected()">isSelected</a></span>()
-        
-        <div class="jd-descrdiv">Check if the UI element's <code>selected</code> property is currently true</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#isSelected()">isSelected</a></span>()</nobr>
+
+        <div class="jd-descrdiv">Checks if the UI element's <code>selected</code> property is currently true.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#longClick()">longClick</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#longClick()">longClick</a></span>()</nobr>
+
         <div class="jd-descrdiv">Long clicks the center of the visible bounds of the UI element</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#longClickBottomRight()">longClickBottomRight</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#longClickBottomRight()">longClickBottomRight</a></span>()</nobr>
+
         <div class="jd-descrdiv">Long clicks bottom and right corner of the UI element</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#longClickTopLeft()">longClickTopLeft</a></span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#longClickTopLeft()">longClickTopLeft</a></span>()</nobr>
+
         <div class="jd-descrdiv">Long clicks on the top and left corner of the UI element</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#setText(java.lang.String)">setText</a></span>(String text)
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#performMultiPointerGesture(android.view.MotionEvent.PointerCoords[]...)">performMultiPointerGesture</a></span>(PointerCoords... touches)</nobr>
+
+        <div class="jd-descrdiv">Performs a multi-touch gesture.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#performTwoPointerGesture(android.graphics.Point, android.graphics.Point, android.graphics.Point, android.graphics.Point, int)">performTwoPointerGesture</a></span>(Point startPoint1, Point startPoint2, Point endPoint1, Point endPoint2, int steps)</nobr>
+
+        <div class="jd-descrdiv">Generates a two-pointer gesture with arbitrary starting and ending points.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#pinchIn(int, int)">pinchIn</a></span>(int percent, int steps)</nobr>
+
+        <div class="jd-descrdiv">Performs a two-pointer gesture, where each pointer moves diagonally
+ toward the other, from the edges to the center of this UiObject .</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#pinchOut(int, int)">pinchOut</a></span>(int percent, int steps)</nobr>
+
+        <div class="jd-descrdiv">Performs a two-pointer gesture, where each pointer moves diagonally
+ opposite across the other, from the center out towards the edges of the
+ this UiObject.</div>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#setText(java.lang.String)">setText</a></span>(String text)</nobr>
+
         <div class="jd-descrdiv">Sets the text in an editable field, after clearing the field's content.</div>
-  
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#swipeDown(int)">swipeDown</a></span>(int steps)
-        
-        <div class="jd-descrdiv">Perform the action on the UI element that is represented by this object, Also see
- #scrollToBeginning(int), #scrollToEnd(int), #scrollBackward(),
- #scrollForward().</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#swipeDown(int)">swipeDown</a></span>(int steps)</nobr>
+
+        <div class="jd-descrdiv">Performs the swipe down action on the UiObject.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#swipeLeft(int)">swipeLeft</a></span>(int steps)
-        
-        <div class="jd-descrdiv">Perform the action on the UI element that is represented by this object.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#swipeLeft(int)">swipeLeft</a></span>(int steps)</nobr>
+
+        <div class="jd-descrdiv">Performs the swipe left action on the UiObject.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#swipeRight(int)">swipeRight</a></span>(int steps)
-        
-        <div class="jd-descrdiv">Perform the action on the UI element that is represented by this object.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#swipeRight(int)">swipeRight</a></span>(int steps)</nobr>
+
+        <div class="jd-descrdiv">Performs the swipe right action on the UiObject.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#swipeUp(int)">swipeUp</a></span>(int steps)
-        
-        <div class="jd-descrdiv">Perform the action on the UI element that is represented by this UiObject.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#swipeUp(int)">swipeUp</a></span>(int steps)</nobr>
+
+        <div class="jd-descrdiv">Performs the swipe up action on the UiObject.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#waitForExists(long)">waitForExists</a></span>(long timeout)
-        
-        <div class="jd-descrdiv">Waits a specified length of time for a UI element to become visible.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#waitForExists(long)">waitForExists</a></span>(long timeout)</nobr>
+
+        <div class="jd-descrdiv">Waits a specified length of time for a view to become visible.</div>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad"><a href="UiObject.html#waitUntilGone(long)">waitUntilGone</a></span>(long timeout)
-        
-        <div class="jd-descrdiv">Waits a specified length of time for a UI element to become undetectable.</div>
-  
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="UiObject.html#waitUntilGone(long)">waitUntilGone</a></span>(long timeout)</nobr>
+
+        <div class="jd-descrdiv">Waits a specified length of time for a view to become undetectable.</div>
+
   </td></tr>
 
 
@@ -1352,7 +1602,7 @@ From class
 
 
 
-<tr class="api apilevel-" >
+<tr class="api" >
 <td colspan="12">
   <a href="#" onclick="return toggleInherited(this, null)" id="inherited-methods-java.lang.Object" class="jd-expando-trigger closed"
           ><img id="inherited-methods-java.lang.Object-trigger"
@@ -1368,150 +1618,182 @@ From class
   </div>
   <div id="inherited-methods-java.lang.Object-summary" style="display: none;">
     <table class="jd-sumtable-expando">
-    
 
 
-	 
+
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            boolean
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            Object</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad">equals</span>(Object arg0)
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">clone</span>()</nobr>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">equals</span>(Object arg0)</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">finalize</span>()</nobr>
+
+  </td></tr>
+
+
+
+    <tr class="api" >
+        <td class="jd-typecol"><nobr>
+
+
             final
-            
-            
-            Class&lt;?&gt;
+
+
+            Class&lt;?&gt;</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad">getClass</span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">getClass</span>()</nobr>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            int
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            int</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad">hashCode</span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">hashCode</span>()</nobr>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
+        <td class="jd-typecol"><nobr>
+
+
             final
-            
-            
-            void
+
+
+            void</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad">notify</span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notify</span>()</nobr>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
+        <td class="jd-typecol"><nobr>
+
+
             final
-            
-            
-            void
+
+
+            void</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad">notifyAll</span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">notifyAll</span>()</nobr>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
-            
-            
-            
-            String
+        <td class="jd-typecol"><nobr>
+
+
+
+
+
+            String</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad">toString</span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">toString</span>()</nobr>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
+        <td class="jd-typecol"><nobr>
+
+
             final
-            
-            
-            void
+
+
+            void</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad">wait</span>()
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>()</nobr>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
+        <td class="jd-typecol"><nobr>
+
+
             final
-            
-            
-            void
+
+
+            void</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad">wait</span>(long arg0, int arg1)
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0, int arg1)</nobr>
+
   </td></tr>
 
 
-	 
+
     <tr class="api" >
-        <td class="jd-typecol">
-            
-            
+        <td class="jd-typecol"><nobr>
+
+
             final
-            
-            
-            void
+
+
+            void</nobr>
         </td>
-        <td class="jd-linkcol" width="100%">
-        <span class="sympad">wait</span>(long arg0)
-        
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad">wait</span>(long arg0)</nobr>
+
   </td></tr>
 
 
@@ -1555,41 +1837,37 @@ From class
 
 
 
-<a id="UiScrollable(com.android.uiautomator.core.UiSelector)"></a>
+<A NAME="UiScrollable(com.android.uiautomator.core.UiSelector)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
-        
+        public
+
+
+
+
+
       </span>
       <span class="sympad">UiScrollable</span>
       <span class="normal">(<a href="UiSelector.html">UiSelector</a> container)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>UiScrollable is a <code><a href="UiCollection.html">UiCollection</a></code> and as such requires a <code><a href="UiSelector.html">UiSelector</a></code> to
- identify the container UI element of the scrollable collection. Further operations on
- the items in the container will require specifying UiSelector as an item selector.</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Constructor.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>container</th>
-          <td>a <code><a href="UiSelector.html">UiSelector</a></code> selector
-</td>
+          <th>container</td>
+          <td>a <code><a href="UiSelector.html">UiSelector</a></code> selector to identify the scrollable
+     layout element.</td>
         </tr>
       </table>
   </div>
@@ -1613,40 +1891,42 @@ From class
 
 
 
-<a id="flingBackward()"></a>
+<A NAME="flingBackward()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">flingBackward</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>See <code><a href="#scrollBackward(int)">scrollBackward(int)</a></code></p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs a backwards fling action with the default number of fling
+ steps (5). If the swipe direction is set to vertical,
+ then the swipe will be performed from top to bottom. If the swipe
+ direction is set to horizontal, then the swipes will be performed from
+ left to right. Make sure to take into account devices configured with
+ right-to-left languages like Arabic and Hebrew.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if scrolled and false if the control can't scroll anymore
-</li></ul>
+      <ul class="nolist"><li>true if scrolled, and false if can't scroll anymore</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1658,40 +1938,42 @@ From class
 </div>
 
 
-<a id="flingForward()"></a>
+<A NAME="flingForward()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">flingForward</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>A convenience version of <code><a href="#scrollForward(int)">scrollForward(int)</a></code>, performs a fling</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs a forward fling with the default number of fling steps (5).
+ If the swipe direction is set to vertical, then the swipes will be
+ performed from bottom to top. If the swipe
+ direction is set to horizontal, then the swipes will be performed from
+ right to left. Make sure to take into account devices configured with
+ right-to-left languages like Arabic and Hebrew.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if scrolled and false if the control can't scroll anymore
-</li></ul>
+      <ul class="nolist"><li>true if scrolled, false if can't scroll anymore</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1703,40 +1985,40 @@ From class
 </div>
 
 
-<a id="flingToBeginning(int)"></a>
+<A NAME="flingToBeginning(int)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">flingToBeginning</span>
       <span class="normal">(int maxSwipes)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>See <code><a href="#scrollToBeginning(int, int)">scrollToBeginning(int, int)</a></code></p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs a fling gesture to reach the beginning of a scrollable layout element.
+ The beginning can be at the  top-most edge in the case of vertical controls, or
+ the left-most edge for horizontal controls. Make sure to take into
+ account devices configured with right-to-left languages like Arabic and Hebrew.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true on scrolled else false
-</li></ul>
+      <ul class="nolist"><li>true on scrolled else false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1748,40 +2030,40 @@ From class
 </div>
 
 
-<a id="flingToEnd(int)"></a>
+<A NAME="flingToEnd(int)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">flingToEnd</span>
       <span class="normal">(int maxSwipes)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>See <code><a href="#scrollToEnd(int, int)">scrollToEnd(int, int)</a></code></p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs a fling gesture to reach the end of a scrollable layout element.
+ The end can be at the  bottom-most edge in the case of vertical controls, or
+ the right-most edge for horizontal controls. Make sure to take into
+ account devices configured with right-to-left languages like Arabic and Hebrew.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true on scrolled else false
-</li></ul>
+      <ul class="nolist"><li>true on scrolled, else false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1793,56 +2075,61 @@ From class
 </div>
 
 
-<a id="getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String, boolean)"></a>
+<A NAME="getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String, boolean)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         <a href="UiObject.html">UiObject</a>
       </span>
       <span class="sympad">getChildByDescription</span>
       <span class="normal">(<a href="UiSelector.html">UiSelector</a> childPattern, String text, boolean allowScrollSearch)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>See <code><a href="#getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String)">getChildByDescription(UiSelector, String)</a></code></p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Searches for a child element in the present scrollable container.
+ The search first looks for a child element that matches the selector
+ you provided, then looks for the content-description in its children elements.
+ If both search conditions are fulfilled, the method returns a {@ link UiObject}
+ representing the element matching the selector (not the child element in its
+ subhierarchy containing the content-description).</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>childPattern</th>
-          <td><code><a href="UiSelector.html">UiSelector</a></code> selector of the child pattern to match and return</td>
+          <th>childPattern</td>
+          <td><code><a href="UiSelector.html">UiSelector</a></code> for a child in a scollable layout element</td>
         </tr>
         <tr>
-          <th>text</th>
-          <td>String may be a partial match for the content-description of a child element.</td>
+          <th>text</td>
+          <td>Content-description to find in the children of
+ the <code>childPattern</code> match (may be a partial match)</td>
         </tr>
         <tr>
-          <th>allowScrollSearch</th>
+          <th>allowScrollSearch</td>
           <td>set to true if scrolling is allowed</td>
         </tr>
       </table>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li><code><a href="UiObject.html">UiObject</a></code> pointing at and instance of <code>childPattern</code></li></ul>
+      <ul class="nolist"><li><code><a href="UiObject.html">UiObject</a></code> representing the child element that matches the search conditions</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1854,58 +2141,58 @@ From class
 </div>
 
 
-<a id="getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String)"></a>
+<A NAME="getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         <a href="UiObject.html">UiObject</a>
       </span>
       <span class="sympad">getChildByDescription</span>
       <span class="normal">(<a href="UiSelector.html">UiSelector</a> childPattern, String text)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Searches for child UI element within the constraints of this UiScrollable <code><a href="UiSelector.html">UiSelector</a></code>
- container. It looks for any child matching the <code>childPattern</code> argument within its
- hierarchy with a matching content-description text. The returned UiObject will represent the
- UI element matching the <code>childPattern</code> and not the sub element that matched the
- content description.</p>
- By default this operation will perform scroll search while attempting to find the UI element
+
+  <div class="jd-tagdata jd-tagdescr"><p>Searches for a child element in the present scrollable container.
+ The search first looks for a child element that matches the selector
+ you provided, then looks for the content-description in its children elements.
+ If both search conditions are fulfilled, the method returns a {@ link UiObject}
+ representing the element matching the selector (not the child element in its
+ subhierarchy containing the content-description). By default, this method performs a
+ scroll search.
  See <code><a href="#getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String, boolean)">getChildByDescription(UiSelector, String, boolean)</a></code></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>childPattern</th>
-          <td><code><a href="UiSelector.html">UiSelector</a></code> selector of the child pattern to match and return</td>
+          <th>childPattern</td>
+          <td><code><a href="UiSelector.html">UiSelector</a></code> for a child in a scollable layout element</td>
         </tr>
         <tr>
-          <th>text</th>
-          <td>String of the identifying child contents of of the <code>childPattern</code></td>
+          <th>text</td>
+          <td>Content-description to find in the children of
+ the <code>childPattern</code> match</td>
         </tr>
       </table>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li><code><a href="UiObject.html">UiObject</a></code> pointing at and instance of <code>childPattern</code></li></ul>
+      <ul class="nolist"><li><code><a href="UiObject.html">UiObject</a></code> representing the child element that matches the search conditions</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1917,56 +2204,53 @@ From class
 </div>
 
 
-<a id="getChildByInstance(com.android.uiautomator.core.UiSelector, int)"></a>
+<A NAME="getChildByInstance(com.android.uiautomator.core.UiSelector, int)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         <a href="UiObject.html">UiObject</a>
       </span>
       <span class="sympad">getChildByInstance</span>
       <span class="normal">(<a href="UiSelector.html">UiSelector</a> childPattern, int instance)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Searches for child UI element within the constraints of this UiScrollable <code><a href="UiSelector.html">UiSelector</a></code>
- selector. It looks for any child matching the <code>childPattern</code> argument and
- return the <code>instance</code> specified. The operation is performed only on the visible
- items and no scrolling is performed in this case.</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Searches for a child element in the present scrollable container that
+ matches the selector you provided. The search is performed without
+ scrolling and only on visible elements.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>childPattern</th>
-          <td><code><a href="UiSelector.html">UiSelector</a></code> selector of the child pattern to match and return</td>
+          <th>childPattern</td>
+          <td><code><a href="UiSelector.html">UiSelector</a></code> for a child in a scollable layout element</td>
         </tr>
         <tr>
-          <th>instance</th>
-          <td>int the desired matched instance of this <code>childPattern</code></td>
+          <th>instance</td>
+          <td>int number representing the occurance of
+ a <code>childPattern</code> match</td>
         </tr>
       </table>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li><code><a href="UiObject.html">UiObject</a></code> pointing at and instance of <code>childPattern</code>
-</li></ul>
+      <ul class="nolist"><li><code><a href="UiObject.html">UiObject</a></code> representing the child element that matches the search conditions</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -1978,56 +2262,59 @@ From class
 </div>
 
 
-<a id="getChildByText(com.android.uiautomator.core.UiSelector, java.lang.String, boolean)"></a>
+<A NAME="getChildByText(com.android.uiautomator.core.UiSelector, java.lang.String, boolean)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         <a href="UiObject.html">UiObject</a>
       </span>
       <span class="sympad">getChildByText</span>
       <span class="normal">(<a href="UiSelector.html">UiSelector</a> childPattern, String text, boolean allowScrollSearch)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>See <code><a href="#getChildByText(com.android.uiautomator.core.UiSelector, java.lang.String)">getChildByText(UiSelector, String)</a></code></p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Searches for a child element in the present scrollable container. The
+ search first looks for a child element that matches the
+ selector you provided, then looks for the text in its children elements.
+ If both search conditions are fulfilled, the method returns a {@ link UiObject}
+ representing the element matching the selector (not the child element in its
+ subhierarchy containing the text).</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>childPattern</th>
-          <td><code><a href="UiSelector.html">UiSelector</a></code> selector of the child pattern to match and return</td>
+          <th>childPattern</td>
+          <td><code><a href="UiSelector.html">UiSelector</a></code> selector for a child in a scrollable layout element</td>
         </tr>
         <tr>
-          <th>text</th>
-          <td>String of the identifying child contents of of the <code>childPattern</code></td>
+          <th>text</td>
+          <td>String to find in the children of the <code>childPattern</code> match</td>
         </tr>
         <tr>
-          <th>allowScrollSearch</th>
+          <th>allowScrollSearch</td>
           <td>set to true if scrolling is allowed</td>
         </tr>
       </table>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li><code><a href="UiObject.html">UiObject</a></code> pointing at and instance of <code>childPattern</code></li></ul>
+      <ul class="nolist"><li><code><a href="UiObject.html">UiObject</a></code> representing the child element that matches the search conditions</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2039,59 +2326,58 @@ From class
 </div>
 
 
-<a id="getChildByText(com.android.uiautomator.core.UiSelector, java.lang.String)"></a>
+<A NAME="getChildByText(com.android.uiautomator.core.UiSelector, java.lang.String)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         <a href="UiObject.html">UiObject</a>
       </span>
       <span class="sympad">getChildByText</span>
       <span class="normal">(<a href="UiSelector.html">UiSelector</a> childPattern, String text)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Searches for child UI element within the constraints of this UiScrollable <code><a href="UiSelector.html">UiSelector</a></code>
- container. It looks for any child matching the <code>childPattern</code> argument that has
- a sub UI element anywhere within its sub hierarchy that has text attribute
- <code>text</code>. The returned UiObject will point at the <code>childPattern</code>
- instance that matched the search and not at the text matched sub element</p>
- By default this operation will perform scroll search while attempting to find the UI
- element.
+
+  <div class="jd-tagdata jd-tagdescr"><p>Searches for a child element in the present scrollable
+ container. The search first looks for a child element that matches the
+ selector you provided, then looks for the text in its children elements.
+ If both search conditions are fulfilled, the method returns a {@ link UiObject}
+ representing the element matching the selector (not the child element in its
+ subhierarchy containing the text). By default, this method performs a
+ scroll search.
  See <code><a href="#getChildByText(com.android.uiautomator.core.UiSelector, java.lang.String, boolean)">getChildByText(UiSelector, String, boolean)</a></code></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>childPattern</th>
-          <td><code><a href="UiSelector.html">UiSelector</a></code> selector of the child pattern to match and return</td>
+          <th>childPattern</td>
+          <td><code><a href="UiSelector.html">UiSelector</a></code> selector for a child in a scrollable layout element</td>
         </tr>
         <tr>
-          <th>text</th>
-          <td>String of the identifying child contents of of the <code>childPattern</code></td>
+          <th>text</td>
+          <td>String to find in the children of the <code>childPattern</code> match</td>
         </tr>
       </table>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li><code><a href="UiObject.html">UiObject</a></code> pointing at and instance of <code>childPattern</code></li></ul>
+      <ul class="nolist"><li><code><a href="UiObject.html">UiObject</a></code> representing the child element that matches the search conditions</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
+
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2103,135 +2389,124 @@ From class
 </div>
 
 
-<a id="getMaxSearchSwipes()"></a>
+<A NAME="getMaxSearchSwipes()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         int
       </span>
       <span class="sympad">getMaxSearchSwipes</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>#getChildByDescription(String, boolean) and #getChildByText(String, boolean)
- use an arguments that specifies if scrolling is allowed while searching for the UI element.
- The number of scrolls currently allowed to perform a search can be read by this method.
- See <code><a href="#setMaxSearchSwipes(int)">setMaxSearchSwipes(int)</a></code></p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the maximum number of scrolls allowed when performing a
+ scroll action in search of a child element.
+ See <code><a href="#getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String)">getChildByDescription(UiSelector, String)</a></code> and
+ <code><a href="#getChildByText(com.android.uiautomator.core.UiSelector, java.lang.String)">getChildByText(UiSelector, String)</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>max value of the number of swipes currently allowed during a scroll search
-</li></ul>
+      <ul class="nolist"><li>max the number of search swipes to perform until giving up</li></ul>
   </div>
 
     </div>
 </div>
 
 
-<a id="getSwipeDeadZonePercentage()"></a>
+<A NAME="getSwipeDeadZonePercentage()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         double
       </span>
       <span class="sympad">getSwipeDeadZonePercentage</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Returns the percentage of a widget's size that's considered as a no touch zone when swiping.
 
- Dead zones are set as percentage of a widget's total width or height, denoting a margin
- around the swipable area of the widget. Swipes must start and
- end inside this margin.
-
- This is important when the widget being swiped may not respond to the swipe if
- started at a point too near to the edge. The default is 10% from either edge.</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Returns the percentage of a widget's size that's considered as a no-touch
+ zone when swiping. The no-touch zone is set as a percentage of a widget's total
+ width or height, denoting a margin around the swipable area of the widget.
+ Swipes must start and end inside this margin. This is important when the
+ widget being swiped may not respond to the swipe if started at a point
+ too near to the edge. The default is 10% from either edge.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>a value between 0 and 1
-</li></ul>
+      <ul class="nolist"><li>a value between 0 and 1</li></ul>
   </div>
 
     </div>
 </div>
 
 
-<a id="scrollBackward(int)"></a>
+<A NAME="scrollBackward(int)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">scrollBackward</span>
       <span class="normal">(int steps)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Perform a scroll backward. If this list is set to vertical (see <code><a href="#setAsVerticalList()">setAsVerticalList()</a></code>
- default) then the swipes will be executed from the top to bottom. If this list is set
- to horizontal (see <code><a href="#setAsHorizontalList()">setAsHorizontalList()</a></code>) then the swipes will be executed from
- the left to right. Caution is required on devices configured with right to left languages
- like Arabic and Hebrew.</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs a backward scroll. If the swipe direction is set to vertical,
+ then the swipes will be performed from top to bottom. If the swipe
+ direction is set to horizontal, then the swipes will be performed from
+ left to right. Make sure to take into account devices configured with
+ right-to-left languages like Arabic and Hebrew.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>steps</th>
-          <td>use steps to control the speed, so that it may be a scroll, or fling</td>
+          <th>steps</td>
+          <td>number of steps. Use this to control the speed of the scroll action.</td>
         </tr>
       </table>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if scrolled and false if the control can't scroll anymore
-</li></ul>
+      <ul class="nolist"><li>true if scrolled, false if can't scroll anymore</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2243,40 +2518,42 @@ From class
 </div>
 
 
-<a id="scrollBackward()"></a>
+<A NAME="scrollBackward()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">scrollBackward</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>See <code><a href="#scrollBackward(int)">scrollBackward(int)</a></code></p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs a backward scroll with the default number of scroll steps (55).
+ If the swipe direction is set to vertical,
+ then the swipes will be performed from top to bottom. If the swipe
+ direction is set to horizontal, then the swipes will be performed from
+ left to right. Make sure to take into account devices configured with
+ right-to-left languages like Arabic and Hebrew.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if scrolled and false if the control can't scroll anymore
-</li></ul>
+      <ul class="nolist"><li>true if scrolled, and false if can't scroll anymore</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2288,50 +2565,48 @@ From class
 </div>
 
 
-<a id="scrollDescriptionIntoView(java.lang.String)"></a>
+<A NAME="scrollDescriptionIntoView(java.lang.String)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">scrollDescriptionIntoView</span>
       <span class="normal">(String text)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Performs a swipe Up on the UI element until the requested content-description
- is visible or until swipe attempts have been exhausted. See <code><a href="#setMaxSearchSwipes(int)">setMaxSearchSwipes(int)</a></code></p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs a forward scroll action on the scrollable layout element until
+ the content-description is found, or until swipe attempts have been exhausted.
+ See <code><a href="#setMaxSearchSwipes(int)">setMaxSearchSwipes(int)</a></code></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>text</th>
-          <td>to look for anywhere within the contents of this scrollable.</td>
+          <th>text</td>
+          <td>content-description to find within the contents of this scrollable layout element.</td>
         </tr>
       </table>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if item us found else false
-</li></ul>
+      <ul class="nolist"><li>true if item is found; else, false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2343,40 +2618,42 @@ From class
 </div>
 
 
-<a id="scrollForward()"></a>
+<A NAME="scrollForward()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">scrollForward</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>A convenience version of <code><a href="#scrollForward(int)">scrollForward(int)</a></code>, performs a regular scroll</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs a forward scroll with the default number of scroll steps (55).
+ If the swipe direction is set to vertical,
+ then the swipes will be performed from bottom to top. If the swipe
+ direction is set to horizontal, then the swipes will be performed from
+ right to left. Make sure to take into account devices configured with
+ right-to-left languages like Arabic and Hebrew.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if scrolled and false if the control can't scroll anymore
-</li></ul>
+      <ul class="nolist"><li>true if scrolled, false if can't scroll anymore</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2388,53 +2665,50 @@ From class
 </div>
 
 
-<a id="scrollForward(int)"></a>
+<A NAME="scrollForward(int)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">scrollForward</span>
       <span class="normal">(int steps)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Perform a scroll forward. If this list is set to vertical (see <code><a href="#setAsVerticalList()">setAsVerticalList()</a></code>
- default) then the swipes will be executed from the bottom to top. If this list is set
- to horizontal (see <code><a href="#setAsHorizontalList()">setAsHorizontalList()</a></code>) then the swipes will be executed from
- the right to left. Caution is required on devices configured with right to left languages
- like Arabic and Hebrew.</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs a forward scroll. If the swipe direction is set to vertical,
+ then the swipes will be performed from bottom to top. If the swipe
+ direction is set to horizontal, then the swipes will be performed from
+ right to left. Make sure to take into account devices configured with
+ right-to-left languages like Arabic and Hebrew.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>steps</th>
-          <td>use steps to control the speed, so that it may be a scroll, or fling</td>
+          <th>steps</td>
+          <td>number of steps. Use this to control the speed of the scroll action</td>
         </tr>
       </table>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if scrolled and false if the control can't scroll anymore
-</li></ul>
+      <ul class="nolist"><li>true if scrolled, false if can't scroll anymore</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2446,50 +2720,49 @@ From class
 </div>
 
 
-<a id="scrollIntoView(com.android.uiautomator.core.UiSelector)"></a>
+<A NAME="scrollIntoView(com.android.uiautomator.core.UiSelector)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">scrollIntoView</span>
       <span class="normal">(<a href="UiSelector.html">UiSelector</a> selector)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Perform a scroll search for a UI element matching the <code><a href="UiSelector.html">UiSelector</a></code> selector argument.
+
+  <div class="jd-tagdata jd-tagdescr"><p>Perform a scroll forward action to move through the scrollable layout
+ element until a visible item that matches the selector is found.
+
  See <code><a href="#scrollDescriptionIntoView(java.lang.String)">scrollDescriptionIntoView(String)</a></code> and <code><a href="#scrollTextIntoView(java.lang.String)">scrollTextIntoView(String)</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>selector</th>
+          <th>selector</td>
           <td><code><a href="UiSelector.html">UiSelector</a></code> selector</td>
         </tr>
       </table>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if the item was found and now is in view else false
-</li></ul>
+      <ul class="nolist"><li>true if the item was found and now is in view; else, false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2501,50 +2774,100 @@ From class
 </div>
 
 
-<a id="scrollTextIntoView(java.lang.String)"></a>
+<A NAME="scrollIntoView(com.android.uiautomator.core.UiObject)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">scrollIntoView</span>
+      <span class="normal">(<a href="UiObject.html">UiObject</a> obj)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Perform a forward scroll action to move through the scrollable layout element until
+ a visible item that matches the <code><a href="UiObject.html">UiObject</a></code> is found.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>obj</td>
+          <td><code><a href="UiObject.html">UiObject</a></code></td>
+        </tr>
+      </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if the item was found and now is in view else false</li></ul>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Throws</h5>
+      <table class="jd-tagtable">
+        <tr>
+            <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
+            <td></td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="scrollTextIntoView(java.lang.String)"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">scrollTextIntoView</span>
       <span class="normal">(String text)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Performs a swipe up on the UI element until the requested text is visible
- or until swipe attempts have been exhausted. See <code><a href="#setMaxSearchSwipes(int)">setMaxSearchSwipes(int)</a></code></p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Performs a forward scroll action on the scrollable layout element until
+ the text you provided is visible, or until swipe attempts have been exhausted.
+ See <code><a href="#setMaxSearchSwipes(int)">setMaxSearchSwipes(int)</a></code></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>text</th>
-          <td>to look for</td>
+          <th>text</td>
+          <td>test to look for</td>
         </tr>
       </table>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true if item us found else false
-</li></ul>
+      <ul class="nolist"><li>true if item is found; else, false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2556,40 +2879,40 @@ From class
 </div>
 
 
-<a id="scrollToBeginning(int)"></a>
+<A NAME="scrollToBeginning(int)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">scrollToBeginning</span>
       <span class="normal">(int maxSwipes)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>See <code><a href="#scrollToBeginning(int, int)">scrollToBeginning(int, int)</a></code></p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Scrolls to the beginning of a scrollable layout element. The beginning
+ can be at the  top-most edge in the case of vertical controls, or the
+ left-most edge for horizontal controls. Make sure to take into account
+ devices configured with right-to-left languages like Arabic and Hebrew.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true on scrolled else false
-</li></ul>
+      <ul class="nolist"><li>true on scrolled else false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2601,51 +2924,49 @@ From class
 </div>
 
 
-<a id="scrollToBeginning(int, int)"></a>
+<A NAME="scrollToBeginning(int, int)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">scrollToBeginning</span>
       <span class="normal">(int maxSwipes, int steps)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Scrolls to the beginning of a scrollable UI element. The beginning could be the top most
- in case of vertical lists or the left most in case of horizontal lists. Caution is required
- on devices configured with right to left languages like Arabic and Hebrew.</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Scrolls to the beginning of a scrollable layout element. The beginning
+ can be at the  top-most edge in the case of vertical controls, or the
+ left-most edge for horizontal controls. Make sure to take into account
+ devices configured with right-to-left languages like Arabic and Hebrew.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>steps</th>
+          <th>steps</td>
           <td>use steps to control the speed, so that it may be a scroll, or fling</td>
         </tr>
       </table>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true on scrolled else false
-</li></ul>
+      <ul class="nolist"><li>true on scrolled else false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2657,51 +2978,49 @@ From class
 </div>
 
 
-<a id="scrollToEnd(int, int)"></a>
+<A NAME="scrollToEnd(int, int)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">scrollToEnd</span>
       <span class="normal">(int maxSwipes, int steps)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Scrolls to the end of a scrollable UI element. The end could be the bottom most
- in case of vertical controls or the right most for horizontal controls. Caution
- is required on devices configured with right to left languages like Arabic and Hebrew.</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Scrolls to the end of a scrollable layout element. The end can be at the
+ bottom-most edge in the case of vertical controls, or the right-most edge for
+ horizontal controls. Make sure to take into account devices configured with
+ right-to-left languages like Arabic and Hebrew.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>steps</th>
+          <th>steps</td>
           <td>use steps to control the speed, so that it may be a scroll, or fling</td>
         </tr>
       </table>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true on scrolled else false
-</li></ul>
+      <ul class="nolist"><li>true on scrolled else false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2713,40 +3032,40 @@ From class
 </div>
 
 
-<a id="scrollToEnd(int)"></a>
+<A NAME="scrollToEnd(int)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
+        public
+
+
+
+
         boolean
       </span>
       <span class="sympad">scrollToEnd</span>
       <span class="normal">(int maxSwipes)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>See {@link UiScrollable#scrollToEnd(int, int)</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Scrolls to the end of a scrollable layout element. The end can be at the
+ bottom-most edge in the case of vertical controls, or the right-most edge for
+ horizontal controls. Make sure to take into account devices configured with
+ right-to-left languages like Arabic and Hebrew.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>true on scrolled else false
-</li></ul>
+      <ul class="nolist"><li>true on scrolled, else false</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
-      <table class="jd-tagtable">  
+      <table class="jd-tagtable">
         <tr>
             <th><a href="UiObjectNotFoundException.html">UiObjectNotFoundException</a></td>
             <td></td>
@@ -2758,157 +3077,207 @@ From class
 </div>
 
 
-<a id="setAsHorizontalList()"></a>
+<A NAME="setAsHorizontalList()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
-        void
+        public
+
+
+
+
+        <a href="#">UiScrollable</a>
       </span>
       <span class="sympad">setAsHorizontalList</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Set the direction of swipes when performing scroll search
-</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Set the direction of swipes to be horizontal when performing scroll actions.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>reference to itself</li></ul>
+  </div>
 
     </div>
 </div>
 
 
-<a id="setAsVerticalList()"></a>
+<A NAME="setAsVerticalList()"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
-        void
+        public
+
+
+
+
+        <a href="#">UiScrollable</a>
       </span>
       <span class="sympad">setAsVerticalList</span>
       <span class="normal">()</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Set the direction of swipes when performing scroll search
-</p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Set the direction of swipes to be vertical when performing scroll actions.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>reference to itself</li></ul>
+  </div>
 
     </div>
 </div>
 
 
-<a id="setMaxSearchSwipes(int)"></a>
+<A NAME="setMaxSearchSwipes(int)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
-        void
+        public
+
+
+
+
+        <a href="#">UiScrollable</a>
       </span>
       <span class="sympad">setMaxSearchSwipes</span>
       <span class="normal">(int swipes)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>#getChildByDescription(String, boolean) and #getChildByText(String, boolean)
- use an arguments that specifies if scrolling is allowed while searching for the UI element.
- The number of scrolls allowed to perform a search can be modified by this method.
- The current value can be read by calling <code><a href="#getMaxSearchSwipes()">getMaxSearchSwipes()</a></code></p></div>
+
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the maximum number of scrolls allowed when performing a
+ scroll action in search of a child element.
+ See <code><a href="#getChildByDescription(com.android.uiautomator.core.UiSelector, java.lang.String)">getChildByDescription(UiSelector, String)</a></code> and
+ <code><a href="#getChildByText(com.android.uiautomator.core.UiSelector, java.lang.String)">getChildByText(UiSelector, String)</a></code>.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>swipes</th>
-          <td>is the number of search swipes until abort
-</td>
+          <th>swipes</td>
+          <td>the number of search swipes to perform until giving up</td>
         </tr>
       </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>reference to itself</li></ul>
   </div>
 
     </div>
 </div>
 
 
-<a id="setSwipeDeadZonePercentage(double)"></a>
+<A NAME="setSwipeDeadZonePercentage(double)"></A>
 
-<div class="jd-details api "> 
+<div class="jd-details api">
     <h4 class="jd-details-title">
       <span class="normal">
-        public 
-         
-         
-         
-         
-        void
+        public
+
+
+
+
+        <a href="#">UiScrollable</a>
       </span>
       <span class="sympad">setSwipeDeadZonePercentage</span>
       <span class="normal">(double swipeDeadZonePercentage)</span>
     </h4>
       <div class="api-level">
-        <div>
+        <div></div>
 
-</div>
-        
-  
+
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Sets the percentage of a widget's size that's considered as a no touch zone when swiping.
 
- Dead zones are set as percentage of a widget's total width or height, denoting a margin
- around the swipable area of the widget. Swipes must always start and
- end inside this margin.
-
- This is important when the widget being swiped may not respond to the swipe if
- started at a point too near to the edge. The default is 10% from either edge</p></div>
+  <div class="jd-tagdata jd-tagdescr"><p>Sets the percentage of a widget's size that's considered as no-touch
+ zone when swiping.
+ The no-touch zone is set as percentage of a widget's total width or height,
+ denoting a margin around the swipable area of the widget. Swipes must
+ always start and end inside this margin. This is important when the
+ widget being swiped may not respond to the swipe if started at a point
+ too near to the edge. The default is 10% from either edge.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
-          <th>swipeDeadZonePercentage</th>
-          <td>is a value between 0 and 1
-</td>
+          <th>swipeDeadZonePercentage</td>
+          <td>is a value between 0 and 1</td>
         </tr>
       </table>
+  </div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>reference to itself</li></ul>
   </div>
 
     </div>
 </div>
+
+
+
+
+
+<!-- ========= METHOD DETAIL ======== -->
+
+<h2>Protected Methods</h2>
+
+
+
+<A NAME="exists(com.android.uiautomator.core.UiSelector)"></A>
+
+<div class="jd-details api">
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected
+
+
+
+
+        boolean
+      </span>
+      <span class="sympad">exists</span>
+      <span class="normal">(<a href="UiSelector.html">UiSelector</a> selector)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+
+
+
+      </div>
+    <div class="jd-details-descr">
+
+  <div class="jd-tagdata jd-tagdescr"><p>Used privately when performing swipe searches to decide if an element has become
+ visible or not.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>true if found else false</li></ul>
+  </div>
+
+    </div>
+
+
+
+
+
