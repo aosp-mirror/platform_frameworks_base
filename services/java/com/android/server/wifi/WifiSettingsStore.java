@@ -51,7 +51,7 @@ final class WifiSettingsStore {
         mContext = context;
         mAirplaneModeOn = getPersistedAirplaneModeOn();
         mPersistWifiState = getPersistedWifiState();
-        mScanAlwaysAvailable = false; // getPersistedScanAlwaysAvailable();
+        mScanAlwaysAvailable = getPersistedScanAlwaysAvailable();
     }
 
     synchronized boolean isWifiToggleEnabled() {
@@ -124,8 +124,7 @@ final class WifiSettingsStore {
     }
 
     synchronized void handleWifiScanAlwaysAvailableToggled() {
-        // mScanAlwaysAvailable = getPersistedScanAlwaysAvailable();
-        mScanAlwaysAvailable = false;
+        mScanAlwaysAvailable = getPersistedScanAlwaysAvailable();
     }
 
     void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
