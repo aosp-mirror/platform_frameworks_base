@@ -36,6 +36,7 @@ import static com.android.server.am.ActivityStackSupervisor.DEBUG_SAVED_STATE;
 import static com.android.server.am.ActivityStackSupervisor.DEBUG_STATES;
 import static com.android.server.am.ActivityStackSupervisor.HOME_STACK_ID;
 
+import android.os.Trace;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.util.Objects;
 import com.android.server.Watchdog;
@@ -595,13 +596,30 @@ final class ActivityStack {
         if (DEBUG_SAVED_STATE) Slog.i(TAG, "Launch completed; removing icicle of " + r.icicle);
     }
 
+    private void startLaunchTraces() {
+        if (mFullyDrawnStartTime != 0)  {
+            Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, "drawing", 0);
+        }
+        Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "launching", 0);
+        Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "drawing", 0);
+    }
+
+    private void stopFullyDrawnTraceIfNeeded() {
+        if (mFullyDrawnStartTime != 0 && mLaunchStartTime == 0) {
+            Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, "drawing", 0);
+            mFullyDrawnStartTime = 0;
+        }
+    }
+
     void setLaunchTime(ActivityRecord r) {
         if (r.displayStartTime == 0) {
             r.fullyDrawnStartTime = r.displayStartTime = SystemClock.uptimeMillis();
             if (mLaunchStartTime == 0) {
+                startLaunchTraces();
                 mLaunchStartTime = mFullyDrawnStartTime = r.displayStartTime;
             }
         } else if (mLaunchStartTime == 0) {
+            startLaunchTraces();
             mLaunchStartTime = mFullyDrawnStartTime = SystemClock.uptimeMillis();
         }
     }
@@ -717,6 +735,7 @@ final class ActivityStack {
         prev.task.touchActiveTime();
         clearLaunchTime(prev);
         prev.updateThumbnail(screenshotActivities(prev), null);
+        stopFullyDrawnTraceIfNeeded();
 
         mService.updateCpuStats();
 

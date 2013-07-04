@@ -820,7 +820,7 @@ final class ActivityRecord {
             final long totalTime = stack.mFullyDrawnStartTime != 0
                     ? (curTime - stack.mFullyDrawnStartTime) : thisTime;
             if (ActivityManagerService.SHOW_ACTIVITY_START_TIME) {
-                Trace.traceCounter(Trace.TRACE_TAG_ACTIVITY_MANAGER, "fully-drawn", (int)totalTime);
+                Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, "drawing", 0);
                 EventLog.writeEvent(EventLogTags.AM_ACTIVITY_FULLY_DRAWN_TIME,
                         userId, System.identityHashCode(this), shortComponentName,
                         thisTime, totalTime);
@@ -851,7 +851,7 @@ final class ActivityRecord {
         final long totalTime = stack.mLaunchStartTime != 0
                 ? (curTime - stack.mLaunchStartTime) : thisTime;
         if (ActivityManagerService.SHOW_ACTIVITY_START_TIME) {
-            Trace.traceCounter(Trace.TRACE_TAG_ACTIVITY_MANAGER, "launch", (int)totalTime);
+            Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, "launching", 0);
             EventLog.writeEvent(EventLogTags.AM_ACTIVITY_LAUNCH_TIME,
                     userId, System.identityHashCode(this), shortComponentName,
                     thisTime, totalTime);
