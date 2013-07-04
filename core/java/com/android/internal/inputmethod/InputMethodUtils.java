@@ -432,6 +432,17 @@ public class InputMethodUtils {
         }
     }
 
+    public static CharSequence getImeAndSubtypeDisplayName(Context context, InputMethodInfo imi,
+            InputMethodSubtype subtype) {
+        final CharSequence imiLabel = imi.loadLabel(context.getPackageManager());
+        return subtype != null
+                ? TextUtils.concat(subtype.getDisplayName(context,
+                        imi.getPackageName(), imi.getServiceInfo().applicationInfo),
+                                (TextUtils.isEmpty(imiLabel) ?
+                                        "" : " - " + imiLabel))
+                : imiLabel;
+    }
+
     /**
      * Utility class for putting and getting settings for InputMethod
      * TODO: Move all putters and getters of settings to this class.
