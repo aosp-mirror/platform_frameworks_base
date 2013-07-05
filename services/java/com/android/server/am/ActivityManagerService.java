@@ -10187,7 +10187,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         TimeUtils.formatDuration(mLastPowerCheckUptime, pw);
                         pw.println("");
                 pw.println("  mGoingToSleep=" + mStackSupervisor.mGoingToSleep);
-                pw.println("  mLaunchingActivity=" + getFocusedStack().mLaunchingActivity);
+                pw.println("  mLaunchingActivity=" + mStackSupervisor.mLaunchingActivity);
                 pw.println("  mAdjSeq=" + mAdjSeq + " mLruSeq=" + mLruSeq);
                 pw.println("  mNumNonCachedProcs=" + mNumNonCachedProcs
                         + " (" + mLruProcesses.size() + " total)"
