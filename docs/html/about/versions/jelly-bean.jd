@@ -1,8 +1,10 @@
 page.title=Jelly Bean
-tab1=Android 4.2
-tab1.link=#android-42
-tab2=Android 4.1
-tab2.link=#android-41
+tab1=Android 4.3
+tab1.link=#android-43
+tab2=Android 4.2
+tab2.link=#android-42
+tab3=Android 4.1
+tab3.link=#android-41
 
 @jd:body
 <div id="butterbar-wrapper" >
@@ -16,6 +18,7 @@ tab2.link=#android-41
 
 <style>
 #android-41 {display:none;}
+#android-42 {display:none;}
 </style>
 
 <script>
@@ -60,6 +63,574 @@ window.onhashchange = function () {
 </script>
 
 
+<!-- BEGIN ANDROID 4.3 -->
+<div id="android-43" class="version-section">
+
+<div style="float:right;padding:0px 0px 10px 28px;width:480px;">
+<div>
+<a href="{@docRoot}images/jb-android-43@2x.png"><img src="{@docRoot}images/jb-android-43.jpg" alt="Android 4.3 on phone and tablet" width="472"></a>
+
+</div>
+</div>
+<p>Welcome to Android 4.3, a sweeter version of <span
+style="white-space:nowrap;">Jelly Bean!</span></p>
+
+<p>Android 4.3 includes performance optimizations and great
+new features for users and developers. This document provides a glimpse of what's new for
+developers.
+
+<p>See the <a href="{@docRoot}about/versions/android-4.3.html">Android 4.3 APIs</a>
+document for a detailed look at the new developer APIs.</p>
+
+<p>Find out more about the new Jelly Bean features for users at <a
+href="http://www.android.com/whatsnew">www.android.com</a>.</p>
+
+
+<h2 id="43-performance" style="line-height:1.25em;">Faster, Smoother, More
+Responsive</h2>
+
+<p>Android 4.3 builds on the performance improvements already included in Jelly
+Bean &mdash; <strong>vsync timing</strong>, <strong>triple buffering</strong>,
+<strong>reduced touch latency</strong>, <strong>CPU input boost</strong>, and
+<strong>hardware-accelerated 2D rendering</strong> &mdash; and adds new
+optimizations that make Android even faster.</p>
+
+<p>For a graphics performance boost, the hardware-accelerated 2D renderer now
+<strong>optimizes the stream of drawing commands</strong>, transforming it into
+a more efficient GPU format by rearranging and merging draw operations. For
+multithreaded processing, the renderer can also now use <strong>multithreading
+across multiple CPU cores</strong> to perform certain tasks.</p>
+
+<p>Android 4.3 also improves <strong>rendering for shapes and text</strong>.
+Shapes such as circles and rounded rectangles are now rendered at higher quality
+in a more efficient manner. Optimizations for text include increased performance
+when using multiple fonts or complex glyph sets (CJK), higher rendering quality
+when scaling text, and faster rendering of drop shadows.</p>
+
+<p><strong>Improved window buffer allocation</strong> results in a faster image
+buffer allocation for your apps, reducing the time taken to start rendering when
+you create a window.</p>
+
+<p>For highest-performance graphics, Android 4.3 introduces support for
+<strong>OpenGL ES 3.0</strong> and makes it accessible to apps through both
+framework and native APIs. On supported devices, the hardware accelerated 2D
+rendering engine takes advantage of OpenGL ES 3.0 to optimize <strong>texture
+management</strong> and increase <strong>gradient rendering
+fidelity</strong>.</p>
+
+
+<h2 id="43-graphics">OpenGL ES 3.0 for High-Performance Graphics</h2>
+
+<p>Android 4.3 introduces platform support for <a class="external-link"
+href="http://www.khronos.org/opengles/3_X/" target="_android">Khronos OpenGL ES 3.0</a>,
+providing games and other apps with highest-performance 2D and 3D graphics
+capabilities on supported devices. You can take advantage of OpenGL ES 3.0
+and related EGL extensions using either <strong>framework APIs</strong>
+or <strong>native API bindings</strong> through the Android Native Development
+Kit (NDK).</p>
+
+<p>Key new functionality provided in OpenGL ES 3.0 includes acceleration of
+advanced visual effects, high quality ETC2/EAC texture compression as a standard
+feature, a new version of the GLSL ES shading language with integer and 32-bit
+floating point support, advanced texture rendering, and standardized texture
+size and render-buffer formats.
+
+<p>You can use the OpenGL ES 3.0 APIs to create highly complex, highly efficient
+graphics that run across a range of compatible Android devices, and you can
+support a single, standard texture-compression format across those devices.</p>
+
+<p>OpenGL ES 3.0 is an optional feature that depends on underlying graphics
+hardware. Support is already available on Nexus 7 (2013), Nexus 4, and
+Nexus 10 devices.</p>
+
+
+<h2 id="43-bluetooth" style="clear:both;">Enhanced Bluetooth Connectivity</h2>
+
+<h4 id="43-bt-le">Connectivity with Bluetooth Smart devices and sensors</h4>
+
+<p>Now you can design and build apps that interact with the latest generation
+of small, low-power devices and sensors that use <a
+href="http://www.bluetooth.com/Pages/Bluetooth-Smart-Devices.aspx"
+class="external-link" target="_android">Bluetooth Smart technology</a>. </p>
+
+<div style="float:right;margin:0px 0px 32px 0px;width:460px;">
+<img src="{@docRoot}images/jb-btle.png" alt="" width="450" style="padding-left:1.5em;margin-bottom:0">
+<p class="img-caption" style="padding-top:1.5em;line-height:1.25em;margin-bottom:0;padding-left:1.5em;">Android 4.3 gives you a single, standard API for interacting with Bluetooth Smart devices. </p>
+</div>
+
+<p>Android 4.3 introduces built-in platform support for <strong>Bluetooth Smart
+Ready</strong> in the central role and provides a standard set of APIs that
+apps can use to discover nearby devices, query for GATT services, and read/write
+characteristics.</p>
+
+<p>With the new APIs, your apps can efficiently scan for devices and services of
+interest. For each device, you can check for supported GATT services by UUID and
+manage connections by device ID and signal strength. You can connect to a GATT
+server hosted on the device and read or write characteristics, or register a
+listener to receive notifications whenever those characteristics change.</p>
+
+<p>You can implement support for any GATT profile. You can read or write
+standard characteristics or add support for custom characteristics as needed.
+Your app can function as either client or server and can transmit and receive
+data in either mode. The APIs are generic, so you’ll be able to support
+interactions with a variety of devices such as proximity tags, watches, fitness
+meters, game controllers, remote controls, health devices, and more.
+</p>
+
+<p>Support for Bluetooth Smart Ready is already available on Nexus 7 (2013)
+and Nexus 4 devices and will be supported in a growing number of
+Android-compatible devices in the months ahead.</p>
+
+<h4 id="43-bt-avrcp">AVRCP 1.3 Profile</h4>
+
+<p>Android 4.3 adds built-in support for <strong>Bluetooth AVRCP 1.3</strong>,
+so your apps can support richer interactions with remote streaming media
+devices. Apps such as media players can take advantage of AVRCP 1.3 through the
+<strong>remote control client APIs</strong> introduced in Android 4.0. In
+addition to exposing playback controls on the remote devices connected over
+Bluetooth, apps can now transmit metadata such as track name, composer, and
+other types of media metadata. </p>
+
+<p>Platform support for AVRCP 1.3 is built on the Bluedroid Bluetooth stack
+introduced by Google and Broadcom in Android 4.2. Support is available right
+away on Nexus devices and other Android-compatible devices that offer A2DP/AVRCP
+capability. </p>
+
+
+<h2 id="43-profiles">Support for Restricted Profiles</h2>
+
+<div style="float:right;margin:22px 0px 0px 24px;width:340px;">
+<img src="{@docRoot}images/jb-profiles-create-n713.png" alt="Setting up a Restricted Profile" width="340" style="margin-bottom:0">
+<p class="img-caption" style="padding-top:1.5em;line-height:1.25em;margin-bottom:0;">A tablet owner can set up one or more restricted profiles in Settings and manage them independently. </p>
+<img src="{@docRoot}images/jb-profiles-restrictions-n713.png" alt="Setting Restrictions in a Profile" width="340" style="margin-bottom:0;padding-top:1em;">
+<p class="img-caption" style="padding-top:1.5em;line-height:1.25em;">Your app can offer restrictions to let owners manage your app content when it's running in a profile. </p>
+</div>
+
+<p>Android 4.3 extends the multiuser feature for tablets with <strong>restricted
+profiles</strong>, a new way to manage users and their capabilities on a single
+device. With restricted profiles, tablet owners can quickly set up
+<strong>separate environments</strong> for each user, with the ability to
+manage <strong>finer-grained restrictions</strong> in the apps that are
+available in those environments. Restricted profiles are ideal for friends and
+family, guest users, kiosks, point-of-sale devices, and more. </p>
+
+<p>Each restricted profile offers an isolated and secure space with its own
+local storage, home screens, widgets, and settings. Unlike with
+users, profiles are created from the tablet owner’s environment, based on the
+owner’s installed apps and system accounts. The owner controls which installed
+apps are enabled in the new profile, and access to the owner’s accounts is
+disabled by default. </p>
+
+<p>Apps that need to access the owner’s accounts &mdash; for sign-in,
+preferences, or other uses &mdash; can opt-in by declaring a manifest attribute,
+and the owner can review and manage those apps from the profile configuration
+settings.</p>
+
+<p>For developers, restricted profiles offer a new way to deliver more value and
+control to your users. You can implement <strong>app restrictions</strong>
+&mdash; content or capabilities controls that are supported by your app &mdash;
+and advertise them to tablet owners in the profile configuration settings.
+</p>
+
+<p>You can add app restrictions directly to the profile configuration settings
+using predefined boolean, select, and multi-select types. If you want more
+flexibility, you can even launch your own UI from profile configuration settings
+to offer any type of restriction you want. </p>
+
+<p>When your app runs in a profile, it can check for any restrictions configured
+by the owner and enforce them appropriately. For example, a media app
+might offer a restriction to let the owner set a maturity level for the profile.
+At run time, the app could check for the maturity setting and then manage
+content according to the preferred maturity level. </p>
+
+<p>If your app is not designed for use in restricted profiles, you can opt
+out altogether, so that your app can't be enabled in any restricted profile.</p>
+
+
+<h2 id="43-optimized-location">Optimized Location and Sensor Capabilities</h2>
+
+<p><a href="{@docRoot}google/play-services/index.html">Google Play services</a>
+offers advanced location APIs that you can use in your apps. Android 4.3
+<strong>optimizes these APIs</strong> on supported devices with new hardware and
+software capabilities that minimize use of the battery. </p>
+
+
+<div style="float:left;margin:22px 24px 36px 22px;width:250px;">
+<a href=""><img src="{@docRoot}images/google/gps-location.png" alt="" height="160" style="padding-right:1.5em;margin-bottom:0"></a>
+</div>
+
+<p><strong>Hardware geofencing</strong> optimizes for power efficiency by
+performing location computation in the device hardware, rather than in
+software. On devices that support hardware geofencing, Google Play services
+geofence APIs will be able to take advantage of this optimization to save
+battery while the device is moving. </p>
+
+<p><strong>Wi-Fi scan-only mode</strong> is a new platform optimization that
+lets users keep Wi-Fi scan on without connecting to a Wi-Fi network, to improve
+location accuracy while conserving battery. Apps that depend on Wi-Fi for
+location services can now ask users to enable scan-only mode from Wi-Fi
+advanced settings. Wi-Fi scan-only mode is not dependent on device hardware and
+is available as part of the Android 4.3 platform.</p>
+
+<p>New sensor types allow apps to better manage sensor readings. A <strong>game
+rotation vector</strong> lets game developers sense the device’s rotation
+without having to worry about magnetic interference.  <strong>Uncalibrated
+gyroscope</strong> and <strong>uncalibrated magnetometer</strong> sensors report
+raw measurements as well as estimated biases to apps. </p>
+
+<p>The new hardware capabilities are already available on Nexus 7 (2013) and
+Nexus 4 devices, and any device manufacturer or chipset vendor can build them
+into their devices.</p>
+
+
+<h2 id="43-media">New Media Capabilities</h2>
+
+<h4 id="43-modular-drm">Modular DRM framework</h4>
+
+<p>To meet the needs of the next generation of media services, Android 4.3
+introduces a <strong>modular DRM framework</strong> that enables media application
+developers to more easily integrate DRM into their own streaming protocols, such
+as MPEG DASH (Dynamic Adaptive Streaming over HTTP, ISO/IEC 23009-1).</p>
+
+<p>Through a combination of new APIs and enhancements to existing APIs, the
+media DRM framework provides an <strong>integrated set of services</strong> for
+managing licensing and provisioning, accessing low-level codecs, and decoding
+encrypted media data. A new MediaExtractor API lets you get the PSSH metadata
+for DASH media. Apps using the media DRM framework manage the network
+communication with a license server and handle the streaming of encrypted data
+from a content library. </p>
+
+<h4 id="43-vp8-encoder">VP8 encoder</h4>
+
+<p>Android 4.3 introduces built-in support for <strong>VP8 encoding</strong>,
+accessible from framework and native APIs. For apps using native APIs, the
+platform includes <strong>OpenMAX 1.1.2 extension headers</strong> to support
+VP8 profiles and levels. VP8 encoding support includes settings for target
+bitrate, rate control, frame rate, token partitioning, error resilience,
+reconstruction and loop filters. The platform API introduces VP8 encoder support
+in a range of formats, so you can take advantage of the best format for your
+content. </p>
+
+<p>VP8 encoding is available in software on all compatible devices running
+Android 4.3. For highest performance, the platform also supports
+hardware-accelerated VP8 encoding on capable devices, such as Nexus 7 (2013),
+Nexus 4, and Nexus 10 devices.</p>
+
+<h4 id="43-surface">Video encoding from a surface</h4>
+
+<p>Starting in Android 4.3 you can use a surface as the input to a video
+encoder. For example, you can now direct a stream from an OpenGL ES surface
+to the encoder, rather than having to copy between buffers.</p>
+
+<h4 id="43-media-muxer">Media muxer</h4>
+
+<p>Apps can use new media muxer APIs to combine elementary audio and video
+streams into a single output file. Currently apps can multiplex a single MPEG-4
+audio stream and a single MPEG-4 video stream into a <strong>single MPEG-4 ouput
+file</strong>. The new APIs are a counterpart to the media demuxing APIs
+introduced in Android 4.2. </p>
+
+<h4 id="43-progress-scrubbing">Playback progress and scrubbing in remote control
+clients</h4>
+
+<p>Since Android 4.0, media players and similar applications have been able to
+offer playback controls from remote control clients such as the device lock
+screen, notifications, and remote devices connected over Bluetooth. Starting in
+Android 4.3, those applications can now also expose playback <strong>progress
+and speed</strong> through their remote control clients, and receive commands to
+jump to a specific <strong>playback position</strong>. </p>
+
+
+<h2 id="43-beautiful-apps">New Ways to Build Beautiful Apps</h2>
+
+
+<h3 id="43-notification-access">Access to notifications</h3>
+
+<p>Notifications have long been a popular Android feature because they let users
+see information and updates from across the system, all in one place. Now in
+Android 4.3, apps can <strong>observe the stream of notifications</strong> with the
+user's permission and display the notifications in any way they want, including
+sending them to nearby devices connected over Bluetooth. </p>
+
+<p>You can access notifications through new APIs that let you <strong>register a
+notification listener</strong> service and with permission of the user, receive
+notifications as they are displayed in the status bar. Notifications are
+delivered to you in full, with all details on the originating app, the post
+time, the content view and style, and priority. You can evaluate fields of
+interest in the notifications, process or add context from your app, and route
+them for display in any way you choose.</p>
+
+<p>The new API gives you callbacks when a notification is added, updated, and
+removed (either because the user dismissed it or the originating app withdrew it).
+You'll be able to launch any intents attached to the notification or its actions,
+as well as dismiss it from the system, allowing your app to provide a complete
+user interface to notifications.</p>
+
+<p><strong>Users remain in control</strong> of which apps can receive
+notifications. At any time, they can look in Settings to see which apps have
+notification access and <strong>enable or disable access</strong> as needed.
+Notification access is disabled by default &mdash; apps can use a new Intent to
+take the user directly to the Settings to enable the listener service after
+installation.</p>
+
+<h4 id="43-view-overlays">View overlays</h4>
+
+<p>You can now create <strong>transparent overlays</strong> on top of Views and
+ViewGroups to render a temporary View hierarchy or transient animation effects
+without disturbing the underlying layout hierarchy. Overlays are particularly
+useful when you want to create animations such as sliding a view outside of its
+container or dragging items on the screen without affecting the view
+hierarchy. </p>
+
+<h4 id="43-optical-bounds">Optical bounds layout mode</h4>
+
+<p>A new layout mode lets you manage the positioning of Views inside ViewGroups
+according to their <strong>optical bounds</strong>, rather than their clip
+bounds. Clip bounds represent a widget’s actual outer boundary, while the new
+optical bounds describe the where the widget appears to be, within the clip
+bounds. You can use the optical bounds layout mode to properly align widgets
+that use outer visual effects such as shadows and glows.</p>
+
+<h4 id="43-rotation-animation">Custom rotation animation types</h4>
+
+<p>Apps can now define the exit and entry animation types used on a window when the
+device is rotated. You can set window properties to enable
+<strong>jump-cut</strong>, <strong>cross-fade</strong>, or
+<strong>standard</strong> window rotation. The system uses the custom animation
+types when the window is fullscreen and is not covered by other windows.</p>
+
+<h4 id="43-screen-orientations">Screen orientation modes</h4>
+
+<p>Apps can set new orientation modes for Activities to ensure that they are
+displayed in the proper orientation when the device is flipped. Additionally,
+apps can use a new mode to <strong>lock the screen</strong> to its current
+orientation. This is useful for apps using the camera that want to
+<strong>disable rotation</strong>  while shooting video. </p>
+
+<h4 id="43-quick-responses-intent">Intent for handling Quick Responses</h4>
+
+<p>Android 4.3 introduces a new public Intent that lets any app <strong>handle
+Quick Responses</strong> &mdash; text messages sent by the user in response to
+an incoming call, without needing to pick up the call or unlock the device. Your
+app can listen for the intent and send the message to the caller over your
+messaging system. The intent includes the recipient (caller) as well as the
+message itself. </p>
+
+
+<h2 id="43-intl">Support for International Users</h2>
+
+<div style="float:right;margin:22px 0px 0px 24px;width:380px;">
+<img src="{@docRoot}images/jb-rtl-arabic-n4.png" alt="" width="180" style="margin-bottom:0;">
+<img src="{@docRoot}images/jb-rtl-hebrew-n4.png" alt="" width="180" style="margin-bottom:0;padding-left:10px;">
+<p class="img-caption" style="padding-top:1.5em;line-height:1.25em;">More parts of Android 4.3 are optimized for RTL languages.</p>
+</div>
+
+<h4 id="43-rtl">RTL improvements</h4>
+
+<p>Android 4.3 includes RTL performance enhancements and broader RTL support
+across framework UI widgets, including ProgressBar/Spinner and
+ExpandableListView. More debugging information visible through the
+<code>uiautomatorviewer</code> tool. In addition, more system UI components are
+now RTL aware, such as notifications, navigation bar and the Action Bar.</p>
+
+<p>To provide a better systemwide experience in RTL scripts, more default system
+apps now support RTL layouts, including Launcher, Quick Settings, Phone, People,
+SetupWizard, Clock, Downloads, and more.</p>
+
+<h4 id="43-localization">Utilities for localization</h4>
+
+<div style="float:right;margin:16px 12px 0px 32px;width:260px;clear:both;">
+<img src="{@docRoot}images/jb-pseudo-locale-zz.png" alt="" width="260" style="margin-bottom:0;">
+<p class="img-caption" style="padding-top:1.5em;line-height:1.25em;">Pseudo-locales make it easier to test your app's localization.</p>
+</div>
+
+<p>Android 4.3 also includes new utilities and APIs for creating better RTL
+strings and testing your localized UIs. A new <strong>BidiFormatter</strong>
+provides a set of simple APIs for wrapping Unicode strings so that you can
+fine-tune your text rendering in RTL scripts. To let you use this utility more
+broadly in your apps, the BidiFormatter APIs are also now available for earlier
+platform versions through the Support Package in the Android SDK. </p>
+
+<p>To assist you with managing date formatting across locales, Android 4.3
+includes a new <strong>getBestAvaialbleDate()</strong> method that automatically
+generates the best possible localized form of a Unicode UTS date for a locale
+that you specify. It’s a convenient way to provide a more localized experience
+for your users. </p>
+
+<p>To help you test your app more easily in other locales, Android 4.3
+introduces <strong>pseudo-locales</strong> as a new developer option.
+Pseudo-locales simulate the language, script, and display characteristics
+associated with a locale or language group. Currently, you can test with a
+pseudo-locale for <strong>Accented English</strong>, which lets you see how your
+UI works with script accents and characters used in a variety of European
+languages. <!--To use the pseudo-locale, enable “Developer options” in Settings
+and then select Accented English from Language and Input settings. --></p>
+
+
+<h2 id="43-accessibility">Accessibility and UI Automation</h2>
+
+<p>Starting in Android 4.3, accessibility services can <strong>observe and
+filter key events</strong>, such as to handle keyboard shortcuts or provide
+navigation parity with gesture-based input. The service receives the events and
+can process them as needed before they are passed to the system or other
+installed apps.</p>
+
+<p>Accessibility services can declare <strong>new capability attributes</strong>
+to describe what their services can do and what platform features they use. For
+example, they can declare the capability to filter key events, retrieve window
+content, enable explore-by-touch, or enable web accessibility features. In some
+cases, services must declare a capability attribute before they can access
+related platform features. The system uses the service’s capability attributes
+to generate an opt-in dialog for users, so they can see and agree to the
+capabilities before launch.</p>
+
+<p>Building on the accessibility framework in Android 4.3, a new <strong>UI
+automation framework</strong> lets tests interact with the device’s UI by
+simulating user actions and introspecting the screen content. Through the UI
+automation framework you can perform basic operations, set rotation of the
+screen, generate input events, take screenshots, and much more. It’s a powerful
+way to automate testing in realistic user scenarios, including actions or
+sequences that span multiple apps.</p>
+
+
+<h2 id="43-enterprise-security">Enterprise and Security</h2>
+
+<h4 id="43-wpa2">Wi-Fi configuration for WPA2-Enterprise networks</h4>
+
+<p>Apps can now configure the <strong>Wi-Fi credentials</strong> they need for
+connections to <strong>WPA2 enterprise access points</strong>. Developers can
+use new APIs to configure Extensible Authentication Protocol (EAP) and
+Encapsulated EAP (Phase 2) credentials for authentication methods used in the
+enterprise. Apps with permission to access and change Wi-Fi can configure
+authentication credentials for a variety of EAP and Phase 2 authentication
+methods. </p>
+
+<h4 id="43-selinux">Android sandbox reinforced with SELinux</h4>
+
+<p>Android now uses <strong>SELinux</strong>, a mandatory access control (MAC)
+system in the Linux kernel to augment the UID based application sandbox.
+This protects the operating system against potential security vulnerabilities.</p>
+
+<h4 id="43-keychain">KeyChain enhancements</h4>
+
+<p>The KeyChain API now provides a method that allows applications to confirm
+that system-wide keys are bound to a <strong>hardware root of trust</strong> for
+the device.  This provides a place to create or store private keys that
+<strong>cannot be exported</strong> off the device, even in the event of a root or
+kernel compromise.</p>
+
+<h4 id="43-keystore">Android Keystore Provider</h4>
+
+<p>Android 4.3 introduces a keystore provider and APIs that allow applications
+to create exclusive-use keys. Using the APIs, apps can create or store private
+keys that <strong>cannot be seen or used by other apps</strong>, and can be
+added to the keystore without any user interaction. </p>
+
+<p>The keystore provider provides the same security benefits that the KeyChain
+API provides for system-wide credentials, such as binding credentials to a
+device. Private keys in the keystore cannot be exported off the device.</p>
+
+<h4 id="43-seuid">Restrict Setuid from Android Apps</h4>
+
+<p>The <code>/system</code> partition is now mounted <code>nosuid</code> for
+zygote-spawned processes, preventing Android applications from executing
+<code>setuid</code> programs. This reduces root attack surface and likelihood of
+potential security vulnerabilities.</p>
+
+
+<h2 id="43-tools">New Ways to Analyze Performance</h2>
+
+<div style="float:right;margin:16px 6px 0px 32px;width:390px;">
+<img src="{@docRoot}images/jb-systrace.png" alt="" width="390" style="margin-bottom:0;">
+<p class="img-caption" style="padding-top:1.5em;line-height:1.25em;">Systrace uses a new command syntax and lets you collect more types of profiling data.</p>
+</div>
+
+<h4 id="43-systrace">Enhanced Systrace logging</h4>
+
+<p>Android 4.3 supports an enhanced version of the <strong>Systrace</strong>
+tool that’s easier to use and that gives you access to more types of information
+to profile the performance of your app. You can now collect trace data from
+<strong>hardware modules</strong>, <strong>kernel functions</strong>,
+<strong>Dalvik VM</strong> including garbage collection, <strong>resources
+loading</strong>, and more. </p>
+
+<p>Android 4.3 also includes new Trace APIs that you can use in your apps to mark
+specific sections of code to trace using Systrace <strong>begin/end
+events</strong>. When the marked sections of code execute, the system writes the
+begin/end events to the trace log. There's minimal impact on the performance of
+your app, so timings reported give you an accurate view of what your app is
+doing.</p>
+
+<p>You can visualize app-specific events in a timeline in the Systrace output
+file and analyze the events in the context of other kernel and user space trace
+data. Together with existing Systrace tags, custom app sections can give you new
+ways to understand the performance and behavior of your apps.</p>
+
+<div style="float:right;margin:6px 0px 0px 32px;width:380px;">
+<img src="{@docRoot}images/jb-gpu-profile-clk-n4.png" alt="" width="180" style="margin-bottom:0;">
+<img src="{@docRoot}images/jb-gpu-profile-cal-n4.png" alt="" width="180" style="margin-bottom:0;padding-left:10px;">
+<p class="img-caption" style="padding-top:1.5em;line-height:1.25em;">On-screen GPU profiling in Android 4.3.</p>
+</div>
+
+<h4 id="43-gpu-profiling" >On-screen GPU profiling</h4>
+
+<p>Android 4.3 adds new developer options to help you analyze your app’s
+performance and pinpoint rendering issues on any device or emulator.</p>
+
+<p>In the <strong>Profile GPU rendering</strong> option you can now visualize
+your app’s effective framerate on-screen, while the app is running. You can
+choose to display profiling data as on-screen <strong>bar or line
+graphs</strong>, with colors indicating time spent creating drawing commands
+(blue), issuing the commands (orange), and waiting for the commands to complete
+(yellow). The system updates the on-screen graphs continuously, displaying a
+graph for each visible Activity, including the navigation bar and notification
+bar. </p>
+
+<p>A green line highlights the <strong>60ms threshold</strong> for rendering
+operations, so you can assess the your app’s effective framerate relative
+to a 60 fps goal. If you see operations that cross the green line, you
+can analyze them further using Systrace and other tools.</p>
+
+<p class="caution" style="clear:both">On devices running Android 4.2 and higher,
+developer options are hidden by default. You can reveal them at any time by
+tapping 7 times on <strong>Settings &gt; About phone &gt; Build number</strong>
+on any compatible Android device.</p>
+
+<h4 id="43-strictmode">StrictMode warning for file URIs</h4>
+
+<p>The latest addition to the StrictMode tool is a policy constraint that warns
+when your app exposes a <code>file://</code> URI to the system or another app.
+In some cases the receiving app may not have access to the <code>file://</code>
+URI path, so when sharing files between apps, a <code>content://</code> URI should
+be used (with the appropriate permission). This new policy helps you catch and fix
+such cases. If you’re looking for a convenient way to store and expose files to other
+apps, try using the <code>FileProvider</code> content provider that’s available
+in the <a href="{@docRoot}tools/support-library/index.html">Support Library</a>.</p>
+
+</div><!-- END ANDROID 4.3 -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <!-- BEGIN ANDROID 4.2 -->
 <div id="android-42" class="version-section">
@@ -75,7 +646,7 @@ style="white-space:nowrap;">Jelly Bean!</span></p>
 new features for users and developers. This document provides a glimpse of what's new for
 developers.
 
-<p>See the <a href="/about/versions/android-4.2.html">Android 4.2 APIs</a>
+<p>See the <a href="{@docRoot}about/versions/android-4.2.html">Android 4.2 APIs</a>
 document for a detailed look at the new developer APIs.</p>
 
 <p>Find out more about the new Jelly Bean features for users at <a
@@ -158,7 +729,7 @@ in a single-user environment. </p>
 <div>
 <img src="{@docRoot}images/jb-lock-calendar.png" alt="Calendar lock screen widget" width="280" height="543" style="padding-left:1em;margin-bottom:0">
 </div>
-<p class="image-caption" style="padding:1.5em">You can extend <strong>app widgets</strong> to run on the lock screen, for instant access to your content.</p>
+<p class="img-caption" style="padding-top:1.5em;line-height:1.25em;">You can extend <strong>app widgets</strong> to run on the lock screen, for instant access to your content.</p>
 </div>
 
 <h3 id="42-lockscreen-widgets">Lock screen widgets</h3>
