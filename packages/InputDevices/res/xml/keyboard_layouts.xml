@@ -12,6 +12,10 @@
             android:label="@string/keyboard_layout_english_us_intl"
             android:keyboardLayout="@raw/keyboard_layout_english_us_intl" />
 
+    <keyboard-layout android:name="keyboard_layout_english_us_colemak"
+            android:label="@string/keyboard_layout_english_us_colemak_label"
+            android:keyboardLayout="@raw/keyboard_layout_english_us_colemak" />
+
     <keyboard-layout android:name="keyboard_layout_english_us_dvorak"
             android:label="@string/keyboard_layout_english_us_dvorak_label"
             android:keyboardLayout="@raw/keyboard_layout_english_us_dvorak" />
