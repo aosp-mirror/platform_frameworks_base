@@ -62,6 +62,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -98,10 +99,18 @@ public final class ActivityStackSupervisor {
     /** How long we can hold the sleep wake lock before giving up. */
     static final int SLEEP_TIMEOUT = 5*1000;
 
+    // How long we can hold the launch wake lock before giving up.
+    static final int LAUNCH_TIMEOUT = 10*1000;
+
     static final int IDLE_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG;
     static final int IDLE_NOW_MSG = FIRST_SUPERVISOR_STACK_MSG + 1;
     static final int RESUME_TOP_ACTIVITY_MSG = FIRST_SUPERVISOR_STACK_MSG + 2;
     static final int SLEEP_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG + 3;
+    static final int LAUNCH_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG + 4;
+
+    // For debugging to make sure the caller when acquiring/releasing our
+    // wake lock is the system process.
+    static final boolean VALIDATE_WAKE_LOCK_CALLER = false;
 
     final ActivityManagerService mService;
     final Context mContext;
@@ -183,6 +192,14 @@ public final class ActivityStackSupervisor {
     boolean mSleepTimeout = false;
 
     /**
+     * We don't want to allow the device to go to sleep while in the process
+     * of launching an activity.  This is primarily to allow alarm intent
+     * receivers to launch an activity and get that to run before the device
+     * goes back to sleep.
+     */
+    final PowerManager.WakeLock mLaunchingActivity;
+
+    /**
      * Set when the system is going to sleep, until we have
      * successfully paused the current activity and released our wake lock.
      * At that point the system is allowed to actually sleep.
@@ -197,6 +214,12 @@ public final class ActivityStackSupervisor {
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mGoingToSleep = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActivityManager-Sleep");
         mHandler = new ActivityStackSupervisorHandler(looper);
+        if (VALIDATE_WAKE_LOCK_CALLER && Binder.getCallingUid() != Process.myUid()) {
+            throw new IllegalStateException("Calling must be system uid");
+        }
+        mLaunchingActivity =
+                pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "ActivityManager-Launch");
+        mLaunchingActivity.setReferenceCounted(false);
     }
 
     void setWindowManager(WindowManagerService wm) {
@@ -388,7 +411,11 @@ public final class ActivityStackSupervisor {
 
     boolean allResumedActivitiesIdle() {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-            final ActivityRecord resumedActivity = mStacks.get(stackNdx).mResumedActivity;
+            final ActivityStack stack = mStacks.get(stackNdx);
+            if (!isFrontStack(stack)) {
+                continue;
+            }
+            final ActivityRecord resumedActivity = stack.mResumedActivity;
             if (resumedActivity == null || !resumedActivity.idle) {
                 return false;
             }
@@ -1666,12 +1693,21 @@ public final class ActivityStackSupervisor {
         return ActivityManager.START_SUCCESS;
     }
 
+    void acquireLaunchWakelock() {
+        if (VALIDATE_WAKE_LOCK_CALLER && Binder.getCallingUid() != Process.myUid()) {
+            throw new IllegalStateException("Calling must be system uid");
+        }
+        mLaunchingActivity.acquire();
+        if (!mHandler.hasMessages(LAUNCH_TIMEOUT_MSG)) {
+            // To be safe, don't allow the wake lock to be held for too long.
+            mHandler.sendEmptyMessageDelayed(LAUNCH_TIMEOUT_MSG, LAUNCH_TIMEOUT);
+        }
+    }
+
     // Checked.
     final ActivityRecord activityIdleInternalLocked(final IBinder token, boolean fromTimeout,
             Configuration config) {
         if (localLOGV) Slog.v(TAG, "Activity idle: " + token);
-
-        ActivityRecord res = null;
 
         ArrayList<ActivityRecord> stops = null;
         ArrayList<ActivityRecord> finishes = null;
@@ -1689,41 +1725,50 @@ public final class ActivityStackSupervisor {
                     Debug.getCallers(4));
             mHandler.removeMessages(IDLE_TIMEOUT_MSG, r);
             r.finishLaunchTickingLocked();
-            res = r.task.stack.activityIdleInternalLocked(token);
-            if (res != null) {
-                if (fromTimeout) {
-                    reportActivityLaunchedLocked(fromTimeout, r, -1, -1);
-                }
-
-                // This is a hack to semi-deal with a race condition
-                // in the client where it can be constructed with a
-                // newer configuration from when we asked it to launch.
-                // We'll update with whatever configuration it now says
-                // it used to launch.
-                if (config != null) {
-                    r.configuration = config;
-                }
-
-                // We are now idle.  If someone is waiting for a thumbnail from
-                // us, we can now deliver.
-                r.idle = true;
-                if (allResumedActivitiesIdle()) {
-                    mService.scheduleAppGcsLocked();
-                    mService.requestPssLocked(r.app, SystemClock.uptimeMillis(), false);
-                }
-                if (r.thumbnailNeeded && r.app != null && r.app.thread != null) {
-                    sendThumbnail = r.app.thread;
-                    r.thumbnailNeeded = false;
-                }
-    
-                //Slog.i(TAG, "IDLE: mBooted=" + mBooted + ", fromTimeout=" + fromTimeout);
-                if (!mService.mBooted && isFrontStack(r.task.stack)) {
-                    mService.mBooted = true;
-                    enableScreen = true;
-                }
-            } else if (fromTimeout) {
-                reportActivityLaunchedLocked(fromTimeout, null, -1, -1);
+            if (fromTimeout) {
+                reportActivityLaunchedLocked(fromTimeout, r, -1, -1);
             }
+
+            // This is a hack to semi-deal with a race condition
+            // in the client where it can be constructed with a
+            // newer configuration from when we asked it to launch.
+            // We'll update with whatever configuration it now says
+            // it used to launch.
+            if (config != null) {
+                r.configuration = config;
+            }
+
+            // We are now idle.  If someone is waiting for a thumbnail from
+            // us, we can now deliver.
+            r.idle = true;
+
+            if (r.thumbnailNeeded && r.app != null && r.app.thread != null) {
+                sendThumbnail = r.app.thread;
+                r.thumbnailNeeded = false;
+            }
+
+            //Slog.i(TAG, "IDLE: mBooted=" + mBooted + ", fromTimeout=" + fromTimeout);
+            if (!mService.mBooted && isFrontStack(r.task.stack)) {
+                mService.mBooted = true;
+                enableScreen = true;
+            }
+        }
+
+        if (allResumedActivitiesIdle()) {
+            if (r != null) {
+                mService.scheduleAppGcsLocked();
+                mService.requestPssLocked(r.app, SystemClock.uptimeMillis(), false);
+            }
+
+            if (mLaunchingActivity.isHeld()) {
+                mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
+                if (VALIDATE_WAKE_LOCK_CALLER &&
+                        Binder.getCallingUid() != Process.myUid()) {
+                    throw new IllegalStateException("Calling must be system uid");
+                }
+                mLaunchingActivity.release();
+            }
+            ensureActivitiesVisibleLocked(null, 0);
         }
 
         // Atomically retrieve all of the other things to do.
@@ -1814,7 +1859,7 @@ public final class ActivityStackSupervisor {
             resumeTopActivitiesLocked();
         }
 
-        return res;
+        return r;
     }
 
     void handleAppDiedLocked(ProcessRecord app, boolean restarting) {
@@ -1882,7 +1927,7 @@ public final class ActivityStackSupervisor {
     void findTaskToMoveToFrontLocked(int taskId, int flags, Bundle options) {
         for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
             if (mStacks.get(stackNdx).findTaskToMoveToFrontLocked(taskId, flags, options)) {
-                if (DEBUG_STACK) Slog.d(TAG, "findTaskToMoveToFront: moved to front of stack=" + 
+                if (DEBUG_STACK) Slog.d(TAG, "findTaskToMoveToFront: moved to front of stack=" +
                         mStacks.get(stackNdx));
                 return;
             }
@@ -1956,11 +2001,12 @@ public final class ActivityStackSupervisor {
         scheduleSleepTimeout();
         if (!mGoingToSleep.isHeld()) {
             mGoingToSleep.acquire();
-            for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = mStacks.get(stackNdx);
-                if (stack.mResumedActivity != null) {
-                    stack.stopIfSleepingLocked();
+            if (mLaunchingActivity.isHeld()) {
+                if (VALIDATE_WAKE_LOCK_CALLER && Binder.getCallingUid() != Process.myUid()) {
+                    throw new IllegalStateException("Calling must be system uid");
                 }
+                mLaunchingActivity.release();
+                mService.mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
             }
         }
     }
@@ -2423,8 +2469,8 @@ public final class ActivityStackSupervisor {
             synchronized (mService) {
                 activityIdleInternalLocked(r != null ? r.appToken : null, true, null);
             }
-        }    
-            
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -2456,6 +2502,23 @@ public final class ActivityStackSupervisor {
                             Slog.w(TAG, "Sleep timeout!  Sleeping now.");
                             mSleepTimeout = true;
                             checkReadyForSleepLocked();
+                        }
+                    }
+                } break;
+                case LAUNCH_TIMEOUT_MSG: {
+                    if (mService.mDidDexOpt) {
+                        mService.mDidDexOpt = false;
+                        mHandler.sendEmptyMessageDelayed(LAUNCH_TIMEOUT_MSG, LAUNCH_TIMEOUT);
+                        return;
+                    }
+                    synchronized (mService) {
+                        if (mLaunchingActivity.isHeld()) {
+                            Slog.w(TAG, "Launch timeout has expired, giving up wake lock!");
+                            if (VALIDATE_WAKE_LOCK_CALLER
+                                    && Binder.getCallingUid() != Process.myUid()) {
+                                throw new IllegalStateException("Calling must be system uid");
+                            }
+                            mLaunchingActivity.release();
                         }
                     }
                 } break;
