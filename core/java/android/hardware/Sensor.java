@@ -204,37 +204,71 @@ public final class Sensor {
     // TODO(): The following arrays are fragile and error-prone. This needs to be refactored.
 
     // Note: This needs to be updated, whenever a new sensor is added.
-    private static int[] sSensorReportingModes = {
-            REPORTING_MODE_CONTINUOUS, REPORTING_MODE_CONTINUOUS, REPORTING_MODE_CONTINUOUS,
-            REPORTING_MODE_CONTINUOUS, REPORTING_MODE_ON_CHANGE, REPORTING_MODE_CONTINUOUS,
-            REPORTING_MODE_ON_CHANGE, REPORTING_MODE_ON_CHANGE, REPORTING_MODE_CONTINUOUS,
-            REPORTING_MODE_CONTINUOUS, REPORTING_MODE_CONTINUOUS, REPORTING_MODE_ON_CHANGE,
-            REPORTING_MODE_ON_CHANGE, REPORTING_MODE_CONTINUOUS, REPORTING_MODE_CONTINUOUS,
-            REPORTING_MODE_CONTINUOUS, REPORTING_MODE_ONE_SHOT };
-
-    // Note: This needs to be updated, whenever a new sensor is added.
-    // Holds the maximum length of the values array associated with {@link SensorEvent} or
-    // {@link TriggerEvent} for the Sensor
-    private static int[] sMaxLengthValuesArray = {
-            3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 3, 3,
-            6, 4, 6, 1 };
+    // Holds the reporting mode and maximum length of the values array
+    // associated with
+    // {@link SensorEvent} or {@link TriggerEvent} for the Sensor
+    private static final int[] sSensorReportingModes = {
+            0, 0, // padding because sensor types start at 1
+            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_ACCELEROMETER
+            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_GEOMAGNETIC_FIELD
+            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_ORIENTATION
+            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_GYROSCOPE
+            REPORTING_MODE_ON_CHANGE,  3, // SENSOR_TYPE_LIGHT
+            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_PRESSURE
+            REPORTING_MODE_ON_CHANGE,  3, // SENSOR_TYPE_TEMPERATURE
+            REPORTING_MODE_ON_CHANGE,  3, // SENSOR_TYPE_PROXIMITY
+            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_GRAVITY
+            REPORTING_MODE_CONTINUOUS, 3, // SENSOR_TYPE_LINEAR_ACCELERATION
+            REPORTING_MODE_CONTINUOUS, 5, // SENSOR_TYPE_ROTATION_VECTOR
+            REPORTING_MODE_ON_CHANGE,  3, // SENSOR_TYPE_RELATIVE_HUMIDITY
+            REPORTING_MODE_ON_CHANGE,  3, // SENSOR_TYPE_AMBIENT_TEMPERATURE
+            REPORTING_MODE_CONTINUOUS, 6, // SENSOR_TYPE_MAGNETIC_FIELD_UNCALIBRATED
+            REPORTING_MODE_CONTINUOUS, 4, // SENSOR_TYPE_GAME_ROTATION_VECTOR
+            REPORTING_MODE_CONTINUOUS, 6, // SENSOR_TYPE_GYROSCOPE_UNCALIBRATED
+            REPORTING_MODE_ONE_SHOT,   1, // SENSOR_TYPE_SIGNIFICANT_MOTION
+            // added post 4.3
+            REPORTING_MODE_ON_CHANGE,  1, // SENSOR_TYPE_STEP_DETECTOR
+            REPORTING_MODE_ON_CHANGE,  1, // SENSOR_TYPE_STEP_COUNTER
+            REPORTING_MODE_CONTINUOUS, 5  // SENSOR_TYPE_GEOMAGNETIC_ROTATION_VECTOR
+    };
 
     static int getReportingMode(Sensor sensor) {
-        // mType starts from offset 1.
-        return sSensorReportingModes[sensor.mType - 1];
+        int offset = sensor.mType * 2;
+        if (offset >= sSensorReportingModes.length) {
+            // we don't know about this sensor, so this is probably a
+            // vendor-defined sensor, in that case, we figure out the reporting
+            // mode from the sensor meta-data.
+            int minDelay = sensor.mMinDelay;
+            if (minDelay == 0) {
+                return REPORTING_MODE_ON_CHANGE;
+            } else if (minDelay < 0) {
+                return REPORTING_MODE_ONE_SHOT;
+            } else {
+                return REPORTING_MODE_CONTINUOUS;
+            }
+        }
+        return sSensorReportingModes[offset];
     }
 
     static int getMaxLengthValuesArray(Sensor sensor, int sdkLevel) {
-        // mType starts from offset 1.
-        int len = sMaxLengthValuesArray[sensor.mType - 1];
-
+        int type = sensor.mType;
         // RotationVector length has changed to 3 to 5 for API level 18
         // Set it to 3 for backward compatibility.
-        if (sensor.getType() == Sensor.TYPE_ROTATION_VECTOR &&
+        if (type == Sensor.TYPE_ROTATION_VECTOR &&
                 sdkLevel <= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            len = 3;
+            return 3;
         }
-        return len;
+        int offset = type * 2 + 1;
+        if (offset >= sSensorReportingModes.length) {
+            // we don't know about this sensor, so this is probably a
+            // vendor-defined sensor, in that case, we don't know how many value
+            // it has
+            // so we return the maximum and assume the app will know.
+            // FIXME: sensor HAL should advertise how much data is returned per
+            // sensor
+            return 16;
+        }
+        return sSensorReportingModes[offset];
     }
 
     /* Some of these fields are set only by the native bindings in
