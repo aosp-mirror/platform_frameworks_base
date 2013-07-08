@@ -42,7 +42,10 @@ public class KeySetManager {
 
     static final String TAG = "KeySetManager";
 
-    private static final long KEYSET_NOT_FOUND = -1;
+    /** Sentinel value returned when a {@code KeySet} is not found. */
+    public static final long KEYSET_NOT_FOUND = -1;
+
+    /** Sentinel value returned when public key is not found. */
     private static final long PUBLIC_KEY_NOT_FOUND = -1;
 
     private final Object mLockObject = new Object();
