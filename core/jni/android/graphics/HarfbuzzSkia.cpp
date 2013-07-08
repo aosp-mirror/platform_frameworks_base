@@ -89,7 +89,7 @@ static void glyphsToAdvances(HB_Font hbFont, const HB_Glyph* glyphs, hb_uint32 n
         ALOGD("glyphsToAdvances -- advances[%d]=%d", i, advances[i]);
 #endif
     }
-    delete glyphs16;
+    delete[] glyphs16;
 }
 
 static HB_Bool canRender(HB_Font hbFont, const HB_UChar16* characters, hb_uint32 length)
@@ -107,7 +107,7 @@ static HB_Bool canRender(HB_Font hbFont, const HB_UChar16* characters, hb_uint32
             break;
         }
     }
-    delete glyphs16;
+    delete[] glyphs16;
     return result;
 }
 
