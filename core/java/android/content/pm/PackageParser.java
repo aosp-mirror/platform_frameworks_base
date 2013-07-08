@@ -1569,7 +1569,7 @@ public class PackageParser {
                 currentKey = parsePublicKey(encodedKey);
                 definedKeySets.put(currentKey, new HashSet<String>());
                 sa.recycle();
-             } else if (tagname.equals("keyset")) {
+            } else if (tagname.equals("keyset")) {
                 final TypedArray sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.KeySet);
                 final String name = sa.getNonResourceString(
