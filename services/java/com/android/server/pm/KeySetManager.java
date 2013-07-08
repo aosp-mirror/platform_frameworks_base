@@ -418,7 +418,7 @@ public class KeySetManager {
                 pw.print("  ["); pw.print(keySetPackage); pw.println("]");
                 if (pkg.keySetData != null) {
                     boolean printedLabel = false;
-                    for (Entry<String, Long> entry : pkg.keySetData.getAliases().entrySet()) {
+                    for (Map.Entry<String, Long> entry : pkg.keySetData.getAliases().entrySet()) {
                         if (!printedLabel) {
                             pw.print("      KeySets Aliases: ");
                             printedLabel = true;
