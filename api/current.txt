@@ -35600,6 +35600,7 @@ package java.net {
     method public int getResponseCode() throws java.io.IOException;
     method public java.lang.String getResponseMessage() throws java.io.IOException;
     method public void setChunkedStreamingMode(int);
+    method public void setFixedLengthStreamingMode(long);
     method public void setFixedLengthStreamingMode(int);
     method public static void setFollowRedirects(boolean);
     method public void setInstanceFollowRedirects(boolean);
@@ -35643,6 +35644,7 @@ package java.net {
     field public static final int HTTP_VERSION = 505; // 0x1f9
     field protected int chunkLength;
     field protected int fixedContentLength;
+    field protected long fixedContentLengthLong;
     field protected boolean instanceFollowRedirects;
     field protected java.lang.String method;
     field protected int responseCode;
