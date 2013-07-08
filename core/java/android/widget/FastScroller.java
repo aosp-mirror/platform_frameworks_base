@@ -1037,7 +1037,12 @@ class FastScroller {
         final int sectionCount = mSections.length;
         final int positionsInSection;
         if (section < sectionCount - 1) {
-            final int nextSectionPos = mSectionIndexer.getPositionForSection(section + 1);
+            final int nextSectionPos;
+            if (section + 1 < sectionCount) {
+                nextSectionPos = mSectionIndexer.getPositionForSection(section + 1);
+            } else {
+                nextSectionPos = totalItemCount - 1;
+            }
             positionsInSection = nextSectionPos - sectionPos;
         } else {
             positionsInSection = totalItemCount - sectionPos;
