@@ -164,7 +164,7 @@ href="#layers">View layers</a> for more information about their uses.</p>
   draws views without hardware acceleration as well. The following sections describe the
   software-based  and hardware-accelerated drawing models.</p>
 
-<h3>Software-based drawing model</h3>
+<h3 id="software-model">Software-based drawing model</h3>
 <p>In the software drawing model, views are drawn with the following two steps:</p>
   <ol>
     <li>Invalidate the hierarchy</li>
@@ -196,7 +196,7 @@ changed.</li>
   android.view.View#invalidate invalidate()} when their properties change, such as the background
   color or the text in a {@link android.widget.TextView}.</p>
 
-  <h3>Hardware accelerated drawing model</h3>
+  <h3 id="hardware-model">Hardware accelerated drawing model</h3>
   <p>The Android system still uses {@link android.view.View#invalidate invalidate()} and {@link
   android.view.View#draw draw()} to request screen updates and to render views, but handles the
   actual drawing differently. Instead of executing the drawing commands immediately, the Android
