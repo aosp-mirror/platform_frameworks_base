@@ -629,8 +629,11 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** Key code constant: Brightness Up key.
      * Adjusts the screen brightness up. */
     public static final int KEYCODE_BRIGHTNESS_UP   = 221;
+    /** Key code constant: Audio Track key
+     * Switches the audio tracks. */
+    public static final int KEYCODE_MEDIA_AUDIO_TRACK = 222;
 
-    private static final int LAST_KEYCODE           = KEYCODE_BRIGHTNESS_UP;
+    private static final int LAST_KEYCODE           = KEYCODE_MEDIA_AUDIO_TRACK;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
@@ -874,6 +877,7 @@ public class KeyEvent extends InputEvent implements Parcelable {
         names.append(KEYCODE_ASSIST, "KEYCODE_ASSIST");
         names.append(KEYCODE_BRIGHTNESS_DOWN, "KEYCODE_BRIGHTNESS_DOWN");
         names.append(KEYCODE_BRIGHTNESS_UP, "KEYCODE_BRIGHTNESS_UP");
+        names.append(KEYCODE_MEDIA_AUDIO_TRACK, "KEYCODE_MEDIA_AUDIO_TRACK");
     };
 
     // Symbolic names of all metakeys in bit order from least significant to most significant.
