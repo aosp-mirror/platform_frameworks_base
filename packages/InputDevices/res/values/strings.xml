@@ -15,6 +15,9 @@
     <!-- US English (International style) keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_english_us_intl">English (US), International style</string>
 
+    <!-- US English (Colemak style) keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_english_us_colemak_label">English (US), Colemak style</string>
+
     <!-- US English (Dvorak style) keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_english_us_dvorak_label">English (US), Dvorak style</string>
 
