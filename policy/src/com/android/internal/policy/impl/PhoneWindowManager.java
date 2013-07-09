@@ -33,6 +33,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.UserInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -4789,8 +4790,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         ActivityInfo ai = null;
         ResolveInfo info = mContext.getPackageManager().resolveActivityAsUser(
                 intent,
-                PackageManager.MATCH_DEFAULT_ONLY,
-                UserHandle.USER_CURRENT);
+                PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_META_DATA,
+                getCurrentUserId());
         if (info != null) {
             ai = info.activityInfo;
         }
@@ -4803,6 +4804,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         return null;
+    }
+
+    private int getCurrentUserId() {
+        try {
+            UserInfo user = ActivityManagerNative.getDefault().getCurrentUser();
+            return user != null ? user.id : UserHandle.USER_NULL;
+        } catch (RemoteException e) {
+            // noop
+        }
+        return UserHandle.USER_NULL;
     }
 
     void startDockOrHome() {
