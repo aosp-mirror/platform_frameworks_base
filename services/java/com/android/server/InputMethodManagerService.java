@@ -1511,23 +1511,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
                 if (imi != null && iconVisibility && needsToShowImeSwitchOngoingNotification()) {
                     // Used to load label
-                    final PackageManager pm = mContext.getPackageManager();
                     final CharSequence title = mRes.getText(
                             com.android.internal.R.string.select_input_method);
-                    final CharSequence imiLabel = imi.loadLabel(pm);
-                    final CharSequence summary = mCurrentSubtype != null
-                            ? TextUtils.concat(mCurrentSubtype.getDisplayName(mContext,
-                                        imi.getPackageName(), imi.getServiceInfo().applicationInfo),
-                                                (TextUtils.isEmpty(imiLabel) ?
-                                                        "" : " - " + imiLabel))
-                            : imiLabel;
+                    final CharSequence summary = InputMethodUtils.getImeAndSubtypeDisplayName(
+                            mContext, imi, mCurrentSubtype);
 
                     mImeSwitcherNotification.setLatestEventInfo(
                             mContext, title, summary, mImeSwitchPendingIntent);
                     if (mNotificationManager != null) {
                         if (DEBUG) {
-                            Slog.d(TAG, "--- show notification: label =  " + imiLabel
-                                    + ", summary = " + summary);
+                            Slog.d(TAG, "--- show notification: label =  " + summary);
                         }
                         mNotificationManager.notifyAsUser(null,
                                 com.android.internal.R.string.select_input_method,
