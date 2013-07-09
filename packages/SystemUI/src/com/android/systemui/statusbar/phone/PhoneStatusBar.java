@@ -45,12 +45,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.service.dreams.DreamService;
-import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -76,7 +73,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
@@ -90,7 +86,7 @@ import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.DateView;
-import com.android.systemui.statusbar.policy.IntruderAlertView;
+import com.android.systemui.statusbar.policy.HeadsUpNotificationView;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
@@ -127,7 +123,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     // 1020-1030 reserved for BaseStatusBar
 
     // will likely move to a resource or other tunable param at some point
-    private static final int INTRUDER_ALERT_DECAY_MS = 0; // disabled, was 10000;
+    private static final int HEADS_UP_DECAY_MS = 0; // disabled, was 10000;
 
     private static final boolean CLOSE_PANEL_WHEN_EMPTIED = true;
 
@@ -168,8 +164,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     int mIconHPadding = -1;
     Display mDisplay;
     Point mCurrentDisplaySize = new Point();
-
-    IDreamManager mDreamManager;
 
     StatusBarWindowView mStatusBarWindow;
     PhoneStatusBarView mStatusBarView;
@@ -230,8 +224,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     // the date view
     DateView mDateView;
 
-    // for immersive activities
-    private IntruderAlertView mIntruderAlertView;
+    // for heads up notifications
+    private HeadsUpNotificationView mHeadsUpNotificationView;
 
     // on-screen navigation buttons
     private NavigationBarView mNavigationBarView = null;
@@ -358,14 +352,11 @@ public class PhoneStatusBar extends BaseStatusBar {
                 .getDefaultDisplay();
         mDisplay.getSize(mCurrentDisplaySize);
 
-        mDreamManager = IDreamManager.Stub.asInterface(
-                ServiceManager.checkService(DreamService.DREAM_SERVICE));
-
         super.start(); // calls createAndAddWindows()
 
         addNavigationBar();
 
-        if (ENABLE_INTRUDERS) addIntruderView();
+        if (ENABLE_HEADS_UP) addHeadsUpView();
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext);
@@ -424,10 +415,11 @@ public class PhoneStatusBar extends BaseStatusBar {
             mNotificationPanel.setBackground(new FastColorDrawable(context.getResources().getColor(
                     R.color.notification_panel_solid_background)));
         }
-        if (ENABLE_INTRUDERS) {
-            mIntruderAlertView = (IntruderAlertView) View.inflate(context, R.layout.intruder_alert, null);
-            mIntruderAlertView.setVisibility(View.GONE);
-            mIntruderAlertView.setBar(this);
+        if (ENABLE_HEADS_UP) {
+            mHeadsUpNotificationView =
+                    (HeadsUpNotificationView) View.inflate(context, R.layout.heads_up, null);
+            mHeadsUpNotificationView.setVisibility(View.GONE);
+            mHeadsUpNotificationView.setBar(this);
         }
         if (MULTIUSER_DEBUG) {
             mNotificationPanelDebugText = (TextView) mNotificationPanel.findViewById(R.id.header_debug_info);
@@ -833,7 +825,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         return lp;
     }
 
-    private void addIntruderView() {
+    private void addHeadsUpView() {
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -847,11 +839,11 @@ public class PhoneStatusBar extends BaseStatusBar {
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
         //lp.y += height * 1.5; // FIXME
-        lp.setTitle("IntruderAlert");
+        lp.setTitle("Heads Up");
         lp.packageName = mContext.getPackageName();
-        lp.windowAnimations = R.style.Animation_StatusBar_IntruderAlert;
+        lp.windowAnimations = R.style.Animation_StatusBar_HeadsUp;
 
-        mWindowManager.addView(mIntruderAlertView, lp);
+        mWindowManager.addView(mHeadsUpNotificationView, lp);
     }
 
     public void refreshAllStatusBarIcons() {
@@ -895,52 +887,31 @@ public class PhoneStatusBar extends BaseStatusBar {
         StatusBarIconView iconView = addNotificationViews(key, notification);
         if (iconView == null) return;
 
-        boolean immersive = false;
-        try {
-            immersive = ActivityManagerNative.getDefault().isTopActivityImmersive();
-            if (DEBUG) {
-                Log.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
-            }
-        } catch (RemoteException ex) {
-        }
-
-        /*
-         * DISABLED due to missing API
-        if (ENABLE_INTRUDERS && (
-                   // TODO(dsandler): Only if the screen is on
-                notification.notification.intruderView != null)) {
-            Log.d(TAG, "Presenting high-priority notification");
-            // special new transient ticker mode
-            // 1. Populate mIntruderAlertView
-
-            if (notification.notification.intruderView == null) {
-                Log.e(TAG, notification.notification.toString() + " wanted to intrude but intruderView was null");
-                return;
-            }
+        if (mUseHeadsUp && shouldInterrupt(notification)) {
+            if (DEBUG) Log.d(TAG, "launching notification in heads up mode");
+            // 1. Populate mHeadsUpNotificationView
 
             // bind the click event to the content area
-            PendingIntent contentIntent = notification.notification.contentIntent;
+            PendingIntent contentIntent = notification.getNotification().contentIntent;
             final View.OnClickListener listener = (contentIntent != null)
                     ? new NotificationClicker(contentIntent,
-                            notification.pkg, notification.tag, notification.id)
+                    notification.getPackageName(), notification.getTag(), notification.getId())
                     : null;
 
-            mIntruderAlertView.applyIntruderContent(notification.notification.intruderView, listener);
+            if (mHeadsUpNotificationView.applyContent(notification.getNotification(), listener)) {
 
-            mCurrentlyIntrudingNotification = notification;
+                mCurrentlyInterruptingNotification = notification;
 
-            // 2. Animate mIntruderAlertView in
-            mHandler.sendEmptyMessage(MSG_SHOW_INTRUDER);
+                // 2. Animate mHeadsUpNotificationView in
+                mHandler.sendEmptyMessage(MSG_SHOW_HEADS_UP);
 
-            // 3. Set alarm to age the notification off (TODO)
-            mHandler.removeMessages(MSG_HIDE_INTRUDER);
-            if (INTRUDER_ALERT_DECAY_MS > 0) {
-                mHandler.sendEmptyMessageDelayed(MSG_HIDE_INTRUDER, INTRUDER_ALERT_DECAY_MS);
+                // 3. Set alarm to age the notification off (TODO)
+                mHandler.removeMessages(MSG_HIDE_HEADS_UP);
+                if (HEADS_UP_DECAY_MS > 0) {
+                    mHandler.sendEmptyMessageDelayed(MSG_HIDE_HEADS_UP, HEADS_UP_DECAY_MS);
+                }
             }
-        } else
-         */
-
-        if (notification.getNotification().fullScreenIntent != null) {
+        } else if (notification.getNotification().fullScreenIntent != null) {
             // Stop screensaver if the notification has a full-screen intent.
             // (like an incoming phone call)
             awakenDreams();
@@ -954,8 +925,8 @@ public class PhoneStatusBar extends BaseStatusBar {
         } else {
             // usual case: status bar visible & not immersive
 
-            // show the ticker if there isn't an intruder too
-            if (mCurrentlyIntrudingNotification == null) {
+            // show the ticker if there isn't already a heads up
+            if (mCurrentlyInterruptingNotification == null) {
                 tick(null, notification, true);
             }
         }
@@ -976,8 +947,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             // Recalculate the position of the sliding windows and the titles.
             updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
 
-            if (ENABLE_INTRUDERS && old == mCurrentlyIntrudingNotification) {
-                mHandler.sendEmptyMessage(MSG_HIDE_INTRUDER);
+            if (ENABLE_HEADS_UP && old == mCurrentlyInterruptingNotification) {
+                mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
             }
 
             if (CLOSE_PANEL_WHEN_EMPTIED && mNotificationData.size() == 0) {
@@ -1359,12 +1330,12 @@ public class PhoneStatusBar extends BaseStatusBar {
                 case MSG_CLOSE_PANELS:
                     animateCollapsePanels();
                     break;
-                case MSG_SHOW_INTRUDER:
-                    setIntruderAlertVisibility(true);
+                case MSG_SHOW_HEADS_UP:
+                    setHeadsUpVisibility(true);
                     break;
-                case MSG_HIDE_INTRUDER:
-                    setIntruderAlertVisibility(false);
-                    mCurrentlyIntrudingNotification = null;
+                case MSG_HIDE_HEADS_UP:
+                    setHeadsUpVisibility(false);
+                    mCurrentlyInterruptingNotification = null;
                     break;
             }
         }
@@ -2487,22 +2458,20 @@ public class PhoneStatusBar extends BaseStatusBar {
                 mCurrentUserId);
     }
 
-    private void setIntruderAlertVisibility(boolean vis) {
-        if (!ENABLE_INTRUDERS) return;
-        if (DEBUG) {
-            Log.v(TAG, (vis ? "showing" : "hiding") + " intruder alert window");
-        }
-        mIntruderAlertView.setVisibility(vis ? View.VISIBLE : View.GONE);
+    private void setHeadsUpVisibility(boolean vis) {
+        if (!ENABLE_HEADS_UP) return;
+        if (DEBUG) Log.v(TAG, (vis ? "showing" : "hiding") + " heads up window");
+        mHeadsUpNotificationView.setVisibility(vis ? View.VISIBLE : View.GONE);
     }
 
-    public void dismissIntruder() {
-        if (mCurrentlyIntrudingNotification == null) return;
+    public void dismissHeadsUp() {
+        if (mCurrentlyInterruptingNotification == null) return;
 
         try {
             mBarService.onNotificationClear(
-                    mCurrentlyIntrudingNotification.getPackageName(),
-                    mCurrentlyIntrudingNotification.getTag(),
-                    mCurrentlyIntrudingNotification.getId());
+                    mCurrentlyInterruptingNotification.getPackageName(),
+                    mCurrentlyInterruptingNotification.getTag(),
+                    mCurrentlyInterruptingNotification.getId());
         } catch (android.os.RemoteException ex) {
             // oh well
         }

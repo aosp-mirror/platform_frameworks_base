@@ -34,7 +34,7 @@
         <item name="android:wallpaperIntraOpenExitAnimation">@anim/wallpaper_recents_launch_from_launcher_exit</item>
     </style>
 
-    <style name="TextAppearance.StatusBar.IntruderAlert"
+    <style name="TextAppearance.StatusBar.HeadsUp"
         parent="@*android:style/TextAppearance.StatusBar">
     </style>
 
@@ -154,9 +154,9 @@
     <style name="Animation.StatusBar">
     </style>
 
-    <style name="Animation.StatusBar.IntruderAlert">
-        <item name="android:windowEnterAnimation">@anim/priority_alert_enter</item>
-        <item name="android:windowExitAnimation">@anim/priority_alert_exit</item>
+    <style name="Animation.StatusBar.HeadsUp">
+        <item name="android:windowEnterAnimation">@anim/heads_up_enter</item>
+        <item name="android:windowExitAnimation">@anim/heads_up_exit</item>
     </style>
 
     <style name="TextAppearance.StatusBar.PhoneTicker"
