@@ -235,7 +235,7 @@ public class AuthenticatorService extends Service {
 <p>
     The following snippet shows the XML file for the authenticator you created previously:
 </p>
-<pre>the
+<pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;account-authenticator
         xmlns:android="http://schemas.android.com/apk/res/android"
