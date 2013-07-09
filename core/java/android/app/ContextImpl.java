@@ -192,6 +192,7 @@ class ContextImpl extends Context {
     private Context mReceiverRestrictedContext = null;
     private boolean mRestricted;
     private UserHandle mUser;
+    private ResourcesManager mResourcesManager;
 
     private final Object mSync = new Object();
 
@@ -1832,8 +1833,9 @@ class ContextImpl extends Context {
 
         ContextImpl c = new ContextImpl();
         c.init(mPackageInfo, null, mMainThread);
-        c.mResources = mMainThread.getTopLevelResources(mPackageInfo.getResDir(), getDisplayId(),
-                overrideConfiguration, mResources.getCompatibilityInfo(), mActivityToken);
+        c.mResources = mResourcesManager.getTopLevelResources(mPackageInfo.getResDir(),
+                getDisplayId(), overrideConfiguration, mResources.getCompatibilityInfo(),
+                mActivityToken);
         return c;
     }
 
@@ -1849,8 +1851,8 @@ class ContextImpl extends Context {
         context.init(mPackageInfo, null, mMainThread);
         context.mDisplay = display;
         DisplayAdjustments daj = getDisplayAdjustments(displayId);
-        context.mResources = mMainThread.getTopLevelResources(mPackageInfo.getResDir(), displayId,
-                null, daj.getCompatibilityInfo(), null);
+        context.mResources = mResourcesManager.getTopLevelResources(mPackageInfo.getResDir(),
+                displayId, null, daj.getCompatibilityInfo(), null);
         return context;
     }
 
@@ -1929,6 +1931,7 @@ class ContextImpl extends Context {
         mPackageInfo = packageInfo;
         mBasePackageName = basePackageName != null ? basePackageName : packageInfo.mPackageName;
         mResources = mPackageInfo.getResources(mainThread);
+        mResourcesManager = ResourcesManager.getInstance();
 
         CompatibilityInfo compatInfo =
                 container == null ? null : container.getCompatibilityInfo();
@@ -1945,7 +1948,7 @@ class ContextImpl extends Context {
             }
             mDisplayAdjustments.setCompatibilityInfo(compatInfo);
             mDisplayAdjustments.setActivityToken(activityToken);
-            mResources = mainThread.getTopLevelResources(mPackageInfo.getResDir(),
+            mResources = mResourcesManager.getTopLevelResources(mPackageInfo.getResDir(),
                     Display.DEFAULT_DISPLAY, null, compatInfo, activityToken);
         } else {
             mDisplayAdjustments.setCompatibilityInfo(packageInfo.getCompatibilityInfo());

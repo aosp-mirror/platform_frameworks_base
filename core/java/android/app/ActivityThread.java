@@ -16,8 +16,6 @@
 
 package android.app;
 
-import static android.view.DisplayAdjustments.DEVELOPMENT_RESOURCES_DEPEND_ON_ACTIVITY_TOKEN;
-
 import android.app.backup.BackupAgent;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
@@ -77,7 +75,6 @@ import android.util.Log;
 import android.util.LogPrinter;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
-import android.view.DisplayAdjustments;
 import android.view.Display;
 import android.view.HardwareRenderer;
 import android.view.View;
@@ -150,7 +147,7 @@ public final class ActivityThread {
     public static final boolean DEBUG_BROADCAST = false;
     private static final boolean DEBUG_RESULTS = false;
     private static final boolean DEBUG_BACKUP = false;
-    private static final boolean DEBUG_CONFIGURATION = false;
+    public static final boolean DEBUG_CONFIGURATION = false;
     private static final boolean DEBUG_SERVICE = false;
     private static final boolean DEBUG_MEMORY_TRIM = false;
     private static final boolean DEBUG_PROVIDER = false;
@@ -182,8 +179,6 @@ public final class ActivityThread {
     boolean mDensityCompatMode;
     Configuration mConfiguration;
     Configuration mCompatConfiguration;
-    Configuration mResConfiguration;
-    CompatibilityInfo mResCompatibilityInfo;
     Application mInitialApplication;
     final ArrayList<Application> mAllApplications
             = new ArrayList<Application>();
@@ -212,13 +207,11 @@ public final class ActivityThread {
             = new HashMap<String, WeakReference<LoadedApk>>();
     final HashMap<String, WeakReference<LoadedApk>> mResourcePackages
             = new HashMap<String, WeakReference<LoadedApk>>();
-    final HashMap<DisplayAdjustments, DisplayMetrics> mDefaultDisplayMetrics
-            = new HashMap<DisplayAdjustments, DisplayMetrics>();
-    final HashMap<ResourcesKey, WeakReference<Resources> > mActiveResources
-            = new HashMap<ResourcesKey, WeakReference<Resources> >();
     final ArrayList<ActivityClientRecord> mRelaunchingActivities
             = new ArrayList<ActivityClientRecord>();
     Configuration mPendingConfiguration = null;
+
+    private final ResourcesManager mResourcesManager;
 
     private static final class ProviderKey {
         final String authority;
@@ -555,7 +548,7 @@ public final class ActivityThread {
         private static final int ACTIVITY_THREAD_CHECKIN_VERSION = 3;
 
         private void updatePendingConfiguration(Configuration config) {
-            synchronized (mPackages) {
+            synchronized (mResourcesManager) {
                 if (mPendingConfiguration == null ||
                         mPendingConfiguration.isOtherSeqNewer(config)) {
                     mPendingConfiguration = config;
@@ -1608,72 +1601,6 @@ public final class ActivityThread {
         }
     }
 
-    private static class ResourcesKey {
-        final private String mResDir;
-        final private int mDisplayId;
-        final private Configuration mOverrideConfiguration;
-        final private float mScale;
-        final private int mHash;
-        final private IBinder mToken;
-
-        ResourcesKey(String resDir, int displayId, Configuration overrideConfiguration,
-                float scale, IBinder token) {
-            mResDir = resDir;
-            mDisplayId = displayId;
-            if (overrideConfiguration != null) {
-                if (Configuration.EMPTY.equals(overrideConfiguration)) {
-                    overrideConfiguration = null;
-                }
-            }
-            mOverrideConfiguration = overrideConfiguration;
-            mScale = scale;
-            int hash = 17;
-            hash = 31 * hash + mResDir.hashCode();
-            hash = 31 * hash + mDisplayId;
-            hash = 31 * hash + (mOverrideConfiguration != null
-                    ? mOverrideConfiguration.hashCode() : 0);
-            hash = 31 * hash + Float.floatToIntBits(mScale);
-            if (DEVELOPMENT_RESOURCES_DEPEND_ON_ACTIVITY_TOKEN) {
-                mToken = token;
-                hash = 31 * hash + (mToken == null ? 0 : mToken.hashCode());
-            } else {
-                mToken = null;
-            }
-            mHash = hash;
-        }
-
-        @Override
-        public int hashCode() {
-            return mHash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof ResourcesKey)) {
-                return false;
-            }
-            ResourcesKey peer = (ResourcesKey) obj;
-            if (!mResDir.equals(peer.mResDir)) {
-                return false;
-            }
-            if (mDisplayId != peer.mDisplayId) {
-                return false;
-            }
-            if (mOverrideConfiguration != peer.mOverrideConfiguration) {
-                if (mOverrideConfiguration == null || peer.mOverrideConfiguration == null) {
-                    return false;
-                }
-                if (!mOverrideConfiguration.equals(peer.mOverrideConfiguration)) {
-                    return false;
-                }
-            }
-            if (mScale != peer.mScale) {
-                return false;
-            }
-            return true;
-        }
-    }
-
     public static ActivityThread currentActivityThread() {
         return sCurrentActivityThread;
     }
@@ -1707,49 +1634,6 @@ public final class ActivityThread {
         return sPackageManager;
     }
 
-    private void flushDisplayMetricsLocked() {
-        mDefaultDisplayMetrics.clear();
-    }
-
-    DisplayMetrics getDisplayMetricsLocked(int displayId) {
-        return getDisplayMetricsLocked(displayId, DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS);
-    }
-
-    DisplayMetrics getDisplayMetricsLocked(int displayId, DisplayAdjustments daj) {
-        boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
-        DisplayMetrics dm = isDefaultDisplay ? mDefaultDisplayMetrics.get(daj) : null;
-        if (dm != null) {
-            return dm;
-        }
-        dm = new DisplayMetrics();
-
-        DisplayManagerGlobal displayManager = DisplayManagerGlobal.getInstance();
-        if (displayManager == null) {
-            // may be null early in system startup
-            dm.setToDefaults();
-            return dm;
-        }
-
-        if (isDefaultDisplay) {
-            mDefaultDisplayMetrics.put(daj, dm);
-        }
-
-        Display d = displayManager.getCompatibleDisplay(displayId, daj);
-        if (d != null) {
-            d.getMetrics(dm);
-        } else {
-            // Display no longer exists
-            // FIXME: This would not be a problem if we kept the Display object around
-            // instead of using the raw display id everywhere.  The Display object caches
-            // its information even after the display has been removed.
-            dm.setToDefaults();
-        }
-        //Slog.i("foo", "New metrics: w=" + metrics.widthPixels + " h="
-        //        + metrics.heightPixels + " den=" + metrics.density
-        //        + " xdpi=" + metrics.xdpi + " ydpi=" + metrics.ydpi);
-        return dm;
-    }
-
     private Configuration mMainThreadConfig = new Configuration();
     Configuration applyConfigCompatMainThread(int displayDensity, Configuration config,
             CompatibilityInfo compat) {
@@ -1765,90 +1649,12 @@ public final class ActivityThread {
     }
 
     /**
-     * Creates the top level Resources for applications with the given compatibility info.
-     *
-     * @param resDir the resource directory.
-     * @param compatInfo the compability info. Must not be null.
-     * @param token the application token for determining stack bounds.
-     */
-    Resources getTopLevelResources(String resDir, int displayId,
-            Configuration overrideConfiguration, CompatibilityInfo compatInfo, IBinder token) {
-        final float scale = compatInfo.applicationScale;
-        ResourcesKey key = new ResourcesKey(resDir, displayId, overrideConfiguration, scale,
-                token);
-        Resources r;
-        synchronized (mPackages) {
-            // Resources is app scale dependent.
-            if (false) {
-                Slog.w(TAG, "getTopLevelResources: " + resDir + " / " + scale);
-            }
-            WeakReference<Resources> wr = mActiveResources.get(key);
-            r = wr != null ? wr.get() : null;
-            //if (r != null) Slog.i(TAG, "isUpToDate " + resDir + ": " + r.getAssets().isUpToDate());
-            if (r != null && r.getAssets().isUpToDate()) {
-                if (false) {
-                    Slog.w(TAG, "Returning cached resources " + r + " " + resDir
-                            + ": appScale=" + r.getCompatibilityInfo().applicationScale);
-                }
-                return r;
-            }
-        }
-
-        //if (r != null) {
-        //    Slog.w(TAG, "Throwing away out-of-date resources!!!! "
-        //            + r + " " + resDir);
-        //}
-
-        AssetManager assets = new AssetManager();
-        if (assets.addAssetPath(resDir) == 0) {
-            return null;
-        }
-
-        //Slog.i(TAG, "Resource: key=" + key + ", display metrics=" + metrics);
-        DisplayMetrics dm = getDisplayMetricsLocked(displayId);
-        Configuration config;
-        boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
-        if (!isDefaultDisplay || key.mOverrideConfiguration != null) {
-            config = new Configuration(getConfiguration());
-            if (!isDefaultDisplay) {
-                applyNonDefaultDisplayMetricsToConfigurationLocked(dm, config);
-            }
-            if (key.mOverrideConfiguration != null) {
-                config.updateFrom(key.mOverrideConfiguration);
-            }
-        } else {
-            config = getConfiguration();
-        }
-        r = new Resources(assets, dm, config, compatInfo, token);
-        if (false) {
-            Slog.i(TAG, "Created app resources " + resDir + " " + r + ": "
-                    + r.getConfiguration() + " appScale="
-                    + r.getCompatibilityInfo().applicationScale);
-        }
-
-        synchronized (mPackages) {
-            WeakReference<Resources> wr = mActiveResources.get(key);
-            Resources existing = wr != null ? wr.get() : null;
-            if (existing != null && existing.getAssets().isUpToDate()) {
-                // Someone else already created the resources while we were
-                // unlocked; go ahead and use theirs.
-                r.getAssets().close();
-                return existing;
-            }
-
-            // XXX need to remove entries when weak references go away
-            mActiveResources.put(key, new WeakReference<Resources>(r));
-            return r;
-        }
-    }
-
-    /**
      * Creates the top level resources for the given package.
      */
     Resources getTopLevelResources(String resDir,
             int displayId, Configuration overrideConfiguration,
             LoadedApk pkgInfo) {
-        return getTopLevelResources(resDir, displayId, overrideConfiguration,
+        return mResourcesManager.getTopLevelResources(resDir, displayId, overrideConfiguration,
                 pkgInfo.getCompatibilityInfo(), null);
     }
 
@@ -1863,7 +1669,7 @@ public final class ActivityThread {
 
     public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
             int flags, int userId) {
-        synchronized (mPackages) {
+        synchronized (mResourcesManager) {
             WeakReference<LoadedApk> ref;
             if ((flags&Context.CONTEXT_INCLUDE_CODE) != 0) {
                 ref = mPackages.get(packageName);
@@ -1933,7 +1739,7 @@ public final class ActivityThread {
     }
 
     public final LoadedApk peekPackageInfo(String packageName, boolean includeCode) {
-        synchronized (mPackages) {
+        synchronized (mResourcesManager) {
             WeakReference<LoadedApk> ref;
             if (includeCode) {
                 ref = mPackages.get(packageName);
@@ -1946,7 +1752,7 @@ public final class ActivityThread {
 
     private LoadedApk getPackageInfo(ApplicationInfo aInfo, CompatibilityInfo compatInfo,
             ClassLoader baseLoader, boolean securityViolation, boolean includeCode) {
-        synchronized (mPackages) {
+        synchronized (mResourcesManager) {
             WeakReference<LoadedApk> ref;
             if (includeCode) {
                 ref = mPackages.get(aInfo.packageName);
@@ -1978,6 +1784,7 @@ public final class ActivityThread {
     }
 
     ActivityThread() {
+        mResourcesManager = ResourcesManager.getInstance();
     }
 
     public ApplicationThread getApplicationThread()
@@ -1988,10 +1795,6 @@ public final class ActivityThread {
     public Instrumentation getInstrumentation()
     {
         return mInstrumentation;
-    }
-
-    public Configuration getConfiguration() {
-        return mResConfiguration;
     }
 
     public boolean isProfiling() {
@@ -2023,8 +1826,8 @@ public final class ActivityThread {
                 LoadedApk info = new LoadedApk(this, "android", context, null,
                         CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO);
                 context.init(info, null, this);
-                context.getResources().updateConfiguration(getConfiguration(),
-                        getDisplayMetricsLocked(Display.DEFAULT_DISPLAY));
+                context.getResources().updateConfiguration(mResourcesManager.getConfiguration(),
+                        mResourcesManager.getDisplayMetricsLocked(Display.DEFAULT_DISPLAY));
                 mSystemContext = context;
                 //Slog.i(TAG, "Created system resources " + context.getResources()
                 //        + ": " + context.getResources().getConfiguration());
@@ -3419,7 +3222,7 @@ public final class ActivityThread {
     }
 
     private void handleSetCoreSettings(Bundle coreSettings) {
-        synchronized (mPackages) {
+        synchronized (mResourcesManager) {
             mCoreSettings = coreSettings;
         }
     }
@@ -3509,7 +3312,7 @@ public final class ActivityThread {
     private ActivityClientRecord performDestroyActivity(IBinder token, boolean finishing,
             int configChanges, boolean getNonConfigInstance) {
         ActivityClientRecord r = mActivities.get(token);
-        Class activityClass = null;
+        Class<? extends Activity> activityClass = null;
         if (localLOGV) Slog.v(TAG, "Performing finish of " + r);
         if (r != null) {
             activityClass = r.activity.getClass();
@@ -3664,7 +3467,7 @@ public final class ActivityThread {
             boolean fromServer) {
         ActivityClientRecord target = null;
 
-        synchronized (mPackages) {
+        synchronized (mResourcesManager) {
             for (int i=0; i<mRelaunchingActivities.size(); i++) {
                 ActivityClientRecord r = mRelaunchingActivities.get(i);
                 if (r.token == token) {
@@ -3725,7 +3528,7 @@ public final class ActivityThread {
         // First: make sure we have the most recent configuration and most
         // recent version of the activity, or skip it if some previous call
         // had taken a more recent version.
-        synchronized (mPackages) {
+        synchronized (mResourcesManager) {
             int N = mRelaunchingActivities.size();
             IBinder token = tmp.token;
             tmp = null;
@@ -3854,7 +3657,7 @@ public final class ActivityThread {
         ArrayList<ComponentCallbacks2> callbacks
                 = new ArrayList<ComponentCallbacks2>();
 
-        synchronized (mPackages) {
+        synchronized (mResourcesManager) {
             final int N = mAllApplications.size();
             for (int i=0; i<N; i++) {
                 callbacks.add(mAllApplications.get(i));
@@ -3948,104 +3751,9 @@ public final class ActivityThread {
     }
 
     public final void applyConfigurationToResources(Configuration config) {
-        synchronized (mPackages) {
-            applyConfigurationToResourcesLocked(config, null);
+        synchronized (mResourcesManager) {
+            mResourcesManager.applyConfigurationToResourcesLocked(config, null);
         }
-    }
-
-    final boolean applyConfigurationToResourcesLocked(Configuration config,
-            CompatibilityInfo compat) {
-        if (mResConfiguration == null) {
-            mResConfiguration = new Configuration();
-        }
-        if (!mResConfiguration.isOtherSeqNewer(config) && compat == null) {
-            if (DEBUG_CONFIGURATION) Slog.v(TAG, "Skipping new config: curSeq="
-                    + mResConfiguration.seq + ", newSeq=" + config.seq);
-            return false;
-        }
-        int changes = mResConfiguration.updateFrom(config);
-        flushDisplayMetricsLocked();
-        DisplayMetrics defaultDisplayMetrics = getDisplayMetricsLocked(Display.DEFAULT_DISPLAY);
-
-        if (compat != null && (mResCompatibilityInfo == null ||
-                !mResCompatibilityInfo.equals(compat))) {
-            mResCompatibilityInfo = compat;
-            changes |= ActivityInfo.CONFIG_SCREEN_LAYOUT
-                    | ActivityInfo.CONFIG_SCREEN_SIZE
-                    | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
-        }
-
-        // set it for java, this also affects newly created Resources
-        if (config.locale != null) {
-            Locale.setDefault(config.locale);
-        }
-
-        Resources.updateSystemConfiguration(config, defaultDisplayMetrics, compat);
-
-        ApplicationPackageManager.configurationChanged();
-        //Slog.i(TAG, "Configuration changed in " + currentPackageName());
-
-        Configuration tmpConfig = null;
-
-        Iterator<Map.Entry<ResourcesKey, WeakReference<Resources>>> it =
-                mActiveResources.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<ResourcesKey, WeakReference<Resources>> entry = it.next();
-            Resources r = entry.getValue().get();
-            if (r != null) {
-                if (DEBUG_CONFIGURATION) Slog.v(TAG, "Changing resources "
-                        + r + " config to: " + config);
-                int displayId = entry.getKey().mDisplayId;
-                boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
-                DisplayMetrics dm = defaultDisplayMetrics;
-                Configuration overrideConfig = entry.getKey().mOverrideConfiguration;
-                if (!isDefaultDisplay || overrideConfig != null) {
-                    if (tmpConfig == null) {
-                        tmpConfig = new Configuration();
-                    }
-                    tmpConfig.setTo(config);
-                    if (!isDefaultDisplay) {
-                        dm = getDisplayMetricsLocked(displayId);
-                        applyNonDefaultDisplayMetricsToConfigurationLocked(dm, tmpConfig);
-                    }
-                    if (overrideConfig != null) {
-                        tmpConfig.updateFrom(overrideConfig);
-                    }
-                    r.updateConfiguration(tmpConfig, dm, compat);
-                } else {
-                    r.updateConfiguration(config, dm, compat);
-                }
-                //Slog.i(TAG, "Updated app resources " + v.getKey()
-                //        + " " + r + ": " + r.getConfiguration());
-            } else {
-                //Slog.i(TAG, "Removing old resources " + v.getKey());
-                it.remove();
-            }
-        }
-        
-        return changes != 0;
-    }
-
-    final void applyNonDefaultDisplayMetricsToConfigurationLocked(
-            DisplayMetrics dm, Configuration config) {
-        config.touchscreen = Configuration.TOUCHSCREEN_NOTOUCH;
-        config.densityDpi = dm.densityDpi;
-        config.screenWidthDp = (int)(dm.widthPixels / dm.density);
-        config.screenHeightDp = (int)(dm.heightPixels / dm.density);
-        int sl = Configuration.resetScreenLayout(config.screenLayout);
-        if (dm.widthPixels > dm.heightPixels) {
-            config.orientation = Configuration.ORIENTATION_LANDSCAPE;
-            config.screenLayout = Configuration.reduceScreenLayout(sl,
-                    config.screenWidthDp, config.screenHeightDp);
-        } else {
-            config.orientation = Configuration.ORIENTATION_PORTRAIT;
-            config.screenLayout = Configuration.reduceScreenLayout(sl,
-                    config.screenHeightDp, config.screenWidthDp);
-        }
-        config.smallestScreenWidthDp = config.screenWidthDp; // assume screen does not rotate
-        config.compatScreenWidthDp = config.screenWidthDp;
-        config.compatScreenHeightDp = config.screenHeightDp;
-        config.compatSmallestScreenWidthDp = config.smallestScreenWidthDp;
     }
 
     final Configuration applyCompatConfiguration(int displayDensity) {
@@ -4054,8 +3762,7 @@ public final class ActivityThread {
             mCompatConfiguration = new Configuration();
         }
         mCompatConfiguration.setTo(mConfiguration);
-        if (mResCompatibilityInfo != null && !mResCompatibilityInfo.supportsScreen()) {
-            mResCompatibilityInfo.applyToConfiguration(displayDensity, mCompatConfiguration);
+        if (mResourcesManager.applyCompatConfiguration(displayDensity, mCompatConfiguration)) {
             config = mCompatConfiguration;
         }
         return config;
@@ -4065,7 +3772,7 @@ public final class ActivityThread {
 
         int configDiff = 0;
 
-        synchronized (mPackages) {
+        synchronized (mResourcesManager) {
             if (mPendingConfiguration != null) {
                 if (!mPendingConfiguration.isOtherSeqNewer(config)) {
                     config = mPendingConfiguration;
@@ -4081,9 +3788,9 @@ public final class ActivityThread {
             
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle configuration changed: "
                     + config);
-        
-            applyConfigurationToResourcesLocked(config, compat);
-            
+
+            mResourcesManager.applyConfigurationToResourcesLocked(config, compat);
+
             if (mConfiguration == null) {
                 mConfiguration = new Configuration();
             }
@@ -4333,7 +4040,7 @@ public final class ActivityThread {
          * reflect configuration changes. The configuration object passed
          * in AppBindData can be safely assumed to be up to date
          */
-        applyConfigurationToResourcesLocked(data.config, data.compatInfo);
+        mResourcesManager.applyConfigurationToResourcesLocked(data.config, data.compatInfo);
         mCurDefaultDisplayDpi = data.config.densityDpi;
         applyCompatConfiguration(mCurDefaultDisplayDpi);
 
@@ -5045,6 +4752,7 @@ public final class ActivityThread {
         mSystemThread = system;
         if (!system) {
             ViewRootImpl.addFirstDrawHandler(new Runnable() {
+                @Override
                 public void run() {
                     ensureJitEnabled();
                 }
@@ -5081,12 +4789,13 @@ public final class ActivityThread {
         DropBox.setReporter(new DropBoxReporter());
 
         ViewRootImpl.addConfigCallback(new ComponentCallbacks2() {
+            @Override
             public void onConfigurationChanged(Configuration newConfig) {
-                synchronized (mPackages) {
+                synchronized (mResourcesManager) {
                     // We need to apply this change to the resources
                     // immediately, because upon returning the view
                     // hierarchy will be informed about it.
-                    if (applyConfigurationToResourcesLocked(newConfig, null)) {
+                    if (mResourcesManager.applyConfigurationToResourcesLocked(newConfig, null)) {
                         // This actually changed the resources!  Tell
                         // everyone about it.
                         if (mPendingConfiguration == null ||
@@ -5098,8 +4807,10 @@ public final class ActivityThread {
                     }
                 }
             }
+            @Override
             public void onLowMemory() {
             }
+            @Override
             public void onTrimMemory(int level) {
             }
         });
@@ -5119,12 +4830,11 @@ public final class ActivityThread {
     }
 
     public int getIntCoreSetting(String key, int defaultValue) {
-        synchronized (mPackages) {
+        synchronized (mResourcesManager) {
             if (mCoreSettings != null) {
                 return mCoreSettings.getInt(key, defaultValue);
-            } else {
-                return defaultValue;
             }
+            return defaultValue;
         }
     }
 
