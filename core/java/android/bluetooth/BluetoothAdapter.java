@@ -1704,7 +1704,7 @@ public final class BluetoothAdapter {
         public void onGetDescriptor(String address, int srvcType,
                                     int srvcInstId, ParcelUuid srvcUuid,
                                     int charInstId, ParcelUuid charUuid,
-                                    ParcelUuid descUuid) {
+                                    int descInstId, ParcelUuid descUuid) {
             // no op
         }
 
@@ -1734,14 +1734,14 @@ public final class BluetoothAdapter {
         public void onDescriptorRead(String address, int status, int srvcType,
                                      int srvcInstId, ParcelUuid srvcUuid,
                                      int charInstId, ParcelUuid charUuid,
-                                     ParcelUuid descrUuid, byte[] value) {
+                                     int descInstId, ParcelUuid descrUuid, byte[] value) {
             // no op
         }
 
         public void onDescriptorWrite(String address, int status, int srvcType,
                                       int srvcInstId, ParcelUuid srvcUuid,
                                       int charInstId, ParcelUuid charUuid,
-                                      ParcelUuid descrUuid) {
+                                      int descInstId, ParcelUuid descrUuid) {
             // no op
         }
 
