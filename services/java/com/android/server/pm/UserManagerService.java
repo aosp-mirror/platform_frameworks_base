@@ -822,6 +822,11 @@ public class UserManagerService extends IUserManager.Stub {
                 pinState.failedAttempts = failedAttempts;
                 pinState.lastAttemptTime = lastAttemptTime;
             }
+            // If this is not a restricted profile and there is no restrictions pin, clean up
+            // any restrictions files that might have been left behind.
+            if (!userInfo.isRestricted() && salt == 0) {
+                cleanAppRestrictions(id);
+            }
             return userInfo;
 
         } catch (IOException ioe) {
@@ -870,6 +875,26 @@ public class UserManagerService extends IUserManager.Stub {
             return Long.parseLong(valueString);
         } catch (NumberFormatException nfe) {
             return defaultValue;
+        }
+    }
+
+    /**
+     * Removes all the restrictions files (res_<packagename>) for a given user.
+     * Does not do any permissions checking.
+     */
+    private void cleanAppRestrictions(int userId) {
+        synchronized (mPackagesLock) {
+            File dir = Environment.getUserSystemDirectory(userId);
+            String[] files = dir.list();
+            if (files == null) return;
+            for (String fileName : files) {
+                if (fileName.startsWith(RESTRICTIONS_FILE_PREFIX)) {
+                    File resFile = new File(dir, fileName);
+                    if (resFile.exists()) {
+                        resFile.delete();
+                    }
+                }
+            }
         }
     }
 
