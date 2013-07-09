@@ -11,7 +11,7 @@ startpage=true
 
 <h2>Dependencies and prerequisites</h2>
 <ul>
-    <li>Android 3.0 (API Level 11) or higher</li>
+    <li>Android 2.1 (API Level 7) or higher</li>
 </ul>
 
 <h2>You should also read</h2>
