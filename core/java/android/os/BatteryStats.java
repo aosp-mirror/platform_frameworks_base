@@ -1803,8 +1803,8 @@ public abstract class BatteryStats implements Parcelable {
             for (int i=0; i<timers.size(); i++) {
                 TimerEntry timer = timers.get(i);
                 sb.setLength(0);
-                sb.append("  Wake lock #");
-                sb.append(timer.mId);
+                sb.append("  Wake lock ");
+                UserHandle.formatUid(sb, timer.mId);
                 sb.append(" ");
                 sb.append(timer.mName);
                 printWakeLock(sb, timer.mTimer, batteryRealtime, null, which, ": ");
@@ -1822,8 +1822,11 @@ public abstract class BatteryStats implements Parcelable {
             }
             
             Uid u = uidStats.valueAt(iu);
-            
-            pw.println(prefix + "  #" + uid + ":");
+
+            pw.print(prefix);
+            pw.print("  ");
+            UserHandle.formatUid(pw, uid);
+            pw.println(":");
             boolean uidActivity = false;
             
             long mobileRxBytes = u.getNetworkActivityCount(NETWORK_MOBILE_RX_BYTES, which);

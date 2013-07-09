@@ -140,9 +140,12 @@ public final class ProcessTracker {
 
     static final int MAX_HISTORIC_STATES = 4;   // Maximum number of historic states we will keep.
     static final String STATE_FILE_PREFIX = "state-"; // Prefix to use for state filenames.
+    static final String STATE_FILE_SUFFIX = ".bin"; // Suffix to use for state filenames.
+    static final String STATE_FILE_CHECKIN_SUFFIX = ".ci"; // State files that have checked in.
     static long WRITE_PERIOD = 30*60*1000;      // Write file every 30 minutes or so.
     static long COMMIT_PERIOD = 24*60*60*1000;  // Commit current stats every day.
 
+    final Object mLock;
     final File mBaseDir;
     State mState;
     boolean mCommitPending;
@@ -694,7 +697,7 @@ public final class ProcessTracker {
                     mTimePeriodStartClock).toString();
             if (mBaseDir != null) {
                 mFile = new AtomicFile(new File(mBaseDir,
-                        STATE_FILE_PREFIX + mTimePeriodStartClockStr));
+                        STATE_FILE_PREFIX + mTimePeriodStartClockStr + STATE_FILE_SUFFIX));
             }
         }
 
@@ -1255,8 +1258,7 @@ public final class ProcessTracker {
             return ps;
         }
 
-        void dumpLocked(PrintWriter pw, String reqPackage, boolean dumpAll) {
-            final long now = SystemClock.uptimeMillis();
+        void dumpLocked(PrintWriter pw, String reqPackage, long now, boolean dumpAll) {
             ArrayMap<String, SparseArray<PackageState>> pkgMap = mPackages.getMap();
             boolean printedHeader = false;
             for (int ip=0; ip<pkgMap.size(); ip++) {
@@ -1318,29 +1320,53 @@ public final class ProcessTracker {
                 }
             }
 
-            dumpFilteredProcesses(pw, "Processes running while critical mem:", "  ",
-                    new int[] {ADJ_SCREEN_OFF, ADJ_SCREEN_ON},
-                    new int[] {ADJ_MEM_FACTOR_CRITICAL},
-                    new int[] {STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
-                            STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME, STATE_PREVIOUS},
-                    now, reqPackage);
-            dumpFilteredProcesses(pw, "Processes running while low mem:", "  ",
-                    new int[] {ADJ_SCREEN_OFF, ADJ_SCREEN_ON},
-                    new int[] {ADJ_MEM_FACTOR_LOW},
-                    new int[] {STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
-                            STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME, STATE_PREVIOUS},
-                    now, reqPackage);
-            dumpFilteredProcesses(pw, "Processes running while moderate mem:", "  ",
-                    new int[] {ADJ_SCREEN_OFF, ADJ_SCREEN_ON},
-                    new int[] {ADJ_MEM_FACTOR_MODERATE},
-                    new int[] {STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
-                            STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME, STATE_PREVIOUS},
-                    now, reqPackage);
-            dumpFilteredProcesses(pw, "Processes running while normal mem:", "  ",
-                    new int[] {ADJ_SCREEN_OFF, ADJ_SCREEN_ON},
-                    new int[] {ADJ_MEM_FACTOR_NORMAL},
-                    new int[] {STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
-                            STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME, STATE_PREVIOUS},
+            if (reqPackage == null) {
+                ArrayMap<String, SparseArray<ProcessState>> procMap = mProcesses.getMap();
+                printedHeader = false;
+                for (int ip=0; ip<procMap.size(); ip++) {
+                    String procName = procMap.keyAt(ip);
+                    SparseArray<ProcessState> uids = procMap.valueAt(ip);
+                    for (int iu=0; iu<uids.size(); iu++) {
+                        int uid = uids.keyAt(iu);
+                        ProcessState proc = uids.valueAt(iu);
+                        if (proc.mDurationsTableSize == 0 && proc.mCurState == STATE_NOTHING
+                                && proc.mPssTableSize == 0) {
+                            continue;
+                        }
+                        if (!printedHeader) {
+                            pw.println("Process Stats:");
+                            printedHeader = true;
+                        }
+                        pw.print("  * "); pw.print(procName); pw.print(" / ");
+                                UserHandle.formatUid(pw, uid);
+                                pw.print(" ("); pw.print(proc.mDurationsTableSize);
+                                pw.print(" entries)"); pw.println(":");
+                        dumpProcessState(pw, "        ", proc, ALL_SCREEN_ADJ, ALL_MEM_ADJ,
+                                ALL_PROC_STATES, now);
+                        dumpProcessPss(pw, "        ", proc, ALL_SCREEN_ADJ, ALL_MEM_ADJ,
+                                ALL_PROC_STATES);
+                    }
+                }
+
+                pw.println();
+                pw.println("Summary:");
+                dumpSummaryLocked(pw, reqPackage, now);
+            }
+
+            if (dumpAll) {
+                pw.println();
+                pw.println("Internal state:");
+                pw.print("  mFile="); pw.println(mFile.getBaseFile());
+                pw.print("  Num long arrays: "); pw.println(mLongs.size());
+                pw.print("  Next long entry: "); pw.println(mNextLong);
+                pw.print("  mRunning="); pw.println(mRunning);
+            }
+        }
+
+        void dumpSummaryLocked(PrintWriter pw, String reqPackage, long now) {
+            dumpFilteredSummaryLocked(pw, null, "  ", ALL_SCREEN_ADJ, ALL_MEM_ADJ,
+                    new int[] { STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
+                            STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME, STATE_PREVIOUS },
                     now, reqPackage);
             pw.println();
             pw.println("Run time Stats:");
@@ -1352,26 +1378,20 @@ public final class ProcessTracker {
             pw.print("  Total elapsed time: ");
             TimeUtils.formatDuration(
                     (mRunning ? SystemClock.elapsedRealtime() : mTimePeriodEndRealtime)
-                    - mTimePeriodStartRealtime, pw);
+                            - mTimePeriodStartRealtime, pw);
             pw.println();
-            if (dumpAll) {
-                pw.println();
-                pw.println("Internal state:");
-                pw.print("  mFile="); pw.println(mFile.getBaseFile());
-                pw.print("  Num long arrays: "); pw.println(mLongs.size());
-                pw.print("  Next long entry: "); pw.println(mNextLong);
-                pw.print("  mRunning="); pw.println(mRunning);
-            }
         }
 
-        void dumpFilteredProcesses(PrintWriter pw, String header, String prefix,
+        void dumpFilteredSummaryLocked(PrintWriter pw, String header, String prefix,
                 int[] screenStates, int[] memStates, int[] procStates, long now, String reqPackage) {
             ArrayList<ProcessState> procs = collectProcessesLocked(screenStates, memStates,
                     procStates, now, reqPackage);
             if (procs.size() > 0) {
-                pw.println();
-                pw.println(header);
-                dumpProcessList(pw, prefix, procs, screenStates, memStates, procStates, now);
+                if (header != null) {
+                    pw.println();
+                    pw.println(header);
+                }
+                dumpProcessSummary(pw, prefix, procs, screenStates, memStates, procStates, now);
             }
         }
 
@@ -1542,7 +1562,8 @@ public final class ProcessTracker {
         }
     }
 
-    public ProcessTracker(File file) {
+    public ProcessTracker(Object lock, File file) {
+        mLock = lock;
         mBaseDir = file;
         mBaseDir.mkdirs();
         mState = new State(mBaseDir, this);
@@ -1637,27 +1658,34 @@ public final class ProcessTracker {
         mState.writeStateLocked(sync, commitPending);
     }
 
-    private ArrayList<String> getCommittedFiles(int minNum) {
+    private ArrayList<String> getCommittedFiles(int minNum, boolean inclAll) {
         File[] files = mBaseDir.listFiles();
         if (files == null || files.length <= minNum) {
             return null;
         }
         ArrayList<String> filesArray = new ArrayList<String>(files.length);
-        String currentFile = mState.mFile.getBaseFile().toString();
+        String currentFile = mState.mFile.getBaseFile().getPath();
         if (DEBUG) Slog.d(TAG, "Collecting " + files.length + " files except: " + currentFile);
         for (int i=0; i<files.length; i++) {
             File file = files[i];
-            if (DEBUG) Slog.d(TAG, "Collecting: " + file);
-            if (!file.toString().equals(currentFile)) {
-                filesArray.add(files[i].toString());
+            String fileStr = file.getPath();
+            if (DEBUG) Slog.d(TAG, "Collecting: " + fileStr);
+            if (!inclAll && fileStr.endsWith(STATE_FILE_CHECKIN_SUFFIX)) {
+                if (DEBUG) Slog.d(TAG, "Skipping: already checked in");
+                continue;
             }
+            if (fileStr.equals(currentFile)) {
+                if (DEBUG) Slog.d(TAG, "Skipping: current stats");
+                continue;
+            }
+            filesArray.add(fileStr);
         }
         Collections.sort(filesArray);
         return filesArray;
     }
 
     public void trimHistoricStatesWriteLocked() {
-        ArrayList<String> filesArray = getCommittedFiles(MAX_HISTORIC_STATES);
+        ArrayList<String> filesArray = getCommittedFiles(MAX_HISTORIC_STATES, true);
         if (filesArray == null) {
             return;
         }
@@ -1803,6 +1831,76 @@ public final class ProcessTracker {
         pw.println();
     }
 
+    static final class ProcessDataCollection {
+        final int[] screenStates;
+        final int[] memStates;
+        final int[] procStates;
+
+        long totalTime;
+        long numPss;
+        long minPss;
+        long avgPss;
+        long maxPss;
+
+        ProcessDataCollection(int[] _screenStates, int[] _memStates, int[] _procStates) {
+            screenStates = _screenStates;
+            memStates = _memStates;
+            procStates = _procStates;
+        }
+
+        void print(PrintWriter pw, boolean full) {
+            TimeUtils.formatDuration(totalTime, pw);
+            if (numPss > 0) {
+                pw.print(" (");
+                printSizeValue(pw, minPss * 1024);
+                pw.print("-");
+                printSizeValue(pw, avgPss * 1024);
+                pw.print("-");
+                printSizeValue(pw, maxPss * 1024);
+                if (full) {
+                    pw.print(" over ");
+                    pw.print(numPss);
+                }
+                pw.print(")");
+            }
+        }
+    }
+
+    static void computeProcessData(ProcessState proc, ProcessDataCollection data, long now) {
+        data.totalTime = 0;
+        data.numPss = data.minPss = data.avgPss = data.maxPss = 0;
+        for (int is=0; is<data.screenStates.length; is++) {
+            for (int im=0; im<data.memStates.length; im++) {
+                for (int ip=0; ip<data.procStates.length; ip++) {
+                    int bucket = ((data.screenStates[is] + data.memStates[im]) * STATE_COUNT)
+                            + data.procStates[ip];
+                    data.totalTime += proc.getDuration(bucket, now);
+                    long samples = proc.getPssSampleCount(bucket);
+                    if (samples > 0) {
+                        long minPss = proc.getPssMinimum(bucket);
+                        long avgPss = proc.getPssAverage(bucket);
+                        long maxPss = proc.getPssMaximum(bucket);
+                        if (data.numPss == 0) {
+                            data.minPss = minPss;
+                            data.avgPss = avgPss;
+                            data.maxPss = maxPss;
+                        } else {
+                            if (minPss < data.minPss) {
+                                data.minPss = minPss;
+                            }
+                            data.avgPss = (long)( ((data.avgPss*(double)data.numPss)
+                                    + (avgPss*(double)samples)) / (data.numPss+samples) );
+                            if (maxPss > data.maxPss) {
+                                data.maxPss = maxPss;
+                            }
+                        }
+                        data.numPss += samples;
+                    }
+                }
+            }
+        }
+    }
+
     static long computeProcessTimeLocked(ProcessState proc, int[] screenStates, int[] memStates,
                 int[] procStates, long now) {
         long totalTime = 0;
@@ -1818,7 +1916,7 @@ public final class ProcessTracker {
         for (int is=0; is<screenStates.length; is++) {
             for (int im=0; im<memStates.length; im++) {
                 for (int ip=0; ip<procStates.length; ip++) {
-                    int bucket = ((screenStates[is]+ memStates[im]) * STATE_COUNT)
+                    int bucket = ((screenStates[is] + memStates[im]) * STATE_COUNT)
                             + procStates[ip];
                     totalTime += proc.getDuration(bucket, now);
                 }
@@ -1910,12 +2008,12 @@ public final class ProcessTracker {
                         pw.print(STATE_NAMES[procStates[ip]]); pw.print(": ");
                         pw.print(count);
                         pw.print(" samples ");
-                        pw.print(proc.getPssMinimum(bucket));
-                        pw.print("kB ");
-                        pw.print(proc.getPssAverage(bucket));
-                        pw.print("kB ");
-                        pw.print(proc.getPssMaximum(bucket));
-                        pw.println("kB");
+                        printSizeValue(pw, proc.getPssMinimum(bucket) * 1024);
+                        pw.print(" ");
+                        printSizeValue(pw, proc.getPssAverage(bucket) * 1024);
+                        pw.print(" ");
+                        printSizeValue(pw, proc.getPssMaximum(bucket) * 1024);
+                        pw.println();
                     }
                 }
             }
@@ -2015,6 +2113,94 @@ public final class ProcessTracker {
                 dumpProcessPss(pw, innerPrefix, proc, screenStates, memStates, procStates);
             }
         }
+    }
+
+    static void dumpProcessSummaryDetails(PrintWriter pw, ProcessState proc, String prefix,
+            String label, int[] screenStates, int[] memStates, int[] procStates,
+            long now, boolean full) {
+        ProcessDataCollection totals = new ProcessDataCollection(screenStates,
+                memStates, procStates);
+        computeProcessData(proc, totals, now);
+        if (totals.totalTime != 0 || totals.numPss != 0) {
+            if (prefix != null) {
+                pw.print(prefix);
+            }
+            if (label != null) {
+                pw.print(label);
+            }
+            totals.print(pw, full);
+            if (prefix != null) {
+                pw.println();
+            }
+        }
+    }
+
+    static void dumpProcessSummary(PrintWriter pw, String prefix, ArrayList<ProcessState> procs,
+            int[] screenStates, int[] memStates, int[] procStates, long now) {
+        for (int i=procs.size()-1; i>=0; i--) {
+            ProcessState proc = procs.get(i);
+            pw.print(prefix);
+            pw.print("* ");
+            pw.print(proc.mName);
+            pw.print(" / ");
+            UserHandle.formatUid(pw, proc.mUid);
+            pw.println(":");
+            dumpProcessSummaryDetails(pw, proc, prefix, "         TOTAL: ", screenStates, memStates,
+                    procStates, now, true);
+            dumpProcessSummaryDetails(pw, proc, prefix, "    Persistent: ", screenStates, memStates,
+                    new int[] {STATE_PERSISTENT}, now, true);
+            dumpProcessSummaryDetails(pw, proc, prefix, "           Top: ", screenStates, memStates,
+                    new int[] {STATE_TOP}, now, true);
+            dumpProcessSummaryDetails(pw, proc, prefix, "    Foreground: ", screenStates, memStates,
+                    new int[] {STATE_FOREGROUND, STATE_VISIBLE, STATE_PERCEPTIBLE}, now, true);
+            dumpProcessSummaryDetails(pw, proc, prefix, "        Backup: ", screenStates, memStates,
+                    new int[] {STATE_BACKUP}, now, true);
+            dumpProcessSummaryDetails(pw, proc, prefix, "       Service: ", screenStates, memStates,
+                    new int[] {STATE_SERVICE}, now, true);
+            dumpProcessSummaryDetails(pw, proc, prefix, "          Home: ", screenStates, memStates,
+                    new int[] {STATE_HOME}, now, true);
+            dumpProcessSummaryDetails(pw, proc, prefix, "      Previous: ", screenStates, memStates,
+                    new int[] {STATE_PREVIOUS}, now, true);
+            dumpProcessSummaryDetails(pw, proc, prefix, "      (Cached): ", screenStates, memStates,
+                    new int[] {STATE_CACHED}, now, true);
+        }
+    }
+
+    private static void printSizeValue(PrintWriter pw, long number) {
+        float result = number;
+        String suffix = "";
+        if (result > 900) {
+            suffix = "KB";
+            result = result / 1024;
+        }
+        if (result > 900) {
+            suffix = "MB";
+            result = result / 1024;
+        }
+        if (result > 900) {
+            suffix = "GB";
+            result = result / 1024;
+        }
+        if (result > 900) {
+            suffix = "TB";
+            result = result / 1024;
+        }
+        if (result > 900) {
+            suffix = "PB";
+            result = result / 1024;
+        }
+        String value;
+        if (result < 1) {
+            value = String.format("%.2f", result);
+        } else if (result < 10) {
+            value = String.format("%.2f", result);
+        } else if (result < 100) {
+            value = String.format("%.2f", result);
+        } else {
+            value = String.format("%.0f", result);
+        }
+        pw.print(value);
+        pw.print(suffix);
     }
 
     static void dumpProcessListCsv(PrintWriter pw, ArrayList<ProcessState> procs,
@@ -2171,7 +2357,7 @@ public final class ProcessTracker {
     static private void dumpHelp(PrintWriter pw) {
         pw.println("Process stats (procstats) dump options:");
         pw.println("    [--checkin|-c|--csv] [--csv-screen] [--csv-proc] [--csv-mem]");
-        pw.println("    [--include-committed] [--commit] [--write] [-h] [<package.name>]");
+        pw.println("    [--details] [--current] [--commit] [--write] [-h] [<package.name>]");
         pw.println("  --checkin: perform a checkin: print and delete old committed states.");
         pw.println("  --c: print only state in checkin format.");
         pw.println("  --csv: output data suitable for putting in a spreadsheet.");
@@ -2179,7 +2365,8 @@ public final class ProcessTracker {
         pw.println("  --csv-mem: norm, mod, low, crit.");
         pw.println("  --csv-proc: pers, top, fore, vis, precept, backup,");
         pw.println("    service, home, prev, cached");
-        pw.println("  --include-committed: also dump any old committed states.");
+        pw.println("  --details: dump all execution details, not just summary.");
+        pw.println("  --current: only dump current state.");
         pw.println("  --commit: commit current stats to disk and reset to start new stats.");
         pw.println("  --write: write current in-memory stats to disk.");
         pw.println("  --read: replace current stats with last-written stats.");
@@ -2188,13 +2375,14 @@ public final class ProcessTracker {
         pw.println("  <package.name>: optional name of package to filter output by.");
     }
 
-    public void dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args) {
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         final long now = SystemClock.uptimeMillis();
 
         boolean isCheckin = false;
         boolean isCompact = false;
         boolean isCsv = false;
-        boolean includeCommitted = false;
+        boolean currentOnly = false;
+        boolean dumpDetails = false;
         boolean dumpAll = false;
         String reqPackage = null;
         boolean csvSepScreenStats = false;
@@ -2264,8 +2452,10 @@ public final class ProcessTracker {
                         return;
                     }
                     csvSepProcStats = sep[0];
-                } else if ("--include-committed".equals(arg)) {
-                    includeCommitted = true;
+                } else if ("--details".equals(arg)) {
+                    dumpDetails = true;
+                } else if ("--current".equals(arg)) {
+                    currentOnly = true;
                 } else if ("--commit".equals(arg)) {
                     mState.writeStateLocked(true, true);
                     pw.println("Process stats committed.");
@@ -2282,8 +2472,8 @@ public final class ProcessTracker {
                     dumpHelp(pw);
                     return;
                 } else if ("-a".equals(arg)) {
+                    dumpDetails = true;
                     dumpAll = true;
-                    includeCommitted = true;
                 } else if (arg.length() > 0 && arg.charAt(0) == '-'){
                     pw.println("Unknown option: " + arg);
                     dumpHelp(pw);
@@ -2294,9 +2484,11 @@ public final class ProcessTracker {
                         IPackageManager pm = AppGlobals.getPackageManager();
                         if (pm.getPackageUid(arg, UserHandle.getCallingUserId()) >= 0) {
                             reqPackage = arg;
-                            // We will automatically include all committed state,
-                            // since we are going to end up with much less printed.
-                            includeCommitted = true;
+                            // Include all details, since we know we are only going to
+                            // be dumping a smaller set of data.  In fact only the details
+                            // container per-package data, so that are needed to be able
+                            // to dump anything at all when filtering by package.
+                            dumpDetails = true;
                         }
                     } catch (RemoteException e) {
                     }
@@ -2330,70 +2522,94 @@ public final class ProcessTracker {
                 }
             }
             pw.println();
-            dumpFilteredProcessesCsvLocked(pw, null,
-                    csvSepScreenStats, csvScreenStats, csvSepMemStats, csvMemStats,
-                    csvSepProcStats, csvProcStats, now, reqPackage);
-            /*
-            dumpFilteredProcessesCsvLocked(pw, "Processes running while critical mem:",
-                    false, new int[] {ADJ_SCREEN_OFF, ADJ_SCREEN_ON},
-                    true, new int[] {ADJ_MEM_FACTOR_CRITICAL},
-                    true, new int[] {STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
-                            STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME,
-                            STATE_PREVIOUS, STATE_CACHED},
-                    now, reqPackage);
-            dumpFilteredProcessesCsvLocked(pw, "Processes running over all mem:",
-                    false, new int[] {ADJ_SCREEN_OFF, ADJ_SCREEN_ON},
-                    false, new int[] {ADJ_MEM_FACTOR_CRITICAL, ADJ_MEM_FACTOR_LOW,
-                            ADJ_MEM_FACTOR_MODERATE, ADJ_MEM_FACTOR_MODERATE},
-                    true, new int[] {STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
-                            STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME,
-                            STATE_PREVIOUS, STATE_CACHED},
-                    now, reqPackage);
-            */
+            synchronized (mLock) {
+                dumpFilteredProcessesCsvLocked(pw, null,
+                        csvSepScreenStats, csvScreenStats, csvSepMemStats, csvMemStats,
+                        csvSepProcStats, csvProcStats, now, reqPackage);
+                /*
+                dumpFilteredProcessesCsvLocked(pw, "Processes running while critical mem:",
+                        false, new int[] {ADJ_SCREEN_OFF, ADJ_SCREEN_ON},
+                        true, new int[] {ADJ_MEM_FACTOR_CRITICAL},
+                        true, new int[] {STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
+                                STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME,
+                                STATE_PREVIOUS, STATE_CACHED},
+                        now, reqPackage);
+                dumpFilteredProcessesCsvLocked(pw, "Processes running over all mem:",
+                        false, new int[] {ADJ_SCREEN_OFF, ADJ_SCREEN_ON},
+                        false, new int[] {ADJ_MEM_FACTOR_CRITICAL, ADJ_MEM_FACTOR_LOW,
+                                ADJ_MEM_FACTOR_MODERATE, ADJ_MEM_FACTOR_MODERATE},
+                        true, new int[] {STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
+                                STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME,
+                                STATE_PREVIOUS, STATE_CACHED},
+                        now, reqPackage);
+                */
+            }
             return;
         }
 
         boolean sepNeeded = false;
-        if (includeCommitted || isCheckin) {
-            ArrayList<String> files = getCommittedFiles(0);
-            if (files != null) {
-                for (int i=0; i<files.size(); i++) {
-                    if (DEBUG) Slog.d(TAG, "Retrieving state: " + files.get(i));
-                    try {
-                        State state = new State(files.get(i));
-                        if (isCheckin || isCompact) {
-                            state.dumpCheckinLocked(pw, reqPackage);
-                        } else {
-                            if (sepNeeded) {
-                                pw.println();
+        if (!currentOnly || isCheckin) {
+            mWriteLock.lock();
+            try {
+                ArrayList<String> files = getCommittedFiles(0, !isCheckin);
+                if (files != null) {
+                    for (int i=0; i<files.size(); i++) {
+                        if (DEBUG) Slog.d(TAG, "Retrieving state: " + files.get(i));
+                        try {
+                            State state = new State(files.get(i));
+                            String fileStr = state.mFile.getBaseFile().getPath();
+                            boolean checkedIn = fileStr.endsWith(STATE_FILE_CHECKIN_SUFFIX);
+                            if (isCheckin || isCompact) {
+                                // Don't really need to lock because we uniquely own this object.
+                                state.dumpCheckinLocked(pw, reqPackage);
                             } else {
-                                sepNeeded = true;
+                                if (sepNeeded) {
+                                    pw.println();
+                                } else {
+                                    sepNeeded = true;
+                                }
+                                pw.print("COMMITTED STATS FROM ");
+                                pw.print(state.mTimePeriodStartClockStr);
+                                if (checkedIn) pw.print(" (checked in)");
+                                pw.println(":");
+                                // Don't really need to lock because we uniquely own this object.
+                                if (dumpDetails) {
+                                    state.dumpLocked(pw, reqPackage, now, dumpAll);
+                                } else {
+                                    state.dumpSummaryLocked(pw, reqPackage, now);
+                                }
                             }
-                            pw.print("COMMITTED STATS FROM ");
-                            pw.print(state.mTimePeriodStartClockStr);
-                            pw.println(":");
-                            state.dumpLocked(pw, reqPackage, dumpAll);
+                            if (isCheckin) {
+                                // Rename file suffix to mark that it has checked in.
+                                state.mFile.getBaseFile().renameTo(new File(
+                                        fileStr + STATE_FILE_CHECKIN_SUFFIX));
+                            }
+                        } catch (Throwable e) {
+                            pw.print("**** FAILURE DUMPING STATE: "); pw.println(files.get(i));
+                            e.printStackTrace(pw);
                         }
-                        if (isCheckin) {
-                            state.mFile.delete();
-                        }
-                    } catch (Throwable e) {
-                        pw.print("**** FAILURE DUMPING STATE: "); pw.println(files.get(i));
-                        e.printStackTrace(pw);
+                        if (DEBUG) Slog.d(TAG, "Deleting state: " + files.get(i));
                     }
-                    if (DEBUG) Slog.d(TAG, "Deleting state: " + files.get(i));
                 }
+            } finally {
+                mWriteLock.unlock();
             }
         }
         if (!isCheckin) {
-            if (isCompact) {
-                mState.dumpCheckinLocked(pw, reqPackage);
-            } else {
-                if (sepNeeded) {
-                    pw.println();
-                    pw.println("CURRENT STATS:");
+            synchronized (mLock) {
+                if (isCompact) {
+                    mState.dumpCheckinLocked(pw, reqPackage);
+                } else {
+                    if (sepNeeded) {
+                        pw.println();
+                        pw.println("CURRENT STATS:");
+                    }
+                    if (dumpDetails) {
+                        mState.dumpLocked(pw, reqPackage, now, dumpAll);
+                    } else {
+                        mState.dumpSummaryLocked(pw, reqPackage, now);
+                    }
                 }
-                mState.dumpLocked(pw, reqPackage, dumpAll);
             }
         }
     }

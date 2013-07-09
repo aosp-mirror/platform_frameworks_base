@@ -425,8 +425,14 @@ final class ProcessRecord {
         } else {
             sb.append('u');
             sb.append(userId);
-            sb.append('a');
-            sb.append(UserHandle.getAppId(info.uid));
+            int appId = UserHandle.getAppId(info.uid);
+            if (appId >= Process.FIRST_APPLICATION_UID) {
+                sb.append('a');
+                sb.append(appId - Process.FIRST_APPLICATION_UID);
+            } else {
+                sb.append('s');
+                sb.append(appId);
+            }
             if (uid != info.uid) {
                 sb.append('i');
                 sb.append(UserHandle.getAppId(uid) - Process.FIRST_ISOLATED_UID);
