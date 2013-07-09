@@ -256,6 +256,7 @@ public class Editor {
         }
 
         getPositionListener().addSubscriber(mCursorAnchorInfoNotifier, true);
+        resumeBlink();
     }
 
     void onDetachedFromWindow() {
@@ -265,9 +266,7 @@ public class Editor {
             hideError();
         }
 
-        if (mBlink != null) {
-            mBlink.removeCallbacks(mBlink);
-        }
+        suspendBlink();
 
         if (mInsertionPointCursorController != null) {
             mInsertionPointCursorController.onDetached();
