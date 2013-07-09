@@ -1795,7 +1795,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return;
             }
 
-            mActivityManagerService.dumpProcessTracker(fd, pw, args);
+            mActivityManagerService.mProcessTracker.dump(fd, pw, args);
         }
     }
 
@@ -1821,7 +1821,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 : mBatteryStatsService.getActiveStatistics().getIsOnBattery();
         mBatteryStatsService.getActiveStatistics().setCallback(this);
 
-        mProcessTracker = new ProcessTracker(new File(systemDir, "procstats"));
+        mProcessTracker = new ProcessTracker(this, new File(systemDir, "procstats"));
 
         mUsageStatsService = new UsageStatsService(new File(systemDir, "usagestats").toString());
         mAppOpsService = new AppOpsService(new File(systemDir, "appops.xml"));
@@ -11343,12 +11343,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         return false;
-    }
-
-    final void dumpProcessTracker(FileDescriptor fd, PrintWriter pw, String[] args) {
-        synchronized (this) {
-            mProcessTracker.dumpLocked(fd, pw, args);
-        }
     }
 
     private final boolean removeDyingProviderLocked(ProcessRecord proc,
