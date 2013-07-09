@@ -69,7 +69,7 @@ import libcore.io.ErrnoException;
 import libcore.io.IoUtils;
 import libcore.io.Libcore;
 import libcore.io.Streams;
-import libcore.io.StructStatFs;
+import libcore.io.StructStatVfs;
 
 /*
  * This service copies a downloaded apk to a file passed in as
@@ -241,7 +241,7 @@ public class DefaultContainerService extends IntentService {
             Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
             try {
-                final StructStatFs stat = Libcore.os.statfs(path);
+                final StructStatVfs stat = Libcore.os.statvfs(path);
                 final long totalSize = stat.f_blocks * stat.f_bsize;
                 final long availSize = stat.f_bavail * stat.f_bsize;
                 return new long[] { totalSize, availSize };
