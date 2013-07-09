@@ -1188,6 +1188,11 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
             mBuiltInKeyboardId = device->id;
         }
 
+        // 'Q' key support = cheap test of whether this is an alpha-capable kbd
+        if (hasKeycodeLocked(device, AKEYCODE_Q)) {
+            device->classes |= INPUT_DEVICE_CLASS_ALPHAKEY;
+        }
+
         // See if this device has a DPAD.
         if (hasKeycodeLocked(device, AKEYCODE_DPAD_UP) &&
                 hasKeycodeLocked(device, AKEYCODE_DPAD_DOWN) &&
@@ -1203,14 +1208,6 @@ status_t EventHub::openDeviceLocked(const char *devicePath) {
                 device->classes |= INPUT_DEVICE_CLASS_GAMEPAD;
                 break;
             }
-        }
-
-        // 'Q' key support = cheap test of whether this is an alpha-capable kbd. Many gamepads will
-        // report a broader set of HID usages than they need, however, so we only want to mark this
-        // device as a keyboard if it is not a gamepad.
-        if (hasKeycodeLocked(device, AKEYCODE_Q) &&
-                !(device->classes & INPUT_DEVICE_CLASS_GAMEPAD)) {
-            device->classes |= INPUT_DEVICE_CLASS_ALPHAKEY;
         }
 
         // Disable kernel key repeat since we handle it ourselves
