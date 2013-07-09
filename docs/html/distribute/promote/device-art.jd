@@ -1,5 +1,13 @@
 page.title=Device Art Generator
 @jd:body
+<div id="butterbar-wrapper" >
+  <div id="butterbar" >
+    <div id="butterbar-message">
+<a target="_blank" href="https://docs.google.com/a/google.com/forms/d/1EHLPGqhbxj2HungHRRN4_0K9TGpc-Izy-u46vBDgS8Q/viewform">
+      Take the Android Developer Survey</a>
+    </div>
+  </div>
+</div>
 
 <p>The device art generator allows you to quickly wrap your app screenshots in real device artwork.
 This provides better visual context for your app screenshots on your web site or in other
