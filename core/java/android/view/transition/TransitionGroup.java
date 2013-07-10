@@ -104,7 +104,7 @@ public class TransitionGroup extends Transition {
                 mTransitions.add(transitions[i]);
                 transitions[i].mParent = this;
                 if (mDuration >= 0) {
-                    transitions[0].setDuration(mDuration);
+                    transitions[i].setDuration(mDuration);
                 }
             }
         }
