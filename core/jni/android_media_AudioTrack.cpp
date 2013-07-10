@@ -520,6 +520,10 @@ jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, jbyte* data,
     // regular write() or copy the data to the AudioTrack's shared memory?
     if (track->sharedBuffer() == 0) {
         written = track->write(data + offsetInBytes, sizeInBytes);
+        // for compatibility with earlier behavior of write(), return 0 in this case
+        if (written == (ssize_t) WOULD_BLOCK) {
+            written = 0;
+        }
     } else {
         if (audioFormat == javaAudioTrackFields.PCM16) {
             // writing to shared memory, check for capacity
