@@ -82,6 +82,7 @@ public class ManualActivity extends CompareActivity {
                         mCompareImageView.setImageBitmap(mCompareBitmap);
                         break;
                 }
+                mCompareImageView.getDrawable().setFilterBitmap(false);
                 mCompareImageView.invalidate();
             }
 
