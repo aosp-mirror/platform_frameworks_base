@@ -96,12 +96,19 @@ public class Fade extends Visibility {
     protected Animator appear(ViewGroup sceneRoot,
             TransitionValues startValues, int startVisibility,
             TransitionValues endValues, int endVisibility) {
-        View endView = (endValues != null) ? endValues.view : null;
-        if ((mFadingMode & IN) != IN) {
+        if ((mFadingMode & IN) != IN || endValues == null) {
             return null;
         }
+        final View endView = endValues.view;
         endView.setAlpha(0);
-        return runAnimation(endView, 0, 1, null);
+        final Animator.AnimatorListener endListener = new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                // Always end animation with full alpha, in case it's canceled mid-stream
+                endView.setAlpha(1);
+            }
+        };
+        return runAnimation(endView, 0, 1, endListener);
     }
 
     @Override
