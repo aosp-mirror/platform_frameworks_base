@@ -1554,10 +1554,15 @@ public class PackageParser {
 
         int type;
         PublicKey currentKey = null;
+        int currentKeyDepth = -1;
         Map<PublicKey, Set<String>> definedKeySets = new HashMap<PublicKey, Set<String>>();
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                 && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
             if (type == XmlPullParser.END_TAG) {
+                if (parser.getDepth() == currentKeyDepth) {
+                    currentKey = null;
+                    currentKeyDepth = -1;
+                }
                 continue;
             }
             String tagname = parser.getName();
@@ -1567,9 +1572,21 @@ public class PackageParser {
                 final String encodedKey = sa.getNonResourceString(
                     com.android.internal.R.styleable.PublicKey_value);
                 currentKey = parsePublicKey(encodedKey);
+                if (currentKey == null) {
+                    Slog.w(TAG, "No valid key in 'publicKey' tag at "
+                            + parser.getPositionDescription());
+                    sa.recycle();
+                    continue;
+                }
+                currentKeyDepth = parser.getDepth();
                 definedKeySets.put(currentKey, new HashSet<String>());
                 sa.recycle();
             } else if (tagname.equals("keyset")) {
+                if (currentKey == null) {
+                    Slog.i(TAG, "'keyset' not in 'publicKey' tag at "
+                            + parser.getPositionDescription());
+                    continue;
+                }
                 final TypedArray sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.KeySet);
                 final String name = sa.getNonResourceString(
