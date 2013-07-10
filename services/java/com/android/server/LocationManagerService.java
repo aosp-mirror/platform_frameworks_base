@@ -47,7 +47,6 @@ import android.location.LocationRequest;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -222,6 +221,9 @@ public class LocationManagerService extends ILocationManager.Stub {
             AppOpsManager.Callback callback = new AppOpsManager.Callback() {
                 public void opChanged(int op, String packageName) {
                     synchronized (mLock) {
+                        for (Receiver receiver : mReceivers.values()) {
+                            receiver.updateMonitoring(true);
+                        }
                         applyAllProviderRequirementsLocked();
                     }
                 }
@@ -460,6 +462,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         final HashMap<String,UpdateRecord> mUpdateRecords = new HashMap<String,UpdateRecord>();
 
+        boolean mOpMonitoring;
         int mPendingBroadcasts;
         PowerManager.WakeLock mWakeLock;
 
@@ -476,6 +479,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             mUid = uid;
             mPid = pid;
             mPackageName = packageName;
+
+            updateMonitoring(true);
 
             // construct/configure wakelock
             mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_KEY);
@@ -510,6 +515,21 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
             s.append("]");
             return s.toString();
+        }
+
+        public void updateMonitoring(boolean allow) {
+            if (!mOpMonitoring) {
+                if (allow) {
+                    mOpMonitoring = mAppOps.startOpNoThrow(AppOpsManager.OP_MONITOR_LOCATION,
+                            mUid, mPackageName) == AppOpsManager.MODE_ALLOWED;
+                }
+            } else {
+                if (!allow || mAppOps.checkOpNoThrow(AppOpsManager.OP_MONITOR_LOCATION,
+                        mUid, mPackageName) != AppOpsManager.MODE_ALLOWED) {
+                    mAppOps.finishOp(AppOpsManager.OP_MONITOR_LOCATION, mUid, mPackageName);
+                    mOpMonitoring = false;
+                }
+            }
         }
 
         public boolean isListener() {
@@ -1365,6 +1385,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                 receiver.clearPendingBroadcastsLocked();
             }
         }
+
+        receiver.updateMonitoring(false);
 
         // Record which providers were associated with this listener
         HashSet<String> providers = new HashSet<String>();

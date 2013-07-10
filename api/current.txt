@@ -3134,6 +3134,32 @@ package android.app {
     ctor public AliasActivity();
   }
 
+  public class AppOpsManager {
+    method public int checkOp(int, int, java.lang.String);
+    method public int checkOpNoThrow(int, int, java.lang.String);
+    method public void finishOp(int, int, java.lang.String);
+    method public void finishOp(int);
+    method public int noteOp(int, int, java.lang.String);
+    method public int noteOpNoThrow(int, int, java.lang.String);
+    method public static java.lang.String opToName(int);
+    method public int startOp(int, int, java.lang.String);
+    method public int startOpNoThrow(int, int, java.lang.String);
+    method public void startWatchingMode(int, java.lang.String, android.app.AppOpsManager.Callback);
+    method public void stopWatchingMode(android.app.AppOpsManager.Callback);
+    field public static final int MODE_ALLOWED = 0; // 0x0
+    field public static final int MODE_ERRORED = 2; // 0x2
+    field public static final int MODE_IGNORED = 1; // 0x1
+    field public static final int OP_COARSE_LOCATION = 0; // 0x0
+    field public static final int OP_FINE_LOCATION = 1; // 0x1
+    field public static final int OP_GPS = 2; // 0x2
+    field public static final int OP_MONITOR_LOCATION = 41; // 0x29
+    field public static final int OP_NONE = -1; // 0xffffffff
+  }
+
+  public static abstract interface AppOpsManager.Callback {
+    method public abstract void opChanged(int, java.lang.String);
+  }
+
   public class Application extends android.content.ContextWrapper implements android.content.ComponentCallbacks2 {
     ctor public Application();
     method public void onConfigurationChanged(android.content.res.Configuration);
