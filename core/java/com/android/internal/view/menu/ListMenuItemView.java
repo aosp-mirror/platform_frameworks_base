@@ -242,17 +242,20 @@ public class ListMenuItemView extends RelativeLayout implements MenuView.ItemVie
 
     private void insertIconView() {
         mIconView = (ImageView) getInflater()
-                .inflate(com.android.internal.R.layout.list_menu_item_icon, this, true);
+                .inflate(com.android.internal.R.layout.list_menu_item_icon, this, false);
+        addView(mIconView);
     }
 
     private void insertRadioButton() {
         mRadioButton = (RadioButton) getInflater()
-                .inflate(com.android.internal.R.layout.list_menu_item_radio, this, true);
+                .inflate(com.android.internal.R.layout.list_menu_item_radio, this, false);
+        addView(mRadioButton);
     }
 
     private void insertCheckBox() {
         mCheckBox = (CheckBox) getInflater()
-                .inflate(com.android.internal.R.layout.list_menu_item_checkbox, this, true);
+                .inflate(com.android.internal.R.layout.list_menu_item_checkbox, this, false);
+        addView(mCheckBox);
     }
 
     private void alignTextToStartOf(View v) {
