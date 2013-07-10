@@ -410,7 +410,7 @@ public final class BroadcastQueue {
             }
         }
         if (r.appOp != AppOpsManager.OP_NONE) {
-            int mode = mService.mAppOpsService.checkOperation(r.appOp,
+            int mode = mService.mAppOpsService.noteOperation(r.appOp,
                     filter.receiverList.uid, filter.packageName);
             if (mode != AppOpsManager.MODE_ALLOWED) {
                 if (DEBUG_BROADCAST)  Slog.v(TAG,
@@ -717,7 +717,7 @@ public final class BroadcastQueue {
                 }
             }
             if (r.appOp != AppOpsManager.OP_NONE) {
-                int mode = mService.mAppOpsService.checkOperation(r.appOp,
+                int mode = mService.mAppOpsService.noteOperation(r.appOp,
                         info.activityInfo.applicationInfo.uid, info.activityInfo.packageName);
                 if (mode != AppOpsManager.MODE_ALLOWED) {
                     if (DEBUG_BROADCAST)  Slog.v(TAG,

@@ -33,21 +33,22 @@ import android.os.RemoteException;
 /**
  * API for interacting with "application operation" tracking.  Allows you to:
  *
- * - Note when operations are happening, and find out if they are allowed for the current caller.
- * - Disallow specific apps from doing specific operations.
- * - Collect all of the current information about operations that have been executed or are not
- * being allowed.
- * - Monitor for changes in whether an operation is allowed.
+ * <ul>
+ * <li> Note when operations are happening, and find out if they are allowed for the current
+ * caller.</li>
+ * <li> Disallow specific apps from doing specific operations.</li>
+ * <li> Collect all of the current information about operations that have been executed or are not
+ * being allowed.</li>
+ * <li> Monitor for changes in whether an operation is allowed.</li>
+ * </ul>
  *
- * Each operation is identified by a single integer; these integers are a fixed set of
+ * <p>Each operation is identified by a single integer; these integers are a fixed set of
  * operations, enumerated by the OP_* constants.
  *
- * When checking operations, the result is a "mode" integer indicating the current setting
+ * <p></p>When checking operations, the result is a "mode" integer indicating the current setting
  * for the operation under that caller: MODE_ALLOWED, MODE_IGNORED (don't execute the operation but
  * fake its behavior enough so that the caller doesn't crash), MODE_ERRORED (through a
  * SecurityException back to the caller; the normal operation calls will do this for you).
- *
- * @hide
  */
 public class AppOpsManager {
     final Context mContext;
@@ -63,50 +64,95 @@ public class AppOpsManager {
     //  - increment _NUM_OP
     //  - add rows to sOpToSwitch, sOpNames, sOpPerms
     //  - add descriptive strings to Settings/res/values/arrays.xml
+
+    /** No operation specified. */
     public static final int OP_NONE = -1;
+    /** Access to coarse location information. */
     public static final int OP_COARSE_LOCATION = 0;
+    /** Access to fine location information. */
     public static final int OP_FINE_LOCATION = 1;
+    /** Causing GPS to run. */
     public static final int OP_GPS = 2;
-    public static final int OP_VIBRATE = 3;
-    public static final int OP_READ_CONTACTS = 4;
-    public static final int OP_WRITE_CONTACTS = 5;
-    public static final int OP_READ_CALL_LOG = 6;
-    public static final int OP_WRITE_CALL_LOG = 7;
-    public static final int OP_READ_CALENDAR = 8;
-    public static final int OP_WRITE_CALENDAR = 9;
-    public static final int OP_WIFI_SCAN = 10;
-    public static final int OP_POST_NOTIFICATION = 11;
-    public static final int OP_NEIGHBORING_CELLS = 12;
-    public static final int OP_CALL_PHONE = 13;
-    public static final int OP_READ_SMS = 14;
-    public static final int OP_WRITE_SMS = 15;
-    public static final int OP_RECEIVE_SMS = 16;
-    public static final int OP_RECEIVE_EMERGECY_SMS = 17;
-    public static final int OP_RECEIVE_MMS = 18;
-    public static final int OP_RECEIVE_WAP_PUSH = 19;
-    public static final int OP_SEND_SMS = 20;
-    public static final int OP_READ_ICC_SMS = 21;
-    public static final int OP_WRITE_ICC_SMS = 22;
-    public static final int OP_WRITE_SETTINGS = 23;
-    public static final int OP_SYSTEM_ALERT_WINDOW = 24;
-    public static final int OP_ACCESS_NOTIFICATIONS = 25;
-    public static final int OP_CAMERA = 26;
-    public static final int OP_RECORD_AUDIO = 27;
-    public static final int OP_PLAY_AUDIO = 28;
-    public static final int OP_READ_CLIPBOARD = 29;
-    public static final int OP_WRITE_CLIPBOARD = 30;
-    public static final int OP_TAKE_MEDIA_BUTTONS = 31;
-    public static final int OP_TAKE_AUDIO_FOCUS = 32;
-    public static final int OP_AUDIO_MASTER_VOLUME = 33;
-    public static final int OP_AUDIO_VOICE_VOLUME = 34;
-    public static final int OP_AUDIO_RING_VOLUME = 35;
-    public static final int OP_AUDIO_MEDIA_VOLUME = 36;
-    public static final int OP_AUDIO_ALARM_VOLUME = 37;
-    public static final int OP_AUDIO_NOTIFICATION_VOLUME = 38;
-    public static final int OP_AUDIO_BLUETOOTH_VOLUME = 39;
-    public static final int OP_WAKE_LOCK = 40;
     /** @hide */
-    public static final int _NUM_OP = 41;
+    public static final int OP_VIBRATE = 3;
+    /** @hide */
+    public static final int OP_READ_CONTACTS = 4;
+    /** @hide */
+    public static final int OP_WRITE_CONTACTS = 5;
+    /** @hide */
+    public static final int OP_READ_CALL_LOG = 6;
+    /** @hide */
+    public static final int OP_WRITE_CALL_LOG = 7;
+    /** @hide */
+    public static final int OP_READ_CALENDAR = 8;
+    /** @hide */
+    public static final int OP_WRITE_CALENDAR = 9;
+    /** @hide */
+    public static final int OP_WIFI_SCAN = 10;
+    /** @hide */
+    public static final int OP_POST_NOTIFICATION = 11;
+    /** @hide */
+    public static final int OP_NEIGHBORING_CELLS = 12;
+    /** @hide */
+    public static final int OP_CALL_PHONE = 13;
+    /** @hide */
+    public static final int OP_READ_SMS = 14;
+    /** @hide */
+    public static final int OP_WRITE_SMS = 15;
+    /** @hide */
+    public static final int OP_RECEIVE_SMS = 16;
+    /** @hide */
+    public static final int OP_RECEIVE_EMERGECY_SMS = 17;
+    /** @hide */
+    public static final int OP_RECEIVE_MMS = 18;
+    /** @hide */
+    public static final int OP_RECEIVE_WAP_PUSH = 19;
+    /** @hide */
+    public static final int OP_SEND_SMS = 20;
+    /** @hide */
+    public static final int OP_READ_ICC_SMS = 21;
+    /** @hide */
+    public static final int OP_WRITE_ICC_SMS = 22;
+    /** @hide */
+    public static final int OP_WRITE_SETTINGS = 23;
+    /** @hide */
+    public static final int OP_SYSTEM_ALERT_WINDOW = 24;
+    /** @hide */
+    public static final int OP_ACCESS_NOTIFICATIONS = 25;
+    /** @hide */
+    public static final int OP_CAMERA = 26;
+    /** @hide */
+    public static final int OP_RECORD_AUDIO = 27;
+    /** @hide */
+    public static final int OP_PLAY_AUDIO = 28;
+    /** @hide */
+    public static final int OP_READ_CLIPBOARD = 29;
+    /** @hide */
+    public static final int OP_WRITE_CLIPBOARD = 30;
+    /** @hide */
+    public static final int OP_TAKE_MEDIA_BUTTONS = 31;
+    /** @hide */
+    public static final int OP_TAKE_AUDIO_FOCUS = 32;
+    /** @hide */
+    public static final int OP_AUDIO_MASTER_VOLUME = 33;
+    /** @hide */
+    public static final int OP_AUDIO_VOICE_VOLUME = 34;
+    /** @hide */
+    public static final int OP_AUDIO_RING_VOLUME = 35;
+    /** @hide */
+    public static final int OP_AUDIO_MEDIA_VOLUME = 36;
+    /** @hide */
+    public static final int OP_AUDIO_ALARM_VOLUME = 37;
+    /** @hide */
+    public static final int OP_AUDIO_NOTIFICATION_VOLUME = 38;
+    /** @hide */
+    public static final int OP_AUDIO_BLUETOOTH_VOLUME = 39;
+    /** @hide */
+    public static final int OP_WAKE_LOCK = 40;
+    /** Continually monitoring location data. */
+    public static final int OP_MONITOR_LOCATION = 41;
+    /** @hide */
+    public static final int _NUM_OP = 42;
 
     /**
      * This maps each operation to the operation that serves as the
@@ -158,6 +204,7 @@ public class AppOpsManager {
             OP_AUDIO_NOTIFICATION_VOLUME,
             OP_AUDIO_BLUETOOTH_VOLUME,
             OP_WAKE_LOCK,
+            OP_COARSE_LOCATION,
     };
 
     /**
@@ -206,6 +253,7 @@ public class AppOpsManager {
             "AUDIO_NOTIFICATION_VOLUME",
             "AUDIO_BLUETOOTH_VOLUME",
             "WAKE_LOCK",
+            "MONITOR_LOCATION",
     };
 
     /**
@@ -254,10 +302,12 @@ public class AppOpsManager {
             null, // no permission for changing notification volume
             null, // no permission for changing bluetooth volume
             android.Manifest.permission.WAKE_LOCK,
+            null, // no permission for generic location monitoring
     };
 
     /**
      * Retrieve the op switch that controls the given operation.
+     * @hide
      */
     public static int opToSwitch(int op) {
         return sOpToSwitch[op];
@@ -273,6 +323,7 @@ public class AppOpsManager {
 
     /**
      * Retrieve the permission associated with an operation, or null if there is not one.
+     * @hide
      */
     public static String opToPermission(int op) {
         return sOpPerms[op];
@@ -280,6 +331,7 @@ public class AppOpsManager {
 
     /**
      * Class holding all of the operation information associated with an app.
+     * @hide
      */
     public static class PackageOps implements Parcelable {
         private final String mPackageName;
@@ -342,6 +394,7 @@ public class AppOpsManager {
 
     /**
      * Class holding the information about one unique operation of an application.
+     * @hide
      */
     public static class OpEntry implements Parcelable {
         private final int mOp;
@@ -422,7 +475,7 @@ public class AppOpsManager {
         public void opChanged(int op, String packageName);
     }
 
-    public AppOpsManager(Context context, IAppOpsService service) {
+    AppOpsManager(Context context, IAppOpsService service) {
         mContext = context;
         mService = service;
     }
@@ -431,6 +484,7 @@ public class AppOpsManager {
      * Retrieve current operation state for all applications.
      *
      * @param ops The set of operations you are interested in, or null if you want all of them.
+     * @hide
      */
     public List<AppOpsManager.PackageOps> getPackagesForOps(int[] ops) {
         try {
@@ -446,6 +500,7 @@ public class AppOpsManager {
      * @param uid The uid of the application of interest.
      * @param packageName The name of the application of interest.
      * @param ops The set of operations you are interested in, or null if you want all of them.
+     * @hide
      */
     public List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, int[] ops) {
         try {
@@ -455,6 +510,7 @@ public class AppOpsManager {
         return null;
     }
 
+    /** @hide */
     public void setMode(int code, int uid, String packageName, int mode) {
         try {
             mService.setMode(code, uid, packageName, mode);
@@ -462,6 +518,12 @@ public class AppOpsManager {
         }
     }
 
+    /**
+     * Monitor for changes to the operating mode for the given op in the given app package.
+     * @param op The operation to monitor, one of OP_*.
+     * @param packageName The name of the application to monitor.
+     * @param callback Where to report changes.
+     */
     public void startWatchingMode(int op, String packageName, final Callback callback) {
         synchronized (mModeWatchers) {
             IAppOpsCallback cb = mModeWatchers.get(callback);
@@ -480,6 +542,10 @@ public class AppOpsManager {
         }
     }
 
+    /**
+     * Stop monitoring that was previously started with {@link #startWatchingMode}.  All
+     * monitoring associated with this callback will be removed.
+     */
     public void stopWatchingMode(Callback callback) {
         synchronized (mModeWatchers) {
             IAppOpsCallback cb = mModeWatchers.get(callback);
@@ -492,6 +558,22 @@ public class AppOpsManager {
         }
     }
 
+    /**
+     * Do a quick check for whether an application might be able to perform an operation.
+     * This is <em>not</em> a security check; you must use {@link #noteOp(int, int, String)}
+     * or {@link #startOp(int, int, String)} for your actual security checks, which also
+     * ensure that the given uid and package name are consistent.  This function can just be
+     * used for a quick check to see if an operation has been disabled for the application,
+     * as an early reject of some work.  This does not modify the time stamp or other data
+     * about the operation.
+     * @param op The operation to check.  One of the OP_* constants.
+     * @param uid The user id of the application attempting to perform the operation.
+     * @param packageName The name of the application attempting to perform the operation.
+     * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
+     * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
+     * causing the app to crash).
+     * @throws SecurityException If the app has been configured to crash on this op.
+     */
     public int checkOp(int op, int uid, String packageName) {
         try {
             int mode = mService.checkOperation(op, uid, packageName);
@@ -504,6 +586,10 @@ public class AppOpsManager {
         return MODE_IGNORED;
     }
 
+    /**
+     * Like {@link #checkOp} but instead of throwing a {@link SecurityException} it
+     * returns {@link #MODE_ERRORED}.
+     */
     public int checkOpNoThrow(int op, int uid, String packageName) {
         try {
             return mService.checkOperation(op, uid, packageName);
@@ -512,6 +598,20 @@ public class AppOpsManager {
         return MODE_IGNORED;
     }
 
+    /**
+     * Make note of an application performing an operation.  Note that you must pass
+     * in both the uid and name of the application to be checked; this function will verify
+     * that these two match, and if not, return {@link #MODE_IGNORED}.  If this call
+     * succeeds, the last execution time of the operation for this app will be updated to
+     * the current time.
+     * @param op The operation to note.  One of the OP_* constants.
+     * @param uid The user id of the application attempting to perform the operation.
+     * @param packageName The name of the application attempting to perform the operation.
+     * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
+     * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
+     * causing the app to crash).
+     * @throws SecurityException If the app has been configured to crash on this op.
+     */
     public int noteOp(int op, int uid, String packageName) {
         try {
             int mode = mService.noteOperation(op, uid, packageName);
@@ -524,6 +624,10 @@ public class AppOpsManager {
         return MODE_IGNORED;
     }
 
+    /**
+     * Like {@link #noteOp} but instead of throwing a {@link SecurityException} it
+     * returns {@link #MODE_ERRORED}.
+     */
     public int noteOpNoThrow(int op, int uid, String packageName) {
         try {
             return mService.noteOperation(op, uid, packageName);
@@ -532,10 +636,27 @@ public class AppOpsManager {
         return MODE_IGNORED;
     }
 
+    /** @hide */
     public int noteOp(int op) {
         return noteOp(op, Process.myUid(), mContext.getBasePackageName());
     }
 
+    /**
+     * Report that an application has started executing a long-running operation.  Note that you
+     * must pass in both the uid and name of the application to be checked; this function will
+     * verify that these two match, and if not, return {@link #MODE_IGNORED}.  If this call
+     * succeeds, the last execution time of the operation for this app will be updated to
+     * the current time and the operation will be marked as "running".  In this case you must
+     * later call {@link #finishOp(int, int, String)} to report when the application is no
+     * longer performing the operation.
+     * @param op The operation to start.  One of the OP_* constants.
+     * @param uid The user id of the application attempting to perform the operation.
+     * @param packageName The name of the application attempting to perform the operation.
+     * @return Returns {@link #MODE_ALLOWED} if the operation is allowed, or
+     * {@link #MODE_IGNORED} if it is not allowed and should be silently ignored (without
+     * causing the app to crash).
+     * @throws SecurityException If the app has been configured to crash on this op.
+     */
     public int startOp(int op, int uid, String packageName) {
         try {
             int mode = mService.startOperation(op, uid, packageName);
@@ -548,6 +669,10 @@ public class AppOpsManager {
         return MODE_IGNORED;
     }
 
+    /**
+     * Like {@link #startOp} but instead of throwing a {@link SecurityException} it
+     * returns {@link #MODE_ERRORED}.
+     */
     public int startOpNoThrow(int op, int uid, String packageName) {
         try {
             return mService.startOperation(op, uid, packageName);
@@ -556,10 +681,17 @@ public class AppOpsManager {
         return MODE_IGNORED;
     }
 
+    /** @hide */
     public int startOp(int op) {
         return startOp(op, Process.myUid(), mContext.getBasePackageName());
     }
 
+    /**
+     * Report that an application is no longer performing an operation that had previously
+     * been started with {@link #startOp(int, int, String)}.  There is no validation of input
+     * or result; the parameters supplied here must be the exact same ones previously passed
+     * in when starting the operation.
+     */
     public void finishOp(int op, int uid, String packageName) {
         try {
             mService.finishOperation(op, uid, packageName);
