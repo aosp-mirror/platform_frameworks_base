@@ -13,7 +13,8 @@
 #include <set>
 #include <map>
 
-using namespace std;
+using std::map;
+using std::set;
 
 class XMLNode;
 class ResourceTable;
