@@ -47995,6 +47995,7 @@ package org.json {
     method public org.json.JSONArray put(int, int) throws org.json.JSONException;
     method public org.json.JSONArray put(int, long) throws org.json.JSONException;
     method public org.json.JSONArray put(int, java.lang.Object) throws org.json.JSONException;
+    method public java.lang.Object remove(int);
     method public org.json.JSONObject toJSONObject(org.json.JSONArray) throws org.json.JSONException;
     method public java.lang.String toString(int) throws org.json.JSONException;
   }
