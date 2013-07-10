@@ -1983,6 +1983,7 @@ public abstract class HardwareRenderer {
                         if (map != null) {
                             GLES20Canvas.initAtlas(buffer, map);
                         }
+                        buffer.destroy();
                     }
                 }
             } catch (RemoteException e) {

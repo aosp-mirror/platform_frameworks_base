@@ -62,6 +62,9 @@ public class GraphicBuffer implements Parcelable {
     private Canvas mCanvas;
     private int mSaveCount;
 
+    // If set to true, this GraphicBuffer instance cannot be used anymore
+    private boolean mDestroyed;
+
     /**
      * Creates new <code>GraphicBuffer</code> instance. This method will return null
      * if the buffer cannot be created.
@@ -128,10 +131,14 @@ public class GraphicBuffer implements Parcelable {
      * <p>The content of the buffer is preserved between unlockCanvas()
      * and lockCanvas().</p>
      *
+     * <p>If this method is called after {@link #destroy()}, the return value will
+     * always be null.</p>
+     *
      * @return A Canvas used to draw into the buffer, or null.
      *
      * @see #lockCanvas(android.graphics.Rect)
      * @see #unlockCanvasAndPost(android.graphics.Canvas)
+     * @see #isDestroyed()
      */
     public Canvas lockCanvas() {
         return lockCanvas(null);
@@ -141,14 +148,22 @@ public class GraphicBuffer implements Parcelable {
      * Just like {@link #lockCanvas()} but allows specification of a dirty
      * rectangle.
      *
+     * <p>If this method is called after {@link #destroy()}, the return value will
+     * always be null.</p>
+     *
      * @param dirty Area of the buffer that may be modified.
 
-     * @return A Canvas used to draw into the surface or null
+     * @return A Canvas used to draw into the surface, or null.
      *
      * @see #lockCanvas()
      * @see #unlockCanvasAndPost(android.graphics.Canvas)
+     * @see #isDestroyed()
      */
     public Canvas lockCanvas(Rect dirty) {
+        if (mDestroyed) {
+            return null;
+        }
+
         if (mCanvas == null) {
             mCanvas = new Canvas();
         }
@@ -164,13 +179,17 @@ public class GraphicBuffer implements Parcelable {
     /**
      * Finish editing pixels in the buffer.
      *
+     * <p>This method doesn't do anything if {@link #destroy()} was
+     * previously called.</p>
+     *
      * @param canvas The Canvas previously returned by lockCanvas()
      *
      * @see #lockCanvas()
      * @see #lockCanvas(android.graphics.Rect)
+     * @see #isDestroyed()
      */
     public void unlockCanvasAndPost(Canvas canvas) {
-        if (mCanvas != null && canvas == mCanvas) {
+        if (!mDestroyed && mCanvas != null && canvas == mCanvas) {
             canvas.restoreToCount(mSaveCount);
             mSaveCount = 0;
 
@@ -178,10 +197,39 @@ public class GraphicBuffer implements Parcelable {
         }
     }
 
+    /**
+     * Destroyes this buffer immediately. Calling this method frees up any
+     * underlying native resources. After calling this method, this buffer
+     * must not be used in any way ({@link #lockCanvas()} must not be called,
+     * etc.)
+     *
+     * @see #isDestroyed()
+     */
+    public void destroy() {
+        if (!mDestroyed) {
+            mDestroyed = true;
+            nDestroyGraphicBuffer(mNativeObject);
+        }
+    }
+
+    /**
+     * Indicates whether this buffer has been destroyed. A destroyed buffer
+     * cannot be used in any way: locking a Canvas will return null, the buffer
+     * cannot be written to a parcel, etc.
+     *
+     * @return True if this <code>GraphicBuffer</code> is in a destroyed state,
+     *         false otherwise.
+     *
+     * @see #destroy()
+     */
+    public boolean isDestroyed() {
+        return mDestroyed;
+    }
+
     @Override
     protected void finalize() throws Throwable {
         try {
-            nDestroyGraphicBuffer(mNativeObject);
+            if (!mDestroyed) nDestroyGraphicBuffer(mNativeObject);
         } finally {
             super.finalize();
         }
@@ -192,8 +240,23 @@ public class GraphicBuffer implements Parcelable {
         return 0;
     }
 
+    /**
+     * Flatten this object in to a Parcel.
+     *
+     * <p>Calling this method will throw an <code>IllegalStateException</code> if
+     * {@link #destroy()} has been previously called.</p>
+     *
+     * @param dest The Parcel in which the object should be written.
+     * @param flags Additional flags about how the object should be written.
+     *              May be 0 or {@link #PARCELABLE_WRITE_RETURN_VALUE}.
+     */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        if (mDestroyed) {
+            throw new IllegalStateException("This GraphicBuffer has been destroyed and cannot be "
+                    + "written to a parcel.");
+        }
+
         dest.writeInt(mWidth);
         dest.writeInt(mHeight);
         dest.writeInt(mFormat);
