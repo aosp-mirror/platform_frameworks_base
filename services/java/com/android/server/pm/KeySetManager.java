@@ -69,7 +69,7 @@ public class KeySetManager {
         mPackages = packages;
     }
 
-    /*
+    /**
      * Determine if a package is signed by the given KeySet.
      *
      * Returns false if the package was not signed by all the
@@ -94,7 +94,7 @@ public class KeySetManager {
         }
     }
 
-    /*
+    /**
      * This informs the system that the given package has defined a KeySet
      * in its manifest that a) contains the given keys and b) is named
      * alias by that package.
@@ -116,7 +116,7 @@ public class KeySetManager {
         }
     }
 
-    /*
+    /**
      * Similar to the above, this informs the system that the given package
      * was signed by the provided KeySet.
      */
@@ -153,10 +153,9 @@ public class KeySetManager {
         }
     }
 
-    /*
-     * Fetches the stable identifier associated with the given KeySet.
-     *
-     * Returns KEYSET_NOT_FOUND if the KeySet... wasn't found.
+    /**
+     * Fetches the stable identifier associated with the given KeySet. Returns
+     * {@link #KEYSET_NOT_FOUND} if the KeySet... wasn't found.
      */
     public long getIdByKeySet(KeySet ks) {
         synchronized (mLockObject) {
@@ -174,10 +173,11 @@ public class KeySetManager {
         return KEYSET_NOT_FOUND;
     }
 
-    /*
+    /**
      * Fetches the KeySet corresponding to the given stable identifier.
      *
-     * Returns KEYSET_NOT_FOUND if the identifier doesn't identify a KeySet.
+     * Returns {@link #KEYSET_NOT_FOUND} if the identifier doesn't
+     * identify a {@link KeySet}.
      */
     public KeySet getKeySetById(long id) {
         synchronized (mLockObject) {
@@ -185,7 +185,7 @@ public class KeySetManager {
         }
     }
 
-    /*
+    /**
      * Fetches the KeySet that a given package refers to by the provided alias.
      *
      * If the package isn't known to us, throws an IllegalArgumentException.
@@ -205,10 +205,9 @@ public class KeySetManager {
         }
     }
 
-    /*
-     * Fetches all the known KeySets that signed the given package.
-     *
-     * If the package is unknown to us, throws an IllegalArgumentException.
+    /**
+     * Fetches all the known {@link KeySet KeySets} that signed the given
+     * package. Returns {@code null} if package is unknown.
      */
     public Set<KeySet> getSigningKeySetsByPackageName(String packageName) {
         synchronized (mLockObject) {
@@ -227,16 +226,16 @@ public class KeySetManager {
         }
     }
 
-    /*
+    /**
      * Creates a new KeySet corresponding to the given keys.
      *
-     * If the PublicKeys aren't known to the system, this adds them. Otherwise,
-     * they're deduped.
+     * If the {@link PublicKey PublicKeys} aren't known to the system, this
+     * adds them. Otherwise, they're deduped.
      *
      * If the KeySet isn't known to the system, this adds that and creates the
      * mapping to the PublicKeys. If it is known, then it's deduped.
      *
-     * Throws if the provided set is null.
+     * Throws if the provided set is {@code null}.
      */
     private KeySet addKeySetLocked(Set<PublicKey> keys) {
         if (keys == null) {
@@ -267,7 +266,7 @@ public class KeySetManager {
         return ks;
     }
 
-    /*
+    /**
      * Adds the given PublicKey to the system, deduping as it goes.
      */
     private long addPublicKeyLocked(PublicKey key) {
@@ -284,7 +283,7 @@ public class KeySetManager {
         return id;
     }
 
-    /*
+    /**
      * Finds the stable identifier for a KeySet based on a set of PublicKey stable IDs.
      *
      * Returns KEYSET_NOT_FOUND if there isn't one.
@@ -299,7 +298,7 @@ public class KeySetManager {
         return KEYSET_NOT_FOUND;
     }
 
-    /*
+    /**
      * Finds the stable identifier for a PublicKey or PUBLIC_KEY_NOT_FOUND.
      */
     private long getIdForPublicKeyLocked(PublicKey k) {
@@ -314,7 +313,7 @@ public class KeySetManager {
         return PUBLIC_KEY_NOT_FOUND;
     }
 
-    /*
+    /**
      * Gets an unused stable identifier for a KeySet.
      */
     private long getFreeKeySetIDLocked() {
@@ -322,7 +321,7 @@ public class KeySetManager {
         return lastIssuedKeySetId;
     }
 
-    /*
+    /**
      * Same as above, but for public keys.
      */
     private long getFreePublicKeyIdLocked() {
