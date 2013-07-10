@@ -199,10 +199,8 @@ public abstract class CompoundButton extends Button implements Checkable {
                 unscheduleDrawable(mButtonDrawable);
             }
             d.setCallback(this);
-            d.setState(getDrawableState());
             d.setVisible(getVisibility() == VISIBLE, false);
             mButtonDrawable = d;
-            mButtonDrawable.setState(null);
             setMinHeight(mButtonDrawable.getIntrinsicHeight());
         }
 
