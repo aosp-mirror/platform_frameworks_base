@@ -7945,21 +7945,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         boolean result = false;
 
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_DPAD_CENTER:
-            case KeyEvent.KEYCODE_ENTER: {
-                if ((mViewFlags & ENABLED_MASK) == DISABLED) {
-                    return true;
-                }
-                // Long clickable items don't necessarily have to be clickable
-                if (((mViewFlags & CLICKABLE) == CLICKABLE ||
-                        (mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) &&
-                        (event.getRepeatCount() == 0)) {
-                    setPressed(true);
-                    checkForLongClick(0);
-                    return true;
-                }
-                break;
+        if (KeyEvent.isConfirmKey(event.getKeyCode())) {
+            if ((mViewFlags & ENABLED_MASK) == DISABLED) {
+                return true;
+            }
+            // Long clickable items don't necessarily have to be clickable
+            if (((mViewFlags & CLICKABLE) == CLICKABLE ||
+                    (mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) &&
+                    (event.getRepeatCount() == 0)) {
+                setPressed(true);
+                checkForLongClick(0);
+                return true;
             }
         }
         return result;
