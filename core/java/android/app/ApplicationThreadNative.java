@@ -603,6 +603,16 @@ public abstract class ApplicationThreadNative extends Binder
             reply.writeNoException();
             return true;
         }
+
+        case SCHEDULE_TRANSLUCENT_CONVERSION_COMPLETE_TRANSACTION:
+        {
+            data.enforceInterface(IApplicationThread.descriptor);
+            IBinder token = data.readStrongBinder();
+            boolean timeout = data.readInt() == 1;
+            scheduleTranslucentConversionComplete(token, timeout);
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -1197,6 +1207,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
 
+    @Override
     public void unstableProviderDied(IBinder provider) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
@@ -1205,6 +1216,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
 
+    @Override
     public void requestActivityExtras(IBinder activityToken, IBinder requestToken, int requestType)
             throws RemoteException {
         Parcel data = Parcel.obtain();
@@ -1213,6 +1225,17 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeStrongBinder(requestToken);
         data.writeInt(requestType);
         mRemote.transact(REQUEST_ACTIVITY_EXTRAS_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
+        data.recycle();
+    }
+
+    @Override
+    public void scheduleTranslucentConversionComplete(IBinder token, boolean timeout)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeStrongBinder(token);
+        data.writeInt(timeout ? 1 : 0);
+        mRemote.transact(SCHEDULE_TRANSLUCENT_CONVERSION_COMPLETE_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 }

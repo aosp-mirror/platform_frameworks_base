@@ -2697,7 +2697,8 @@ package android.app {
     method public void addContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public void closeContextMenu();
     method public void closeOptionsMenu();
-    method public void convertToOpaque();
+    method public void convertFromTranslucent();
+    method public void convertToTranslucent(android.app.Activity.TranslucentConversionListener);
     method public android.app.PendingIntent createPendingResult(int, android.content.Intent, int);
     method public final deprecated void dismissDialog(int);
     method public boolean dispatchGenericMotionEvent(android.view.MotionEvent);
@@ -2881,6 +2882,10 @@ package android.app {
     field public static final int RESULT_CANCELED = 0; // 0x0
     field public static final int RESULT_FIRST_USER = 1; // 0x1
     field public static final int RESULT_OK = -1; // 0xffffffff
+  }
+
+  public static abstract interface Activity.TranslucentConversionListener {
+    method public abstract void onTranslucentConversionComplete(boolean);
   }
 
   public deprecated class ActivityGroup extends android.app.Activity {

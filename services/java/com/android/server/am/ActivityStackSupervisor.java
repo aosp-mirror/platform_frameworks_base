@@ -2475,8 +2475,7 @@ public final class ActivityStackSupervisor {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case IDLE_TIMEOUT_MSG: {
-                    if (DEBUG_IDLE) Slog.d(TAG, "handleMessage: IDLE_TIMEOUT_MSG: Callers=" +
-                            Debug.getCallers(4));
+                    if (DEBUG_IDLE) Slog.d(TAG, "handleMessage: IDLE_TIMEOUT_MSG: r=" + msg.obj);
                     if (mService.mDidDexOpt) {
                         mService.mDidDexOpt = false;
                         Message nmsg = mHandler.obtainMessage(IDLE_TIMEOUT_MSG);
@@ -2489,6 +2488,7 @@ public final class ActivityStackSupervisor {
                     activityIdleInternal((ActivityRecord)msg.obj);
                 } break;
                 case IDLE_NOW_MSG: {
+                    if (DEBUG_IDLE) Slog.d(TAG, "handleMessage: IDLE_NOW_MSG: r=" + msg.obj);
                     activityIdleInternal((ActivityRecord)msg.obj);
                 } break;
                 case RESUME_TOP_ACTIVITY_MSG: {

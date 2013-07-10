@@ -258,7 +258,7 @@ public interface IActivityManager extends IInterface {
             StrictMode.ViolationInfo crashInfo) throws RemoteException;
 
     /*
-     * This will deliver the specified signal to all the persistent processes. Currently only 
+     * This will deliver the specified signal to all the persistent processes. Currently only
      * SIGUSR1 is delivered. All others are ignored.
      */
     public void signalPersistentProcesses(int signal) throws RemoteException;
@@ -301,7 +301,9 @@ public interface IActivityManager extends IInterface {
 
     public void finishHeavyWeightApp() throws RemoteException;
 
-    public void convertToOpaque(IBinder token) throws RemoteException;
+    public void convertFromTranslucent(IBinder token) throws RemoteException;
+    public void convertToTranslucent(IBinder token) throws RemoteException;
+    public void notifyActivityDrawn(IBinder token) throws RemoteException;
 
     public void setImmersive(IBinder token, boolean immersive) throws RemoteException;
     public boolean isImmersive(IBinder token) throws RemoteException;
@@ -494,7 +496,7 @@ public interface IActivityManager extends IInterface {
             thisTime = source.readLong();
             totalTime = source.readLong();
         }
-    };
+    }
 
     String descriptor = "android.app.IActivityManager";
 
@@ -670,6 +672,8 @@ public interface IActivityManager extends IInterface {
     int GET_STACK_BOXES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+170;
     int SET_FOCUSED_STACK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+171;
     int GET_STACK_BOX_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+172;
-    int CONVERT_TO_OPAQUE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+173;
-    int REPORT_ACTIVITY_FULLY_DRAWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+174;
+    int CONVERT_FROM_TRANSLUCENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+173;
+    int CONVERT_TO_TRANSLUCENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+174;
+    int NOTIFY_ACTIVITY_DRAWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+175;
+    int REPORT_ACTIVITY_FULLY_DRAWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+176;
 }

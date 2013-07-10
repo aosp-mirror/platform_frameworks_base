@@ -25,6 +25,7 @@ import static android.view.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import android.app.AppOpsManager;
 import android.util.TimeUtils;
 import android.view.IWindowId;
+
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.policy.impl.PhoneWindowManager;
@@ -4117,10 +4118,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    public void setAppFullscreen(IBinder token) {
+    public void setAppFullscreen(IBinder token, boolean toOpaque) {
         AppWindowToken atoken = findAppWindowToken(token);
         if (atoken != null) {
-            atoken.appFullscreen = true;
+            atoken.appFullscreen = toOpaque;
+            requestTraversal();
         }
     }
 
@@ -7020,6 +7022,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         public static final int CLIENT_FREEZE_TIMEOUT = 30;
         public static final int TAP_OUTSIDE_STACK = 31;
+        public static final int NOTIFY_ACTIVITY_DRAWN = 32;
 
         @Override
         public void handleMessage(Message msg) {
@@ -7452,6 +7455,13 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                     }
                 }
+                break;
+                case NOTIFY_ACTIVITY_DRAWN:
+                    try {
+                        mActivityManager.notifyActivityDrawn((IBinder) msg.obj);
+                    } catch (RemoteException e) {
+                    }
+                    break;
             }
             if (DEBUG_WINDOW_TRACE) {
                 Slog.v(TAG, "handleMessage: exit");
@@ -8759,6 +8769,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 + " interesting=" + numInteresting
                                 + " drawn=" + wtoken.numDrawnWindows);
                         wtoken.allDrawn = true;
+                        mH.obtainMessage(H.NOTIFY_ACTIVITY_DRAWN, wtoken.token).sendToTarget();
                     }
                 }
             }

@@ -745,6 +745,7 @@ public class Activity extends ContextThemeWrapper
     // protected by synchronized (this) 
     int mResultCode = RESULT_CANCELED;
     Intent mResultData = null;
+    private TranslucentConversionListener mTranslucentCallback;
 
     private boolean mTitleReady = false;
 
@@ -1382,6 +1383,7 @@ public class Activity extends ContextThemeWrapper
         if (DEBUG_LIFECYCLE) Slog.v(TAG, "onStop " + this);
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(false);
         getApplication().dispatchActivityStopped(this);
+        mTranslucentCallback = null;
         mCalled = true;
     }
 
@@ -4886,19 +4888,58 @@ public class Activity extends ContextThemeWrapper
     /**
      * Convert a translucent themed Activity {@link android.R.attr#windowIsTranslucent} to a
      * fullscreen opaque Activity.
-     *
+     * <p>
      * Call this whenever the background of a translucent Activity has changed to become opaque.
-     * Doing so will allow the previously visible Activity behind this one to be stopped. Stopped
-     * apps consume no CPU cycles and are eligible for removal when reclaiming memory.
-     *
+     * Doing so will allow the {@link android.view.Surface} of the Activity behind to be released.
+     * <p>
      * This call has no effect on non-translucent activities or on activities with the
      * {@link android.R.attr#windowIsFloating} attribute.
+     *
+     * @see #convertToTranslucent(TranslucentConversionListener)
+     * @see TranslucentConversionListener
      */
-    public void convertToOpaque() {
+    public void convertFromTranslucent() {
         try {
-            ActivityManagerNative.getDefault().convertToOpaque(mToken);
+            mTranslucentCallback = null;
+            ActivityManagerNative.getDefault().convertFromTranslucent(mToken);
         } catch (RemoteException e) {
             // pass
+        }
+    }
+
+    /**
+     * Convert a translucent themed Activity {@link android.R.attr#windowIsTranslucent} back from
+     * opaque to translucent following a call to {@link #convertFromTranslucent()}.
+     * <p>
+     * Calling this allows the Activity behind this one to be seen again. Once all such Activities
+     * have been redrawn {@link TranslucentConversionListener#onTranslucentConversionComplete} will
+     * be called indicating that it is safe to make this activity translucent again. Until
+     * {@link TranslucentConversionListener#onTranslucentConversionComplete} is called the image
+     * behind the frontmost Activity will be indeterminate.
+     * <p>
+     * This call has no effect on non-translucent activities or on activities with the
+     * {@link android.R.attr#windowIsFloating} attribute.
+     *
+     * @param callback the method to call when all visible Activities behind this one have been
+     * drawn and it is safe to make this Activity translucent again.
+     *
+     * @see #convertFromTranslucent()
+     * @see TranslucentConversionListener
+     */
+    public void convertToTranslucent(TranslucentConversionListener callback) {
+        try {
+            mTranslucentCallback = callback;
+            ActivityManagerNative.getDefault().convertToTranslucent(mToken);
+        } catch (RemoteException e) {
+            // pass
+        }
+    }
+
+    /** @hide */
+    void onTranslucentConversionComplete(boolean drawComplete) {
+        if (mTranslucentCallback != null) {
+            mTranslucentCallback.onTranslucentConversionComplete(drawComplete);
+            mTranslucentCallback = null;
         }
     }
 
@@ -4947,6 +4988,7 @@ public class Activity extends ContextThemeWrapper
      * @return The new action mode, or <code>null</code> if the activity does not want to
      *         provide special handling for this action mode. (It will be handled by the system.)
      */
+    @Override
     public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
         initActionBar();
         if (mActionBar != null) {
@@ -4961,6 +5003,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @param mode The new action mode.
      */
+    @Override
     public void onActionModeStarted(ActionMode mode) {
     }
 
@@ -4970,6 +5013,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @param mode The action mode that just finished.
      */
+    @Override
     public void onActionModeFinished(ActionMode mode) {
     }
 
@@ -5372,5 +5416,27 @@ public class Activity extends ContextThemeWrapper
                 frag.onActivityResult(requestCode, resultCode, data);
             }
         }
+    }
+
+    /**
+     * Interface for informing a translucent {@link Activity} once all visible activities below it
+     * have completed drawing. This is necessary only after an {@link Activity} has been made
+     * opaque using {@link Activity#convertFromTranslucent()} and before it has been drawn
+     * translucent again following a call to {@link
+     * Activity#convertToTranslucent(TranslucentConversionListener)}.
+     */
+    public interface TranslucentConversionListener {
+        /**
+         * Callback made following {@link Activity#convertToTranslucent} once all visible Activities
+         * below the top one have been redrawn. Following this callback it is safe to make the top
+         * Activity translucent because the underlying Activity has been drawn.
+         *
+         * @param drawComplete True if the background Activity has drawn itself. False if a timeout
+         * occurred waiting for the Activity to complete drawing.
+         *
+         * @see Activity#convertFromTranslucent()
+         * @see Activity#convertToTranslucent(TranslucentConversionListener)
+         */
+        public void onTranslucentConversionComplete(boolean drawComplete);
     }
 }
