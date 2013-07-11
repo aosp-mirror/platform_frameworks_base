@@ -941,8 +941,8 @@
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"ቦታ"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"አሰገባ"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"ሰርዝ"</string>
-    <string name="search_go" msgid="8298016669822141719">" ፈልግ"</string>
-    <string name="searchview_description_search" msgid="6749826639098512120">"ፈልግ"</string>
+    <string name="search_go" msgid="8298016669822141719">"ፍለጋ"</string>
+    <string name="searchview_description_search" msgid="6749826639098512120">"ፍለጋ"</string>
     <string name="searchview_description_query" msgid="5911778593125355124">"ጥያቄ ፍለጋ"</string>
     <string name="searchview_description_clear" msgid="1330281990951833033">"ጥያቄ አጥራ"</string>
     <string name="searchview_description_submit" msgid="2688450133297983542">"ጥያቄ አስረክብ"</string>
@@ -1394,7 +1394,7 @@
     <string name="description_target_camera" msgid="969071997552486814">"ካሜራ"</string>
     <string name="description_target_silent" msgid="893551287746522182">"ፀጥታ"</string>
     <string name="description_target_soundon" msgid="30052466675500172">"ድምፅ አብራ"</string>
-    <string name="description_target_search" msgid="3091587249776033139">"ፈልግ"</string>
+    <string name="description_target_search" msgid="3091587249776033139">"ፍለጋ"</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"ላለመቆለፍ አንሸራት፡፡"</string>
     <string name="keyboard_headset_required_to_hear_password" msgid="7011927352267668657">"የይለፍ ቃል ቁልፎች  ሲነገሩ ለመስማት የጆሮ ማዳመጫ ሰካ።"</string>
     <string name="keyboard_password_character_no_headset" msgid="2859873770886153678">"ነጥብ."</string>
