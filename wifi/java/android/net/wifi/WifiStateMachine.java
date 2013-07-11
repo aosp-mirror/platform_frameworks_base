@@ -337,6 +337,8 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_SET_FREQUENCY_BAND               = BASE + 90;
     /* Enable background scan for configured networks */
     static final int CMD_ENABLE_BACKGROUND_SCAN           = BASE + 91;
+    /* Enable TDLS on a specific MAC address */
+    static final int CMD_ENABLE_TDLS                      = BASE + 92;
 
     /* Commands from/to the SupplicantStateTracker */
     /* Reset the supplicant state tracker */
@@ -1071,6 +1073,14 @@ public class WifiStateMachine extends StateMachine {
                     band);
         }
         sendMessage(CMD_SET_FREQUENCY_BAND, band, 0);
+    }
+
+    /**
+     * Enable TDLS for a specific MAC address
+     */
+    public void enableTdls(String remoteMacAddress, boolean enable) {
+        int enabler = enable ? 1 : 0;
+        sendMessage(CMD_ENABLE_TDLS, enabler, 0, remoteMacAddress);
     }
 
     /**
@@ -2593,6 +2603,13 @@ public class WifiStateMachine extends StateMachine {
                         setSuspendOptimizationsNative(SUSPEND_DUE_TO_HIGH_PERF, false);
                     } else {
                         setSuspendOptimizationsNative(SUSPEND_DUE_TO_HIGH_PERF, true);
+                    }
+                    break;
+                case CMD_ENABLE_TDLS:
+                    if (message.obj != null) {
+                        String remoteAddress = (String) message.obj;
+                        boolean enable = (message.arg1 == 1);
+                        mWifiNative.startTdls(remoteAddress, enable);
                     }
                     break;
                 default:

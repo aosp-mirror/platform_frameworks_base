@@ -32,6 +32,7 @@ import android.os.Messenger;
 import android.util.Log;
 import android.util.SparseArray;
 
+import java.net.InetAddress;
 import java.util.concurrent.CountDownLatch;
 
 import com.android.internal.util.AsyncChannel;
@@ -1129,6 +1130,43 @@ public class WifiManager {
             return true;
         } catch (RemoteException e) {
             return false;
+        }
+    }
+
+
+    /**
+     * Enable TDLS on a specific local route
+     *
+     * This API is used by WiFi display, but eventually it can be made public,
+     * just depends on how popular TDLS gets
+     *
+     * @param remoteIPAddress IP address of the endpoint to setup TDLS with
+     * @param enable true = setup and false = tear down TDLS
+     * @hide
+     */
+    public void enableTdls(InetAddress remoteIPAddress, boolean enable) {
+        try {
+            mService.enableTdls(remoteIPAddress.getHostAddress(), enable);
+        } catch (RemoteException e) {
+            // Just ignore the exception
+        }
+    }
+
+    /**
+     * Enable TDLS on a specific local route
+     *
+     * This API is used by WiFi display, but eventually it can be made public,
+     * just depends on how popular TDLS gets
+     *
+     * @param remoteMacAddress MAC address of the remote endpoint such as 00:00:0c:9f:f2:ab
+     * @param enable true = setup and false = tear down TDLS
+     * @hide
+     */
+    public void enableTdlsWithMacAddress(String remoteMacAddress, boolean enable) {
+        try {
+            mService.enableTdlsWithMacAddress(remoteMacAddress, enable);
+        } catch (RemoteException e) {
+            // Just ignore the exception
         }
     }
 

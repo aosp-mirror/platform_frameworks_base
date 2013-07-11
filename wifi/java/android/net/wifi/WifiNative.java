@@ -370,6 +370,13 @@ public class WifiNative {
         doBooleanCommand("SCAN_INTERVAL " + scanInterval);
     }
 
+    public void startTdls(String macAddr, boolean enable) {
+        if (enable)
+            doBooleanCommand("TDLS_SETUP " + macAddr);
+        else
+            doBooleanCommand("TDLS_TEARDOWN " + macAddr);
+    }
+
     /** Example output:
      * RSSI=-65
      * LINKSPEED=48
