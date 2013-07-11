@@ -458,7 +458,7 @@ public class FastPrintWriter extends PrintWriter {
         if (lnum == 0) {
             println("0");
         } else {
-            super.print(lnum);
+            super.println(lnum);
         }
     }
 

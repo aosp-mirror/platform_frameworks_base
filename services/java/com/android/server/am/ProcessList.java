@@ -39,7 +39,7 @@ final class ProcessList {
     // This is a process only hosting activities that are not visible,
     // so it can be killed without any disruption.
     static final int CACHED_APP_MAX_ADJ = 15;
-    static int CACHED_APP_MIN_ADJ = 9;
+    static final int CACHED_APP_MIN_ADJ = 9;
 
     // The B list of SERVICE_ADJ -- these are the old and decrepit
     // services that aren't as shiny and interesting as the ones in the A list.
