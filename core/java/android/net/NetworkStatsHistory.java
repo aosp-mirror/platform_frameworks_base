@@ -639,6 +639,7 @@ public class NetworkStatsHistory implements Parcelable {
         @Deprecated
         public static long[] readFullLongArray(DataInputStream in) throws IOException {
             final int size = in.readInt();
+            if (size < 0) throw new ProtocolException("negative array size");
             final long[] values = new long[size];
             for (int i = 0; i < values.length; i++) {
                 values[i] = in.readLong();
@@ -680,6 +681,7 @@ public class NetworkStatsHistory implements Parcelable {
         public static long[] readVarLongArray(DataInputStream in) throws IOException {
             final int size = in.readInt();
             if (size == -1) return null;
+            if (size < 0) throw new ProtocolException("negative array size");
             final long[] values = new long[size];
             for (int i = 0; i < values.length; i++) {
                 values[i] = readVarLong(in);
