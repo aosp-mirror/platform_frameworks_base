@@ -16,6 +16,7 @@
 */
 
 // #define LOG_NDEBUG 0
+// #define LOG_NNDEBUG 0
 #define LOG_TAG "CameraMetadata-JNI"
 #include <utils/Log.h>
 
@@ -25,6 +26,16 @@
 #include "android_runtime/AndroidRuntime.h"
 
 #include <camera/CameraMetadata.h>
+#include <nativehelper/ScopedUtfChars.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
+
+#if defined(LOG_NNDEBUG)
+#if !LOG_NNDEBUG
+#define ALOGVV ALOGV
+#endif
+#else
+#define ALOGVV(...)
+#endif
 
 // fully-qualified class name
 #define CAMERA_METADATA_CLASS_NAME "android/hardware/photography/CameraMetadata"
@@ -37,9 +48,70 @@ struct fields_t {
 
 static fields_t fields;
 
+namespace {
+struct Helpers {
+    static size_t getTypeSize(uint8_t type) {
+        if (type >= NUM_TYPES) {
+            ALOGE("%s: Invalid type specified (%ud)", __FUNCTION__, type);
+            return static_cast<size_t>(-1);
+        }
+
+        return camera_metadata_type_size[type];
+    }
+
+    static status_t updateAny(CameraMetadata *metadata,
+                          uint32_t tag,
+                          uint32_t type,
+                          const void *data,
+                          size_t dataBytes) {
+
+        if (type >= NUM_TYPES) {
+            ALOGE("%s: Invalid type specified (%ud)", __FUNCTION__, type);
+            return INVALID_OPERATION;
+        }
+
+        size_t typeSize = getTypeSize(type);
+
+        if (dataBytes % typeSize != 0) {
+            ALOGE("%s: Expected dataBytes (%ud) to be divisible by typeSize "
+                  "(%ud)", __FUNCTION__, dataBytes, typeSize);
+            return BAD_VALUE;
+        }
+
+        size_t dataCount = dataBytes / typeSize;
+
+        switch(type) {
+#define METADATA_UPDATE(runtime_type, compile_type)                            \
+            case runtime_type: {                                               \
+                const compile_type *dataPtr =                                  \
+                        static_cast<const compile_type*>(data);                \
+                return metadata->update(tag, dataPtr, dataCount);              \
+            }                                                                  \
+
+            METADATA_UPDATE(TYPE_BYTE,     uint8_t);
+            METADATA_UPDATE(TYPE_INT32,    int32_t);
+            METADATA_UPDATE(TYPE_FLOAT,    float);
+            METADATA_UPDATE(TYPE_INT64,    int64_t);
+            METADATA_UPDATE(TYPE_DOUBLE,   double);
+            METADATA_UPDATE(TYPE_RATIONAL, camera_metadata_rational_t);
+
+            default: {
+                // unreachable
+                ALOGE("%s: Unreachable", __FUNCTION__);
+                return INVALID_OPERATION;
+            }
+        }
+
+#undef METADATA_UPDATE
+    }
+};
+} // namespace {}
+
 extern "C" {
 
 static void CameraMetadata_classInit(JNIEnv *env, jobject thiz);
+static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyName);
+static jint CameraMetadata_getTypeFromTag(JNIEnv *env, jobject thiz, jint tag);
 
 // Less safe access to native pointer. Does NOT throw any Java exceptions if NULL.
 static CameraMetadata* CameraMetadata_getPointerNoThrow(JNIEnv *env, jobject thiz) {
@@ -140,6 +212,86 @@ static void CameraMetadata_swap(JNIEnv *env, jobject thiz, jobject other) {
     metadata->swap(*otherMetadata);
 }
 
+static jbyteArray CameraMetadata_readValues(JNIEnv *env, jobject thiz, jint tag) {
+    ALOGV("%s (tag = %d)", __FUNCTION__, tag);
+
+    CameraMetadata* metadata = CameraMetadata_getPointerThrow(env, thiz);
+    if (metadata == NULL) return NULL;
+
+    int tagType = get_camera_metadata_tag_type(tag);
+    if (tagType == -1) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                             "Tag (%d) did not have a type", tag);
+        return NULL;
+    }
+    size_t tagSize = Helpers::getTypeSize(tagType);
+
+    camera_metadata_entry entry = metadata->find(tag);
+    if (entry.count == 0) {
+         if (!metadata->exists(tag)) {
+             ALOGV("%s: Tag %d does not have any entries", __FUNCTION__, tag);
+             return NULL;
+         } else {
+             // OK: we will return a 0-sized array.
+             ALOGV("%s: Tag %d had an entry, but it had 0 data", __FUNCTION__,
+                   tag);
+         }
+    }
+
+    jsize byteCount = entry.count * tagSize;
+    jbyteArray byteArray = env->NewByteArray(byteCount);
+    if (env->ExceptionCheck()) return NULL;
+
+    // Copy into java array from native array
+    ScopedByteArrayRW arrayWriter(env, byteArray);
+    memcpy(arrayWriter.get(), entry.data.u8, byteCount);
+
+    return byteArray;
+}
+
+static void CameraMetadata_writeValues(JNIEnv *env, jobject thiz, jint tag, jbyteArray src) {
+    ALOGV("%s (tag = %d)", __FUNCTION__, tag);
+
+    CameraMetadata* metadata = CameraMetadata_getPointerThrow(env, thiz);
+    if (metadata == NULL) return;
+
+    int tagType = get_camera_metadata_tag_type(tag);
+    if (tagType == -1) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                             "Tag (%d) did not have a type", tag);
+        return;
+    }
+    size_t tagSize = Helpers::getTypeSize(tagType);
+
+    status_t res;
+
+    if (src == NULL) {
+        // If array is NULL, delete the entry
+        res = metadata->erase(tag);
+    } else {
+        // Copy from java array into native array
+        ScopedByteArrayRO arrayReader(env, src);
+        if (arrayReader.get() == NULL) return;
+
+        res = Helpers::updateAny(metadata, static_cast<uint32_t>(tag),
+                                 tagType, arrayReader.get(), arrayReader.size());
+    }
+
+    if (res == OK) {
+        return;
+    } else if (res == BAD_VALUE) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                             "Src byte array was poorly formed");
+    } else if (res == INVALID_OPERATION) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
+                             "Internal error while trying to update metadata");
+    } else {
+        jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
+                             "Unknown error (%d) while trying to update "
+                            "metadata", res);
+    }
+}
+
 static void CameraMetadata_readFromParcel(JNIEnv *env, jobject thiz, jobject parcel) {
     ALOGV("%s", __FUNCTION__);
     CameraMetadata* metadata = CameraMetadata_getPointerThrow(env, thiz);
@@ -187,9 +339,17 @@ static void CameraMetadata_writeToParcel(JNIEnv *env, jobject thiz, jobject parc
 //-------------------------------------------------
 
 static JNINativeMethod gCameraMetadataMethods[] = {
+// static methods
   { "nativeClassInit",
     "()V",
     (void *)CameraMetadata_classInit },
+  { "nativeGetTagFromKey",
+    "(Ljava/lang/String;)I",
+    (void *)CameraMetadata_getTagFromKey },
+  { "nativeGetTypeFromTag",
+    "(I)I",
+    (void *)CameraMetadata_getTypeFromTag },
+// instance methods
   { "nativeAllocate",
     "()J",
     (void*)CameraMetadata_allocate },
@@ -205,6 +365,13 @@ static JNINativeMethod gCameraMetadataMethods[] = {
   { "nativeSwap",
     "(L" CAMERA_METADATA_CLASS_NAME ";)V",
     (void *)CameraMetadata_swap },
+  { "nativeReadValues",
+    "(I)[B",
+    (void *)CameraMetadata_readValues },
+  { "nativeWriteValues",
+    "(I[B)V",
+    (void *)CameraMetadata_writeValues },
+// Parcelable interface
   { "nativeReadFromParcel",
     "(Landroid/os/Parcel;)V",
     (void *)CameraMetadata_readFromParcel },
@@ -268,4 +435,99 @@ static void CameraMetadata_classInit(JNIEnv *env, jobject thiz) {
 
     jclass clazz = env->FindClass(CAMERA_METADATA_CLASS_NAME);
 }
+
+static jint CameraMetadata_getTagFromKey(JNIEnv *env, jobject thiz, jstring keyName) {
+
+    ScopedUtfChars keyScoped(env, keyName);
+    const char *key = keyScoped.c_str();
+    if (key == NULL) {
+        // exception thrown by ScopedUtfChars
+        return 0;
+    }
+    size_t keyLength = strlen(key);
+
+    ALOGV("%s (key = '%s')", __FUNCTION__, key);
+
+    // First, find the section by the longest string match
+    const char *section = NULL;
+    size_t sectionIndex = 0;
+    size_t sectionLength = 0;
+    for (size_t i = 0; i < ANDROID_SECTION_COUNT; ++i) {
+        const char *str = camera_metadata_section_names[i];
+        ALOGVV("%s: Trying to match against section '%s'",
+               __FUNCTION__, str);
+        if (strstr(key, str) == key) { // key begins with the section name
+            size_t strLength = strlen(str);
+
+            ALOGVV("%s: Key begins with section name", __FUNCTION__);
+
+            // section name is the longest we've found so far
+            if (section == NULL || sectionLength < strLength) {
+                section = str;
+                sectionIndex = i;
+                sectionLength = strLength;
+
+                ALOGVV("%s: Found new best section (idx %d)", __FUNCTION__, sectionIndex);
+            }
+        }
+    }
+
+    // TODO: vendor ext
+    // TODO: Make above get_camera_metadata_section_from_name ?
+
+    if (section == NULL) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                             "Could not find section name for key '%s')", key);
+        return 0;
+    } else {
+        ALOGV("%s: Found matched section '%s' (%d)",
+              __FUNCTION__, section, sectionIndex);
+    }
+
+    // Get the tag name component of the key
+    const char *keyTagName = key + sectionLength + 1; // x.y.z -> z
+    if (sectionLength + 1 >= keyLength) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                             "Key length too short for key '%s')", key);
+    }
+
+    // Match rest of name against the tag names in that section only
+    uint32_t tagBegin, tagEnd; // [tagBegin, tagEnd)
+    tagBegin = camera_metadata_section_bounds[sectionIndex][0];
+    tagEnd = camera_metadata_section_bounds[sectionIndex][1];
+
+    uint32_t tag;
+    for (tag = tagBegin; tag < tagEnd; ++tag) {
+        const char *tagName = get_camera_metadata_tag_name(tag);
+
+        if (strcmp(keyTagName, tagName) == 0) {
+            ALOGV("%s: Found matched tag '%s' (%d)",
+                  __FUNCTION__, tagName, tag);
+            break;
+        }
+    }
+
+    // TODO: vendor ext
+    // TODO: Make above get_camera_metadata_tag_from_name ?
+
+    if (tag == tagEnd) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                             "Could not find tag name for key '%s')", key);
+        return 0;
+    }
+
+    return tag;
+}
+
+static jint CameraMetadata_getTypeFromTag(JNIEnv *env, jobject thiz, jint tag) {
+    int tagType = get_camera_metadata_tag_type(tag);
+    if (tagType == -1) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
+                             "Tag (%d) did not have a type", tag);
+        return -1;
+    }
+
+    return tagType;
+}
+
 } // extern "C"

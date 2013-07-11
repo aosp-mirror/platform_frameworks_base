@@ -10760,7 +10760,7 @@ package android.hardware.photography {
   }
 
   public static class CameraMetadata.Key {
-    ctor public CameraMetadata.Key(java.lang.String);
+    ctor public CameraMetadata.Key(java.lang.String, java.lang.Class<T>);
     method public final boolean equals(java.lang.Object);
     method public final java.lang.String getName();
     method public final int hashCode();
@@ -10810,6 +10810,12 @@ package android.hardware.photography {
     method public android.graphics.Point getMouth();
     method public android.graphics.Point getRightEye();
     method public int getScore();
+  }
+
+  public final class Rational {
+    ctor public Rational(int, int);
+    method public int getDenominator();
+    method public int getNumerator();
   }
 
   public final class Size {

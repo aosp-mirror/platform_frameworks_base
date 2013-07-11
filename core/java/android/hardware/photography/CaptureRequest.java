@@ -58,14 +58,14 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * The exposure time for this capture, in nanoseconds.
      */
     public static final Key<Long> SENSOR_EXPOSURE_TIME =
-            new Key<Long>("android.sensor.exposureTime");
+            new Key<Long>("android.sensor.exposureTime", Long.TYPE);
 
     /**
      * The sensor sensitivity (gain) setting for this camera.
      * This is represented as an ISO sensitivity value
      */
     public static final Key<Integer> SENSOR_SENSITIVITY =
-            new Key<Integer>("android.sensor.sensitivity");
+            new Key<Integer>("android.sensor.sensitivity", Integer.TYPE);
 
     // Many more settings
 

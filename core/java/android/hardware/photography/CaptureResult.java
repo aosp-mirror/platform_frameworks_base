@@ -42,15 +42,15 @@ public final class CaptureResult extends CameraMetadata {
      * or {@link android.media.Image#getTimestamp Image.getTimestamp()} for this
      * capture's image data.
      */
-    public static final Key SENSOR_TIMESTAMP =
-            new Key<Long>("android.sensor.timestamp");
+    public static final Key<Long> SENSOR_TIMESTAMP =
+            new Key<Long>("android.sensor.timestamp", Long.TYPE);
 
     /**
      * The state of the camera device's auto-exposure algorithm. One of the
      * CONTROL_AE_STATE_* enumerations.
      */
-    public static final Key CONTROL_AE_STATE =
-            new Key<Integer>("android.control.aeState");
+    public static final Key<Integer> CONTROL_AE_STATE =
+            new Key<Integer>("android.control.aeState", Integer.TYPE);
 
     /**
      * The auto-exposure algorithm is inactive.
@@ -96,8 +96,8 @@ public final class CaptureResult extends CameraMetadata {
      * The list of faces detected in this capture. Available if face detection
      * was enabled for this capture
      */
-    public static final Key STATISTICS_DETECTED_FACES =
-            new Key<Face[]>("android.statistics.faces");
+    public static final Key<Face[]> STATISTICS_DETECTED_FACES =
+            new Key<Face[]>("android.statistics.faces", Face[].class);
 
     // TODO: Many many more
 
