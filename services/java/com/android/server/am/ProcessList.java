@@ -18,6 +18,8 @@ package com.android.server.am;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 
 import android.app.ActivityManager;
 import com.android.internal.util.MemInfoReader;
@@ -26,6 +28,8 @@ import com.android.server.wm.WindowManagerService;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.os.SystemProperties;
+import android.net.LocalSocketAddress;
+import android.net.LocalSocket;
 import android.util.Slog;
 import android.view.Display;
 
@@ -141,6 +145,16 @@ final class ProcessList {
     // Threshold of number of cached+empty where we consider memory critical.
     static final int TRIM_LOW_THRESHOLD = 5;
 
+    // Low Memory Killer Daemon command codes.
+    // These must be kept in sync with the definitions in lmkd.c
+    //
+    // LMK_TARGET <minfree> <minkillprio> ... (up to 6 pairs)
+    // LMK_PROCPRIO <pid> <prio>
+    // LMK_PROCREMOVE <pid>
+    static final byte LMK_TARGET = 0;
+    static final byte LMK_PROCPRIO = 1;
+    static final byte LMK_PROCREMOVE = 2;
+
     // These are the various interesting memory levels that we will give to
     // the OOM killer.  Note that the OOM killer only supports 6 slots, so we
     // can't give it a different value for every possible kind of process.
@@ -150,24 +164,27 @@ final class ProcessList {
     };
     // These are the low-end OOM level limits.  This is appropriate for an
     // HVGA or smaller phone with less than 512MB.  Values are in KB.
-    private final long[] mOomMinFreeLow = new long[] {
+    private final int[] mOomMinFreeLow = new int[] {
             8192, 12288, 16384,
             24576, 28672, 32768
     };
     // These are the high-end OOM level limits.  This is appropriate for a
     // 1280x800 or larger screen with around 1GB RAM.  Values are in KB.
-    private final long[] mOomMinFreeHigh = new long[] {
+    private final int[] mOomMinFreeHigh = new int[] {
             49152, 61440, 73728,
             86016, 98304, 122880
     };
     // The actual OOM killer memory levels we are using.
-    private final long[] mOomMinFree = new long[mOomAdj.length];
+    private final int[] mOomMinFree = new int[mOomAdj.length];
 
     private final long mTotalMemMb;
 
     private long mCachedRestoreLevel;
 
     private boolean mHaveDisplaySize;
+
+    private static LocalSocket sLmkdSocket;
+    private static OutputStream sLmkdOutputStream;
 
     ProcessList() {
         MemInfoReader minfo = new MemInfoReader();
@@ -202,9 +219,6 @@ final class ProcessList {
                     + " dh=" + displayHeight);
         }
 
-        StringBuilder adjString = new StringBuilder();
-        StringBuilder memString = new StringBuilder();
-
         float scale = scaleMem > scaleDisp ? scaleMem : scaleDisp;
         if (scale < 0) scale = 0;
         else if (scale > 1) scale = 1;
@@ -217,20 +231,20 @@ final class ProcessList {
         }
 
         for (int i=0; i<mOomAdj.length; i++) {
-            long low = mOomMinFreeLow[i];
-            long high = mOomMinFreeHigh[i];
-            mOomMinFree[i] = (long)(low + ((high-low)*scale));
+            int low = mOomMinFreeLow[i];
+            int high = mOomMinFreeHigh[i];
+            mOomMinFree[i] = (int)(low + ((high-low)*scale));
         }
 
         if (minfree_abs >= 0) {
             for (int i=0; i<mOomAdj.length; i++) {
-                mOomMinFree[i] = (long)((float)minfree_abs * mOomMinFree[i] / mOomMinFree[mOomAdj.length - 1]);
+                mOomMinFree[i] = (int)((float)minfree_abs * mOomMinFree[i] / mOomMinFree[mOomAdj.length - 1]);
             }
         }
 
         if (minfree_adj != 0) {
             for (int i=0; i<mOomAdj.length; i++) {
-                mOomMinFree[i] += (long)((float)minfree_adj * mOomMinFree[i] / mOomMinFree[mOomAdj.length - 1]);
+                mOomMinFree[i] += (int)((float)minfree_adj * mOomMinFree[i] / mOomMinFree[mOomAdj.length - 1]);
                 if (mOomMinFree[i] < 0) {
                     mOomMinFree[i] = 0;
                 }
@@ -241,15 +255,6 @@ final class ProcessList {
         // memory duress, is 1/3 the size we have reserved for kernel caches and other overhead
         // before killing background processes.
         mCachedRestoreLevel = (getMemLevel(ProcessList.CACHED_APP_MAX_ADJ)/1024) / 3;
-
-        for (int i=0; i<mOomAdj.length; i++) {
-            if (i > 0) {
-                adjString.append(',');
-                memString.append(',');
-            }
-            adjString.append(mOomAdj[i]);
-            memString.append((mOomMinFree[i]*1024)/PAGE_SIZE);
-        }
 
         // Ask the kernel to try to keep enough memory free to allocate 3 full
         // screen 32bpp buffers without entering direct reclaim.
@@ -268,10 +273,15 @@ final class ProcessList {
             }
         }
 
-        //Slog.i("XXXXXXX", "******************************* MINFREE: " + memString);
         if (write) {
-            writeFile("/sys/module/lowmemorykiller/parameters/adj", adjString.toString());
-            writeFile("/sys/module/lowmemorykiller/parameters/minfree", memString.toString());
+            ByteBuffer buf = ByteBuffer.allocate(4 * (2*mOomAdj.length + 1));
+            buf.putInt(LMK_TARGET);
+            for (int i=0; i<mOomAdj.length; i++) {
+                buf.putInt((mOomMinFree[i]*1024)/PAGE_SIZE);
+                buf.putInt(mOomAdj[i]);
+            }
+
+            writeLmkd(buf);
             SystemProperties.set("sys.sysctl.extra_free_kbytes", Integer.toString(reserve));
         }
         // GB: 2048,3072,4096,6144,7168,8192
@@ -506,19 +516,78 @@ final class ProcessList {
         return mCachedRestoreLevel;
     }
 
-    private void writeFile(String path, String data) {
-        FileOutputStream fos = null;
+    /**
+     * Set the out-of-memory badness adjustment for a process.
+     *
+     * @param pid The process identifier to set.
+     * @param amt Adjustment value -- lmkd allows -16 to +15.
+     *
+     * {@hide}
+     */
+    public static final void setOomAdj(int pid, int amt) {
+        if (amt == UNKNOWN_ADJ)
+            return;
+
+        ByteBuffer buf = ByteBuffer.allocate(4 * 3);
+        buf.putInt(LMK_PROCPRIO);
+        buf.putInt(pid);
+        buf.putInt(amt);
+        writeLmkd(buf);
+    }
+
+    /*
+     * {@hide}
+     */
+    public static final void remove(int pid) {
+        ByteBuffer buf = ByteBuffer.allocate(4 * 2);
+        buf.putInt(LMK_PROCREMOVE);
+        buf.putInt(pid);
+        writeLmkd(buf);
+    }
+
+    private static boolean openLmkdSocket() {
         try {
-            fos = new FileOutputStream(path);
-            fos.write(data.getBytes());
-        } catch (IOException e) {
-            Slog.w(ActivityManagerService.TAG, "Unable to write " + path);
-        } finally {
-            if (fos != null) {
+            sLmkdSocket = new LocalSocket(LocalSocket.SOCKET_SEQPACKET);
+            sLmkdSocket.connect(
+                new LocalSocketAddress("lmkd",
+                        LocalSocketAddress.Namespace.RESERVED));
+            sLmkdOutputStream = sLmkdSocket.getOutputStream();
+        } catch (IOException ex) {
+            Slog.w(ActivityManagerService.TAG,
+                   "lowmemorykiller daemon socket open failed");
+            sLmkdSocket = null;
+            return false;
+        }
+
+        return true;
+    }
+
+    private static void writeLmkd(ByteBuffer buf) {
+
+        for (int i = 0; i < 3; i++) {
+            if (sLmkdSocket == null) {
+                    if (openLmkdSocket() == false) {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException ie) {
+                        }
+                        continue;
+                    }
+            }
+
+            try {
+                sLmkdOutputStream.write(buf.array(), 0, buf.position());
+                return;
+            } catch (IOException ex) {
+                Slog.w(ActivityManagerService.TAG,
+                       "Error writing to lowmemorykiller socket");
+
                 try {
-                    fos.close();
-                } catch (IOException e) {
+                    sLmkdSocket.close();
+                } catch (IOException ex2) {
                 }
+
+                sLmkdSocket = null;
             }
         }
     }
