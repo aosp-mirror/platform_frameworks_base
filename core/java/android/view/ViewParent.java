@@ -271,8 +271,6 @@ public interface ViewParent {
      *
      * @param child Child view whose state has changed
      * @param hasTransientState true if this child has transient state
-     *
-     * @hide
      */
     public void childHasTransientStateChanged(View child, boolean hasTransientState);
 
@@ -295,9 +293,7 @@ public interface ViewParent {
      * A child notifies its parent that the accessibility state of a subtree rooted
      * at a given node changed. That is the structure of the subtree is different.
      *
-     * @param The root of the changed subtree.
-     *
-     * @hide
+     * @param root The root of the changed subtree.
      */
     public void childAccessibilityStateChanged(View root);
 
@@ -306,8 +302,6 @@ public interface ViewParent {
      * See {@link View#setLayoutDirection(int)}
      *
      * @return True if this view parent can resolve the layout direction.
-     *
-     * @hide
      */
     public boolean canResolveLayoutDirection();
 
@@ -316,8 +310,6 @@ public interface ViewParent {
      * See {@link View#setLayoutDirection(int)}
      *
      * @return True if this view parent layout direction is resolved.
-     *
-     * @hide
      */
     public boolean isLayoutDirectionResolved();
 
@@ -326,8 +318,6 @@ public interface ViewParent {
      *
      * @return {@link View#LAYOUT_DIRECTION_RTL} if the layout direction is RTL or returns
      * {@link View#LAYOUT_DIRECTION_LTR} if the layout direction is not RTL.
-     *
-     * @hide
      */
     public int getLayoutDirection();
 
@@ -336,8 +326,6 @@ public interface ViewParent {
      * See {@link View#setTextDirection(int)}
      *
      * @return True if this view parent can resolve the text direction.
-     *
-     * @hide
      */
     public boolean canResolveTextDirection();
 
@@ -346,8 +334,6 @@ public interface ViewParent {
      * See {@link View#setTextDirection(int)}
      *
      * @return True if this view parent text direction is resolved.
-     *
-     * @hide
      */
     public boolean isTextDirectionResolved();
 
@@ -361,8 +347,6 @@ public interface ViewParent {
      * {@link View#TEXT_DIRECTION_LTR},
      * {@link View#TEXT_DIRECTION_RTL},
      * {@link View#TEXT_DIRECTION_LOCALE}
-     *
-     * @hide
      */
     public int getTextDirection();
 
@@ -371,8 +355,6 @@ public interface ViewParent {
      * See {@link View#setTextAlignment(int)}
      *
      * @return True if this view parent can resolve the text alignment.
-     *
-     * @hide
      */
     public boolean canResolveTextAlignment();
 
@@ -381,8 +363,6 @@ public interface ViewParent {
      * See {@link View#setTextAlignment(int)}
      *
      * @return True if this view parent text alignment is resolved.
-     *
-     * @hide
      */
     public boolean isTextAlignmentResolved();
 
@@ -397,8 +377,6 @@ public interface ViewParent {
      * {@link View#TEXT_ALIGNMENT_TEXT_END},
      * {@link View#TEXT_ALIGNMENT_VIEW_START},
      * {@link View#TEXT_ALIGNMENT_VIEW_END}
-     *
-     * @hide
      */
     public int getTextAlignment();
 }

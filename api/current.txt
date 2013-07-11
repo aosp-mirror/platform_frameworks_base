@@ -26541,6 +26541,9 @@ package android.view {
     method public void buildDrawingCache(boolean);
     method public void buildLayer();
     method public boolean callOnClick();
+    method public boolean canResolveLayoutDirection();
+    method public boolean canResolveTextAlignment();
+    method public boolean canResolveTextDirection();
     method public boolean canScrollHorizontally(int);
     method public boolean canScrollVertically(int);
     method public void cancelLongPress();
@@ -26745,6 +26748,7 @@ package android.view {
     method public boolean isInEditMode();
     method public boolean isInLayout();
     method public boolean isInTouchMode();
+    method public boolean isLayoutDirectionResolved();
     method public boolean isLayoutRequested();
     method public boolean isLongClickable();
     method public boolean isOpaque();
@@ -26758,6 +26762,8 @@ package android.view {
     method public boolean isSelected();
     method public boolean isShown();
     method public boolean isSoundEffectsEnabled();
+    method public boolean isTextAlignmentResolved();
+    method public boolean isTextDirectionResolved();
     method public boolean isVerticalFadingEdgeEnabled();
     method public boolean isVerticalScrollBarEnabled();
     method public void jumpDrawablesToCurrentState();
@@ -27261,7 +27267,9 @@ package android.view {
     method public void bringChildToFront(android.view.View);
     method protected boolean canAnimate();
     method protected boolean checkLayoutParams(android.view.ViewGroup.LayoutParams);
+    method public void childAccessibilityStateChanged(android.view.View);
     method public void childDrawableStateChanged(android.view.View);
+    method public void childHasTransientStateChanged(android.view.View, boolean);
     method protected void cleanupLayoutState(android.view.View);
     method public void clearChildFocus(android.view.View);
     method public void clearDisappearingChildren();
@@ -27422,17 +27430,28 @@ package android.view {
 
   public abstract interface ViewParent {
     method public abstract void bringChildToFront(android.view.View);
+    method public abstract boolean canResolveLayoutDirection();
+    method public abstract boolean canResolveTextAlignment();
+    method public abstract boolean canResolveTextDirection();
+    method public abstract void childAccessibilityStateChanged(android.view.View);
     method public abstract void childDrawableStateChanged(android.view.View);
+    method public abstract void childHasTransientStateChanged(android.view.View, boolean);
     method public abstract void clearChildFocus(android.view.View);
     method public abstract void createContextMenu(android.view.ContextMenu);
     method public abstract android.view.View focusSearch(android.view.View, int);
     method public abstract void focusableViewAvailable(android.view.View);
     method public abstract boolean getChildVisibleRect(android.view.View, android.graphics.Rect, android.graphics.Point);
+    method public abstract int getLayoutDirection();
     method public abstract android.view.ViewParent getParent();
     method public abstract android.view.ViewParent getParentForAccessibility();
+    method public abstract int getTextAlignment();
+    method public abstract int getTextDirection();
     method public abstract void invalidateChild(android.view.View, android.graphics.Rect);
     method public abstract android.view.ViewParent invalidateChildInParent(int[], android.graphics.Rect);
+    method public abstract boolean isLayoutDirectionResolved();
     method public abstract boolean isLayoutRequested();
+    method public abstract boolean isTextAlignmentResolved();
+    method public abstract boolean isTextDirectionResolved();
     method public abstract void recomputeViewAttributes(android.view.View);
     method public abstract void requestChildFocus(android.view.View, android.view.View);
     method public abstract boolean requestChildRectangleOnScreen(android.view.View, android.graphics.Rect, boolean);
