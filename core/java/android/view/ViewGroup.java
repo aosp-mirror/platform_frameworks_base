@@ -742,8 +742,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     /**
      * Called when a child view has changed whether or not it is tracking transient state.
-     *
-     * @hide
      */
     public void childHasTransientStateChanged(View child, boolean childHasTransientState) {
         final boolean oldHasTransientState = hasTransientState();
@@ -764,9 +762,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
-    /**
-     * @hide
-     */
     @Override
     public boolean hasTransientState() {
         return mChildCountWithTransientState > 0 || super.hasTransientState();
@@ -2530,13 +2525,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         event.setClassName(ViewGroup.class.getName());
     }
 
-    /**
-     * @hide
-     */
     @Override
     public void childAccessibilityStateChanged(View root) {
         if (mParent != null) {
-            mParent.childAccessibilityStateChanged(root);
+            try {
+                mParent.childAccessibilityStateChanged(root);
+            } catch (AbstractMethodError e) {
+                Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                        " does not fully implement ViewParent", e);
+            }
         }
     }
 

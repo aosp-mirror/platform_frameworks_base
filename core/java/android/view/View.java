@@ -7051,7 +7051,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if ((mPrivateFlags2 & PFLAG2_SUBTREE_ACCESSIBILITY_STATE_CHANGED) == 0) {
             mPrivateFlags2 |= PFLAG2_SUBTREE_ACCESSIBILITY_STATE_CHANGED;
             if (mParent != null) {
-                mParent.childAccessibilityStateChanged(this);
+                try {
+                    mParent.childAccessibilityStateChanged(this);
+                } catch (AbstractMethodError e) {
+                    Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                            " does not fully implement ViewParent", e);
+                }
             }
         }
     }
@@ -11944,10 +11949,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     if (!canResolveLayoutDirection()) return false;
 
                     // Parent has not yet resolved, LTR is still the default
-                    if (!mParent.isLayoutDirectionResolved()) return false;
+                    try {
+                        if (!mParent.isLayoutDirectionResolved()) return false;
 
-                    if (mParent.getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
-                        mPrivateFlags2 |= PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL;
+                        if (mParent.getLayoutDirection() == LAYOUT_DIRECTION_RTL) {
+                            mPrivateFlags2 |= PFLAG2_LAYOUT_DIRECTION_RESOLVED_RTL;
+                        }
+                    } catch (AbstractMethodError e) {
+                        Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                                " does not fully implement ViewParent", e);
                     }
                     break;
                 case LAYOUT_DIRECTION_RTL:
@@ -11973,13 +11983,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Check if layout direction resolution can be done.
      *
      * @return true if layout direction resolution can be done otherwise return false.
-     *
-     * @hide
      */
     public boolean canResolveLayoutDirection() {
         switch (getRawLayoutDirection()) {
             case LAYOUT_DIRECTION_INHERIT:
-                return (mParent != null) && mParent.canResolveLayoutDirection();
+                if (mParent != null) {
+                    try {
+                        return mParent.canResolveLayoutDirection();
+                    } catch (AbstractMethodError e) {
+                        Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                                " does not fully implement ViewParent", e);
+                    }
+                }
+                return false;
+
             default:
                 return true;
         }
@@ -12007,7 +12024,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * @return true if layout direction has been resolved.
-     * @hide
      */
     public boolean isLayoutDirectionResolved() {
         return (mPrivateFlags2 & PFLAG2_LAYOUT_DIRECTION_RESOLVED) == PFLAG2_LAYOUT_DIRECTION_RESOLVED;
@@ -17181,14 +17197,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
 
                     // Parent has not yet resolved, so we still return the default
-                    if (!mParent.isTextDirectionResolved()) {
-                        mPrivateFlags2 |= PFLAG2_TEXT_DIRECTION_RESOLVED_DEFAULT;
-                        // Resolution will need to happen again later
-                        return false;
+                    try {
+                        if (!mParent.isTextDirectionResolved()) {
+                            mPrivateFlags2 |= PFLAG2_TEXT_DIRECTION_RESOLVED_DEFAULT;
+                            // Resolution will need to happen again later
+                            return false;
+                        }
+                    } catch (AbstractMethodError e) {
+                        Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                                " does not fully implement ViewParent", e);
                     }
 
                     // Set current resolved direction to the same value as the parent's one
-                    final int parentResolvedDirection = mParent.getTextDirection();
+                    int parentResolvedDirection;
+                    try {
+                        parentResolvedDirection = mParent.getTextDirection();
+                    } catch (AbstractMethodError e) {
+                        Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                                " does not fully implement ViewParent", e);
+                        parentResolvedDirection = TEXT_DIRECTION_LTR;
+                    }
                     switch (parentResolvedDirection) {
                         case TEXT_DIRECTION_FIRST_STRONG:
                         case TEXT_DIRECTION_ANY_RTL:
@@ -17229,13 +17257,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Check if text direction resolution can be done.
      *
      * @return true if text direction resolution can be done otherwise return false.
-     *
-     * @hide
      */
     public boolean canResolveTextDirection() {
         switch (getRawTextDirection()) {
             case TEXT_DIRECTION_INHERIT:
-                return (mParent != null) && mParent.canResolveTextDirection();
+                if (mParent != null) {
+                    try {
+                        return mParent.canResolveTextDirection();
+                    } catch (AbstractMethodError e) {
+                        Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                                " does not fully implement ViewParent", e);
+                    }
+                }
+                return false;
+
             default:
                 return true;
         }
@@ -17265,8 +17300,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * @return true if text direction is resolved.
-     *
-     * @hide
      */
     public boolean isTextDirectionResolved() {
         return (mPrivateFlags2 & PFLAG2_TEXT_DIRECTION_RESOLVED) == PFLAG2_TEXT_DIRECTION_RESOLVED;
@@ -17393,13 +17426,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
 
                     // Parent has not yet resolved, so we still return the default
-                    if (!mParent.isTextAlignmentResolved()) {
-                        mPrivateFlags2 |= PFLAG2_TEXT_ALIGNMENT_RESOLVED_DEFAULT;
-                        // Resolution will need to happen again later
-                        return false;
+                    try {
+                        if (!mParent.isTextAlignmentResolved()) {
+                            mPrivateFlags2 |= PFLAG2_TEXT_ALIGNMENT_RESOLVED_DEFAULT;
+                            // Resolution will need to happen again later
+                            return false;
+                        }
+                    } catch (AbstractMethodError e) {
+                        Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                                " does not fully implement ViewParent", e);
                     }
 
-                    final int parentResolvedTextAlignment = mParent.getTextAlignment();
+                    int parentResolvedTextAlignment;
+                    try {
+                        parentResolvedTextAlignment = mParent.getTextAlignment();
+                    } catch (AbstractMethodError e) {
+                        Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                                " does not fully implement ViewParent", e);
+                        parentResolvedTextAlignment = TEXT_ALIGNMENT_GRAVITY;
+                    }
                     switch (parentResolvedTextAlignment) {
                         case TEXT_ALIGNMENT_GRAVITY:
                         case TEXT_ALIGNMENT_TEXT_START:
@@ -17444,13 +17489,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Check if text alignment resolution can be done.
      *
      * @return true if text alignment resolution can be done otherwise return false.
-     *
-     * @hide
      */
     public boolean canResolveTextAlignment() {
         switch (getRawTextAlignment()) {
             case TEXT_DIRECTION_INHERIT:
-                return (mParent != null) && mParent.canResolveTextAlignment();
+                if (mParent != null) {
+                    try {
+                        return mParent.canResolveTextAlignment();
+                    } catch (AbstractMethodError e) {
+                        Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
+                                " does not fully implement ViewParent", e);
+                    }
+                }
+                return false;
+
             default:
                 return true;
         }
@@ -17480,8 +17532,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
     /**
      * @return true if text alignment is resolved.
-     *
-     * @hide
      */
     public boolean isTextAlignmentResolved() {
         return (mPrivateFlags2 & PFLAG2_TEXT_ALIGNMENT_RESOLVED) == PFLAG2_TEXT_ALIGNMENT_RESOLVED;
