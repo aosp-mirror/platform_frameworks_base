@@ -84,6 +84,7 @@ public class Am extends BaseCommand {
                 "               [--R COUNT] [-S] [--opengl-trace]\n" +
                 "               [--user <USER_ID> | current] <INTENT>\n" +
                 "       am startservice [--user <USER_ID> | current] <INTENT>\n" +
+                "       am stopservice [--user <USER_ID> | current] <INTENT>\n" +
                 "       am force-stop [--user <USER_ID> | all | current] <PACKAGE>\n" +
                 "       am kill [--user <USER_ID> | all | current] <PACKAGE>\n" +
                 "       am kill-all\n" +
@@ -122,6 +123,10 @@ public class Am extends BaseCommand {
                 "        specified then run as the current user.\n" +
                 "\n" +
                 "am startservice: start a Service.  Options are:\n" +
+                "    --user <USER_ID> | current: Specify which user to run as; if not\n" +
+                "        specified then run as the current user.\n" +
+                "\n" +
+                "am stopservice: stop a Service.  Options are:\n" +
                 "    --user <USER_ID> | current: Specify which user to run as; if not\n" +
                 "        specified then run as the current user.\n" +
                 "\n" +
@@ -259,6 +264,8 @@ public class Am extends BaseCommand {
             runStart();
         } else if (op.equals("startservice")) {
             runStartService();
+        } else if (op.equals("stopservice")) {
+            runStopService();
         } else if (op.equals("force-stop")) {
             runForceStop();
         } else if (op.equals("kill")) {
@@ -571,6 +578,23 @@ public class Am extends BaseCommand {
             System.err.println("Error: Requires permission " + cn.getClassName());
         } else if (cn.getPackageName().equals("!!")) {
             System.err.println("Error: " + cn.getClassName());
+        }
+    }
+
+    private void runStopService() throws Exception {
+        Intent intent = makeIntent(UserHandle.USER_CURRENT);
+        if (mUserId == UserHandle.USER_ALL) {
+            System.err.println("Error: Can't stop activity with user 'all'");
+            return;
+        }
+        System.out.println("Stopping service: " + intent);
+        int result = mAm.stopService(null, intent, intent.getType(), mUserId);
+        if (result == 0) {
+            System.err.println("Service not stopped: was not running.");
+        } else if (result == 1) {
+            System.err.println("Service stopped");
+        } else if (result == -1) {
+            System.err.println("Error stopping service");
         }
     }
 
