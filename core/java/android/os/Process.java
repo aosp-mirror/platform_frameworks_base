@@ -892,19 +892,6 @@ public class Process {
     }
 
     /**
-     * Set the out-of-memory badness adjustment for a process.
-     * 
-     * @param pid The process identifier to set.
-     * @param amt Adjustment value -- linux allows -16 to +15.
-     * 
-     * @return Returns true if the underlying system supports this
-     *         feature, else false.
-     *         
-     * {@hide}
-     */
-    public static final native boolean setOomAdj(int pid, int amt);
-
-    /**
      * Adjust the swappiness level for a process.
      *
      * @param pid The process identifier to set.

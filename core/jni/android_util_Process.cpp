@@ -344,23 +344,6 @@ jint android_os_Process_getThreadPriority(JNIEnv* env, jobject clazz,
     return pri;
 }
 
-jboolean android_os_Process_setOomAdj(JNIEnv* env, jobject clazz,
-                                      jint pid, jint adj)
-{
-#ifdef HAVE_OOM_ADJ
-    char text[64];
-    sprintf(text, "/proc/%d/oom_adj", pid);
-    int fd = open(text, O_WRONLY);
-    if (fd >= 0) {
-        sprintf(text, "%d", adj);
-        write(fd, text, strlen(text));
-        close(fd);
-    }
-    return true;
-#endif
-    return false;
-}
-
 jboolean android_os_Process_setSwappiness(JNIEnv *env, jobject clazz,
                                           jint pid, jboolean is_increased)
 {
@@ -1023,7 +1006,6 @@ static const JNINativeMethod methods[] = {
     {"setThreadGroup",      "(II)V", (void*)android_os_Process_setThreadGroup},
     {"setProcessGroup",     "(II)V", (void*)android_os_Process_setProcessGroup},
     {"getProcessGroup",     "(I)I", (void*)android_os_Process_getProcessGroup},
-    {"setOomAdj",   "(II)Z", (void*)android_os_Process_setOomAdj},
     {"setSwappiness",   "(IZ)Z", (void*)android_os_Process_setSwappiness},
     {"setArgV0",    "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
     {"setUid", "(I)I", (void*)android_os_Process_setUid},

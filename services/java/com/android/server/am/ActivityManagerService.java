@@ -3245,9 +3245,13 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     private final void handleAppDiedLocked(ProcessRecord app,
             boolean restarting, boolean allowRestart) {
+        int pid = app.pid;
         cleanUpApplicationRecordLocked(app, restarting, allowRestart, -1);
         if (!restarting) {
             mLruProcesses.remove(app);
+            if (pid > 0) {
+                ProcessList.remove(pid);
+            }
         }
 
         if (mProfileProc == app) {
@@ -11760,6 +11764,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             boolean restarting, boolean allowRestart, int index) {
         if (index >= 0) {
             mLruProcesses.remove(index);
+            ProcessList.remove(app.pid);
         }
 
         mProcessesToGc.remove(app);
@@ -14597,16 +14602,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (app.curAdj != app.setAdj) {
-            if (Process.setOomAdj(app.pid, app.curAdj)) {
-                if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(
-                    TAG, "Set " + app.pid + " " + app.processName +
-                    " adj " + app.curAdj + ": " + app.adjType);
-                app.setAdj = app.curAdj;
-            } else {
-                success = false;
-                Slog.w(TAG, "Failed setting oom adj of " + app + " to " + app.curAdj);
-            }
+            ProcessList.setOomAdj(app.pid, app.curAdj);
+            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(
+                TAG, "Set " + app.pid + " " + app.processName +
+                " adj " + app.curAdj + ": " + app.adjType);
+            app.setAdj = app.curAdj;
         }
+
         if (app.setSchedGroup != app.curSchedGroup) {
             app.setSchedGroup = app.curSchedGroup;
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG,
