@@ -3,7 +3,14 @@ page.trainingcourse=true
 page.metaDescription=Android Training provides a collection of classes that aim to help you build great apps for Android. Each class explains the steps required to solve a problem or implement a feature using code snippets and sample code for you to use in your apps.
 
 @jd:body
-
+<div id="butterbar-wrapper" >
+  <div id="butterbar" >
+    <div id="butterbar-message">
+<a target="_blank" href="https://docs.google.com/a/google.com/forms/d/1EHLPGqhbxj2HungHRRN4_0K9TGpc-Izy-u46vBDgS8Q/viewform">
+      Take the Android Developer Survey</a>
+    </div>
+  </div>
+</div>
 
 <p>Welcome to Training for Android developers. Here you'll find sets of lessons within classes
 that describe how to accomplish a specific task with code samples you can re-use in your app.

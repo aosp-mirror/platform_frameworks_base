@@ -3,6 +3,14 @@ no_footer_links=true
 carousel=true
 page.metaDescription=The official site for Android developers. Provides the Android SDK and documentation for app developers and designers.
 @jd:body
+<div id="butterbar-wrapper" >
+  <div id="butterbar" >
+    <div id="butterbar-message">
+<a target="_blank" href="https://docs.google.com/a/google.com/forms/d/1EHLPGqhbxj2HungHRRN4_0K9TGpc-Izy-u46vBDgS8Q/viewform">
+      Take the Android Developer Survey</a>
+    </div>
+  </div>
+</div>
 
 
 <div class="wrap">
