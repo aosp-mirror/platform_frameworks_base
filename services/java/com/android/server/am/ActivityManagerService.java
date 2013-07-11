@@ -10989,23 +10989,37 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     final static class MemItem {
+        final boolean isProc;
         final String label;
         final String shortLabel;
         final long pss;
         final int id;
+        final boolean hasActivities;
         ArrayList<MemItem> subitems;
 
-        public MemItem(String _label, String _shortLabel, long _pss, int _id) {
+        public MemItem(String _label, String _shortLabel, long _pss, int _id,
+                boolean _hasActivities) {
+            isProc = true;
             label = _label;
             shortLabel = _shortLabel;
             pss = _pss;
             id = _id;
+            hasActivities = _hasActivities;
+        }
+
+        public MemItem(String _label, String _shortLabel, long _pss, int _id) {
+            isProc = false;
+            label = _label;
+            shortLabel = _shortLabel;
+            pss = _pss;
+            id = _id;
+            hasActivities = false;
         }
     }
 
-    static final void dumpMemItems(PrintWriter pw, String prefix, ArrayList<MemItem> items,
-            boolean sort) {
-        if (sort) {
+    static final void dumpMemItems(PrintWriter pw, String prefix, String tag,
+            ArrayList<MemItem> items, boolean sort, boolean isCompact) {
+        if (sort && !isCompact) {
             Collections.sort(items, new Comparator<MemItem>() {
                 @Override
                 public int compare(MemItem lhs, MemItem rhs) {
@@ -11021,9 +11035,19 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         for (int i=0; i<items.size(); i++) {
             MemItem mi = items.get(i);
-            pw.print(prefix); pw.printf("%7d kB: ", mi.pss); pw.println(mi.label);
+            if (!isCompact) {
+                pw.print(prefix); pw.printf("%7d kB: ", mi.pss); pw.println(mi.label);
+            } else if (mi.isProc) {
+                pw.print("proc,"); pw.print(tag); pw.print(","); pw.print(mi.shortLabel);
+                pw.print(","); pw.print(mi.id); pw.print(","); pw.print(mi.pss);
+                pw.println(mi.hasActivities ? ",a" : ",e");
+            } else {
+                pw.print(tag); pw.print(","); pw.print(mi.shortLabel); pw.print(",");
+                pw.println(mi.pss);
+            }
             if (mi.subitems != null) {
-                dumpMemItems(pw, prefix + "           ", mi.subitems, true);
+                dumpMemItems(pw, prefix + "           ", mi.shortLabel, mi.subitems,
+                        true, isCompact);
             }
         }
     }
@@ -11068,6 +11092,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             "Backup", "A Services", "Home", "Previous",
             "B Services", "Cached"
     };
+    static final String[] DUMP_MEM_OOM_COMPACT_LABEL = new String[] {
+            "sys", "pers", "fore",
+            "vis", "percept", "heavy",
+            "backup", "servicea", "home", "prev",
+            "serviceb", "cached"
+    };
 
     final void dumpApplicationMemoryUsage(FileDescriptor fd,
             PrintWriter pw, String prefix, String[] args, boolean brief,
@@ -11075,6 +11105,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         boolean dumpDetails = false;
         boolean dumpDalvik = false;
         boolean oomOnly = false;
+        boolean isCompact = false;
         
         int opti = 0;
         while (opti < args.length) {
@@ -11088,12 +11119,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                 dumpDalvik = true;
             } else if ("-d".equals(opt)) {
                 dumpDalvik = true;
+            } else if ("-c".equals(opt)) {
+                isCompact = true;
             } else if ("--oom".equals(opt)) {
                 oomOnly = true;
             } else if ("-h".equals(opt)) {
-                pw.println("meminfo dump options: [-a] [--oom] [process]");
+                pw.println("meminfo dump options: [-a] [-d] [-c] [--oom] [process]");
                 pw.println("  -a: include all available information for each process.");
                 pw.println("  -d: include dalvik details when dumping process details.");
+                pw.println("  -c: dump in a compact machine-parseable representation.");
                 pw.println("  --oom: only show processes organized by oom adj.");
                 pw.println("If [process] is specified it can be the name or ");
                 pw.println("pid of a specific process to dump.");
@@ -11116,10 +11150,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             dumpDetails = true;
         }
 
-        if (isCheckinRequest) {
+        if (isCheckinRequest || isCompact) {
             // short checkin version
-            pw.println(uptime + "," + realtime);
-            pw.flush();
+            pw.print("time,"); pw.print(uptime); pw.print(","); pw.println(realtime);
         } else {
             pw.println("Applications Memory Usage (kB):");
             pw.println("Uptime: " + uptime + " Realtime: " + realtime);
@@ -11141,20 +11174,24 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         Debug.MemoryInfo mi = null;
         for (int i = procs.size() - 1 ; i >= 0 ; i--) {
-            ProcessRecord r = procs.get(i);
-            IApplicationThread thread;
-            int oomAdj;
+            final ProcessRecord r = procs.get(i);
+            final IApplicationThread thread;
+            final int pid;
+            final int oomAdj;
+            final boolean hasActivities;
             synchronized (this) {
                 thread = r.thread;
+                pid = r.pid;
                 oomAdj = r.getSetAdjWithServices();
+                hasActivities = r.hasActivities;
             }
             if (thread != null) {
                 if (!isCheckinRequest && dumpDetails) {
-                    pw.println("\n** MEMINFO in pid " + r.pid + " [" + r.processName + "] **");
-                    pw.flush();
+                    pw.println("\n** MEMINFO in pid " + pid + " [" + r.processName + "] **");
                 }
                 if (dumpDetails) {
                     try {
+                        pw.flush();
                         mi = null;
                         mi = thread.dumpMemInfo(fd, isCheckinRequest, true, dumpDalvik, innerArgs);
                     } catch (RemoteException e) {
@@ -11168,9 +11205,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                         mi = new Debug.MemoryInfo();
                     }
                     if (!brief && !oomOnly) {
-                        Debug.getMemoryInfo(r.pid, mi);
+                        Debug.getMemoryInfo(pid, mi);
                     } else {
-                        mi.dalvikPss = (int)Debug.getPss(r.pid);
+                        mi.dalvikPss = (int)Debug.getPss(pid);
                     }
                 }
 
@@ -11185,8 +11222,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 if (!isCheckinRequest && mi != null) {
                     totalPss += myTotalPss;
-                    MemItem pssItem = new MemItem(r.processName + " (pid " + r.pid + ")",
-                            r.processName, myTotalPss, 0);
+                    MemItem pssItem = new MemItem(r.processName + " (pid " + pid +
+                            (hasActivities ? " / activities)" : ")"),
+                            r.processName, myTotalPss, pid, hasActivities);
                     procMems.add(pssItem);
 
                     nativePss += mi.nativePss;
@@ -11203,7 +11241,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
 
                     for (int oomIndex=0; oomIndex<oomPss.length; oomIndex++) {
-                        if (r.setAdj <= DUMP_MEM_OOM_ADJ[oomIndex]
+                        if (oomAdj <= DUMP_MEM_OOM_ADJ[oomIndex]
                                 || oomIndex == (oomPss.length-1)) {
                             oomPss[oomIndex] += myTotalPss;
                             if (oomProcs[oomIndex] == null) {
@@ -11231,7 +11269,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             ArrayList<MemItem> oomMems = new ArrayList<MemItem>();
             for (int j=0; j<oomPss.length; j++) {
                 if (oomPss[j] != 0) {
-                    String label = DUMP_MEM_OOM_LABEL[j];
+                    String label = isCompact ? DUMP_MEM_OOM_COMPACT_LABEL[j]
+                            : DUMP_MEM_OOM_LABEL[j];
                     MemItem item = new MemItem(label, label, oomPss[j],
                             DUMP_MEM_OOM_ADJ[j]);
                     item.subitems = oomProcs[j];
@@ -11301,29 +11340,45 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
 
-            if (!brief && !oomOnly) {
+            if (!brief && !oomOnly && !isCompact) {
                 pw.println();
                 pw.println("Total PSS by process:");
-                dumpMemItems(pw, "  ", procMems, true);
+                dumpMemItems(pw, "  ", "proc", procMems, true, isCompact);
                 pw.println();
             }
-            pw.println("Total PSS by OOM adjustment:");
-            dumpMemItems(pw, "  ", oomMems, false);
+            if (!isCompact) {
+                pw.println("Total PSS by OOM adjustment:");
+            }
+            dumpMemItems(pw, "  ", "oom", oomMems, false, isCompact);
             if (!brief && !oomOnly) {
                 PrintWriter out = categoryPw != null ? categoryPw : pw;
-                out.println();
-                out.println("Total PSS by category:");
-                dumpMemItems(out, "  ", catMems, true);
+                if (!isCompact) {
+                    out.println();
+                    out.println("Total PSS by category:");
+                }
+                dumpMemItems(out, "  ", "cat", catMems, true, isCompact);
             }
-            pw.println();
+            if (!isCompact) {
+                pw.println();
+            }
             if (!brief) {
                 MemInfoReader memInfo = new MemInfoReader();
                 memInfo.readMemInfo();
-                pw.print("Total RAM: "); pw.print(memInfo.getTotalSize()/1024); pw.println(" kB");
-                pw.print(" Free RAM: "); pw.print(cachedPss + (memInfo.getCachedSize()/1024)
-                        + (memInfo.getFreeSize()/1024)); pw.println(" kB");
+                if (!isCompact) {
+                    pw.print("Total RAM: "); pw.print(memInfo.getTotalSize()/1024);
+                    pw.println(" kB");
+                    pw.print(" Free RAM: "); pw.print(cachedPss + (memInfo.getCachedSize()/1024)
+                            + (memInfo.getFreeSize()/1024)); pw.println(" kB");
+                } else {
+                    pw.print("ram,"); pw.print(memInfo.getTotalSize()/1024); pw.print(",");
+                    pw.print(cachedPss + (memInfo.getCachedSize()/1024)
+                            + (memInfo.getFreeSize()/1024)); pw.print(",");
+                    pw.println(totalPss - cachedPss);
+                }
             }
-            pw.print(" Used PSS: "); pw.print(totalPss - cachedPss); pw.println(" kB");
+            if (!isCompact) {
+                pw.print(" Used PSS: "); pw.print(totalPss - cachedPss); pw.println(" kB");
+            }
             if (!brief) {
                 final int[] SINGLE_LONG_FORMAT = new int[] {
                     Process.PROC_SPACE_TERM|Process.PROC_OUT_LONG
@@ -11344,11 +11399,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                 Process.readProcFile("/sys/kernel/mm/ksm/pages_volatile",
                         SINGLE_LONG_FORMAT, null, longOut, null);
                 long voltile = longOut[0] * ProcessList.PAGE_SIZE / 1024;
-                if (sharing != 0 || shared != 0 || unshared != 0 || voltile != 0) {
-                    pw.print("      KSM: "); pw.print(sharing); pw.print(" kB saved from shared ");
-                            pw.print(shared); pw.println(" kB");
-                    pw.print("           "); pw.print(unshared); pw.print(" kB unshared; ");
-                            pw.print(voltile); pw.println(" kB volatile");
+                if (!isCompact) {
+                    if (sharing != 0 || shared != 0 || unshared != 0 || voltile != 0) {
+                        pw.print("      KSM: "); pw.print(sharing);
+                                pw.print(" kB saved from shared ");
+                                pw.print(shared); pw.println(" kB");
+                        pw.print("           "); pw.print(unshared); pw.print(" kB unshared; ");
+                                pw.print(voltile); pw.println(" kB volatile");
+                    }
+                } else {
+                    pw.print("ksm,"); pw.print(sharing); pw.print(",");
+                    pw.print(shared); pw.print(","); pw.print(unshared); pw.print(",");
+                    pw.println(voltile);
                 }
             }
         }

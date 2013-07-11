@@ -465,8 +465,10 @@ final class ProcessRecord {
     }
 
     public int getSetAdjWithServices() {
-        if (setAdj >= ProcessList.CACHED_APP_MIN_ADJ && hasStartedServices) {
-            return ProcessList.SERVICE_B_ADJ;
+        if (setAdj >= ProcessList.CACHED_APP_MIN_ADJ) {
+            if (hasStartedServices) {
+                return ProcessList.SERVICE_B_ADJ;
+            }
         }
         return setAdj;
     }
