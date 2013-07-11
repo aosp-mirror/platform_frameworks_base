@@ -104,6 +104,11 @@ public class NetworkUtils {
     public native static String getDhcpError();
 
     /**
+     * Set the SO_MARK of {@code socketfd} to {@code mark}
+     */
+    public native static void markSocket(int socketfd, int mark);
+
+    /**
      * Convert a IPv4 address from an integer to an InetAddress.
      * @param hostAddress an int corresponding to the IPv4 address in network byte order
      */
