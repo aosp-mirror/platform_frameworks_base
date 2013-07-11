@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.os.Trace;
 import com.android.internal.R;
 import com.android.internal.util.Predicate;
 import com.google.android.collect.Lists;
@@ -1876,6 +1877,8 @@ public class ListView extends AbsListView {
      */
     private void setupChild(View child, int position, int y, boolean flowDown, int childrenLeft,
             boolean selected, boolean recycled) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "setupListItem");
+
         final boolean isSelected = selected && shouldShowSelector();
         final boolean updateChildSelected = isSelected != child.isSelected();
         final int mode = mTouchMode;
@@ -1956,6 +1959,8 @@ public class ListView extends AbsListView {
                 != position) {
             child.jumpDrawablesToCurrentState();
         }
+
+        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
     }
 
     @Override

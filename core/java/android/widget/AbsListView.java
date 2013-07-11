@@ -28,6 +28,7 @@ import android.os.Debug;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.StrictMode;
+import android.os.Trace;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -2151,6 +2152,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @return A view displaying the data associated with the specified position
      */
     View obtainView(int position, boolean[] isScrap) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "obtainView");
+
         isScrap[0] = false;
         View scrapView;
 
@@ -2212,6 +2215,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 child.setAccessibilityDelegate(mAccessibilityDelegate);
             }
         }
+
+        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
 
         return child;
     }

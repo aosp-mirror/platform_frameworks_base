@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -1364,6 +1365,8 @@ public class GridView extends AbsListView {
      */
     private void setupChild(View child, int position, int y, boolean flow, int childrenLeft,
             boolean selected, boolean recycled, int where) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, "setupGridItem");
+
         boolean isSelected = selected && shouldShowSelector();
         final boolean updateChildSelected = isSelected != child.isSelected();
         final int mode = mTouchMode;
@@ -1459,6 +1462,8 @@ public class GridView extends AbsListView {
                 != position) {
             child.jumpDrawablesToCurrentState();
         }
+
+        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
     }
 
     /**
