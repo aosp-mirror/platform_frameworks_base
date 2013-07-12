@@ -182,14 +182,15 @@ public class TransitionManager {
 
     private static void sceneChangeSetup(ViewGroup sceneRoot, Transition transition) {
 
-        Transition runningTransition = sRunningTransitions.get(sceneRoot);
-        if (runningTransition != null) {
-            runningTransition.cancelTransition();
-        }
-
         // Capture current values
+        Transition runningTransition = sRunningTransitions.get(sceneRoot);
+
         if (transition != null) {
             transition.captureValues(sceneRoot, true);
+        }
+
+        if (runningTransition != null) {
+            runningTransition.cancelTransition();
         }
 
         // Notify previous scene that it is being exited
