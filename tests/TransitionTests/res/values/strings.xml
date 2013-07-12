@@ -49,4 +49,12 @@
     <string name="button3">Button 3</string>
     <string name="button4">Button 4</string>
     <string name="button5">Button 5</string>
+    <string name="a">A</string>
+    <string name="b">B</string>
+    <string name="c">C</string>
+    <string name="reveal">Reveal</string>
+    <string name="crossfade">Crossfade</string>
+    <string name="inout">In/Out</string>
+    <string name="textfade1">T1</string>
+    <string name="textfade2">T2</string>
 </resources>

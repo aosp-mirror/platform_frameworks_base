@@ -28856,6 +28856,7 @@ package android.view.transition {
     method public void setFadeBehavior(int);
     method public void setResizeBehavior(int);
     field public static final int FADE_BEHAVIOR_CROSSFADE = 0; // 0x0
+    field public static final int FADE_BEHAVIOR_OUT_IN = 2; // 0x2
     field public static final int FADE_BEHAVIOR_REVEAL = 1; // 0x1
     field public static final int RESIZE_BEHAVIOR_NONE = 0; // 0x0
     field public static final int RESIZE_BEHAVIOR_SCALE = 1; // 0x1
@@ -28903,6 +28904,11 @@ package android.view.transition {
   public class TextChange extends android.view.transition.Transition {
     ctor public TextChange();
     method protected void captureValues(android.view.transition.TransitionValues, boolean);
+    method public void setChangeBehavior(int);
+    field public static final int CHANGE_BEHAVIOR_IN = 2; // 0x2
+    field public static final int CHANGE_BEHAVIOR_KEEP = 0; // 0x0
+    field public static final int CHANGE_BEHAVIOR_OUT = 1; // 0x1
+    field public static final int CHANGE_BEHAVIOR_OUT_IN = 3; // 0x3
   }
 
   public abstract class Transition implements java.lang.Cloneable {

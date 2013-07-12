@@ -24,6 +24,7 @@ import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -79,6 +80,15 @@ public class Crossfade extends Transition {
      * @see #setFadeBehavior(int)
      */
     public static final int FADE_BEHAVIOR_REVEAL = 1;
+    /**
+     * Flag specifying that the fading animation should first fade
+     * out the original representation completely and then fade in the
+     * new one. This effect may be more suitable than the other
+     * fade behaviors for views with.
+     *
+     * @see #setFadeBehavior(int)
+     */
+    public static final int FADE_BEHAVIOR_OUT_IN = 2;
 
     /**
      * Flag specifying that the transition should not animate any
@@ -112,7 +122,7 @@ public class Crossfade extends Transition {
      * transition is run.
      */
     public void setFadeBehavior(int fadeBehavior) {
-        if (fadeBehavior >= FADE_BEHAVIOR_CROSSFADE && fadeBehavior <= FADE_BEHAVIOR_REVEAL) {
+        if (fadeBehavior >= FADE_BEHAVIOR_CROSSFADE && fadeBehavior <= FADE_BEHAVIOR_OUT_IN) {
             mFadeBehavior = fadeBehavior;
         }
     }
@@ -145,6 +155,7 @@ public class Crossfade extends Transition {
         if (startValues == null || endValues == null) {
             return null;
         }
+        final boolean useParentOverlay = mFadeBehavior != FADE_BEHAVIOR_REVEAL;
         final View view = endValues.view;
         Map<String, Object> startVals = startValues.values;
         Map<String, Object> endVals = endValues.values;
@@ -159,8 +170,8 @@ public class Crossfade extends Transition {
                     " for start, end: " + startBitmap + ", " + endBitmap);
         }
         if (startDrawable != null && endDrawable != null && !startBitmap.sameAs(endBitmap)) {
-            ViewOverlay overlay = (mFadeBehavior == FADE_BEHAVIOR_REVEAL) ?
-                    view.getOverlay() : ((ViewGroup) view.getParent()).getOverlay();
+            ViewOverlay overlay = useParentOverlay ?
+                    ((ViewGroup) view.getParent()).getOverlay() : view.getOverlay();
             if (mFadeBehavior == FADE_BEHAVIOR_REVEAL) {
                 overlay.add(endDrawable);
             }
@@ -169,7 +180,13 @@ public class Crossfade extends Transition {
             // gradually fading out the start drawable. So it's not really a cross-fade, but rather
             // a reveal of the end scene over time. Also, animate the bounds of both drawables
             // to mimic the change in the size of the view itself between scenes.
-            ObjectAnimator anim = ObjectAnimator.ofInt(startDrawable, "alpha", 0);
+            ObjectAnimator anim;
+            if (mFadeBehavior == FADE_BEHAVIOR_OUT_IN) {
+                // Fade out completely halfway through the transition
+                anim = ObjectAnimator.ofInt(startDrawable, "alpha", 255, 0, 0);
+            } else {
+                anim = ObjectAnimator.ofInt(startDrawable, "alpha", 0);
+            }
             anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
@@ -178,7 +195,10 @@ public class Crossfade extends Transition {
                 }
             });
             ObjectAnimator anim1 = null;
-            if (mFadeBehavior == FADE_BEHAVIOR_CROSSFADE) {
+            if (mFadeBehavior == FADE_BEHAVIOR_OUT_IN) {
+                // start fading in halfway through the transition
+                anim1 = ObjectAnimator.ofFloat(view, View.ALPHA, 0, 0, 1);
+            } else if (mFadeBehavior == FADE_BEHAVIOR_CROSSFADE) {
                 anim1 = ObjectAnimator.ofFloat(view, View.ALPHA, 0, 1);
             }
             if (Transition.DBG) {
@@ -188,8 +208,8 @@ public class Crossfade extends Transition {
             anim.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    ViewOverlay overlay = (mFadeBehavior == FADE_BEHAVIOR_REVEAL) ?
-                            view.getOverlay() : ((ViewGroup) view.getParent()).getOverlay();
+                    ViewOverlay overlay = useParentOverlay ?
+                            ((ViewGroup) view.getParent()).getOverlay() : view.getOverlay();
                     overlay.remove(startDrawable);
                     if (mFadeBehavior == FADE_BEHAVIOR_REVEAL) {
                         overlay.remove(endDrawable);
@@ -227,7 +247,7 @@ public class Crossfade extends Transition {
     protected void captureValues(TransitionValues values, boolean start) {
         View view = values.view;
         Rect bounds = new Rect(0, 0, view.getWidth(), view.getHeight());
-        if (mFadeBehavior == FADE_BEHAVIOR_CROSSFADE) {
+        if (mFadeBehavior != FADE_BEHAVIOR_REVEAL) {
             bounds.offset(view.getLeft(), view.getTop());
         }
         values.values.put(PROPNAME_BOUNDS, bounds);

@@ -509,6 +509,15 @@ public abstract class Transition implements Cloneable {
      * false otherwise
      */
     void captureValues(ViewGroup sceneRoot, boolean start) {
+        if (start) {
+            mStartValues.viewValues.clear();
+            mStartValues.idValues.clear();
+            mStartValues.itemIdValues.clear();
+        } else {
+            mEndValues.viewValues.clear();
+            mEndValues.idValues.clear();
+            mEndValues.itemIdValues.clear();
+        }
         if (mTargetIds != null && mTargetIds.length > 0 ||
                 mTargets != null && mTargets.length > 0) {
             if (mTargetIds != null) {
@@ -774,13 +783,6 @@ public abstract class Transition implements Cloneable {
                     v.setHasTransientState(false);
                 }
             }
-            mStartValues.viewValues.clear();
-            mStartValues.idValues.clear();
-            mStartValues.itemIdValues.clear();
-            mEndValues.viewValues.clear();
-            mEndValues.idValues.clear();
-            mEndValues.itemIdValues.clear();
-            mCurrentAnimators.clear();
         }
     }
 
