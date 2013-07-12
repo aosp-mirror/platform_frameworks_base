@@ -511,7 +511,7 @@ final class ActivityRecord {
             return false;
         }
         AttributeCache.Entry ent =
-                AttributeCache.instance().get(packageName, realTheme, styleable.Window);
+                AttributeCache.instance().get(packageName, realTheme, styleable.Window, userId);
         if (ent == null
                 || !ent.array.getBoolean(styleable.Window_windowIsTranslucent, false)
                 || ent.array.getBoolean(styleable.Window_windowIsFloating, false)) {
