@@ -219,7 +219,8 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.IntToString(from = TYPE_DREAM, to = "TYPE_DREAM"),
             @ViewDebug.IntToString(from = TYPE_NAVIGATION_BAR_PANEL, to = "TYPE_NAVIGATION_BAR_PANEL"),
             @ViewDebug.IntToString(from = TYPE_DISPLAY_OVERLAY, to = "TYPE_DISPLAY_OVERLAY"),
-            @ViewDebug.IntToString(from = TYPE_MAGNIFICATION_OVERLAY, to = "TYPE_MAGNIFICATION_OVERLAY")
+            @ViewDebug.IntToString(from = TYPE_MAGNIFICATION_OVERLAY, to = "TYPE_MAGNIFICATION_OVERLAY"),
+            @ViewDebug.IntToString(from = TYPE_PRIVATE_PRESENTATION, to = "TYPE_PRIVATE_PRESENTATION"),
         })
         public int type;
     
@@ -534,6 +535,12 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int TYPE_KEYGUARD_SCRIM           = FIRST_SYSTEM_WINDOW+29;
+
+        /**
+         * Window type: Window for Presentation on top of private
+         * virtual display.
+         */
+        public static final int TYPE_PRIVATE_PRESENTATION = FIRST_SYSTEM_WINDOW+30;
 
         /**
          * End of types of system windows.

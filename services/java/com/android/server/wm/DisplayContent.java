@@ -156,6 +156,10 @@ class DisplayContent {
         mStackHistory.add(toTop ? mStackHistory.size() : 0, stack);
     }
 
+    public boolean isPrivate() {
+        return (mDisplay.getFlags() & Display.FLAG_PRIVATE) != 0;
+    }
+
     /**
      * Retrieve the tasks on this display in stack order from the bottommost TaskStack up.
      * @return All the Tasks, in order, on this display.
