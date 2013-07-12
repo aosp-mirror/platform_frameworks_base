@@ -16,7 +16,10 @@
 
 package android.text;
 
+import com.android.ide.common.rendering.api.LayoutLog;
+import com.android.layoutlib.bridge.Bridge;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
+import com.ibm.icu.text.Bidi;
 
 
 /**
@@ -29,9 +32,29 @@ import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 public class AndroidBidi_Delegate {
 
     @LayoutlibDelegate
-    /*package*/ static int runBidi(int dir, char[] chs, byte[] chInfo, int n, boolean haveInfo) {
-        // return the equivalent of Layout.DIR_LEFT_TO_RIGHT
-        // TODO: actually figure the direction.
-        return 0;
+    /*package*/ static int runBidi(int dir, char[] chars, byte[] charInfo, int count,
+            boolean haveInfo) {
+
+        switch (dir) {
+        case 0: // Layout.DIR_REQUEST_LTR
+        case 1: // Layout.DIR_REQUEST_RTL
+            break;  // No change.
+        case -1:
+            dir = Bidi.LEVEL_DEFAULT_LTR;
+            break;
+        case -2:
+            dir = Bidi.LEVEL_DEFAULT_RTL;
+            break;
+        default:
+            // Invalid code. Log error, assume LEVEL_DEFAULT_LTR and continue.
+            Bridge.getLog().error(LayoutLog.TAG_BROKEN, "Invalid direction flag", null);
+            dir = Bidi.LEVEL_DEFAULT_LTR;
+        }
+        Bidi bidi = new Bidi(chars, 0, null, 0, count, dir);
+        if (charInfo != null) {
+            for (int i = 0; i < count; ++i)
+            charInfo[i] = bidi.getLevelAt(i);
+        }
+        return bidi.getParaLevel();
     }
 }
