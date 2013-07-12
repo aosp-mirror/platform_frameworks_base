@@ -1659,10 +1659,16 @@ public class AudioManager {
      * @see #playSoundEffect(int)
      */
     public static final int FX_KEYPRESS_RETURN = 8;
+
+    /**
+     * Invalid keypress sound
+     * @see #playSoundEffect(int)
+     */
+    public static final int FX_KEYPRESS_INVALID = 9;
     /**
      * @hide Number of sound effects
      */
-    public static final int NUM_SOUND_EFFECTS = 9;
+    public static final int NUM_SOUND_EFFECTS = 10;
 
     /**
      * Plays a sound effect (Key clicks, lid open/close...)
@@ -1676,6 +1682,7 @@ public class AudioManager {
      *            {@link #FX_KEYPRESS_SPACEBAR},
      *            {@link #FX_KEYPRESS_DELETE},
      *            {@link #FX_KEYPRESS_RETURN},
+     *            {@link #FX_KEYPRESS_INVALID},
      * NOTE: This version uses the UI settings to determine
      * whether sounds are heard or not.
      */
@@ -1708,6 +1715,7 @@ public class AudioManager {
      *            {@link #FX_KEYPRESS_SPACEBAR},
      *            {@link #FX_KEYPRESS_DELETE},
      *            {@link #FX_KEYPRESS_RETURN},
+     *            {@link #FX_KEYPRESS_INVALID},
      * @param volume Sound effect volume.
      * The volume value is a raw scalar so UI controls should be scaled logarithmically.
      * If a volume of -1 is specified, the AudioManager.STREAM_MUSIC stream volume minus 3dB will be used.
