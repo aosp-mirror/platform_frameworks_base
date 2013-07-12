@@ -166,6 +166,16 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
     public static final int SET_MIRACAST_MODE               =   BASE + 14;
 
+    // During dhcp (and perhaps other times) we can't afford to drop packets
+    // but Discovery will switch our channel enough we will.
+    //   msg.arg1 = ENABLED for blocking, DISABLED for resumed.
+    //   msg.arg2 = msg to send when blocked
+    //   msg.obj  = StateMachine to send to when blocked
+    public static final int BLOCK_DISCOVERY                 =   BASE + 15;
+
+    public static final int ENABLED                         = 1;
+    public static final int DISABLED                        = 0;
+
     private final boolean mP2pSupported;
 
     private WifiP2pDevice mThisDevice = new WifiP2pDevice();
@@ -182,6 +192,15 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
      * broadcasts
      */
     private boolean mDiscoveryStarted;
+    /* Track whether servcice/peer discovery is blocked in favor of other wifi actions
+     * (notably dhcp)
+     */
+    private boolean mDiscoveryBlocked;
+
+    /*
+     * remember if we were in a scan when it had to be stopped
+     */
+    private boolean mDiscoveryPostponed = false;
 
     private NetworkInfo mNetworkInfo;
 
@@ -478,6 +497,20 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION:
                     AsyncChannel ac = new AsyncChannel();
                     ac.connect(mContext, getHandler(), message.replyTo);
+                    break;
+                case BLOCK_DISCOVERY:
+                    mDiscoveryBlocked = (message.arg1 == ENABLED ? true : false);
+                    // always reset this - we went to a state that doesn't support discovery so
+                    // it would have stopped regardless
+                    mDiscoveryPostponed = false;
+                    if (mDiscoveryBlocked) {
+                        try {
+                            StateMachine m = (StateMachine)message.obj;
+                            m.sendMessage(message.arg2);
+                        } catch (Exception e) {
+                            loge("unable to send BLOCK_DISCOVERY response: " + e);
+                        }
+                    }
                     break;
                 case WifiP2pManager.DISCOVER_PEERS:
                     replyToMessage(message, WifiP2pManager.DISCOVER_PEERS_FAILED,
@@ -851,7 +884,33 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     }
                     break;
                 }
+                case BLOCK_DISCOVERY:
+                    boolean blocked = (message.arg1 == ENABLED ? true : false);
+                    if (mDiscoveryBlocked == blocked) break;
+                    mDiscoveryBlocked = blocked;
+                    if (blocked && mDiscoveryStarted) {
+                        mWifiNative.p2pStopFind();
+                        mDiscoveryPostponed = true;
+                    }
+                    if (!blocked && mDiscoveryPostponed) {
+                        mDiscoveryPostponed = false;
+                        mWifiNative.p2pFind(DISCOVER_TIMEOUT_S);
+                    }
+                    if (blocked) {
+                        try {
+                            StateMachine m = (StateMachine)message.obj;
+                            m.sendMessage(message.arg2);
+                        } catch (Exception e) {
+                            loge("unable to send BLOCK_DISCOVERY response: " + e);
+                        }
+                    }
+                    break;
                 case WifiP2pManager.DISCOVER_PEERS:
+                    if (mDiscoveryBlocked) {
+                        replyToMessage(message, WifiP2pManager.DISCOVER_PEERS_FAILED,
+                                WifiP2pManager.BUSY);
+                        break;
+                    }
                     // do not send service discovery request while normal find operation.
                     clearSupplicantServiceRequest();
                     if (mWifiNative.p2pFind(DISCOVER_TIMEOUT_S)) {
@@ -874,6 +933,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     }
                     break;
                 case WifiP2pManager.DISCOVER_SERVICES:
+                    if (mDiscoveryBlocked) {
+                        replyToMessage(message, WifiP2pManager.DISCOVER_SERVICES_FAILED,
+                                WifiP2pManager.BUSY);
+                        break;
+                    }
                     if (DBG) logd(getName() + " discover services");
                     if (!updateSupplicantServiceRequest()) {
                         replyToMessage(message, WifiP2pManager.DISCOVER_SERVICES_FAILED,
