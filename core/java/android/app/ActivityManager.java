@@ -228,6 +228,39 @@ public class ActivityManager {
     /** @hide User operation call: given user id is the current user, can't be stopped. */
     public static final int USER_OP_IS_CURRENT = -2;
 
+    /** @hide Process is a persistent system process. */
+    public static final int PROCESS_STATE_PERSISTENT = 0;
+
+    /** @hide Process is a persistent system process and is doing UI. */
+    public static final int PROCESS_STATE_PERSISTENT_UI = 1;
+
+    /** @hide Process is hosting the current top activity. */
+    public static final int PROCESS_STATE_TOP = 2;
+
+    /** @hide Process is important to the user, and something they are aware of. */
+    public static final int PROCESS_STATE_IMPORTANT_PERCEPTIBLE = 3;
+
+    /** @hide Process is important to the user, but not something they are aware of. */
+    public static final int PROCESS_STATE_IMPORTANT_BACKGROUND = 4;
+
+    /** @hide Process is in the background running a receiver. */
+    public static final int PROCESS_STATE_RECEIVER = 5;
+
+    /** @hide Process is in the background running a backup/restore operation. */
+    public static final int PROCESS_STATE_BACKUP = 6;
+
+    /** @hide Process is in the background running a service. */
+    public static final int PROCESS_STATE_SERVICE = 7;
+
+    /** @hide Process is in the background but hosts the home activity. */
+    public static final int PROCESS_STATE_HOME = 8;
+
+    /** @hide Process is in the background but hosts the last shown activity. */
+    public static final int PROCESS_STATE_LAST_ACTIVITY = 9;
+
+    /** @hide Process is being cached for later use. */
+    public static final int PROCESS_STATE_CACHED = 10;
+
     /*package*/ ActivityManager(Context context, Handler handler) {
         mContext = context;
         mHandler = handler;

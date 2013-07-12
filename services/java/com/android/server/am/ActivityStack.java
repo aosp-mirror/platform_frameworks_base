@@ -811,21 +811,7 @@ final class ActivityStack {
                     destroyActivityLocked(r, true, false, "stop-config");
                     mStackSupervisor.resumeTopActivitiesLocked();
                 } else {
-                    // Now that this process has stopped, we may want to consider
-                    // it to be the previous app to try to keep around in case
-                    // the user wants to return to it.
-                    ProcessRecord fgApp = null;
-                    if (mResumedActivity != null) {
-                        fgApp = mResumedActivity.app;
-                    } else if (mPausingActivity != null) {
-                        fgApp = mPausingActivity.app;
-                    }
-                    if (r.app != null && fgApp != null && r.app != fgApp
-                            && r.lastVisibleTime > mService.mPreviousProcessVisibleTime
-                            && r.app != mService.mHomeProcess) {
-                        mService.mPreviousProcess = r.app;
-                        mService.mPreviousProcessVisibleTime = r.lastVisibleTime;
-                    }
+                    mStackSupervisor.updatePreviousProcessLocked(r);
                 }
             }
         }
@@ -1513,7 +1499,8 @@ final class ActivityStack {
                 next.sleeping = false;
                 mService.showAskCompatModeDialogLocked(next);
                 next.app.pendingUiClean = true;
-                next.app.thread.scheduleResumeActivity(next.appToken,
+                next.app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_TOP);
+                next.app.thread.scheduleResumeActivity(next.appToken, next.app.repProcState,
                         mService.isNextTransitionForward());
 
                 mStackSupervisor.checkReadyForSleepLocked();

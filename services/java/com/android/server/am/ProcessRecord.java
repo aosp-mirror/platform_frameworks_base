@@ -76,6 +76,8 @@ final class ProcessRecord {
     int setSchedGroup;          // Last set to background scheduling class
     int trimMemoryLevel;        // Last selected memory trimming level
     int memImportance;          // Importance constant computed from curAdj
+    int curProcState = -1;      // Currently computed process state: ActivityManager.PROCESS_STATE_*
+    int repProcState = -1;      // Last reported process state
     boolean serviceb;           // Process currently is on the service B list
     boolean keeping;            // Actively running code so don't kill due to that?
     boolean setIsForeground;    // Running foreground UI when last set?
@@ -225,6 +227,8 @@ final class ProcessRecord {
                 pw.print(" setSchedGroup="); pw.print(setSchedGroup);
                 pw.print(" systemNoUi="); pw.print(systemNoUi);
                 pw.print(" trimMemoryLevel="); pw.println(trimMemoryLevel);
+        pw.print(prefix); pw.print("curProcState="); pw.print(curProcState);
+                pw.print(" repProcState="); pw.println(repProcState);
         pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
                 pw.print(" lruSeq="); pw.print(lruSeq);
                 pw.print(" lastPssTime="); pw.println(lastPssTime);
@@ -471,6 +475,12 @@ final class ProcessRecord {
             }
         }
         return setAdj;
+    }
+
+    public void forceProcessStateUpTo(int newState) {
+        if (repProcState > newState) {
+            curProcState = repProcState = newState;
+        }
     }
 
     public void setProcessTrackerState(ProcessRecord TOP_APP, int memFactor, long now,

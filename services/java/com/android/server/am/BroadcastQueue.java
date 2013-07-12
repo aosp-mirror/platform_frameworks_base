@@ -217,6 +217,7 @@ public final class BroadcastQueue {
         r.receiver = app.thread.asBinder();
         r.curApp = app;
         app.curReceiver = r;
+        app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_RECEIVER);
         mService.updateLruProcessLocked(app, true);
 
         // Tell the application to launch this receiver.
@@ -230,7 +231,8 @@ public final class BroadcastQueue {
             mService.ensurePackageDexOpt(r.intent.getComponent().getPackageName());
             app.thread.scheduleReceiver(new Intent(r.intent), r.curReceiver,
                     mService.compatibilityInfoForPackageLocked(r.curReceiver.applicationInfo),
-                    r.resultCode, r.resultData, r.resultExtras, r.ordered, r.userId);
+                    r.resultCode, r.resultData, r.resultExtras, r.ordered, r.userId,
+                    app.repProcState);
             if (DEBUG_BROADCAST)  Slog.v(TAG,
                     "Process cur broadcast " + r + " DELIVERED for app " + app);
             started = true;
@@ -371,7 +373,7 @@ public final class BroadcastQueue {
             // If we have an app thread, do the call through that so it is
             // correctly ordered with other one-way calls.
             app.thread.scheduleRegisteredReceiver(receiver, intent, resultCode,
-                    data, extras, ordered, sticky, sendingUser);
+                    data, extras, ordered, sticky, sendingUser, app.repProcState);
         } else {
             receiver.performReceive(intent, resultCode, data, extras, ordered,
                     sticky, sendingUser);
@@ -437,7 +439,7 @@ public final class BroadcastQueue {
                     // are already core system stuff so don't matter for this.
                     r.curApp = filter.receiverList.app;
                     filter.receiverList.app.curReceiver = r;
-                    mService.updateOomAdjLocked();
+                    mService.updateOomAdjLocked(r.curApp, true);
                 }
             }
             try {
