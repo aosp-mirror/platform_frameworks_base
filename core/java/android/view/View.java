@@ -17206,6 +17206,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     } catch (AbstractMethodError e) {
                         Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
                                 " does not fully implement ViewParent", e);
+                        mPrivateFlags2 |= PFLAG2_TEXT_DIRECTION_RESOLVED |
+                                PFLAG2_TEXT_DIRECTION_RESOLVED_DEFAULT;
+                        return true;
                     }
 
                     // Set current resolved direction to the same value as the parent's one
@@ -17435,6 +17438,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     } catch (AbstractMethodError e) {
                         Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
                                 " does not fully implement ViewParent", e);
+                        mPrivateFlags2 |= PFLAG2_TEXT_ALIGNMENT_RESOLVED |
+                                PFLAG2_TEXT_ALIGNMENT_RESOLVED_DEFAULT;
+                        return true;
                     }
 
                     int parentResolvedTextAlignment;
