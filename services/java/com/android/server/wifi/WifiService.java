@@ -48,16 +48,23 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
+import android.os.AsyncTask;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
 
+import java.io.FileNotFoundException;
+import java.io.BufferedReader;
 import java.io.FileDescriptor;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
+
 import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.util.ArrayList;
 import java.util.List;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.android.internal.R;
@@ -746,6 +753,92 @@ public final class WifiService extends IWifiManager.Stub {
         enforceChangePermission();
 
         mWifiStateMachine.clearBlacklist();
+    }
+
+    /**
+     * enable TDLS for the local NIC to remote NIC
+     * The APPs don't know the remote MAC address to identify NIC though,
+     * so we need to do additional work to find it from remote IP address
+     */
+
+    class TdlsTaskParams {
+        public String remoteIpAddress;
+        public boolean enable;
+    }
+
+    class TdlsTask extends AsyncTask<TdlsTaskParams, Integer, Integer> {
+        @Override
+        protected Integer doInBackground(TdlsTaskParams... params) {
+
+            // Retrieve parameters for the call
+            TdlsTaskParams param = params[0];
+            String remoteIpAddress = param.remoteIpAddress.trim();
+            boolean enable = param.enable;
+
+            // Get MAC address of Remote IP
+            String macAddress = null;
+
+            BufferedReader reader = null;
+
+            try {
+                reader = new BufferedReader(new FileReader("/proc/net/arp"));
+
+                // Skip over the line bearing colum titles
+                String line = reader.readLine();
+
+                while ((line = reader.readLine()) != null) {
+                    String[] tokens = line.split("[ ]+");
+                    if (tokens.length < 6) {
+                        continue;
+                    }
+
+                    // ARP column format is
+                    // Address HWType HWAddress Flags Mask IFace
+                    String ip = tokens[0];
+                    String mac = tokens[3];
+
+                    if (remoteIpAddress.equals(ip)) {
+                        macAddress = mac;
+                        break;
+                    }
+                }
+
+                if (macAddress == null) {
+                    Slog.w(TAG, "Did not find remoteAddress {" + remoteIpAddress + "} in " +
+                            "/proc/net/arp");
+                } else {
+                    enableTdlsWithMacAddress(macAddress, enable);
+                }
+
+            } catch (FileNotFoundException e) {
+                Slog.e(TAG, "Could not open /proc/net/arp to lookup mac address");
+            } catch (IOException e) {
+                Slog.e(TAG, "Could not read /proc/net/arp to lookup mac address");
+            } finally {
+                try {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                }
+                catch (IOException e) {
+                    // Do nothing
+                }
+            }
+
+            return 0;
+        }
+    }
+
+    public void enableTdls(String remoteAddress, boolean enable) {
+        TdlsTaskParams params = new TdlsTaskParams();
+        params.remoteIpAddress = remoteAddress;
+        params.enable = enable;
+        new TdlsTask().execute(params);
+    }
+
+
+    public void enableTdlsWithMacAddress(String remoteMacAddress, boolean enable) {
+        mWifiStateMachine.enableTdls(remoteMacAddress, enable);
     }
 
     /**
