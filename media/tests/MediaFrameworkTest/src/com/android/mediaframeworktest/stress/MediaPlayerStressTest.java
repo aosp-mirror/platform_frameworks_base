@@ -17,18 +17,13 @@
 package com.android.mediaframeworktest.stress;
 
 import com.android.mediaframeworktest.MediaFrameworkTest;
+import com.android.mediaframeworktest.MediaPlayerStressTestRunner;
 
-import android.app.Activity;
-import android.app.Instrumentation;
-import android.content.Intent;
-import android.hardware.Camera;
-import android.media.MediaPlayer;
-import android.media.MediaRecorder;
+import android.os.Bundle;
 import android.os.Environment;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.util.Log;
-import android.view.SurfaceHolder;
 
 import com.android.mediaframeworktest.MediaNames;
 import com.android.mediaframeworktest.functional.CodecTest;
@@ -38,14 +33,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.Writer;
 
-import android.test.AndroidTestCase;
-import android.test.InstrumentationTestCase;
-
 /**
  * Junit / Instrumentation test case for the media player
  */
 public class MediaPlayerStressTest extends ActivityInstrumentationTestCase2<MediaFrameworkTest> {
     private String TAG = "MediaPlayerStressTest";
+    private String mMediaSrc;
 
     public MediaPlayerStressTest() {
         super("com.android.mediaframeworktest", MediaFrameworkTest.class);
@@ -56,6 +49,12 @@ public class MediaPlayerStressTest extends ActivityInstrumentationTestCase2<Medi
         //the workaround for the race condition of requesting the updated surface.
         Thread.sleep(2000);
         getActivity();
+        MediaPlayerStressTestRunner mRunner = (MediaPlayerStressTestRunner)getInstrumentation();
+        Bundle arguments = mRunner.getArguments();
+        mMediaSrc = arguments.getString("media-source");
+        if (mMediaSrc == null) {
+            mMediaSrc = MediaNames.MEDIA_SAMPLE_POOL;
+        }
         super.setUp();
     }
 
@@ -119,17 +118,20 @@ public class MediaPlayerStressTest extends ActivityInstrumentationTestCase2<Medi
         boolean testResult = true;
         // load directory files
         boolean onCompleteSuccess = false;
-        File dir = new File(MediaNames.MEDIA_SAMPLE_POOL);
-        String[] children = dir.list();
+        String[] children = MediaNames.NETWORK_VIDEO_FILES;
+        if (MediaNames.MEDIA_SAMPLE_POOL.equals(mMediaSrc)) {
+            File dir = new File(mMediaSrc);
+            children = dir.list();
+        }
         if (children == null) {
             Log.v("MediaPlayerApiTest:testMediaSamples", "dir is empty");
             return;
         } else {
             for (int i = 0; i < children.length; i++) {
-                //Get filename of directory
+                //Get filename
                 String filename = children[i];
                 onCompleteSuccess =
-                    CodecTest.playMediaSamples(dir + "/" + filename);
+                    CodecTest.playMediaSamples(mMediaSrc + filename);
                 if (!onCompleteSuccess){
                     //Don't fail the test right away, print out the failure file.
                     fileWithError += filename + '\n';
