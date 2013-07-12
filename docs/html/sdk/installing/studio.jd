@@ -292,13 +292,19 @@ download (or continue to use) the
 follow the <a href="#Installing">installation instructions</a> below and replace your existing
 installation.</p>
 
-<p class="caution"><strong>Caution:</strong> Replacing your existing installation of
+<div class="caution">
+<p><strong>Caution:</strong> Replacing your existing installation of
 Android Studio will remove any additional SDK packages you've installed, such as target
 platforms, system images, and sample apps. To preserve these, copy them from your current
 SDK directory under Android Studio to a temporary location
 before installing the update. Then move them back once the update is complete.
 If you fail to copy these packages, then you can instead download them again through
 the Android SDK Manager.</p>
+<p><strong>Windows users:</strong> Do not install Android Studio 0.2.x in the same
+location as 0.1.x. Doing so may cause errors such as ClassCastException or other unexpected
+behaviors. It's best if you remove your previous version of Android Studio 0.1.x.</p>
+</div>
+
 
 <p>Also note that due to the update to Gradle 0.5, you will encounter errors when opening
 existing projects. See the <a href="#Troubleshooting">Troubleshooting</a> notes below for
@@ -548,7 +554,7 @@ or opening a project using the support library.</p>
 
 <p>If, after updating to Android Studio 0.2.x and creating or opening a project, you receive an
 error stating <em>"Could not find any version that matches
-com.android.support:support-v4:13.0.+"</em>, then you must install the <strong>Android Studio
+com.android.support:support-v4:13.0.+"</em>, then you must install the <strong>Android Support
 Repository</strong>. This was likely caused because you're pointing Android Studio to an external
 Android SDK location that does not have the new Maven repository included with Android Studio
 0.2.x. This new Maven repository is used by the new build system for the Support Library, instead
@@ -558,8 +564,12 @@ of using the Support Library JAR files, so must be present in the SDK.</p>
 <ol>
   <li>Open the <strong>Android SDK Manager</strong>.</li>
   <li>Expand the <strong>Extras</strong> directory
-and install <strong>Android Studio Repository</strong>.</li>
+and install <strong>Android Support Repository</strong>.</li>
 </ol>
+
+<p>If you've encountered other problems in Android Studio, look at the following page
+for possible resolutions to known issues: <a href="http://tools.android.com/knownissues"
+>http://tools.android.com/knownissues</a>.</p>
 
 
 
