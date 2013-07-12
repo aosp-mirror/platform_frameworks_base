@@ -1371,6 +1371,11 @@
     <string name="permdesc_readFrameBuffer">Allows the app to read the content of the frame buffer.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_accessInputFlinger">access InputFlinger</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_accessInputFlinger">Allows the app to use InputFlinger low-level features.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_configureWifiDisplay">configure Wifi displays</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_configureWifiDisplay">Allows the app to configure and connect to Wifi displays.</string>
