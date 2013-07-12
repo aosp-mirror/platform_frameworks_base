@@ -1246,7 +1246,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Find base frameworks (resource packages without code).
             mFrameworkInstallObserver = new AppDirObserver(
-                mFrameworkDir.getPath(), OBSERVER_EVENTS, true);
+                mFrameworkDir.getPath(), OBSERVER_EVENTS, true, false);
             mFrameworkInstallObserver.startWatching();
             scanDirLI(mFrameworkDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR,
@@ -1255,7 +1255,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Collected privileged system packages.
             mPrivilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
             mPrivilegedInstallObserver = new AppDirObserver(
-                    mPrivilegedAppDir.getPath(), OBSERVER_EVENTS, true);
+                    mPrivilegedAppDir.getPath(), OBSERVER_EVENTS, true, true);
             mPrivilegedInstallObserver.startWatching();
                 scanDirLI(mPrivilegedAppDir, PackageParser.PARSE_IS_SYSTEM
                         | PackageParser.PARSE_IS_SYSTEM_DIR
@@ -1264,7 +1264,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Collect ordinary system packages.
             mSystemAppDir = new File(Environment.getRootDirectory(), "app");
             mSystemInstallObserver = new AppDirObserver(
-                mSystemAppDir.getPath(), OBSERVER_EVENTS, true);
+                mSystemAppDir.getPath(), OBSERVER_EVENTS, true, false);
             mSystemInstallObserver.startWatching();
             scanDirLI(mSystemAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode, 0);
@@ -1272,7 +1272,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             // Collect all vendor packages.
             mVendorAppDir = new File("/vendor/app");
             mVendorInstallObserver = new AppDirObserver(
-                mVendorAppDir.getPath(), OBSERVER_EVENTS, true);
+                mVendorAppDir.getPath(), OBSERVER_EVENTS, true, false);
             mVendorInstallObserver.startWatching();
             scanDirLI(mVendorAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode, 0);
@@ -1345,12 +1345,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_PMS_DATA_SCAN_START,
                         SystemClock.uptimeMillis());
                 mAppInstallObserver = new AppDirObserver(
-                    mAppInstallDir.getPath(), OBSERVER_EVENTS, false);
+                    mAppInstallDir.getPath(), OBSERVER_EVENTS, false, false);
                 mAppInstallObserver.startWatching();
                 scanDirLI(mAppInstallDir, 0, scanMode, 0);
     
                 mDrmAppInstallObserver = new AppDirObserver(
-                    mDrmAppPrivateInstallDir.getPath(), OBSERVER_EVENTS, false);
+                    mDrmAppPrivateInstallDir.getPath(), OBSERVER_EVENTS, false, false);
                 mDrmAppInstallObserver.startWatching();
                 scanDirLI(mDrmAppPrivateInstallDir, PackageParser.PARSE_FORWARD_LOCK,
                         scanMode, 0);
@@ -5972,10 +5972,11 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
     
     private final class AppDirObserver extends FileObserver {
-        public AppDirObserver(String path, int mask, boolean isrom) {
+        public AppDirObserver(String path, int mask, boolean isrom, boolean isPrivileged) {
             super(path, mask);
             mRootDir = path;
             mIsRom = isrom;
+            mIsPrivileged = isPrivileged;
         }
 
         public void onEvent(int event, String path) {
@@ -6036,11 +6037,15 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if ((event&ADD_EVENTS) != 0) {
                     if (p == null) {
                         if (DEBUG_INSTALL) Slog.d(TAG, "New file appeared: " + fullPath);
-                        p = scanPackageLI(fullPath,
-                                (mIsRom ? PackageParser.PARSE_IS_SYSTEM
-                                        | PackageParser.PARSE_IS_SYSTEM_DIR: 0) |
-                                PackageParser.PARSE_CHATTY |
-                                PackageParser.PARSE_MUST_BE_APK,
+                        int flags = PackageParser.PARSE_CHATTY | PackageParser.PARSE_MUST_BE_APK;
+                        if (mIsRom) {
+                            flags |= PackageParser.PARSE_IS_SYSTEM
+                                    | PackageParser.PARSE_IS_SYSTEM_DIR;
+                            if (mIsPrivileged) {
+                                flags |= PackageParser.PARSE_IS_PRIVILEGED;
+                            }
+                        }
+                        p = scanPackageLI(fullPath, flags,
                                 SCAN_MONITOR | SCAN_NO_PATHS | SCAN_UPDATE_TIME,
                                 System.currentTimeMillis(), UserHandle.ALL);
                         if (p != null) {
@@ -6083,6 +6088,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         private final String mRootDir;
         private final boolean mIsRom;
+        private final boolean mIsPrivileged;
     }
 
     /* Called when a downloaded package installation has been confirmed by the user */
