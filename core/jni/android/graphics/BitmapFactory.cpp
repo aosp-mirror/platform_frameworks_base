@@ -116,30 +116,6 @@ static void scaleNinePatchChunk(android::Res_png_9patch* chunk, float scale) {
     }
 }
 
-static jbyteArray nativeScaleNinePatch(JNIEnv* env, jobject, jbyteArray chunkObject, jfloat scale,
-        jobject padding) {
-
-    jbyte* array = env->GetByteArrayElements(chunkObject, 0);
-    if (array != NULL) {
-        size_t chunkSize = env->GetArrayLength(chunkObject);
-        void* storage = alloca(chunkSize);
-        android::Res_png_9patch* chunk = static_cast<android::Res_png_9patch*>(storage);
-        memcpy(chunk, array, chunkSize);
-        android::Res_png_9patch::deserialize(chunk);
-
-        scaleNinePatchChunk(chunk, scale);
-        memcpy(array, chunk, chunkSize);
-
-        if (padding) {
-            GraphicsJNI::set_jrect(env, padding, chunk->paddingLeft, chunk->paddingTop,
-                    chunk->paddingRight, chunk->paddingBottom);
-        }
-
-        env->ReleaseByteArrayElements(chunkObject, array, 0);
-    }
-    return chunkObject;
-}
-
 static SkPixelRef* installPixelRef(SkBitmap* bitmap, SkStream* stream,
         int sampleSize, bool ditherImage) {
 
@@ -622,11 +598,6 @@ static JNINativeMethod gMethods[] = {
     {   "nativeDecodeByteArray",
         "([BIILandroid/graphics/BitmapFactory$Options;)Landroid/graphics/Bitmap;",
         (void*)nativeDecodeByteArray
-    },
-
-    {   "nativeScaleNinePatch",
-        "([BFLandroid/graphics/Rect;)[B",
-        (void*)nativeScaleNinePatch
     },
 
     {   "nativeIsSeekable",
