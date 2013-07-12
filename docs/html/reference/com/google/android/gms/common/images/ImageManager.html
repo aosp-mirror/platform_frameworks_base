@@ -767,21 +767,9 @@ Summary:
          
          
         
-        class</nobr></td>
-      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/images/ImageManager.ImageReceiver.html">ImageManager.ImageReceiver</a></td>
-      <td class="jd-descrcol" width="100%">&nbsp;</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-      <td class="jd-typecol"><nobr>
-        
-         
-         
-        
         interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/common/images/ImageManager.OnImageLoadedListener.html">ImageManager.OnImageLoadedListener</a></td>
-      <td class="jd-descrcol" width="100%">&nbsp;</td>
+      <td class="jd-descrcol" width="100%">Listener interface for handling when the image for a particular URI has been loaded.&nbsp;</td>
     </tr>
     
     
@@ -1269,7 +1257,7 @@ From class
         </tr>
         <tr>
           <th>uri</td>
-          <td>Uri to load the image data from.</td>
+          <td>URI to load the image data from.</td>
         </tr>
       </table>
   </div>
@@ -1356,8 +1344,8 @@ From class
  <p>
  The result is delivered to the given listener on the main thread.
  <p>
- If we don't find a result image view will be set to the given default resource if the image
- needs to be loaded asynchronously.</p></div>
+ If a result is not found, the image view will be set to the given default resource if the
+ image needs to be loaded asynchronously.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
@@ -1367,7 +1355,7 @@ From class
         </tr>
         <tr>
           <th>uri</td>
-          <td>Uri to load the image data from.</td>
+          <td>URI to load the image data from.</td>
         </tr>
         <tr>
           <th>defaultResId</td>
@@ -1417,7 +1405,7 @@ From class
         </tr>
         <tr>
           <th>uri</td>
-          <td>Uri to load the image data from.
+          <td>URI to load the image data from.
 </td>
         </tr>
       </table>
@@ -1471,7 +1459,7 @@ From class
         </tr>
         <tr>
           <th>uri</td>
-          <td>Uri to load the image data from.</td>
+          <td>URI to load the image data from.</td>
         </tr>
         <tr>
           <th>defaultResId</td>
