@@ -288,7 +288,7 @@ download (or continue to use) the
 
 <h2 id="Updating">Updating to 0.2.x</h2>
 
-<p>To update your existing version of Android Studio to 0.2.x, simply
+<p>To update from Android Studio 0.1.x to 0.2.x,
 follow the <a href="#Installing">installation instructions</a> below and replace your existing
 installation.</p>
 
@@ -597,7 +597,7 @@ and install <strong>Android Studio Repository</strong>.</li>
     /* set up primary ACE download button */
     $('#download-ide-button').show();
     $('#download-ide-button').append("Download Android Studio <span class='small'>v0.2.x</span>"
-        + "<br/><span class='small'>for " + os + "</span>");
+        + "<br/> <span class='small'>for " + os + "</span>");
     $('#download-ide-button').click(function() {return onDownload(this,true);}).attr('href', bundlename);
 
   } else {
@@ -639,10 +639,9 @@ and install <strong>Android Studio Repository</strong>.</li>
 
   function onDownloadForRealz(link) {
     if ($("input#agree").is(':checked')) {
-      $("div.sdk-terms,#sdk-terms-form,.sdk-terms-intro").hide();
-      $("#main").show(function() {
-          location.hash = "Installing";
-          });
+      $("#tos").hide();
+      $("#main").show();
+      location.hash = "Updating";
       return true;
     } else {
       $("label#agreeLabel,#bitpicker input").parent().stop().animate({color: "#258AAF"}, 200,
