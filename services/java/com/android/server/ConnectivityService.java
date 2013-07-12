@@ -3986,17 +3986,20 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private String getProvisioningUrl() {
         String url = mContext.getResources().getString(R.string.mobile_provisioning_url);
-        log("getProvisioningUrl: resource url=" + url);
+        log("getProvisioningUrl: mobile_provisioning_url=" + url);
 
-        // populate the iccid and imei in the provisioning url.
+        // populate the iccid, imei and phone number in the provisioning url.
         if (!TextUtils.isEmpty(url)) {
+            String phoneNumber = mTelephonyManager.getLine1Number();
+            if (TextUtils.isEmpty(phoneNumber)) {
+                phoneNumber = "0000000000";
+            }
             url = String.format(url,
                     mTelephonyManager.getSimSerialNumber() /* ICCID */,
                     mTelephonyManager.getDeviceId() /* IMEI */,
-                    mTelephonyManager.getLine1Number() /* Phone numer */);
+                    phoneNumber /* Phone numer */);
         }
 
-        log("getProvisioningUrl: url=" + url);
         return url;
     }
 }
