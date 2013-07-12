@@ -49066,6 +49066,7 @@ package org.json {
     ctor public JSONArray(java.util.Collection);
     ctor public JSONArray(org.json.JSONTokener) throws org.json.JSONException;
     ctor public JSONArray(java.lang.String) throws org.json.JSONException;
+    ctor public JSONArray(java.lang.Object) throws org.json.JSONException;
     method public java.lang.Object get(int) throws org.json.JSONException;
     method public boolean getBoolean(int) throws org.json.JSONException;
     method public double getDouble(int) throws org.json.JSONException;
@@ -49153,6 +49154,7 @@ package org.json {
     method public java.lang.Object remove(java.lang.String);
     method public org.json.JSONArray toJSONArray(org.json.JSONArray) throws org.json.JSONException;
     method public java.lang.String toString(int) throws org.json.JSONException;
+    method public static java.lang.Object wrap(java.lang.Object);
     field public static final java.lang.Object NULL;
   }
 
