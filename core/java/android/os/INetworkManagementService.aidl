@@ -368,6 +368,26 @@ interface INetworkManagementService
     void clearMarkedForwarding(String iface);
 
     /**
+     * Get the SO_MARK associated with routing packets for user {@code uid}
+     */
+    int getMarkForUid(int uid);
+
+    /**
+     * Get the SO_MARK associated with protecting packets from VPN routing rules
+     */
+    int getMarkForProtect();
+
+    /**
+     * Route all traffic in {@code route} to {@code iface} setup for marked forwarding
+     */
+    void setMarkedForwardingRoute(String iface, in RouteInfo route);
+
+    /**
+     * Clear routes set by {@link setMarkedForwardingRoute}
+     */
+    void clearMarkedForwardingRoute(String iface, in RouteInfo route);
+
+    /**
      * Set a process (pid) to use the name servers associated with the specified interface.
      */
     void setDnsInterfaceForPid(String iface, int pid);

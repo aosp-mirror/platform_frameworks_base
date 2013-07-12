@@ -32,6 +32,7 @@ import static com.android.server.NetworkManagementService.NetdResponseCode.Tethe
 import static com.android.server.NetworkManagementService.NetdResponseCode.TetherStatusResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.TetheringStatsResult;
 import static com.android.server.NetworkManagementService.NetdResponseCode.TtyListResult;
+import static com.android.server.NetworkManagementService.NetdResponseCode.GetMarkResult;
 import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
 
 import android.content.Context;
@@ -127,6 +128,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         public static final int TetheringStatsResult      = 221;
         public static final int DnsProxyQueryResult       = 222;
         public static final int ClatdStatusResult         = 223;
+        public static final int GetMarkResult             = 225;
 
         public static final int InterfaceChange           = 600;
         public static final int BandwidthControl          = 601;
@@ -1382,7 +1384,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setUidRangeRoute(String iface, int uid_start, int uid_end) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            mConnector.execute("interface", "route",
+            mConnector.execute("interface", "fwmark",
                     "uid", "add", iface, uid_start, uid_end);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
@@ -1393,7 +1395,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void clearUidRangeRoute(String iface, int uid_start, int uid_end) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            mConnector.execute("interface", "route",
+            mConnector.execute("interface", "fwmark",
                     "uid", "remove", iface, uid_start, uid_end);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
@@ -1404,7 +1406,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setMarkedForwarding(String iface) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            mConnector.execute("interface", "route", "fwmark", "add", iface);
+            mConnector.execute("interface", "fwmark", "rule", "add", iface);
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
@@ -1414,7 +1416,57 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void clearMarkedForwarding(String iface) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
-            mConnector.execute("interface", "route", "fwmark", "remove", iface);
+            mConnector.execute("interface", "fwmark", "rule", "remove", iface);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public int getMarkForUid(int uid) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        final NativeDaemonEvent event;
+        try {
+            event = mConnector.execute("interface", "fwmark", "get", "mark", uid);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+        event.checkCode(GetMarkResult);
+        return Integer.parseInt(event.getMessage());
+    }
+
+    @Override
+    public int getMarkForProtect() {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        final NativeDaemonEvent event;
+        try {
+            event = mConnector.execute("interface", "fwmark", "get", "protect");
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+        event.checkCode(GetMarkResult);
+        return Integer.parseInt(event.getMessage());
+    }
+
+    @Override
+    public void setMarkedForwardingRoute(String iface, RouteInfo route) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        try {
+            LinkAddress dest = route.getDestination();
+            mConnector.execute("interface", "fwmark", "route", "add", iface,
+                    dest.getAddress().getHostAddress(), dest.getNetworkPrefixLength());
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void clearMarkedForwardingRoute(String iface, RouteInfo route) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        try {
+            LinkAddress dest = route.getDestination();
+            mConnector.execute("interface", "fwmark", "route", "remove", iface,
+                    dest.getAddress().getHostAddress(), dest.getNetworkPrefixLength());
         } catch (NativeDaemonConnectorException e) {
             throw e.rethrowAsParcelableException();
         }
