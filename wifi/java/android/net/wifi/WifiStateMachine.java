@@ -1773,6 +1773,14 @@ public class WifiStateMachine extends StateMachine {
         // TODO: Remove this comment when the driver is fixed.
         setSuspendOptimizationsNative(SUSPEND_DUE_TO_DHCP, false);
         mWifiNative.setPowerSave(false);
+
+        /* P2p discovery breaks dhcp, shut it down in order to get through this */
+        Message msg = new Message();
+        msg.what = WifiP2pService.BLOCK_DISCOVERY;
+        msg.arg1 = WifiP2pService.ENABLED;
+        msg.arg2 = DhcpStateMachine.CMD_PRE_DHCP_ACTION_COMPLETE;
+        msg.obj = mDhcpStateMachine;
+        mWifiP2pChannel.sendMessage(msg);
     }
 
 
@@ -1798,6 +1806,8 @@ public class WifiStateMachine extends StateMachine {
         /* Restore power save and suspend optimizations */
         setSuspendOptimizationsNative(SUSPEND_DUE_TO_DHCP, true);
         mWifiNative.setPowerSave(true);
+
+        mWifiP2pChannel.sendMessage(WifiP2pService.BLOCK_DISCOVERY, WifiP2pService.DISABLED);
 
         // Set the coexistence mode back to its default value
         mWifiNative.setBluetoothCoexistenceMode(
@@ -2995,7 +3005,6 @@ public class WifiStateMachine extends StateMachine {
             switch (message.what) {
               case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
                   handlePreDhcpSetup();
-                  mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_PRE_DHCP_ACTION_COMPLETE);
                   break;
               case DhcpStateMachine.CMD_POST_DHCP_ACTION:
                   handlePostDhcpSetup();
