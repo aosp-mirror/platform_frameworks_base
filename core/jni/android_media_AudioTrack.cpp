@@ -597,11 +597,14 @@ static jint android_media_AudioTrack_native_write_short(JNIEnv *env,  jobject th
                                                   jshortArray javaAudioData,
                                                   jint offsetInShorts, jint sizeInShorts,
                                                   jint javaAudioFormat) {
-    return (android_media_AudioTrack_native_write_byte(env, thiz,
+    jint written = android_media_AudioTrack_native_write_byte(env, thiz,
                                                  (jbyteArray) javaAudioData,
                                                  offsetInShorts*2, sizeInShorts*2,
-                                                 javaAudioFormat)
-            / 2);
+                                                 javaAudioFormat);
+    if (written > 0) {
+        written /= 2;
+    }
+    return written;
 }
 
 
