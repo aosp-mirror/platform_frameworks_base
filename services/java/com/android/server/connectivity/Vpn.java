@@ -467,15 +467,15 @@ public class Vpn extends BaseNetworkStateTracker {
     private native int jniCheck(String interfaze);
     private native void jniProtect(int socket, String interfaze);
 
-    private static String findLegacyVpnGateway(LinkProperties prop) {
-        for (RouteInfo route : prop.getRoutes()) {
+    private static RouteInfo findIPv4DefaultRoute(LinkProperties prop) {
+        for (RouteInfo route : prop.getAllRoutes()) {
             // Currently legacy VPN only works on IPv4.
             if (route.isDefaultRoute() && route.getGateway() instanceof Inet4Address) {
-                return route.getGateway().getHostAddress();
+                return route;
             }
         }
 
-        throw new IllegalStateException("Unable to find suitable gateway");
+        throw new IllegalStateException("Unable to find IPv4 default gateway");
     }
 
     /**
@@ -488,8 +488,9 @@ public class Vpn extends BaseNetworkStateTracker {
             throw new IllegalStateException("KeyStore isn't unlocked");
         }
 
-        final String iface = egress.getInterfaceName();
-        final String gateway = findLegacyVpnGateway(egress);
+        final RouteInfo ipv4DefaultRoute = findIPv4DefaultRoute(egress);
+        final String gateway = ipv4DefaultRoute.getGateway().getHostAddress();
+        final String iface = ipv4DefaultRoute.getInterface();
 
         // Load certificates.
         String privateKey = "";
