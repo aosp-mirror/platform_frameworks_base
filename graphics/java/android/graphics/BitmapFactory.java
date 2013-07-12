@@ -18,6 +18,7 @@ package android.graphics;
 
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.os.Trace;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -436,12 +437,21 @@ public class BitmapFactory {
         if ((offset | length) < 0 || data.length < offset + length) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        Bitmap bm = nativeDecodeByteArray(data, offset, length, opts);
 
-        if (bm == null && opts != null && opts.inBitmap != null) {
-            throw new IllegalArgumentException("Problem decoding into existing bitmap");
+        Bitmap bm;
+
+        Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "decodeBitmap");
+        try {
+            bm = nativeDecodeByteArray(data, offset, length, opts);
+
+            if (bm == null && opts != null && opts.inBitmap != null) {
+                throw new IllegalArgumentException("Problem decoding into existing bitmap");
+            }
+            setDensityFromOptions(bm, opts);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
         }
-        setDensityFromOptions(bm, opts);
+
         return bm;
     }
 
@@ -508,39 +518,43 @@ public class BitmapFactory {
             return null;
         }
 
-        // we need mark/reset to work properly
-
-        if (!is.markSupported()) {
-            is = new BufferedInputStream(is, DECODE_BUFFER_SIZE);
-        }
-
-        // so we can call reset() if a given codec gives up after reading up to
-        // this many bytes. FIXME: need to find out from the codecs what this
-        // value should be.
-        is.mark(1024);
-
         Bitmap bm;
-        boolean finish = true;
 
-        if (is instanceof AssetManager.AssetInputStream) {
-            final int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
-            bm = nativeDecodeAsset(asset, outPadding, opts);
-        } else {
-            // pass some temp storage down to the native code. 1024 is made up,
-            // but should be large enough to avoid too many small calls back
-            // into is.read(...) This number is not related to the value passed
-            // to mark(...) above.
-            byte [] tempStorage = null;
-            if (opts != null) tempStorage = opts.inTempStorage;
-            if (tempStorage == null) tempStorage = new byte[DECODE_BUFFER_SIZE];
-            bm = nativeDecodeStream(is, tempStorage, outPadding, opts);
+        Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "decodeBitmap");
+        try {
+            // we need mark/reset to work properly
+            if (!is.markSupported()) {
+                is = new BufferedInputStream(is, DECODE_BUFFER_SIZE);
+            }
+
+            // so we can call reset() if a given codec gives up after reading up to
+            // this many bytes. FIXME: need to find out from the codecs what this
+            // value should be.
+            is.mark(1024);
+
+            if (is instanceof AssetManager.AssetInputStream) {
+                final int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
+                bm = nativeDecodeAsset(asset, outPadding, opts);
+            } else {
+                // pass some temp storage down to the native code. 1024 is made up,
+                // but should be large enough to avoid too many small calls back
+                // into is.read(...) This number is not related to the value passed
+                // to mark(...) above.
+                byte [] tempStorage = null;
+                if (opts != null) tempStorage = opts.inTempStorage;
+                if (tempStorage == null) tempStorage = new byte[DECODE_BUFFER_SIZE];
+                bm = nativeDecodeStream(is, tempStorage, outPadding, opts);
+            }
+
+            if (bm == null && opts != null && opts.inBitmap != null) {
+                throw new IllegalArgumentException("Problem decoding into existing bitmap");
+            }
+
+            setDensityFromOptions(bm, opts);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
         }
 
-        if (bm == null && opts != null && opts.inBitmap != null) {
-            throw new IllegalArgumentException("Problem decoding into existing bitmap");
-        }
-
-        setDensityFromOptions(bm, opts);
         return bm;
     }
 
@@ -608,10 +622,7 @@ public class BitmapFactory {
     private static native Bitmap nativeDecodeFileDescriptor(FileDescriptor fd,
             Rect padding, Options opts);
     private static native Bitmap nativeDecodeAsset(int asset, Rect padding, Options opts);
-    private static native Bitmap nativeDecodeAsset(int asset, Rect padding, Options opts,
-            boolean applyScale, float scale);
     private static native Bitmap nativeDecodeByteArray(byte[] data, int offset,
             int length, Options opts);
-    private static native byte[] nativeScaleNinePatch(byte[] chunk, float scale, Rect pad);
     private static native boolean nativeIsSeekable(FileDescriptor fd);
 }
