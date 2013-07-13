@@ -160,7 +160,8 @@ bool GLEnv::InitWithNewContext() {
   }
 
   // Create dummy surface using a GLConsumer
-  surfaceTexture_ = new GLConsumer(0);
+  sp<BufferQueue> bq = new BufferQueue();
+  surfaceTexture_ = new GLConsumer(bq, 0);
   window_ = new Surface(static_cast<sp<IGraphicBufferProducer> >(
           surfaceTexture_->getBufferQueue()));
 

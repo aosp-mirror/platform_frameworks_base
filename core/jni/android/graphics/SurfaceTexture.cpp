@@ -200,7 +200,8 @@ static void SurfaceTexture_classInit(JNIEnv* env, jclass clazz)
 static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jint texName,
         jobject weakThiz, jboolean allowSynchronous)
 {
-    sp<GLConsumer> surfaceTexture(new GLConsumer(texName, allowSynchronous));
+    sp<BufferQueue> bq = new BufferQueue(allowSynchronous);
+    sp<GLConsumer> surfaceTexture(new GLConsumer(bq, texName));
     if (surfaceTexture == 0) {
         jniThrowException(env, OutOfResourcesException,
                 "Unable to create native SurfaceTexture");
