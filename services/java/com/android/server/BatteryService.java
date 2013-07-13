@@ -372,9 +372,9 @@ public final class BatteryService extends Binder {
                         mBatteryStatus, mBatteryHealth, mBatteryPresent ? 1 : 0,
                         mPlugType, mBatteryTechnology);
             }
-            if (mBatteryLevel != mLastBatteryLevel ||
-                    mBatteryVoltage != mLastBatteryVoltage ||
-                    mBatteryTemperature != mLastBatteryTemperature) {
+            if (mBatteryLevel != mLastBatteryLevel) {
+                // Don't do this just from voltage or temperature changes, that is
+                // too noisy.
                 EventLog.writeEvent(EventLogTags.BATTERY_LEVEL,
                         mBatteryLevel, mBatteryVoltage, mBatteryTemperature);
             }
