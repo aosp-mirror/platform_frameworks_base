@@ -34,8 +34,7 @@ import java.util.Set;
  * that may contain large numbers of items.  It is generally slower than a traditional
  * HashMap, since lookups require a binary search and adds and removes require inserting
  * and deleting entries in the array.  For containers holding up to hundreds of items,
- * the performance difference is not significant, less than 50%.  For larger numbers of items
- * this data structure should be avoided.</p>
+ * the performance difference is not significant, less than 50%.</p>
  *
  * <p><b>Note:</b> unlike {@link java.util.HashMap}, this container does not support
  * null keys.</p>
@@ -44,7 +43,7 @@ import java.util.Set;
  * standard Java containers it will shrink its array as items are removed from it.  Currently
  * you have no control over this shrinking -- if you set a capacity and then remove an
  * item, it may reduce the capacity to better match the current size.  In the future an
- * explicitly call to set the capacity should turn off this aggressive shrinking behavior.</p>
+ * explicit call to set the capacity should turn off this aggressive shrinking behavior.</p>
  *
  * @hide
  */
