@@ -170,7 +170,98 @@ public final class Bitmap implements Parcelable {
     public void setDensity(int density) {
         mDensity = density;
     }
-    
+
+    /**
+     * <p>Modifies the bitmap to have a specified width, height, and {@link
+     * Config}, without affecting the underlying allocation backing the bitmap.
+     * Bitmap pixel data is not re-initialized for the new configuration.</p>
+     *
+     * <p>This method can be used to avoid allocating a new bitmap, instead
+     * reusing an existing bitmap's allocation for a new configuration of equal
+     * or lesser size. If the Bitmap's allocation isn't large enough to support
+     * the new configuration, an IllegalArgumentException will be thrown and the
+     * bitmap will not be modified.</p>
+     *
+     * <p>The result of {@link #getByteCount()} will reflect the new configuration,
+     * while {@link #getAllocationByteCount()} will reflect that of the initial
+     * configuration.</p>
+     *
+     * <p>WARNING: This method should NOT be called on a bitmap currently used
+     * by the view system. It does not make guarantees about how the underlying
+     * pixel buffer is remapped to the new config, just that the allocation is
+     * reused. Additionally, the view system does not account for bitmap
+     * properties being modifying during use, e.g. while attached to
+     * drawables.</p>
+     *
+     * @see #setWidth(int)
+     * @see #setHeight(int)
+     * @see #setConfig(Config)
+     */
+    public void reconfigure(int width, int height, Config config) {
+        checkRecycled("Can't call reconfigure() on a recycled bitmap");
+        if (width <= 0 || height <= 0) {
+            throw new IllegalArgumentException("width and height must be > 0");
+        }
+        if (!isMutable()) {
+            throw new IllegalArgumentException("only mutable bitmaps may be reconfigured");
+        }
+        if (mBuffer == null) {
+            throw new IllegalArgumentException("only non-inPurgeable bitmaps may be reconfigured");
+        }
+
+        nativeReconfigure(mNativeBitmap, width, height, config.nativeInt, mBuffer.length);
+        mWidth = width;
+        mHeight = height;
+    }
+
+    /**
+     * <p>Convenience method for calling {@link #reconfigure(int, int, Config)}
+     * with the current height and config.</p>
+     *
+     * <p>WARNING: this method should not be used on bitmaps currently used by
+     * the view system, see {@link #reconfigure(int, int, Config)} for more
+     * details.</p>
+     *
+     * @see #reconfigure(int, int, Config)
+     * @see #setHeight(int)
+     * @see #setConfig(Config)
+     */
+    public void setWidth(int width) {
+        reconfigure(width, getHeight(), getConfig());
+    }
+
+    /**
+     * <p>Convenience method for calling {@link #reconfigure(int, int, Config)}
+     * with the current width and config.</p>
+     *
+     * <p>WARNING: this method should not be used on bitmaps currently used by
+     * the view system, see {@link #reconfigure(int, int, Config)} for more
+     * details.</p>
+     *
+     * @see #reconfigure(int, int, Config)
+     * @see #setWidth(int)
+     * @see #setConfig(Config)
+     */
+    public void setHeight(int height) {
+        reconfigure(getWidth(), height, getConfig());
+    }
+
+    /**
+     * <p>Convenience method for calling {@link #reconfigure(int, int, Config)}
+     * with the current height and width.</p>
+     *
+     * <p>WARNING: this method should not be used on bitmaps currently used by
+     * the view system, see {@link #reconfigure(int, int, Config)} for more
+     * details.</p>
+     *
+     * @see #reconfigure(int, int, Config)
+     * @see #setWidth(int)
+     * @see #setHeight(int)
+     */
+    public void setConfig(Config config) {
+        reconfigure(getWidth(), getHeight(), config);
+    }
+
     /**
      * Sets the nine patch chunk.
      *
@@ -1010,7 +1101,7 @@ public final class Bitmap implements Parcelable {
      *
      * <p>As of {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, the result of this method can
      * no longer be used to determine memory usage of a bitmap. See {@link
-     * #getAllocationByteCount()}.
+     * #getAllocationByteCount()}.</p>
      */
     public final int getByteCount() {
         // int result permits bitmaps up to 46,340 x 46,340
@@ -1021,11 +1112,15 @@ public final class Bitmap implements Parcelable {
      * Returns the size of the allocated memory used to store this bitmap's pixels.
      *
      * <p>This can be larger than the result of {@link #getByteCount()} if a bitmap is reused to
-     * decode other bitmaps of smaller size. See {@link BitmapFactory.Options#inBitmap inBitmap in
-     * BitmapFactory.Options}. If a bitmap is not reused in this way, this value will be the same as
-     * that returned by {@link #getByteCount()}.
+     * decode other bitmaps of smaller size, or by manual reconfiguration. See {@link
+     * #reconfigure(int, int, Config)}, {@link #setWidth(int)}, {@link #setHeight(int)}, {@link
+     * #setConfig(Bitmap.Config)}, and {@link BitmapFactory.Options#inBitmap
+     * BitmapFactory.Options.inBitmap}. If a bitmap is not modified in this way, this value will be
+     * the same as that returned by {@link #getByteCount()}.</p>
      *
-     * <p>This value will not change over the lifetime of a Bitmap.
+     * <p>This value will not change over the lifetime of a Bitmap.</p>
+     *
+     * @see #reconfigure(int, int, Config)
      */
     public final int getAllocationByteCount() {
         return mBuffer.length;
@@ -1423,11 +1518,13 @@ public final class Bitmap implements Parcelable {
 
     private static native Bitmap nativeCreate(int[] colors, int offset,
                                               int stride, int width, int height,
-                                            int nativeConfig, boolean mutable);
+                                              int nativeConfig, boolean mutable);
     private static native Bitmap nativeCopy(int srcBitmap, int nativeConfig,
                                             boolean isMutable);
     private static native void nativeDestructor(int nativeBitmap);
     private static native boolean nativeRecycle(int nativeBitmap);
+    private static native void nativeReconfigure(int nativeBitmap, int width, int height,
+                                                 int config, int allocSize);
 
     private static native boolean nativeCompress(int nativeBitmap, int format,
                                             int quality, OutputStream stream,
