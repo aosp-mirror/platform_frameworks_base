@@ -10789,30 +10789,87 @@ public final class ActivityManagerService extends ActivityManagerNative
             } else {
                 oomAdj = Integer.toString(r.setAdj);
             }
-            String schedGroup;
+            char schedGroup;
             switch (r.setSchedGroup) {
                 case Process.THREAD_GROUP_BG_NONINTERACTIVE:
-                    schedGroup = "B";
+                    schedGroup = 'B';
                     break;
                 case Process.THREAD_GROUP_DEFAULT:
-                    schedGroup = "F";
+                    schedGroup = 'F';
                     break;
                 default:
-                    schedGroup = Integer.toString(r.setSchedGroup);
+                    schedGroup = '?';
                     break;
             }
-            String foreground;
+            char foreground;
             if (r.foregroundActivities) {
-                foreground = "A";
+                foreground = 'A';
             } else if (r.foregroundServices) {
-                foreground = "S";
+                foreground = 'S';
             } else {
-                foreground = " ";
+                foreground = ' ';
             }
-            pw.println(String.format("%s%s #%2d: adj=%s/%s%s trm=%2d %s (%s)",
-                    prefix, (r.persistent ? persistentLabel : normalLabel),
-                    (origList.size()-1)-list.get(i).second, oomAdj, schedGroup,
-                    foreground, r.trimMemoryLevel, r.toShortString(), r.adjType));
+            String procState;
+            switch (r.curProcState) {
+                case ActivityManager.PROCESS_STATE_PERSISTENT:
+                    procState = "P ";
+                    break;
+                case ActivityManager.PROCESS_STATE_PERSISTENT_UI:
+                    procState = "PU";
+                    break;
+                case ActivityManager.PROCESS_STATE_TOP:
+                    procState = "T ";
+                    break;
+                case ActivityManager.PROCESS_STATE_IMPORTANT_PERCEPTIBLE:
+                    procState = "IP";
+                    break;
+                case ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND:
+                    procState = "IB";
+                    break;
+                case ActivityManager.PROCESS_STATE_RECEIVER:
+                    procState = "R ";
+                    break;
+                case ActivityManager.PROCESS_STATE_BACKUP:
+                    procState = "BU";
+                    break;
+                case ActivityManager.PROCESS_STATE_SERVICE:
+                    procState = "S ";
+                    break;
+                case ActivityManager.PROCESS_STATE_HOME:
+                    procState = "H ";
+                    break;
+                case ActivityManager.PROCESS_STATE_LAST_ACTIVITY:
+                    procState = "LA";
+                    break;
+                case ActivityManager.PROCESS_STATE_CACHED:
+                    procState = "C ";
+                    break;
+                default:
+                    procState = "??";
+                    break;
+            }
+            pw.print(prefix);
+            pw.print(r.persistent ? persistentLabel : normalLabel);
+            pw.print(" #");
+            int num = (origList.size()-1)-list.get(i).second;
+            if (num < 10) pw.print(' ');
+            pw.print(num);
+            pw.print(": ");
+            pw.print(oomAdj);
+            pw.print(' ');
+            pw.print(schedGroup);
+            pw.print('/');
+            pw.print(foreground);
+            pw.print('/');
+            pw.print(procState);
+            pw.print(" trm:");
+            if (r.trimMemoryLevel < 10) pw.print(' ');
+            pw.print(r.trimMemoryLevel);
+            pw.print(' ');
+            pw.print(r.toShortString());
+            pw.print(" (");
+            pw.print(r.adjType);
+            pw.println(')');
             if (r.adjSource != null || r.adjTarget != null) {
                 pw.print(prefix);
                 pw.print("    ");
@@ -13374,6 +13431,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (app.thread == null) {
             app.adjSeq = mAdjSeq;
             app.curSchedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
+            app.curProcState = ActivityManager.PROCESS_STATE_CACHED;
             return (app.curAdj=app.curRawAdj=ProcessList.CACHED_APP_MAX_ADJ);
         }
 
@@ -13396,6 +13454,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.foregroundActivities = false;
             app.keeping = true;
             app.curSchedGroup = Process.THREAD_GROUP_DEFAULT;
+            app.curProcState = ActivityManager.PROCESS_STATE_PERSISTENT;
             // System process can do UI, and when they do we want to have
             // them trim their memory after the user leaves the UI.  To
             // facilitate this, here we need to determine whether or not it
@@ -13415,6 +13474,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
             }
+            if (!app.systemNoUi) {
+                app.curProcState = ActivityManager.PROCESS_STATE_PERSISTENT_UI;
+            }
             return (app.curAdj=app.maxAdj);
         }
 
@@ -13426,6 +13488,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         // important to least, and assign an appropriate OOM adjustment.
         int adj;
         int schedGroup;
+        int procState;
         boolean foregroundActivities = false;
         boolean interesting = false;
         BroadcastQueue queue;
@@ -13437,12 +13500,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             foregroundActivities = true;
             interesting = true;
             app.hasActivities = true;
+            procState = ActivityManager.PROCESS_STATE_TOP;
         } else if (app.instrumentationClass != null) {
             // Don't want to kill running instrumentation.
             adj = ProcessList.FOREGROUND_APP_ADJ;
             schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "instrumentation";
             interesting = true;
+            procState = ActivityManager.PROCESS_STATE_IMPORTANT_PERCEPTIBLE;
         } else if ((queue = isReceivingBroadcast(app)) != null) {
             // An app that is currently receiving a broadcast also
             // counts as being in the foreground for OOM killer purposes.
@@ -13452,12 +13517,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             schedGroup = (queue == mFgBroadcastQueue)
                     ? Process.THREAD_GROUP_DEFAULT : Process.THREAD_GROUP_BG_NONINTERACTIVE;
             app.adjType = "broadcast";
+            procState = ActivityManager.PROCESS_STATE_RECEIVER;
         } else if (app.executingServices.size() > 0) {
             // An app that is currently executing a service callback also
             // counts as being in the foreground.
             adj = ProcessList.FOREGROUND_APP_ADJ;
             schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "exec-service";
+            procState = ActivityManager.PROCESS_STATE_SERVICE;
         } else {
             // Assume process is cached (has activities); we will correct
             // later if this is not the case.
@@ -13465,6 +13532,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
             app.cached = true;
             app.adjType = "cch-act";
+            procState = ActivityManager.PROCESS_STATE_CACHED;
         }
 
         boolean hasStoppingActivities = false;
@@ -13479,6 +13547,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                         adj = ProcessList.VISIBLE_APP_ADJ;
                         app.adjType = "visible";
                     }
+                    if (procState > ActivityManager.PROCESS_STATE_IMPORTANT_PERCEPTIBLE) {
+                        procState = ActivityManager.PROCESS_STATE_IMPORTANT_PERCEPTIBLE;
+                    }
                     schedGroup = Process.THREAD_GROUP_DEFAULT;
                     app.cached = false;
                     app.hasActivities = true;
@@ -13489,12 +13560,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                         adj = ProcessList.PERCEPTIBLE_APP_ADJ;
                         app.adjType = "pausing";
                     }
+                    if (procState > ActivityManager.PROCESS_STATE_IMPORTANT_PERCEPTIBLE) {
+                        procState = ActivityManager.PROCESS_STATE_IMPORTANT_PERCEPTIBLE;
+                    }
                     app.cached = false;
                     foregroundActivities = true;
                 } else if (r.state == ActivityState.STOPPING) {
                     // We will apply the actual adjustment later, because
                     // we want to allow this process to immediately go through
                     // any memory trimming that is in effect.
+                    if (procState > ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND) {
+                        procState = ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND;
+                    }
                     app.cached = false;
                     foregroundActivities = true;
                     hasStoppingActivities = true;
@@ -13522,12 +13599,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (app.foregroundServices) {
                 // The user is aware of this app, so make it visible.
                 adj = ProcessList.PERCEPTIBLE_APP_ADJ;
+                procState = ActivityManager.PROCESS_STATE_IMPORTANT_PERCEPTIBLE;
                 app.cached = false;
                 app.adjType = "fg-service";
                 schedGroup = Process.THREAD_GROUP_DEFAULT;
             } else if (app.forcingToForeground != null) {
                 // The user is aware of this app, so make it visible.
                 adj = ProcessList.PERCEPTIBLE_APP_ADJ;
+                procState = ActivityManager.PROCESS_STATE_IMPORTANT_PERCEPTIBLE;
                 app.cached = false;
                 app.adjType = "force-fg";
                 app.adjSource = app.forcingToForeground;
@@ -13547,24 +13626,33 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.adjType = "heavy";
         }
 
-        if (adj > ProcessList.HOME_APP_ADJ && app == mHomeProcess) {
-            // This process is hosting what we currently consider to be the
-            // home app, so we don't want to let it go into the background.
-            adj = ProcessList.HOME_APP_ADJ;
-            schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
-            app.cached = false;
-            app.adjType = "home";
+        if (app == mHomeProcess) {
+            if (adj > ProcessList.HOME_APP_ADJ) {
+                // This process is hosting what we currently consider to be the
+                // home app, so we don't want to let it go into the background.
+                adj = ProcessList.HOME_APP_ADJ;
+                schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
+                app.cached = false;
+                app.adjType = "home";
+            }
+            if (procState > ActivityManager.PROCESS_STATE_HOME) {
+                procState = ActivityManager.PROCESS_STATE_HOME;
+            }
         }
 
-        if (adj > ProcessList.PREVIOUS_APP_ADJ && app == mPreviousProcess
-                && app.activities.size() > 0) {
-            // This was the previous process that showed UI to the user.
-            // We want to try to keep it around more aggressively, to give
-            // a good experience around switching between two apps.
-            adj = ProcessList.PREVIOUS_APP_ADJ;
-            schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
-            app.cached = false;
-            app.adjType = "previous";
+        if (app == mPreviousProcess && app.activities.size() > 0) {
+            if (adj > ProcessList.PREVIOUS_APP_ADJ) {
+                // This was the previous process that showed UI to the user.
+                // We want to try to keep it around more aggressively, to give
+                // a good experience around switching between two apps.
+                adj = ProcessList.PREVIOUS_APP_ADJ;
+                schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
+                app.cached = false;
+                app.adjType = "previous";
+            }
+            if (procState > ActivityManager.PROCESS_STATE_LAST_ACTIVITY) {
+                procState = ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
+            }
         }
 
         if (false) Slog.i(TAG, "OOM " + app + ": initial adj=" + adj
@@ -13583,8 +13671,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (adj > ProcessList.BACKUP_APP_ADJ) {
                 if (DEBUG_BACKUP) Slog.v(TAG, "oom BACKUP_APP_ADJ for " + app);
                 adj = ProcessList.BACKUP_APP_ADJ;
+                if (procState > ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND) {
+                    procState = ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND;
+                }
                 app.adjType = "backup";
                 app.cached = false;
+            }
+            if (procState > ActivityManager.PROCESS_STATE_BACKUP) {
+                procState = ActivityManager.PROCESS_STATE_BACKUP;
             }
         }
 
@@ -13598,6 +13692,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 ServiceRecord s = jt.next();
                 if (s.startRequested) {
                     app.hasStartedServices = true;
+                    if (procState > ActivityManager.PROCESS_STATE_SERVICE) {
+                        procState = ActivityManager.PROCESS_STATE_SERVICE;
+                    }
                     if (app.hasShownUi && app != mHomeProcess) {
                         // If this process has shown some UI, let it immediately
                         // go to the LRU list because it may be pretty heavy with
@@ -13646,7 +13743,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                         if ((cr.flags&Context.BIND_WAIVE_PRIORITY) == 0) {
                             ProcessRecord client = cr.binding.client;
-                            int clientAdj = adj;
                             int myCachedAdj = cachedAdj;
                             if (myCachedAdj > client.cachedAdj) {
                                 if (client.cachedAdj >= ProcessList.VISIBLE_APP_ADJ) {
@@ -13671,8 +13767,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     myEmptyAdj = ProcessList.VISIBLE_APP_ADJ;
                                 }
                             }
-                            clientAdj = computeOomAdjLocked(client, myCachedAdj,
+                            int clientAdj = computeOomAdjLocked(client, myCachedAdj,
                                     myClientCachedAdj, myEmptyAdj, TOP_APP, true, doingAll);
+                            int clientProcState = client.curProcState;
                             String adjType = null;
                             if ((cr.flags&Context.BIND_ALLOW_OOM_MANAGEMENT) != 0) {
                                 // Not doing bind OOM management, so treat
@@ -13687,6 +13784,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     }
                                     app.cached = false;
                                     clientAdj = adj;
+                                    clientProcState = procState;
                                 } else {
                                     if (now >= (s.lastActivity
                                             + ActiveServices.MAX_SERVICE_INACTIVITY)) {
@@ -13710,7 +13808,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     // LRU list as a cached process (with activities),
                                     // we don't want the service it is connected to
                                     // to go into the empty LRU and quickly get killed,
-                                    // because I'll we'll do is just end up restarting
+                                    // because all we'll do is just end up restarting
                                     // the service.
                                     app.hasClientActivities |= client.hasActivities;
                                 }
@@ -13751,6 +13849,25 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     adjType = "service";
                                 }
                             }
+                            if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
+                                if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
+                                    schedGroup = Process.THREAD_GROUP_DEFAULT;
+                                }
+                                if (clientProcState <
+                                        ActivityManager.PROCESS_STATE_IMPORTANT_PERCEPTIBLE) {
+                                    clientProcState =
+                                            ActivityManager.PROCESS_STATE_IMPORTANT_PERCEPTIBLE;
+                                }
+                            } else {
+                                if (clientProcState <
+                                        ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND) {
+                                    clientProcState =
+                                            ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND;
+                                }
+                            }
+                            if (procState > clientProcState) {
+                                procState = clientProcState;
+                            }
                             if (adjType != null) {
                                 app.adjType = adjType;
                                 app.adjTypeCode = ActivityManager.RunningAppProcessInfo
@@ -13758,11 +13875,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 app.adjSource = cr.binding.client;
                                 app.adjSourceOom = clientAdj;
                                 app.adjTarget = s.name;
-                            }
-                            if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
-                                if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
-                                    schedGroup = Process.THREAD_GROUP_DEFAULT;
-                                }
                             }
                         }
                         final ActivityRecord a = cr.activity;
@@ -13861,6 +13973,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.adjSourceOom = clientAdj;
                     app.adjTarget = cpr.name;
                 }
+                if (procState > client.curProcState) {
+                    procState = client.curProcState;
+                }
                 if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
                     schedGroup = Process.THREAD_GROUP_DEFAULT;
                 }
@@ -13876,6 +13991,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.keeping = true;
                     app.adjType = "provider";
                     app.adjTarget = cpr.name;
+                }
+                if (procState > ActivityManager.PROCESS_STATE_IMPORTANT_PERCEPTIBLE) {
+                    procState = ActivityManager.PROCESS_STATE_IMPORTANT_PERCEPTIBLE;
                 }
             }
         }
@@ -13934,6 +14052,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 adj++;
             }
         }
+
+        app.curProcState = procState;
 
         int importance = app.memImportance;
         if (importance == 0 || adj != app.curAdj || schedGroup != app.curSchedGroup) {
@@ -14288,7 +14408,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private final boolean updateOomAdjLocked(ProcessRecord app, int cachedAdj,
-            int clientCachedAdj, int emptyAdj, ProcessRecord TOP_APP, boolean doingAll, long now) {
+            int clientCachedAdj, int emptyAdj, ProcessRecord TOP_APP, boolean doingAll,
+            boolean doingProcessState, long now) {
         app.cachedAdj = cachedAdj;
         app.clientCachedAdj = clientCachedAdj;
         app.emptyAdj = emptyAdj;
@@ -14391,6 +14512,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         }
+        if (app.repProcState != app.curProcState) {
+            app.repProcState = app.curProcState;
+            if (!doingProcessState && app.thread != null) {
+                try {
+                    if (false) {
+                        //RuntimeException h = new RuntimeException("here");
+                        Slog.i(TAG, "Sending new process state " + app.repProcState
+                                + " to " + app /*, h*/);
+                    }
+                    app.thread.setProcessState(app.repProcState);
+                } catch (RemoteException e) {
+                }
+            }
+        }
         return success;
     }
 
@@ -14399,6 +14534,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     final boolean updateOomAdjLocked(ProcessRecord app) {
+        return updateOomAdjLocked(app, false);
+    }
+
+    final boolean updateOomAdjLocked(ProcessRecord app, boolean doingProcessState) {
         final ActivityRecord TOP_ACT = resumedAppLocked();
         final ProcessRecord TOP_APP = TOP_ACT != null ? TOP_ACT.app : null;
         int curAdj = app.curAdj;
@@ -14408,7 +14547,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         mAdjSeq++;
 
         boolean success = updateOomAdjLocked(app, app.cachedAdj, app.clientCachedAdj,
-                app.emptyAdj, TOP_APP, false, SystemClock.uptimeMillis());
+                app.emptyAdj, TOP_APP, false, doingProcessState, SystemClock.uptimeMillis());
         final boolean nowCached = app.curAdj >= ProcessList.CACHED_APP_MIN_ADJ
             && app.curAdj <= ProcessList.CACHED_APP_MAX_ADJ;
         if (nowCached != wasCached) {
@@ -14490,7 +14629,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             //Slog.i(TAG, "OOM " + app + ": cur cached=" + curCachedAdj);
             app.setAdjChanged = false;
             updateOomAdjLocked(app, curCachedAdj, curClientCachedAdj, curEmptyAdj, TOP_APP,
-                    true, now);
+                    true, false, now);
             changed |= app.setAdjChanged;
             if (!app.killedBackground) {
                 if (app.curRawAdj == curCachedAdj && app.hasActivities) {

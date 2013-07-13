@@ -547,6 +547,8 @@ public final class ActivityThread {
         // Formatting for checkin service - update version if row format changes
         private static final int ACTIVITY_THREAD_CHECKIN_VERSION = 3;
 
+        private int mLastProcessState = -1;
+
         private void updatePendingConfiguration(Configuration config) {
             synchronized (mResourcesManager) {
                 if (mPendingConfiguration == null ||
@@ -582,7 +584,9 @@ public final class ActivityThread {
             queueOrSendMessage(H.SLEEPING, token, sleeping ? 1 : 0);
         }
 
-        public final void scheduleResumeActivity(IBinder token, boolean isForward) {
+        public final void scheduleResumeActivity(IBinder token, int processState,
+                boolean isForward) {
+            updateProcessState(processState, false);
             queueOrSendMessage(H.RESUME_ACTIVITY, token, isForward ? 1 : 0);
         }
 
@@ -597,9 +601,12 @@ public final class ActivityThread {
         // activity itself back to the activity manager. (matters more with ipc)
         public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
                 ActivityInfo info, Configuration curConfig, CompatibilityInfo compatInfo,
-                Bundle state, List<ResultInfo> pendingResults,
+                int procState, Bundle state, List<ResultInfo> pendingResults,
                 List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
                 String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler) {
+
+            updateProcessState(procState, false);
+
             ActivityClientRecord r = new ActivityClientRecord();
 
             r.token = token;
@@ -647,7 +654,8 @@ public final class ActivityThread {
 
         public final void scheduleReceiver(Intent intent, ActivityInfo info,
                 CompatibilityInfo compatInfo, int resultCode, String data, Bundle extras,
-                boolean sync, int sendingUser) {
+                boolean sync, int sendingUser, int processState) {
+            updateProcessState(processState, false);
             ReceiverData r = new ReceiverData(intent, resultCode, data, extras,
                     sync, false, mAppThread.asBinder(), sendingUser);
             r.info = info;
@@ -675,7 +683,8 @@ public final class ActivityThread {
         }
 
         public final void scheduleCreateService(IBinder token,
-                ServiceInfo info, CompatibilityInfo compatInfo) {
+                ServiceInfo info, CompatibilityInfo compatInfo, int processState) {
+            updateProcessState(processState, false);
             CreateServiceData s = new CreateServiceData();
             s.token = token;
             s.info = info;
@@ -685,7 +694,8 @@ public final class ActivityThread {
         }
 
         public final void scheduleBindService(IBinder token, Intent intent,
-                boolean rebind) {
+                boolean rebind, int processState) {
+            updateProcessState(processState, false);
             BindServiceData s = new BindServiceData();
             s.token = token;
             s.intent = intent;
@@ -810,7 +820,8 @@ public final class ActivityThread {
         // applies transaction ordering per object for such calls.
         public void scheduleRegisteredReceiver(IIntentReceiver receiver, Intent intent,
                 int resultCode, String dataStr, Bundle extras, boolean ordered,
-                boolean sticky, int sendingUser) throws RemoteException {
+                boolean sticky, int sendingUser, int processState) throws RemoteException {
+            updateProcessState(processState, false);
             receiver.performReceive(intent, resultCode, dataStr, extras, ordered,
                     sticky, sendingUser);
         }
@@ -1217,6 +1228,24 @@ public final class ActivityThread {
 
         public void scheduleTranslucentConversionComplete(IBinder token, boolean drawComplete) {
             queueOrSendMessage(H.TRANSLUCENT_CONVERSION_COMPLETE, token, drawComplete ? 1 : 0);
+        }
+
+        public void setProcessState(int state) {
+            updateProcessState(state, true);
+        }
+
+        public void updateProcessState(int processState, boolean fromIpc) {
+            synchronized (this) {
+                if (mLastProcessState != processState) {
+                    mLastProcessState = processState;
+
+                    // Update Dalvik state here based on ActivityManager.PROCESS_STATE_* constants.
+                    if (false) {
+                        Slog.i(TAG, "******************* PROCESS STATE CHANGED TO: " + processState
+                                + (fromIpc ? " (from ipc": ""));
+                    }
+                }
+            }
         }
     }
 

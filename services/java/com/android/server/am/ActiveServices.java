@@ -852,7 +852,9 @@ public final class ActiveServices {
         if ((!i.requested || rebind) && i.apps.size() > 0) {
             try {
                 bumpServiceExecutingLocked(r, "bind");
-                r.app.thread.scheduleBindService(r, i.intent.getIntent(), rebind);
+                r.app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_SERVICE);
+                r.app.thread.scheduleBindService(r, i.intent.getIntent(), rebind,
+                        r.app.repProcState);
                 if (!rebind) {
                     i.requested = true;
                 }
@@ -1127,8 +1129,10 @@ public final class ActiveServices {
                 r.stats.startLaunchedLocked();
             }
             mAm.ensurePackageDexOpt(r.serviceInfo.packageName);
+            app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_SERVICE);
             app.thread.scheduleCreateService(r, r.serviceInfo,
-                    mAm.compatibilityInfoForPackageLocked(r.serviceInfo.applicationInfo));
+                    mAm.compatibilityInfoForPackageLocked(r.serviceInfo.applicationInfo),
+                    app.repProcState);
             r.postNotification();
             created = true;
         } finally {

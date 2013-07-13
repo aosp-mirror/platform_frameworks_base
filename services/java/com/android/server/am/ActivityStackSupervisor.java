@@ -929,10 +929,11 @@ public final class ActivityStackSupervisor {
                     }
                 }
             }
+            app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_TOP);
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
                     System.identityHashCode(r), r.info,
-                    new Configuration(mService.mConfiguration),
-                    r.compat, r.icicle, results, newIntents, !andResume,
+                    new Configuration(mService.mConfiguration), r.compat,
+                    app.repProcState, r.icicle, results, newIntents, !andResume,
                     mService.isNextTransitionForward(), profileFile, profileFd,
                     profileAutoStop);
 
@@ -1891,6 +1892,37 @@ public final class ActivityStackSupervisor {
             }
         }
         return didSomething;
+    }
+
+    void updatePreviousProcessLocked(ActivityRecord r) {
+        // Now that this process has stopped, we may want to consider
+        // it to be the previous app to try to keep around in case
+        // the user wants to return to it.
+
+        // First, found out what is currently the foreground app, so that
+        // we don't blow away the previous app if this activity is being
+        // hosted by the process that is actually still the foreground.
+        ProcessRecord fgApp = null;
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityStack stack = mStacks.get(stackNdx);
+            if (isFrontStack(stack)) {
+                if (stack.mResumedActivity != null) {
+                    fgApp = stack.mResumedActivity.app;
+                } else if (stack.mPausingActivity != null) {
+                    fgApp = stack.mPausingActivity.app;
+                }
+                break;
+            }
+        }
+
+        // Now set this one as the previous process, only if that really
+        // makes sense to.
+        if (r.app != null && fgApp != null && r.app != fgApp
+                && r.lastVisibleTime > mService.mPreviousProcessVisibleTime
+                && r.app != mService.mHomeProcess) {
+            mService.mPreviousProcess = r.app;
+            mService.mPreviousProcessVisibleTime = r.lastVisibleTime;
+        }
     }
 
     boolean resumeTopActivitiesLocked() {
