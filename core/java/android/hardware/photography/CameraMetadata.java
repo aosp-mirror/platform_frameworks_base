@@ -258,7 +258,7 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
             int nativeType, boolean sizeOnly) {
 
         // TODO: add support for enums with their own values.
-        return packSingleNative(value.ordinal(), buffer, Integer.TYPE, nativeType, sizeOnly);
+        return packSingleNative(getEnumValue(value), buffer, Integer.TYPE, nativeType, sizeOnly);
     }
 
     @SuppressWarnings("unchecked")
@@ -552,19 +552,8 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
 
     private static <T extends Enum<T>> T unpackEnum(ByteBuffer buffer, Class<T> type,
             int nativeType) {
-
-        // TODO: add support for enums with their own values.
-
-        T[] values = type.getEnumConstants();
         int ordinal = unpackSingleNative(buffer, Integer.TYPE, nativeType);
-
-        if (ordinal < 0 || ordinal >= values.length) {
-            Log.e(TAG, String.format("Got invalid enum value %d for type %s, assuming it's 0",
-                    ordinal, type));
-            ordinal = 0;
-        }
-
-        return values[ordinal];
+        return getEnumFromValue(type, ordinal);
     }
 
     private static <T> T unpackClass(ByteBuffer buffer, Class<T> type, int nativeType) {
@@ -855,6 +844,83 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
         } finally {
             super.finalize();
         }
+    }
+
+    private static final HashMap<Class<? extends Enum>, int[]> sEnumValues =
+            new HashMap<Class<? extends Enum>, int[]>();
+    /**
+     * Register a non-sequential set of values to be used with the pack/unpack functions.
+     * This enables get/set to correctly marshal the enum into a value that is C-compatible.
+     *
+     * @param enumType the class for an enum
+     * @param values a list of values mapping to the ordinals of the enum
+     *
+     * @hide
+     */
+    public static <T extends Enum<T>> void registerEnumValues(Class<T> enumType, int[] values) {
+        if (enumType.getEnumConstants().length != values.length) {
+            throw new IllegalArgumentException(
+                    "Expected values array to be the same size as the enumTypes values "
+                            + values.length + " for type " + enumType);
+        }
+
+        sEnumValues.put(enumType, values);
+    }
+
+    /**
+     * Get the numeric value from an enum. This is usually the same as the ordinal value for
+     * enums that have fully sequential values, although for C-style enums the range of values
+     * may not map 1:1.
+     *
+     * @param enumValue enum instance
+     * @return int guaranteed to be ABI-compatible with the C enum equivalent
+     */
+    private static <T extends Enum<T>> int getEnumValue(T enumValue) {
+        int[] values;
+        values = sEnumValues.get(enumValue.getClass());
+
+        int ordinal = enumValue.ordinal();
+        if (values != null) {
+            return values[ordinal];
+        }
+
+        return ordinal;
+    }
+
+    /**
+     * Finds the enum corresponding to it's numeric value. Opposite of {@link #getEnumValue} method.
+     *
+     * @param enumType class of the enum we want to find
+     * @param value the numeric value of the enum
+     * @return an instance of the enum
+     */
+    private static <T extends Enum<T>> T getEnumFromValue(Class<T> enumType, int value) {
+        int ordinal;
+
+        int[] registeredValues = sEnumValues.get(enumType);
+        if (registeredValues != null) {
+            ordinal = -1;
+
+            for (int i = 0; i < registeredValues.length; ++i) {
+                if (registeredValues[i] == value) {
+                    ordinal = i;
+                    break;
+                }
+            }
+        } else {
+            ordinal = value;
+        }
+
+        T[] values = enumType.getEnumConstants();
+
+        if (ordinal < 0 || ordinal >= values.length) {
+            throw new IllegalArgumentException(
+                    String.format(
+                            "Argument 'value' (%d) was not a valid enum value for type %s", value,
+                            enumType));
+        }
+
+        return values[ordinal];
     }
 
     /**

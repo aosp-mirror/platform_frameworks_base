@@ -27,6 +27,7 @@ import static android.hardware.photography.CameraMetadata.*;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 
 import static org.junit.Assert.assertArrayEquals;
 
@@ -435,5 +436,74 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                         AvailableFormat.IMPLEMENTATION_DEFINED
                 });
 
+    }
+
+    @SmallTest
+    public void testReadWriteEnumWithCustomValues() {
+        CameraMetadata.registerEnumValues(AeAntibandingMode.class, new int[] {
+            0,
+            10,
+            20,
+            30
+        });
+
+        // byte (single)
+        checkKeyGetAndSet("android.control.aeAntibandingMode", AeAntibandingMode.class,
+                AeAntibandingMode.AUTO);
+
+        // byte (n)
+        checkKeyGetAndSetArray("android.control.aeAvailableAntibandingModes",
+                AeAntibandingMode[].class, new AeAntibandingMode[] {
+                        AeAntibandingMode.OFF, AeAntibandingMode._50HZ, AeAntibandingMode._60HZ,
+                        AeAntibandingMode.AUTO
+                });
+
+        Key<AeAntibandingMode[]> aeAntibandingModeKey =
+                new Key<AeAntibandingMode[]>("android.control.aeAvailableAntibandingModes",
+                        AeAntibandingMode[].class);
+        byte[] aeAntibandingModeValues = mMetadata.readValues(CameraMetadata
+                .getTag("android.control.aeAvailableAntibandingModes"));
+        byte[] expectedValues = new byte[] { 0, 10, 20, 30 };
+        assertArrayEquals(expectedValues, aeAntibandingModeValues);
+
+
+        /**
+         * Stranger cases that don't use byte enums
+         */
+        // int (n)
+        CameraMetadata.registerEnumValues(AvailableFormat.class, new int[] {
+            0x20,
+            0x32315659,
+            0x11,
+            0x22,
+            0x23,
+            0x21,
+        });
+
+        checkKeyGetAndSetArray("android.scaler.availableFormats", AvailableFormat[].class,
+                new AvailableFormat[] {
+                        AvailableFormat.RAW_SENSOR,
+                        AvailableFormat.YV12,
+                        AvailableFormat.IMPLEMENTATION_DEFINED
+                });
+
+        Key<AeAntibandingMode> availableFormatsKey =
+                new Key<AeAntibandingMode>("android.scaler.availableFormats",
+                        AeAntibandingMode.class);
+        byte[] availableFormatValues = mMetadata.readValues(CameraMetadata
+                .getTag(availableFormatsKey.getName()));
+
+        int[] expectedIntValues = new int[] {
+                0x20,
+                0x32315659,
+                0x22
+        };
+
+        ByteBuffer bf = ByteBuffer.wrap(availableFormatValues).order(ByteOrder.nativeOrder());
+
+        assertEquals(expectedIntValues.length * 4, availableFormatValues.length);
+        for (int i = 0; i < expectedIntValues.length; ++i) {
+            assertEquals(expectedIntValues[i], bf.getInt());
+        }
     }
 }
