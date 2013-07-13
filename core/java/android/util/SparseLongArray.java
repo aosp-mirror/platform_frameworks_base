@@ -20,8 +20,18 @@ import com.android.internal.util.ArrayUtils;
 
 /**
  * SparseLongArrays map integers to longs.  Unlike a normal array of longs,
- * there can be gaps in the indices.  It is intended to be more efficient
- * than using a HashMap to map Integers to Longs.
+ * there can be gaps in the indices.  It is intended to be more memory efficient
+ * than using a HashMap to map Integers to Longs, both because it avoids
+ * auto-boxing keys and values and its data structure doesn't rely on an extra entry object
+ * for each mapping.
+ *
+ * <p>Note that this container keeps its mappings in an array data structure,
+ * using a binary search to find keys.  The implementation is not intended to be appropriate for
+ * data structures
+ * that may contain large numbers of items.  It is generally slower than a traditional
+ * HashMap, since lookups require a binary search and adds and removes require inserting
+ * and deleting entries in the array.  For containers holding up to hundreds of items,
+ * the performance difference is not significant, less than 50%.</p>
  */
 public class SparseLongArray implements Cloneable {
     static final long[] EMPTY_LONGS = new long[0];
