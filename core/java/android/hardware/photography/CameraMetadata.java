@@ -864,6 +864,8 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
                             + values.length + " for type " + enumType);
         }
 
+        Log.v(TAG, "Registered enum values for type " + enumType + " values");
+
         sEnumValues.put(enumType, values);
     }
 
@@ -916,8 +918,10 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
         if (ordinal < 0 || ordinal >= values.length) {
             throw new IllegalArgumentException(
                     String.format(
-                            "Argument 'value' (%d) was not a valid enum value for type %s", value,
-                            enumType));
+                            "Argument 'value' (%d) was not a valid enum value for type %s "
+                                    + "(registered? %b)",
+                            value,
+                            enumType, (registeredValues != null)));
         }
 
         return values[ordinal];

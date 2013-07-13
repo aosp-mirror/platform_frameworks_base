@@ -48,6 +48,7 @@ public class CameraDevice implements android.hardware.photography.CameraDevice {
     private final CameraDeviceCallbacks mCallbacks = new CameraDeviceCallbacks();
 
     // XX: Make this a WeakReference<CaptureListener> ?
+    // TODO: Convert to SparseIntArray
     private final HashMap<Integer, CaptureListenerHolder> mCaptureListenerMap =
             new HashMap<Integer, CaptureListenerHolder>();
 
@@ -73,9 +74,21 @@ public class CameraDevice implements android.hardware.photography.CameraDevice {
 
     @Override
     public CameraProperties getProperties() throws CameraAccessException {
-        // TODO
-        Log.v(TAG, "TODO: Implement getProperties");
-        return new CameraProperties();
+
+        CameraProperties properties = new CameraProperties();
+        CameraMetadata info = new CameraMetadata();
+
+        try {
+            mRemoteDevice.getCameraInfo(/*out*/info);
+        } catch(CameraRuntimeException e) {
+            throw e.asChecked();
+        } catch(RemoteException e) {
+            // impossible
+            return null;
+        }
+
+        properties.swap(info);
+        return properties;
     }
 
     @Override
@@ -114,9 +127,6 @@ public class CameraDevice implements android.hardware.photography.CameraDevice {
             }
 
             CaptureRequest request = new CaptureRequest();
-
-            // XX: could also change binder signature but that's more work than
-            // just using swap.
             request.swap(templatedRequest);
 
             return request;

@@ -20,7 +20,7 @@ public class CameraBinderTestUtils {
     protected static final int USE_CALLING_UID = -1;
     protected static final int BAD_VALUE = -22;
     protected static final int ALREADY_EXISTS = -17;
-    protected static final int NO_ERROR = 0;
+    public static final int NO_ERROR = 0;
     private final Context mContext;
 
     public CameraBinderTestUtils(Context context) {

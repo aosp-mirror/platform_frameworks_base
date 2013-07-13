@@ -27,7 +27,7 @@ public final class Size {
      * @param width The width to store in the Size instance
      * @param height The height to store in the Size instance
      */
-    Size(int width, int height) {
+    public Size(int width, int height) {
         mWidth = width;
         mHeight = height;
     }
@@ -38,6 +38,38 @@ public final class Size {
 
     public final int getHeight() {
         return mHeight;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (this == obj) {
+            return true;
+        }
+        if (obj instanceof Size) {
+            Size other = (Size) obj;
+            return mWidth == other.mWidth && mHeight == other.mHeight;
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return mWidth + "x" + mHeight;
+    }
+
+    @Override
+    public int hashCode() {
+        final long INT_MASK = 0xffffffffL;
+
+        long asLong = INT_MASK & mWidth;
+        asLong <<= 32;
+
+        asLong |= (INT_MASK & mHeight);
+
+        return ((Long)asLong).hashCode();
     }
 
     private final int mWidth;

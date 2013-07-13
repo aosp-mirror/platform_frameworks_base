@@ -56,6 +56,7 @@ public final class CaptureRequestKeys {
                 private ModeKey(String name) {
                     super(name, ColorCorrection.ModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<ColorCorrection.ModeKey.Enum> MODE =
@@ -84,6 +85,7 @@ public final class CaptureRequestKeys {
                 private AeAntibandingModeKey(String name) {
                     super(name, Control.AeAntibandingModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Control.AeAntibandingModeKey.Enum> AE_ANTIBANDING_MODE =
@@ -104,6 +106,7 @@ public final class CaptureRequestKeys {
                 private AeLockKey(String name) {
                     super(name, Control.AeLockKey.Enum.class);
                 }
+
             }
 
         public static final Key<Control.AeLockKey.Enum> AE_LOCK =
@@ -128,6 +131,7 @@ public final class CaptureRequestKeys {
                 private AeModeKey(String name) {
                     super(name, Control.AeModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Control.AeModeKey.Enum> AE_MODE =
@@ -150,6 +154,7 @@ public final class CaptureRequestKeys {
                 private AePrecaptureTriggerKey(String name) {
                     super(name, Control.AePrecaptureTriggerKey.Enum.class);
                 }
+
             }
 
         public static final Key<Control.AePrecaptureTriggerKey.Enum> AE_PRECAPTURE_TRIGGER =
@@ -176,6 +181,7 @@ public final class CaptureRequestKeys {
                 private AfModeKey(String name) {
                     super(name, Control.AfModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Control.AfModeKey.Enum> AF_MODE =
@@ -198,6 +204,7 @@ public final class CaptureRequestKeys {
                 private AfTriggerKey(String name) {
                     super(name, Control.AfTriggerKey.Enum.class);
                 }
+
             }
 
         public static final Key<Control.AfTriggerKey.Enum> AF_TRIGGER =
@@ -216,6 +223,7 @@ public final class CaptureRequestKeys {
                 private AwbLockKey(String name) {
                     super(name, Control.AwbLockKey.Enum.class);
                 }
+
             }
 
         public static final Key<Control.AwbLockKey.Enum> AWB_LOCK =
@@ -248,6 +256,7 @@ public final class CaptureRequestKeys {
                 private AwbModeKey(String name) {
                     super(name, Control.AwbModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Control.AwbModeKey.Enum> AWB_MODE =
@@ -276,6 +285,7 @@ public final class CaptureRequestKeys {
                 private CaptureIntentKey(String name) {
                     super(name, Control.CaptureIntentKey.Enum.class);
                 }
+
             }
 
         public static final Key<Control.CaptureIntentKey.Enum> CAPTURE_INTENT =
@@ -308,6 +318,7 @@ public final class CaptureRequestKeys {
                 private EffectModeKey(String name) {
                     super(name, Control.EffectModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Control.EffectModeKey.Enum> EFFECT_MODE =
@@ -328,6 +339,7 @@ public final class CaptureRequestKeys {
                 private ModeKey(String name) {
                     super(name, Control.ModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Control.ModeKey.Enum> MODE =
@@ -376,6 +388,28 @@ public final class CaptureRequestKeys {
                 private SceneModeKey(String name) {
                     super(name, Control.SceneModeKey.Enum.class);
                 }
+
+                static {
+                    CameraMetadata.registerEnumValues(Control.SceneModeKey.Enum.class, new int[] {
+                        0,  // UNSUPPORTED
+                        1,  // FACE_PRIORITY
+                        2,  // ACTION
+                        3,  // PORTRAIT
+                        4,  // LANDSCAPE
+                        5,  // NIGHT
+                        6,  // NIGHT_PORTRAIT
+                        7,  // THEATRE
+                        8,  // BEACH
+                        9,  // SNOW
+                        10,  // SUNSET
+                        11,  // STEADYPHOTO
+                        12,  // FIREWORKS
+                        13,  // SPORTS
+                        14,  // PARTY
+                        15,  // CANDLELIGHT
+                        16  // BARCODE
+                    });
+                }
             }
 
         public static final Key<Control.SceneModeKey.Enum> SCENE_MODE =
@@ -394,6 +428,7 @@ public final class CaptureRequestKeys {
                 private VideoStabilizationModeKey(String name) {
                     super(name, Control.VideoStabilizationModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Control.VideoStabilizationModeKey.Enum> VIDEO_STABILIZATION_MODE =
@@ -416,6 +451,7 @@ public final class CaptureRequestKeys {
                 private ModeKey(String name) {
                     super(name, Demosaic.ModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Demosaic.ModeKey.Enum> MODE =
@@ -440,6 +476,7 @@ public final class CaptureRequestKeys {
                 private ModeKey(String name) {
                     super(name, Edge.ModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Edge.ModeKey.Enum> MODE =
@@ -470,6 +507,7 @@ public final class CaptureRequestKeys {
                 private ModeKey(String name) {
                     super(name, Flash.ModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Flash.ModeKey.Enum> MODE =
@@ -494,6 +532,7 @@ public final class CaptureRequestKeys {
                 private ModeKey(String name) {
                     super(name, Geometric.ModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Geometric.ModeKey.Enum> MODE =
@@ -520,6 +559,7 @@ public final class CaptureRequestKeys {
                 private ModeKey(String name) {
                     super(name, HotPixel.ModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<HotPixel.ModeKey.Enum> MODE =
@@ -568,6 +608,7 @@ public final class CaptureRequestKeys {
                 private OpticalStabilizationModeKey(String name) {
                     super(name, Lens.OpticalStabilizationModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Lens.OpticalStabilizationModeKey.Enum> OPTICAL_STABILIZATION_MODE =
@@ -592,6 +633,7 @@ public final class CaptureRequestKeys {
                 private ModeKey(String name) {
                     super(name, NoiseReduction.ModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<NoiseReduction.ModeKey.Enum> MODE =
@@ -622,6 +664,7 @@ public final class CaptureRequestKeys {
                 private MetadataModeKey(String name) {
                     super(name, Request.MetadataModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Request.MetadataModeKey.Enum> METADATA_MODE =
@@ -642,6 +685,7 @@ public final class CaptureRequestKeys {
                 private TypeKey(String name) {
                     super(name, Request.TypeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Request.TypeKey.Enum> TYPE =
@@ -682,6 +726,7 @@ public final class CaptureRequestKeys {
                 private ModeKey(String name) {
                     super(name, Shading.ModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Shading.ModeKey.Enum> MODE =
@@ -708,6 +753,7 @@ public final class CaptureRequestKeys {
                 private FaceDetectModeKey(String name) {
                     super(name, Statistics.FaceDetectModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Statistics.FaceDetectModeKey.Enum> FACE_DETECT_MODE =
@@ -726,6 +772,7 @@ public final class CaptureRequestKeys {
                 private HistogramModeKey(String name) {
                     super(name, Statistics.HistogramModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Statistics.HistogramModeKey.Enum> HISTOGRAM_MODE =
@@ -744,6 +791,7 @@ public final class CaptureRequestKeys {
                 private SharpnessMapModeKey(String name) {
                     super(name, Statistics.SharpnessMapModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Statistics.SharpnessMapModeKey.Enum> SHARPNESS_MAP_MODE =
@@ -774,6 +822,7 @@ public final class CaptureRequestKeys {
                 private ModeKey(String name) {
                     super(name, Tonemap.ModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Tonemap.ModeKey.Enum> MODE =
@@ -796,33 +845,12 @@ public final class CaptureRequestKeys {
                 private TransmitKey(String name) {
                     super(name, Led.TransmitKey.Enum.class);
                 }
+
             }
 
         public static final Key<Led.TransmitKey.Enum> TRANSMIT =
                 new TransmitKey("android.led.transmit");
 
-    }
-
-    static {
-                    CameraMetadata.registerEnumValues(Control.SceneModeKey.Enum.class, new int[] {
-                            0,  // UNSUPPORTED
-                            1,  // FACE_PRIORITY
-                            2,  // ACTION
-                            3,  // PORTRAIT
-                            4,  // LANDSCAPE
-                            5,  // NIGHT
-                            6,  // NIGHT_PORTRAIT
-                            7,  // THEATRE
-                            8,  // BEACH
-                            9,  // SNOW
-                            10,  // SUNSET
-                            11,  // STEADYPHOTO
-                            12,  // FIREWORKS
-                            13,  // SPORTS
-                            14,  // PARTY
-                            15,  // CANDLELIGHT
-                            16,  // BARCODE
-                    });
     }
 }
 

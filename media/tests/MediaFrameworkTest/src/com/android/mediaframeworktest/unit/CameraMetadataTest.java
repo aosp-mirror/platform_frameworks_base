@@ -484,7 +484,8 @@ public class CameraMetadataTest extends junit.framework.TestCase {
                 new AvailableFormat[] {
                         AvailableFormat.RAW_SENSOR,
                         AvailableFormat.YV12,
-                        AvailableFormat.IMPLEMENTATION_DEFINED
+                        AvailableFormat.IMPLEMENTATION_DEFINED,
+                        AvailableFormat.YCbCr_420_888
                 });
 
         Key<AeAntibandingMode> availableFormatsKey =
@@ -496,7 +497,8 @@ public class CameraMetadataTest extends junit.framework.TestCase {
         int[] expectedIntValues = new int[] {
                 0x20,
                 0x32315659,
-                0x22
+                0x22,
+                0x23
         };
 
         ByteBuffer bf = ByteBuffer.wrap(availableFormatValues).order(ByteOrder.nativeOrder());
