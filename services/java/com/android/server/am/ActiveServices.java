@@ -1118,8 +1118,11 @@ public final class ActiveServices {
 
         boolean created = false;
         try {
+            String nameTerm;
+            int lastPeriod = r.shortName.lastIndexOf('.');
+            nameTerm = lastPeriod >= 0 ? r.shortName.substring(lastPeriod) : r.shortName;
             EventLogTags.writeAmCreateService(
-                    r.userId, System.identityHashCode(r), r.shortName, r.app.pid);
+                    r.userId, System.identityHashCode(r), nameTerm, r.app.uid, r.app.pid);
             synchronized (r.stats.getBatteryStats()) {
                 r.stats.startLaunchedLocked();
             }
