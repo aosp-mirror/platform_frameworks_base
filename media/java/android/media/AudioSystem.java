@@ -403,4 +403,6 @@ public class AudioSystem
     public static native int getPrimaryOutputFrameCount();
     public static native int getOutputLatency(int stream);
 
+    public static native int setLowRamDevice(boolean isLowRamDevice);
+
 }
