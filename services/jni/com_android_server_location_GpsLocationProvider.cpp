@@ -490,7 +490,7 @@ static jint android_location_GpsLocationProvider_read_sv_status(JNIEnv* env, job
 }
 
 static void android_location_GpsLocationProvider_agps_set_reference_location_cellid(JNIEnv* env,
-        jobject obj, jint type, jint mcc, jint mnc, jint lac, jint cid)
+        jobject obj, jint type, jint mcc, jint mnc, jint lac, jint psc, jint cid)
 {
     AGpsRefLocation location;
 
@@ -503,9 +503,13 @@ static void android_location_GpsLocationProvider_agps_set_reference_location_cel
         case AGPS_REF_LOCATION_TYPE_GSM_CELLID:
         case AGPS_REF_LOCATION_TYPE_UMTS_CELLID:
             location.type = type;
+            location.u.cellID.type = type;
             location.u.cellID.mcc = mcc;
             location.u.cellID.mnc = mnc;
             location.u.cellID.lac = lac;
+#ifdef AGPS_USE_PSC
+            location.u.cellID.psc = psc;
+#endif
             location.u.cellID.cid = cid;
             break;
         default:
@@ -772,7 +776,7 @@ static JNINativeMethod sMethods[] = {
     {"native_agps_data_conn_closed", "()V", (void*)android_location_GpsLocationProvider_agps_data_conn_closed},
     {"native_agps_data_conn_failed", "()V", (void*)android_location_GpsLocationProvider_agps_data_conn_failed},
     {"native_agps_set_id","(ILjava/lang/String;)V",(void*)android_location_GpsLocationProvider_agps_set_id},
-    {"native_agps_set_ref_location_cellid","(IIIII)V",(void*)android_location_GpsLocationProvider_agps_set_reference_location_cellid},
+    {"native_agps_set_ref_location_cellid","(IIIIII)V",(void*)android_location_GpsLocationProvider_agps_set_reference_location_cellid},
     {"native_set_agps_server", "(ILjava/lang/String;I)V", (void*)android_location_GpsLocationProvider_set_agps_server},
     {"native_send_ni_response", "(II)V", (void*)android_location_GpsLocationProvider_send_ni_response},
     {"native_agps_ni_message", "([BI)V", (void *)android_location_GpsLocationProvider_agps_send_ni_message},

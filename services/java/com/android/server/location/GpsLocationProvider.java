@@ -1737,7 +1737,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     type = AGPS_REF_LOCATION_TYPE_GSM_CELLID;
                 }
                 native_agps_set_ref_location_cellid(type, mcc, mnc,
-                        gsm_cell.getLac(), gsm_cell.getCid());
+                        gsm_cell.getLac(), gsm_cell.getPsc(), gsm_cell.getCid());
             } else {
                 Log.e(TAG,"Error getting cell location info.");
             }
@@ -1907,7 +1907,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     // AGPS ril suport
     private native void native_agps_set_ref_location_cellid(int type, int mcc, int mnc,
-            int lac, int cid);
+            int lac, int psc, int cid);
     private native void native_agps_set_id(int type, String setid);
 
     private native void native_update_network_state(boolean connected, int type,
