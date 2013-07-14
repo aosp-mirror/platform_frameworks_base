@@ -192,6 +192,14 @@ public final class Debug
             return dalvikPss + nativePss + otherPss;
         }
 
+        /**
+         * @hide Return total PSS memory usage in kB.
+         */
+        public int getTotalUss() {
+            return dalvikPrivateClean + dalvikPrivateDirty
+                    + nativePrivateClean + nativePrivateDirty
+                    + otherPrivateClean + otherPrivateDirty;
+        }
 
         /**
          * Return total PSS memory usage in kB.
@@ -1001,9 +1009,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
     /**
      * Retrieves the PSS memory used by the process as given by the
-     * smaps. @hide
+     * smaps.  Optionally supply a long array of 1 entry to also
+     * receive the uss of the process.  @hide
      */
-    public static native long getPss(int pid);
+    public static native long getPss(int pid, long[] outUss);
 
     /**
      * Establish an object allocation limit in the current thread.

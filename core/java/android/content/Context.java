@@ -230,7 +230,15 @@ public abstract class Context {
      * tries to balance such requests from one app vs. the importantance of
      * keeping other apps around.
      */
-    public static final int BIND_VISIBLE = 0x0100;
+    public static final int BIND_VISIBLE = 0x10000000;
+
+    /**
+     * @hide
+     * Flag for {@link #bindService}: Consider this binding to be causing the target
+     * process to be showing UI, so it will be do a UI_HIDDEN memory trim when it goes
+     * away.
+     */
+    public static final int BIND_SHOWING_UI = 0x20000000;
 
     /**
      * Flag for {@link #bindService}: Don't consider the bound service to be

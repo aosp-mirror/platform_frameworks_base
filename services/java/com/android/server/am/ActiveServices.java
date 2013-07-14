@@ -421,7 +421,8 @@ public final class ActiveServices {
 
     private void updateServiceForegroundLocked(ProcessRecord proc, boolean oomAdj) {
         boolean anyForeground = false;
-        for (ServiceRecord sr : proc.services) {
+        for (int i=proc.services.size()-1; i>=0; i--) {
+            ServiceRecord sr = proc.services.valueAt(i);
             if (sr.isForeground) {
                 anyForeground = true;
                 break;
@@ -1670,78 +1671,72 @@ public final class ActiveServices {
         }
 
         // Clean up any connections this application has to other services.
-        if (app.connections.size() > 0) {
-            Iterator<ConnectionRecord> it = app.connections.iterator();
-            while (it.hasNext()) {
-                ConnectionRecord r = it.next();
-                removeConnectionLocked(r, app, null);
-            }
+        for (int i=app.connections.size()-1; i>=0; i--) {
+            ConnectionRecord r = app.connections.valueAt(i);
+            removeConnectionLocked(r, app, null);
         }
         app.connections.clear();
 
-        if (app.services.size() != 0) {
+        for (int i=app.services.size()-1; i>=0; i--) {
             // Any services running in the application need to be placed
             // back in the pending list.
-            Iterator<ServiceRecord> it = app.services.iterator();
-            while (it.hasNext()) {
-                ServiceRecord sr = it.next();
-                synchronized (sr.stats.getBatteryStats()) {
-                    sr.stats.stopLaunchedLocked();
-                }
-                sr.app = null;
-                sr.isolatedProc = null;
-                sr.executeNesting = 0;
-                if (sr.tracker != null) {
-                    sr.tracker.setExecuting(false, mAm.mProcessTracker.getMemFactorLocked(),
-                            SystemClock.uptimeMillis());
-                }
-                if (mStoppingServices.remove(sr)) {
-                    if (DEBUG_SERVICE) Slog.v(TAG, "killServices remove stopping " + sr);
-                }
+            ServiceRecord sr = app.services.valueAt(i);
+            synchronized (sr.stats.getBatteryStats()) {
+                sr.stats.stopLaunchedLocked();
+            }
+            sr.app = null;
+            sr.isolatedProc = null;
+            sr.executeNesting = 0;
+            if (sr.tracker != null) {
+                sr.tracker.setExecuting(false, mAm.mProcessTracker.getMemFactorLocked(),
+                        SystemClock.uptimeMillis());
+            }
+            if (mStoppingServices.remove(sr)) {
+                if (DEBUG_SERVICE) Slog.v(TAG, "killServices remove stopping " + sr);
+            }
 
-                final int numClients = sr.bindings.size();
-                for (int bindingi=numClients-1; bindingi>=0; bindingi--) {
-                    IntentBindRecord b = sr.bindings.valueAt(bindingi);
-                    if (DEBUG_SERVICE) Slog.v(TAG, "Killing binding " + b
-                            + ": shouldUnbind=" + b.hasBound);
-                    b.binder = null;
-                    b.requested = b.received = b.hasBound = false;
-                }
+            final int numClients = sr.bindings.size();
+            for (int bindingi=numClients-1; bindingi>=0; bindingi--) {
+                IntentBindRecord b = sr.bindings.valueAt(bindingi);
+                if (DEBUG_SERVICE) Slog.v(TAG, "Killing binding " + b
+                        + ": shouldUnbind=" + b.hasBound);
+                b.binder = null;
+                b.requested = b.received = b.hasBound = false;
+            }
 
-                if (sr.crashCount >= 2 && (sr.serviceInfo.applicationInfo.flags
-                        &ApplicationInfo.FLAG_PERSISTENT) == 0) {
-                    Slog.w(TAG, "Service crashed " + sr.crashCount
-                            + " times, stopping: " + sr);
-                    EventLog.writeEvent(EventLogTags.AM_SERVICE_CRASHED_TOO_MUCH,
-                            sr.userId, sr.crashCount, sr.shortName, app.pid);
-                    bringDownServiceLocked(sr);
-                } else if (!allowRestart) {
-                    bringDownServiceLocked(sr);
-                } else {
-                    boolean canceled = scheduleServiceRestartLocked(sr, true);
+            if (sr.crashCount >= 2 && (sr.serviceInfo.applicationInfo.flags
+                    &ApplicationInfo.FLAG_PERSISTENT) == 0) {
+                Slog.w(TAG, "Service crashed " + sr.crashCount
+                        + " times, stopping: " + sr);
+                EventLog.writeEvent(EventLogTags.AM_SERVICE_CRASHED_TOO_MUCH,
+                        sr.userId, sr.crashCount, sr.shortName, app.pid);
+                bringDownServiceLocked(sr);
+            } else if (!allowRestart) {
+                bringDownServiceLocked(sr);
+            } else {
+                boolean canceled = scheduleServiceRestartLocked(sr, true);
 
-                    // Should the service remain running?  Note that in the
-                    // extreme case of so many attempts to deliver a command
-                    // that it failed we also will stop it here.
-                    if (sr.startRequested && (sr.stopIfKilled || canceled)) {
-                        if (sr.pendingStarts.size() == 0) {
-                            sr.startRequested = false;
-                            if (sr.tracker != null) {
-                                sr.tracker.setStarted(false, mAm.mProcessTracker.getMemFactorLocked(),
-                                        SystemClock.uptimeMillis());
-                            }
-                            if (!sr.hasAutoCreateConnections()) {
-                                // Whoops, no reason to restart!
-                                bringDownServiceLocked(sr);
-                            }
+                // Should the service remain running?  Note that in the
+                // extreme case of so many attempts to deliver a command
+                // that it failed we also will stop it here.
+                if (sr.startRequested && (sr.stopIfKilled || canceled)) {
+                    if (sr.pendingStarts.size() == 0) {
+                        sr.startRequested = false;
+                        if (sr.tracker != null) {
+                            sr.tracker.setStarted(false, mAm.mProcessTracker.getMemFactorLocked(),
+                                    SystemClock.uptimeMillis());
+                        }
+                        if (!sr.hasAutoCreateConnections()) {
+                            // Whoops, no reason to restart!
+                            bringDownServiceLocked(sr);
                         }
                     }
                 }
             }
+        }
 
-            if (!allowRestart) {
-                app.services.clear();
-            }
+        if (!allowRestart) {
+            app.services.clear();
         }
 
         // Make sure we have no more records on the stopping list.
@@ -1880,11 +1875,10 @@ public final class ActiveServices {
                 return;
             }
             long maxTime = SystemClock.uptimeMillis() - SERVICE_TIMEOUT;
-            Iterator<ServiceRecord> it = proc.executingServices.iterator();
             ServiceRecord timeout = null;
             long nextTime = 0;
-            while (it.hasNext()) {
-                ServiceRecord sr = it.next();
+            for (int i=proc.executingServices.size()-1; i>=0; i--) {
+                ServiceRecord sr = proc.executingServices.valueAt(i);
                 if (sr.executingStart < maxTime) {
                     timeout = sr;
                     break;

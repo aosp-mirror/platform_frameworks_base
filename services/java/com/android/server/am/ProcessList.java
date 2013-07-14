@@ -36,6 +36,11 @@ final class ProcessList {
 
     // OOM adjustments for processes in various states:
 
+    // Adjustment used in certain places where we don't know it yet.
+    // (Generally this is something that is going to be cached, but we
+    // don't know the exact value in the cached range to assign yet.)
+    static final int UNKNOWN_ADJ = 16;
+
     // This is a process only hosting activities that are not visible,
     // so it can be killed without any disruption.
     static final int CACHED_APP_MAX_ADJ = 15;
@@ -62,14 +67,14 @@ final class ProcessList {
     // have much of an impact as far as the user is concerned.
     static final int SERVICE_ADJ = 5;
 
-    // This is a process currently hosting a backup operation.  Killing it
-    // is not entirely fatal but is generally a bad idea.
-    static final int BACKUP_APP_ADJ = 4;
-
     // This is a process with a heavy-weight application.  It is in the
     // background, but we want to try to avoid killing it.  Value set in
     // system/rootdir/init.rc on startup.
-    static final int HEAVY_WEIGHT_APP_ADJ = 3;
+    static final int HEAVY_WEIGHT_APP_ADJ = 4;
+
+    // This is a process currently hosting a backup operation.  Killing it
+    // is not entirely fatal but is generally a bad idea.
+    static final int BACKUP_APP_ADJ = 3;
 
     // This is a process only hosting components that are perceptible to the
     // user, and we really want to avoid killing them, but they are not
@@ -163,34 +168,11 @@ final class ProcessList {
 
     private boolean mHaveDisplaySize;
 
-    private final int[] mAdjToTrackedState = new int[CACHED_APP_MAX_ADJ+1];
-
     ProcessList() {
         MemInfoReader minfo = new MemInfoReader();
         minfo.readMemInfo();
         mTotalMemMb = minfo.getTotalSize()/(1024*1024);
         updateOomLevels(0, 0, false);
-        for (int i=0; i<=CACHED_APP_MAX_ADJ; i++) {
-            if (i <= FOREGROUND_APP_ADJ) {
-                mAdjToTrackedState[i] = ProcessTracker.STATE_FOREGROUND;
-            } else if (i <= VISIBLE_APP_ADJ) {
-                mAdjToTrackedState[i] = ProcessTracker.STATE_VISIBLE;
-            } else if (i <= PERCEPTIBLE_APP_ADJ) {
-                mAdjToTrackedState[i] = ProcessTracker.STATE_PERCEPTIBLE;
-            } else if (i <= BACKUP_APP_ADJ) {
-                mAdjToTrackedState[i] = ProcessTracker.STATE_BACKUP;
-            } else if (i <= SERVICE_ADJ) {
-                mAdjToTrackedState[i] = ProcessTracker.STATE_SERVICE;
-            } else if (i <= HOME_APP_ADJ) {
-                mAdjToTrackedState[i] = ProcessTracker.STATE_HOME;
-            } else if (i <= PREVIOUS_APP_ADJ) {
-                mAdjToTrackedState[i] = ProcessTracker.STATE_PREVIOUS;
-            } else if (i <= SERVICE_B_ADJ) {
-                mAdjToTrackedState[i] = ProcessTracker.STATE_SERVICE;
-            } else {
-                mAdjToTrackedState[i] = ProcessTracker.STATE_CACHED;
-            }
-        }
     }
 
     void applyDisplaySize(WindowManagerService wm) {
@@ -254,11 +236,6 @@ final class ProcessList {
             }
         }
         return mOomMinFree[mOomAdj.length-1] * 1024;
-    }
-
-    int adjToTrackedState(int adj) {
-        return adj >= FOREGROUND_APP_ADJ
-                ? mAdjToTrackedState[adj] : ProcessTracker.STATE_PERSISTENT;
     }
 
     private void writeFile(String path, String data) {

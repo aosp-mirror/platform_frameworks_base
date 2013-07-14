@@ -1210,7 +1210,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mCurIntent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
                 mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS), 0));
         if (bindCurrentInputMethodService(mCurIntent, this, Context.BIND_AUTO_CREATE
-                | Context.BIND_NOT_VISIBLE)) {
+                | Context.BIND_NOT_VISIBLE | Context.BIND_SHOWING_UI)) {
             mLastBindTime = SystemClock.uptimeMillis();
             mHaveConnection = true;
             mCurId = info.getId();
