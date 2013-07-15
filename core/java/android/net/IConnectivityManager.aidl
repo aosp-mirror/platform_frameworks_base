@@ -119,6 +119,8 @@ interface IConnectivityManager
 
     boolean prepareVpn(String oldPackage, String newPackage);
 
+    void markSocketAsUser(in ParcelFileDescriptor socket, int uid);
+
     ParcelFileDescriptor establishVpn(in VpnConfig config);
 
     void startLegacyVpn(in VpnProfile profile);

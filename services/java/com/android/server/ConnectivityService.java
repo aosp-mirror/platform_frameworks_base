@@ -1749,6 +1749,16 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 "ConnectivityService");
     }
 
+    private void enforceMarkNetworkSocketPermission() {
+        //Media server special case
+        if (Binder.getCallingUid() == Process.MEDIA_UID) {
+            return;
+        }
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MARK_NETWORK_SOCKET,
+                "ConnectivityService");
+    }
+
     /**
      * Handle a {@code DISCONNECTED} event. If this pertains to the non-active
      * network, we ignore it. If it is for the active network, we send out a
@@ -3347,6 +3357,23 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         int user = UserHandle.getUserId(Binder.getCallingUid());
         synchronized(mVpns) {
             return mVpns.get(user).prepare(oldPackage, newPackage);
+        }
+    }
+
+    @Override
+    public void markSocketAsUser(ParcelFileDescriptor socket, int uid) {
+        enforceMarkNetworkSocketPermission();
+        final long token = Binder.clearCallingIdentity();
+        try {
+            int mark = mNetd.getMarkForUid(uid);
+            // Clear the mark on the socket if no mark is needed to prevent socket reuse issues
+            if (mark == -1) {
+                mark = 0;
+            }
+            NetworkUtils.markSocket(socket.getFd(), mark);
+        } catch (RemoteException e) {
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
