@@ -237,6 +237,23 @@ public class TelephonyIntents {
     public static final String ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS
             = "android.intent.action.ACTION_SHOW_NOTICE_ECM_BLOCK_OTHERS";
 
+    /**
+     * Activity Action: Start this activity to invoke the carrier setup app.
+     * To filter the intent, see {@link #CATEGORY_MCCMNC_PREFIX}.
+     *
+     * <p class="note">Callers of this should hold the android.permission.INVOKE_CARRIER_SETUP
+     * permission.</p>
+     */
+    public static final String ACTION_CARRIER_SETUP = "android.intent.action.ACTION_CARRIER_SETUP";
+
+    /**
+     * A <em>prefix</em> for the MCC/MNC filtering used with {@link #ACTION_CARRIER_SETUP}.
+     * The MCC/MNC will be concatenated (zero-padded to 3 digits each) to create a final
+     * string of the form:
+     * <br />
+     * <code>android.intent.category.MCCMNC_310260</code>
+     */
+    public static final String CATEGORY_MCCMNC_PREFIX = "android.intent.category.MCCMNC_";
 
     /**
      * Broadcast Action: A "secret code" has been entered in the dialer. Secret codes are
