@@ -621,9 +621,9 @@ public abstract class BaseStatusBar extends SystemUI implements
         int maxHeight =
                 mContext.getResources().getDimensionPixelSize(R.dimen.notification_max_height);
         StatusBarNotification sbn = entry.notification;
-        RemoteViews oneU = sbn.getNotification().contentView;
-        RemoteViews large = sbn.getNotification().bigContentView;
-        if (oneU == null) {
+        RemoteViews contentView = sbn.getNotification().contentView;
+        RemoteViews bigContentView = sbn.getNotification().bigContentView;
+        if (contentView == null) {
             return false;
         }
 
@@ -657,13 +657,12 @@ public abstract class BaseStatusBar extends SystemUI implements
             content.setOnClickListener(null);
         }
 
-        // TODO(cwren) normalize variable names with those in updateNotification
-        View expandedOneU = null;
-        View expandedLarge = null;
+        View contentViewLocal = null;
+        View bigContentViewLocal = null;
         try {
-            expandedOneU = oneU.apply(mContext, adaptive, mOnClickHandler);
-            if (large != null) {
-                expandedLarge = large.apply(mContext, adaptive, mOnClickHandler);
+            contentViewLocal = contentView.apply(mContext, adaptive, mOnClickHandler);
+            if (bigContentView != null) {
+                bigContentViewLocal = bigContentView.apply(mContext, adaptive, mOnClickHandler);
             }
         }
         catch (RuntimeException e) {
@@ -672,25 +671,23 @@ public abstract class BaseStatusBar extends SystemUI implements
             return false;
         }
 
-        if (expandedOneU != null) {
+        if (contentViewLocal != null) {
             SizeAdaptiveLayout.LayoutParams params =
-                    new SizeAdaptiveLayout.LayoutParams(expandedOneU.getLayoutParams());
+                    new SizeAdaptiveLayout.LayoutParams(contentViewLocal.getLayoutParams());
             params.minHeight = minHeight;
             params.maxHeight = minHeight;
-            adaptive.addView(expandedOneU, params);
+            adaptive.addView(contentViewLocal, params);
         }
-        if (expandedLarge != null) {
+        if (bigContentViewLocal != null) {
             SizeAdaptiveLayout.LayoutParams params =
-                    new SizeAdaptiveLayout.LayoutParams(expandedLarge.getLayoutParams());
+                    new SizeAdaptiveLayout.LayoutParams(bigContentViewLocal.getLayoutParams());
             params.minHeight = minHeight+1;
             params.maxHeight = maxHeight;
-            adaptive.addView(expandedLarge, params);
+            adaptive.addView(bigContentViewLocal, params);
         }
         row.setDrawingCacheEnabled(true);
 
         applyLegacyRowBackground(sbn, content);
-
-        row.setTag(R.id.expandable_tag, Boolean.valueOf(large != null));
 
         if (MULTIUSER_DEBUG) {
             TextView debug = (TextView) row.findViewById(R.id.debug_info);
@@ -701,8 +698,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         entry.row = row;
         entry.content = content;
-        entry.expanded = expandedOneU;
-        entry.setLargeView(expandedLarge);
+        entry.expanded = contentViewLocal;
+        entry.setBigContentView(bigContentViewLocal);
 
         return true;
     }
@@ -944,8 +941,8 @@ public abstract class BaseStatusBar extends SystemUI implements
                 && oldContentView.getLayoutId() == contentView.getLayoutId();
         // large view may be null
         boolean bigContentsUnchanged =
-                (oldEntry.getLargeView() == null && bigContentView == null)
-                || ((oldEntry.getLargeView() != null && bigContentView != null)
+                (oldEntry.getBigContentView() == null && bigContentView == null)
+                || ((oldEntry.getBigContentView() != null && bigContentView != null)
                     && bigContentView.getPackage() != null
                     && oldBigContentView.getPackage() != null
                     && oldBigContentView.getPackage().equals(bigContentView.getPackage())
@@ -965,8 +962,8 @@ public abstract class BaseStatusBar extends SystemUI implements
             try {
                 // Reapply the RemoteViews
                 contentView.reapply(mContext, oldEntry.expanded, mOnClickHandler);
-                if (bigContentView != null && oldEntry.getLargeView() != null) {
-                    bigContentView.reapply(mContext, oldEntry.getLargeView(), mOnClickHandler);
+                if (bigContentView != null && oldEntry.getBigContentView() != null) {
+                    bigContentView.reapply(mContext, oldEntry.getBigContentView(), mOnClickHandler);
                 }
                 // update the contentIntent
                 final PendingIntent contentIntent = notification.getNotification().contentIntent;

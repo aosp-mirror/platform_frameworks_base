@@ -38,19 +38,19 @@ public class NotificationData {
         public View content; // takes the click events and sends the PendingIntent
         public View expanded; // the inflated RemoteViews
         public ImageView largeIcon;
-        protected View expandedLarge;
+        private View expandedBig;
         public Entry() {}
         public Entry(IBinder key, StatusBarNotification n, StatusBarIconView ic) {
             this.key = key;
             this.notification = n;
             this.icon = ic;
         }
-        public void setLargeView(View expandedLarge) {
-            this.expandedLarge = expandedLarge;
-            writeBooleanTag(row, R.id.expandable_tag, expandedLarge != null);
+        public void setBigContentView(View bigContentView) {
+            this.expandedBig = bigContentView;
+            writeBooleanTag(row, R.id.expandable_tag, bigContentView != null);
         }
-        public View getLargeView() {
-            return expandedLarge;
+        public View getBigContentView() {
+            return expandedBig;
         }
         /**
          * Return whether the entry can be expanded.
