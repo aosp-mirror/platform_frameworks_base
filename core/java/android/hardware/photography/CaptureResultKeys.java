@@ -56,6 +56,7 @@ public final class CaptureResultKeys {
                 private ModeKey(String name) {
                     super(name, ColorCorrection.ModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<ColorCorrection.ModeKey.Enum> MODE =
@@ -90,6 +91,7 @@ public final class CaptureResultKeys {
                 private AeStateKey(String name) {
                     super(name, Control.AeStateKey.Enum.class);
                 }
+
             }
 
         public static final Key<Control.AeStateKey.Enum> AE_STATE =
@@ -116,6 +118,7 @@ public final class CaptureResultKeys {
                 private AfModeKey(String name) {
                     super(name, Control.AfModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Control.AfModeKey.Enum> AF_MODE =
@@ -144,6 +147,7 @@ public final class CaptureResultKeys {
                 private AfStateKey(String name) {
                     super(name, Control.AfStateKey.Enum.class);
                 }
+
             }
 
         public static final Key<Control.AfStateKey.Enum> AF_STATE =
@@ -178,6 +182,7 @@ public final class CaptureResultKeys {
                 private AwbModeKey(String name) {
                     super(name, Control.AwbModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Control.AwbModeKey.Enum> AWB_MODE =
@@ -202,6 +207,7 @@ public final class CaptureResultKeys {
                 private AwbStateKey(String name) {
                     super(name, Control.AwbStateKey.Enum.class);
                 }
+
             }
 
         public static final Key<Control.AwbStateKey.Enum> AWB_STATE =
@@ -222,6 +228,7 @@ public final class CaptureResultKeys {
                 private ModeKey(String name) {
                     super(name, Control.ModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Control.ModeKey.Enum> MODE =
@@ -246,6 +253,7 @@ public final class CaptureResultKeys {
                 private ModeKey(String name) {
                     super(name, Edge.ModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Edge.ModeKey.Enum> MODE =
@@ -274,6 +282,7 @@ public final class CaptureResultKeys {
                 private ModeKey(String name) {
                     super(name, Flash.ModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Flash.ModeKey.Enum> MODE =
@@ -296,6 +305,7 @@ public final class CaptureResultKeys {
                 private StateKey(String name) {
                     super(name, Flash.StateKey.Enum.class);
                 }
+
             }
 
         public static final Key<Flash.StateKey.Enum> STATE =
@@ -320,6 +330,7 @@ public final class CaptureResultKeys {
                 private ModeKey(String name) {
                     super(name, HotPixel.ModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<HotPixel.ModeKey.Enum> MODE =
@@ -372,6 +383,7 @@ public final class CaptureResultKeys {
                 private OpticalStabilizationModeKey(String name) {
                     super(name, Lens.OpticalStabilizationModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Lens.OpticalStabilizationModeKey.Enum> OPTICAL_STABILIZATION_MODE =
@@ -388,6 +400,7 @@ public final class CaptureResultKeys {
                 private StateKey(String name) {
                     super(name, Lens.StateKey.Enum.class);
                 }
+
             }
 
         public static final Key<Lens.StateKey.Enum> STATE =
@@ -412,6 +425,7 @@ public final class CaptureResultKeys {
                 private ModeKey(String name) {
                     super(name, NoiseReduction.ModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<NoiseReduction.ModeKey.Enum> MODE =
@@ -438,6 +452,7 @@ public final class CaptureResultKeys {
                 private MetadataModeKey(String name) {
                     super(name, Request.MetadataModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Request.MetadataModeKey.Enum> METADATA_MODE =
@@ -482,6 +497,7 @@ public final class CaptureResultKeys {
                 private ModeKey(String name) {
                     super(name, Shading.ModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Shading.ModeKey.Enum> MODE =
@@ -506,6 +522,7 @@ public final class CaptureResultKeys {
                 private FaceDetectModeKey(String name) {
                     super(name, Statistics.FaceDetectModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Statistics.FaceDetectModeKey.Enum> FACE_DETECT_MODE =
@@ -534,6 +551,7 @@ public final class CaptureResultKeys {
                 private HistogramModeKey(String name) {
                     super(name, Statistics.HistogramModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Statistics.HistogramModeKey.Enum> HISTOGRAM_MODE =
@@ -554,6 +572,7 @@ public final class CaptureResultKeys {
                 private SharpnessMapModeKey(String name) {
                     super(name, Statistics.SharpnessMapModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Statistics.SharpnessMapModeKey.Enum> SHARPNESS_MAP_MODE =
@@ -584,6 +603,7 @@ public final class CaptureResultKeys {
                 private ModeKey(String name) {
                     super(name, Tonemap.ModeKey.Enum.class);
                 }
+
             }
 
         public static final Key<Tonemap.ModeKey.Enum> MODE =
@@ -606,14 +626,12 @@ public final class CaptureResultKeys {
                 private TransmitKey(String name) {
                     super(name, Led.TransmitKey.Enum.class);
                 }
+
             }
 
         public static final Key<Led.TransmitKey.Enum> TRANSMIT =
                 new TransmitKey("android.led.transmit");
 
-    }
-
-    static {
     }
 }
 

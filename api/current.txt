@@ -10819,6 +10819,7 @@ package android.hardware.photography {
   }
 
   public final class Size {
+    ctor public Size(int, int);
     method public final int getHeight();
     method public final int getWidth();
   }

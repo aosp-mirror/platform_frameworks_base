@@ -41,4 +41,6 @@ interface ICameraDeviceUser
     int createStream(int width, int height, int format, in Surface surface);
 
     int createDefaultRequest(int templateId, out CameraMetadata request);
+
+    int getCameraInfo(out CameraMetadata info);
 }

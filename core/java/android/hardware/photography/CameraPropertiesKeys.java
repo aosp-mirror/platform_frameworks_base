@@ -134,6 +134,7 @@ public final class CameraPropertiesKeys {
                 private FacingKey(String name) {
                     super(name, Lens.FacingKey.Enum.class);
                 }
+
             }
 
         public static final Key<Lens.FacingKey.Enum> FACING =
@@ -186,6 +187,17 @@ public final class CameraPropertiesKeys {
                 private AvailableFormatsKey(String name) {
                     super(name, Scaler.AvailableFormatsKey.Enum[].class);
                 }
+
+                static {
+                    CameraMetadata.registerEnumValues(Scaler.AvailableFormatsKey.Enum.class, new int[] {
+                        0x20,  // RAW_SENSOR
+                        0x32315659,  // YV12
+                        0x11,  // YCrCb_420_SP
+                        0x22,  // IMPLEMENTATION_DEFINED
+                        0x23,  // YCbCr_420_888
+                        0x21  // BLOB
+                    });
+                }
             }
 
         public static final Key<Scaler.AvailableFormatsKey.Enum[]> AVAILABLE_FORMATS =
@@ -232,6 +244,7 @@ public final class CameraPropertiesKeys {
                 private ColorFilterArrangementKey(String name) {
                     super(name, Sensor.Info.ColorFilterArrangementKey.Enum.class);
                 }
+
             }
 
             public static final Key<Sensor.Info.ColorFilterArrangementKey.Enum> COLOR_FILTER_ARRANGEMENT =
@@ -318,6 +331,30 @@ public final class CameraPropertiesKeys {
                 private ReferenceIlluminant1Key(String name) {
                     super(name, Sensor.ReferenceIlluminant1Key.Enum.class);
                 }
+
+                static {
+                    CameraMetadata.registerEnumValues(Sensor.ReferenceIlluminant1Key.Enum.class, new int[] {
+                        1,  // DAYLIGHT
+                        2,  // FLUORESCENT
+                        3,  // TUNGSTEN
+                        4,  // FLASH
+                        9,  // FINE_WEATHER
+                        10,  // CLOUDY_WEATHER
+                        11,  // SHADE
+                        12,  // DAYLIGHT_FLUORESCENT
+                        13,  // DAY_WHITE_FLUORESCENT
+                        14,  // COOL_WHITE_FLUORESCENT
+                        15,  // WHITE_FLUORESCENT
+                        17,  // STANDARD_A
+                        18,  // STANDARD_B
+                        19,  // STANDARD_C
+                        20,  // D55
+                        21,  // D65
+                        22,  // D75
+                        23,  // D50
+                        24  // ISO_STUDIO_TUNGSTEN
+                    });
+                }
             }
 
         public static final Key<Sensor.ReferenceIlluminant1Key.Enum> REFERENCE_ILLUMINANT1 =
@@ -364,6 +401,7 @@ public final class CameraPropertiesKeys {
                 private AvailableLedsKey(String name) {
                     super(name, Led.AvailableLedsKey.Enum[].class);
                 }
+
             }
 
         public static final Key<Led.AvailableLedsKey.Enum[]> AVAILABLE_LEDS =
@@ -386,43 +424,12 @@ public final class CameraPropertiesKeys {
                 private SupportedHardwareLevelKey(String name) {
                     super(name, Info.SupportedHardwareLevelKey.Enum.class);
                 }
+
             }
 
         public static final Key<Info.SupportedHardwareLevelKey.Enum> SUPPORTED_HARDWARE_LEVEL =
                 new SupportedHardwareLevelKey("android.info.supportedHardwareLevel");
 
-    }
-
-    static {
-                    CameraMetadata.registerEnumValues(Scaler.AvailableFormatsKey.Enum.class, new int[] {
-                            0x20,  // RAW_SENSOR
-                            0x32315659,  // YV12
-                            0x11,  // YCrCb_420_SP
-                            0x22,  // IMPLEMENTATION_DEFINED
-                            0x23,  // YCbCr_420_888
-                            0x21,  // BLOB
-                    });
-                    CameraMetadata.registerEnumValues(Sensor.ReferenceIlluminant1Key.Enum.class, new int[] {
-                            1,  // DAYLIGHT
-                            2,  // FLUORESCENT
-                            3,  // TUNGSTEN
-                            4,  // FLASH
-                            9,  // FINE_WEATHER
-                            10,  // CLOUDY_WEATHER
-                            11,  // SHADE
-                            12,  // DAYLIGHT_FLUORESCENT
-                            13,  // DAY_WHITE_FLUORESCENT
-                            14,  // COOL_WHITE_FLUORESCENT
-                            15,  // WHITE_FLUORESCENT
-                            17,  // STANDARD_A
-                            18,  // STANDARD_B
-                            19,  // STANDARD_C
-                            20,  // D55
-                            21,  // D65
-                            22,  // D75
-                            23,  // D50
-                            24,  // ISO_STUDIO_TUNGSTEN
-                    });
     }
 }
 

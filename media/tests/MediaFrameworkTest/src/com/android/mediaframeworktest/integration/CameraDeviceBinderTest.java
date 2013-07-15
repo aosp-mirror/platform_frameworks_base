@@ -18,6 +18,7 @@ package com.android.mediaframeworktest.integration;
 
 import android.graphics.SurfaceTexture;
 import android.hardware.photography.CameraMetadata;
+import android.hardware.photography.CameraPropertiesKeys;
 import android.hardware.photography.CaptureRequest;
 import android.hardware.photography.ICameraDeviceCallbacks;
 import android.hardware.photography.ICameraDeviceUser;
@@ -294,4 +295,16 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         request.close();
         metadata.close();
     }
+
+    @SmallTest
+    public void testCameraInfo() throws RemoteException {
+        CameraMetadata info = new CameraMetadata();
+
+        int status = mCameraUser.getCameraInfo(/*out*/info);
+        assertEquals(CameraBinderTestUtils.NO_ERROR, status);
+
+        assertFalse(info.isEmpty());
+        assertNotNull(info.get(CameraPropertiesKeys.Scaler.AVAILABLE_FORMATS));
+    }
+
 }
