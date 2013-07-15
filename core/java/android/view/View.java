@@ -1122,7 +1122,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @see android.graphics.drawable.Drawable
      * @see #getDrawableState()
-     * @hide
      */
     protected static final int[] PRESSED_STATE_SET;
     /**
