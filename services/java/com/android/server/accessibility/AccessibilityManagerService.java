@@ -2820,7 +2820,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub {
 
         public int resolveCallingUserIdEnforcingPermissionsLocked(int userId) {
             final int callingUid = Binder.getCallingUid();
-            if (callingUid == Process.SYSTEM_UID
+            if (callingUid == 0
+                    || callingUid == Process.SYSTEM_UID
                     || callingUid == Process.SHELL_UID) {
                 return mCurrentUserId;
             }
