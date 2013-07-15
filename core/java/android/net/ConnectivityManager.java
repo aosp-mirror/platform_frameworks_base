@@ -480,6 +480,22 @@ public class ConnectivityManager {
     }
 
     /**
+     * Checks if the given network type should be exempt from VPN routing rules
+     *
+     * @hide
+     */
+    public static boolean isNetworkTypeExempt(int networkType) {
+        switch (networkType) {
+            case TYPE_MOBILE_MMS:
+            case TYPE_MOBILE_SUPL:
+            case TYPE_MOBILE_HIPRI:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
      * Specifies the preferred network type.  When the device has more
      * than one type available the preferred network type will be used.
      * Note that this made sense when we only had 2 network types,

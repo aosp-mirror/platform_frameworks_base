@@ -252,6 +252,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static final boolean TO_DEFAULT_TABLE = true;
     private static final boolean TO_SECONDARY_TABLE = false;
 
+    private static final boolean EXEMPT = true;
+    private static final boolean UNEXEMPT = false;
+
     /**
      * used internally as a delayed event to make us switch back to the
      * default network
@@ -349,9 +352,18 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private InetAddress mDefaultDns;
 
+    // Lock for protecting access to mAddedRoutes and mExemptAddresses
+    private final Object mRoutesLock = new Object();
+
     // this collection is used to refcount the added routes - if there are none left
     // it's time to remove the route from the route table
+    @GuardedBy("mRoutesLock")
     private Collection<RouteInfo> mAddedRoutes = new ArrayList<RouteInfo>();
+
+    // this collection corresponds to the entries of mAddedRoutes that have routing exemptions
+    // used to handle cleanup of exempt rules
+    @GuardedBy("mRoutesLock")
+    private Collection<LinkAddress> mExemptAddresses = new ArrayList<LinkAddress>();
 
     // used in DBG mode to track inet condition reports
     private static final int INET_CONDITION_LOG_MAX_SIZE = 15;
@@ -1470,7 +1482,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         try {
             InetAddress addr = InetAddress.getByAddress(hostAddress);
             LinkProperties lp = tracker.getLinkProperties();
-            boolean ok = addRouteToAddress(lp, addr);
+            boolean ok = addRouteToAddress(lp, addr, EXEMPT);
             if (DBG) log("requestRouteToHostAddress ok=" + ok);
             return ok;
         } catch (UnknownHostException e) {
@@ -1482,24 +1494,25 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return false;
     }
 
-    private boolean addRoute(LinkProperties p, RouteInfo r, boolean toDefaultTable) {
-        return modifyRoute(p, r, 0, ADD, toDefaultTable);
+    private boolean addRoute(LinkProperties p, RouteInfo r, boolean toDefaultTable,
+            boolean exempt) {
+        return modifyRoute(p, r, 0, ADD, toDefaultTable, exempt);
     }
 
     private boolean removeRoute(LinkProperties p, RouteInfo r, boolean toDefaultTable) {
-        return modifyRoute(p, r, 0, REMOVE, toDefaultTable);
+        return modifyRoute(p, r, 0, REMOVE, toDefaultTable, UNEXEMPT);
     }
 
-    private boolean addRouteToAddress(LinkProperties lp, InetAddress addr) {
-        return modifyRouteToAddress(lp, addr, ADD, TO_DEFAULT_TABLE);
+    private boolean addRouteToAddress(LinkProperties lp, InetAddress addr, boolean exempt) {
+        return modifyRouteToAddress(lp, addr, ADD, TO_DEFAULT_TABLE, exempt);
     }
 
     private boolean removeRouteToAddress(LinkProperties lp, InetAddress addr) {
-        return modifyRouteToAddress(lp, addr, REMOVE, TO_DEFAULT_TABLE);
+        return modifyRouteToAddress(lp, addr, REMOVE, TO_DEFAULT_TABLE, UNEXEMPT);
     }
 
     private boolean modifyRouteToAddress(LinkProperties lp, InetAddress addr, boolean doAdd,
-            boolean toDefaultTable) {
+            boolean toDefaultTable, boolean exempt) {
         RouteInfo bestRoute = RouteInfo.selectBestRoute(lp.getAllRoutes(), addr);
         if (bestRoute == null) {
             bestRoute = RouteInfo.makeHostRoute(addr, lp.getInterfaceName());
@@ -1514,11 +1527,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 bestRoute = RouteInfo.makeHostRoute(addr, bestRoute.getGateway(), iface);
             }
         }
-        return modifyRoute(lp, bestRoute, 0, doAdd, toDefaultTable);
+        return modifyRoute(lp, bestRoute, 0, doAdd, toDefaultTable, exempt);
     }
 
     private boolean modifyRoute(LinkProperties lp, RouteInfo r, int cycleCount, boolean doAdd,
-            boolean toDefaultTable) {
+            boolean toDefaultTable, boolean exempt) {
         if ((lp == null) || (r == null)) {
             if (DBG) log("modifyRoute got unexpected null: " + lp + ", " + r);
             return false;
@@ -1547,15 +1560,25 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                                         bestRoute.getGateway(),
                                                         ifaceName);
                 }
-                modifyRoute(lp, bestRoute, cycleCount+1, doAdd, toDefaultTable);
+                modifyRoute(lp, bestRoute, cycleCount+1, doAdd, toDefaultTable, exempt);
             }
         }
         if (doAdd) {
             if (VDBG) log("Adding " + r + " for interface " + ifaceName);
             try {
                 if (toDefaultTable) {
-                    mAddedRoutes.add(r);  // only track default table - only one apps can effect
-                    mNetd.addRoute(ifaceName, r);
+                    synchronized (mRoutesLock) {
+                        // only track default table - only one apps can effect
+                        mAddedRoutes.add(r);
+                        mNetd.addRoute(ifaceName, r);
+                        if (exempt) {
+                            LinkAddress dest = r.getDestination();
+                            if (!mExemptAddresses.contains(dest)) {
+                                mNetd.setHostExemption(dest);
+                                mExemptAddresses.add(dest);
+                            }
+                        }
+                    }
                 } else {
                     mNetd.addSecondaryRoute(ifaceName, r);
                 }
@@ -1568,18 +1591,25 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             // if we remove this one and there are no more like it, then refcount==0 and
             // we can remove it from the table
             if (toDefaultTable) {
-                mAddedRoutes.remove(r);
-                if (mAddedRoutes.contains(r) == false) {
-                    if (VDBG) log("Removing " + r + " for interface " + ifaceName);
-                    try {
-                        mNetd.removeRoute(ifaceName, r);
-                    } catch (Exception e) {
-                        // never crash - catch them all
-                        if (VDBG) loge("Exception trying to remove a route: " + e);
-                        return false;
+                synchronized (mRoutesLock) {
+                    mAddedRoutes.remove(r);
+                    if (mAddedRoutes.contains(r) == false) {
+                        if (VDBG) log("Removing " + r + " for interface " + ifaceName);
+                        try {
+                            mNetd.removeRoute(ifaceName, r);
+                            LinkAddress dest = r.getDestination();
+                            if (mExemptAddresses.contains(dest)) {
+                                mNetd.clearHostExemption(dest);
+                                mExemptAddresses.remove(dest);
+                            }
+                        } catch (Exception e) {
+                            // never crash - catch them all
+                            if (VDBG) loge("Exception trying to remove a route: " + e);
+                            return false;
+                        }
+                    } else {
+                        if (VDBG) log("not removing " + r + " as it's still in use");
                     }
-                } else {
-                    if (VDBG) log("not removing " + r + " as it's still in use");
                 }
             } else {
                 if (VDBG) log("Removing " + r + " for interface " + ifaceName);
@@ -2260,6 +2290,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private void handleConnectivityChange(int netType, boolean doReset) {
         int resetMask = doReset ? NetworkUtils.RESET_ALL_ADDRESSES : 0;
+        boolean exempt = ConnectivityManager.isNetworkTypeExempt(netType);
 
         /*
          * If a non-default network is enabled, add the host routes that
@@ -2324,7 +2355,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
         mCurrentLinkProperties[netType] = newLp;
-        boolean resetDns = updateRoutes(newLp, curLp, mNetConfigs[netType].isDefault());
+        boolean resetDns = updateRoutes(newLp, curLp, mNetConfigs[netType].isDefault(), exempt);
 
         if (resetMask != 0 || resetDns) {
             if (curLp != null) {
@@ -2400,7 +2431,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * returns a boolean indicating the routes changed
      */
     private boolean updateRoutes(LinkProperties newLp, LinkProperties curLp,
-            boolean isLinkDefault) {
+            boolean isLinkDefault, boolean exempt) {
         Collection<RouteInfo> routesToAdd = null;
         CompareResult<InetAddress> dnsDiff = new CompareResult<InetAddress>();
         CompareResult<RouteInfo> routeDiff = new CompareResult<RouteInfo>();
@@ -2436,7 +2467,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 }
                 if (newLp != null) {
                     for (InetAddress newDns : newLp.getDnses()) {
-                        addRouteToAddress(newLp, newDns);
+                        addRouteToAddress(newLp, newDns, exempt);
                     }
                 }
             } else {
@@ -2445,28 +2476,30 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     removeRouteToAddress(curLp, oldDns);
                 }
                 for (InetAddress newDns : dnsDiff.added) {
-                    addRouteToAddress(newLp, newDns);
+                    addRouteToAddress(newLp, newDns, exempt);
                 }
             }
         }
 
         for (RouteInfo r :  routeDiff.added) {
             if (isLinkDefault || ! r.isDefaultRoute()) {
-                addRoute(newLp, r, TO_DEFAULT_TABLE);
+                addRoute(newLp, r, TO_DEFAULT_TABLE, exempt);
             } else {
                 // add to a secondary route table
-                addRoute(newLp, r, TO_SECONDARY_TABLE);
+                addRoute(newLp, r, TO_SECONDARY_TABLE, UNEXEMPT);
 
                 // many radios add a default route even when we don't want one.
                 // remove the default route unless somebody else has asked for it
                 String ifaceName = newLp.getInterfaceName();
-                if (TextUtils.isEmpty(ifaceName) == false && mAddedRoutes.contains(r) == false) {
-                    if (VDBG) log("Removing " + r + " for interface " + ifaceName);
-                    try {
-                        mNetd.removeRoute(ifaceName, r);
-                    } catch (Exception e) {
-                        // never crash - catch them all
-                        if (DBG) loge("Exception trying to remove a route: " + e);
+                synchronized (mRoutesLock) {
+                    if (!TextUtils.isEmpty(ifaceName) && !mAddedRoutes.contains(r)) {
+                        if (VDBG) log("Removing " + r + " for interface " + ifaceName);
+                        try {
+                            mNetd.removeRoute(ifaceName, r);
+                        } catch (Exception e) {
+                            // never crash - catch them all
+                            if (DBG) loge("Exception trying to remove a route: " + e);
+                        }
                     }
                 }
             }
