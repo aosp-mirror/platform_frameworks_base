@@ -1085,11 +1085,9 @@ public class SystemServer {
     private static final long EARLIEST_SUPPORTED_TIME = 86400 * 1000;
 
     /**
-     * This method is called from Zygote to initialize the system. This will cause the native
-     * services (SurfaceFlinger, AudioFlinger, etc..) to be started. After that it will call back
-     * up into init2() to start the Android services.
+     * Called to initialize native system services.
      */
-    native public static void init1(String[] args);
+    private static native void nativeInit();
 
     public static void main(String[] args) {
         if (System.currentTimeMillis() < EARLIEST_SUPPORTED_TIME) {
@@ -1123,11 +1121,11 @@ public class SystemServer {
         Environment.setUserRequired(true);
 
         System.loadLibrary("android_servers");
-        init1(args);
-    }
 
-    public static final void init2() {
         Slog.i(TAG, "Entered the Android system server!");
+
+        // Initialize native services.
+        nativeInit();
 
         // This used to be its own separate thread, but now it is
         // just the loop we run on the main thread.

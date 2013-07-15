@@ -23,6 +23,7 @@ LOCAL_C_INCLUDES += \
     $(JNI_H_INCLUDE) \
     frameworks/base/services \
     frameworks/base/core/jni \
+    frameworks/native/services \
     external/skia/include/core \
     libcore/include \
     libcore/include/libsuspend \
@@ -32,16 +33,17 @@ LOCAL_C_INCLUDES += \
 LOCAL_SHARED_LIBRARIES := \
     libandroid_runtime \
     libandroidfw \
+    libbinder \
     libcutils \
     liblog \
     libhardware \
     libhardware_legacy \
     libnativehelper \
-    libsystem_server \
     libutils \
     libui \
     libinput \
     libinputservice \
+    libsensorservice \
     libskia \
     libgui \
     libusbhost \
