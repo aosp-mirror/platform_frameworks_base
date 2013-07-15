@@ -639,6 +639,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Lehetővé teszi az alkalmazás számára, hogy kezelje a hálózati irányelveket és meghatározza az alkalmazásspecifikus szabályokat."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"hálózathasználat elszámolásának módosítása"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Lehetővé teszi az alkalmazás számára annak módosítását, hogy a hálózathasználatot hogyan számolják el az alkalmazások esetében. Normál alkalmazások nem használhatják."</string>
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"hozzáférési értesítések"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Lehetővé teszi, hogy az alkalmazás értesítéseket kérdezzen le, vizsgáljon és tisztítson meg, beleértve az egyéb alkalmazások által közzétett értesítéseket is."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"csatlakozzon értesítésfigyelő szolgáltatáshoz"</string>

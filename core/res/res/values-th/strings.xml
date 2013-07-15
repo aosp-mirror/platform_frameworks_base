@@ -639,6 +639,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"อนุญาตให้แอปพลิเคชันจัดการนโยบายเครือข่ายและกำหนดกฎเฉพาะแอปพลิเคชัน"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"แก้ไขการบันทึกบัญชีการใช้งานเครือข่าย"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"อนุญาตให้แอปพลิเคชันแก้ไขวิธีการบันทึกบัญชีการใช้งานเครือข่ายของแอปพลิเคชัน ไม่ใช้สำหรับแอปพลิเคชันทั่วไป"</string>
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"เข้าถึงการแจ้งเตือน"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"ทำให้แอปสามารถเรียกดู ตรวจสอบ และล้างการแจ้งเตือนได้ ซึ่งรวมถึงการแจ้งเตือนที่โพสต์โดยแอปอื่นๆ ด้วย"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"เชื่อมโยงกับบริการตัวฟังการแจ้งเตือน"</string>

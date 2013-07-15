@@ -639,6 +639,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Uygulamaya, ağ politikalarını yönetme ve uygulamaya özgü kuralları tanımlama izni verir."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"ağ kullanım hesaplamasını değiştir"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Uygulamaya, ağın uygulamalara göre nasıl kullanılacağını değiştirme izni verir. Normal uygulamalar tarafından kullanılmak için değildir."</string>
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"bildirimlere eriş"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Uygulamanın bildirimler almasına, bildirimleri incelemesine ve temizlemesine izin verir. Buna diğer uygulamalar tarafından yayınlanan bildirimler de dahildir."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"bildirim dinleyici hizmetine bağlan"</string>

@@ -639,6 +639,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Programu omogoča upravljanje pravilnikov o omrežju in določanje pravil za program."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"spremeni obračunavanje uporabe omrežja"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Programu omogoča, da spremeni uporabo omrežja na podlagi programov. Ni za uporabo z navadnimi programi."</string>
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"dostop do obvestil"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Dovoli aplikaciji, da prenese, razišče in izbriše obvestila, tudi tista, ki so jih objavile druge aplikacije."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"poveži se s storitvijo poslušalca obvestil"</string>

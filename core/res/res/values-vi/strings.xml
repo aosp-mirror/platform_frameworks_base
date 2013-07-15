@@ -639,6 +639,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Cho phép ứng dụng quản lý chính sách mạng và xác định quy tắc dành riêng cho ứng dụng."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"sửa đổi hạch toán sử dụng mạng"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Cho phép ứng dụng sửa đổi cách tính mức sử dụng mạng so với ứng dụng. Không dành cho các ứng dụng thông thường."</string>
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"truy cập thông báo"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Cho phép ứng dụng truy xuất, kiểm tra và xóa thông báo, bao gồm những thông báo được đăng bởi các ứng dụng khác."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"liên kết với dịch vụ trình xử lý thông báo"</string>

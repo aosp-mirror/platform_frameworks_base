@@ -639,6 +639,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"एप्‍लिकेशन को नेटवर्क नीतियां प्रबंधित करने और एप्‍लिकेशन-विशिष्‍ट नियमों को परिभाषित करने देता है."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"नेटवर्क उपयोग हिसाब बदलें"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"एप्लिकेशन को यह संशोधित करने देता है कि एप्‍लिकेशन की तुलना में नेटवर्क उपयोग का मूल्यांकन कैसे किया जाता है. सामान्‍य एप्‍लिकेशन द्वारा उपयोग करने के लिए नहीं."</string>
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"सूचनाओं तक पहुंचें"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"एप्लिकेशन को सूचनाओं को प्राप्त करने, जांच करने, और साफ़ करने देता है, जिनमें अन्य एप्लिकेशन के द्वारा पोस्ट की गई सूचनाएं भी शामिल हैं."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"सूचना श्रवणकर्ता सेवा से जुड़ें"</string>

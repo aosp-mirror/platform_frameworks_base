@@ -639,6 +639,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"به برنامه اجازه می‎دهد تا خط مشی‎های شبکه را مدیریت کند و قوانین خاص برنامه را تعیین کند."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"اصلاح محاسبه استفاده از شبکه"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"به برنامه اجازه می‎دهد تا نحوه محاسبه کاربرد شبکه در برنامه را تغییر دهد. برای استفاده برنامه‎های عادی نیست."</string>
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"اعلان‌های دسترسی"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"به برنامه اجازه می‌دهد به بازیابی، بررسی و پاک کردن اعلان‌ها از جمله موارد پست شده توسط سایر برنامه‌ها بپردازد."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"اتصال به یک سرویس شنونده اعلان"</string>
