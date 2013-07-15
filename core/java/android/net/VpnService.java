@@ -36,6 +36,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * VpnService is a base class for applications to extend and build their
@@ -253,8 +254,8 @@ public class VpnService extends Service {
     public class Builder {
 
         private final VpnConfig mConfig = new VpnConfig();
-        private final StringBuilder mAddresses = new StringBuilder();
-        private final StringBuilder mRoutes = new StringBuilder();
+        private final List<LinkAddress> mAddresses = new ArrayList<LinkAddress>();
+        private final List<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
 
         public Builder() {
             mConfig.user = VpnService.this.getClass().getName();
@@ -328,9 +329,7 @@ public class VpnService extends Service {
             if (address.isAnyLocalAddress()) {
                 throw new IllegalArgumentException("Bad address");
             }
-
-            mAddresses.append(' ')
-                    .append(address.getHostAddress()).append('/').append(prefixLength);
+            mAddresses.add(new LinkAddress(address, prefixLength));
             return this;
         }
 
@@ -364,8 +363,7 @@ public class VpnService extends Service {
                     }
                 }
             }
-
-            mRoutes.append(' ').append(address.getHostAddress()).append('/').append(prefixLength);
+            mRoutes.add(new RouteInfo(new LinkAddress(address, prefixLength), null));
             return this;
         }
 
@@ -466,8 +464,8 @@ public class VpnService extends Service {
          * @see VpnService
          */
         public ParcelFileDescriptor establish() {
-            mConfig.addresses = mAddresses.toString();
-            mConfig.routes = mRoutes.toString();
+            mConfig.addresses = mAddresses;
+            mConfig.routes = mRoutes;
 
             try {
                 return getService().establishVpn(mConfig);

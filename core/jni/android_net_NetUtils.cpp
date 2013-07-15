@@ -17,6 +17,7 @@
 #define LOG_TAG "NetUtils"
 
 #include "jni.h"
+#include "JNIHelp.h"
 #include <utils/misc.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
@@ -239,6 +240,13 @@ static jstring android_net_utils_getDhcpError(JNIEnv* env, jobject clazz)
     return env->NewStringUTF(::dhcp_get_errmsg());
 }
 
+static void android_net_utils_markSocket(JNIEnv *env, jobject thiz, jint socket, jint mark)
+{
+    if (setsockopt(socket, SOL_SOCKET, SO_MARK, &mark, sizeof(mark)) < 0) {
+        jniThrowException(env, "java/lang/IllegalStateException", "Error marking socket");
+    }
+}
+
 // ----------------------------------------------------------------------------
 
 /*
@@ -255,6 +263,7 @@ static JNINativeMethod gNetworkUtilMethods[] = {
     { "stopDhcp", "(Ljava/lang/String;)Z",  (void *)android_net_utils_stopDhcp },
     { "releaseDhcpLease", "(Ljava/lang/String;)Z",  (void *)android_net_utils_releaseDhcpLease },
     { "getDhcpError", "()Ljava/lang/String;", (void*) android_net_utils_getDhcpError },
+    { "markSocket", "(II)V", (void*) android_net_utils_markSocket },
 };
 
 int register_android_net_NetworkUtils(JNIEnv* env)
