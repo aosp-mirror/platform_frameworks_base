@@ -39,11 +39,8 @@ import static android.hardware.photography.CameraMetadata.Key;
  **/
 public final class CameraPropertiesKeys {
     public static final class Control {
-
         public static final Key<byte[]> AE_AVAILABLE_ANTIBANDING_MODES =
                 new Key<byte[]>("android.control.aeAvailableAntibandingModes", byte[].class);
-        public static final Key<byte[]> AE_AVAILABLE_MODES =
-                new Key<byte[]>("android.control.aeAvailableModes", byte[].class);
         public static final Key<int[]> AE_AVAILABLE_TARGET_FPS_RANGES =
                 new Key<int[]>("android.control.aeAvailableTargetFpsRanges", int[].class);
         public static final Key<int[]> AE_COMPENSATION_RANGE =
@@ -62,40 +59,23 @@ public final class CameraPropertiesKeys {
                 new Key<byte[]>("android.control.awbAvailableModes", byte[].class);
         public static final Key<Integer> MAX_REGIONS =
                 new Key<Integer>("android.control.maxRegions", int.class);
-        public static final Key<byte[]> SCENE_MODE_OVERRIDES =
-                new Key<byte[]>("android.control.sceneModeOverrides", byte[].class);
 
     }
+
     public static final class Flash {
         public static final class Info {
             public static final Key<Byte> AVAILABLE =
                     new Key<Byte>("android.flash.info.available", byte.class);
-            public static final Key<Long> CHARGE_DURATION =
-                    new Key<Long>("android.flash.info.chargeDuration", long.class);
         }
 
-        public static final Key<Byte> COLOR_TEMPERATURE =
-                new Key<Byte>("android.flash.colorTemperature", byte.class);
-        public static final Key<Byte> MAX_ENERGY =
-                new Key<Byte>("android.flash.maxEnergy", byte.class);
-
     }
-    public static final class HotPixel {
-        public static final class Info {
-            public static final Key<int[]> MAP =
-                    new Key<int[]>("android.hotPixel.info.map", int[].class);
-        }
 
-
-    }
     public static final class Jpeg {
-
         public static final Key<int[]> AVAILABLE_THUMBNAIL_SIZES =
                 new Key<int[]>("android.jpeg.availableThumbnailSizes", int[].class);
-        public static final Key<Integer> MAX_SIZE =
-                new Key<Integer>("android.jpeg.maxSize", int.class);
 
     }
+
     public static final class Lens {
         public static final class Info {
             public static final Key<float[]> AVAILABLE_APERTURES =
@@ -106,20 +86,13 @@ public final class CameraPropertiesKeys {
                     new Key<float[]>("android.lens.info.availableFocalLengths", float[].class);
             public static final Key<byte[]> AVAILABLE_OPTICAL_STABILIZATION =
                     new Key<byte[]>("android.lens.info.availableOpticalStabilization", byte[].class);
-            public static final Key<float[]> GEOMETRIC_CORRECTION_MAP =
-                    new Key<float[]>("android.lens.info.geometricCorrectionMap", float[].class);
-            public static final Key<int[]> GEOMETRIC_CORRECTION_MAP_SIZE =
-                    new Key<int[]>("android.lens.info.geometricCorrectionMapSize", int[].class);
             public static final Key<Float> HYPERFOCAL_DISTANCE =
                     new Key<Float>("android.lens.info.hyperfocalDistance", float.class);
             public static final Key<Float> MINIMUM_FOCUS_DISTANCE =
                     new Key<Float>("android.lens.info.minimumFocusDistance", float.class);
-            public static final Key<float[]> SHADING_MAP =
-                    new Key<float[]>("android.lens.info.shadingMap", float[].class);
             public static final Key<int[]> SHADING_MAP_SIZE =
                     new Key<int[]>("android.lens.info.shadingMapSize", int[].class);
         }
-
 
             public static final class FacingKey extends Key<Lens.FacingKey.Enum> {
                 public enum Enum {
@@ -139,32 +112,16 @@ public final class CameraPropertiesKeys {
 
         public static final Key<Lens.FacingKey.Enum> FACING =
                 new FacingKey("android.lens.facing");
-        public static final Key<float[]> OPTICAL_AXIS_ANGLE =
-                new Key<float[]>("android.lens.opticalAxisAngle", float[].class);
-        public static final Key<float[]> POSITION =
-                new Key<float[]>("android.lens.position", float[].class);
 
     }
-    public static final class Quirks {
 
-        public static final Key<Byte> METERING_CROP_REGION =
-                new Key<Byte>("android.quirks.meteringCropRegion", byte.class);
-        public static final Key<Byte> TRIGGER_AF_WITH_AUTO =
-                new Key<Byte>("android.quirks.triggerAfWithAuto", byte.class);
-        public static final Key<Byte> USE_ZSL_FORMAT =
-                new Key<Byte>("android.quirks.useZslFormat", byte.class);
-
-    }
     public static final class Request {
-
         public static final Key<int[]> MAX_NUM_OUTPUT_STREAMS =
                 new Key<int[]>("android.request.maxNumOutputStreams", int[].class);
-        public static final Key<int[]> MAX_NUM_REPROCESS_STREAMS =
-                new Key<int[]>("android.request.maxNumReprocessStreams", int[].class);
 
     }
-    public static final class Scaler {
 
+    public static final class Scaler {
 
             public static final class AvailableFormatsKey extends Key<Scaler.AvailableFormatsKey.Enum[]> {
                 public enum Enum {
@@ -212,184 +169,55 @@ public final class CameraPropertiesKeys {
                 new Key<long[]>("android.scaler.availableProcessedMinDurations", long[].class);
         public static final Key<int[]> AVAILABLE_PROCESSED_SIZES =
                 new Key<int[]>("android.scaler.availableProcessedSizes", int[].class);
-        public static final Key<long[]> AVAILABLE_RAW_MIN_DURATIONS =
-                new Key<long[]>("android.scaler.availableRawMinDurations", long[].class);
-        public static final Key<int[]> AVAILABLE_RAW_SIZES =
-                new Key<int[]>("android.scaler.availableRawSizes", int[].class);
 
     }
+
     public static final class Sensor {
         public static final class Info {
             public static final Key<int[]> ACTIVE_ARRAY_SIZE =
                     new Key<int[]>("android.sensor.info.activeArraySize", int[].class);
             public static final Key<int[]> AVAILABLE_SENSITIVITIES =
                     new Key<int[]>("android.sensor.info.availableSensitivities", int[].class);
-
-            public static final class ColorFilterArrangementKey extends Key<Sensor.Info.ColorFilterArrangementKey.Enum> {
-                public enum Enum {
-                    RGGB,
-                    GRBG,
-                    GBRG,
-                    BGGR,
-                    RGB;
-                }
-
-                public static final Enum RGGB = Enum.RGGB;
-                public static final Enum GRBG = Enum.GRBG;
-                public static final Enum GBRG = Enum.GBRG;
-                public static final Enum BGGR = Enum.BGGR;
-                public static final Enum RGB = Enum.RGB;
-
-                // TODO: remove requirement for constructor by making Key an interface
-                private ColorFilterArrangementKey(String name) {
-                    super(name, Sensor.Info.ColorFilterArrangementKey.Enum.class);
-                }
-
-            }
-
-            public static final Key<Sensor.Info.ColorFilterArrangementKey.Enum> COLOR_FILTER_ARRANGEMENT =
-                    new ColorFilterArrangementKey("android.sensor.info.colorFilterArrangement");
             public static final Key<long[]> EXPOSURE_TIME_RANGE =
                     new Key<long[]>("android.sensor.info.exposureTimeRange", long[].class);
             public static final Key<Long> MAX_FRAME_DURATION =
                     new Key<Long>("android.sensor.info.maxFrameDuration", long.class);
             public static final Key<float[]> PHYSICAL_SIZE =
                     new Key<float[]>("android.sensor.info.physicalSize", float[].class);
-            public static final Key<int[]> PIXEL_ARRAY_SIZE =
-                    new Key<int[]>("android.sensor.info.pixelArraySize", int[].class);
-            public static final Key<Integer> WHITE_LEVEL =
-                    new Key<Integer>("android.sensor.info.whiteLevel", int.class);
         }
-
         public static final Key<Rational> BASE_GAIN_FACTOR =
                 new Key<Rational>("android.sensor.baseGainFactor", Rational.class);
-        public static final Key<int[]> BLACK_LEVEL_PATTERN =
-                new Key<int[]>("android.sensor.blackLevelPattern", int[].class);
-        public static final Key<Rational[]> CALIBRATION_TRANSFORM1 =
-                new Key<Rational[]>("android.sensor.calibrationTransform1", Rational[].class);
-        public static final Key<Rational[]> CALIBRATION_TRANSFORM2 =
-                new Key<Rational[]>("android.sensor.calibrationTransform2", Rational[].class);
-        public static final Key<Rational[]> COLOR_TRANSFORM1 =
-                new Key<Rational[]>("android.sensor.colorTransform1", Rational[].class);
-        public static final Key<Rational[]> COLOR_TRANSFORM2 =
-                new Key<Rational[]>("android.sensor.colorTransform2", Rational[].class);
-        public static final Key<Rational[]> FORWARD_MATRIX1 =
-                new Key<Rational[]>("android.sensor.forwardMatrix1", Rational[].class);
-        public static final Key<Rational[]> FORWARD_MATRIX2 =
-                new Key<Rational[]>("android.sensor.forwardMatrix2", Rational[].class);
         public static final Key<Integer> MAX_ANALOG_SENSITIVITY =
                 new Key<Integer>("android.sensor.maxAnalogSensitivity", int.class);
-        public static final Key<float[]> NOISE_MODEL_COEFFICIENTS =
-                new Key<float[]>("android.sensor.noiseModelCoefficients", float[].class);
         public static final Key<Integer> ORIENTATION =
                 new Key<Integer>("android.sensor.orientation", int.class);
 
-            public static final class ReferenceIlluminant1Key extends Key<Sensor.ReferenceIlluminant1Key.Enum> {
-                public enum Enum {
-                    DAYLIGHT,
-                    FLUORESCENT,
-                    TUNGSTEN,
-                    FLASH,
-                    FINE_WEATHER,
-                    CLOUDY_WEATHER,
-                    SHADE,
-                    DAYLIGHT_FLUORESCENT,
-                    DAY_WHITE_FLUORESCENT,
-                    COOL_WHITE_FLUORESCENT,
-                    WHITE_FLUORESCENT,
-                    STANDARD_A,
-                    STANDARD_B,
-                    STANDARD_C,
-                    D55,
-                    D65,
-                    D75,
-                    D50,
-                    ISO_STUDIO_TUNGSTEN;
-                }
-
-                public static final Enum DAYLIGHT = Enum.DAYLIGHT;
-                public static final Enum FLUORESCENT = Enum.FLUORESCENT;
-                public static final Enum TUNGSTEN = Enum.TUNGSTEN;
-                public static final Enum FLASH = Enum.FLASH;
-                public static final Enum FINE_WEATHER = Enum.FINE_WEATHER;
-                public static final Enum CLOUDY_WEATHER = Enum.CLOUDY_WEATHER;
-                public static final Enum SHADE = Enum.SHADE;
-                public static final Enum DAYLIGHT_FLUORESCENT = Enum.DAYLIGHT_FLUORESCENT;
-                public static final Enum DAY_WHITE_FLUORESCENT = Enum.DAY_WHITE_FLUORESCENT;
-                public static final Enum COOL_WHITE_FLUORESCENT = Enum.COOL_WHITE_FLUORESCENT;
-                public static final Enum WHITE_FLUORESCENT = Enum.WHITE_FLUORESCENT;
-                public static final Enum STANDARD_A = Enum.STANDARD_A;
-                public static final Enum STANDARD_B = Enum.STANDARD_B;
-                public static final Enum STANDARD_C = Enum.STANDARD_C;
-                public static final Enum D55 = Enum.D55;
-                public static final Enum D65 = Enum.D65;
-                public static final Enum D75 = Enum.D75;
-                public static final Enum D50 = Enum.D50;
-                public static final Enum ISO_STUDIO_TUNGSTEN = Enum.ISO_STUDIO_TUNGSTEN;
-
-                // TODO: remove requirement for constructor by making Key an interface
-                private ReferenceIlluminant1Key(String name) {
-                    super(name, Sensor.ReferenceIlluminant1Key.Enum.class);
-                }
-
-                static {
-                    CameraMetadata.registerEnumValues(Sensor.ReferenceIlluminant1Key.Enum.class, new int[] {
-                        1,  // DAYLIGHT
-                        2,  // FLUORESCENT
-                        3,  // TUNGSTEN
-                        4,  // FLASH
-                        9,  // FINE_WEATHER
-                        10,  // CLOUDY_WEATHER
-                        11,  // SHADE
-                        12,  // DAYLIGHT_FLUORESCENT
-                        13,  // DAY_WHITE_FLUORESCENT
-                        14,  // COOL_WHITE_FLUORESCENT
-                        15,  // WHITE_FLUORESCENT
-                        17,  // STANDARD_A
-                        18,  // STANDARD_B
-                        19,  // STANDARD_C
-                        20,  // D55
-                        21,  // D65
-                        22,  // D75
-                        23,  // D50
-                        24  // ISO_STUDIO_TUNGSTEN
-                    });
-                }
-            }
-
-        public static final Key<Sensor.ReferenceIlluminant1Key.Enum> REFERENCE_ILLUMINANT1 =
-                new ReferenceIlluminant1Key("android.sensor.referenceIlluminant1");
-        public static final Key<Byte> REFERENCE_ILLUMINANT2 =
-                new Key<Byte>("android.sensor.referenceIlluminant2", byte.class);
-
     }
+
     public static final class Statistics {
         public static final class Info {
             public static final Key<byte[]> AVAILABLE_FACE_DETECT_MODES =
                     new Key<byte[]>("android.statistics.info.availableFaceDetectModes", byte[].class);
-            public static final Key<Integer> HISTOGRAM_BUCKET_COUNT =
-                    new Key<Integer>("android.statistics.info.histogramBucketCount", int.class);
             public static final Key<Integer> MAX_FACE_COUNT =
                     new Key<Integer>("android.statistics.info.maxFaceCount", int.class);
-            public static final Key<Integer> MAX_HISTOGRAM_COUNT =
-                    new Key<Integer>("android.statistics.info.maxHistogramCount", int.class);
-            public static final Key<Integer> MAX_SHARPNESS_MAP_VALUE =
-                    new Key<Integer>("android.statistics.info.maxSharpnessMapValue", int.class);
-            public static final Key<int[]> SHARPNESS_MAP_SIZE =
-                    new Key<int[]>("android.statistics.info.sharpnessMapSize", int[].class);
         }
 
-
     }
-    public static final class Tonemap {
 
+    public static final class Tonemap {
         public static final Key<Integer> MAX_CURVE_POINTS =
                 new Key<Integer>("android.tonemap.maxCurvePoints", int.class);
 
     }
+
+    /**
+     * @hide
+     */
     public static final class Led {
 
-
+            /**
+             * @hide
+             */
             public static final class AvailableLedsKey extends Key<Led.AvailableLedsKey.Enum[]> {
                 public enum Enum {
                     TRANSMIT;
@@ -404,12 +232,15 @@ public final class CameraPropertiesKeys {
 
             }
 
+        /**
+         * @hide
+         */
         public static final Key<Led.AvailableLedsKey.Enum[]> AVAILABLE_LEDS =
                 new AvailableLedsKey("android.led.availableLeds");
 
     }
-    public static final class Info {
 
+    public static final class Info {
 
             public static final class SupportedHardwareLevelKey extends Key<Info.SupportedHardwareLevelKey.Enum> {
                 public enum Enum {
@@ -431,6 +262,7 @@ public final class CameraPropertiesKeys {
                 new SupportedHardwareLevelKey("android.info.supportedHardwareLevel");
 
     }
+
 }
 
 
