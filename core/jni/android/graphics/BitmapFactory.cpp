@@ -65,6 +65,7 @@ jstring getMimeTypeString(JNIEnv* env, SkImageDecoder::Format format) {
         { SkImageDecoder::kICO_Format,  "image/x-ico" },
         { SkImageDecoder::kJPEG_Format, "image/jpeg" },
         { SkImageDecoder::kPNG_Format,  "image/png" },
+        { SkImageDecoder::kWEBP_Format, "image/webp" },
         { SkImageDecoder::kWBMP_Format, "image/vnd.wap.wbmp" }
     };
 
