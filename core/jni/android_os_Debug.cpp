@@ -380,10 +380,11 @@ static void android_os_Debug_getDirtyPages(JNIEnv *env, jobject clazz, jobject o
     android_os_Debug_getDirtyPagesPid(env, clazz, getpid(), object);
 }
 
-static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid)
+static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid, jlongArray outUss)
 {
     char line[1024];
     jlong pss = 0;
+    jlong uss = 0;
     unsigned temp;
 
     char tmp[128];
@@ -398,23 +399,42 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid)
             break;
         }
 
-        if (strncmp(line, "Pss: ", 5) == 0) {
-            char* c = line + 5;
-            while (*c != 0 && (*c < '0' || *c > '9')) {
-                c++;
+        if (line[0] == 'P') {
+            if (strncmp(line, "Pss:", 4) == 0) {
+                char* c = line + 4;
+                while (*c != 0 && (*c < '0' || *c > '9')) {
+                    c++;
+                }
+                pss += atoi(c);
+            } else if (strncmp(line, "Private_Clean:", 14)
+                    || strncmp(line, "Private_Dirty:", 14)) {
+                char* c = line + 14;
+                while (*c != 0 && (*c < '0' || *c > '9')) {
+                    c++;
+                }
+                uss += atoi(c);
             }
-            pss += atoi(c);
         }
     }
 
     fclose(fp);
+
+    if (outUss != NULL) {
+        if (env->GetArrayLength(outUss) >= 1) {
+            jlong* outUssArray = env->GetLongArrayElements(outUss, 0);
+            if (outUssArray != NULL) {
+                outUssArray[0] = uss;
+            }
+            env->ReleaseLongArrayElements(outUss, outUssArray, 0);
+        }
+    }
 
     return pss;
 }
 
 static jlong android_os_Debug_getPss(JNIEnv *env, jobject clazz)
 {
-    return android_os_Debug_getPssPid(env, clazz, getpid());
+    return android_os_Debug_getPssPid(env, clazz, getpid(), NULL);
 }
 
 static jint read_binder_stat(const char* stat)
@@ -689,7 +709,7 @@ static JNINativeMethod gMethods[] = {
             (void*) android_os_Debug_getDirtyPagesPid },
     { "getPss",                 "()J",
             (void*) android_os_Debug_getPss },
-    { "getPss",                 "(I)J",
+    { "getPss",                 "(I[J)J",
             (void*) android_os_Debug_getPssPid },
     { "dumpNativeHeap",         "(Ljava/io/FileDescriptor;)V",
             (void*) android_os_Debug_dumpNativeHeap },

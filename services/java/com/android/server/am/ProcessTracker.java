@@ -52,26 +52,34 @@ public final class ProcessTracker {
     public static final int STATE_NOTHING = -1;
     public static final int STATE_PERSISTENT = 0;
     public static final int STATE_TOP = 1;
-    public static final int STATE_FOREGROUND = 2;
-    public static final int STATE_VISIBLE = 3;
-    public static final int STATE_PERCEPTIBLE = 4;
-    public static final int STATE_BACKUP = 5;
+    public static final int STATE_IMPORTANT_FOREGROUND = 2;
+    public static final int STATE_IMPORTANT_BACKGROUND = 3;
+    public static final int STATE_BACKUP = 4;
+    public static final int STATE_HEAVY_WEIGHT = 5;
     public static final int STATE_SERVICE = 6;
-    public static final int STATE_HOME = 7;
-    public static final int STATE_PREVIOUS = 8;
-    public static final int STATE_CACHED = 9;
-    public static final int STATE_COUNT = STATE_CACHED+1;
+    public static final int STATE_RECEIVER = 7;
+    public static final int STATE_HOME = 8;
+    public static final int STATE_LAST_ACTIVITY = 9;
+    public static final int STATE_CACHED_ACTIVITY = 10;
+    public static final int STATE_CACHED_ACTIVITY_CLIENT = 11;
+    public static final int STATE_CACHED_EMPTY = 12;
+    public static final int STATE_COUNT = STATE_CACHED_EMPTY+1;
 
-    static final int[] ALL_PROC_STATES = new int[] { STATE_PERSISTENT, STATE_TOP,
-            STATE_FOREGROUND, STATE_VISIBLE, STATE_PERCEPTIBLE, STATE_BACKUP,
-            STATE_SERVICE, STATE_HOME, STATE_PREVIOUS, STATE_CACHED
+    static final int[] ALL_PROC_STATES = new int[] { STATE_PERSISTENT,
+            STATE_TOP, STATE_IMPORTANT_FOREGROUND, STATE_IMPORTANT_BACKGROUND,
+            STATE_BACKUP, STATE_HEAVY_WEIGHT, STATE_SERVICE, STATE_RECEIVER,
+            STATE_HOME, STATE_LAST_ACTIVITY, STATE_CACHED_ACTIVITY,
+            STATE_CACHED_ACTIVITY_CLIENT, STATE_CACHED_EMPTY
     };
 
     public static final int PSS_SAMPLE_COUNT = 0;
     public static final int PSS_MINIMUM = 1;
     public static final int PSS_AVERAGE = 2;
     public static final int PSS_MAXIMUM = 3;
-    public static final int PSS_COUNT = PSS_MAXIMUM+1;
+    public static final int PSS_USS_MINIMUM = 4;
+    public static final int PSS_USS_AVERAGE = 5;
+    public static final int PSS_USS_MAXIMUM = 6;
+    public static final int PSS_COUNT = PSS_USS_MAXIMUM+1;
 
     public static final int ADJ_NOTHING = -1;
     public static final int ADJ_MEM_FACTOR_NORMAL = 0;
@@ -106,8 +114,9 @@ public final class ProcessTracker {
     static int OFFSET_INDEX_MASK = 0xffff;
 
     static final String[] STATE_NAMES = new String[] {
-            "Persistent ", "Top        ", "Foreground ", "Visible    ", "Perceptible",
-            "Backup     ", "Service    ", "Home       ", "Previous   ", "Cached     "
+            "Persistent", "Top       ", "Imp Fg    ", "Imp Bg    ",
+            "Backup    ", "Heavy Wght", "Service   ", "Receiver  ", "Home      ",
+            "Last Act  ", "Cch Actvty", "Cch Client", "Cch Empty "
     };
 
     static final String[] ADJ_SCREEN_NAMES_CSV = new String[] {
@@ -119,8 +128,9 @@ public final class ProcessTracker {
     };
 
     static final String[] STATE_NAMES_CSV = new String[] {
-            "pers", "top", "fore", "vis", "percept",
-            "backup", "service", "home", "prev", "cached"
+            "pers", "top", "impfg", "impbg", "backup", "heavy",
+            "service", "receiver", "home", "lastact",
+            "cch-activity", "cch-aclient", "cch-empty"
     };
 
     static final String[] ADJ_SCREEN_TAGS = new String[] {
@@ -132,8 +142,26 @@ public final class ProcessTracker {
     };
 
     static final String[] STATE_TAGS = new String[] {
-            "y", "t", "f", "v", "r",
-            "b", "s", "h", "p", "c"
+            "p", "t", "f", "b", "u", "w",
+            "s", "r", "h", "l", "a", "c", "e"
+    };
+
+    // Map from process states to the states we track.
+    static final int[] PROCESS_STATE_TO_STATE = new int[] {
+            STATE_PERSISTENT,               // ActivityManager.PROCESS_STATE_PERSISTENT
+            STATE_PERSISTENT,               // ActivityManager.PROCESS_STATE_PERSISTENT_UI
+            STATE_TOP,                      // ActivityManager.PROCESS_STATE_TOP
+            STATE_IMPORTANT_FOREGROUND,     // ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+            STATE_IMPORTANT_BACKGROUND,     // ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
+            STATE_BACKUP,                   // ActivityManager.PROCESS_STATE_BACKUP
+            STATE_HEAVY_WEIGHT,             // ActivityManager.PROCESS_STATE_HEAVY_WEIGHT
+            STATE_SERVICE,                  // ActivityManager.PROCESS_STATE_SERVICE
+            STATE_RECEIVER,                 // ActivityManager.PROCESS_STATE_RECEIVER
+            STATE_HOME,                     // ActivityManager.PROCESS_STATE_HOME
+            STATE_LAST_ACTIVITY,            // ActivityManager.PROCESS_STATE_LAST_ACTIVITY
+            STATE_CACHED_ACTIVITY,          // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY
+            STATE_CACHED_ACTIVITY_CLIENT,   // ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT
+            STATE_CACHED_EMPTY,             // ActivityManager.PROCESS_STATE_CACHED_EMPTY
     };
 
     static final String CSV_SEP = "\t";
@@ -322,10 +350,20 @@ public final class ProcessTracker {
             return true;
         }
 
+        /**
+         * Update the current state of the given list of processes.
+         *
+         * @param state Current ActivityManager.PROCESS_STATE_*
+         * @param memFactor Current mem factor constant.
+         * @param now Current time.
+         * @param pkgList Processes to update.
+         */
         public void setState(int state, int memFactor, long now,
                 ArrayMap<String, ProcessTracker.ProcessState> pkgList) {
-            if (state != STATE_NOTHING) {
-                state += memFactor*STATE_COUNT;
+            if (state < 0) {
+                state = STATE_NOTHING;
+            } else {
+                state = PROCESS_STATE_TO_STATE[state] + (memFactor*STATE_COUNT);
             }
 
             // First update the common process.
@@ -370,7 +408,7 @@ public final class ProcessTracker {
             mStartTime = now;
         }
 
-        public void addPss(long pss, boolean always) {
+        public void addPss(long pss, long uss, boolean always) {
             if (!always) {
                 if (mLastPssState == mCurState && SystemClock.uptimeMillis()
                         < (mLastPssTime+(30*1000))) {
@@ -399,15 +437,26 @@ public final class ProcessTracker {
                     longs[idx+PSS_MINIMUM] = pss;
                     longs[idx+PSS_AVERAGE] = pss;
                     longs[idx+PSS_MAXIMUM] = pss;
+                    longs[idx+PSS_USS_MINIMUM] = uss;
+                    longs[idx+PSS_USS_AVERAGE] = uss;
+                    longs[idx+PSS_USS_MAXIMUM] = uss;
                 } else {
                     longs[idx+PSS_SAMPLE_COUNT] = count+1;
                     if (longs[idx+PSS_MINIMUM] > pss) {
                         longs[idx+PSS_MINIMUM] = pss;
                     }
-                    longs[idx+PSS_AVERAGE] = (long)( ((longs[idx+PSS_AVERAGE]*(double)count)+pss)
-                            / (count+1) );
+                    longs[idx+PSS_AVERAGE] = (long)(
+                            ((longs[idx+PSS_AVERAGE]*(double)count)+pss) / (count+1) );
                     if (longs[idx+PSS_MAXIMUM] < pss) {
                         longs[idx+PSS_MAXIMUM] = pss;
+                    }
+                    if (longs[idx+PSS_USS_MINIMUM] > uss) {
+                        longs[idx+PSS_USS_MINIMUM] = uss;
+                    }
+                    longs[idx+PSS_USS_AVERAGE] = (long)(
+                            ((longs[idx+PSS_USS_AVERAGE]*(double)count)+uss) / (count+1) );
+                    if (longs[idx+PSS_USS_MAXIMUM] < uss) {
+                        longs[idx+PSS_USS_MAXIMUM] = uss;
                     }
                 }
             }
@@ -479,6 +528,21 @@ public final class ProcessTracker {
         long getPssMaximum(int state) {
             int idx = State.binarySearch(mPssTable, mPssTableSize, state);
             return idx >= 0 ? mState.getLong(mPssTable[idx], PSS_MAXIMUM) : 0;
+        }
+
+        long getPssUssMinimum(int state) {
+            int idx = State.binarySearch(mPssTable, mPssTableSize, state);
+            return idx >= 0 ? mState.getLong(mPssTable[idx], PSS_USS_MINIMUM) : 0;
+        }
+
+        long getPssUssAverage(int state) {
+            int idx = State.binarySearch(mPssTable, mPssTableSize, state);
+            return idx >= 0 ? mState.getLong(mPssTable[idx], PSS_USS_AVERAGE) : 0;
+        }
+
+        long getPssUssMaximum(int state) {
+            int idx = State.binarySearch(mPssTable, mPssTableSize, state);
+            return idx >= 0 ? mState.getLong(mPssTable[idx], PSS_USS_MAXIMUM) : 0;
         }
     }
 
@@ -589,9 +653,12 @@ public final class ProcessTracker {
 
     static final class State {
         // Current version of the parcel format.
-        private static final int PARCEL_VERSION = 3;
+        private static final int PARCEL_VERSION = 6;
         // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
         private static final int MAGIC = 0x50535453;
+
+        static final int FLAG_COMPLETE = 1<<0;
+        static final int FLAG_SHUTDOWN = 1<<1;
 
         final File mBaseDir;
         final ProcessTracker mProcessTracker;
@@ -603,6 +670,7 @@ public final class ProcessTracker {
         long mTimePeriodStartRealtime;
         long mTimePeriodEndRealtime;
         boolean mRunning;
+        int mFlags;
 
         final ProcessMap<PackageState> mPackages = new ProcessMap<PackageState>();
         final ProcessMap<ProcessState> mProcesses = new ProcessMap<ProcessState>();
@@ -690,6 +758,7 @@ public final class ProcessTracker {
             Arrays.fill(mMemFactorDurations, 0);
             mMemFactor = STATE_NOTHING;
             mStartTime = 0;
+            mReadError = null;
         }
 
         private void buildTimePeriodStartClockStr() {
@@ -724,7 +793,7 @@ public final class ProcessTracker {
             }
         }
 
-        void readLocked() {
+        boolean readLocked() {
             try {
                 FileInputStream stream = mFile.openRead();
 
@@ -770,11 +839,14 @@ public final class ProcessTracker {
                             }
                         }
                     }
+                    return false;
                 }
             } catch (Throwable e) {
-                mReadError = "error reading: " + e;
+                mReadError = "caught exception: " + e;
                 Slog.e(TAG, "Error reading process statistics", e);
+                return false;
             }
+            return true;
         }
 
         private void writeStateLocked(boolean sync, final boolean commit) {
@@ -848,6 +920,7 @@ public final class ProcessTracker {
             out.writeLong(mTimePeriodStartClock);
             out.writeLong(mTimePeriodStartRealtime);
             out.writeLong(mTimePeriodEndRealtime);
+            out.writeInt(mFlags);
 
             out.writeInt(mLongs.size());
             out.writeInt(mNextLong);
@@ -920,7 +993,7 @@ public final class ProcessTracker {
         private boolean readCheckedInt(Parcel in, int val, String what) {
             int got;
             if ((got=in.readInt()) != val) {
-                mReadError = "bad " + ": " + got;
+                mReadError = "bad " + what + ": " + got;
                 return false;
             }
             return true;
@@ -956,6 +1029,7 @@ public final class ProcessTracker {
             buildTimePeriodStartClockStr();
             mTimePeriodStartRealtime = in.readLong();
             mTimePeriodEndRealtime = in.readLong();
+            mFlags = in.readInt();
 
             final int NLONGS = in.readInt();
             final int NEXTLONG = in.readInt();
@@ -1365,8 +1439,9 @@ public final class ProcessTracker {
 
         void dumpSummaryLocked(PrintWriter pw, String reqPackage, long now) {
             dumpFilteredSummaryLocked(pw, null, "  ", ALL_SCREEN_ADJ, ALL_MEM_ADJ,
-                    new int[] { STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
-                            STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME, STATE_PREVIOUS },
+                    new int[] { STATE_PERSISTENT, STATE_TOP, STATE_IMPORTANT_FOREGROUND,
+                            STATE_IMPORTANT_BACKGROUND, STATE_BACKUP, STATE_HEAVY_WEIGHT,
+                            STATE_SERVICE, STATE_RECEIVER, STATE_HOME, STATE_LAST_ACTIVITY },
                     now, reqPackage);
             pw.println();
             pw.println("Run time Stats:");
@@ -1379,6 +1454,9 @@ public final class ProcessTracker {
             TimeUtils.formatDuration(
                     (mRunning ? SystemClock.elapsedRealtime() : mTimePeriodEndRealtime)
                             - mTimePeriodStartRealtime, pw);
+            if ((mFlags&FLAG_COMPLETE) != 0) pw.print(" (complete)");
+            else if ((mFlags&FLAG_SHUTDOWN) != 0) pw.print(" (shutdown)");
+            else pw.print(" (partial)");
             pw.println();
         }
 
@@ -1452,10 +1530,13 @@ public final class ProcessTracker {
         void dumpCheckinLocked(PrintWriter pw, String reqPackage) {
             final long now = SystemClock.uptimeMillis();
             ArrayMap<String, SparseArray<PackageState>> pkgMap = mPackages.getMap();
-            pw.println("vers,1");
+            pw.println("vers,2");
             pw.print("period,"); pw.print(mTimePeriodStartClockStr);
             pw.print(","); pw.print(mTimePeriodStartRealtime); pw.print(",");
             pw.print(mRunning ? SystemClock.elapsedRealtime() : mTimePeriodEndRealtime);
+            if ((mFlags&FLAG_COMPLETE) != 0) pw.print(",complete");
+            else if ((mFlags&FLAG_SHUTDOWN) != 0) pw.print(",shutdown");
+            else pw.print(",partial");
             pw.println();
             for (int ip=0; ip<pkgMap.size(); ip++) {
                 String pkgName = pkgMap.keyAt(ip);
@@ -1629,6 +1710,7 @@ public final class ProcessTracker {
         if (now > (mState.mLastWriteTime+WRITE_PERIOD)) {
             if (SystemClock.elapsedRealtime() > (mState.mTimePeriodStartRealtime+COMMIT_PERIOD)) {
                 mCommitPending = true;
+                mState.mFlags |= State.FLAG_COMPLETE;
             }
             return true;
         }
@@ -1637,6 +1719,7 @@ public final class ProcessTracker {
 
     public void shutdownLocked() {
         Slog.w(TAG, "Writing process stats before shutdown...");
+        mState.mFlags |= State.FLAG_SHUTDOWN;
         writeStateSyncLocked();
         mShuttingDown = true;
     }
@@ -1841,6 +1924,9 @@ public final class ProcessTracker {
         long minPss;
         long avgPss;
         long maxPss;
+        long minUss;
+        long avgUss;
+        long maxUss;
 
         ProcessDataCollection(int[] _screenStates, int[] _memStates, int[] _procStates) {
             screenStates = _screenStates;
@@ -1857,6 +1943,12 @@ public final class ProcessTracker {
                 printSizeValue(pw, avgPss * 1024);
                 pw.print("-");
                 printSizeValue(pw, maxPss * 1024);
+                pw.print("/");
+                printSizeValue(pw, minUss * 1024);
+                pw.print("-");
+                printSizeValue(pw, avgUss * 1024);
+                pw.print("-");
+                printSizeValue(pw, maxUss * 1024);
                 if (full) {
                     pw.print(" over ");
                     pw.print(numPss);
@@ -1868,7 +1960,8 @@ public final class ProcessTracker {
 
     static void computeProcessData(ProcessState proc, ProcessDataCollection data, long now) {
         data.totalTime = 0;
-        data.numPss = data.minPss = data.avgPss = data.maxPss = 0;
+        data.numPss = data.minPss = data.avgPss = data.maxPss =
+                data.minUss = data.avgUss = data.maxUss = 0;
         for (int is=0; is<data.screenStates.length; is++) {
             for (int im=0; im<data.memStates.length; im++) {
                 for (int ip=0; ip<data.procStates.length; ip++) {
@@ -1880,10 +1973,16 @@ public final class ProcessTracker {
                         long minPss = proc.getPssMinimum(bucket);
                         long avgPss = proc.getPssAverage(bucket);
                         long maxPss = proc.getPssMaximum(bucket);
+                        long minUss = proc.getPssUssMinimum(bucket);
+                        long avgUss = proc.getPssUssAverage(bucket);
+                        long maxUss = proc.getPssUssMaximum(bucket);
                         if (data.numPss == 0) {
                             data.minPss = minPss;
                             data.avgPss = avgPss;
                             data.maxPss = maxPss;
+                            data.minUss = minUss;
+                            data.avgUss = avgUss;
+                            data.maxUss = maxUss;
                         } else {
                             if (minPss < data.minPss) {
                                 data.minPss = minPss;
@@ -1892,6 +1991,14 @@ public final class ProcessTracker {
                                     + (avgPss*(double)samples)) / (data.numPss+samples) );
                             if (maxPss > data.maxPss) {
                                 data.maxPss = maxPss;
+                            }
+                            if (minUss < data.minUss) {
+                                data.minUss = minUss;
+                            }
+                            data.avgUss = (long)( ((data.avgUss*(double)data.numPss)
+                                    + (avgUss*(double)samples)) / (data.numPss+samples) );
+                            if (maxUss > data.maxUss) {
+                                data.maxUss = maxUss;
                             }
                         }
                         data.numPss += samples;
@@ -1989,7 +2096,7 @@ public final class ProcessTracker {
                     if (count > 0) {
                         if (!printedHeader) {
                             pw.print(prefix);
-                            pw.print("PSS (");
+                            pw.print("PSS/USS (");
                             pw.print(proc.mPssTableSize);
                             pw.println(" entries):");
                             printedHeader = true;
@@ -2013,6 +2120,12 @@ public final class ProcessTracker {
                         printSizeValue(pw, proc.getPssAverage(bucket) * 1024);
                         pw.print(" ");
                         printSizeValue(pw, proc.getPssMaximum(bucket) * 1024);
+                        pw.print(" / ");
+                        printSizeValue(pw, proc.getPssUssMinimum(bucket) * 1024);
+                        pw.print(" ");
+                        printSizeValue(pw, proc.getPssUssAverage(bucket) * 1024);
+                        pw.print(" ");
+                        printSizeValue(pw, proc.getPssUssMaximum(bucket) * 1024);
                         pw.println();
                     }
                 }
@@ -2148,21 +2261,28 @@ public final class ProcessTracker {
             dumpProcessSummaryDetails(pw, proc, prefix, "         TOTAL: ", screenStates, memStates,
                     procStates, now, true);
             dumpProcessSummaryDetails(pw, proc, prefix, "    Persistent: ", screenStates, memStates,
-                    new int[] {STATE_PERSISTENT}, now, true);
+                    new int[] { STATE_PERSISTENT }, now, true);
             dumpProcessSummaryDetails(pw, proc, prefix, "           Top: ", screenStates, memStates,
                     new int[] {STATE_TOP}, now, true);
-            dumpProcessSummaryDetails(pw, proc, prefix, "    Foreground: ", screenStates, memStates,
-                    new int[] {STATE_FOREGROUND, STATE_VISIBLE, STATE_PERCEPTIBLE}, now, true);
+            dumpProcessSummaryDetails(pw, proc, prefix, "        Imp Fg: ", screenStates, memStates,
+                    new int[] { STATE_IMPORTANT_FOREGROUND }, now, true);
+            dumpProcessSummaryDetails(pw, proc, prefix, "        Imp Bg: ", screenStates, memStates,
+                    new int[] {STATE_IMPORTANT_BACKGROUND}, now, true);
             dumpProcessSummaryDetails(pw, proc, prefix, "        Backup: ", screenStates, memStates,
                     new int[] {STATE_BACKUP}, now, true);
+            dumpProcessSummaryDetails(pw, proc, prefix, "     Heavy Wgt: ", screenStates, memStates,
+                    new int[] {STATE_HEAVY_WEIGHT}, now, true);
             dumpProcessSummaryDetails(pw, proc, prefix, "       Service: ", screenStates, memStates,
                     new int[] {STATE_SERVICE}, now, true);
+            dumpProcessSummaryDetails(pw, proc, prefix, "      Receiver: ", screenStates, memStates,
+                    new int[] {STATE_RECEIVER}, now, true);
             dumpProcessSummaryDetails(pw, proc, prefix, "          Home: ", screenStates, memStates,
                     new int[] {STATE_HOME}, now, true);
-            dumpProcessSummaryDetails(pw, proc, prefix, "      Previous: ", screenStates, memStates,
-                    new int[] {STATE_PREVIOUS}, now, true);
+            dumpProcessSummaryDetails(pw, proc, prefix, "      Last Act: ", screenStates, memStates,
+                    new int[] {STATE_LAST_ACTIVITY}, now, true);
             dumpProcessSummaryDetails(pw, proc, prefix, "      (Cached): ", screenStates, memStates,
-                    new int[] {STATE_CACHED}, now, true);
+                    new int[] {STATE_CACHED_ACTIVITY_CLIENT, STATE_CACHED_ACTIVITY_CLIENT,
+                            STATE_CACHED_EMPTY}, now, true);
         }
     }
 
@@ -2193,9 +2313,9 @@ public final class ProcessTracker {
         if (result < 1) {
             value = String.format("%.2f", result);
         } else if (result < 10) {
-            value = String.format("%.2f", result);
+            value = String.format("%.1f", result);
         } else if (result < 100) {
-            value = String.format("%.2f", result);
+            value = String.format("%.0f", result);
         } else {
             value = String.format("%.0f", result);
         }
@@ -2300,6 +2420,9 @@ public final class ProcessTracker {
             long min = proc.mState.getLong(off, PSS_MINIMUM);
             long avg = proc.mState.getLong(off, PSS_AVERAGE);
             long max = proc.mState.getLong(off, PSS_MAXIMUM);
+            long umin = proc.mState.getLong(off, PSS_USS_MINIMUM);
+            long uavg = proc.mState.getLong(off, PSS_USS_AVERAGE);
+            long umax = proc.mState.getLong(off, PSS_USS_MAXIMUM);
             pw.print(',');
             printProcStateTag(pw, type);
             pw.print(':');
@@ -2310,6 +2433,12 @@ public final class ProcessTracker {
             pw.print(avg);
             pw.print(':');
             pw.print(max);
+            pw.print(':');
+            pw.print(umin);
+            pw.print(':');
+            pw.print(uavg);
+            pw.print(':');
+            pw.print(umax);
         }
     }
 
@@ -2391,9 +2520,10 @@ public final class ProcessTracker {
         int[] csvMemStats = new int[] {ADJ_MEM_FACTOR_CRITICAL};
         boolean csvSepProcStats = true;
         int[] csvProcStats = new int[] {
-                STATE_PERSISTENT, STATE_TOP, STATE_FOREGROUND, STATE_VISIBLE,
-                STATE_PERCEPTIBLE, STATE_BACKUP, STATE_SERVICE, STATE_HOME,
-                STATE_PREVIOUS, STATE_CACHED };
+                STATE_PERSISTENT, STATE_TOP, STATE_IMPORTANT_FOREGROUND,
+                STATE_IMPORTANT_BACKGROUND, STATE_BACKUP, STATE_HEAVY_WEIGHT, STATE_SERVICE,
+                STATE_RECEIVER, STATE_HOME, STATE_LAST_ACTIVITY,
+                STATE_CACHED_ACTIVITY, STATE_CACHED_ACTIVITY_CLIENT, STATE_CACHED_EMPTY };
         if (args != null) {
             for (int i=0; i<args.length; i++) {
                 String arg = args[i];
@@ -2457,6 +2587,7 @@ public final class ProcessTracker {
                 } else if ("--current".equals(arg)) {
                     currentOnly = true;
                 } else if ("--commit".equals(arg)) {
+                    mState.mFlags |= State.FLAG_COMPLETE;
                     mState.writeStateLocked(true, true);
                     pw.println("Process stats committed.");
                     return;
@@ -2557,6 +2688,13 @@ public final class ProcessTracker {
                         if (DEBUG) Slog.d(TAG, "Retrieving state: " + files.get(i));
                         try {
                             State state = new State(files.get(i));
+                            if (state.mReadError != null) {
+                                pw.print("Failure reading "); pw.print(files.get(i));
+                                pw.print("; "); pw.println(state.mReadError);
+                                if (DEBUG) Slog.d(TAG, "Deleting state: " + files.get(i));
+                                (new File(files.get(i))).delete();
+                                continue;
+                            }
                             String fileStr = state.mFile.getBaseFile().getPath();
                             boolean checkedIn = fileStr.endsWith(STATE_FILE_CHECKIN_SUFFIX);
                             if (isCheckin || isCompact) {
@@ -2588,7 +2726,6 @@ public final class ProcessTracker {
                             pw.print("**** FAILURE DUMPING STATE: "); pw.println(files.get(i));
                             e.printStackTrace(pw);
                         }
-                        if (DEBUG) Slog.d(TAG, "Deleting state: " + files.get(i));
                     }
                 }
             } finally {

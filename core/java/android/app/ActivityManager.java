@@ -234,32 +234,49 @@ public class ActivityManager {
     /** @hide Process is a persistent system process and is doing UI. */
     public static final int PROCESS_STATE_PERSISTENT_UI = 1;
 
-    /** @hide Process is hosting the current top activity. */
+    /** @hide Process is hosting the current top activities.  Note that this covers
+     * all activities that are visible to the user. */
     public static final int PROCESS_STATE_TOP = 2;
 
     /** @hide Process is important to the user, and something they are aware of. */
-    public static final int PROCESS_STATE_IMPORTANT_PERCEPTIBLE = 3;
+    public static final int PROCESS_STATE_IMPORTANT_FOREGROUND = 3;
 
     /** @hide Process is important to the user, but not something they are aware of. */
     public static final int PROCESS_STATE_IMPORTANT_BACKGROUND = 4;
 
-    /** @hide Process is in the background running a receiver. */
-    public static final int PROCESS_STATE_RECEIVER = 5;
-
     /** @hide Process is in the background running a backup/restore operation. */
-    public static final int PROCESS_STATE_BACKUP = 6;
+    public static final int PROCESS_STATE_BACKUP = 5;
 
-    /** @hide Process is in the background running a service. */
+    /** @hide Process is in the background, but it can't restore its state so we want
+     * to try to avoid killing it. */
+    public static final int PROCESS_STATE_HEAVY_WEIGHT = 6;
+
+    /** @hide Process is in the background running a service.  Unlike oom_adj, this level
+     * is used for both the normal running in background state and the executing
+     * operations state. */
     public static final int PROCESS_STATE_SERVICE = 7;
 
+    /** @hide Process is in the background running a receiver.   Note that from the
+     * perspective of oom_adj receivers run at a higher foreground level, but for our
+     * prioritization here that is not necessary and putting them below services means
+     * many fewer changes in some process states as they receive broadcasts. */
+    public static final int PROCESS_STATE_RECEIVER = 8;
+
     /** @hide Process is in the background but hosts the home activity. */
-    public static final int PROCESS_STATE_HOME = 8;
+    public static final int PROCESS_STATE_HOME = 9;
 
     /** @hide Process is in the background but hosts the last shown activity. */
-    public static final int PROCESS_STATE_LAST_ACTIVITY = 9;
+    public static final int PROCESS_STATE_LAST_ACTIVITY = 10;
 
-    /** @hide Process is being cached for later use. */
-    public static final int PROCESS_STATE_CACHED = 10;
+    /** @hide Process is being cached for later use and contains activities. */
+    public static final int PROCESS_STATE_CACHED_ACTIVITY = 11;
+
+    /** @hide Process is being cached for later use and is a client of another cached
+     * process that contains activities. */
+    public static final int PROCESS_STATE_CACHED_ACTIVITY_CLIENT = 12;
+
+    /** @hide Process is being cached for later use and is empty. */
+    public static final int PROCESS_STATE_CACHED_EMPTY = 13;
 
     /*package*/ ActivityManager(Context context, Handler handler) {
         mContext = context;

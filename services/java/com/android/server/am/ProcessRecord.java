@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.util.ArraySet;
 import com.android.internal.os.BatteryStatsImpl;
 
 import android.app.ActivityManager;
@@ -64,12 +65,8 @@ final class ProcessRecord {
     long lruWeight;             // Weight for ordering in LRU list
     long lastPssTime;           // Last time we requested PSS data
     int maxAdj;                 // Maximum OOM adjustment for this process
-    int cachedAdj;              // If cached, this is the adjustment to use
-    int clientCachedAdj;        // If empty but cached client, this is the adjustment to use
-    int emptyAdj;               // If empty, this is the adjustment to use
     int curRawAdj;              // Current OOM unlimited adjustment for this process
     int setRawAdj;              // Last set OOM unlimited adjustment for this process
-    int nonStoppingAdj;         // Adjustment not counting any stopping activities
     int curAdj;                 // Current OOM adjustment for this process
     int setAdj;                 // Last set OOM adjustment for this process
     int curSchedGroup;          // Currently desired scheduling class
@@ -78,6 +75,7 @@ final class ProcessRecord {
     int memImportance;          // Importance constant computed from curAdj
     int curProcState = -1;      // Currently computed process state: ActivityManager.PROCESS_STATE_*
     int repProcState = -1;      // Last reported process state
+    int setProcState = -1;      // Last set process state in process tracker
     boolean serviceb;           // Process currently is on the service B list
     boolean keeping;            // Actively running code so don't kill due to that?
     boolean setIsForeground;    // Running foreground UI when last set?
@@ -92,7 +90,7 @@ final class ProcessRecord {
     boolean hasAboveClient;     // Bound using BIND_ABOVE_CLIENT, so want to be lower
     boolean bad;                // True if disabled in the bad process list
     boolean killedBackground;   // True when proc has been killed due to too many bg
-    boolean setAdjChanged;      // Keep track of whether we changed 'setAdj'.
+    boolean procStateChanged;   // Keep track of whether we changed 'setAdj'.
     String waitingToKill;       // Process is waiting to be killed when in the bg; reason
     IBinder forcingToForeground;// Token that is forcing this process to be foreground
     int adjSeq;                 // Sequence id for identifying oom_adj assignment cycles
@@ -125,15 +123,15 @@ final class ProcessRecord {
     // contains HistoryRecord objects
     final ArrayList<ActivityRecord> activities = new ArrayList<ActivityRecord>();
     // all ServiceRecord running in this process
-    final HashSet<ServiceRecord> services = new HashSet<ServiceRecord>();
+    final ArraySet<ServiceRecord> services = new ArraySet<ServiceRecord>();
     // services that are currently executing code (need to remain foreground).
-    final HashSet<ServiceRecord> executingServices
-             = new HashSet<ServiceRecord>();
+    final ArraySet<ServiceRecord> executingServices
+             = new ArraySet<ServiceRecord>();
     // All ConnectionRecord this process holds
-    final HashSet<ConnectionRecord> connections
-            = new HashSet<ConnectionRecord>();  
+    final ArraySet<ConnectionRecord> connections
+            = new ArraySet<ConnectionRecord>();
     // all IIntentReceivers that are registered from this process.
-    final HashSet<ReceiverList> receivers = new HashSet<ReceiverList>();
+    final ArraySet<ReceiverList> receivers = new ArraySet<ReceiverList>();
     // class (String) -> ContentProviderRecord
     final ArrayMap<String, ContentProviderRecord> pubProviders
             = new ArrayMap<String, ContentProviderRecord>();
@@ -215,12 +213,8 @@ final class ProcessRecord {
                 pw.print(" cached="); pw.print(cached);
                 pw.print(" empty="); pw.println(empty);
         pw.print(prefix); pw.print("oom: max="); pw.print(maxAdj);
-                pw.print(" cached="); pw.print(cachedAdj);
-                pw.print(" client="); pw.print(clientCachedAdj);
-                pw.print(" empty="); pw.print(emptyAdj);
                 pw.print(" curRaw="); pw.print(curRawAdj);
                 pw.print(" setRaw="); pw.print(setRawAdj);
-                pw.print(" nonStopping="); pw.print(nonStoppingAdj);
                 pw.print(" cur="); pw.print(curAdj);
                 pw.print(" set="); pw.println(setAdj);
         pw.print(prefix); pw.print("curSchedGroup="); pw.print(curSchedGroup);
@@ -228,7 +222,8 @@ final class ProcessRecord {
                 pw.print(" systemNoUi="); pw.print(systemNoUi);
                 pw.print(" trimMemoryLevel="); pw.println(trimMemoryLevel);
         pw.print(prefix); pw.print("curProcState="); pw.print(curProcState);
-                pw.print(" repProcState="); pw.println(repProcState);
+                pw.print(" repProcState="); pw.print(repProcState);
+                pw.print(" setProcState="); pw.println(setProcState);
         pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
                 pw.print(" lruSeq="); pw.print(lruSeq);
                 pw.print(" lastPssTime="); pw.println(lastPssTime);
@@ -301,20 +296,20 @@ final class ProcessRecord {
         }
         if (services.size() > 0) {
             pw.print(prefix); pw.println("Services:");
-            for (ServiceRecord sr : services) {
-                pw.print(prefix); pw.print("  - "); pw.println(sr);
+            for (int i=0; i<services.size(); i++) {
+                pw.print(prefix); pw.print("  - "); pw.println(services.valueAt(i));
             }
         }
         if (executingServices.size() > 0) {
             pw.print(prefix); pw.println("Executing Services:");
-            for (ServiceRecord sr : executingServices) {
-                pw.print(prefix); pw.print("  - "); pw.println(sr);
+            for (int i=0; i<executingServices.size(); i++) {
+                pw.print(prefix); pw.print("  - "); pw.println(executingServices.valueAt(i));
             }
         }
         if (connections.size() > 0) {
             pw.print(prefix); pw.println("Connections:");
-            for (ConnectionRecord cr : connections) {
-                pw.print(prefix); pw.print("  - "); pw.println(cr);
+            for (int i=0; i<connections.size(); i++) {
+                pw.print(prefix); pw.print("  - "); pw.println(connections.valueAt(i));
             }
         }
         if (pubProviders.size() > 0) {
@@ -335,8 +330,8 @@ final class ProcessRecord {
         }
         if (receivers.size() > 0) {
             pw.print(prefix); pw.println("Receivers:");
-            for (ReceiverList rl : receivers) {
-                pw.print(prefix); pw.print("  - "); pw.println(rl);
+            for (int i=0; i<receivers.size(); i++) {
+                pw.print(prefix); pw.print("  - "); pw.println(receivers.valueAt(i));
             }
         }
     }
@@ -353,8 +348,7 @@ final class ProcessRecord {
         baseProcessTracker = tracker;
         pkgList.put(_info.packageName, tracker);
         thread = _thread;
-        maxAdj = ProcessList.CACHED_APP_MAX_ADJ;
-        cachedAdj = clientCachedAdj = emptyAdj = ProcessList.CACHED_APP_MIN_ADJ;
+        maxAdj = ProcessList.UNKNOWN_ADJ;
         curRawAdj = setRawAdj = -100;
         curAdj = setAdj = -100;
         persistent = false;
@@ -400,14 +394,35 @@ final class ProcessRecord {
 
     void updateHasAboveClientLocked() {
         hasAboveClient = false;
-        if (connections.size() > 0) {
-            for (ConnectionRecord cr : connections) {
-                if ((cr.flags&Context.BIND_ABOVE_CLIENT) != 0) {
-                    hasAboveClient = true;
-                    break;
-                }
+        for (int i=connections.size()-1; i>=0; i--) {
+            ConnectionRecord cr = connections.valueAt(i);
+            if ((cr.flags&Context.BIND_ABOVE_CLIENT) != 0) {
+                hasAboveClient = true;
+                break;
             }
         }
+    }
+
+    int modifyRawOomAdj(int adj) {
+        if (hasAboveClient) {
+            // If this process has bound to any services with BIND_ABOVE_CLIENT,
+            // then we need to drop its adjustment to be lower than the service's
+            // in order to honor the request.  We want to drop it by one adjustment
+            // level...  but there is special meaning applied to various levels so
+            // we will skip some of them.
+            if (adj < ProcessList.FOREGROUND_APP_ADJ) {
+                // System process will not get dropped, ever
+            } else if (adj < ProcessList.VISIBLE_APP_ADJ) {
+                adj = ProcessList.VISIBLE_APP_ADJ;
+            } else if (adj < ProcessList.PERCEPTIBLE_APP_ADJ) {
+                adj = ProcessList.PERCEPTIBLE_APP_ADJ;
+            } else if (adj < ProcessList.CACHED_APP_MIN_ADJ) {
+                adj = ProcessList.CACHED_APP_MIN_ADJ;
+            } else if (adj < ProcessList.CACHED_APP_MAX_ADJ) {
+                adj++;
+            }
+        }
+        return adj;
     }
 
     public String toShortString() {
@@ -483,11 +498,8 @@ final class ProcessRecord {
         }
     }
 
-    public void setProcessTrackerState(ProcessRecord TOP_APP, int memFactor, long now,
-            ProcessList plist) {
-        int state = this == TOP_APP ? ProcessTracker.STATE_TOP
-                : plist.adjToTrackedState(getSetAdjWithServices());
-        baseProcessTracker.setState(state, memFactor, now, pkgList);
+    public void setProcessTrackerState(int memFactor, long now) {
+        baseProcessTracker.setState(repProcState, memFactor, now, pkgList);
     }
 
     /*
