@@ -40,7 +40,6 @@ import static android.hardware.photography.CameraMetadata.Key;
 public final class CaptureResultKeys {
     public static final class ColorCorrection {
 
-
             public static final class ModeKey extends Key<ColorCorrection.ModeKey.Enum> {
                 public enum Enum {
                     TRANSFORM_MATRIX,
@@ -63,8 +62,11 @@ public final class CaptureResultKeys {
                 new ModeKey("android.colorCorrection.mode");
 
     }
-    public static final class Control {
 
+    public static final class Control {
+        /**
+         * @hide
+         */
         public static final Key<Integer> AE_PRECAPTURE_ID =
                 new Key<Integer>("android.control.aePrecaptureId", int.class);
         public static final Key<int[]> AE_REGIONS =
@@ -152,6 +154,9 @@ public final class CaptureResultKeys {
 
         public static final Key<Control.AfStateKey.Enum> AF_STATE =
                 new AfStateKey("android.control.afState");
+        /**
+         * @hide
+         */
         public static final Key<Integer> AF_TRIGGER_ID =
                 new Key<Integer>("android.control.afTriggerId", int.class);
 
@@ -235,8 +240,8 @@ public final class CaptureResultKeys {
                 new ModeKey("android.control.mode");
 
     }
-    public static final class Edge {
 
+    public static final class Edge {
 
             public static final class ModeKey extends Key<Edge.ModeKey.Enum> {
                 public enum Enum {
@@ -260,12 +265,8 @@ public final class CaptureResultKeys {
                 new ModeKey("android.edge.mode");
 
     }
-    public static final class Flash {
 
-        public static final Key<Byte> FIRING_POWER =
-                new Key<Byte>("android.flash.firingPower", byte.class);
-        public static final Key<Long> FIRING_TIME =
-                new Key<Long>("android.flash.firingTime", long.class);
+    public static final class Flash {
 
             public static final class ModeKey extends Key<Flash.ModeKey.Enum> {
                 public enum Enum {
@@ -312,33 +313,8 @@ public final class CaptureResultKeys {
                 new StateKey("android.flash.state");
 
     }
-    public static final class HotPixel {
 
-
-            public static final class ModeKey extends Key<HotPixel.ModeKey.Enum> {
-                public enum Enum {
-                    OFF,
-                    FAST,
-                    HIGH_QUALITY;
-                }
-
-                public static final Enum OFF = Enum.OFF;
-                public static final Enum FAST = Enum.FAST;
-                public static final Enum HIGH_QUALITY = Enum.HIGH_QUALITY;
-
-                // TODO: remove requirement for constructor by making Key an interface
-                private ModeKey(String name) {
-                    super(name, HotPixel.ModeKey.Enum.class);
-                }
-
-            }
-
-        public static final Key<HotPixel.ModeKey.Enum> MODE =
-                new ModeKey("android.hotPixel.mode");
-
-    }
     public static final class Jpeg {
-
         public static final Key<double[]> GPS_COORDINATES =
                 new Key<double[]>("android.jpeg.gpsCoordinates", double[].class);
         public static final Key<Byte> GPS_PROCESSING_METHOD =
@@ -349,16 +325,14 @@ public final class CaptureResultKeys {
                 new Key<Integer>("android.jpeg.orientation", int.class);
         public static final Key<Byte> QUALITY =
                 new Key<Byte>("android.jpeg.quality", byte.class);
-        public static final Key<Integer> SIZE =
-                new Key<Integer>("android.jpeg.size", int.class);
         public static final Key<Byte> THUMBNAIL_QUALITY =
                 new Key<Byte>("android.jpeg.thumbnailQuality", byte.class);
         public static final Key<int[]> THUMBNAIL_SIZE =
                 new Key<int[]>("android.jpeg.thumbnailSize", int[].class);
 
     }
-    public static final class Lens {
 
+    public static final class Lens {
         public static final Key<Float> APERTURE =
                 new Key<Float>("android.lens.aperture", float.class);
         public static final Key<Float> FILTER_DENSITY =
@@ -407,8 +381,8 @@ public final class CaptureResultKeys {
                 new StateKey("android.lens.state");
 
     }
-    public static final class NoiseReduction {
 
+    public static final class NoiseReduction {
 
             public static final class ModeKey extends Key<NoiseReduction.ModeKey.Enum> {
                 public enum Enum {
@@ -432,43 +406,25 @@ public final class CaptureResultKeys {
                 new ModeKey("android.noiseReduction.mode");
 
     }
-    public static final class Request {
 
+    public static final class Request {
         public static final Key<Integer> FRAME_COUNT =
                 new Key<Integer>("android.request.frameCount", int.class);
+        /**
+         * @hide
+         */
         public static final Key<Integer> ID =
                 new Key<Integer>("android.request.id", int.class);
 
-            public static final class MetadataModeKey extends Key<Request.MetadataModeKey.Enum> {
-                public enum Enum {
-                    NONE,
-                    FULL;
-                }
-
-                public static final Enum NONE = Enum.NONE;
-                public static final Enum FULL = Enum.FULL;
-
-                // TODO: remove requirement for constructor by making Key an interface
-                private MetadataModeKey(String name) {
-                    super(name, Request.MetadataModeKey.Enum.class);
-                }
-
-            }
-
-        public static final Key<Request.MetadataModeKey.Enum> METADATA_MODE =
-                new MetadataModeKey("android.request.metadataMode");
-        public static final Key<Byte> OUTPUT_STREAMS =
-                new Key<Byte>("android.request.outputStreams", byte.class);
-
     }
-    public static final class Scaler {
 
+    public static final class Scaler {
         public static final Key<int[]> CROP_REGION =
                 new Key<int[]>("android.scaler.cropRegion", int[].class);
 
     }
-    public static final class Sensor {
 
+    public static final class Sensor {
         public static final Key<Long> EXPOSURE_TIME =
                 new Key<Long>("android.sensor.exposureTime", long.class);
         public static final Key<Long> FRAME_DURATION =
@@ -479,33 +435,8 @@ public final class CaptureResultKeys {
                 new Key<Long>("android.sensor.timestamp", long.class);
 
     }
-    public static final class Shading {
 
-
-            public static final class ModeKey extends Key<Shading.ModeKey.Enum> {
-                public enum Enum {
-                    OFF,
-                    FAST,
-                    HIGH_QUALITY;
-                }
-
-                public static final Enum OFF = Enum.OFF;
-                public static final Enum FAST = Enum.FAST;
-                public static final Enum HIGH_QUALITY = Enum.HIGH_QUALITY;
-
-                // TODO: remove requirement for constructor by making Key an interface
-                private ModeKey(String name) {
-                    super(name, Shading.ModeKey.Enum.class);
-                }
-
-            }
-
-        public static final Key<Shading.ModeKey.Enum> MODE =
-                new ModeKey("android.shading.mode");
-
-    }
     public static final class Statistics {
-
 
             public static final class FaceDetectModeKey extends Key<Statistics.FaceDetectModeKey.Enum> {
                 public enum Enum {
@@ -535,52 +466,10 @@ public final class CaptureResultKeys {
                 new Key<int[]>("android.statistics.faceRectangles", int[].class);
         public static final Key<byte[]> FACE_SCORES =
                 new Key<byte[]>("android.statistics.faceScores", byte[].class);
-        public static final Key<int[]> HISTOGRAM =
-                new Key<int[]>("android.statistics.histogram", int[].class);
-
-            public static final class HistogramModeKey extends Key<Statistics.HistogramModeKey.Enum> {
-                public enum Enum {
-                    OFF,
-                    ON;
-                }
-
-                public static final Enum OFF = Enum.OFF;
-                public static final Enum ON = Enum.ON;
-
-                // TODO: remove requirement for constructor by making Key an interface
-                private HistogramModeKey(String name) {
-                    super(name, Statistics.HistogramModeKey.Enum.class);
-                }
-
-            }
-
-        public static final Key<Statistics.HistogramModeKey.Enum> HISTOGRAM_MODE =
-                new HistogramModeKey("android.statistics.histogramMode");
-        public static final Key<int[]> SHARPNESS_MAP =
-                new Key<int[]>("android.statistics.sharpnessMap", int[].class);
-
-            public static final class SharpnessMapModeKey extends Key<Statistics.SharpnessMapModeKey.Enum> {
-                public enum Enum {
-                    OFF,
-                    ON;
-                }
-
-                public static final Enum OFF = Enum.OFF;
-                public static final Enum ON = Enum.ON;
-
-                // TODO: remove requirement for constructor by making Key an interface
-                private SharpnessMapModeKey(String name) {
-                    super(name, Statistics.SharpnessMapModeKey.Enum.class);
-                }
-
-            }
-
-        public static final Key<Statistics.SharpnessMapModeKey.Enum> SHARPNESS_MAP_MODE =
-                new SharpnessMapModeKey("android.statistics.sharpnessMapMode");
 
     }
-    public static final class Tonemap {
 
+    public static final class Tonemap {
         public static final Key<Float> CURVE_BLUE =
                 new Key<Float>("android.tonemap.curveBlue", float.class);
         public static final Key<Float> CURVE_GREEN =
@@ -610,9 +499,15 @@ public final class CaptureResultKeys {
                 new ModeKey("android.tonemap.mode");
 
     }
+
+    /**
+     * @hide
+     */
     public static final class Led {
 
-
+            /**
+             * @hide
+             */
             public static final class TransmitKey extends Key<Led.TransmitKey.Enum> {
                 public enum Enum {
                     OFF,
@@ -629,10 +524,14 @@ public final class CaptureResultKeys {
 
             }
 
+        /**
+         * @hide
+         */
         public static final Key<Led.TransmitKey.Enum> TRANSMIT =
                 new TransmitKey("android.led.transmit");
 
     }
+
 }
 
 
