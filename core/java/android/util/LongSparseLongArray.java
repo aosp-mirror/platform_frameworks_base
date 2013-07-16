@@ -58,8 +58,8 @@ public class LongSparseLongArray implements Cloneable {
      */
     public LongSparseLongArray(int initialCapacity) {
         if (initialCapacity == 0) {
-            mKeys = SparseLongArray.EMPTY_LONGS;
-            mValues = SparseLongArray.EMPTY_LONGS;
+            mKeys = ContainerHelpers.EMPTY_LONGS;
+            mValues = ContainerHelpers.EMPTY_LONGS;
         } else {
             initialCapacity = ArrayUtils.idealLongArraySize(initialCapacity);
             mKeys = new long[initialCapacity];
@@ -94,7 +94,7 @@ public class LongSparseLongArray implements Cloneable {
      * if no such mapping has been made.
      */
     public long get(long key, long valueIfKeyNotFound) {
-        int i = Arrays.binarySearch(mKeys, 0, mSize, key);
+        int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
 
         if (i < 0) {
             return valueIfKeyNotFound;
@@ -107,7 +107,7 @@ public class LongSparseLongArray implements Cloneable {
      * Removes the mapping from the specified key, if there was any.
      */
     public void delete(long key) {
-        int i = Arrays.binarySearch(mKeys, 0, mSize, key);
+        int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
 
         if (i >= 0) {
             removeAt(i);
@@ -129,7 +129,7 @@ public class LongSparseLongArray implements Cloneable {
      * was one.
      */
     public void put(long key, long value) {
-        int i = Arrays.binarySearch(mKeys, 0, mSize, key);
+        int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
 
         if (i >= 0) {
             mValues[i] = value;
@@ -183,7 +183,7 @@ public class LongSparseLongArray implements Cloneable {
      * key is not mapped.
      */
     public int indexOfKey(long key) {
-        return Arrays.binarySearch(mKeys, 0, mSize, key);
+        return ContainerHelpers.binarySearch(mKeys, mSize, key);
     }
 
     /**
@@ -240,5 +240,32 @@ public class LongSparseLongArray implements Cloneable {
 
         mKeys = nkeys;
         mValues = nvalues;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation composes a string by iterating over its mappings.
+     */
+    @Override
+    public String toString() {
+        if (size() <= 0) {
+            return "{}";
+        }
+
+        StringBuilder buffer = new StringBuilder(mSize * 28);
+        buffer.append('{');
+        for (int i=0; i<mSize; i++) {
+            if (i > 0) {
+                buffer.append(", ");
+            }
+            long key = keyAt(i);
+            buffer.append(key);
+            buffer.append('=');
+            long value = valueAt(i);
+            buffer.append(value);
+        }
+        buffer.append('}');
+        return buffer.toString();
     }
 }

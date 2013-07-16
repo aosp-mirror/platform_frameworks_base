@@ -44,8 +44,6 @@ import java.util.Set;
  * you have no control over this shrinking -- if you set a capacity and then remove an
  * item, it may reduce the capacity to better match the current size.  In the future an
  * explicit call to set the capacity should turn off this aggressive shrinking behavior.</p>
- *
- * @hide
  */
 public final class ArrayMap<K, V> implements Map<K, V> {
     private static final boolean DEBUG = false;
@@ -86,7 +84,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
             return ~0;
         }
 
-        int index = SparseArray.binarySearch(mHashes, N, hash);
+        int index = ContainerHelpers.binarySearch(mHashes, N, hash);
 
         // If the hash code wasn't found, then we have no entry for this key.
         if (index < 0) {
@@ -188,8 +186,8 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      * will grow once items are added to it.
      */
     public ArrayMap() {
-        mHashes = SparseArray.EMPTY_INTS;
-        mArray = SparseArray.EMPTY_OBJECTS;
+        mHashes = ContainerHelpers.EMPTY_INTS;
+        mArray = ContainerHelpers.EMPTY_OBJECTS;
         mSize = 0;
     }
 
@@ -198,8 +196,8 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     public ArrayMap(int capacity) {
         if (capacity == 0) {
-            mHashes = SparseArray.EMPTY_INTS;
-            mArray = SparseArray.EMPTY_OBJECTS;
+            mHashes = ContainerHelpers.EMPTY_INTS;
+            mArray = ContainerHelpers.EMPTY_OBJECTS;
         } else {
             allocArrays(capacity);
         }
@@ -223,8 +221,8 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     public void clear() {
         if (mSize != 0) {
             freeArrays(mHashes, mArray, mSize);
-            mHashes = SparseArray.EMPTY_INTS;
-            mArray = SparseArray.EMPTY_OBJECTS;
+            mHashes = ContainerHelpers.EMPTY_INTS;
+            mArray = ContainerHelpers.EMPTY_OBJECTS;
             mSize = 0;
         }
     }
@@ -439,8 +437,8 @@ public final class ArrayMap<K, V> implements Map<K, V> {
             // Now empty.
             if (DEBUG) Log.d(TAG, "remove: shrink from " + mHashes.length + " to 0");
             freeArrays(mHashes, mArray, mSize);
-            mHashes = SparseArray.EMPTY_INTS;
-            mArray = SparseArray.EMPTY_OBJECTS;
+            mHashes = ContainerHelpers.EMPTY_INTS;
+            mArray = ContainerHelpers.EMPTY_OBJECTS;
             mSize = 0;
         } else {
             if (mHashes.length > (BASE_SIZE*2) && mSize < mHashes.length/3) {

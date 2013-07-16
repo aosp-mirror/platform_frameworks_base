@@ -34,8 +34,6 @@ import com.android.internal.util.ArrayUtils;
  * the performance difference is not significant, less than 50%.</p>
  */
 public class SparseLongArray implements Cloneable {
-    static final long[] EMPTY_LONGS = new long[0];
-
     private int[] mKeys;
     private long[] mValues;
     private int mSize;
@@ -56,8 +54,8 @@ public class SparseLongArray implements Cloneable {
      */
     public SparseLongArray(int initialCapacity) {
         if (initialCapacity == 0) {
-            mKeys = SparseArray.EMPTY_INTS;
-            mValues = EMPTY_LONGS;
+            mKeys = ContainerHelpers.EMPTY_INTS;
+            mValues = ContainerHelpers.EMPTY_LONGS;
         } else {
             initialCapacity = ArrayUtils.idealLongArraySize(initialCapacity);
             mKeys = new int[initialCapacity];
@@ -92,7 +90,7 @@ public class SparseLongArray implements Cloneable {
      * if no such mapping has been made.
      */
     public long get(int key, long valueIfKeyNotFound) {
-        int i = SparseArray.binarySearch(mKeys, mSize, key);
+        int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
 
         if (i < 0) {
             return valueIfKeyNotFound;
@@ -105,7 +103,7 @@ public class SparseLongArray implements Cloneable {
      * Removes the mapping from the specified key, if there was any.
      */
     public void delete(int key) {
-        int i = SparseArray.binarySearch(mKeys, mSize, key);
+        int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
 
         if (i >= 0) {
             removeAt(i);
@@ -127,7 +125,7 @@ public class SparseLongArray implements Cloneable {
      * was one.
      */
     public void put(int key, long value) {
-        int i = SparseArray.binarySearch(mKeys, mSize, key);
+        int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
 
         if (i >= 0) {
             mValues[i] = value;
@@ -181,7 +179,7 @@ public class SparseLongArray implements Cloneable {
      * key is not mapped.
      */
     public int indexOfKey(int key) {
-        return SparseArray.binarySearch(mKeys, mSize, key);
+        return ContainerHelpers.binarySearch(mKeys, mSize, key);
     }
 
     /**
@@ -238,5 +236,32 @@ public class SparseLongArray implements Cloneable {
 
         mKeys = nkeys;
         mValues = nvalues;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation composes a string by iterating over its mappings.
+     */
+    @Override
+    public String toString() {
+        if (size() <= 0) {
+            return "{}";
+        }
+
+        StringBuilder buffer = new StringBuilder(mSize * 28);
+        buffer.append('{');
+        for (int i=0; i<mSize; i++) {
+            if (i > 0) {
+                buffer.append(", ");
+            }
+            int key = keyAt(i);
+            buffer.append(key);
+            buffer.append('=');
+            long value = valueAt(i);
+            buffer.append(value);
+        }
+        buffer.append('}');
+        return buffer.toString();
     }
 }

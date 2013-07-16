@@ -35,8 +35,6 @@ import com.android.internal.util.ArrayUtils;
  * the performance difference is not significant, less than 50%.</p>
  */
 public class SparseBooleanArray implements Cloneable {
-    static final boolean[] EMPTY_BOOLEANS = new boolean[0];
-
     /**
      * Creates a new SparseBooleanArray containing no mappings.
      */
@@ -53,8 +51,8 @@ public class SparseBooleanArray implements Cloneable {
      */
     public SparseBooleanArray(int initialCapacity) {
         if (initialCapacity == 0) {
-            mKeys = SparseArray.EMPTY_INTS;
-            mValues = EMPTY_BOOLEANS;
+            mKeys = ContainerHelpers.EMPTY_INTS;
+            mValues = ContainerHelpers.EMPTY_BOOLEANS;
         } else {
             initialCapacity = ArrayUtils.idealIntArraySize(initialCapacity);
             mKeys = new int[initialCapacity];
@@ -89,7 +87,7 @@ public class SparseBooleanArray implements Cloneable {
      * if no such mapping has been made.
      */
     public boolean get(int key, boolean valueIfKeyNotFound) {
-        int i = SparseArray.binarySearch(mKeys, mSize, key);
+        int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
 
         if (i < 0) {
             return valueIfKeyNotFound;
@@ -102,7 +100,7 @@ public class SparseBooleanArray implements Cloneable {
      * Removes the mapping from the specified key, if there was any.
      */
     public void delete(int key) {
-        int i = SparseArray.binarySearch(mKeys, mSize, key);
+        int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
 
         if (i >= 0) {
             System.arraycopy(mKeys, i + 1, mKeys, i, mSize - (i + 1));
@@ -117,7 +115,7 @@ public class SparseBooleanArray implements Cloneable {
      * was one.
      */
     public void put(int key, boolean value) {
-        int i = SparseArray.binarySearch(mKeys, mSize, key);
+        int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
 
         if (i >= 0) {
             mValues[i] = value;
@@ -182,7 +180,7 @@ public class SparseBooleanArray implements Cloneable {
      * key is not mapped.
      */
     public int indexOfKey(int key) {
-        return SparseArray.binarySearch(mKeys, mSize, key);
+        return ContainerHelpers.binarySearch(mKeys, mSize, key);
     }
 
     /**
@@ -237,7 +235,34 @@ public class SparseBooleanArray implements Cloneable {
         mValues[pos] = value;
         mSize = pos + 1;
     }
-    
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation composes a string by iterating over its mappings.
+     */
+    @Override
+    public String toString() {
+        if (size() <= 0) {
+            return "{}";
+        }
+
+        StringBuilder buffer = new StringBuilder(mSize * 28);
+        buffer.append('{');
+        for (int i=0; i<mSize; i++) {
+            if (i > 0) {
+                buffer.append(", ");
+            }
+            int key = keyAt(i);
+            buffer.append(key);
+            buffer.append('=');
+            boolean value = valueAt(i);
+            buffer.append(value);
+        }
+        buffer.append('}');
+        return buffer.toString();
+    }
+
     private int[] mKeys;
     private boolean[] mValues;
     private int mSize;

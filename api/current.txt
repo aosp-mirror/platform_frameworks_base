@@ -24781,6 +24781,33 @@ package android.util {
     ctor public AndroidRuntimeException(java.lang.Exception);
   }
 
+  public final class ArrayMap implements java.util.Map {
+    ctor public ArrayMap();
+    ctor public ArrayMap(int);
+    ctor public ArrayMap(android.util.ArrayMap);
+    method public void clear();
+    method public boolean containsAll(java.util.Collection<?>);
+    method public boolean containsKey(java.lang.Object);
+    method public boolean containsValue(java.lang.Object);
+    method public void ensureCapacity(int);
+    method public java.util.Set<java.util.Map.Entry<K, V>> entrySet();
+    method public V get(java.lang.Object);
+    method public boolean isEmpty();
+    method public K keyAt(int);
+    method public java.util.Set<K> keySet();
+    method public V put(K, V);
+    method public void putAll(android.util.ArrayMap<? extends K, ? extends V>);
+    method public void putAll(java.util.Map<? extends K, ? extends V>);
+    method public V remove(java.lang.Object);
+    method public boolean removeAll(java.util.Collection<?>);
+    method public V removeAt(int);
+    method public boolean retainAll(java.util.Collection<?>);
+    method public V setValueAt(int, V);
+    method public int size();
+    method public V valueAt(int);
+    method public java.util.Collection<V> values();
+  }
+
   public class AtomicFile {
     ctor public AtomicFile(java.io.File);
     method public void delete();
@@ -25134,6 +25161,7 @@ package android.util {
     method public void put(int, E);
     method public void remove(int);
     method public void removeAt(int);
+    method public void removeAtRange(int, int);
     method public void setValueAt(int, E);
     method public int size();
     method public E valueAt(int);
