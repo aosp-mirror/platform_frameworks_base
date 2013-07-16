@@ -6435,11 +6435,17 @@ public final class ViewRootImpl implements ViewParent,
         public long mLastEventTimeMillis;
 
         public void run() {
-            mLastEventTimeMillis = SystemClock.uptimeMillis();
-            AccessibilityEvent event = AccessibilityEvent.obtain();
-            event.setEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-            event.setContentChangeType(AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
-            mSource.sendAccessibilityEventUnchecked(event);
+            // The accessibility may be turned off while we were waiting so check again.
+            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+                mLastEventTimeMillis = SystemClock.uptimeMillis();
+                AccessibilityEvent event = AccessibilityEvent.obtain();
+                event.setEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+                event.setContentChangeType(AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
+                mSource.sendAccessibilityEventUnchecked(event);
+            } else {
+                mLastEventTimeMillis = 0;
+            }
+            // In any case reset to initial state.
             mSource.resetSubtreeAccessibilityStateChanged();
             mSource = null;
         }
