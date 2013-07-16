@@ -19,7 +19,6 @@ package com.android.server.wm;
 import com.android.server.input.InputManagerService;
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.input.InputWindowHandle;
-import com.android.server.wm.WindowManagerService.AllWindowsIterator;
 
 import android.app.ActivityManagerNative;
 import android.graphics.Rect;
@@ -31,7 +30,6 @@ import android.view.InputChannel;
 import android.view.KeyEvent;
 import android.view.WindowManager;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
@@ -249,45 +247,48 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         }
 
         // Add all windows on the default display.
-        final AllWindowsIterator iterator = mService.new AllWindowsIterator(
-                WindowManagerService.REVERSE_ITERATOR);
-        while (iterator.hasNext()) {
-            final WindowState child = iterator.next();
-            final InputChannel inputChannel = child.mInputChannel;
-            final InputWindowHandle inputWindowHandle = child.mInputWindowHandle;
-            if (inputChannel == null || inputWindowHandle == null || child.mRemoved) {
-                // Skip this window because it cannot possibly receive input.
-                continue;
-            }
-            
-            final int flags = child.mAttrs.flags;
-            final int type = child.mAttrs.type;
-            
-            final boolean hasFocus = (child == mInputFocus);
-            final boolean isVisible = child.isVisibleLw();
-            final boolean hasWallpaper = (child == mService.mWallpaperTarget)
-                    && (type != WindowManager.LayoutParams.TYPE_KEYGUARD);
-            final boolean onDefaultDisplay = (child.getDisplayId() == Display.DEFAULT_DISPLAY);
-
-            // If there's a drag in progress and 'child' is a potential drop target,
-            // make sure it's been told about the drag
-            if (inDrag && isVisible && onDefaultDisplay) {
-                mService.mDragState.sendDragStartedIfNeededLw(child);
-            }
-
-            if (universeBackground != null && !addedUniverse
-                    && child.mBaseLayer < aboveUniverseLayer && onDefaultDisplay) {
-                final WindowState u = universeBackground.mWin;
-                if (u.mInputChannel != null && u.mInputWindowHandle != null) {
-                    addInputWindowHandleLw(u.mInputWindowHandle, u, u.mAttrs.flags,
-                            u.mAttrs.type, true, u == mInputFocus, false);
+        final int numDisplays = mService.mDisplayContents.size();
+        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+            final WindowList windows =
+                    mService.mDisplayContents.valueAt(displayNdx).getWindowList();
+            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+                final WindowState child = windows.get(winNdx);
+                final InputChannel inputChannel = child.mInputChannel;
+                final InputWindowHandle inputWindowHandle = child.mInputWindowHandle;
+                if (inputChannel == null || inputWindowHandle == null || child.mRemoved) {
+                    // Skip this window because it cannot possibly receive input.
+                    continue;
                 }
-                addedUniverse = true;
-            }
 
-            if (child.mWinAnimator != universeBackground) {
-                addInputWindowHandleLw(inputWindowHandle, child, flags, type,
-                        isVisible, hasFocus, hasWallpaper);
+                final int flags = child.mAttrs.flags;
+                final int type = child.mAttrs.type;
+
+                final boolean hasFocus = (child == mInputFocus);
+                final boolean isVisible = child.isVisibleLw();
+                final boolean hasWallpaper = (child == mService.mWallpaperTarget)
+                        && (type != WindowManager.LayoutParams.TYPE_KEYGUARD);
+                final boolean onDefaultDisplay = (child.getDisplayId() == Display.DEFAULT_DISPLAY);
+
+                // If there's a drag in progress and 'child' is a potential drop target,
+                // make sure it's been told about the drag
+                if (inDrag && isVisible && onDefaultDisplay) {
+                    mService.mDragState.sendDragStartedIfNeededLw(child);
+                }
+
+                if (universeBackground != null && !addedUniverse
+                        && child.mBaseLayer < aboveUniverseLayer && onDefaultDisplay) {
+                    final WindowState u = universeBackground.mWin;
+                    if (u.mInputChannel != null && u.mInputWindowHandle != null) {
+                        addInputWindowHandleLw(u.mInputWindowHandle, u, u.mAttrs.flags,
+                                u.mAttrs.type, true, u == mInputFocus, false);
+                    }
+                    addedUniverse = true;
+                }
+
+                if (child.mWinAnimator != universeBackground) {
+                    addInputWindowHandleLw(inputWindowHandle, child, flags, type,
+                            isVisible, hasFocus, hasWallpaper);
+                }
             }
         }
 
