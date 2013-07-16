@@ -1273,7 +1273,7 @@ public class SyncManager {
                 for (int i = 0; i < settings.periodicSyncs.size(); i++) {
                     final Pair<Bundle, Long> pair = settings.periodicSyncs.get(i);
                     final String period = String.valueOf(pair.second);
-                    final String extras = pair.first.size() > 0 ? pair.first.toString() : "";
+                    final String extras = pair.first.size() > 0 ? " " + pair.first.toString() : "";
                     final String next = formatTime(status.getPeriodicSyncTime(i)
                             + pair.second * 1000);
                     table.set(row + i * 2, 12, period + extras);
