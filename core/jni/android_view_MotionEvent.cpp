@@ -18,6 +18,7 @@
 
 #include "JNIHelp.h"
 
+#include <SkMatrix.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Log.h>
 #include <input/Input.h>
@@ -25,9 +26,6 @@
 #include "android_view_MotionEvent.h"
 #include "android_util_Binder.h"
 #include "android/graphics/Matrix.h"
-
-#include "SkMatrix.h"
-
 
 namespace android {
 
