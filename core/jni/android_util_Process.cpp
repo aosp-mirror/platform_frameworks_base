@@ -33,6 +33,7 @@
 #include <sys/errno.h>
 #include <sys/resource.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <dirent.h>
 #include <fcntl.h>
 #include <grp.h>
@@ -379,6 +380,32 @@ jboolean android_os_Process_setOomAdj(JNIEnv* env, jobject clazz,
     return true;
 #endif
     return false;
+}
+
+jboolean android_os_Process_setSwappiness(JNIEnv *env, jobject clazz,
+                                          jint pid, jboolean is_increased)
+{
+    char text[64];
+
+    if (is_increased) {
+        strcpy(text, "/sys/fs/cgroup/memory/sw/tasks");
+    } else {
+        strcpy(text, "/sys/fs/cgroup/memory/tasks");
+    }
+
+    struct stat st;
+    if (stat(text, &st) || !S_ISREG(st.st_mode)) {
+        return false;
+    }
+
+    int fd = open(text, O_WRONLY);
+    if (fd >= 0) {
+        sprintf(text, "%d", pid);
+        write(fd, text, strlen(text));
+        close(fd);
+    }
+
+    return true;
 }
 
 void android_os_Process_setArgV0(JNIEnv* env, jobject clazz, jstring name)
@@ -1022,6 +1049,7 @@ static const JNINativeMethod methods[] = {
     {"setProcessGroup",     "(II)V", (void*)android_os_Process_setProcessGroup},
     {"getProcessGroup",     "(I)I", (void*)android_os_Process_getProcessGroup},
     {"setOomAdj",   "(II)Z", (void*)android_os_Process_setOomAdj},
+    {"setSwappiness",   "(IZ)Z", (void*)android_os_Process_setSwappiness},
     {"setArgV0",    "(Ljava/lang/String;)V", (void*)android_os_Process_setArgV0},
     {"setUid", "(I)I", (void*)android_os_Process_setUid},
     {"setGid", "(I)I", (void*)android_os_Process_setGid},

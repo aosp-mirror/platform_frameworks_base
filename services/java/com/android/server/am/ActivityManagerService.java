@@ -14510,6 +14510,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
                 }
+                Process.setSwappiness(app.pid,
+                        app.curSchedGroup <= Process.THREAD_GROUP_BG_NONINTERACTIVE);
             }
         }
         if (app.repProcState != app.curProcState) {

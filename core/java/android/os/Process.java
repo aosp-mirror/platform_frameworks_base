@@ -894,6 +894,19 @@ public class Process {
     public static final native boolean setOomAdj(int pid, int amt);
 
     /**
+     * Adjust the swappiness level for a process.
+     *
+     * @param pid The process identifier to set.
+     * @param is_increased Whether swappiness should be increased or default.
+     *
+     * @return Returns true if the underlying system supports this
+     *         feature, else false.
+     *
+     * {@hide}
+     */
+    public static final native boolean setSwappiness(int pid, boolean is_increased);
+
+    /**
      * Change this process's argv[0] parameter.  This can be useful to show
      * more descriptive information in things like the 'ps' command.
      * 
