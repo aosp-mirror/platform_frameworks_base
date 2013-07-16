@@ -24,7 +24,6 @@ import android.view.SurfaceControl;
 import android.view.WindowManagerPolicy;
 import android.view.animation.Animation;
 
-import com.android.server.wm.WindowManagerService.DisplayContentsIterator;
 import com.android.server.wm.WindowManagerService.LayoutFields;
 
 import java.io.PrintWriter;
@@ -442,7 +441,7 @@ public class WindowAnimator {
                             setAppLayoutChanges(appAnimator,
                                     WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM,
                                     "testTokenMayBeDrawnLocked");
-    
+
                             // We can now show all of the drawn windows!
                             if (!mService.mOpeningApps.contains(wtoken)) {
                                 mAnimating |= appAnimator.showAllWindowsLocked();
@@ -541,9 +540,9 @@ public class WindowAnimator {
         }
 
         boolean hasPendingLayoutChanges = false;
-        DisplayContentsIterator iterator = mService.new DisplayContentsIterator();
-        while (iterator.hasNext()) {
-            final DisplayContent displayContent = iterator.next();
+        final int numDisplays = mService.mDisplayContents.size();
+        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+            final DisplayContent displayContent = mService.mDisplayContents.get(displayNdx);
             final int pendingChanges = getPendingLayoutChanges(displayContent.getDisplayId());
             if ((pendingChanges & WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
                 mBulkUpdateParams |= SET_WALLPAPER_ACTION_PENDING;

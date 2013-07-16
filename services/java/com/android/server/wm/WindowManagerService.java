@@ -149,7 +149,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /** {@hide} */
 public class WindowManagerService extends IWindowManager.Stub
@@ -425,9 +424,7 @@ public class WindowManagerService extends IWindowManager.Stub
     String mLastANRState;
 
     /** All DisplayContents in the world, kept here */
-    private SparseArray<DisplayContent> mDisplayContents = new SparseArray<DisplayContent>(2);
-
-    private final AllWindowsIterator mTmpWindowsIterator = new AllWindowsIterator();
+    SparseArray<DisplayContent> mDisplayContents = new SparseArray<DisplayContent>(2);
 
     int mRotation = 0;
     int mForcedAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -2531,13 +2528,17 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void updateAppOpsState() {
         synchronized(mWindowMap) {
-            mTmpWindowsIterator.reset(FORWARD_ITERATOR);
-            while (mTmpWindowsIterator.hasNext()) {
-                final WindowState win = mTmpWindowsIterator.next();
-                if (win.mAppOp != AppOpsManager.OP_NONE) {
-                    final int mode = mAppOps.checkOpNoThrow(win.mAppOp, win.getOwningUid(),
-                            win.getOwningPackage());
-                    win.setAppOpVisibilityLw(mode == AppOpsManager.MODE_ALLOWED);
+            final int numDisplays = mDisplayContents.size();
+            for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                final WindowList windows = mDisplayContents.valueAt(displayNdx).getWindowList();
+                final int numWindows = windows.size();
+                for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
+                    final WindowState win = windows.get(winNdx);
+                    if (win.mAppOp != AppOpsManager.OP_NONE) {
+                        final int mode = mAppOps.checkOpNoThrow(win.mAppOp, win.getOwningUid(),
+                                win.getOwningPackage());
+                        win.setAppOpVisibilityLw(mode == AppOpsManager.MODE_ALLOWED);
+                    }
                 }
             }
         }
@@ -4544,9 +4545,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     void dumpAppTokensLocked() {
-        DisplayContentsIterator iterator = new DisplayContentsIterator();
-        while (iterator.hasNext()) {
-            DisplayContent displayContent = iterator.next();
+        final int numDisplays = mDisplayContents.size();
+        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+            final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
             Slog.v(TAG, "  Display " + displayContent.getDisplayId());
             final ArrayList<Task> tasks = displayContent.getTasks();
             int i = displayContent.numTokens();
@@ -4562,10 +4563,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void dumpWindowsLocked() {
         int i = 0;
-        mTmpWindowsIterator.reset(REVERSE_ITERATOR);
-        while (mTmpWindowsIterator.hasNext()) {
-            final WindowState w = mTmpWindowsIterator.next();
-            Slog.v(TAG, "  #" + i++ + ": " + w);
+        final int numDisplays = mDisplayContents.size();
+        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+            final WindowList windows = mDisplayContents.valueAt(displayNdx).getWindowList();
+            for (int winNdx = windows.size() - 1; winNdx >= 0; --winNdx) {
+                Slog.v(TAG, "  #" + i++ + ": " + windows.get(winNdx));
+            }
         }
     }
 
@@ -4816,9 +4819,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         "createStack: weight must be between " + STACK_WEIGHT_MIN + " and " +
                         STACK_WEIGHT_MAX + ", weight=" + weight);
             }
-            DisplayContentsIterator iterator = new DisplayContentsIterator();
-            while (iterator.hasNext()) {
-                final DisplayContent displayContent = iterator.next();
+            final int numDisplays = mDisplayContents.size();
+            for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
                 TaskStack stack = displayContent.createStack(this, stackId, relativeStackBoxId,
                         position, weight);
                 if (stack != null) {
@@ -4881,9 +4884,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     STACK_WEIGHT_MAX + ", weight=" + weight);
         }
         synchronized (mWindowMap) {
-            DisplayContentsIterator iterator = new DisplayContentsIterator();
-            while (iterator.hasNext()) {
-                if (iterator.next().resizeStack(stackBoxId, weight)) {
+            final int numDisplays = mDisplayContents.size();
+            for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                if (mDisplayContents.valueAt(displayNdx).resizeStack(stackBoxId, weight)) {
                     performLayoutAndPlaceSurfacesLocked();
                     return;
                 }
@@ -4900,9 +4903,9 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public Rect getStackBounds(int stackId) {
-        DisplayContentsIterator iterator = new DisplayContentsIterator();
-        while (iterator.hasNext()) {
-            Rect bounds = iterator.next().getStackBounds(stackId);
+        final int numDisplays = mDisplayContents.size();
+        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+            Rect bounds = mDisplayContents.valueAt(displayNdx).getStackBounds(stackId);
             if (bounds != null) {
                 return bounds;
             }
@@ -5029,13 +5032,17 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void closeSystemDialogs(String reason) {
         synchronized(mWindowMap) {
-            mTmpWindowsIterator.reset(FORWARD_ITERATOR);
-            while (mTmpWindowsIterator.hasNext()) {
-                final WindowState w = mTmpWindowsIterator.next();
-                if (w.mHasSurface) {
-                    try {
-                        w.mClient.closeSystemDialogs(reason);
-                    } catch (RemoteException e) {
+            final int numDisplays = mDisplayContents.size();
+            for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                final WindowList windows = mDisplayContents.valueAt(displayNdx).getWindowList();
+                final int numWindows = windows.size();
+                for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
+                    final WindowState w = windows.get(winNdx);
+                    if (w.mHasSurface) {
+                        try {
+                            w.mClient.closeSystemDialogs(reason);
+                        } catch (RemoteException e) {
+                        }
                     }
                 }
             }
@@ -5172,9 +5179,9 @@ public class WindowManagerService extends IWindowManager.Stub
             mPolicy.setCurrentUserLw(newUserId);
 
             // Hide windows that should not be seen by the new user.
-            DisplayContentsIterator iterator = new DisplayContentsIterator();
-            while (iterator.hasNext()) {
-                DisplayContent displayContent = iterator.next();
+            final int numDisplays = mDisplayContents.size();
+            for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
                 displayContent.switchUserStacks(oldUserId, newUserId);
                 rebuildAppWindowListLocked(displayContent);
             }
@@ -5424,12 +5431,16 @@ public class WindowManagerService extends IWindowManager.Stub
             // the background..)
             if (on) {
                 boolean isVisible = false;
-                mTmpWindowsIterator.reset(FORWARD_ITERATOR);
-                while (mTmpWindowsIterator.hasNext()) {
-                    final WindowState ws = mTmpWindowsIterator.next();
-                    if (ws.mSession.mPid == pid && ws.isVisibleLw()) {
-                        isVisible = true;
-                        break;
+                final int numDisplays = mDisplayContents.size();
+                for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                    final WindowList windows = mDisplayContents.valueAt(displayNdx).getWindowList();
+                    final int numWindows = windows.size();
+                    for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
+                        final WindowState ws = windows.get(winNdx);
+                        if (ws.mSession.mPid == pid && ws.isVisibleLw()) {
+                            isVisible = true;
+                            break;
+                        }
                     }
                 }
                 if (!isVisible) {
@@ -6189,9 +6200,10 @@ public class WindowManagerService extends IWindowManager.Stub
         WindowList windows = new WindowList();
         synchronized (mWindowMap) {
             //noinspection unchecked
-            DisplayContentsIterator iterator = new DisplayContentsIterator();
-            while(iterator.hasNext()) {
-                windows.addAll(iterator.next().getWindowList());
+            final int numDisplays = mDisplayContents.size();
+            for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
+                windows.addAll(displayContent.getWindowList());
             }
         }
 
@@ -6419,11 +6431,15 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized (mWindowMap) {
-            mTmpWindowsIterator.reset(FORWARD_ITERATOR);
-            while (mTmpWindowsIterator.hasNext()) {
-                final WindowState w = mTmpWindowsIterator.next();
-                if (System.identityHashCode(w) == hashCode) {
-                    return w;
+            final int numDisplays = mDisplayContents.size();
+            for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                final WindowList windows = mDisplayContents.valueAt(displayNdx).getWindowList();
+                final int numWindows = windows.size();
+                for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
+                    final WindowState w = windows.get(winNdx);
+                    if (System.identityHashCode(w) == hashCode) {
+                        return w;
+                    }
                 }
             }
         }
@@ -6974,12 +6990,16 @@ public class WindowManagerService extends IWindowManager.Stub
     // TODO(multidisplay): Call isScreenOn for each display.
     private void sendScreenStatusToClientsLocked() {
         final boolean on = mPowerManager.isScreenOn();
-        mTmpWindowsIterator.reset(FORWARD_ITERATOR);
-        while (mTmpWindowsIterator.hasNext()) {
-            try {
-                mTmpWindowsIterator.next().mClient.dispatchScreenState(on);
-            } catch (RemoteException e) {
-                // Ignored
+        final int numDisplays = mDisplayContents.size();
+        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+            final WindowList windows = mDisplayContents.valueAt(displayNdx).getWindowList();
+            final int numWindows = windows.size();
+            for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
+                try {
+                    windows.get(winNdx).mClient.dispatchScreenState(on);
+                } catch (RemoteException e) {
+                    // Ignored
+                }
             }
         }
     }
@@ -7833,9 +7853,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     final void rebuildAppWindowListLocked() {
-        DisplayContentsIterator iterator = new DisplayContentsIterator();
-        while (iterator.hasNext()) {
-            rebuildAppWindowListLocked(iterator.next());
+        final int numDisplays = mDisplayContents.size();
+        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+            final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
+            rebuildAppWindowListLocked(displayContent);
         }
     }
 
@@ -8783,9 +8804,9 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         // Initialize state of exiting tokens.
-        DisplayContentsIterator iterator = new DisplayContentsIterator();
-        while (iterator.hasNext()) {
-            final DisplayContent displayContent = iterator.next();
+        final int numDisplays = mDisplayContents.size();
+        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+            final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
             for (i=displayContent.mExitingTokens.size()-1; i>=0; i--) {
                 displayContent.mExitingTokens.get(i).hasVisible = false;
             }
@@ -8823,10 +8844,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
             boolean focusDisplayed = false;
 
-            iterator = new DisplayContentsIterator();
-            while (iterator.hasNext()) {
+            for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
                 boolean updateAllDrawn = false;
-                final DisplayContent displayContent = iterator.next();
                 WindowList windows = displayContent.getWindowList();
                 DisplayInfo displayInfo = displayContent.getDisplayInfo();
                 final int displayId = displayContent.getDisplayId();
@@ -9238,9 +9258,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         // Time to remove any exiting tokens?
-        iterator = new DisplayContentsIterator();
-        while (iterator.hasNext()) {
-            final DisplayContent displayContent = iterator.next();
+        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+            final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
             ArrayList<WindowToken> exitingTokens = displayContent.mExitingTokens;
             for (i = exitingTokens.size() - 1; i >= 0; i--) {
                 WindowToken token = exitingTokens.get(i);
@@ -9289,9 +9308,8 @@ public class WindowManagerService extends IWindowManager.Stub
             defaultDisplay.layoutNeeded = true;
         }
 
-        iterator = new DisplayContentsIterator();
-        while (iterator.hasNext()) {
-            DisplayContent displayContent = iterator.next();
+        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+            final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
             if (displayContent.pendingLayoutChanges != 0) {
                 displayContent.layoutNeeded = true;
             }
@@ -9472,9 +9490,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private boolean needsLayout() {
-        DisplayContentsIterator iterator = new DisplayContentsIterator();
-        while (iterator.hasNext()) {
-            if (iterator.next().layoutNeeded) {
+        final int numDisplays = mDisplayContents.size();
+        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+            final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
+            if (displayContent.layoutNeeded) {
                 return true;
             }
         }
@@ -9553,35 +9572,39 @@ public class WindowManagerService extends IWindowManager.Stub
             // window list to make sure we haven't left any dangling surfaces
             // around.
 
-            mTmpWindowsIterator.reset(FORWARD_ITERATOR);
             Slog.i(TAG, "Out of memory for surface!  Looking for leaks...");
-            while (mTmpWindowsIterator.hasNext()) {
-                WindowState ws = mTmpWindowsIterator.next();
-                WindowStateAnimator wsa = ws.mWinAnimator;
-                if (wsa.mSurfaceControl != null) {
-                    if (!mSessions.contains(wsa.mSession)) {
-                        Slog.w(TAG, "LEAKED SURFACE (session doesn't exist): "
-                                + ws + " surface=" + wsa.mSurfaceControl
-                                + " token=" + ws.mToken
-                                + " pid=" + ws.mSession.mPid
-                                + " uid=" + ws.mSession.mUid);
-                        if (SHOW_TRANSACTIONS) logSurface(ws, "LEAK DESTROY", null);
-                        wsa.mSurfaceControl.destroy();
-                        wsa.mSurfaceShown = false;
-                        wsa.mSurfaceControl = null;
-                        ws.mHasSurface = false;
-                        mForceRemoves.add(ws);
-                        leakedSurface = true;
-                    } else if (ws.mAppToken != null && ws.mAppToken.clientHidden) {
-                        Slog.w(TAG, "LEAKED SURFACE (app token hidden): "
-                                + ws + " surface=" + wsa.mSurfaceControl
-                                + " token=" + ws.mAppToken);
-                        if (SHOW_TRANSACTIONS) logSurface(ws, "LEAK DESTROY", null);
-                        wsa.mSurfaceControl.destroy();
-                        wsa.mSurfaceShown = false;
-                        wsa.mSurfaceControl = null;
-                        ws.mHasSurface = false;
-                        leakedSurface = true;
+            final int numDisplays = mDisplayContents.size();
+            for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                final WindowList windows = mDisplayContents.valueAt(displayNdx).getWindowList();
+                final int numWindows = windows.size();
+                for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
+                    final WindowState ws = windows.get(winNdx);
+                    WindowStateAnimator wsa = ws.mWinAnimator;
+                    if (wsa.mSurfaceControl != null) {
+                        if (!mSessions.contains(wsa.mSession)) {
+                            Slog.w(TAG, "LEAKED SURFACE (session doesn't exist): "
+                                    + ws + " surface=" + wsa.mSurfaceControl
+                                    + " token=" + ws.mToken
+                                    + " pid=" + ws.mSession.mPid
+                                    + " uid=" + ws.mSession.mUid);
+                            if (SHOW_TRANSACTIONS) logSurface(ws, "LEAK DESTROY", null);
+                            wsa.mSurfaceControl.destroy();
+                            wsa.mSurfaceShown = false;
+                            wsa.mSurfaceControl = null;
+                            ws.mHasSurface = false;
+                            mForceRemoves.add(ws);
+                            leakedSurface = true;
+                        } else if (ws.mAppToken != null && ws.mAppToken.clientHidden) {
+                            Slog.w(TAG, "LEAKED SURFACE (app token hidden): "
+                                    + ws + " surface=" + wsa.mSurfaceControl
+                                    + " token=" + ws.mAppToken);
+                            if (SHOW_TRANSACTIONS) logSurface(ws, "LEAK DESTROY", null);
+                            wsa.mSurfaceControl.destroy();
+                            wsa.mSurfaceShown = false;
+                            wsa.mSurfaceControl = null;
+                            ws.mHasSurface = false;
+                            leakedSurface = true;
+                        }
                     }
                 }
             }
@@ -9589,27 +9612,30 @@ public class WindowManagerService extends IWindowManager.Stub
             if (!leakedSurface) {
                 Slog.w(TAG, "No leaked surfaces; killing applicatons!");
                 SparseIntArray pidCandidates = new SparseIntArray();
-                mTmpWindowsIterator.reset(FORWARD_ITERATOR);
-                while (mTmpWindowsIterator.hasNext()) {
-                    WindowState ws = mTmpWindowsIterator.next();
-                    if (mForceRemoves.contains(ws)) {
-                        continue;
-                    }
-                    WindowStateAnimator wsa = ws.mWinAnimator;
-                    if (wsa.mSurfaceControl != null) {
-                        pidCandidates.append(wsa.mSession.mPid, wsa.mSession.mPid);
-                    }
-                }
-                if (pidCandidates.size() > 0) {
-                    int[] pids = new int[pidCandidates.size()];
-                    for (int i=0; i<pids.length; i++) {
-                        pids[i] = pidCandidates.keyAt(i);
-                    }
-                    try {
-                        if (mActivityManager.killPids(pids, "Free memory", secure)) {
-                            killedApps = true;
+                for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                    final WindowList windows = mDisplayContents.valueAt(displayNdx).getWindowList();
+                    final int numWindows = windows.size();
+                    for (int winNdx = 0; winNdx < numWindows; ++winNdx) {
+                        final WindowState ws = windows.get(winNdx);
+                        if (mForceRemoves.contains(ws)) {
+                            continue;
                         }
-                    } catch (RemoteException e) {
+                        WindowStateAnimator wsa = ws.mWinAnimator;
+                        if (wsa.mSurfaceControl != null) {
+                            pidCandidates.append(wsa.mSession.mPid, wsa.mSession.mPid);
+                        }
+                    }
+                    if (pidCandidates.size() > 0) {
+                        int[] pids = new int[pidCandidates.size()];
+                        for (int i=0; i<pids.length; i++) {
+                            pids[i] = pidCandidates.keyAt(i);
+                        }
+                        try {
+                            if (mActivityManager.killPids(pids, "Free memory", secure)) {
+                                killedApps = true;
+                            }
+                        } catch (RemoteException e) {
+                        }
                     }
                 }
             }
@@ -10208,9 +10234,10 @@ public class WindowManagerService extends IWindowManager.Stub
     void dumpDisplayContentsLocked(PrintWriter pw, boolean dumpAll) {
         pw.println("WINDOW MANAGER DISPLAY CONTENTS (dumpsys window displays)");
         if (mDisplayReady) {
-            DisplayContentsIterator dCIterator = new DisplayContentsIterator();
-            while (dCIterator.hasNext()) {
-                dCIterator.next().dump("  ", pw);
+            final int numDisplays = mDisplayContents.size();
+            for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
+                displayContent.dump("  ", pw);
             }
         } else {
             pw.println("  NO DISPLAY");
@@ -10226,13 +10253,16 @@ public class WindowManagerService extends IWindowManager.Stub
     void dumpWindowsNoHeaderLocked(PrintWriter pw, boolean dumpAll,
             ArrayList<WindowState> windows) {
         int j = 0;
-        mTmpWindowsIterator.reset(REVERSE_ITERATOR);
-        while (mTmpWindowsIterator.hasNext()) {
-            final WindowState w = mTmpWindowsIterator.next();
-            if (windows == null || windows.contains(w)) {
-                pw.print("  Window #"); pw.print(j++); pw.print(' ');
-                        pw.print(w); pw.println(":");
-                w.dump(pw, "    ", dumpAll || windows != null);
+        final int numDisplays = mDisplayContents.size();
+        for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+            final WindowList windowList = mDisplayContents.valueAt(displayNdx).getWindowList();
+            for (int winNdx = windowList.size() - 1; winNdx >= 0; --winNdx) {
+                final WindowState w = windowList.get(winNdx);
+                if (windows == null || windows.contains(w)) {
+                    pw.print("  Window #"); pw.print(j++); pw.print(' ');
+                            pw.print(w); pw.println(":");
+                    w.dump(pw, "    ", dumpAll || windows != null);
+                }
             }
         }
         if (mInputMethodDialogs.size() > 0) {
@@ -10385,9 +10415,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(" mDisplayEnabled="); pw.println(mDisplayEnabled);
             if (needsLayout()) {
                 pw.print("  layoutNeeded on displays=");
-                DisplayContentsIterator dcIterator = new DisplayContentsIterator();
-                while (dcIterator.hasNext()) {
-                    final DisplayContent displayContent = dcIterator.next();
+                for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                    final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
                     if (displayContent.layoutNeeded) {
                         pw.print(displayContent.getDisplayId());
                     }
@@ -10421,11 +10450,15 @@ public class WindowManagerService extends IWindowManager.Stub
         WindowList windows = new WindowList();
         if ("visible".equals(name)) {
             synchronized(mWindowMap) {
-                mTmpWindowsIterator.reset(REVERSE_ITERATOR);
-                while (mTmpWindowsIterator.hasNext()) {
-                    final WindowState w = mTmpWindowsIterator.next();
-                    if (w.mWinAnimator.mSurfaceShown) {
-                        windows.add(w);
+                final int numDisplays = mDisplayContents.size();
+                for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                    final WindowList windowList =
+                            mDisplayContents.valueAt(displayNdx).getWindowList();
+                    for (int winNdx = windowList.size() - 1; winNdx >= 0; --winNdx) {
+                        final WindowState w = windowList.get(winNdx);
+                        if (w.mWinAnimator.mSurfaceShown) {
+                            windows.add(w);
+                        }
                     }
                 }
             }
@@ -10438,15 +10471,19 @@ public class WindowManagerService extends IWindowManager.Stub
             } catch (RuntimeException e) {
             }
             synchronized(mWindowMap) {
-                mTmpWindowsIterator.reset(REVERSE_ITERATOR);
-                while (mTmpWindowsIterator.hasNext()) {
-                    final WindowState w = mTmpWindowsIterator.next();
-                    if (name != null) {
-                        if (w.mAttrs.getTitle().toString().contains(name)) {
+                final int numDisplays = mDisplayContents.size();
+                for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
+                    final WindowList windowList =
+                            mDisplayContents.valueAt(displayNdx).getWindowList();
+                    for (int winNdx = windowList.size() - 1; winNdx >= 0; --winNdx) {
+                        final WindowState w = windowList.get(winNdx);
+                        if (name != null) {
+                            if (w.mAttrs.getTitle().toString().contains(name)) {
+                                windows.add(w);
+                            }
+                        } else if (System.identityHashCode(w) == objectId) {
                             windows.add(w);
                         }
-                    } else if (System.identityHashCode(w) == objectId) {
-                        windows.add(w);
                     }
                 }
             }
@@ -10696,104 +10733,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         return displayContent;
-    }
-
-    class DisplayContentsIterator implements Iterator<DisplayContent> {
-        private int cur;
-
-        void reset() {
-            cur = 0;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return cur < mDisplayContents.size();
-        }
-
-        @Override
-        public DisplayContent next() {
-            if (hasNext()) {
-                return mDisplayContents.valueAt(cur++);
-            }
-            throw new NoSuchElementException();
-        }
-
-        @Override
-        public void remove() {
-            throw new IllegalArgumentException("AllDisplayContentIterator.remove not implemented");
-        }
-    }
-
-    class AllWindowsIterator implements Iterator<WindowState> {
-        private DisplayContent mDisplayContent;
-        private DisplayContentsIterator mDisplayContentsIterator;
-        private WindowList mWindowList;
-        private int mWindowListIndex;
-        private boolean mReverse;
-
-        AllWindowsIterator() {
-            this(false);
-        }
-
-        AllWindowsIterator(boolean reverse) {
-            mDisplayContentsIterator = new DisplayContentsIterator();
-            reset(reverse);
-        }
-
-        void reset(boolean reverse) {
-            mReverse = reverse;
-            mDisplayContentsIterator.reset();
-            if (mDisplayContentsIterator.hasNext()) {
-                mDisplayContent = mDisplayContentsIterator.next();
-                mWindowList = mDisplayContent.getWindowList();
-                mWindowListIndex = reverse ? mWindowList.size() - 1 : 0;
-            } else {
-                mDisplayContent = null;
-                mWindowList = null;
-                mWindowListIndex = 0;
-            }
-        }
-
-        @Override
-        public boolean hasNext() {
-            if (mDisplayContent == null) {
-                return false;
-            }
-            if (mReverse) {
-                return mWindowListIndex >= 0;
-            }
-            return mWindowListIndex < mWindowList.size();
-        }
-
-        @Override
-        public WindowState next() {
-            if (hasNext()) {
-                WindowState win = mWindowList.get(mWindowListIndex);
-                if (mReverse) {
-                    mWindowListIndex--;
-                    if (mWindowListIndex < 0 && mDisplayContentsIterator.hasNext()) {
-                        mDisplayContent = mDisplayContentsIterator.next();
-                        mWindowList = mDisplayContent.getWindowList();
-                        mWindowListIndex = mWindowList.size() - 1;
-                    }
-                } else {
-                    mWindowListIndex++;
-                    if (mWindowListIndex >= mWindowList.size()
-                            && mDisplayContentsIterator.hasNext()) {
-                        mDisplayContent = mDisplayContentsIterator.next();
-                        mWindowList = mDisplayContent.getWindowList();
-                        mWindowListIndex = 0;
-                    }
-                }
-                return win;
-            }
-            throw new NoSuchElementException();
-        }
-
-        @Override
-        public void remove() {
-            throw new IllegalArgumentException("AllWindowsIterator.remove not implemented");
-        }
     }
 
     // There is an inherent assumption that this will never return null.
