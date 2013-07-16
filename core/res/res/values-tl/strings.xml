@@ -639,6 +639,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Pinapayagan ang app na pamahalaan ang mga patakaran ng network at ilarawan ang mga patakarang tukoy sa app."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"baguhin ang pagkukuwenta sa paggamit ng network"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Pinapayagan ang app na baguhin kung paano isinasaalang-alang ang paggamit ng network laban sa apps. Hindi para sa paggamit ng normal na apps."</string>
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"i-access ang mga notification"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Pinapayagan ang app na kumuha, sumuri, at mag-clear ng mga notification, kabilang ang mga na-post ng iba pang apps."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"mapailalim sa isang serbisyo ng notification listener"</string>

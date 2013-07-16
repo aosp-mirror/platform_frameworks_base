@@ -639,6 +639,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Приложение сможет управлять сетевыми политиками и определять правила для отдельных приложений."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"Изменение учета использования сети"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Приложение сможет изменять порядок расчета использования сетевых ресурсов различными программами. Это разрешение не используется обычными приложениями."</string>
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"Доступ к уведомлениям"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Приложение сможет получать, проверять и удалять уведомления, включая те, что опубликованы другими приложениями."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"Подключение к службе просмотра уведомлений"</string>

@@ -639,6 +639,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Permet à l\'application de gérer les stratégies du réseau et de définir celles qui sont spécifiques à l\'application."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"modifier le système de comptabilisation de l\'utilisation du réseau"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Permet à l\'application de modifier l\'utilisation du réseau par les autres applications. Les applications standards ne doivent pas utiliser cette fonctionnalité."</string>
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"accéder aux notifications"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permet aux applications de récupérer, d\'examiner et d\'autoriser les notifications, y compris celles envoyées par d\'autres applications."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"s\'associer à l\'interface de niveau supérieur d\'un service d\'écoute des notifications"</string>

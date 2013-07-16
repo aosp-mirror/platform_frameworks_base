@@ -639,6 +639,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Lar appen administrere retningslinjene for nettverket og definere appspesifikke regler."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"Modifisering av regnskapsføring av nettverksbruk"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Lar appen endre hvordan nettverksbruk regnes ut for apper. Ikke beregnet på vanlige apper."</string>
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"varseltilgang"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Lar appen hente, gjennomgå og fjerne varsler, inkludert de som sendes fra andre apper."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"binding til en varsellyttertjeneste"</string>

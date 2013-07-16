@@ -639,6 +639,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"للسماح لتطبيق بإدارة سياسات الشبكة وتحديد قواعد متعلقة بالتطبيق."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"تعديل حساب استخدام الشبكة"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"للسماح للتطبيق بتعديل كيفية حساب استخدام الشبكة في التطبيقات. ليس للاستخدام بواسطة التطبيقات العادية."</string>
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"إشعارات الدخول"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"يتيح للتطبيق استرجاع الإشعارات وفحصها ومسحها، بما في ذلك تلك التي نشرتها تطبيقات أخرى."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"الربط بخدمة تلقّي الإشعارات الصوتية"</string>

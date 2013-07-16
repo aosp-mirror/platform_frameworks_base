@@ -639,6 +639,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"允許應用程式管理網路政策並定義應用程式專用規則。"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"修改網路使用量計算方式"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"允許應用程式修改應用程式網路使用量的計算方式 (不建議一般應用程式使用)。"</string>
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"存取通知"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"允許應用程式擷取、檢查及清除通知 (包括由其他應用程式發佈的通知)。"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"繫結至通知接聽器服務"</string>

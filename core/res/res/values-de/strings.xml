@@ -639,6 +639,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Ermöglicht der App, Netzwerkrichtlinien zu verwalten und anwendungsspezifische Regeln festzulegen"</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"Zuordnung für Netzwerknutzung ändern"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Ermöglicht der App, die Art und Weise zu ändern, wie der Netzwerkverbrauch im Hinblick auf Apps berechnet wird. Nicht für normale Apps vorgesehen."</string>
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"Auf Benachrichtigungen zugreifen"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Ermöglicht der App das Abrufen, Überprüfen und Löschen von Benachrichtigungen, einschließlich Benachrichtigungen, die von anderen Apps gepostet wurden"</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"An Benachrichtigungs-Listener-Dienst binden"</string>

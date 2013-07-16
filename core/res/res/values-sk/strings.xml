@@ -639,6 +639,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Umožňuje aplikácii spravovať pravidlá siete a definovať pravidlá pre konkrétnu aplikáciu."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"zmeniť kontrolu používania siete"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Umožňuje aplikácii upraviť používanie siete jednotlivými aplikáciami. Bežné aplikácie toto nastavenie nepoužívajú."</string>
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"prístup k upozorneniam"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Umožňuje aplikácii načítať, zobrazovať a mazať upozornenia vrátane tých, ktoré boli uverejnené inými aplikáciami."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"naviazanie sa na službu na počúvanie upozornení"</string>

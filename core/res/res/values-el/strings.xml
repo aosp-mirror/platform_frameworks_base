@@ -639,6 +639,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Επιτρέπει στην εφαρμογή τη διαχείριση των πολιτικών δικτύου και τον ορισμό κανόνων για ορισμένες εφαρμογές."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"τροποποίηση υπολογισμού χρήσης δικτύου"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Επιτρέπει στην εφαρμογή την τροποποίηση του τρόπου υπολογισμού της χρήσης δικτύου έναντι των εφαρμογών. Δεν προορίζεται για χρήση από συνήθεις εφαρμογές."</string>
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"πρόσβαση στις ειδοποιήσεις"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Επιτρέπει στην εφαρμογή να ανακτά, να εξετάζει και να απαλείφει ειδοποιήσεις, συμπεριλαμβανομένων εκείνων που δημοσιεύονται από άλλες εφαρμογές."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"δέσμευση σε υπηρεσία ακρόασης ειδοποίησης"</string>

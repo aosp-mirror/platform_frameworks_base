@@ -639,6 +639,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Permite aplicaţiei să gestioneze politicile de reţea şi să definească regulile specifice aplicaţiilor."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"modificaţi modul de calcul al utilizării reţelei"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Permite aplicaţiei să modifice modul în care este calculată utilizarea reţelei pentru aplicaţii. Nu se utilizează de aplicaţiile obişnuite."</string>
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"accesare notificări"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permite aplicației să recupereze, să examineze și să șteargă notificări, inclusiv pe cele postate de alte aplicații."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"conectare la un serviciu de citire a notificărilor"</string>

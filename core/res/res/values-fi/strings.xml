@@ -639,6 +639,10 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Sallii sovelluksen hallinnoida verkkokäytäntöjä ja määritellä sovelluskohtaisia sääntöjä."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"verkon käytön seurannan muokkaaminen"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Antaa sovelluksen muokata, miten sovellusten verkonkäyttöä lasketaan. Ei tavallisten sovellusten käyttöön."</string>
+    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
+    <skip />
+    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
+    <skip />
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"käytä ilmoituksia"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Antaa sovelluksen noutaa, tutkia ja tyhjentää ilmoituksia (myös muiden sovelluksien lähettämiä)."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"sido ilmoituskuuntelijapalveluun"</string>
