@@ -445,6 +445,7 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     mCaches.enableScissor();
     if (mDirtyClip) {
         setScissorFromClip();
+        setStencilFromClip();
     }
 
     Rect clip(*mSnapshot->clipRect);
