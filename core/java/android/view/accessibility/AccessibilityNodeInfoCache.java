@@ -39,7 +39,7 @@ public class AccessibilityNodeInfoCache {
 
     private static final boolean ENABLED = true;
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private static final boolean CHECK_INTEGRITY_IF_DEBUGGABLE_BUILD = true;
 
@@ -108,7 +108,7 @@ public class AccessibilityNodeInfoCache {
 
     private void refreshCachedNode(long sourceId) {
         if (DEBUG) {
-            Log.i(LOG_TAG, "Refresing cached node.");
+            Log.i(LOG_TAG, "Refreshing cached node.");
         }
         synchronized (mLock) {
             AccessibilityNodeInfo cachedInfo = mCacheImpl.get(sourceId);
@@ -117,7 +117,7 @@ public class AccessibilityNodeInfoCache {
                 return;
             }
             // The node changed so we will just refresh it right now.
-            if (cachedInfo.refresh(false)) {
+            if (cachedInfo.refresh(true)) {
                 return;
             }
             // Weird, we could not refresh. Just evict the entire sub-tree.
@@ -141,7 +141,7 @@ public class AccessibilityNodeInfoCache {
                     info = AccessibilityNodeInfo.obtain(info);
                 }
                 if (DEBUG) {
-//                    Log.i(LOG_TAG, "get(" + accessibilityNodeId + ") = " + info);
+                    Log.i(LOG_TAG, "get(" + accessibilityNodeId + ") = " + info);
                 }
                 return info;
             }
@@ -159,7 +159,7 @@ public class AccessibilityNodeInfoCache {
         if (ENABLED) {
             synchronized(mLock) {
                 if (DEBUG) {
-//                    Log.i(LOG_TAG, "add(" + info + ")");
+                    Log.i(LOG_TAG, "add(" + info + ")");
                 }
 
                 final long sourceId = info.getSourceNodeId();
@@ -319,8 +319,6 @@ public class AccessibilityNodeInfoCache {
                         Log.e(LOG_TAG, "Node from: " + info.getWindowId() + " not from:"
                                 + windowId + " " + info);
                     }
-                    mCacheImpl.removeAt(i);
-                    i--;
                 }
             }
         }
