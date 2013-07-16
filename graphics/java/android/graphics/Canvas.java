@@ -513,12 +513,13 @@ public class Canvas {
     public native void skew(float sx, float sy);
 
     /**
-     * Preconcat the current matrix with the specified matrix.
+     * Preconcat the current matrix with the specified matrix. If the specified
+     * matrix is null, this method does nothing.
      *
      * @param matrix The matrix to preconcatenate with the current matrix
      */
     public void concat(Matrix matrix) {
-        native_concat(mNativeCanvas, matrix.native_instance);
+        if (matrix != null) native_concat(mNativeCanvas, matrix.native_instance);
     }
     
     /**

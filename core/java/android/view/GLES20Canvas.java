@@ -621,7 +621,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void concat(Matrix matrix) {
-        nConcatMatrix(mRenderer, matrix.native_instance);
+        if (matrix != null) nConcatMatrix(mRenderer, matrix.native_instance);
     }
     
     private static native void nConcatMatrix(int renderer, int matrix);
