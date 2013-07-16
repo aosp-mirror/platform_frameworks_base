@@ -166,7 +166,7 @@ public class CountryDetectorService extends ICountryDetector.Stub implements Run
         }
     }
 
-    void systemReady() {
+    void systemRunning() {
         // Shall we wait for the initialization finish.
         BackgroundThread.getHandler().post(this);
     }

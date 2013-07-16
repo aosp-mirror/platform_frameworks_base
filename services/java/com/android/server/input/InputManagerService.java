@@ -283,7 +283,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // TODO(BT) Pass in paramter for bluetooth system
-    public void systemReady() {
+    public void systemRunning() {
         if (DEBUG) {
             Slog.d(TAG, "System ready.");
         }

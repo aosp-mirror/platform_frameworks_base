@@ -55,7 +55,7 @@ public final class PrintJob {
      * @return The print job info.
      */
     public PrintJobInfo getInfo() {
-        PrintJobInfo info = mPrintManager.getPrintJob(mId);
+        PrintJobInfo info = mPrintManager.getPrintJobInfo(mId);
         if (info != null) {
             mCachedInfo = info;
         }

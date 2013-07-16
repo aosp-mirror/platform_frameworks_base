@@ -76,7 +76,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             new HashMap<String, SpellCheckerBindGroup>();
     private final TextServicesSettings mSettings;
 
-    public void systemReady() {
+    public void systemRunning() {
         if (!mSystemReady) {
             mSystemReady = true;
         }

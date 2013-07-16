@@ -198,7 +198,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // most startup is deferred until systemReady()
     }
 
-    public void systemReady() {
+    public void systemRunning() {
         synchronized (mLock) {
             if (D) Log.d(TAG, "systemReady()");
 

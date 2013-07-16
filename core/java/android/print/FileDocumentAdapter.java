@@ -36,15 +36,15 @@ import java.util.List;
 /**
  * Adapter for printing files.
  */
-class PrintFileAdapter extends PrintAdapter {
+final class FileDocumentAdapter extends PrintDocumentAdapter {
 
-    private static final String LOG_TAG = "PrintFileAdapter";
+    private static final String LOG_TAG = "FileDocumentAdapter";
 
     private final File mFile;
 
     private WriteFileAsyncTask mWriteFileAsyncTask;
 
-    public PrintFileAdapter(File file) {
+    public FileDocumentAdapter(File file) {
         if (file == null) {
             throw new IllegalArgumentException("File cannot be null!");
         }
@@ -52,19 +52,22 @@ class PrintFileAdapter extends PrintAdapter {
     }
 
     @Override
-    public void onPrint(List<PageRange> pages, FileDescriptor destination,
-            CancellationSignal cancellationSignal, PrintResultCallback callback) {
+    public void onLayout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
+            CancellationSignal cancellationSignal, LayoutResultCallback callback) {
+        // TODO: When we have a PDF rendering library we should query the page count.
+        PrintDocumentInfo info =  new PrintDocumentInfo.Builder()
+        .setPageCount(PrintDocumentInfo.PAGE_COUNT_UNKNOWN).create();
+        callback.onLayoutFinished(info, false);
+    }
+
+    @Override
+    public void onWrite(List<PageRange> pages, FileDescriptor destination,
+            CancellationSignal cancellationSignal, WriteResultCallback callback) {
         mWriteFileAsyncTask = new WriteFileAsyncTask(mFile, destination, cancellationSignal,
                 callback);
         mWriteFileAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
                 (Void[]) null);
         
-    }
-
-    @Override
-    public PrintAdapterInfo getInfo() {
-        // TODO: When we have PDF render library we should query the page count.
-        return new PrintAdapterInfo.Builder().create();
     }
 
     private static final class WriteFileAsyncTask extends AsyncTask<Void, Void, Void> {
@@ -73,12 +76,12 @@ class PrintFileAdapter extends PrintAdapter {
 
         private final FileDescriptor mDestination;
 
-        private final PrintResultCallback mResultCallback;
+        private final WriteResultCallback mResultCallback;
 
         private final CancellationSignal mCancellationSignal;
 
         public WriteFileAsyncTask(File source, FileDescriptor destination,
-                CancellationSignal cancellationSignal, PrintResultCallback callback) {
+                CancellationSignal cancellationSignal, WriteResultCallback callback) {
             mSource = source;
             mDestination = destination;
             mResultCallback = callback;
@@ -113,9 +116,9 @@ class PrintFileAdapter extends PrintAdapter {
                 if (!isCancelled()) {
                     List<PageRange> pages = new ArrayList<PageRange>();
                     pages.add(PageRange.ALL_PAGES);
-                    mResultCallback.onPrintFinished(pages);
+                    mResultCallback.onWriteFinished(pages);
                 } else {
-                    mResultCallback.onPrintFailed("Cancelled");
+                    mResultCallback.onWriteFailed("Cancelled");
                 }
             }
             return null;

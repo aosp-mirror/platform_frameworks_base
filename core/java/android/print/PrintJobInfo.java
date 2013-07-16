@@ -116,6 +116,44 @@ public final class PrintJobInfo implements Parcelable {
     /** The print job attributes size. */
     private PrintAttributes mAttributes;
 
+    /** Information about the printed document. */
+    private PrintDocumentInfo mDocumentInfo;
+
+    /** @hide*/
+    public PrintJobInfo() {
+        /* do nothing */
+    }
+
+    /** @hide */
+    public PrintJobInfo(PrintJobInfo other) {
+        mId = other.mId;
+        mLabel = other.mLabel;
+        mPrinterId = other.mPrinterId;
+        mState = other.mState;
+        mAppId = other.mAppId;
+        mUserId = other.mUserId;
+        mAttributes = other.mAttributes;
+        mDocumentInfo = other.mDocumentInfo;
+    }
+
+    private PrintJobInfo(Parcel parcel) {
+        mId = parcel.readInt();
+        mLabel = parcel.readCharSequence();
+        mPrinterId = parcel.readParcelable(null);
+        mState = parcel.readInt();
+        mAppId = parcel.readInt();
+        mUserId = parcel.readInt();
+        if (parcel.readInt() == 1) {
+            mPageRanges = (PageRange[]) parcel.readParcelableArray(null);
+        }
+        if (parcel.readInt() == 1) {
+            mAttributes = PrintAttributes.CREATOR.createFromParcel(parcel);
+        }
+        if (parcel.readInt() == 1) {
+            mDocumentInfo = PrintDocumentInfo.CREATOR.createFromParcel(parcel);
+        }
+    }
+
     /**
      * Gets the unique print job id.
      *
@@ -300,35 +338,26 @@ public final class PrintJobInfo implements Parcelable {
         mAttributes = attributes;
     }
 
-    /** @hide*/
-    public PrintJobInfo() {
-        /* do nothing */
+    /**
+     * Gets the info describing the printed document.
+     *
+     * @return The document info.
+     *
+     * @hide
+     */
+    public PrintDocumentInfo getDocumentInfo() {
+        return mDocumentInfo;
     }
 
-    /** @hide */
-    public PrintJobInfo(PrintJobInfo other) {
-        mId = other.mId;
-        mLabel = other.mLabel;
-        mPrinterId = other.mPrinterId;
-        mState = other.mState;
-        mAppId = other.mAppId;
-        mUserId = other.mUserId;
-        mAttributes = other.mAttributes;
-    }
-
-    private PrintJobInfo(Parcel parcel) {
-        mId = parcel.readInt();
-        mLabel = parcel.readCharSequence();
-        mPrinterId = parcel.readParcelable(null);
-        mState = parcel.readInt();
-        mAppId = parcel.readInt();
-        mUserId = parcel.readInt();
-        if (parcel.readInt() == 1) {
-            mPageRanges = (PageRange[]) parcel.readParcelableArray(null);
-        }
-        if (parcel.readInt() == 1) {
-            mAttributes = PrintAttributes.CREATOR.createFromParcel(parcel);
-        }
+    /**
+     * Sets the info describing the printed document.
+     *
+     * @param info The document info.
+     *
+     * @hide
+     */
+    public void setDocumentInfo(PrintDocumentInfo info) {
+        mDocumentInfo = info;
     }
 
     @Override
@@ -356,6 +385,12 @@ public final class PrintJobInfo implements Parcelable {
         } else {
             parcel.writeInt(0);
         }
+        if (mDocumentInfo != null) {
+            parcel.writeInt(1);
+            mDocumentInfo.writeToParcel(parcel, flags);
+        } else {
+            parcel.writeInt(0);
+        }
     }
 
     @Override
@@ -366,7 +401,10 @@ public final class PrintJobInfo implements Parcelable {
         builder.append(", id: ").append(mId);
         builder.append(", status: ").append(stateToString(mState));
         builder.append(", printer: " + mPrinterId);
-        builder.append(", attributes: " + (mAttributes != null ? mAttributes.toString() : null));
+        builder.append(", attributes: " + (mAttributes != null
+                ? mAttributes.toString() : null));
+        builder.append(", documentInfo: " + (mDocumentInfo != null
+                ? mDocumentInfo.toString() : null));
         builder.append("}");
         return builder.toString();
     }

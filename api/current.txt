@@ -18448,36 +18448,6 @@ package android.print {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public abstract class PrintAdapter {
-    ctor public PrintAdapter();
-    method public abstract android.print.PrintAdapterInfo getInfo();
-    method public void onFinish();
-    method public abstract void onPrint(java.util.List<android.print.PageRange>, java.io.FileDescriptor, android.os.CancellationSignal, android.print.PrintAdapter.PrintResultCallback);
-    method public boolean onPrintAttributesChanged(android.print.PrintAttributes);
-    method public void onStart();
-  }
-
-  public static abstract class PrintAdapter.PrintResultCallback {
-    method public void onPrintFailed(java.lang.CharSequence);
-    method public void onPrintFinished(java.util.List<android.print.PageRange>);
-  }
-
-  public final class PrintAdapterInfo implements android.os.Parcelable {
-    method public int describeContents();
-    method public int getFlags();
-    method public int getPageCount();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int PAGE_COUNT_UNKNOWN = -1; // 0xffffffff
-  }
-
-  public static final class PrintAdapterInfo.Builder {
-    ctor public PrintAdapterInfo.Builder();
-    method public android.print.PrintAdapterInfo create();
-    method public android.print.PrintAdapterInfo.Builder setFlags(int);
-    method public android.print.PrintAdapterInfo.Builder setPageCount(int);
-  }
-
   public final class PrintAttributes implements android.os.Parcelable {
     method public void clear();
     method public int describeContents();
@@ -18588,6 +18558,43 @@ package android.print {
     method public java.lang.CharSequence getLabel(android.content.pm.PackageManager);
   }
 
+  public abstract class PrintDocumentAdapter {
+    ctor public PrintDocumentAdapter();
+    method public void onFinish();
+    method public abstract void onLayout(android.print.PrintAttributes, android.print.PrintAttributes, android.os.CancellationSignal, android.print.PrintDocumentAdapter.LayoutResultCallback);
+    method public void onStart();
+    method public abstract void onWrite(java.util.List<android.print.PageRange>, java.io.FileDescriptor, android.os.CancellationSignal, android.print.PrintDocumentAdapter.WriteResultCallback);
+  }
+
+  public static abstract class PrintDocumentAdapter.LayoutResultCallback {
+    method public void onLayoutFailed(java.lang.CharSequence);
+    method public void onLayoutFinished(android.print.PrintDocumentInfo, boolean);
+  }
+
+  public static abstract class PrintDocumentAdapter.WriteResultCallback {
+    method public void onWriteFailed(java.lang.CharSequence);
+    method public void onWriteFinished(java.util.List<android.print.PageRange>);
+  }
+
+  public final class PrintDocumentInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getContentType();
+    method public int getPageCount();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CONTENT_TYPE_DOCUMENT = 0; // 0x0
+    field public static final int CONTENT_TYPE_PHOTO = 1; // 0x1
+    field public static final int CONTENT_TYPE_UNKNOWN = -1; // 0xffffffff
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int PAGE_COUNT_UNKNOWN = -1; // 0xffffffff
+  }
+
+  public static final class PrintDocumentInfo.Builder {
+    ctor public PrintDocumentInfo.Builder();
+    method public android.print.PrintDocumentInfo create();
+    method public android.print.PrintDocumentInfo.Builder setContentType(int);
+    method public android.print.PrintDocumentInfo.Builder setPageCount(int);
+  }
+
   public final class PrintJob {
     method public void cancel();
     method public int getId();
@@ -18617,7 +18624,7 @@ package android.print {
   public final class PrintManager {
     method public java.util.List<android.print.PrintJob> getPrintJobs();
     method public android.print.PrintJob print(java.lang.String, java.io.File, android.print.PrintAttributes);
-    method public android.print.PrintJob print(java.lang.String, android.print.PrintAdapter, android.print.PrintAttributes);
+    method public android.print.PrintJob print(java.lang.String, android.print.PrintDocumentAdapter, android.print.PrintAttributes);
   }
 
   public final class PrinterId implements android.os.Parcelable {
@@ -18699,11 +18706,16 @@ package android.print.pdf {
 
 package android.printservice {
 
+  public final class PrintDocument {
+    method public java.io.FileDescriptor getData();
+    method public android.print.PrintDocumentInfo getInfo();
+  }
+
   public final class PrintJob {
     method public boolean cancel();
     method public boolean complete();
     method public boolean fail(java.lang.CharSequence);
-    method public final java.io.FileDescriptor getData();
+    method public android.printservice.PrintDocument getDocument();
     method public int getId();
     method public android.print.PrintJobInfo getInfo();
     method public boolean isQueued();

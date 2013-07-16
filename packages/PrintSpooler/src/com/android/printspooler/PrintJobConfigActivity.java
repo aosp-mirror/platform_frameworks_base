@@ -24,20 +24,21 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IBinder.DeathRecipient;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.os.IBinder.DeathRecipient;
-import android.print.IPrintAdapter;
-import android.print.IPrintManager;
+import android.print.IPrintDocumentAdapter;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.PageRange;
 import android.print.PrintAttributes;
 import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Resolution;
 import android.print.PrintAttributes.Tray;
+import android.print.PrintDocumentAdapter.LayoutResultCallback;
+import android.print.PrintDocumentAdapter.WriteResultCallback;
+import android.print.PrintDocumentInfo;
 import android.print.PrintJobInfo;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
@@ -47,6 +48,7 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Choreographer;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -58,7 +60,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,9 +79,7 @@ public class PrintJobConfigActivity extends Activity {
 
     private static final int MIN_COPIES = 1;
 
-    private final List<QueuedAsyncTask<?>> mTaskQueue = new ArrayList<QueuedAsyncTask<?>>();
-
-    private IPrintManager mPrintManager;
+    private final PrintSpooler mPrintSpooler = PrintSpooler.getInstance(this);
 
     private IPrinterDiscoveryObserver mPrinterDiscoveryObserver;
 
@@ -89,9 +88,7 @@ public class PrintJobConfigActivity extends Activity {
 
     private PrintAttributes mPrintAttributes;
 
-    private final PrintSpooler mPrintSpooler = PrintSpooler.getInstance(this);
-
-    private RemotePrintAdapter mRemotePrintAdapter;
+    private RemotePrintDocumentAdapter mRemotePrintAdapter;
 
     // UI elements
 
@@ -124,11 +121,11 @@ public class PrintJobConfigActivity extends Activity {
     private Spinner mOrientationSpinner;
     public ArrayAdapter<SpinnerItem<Integer>> mOrientationSpinnerAdapter;
 
-    private boolean mPrintStarted;
-
     private boolean mPrintConfirmed;
 
-    private IBinder mPrinable;
+    private boolean mStarted;
+
+    private IBinder mIPrintDocumentAdapter;
 
     // TODO: Implement store/restore state.
 
@@ -231,9 +228,6 @@ public class PrintJobConfigActivity extends Activity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
                 | WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-        mPrintManager = (IPrintManager) IPrintManager.Stub.asInterface(
-                ServiceManager.getService(PRINT_SERVICE));
-
         Bundle extras = getIntent().getExtras();
 
         mPrintJobId = extras.getInt(EXTRA_PRINT_JOB_ID, -1);
@@ -251,15 +245,16 @@ public class PrintJobConfigActivity extends Activity {
             mPrintAttributes = new PrintAttributes.Builder().create();
         }
 
-        mPrinable = extras.getBinder(EXTRA_PRINTABLE);
-        if (mPrinable == null) {
+        mIPrintDocumentAdapter = extras.getBinder(EXTRA_PRINTABLE);
+        if (mIPrintDocumentAdapter == null) {
             throw new IllegalArgumentException("Printable cannot be null");
         }
-        mRemotePrintAdapter = new RemotePrintAdapter(IPrintAdapter.Stub.asInterface(mPrinable),
+        mRemotePrintAdapter = new RemotePrintDocumentAdapter(
+                IPrintDocumentAdapter.Stub.asInterface(mIPrintDocumentAdapter),
                 mPrintSpooler.generateFileForPrintJob(mPrintJobId));
 
         try {
-            mPrinable.linkToDeath(mDeathRecipient, 0);
+            mIPrintDocumentAdapter.linkToDeath(mDeathRecipient, 0);
         } catch (RemoteException re) {
             finish();
         }
@@ -271,7 +266,7 @@ public class PrintJobConfigActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        mPrinable.unlinkToDeath(mDeathRecipient, 0);
+        mIPrintDocumentAdapter.unlinkToDeath(mDeathRecipient, 0);
         super.onDestroy();
     }
 
@@ -367,7 +362,6 @@ public class PrintJobConfigActivity extends Activity {
                 mPrintAttributes.getMediaSize());
         mMediaSizeSpinner.setOnItemSelectedListener(null);
         mMediaSizeSpinner.setSelection(selectedMediaSizeIndex);
-        mMediaSizeSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
 
         // Resolution.
         mResolutionSpinnerAdapter.clear();
@@ -382,7 +376,19 @@ public class PrintJobConfigActivity extends Activity {
                 mPrintAttributes.getResolution());
         mResolutionSpinner.setOnItemSelectedListener(null);
         mResolutionSpinner.setSelection(selectedResolutionIndex);
-        mResolutionSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
+
+        // AdapterView has the weird behavior to notify the selection listener for a
+        // selection event that occurred *before* the listener was registered because
+        // it does the real selection change on the next layout pass. To avoid this
+        // behavior we re-attach the listener in the next traversal window - fun!
+        Choreographer.getInstance().postCallback(
+                Choreographer.CALLBACK_TRAVERSAL, new Runnable() {
+                    @Override
+                    public void run() {
+                        mMediaSizeSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
+                        mResolutionSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
+                    }
+                }, null);
 
         // Input tray.
         mInputTraySpinnerAdapter.clear();
@@ -482,22 +488,14 @@ public class PrintJobConfigActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        try {
-            mPrintManager.startDiscoverPrinters(mPrinterDiscoveryObserver);
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error starting printer discovery!", re);
-        }
+        mPrintSpooler.startPrinterDiscovery(mPrinterDiscoveryObserver);
         notifyPrintableStartIfNeeded();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        try {
-            mPrintManager.stopDiscoverPrinters();
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error starting printer discovery!", re);
-        }
+        mPrintSpooler.stopPrinterDiscovery();
         notifyPrintableFinishIfNeeded();
     }
 
@@ -518,119 +516,83 @@ public class PrintJobConfigActivity extends Activity {
 
     private void notifyPrintableStartIfNeeded() {
         if (mDestinationSpinner.getSelectedItemPosition() < 0
-                || mPrintStarted) {
+                || mStarted) {
             return;
         }
-        mPrintStarted = true;
-        new QueuedAsyncTask<Void>(mTaskQueue) {
-            @Override
-            protected Void doInBackground(Void... params) {
-                try {
-                    mRemotePrintAdapter.start();
-                } catch (IOException ioe) {
-                    Log.e(LOG_TAG, "Error reading printed data!", ioe);
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void result) {
-                super.onPostExecute(result);
-                updatePrintableContentIfNeeded();
-            }
-        }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
+        mStarted = true;
+        mRemotePrintAdapter.start();
+        updatePrintableContentIfNeeded();
     }
 
     private void updatePrintableContentIfNeeded() {
-        if (!mPrintStarted) {
+        if (!mStarted) {
             return;
         }
 
+        // TODO: Implement old attributes tracking
         mPrintSpooler.setPrintJobAttributes(mPrintJobId, mPrintAttributes);
 
-        // TODO: Implement page selector.
-        final List<PageRange> pages = new ArrayList<PageRange>();
-        pages.add(PageRange.ALL_PAGES);
-
-        new QueuedAsyncTask<File>(mTaskQueue) {
+        mRemotePrintAdapter.layout(new PrintAttributes.Builder().create(),
+                mPrintAttributes, new LayoutResultCallback() {
             @Override
-            protected File doInBackground(Void... params) {
-                try {
-                    mRemotePrintAdapter.printAttributesChanged(mPrintAttributes);
-                    mRemotePrintAdapter.cancelPrint();
-                    mRemotePrintAdapter.print(pages);
-                    return mRemotePrintAdapter.getFile();
-                } catch (IOException ioe) {
-                    Log.e(LOG_TAG, "Error reading printed data!", ioe);
-                }
-                return null;
+            public void onLayoutFinished(PrintDocumentInfo info, boolean changed) {
+                // TODO: Handle the case of unchanged content
+                mPrintSpooler.setPrintJobPrintDocumentInfo(mPrintJobId, info);
+
+                // TODO: Implement page selector.
+                final List<PageRange> pages = new ArrayList<PageRange>();
+                pages.add(PageRange.ALL_PAGES);
+
+                mRemotePrintAdapter.write(pages, new WriteResultCallback() {
+                    @Override
+                    public void onWriteFinished(List<PageRange> pages) {
+                        updatePrintPreview(mRemotePrintAdapter.getFile());
+                    }
+
+                    @Override
+                    public void onWriteFailed(CharSequence error) {
+                        Log.e(LOG_TAG, "Error write layout: " + error);
+                        finishActivity(Activity.RESULT_CANCELED);
+                    }
+                });
             }
 
             @Override
-            protected void onPostExecute(File file) {
-                super.onPostExecute(file);
-                updatePrintPreview(file);
+            public void onLayoutFailed(CharSequence error) {
+                Log.e(LOG_TAG, "Error during layout: " + error);
+                finishActivity(Activity.RESULT_CANCELED);
             }
-        }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
+        });
     }
 
     private void notifyPrintableFinishIfNeeded() {
-        if (!mPrintStarted) {
+        if (!mStarted) {
             return;
         }
-        mPrintStarted = false;
 
-        // Cancel all pending async tasks if the activity was canceled.
         if (!mPrintConfirmed) {
-            final int taskCount = mTaskQueue.size();
-            for (int i = taskCount - 1; i >= 0; i--) {
-                mTaskQueue.remove(i).cancel();
-            }
+            mRemotePrintAdapter.cancel();
+        }
+        mRemotePrintAdapter.finish();
+
+        // If canceled or no printer, nothing to do.
+        final int selectedIndex = mDestinationSpinner.getSelectedItemPosition();
+        if (!mPrintConfirmed || selectedIndex < 0) {
+            // Update the print job's status.
+            mPrintSpooler.setPrintJobState(mPrintJobId,
+                    PrintJobInfo.STATE_CANCELED);
+            return;
         }
 
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                // Notify the app that printing completed.
-                try {
-                    mRemotePrintAdapter.finish();
-                } catch (IOException ioe) {
-                    Log.e(LOG_TAG, "Error reading printed data!", ioe);
-                }
+        // Update the print job's printer.
+        SpinnerItem<PrinterInfo> printerItem =
+                mDestinationSpinnerAdapter.getItem(selectedIndex);
+        PrinterId printerId =  printerItem.value.getId();
+        mPrintSpooler.setPrintJobPrinterId(mPrintJobId, printerId);
 
-                // If canceled, nothing to do.
-                if (!mPrintConfirmed) {
-                    mPrintSpooler.setPrintJobState(mPrintJobId,
-                            PrintJobInfo.STATE_CANCELED);
-                    return null;
-                }
-
-                // No printer, nothing to do.
-                final int selectedIndex = mDestinationSpinner.getSelectedItemPosition();
-                if (selectedIndex < 0) {
-                    // Update the print job's status.
-                    mPrintSpooler.setPrintJobState(mPrintJobId,
-                            PrintJobInfo.STATE_CANCELED);
-                    return null;
-                }
-
-                // Update the print job's printer.
-                SpinnerItem<PrinterInfo> printerItem =
-                        mDestinationSpinnerAdapter.getItem(selectedIndex);
-                PrinterId printerId =  printerItem.value.getId();
-                mPrintSpooler.setPrintJobPrinterId(mPrintJobId, printerId);
-
-                // Update the print job's status.
-                mPrintSpooler.setPrintJobState(mPrintJobId,
-                        PrintJobInfo.STATE_QUEUED);
-                return null;
-            }
-
-            // Important: If we are canceling, then we do not wait for the write
-            // to complete since the result will be discarded anyway, we simply
-            // execute the finish immediately which will interrupt the write.
-        }.executeOnExecutor(mPrintConfirmed ? AsyncTask.SERIAL_EXECUTOR
-                : AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+        // Update the print job's status.
+        mPrintSpooler.setPrintJobState(mPrintJobId,
+                PrintJobInfo.STATE_QUEUED);
 
         if (DEBUG) {
             if (mPrintConfirmed) {
@@ -689,30 +651,7 @@ public class PrintJobConfigActivity extends Activity {
         }
     }
 
-    private abstract class QueuedAsyncTask<T> extends AsyncTask<Void, Void, T> {
-
-        private final List<QueuedAsyncTask<?>> mPendingOrRunningTasks;
-
-        public QueuedAsyncTask(List<QueuedAsyncTask<?>> pendingOrRunningTasks) {
-            mPendingOrRunningTasks = pendingOrRunningTasks;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            mPendingOrRunningTasks.add(this);
-        }
-
-        @Override
-        protected void onPostExecute(T result) {
-            mPendingOrRunningTasks.remove(this);
-        }
-
-        public void cancel() {
-            super.cancel(true);
-            mPendingOrRunningTasks.remove(this);
-        }
-    }
-
+    // Caution: Use this only for debugging
     private final class ViewSpooledFileAsyncTask extends AsyncTask<Void, Void, Void> {
 
         private final File mFile;

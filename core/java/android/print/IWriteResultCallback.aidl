@@ -16,22 +16,16 @@
 
 package android.print;
 
-import android.print.IPrintDocumentAdapter;
-import android.print.IPrintClient;
-import android.print.PrintJobInfo;
-import android.print.PrintAttributes;
+import android.os.ICancellationSignal;
+import android.print.PageRange;
 
 /**
- * Interface for communication with the core print manager service.
+ * Callback for observing the result of android.print.DocuemntAdapter#onWrite.
  *
  * @hide
  */
-interface IPrintManager {
-    List<PrintJobInfo> getPrintJobInfos(int appId, int userId);
-    PrintJobInfo getPrintJobInfo(int printJobId, int appId, int userId);
-    PrintJobInfo print(String printJobName, in IPrintClient client,
-            in IPrintDocumentAdapter printAdapter, in PrintAttributes attributes,
-            int appId, int userId);
-    void cancelPrintJob(int printJobId, int appId, int userId);
-
+oneway interface IWriteResultCallback {
+    void onWriteStarted(ICancellationSignal cancellationSignal);
+    void onWriteFinished(in List<PageRange> pages);
+    void onWriteFailed(CharSequence error);
 }

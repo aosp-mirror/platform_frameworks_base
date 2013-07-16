@@ -16,10 +16,6 @@
 
 package android.printservice;
 
-import java.io.FileDescriptor;
-import java.io.IOException;
-
-import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.print.PrintJobInfo;
 import android.util.Log;
@@ -33,19 +29,16 @@ public final class PrintJob {
 
     private static final String LOG_TAG = "PrintJob";
 
-    private final int mId;
-
     private final IPrintServiceClient mPrintServiceClient;
+
+    private final PrintDocument mDocument;
 
     private PrintJobInfo mCachedInfo;
 
-    PrintJob(PrintJobInfo info, IPrintServiceClient client) {
-        if (client == null) {
-            throw new IllegalStateException("Print serivice not connected!");
-        }
-        mCachedInfo = info;
-        mId = info.getId();
+    PrintJob(PrintJobInfo jobInfo, IPrintServiceClient client) {
+        mCachedInfo = jobInfo;
         mPrintServiceClient = client;
+        mDocument = new PrintDocument(mCachedInfo.getId(), client, jobInfo.getDocumentInfo());
     }
 
     /**
@@ -54,7 +47,7 @@ public final class PrintJob {
      * @return The id.
      */
     public int getId() {
-        return mId;
+        return mCachedInfo.getId();
     }
 
     /**
@@ -70,14 +63,23 @@ public final class PrintJob {
     public PrintJobInfo getInfo() {
         PrintJobInfo info = null;
         try {
-            info = mPrintServiceClient.getPrintJob(mId);
+            info = mPrintServiceClient.getPrintJobInfo(mCachedInfo.getId());
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Couldn't get info for job: " + mId, re);
+            Log.e(LOG_TAG, "Couldn't get info for job: " + mCachedInfo.getId(), re);
         }
         if (info != null) {
             mCachedInfo = info;
         }
         return mCachedInfo;
+    }
+
+    /**
+     * Gets the document of this print job.
+     *
+     * @return The document.
+     */
+    public PrintDocument getDocument() {
+        return mDocument;
     }
 
     /**
@@ -103,7 +105,7 @@ public final class PrintJob {
      * @see #fail(CharSequence)
      */
     public boolean isStarted() {
-        return  getInfo().getState() == PrintJobInfo.STATE_STARTED;
+        return getInfo().getState() == PrintJobInfo.STATE_STARTED;
     }
 
     /**
@@ -181,46 +183,11 @@ public final class PrintJob {
      */
     public boolean setTag(String tag) {
         try {
-            return mPrintServiceClient.setPrintJobTag(mId, tag);
+            return mPrintServiceClient.setPrintJobTag(mCachedInfo.getId(), tag);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error setting tag for job:" + mId, re);
+            Log.e(LOG_TAG, "Error setting tag for job: " + mCachedInfo.getId(), re);
         }
         return false;
-    }
-
-    /**
-     * Gets the data associated with this print job. It is a responsibility of
-     * the print service to open a stream to the returned file descriptor
-     * and fully read the content.
-     * <p>
-     * <strong>Note:</strong> It is your responsibility to close the file descriptor.
-     * </p>
-     *
-     * @return A file descriptor for reading the data or <code>null</code>.
-     */
-    public final FileDescriptor getData() {
-        ParcelFileDescriptor source = null;
-        ParcelFileDescriptor sink = null;
-        try {
-            ParcelFileDescriptor[] fds = ParcelFileDescriptor.createPipe();
-            source = fds[0];
-            sink = fds[1];
-            mPrintServiceClient.writePrintJobData(sink, mId);
-            return source.getFileDescriptor();
-        } catch (IOException ioe) {
-            Log.e(LOG_TAG, "Error calling getting print job data!", ioe);
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error calling getting print job data!", re);
-        } finally {
-            if (sink != null) {
-                try {
-                    sink.close();
-                } catch (IOException ioe) {
-                    /* ignore */
-                }
-            }
-        }
-        return null;
     }
 
     @Override
@@ -235,23 +202,25 @@ public final class PrintJob {
             return false;
         }
         PrintJob other = (PrintJob) obj;
-        return (mId == other.mId);
+        return (mCachedInfo.getId() == other.mCachedInfo.getId());
     }
 
     @Override
     public int hashCode() {
-        return mId;
+        return mCachedInfo.getId();
     }
 
     private boolean setState(int state) {
-        // Best effort - update the state of the cached info since
-        // we may not be able to re-fetch it later if the job gets
-        // removed from the spooler.
-        mCachedInfo.setState(state);
         try {
-            return mPrintServiceClient.setPrintJobState(mId, state);
+            if (mPrintServiceClient.setPrintJobState(mCachedInfo.getId(), state)) {
+                // Best effort - update the state of the cached info since
+                // we may not be able to re-fetch it later if the job gets
+                // removed from the spooler as a result of the state change.
+                mCachedInfo.setState(state);
+                return true;
+            }
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error setting the state of job:" + mId, re);
+            Log.e(LOG_TAG, "Error setting the state of job: " + mCachedInfo.getId(), re);
         }
         return false;
     }

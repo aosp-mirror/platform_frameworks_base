@@ -823,7 +823,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    public void systemReady(StatusBarManagerService statusBar) {
+    public void systemRunning(StatusBarManagerService statusBar) {
         synchronized (mMethodMap) {
             if (DEBUG) {
                 Slog.d(TAG, "--- systemReady");

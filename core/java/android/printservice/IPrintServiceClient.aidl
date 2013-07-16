@@ -27,11 +27,9 @@ import android.print.PrinterInfo;
  * @hide
  */
 interface IPrintServiceClient {
-    List<PrintJobInfo> getPrintJobs();
-    PrintJobInfo getPrintJob(int printJobId);
+    List<PrintJobInfo> getPrintJobInfos();
+    PrintJobInfo getPrintJobInfo(int printJobId);
     boolean setPrintJobState(int printJobId, int status);
     boolean setPrintJobTag(int printJobId, String tag);
     oneway void writePrintJobData(in ParcelFileDescriptor fd, int printJobId);
-    oneway void addDiscoveredPrinters(in List<PrinterInfo> printers);
-    oneway void removeDiscoveredPrinters(in List<PrinterId> printers);
 }

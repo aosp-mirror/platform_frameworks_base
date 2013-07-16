@@ -17,6 +17,7 @@
 package android.printservice;
 
 import android.os.ICancellationSignal;
+import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintJobInfo;
 import android.print.PrinterId;
 import android.printservice.IPrintServiceClient;
@@ -28,8 +29,8 @@ import android.printservice.IPrintServiceClient;
  */
 oneway interface IPrintService {
     void setClient(IPrintServiceClient client);
-    void requestCancelPrintJob(in PrintJobInfo printJob);
-    void onPrintJobQueued(in PrintJobInfo printJob);
-    void startPrinterDiscovery();
+    void requestCancelPrintJob(in PrintJobInfo printJobInfo);
+    void onPrintJobQueued(in PrintJobInfo printJobInfo);
+    void startPrinterDiscovery(IPrinterDiscoveryObserver observer);
     void stopPrinterDiscovery();
 }
