@@ -22,7 +22,7 @@
         </activity>
 
         <!-- TODO: remove when we have real clients -->
-        <activity android:name=".TestActivity">
+        <activity android:name=".TestActivity" android:enabled="false">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.DEFAULT" />
