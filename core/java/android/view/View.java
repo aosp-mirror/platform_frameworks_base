@@ -52,6 +52,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.Log;
+import android.util.LongSparseLongArray;
 import android.util.Pools.SynchronizedPool;
 import android.util.Property;
 import android.util.SparseArray;
@@ -2199,6 +2200,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     static final int PFLAG3_HAS_LAYOUT = 0x4;
 
+    /**
+     * Flag indicating that a call to measure() was skipped and should be done
+     * instead when layout() is invoked.
+     */
+    static final int PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT = 0x8;
+
 
     /* End of masks for mPrivateFlags3 */
 
@@ -2978,6 +2985,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     int mOldHeightMeasureSpec = Integer.MIN_VALUE;
+
+    private LongSparseLongArray mMeasureCache;
 
     @ViewDebug.ExportedProperty(deepExport = true, prefix = "bg_")
     private Drawable mBackground;
@@ -14401,12 +14410,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @SuppressWarnings({"unchecked"})
     public void layout(int l, int t, int r, int b) {
+        if ((mPrivateFlags3 & PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT) != 0) {
+            onMeasure(mOldWidthMeasureSpec, mOldHeightMeasureSpec);
+            mPrivateFlags3 &= ~PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;
+        }
+
         int oldL = mLeft;
         int oldT = mTop;
         int oldB = mBottom;
         int oldR = mRight;
+
         boolean changed = isLayoutModeOptical(mParent) ?
                 setOpticalFrame(l, t, r, b) : setFrame(l, t, r, b);
+
         if (changed || (mPrivateFlags & PFLAG_LAYOUT_REQUIRED) == PFLAG_LAYOUT_REQUIRED) {
             onLayout(changed, l, t, r, b);
             mPrivateFlags &= ~PFLAG_LAYOUT_REQUIRED;
@@ -14421,6 +14437,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
             }
         }
+
         mPrivateFlags &= ~PFLAG_FORCE_LAYOUT;
         mPrivateFlags3 |= PFLAG3_HAS_LAYOUT;
     }
@@ -15898,6 +15915,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * handle possible request-during-layout errors correctly.</p>
      */
     public void requestLayout() {
+        if (mMeasureCache != null) mMeasureCache.clear();
+
         if (mAttachInfo != null && mAttachInfo.mViewRequestingLayout == null) {
             // Only trigger request-during-layout logic if this is the view requesting it,
             // not the views in its parent hierarchy
@@ -15927,6 +15946,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * on the parent.
      */
     public void forceLayout() {
+        if (mMeasureCache != null) mMeasureCache.clear();
+
         mPrivateFlags |= PFLAG_FORCE_LAYOUT;
         mPrivateFlags |= PFLAG_INVALIDATED;
     }
@@ -15960,6 +15981,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             widthMeasureSpec  = MeasureSpec.adjust(widthMeasureSpec,  optical ? -oWidth  : oWidth);
             heightMeasureSpec = MeasureSpec.adjust(heightMeasureSpec, optical ? -oHeight : oHeight);
         }
+
+        // Suppress sign extension for the low bytes
+        long key = (long) widthMeasureSpec << 32 | (long) heightMeasureSpec & 0xffffffffL;
+        if (mMeasureCache == null) mMeasureCache = new LongSparseLongArray(2);
+
         if ((mPrivateFlags & PFLAG_FORCE_LAYOUT) == PFLAG_FORCE_LAYOUT ||
                 widthMeasureSpec != mOldWidthMeasureSpec ||
                 heightMeasureSpec != mOldHeightMeasureSpec) {
@@ -15969,8 +15995,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             resolveRtlPropertiesIfNeeded();
 
-            // measure ourselves, this should set the measured dimension flag back
-            onMeasure(widthMeasureSpec, heightMeasureSpec);
+            int cacheIndex = mMeasureCache.indexOfKey(key);
+            if (cacheIndex < 0) {
+                // measure ourselves, this should set the measured dimension flag back
+                onMeasure(widthMeasureSpec, heightMeasureSpec);
+                mPrivateFlags3 &= ~PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;
+            } else {
+                long value = mMeasureCache.valueAt(cacheIndex);
+                // Casting a long to int drops the high 32 bits, no mask needed
+                setMeasuredDimension((int) (value >> 32), (int) value);
+                mPrivateFlags3 |= PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;
+            }
 
             // flag not set, setMeasuredDimension() was not invoked, we raise
             // an exception to warn the developer
@@ -15985,6 +16020,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         mOldWidthMeasureSpec = widthMeasureSpec;
         mOldHeightMeasureSpec = heightMeasureSpec;
+
+        mMeasureCache.put(key, ((long) mMeasuredWidth) << 32 |
+                (long) mMeasuredHeight & 0xffffffffL); // suppress sign extension
     }
 
     /**
