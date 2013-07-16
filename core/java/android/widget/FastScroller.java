@@ -175,6 +175,9 @@ class FastScroller {
     /** Whether decorations should be laid out from right to left. */
     private boolean mLayoutFromRight;
 
+    /** Whether the fast scroller is enabled. */
+    private boolean mEnabled;
+
     /** Whether the scrollbar and decorations should always be shown. */
     private boolean mAlwaysShow;
 
@@ -302,6 +305,39 @@ class FastScroller {
     }
 
     /**
+     * Removes this FastScroller overlay from the host view.
+     */
+    public void remove() {
+        mOverlay.remove(mTrackImage);
+        mOverlay.remove(mThumbImage);
+        mOverlay.remove(mPreviewImage);
+        mOverlay.remove(mPrimaryText);
+        mOverlay.remove(mSecondaryText);
+    }
+
+    /**
+     * @param enabled Whether the fast scroll thumb is enabled.
+     */
+    public void setEnabled(boolean enabled) {
+        mEnabled = enabled;
+
+        if (enabled) {
+            if (mAlwaysShow) {
+                setState(STATE_VISIBLE);
+            }
+        } else {
+            stop();
+        }
+    }
+
+    /**
+     * @return Whether the fast scroll thumb is enabled.
+     */
+    public boolean isEnabled() {
+        return mEnabled;
+    }
+
+    /**
      * @param alwaysShow Whether the fast scroll thumb should always be shown
      */
     public void setAlwaysShow(boolean alwaysShow) {
@@ -327,18 +363,6 @@ class FastScroller {
      */
     public void stop() {
         setState(STATE_NONE);
-    }
-
-    /**
-     * @return Whether the fast scroll thumb should be shown.
-     */
-    public boolean shouldShow() {
-        // Don't show if the list is as tall as or shorter than the thumbnail.
-        if (mList.getHeight() <= mThumbImage.getHeight()) {
-            return false;
-        }
-
-        return true;
     }
 
     public void setScrollbarPosition(int position) {
@@ -696,7 +720,7 @@ class FastScroller {
     }
 
     public void onScroll(int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        if (!mAlwaysShow && !isLongList(visibleItemCount, totalItemCount)) {
+        if (!mEnabled || !mAlwaysShow && !isLongList(visibleItemCount, totalItemCount)) {
             setState(STATE_NONE);
             return;
         }
@@ -1106,6 +1130,10 @@ class FastScroller {
     }
 
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (!mEnabled) {
+            return false;
+        }
+
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 if (isPointInside(ev.getX(), ev.getY())) {
@@ -1134,6 +1162,10 @@ class FastScroller {
     }
 
     public boolean onTouchEvent(MotionEvent me) {
+        if (!mEnabled) {
+            return false;
+        }
+
         switch (me.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
                 if (isPointInside(me.getX(), me.getY())) {
