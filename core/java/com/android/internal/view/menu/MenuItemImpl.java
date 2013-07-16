@@ -616,7 +616,7 @@ public final class MenuItemImpl implements MenuItem {
 
     @Override
     public boolean expandActionView() {
-        if (hasCollapsibleActionView()) {
+        if (!hasCollapsibleActionView()) {
             return false;
         }
 
