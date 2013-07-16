@@ -1711,24 +1711,30 @@ public final class PowerManagerService extends IPowerManager.Stub
             new DisplayPowerController.Callbacks() {
         @Override
         public void onStateChanged() {
-            mDirty |= DIRTY_ACTUAL_DISPLAY_POWER_STATE_UPDATED;
-            updatePowerStateLocked();
+            synchronized (mLock) {
+                mDirty |= DIRTY_ACTUAL_DISPLAY_POWER_STATE_UPDATED;
+                updatePowerStateLocked();
+            }
         }
 
         @Override
         public void onProximityPositive() {
-            mProximityPositive = true;
-            mDirty |= DIRTY_PROXIMITY_POSITIVE;
-            updatePowerStateLocked();
+            synchronized (mLock) {
+                mProximityPositive = true;
+                mDirty |= DIRTY_PROXIMITY_POSITIVE;
+                updatePowerStateLocked();
+            }
         }
 
         @Override
         public void onProximityNegative() {
-            mProximityPositive = false;
-            mDirty |= DIRTY_PROXIMITY_POSITIVE;
-            userActivityNoUpdateLocked(SystemClock.uptimeMillis(),
-                    PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
-            updatePowerStateLocked();
+            synchronized (mLock) {
+                mProximityPositive = false;
+                mDirty |= DIRTY_PROXIMITY_POSITIVE;
+                userActivityNoUpdateLocked(SystemClock.uptimeMillis(),
+                        PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
+                updatePowerStateLocked();
+            }
         }
     };
 
