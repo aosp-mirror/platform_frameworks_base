@@ -13462,6 +13462,7 @@ package android.net {
 
   public class LocalSocket implements java.io.Closeable {
     ctor public LocalSocket();
+    ctor public LocalSocket(int);
     method public void bind(android.net.LocalSocketAddress) throws java.io.IOException;
     method public void close() throws java.io.IOException;
     method public void connect(android.net.LocalSocketAddress) throws java.io.IOException;
@@ -13487,6 +13488,9 @@ package android.net {
     method public void setSoTimeout(int) throws java.io.IOException;
     method public void shutdownInput() throws java.io.IOException;
     method public void shutdownOutput() throws java.io.IOException;
+    field public static final int SOCKET_DGRAM = 1; // 0x1
+    field public static final int SOCKET_SEQPACKET = 3; // 0x3
+    field public static final int SOCKET_STREAM = 2; // 0x2
   }
 
   public class LocalSocketAddress {
