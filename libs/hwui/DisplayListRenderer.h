@@ -269,11 +269,14 @@ private:
     }
 
     inline SkMatrix* refMatrix(SkMatrix* matrix) {
-        // Copying the matrix is cheap and prevents against the user changing the original
-        // matrix before the operation that uses it
-        SkMatrix* copy = new SkMatrix(*matrix);
-        mMatrices.add(copy);
-        return copy;
+        if (matrix) {
+            // Copying the matrix is cheap and prevents against the user changing
+            // the original matrix before the operation that uses it
+            SkMatrix* copy = new SkMatrix(*matrix);
+            mMatrices.add(copy);
+            return copy;
+        }
+        return matrix;
     }
 
     inline Layer* refLayer(Layer* layer) {

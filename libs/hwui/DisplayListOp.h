@@ -468,7 +468,11 @@ public:
     }
 
     virtual void output(int level, uint32_t logFlags) const {
-        OP_LOG("SetMatrix " MATRIX_STRING, MATRIX_ARGS(mMatrix));
+        if (mMatrix) {
+            OP_LOG("SetMatrix " MATRIX_STRING, MATRIX_ARGS(mMatrix));
+        } else {
+            OP_LOGS("SetMatrix (reset)");
+        }
     }
 
     virtual const char* name() { return "SetMatrix"; }
