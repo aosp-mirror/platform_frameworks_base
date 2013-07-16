@@ -53,6 +53,23 @@ public class TransitionValues {
     public final Map<String, Object> values = new ArrayMap<String, Object>();
 
     @Override
+    public boolean equals(Object other) {
+        if (other instanceof TransitionValues) {
+            if (view == ((TransitionValues) other).view) {
+                if (values.equals(((TransitionValues) other).values)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31*view.hashCode() + values.hashCode();
+    }
+
+    @Override
     public String toString() {
         String returnValue = "TransitionValues@" + Integer.toHexString(hashCode()) + ":\n";
         returnValue += "    view = " + view + "\n";

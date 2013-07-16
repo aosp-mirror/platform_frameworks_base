@@ -32,6 +32,8 @@ import android.view.ViewGroup;
  */
 public class Fade extends Visibility {
 
+    private static boolean DBG = Transition.DBG && false;
+
     private static final String LOG_TAG = "Fade";
     private static final String PROPNAME_SCREEN_X = "android:fade:screenX";
     private static final String PROPNAME_SCREEN_Y = "android:fade:screenY";
@@ -121,7 +123,7 @@ public class Fade extends Visibility {
         View view;
         View startView = (startValues != null) ? startValues.view : null;
         View endView = (endValues != null) ? endValues.view : null;
-        if (Transition.DBG) {
+        if (DBG) {
             Log.d(LOG_TAG, "Fade.predisappear: startView, startVis, endView, endVis = " +
                         startView + ", " + startVisibility + ", " + endView + ", " + endVisibility);
         }
