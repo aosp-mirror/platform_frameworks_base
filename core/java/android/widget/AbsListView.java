@@ -1207,15 +1207,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     public void setFastScrollEnabled(boolean enabled) {
         mFastScrollEnabled = enabled;
-        if (enabled) {
-            if (mFastScroller == null) {
-                mFastScroller = new FastScroller(getContext(), this);
-            }
-        } else {
-            if (mFastScroller != null) {
-                mFastScroller.stop();
-                mFastScroller = null;
-            }
+
+        if (enabled && mFastScroller == null) {
+            mFastScroller = new FastScroller(getContext(), this);
+        }
+
+        if (mFastScroller != null) {
+            mFastScroller.setEnabled(enabled);
         }
     }
 
