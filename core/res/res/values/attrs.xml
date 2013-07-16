@@ -1550,6 +1550,7 @@
         <enum name="KEYCODE_ASSIST" value="219" />
         <enum name="KEYCODE_BRIGHTNESS_DOWN" value="220" />
         <enum name="KEYCODE_BRIGHTNESS_UP" value="221" />
+        <enum name="KEYCODE_MEDIA_AUDIO_TRACK" value="222" />
     </attr>
 
     <!-- ***************************************************************** -->

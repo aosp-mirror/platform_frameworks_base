@@ -25872,6 +25872,7 @@ package android.view {
     field public static final int KEYCODE_LEFT_BRACKET = 71; // 0x47
     field public static final int KEYCODE_M = 41; // 0x29
     field public static final int KEYCODE_MANNER_MODE = 205; // 0xcd
+    field public static final int KEYCODE_MEDIA_AUDIO_TRACK = 222; // 0xde
     field public static final int KEYCODE_MEDIA_CLOSE = 128; // 0x80
     field public static final int KEYCODE_MEDIA_EJECT = 129; // 0x81
     field public static final int KEYCODE_MEDIA_FAST_FORWARD = 90; // 0x5a

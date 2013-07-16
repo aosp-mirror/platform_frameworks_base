@@ -4725,6 +4725,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
             case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
             case KeyEvent.KEYCODE_MEDIA_CLOSE:
             case KeyEvent.KEYCODE_MEDIA_EJECT:
+            case KeyEvent.KEYCODE_MEDIA_AUDIO_TRACK:
                 break;
             default:
                 return false;
