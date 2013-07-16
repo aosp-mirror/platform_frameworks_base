@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.TimeInterpolator;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Pair;
 import android.util.SparseArray;
@@ -84,10 +85,13 @@ public abstract class Transition implements Cloneable {
     int mNumInstances = 0;
 
 
-    /**
-     * The set of listeners to be sent transition lifecycle events.
-     */
+
+    // The set of listeners to be sent transition lifecycle events.
     ArrayList<TransitionListener> mListeners = null;
+
+    // The set of animators collected from calls to play(), to be run in runAnimations()
+    ArrayMap<Pair<TransitionValues, TransitionValues>, Animator> mAnimatorMap =
+            new ArrayMap<Pair<TransitionValues, TransitionValues>, Animator>();
 
     /**
      * Constructs a Transition object with no target objects. A transition with
@@ -203,6 +207,9 @@ public abstract class Transition implements Cloneable {
      */
     protected void play(ViewGroup sceneRoot, TransitionValuesMaps startValues,
             TransitionValuesMaps endValues) {
+        if (DBG) {
+            Log.d(LOG_TAG, "play() for " + this);
+        }
         mPlayStartValuesList.clear();
         mPlayEndValuesList.clear();
         ArrayMap<View, TransitionValues> endCopy =
@@ -312,19 +319,44 @@ public abstract class Transition implements Cloneable {
         for (int i = 0; i < startValuesList.size(); ++i) {
             TransitionValues start = startValuesList.get(i);
             TransitionValues end = endValuesList.get(i);
-            // TODO: what to do about targetIds and itemIds?
-            Animator animator = play(sceneRoot, start, end);
-            if (animator != null) {
-                mAnimatorMap.put(new Pair(start, end), animator);
-                // Note: we've already done the check against targetIDs in these lists
-                mPlayStartValuesList.add(start);
-                mPlayEndValuesList.add(end);
+            // Only bother trying to animate with values that differ between start/end
+            if (start != null || end != null) {
+                if (start == null || !start.equals(end)) {
+                    if (DBG) {
+                        View view = (end != null) ? end.view : start.view;
+                        Log.d(LOG_TAG, "  differing start/end values for view " +
+                                view);
+                        if (start == null || end == null) {
+                            if (start == null) {
+                                Log.d(LOG_TAG, "    " + ((start == null) ?
+                                        "start null, end non-null" : "start non-null, end null"));
+                            }
+                        } else {
+                            for (String key : start.values.keySet()) {
+                                Object startValue = start.values.get(key);
+                                Object endValue = end.values.get(key);
+                                if (startValue != endValue && !startValue.equals(endValue)) {
+                                    Log.d(LOG_TAG, "    " + key + ": start(" + startValue +
+                                            "), end(" + endValue +")");
+                                }
+                            }
+                        }
+                    }
+                    // TODO: what to do about targetIds and itemIds?
+                    Animator animator = play(sceneRoot, start, end);
+                    if (animator != null) {
+                        mAnimatorMap.put(new Pair(start, end), animator);
+                        // Note: we've already done the check against targetIDs in these lists
+                        mPlayStartValuesList.add(start);
+                        mPlayEndValuesList.add(end);
+                    }
+                } else if (DBG) {
+                    View view = (end != null) ? end.view : start.view;
+                    Log.d(LOG_TAG, "  No change for view " + view);
+                }
             }
         }
     }
-
-    ArrayMap<Pair<TransitionValues, TransitionValues>, Animator> mAnimatorMap =
-            new ArrayMap<Pair<TransitionValues, TransitionValues>, Animator>();
 
     /**
      * Internal utility method for checking whether a given view/id
@@ -364,14 +396,20 @@ public abstract class Transition implements Cloneable {
      * @hide
      */
     protected void runAnimations() {
-
+        if (DBG && mPlayStartValuesList.size() > 0) {
+            Log.d(LOG_TAG, "runAnimations (" + mPlayStartValuesList.size() + ") on " + this);
+        }
         startTransition();
         // Now walk the list of TransitionValues, calling play for each pair
         for (int i = 0; i < mPlayStartValuesList.size(); ++i) {
             TransitionValues start = mPlayStartValuesList.get(i);
             TransitionValues end = mPlayEndValuesList.get(i);
+            Animator anim = mAnimatorMap.get(new Pair(start, end));
+            if (DBG) {
+                Log.d(LOG_TAG, "  anim: " + anim);
+            }
             startTransition();
-            runAnimator(mAnimatorMap.get(new Pair(start, end)));
+            runAnimator(anim);
         }
         mPlayStartValuesList.clear();
         mPlayEndValuesList.clear();
@@ -871,27 +909,35 @@ public abstract class Transition implements Cloneable {
     String toString(String indent) {
         String result = indent + getClass().getSimpleName() + "@" +
                 Integer.toHexString(hashCode()) + ": ";
-        result += "dur(" + mDuration + ") ";
-        result += "dly(" + mStartDelay + ") ";
-        result += "interp(" + mInterpolator + ") ";
-        result += "tgts(";
-        if (mTargetIds != null) {
-            for (int i = 0; i < mTargetIds.length; ++i) {
-                if (i > 0) {
-                    result += ", ";
-                }
-                result += mTargetIds[i];
-            }
+        if (mDuration != -1) {
+            result += "dur(" + mDuration + ") ";
         }
-        if (mTargets != null) {
-            for (int i = 0; i < mTargets.length; ++i) {
-                if (i > 0) {
-                    result += ", ";
-                }
-                result += mTargets[i];
-            }
+        if (mStartDelay != -1) {
+            result += "dly(" + mStartDelay + ") ";
         }
-        result += ")";
+        if (mInterpolator != null) {
+            result += "interp(" + mInterpolator + ") ";
+        }
+        if (mTargetIds != null || mTargets != null) {
+            result += "tgts(";
+            if (mTargetIds != null) {
+                for (int i = 0; i < mTargetIds.length; ++i) {
+                    if (i > 0) {
+                        result += ", ";
+                    }
+                    result += mTargetIds[i];
+                }
+            }
+            if (mTargets != null) {
+                for (int i = 0; i < mTargets.length; ++i) {
+                    if (i > 0) {
+                        result += ", ";
+                    }
+                    result += mTargets[i];
+                }
+            }
+            result += ")";
+        }
         return result;
     }
 

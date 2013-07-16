@@ -17,6 +17,7 @@
 package android.view.transition;
 
 import android.util.ArrayMap;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
@@ -35,6 +36,8 @@ import java.util.ArrayList;
  */
 public class TransitionManager {
     // TODO: how to handle enter/exit?
+
+    private static String LOG_TAG = "TransitionManager";
 
     private static final Transition sDefaultTransition = new AutoTransition();
     private Transition mDefaultTransition = new AutoTransition();
@@ -164,6 +167,7 @@ public class TransitionManager {
             observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 public boolean onPreDraw() {
                     sceneRoot.getViewTreeObserver().removeOnPreDrawListener(this);
+                    sPendingTransitions.remove(sceneRoot);
                     // Add to running list, handle end to remove it
                     sRunningTransitions.put(sceneRoot, transition);
                     transition.addListener(new Transition.TransitionListenerAdapter() {
@@ -316,8 +320,11 @@ public class TransitionManager {
      * value of null causes the TransitionManager to use the default transition.
      */
     public static void beginDelayedTransition(final ViewGroup sceneRoot, Transition transition) {
-
-        if (!sPendingTransitions.contains(sceneRoot)) {
+        if (!sPendingTransitions.contains(sceneRoot) && sceneRoot.hasLayout()) {
+            if (Transition.DBG) {
+                Log.d(LOG_TAG, "beginDelayedTransition: root, transition = " +
+                        sceneRoot + ", " + transition);
+            }
             sPendingTransitions.add(sceneRoot);
             if (transition == null) {
                 transition = sDefaultTransition;
@@ -325,13 +332,7 @@ public class TransitionManager {
             final Transition finalTransition = transition.clone();
             sceneChangeSetup(sceneRoot, transition);
             sceneRoot.setCurrentScene(null);
-            sceneRoot.postOnAnimation(new Runnable() {
-                @Override
-                public void run() {
-                    sPendingTransitions.remove(sceneRoot);
-                    sceneChangeRunTransition(sceneRoot, finalTransition);
-                }
-            });
+            sceneChangeRunTransition(sceneRoot, finalTransition);
         }
     }
 }
