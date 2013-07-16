@@ -371,10 +371,12 @@ public class WifiNative {
     }
 
     public void startTdls(String macAddr, boolean enable) {
-        if (enable)
+        if (enable) {
+            doBooleanCommand("TDLS_DISCOVER " + macAddr);
             doBooleanCommand("TDLS_SETUP " + macAddr);
-        else
+        } else {
             doBooleanCommand("TDLS_TEARDOWN " + macAddr);
+        }
     }
 
     /** Example output:
