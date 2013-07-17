@@ -519,6 +519,14 @@ public class Vpn extends BaseNetworkStateTracker {
         }
     }
 
+    /**
+     * Return the configuration of the currently running VPN.
+     */
+    public VpnConfig getVpnConfig() {
+        enforceControlPermission();
+        return mConfig;
+    }
+
     @Deprecated
     public synchronized void interfaceStatusChanged(String iface, boolean up) {
         try {
@@ -610,7 +618,7 @@ public class Vpn extends BaseNetworkStateTracker {
 
     private void showNotification(String label, Bitmap icon, int user) {
         if (!mEnableNotif) return;
-        mStatusIntent = VpnConfig.getIntentForStatusPanel(mContext, mConfig);
+        mStatusIntent = VpnConfig.getIntentForStatusPanel(mContext);
 
         NotificationManager nm = (NotificationManager)
                 mContext.getSystemService(Context.NOTIFICATION_SERVICE);

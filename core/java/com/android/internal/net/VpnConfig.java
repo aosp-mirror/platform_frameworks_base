@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.UserHandle;
 import android.net.RouteInfo;
 import android.net.LinkAddress;
 
@@ -50,15 +51,12 @@ public class VpnConfig implements Parcelable {
         return intent;
     }
 
-    public static PendingIntent getIntentForStatusPanel(Context context, VpnConfig config) {
-        Preconditions.checkNotNull(config);
-
+    public static PendingIntent getIntentForStatusPanel(Context context) {
         Intent intent = new Intent();
         intent.setClassName(DIALOGS_PACKAGE, DIALOGS_PACKAGE + ".ManageDialog");
-        intent.putExtra("config", config);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY |
                 Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        return PendingIntent.getActivityAsUser(context, 0, intent, 0, null, UserHandle.CURRENT);
     }
 
     public String user;
