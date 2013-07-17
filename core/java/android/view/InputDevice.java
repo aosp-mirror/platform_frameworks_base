@@ -44,6 +44,7 @@ import java.util.List;
 public final class InputDevice implements Parcelable {
     private final int mId;
     private final int mGeneration;
+    private final int mControllerNumber;
     private final String mName;
     private final String mDescriptor;
     private final boolean mIsExternal;
@@ -342,12 +343,12 @@ public final class InputDevice implements Parcelable {
     };
 
     // Called by native code.
-    private InputDevice(int id, int generation, String name, String descriptor,
-            boolean isExternal, int sources,
-            int keyboardType, KeyCharacterMap keyCharacterMap,
-            boolean hasVibrator, boolean hasButtonUnderPad) {
+    private InputDevice(int id, int generation, int controllerNumber, String name,
+            String descriptor, boolean isExternal, int sources, int keyboardType,
+            KeyCharacterMap keyCharacterMap, boolean hasVibrator, boolean hasButtonUnderPad) {
         mId = id;
         mGeneration = generation;
+        mControllerNumber = controllerNumber;
         mName = name;
         mDescriptor = descriptor;
         mIsExternal = isExternal;
@@ -361,6 +362,7 @@ public final class InputDevice implements Parcelable {
     private InputDevice(Parcel in) {
         mId = in.readInt();
         mGeneration = in.readInt();
+        mControllerNumber = in.readInt();
         mName = in.readString();
         mDescriptor = in.readString();
         mIsExternal = in.readInt() != 0;
@@ -411,6 +413,20 @@ public final class InputDevice implements Parcelable {
      */
     public int getId() {
         return mId;
+    }
+
+    /**
+     * The controller number for a given input device.
+     * <p>
+     * Each game controller or joystick is given a unique controller number when initially
+     * configured by the system. The number is not stable and may be changed by the system at any
+     * point.  All controller numbers will be non-negative. A game controller or joystick will be
+     * given a unique number indexed from one; everything else will be assigned a controller number
+     * of 0.
+     * </p>
+     */
+    public int getControllerNumber() {
+        return mControllerNumber;
     }
 
     /**
@@ -739,6 +755,7 @@ public final class InputDevice implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mId);
         out.writeInt(mGeneration);
+        out.writeInt(mControllerNumber);
         out.writeString(mName);
         out.writeString(mDescriptor);
         out.writeInt(mIsExternal ? 1 : 0);

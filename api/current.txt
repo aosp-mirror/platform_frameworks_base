@@ -25597,6 +25597,7 @@ package android.view {
 
   public final class InputDevice implements android.os.Parcelable {
     method public int describeContents();
+    method public int getControllerNumber();
     method public java.lang.String getDescriptor();
     method public static android.view.InputDevice getDevice(int);
     method public static int[] getDeviceIds();
