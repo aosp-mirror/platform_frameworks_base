@@ -30,6 +30,7 @@ import android.util.ArrayMap;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.ResolverActivity;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessStats;
@@ -2056,7 +2057,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final void setFocusedActivityLocked(ActivityRecord r) {
         if (mFocusedActivity != r) {
-            if (DEBUG_FOCUS) Slog.d(TAG, "setFocusedActivitiyLocked: r=" + r);
+            if (DEBUG_FOCUS) Slog.d(TAG, "setFocusedActivityLocked: r=" + r);
             mFocusedActivity = r;
             mStackSupervisor.setFocusedStack(r);
             if (r != null) {
@@ -2491,6 +2492,20 @@ public final class ActivityManagerService extends ActivityManagerNative
                 stats.noteActivityPausedLocked(component.app.uid);
             }
         }
+    }
+
+    String getHomePackageName() {
+        Intent intent = new Intent(mTopAction, mTopData != null ? Uri.parse(mTopData) : null);
+        intent.setComponent(mTopComponent);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        ActivityInfo aInfo = resolveActivityInfo(intent, STOCK_PM_FLAGS, mCurrentUserId);
+        if (aInfo != null) {
+            final String homePackageName = aInfo.applicationInfo.packageName;
+            if (!ResolverActivity.class.getName().equals(homePackageName)) {
+                return homePackageName;
+            }
+        }
+        return null;
     }
 
     boolean startHomeActivityLocked(int userId) {

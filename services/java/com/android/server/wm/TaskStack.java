@@ -97,9 +97,28 @@ public class TaskStack {
      * @param toTop Whether to add it to the top or bottom.
      */
     boolean addTask(Task task, boolean toTop) {
-        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "addTask: task=" + task + " toTop=" + toTop);
         mStackBox.makeDirty();
-        mTasks.add(toTop ? mTasks.size() : 0, task);
+
+        int stackNdx;
+        if (!toTop) {
+            stackNdx = 0;
+        } else {
+            stackNdx = mTasks.size();
+            final int currentUserId = mService.mCurrentUserId;
+            if (task.mUserId != currentUserId) {
+                // Place the task below all current user tasks.
+                while (--stackNdx >= 0) {
+                    if (currentUserId != mTasks.get(stackNdx).mUserId) {
+                        break;
+                    }
+                }
+                ++stackNdx;
+            }
+        }
+        if (DEBUG_TASK_MOVEMENT) Slog.d(TAG, "addTask: task=" + task + " toTop=" + toTop
+                + " pos=" + stackNdx);
+        mTasks.add(stackNdx, task);
+
         task.mStack = this;
         return mDisplayContent.moveHomeStackBox(mStackId == HOME_STACK_ID);
     }
@@ -252,6 +271,18 @@ public class TaskStack {
                     }
                     win.mUnderStatusBar = underStatusBar;
                 }
+            }
+        }
+    }
+
+    void switchUser(int userId) {
+        int top = mTasks.size();
+        for (int taskNdx = 0; taskNdx < top; ++taskNdx) {
+            Task task = mTasks.get(taskNdx);
+            if (task.mUserId == userId) {
+                mTasks.remove(taskNdx);
+                mTasks.add(task);
+                --top;
             }
         }
     }

@@ -465,7 +465,9 @@ final class ActivityStack {
      * Returns the top activity in any existing task matching the given
      * Intent.  Returns null if no such task is found.
      */
-    ActivityRecord findTaskLocked(Intent intent, ActivityInfo info) {
+    ActivityRecord findTaskLocked(ActivityRecord target) {
+        Intent intent = target.intent;
+        ActivityInfo info = target.info;
         ComponentName cls = intent.getComponent();
         if (info.targetActivity != null) {
             cls = new ComponentName(info.packageName, info.targetActivity);
@@ -474,6 +476,10 @@ final class ActivityStack {
 
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
             final TaskRecord task = mTaskHistory.get(taskNdx);
+            if (task.userId != userId) {
+                // Looking for a different task.
+                continue;
+            }
             final ActivityRecord r = task.getTopActivity();
             if (r == null || r.finishing || r.userId != userId ||
                     r.launchMode == ActivityInfo.LAUNCH_SINGLE_INSTANCE) {
@@ -518,7 +524,11 @@ final class ActivityStack {
         final int userId = UserHandle.getUserId(info.applicationInfo.uid);
 
         for (int taskNdx = mTaskHistory.size() - 1; taskNdx >= 0; --taskNdx) {
-            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
+            TaskRecord task = mTaskHistory.get(taskNdx);
+            if (task.userId != mCurrentUser) {
+                return null;
+            }
+            final ArrayList<ActivityRecord> activities = task.mActivities;
             for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
                 ActivityRecord r = activities.get(activityNdx);
                 if (!r.finishing && r.intent.getComponent().equals(cls) && r.userId == userId) {
@@ -534,8 +544,7 @@ final class ActivityStack {
     }
 
     /*
-     * Move the activities around in the stack to bring a user to the foreground. This only
-     * matters on the home stack. All other stacks are single user.
+     * Move the activities around in the stack to bring a user to the foreground.
      * @return whether there are any activities for the specified user.
      */
     final boolean switchUserLocked(int userId) {
@@ -1172,6 +1181,7 @@ final class ActivityStack {
             // There are no more activities!  Let's just start up the
             // Launcher...
             ActivityOptions.abort(options);
+            if (DEBUG_STATES) Slog.d(TAG, "resumeTopActivityLocked: No more activities go home");
             if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
             return mStackSupervisor.resumeHomeActivity(prev);
         }
@@ -1186,6 +1196,7 @@ final class ActivityStack {
             mWindowManager.executeAppTransition();
             mNoAnimActivities.clear();
             ActivityOptions.abort(options);
+            if (DEBUG_STATES) Slog.d(TAG, "resumeTopActivityLocked: Top activity resumed " + next);
             if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
             return false;
         }
@@ -1213,6 +1224,7 @@ final class ActivityStack {
                 final int taskNdx = mTaskHistory.indexOf(prevTask) + 1;
                 mTaskHistory.get(taskNdx).mActivities.get(0).mLaunchHomeTaskNext = true;
             } else {
+                if (DEBUG_STATES) Slog.d(TAG, "resumeTopActivityLocked: Launching home next");
                 return mStackSupervisor.resumeHomeActivity(prev);
             }
         }
@@ -1227,6 +1239,7 @@ final class ActivityStack {
             mWindowManager.executeAppTransition();
             mNoAnimActivities.clear();
             ActivityOptions.abort(options);
+            if (DEBUG_STATES) Slog.d(TAG, "resumeTopActivityLocked: Going to sleep and all paused");
             if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
             return false;
         }
@@ -1255,7 +1268,8 @@ final class ActivityStack {
         // If we are currently pausing an activity, then don't do anything
         // until that is done.
         if (!mStackSupervisor.allPausedActivitiesComplete()) {
-            if (DEBUG_SWITCH || DEBUG_PAUSE) Slog.v(TAG, "Skip resume: some activity pausing");
+            if (DEBUG_SWITCH || DEBUG_PAUSE || DEBUG_STATES) Slog.v(TAG,
+                    "resumeTopActivityLocked: Skip resume: some activity pausing.");
             if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
             return false;
         }
@@ -1295,9 +1309,11 @@ final class ActivityStack {
         if (mResumedActivity != null) {
             pausing = true;
             startPausingLocked(userLeaving, false);
+            if (DEBUG_STATES) Slog.d(TAG, "resumeTopActivityLocked: Pausing " + mResumedActivity);
         }
         if (pausing) {
-            if (DEBUG_SWITCH) Slog.v(TAG, "Skip resume: need to start pausing");
+            if (DEBUG_SWITCH || DEBUG_STATES) Slog.v(TAG,
+                    "resumeTopActivityLocked: Skip resume: need to start pausing");
             // At this point we want to put the upcoming activity's process
             // at the top of the LRU list, since we know we will be needing it
             // very soon and it would be a waste to let it get killed if it
@@ -1459,7 +1475,7 @@ final class ActivityStack {
                 // is still at the top and schedule another run if something
                 // weird happened.
                 ActivityRecord nextNext = topRunningActivityLocked(null);
-                if (DEBUG_SWITCH) Slog.i(TAG,
+                if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG,
                         "Activity config changed during resume: " + next
                         + ", new next: " + nextNext);
                 if (nextNext != next) {
@@ -1505,6 +1521,7 @@ final class ActivityStack {
 
                 mStackSupervisor.checkReadyForSleepLocked();
 
+                if (DEBUG_STATES) Slog.d(TAG, "resumeTopActivityLocked: Resumed " + next);
             } catch (Exception e) {
                 // Whoops, need to restart this activity!
                 if (DEBUG_STATES) Slog.v(TAG, "Resume failed; resetting state to "
@@ -1561,6 +1578,7 @@ final class ActivityStack {
                 }
                 if (DEBUG_SWITCH) Slog.v(TAG, "Restarting: " + next);
             }
+            if (DEBUG_STATES) Slog.d(TAG, "resumeTopActivityLocked: Restarting " + next);
             mStackSupervisor.startSpecificActivityLocked(next, true, true);
         }
 
@@ -1568,6 +1586,21 @@ final class ActivityStack {
         return true;
     }
 
+    private void insertTaskAtTop(TaskRecord task) {
+        mTaskHistory.remove(task);
+        // Now put task at top.
+        int stackNdx = mTaskHistory.size();
+        if (task.userId != mCurrentUser) {
+            // Put non-current user tasks below current user tasks.
+            while (--stackNdx >= 0) {
+                if (mTaskHistory.get(stackNdx).userId != mCurrentUser) {
+                    break;
+                }
+            }
+            ++stackNdx;
+        }
+        mTaskHistory.add(stackNdx, task);
+    }
 
     final void startActivityLocked(ActivityRecord r, boolean newTask,
             boolean doResume, boolean keepCurTransition, Bundle options) {
@@ -1577,9 +1610,7 @@ final class ActivityStack {
             // Last activity in task had been removed or ActivityManagerService is reusing task.
             // Insert or replace.
             // Might not even be in.
-            mTaskHistory.remove(rTask);
-            // Now put task at top.
-            mTaskHistory.add(rTask);
+            insertTaskAtTop(rTask);
             mWindowManager.moveTaskToTop(taskId);
         }
         TaskRecord task = null;
@@ -1599,7 +1630,8 @@ final class ActivityStack {
                         r.putInHistory();
                         mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
                                 r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
-                                (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
+                                (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0,
+                                r.userId);
                         if (VALIDATE_TOKENS) {
                             validateAppTokensLocked();
                         }
@@ -1660,7 +1692,7 @@ final class ActivityStack {
             r.updateOptionsLocked(options);
             mWindowManager.addAppToken(task.mActivities.indexOf(r),
                     r.appToken, r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
-                    (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
+                    (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0, r.userId);
             boolean doShow = true;
             if (newTask) {
                 // Even though this activity is starting fresh, we still need
@@ -1703,7 +1735,7 @@ final class ActivityStack {
             // because there is nothing for it to animate on top of.
             mWindowManager.addAppToken(task.mActivities.indexOf(r), r.appToken,
                     r.task.taskId, mStackId, r.info.screenOrientation, r.fullscreen,
-                    (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0);
+                    (r.info.flags & ActivityInfo.FLAG_SHOW_ON_LOCK_SCREEN) != 0, r.userId);
             ActivityOptions.abort(options);
         }
         if (VALIDATE_TOKENS) {
@@ -2897,8 +2929,7 @@ final class ActivityStack {
 
         // Shift all activities with this task up to the top
         // of the stack, keeping them in the same internal order.
-        mTaskHistory.remove(tr);
-        mTaskHistory.add(tr);
+        insertTaskAtTop(tr);
 
         if (DEBUG_TRANSITION) Slog.v(TAG, "Prepare to front transition: task=" + tr);
         if (reason != null &&
@@ -3380,7 +3411,7 @@ final class ActivityStack {
             printed |= ActivityStackSupervisor.dumpHistoryList(fd, pw,
                     mTaskHistory.get(taskNdx).mActivities, "    ", "Hist", true, !dumpAll,
                     dumpClient, dumpPackage, needSep, header,
-                    "    Task " + taskNdx + ": id #" + task.taskId);
+                    "    Task id #" + task.taskId);
             if (printed) {
                 header = null;
             }
@@ -3448,12 +3479,8 @@ final class ActivityStack {
     }
 
     TaskRecord createTaskRecord(int taskId, ActivityInfo info, Intent intent, boolean toTop) {
-        TaskRecord task = new TaskRecord(taskId, info, intent, this);
-        if (toTop) {
-            mTaskHistory.add(task);
-        } else {
-            mTaskHistory.add(0, task);
-        }
+        TaskRecord task = new TaskRecord(taskId, info, intent);
+        addTask(task, toTop);
         return task;
     }
 
@@ -3464,7 +3491,7 @@ final class ActivityStack {
     void addTask(final TaskRecord task, final boolean toTop) {
         task.stack = this;
         if (toTop) {
-            mTaskHistory.add(task);
+            insertTaskAtTop(task);
         } else {
             mTaskHistory.add(0, task);
         }
