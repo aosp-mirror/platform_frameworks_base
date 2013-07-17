@@ -38,8 +38,8 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
         View getChildAtRawPosition(float x, float y);
         View getChildAtPosition(float x, float y);
         boolean canChildBeExpanded(View v);
-        boolean setUserExpandedChild(View v, boolean userExpanded);
-        boolean setUserLockedChild(View v, boolean userLocked);
+        void setUserExpandedChild(View v, boolean userExpanded);
+        void setUserLockedChild(View v, boolean userLocked);
     }
 
     private static final String TAG = "ExpandHelper";
@@ -181,7 +181,6 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
      * @param callback the container that holds the items to be manipulated
      * @param small the smallest allowable size for the manuipulated items.
      * @param large the largest allowable size for the manuipulated items.
-     * @param scoller if non-null also manipulate the scroll position to obey the gravity.
      */
     public ExpandHelper(Context context, Callback callback, int small, int large) {
         mSmallSize = small;

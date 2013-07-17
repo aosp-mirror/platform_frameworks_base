@@ -34,7 +34,7 @@ public class NotificationData {
         public IBinder key;
         public StatusBarNotification notification;
         public StatusBarIconView icon;
-        public View row; // the outer expanded view
+        public ExpandableNotificationRow row; // the outer expanded view
         public View content; // takes the click events and sends the PendingIntent
         public View expanded; // the inflated RemoteViews
         public ImageView largeIcon;
@@ -47,40 +47,16 @@ public class NotificationData {
         }
         public void setBigContentView(View bigContentView) {
             this.expandedBig = bigContentView;
-            writeBooleanTag(row, R.id.expandable_tag, bigContentView != null);
+            row.setExpandable(bigContentView != null);
         }
         public View getBigContentView() {
             return expandedBig;
         }
         /**
-         * Return whether the entry can be expanded.
-         */
-        public boolean expandable() {
-            return NotificationData.getIsExpandable(row);
-        }
-        /**
-         * Return whether the entry has been manually expanded by the user.
-         */
-        public boolean userExpanded() {
-            return NotificationData.getUserExpanded(row);
-        }
-        /**
-         * Set the flag indicating that this was manually expanded by the user.
-         */
-        public boolean setUserExpanded(boolean userExpanded) {
-            return NotificationData.setUserExpanded(row, userExpanded);
-        }
-        /**
-         * Return whether the entry is being touched by the user.
-         */
-        public boolean userLocked() {
-            return NotificationData.getUserLocked(row);
-        }
-        /**
          * Set the flag indicating that this is being touched by the user.
          */
-        public boolean setUserLocked(boolean userLocked) {
-            return NotificationData.setUserLocked(row, userLocked);
+        public void setUserLocked(boolean userLocked) {
+            row.setUserLocked(userLocked);
         }
     }
     private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
@@ -125,8 +101,8 @@ public class NotificationData {
         return i;
     }
 
-    public int add(IBinder key, StatusBarNotification notification, View row, View content,
-            View expanded, StatusBarIconView icon) {
+    public int add(IBinder key, StatusBarNotification notification, ExpandableNotificationRow row,
+            View content, View expanded, StatusBarIconView icon) {
         Entry entry = new Entry();
         entry.key = key;
         entry.notification = notification;
@@ -170,56 +146,5 @@ public class NotificationData {
             }
         }
         return false;
-    }
-
-    protected static boolean readBooleanTag(View view, int id)  {
-        if (view != null) {
-            Object value = view.getTag(id);
-            return value != null && value instanceof Boolean && ((Boolean) value).booleanValue();
-        }
-        return false;
-    }
-
-    protected static boolean writeBooleanTag(View view, int id, boolean value)  {
-        if (view != null) {
-            view.setTag(id, Boolean.valueOf(value));
-            return value;
-        }
-        return false;
-    }
-
-    /**
-     * Return whether the entry can be expanded.
-     */
-    public static boolean getIsExpandable(View row) {
-        return readBooleanTag(row, R.id.expandable_tag);
-    }
-
-    /**
-     * Return whether the entry has been manually expanded by the user.
-     */
-    public static boolean getUserExpanded(View row) {
-        return readBooleanTag(row, R.id.user_expanded_tag);
-    }
-
-    /**
-     * Set whether the entry has been manually expanded by the user.
-     */
-    public static boolean setUserExpanded(View row, boolean userExpanded) {
-        return writeBooleanTag(row, R.id.user_expanded_tag, userExpanded);
-    }
-
-    /**
-     * Return whether the entry is being touched by the user.
-     */
-    public static boolean getUserLocked(View row) {
-        return readBooleanTag(row, R.id.user_lock_tag);
-    }
-
-    /**
-     * Set whether the entry is being touched by the user.
-     */
-    public static boolean setUserLocked(View row, boolean userLocked) {
-        return writeBooleanTag(row, R.id.user_lock_tag, userLocked);
     }
 }

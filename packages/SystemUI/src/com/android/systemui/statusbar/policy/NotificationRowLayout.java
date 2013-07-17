@@ -32,6 +32,7 @@ import android.widget.LinearLayout;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
+import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationData;
 
 import java.util.HashMap;
@@ -149,15 +150,20 @@ public class NotificationRowLayout
     }
 
     public boolean canChildBeExpanded(View v) {
-        return NotificationData.getIsExpandable(v);
+        return v instanceof ExpandableNotificationRow
+                && ((ExpandableNotificationRow) v).isExpandable();
     }
 
-    public boolean setUserExpandedChild(View v, boolean userExpanded) {
-        return NotificationData.setUserExpanded(v, userExpanded);
+    public void setUserExpandedChild(View v, boolean userExpanded) {
+        if (v instanceof ExpandableNotificationRow) {
+            ((ExpandableNotificationRow) v).setUserExpanded(userExpanded);
+        }
     }
 
-    public boolean setUserLockedChild(View v, boolean userLocked) {
-        return NotificationData.setUserLocked(v, userLocked);
+    public void setUserLockedChild(View v, boolean userLocked) {
+        if (v instanceof ExpandableNotificationRow) {
+            ((ExpandableNotificationRow) v).setUserLocked(userLocked);
+        }
     }
 
     public void onChildDismissed(View v) {

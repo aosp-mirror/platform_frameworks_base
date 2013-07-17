@@ -16,11 +16,9 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.app.Notification;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -29,23 +27,32 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.statusbar.BaseStatusBar;
+import com.android.systemui.statusbar.NotificationData;
 
-public class HeadsUpNotificationView extends LinearLayout implements SwipeHelper.Callback {
+public class HeadsUpNotificationView extends LinearLayout implements SwipeHelper.Callback, ExpandHelper.Callback {
     private static final String TAG = "HeadsUpNotificationView";
     private static final boolean DEBUG = false;
 
     Rect mTmpRect = new Rect();
 
+    private final int mTouchSensitivityDelay;
     private SwipeHelper mSwipeHelper;
 
-    BaseStatusBar mBar;
+    private BaseStatusBar mBar;
+    private ExpandHelper mExpandHelper;
+    private long mStartTouchTime;
+
+    public ViewGroup getHolder() {
+        return mContentHolder;
+    }
+
     private ViewGroup mContentHolder;
 
-    private Notification mHeadsUp;
-    private OnClickListener mOnClickListener;
+    private NotificationData.Entry mHeadsUp;
 
     public HeadsUpNotificationView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -53,8 +60,9 @@ public class HeadsUpNotificationView extends LinearLayout implements SwipeHelper
 
     public HeadsUpNotificationView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-
         setOrientation(LinearLayout.VERTICAL);
+        mTouchSensitivityDelay = getResources().getInteger(R.integer.heads_up_sensitivity_delay);
+        if (DEBUG) Log.v(TAG, "create() " + mTouchSensitivityDelay);
     }
 
     @Override
@@ -63,10 +71,14 @@ public class HeadsUpNotificationView extends LinearLayout implements SwipeHelper
         float pagingTouchSlop = ViewConfiguration.get(getContext()).getScaledPagingTouchSlop();
         mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
 
+        int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
+        int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_max_height);
+        mExpandHelper = new ExpandHelper(mContext, this, minHeight, maxHeight);
+
         mContentHolder = (ViewGroup) findViewById(R.id.contentHolder);
         if (mHeadsUp != null) {
             // whoops, we're on already!
-            applyContent(mHeadsUp, mOnClickListener);
+            setNotification(mHeadsUp);
         }
     }
 
@@ -77,14 +89,23 @@ public class HeadsUpNotificationView extends LinearLayout implements SwipeHelper
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         if (DEBUG) Log.v(TAG, "onInterceptTouchEvent()");
-        return mSwipeHelper.onInterceptTouchEvent(ev) ||
-            super.onInterceptTouchEvent(ev);
+        if (System.currentTimeMillis() < mStartTouchTime) {
+            return true;
+        }
+        return mSwipeHelper.onInterceptTouchEvent(ev)
+                || mExpandHelper.onInterceptTouchEvent(ev)
+                || super.onInterceptTouchEvent(ev);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        return mSwipeHelper.onTouchEvent(ev) ||
-            super.onTouchEvent(ev);
+        if (System.currentTimeMillis() < mStartTouchTime) {
+            return false;
+        }
+        mBar.resetHeadsUpDecayTimer();
+        return mSwipeHelper.onTouchEvent(ev)
+                || mExpandHelper.onTouchEvent(ev)
+                || super.onTouchEvent(ev);
     }
 
     public boolean canChildBeDismissed(View v) {
@@ -93,7 +114,7 @@ public class HeadsUpNotificationView extends LinearLayout implements SwipeHelper
 
     public void onChildDismissed(View v) {
         Log.v(TAG, "User swiped heads up to dismiss");
-        mBar.dismissHeadsUp();
+        mBar.onHeadsUpDismissed();
     }
 
     public void onBeginDrag(View v) {
@@ -134,34 +155,48 @@ public class HeadsUpNotificationView extends LinearLayout implements SwipeHelper
         }
     }
 
-    public boolean applyContent(Notification headsUp, OnClickListener listener) {
+    public boolean setNotification(NotificationData.Entry headsUp) {
         mHeadsUp = headsUp;
-        mOnClickListener = listener;
+        mHeadsUp.row.setExpanded(false);
         if (mContentHolder == null) {
             // too soon!
-            return false;
-        }
-        if (headsUp.contentView == null) {
-            // bad data
             return false;
         }
         mContentHolder.setX(0);
         mContentHolder.setVisibility(View.VISIBLE);
         mContentHolder.setAlpha(1f);
         mContentHolder.removeAllViews();
-        final View content = headsUp.contentView.apply(getContext(), mContentHolder);
-        if (listener != null) {
-            content.setOnClickListener(listener);
-
-            Drawable bg = getResources().getDrawable(R.drawable.heads_up_notification_row_bg);
-            if (bg == null) {
-                Log.e(TAG, String.format("Can't find background drawable id=0x%08x",
-                        R.drawable.heads_up_notification_row_bg));
-            } else {
-                content.setBackgroundDrawable(bg);
-            }
-        }
-        mContentHolder.addView(content);
+        mContentHolder.addView(mHeadsUp.row);
+        mStartTouchTime = System.currentTimeMillis() + mTouchSensitivityDelay;
         return true;
+    }
+
+    @Override
+    public View getChildAtRawPosition(float x, float y) {
+        return getChildAtPosition(x, y);
+    }
+
+    @Override
+    public View getChildAtPosition(float x, float y) {
+        return mHeadsUp == null ? null : mHeadsUp.row;
+    }
+
+    @Override
+    public boolean canChildBeExpanded(View v) {
+        return mHeadsUp != null && mHeadsUp.row == v && mHeadsUp.row.isExpandable();
+    }
+
+    @Override
+    public void setUserExpandedChild(View v, boolean userExpanded) {
+        if (mHeadsUp != null && mHeadsUp.row == v) {
+            mHeadsUp.row.setUserExpanded(userExpanded);
+        }
+    }
+
+    @Override
+    public void setUserLockedChild(View v, boolean userLocked) {
+        if (mHeadsUp != null && mHeadsUp.row == v) {
+            mHeadsUp.row.setUserLocked(userLocked);
+        }
     }
 }
