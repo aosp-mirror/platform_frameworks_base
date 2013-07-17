@@ -825,6 +825,14 @@ public final class ContactsContract {
         public static final String STARRED = "starred";
 
         /**
+         * The position at which the contact is pinned. If {@link PinnedPositions.UNPINNED},
+         * the contact is not pinned. Also see {@link PinnedPositions}.
+         * <P>Type: INTEGER </P>
+         * @hide
+         */
+        public static final String PINNED = "pinned";
+
+        /**
          * URI for a custom ringtone associated with the contact. If null or missing,
          * the default ringtone is used.
          * <P>Type: TEXT (URI to the ringtone)</P>
@@ -7711,6 +7719,107 @@ public final class ContactsContract {
          * </p>
          */
         public static final String USAGE_TYPE_SHORT_TEXT = "short_text";
+    }
+
+    /**
+     * <p>
+     * API allowing applications to send pinning information for specified contacts to the
+     * Contacts Provider.
+     * </p>
+     *
+     * <p>
+     * This pinning information can be used by individual applications to customize how
+     * they order particular pinned contacts. For example, a Dialer application could
+     * use pinned information to order user-pinned contacts in a top row of favorites.
+     * </p>
+     *
+     * <p>
+     * It is possible for two or more contacts to occupy the same pinned position (due
+     * to aggregation and sync), so this pinning information should be used on a best-effort
+     * basis to order contacts in-application rather than an absolute guide on where a contact
+     * should be positioned. Contacts returned by the ContactsProvider will not be ordered based
+     * on this information, so it is up to the client application to reorder these contacts within
+     * their own UI adhering to (or ignoring as appropriate) information stored in the pinned
+     * column.
+     * </p>
+     *
+     * <p>
+     * By default, unpinned contacts will have a pinned position of
+     * {@link PinnedPositions#UNPINNED}, or {@link Integer#MAX_VALUE} (2^31 - 1). Client-provided
+     * pinned positions can be positive integers that range anywhere from 0 to
+     * {@link PinnedPositions#UNPINNED}.
+     * </p>
+     *
+     * <p>
+     * When using {@link PinnedPositions#UPDATE_URI} to update the pinned positions of
+     * certain contacts, it may make sense for your application to star any pinned contacts
+     * by default. To specify this behavior, set the boolean query parameter
+     * {@link PinnedPositions#STAR_WHEN_PINNING} to true to force all pinned and unpinned
+     * contacts to be automatically starred and unstarred.
+     * </p>
+     * @hide
+     */
+    public static final class PinnedPositions {
+
+        /**
+         * <p>
+         * This URI allows applications to update pinned positions for a provided set of contacts.
+         * </p>
+         *
+         * <p>
+         * The list of contactIds to pin and their corresponding pinned positions should be
+         * provided in key-value pairs stored in a {@link ContentValues} object where the key
+         * is a valid contactId, while each pinned position is a positive integer.
+         * </p>
+         *
+         * <p>
+         * Example:
+         * <pre>
+         * ContentValues values = new ContentValues();
+         * values.put("10", 20);
+         * values.put("12", 2);
+         * values.put("15", PinnedPositions.UNPINNED);
+         * int count = resolver.update(PinnedPositions.UPDATE_URI, values, null, null);
+         * </pre>
+         *
+         * This pins the contact with id 10 at position 20, the contact with id 12 at position 2,
+         * and unpins the contact with id 15.
+         * </p>
+         */
+        public static final Uri UPDATE_URI = Uri.withAppendedPath(AUTHORITY_URI,
+                "pinned_position_update");
+
+        /**
+         * Default value for the pinned position of an unpinned contact. Also equal to
+         * {@link Integer#MAX_VALUE}.
+         */
+        public static final int UNPINNED = 0x7FFFFFFF;
+
+        /**
+         * <p>
+         * A boolean query parameter that can be used with {@link #UPDATE_URI}.
+         * If "1" or "true", any contact that is pinned or unpinned will be correspondingly
+         * starred or unstarred. Otherwise, starring information will not be affected by pinned
+         * updates. This is false by default.
+         * </p>
+         *
+         * <p>
+         * Example:
+         * <pre>
+         * ContentValues values = new ContentValues();
+         * values.put("10", 20);
+         * values.put("15", PinnedPositions.UNPINNED);
+         * int count = resolver.update(ContactsContract.PinnedPositions.UPDATE_URI.buildUpon()
+         *          .appendQueryParameter(PinnedPositions.FORCE_STAR_WHEN_PINNING, "true").build(),
+         *          values, null, null);
+         * </pre>
+         *
+         * This will pin the contact with id 10 at position 20 and star it automatically if not
+         * already starred, and unpin the contact with id 15, and unstar it automatically if not
+         * already unstarred.
+         * </p>
+         */
+        public static final String STAR_WHEN_PINNING = "star_when_pinning";
     }
 
     /**
