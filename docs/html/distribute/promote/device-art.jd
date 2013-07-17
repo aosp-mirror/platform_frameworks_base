@@ -173,12 +173,13 @@ feature image or screenshots for your Google Play app listing.</p>
       title: 'Nexus 7',
       url: 'http://www.google.com/nexus/7/',
       physicalSize: 7,
-      physicalHeight: 7.81,
-      density: '213dpi',
+      physicalHeight: 8,
+      actualResolution: [1200,1920],
+      density: 'XHDPI',
       landRes: ['shadow', 'back', 'fore'],
-      landOffset: [315,270],
+      landOffset: [326,245],
       portRes: ['shadow', 'back', 'fore'],
-      portOffset: [264,311],
+      portOffset: [244,326],
       portSize: [800,1280]
     },
     {
@@ -206,6 +207,20 @@ feature image or screenshots for your Google Play app listing.</p>
       landOffset: [218,191],
       portRes: ['shadow', 'back', 'fore'],
       portOffset: [199,200],
+      portSize: [800,1280],
+      archived: true
+    },
+    {
+      id: 'nexus_7_2012',
+      title: 'Nexus 7 (2012)',
+      url: 'http://www.google.com/nexus/7/',
+      physicalSize: 7,
+      physicalHeight: 7.81,
+      density: '213dpi',
+      landRes: ['shadow', 'back', 'fore'],
+      landOffset: [315,270],
+      portRes: ['shadow', 'back', 'fore'],
+      portOffset: [264,311],
       portSize: [800,1280],
       archived: true
     },
