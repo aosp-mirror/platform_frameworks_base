@@ -16,12 +16,11 @@
 
 package android.app;
 
-import android.Manifest;
+import android.util.ArrayMap;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsCallback;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import android.content.Context;
@@ -53,8 +52,8 @@ import android.os.RemoteException;
 public class AppOpsManager {
     final Context mContext;
     final IAppOpsService mService;
-    final HashMap<Callback, IAppOpsCallback> mModeWatchers
-            = new HashMap<Callback, IAppOpsCallback>();
+    final ArrayMap<Callback, IAppOpsCallback> mModeWatchers
+            = new ArrayMap<Callback, IAppOpsCallback>();
 
     public static final int MODE_ALLOWED = 0;
     public static final int MODE_IGNORED = 1;

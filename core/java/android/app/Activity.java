@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.util.ArrayMap;
 import com.android.internal.app.ActionBarImpl;
 import com.android.internal.policy.PolicyManager;
 
@@ -700,7 +701,7 @@ public class Activity extends ContextThemeWrapper
         Object activity;
         HashMap<String, Object> children;
         ArrayList<Fragment> fragments;
-        HashMap<String, LoaderManagerImpl> loaders;
+        ArrayMap<String, LoaderManagerImpl> loaders;
     }
     /* package */ NonConfigurationInstances mLastNonConfigurationInstances;
     
@@ -725,7 +726,7 @@ public class Activity extends ContextThemeWrapper
         }
     };
     
-    HashMap<String, LoaderManagerImpl> mAllLoaderManagers;
+    ArrayMap<String, LoaderManagerImpl> mAllLoaderManagers;
     LoaderManagerImpl mLoaderManager;
     
     private static final class ManagedCursor {
@@ -819,13 +820,13 @@ public class Activity extends ContextThemeWrapper
             return mLoaderManager;
         }
         mCheckedForLoaderManager = true;
-        mLoaderManager = getLoaderManager(null, mLoadersStarted, true);
+        mLoaderManager = getLoaderManager("(root)", mLoadersStarted, true);
         return mLoaderManager;
     }
     
     LoaderManagerImpl getLoaderManager(String who, boolean started, boolean create) {
         if (mAllLoaderManagers == null) {
-            mAllLoaderManagers = new HashMap<String, LoaderManagerImpl>();
+            mAllLoaderManagers = new ArrayMap<String, LoaderManagerImpl>();
         }
         LoaderManagerImpl lm = mAllLoaderManagers.get(who);
         if (lm == null) {
@@ -1036,7 +1037,7 @@ public class Activity extends ContextThemeWrapper
             if (mLoaderManager != null) {
                 mLoaderManager.doStart();
             } else if (!mCheckedForLoaderManager) {
-                mLoaderManager = getLoaderManager(null, mLoadersStarted, false);
+                mLoaderManager = getLoaderManager("(root)", mLoadersStarted, false);
             }
             mCheckedForLoaderManager = true;
         }
@@ -1648,17 +1649,18 @@ public class Activity extends ContextThemeWrapper
         if (mAllLoaderManagers != null) {
             // prune out any loader managers that were already stopped and so
             // have nothing useful to retain.
-            LoaderManagerImpl loaders[] = new LoaderManagerImpl[mAllLoaderManagers.size()];
-            mAllLoaderManagers.values().toArray(loaders);
-            if (loaders != null) {
-                for (int i=0; i<loaders.length; i++) {
-                    LoaderManagerImpl lm = loaders[i];
-                    if (lm.mRetaining) {
-                        retainLoaders = true;
-                    } else {
-                        lm.doDestroy();
-                        mAllLoaderManagers.remove(lm.mWho);
-                    }
+            final int N = mAllLoaderManagers.size();
+            LoaderManagerImpl loaders[] = new LoaderManagerImpl[N];
+            for (int i=N-1; i>=0; i--) {
+                loaders[i] = mAllLoaderManagers.valueAt(i);
+            }
+            for (int i=0; i<N; i++) {
+                LoaderManagerImpl lm = loaders[i];
+                if (lm.mRetaining) {
+                    retainLoaders = true;
+                } else {
+                    lm.doDestroy();
+                    mAllLoaderManagers.remove(lm.mWho);
                 }
             }
         }
@@ -5236,14 +5238,15 @@ public class Activity extends ContextThemeWrapper
         }
         mFragments.dispatchStart();
         if (mAllLoaderManagers != null) {
-            LoaderManagerImpl loaders[] = new LoaderManagerImpl[mAllLoaderManagers.size()];
-            mAllLoaderManagers.values().toArray(loaders);
-            if (loaders != null) {
-                for (int i=0; i<loaders.length; i++) {
-                    LoaderManagerImpl lm = loaders[i];
-                    lm.finishRetain();
-                    lm.doReportStart();
-                }
+            final int N = mAllLoaderManagers.size();
+            LoaderManagerImpl loaders[] = new LoaderManagerImpl[N];
+            for (int i=N-1; i>=0; i--) {
+                loaders[i] = mAllLoaderManagers.valueAt(i);
+            }
+            for (int i=0; i<N; i++) {
+                LoaderManagerImpl lm = loaders[i];
+                lm.finishRetain();
+                lm.doReportStart();
             }
         }
     }

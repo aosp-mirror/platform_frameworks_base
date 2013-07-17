@@ -42,8 +42,6 @@ import com.android.internal.util.ArrayUtils;
  */
 public class SparseArray<E> implements Cloneable {
     private static final Object DELETED = new Object();
-    static final int[] EMPTY_INTS = new int[0];
-    static final Object[] EMPTY_OBJECTS = new Object[0];
     private boolean mGarbage = false;
 
     private int[] mKeys;
@@ -66,8 +64,8 @@ public class SparseArray<E> implements Cloneable {
      */
     public SparseArray(int initialCapacity) {
         if (initialCapacity == 0) {
-            mKeys = EMPTY_INTS;
-            mValues = EMPTY_OBJECTS;
+            mKeys = ContainerHelpers.EMPTY_INTS;
+            mValues = ContainerHelpers.EMPTY_OBJECTS;
         } else {
             initialCapacity = ArrayUtils.idealIntArraySize(initialCapacity);
             mKeys = new int[initialCapacity];
@@ -104,7 +102,7 @@ public class SparseArray<E> implements Cloneable {
      */
     @SuppressWarnings("unchecked")
     public E get(int key, E valueIfKeyNotFound) {
-        int i = binarySearch(mKeys, mSize, key);
+        int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
 
         if (i < 0 || mValues[i] == DELETED) {
             return valueIfKeyNotFound;
@@ -117,7 +115,7 @@ public class SparseArray<E> implements Cloneable {
      * Removes the mapping from the specified key, if there was any.
      */
     public void delete(int key) {
-        int i = binarySearch(mKeys, mSize, key);
+        int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
 
         if (i >= 0) {
             if (mValues[i] != DELETED) {
@@ -141,6 +139,19 @@ public class SparseArray<E> implements Cloneable {
         if (mValues[index] != DELETED) {
             mValues[index] = DELETED;
             mGarbage = true;
+        }
+    }
+
+    /**
+     * Remove a range of mappings as a batch.
+     *
+     * @param index Index to begin at
+     * @param size Number of mappings to remove
+     */
+    public void removeAtRange(int index, int size) {
+        final int end = Math.min(mSize, index + size);
+        for (int i = index; i < end; i++) {
+            removeAt(i);
         }
     }
 
@@ -178,7 +189,7 @@ public class SparseArray<E> implements Cloneable {
      * was one.
      */
     public void put(int key, E value) {
-        int i = binarySearch(mKeys, mSize, key);
+        int i = ContainerHelpers.binarySearch(mKeys, mSize, key);
 
         if (i >= 0) {
             mValues[i] = value;
@@ -195,7 +206,7 @@ public class SparseArray<E> implements Cloneable {
                 gc();
 
                 // Search again because indices may have changed.
-                i = ~binarySearch(mKeys, mSize, key);
+                i = ~ContainerHelpers.binarySearch(mKeys, mSize, key);
             }
 
             if (mSize >= mKeys.length) {
@@ -286,7 +297,7 @@ public class SparseArray<E> implements Cloneable {
             gc();
         }
 
-        return binarySearch(mKeys, mSize, key);
+        return ContainerHelpers.binarySearch(mKeys, mSize, key);
     }
 
     /**
@@ -360,23 +371,36 @@ public class SparseArray<E> implements Cloneable {
         mSize = pos + 1;
     }
 
-    // This is Arrays.binarySearch(), but doesn't do any argument validation.
-    static int binarySearch(int[] array, int size, int value) {
-        int lo = 0;
-        int hi = size - 1;
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This implementation composes a string by iterating over its mappings. If
+     * this map contains itself as a value, the string "(this Map)"
+     * will appear in its place.
+     */
+    @Override
+    public String toString() {
+        if (size() <= 0) {
+            return "{}";
+        }
 
-        while (lo <= hi) {
-            int mid = (lo + hi) >>> 1;
-            int midVal = array[mid];
-
-            if (midVal < value) {
-                lo = mid + 1;
-            } else if (midVal > value) {
-                hi = mid - 1;
+        StringBuilder buffer = new StringBuilder(mSize * 28);
+        buffer.append('{');
+        for (int i=0; i<mSize; i++) {
+            if (i > 0) {
+                buffer.append(", ");
+            }
+            int key = keyAt(i);
+            buffer.append(key);
+            buffer.append('=');
+            Object value = valueAt(i);
+            if (value != this) {
+                buffer.append(value);
             } else {
-                return mid;  // value found
+                buffer.append("(this Map)");
             }
         }
-        return ~lo;  // value not present
+        buffer.append('}');
+        return buffer.toString();
     }
 }

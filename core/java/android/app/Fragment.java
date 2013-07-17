@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AndroidRuntimeException;
+import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.DebugUtils;
 import android.util.Log;
@@ -43,7 +44,6 @@ import android.widget.AdapterView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.HashMap;
 
 final class FragmentState implements Parcelable {
     final String mClassName;
@@ -342,8 +342,8 @@ final class FragmentState implements Parcelable {
  * the activity UI was in.
  */
 public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListener {
-    private static final HashMap<String, Class<?>> sClassMap =
-            new HashMap<String, Class<?>>();
+    private static final ArrayMap<String, Class<?>> sClassMap =
+            new ArrayMap<String, Class<?>>();
     
     static final int INVALID_STATE = -1;   // Invalid state used as a null value.
     static final int INITIALIZING = 0;     // Not yet created.

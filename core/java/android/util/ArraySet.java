@@ -85,7 +85,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
             return ~0;
         }
 
-        int index = SparseArray.binarySearch(mHashes, N, hash);
+        int index = ContainerHelpers.binarySearch(mHashes, N, hash);
 
         // If the hash code wasn't found, then we have no entry for this key.
         if (index < 0) {
@@ -187,8 +187,8 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
      * will grow once items are added to it.
      */
     public ArraySet() {
-        mHashes = SparseArray.EMPTY_INTS;
-        mArray = SparseArray.EMPTY_OBJECTS;
+        mHashes = ContainerHelpers.EMPTY_INTS;
+        mArray = ContainerHelpers.EMPTY_OBJECTS;
         mSize = 0;
     }
 
@@ -197,8 +197,8 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
      */
     public ArraySet(int capacity) {
         if (capacity == 0) {
-            mHashes = SparseArray.EMPTY_INTS;
-            mArray = SparseArray.EMPTY_OBJECTS;
+            mHashes = ContainerHelpers.EMPTY_INTS;
+            mArray = ContainerHelpers.EMPTY_OBJECTS;
         } else {
             allocArrays(capacity);
         }
@@ -223,8 +223,8 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
     public void clear() {
         if (mSize != 0) {
             freeArrays(mHashes, mArray, mSize);
-            mHashes = SparseArray.EMPTY_INTS;
-            mArray = SparseArray.EMPTY_OBJECTS;
+            mHashes = ContainerHelpers.EMPTY_INTS;
+            mArray = ContainerHelpers.EMPTY_OBJECTS;
             mSize = 0;
         }
     }
@@ -371,8 +371,8 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
             // Now empty.
             if (DEBUG) Log.d(TAG, "remove: shrink from " + mHashes.length + " to 0");
             freeArrays(mHashes, mArray, mSize);
-            mHashes = SparseArray.EMPTY_INTS;
-            mArray = SparseArray.EMPTY_OBJECTS;
+            mHashes = ContainerHelpers.EMPTY_INTS;
+            mArray = ContainerHelpers.EMPTY_OBJECTS;
             mSize = 0;
         } else {
             if (mHashes.length > (BASE_SIZE*2) && mSize < mHashes.length/3) {
