@@ -16,6 +16,7 @@
 
 package android.print;
 
+import android.os.Bundle;
 import android.os.CancellationSignal;
 
 import java.io.FileDescriptor;
@@ -33,14 +34,14 @@ import java.util.List;
  * </li>
  * <li>
  * Next, you will get one or more calls to {@link #onLayout(PrintAttributes,
- * PrintAttributes, CancellationSignal, LayoutResultCallback)} to inform you
- * that the print attributes (page size, density, etc) changed giving you an
- * opportunity to layout the content to match the new constraints.
+ * PrintAttributes, CancellationSignal, LayoutResultCallback, Bundle)} to
+ * inform you that the print attributes (page size, density, etc) changed
+ * giving you an opportunity to layout the content to match the new constraints.
  * </li>
  * <li>
  * After every call to {@link #onLayout(PrintAttributes, PrintAttributes,
- * CancellationSignal, LayoutResultCallback)}, you may get a call to {@link
- * #onWrite(List, FileDescriptor, CancellationSignal, WriteResultCallback)}
+ * CancellationSignal, LayoutResultCallback, Bundle)}, you may get a call to
+ * {@link #onWrite(List, FileDescriptor, CancellationSignal, WriteResultCallback)}
  * asking you to write a PDF file with the content for specific pages.
  * </li>
  * <li>
@@ -49,8 +50,36 @@ import java.util.List;
  * </li>
  * </ul>
  * </p>
+ * <h3>Implementation</h3>
+ * <p>
+ * The APIs defined in this class are designed to enable doing part or all
+ * of the work on an arbitrary thread. For example, if the printed content
+ * does not depend on the UI state, i.e. on what is shown on the screen, then
+ * you can off load the entire work on a dedicated thread, thus making your
+ * application interactive while the print work is being performed.
+ * </p>
+ * <p>
+ * You can also do work on different threads, for example if you print UI
+ * content, you can handle {@link #onStart()} and {@link #onLayout(PrintAttributes,
+ * PrintAttributes, CancellationSignal, LayoutResultCallback, Bundle)} on
+ * the UI thread (assuming onStart initializes resources needed for layout).
+ * This will ensure that the UI does not change while you are laying out the
+ * printed content. Then you can handle {@link #onWrite(List, FileDescriptor,
+ * CancellationSignal, WriteResultCallback)} and {@link #onFinish()} on another
+ * thread. This will ensure that the UI is frozen for the minimal amount of
+ * time. Also this assumes that you will generate the printed content in
+ * {@link #onLayout(PrintAttributes, PrintAttributes, CancellationSignal,
+ * LayoutResultCallback, Bundle)} which is not mandatory. If you use multiple
+ * threads, you are responsible for proper synchronization.
+ * </p>
  */
 public abstract class PrintDocumentAdapter {
+
+    /**
+     * Meta-data key: mapped to a boolean value that is <code>true</code> if
+     * the current layout is for a print preview, <code>false</code> otherwise.
+     */
+    public static final String METADATA_KEY_PRINT_PREVIEW = "KEY_METADATA_PRINT_PREVIEW";
 
     /**
      * Called when printing starts. You can use this callback to allocate
@@ -65,11 +94,11 @@ public abstract class PrintDocumentAdapter {
      * giving you a chance to layout the content such that it matches the
      * new constraints. This method is invoked on the main thread.
      * <p>
-     * After you are done laying out, you must invoke: {@link LayoutResultCallback
-     * #onLayoutFinished(PrintDocumentInfo, boolean)} with the last argument <code>true
-     * </code> or <code>false</code> depending on whether the layout changed the
-     * content or not, respectively; and {@link LayoutResultCallback#onLayoutFailed(
-     * CharSequence), if an error occurred.
+     * After you are done laying out, you <strong>must</strong> invoke: {@link
+     * LayoutResultCallback#onLayoutFinished(PrintDocumentInfo, boolean)} with
+     * the last argument <code>true</code> or <code>false</code> depending on
+     * whether the layout changed the content or not, respectively; and {@link
+     * LayoutResultCallback#onLayoutFailed(CharSequence)}, if an error occurred.
      * </p>
      * <p>
      * <strong>Note:</strong> If the content is large and a layout will be
@@ -84,12 +113,15 @@ public abstract class PrintDocumentAdapter {
      * @param newAttributes The new print attributes.
      * @param cancellationSignal Signal for observing cancel layout requests.
      * @param callback Callback to inform the system for the layout result.
+     * @param metadata Additional information about how layout the content.
      *
      * @see LayoutResultCallback
      * @see CancellationSignal
+     * @see #METADATA_KEY_PRINT_PREVIEW
      */
     public abstract void onLayout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
-            CancellationSignal cancellationSignal, LayoutResultCallback callback);
+            CancellationSignal cancellationSignal, LayoutResultCallback callback,
+            Bundle metadata);
 
     /**
      * Called when specific pages of the content should be written in the
@@ -98,7 +130,7 @@ public abstract class PrintDocumentAdapter {
      *<p>
      * After you are done writing, you should <strong>not</strong> close the
      * file descriptor, rather you must invoke: {@link WriteResultCallback
-     * #onWriteFinished()}, if writing completed successfully; or {@link
+     * #onWriteFinished(List)}, if writing completed successfully; or {@link
      * WriteResultCallback#onWriteFailed(CharSequence)}, if an error occurred.
      * </p>
      * <p>
@@ -165,7 +197,7 @@ public abstract class PrintDocumentAdapter {
     /**
      * Base class for implementing a callback for the result of {@link
      * PrintDocumentAdapter#onLayout(PrintAttributes, PrintAttributes,
-     * CancellationSignal, LayoutResultCallback)}.
+     * CancellationSignal, LayoutResultCallback, Bundle)}.
      */
     public static abstract class LayoutResultCallback {
 

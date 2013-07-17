@@ -18562,9 +18562,10 @@ package android.print {
   public abstract class PrintDocumentAdapter {
     ctor public PrintDocumentAdapter();
     method public void onFinish();
-    method public abstract void onLayout(android.print.PrintAttributes, android.print.PrintAttributes, android.os.CancellationSignal, android.print.PrintDocumentAdapter.LayoutResultCallback);
+    method public abstract void onLayout(android.print.PrintAttributes, android.print.PrintAttributes, android.os.CancellationSignal, android.print.PrintDocumentAdapter.LayoutResultCallback, android.os.Bundle);
     method public void onStart();
     method public abstract void onWrite(java.util.List<android.print.PageRange>, java.io.FileDescriptor, android.os.CancellationSignal, android.print.PrintDocumentAdapter.WriteResultCallback);
+    field public static final java.lang.String METADATA_KEY_PRINT_PREVIEW = "KEY_METADATA_PRINT_PREVIEW";
   }
 
   public static abstract class PrintDocumentAdapter.LayoutResultCallback {

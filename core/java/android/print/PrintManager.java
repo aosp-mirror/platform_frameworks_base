@@ -19,6 +19,7 @@ package android.print;
 import android.content.Context;
 import android.content.IntentSender;
 import android.content.IntentSender.SendIntentException;
+import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.ICancellationSignal;
@@ -233,12 +234,13 @@ public final class PrintManager {
         }
 
         @Override
-        public void layout(PrintAttributes oldAttributes,
-            PrintAttributes newAttributes, ILayoutResultCallback callback) {
+        public void layout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
+                ILayoutResultCallback callback, Bundle metadata) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = oldAttributes;
             args.arg2 = newAttributes;
             args.arg3 = callback;
+            args.arg4 = metadata;
             mHandler.obtainMessage(MyHandler.MSG_LAYOUT, args).sendToTarget();
         }
 
@@ -292,6 +294,7 @@ public final class PrintManager {
                         PrintAttributes oldAttributes = (PrintAttributes) args.arg1;
                         PrintAttributes newAttributes = (PrintAttributes) args.arg2;
                         ILayoutResultCallback callback = (ILayoutResultCallback) args.arg3;
+                        Bundle metadata = (Bundle) args.arg4;
                         args.recycle();
 
                         try {
@@ -300,7 +303,7 @@ public final class PrintManager {
 
                             mDocumentAdapter.onLayout(oldAttributes, newAttributes,
                                     CancellationSignal.fromTransport(remoteSignal),
-                                    new LayoutResultCallbackWrapper(callback));
+                                    new LayoutResultCallbackWrapper(callback), metadata);
                         } catch (RemoteException re) {
                             Log.e(LOG_TAG, "Error printing", re);
                         }
