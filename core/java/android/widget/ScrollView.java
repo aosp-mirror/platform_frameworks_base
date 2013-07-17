@@ -1473,7 +1473,7 @@ public class ScrollView extends FrameLayout {
         }
         mChildToScrollTo = null;
 
-        if (!hasLayout()) {
+        if (!isLaidOut()) {
             if (mSavedState != null) {
                 mScrollY = mSavedState.scrollPosition;
                 mSavedState = null;

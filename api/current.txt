@@ -26768,7 +26768,6 @@ package android.view {
     method public float getY();
     method public boolean hasFocus();
     method public boolean hasFocusable();
-    method public boolean hasLayout();
     method public boolean hasOnClickListeners();
     method public boolean hasOverlappingRendering();
     method public boolean hasTransientState();
@@ -26798,6 +26797,7 @@ package android.view {
     method public boolean isInEditMode();
     method public boolean isInLayout();
     method public boolean isInTouchMode();
+    method public boolean isLaidOut();
     method public boolean isLayoutDirectionResolved();
     method public boolean isLayoutRequested();
     method public boolean isLongClickable();

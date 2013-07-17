@@ -1480,7 +1480,7 @@ public class HorizontalScrollView extends FrameLayout {
         }
         mChildToScrollTo = null;
 
-        if (!hasLayout()) {
+        if (!isLaidOut()) {
             final int scrollRange = Math.max(0,
                     childWidth - (r - l - mPaddingLeft - mPaddingRight));
             if (mSavedState != null) {
