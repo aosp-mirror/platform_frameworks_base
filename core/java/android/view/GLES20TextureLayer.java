@@ -73,7 +73,7 @@ class GLES20TextureLayer extends GLES20Layer {
 
     SurfaceTexture getSurfaceTexture() {
         if (mSurface == null) {
-            mSurface = new SurfaceTexture(mTexture, false);
+            mSurface = new SurfaceTexture(mTexture);
         }
         return mSurface;
     }
