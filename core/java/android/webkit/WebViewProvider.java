@@ -114,6 +114,8 @@ public interface WebViewProvider {
     public void loadDataWithBaseURL(String baseUrl, String data,
             String mimeType, String encoding, String historyUrl);
 
+    public void evaluateJavaScript(String script, ValueCallback<String> resultCallback);
+
     public void saveWebArchive(String filename);
 
     public void saveWebArchive(String basename, boolean autoname, ValueCallback<String> callback);

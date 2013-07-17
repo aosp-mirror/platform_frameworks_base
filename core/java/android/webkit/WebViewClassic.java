@@ -2656,6 +2656,12 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
         clearHelpers();
     }
 
+    @Override
+    public void evaluateJavaScript(String script, ValueCallback<String> resultCallback) {
+        // K-only API not implemented in WebViewClassic.
+        throw new IllegalStateException("This API not supported in Classic WebView.");
+    }
+
     /**
      * See {@link WebView#saveWebArchive(String)}
      */

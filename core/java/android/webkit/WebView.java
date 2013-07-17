@@ -850,6 +850,23 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * Asynchronously evaluates JavaScript in the context of the currently displayed page.
+     * If non-null, |resultCallback| will be invoked with any result returned from that
+     * execution. This method must be called on the UI thread and the callback will
+     * be made on the UI thread.
+     *
+     * @param script the JavaScript to execute.
+     * @param resultCallback A callback to be invoked when the script execution
+     *                       completes with the result of the execution (if any).
+     *                       May be null if no notificaion of the result is required.
+     * @hide pending API council approval and CTS test coverage.
+     */
+    public void evaluateJavascript(String script, ValueCallback<String> resultCallback) {
+        checkThread();
+        mProvider.evaluateJavaScript(script, resultCallback);
+    }
+
+    /**
      * Saves the current view as a web archive.
      *
      * @param filename the filename where the archive should be placed
