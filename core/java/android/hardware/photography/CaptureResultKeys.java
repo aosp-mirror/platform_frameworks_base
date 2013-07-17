@@ -39,27 +39,10 @@ import static android.hardware.photography.CameraMetadata.Key;
  **/
 public final class CaptureResultKeys {
     public static final class ColorCorrection {
-
-            public static final class ModeKey extends Key<ColorCorrection.ModeKey.Enum> {
-                public enum Enum {
-                    TRANSFORM_MATRIX,
-                    FAST,
-                    HIGH_QUALITY;
-                }
-
-                public static final Enum TRANSFORM_MATRIX = Enum.TRANSFORM_MATRIX;
-                public static final Enum FAST = Enum.FAST;
-                public static final Enum HIGH_QUALITY = Enum.HIGH_QUALITY;
-
-                // TODO: remove requirement for constructor by making Key an interface
-                private ModeKey(String name) {
-                    super(name, ColorCorrection.ModeKey.Enum.class);
-                }
-
-            }
-
-        public static final Key<ColorCorrection.ModeKey.Enum> MODE =
-                new ModeKey("android.colorCorrection.mode");
+        public static final Key<Rational[]> TRANSFORM =
+                new Key<Rational[]>("android.colorCorrection.transform", Rational[].class);
+        public static final Key<float[]> GAINS =
+                new Key<float[]>("android.colorCorrection.gains", float[].class);
 
     }
 
@@ -466,6 +449,33 @@ public final class CaptureResultKeys {
                 new Key<int[]>("android.statistics.faceRectangles", int[].class);
         public static final Key<byte[]> FACE_SCORES =
                 new Key<byte[]>("android.statistics.faceScores", byte[].class);
+        public static final Key<float[]> LENS_SHADING_MAP =
+                new Key<float[]>("android.statistics.lensShadingMap", float[].class);
+        public static final Key<float[]> PREDICTED_COLOR_GAINS =
+                new Key<float[]>("android.statistics.predictedColorGains", float[].class);
+        public static final Key<Rational[]> PREDICTED_COLOR_TRANSFORM =
+                new Key<Rational[]>("android.statistics.predictedColorTransform", Rational[].class);
+
+            public static final class SceneFlickerKey extends Key<Statistics.SceneFlickerKey.Enum> {
+                public enum Enum {
+                    NONE,
+                    _50HZ,
+                    _60HZ;
+                }
+
+                public static final Enum NONE = Enum.NONE;
+                public static final Enum _50HZ = Enum._50HZ;
+                public static final Enum _60HZ = Enum._60HZ;
+
+                // TODO: remove requirement for constructor by making Key an interface
+                private SceneFlickerKey(String name) {
+                    super(name, Statistics.SceneFlickerKey.Enum.class);
+                }
+
+            }
+
+        public static final Key<Statistics.SceneFlickerKey.Enum> SCENE_FLICKER =
+                new SceneFlickerKey("android.statistics.sceneFlicker");
 
     }
 
@@ -529,6 +539,29 @@ public final class CaptureResultKeys {
          */
         public static final Key<Led.TransmitKey.Enum> TRANSMIT =
                 new TransmitKey("android.led.transmit");
+
+    }
+
+    public static final class BlackLevel {
+
+            public static final class LockKey extends Key<BlackLevel.LockKey.Enum> {
+                public enum Enum {
+                    OFF,
+                    ON;
+                }
+
+                public static final Enum OFF = Enum.OFF;
+                public static final Enum ON = Enum.ON;
+
+                // TODO: remove requirement for constructor by making Key an interface
+                private LockKey(String name) {
+                    super(name, BlackLevel.LockKey.Enum.class);
+                }
+
+            }
+
+        public static final Key<BlackLevel.LockKey.Enum> LOCK =
+                new LockKey("android.blackLevel.lock");
 
     }
 
