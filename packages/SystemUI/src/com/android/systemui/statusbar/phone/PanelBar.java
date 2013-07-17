@@ -198,7 +198,7 @@ public class PanelBar extends FrameLayout {
         }
         if (DEBUG) LOG("collapseAllPanels: animate=%s waiting=%s", animate, waiting);
         if (!waiting && mState != STATE_CLOSED) {
-            // it's possible that nothing animated, so we replicate the termination 
+            // it's possible that nothing animated, so we replicate the termination
             // conditions of panelExpansionChanged here
             go(STATE_CLOSED);
             onAllPanelsCollapsed();

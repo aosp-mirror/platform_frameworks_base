@@ -33,18 +33,18 @@ import com.android.internal.os.ProcessStats;
 
 public class LoadAverageService extends Service {
     private View mView;
-    
+
     private static final class Stats extends ProcessStats {
         String mLoadText;
         int mLoadWidth;
-        
+
         private final Paint mPaint;
-        
+
         Stats(Paint paint) {
             super(false);
             mPaint = paint;
         }
-        
+
         @Override
         public void onLoadChanged(float load1, float load5, float load15) {
             mLoadText = load1 + " / " + load5 + " / " + load15;
@@ -56,7 +56,7 @@ public class LoadAverageService extends Service {
             return (int)mPaint.measureText(name);
         }
     }
-    
+
     private class LoadView extends View {
         private Handler mHandler = new Handler() {
             @Override
@@ -71,7 +71,7 @@ public class LoadAverageService extends Service {
         };
 
         private final Stats mStats;
-        
+
         private Paint mLoadPaint;
         private Paint mAddedPaint;
         private Paint mRemovedPaint;
@@ -186,7 +186,7 @@ public class LoadAverageService extends Service {
             final int irqTime = stats.getLastIrqTime();
             final int softIrqTime = stats.getLastSoftIrqTime();
             final int idleTime = stats.getLastIdleTime();
-            
+
             final int totalTime = userTime+systemTime+iowaitTime+irqTime+softIrqTime+idleTime;
             if (totalTime == 0) {
                 return;
@@ -269,7 +269,7 @@ public class LoadAverageService extends Service {
                     maxWidth = st.nameWidth;
                 }
             }
-            
+
             int neededWidth = mPaddingLeft + mPaddingRight + maxWidth;
             int neededHeight = mPaddingTop + mPaddingBottom + (mFH*(1+NW));
             if (neededWidth != mNeededWidth || neededHeight != mNeededHeight) {

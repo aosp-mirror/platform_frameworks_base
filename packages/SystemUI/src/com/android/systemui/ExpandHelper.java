@@ -109,7 +109,7 @@ public class ExpandHelper implements Gefingerpoken, OnClickListener {
 
     private View mScrollView;
 
-    private OnScaleGestureListener mScaleGestureListener 
+    private OnScaleGestureListener mScaleGestureListener
             = new ScaleGestureDetector.SimpleOnScaleGestureListener() {
         @Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {

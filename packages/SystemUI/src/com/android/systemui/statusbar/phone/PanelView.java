@@ -226,7 +226,7 @@ public class PanelView extends FrameLayout {
             return;
         }
         if (mPeekAnimator == null) {
-            mPeekAnimator = ObjectAnimator.ofFloat(this, 
+            mPeekAnimator = ObjectAnimator.ofFloat(this,
                     "expandedHeight", mPeekHeight)
                 .setDuration(250);
         }
@@ -339,7 +339,7 @@ public class PanelView extends FrameLayout {
 
         mFlingGestureMaxOutputVelocityPx = res.getDimension(R.dimen.fling_gesture_max_output_velocity);
 
-        mPeekHeight = res.getDimension(R.dimen.peek_height) 
+        mPeekHeight = res.getDimension(R.dimen.peek_height)
             + getPaddingBottom() // our window might have a dropshadow
             - (mHandleView == null ? 0 : mHandleView.getPaddingTop()); // the handle might have a topshadow
     }

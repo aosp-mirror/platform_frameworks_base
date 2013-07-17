@@ -28,7 +28,7 @@ public abstract class SystemUI {
     public Map<Class<?>, Object> mComponents;
 
     public abstract void start();
-    
+
     protected void onConfigurationChanged(Configuration newConfig) {
     }
 

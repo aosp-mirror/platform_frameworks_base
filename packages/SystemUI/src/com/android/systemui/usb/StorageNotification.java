@@ -41,7 +41,7 @@ public class StorageNotification extends SystemUI {
 
     /**
      * The notification that is shown when a USB mass storage host
-     * is connected. 
+     * is connected.
      * <p>
      * This is lazily created, so use {@link #setUsbStorageNotification()}.
      */
@@ -217,7 +217,7 @@ public class StorageNotification extends SystemUI {
             setMediaStorageNotification(
                     com.android.internal.R.string.ext_media_unmountable_notification_title,
                     com.android.internal.R.string.ext_media_unmountable_notification_message,
-                    com.android.internal.R.drawable.stat_notify_sdcard_usb, true, false, pi); 
+                    com.android.internal.R.drawable.stat_notify_sdcard_usb, true, false, pi);
             updateUsbMassStorageNotification(mUmsAvailable);
         } else if (newState.equals(Environment.MEDIA_REMOVED)) {
             /*
@@ -283,7 +283,7 @@ public class StorageNotification extends SystemUI {
         if (notificationManager == null) {
             return;
         }
-        
+
         if (visible) {
             Resources r = Resources.getSystem();
             CharSequence title = r.getText(titleId);
@@ -300,7 +300,7 @@ public class StorageNotification extends SystemUI {
             } else {
                 mUsbStorageNotification.defaults &= ~Notification.DEFAULT_SOUND;
             }
-                
+
             mUsbStorageNotification.flags = Notification.FLAG_ONGOING_EVENT;
 
             mUsbStorageNotification.tickerText = title;
@@ -329,7 +329,7 @@ public class StorageNotification extends SystemUI {
                 mUsbStorageNotification.fullScreenIntent = pi;
             }
         }
-    
+
         final int notificationId = mUsbStorageNotification.icon;
         if (visible) {
             notificationManager.notifyAsUser(null, notificationId, mUsbStorageNotification,
@@ -373,7 +373,7 @@ public class StorageNotification extends SystemUI {
             final int notificationId = mMediaStorageNotification.icon;
             notificationManager.cancel(notificationId);
         }
-        
+
         if (visible) {
             Resources r = Resources.getSystem();
             CharSequence title = r.getText(titleId);
@@ -402,7 +402,7 @@ public class StorageNotification extends SystemUI {
             mMediaStorageNotification.icon = icon;
             mMediaStorageNotification.setLatestEventInfo(mContext, title, message, pi);
         }
-    
+
         final int notificationId = mMediaStorageNotification.icon;
         if (visible) {
             notificationManager.notifyAsUser(null, notificationId,

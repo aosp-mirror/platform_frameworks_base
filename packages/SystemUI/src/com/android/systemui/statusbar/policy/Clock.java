@@ -192,7 +192,7 @@ public class Clock extends TextView {
                 return formatted;
             }
         }
- 
+
         return result;
 
     }

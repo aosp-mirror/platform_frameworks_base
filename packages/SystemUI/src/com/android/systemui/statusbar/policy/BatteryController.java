@@ -71,7 +71,7 @@ public class BatteryController extends BroadcastReceiver {
 
             boolean plugged = false;
             switch (status) {
-                case BatteryManager.BATTERY_STATUS_CHARGING: 
+                case BatteryManager.BATTERY_STATUS_CHARGING:
                 case BatteryManager.BATTERY_STATUS_FULL:
                     plugged = true;
                     break;

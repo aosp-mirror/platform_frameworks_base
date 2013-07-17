@@ -40,10 +40,10 @@ public class HeadsUpNotificationView extends LinearLayout implements SwipeHelper
     Rect mTmpRect = new Rect();
 
     private SwipeHelper mSwipeHelper;
-    
+
     BaseStatusBar mBar;
     private ViewGroup mContentHolder;
-    
+
     private Notification mHeadsUp;
     private OnClickListener mOnClickListener;
 
@@ -62,14 +62,14 @@ public class HeadsUpNotificationView extends LinearLayout implements SwipeHelper
         float densityScale = getResources().getDisplayMetrics().density;
         float pagingTouchSlop = ViewConfiguration.get(getContext()).getScaledPagingTouchSlop();
         mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
-        
+
         mContentHolder = (ViewGroup) findViewById(R.id.contentHolder);
         if (mHeadsUp != null) {
             // whoops, we're on already!
             applyContent(mHeadsUp, mOnClickListener);
         }
     }
-    
+
     public void setBar(BaseStatusBar bar) {
         mBar = bar;
     }

@@ -283,7 +283,7 @@ public class PowerUI extends SystemUI {
         d.show();
         mInvalidChargerDialog = d;
     }
-    
+
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.print("mLowBatteryAlertCloseLevel=");
         pw.println(mLowBatteryAlertCloseLevel);
