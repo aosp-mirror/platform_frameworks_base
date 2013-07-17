@@ -461,8 +461,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     public void computeFrameLw(Rect pf, Rect df, Rect of, Rect cf, Rect vf) {
         mHaveFrame = true;
 
-        if (mAppToken != null) {
-            mContainingFrame.set(getStackBounds());
+        TaskStack stack = mAppToken != null ? getStack() : null;
+        if (stack != null && stack.hasSibling()) {
+            mContainingFrame.set(getStackBounds(stack));
             if (mUnderStatusBar) {
                 mContainingFrame.top = pf.top;
             }
@@ -714,7 +715,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     }
 
     Rect getStackBounds() {
-        TaskStack stack = getStack();
+        return getStackBounds(getStack());
+    }
+
+    private Rect getStackBounds(TaskStack stack) {
         if (stack != null) {
             return stack.mStackBox.mBounds;
         }

@@ -87,6 +87,10 @@ public class TaskStack {
         return mStackId == HOME_STACK_ID;
     }
 
+    boolean hasSibling() {
+        return mStackBox.mParent != null;
+    }
+
     /**
      * Put a Task in this stack. Used for adding and moving.
      * @param task The task to add.
