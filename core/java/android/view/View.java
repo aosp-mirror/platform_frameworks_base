@@ -2198,7 +2198,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Flag indicating that the view has been through at least one layout since it
      * was last attached to a window.
      */
-    static final int PFLAG3_HAS_LAYOUT = 0x4;
+    static final int PFLAG3_IS_LAID_OUT = 0x4;
 
     /**
      * Flag indicating that a call to measure() was skipped and should be done
@@ -6160,8 +6160,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Returns true if this view has been through at least one layout since it
      * was last attached to or detached from a window.
      */
-    public boolean hasLayout() {
-        return (mPrivateFlags3 & PFLAG3_HAS_LAYOUT) == PFLAG3_HAS_LAYOUT;
+    public boolean isLaidOut() {
+        return (mPrivateFlags3 & PFLAG3_IS_LAID_OUT) == PFLAG3_IS_LAID_OUT;
     }
 
     /**
@@ -11813,7 +11813,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags &= ~PFLAG_AWAKEN_SCROLL_BARS_ON_ATTACH;
         }
 
-        mPrivateFlags3 &= ~PFLAG3_HAS_LAYOUT;
+        mPrivateFlags3 &= ~PFLAG3_IS_LAID_OUT;
 
         jumpDrawablesToCurrentState();
 
@@ -12112,7 +12112,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected void onDetachedFromWindow() {
         mPrivateFlags &= ~PFLAG_CANCEL_NEXT_UP_EVENT;
-        mPrivateFlags3 &= ~PFLAG3_HAS_LAYOUT;
+        mPrivateFlags3 &= ~PFLAG3_IS_LAID_OUT;
 
         removeUnsetPressCallback();
         removeLongPressCallback();
@@ -14439,7 +14439,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         mPrivateFlags &= ~PFLAG_FORCE_LAYOUT;
-        mPrivateFlags3 |= PFLAG3_HAS_LAYOUT;
+        mPrivateFlags3 |= PFLAG3_IS_LAID_OUT;
     }
 
     /**
