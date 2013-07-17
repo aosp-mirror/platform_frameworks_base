@@ -973,6 +973,9 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
+        if (!isResumed()) {
+            return;
+        }
         super.onListItemClick(l, v, position, id);
 
         if (mAdapter != null) {
