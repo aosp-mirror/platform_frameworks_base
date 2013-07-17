@@ -56,7 +56,7 @@ import java.util.List;
  * // finish the page
  * document.finishPage(page);
  * . . .
- * add more pages
+ * // add more pages
  * . . .
  * // write the document content
  * document.writeTo(getOutputStream());

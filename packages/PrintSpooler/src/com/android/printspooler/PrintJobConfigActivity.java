@@ -536,6 +536,7 @@ public class PrintJobConfigActivity extends Activity {
         // TODO: Implement old attributes tracking
         mPrintSpooler.setPrintJobAttributes(mPrintJobId, mPrintAttributes);
 
+        // TODO: Implement setting the print preview attribute
         mRemotePrintAdapter.layout(new PrintAttributes.Builder().create(),
                 mPrintAttributes, new LayoutResultCallback() {
             @Override
@@ -566,7 +567,7 @@ public class PrintJobConfigActivity extends Activity {
                 Log.e(LOG_TAG, "Error during layout: " + error);
                 finishActivity(Activity.RESULT_CANCELED);
             }
-        });
+        }, new Bundle());
     }
 
     private void notifyPrintableFinishIfNeeded() {

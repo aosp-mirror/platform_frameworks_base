@@ -16,6 +16,7 @@
 
 package android.print;
 
+import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.print.ILayoutResultCallback;
 import android.print.IWriteResultCallback;
@@ -30,7 +31,7 @@ import android.print.PrintAttributes;
 oneway interface IPrintDocumentAdapter {
     void start();
     void layout(in PrintAttributes oldAttributes, in PrintAttributes newAttributes,
-            ILayoutResultCallback callback);
+            ILayoutResultCallback callback, in Bundle metadata);
     void write(in List<PageRange> pages, in ParcelFileDescriptor fd,
             IWriteResultCallback callback);
     void finish();

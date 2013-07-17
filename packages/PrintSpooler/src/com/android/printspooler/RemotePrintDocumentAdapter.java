@@ -17,6 +17,7 @@
 package com.android.printspooler;
 
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.ICancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -31,8 +32,6 @@ import android.print.PrintDocumentInfo;
 import android.util.Log;
 import android.util.Slog;
 
-import libcore.io.IoUtils;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -41,6 +40,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import libcore.io.IoUtils;
 
 /**
  * This class represents a remote print document adapter instance.
@@ -122,8 +123,9 @@ final class RemotePrintDocumentAdapter {
     }
 
     public void layout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
-            LayoutResultCallback callback) {
-        LayoutAsyncTask task = new LayoutAsyncTask(oldAttributes, newAttributes, callback);
+            LayoutResultCallback callback, Bundle metadata) {
+        LayoutAsyncTask task = new LayoutAsyncTask(oldAttributes, newAttributes, callback,
+                metadata);
         synchronized (mLock) {
             mTaskQueue.add(task);
             task.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
@@ -181,6 +183,8 @@ final class RemotePrintDocumentAdapter {
 
         private final LayoutResultCallback mCallback;
 
+        private final Bundle mMetadata;
+
         private final ILayoutResultCallback mILayoutResultCallback =
                 new ILayoutResultCallback.Stub() {
             @Override
@@ -219,11 +223,12 @@ final class RemotePrintDocumentAdapter {
 
         private boolean mCompleted;
 
-        public LayoutAsyncTask(PrintAttributes oldAttributes,
-                PrintAttributes newAttributes, LayoutResultCallback callback) {
+        public LayoutAsyncTask(PrintAttributes oldAttributes, PrintAttributes newAttributes,
+                LayoutResultCallback callback, Bundle metadata) {
             mOldAttributes = oldAttributes;
             mNewAttributes = newAttributes;
             mCallback = callback;
+            mMetadata = metadata;
         }
 
         @Override
@@ -246,7 +251,7 @@ final class RemotePrintDocumentAdapter {
             }
             try {
                 mRemoteInterface.layout(mOldAttributes, mNewAttributes,
-                        mILayoutResultCallback);
+                        mILayoutResultCallback, mMetadata);
                 synchronized (mLock) {
                     while (true) {
                         if (isCancelled()) {

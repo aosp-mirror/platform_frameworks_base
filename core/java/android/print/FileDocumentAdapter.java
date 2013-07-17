@@ -18,6 +18,7 @@ package android.print;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.CancellationSignal.OnCancelListener;
 import android.util.Log;
@@ -59,7 +60,8 @@ final class FileDocumentAdapter extends PrintDocumentAdapter {
 
     @Override
     public void onLayout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
-            CancellationSignal cancellationSignal, LayoutResultCallback callback) {
+            CancellationSignal cancellationSignal, LayoutResultCallback callback,
+            Bundle metadata) {
         // TODO: When we have a PDF rendering library we should query the page count.
         PrintDocumentInfo info =  new PrintDocumentInfo.Builder()
         .setPageCount(PrintDocumentInfo.PAGE_COUNT_UNKNOWN).create();
