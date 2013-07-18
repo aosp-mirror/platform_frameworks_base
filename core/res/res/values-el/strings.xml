@@ -470,6 +470,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Επιτρέπει σε μια εφαρμογή να χρησιμοποιεί λειτουργίες SurfaceFlinger χαμηλού επιπέδου."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"ανάγνωση προσωρινής μνήμης πλαισίου"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Επιτρέπει στην εφαρμογή την ανάγνωση του περιεχομένου της προσωρινής μνήμης πλαισίου."</string>
+    <!-- no translation found for permlab_accessInputFlinger (5348635270689553857) -->
+    <skip />
+    <!-- no translation found for permdesc_accessInputFlinger (2104864941201226616) -->
+    <skip />
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"διαμόρφωση οθονών Wifi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Επιτρέπει τη διαμόρφωση της εφαρμογής και τη σύνδεσης σε οθόνες Wifi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"έλεγχος οθονών Wifi"</string>
@@ -647,6 +651,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Επιτρέπει στην εφαρμογή να ανακτά, να εξετάζει και να απαλείφει ειδοποιήσεις, συμπεριλαμβανομένων εκείνων που δημοσιεύονται από άλλες εφαρμογές."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"δέσμευση σε υπηρεσία ακρόασης ειδοποίησης"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας υπηρεσίας ακρόασης ειδοποιήσεων. Δεν απαιτείται σε κανονικές εφαρμογές."</string>
+    <!-- no translation found for permlab_invokeCarrierSetup (3699600833975117478) -->
+    <skip />
+    <!-- no translation found for permdesc_invokeCarrierSetup (4159549152529111920) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ορισμός κανόνων κωδικού πρόσβασης"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Έλεγχος του μεγέθους και των χαρακτήρων που επιτρέπονται στους κωδικούς πρόσβασης ξεκλειδώματος οθόνης."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Παρακολούθηση προσπαθειών ξεκλειδώματος οθόνης"</string>
@@ -1596,6 +1604,10 @@
     <!-- no translation found for mediaSize_na_ledger (281871464896601236) -->
     <skip />
     <!-- no translation found for mediaSize_na_tabloid (5775966416333578127) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cancelled (7091258378121627624) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cannot_write (8132505417935337724) -->
     <skip />
     <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
     <skip />

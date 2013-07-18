@@ -470,6 +470,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permite à aplicação utilizar funcionalidades de SurfaceFlinger de nível inferior."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"ler memória intermédia de fotogramas"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Permite à aplicação ler o conteúdo da memória intermédia de fotogramas."</string>
+    <!-- no translation found for permlab_accessInputFlinger (5348635270689553857) -->
+    <skip />
+    <!-- no translation found for permdesc_accessInputFlinger (2104864941201226616) -->
+    <skip />
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configurar visores Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Permite que a aplicação se configure e se ligue a visores Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"controlar visores Wi-Fi"</string>
@@ -647,6 +651,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permite que a aplicação obtenha, examine e limpe notificações, incluindo as que foram publicadas por outras aplicações."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"vincular a um serviço de escuta de notificações"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite que o titular vincule a interface de nível superior de um serviço de escuta de notificações. Nunca deverá ser necessário para aplicações normais."</string>
+    <!-- no translation found for permlab_invokeCarrierSetup (3699600833975117478) -->
+    <skip />
+    <!-- no translation found for permdesc_invokeCarrierSetup (4159549152529111920) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Definir regras de palavra-passe"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controlar o comprimento e os caracteres permitidos nas palavras-passe de desbloqueio do ecrã."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitorizar tentativas de desbloqueio do ecrã"</string>
@@ -1596,6 +1604,10 @@
     <!-- no translation found for mediaSize_na_ledger (281871464896601236) -->
     <skip />
     <!-- no translation found for mediaSize_na_tabloid (5775966416333578127) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cancelled (7091258378121627624) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cannot_write (8132505417935337724) -->
     <skip />
     <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
     <skip />
