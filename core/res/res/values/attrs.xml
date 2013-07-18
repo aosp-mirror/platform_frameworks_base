@@ -2577,6 +2577,31 @@
         <attr name="vendor" format="string"/>
     </declare-styleable>
 
+    <!-- Use <code>apdu-service</code> as the root tag of the XML resource that
+         describes an {@link android.nfc.cardemulation.HostApduService} or
+         {@link android.nfc.cardemulation.SeApduService} service, which is referenced
+         from its SERVICE_META_DATA entry. -->
+    <declare-styleable name="ApduService">
+        <!-- Set to true to let the NFC subsystem know that this service implements
+             a payment instrument. That will allow this service to be enumerated in
+             a list of payment services, where the user can pick his preferred payment
+             service. The preferred service will be bound to persistently, to make sure
+             it can immediately process APDUs without service startup delay. This is vital
+             for existing payment infrastructure that has very strict timing requirements. -->
+        <attr name="paymentService" format="boolean" />
+        <!-- Short description of the functionality the serivce implements.-->
+        <attr name="description" />
+    </declare-styleable>
+
+    <!-- Specify one or more <code>aid-filter</code> elements inside a <code>apdu-service</code>
+         element to list the ISO7816 Application ID (AIDs) your service can handle.-->
+    <declare-styleable name="AidFilter">
+        <!-- The ISO7816 Application ID -->
+        <attr name="aid" format="string" />
+        <!-- Short description of what the AID implements.-->
+        <attr name="description" />
+    </declare-styleable>
+
     <declare-styleable name="ActionMenuItemView">
         <attr name="minWidth" />
     </declare-styleable>
