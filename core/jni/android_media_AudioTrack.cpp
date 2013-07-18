@@ -137,12 +137,8 @@ static void audioCallback(int event, void* user, void *info) {
         callbackInfo->busy = true;
     }
 
-    if (event == AudioTrack::EVENT_MORE_DATA) {
-        // set size to 0 to signal we're not using the callback to write more data
-        AudioTrack::Buffer* pBuff = (AudioTrack::Buffer*)info;
-        pBuff->size = 0;
-
-    } else if (event == AudioTrack::EVENT_MARKER) {
+    switch (event) {
+    case AudioTrack::EVENT_MARKER: {
         JNIEnv *env = AndroidRuntime::getJNIEnv();
         if (user && env) {
             env->CallStaticVoidMethod(
@@ -154,8 +150,9 @@ static void audioCallback(int event, void* user, void *info) {
                 env->ExceptionClear();
             }
         }
+        } break;
 
-    } else if (event == AudioTrack::EVENT_NEW_POS) {
+    case AudioTrack::EVENT_NEW_POS: {
         JNIEnv *env = AndroidRuntime::getJNIEnv();
         if (user && env) {
             env->CallStaticVoidMethod(
@@ -167,7 +164,9 @@ static void audioCallback(int event, void* user, void *info) {
                 env->ExceptionClear();
             }
         }
+        } break;
     }
+
     {
         Mutex::Autolock l(sLock);
         callbackInfo->busy = false;

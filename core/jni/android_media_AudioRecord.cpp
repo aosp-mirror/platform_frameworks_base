@@ -101,12 +101,9 @@ static void recorderCallback(int event, void* user, void *info) {
         }
         callbackInfo->busy = true;
     }
-    if (event == AudioRecord::EVENT_MORE_DATA) {
-        // set size to 0 to signal we're not using the callback to read more data
-        AudioRecord::Buffer* pBuff = (AudioRecord::Buffer*)info;
-        pBuff->size = 0;
 
-    } else if (event == AudioRecord::EVENT_MARKER) {
+    switch (event) {
+    case AudioRecord::EVENT_MARKER: {
         JNIEnv *env = AndroidRuntime::getJNIEnv();
         if (user && env) {
             env->CallStaticVoidMethod(
@@ -118,8 +115,9 @@ static void recorderCallback(int event, void* user, void *info) {
                 env->ExceptionClear();
             }
         }
+        } break;
 
-    } else if (event == AudioRecord::EVENT_NEW_POS) {
+    case AudioRecord::EVENT_NEW_POS: {
         JNIEnv *env = AndroidRuntime::getJNIEnv();
         if (user && env) {
             env->CallStaticVoidMethod(
@@ -131,7 +129,9 @@ static void recorderCallback(int event, void* user, void *info) {
                 env->ExceptionClear();
             }
         }
+        } break;
     }
+
     {
         Mutex::Autolock l(sLock);
         callbackInfo->busy = false;
