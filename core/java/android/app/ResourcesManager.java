@@ -18,7 +18,6 @@ package android.app;
 
 import static android.app.ActivityThread.DEBUG_CONFIGURATION;
 
-import android.app.ApplicationPackageManager;
 import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
@@ -34,10 +33,7 @@ import android.view.Display;
 import android.view.DisplayAdjustments;
 
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Locale;
-import java.util.Map;
 
 /** @hide */
 public class ResourcesManager {
@@ -46,8 +42,8 @@ public class ResourcesManager {
     static final boolean DEBUG_STATS = true;
 
     private static ResourcesManager sResourcesManager;
-    final HashMap<ResourcesKey, WeakReference<Resources> > mActiveResources
-            = new HashMap<ResourcesKey, WeakReference<Resources> >();
+    final ArrayMap<ResourcesKey, WeakReference<Resources> > mActiveResources
+            = new ArrayMap<ResourcesKey, WeakReference<Resources> >();
 
     final ArrayMap<DisplayAdjustments, DisplayMetrics> mDefaultDisplayMetrics
             = new ArrayMap<DisplayAdjustments, DisplayMetrics>();
@@ -257,19 +253,16 @@ public class ResourcesManager {
 
         Configuration tmpConfig = null;
 
-        Iterator<Map.Entry<ResourcesKey, WeakReference<Resources>>> it =
-                mActiveResources.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<ResourcesKey, WeakReference<Resources>> entry = it.next();
-            Resources r = entry.getValue().get();
+        for (int i=mActiveResources.size()-1; i>=0; i--) {
+            ResourcesKey key = mActiveResources.keyAt(i);
+            Resources r = mActiveResources.valueAt(i).get();
             if (r != null) {
                 if (DEBUG_CONFIGURATION) Slog.v(TAG, "Changing resources "
                         + r + " config to: " + config);
-                int displayId = entry.getKey().mDisplayId;
+                int displayId = key.mDisplayId;
                 boolean isDefaultDisplay = (displayId == Display.DEFAULT_DISPLAY);
                 DisplayMetrics dm = defaultDisplayMetrics;
-                ResourcesKey resourcesKey = entry.getKey();
-                final boolean hasOverrideConfiguration = resourcesKey.hasOverrideConfiguration();
+                final boolean hasOverrideConfiguration = key.hasOverrideConfiguration();
                 if (!isDefaultDisplay || hasOverrideConfiguration) {
                     if (tmpConfig == null) {
                         tmpConfig = new Configuration();
@@ -280,7 +273,7 @@ public class ResourcesManager {
                         applyNonDefaultDisplayMetricsToConfigurationLocked(dm, tmpConfig);
                     }
                     if (hasOverrideConfiguration) {
-                        tmpConfig.updateFrom(resourcesKey.mOverrideConfiguration);
+                        tmpConfig.updateFrom(key.mOverrideConfiguration);
                     }
                     r.updateConfiguration(tmpConfig, dm, compat);
                 } else {
@@ -290,7 +283,7 @@ public class ResourcesManager {
                 //        + " " + r + ": " + r.getConfiguration());
             } else {
                 //Slog.i(TAG, "Removing old resources " + v.getKey());
-                it.remove();
+                mActiveResources.removeAt(i);
             }
         }
 

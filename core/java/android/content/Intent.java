@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.util.ArraySet;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -42,7 +43,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
@@ -3609,7 +3609,7 @@ public class Intent implements Parcelable, Cloneable {
     private String mPackage;
     private ComponentName mComponent;
     private int mFlags;
-    private HashSet<String> mCategories;
+    private ArraySet<String> mCategories;
     private Bundle mExtras;
     private Rect mSourceBounds;
     private Intent mSelector;
@@ -3634,7 +3634,7 @@ public class Intent implements Parcelable, Cloneable {
         this.mComponent = o.mComponent;
         this.mFlags = o.mFlags;
         if (o.mCategories != null) {
-            this.mCategories = new HashSet<String>(o.mCategories);
+            this.mCategories = new ArraySet<String>(o.mCategories);
         }
         if (o.mExtras != null) {
             this.mExtras = new Bundle(o.mExtras);
@@ -3662,7 +3662,7 @@ public class Intent implements Parcelable, Cloneable {
         this.mPackage = o.mPackage;
         this.mComponent = o.mComponent;
         if (o.mCategories != null) {
-            this.mCategories = new HashSet<String>(o.mCategories);
+            this.mCategories = new ArraySet<String>(o.mCategories);
         }
     }
 
@@ -5226,7 +5226,7 @@ public class Intent implements Parcelable, Cloneable {
      */
     public Intent addCategory(String category) {
         if (mCategories == null) {
-            mCategories = new HashSet<String>();
+            mCategories = new ArraySet<String>();
         }
         mCategories.add(category.intern());
         return this;
@@ -6370,7 +6370,7 @@ public class Intent implements Parcelable, Cloneable {
         if (other.mCategories != null
                 && (mCategories == null || (flags&FILL_IN_CATEGORIES) != 0)) {
             if (other.mCategories != null) {
-                mCategories = new HashSet<String>(other.mCategories);
+                mCategories = new ArraySet<String>(other.mCategories);
             }
             changes |= FILL_IN_CATEGORIES;
         }
@@ -6641,12 +6641,9 @@ public class Intent implements Parcelable, Cloneable {
             }
             first = false;
             b.append("cat=[");
-            Iterator<String> i = mCategories.iterator();
-            boolean didone = false;
-            while (i.hasNext()) {
-                if (didone) b.append(",");
-                didone = true;
-                b.append(i.next());
+            for (int i=0; i<mCategories.size(); i++) {
+                if (i > 0) b.append(',');
+                b.append(mCategories.valueAt(i));
             }
             b.append("]");
         }
@@ -6804,8 +6801,8 @@ public class Intent implements Parcelable, Cloneable {
             uri.append("action=").append(Uri.encode(mAction)).append(';');
         }
         if (mCategories != null) {
-            for (String category : mCategories) {
-                uri.append("category=").append(Uri.encode(category)).append(';');
+            for (int i=0; i<mCategories.size(); i++) {
+                uri.append("category=").append(Uri.encode(mCategories.valueAt(i))).append(';');
             }
         }
         if (mType != null) {
@@ -6873,9 +6870,10 @@ public class Intent implements Parcelable, Cloneable {
         }
 
         if (mCategories != null) {
-            out.writeInt(mCategories.size());
-            for (String category : mCategories) {
-                out.writeString(category);
+            final int N = mCategories.size();
+            out.writeInt(N);
+            for (int i=0; i<N; i++) {
+                out.writeString(mCategories.valueAt(i));
             }
         } else {
             out.writeInt(0);
@@ -6927,7 +6925,7 @@ public class Intent implements Parcelable, Cloneable {
 
         int N = in.readInt();
         if (N > 0) {
-            mCategories = new HashSet<String>();
+            mCategories = new ArraySet<String>();
             int i;
             for (i=0; i<N; i++) {
                 mCategories.add(in.readString().intern());
