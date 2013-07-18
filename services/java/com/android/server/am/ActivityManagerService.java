@@ -479,38 +479,31 @@ public final class ActivityManagerService extends ActivityManagerNative
         int pid;
         IBinder token;
     }
-    final SparseArray<ForegroundToken> mForegroundProcesses
-            = new SparseArray<ForegroundToken>();
+    final SparseArray<ForegroundToken> mForegroundProcesses = new SparseArray<ForegroundToken>();
 
     /**
      * List of records for processes that someone had tried to start before the
      * system was ready.  We don't start them at that point, but ensure they
      * are started by the time booting is complete.
      */
-    final ArrayList<ProcessRecord> mProcessesOnHold
-            = new ArrayList<ProcessRecord>();
+    final ArrayList<ProcessRecord> mProcessesOnHold = new ArrayList<ProcessRecord>();
 
     /**
      * List of persistent applications that are in the process
      * of being started.
      */
-    final ArrayList<ProcessRecord> mPersistentStartingProcesses
-            = new ArrayList<ProcessRecord>();
+    final ArrayList<ProcessRecord> mPersistentStartingProcesses = new ArrayList<ProcessRecord>();
 
     /**
      * Processes that are being forcibly torn down.
      */
-    final ArrayList<ProcessRecord> mRemovedProcesses
-            = new ArrayList<ProcessRecord>();
+    final ArrayList<ProcessRecord> mRemovedProcesses = new ArrayList<ProcessRecord>();
 
     /**
      * List of running applications, sorted by recent usage.
      * The first entry in the list is the least recently used.
-     * It contains ApplicationRecord objects.  This list does NOT include
-     * any persistent application records (since we never want to exit them).
      */
-    final ArrayList<ProcessRecord> mLruProcesses
-            = new ArrayList<ProcessRecord>();
+    final ArrayList<ProcessRecord> mLruProcesses = new ArrayList<ProcessRecord>();
 
     /**
      * List of processes that should gc as soon as things are idle.
@@ -13754,6 +13747,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                         int clientAdj = computeOomAdjLocked(client, cachedAdj,
                                 TOP_APP, doingAll, now);
                         int clientProcState = client.curProcState;
+                        if (clientProcState >= ActivityManager.PROCESS_STATE_CACHED_ACTIVITY) {
+                            // If the other app is cached for any reason, for purposes here
+                            // we are going to consider it empty.  The specific cached state
+                            // doesn't propagate except under certain conditions.
+                            clientProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
+                        }
                         String adjType = null;
                         if ((cr.flags&Context.BIND_ALLOW_OOM_MANAGEMENT) != 0) {
                             // Not doing bind OOM management, so treat
@@ -13801,8 +13800,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                                                 ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT;
                                         app.adjType = "cch-client-act";
                                     }
+                                    app.hasClientActivities = true;
                                 }
-                                app.hasClientActivities |= client.hasActivities;
                             }
                         }
                         if (adj > clientAdj) {
@@ -13912,6 +13911,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                     continue;
                 }
                 int clientAdj = computeOomAdjLocked(client, cachedAdj, TOP_APP, doingAll, now);
+                int clientProcState = client.curProcState;
+                if (clientProcState >= ActivityManager.PROCESS_STATE_CACHED_ACTIVITY) {
+                    // If the other app is cached for any reason, for purposes here
+                    // we are going to consider it empty.
+                    clientProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
+                }
                 if (adj > clientAdj) {
                     if (app.hasShownUi && app != mHomeProcess
                             && clientAdj > ProcessList.PERCEPTIBLE_APP_ADJ) {
@@ -13929,11 +13934,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.adjSourceOom = clientAdj;
                     app.adjTarget = cpr.name;
                 }
-                if (procState > client.curProcState) {
-                    procState = client.curProcState >
-                            ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
-                            ? client.curProcState
-                            : ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+                if (procState > clientProcState) {
+                    procState = clientProcState > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
+                            ? clientProcState : ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
                 }
                 if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
                     schedGroup = Process.THREAD_GROUP_DEFAULT;
@@ -14566,10 +14569,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         // application processes based on their current state.
         int curCachedAdj = ProcessList.CACHED_APP_MIN_ADJ;
         int nextCachedAdj = curCachedAdj+1;
+        int curClientCachedAdj = curCachedAdj+1;
         int curEmptyAdj = ProcessList.CACHED_APP_MIN_ADJ;
         int nextEmptyAdj = curEmptyAdj+2;
-        int curClientCachedAdj = curEmptyAdj;
-        for (int i=0; i<N; i++) {
+        for (int i=N-1; i>=0; i--) {
             ProcessRecord app = mLruProcesses.get(i);
             if (!app.killedBackground && app.thread != null) {
                 app.procStateChanged = false;
