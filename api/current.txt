@@ -11609,6 +11609,7 @@ package android.media {
     field public static final int FX_FOCUS_NAVIGATION_RIGHT = 4; // 0x4
     field public static final int FX_FOCUS_NAVIGATION_UP = 1; // 0x1
     field public static final int FX_KEYPRESS_DELETE = 7; // 0x7
+    field public static final int FX_KEYPRESS_INVALID = 9; // 0x9
     field public static final int FX_KEYPRESS_RETURN = 8; // 0x8
     field public static final int FX_KEYPRESS_SPACEBAR = 6; // 0x6
     field public static final int FX_KEYPRESS_STANDARD = 5; // 0x5
