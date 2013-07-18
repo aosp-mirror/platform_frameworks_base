@@ -1478,11 +1478,11 @@ public class ListView extends AbsListView {
     @Override
     protected void layoutChildren() {
         final boolean blockLayoutRequests = mBlockLayoutRequests;
-        if (!blockLayoutRequests) {
-            mBlockLayoutRequests = true;
-        } else {
+        if (blockLayoutRequests) {
             return;
         }
+
+        mBlockLayoutRequests = true;
 
         try {
             super.layoutChildren();
@@ -1495,10 +1495,10 @@ public class ListView extends AbsListView {
                 return;
             }
 
-            int childrenTop = mListPadding.top;
-            int childrenBottom = mBottom - mTop - mListPadding.bottom;
+            final int childrenTop = mListPadding.top;
+            final int childrenBottom = mBottom - mTop - mListPadding.bottom;
+            final int childCount = getChildCount();
 
-            int childCount = getChildCount();
             int index = 0;
             int delta = 0;
 
@@ -1506,8 +1506,6 @@ public class ListView extends AbsListView {
             View oldSel = null;
             View oldFirst = null;
             View newSel = null;
-
-            View focusLayoutRestoreView = null;
 
             AccessibilityNodeInfo accessibilityFocusLayoutRestoreNode = null;
             View accessibilityFocusLayoutRestoreView = null;
@@ -1570,6 +1568,7 @@ public class ListView extends AbsListView {
             // Remember which child, if any, had accessibility focus. This must
             // occur before recycling any views, since that will clear
             // accessibility focus.
+            // TODO: This should rely on transient state.
             final ViewRootImpl viewRootImpl = getViewRootImpl();
             if (viewRootImpl != null) {
                 final View accessFocusedView = viewRootImpl.getAccessibilityFocusedHost();
@@ -1593,44 +1592,24 @@ public class ListView extends AbsListView {
                 }
             }
 
+            // Ensure the child containing focus, if any, has transient state.
+            // If the list data hasn't changed, or if the adapter has stable
+            // IDs, this will maintain focus.
+            final View focusedChild = getFocusedChild();
+            if (focusedChild != null) {
+                focusedChild.setHasTransientState(true);
+            }
+
             // Pull all children into the RecycleBin.
             // These views will be reused if possible
             final int firstPosition = mFirstPosition;
             final RecycleBin recycleBin = mRecycler;
-
-            // reset the focus restoration
-            View focusLayoutRestoreDirectChild = null;
-
-            // Don't put header or footer views into the Recycler. Those are
-            // already cached in mHeaderViews;
             if (dataChanged) {
                 for (int i = 0; i < childCount; i++) {
                     recycleBin.addScrapView(getChildAt(i), firstPosition+i);
                 }
             } else {
                 recycleBin.fillActiveViews(childCount, firstPosition);
-            }
-
-            // take focus back to us temporarily to avoid the eventual
-            // call to clear focus when removing the focused child below
-            // from messing things up when ViewAncestor assigns focus back
-            // to someone else
-            final View focusedChild = getFocusedChild();
-            if (focusedChild != null) {
-                // TODO: in some cases focusedChild.getParent() == null
-
-                // we can remember the focused view to restore after relayout if the
-                // data hasn't changed, or if the focused position is a header or footer
-                if (!dataChanged || isDirectChildHeaderOrFooter(focusedChild)) {
-                    focusLayoutRestoreDirectChild = focusedChild;
-                    // remember the specific view that had focus
-                    focusLayoutRestoreView = findFocus();
-                    if (focusLayoutRestoreView != null) {
-                        // tell it we are going to mess with it
-                        focusLayoutRestoreView.onStartTemporaryDetach();
-                    }
-                }
-                requestFocus();
             }
 
             // Clear out old views
@@ -1692,42 +1671,36 @@ public class ListView extends AbsListView {
             recycleBin.scrapActiveViews();
 
             if (sel != null) {
-                // the current selected item should get focus if items
-                // are focusable
-                if (mItemsCanFocus && hasFocus() && !sel.hasFocus()) {
-                    final boolean focusWasTaken = (sel == focusLayoutRestoreDirectChild &&
-                            focusLayoutRestoreView != null &&
-                            focusLayoutRestoreView.requestFocus()) || sel.requestFocus();
-                    if (!focusWasTaken) {
-                        // selected item didn't take focus, fine, but still want
-                        // to make sure something else outside of the selected view
-                        // has focus
+                final boolean shouldPlaceFocus = mItemsCanFocus && hasFocus();
+                final boolean maintainedFocus = focusedChild != null && focusedChild.hasFocus();
+                if (shouldPlaceFocus && !maintainedFocus && !sel.hasFocus()) {
+                    if (sel.requestFocus()) {
+                        // Successfully placed focus, clear selection.
+                        sel.setSelected(false);
+                        mSelectorRect.setEmpty();
+                    } else {
+                        // Failed to place focus, clear current (invalid) focus.
                         final View focused = getFocusedChild();
                         if (focused != null) {
                             focused.clearFocus();
                         }
                         positionSelector(INVALID_POSITION, sel);
-                    } else {
-                        sel.setSelected(false);
-                        mSelectorRect.setEmpty();
                     }
                 } else {
                     positionSelector(INVALID_POSITION, sel);
                 }
                 mSelectedTop = sel.getTop();
             } else {
-                if (mTouchMode > TOUCH_MODE_DOWN && mTouchMode < TOUCH_MODE_SCROLL) {
-                    View child = getChildAt(mMotionPosition - mFirstPosition);
-                    if (child != null) positionSelector(mMotionPosition, child);
+                // If the user's finger is down, select the motion position.
+                // Otherwise, clear selection.
+                if (mTouchMode == TOUCH_MODE_TAP || mTouchMode == TOUCH_MODE_DONE_WAITING) {
+                    final View child = getChildAt(mMotionPosition - mFirstPosition);
+                    if (child != null)  {
+                        positionSelector(mMotionPosition, child);
+                    }
                 } else {
                     mSelectedTop = 0;
                     mSelectorRect.setEmpty();
-                }
-
-                // even if there is not selected position, we may need to restore
-                // focus (i.e. something focusable in touch mode)
-                if (hasFocus() && focusLayoutRestoreView != null) {
-                    focusLayoutRestoreView.requestFocus();
                 }
             }
 
@@ -1753,11 +1726,8 @@ public class ListView extends AbsListView {
                 }
             }
 
-            // tell focus view we are done mucking with it, if it is still in
-            // our view hierarchy.
-            if (focusLayoutRestoreView != null
-                    && focusLayoutRestoreView.getWindowToken() != null) {
-                focusLayoutRestoreView.onFinishTemporaryDetach();
+            if (focusedChild != null) {
+                focusedChild.setHasTransientState(false);
             }
             
             mLayoutMode = LAYOUT_NORMAL;
