@@ -26,7 +26,10 @@ LOCAL_PATH := $(call my-dir)
 # TODO: find a more appropriate way to do this.
 framework_res_source_path := APPS/framework-res_intermediates/src
 
-# the library
+# Build the master framework library.
+# The framework contains too many method references (>64K) for poor old DEX.
+# So we first build the framework as a monolithic static library then split it
+# up into smaller pieces.
 # ============================================================
 include $(CLEAR_VARS)
 
@@ -38,14 +41,6 @@ LOCAL_SRC_FILES += \
        core/java/android/content/EventLogTags.logtags \
        core/java/android/speech/tts/EventLogTags.logtags \
        core/java/android/webkit/EventLogTags.logtags \
-
-# The following filters out code we are temporarily not including at all.
-# TODO: Move AWT and beans (and associated harmony code) back into libcore.
-# TODO: Maybe remove javax.microedition entirely?
-# TODO: Move SyncML (org.mobilecontrol.*) into its own library.
-LOCAL_SRC_FILES := $(filter-out \
-			org/mobilecontrol/% \
-			,$(LOCAL_SRC_FILES))
 
 ## READ ME: ########################################################
 ##
@@ -258,8 +253,6 @@ LOCAL_SRC_FILES += \
 	telephony/java/com/android/internal/telephony/IWapPushManager.aidl \
 	wifi/java/android/net/wifi/IWifiManager.aidl \
 	wifi/java/android/net/wifi/p2p/IWifiP2pManager.aidl
-#
-
 
 # FRAMEWORKS_BASE_JAVA_SRC_DIRS comes from build/core/pathmap.mk
 LOCAL_AIDL_INCLUDES += $(FRAMEWORKS_BASE_JAVA_SRC_DIRS)
@@ -272,17 +265,11 @@ LOCAL_INTERMEDIATE_SOURCES := \
 LOCAL_NO_STANDARD_LIBRARIES := true
 LOCAL_JAVA_LIBRARIES := bouncycastle conscrypt core core-junit ext okhttp
 
-LOCAL_MODULE := framework
-LOCAL_MODULE_CLASS := JAVA_LIBRARIES
+LOCAL_MODULE := framework-base
 
-# List of classes and interfaces which should be loaded by the Zygote.
-LOCAL_JAVA_RESOURCE_FILES += $(LOCAL_PATH)/preloaded-classes
+LOCAL_JAR_EXCLUDE_FILES := none
 
-#LOCAL_JARJAR_RULES := $(LOCAL_PATH)/jarjar-rules.txt
-
-LOCAL_DX_FLAGS := --core-library
-
-include $(BUILD_JAVA_LIBRARY)
+include $(BUILD_STATIC_JAVA_LIBRARY)
 
 # Make sure that R.java and Manifest.java are built before we build
 # the source for this library.
@@ -290,14 +277,53 @@ framework_res_R_stamp := \
 	$(call intermediates-dir-for,APPS,framework-res,,COMMON)/src/R.stamp
 $(full_classes_compiled_jar): $(framework_res_R_stamp)
 
-# Make sure that framework-res is installed when framework is.
-$(LOCAL_INSTALLED_MODULE): | $(dir $(LOCAL_INSTALLED_MODULE))framework-res.apk
-
-framework_built := $(call java-lib-deps,framework)
-
-# AIDL files to be preprocessed and included in the SDK,
-# relative to the root of the build tree.
+# Build part 1 of the framework library.
 # ============================================================
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := framework
+LOCAL_MODULE_CLASS := JAVA_LIBRARIES
+LOCAL_NO_STANDARD_LIBRARIES := true
+LOCAL_STATIC_JAVA_LIBRARIES := framework-base
+LOCAL_DX_FLAGS := --core-library
+
+# Packages to include, use \* wildcard to include descendants.
+LOCAL_JAR_PACKAGES := android\*
+
+# List of classes and interfaces which should be loaded by the Zygote.
+LOCAL_JAVA_RESOURCE_FILES += $(LOCAL_PATH)/preloaded-classes
+
+include $(BUILD_JAVA_LIBRARY)
+framework_module := $(LOCAL_INSTALLED_MODULE)
+
+# Build part 2 of the framework library.
+# ============================================================
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := framework2
+LOCAL_MODULE_CLASS := JAVA_LIBRARIES
+LOCAL_NO_STANDARD_LIBRARIES := true
+LOCAL_STATIC_JAVA_LIBRARIES := framework-base
+LOCAL_DX_FLAGS := --core-library
+
+# Packages to include, use \* wildcard to include descendants.
+LOCAL_JAR_PACKAGES := com\* javax\*
+
+include $(BUILD_JAVA_LIBRARY)
+framework2_module := $(LOCAL_INSTALLED_MODULE)
+
+# Make sure that all framework modules are installed when framework is.
+# ============================================================
+$(framework_module): | $(dir $(framework_module))framework-res.apk
+$(framework_module): | $(dir $(framework_module))framework2.jar
+
+framework_built := $(call java-lib-deps,framework framework2)
+
+# Copy AIDL files to be preprocessed and included in the SDK,
+# specified relative to the root of the build tree.
+# ============================================================
+include $(CLEAR_VARS)
+
 aidl_files := \
 	frameworks/base/core/java/android/accounts/IAccountManager.aidl \
 	frameworks/base/core/java/android/accounts/IAccountManagerResponse.aidl \
@@ -443,6 +469,7 @@ framework_docs_LOCAL_API_CHECK_JAVA_LIBRARIES := \
 	okhttp \
 	ext \
 	framework \
+	framework2 \
 	mms-common \
 	telephony-common \
 	voip-common
@@ -479,7 +506,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
 framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR:= \
-	$(call intermediates-dir-for,JAVA_LIBRARIES,framework,,COMMON)
+	$(call intermediates-dir-for,JAVA_LIBRARIES,framework-base,,COMMON)
 
 framework_docs_LOCAL_ADDITIONAL_JAVA_DIR:= \
 	$(framework_docs_LOCAL_API_CHECK_ADDITIONAL_JAVA_DIR) \
@@ -761,7 +788,7 @@ include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=$(framework_docs_LOCAL_SRC_FILES)
 LOCAL_INTERMEDIATE_SOURCES:=$(framework_docs_LOCAL_INTERMEDIATE_SOURCES)
-LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES) framework
+LOCAL_JAVA_LIBRARIES:=$(framework_docs_LOCAL_JAVA_LIBRARIES)
 LOCAL_MODULE_CLASS:=$(framework_docs_LOCAL_MODULE_CLASS)
 LOCAL_DROIDDOC_SOURCE_PATH:=$(framework_docs_LOCAL_DROIDDOC_SOURCE_PATH)
 LOCAL_DROIDDOC_HTML_DIR:=$(framework_docs_LOCAL_DROIDDOC_HTML_DIR)
