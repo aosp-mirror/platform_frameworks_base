@@ -63,13 +63,13 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Rek uit v. schermvulling"</string>
     <string name="compat_mode_help_header" msgid="7969493989397529910">"Compatibiliteitszoom"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Wanneer een app is ontworpen voor een kleiner scherm, wordt naast de klok een zoomknop weergegeven."</string>
-    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Schermafbeelding opslaan..."</string>
-    <string name="screenshot_saving_title" msgid="8242282144535555697">"Schermafbeelding opslaan..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Schermafbeelding wordt opgeslagen."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Schermafbeelding gemaakt."</string>
-    <string name="screenshot_saved_text" msgid="1152839647677558815">"Raak aan om uw schermafbeelding te bekijken."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Schermafbeelding is niet gemaakt."</string>
-    <string name="screenshot_failed_text" msgid="8134011269572415402">"Kan schermafbeelding niet opslaan. Mogelijk is de opslag in gebruik."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Screenshot opslaan..."</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Screenshot opslaan..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Screenshot wordt opgeslagen."</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Screenshot gemaakt."</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Raak aan om uw screenshot te bekijken."</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Screenshot is niet gemaakt."</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Kan screenshot niet opslaan. Mogelijk is de opslag in gebruik."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opties voor USB-bestandsoverdracht"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Koppelen als mediaspeler (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Koppelen als camera (PTP)"</string>
