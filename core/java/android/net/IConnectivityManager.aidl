@@ -37,6 +37,9 @@ import com.android.internal.net.VpnProfile;
 /** {@hide} */
 interface IConnectivityManager
 {
+    // Keep this in sync with framework/native/services/connectivitymanager/ConnectivityManager.h
+    void markSocketAsUser(in ParcelFileDescriptor socket, int uid);
+
     void setNetworkPreference(int pref);
 
     int getNetworkPreference();
@@ -118,8 +121,6 @@ interface IConnectivityManager
     boolean protectVpn(in ParcelFileDescriptor socket);
 
     boolean prepareVpn(String oldPackage, String newPackage);
-
-    void markSocketAsUser(in ParcelFileDescriptor socket, int uid);
 
     ParcelFileDescriptor establishVpn(in VpnConfig config);
 
