@@ -60,8 +60,10 @@ public final class CaptureRequestKeys {
 
         public static final Key<ColorCorrection.ModeKey.Enum> MODE =
                 new ModeKey("android.colorCorrection.mode");
-        public static final Key<float[]> TRANSFORM =
-                new Key<float[]>("android.colorCorrection.transform", float[].class);
+        public static final Key<Rational[]> TRANSFORM =
+                new Key<Rational[]>("android.colorCorrection.transform", Rational[].class);
+        public static final Key<float[]> GAINS =
+                new Key<float[]>("android.colorCorrection.gains", float[].class);
 
     }
 
@@ -672,6 +674,29 @@ public final class CaptureRequestKeys {
          */
         public static final Key<Led.TransmitKey.Enum> TRANSMIT =
                 new TransmitKey("android.led.transmit");
+
+    }
+
+    public static final class BlackLevel {
+
+            public static final class LockKey extends Key<BlackLevel.LockKey.Enum> {
+                public enum Enum {
+                    OFF,
+                    ON;
+                }
+
+                public static final Enum OFF = Enum.OFF;
+                public static final Enum ON = Enum.ON;
+
+                // TODO: remove requirement for constructor by making Key an interface
+                private LockKey(String name) {
+                    super(name, BlackLevel.LockKey.Enum.class);
+                }
+
+            }
+
+        public static final Key<BlackLevel.LockKey.Enum> LOCK =
+                new LockKey("android.blackLevel.lock");
 
     }
 

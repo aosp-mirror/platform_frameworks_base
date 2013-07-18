@@ -176,8 +176,8 @@ public final class CameraPropertiesKeys {
         public static final class Info {
             public static final Key<int[]> ACTIVE_ARRAY_SIZE =
                     new Key<int[]>("android.sensor.info.activeArraySize", int[].class);
-            public static final Key<int[]> AVAILABLE_SENSITIVITIES =
-                    new Key<int[]>("android.sensor.info.availableSensitivities", int[].class);
+            public static final Key<int[]> SENSITIVITY_RANGE =
+                    new Key<int[]>("android.sensor.info.sensitivityRange", int[].class);
             public static final Key<long[]> EXPOSURE_TIME_RANGE =
                     new Key<long[]>("android.sensor.info.exposureTimeRange", long[].class);
             public static final Key<Long> MAX_FRAME_DURATION =
