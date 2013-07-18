@@ -16,15 +16,12 @@
 
 package android.os;
 
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -37,13 +34,13 @@ public final class Bundle implements Parcelable, Cloneable {
 
     static {
         EMPTY = new Bundle();
-        EMPTY.mMap = Collections.unmodifiableMap(new HashMap<String, Object>());
+        EMPTY.mMap = ArrayMap.EMPTY;
     }
 
     // Invariant - exactly one of mMap / mParcelledData will be null
     // (except inside a call to unparcel)
 
-    /* package */ Map<String, Object> mMap = null;
+    /* package */ ArrayMap<String, Object> mMap = null;
 
     /*
      * If mParcelledData is non-null, then mMap will be null and the
@@ -65,7 +62,7 @@ public final class Bundle implements Parcelable, Cloneable {
      * Constructs a new, empty Bundle.
      */
     public Bundle() {
-        mMap = new HashMap<String, Object>();
+        mMap = new ArrayMap<String, Object>();
         mClassLoader = getClass().getClassLoader();
     }
 
@@ -91,7 +88,7 @@ public final class Bundle implements Parcelable, Cloneable {
      * inside of the Bundle.
      */
     public Bundle(ClassLoader loader) {
-        mMap = new HashMap<String, Object>();
+        mMap = new ArrayMap<String, Object>();
         mClassLoader = loader;
     }
 
@@ -102,7 +99,7 @@ public final class Bundle implements Parcelable, Cloneable {
      * @param capacity the initial capacity of the Bundle
      */
     public Bundle(int capacity) {
-        mMap = new HashMap<String, Object>(capacity);
+        mMap = new ArrayMap<String, Object>(capacity);
         mClassLoader = getClass().getClassLoader();
     }
 
@@ -122,7 +119,7 @@ public final class Bundle implements Parcelable, Cloneable {
         }
 
         if (b.mMap != null) {
-            mMap = new HashMap<String, Object>(b.mMap);
+            mMap = new ArrayMap<String, Object>(b.mMap);
         } else {
             mMap = null;
         }
@@ -162,7 +159,7 @@ public final class Bundle implements Parcelable, Cloneable {
         if (size == 0) {
             return null;
         }
-        Object o = mMap.values().iterator().next();
+        Object o = mMap.valueAt(0);
         try {
             return (String) o;
         } catch (ClassCastException e) {
@@ -218,9 +215,9 @@ public final class Bundle implements Parcelable, Cloneable {
             return;
         }
         if (mMap == null) {
-            mMap = new HashMap<String, Object>(N);
+            mMap = new ArrayMap<String, Object>(N);
         }
-        mParcelledData.readMapInternal(mMap, N, mClassLoader);
+        mParcelledData.readArrayMapInternal(mMap, N, mClassLoader);
         mParcelledData.recycle();
         mParcelledData = null;
     }
@@ -331,9 +328,8 @@ public final class Bundle implements Parcelable, Cloneable {
                 }
             } else {
                 // It's been unparcelled, so we need to walk the map
-                Iterator<Map.Entry<String, Object>> iter = mMap.entrySet().iterator();
-                while (!fdFound && iter.hasNext()) {
-                    Object obj = iter.next().getValue();
+                for (int i=mMap.size()-1; i>=0; i--) {
+                    Object obj = mMap.valueAt(i);
                     if (obj instanceof Parcelable) {
                         if ((((Parcelable)obj).describeContents()
                                 & Parcelable.CONTENTS_FILE_DESCRIPTOR) != 0) {
@@ -1643,7 +1639,7 @@ public final class Bundle implements Parcelable, Cloneable {
                 parcel.writeInt(0x4C444E42); // 'B' 'N' 'D' 'L'
     
                 int oldPos = parcel.dataPosition();
-                parcel.writeMapInternal(mMap);
+                parcel.writeArrayMapInternal(mMap);
                 int newPos = parcel.dataPosition();
     
                 // Backpatch length
