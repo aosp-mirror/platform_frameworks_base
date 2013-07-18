@@ -46,7 +46,8 @@
 
         <activity
             android:name=".PrintJobConfigActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@android:style/Theme.Holo.Light.Dialog.NoActionBar">
         </activity>
 
     </application>

@@ -14,248 +14,197 @@
      limitations under the License.
 -->
 
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
-    <GridLayout
-        android:layout_width="wrap_content"
+    <ScrollView
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="vertical"
-        android:columnCount="2">
+        android:background="@*android:color/bright_foreground_disabled_holo_light">
 
-        <EditText
-            android:id="@+id/copies_edittext"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="0"
-            android:layout_column="1"
-            android:minWidth="150dip"
-            android:inputType="number"
-            android:selectAllOnFocus="true">
-        </EditText>
-
-        <TextView
+        <GridLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="0"
-            android:layout_column="0"
-            android:text="@string/label_copies"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:labelFor="@id/copies_edittext">
-        </TextView>
+            android:layout_margin="32dip"
+            android:orientation="vertical"
+            android:columnCount="2">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="1"
-            android:layout_column="0"
-            android:text="@string/label_destination"
-            android:textAppearance="?android:attr/textAppearanceMedium">
-        </TextView>
+            <!-- Destination -->
 
-        <Spinner
-            android:id="@+id/destination_spinner"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="1"
-            android:layout_column="1"
-            android:minWidth="150dip">
-        </Spinner>
+            <Spinner
+                android:id="@+id/destination_spinner"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dip"
+                android:layout_row="0"
+                android:layout_column="0"
+                android:layout_columnSpan="2"
+                android:minWidth="324dip"
+                android:minHeight="?android:attr/listPreferredItemHeightSmall">
+            </Spinner>
 
+            <!-- Copies -->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="2"
-            android:layout_column="0"
-            android:text="@string/label_media_size"
-            android:textAppearance="?android:attr/textAppearanceMedium">
-        </TextView>
+            <view
+                class="com.android.printspooler.PrintJobConfigActivity$CustomEditText"
+                android:id="@+id/copies_edittext"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="12dip"
+                android:layout_marginBottom="12dip"
+                android:layout_row="2"
+                android:layout_column="0"
+                android:layout_gravity="bottom"
+                android:inputType="numberDecimal"
+                android:selectAllOnFocus="true"
+                android:minWidth="150dip">
+            </view>
 
-        <Spinner
-            android:id="@+id/media_size_spinner"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="2"
-            android:layout_column="1"
-            android:minWidth="150dip">
-        </Spinner>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dip"
+                android:layout_marginRight="12dip"
+                android:layout_row="1"
+                android:layout_column="0"
+                android:layout_gravity="left|bottom"
+                android:text="@string/label_copies"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textStyle="bold"
+                android:labelFor="@id/copies_edittext">
+            </TextView>
 
+            <!-- Paper size -->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="3"
-            android:layout_column="0"
-            android:text="@string/label_resolution"
-            android:textAppearance="?android:attr/textAppearanceMedium">
-        </TextView>
+            <Spinner
+                android:id="@+id/paper_size_spinner"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="12dip"
+                android:layout_marginBottom="12dip"
+                android:layout_row="2"
+                android:layout_column="1"
+                android:minWidth="150dip">
+            </Spinner>
 
-        <Spinner
-            android:id="@+id/resolution_spinner"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="3"
-            android:layout_column="1"
-            android:minWidth="150dip">
-        </Spinner>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="12dip"
+                android:layout_marginTop="12dip"
+                android:layout_row="1"
+                android:layout_column="1"
+                android:text="@string/label_paper_size"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textStyle="bold"
+                android:labelFor="@id/paper_size_spinner">
+            </TextView>
 
+            <!-- Color -->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="4"
-            android:layout_column="0"
-            android:text="@string/label_input_tray"
-            android:textAppearance="?android:attr/textAppearanceMedium">
-        </TextView>
+            <Spinner
+                android:id="@+id/color_spinner"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="12dip"
+                android:layout_marginBottom="12dip"
+                android:layout_row="4"
+                android:layout_column="0"
+                android:minWidth="150dip">
+            </Spinner>
 
-        <Spinner
-            android:id="@+id/input_tray_spinner"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="4"
-            android:layout_column="1"
-            android:minWidth="150dip">
-        </Spinner>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dip"
+                android:layout_marginRight="12dip"
+                android:layout_row="3"
+                android:layout_column="0"
+                android:text="@string/label_color"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textStyle="bold"
+                android:labelFor="@id/color_spinner">
+            </TextView>
 
+            <!-- Orientation -->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="5"
-            android:layout_column="0"
-            android:text="@string/label_output_tray"
-            android:textAppearance="?android:attr/textAppearanceMedium">
-        </TextView>
+            <Spinner
+                android:id="@+id/orientation_spinner"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="12dip"
+                android:layout_marginBottom="12dip"
+                android:layout_row="4"
+                android:layout_column="1"
+                android:minWidth="150dip">
+            </Spinner>
 
-        <Spinner
-            android:id="@+id/output_tray_spinner"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="5"
-            android:layout_column="1"
-            android:minWidth="150dip">
-        </Spinner>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="12dip"
+                android:layout_marginTop="12dip"
+                android:layout_row="3"
+                android:layout_column="1"
+                android:text="@string/label_orientation"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textStyle="bold"
+                android:labelFor="@id/orientation_spinner">
+            </TextView>
 
+            <!-- Pages -->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="6"
-            android:layout_column="0"
-            android:text="@string/label_duplex_mode"
-            android:textAppearance="?android:attr/textAppearanceMedium">
-        </TextView>
+            <Spinner
+                android:id="@+id/range_options_spinner"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="12dip"
+                android:layout_row="6"
+                android:layout_column="0"
+                android:minWidth="150dip">
+            </Spinner>
 
-        <Spinner
-            android:id="@+id/duplex_mode_spinner"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="6"
-            android:layout_column="1"
-            android:minWidth="150dip">
-        </Spinner>
+            <EditText
+                android:id="@+id/page_range_edittext"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="12dip"
+                android:layout_row="6"
+                android:layout_column="1"
+                android:layout_gravity="bottom"
+                android:selectAllOnFocus="true"
+                android:minWidth="150dip"
+                android:hint="@string/pages_range_example"
+                android:inputType="textNoSuggestions"
+                android:visibility="gone">
+            </EditText>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dip"
+                android:layout_marginRight="12dip"
+                android:layout_row="5"
+                android:layout_column="0"
+                android:text="@string/label_pages"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textStyle="bold"
+                android:labelFor="@id/range_options_spinner">
+            </TextView>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="7"
-            android:layout_column="0"
-            android:text="@string/label_color_mode"
-            android:textAppearance="?android:attr/textAppearanceMedium">
-        </TextView>
+        </GridLayout>
 
-        <Spinner
-            android:id="@+id/color_mode_spinner"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="7"
-            android:layout_column="1"
-            android:minWidth="150dip">
-        </Spinner>
+    </ScrollView>
 
+    <Button
+        android:id="@+id/print_button"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="0dip"
+        android:text="@string/print_button"
+        android:background="?android:attr/selectableItemBackground">
+    </Button>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="8"
-            android:layout_column="0"
-            android:text="@string/label_fitting_mode"
-            android:textAppearance="?android:attr/textAppearanceMedium">
-        </TextView>
-
-        <Spinner
-            android:id="@+id/fitting_mode_spinner"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="8"
-            android:layout_column="1"
-            android:minWidth="150dip">
-        </Spinner>
-
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="9"
-            android:layout_column="0"
-            android:text="@string/label_orientation"
-            android:textAppearance="?android:attr/textAppearanceMedium">
-        </TextView>
-
-        <Spinner
-            android:id="@+id/orientation_spinner"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="12dip"
-            android:layout_marginRight="12dip"
-            android:layout_row="9"
-            android:layout_column="1"
-            android:minWidth="150dip">
-        </Spinner>
-
-    </GridLayout>
-
-</ScrollView>
+</LinearLayout>

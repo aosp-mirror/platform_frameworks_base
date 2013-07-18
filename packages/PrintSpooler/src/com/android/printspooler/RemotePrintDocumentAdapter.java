@@ -56,6 +56,7 @@ final class RemotePrintDocumentAdapter {
     public static final int STATE_LAYOUT_COMPLETED = 2;
     public static final int STATE_WRITE_COMPLETED = 3;
     public static final int STATE_FINISH_COMPLETED = 4;
+    public static final int STATE_FAILED = 6;
 
     private final Object mLock = new Object();
 
@@ -77,19 +78,11 @@ final class RemotePrintDocumentAdapter {
             Log.i(LOG_TAG, "getFile()");
         }
         synchronized (mLock) {
-            if (mState < STATE_WRITE_COMPLETED) {
+            if (mState != STATE_WRITE_COMPLETED
+                    && mState != STATE_FINISH_COMPLETED) {
                 throw new IllegalStateException("Write not completed");
             }
             return mFile;
-        }
-    }
-
-    public void cancel() {
-        synchronized (mLock) {
-            final int taskCount = mTaskQueue.size();
-            for (int i = 0; i < taskCount; i++) {
-                mTaskQueue.remove(i).cancel();
-            }
         }
     }
 
@@ -101,6 +94,7 @@ final class RemotePrintDocumentAdapter {
                     Log.i(LOG_TAG, "start()");
                 }
                 synchronized (mLock) {
+                    mTaskQueue.add(this);
                     if (mState != STATE_INITIALIZED) {
                         throw new IllegalStateException("Invalid state: " + mState);
                     }
@@ -116,29 +110,22 @@ final class RemotePrintDocumentAdapter {
                 return null;
             }
         };
-        synchronized (mLock) {
-            mTaskQueue.add(task);
-            task.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
-        }
+        task.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
     }
 
     public void layout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
             LayoutResultCallback callback, Bundle metadata) {
         LayoutAsyncTask task = new LayoutAsyncTask(oldAttributes, newAttributes, callback,
                 metadata);
-        synchronized (mLock) {
-            mTaskQueue.add(task);
-            task.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
-        }
+        task.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
     }
 
     public void write(List<PageRange> pages, WriteResultCallback callback) {
         WriteAsyncTask task = new WriteAsyncTask(pages, callback);
-        mTaskQueue.add(task);
         task.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
     }
 
-    public void finish() {
+    public void finish(final boolean abortPendingWork) {
         QueuedAsyncTask task = new QueuedAsyncTask() {
             @Override
             protected Void doInBackground(Void... params) {
@@ -146,9 +133,15 @@ final class RemotePrintDocumentAdapter {
                     Log.i(LOG_TAG, "finish");
                 }
                 synchronized (mLock) {
-                    if (mState != STATE_LAYOUT_COMPLETED
-                            && mState != STATE_WRITE_COMPLETED) {
-                        throw new IllegalStateException("Invalid state: " + mState);
+                    if (abortPendingWork) {
+                        final int taskCount = mTaskQueue.size();
+                        for (int i = taskCount - 1; i >= 0; i--) {
+                            mTaskQueue.remove(i).cancel();
+                        }
+                    }
+                    mTaskQueue.add(this);
+                    if (mState < STATE_START_COMPLETED) {
+                        return null;
                     }
                 }
                 try {
@@ -158,15 +151,12 @@ final class RemotePrintDocumentAdapter {
                     }
                 } catch (RemoteException re) {
                     Log.e(LOG_TAG, "Error reading file", re);
-                    mState = STATE_INITIALIZED;
+                    mState = STATE_FAILED;
                 }
                 return null;
             }
         };
-        synchronized (mLock) {
-            mTaskQueue.add(task);
-            task.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
-        }
+        task.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
     }
 
     private abstract class QueuedAsyncTask extends AsyncTask<Void, Void, Void> {
@@ -243,6 +233,7 @@ final class RemotePrintDocumentAdapter {
         @Override
         protected Void doInBackground(Void... params) {
             synchronized (mLock) {
+                mTaskQueue.add(this);
                 if (mState != STATE_START_COMPLETED
                         && mState != STATE_LAYOUT_COMPLETED
                         && mState != STATE_WRITE_COMPLETED) {
@@ -255,7 +246,6 @@ final class RemotePrintDocumentAdapter {
                 synchronized (mLock) {
                     while (true) {
                         if (isCancelled()) {
-                            mState = STATE_INITIALIZED;
                             mTaskQueue.remove(this);
                             break;
                         }
@@ -273,7 +263,7 @@ final class RemotePrintDocumentAdapter {
                 }
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Error calling layout", re);
-                mState = STATE_INITIALIZED;
+                mState = STATE_FAILED;
             }
             return null;
         }
@@ -362,7 +352,9 @@ final class RemotePrintDocumentAdapter {
                 Log.i(LOG_TAG, "print()");
             }
             synchronized (mLock) {
-                if (mState != STATE_LAYOUT_COMPLETED) {
+                mTaskQueue.add(this);
+                if (mState != STATE_LAYOUT_COMPLETED
+                        && mState != STATE_WRITE_COMPLETED) {
                     throw new IllegalStateException("Invalid state: " + mState);
                 }
             }
@@ -403,7 +395,6 @@ final class RemotePrintDocumentAdapter {
                 synchronized (mLock) {
                     while (true) {
                         if (isCancelled()) {
-                            mState = STATE_INITIALIZED;
                             mTaskQueue.remove(this);
                             break;
                         }
@@ -421,10 +412,10 @@ final class RemotePrintDocumentAdapter {
                 }
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Error writing print document", re);
-                mState = STATE_INITIALIZED;
+                mState = STATE_FAILED;
             } catch (IOException ioe) {
                 Slog.e(LOG_TAG, "Error writing print document", ioe);
-                mState = STATE_INITIALIZED;
+                mState = STATE_FAILED;
             } finally {
                 IoUtils.closeQuietly(in);
                 IoUtils.closeQuietly(out);

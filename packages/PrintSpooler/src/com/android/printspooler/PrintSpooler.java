@@ -129,7 +129,7 @@ public class PrintSpooler {
         }
     }
 
-    public List<PrintJobInfo> getPrintJobs(ComponentName componentName, int state, int appId) {
+    public List<PrintJobInfo> getPrintJobInfos(ComponentName componentName, int state, int appId) {
         synchronized (mLock) {
             List<PrintJobInfo> foundPrintJobs = null;
             final int printJobCount = mPrintJobs.size();
@@ -154,7 +154,7 @@ public class PrintSpooler {
         }
     }
 
-    public PrintJobInfo getPrintJob(int printJobId, int appId) {
+    public PrintJobInfo getPrintJobInfo(int printJobId, int appId) {
         synchronized (mLock) {
             final int printJobCount = mPrintJobs.size();
             for (int i = 0; i < printJobCount; i++) {
@@ -170,7 +170,7 @@ public class PrintSpooler {
 
     public boolean cancelPrintJob(int printJobId, int appId) {
         synchronized (mLock) {
-            PrintJobInfo printJob = getPrintJob(printJobId, appId);
+            PrintJobInfo printJob = getPrintJobInfo(printJobId, appId);
             if (printJob != null) {
                 switch (printJob.getState()) {
                     case PrintJobInfo.STATE_CREATED:
@@ -291,7 +291,7 @@ public class PrintSpooler {
             FileInputStream in = null;
             FileOutputStream out = null;
             try {
-                PrintJobInfo printJob = getPrintJob(printJobId, PrintManager.APP_ID_ANY);
+                PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
                 if (printJob != null) {
                     File file = generateFileForPrintJob(printJobId);
                     in = new FileInputStream(file);
@@ -355,7 +355,7 @@ public class PrintSpooler {
             }
             client = mClient;
 
-            PrintJobInfo printJob = getPrintJob(printJobId, PrintManager.APP_ID_ANY);
+            PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
             if (printJob != null && printJob.getState() < state) {
                 success = true;
                 printJob.setState(state);
@@ -465,7 +465,7 @@ public class PrintSpooler {
 
     public boolean setPrintJobTag(int printJobId, String tag) {
         synchronized (mLock) {
-            PrintJobInfo printJob = getPrintJob(printJobId, PrintManager.APP_ID_ANY);
+            PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
             if (printJob != null) {
                 printJob.setTag(tag);
                 mPersistanceManager.writeStateLocked();
@@ -477,7 +477,7 @@ public class PrintSpooler {
 
     public final boolean setPrintJobPrintDocumentInfo(int printJobId, PrintDocumentInfo info) {
         synchronized (mLock) {
-            PrintJobInfo printJob = getPrintJob(printJobId, PrintManager.APP_ID_ANY);
+            PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
             if (printJob != null) {
                 printJob.setDocumentInfo(info);
                 mPersistanceManager.writeStateLocked();
@@ -489,7 +489,7 @@ public class PrintSpooler {
 
     public void setPrintJobAttributes(int printJobId, PrintAttributes attributes) {
         synchronized (mLock) {
-            PrintJobInfo printJob = getPrintJob(printJobId, PrintManager.APP_ID_ANY);
+            PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
             if (printJob != null) {
                 printJob.setAttributes(attributes);
                 mPersistanceManager.writeStateLocked();
@@ -499,7 +499,7 @@ public class PrintSpooler {
 
     public void setPrintJobPrinterId(int printJobId, PrinterId printerId) {
         synchronized (mLock) {
-            PrintJobInfo printJob = getPrintJob(printJobId, PrintManager.APP_ID_ANY);
+            PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
             if (printJob != null) {
                 printJob.setPrinterId(printerId);
                 mPersistanceManager.writeStateLocked();

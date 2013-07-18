@@ -245,13 +245,10 @@ public abstract class PrintService extends Service {
      * @see #removeDiscoveredPrinters(List)
      * @see #onStartPrinterDiscovery()
      * @see #onStopPrinterDiscovery()
-     *
-     * @throws IllegalStateException If this service is not connected.
      */
     public final void addDiscoveredPrinters(List<PrinterInfo> printers) {
         final IPrinterDiscoveryObserver observer;
         synchronized (mLock) {
-            throwIfNotConnectedLocked();
             observer = mDiscoveryObserver;
         }
         if (observer != null) {
@@ -284,13 +281,10 @@ public abstract class PrintService extends Service {
      * @see #addDiscoveredPrinters(List)
      * @see #onStartPrinterDiscovery()
      * @see #onStopPrinterDiscovery()
-     *
-     * @throws IllegalStateException If this service is not connected.
      */
     public final void removeDiscoveredPrinters(List<PrinterId> printerIds) {
         final IPrinterDiscoveryObserver observer;
         synchronized (mLock) {
-            throwIfNotConnectedLocked();
             observer = mDiscoveryObserver;
         }
         if (observer != null) {
@@ -334,13 +328,10 @@ public abstract class PrintService extends Service {
      * Gets the print jobs for the printers managed by this service.
      *
      * @return The print jobs.
-     *
-     * @throws IllegalStateException If this service is not connected.
      */
     public final List<PrintJob> getPrintJobs() {
         final IPrintServiceClient client;
         synchronized (mLock) {
-            throwIfNotConnectedLocked();
             client = mClient;
         }
         if (client == null) {
@@ -408,12 +399,6 @@ public abstract class PrintService extends Service {
                         printJobInfo).sendToTarget();
             }
         };
-    }
-
-    private void throwIfNotConnectedLocked() {
-        if (mClient == null) {
-            throw new IllegalStateException("Print serivice not connected");
-        }
     }
 
     private final class MyHandler extends Handler {

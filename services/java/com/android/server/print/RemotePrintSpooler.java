@@ -296,8 +296,7 @@ final class RemotePrintSpooler {
         }
 
         mContext.bindServiceAsUser(mIntent, mServiceConnection,
-                Context.BIND_AUTO_CREATE | Context.BIND_ALLOW_OOM_MANAGEMENT,
-                    mUserHandle);
+                Context.BIND_AUTO_CREATE, mUserHandle);
 
         final long startMillis = SystemClock.uptimeMillis();
         while (true) {

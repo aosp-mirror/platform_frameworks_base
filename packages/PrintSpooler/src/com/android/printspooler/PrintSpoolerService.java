@@ -72,7 +72,7 @@ public final class PrintSpoolerService extends Service {
                             throws RemoteException {
                 List<PrintJobInfo> printJobs = null;
                 try {
-                    printJobs = mSpooler.getPrintJobs(componentName, state, appId);
+                    printJobs = mSpooler.getPrintJobInfos(componentName, state, appId);
                 } finally {
                     callback.onGetPrintJobInfosResult(printJobs, sequence);
                 }
@@ -83,7 +83,7 @@ public final class PrintSpoolerService extends Service {
                     int appId, int sequence) throws RemoteException {
                 PrintJobInfo printJob = null;
                 try {
-                    printJob = mSpooler.getPrintJob(printJobId, appId);
+                    printJob = mSpooler.getPrintJobInfo(printJobId, appId);
                 } finally {
                     callback.onGetPrintJobInfoResult(printJob, sequence);
                 }

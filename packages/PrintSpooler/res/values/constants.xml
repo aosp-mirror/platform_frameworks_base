@@ -13,9 +13,15 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/print_button"
-          android:title="@string/print_button"
-          android:showAsAction="ifRoom">
-    </item>
-</menu>
+
+<resources>
+
+    <integer name="page_option_value_all">1</integer>
+    <integer name="page_option_value_page_range">2</integer>
+
+    <integer-array name="page_options_values" translatable="false">
+        <item>@integer/page_option_value_all</item>
+        <item>@integer/page_option_value_page_range</item>
+    </integer-array>
+
+</resources>
