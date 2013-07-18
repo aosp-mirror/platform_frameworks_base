@@ -117,10 +117,36 @@ android_media_AudioSystem_getParameters(JNIEnv *env, jobject thiz, jstring keys)
     return env->NewStringUTF(AudioSystem::getParameters(0, c_keys8).string());
 }
 
+static JNIEnv* AudioSystem_getJNIEnv(bool* needsDetach) {
+    *needsDetach = false;
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    if (env == NULL) {
+        JavaVMAttachArgs args = {JNI_VERSION_1_4, NULL, NULL};
+        JavaVM* vm = AndroidRuntime::getJavaVM();
+        int result = vm->AttachCurrentThread(&env, (void*) &args);
+        if (result != JNI_OK) {
+            ALOGE("thread attach failed: %#x", result);
+            return NULL;
+        }
+        *needsDetach = true;
+    }
+    return env;
+}
+
+static void AudioSystem_detachJNI() {
+    JavaVM* vm = AndroidRuntime::getJavaVM();
+    int result = vm->DetachCurrentThread();
+    if (result != JNI_OK) {
+        ALOGE("thread detach failed: %#x", result);
+    }
+}
+
 static void
 android_media_AudioSystem_error_callback(status_t err)
 {
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    bool needsDetach = false;
+    JNIEnv *env = AudioSystem_getJNIEnv(&needsDetach);
+
     if (env == NULL) {
         return;
     }
@@ -142,6 +168,10 @@ android_media_AudioSystem_error_callback(status_t err)
     }
 
     env->CallStaticVoidMethod(clazz, env->GetStaticMethodID(clazz, "errorCallbackFromNative","(I)V"), error);
+
+    if (needsDetach) {
+        AudioSystem_detachJNI();
+    }
 }
 
 static int
