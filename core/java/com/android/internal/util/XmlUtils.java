@@ -796,16 +796,8 @@ public class XmlUtils {
             }
             throw new XmlPullParserException(
                 "Unexpected end of document in <string>");
-        } else if (tagName.equals("int")) {
-            res = Integer.parseInt(parser.getAttributeValue(null, "value"));
-        } else if (tagName.equals("long")) {
-            res = Long.valueOf(parser.getAttributeValue(null, "value"));
-        } else if (tagName.equals("float")) {
-            res = new Float(parser.getAttributeValue(null, "value"));
-        } else if (tagName.equals("double")) {
-            res = new Double(parser.getAttributeValue(null, "value"));
-        } else if (tagName.equals("boolean")) {
-            res = Boolean.valueOf(parser.getAttributeValue(null, "value"));
+        } else if ((res = readThisPrimitiveValueXml(parser, tagName)) != null) {
+            // all work already done by readThisPrimitiveValueXml
         } else if (tagName.equals("int-array")) {
             parser.next();
             res = readThisIntArrayXml(parser, "int-array", name);
@@ -856,6 +848,31 @@ public class XmlUtils {
         }
         throw new XmlPullParserException(
             "Unexpected end of document in <" + tagName + ">");
+    }
+
+    private static final Object readThisPrimitiveValueXml(XmlPullParser parser, String tagName)
+    throws XmlPullParserException, java.io.IOException
+    {
+        try {
+            if (tagName.equals("int")) {
+                return Integer.parseInt(parser.getAttributeValue(null, "value"));
+            } else if (tagName.equals("long")) {
+                return Long.valueOf(parser.getAttributeValue(null, "value"));
+            } else if (tagName.equals("float")) {
+                return new Float(parser.getAttributeValue(null, "value"));
+            } else if (tagName.equals("double")) {
+                return new Double(parser.getAttributeValue(null, "value"));
+            } else if (tagName.equals("boolean")) {
+                return Boolean.valueOf(parser.getAttributeValue(null, "value"));
+            } else {
+                return null;
+            }
+        } catch (NullPointerException e) {
+            throw new XmlPullParserException("Need value attribute in <" + tagName + ">");
+        } catch (NumberFormatException e) {
+            throw new XmlPullParserException(
+                    "Not a number in value attribute in <" + tagName + ">");
+        }
     }
 
     public static final void beginDocument(XmlPullParser parser, String firstElementName) throws XmlPullParserException, IOException
