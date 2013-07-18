@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.os.Binder;
+import android.os.IBinder;
 import android.util.ArrayMap;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsCallback;
@@ -54,6 +56,8 @@ public class AppOpsManager {
     final IAppOpsService mService;
     final ArrayMap<Callback, IAppOpsCallback> mModeWatchers
             = new ArrayMap<Callback, IAppOpsCallback>();
+
+    static IBinder sToken;
 
     public static final int MODE_ALLOWED = 0;
     public static final int MODE_IGNORED = 1;
@@ -640,6 +644,21 @@ public class AppOpsManager {
         return noteOp(op, Process.myUid(), mContext.getBasePackageName());
     }
 
+    /** @hide */
+    public static IBinder getToken(IAppOpsService service) {
+        synchronized (AppOpsManager.class) {
+            if (sToken != null) {
+                return sToken;
+            }
+            try {
+                sToken = service.getToken(new Binder());
+            } catch (RemoteException e) {
+                // System is dead, whatevs.
+            }
+            return sToken;
+        }
+    }
+
     /**
      * Report that an application has started executing a long-running operation.  Note that you
      * must pass in both the uid and name of the application to be checked; this function will
@@ -658,7 +677,7 @@ public class AppOpsManager {
      */
     public int startOp(int op, int uid, String packageName) {
         try {
-            int mode = mService.startOperation(op, uid, packageName);
+            int mode = mService.startOperation(getToken(mService), op, uid, packageName);
             if (mode == MODE_ERRORED) {
                 throw new SecurityException("Operation not allowed");
             }
@@ -674,7 +693,7 @@ public class AppOpsManager {
      */
     public int startOpNoThrow(int op, int uid, String packageName) {
         try {
-            return mService.startOperation(op, uid, packageName);
+            return mService.startOperation(getToken(mService), op, uid, packageName);
         } catch (RemoteException e) {
         }
         return MODE_IGNORED;
@@ -693,7 +712,7 @@ public class AppOpsManager {
      */
     public void finishOp(int op, int uid, String packageName) {
         try {
-            mService.finishOperation(op, uid, packageName);
+            mService.finishOperation(getToken(mService), op, uid, packageName);
         } catch (RemoteException e) {
         }
     }
