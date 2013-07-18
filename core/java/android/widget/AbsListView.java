@@ -6500,58 +6500,67 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         /**
-         * Put a view into the ScrapViews list. These views are unordered.
+         * Puts a view into the list of scrap views.
+         * <p>
+         * If the list data hasn't changed or the adapter has stable IDs, views
+         * with transient state will be preserved for later retrieval.
          *
          * @param scrap The view to add
+         * @param position The view's position within its parent
          */
         void addScrapView(View scrap, int position) {
-            AbsListView.LayoutParams lp = (AbsListView.LayoutParams) scrap.getLayoutParams();
+            final AbsListView.LayoutParams lp = (AbsListView.LayoutParams) scrap.getLayoutParams();
             if (lp == null) {
                 return;
             }
 
             lp.scrappedFromPosition = position;
 
-            // Don't put header or footer views or views that should be ignored
-            // into the scrap heap
-            int viewType = lp.viewType;
+            // Don't scrap header or footer views, or views that should
+            // otherwise not be recycled.
+            final int viewType = lp.viewType;
+            if (!shouldRecycleViewType(viewType)) {
+                return;
+            }
+
+            scrap.dispatchStartTemporaryDetach();
+
+            // Don't scrap views that have transient state.
             final boolean scrapHasTransientState = scrap.hasTransientState();
-            if (!shouldRecycleViewType(viewType) || scrapHasTransientState) {
-                if (viewType != ITEM_VIEW_TYPE_HEADER_OR_FOOTER && scrapHasTransientState) {
+            if (scrapHasTransientState) {
+                if (mAdapter != null && mAdapterHasStableIds) {
+                    // If the adapter has stable IDs, we can reuse the view for
+                    // the same data.
+                    if (mTransientStateViewsById == null) {
+                        mTransientStateViewsById = new LongSparseArray<View>();
+                    }
+                    mTransientStateViewsById.put(lp.itemId, scrap);
+                } else if (!mDataChanged) {
+                    // If the data hasn't changed, we can reuse the views at
+                    // their old positions.
+                    if (mTransientStateViews == null) {
+                        mTransientStateViews = new SparseArray<View>();
+                    }
+                    mTransientStateViews.put(position, scrap);
+                } else {
+                    // Otherwise, we'll have to remove the view and start over.
                     if (mSkippedScrap == null) {
                         mSkippedScrap = new ArrayList<View>();
                     }
                     mSkippedScrap.add(scrap);
                 }
-                if (scrapHasTransientState) {
-                    scrap.dispatchStartTemporaryDetach();
-                    if (mAdapter != null && mAdapterHasStableIds) {
-                        if (mTransientStateViewsById == null) {
-                            mTransientStateViewsById = new LongSparseArray<View>();
-                        }
-                        mTransientStateViewsById.put(lp.itemId, scrap);
-                    } else if (!mDataChanged) {
-                        // avoid putting views on transient state list during a data change;
-                        // the layout positions may be out of sync with the adapter positions
-                        if (mTransientStateViews == null) {
-                            mTransientStateViews = new SparseArray<View>();
-                        }
-                        mTransientStateViews.put(position, scrap);
-                    }
-                }
-                return;
-            }
-
-            scrap.dispatchStartTemporaryDetach();
-            if (mViewTypeCount == 1) {
-                mCurrentScrap.add(scrap);
             } else {
-                mScrapViews[viewType].add(scrap);
-            }
+                if (mViewTypeCount == 1) {
+                    mCurrentScrap.add(scrap);
+                } else {
+                    mScrapViews[viewType].add(scrap);
+                }
 
-            scrap.setAccessibilityDelegate(null);
-            if (mRecyclerListener != null) {
-                mRecyclerListener.onMovedToScrapHeap(scrap);
+                scrap.setAccessibilityDelegate(null);
+
+                if (mRecyclerListener != null) {
+                    mRecyclerListener.onMovedToScrapHeap(scrap);
+                }
             }
         }
 
