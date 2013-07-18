@@ -61,6 +61,11 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     private static final int CACHE_SIZE = 10;
 
     /**
+     * @hide Special immutable empty ArrayMap.
+     */
+    public static final ArrayMap EMPTY = new ArrayMap(true);
+
+    /**
      * Caches of small array objects to avoid spamming garbage.  The cache
      * Object[] variable is a pointer to a linked list of array objects.
      * The first entry in the array is a pointer to the next array in the
@@ -70,6 +75,11 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     static int mBaseCacheSize;
     static Object[] mTwiceBaseCache;
     static int mTwiceBaseCacheSize;
+
+    /**
+     * Special hash array value that indicates the container is immutable.
+     */
+    static final int[] EMPTY_IMMUTABLE_INTS = new int[0];
 
     int[] mHashes;
     Object[] mArray;
@@ -115,6 +125,9 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     }
 
     private void allocArrays(final int size) {
+        if (mHashes == EMPTY_IMMUTABLE_INTS) {
+            throw new UnsupportedOperationException("ArrayMap is immutable");
+        }
         if (size == (BASE_SIZE*2)) {
             synchronized (ArrayMap.class) {
                 if (mTwiceBaseCache != null) {
@@ -204,6 +217,12 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         mSize = 0;
     }
 
+    private ArrayMap(boolean immutable) {
+        mHashes = EMPTY_IMMUTABLE_INTS;
+        mArray = ContainerHelpers.EMPTY_OBJECTS;
+        mSize = 0;
+    }
+
     /**
      * Create a new ArrayMap with the mappings from the given ArrayMap.
      */
@@ -219,7 +238,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     @Override
     public void clear() {
-        if (mSize != 0) {
+        if (mSize > 0) {
             freeArrays(mHashes, mArray, mSize);
             mHashes = ContainerHelpers.EMPTY_INTS;
             mArray = ContainerHelpers.EMPTY_OBJECTS;
@@ -388,6 +407,28 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         mArray[(index<<1)+1] = value;
         mSize++;
         return null;
+    }
+
+    /**
+     * Special fast path for appending items to the end of the array without validation.
+     * The array must already be large enough to contain the item.
+     * @hide
+     */
+    public void append(K key, V value) {
+        int index = mSize;
+        final int hash = key.hashCode();
+        if (index >= mHashes.length) {
+            throw new IllegalStateException("Array is full");
+        }
+        if (index > 0 && mHashes[index-1] > hash) {
+            throw new IllegalArgumentException("New hash " + hash
+                    + " is before end of array hash " + mHashes[index-1]);
+        }
+        mSize = index+1;
+        mHashes[index] = hash;
+        index <<= 1;
+        mArray[index] = key;
+        mArray[index+1] = value;
     }
 
     /**

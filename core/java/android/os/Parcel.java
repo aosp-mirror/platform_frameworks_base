@@ -17,6 +17,7 @@
 package android.os;
 
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -572,7 +573,7 @@ public final class Parcel {
      * allows you to avoid mysterious type errors at the point of marshalling.
      */
     public final void writeMap(Map val) {
-        writeMapInternal((Map<String,Object>) val);
+        writeMapInternal((Map<String, Object>) val);
     }
 
     /**
@@ -589,6 +590,23 @@ public final class Parcel {
         for (Map.Entry<String,Object> e : entries) {
             writeValue(e.getKey());
             writeValue(e.getValue());
+        }
+    }
+
+    /**
+     * Flatten an ArrayMap into the parcel at the current dataPosition(),
+     * growing dataCapacity() if needed.  The Map keys must be String objects.
+     */
+    /* package */ void writeArrayMapInternal(ArrayMap<String,Object> val) {
+        if (val == null) {
+            writeInt(-1);
+            return;
+        }
+        final int N = val.size();
+        writeInt(N);
+        for (int i=0; i<N; i++) {
+            writeValue(val.keyAt(i));
+            writeValue(val.valueAt(i));
         }
     }
 
@@ -2254,6 +2272,16 @@ public final class Parcel {
             Object key = readValue(loader);
             Object value = readValue(loader);
             outVal.put(key, value);
+            N--;
+        }
+    }
+
+    /* package */ void readArrayMapInternal(ArrayMap outVal, int N,
+        ClassLoader loader) {
+        while (N > 0) {
+            Object key = readValue(loader);
+            Object value = readValue(loader);
+            outVal.append(key, value);
             N--;
         }
     }
