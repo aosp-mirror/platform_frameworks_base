@@ -69,6 +69,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.AndroidRuntimeException;
+import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -103,8 +104,6 @@ import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.security.Security;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -164,15 +163,15 @@ public final class ActivityThread {
     final ApplicationThread mAppThread = new ApplicationThread();
     final Looper mLooper = Looper.myLooper();
     final H mH = new H();
-    final HashMap<IBinder, ActivityClientRecord> mActivities
-            = new HashMap<IBinder, ActivityClientRecord>();
+    final ArrayMap<IBinder, ActivityClientRecord> mActivities
+            = new ArrayMap<IBinder, ActivityClientRecord>();
     // List of new activities (via ActivityRecord.nextIdle) that should
     // be reported when next we idle.
     ActivityClientRecord mNewActivities = null;
     // Number of activities that are currently visible on-screen.
     int mNumVisibleActivities = 0;
-    final HashMap<IBinder, Service> mServices
-            = new HashMap<IBinder, Service>();
+    final ArrayMap<IBinder, Service> mServices
+            = new ArrayMap<IBinder, Service>();
     AppBindData mBoundApplication;
     Profiler mProfiler;
     int mCurDefaultDisplayDpi;
@@ -183,7 +182,7 @@ public final class ActivityThread {
     final ArrayList<Application> mAllApplications
             = new ArrayList<Application>();
     // set of instantiated backup agents, keyed by package name
-    final HashMap<String, BackupAgent> mBackupAgents = new HashMap<String, BackupAgent>();
+    final ArrayMap<String, BackupAgent> mBackupAgents = new ArrayMap<String, BackupAgent>();
     /** Reference to singleton {@link ActivityThread} */
     private static ActivityThread sCurrentActivityThread;
     Instrumentation mInstrumentation;
@@ -203,10 +202,10 @@ public final class ActivityThread {
     // which means this lock gets held while the activity and window managers
     // holds their own lock.  Thus you MUST NEVER call back into the activity manager
     // or window manager or anything that depends on them while holding this lock.
-    final HashMap<String, WeakReference<LoadedApk>> mPackages
-            = new HashMap<String, WeakReference<LoadedApk>>();
-    final HashMap<String, WeakReference<LoadedApk>> mResourcePackages
-            = new HashMap<String, WeakReference<LoadedApk>>();
+    final ArrayMap<String, WeakReference<LoadedApk>> mPackages
+            = new ArrayMap<String, WeakReference<LoadedApk>>();
+    final ArrayMap<String, WeakReference<LoadedApk>> mResourcePackages
+            = new ArrayMap<String, WeakReference<LoadedApk>>();
     final ArrayList<ActivityClientRecord> mRelaunchingActivities
             = new ArrayList<ActivityClientRecord>();
     Configuration mPendingConfiguration = null;
@@ -238,17 +237,17 @@ public final class ActivityThread {
     }
 
     // The lock of mProviderMap protects the following variables.
-    final HashMap<ProviderKey, ProviderClientRecord> mProviderMap
-        = new HashMap<ProviderKey, ProviderClientRecord>();
-    final HashMap<IBinder, ProviderRefCount> mProviderRefCountMap
-        = new HashMap<IBinder, ProviderRefCount>();
-    final HashMap<IBinder, ProviderClientRecord> mLocalProviders
-        = new HashMap<IBinder, ProviderClientRecord>();
-    final HashMap<ComponentName, ProviderClientRecord> mLocalProvidersByName
-            = new HashMap<ComponentName, ProviderClientRecord>();
+    final ArrayMap<ProviderKey, ProviderClientRecord> mProviderMap
+        = new ArrayMap<ProviderKey, ProviderClientRecord>();
+    final ArrayMap<IBinder, ProviderRefCount> mProviderRefCountMap
+        = new ArrayMap<IBinder, ProviderRefCount>();
+    final ArrayMap<IBinder, ProviderClientRecord> mLocalProviders
+        = new ArrayMap<IBinder, ProviderClientRecord>();
+    final ArrayMap<ComponentName, ProviderClientRecord> mLocalProvidersByName
+            = new ArrayMap<ComponentName, ProviderClientRecord>();
 
-    final HashMap<Activity, ArrayList<OnActivityPausedListener>> mOnPauseListeners
-        = new HashMap<Activity, ArrayList<OnActivityPausedListener>>();
+    final ArrayMap<Activity, ArrayList<OnActivityPausedListener>> mOnPauseListeners
+        = new ArrayMap<Activity, ArrayList<OnActivityPausedListener>>();
 
     final GcIdler mGcIdler = new GcIdler();
     boolean mGcIdlerScheduled = false;
@@ -3702,47 +3701,45 @@ public final class ActivityThread {
                 = new ArrayList<ComponentCallbacks2>();
 
         synchronized (mResourcesManager) {
-            final int N = mAllApplications.size();
-            for (int i=0; i<N; i++) {
+            final int NAPP = mAllApplications.size();
+            for (int i=0; i<NAPP; i++) {
                 callbacks.add(mAllApplications.get(i));
             }
-            if (mActivities.size() > 0) {
-                for (ActivityClientRecord ar : mActivities.values()) {
-                    Activity a = ar.activity;
-                    if (a != null) {
-                        Configuration thisConfig = applyConfigCompatMainThread(
-                                mCurDefaultDisplayDpi, newConfig,
-                                ar.packageInfo.getCompatibilityInfo());
-                        if (!ar.activity.mFinished && (allActivities || !ar.paused)) {
-                            // If the activity is currently resumed, its configuration
-                            // needs to change right now.
-                            callbacks.add(a);
-                        } else if (thisConfig != null) {
-                            // Otherwise, we will tell it about the change
-                            // the next time it is resumed or shown.  Note that
-                            // the activity manager may, before then, decide the
-                            // activity needs to be destroyed to handle its new
-                            // configuration.
-                            if (DEBUG_CONFIGURATION) {
-                                Slog.v(TAG, "Setting activity "
-                                        + ar.activityInfo.name + " newConfig=" + thisConfig);
-                            }
-                            ar.newConfig = thisConfig;
+            final int NACT = mActivities.size();
+            for (int i=0; i<NACT; i++) {
+                ActivityClientRecord ar = mActivities.valueAt(i);
+                Activity a = ar.activity;
+                if (a != null) {
+                    Configuration thisConfig = applyConfigCompatMainThread(
+                            mCurDefaultDisplayDpi, newConfig,
+                            ar.packageInfo.getCompatibilityInfo());
+                    if (!ar.activity.mFinished && (allActivities || !ar.paused)) {
+                        // If the activity is currently resumed, its configuration
+                        // needs to change right now.
+                        callbacks.add(a);
+                    } else if (thisConfig != null) {
+                        // Otherwise, we will tell it about the change
+                        // the next time it is resumed or shown.  Note that
+                        // the activity manager may, before then, decide the
+                        // activity needs to be destroyed to handle its new
+                        // configuration.
+                        if (DEBUG_CONFIGURATION) {
+                            Slog.v(TAG, "Setting activity "
+                                    + ar.activityInfo.name + " newConfig=" + thisConfig);
                         }
+                        ar.newConfig = thisConfig;
                     }
                 }
             }
-            if (mServices.size() > 0) {
-                for (Service service : mServices.values()) {
-                    callbacks.add(service);
-                }
+            final int NSVC = mServices.size();
+            for (int i=0; i<NSVC; i++) {
+                callbacks.add(mServices.valueAt(i));
             }
         }
         synchronized (mProviderMap) {
-            if (mLocalProviders.size() > 0) {
-                for (ProviderClientRecord providerClientRecord : mLocalProviders.values()) {
-                    callbacks.add(providerClientRecord.mLocalProvider);
-                }
+            final int NPRV = mLocalProviders.size();
+            for (int i=0; i<NPRV; i++) {
+                callbacks.add(mLocalProviders.valueAt(i).mLocalProvider);
             }
         }
 
@@ -4575,12 +4572,11 @@ public final class ActivityThread {
                 mProviderRefCountMap.remove(jBinder);
             }
 
-            Iterator<ProviderClientRecord> iter = mProviderMap.values().iterator();
-            while (iter.hasNext()) {
-                ProviderClientRecord pr = iter.next();
+            for (int i=mProviderMap.size()-1; i>=0; i--) {
+                ProviderClientRecord pr = mProviderMap.valueAt(i);
                 IBinder myBinder = pr.mProvider.asBinder();
                 if (myBinder == jBinder) {
-                    iter.remove();
+                    mProviderMap.removeAt(i);
                 }
             }
         }
