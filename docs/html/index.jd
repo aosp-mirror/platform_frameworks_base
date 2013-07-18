@@ -20,6 +20,7 @@ page.metaDescription=The official site for Android developers. Provides the Andr
         <a href="" class="slideshow-next">Next</a>
         <div class="frame">
             <ul>
+
                 <li class="item carousel-home">
                     <div class="content-left col-9">
                         <a href="{@docRoot}about/versions/jelly-bean.html"><img src="{@docRoot}images/home/android-jellybean.png" ></a>
@@ -34,24 +35,6 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                     <p><a href="{@docRoot}about/versions/jelly-bean.html" class="button">Learn More</a></p>
                     </div>
                 </li>
-                <li class="item carousel-home">
-                    <div class="content-left col-11" style="padding-top:10px;">
-                        <a href="{@docRoot}channels/io2013.html">
-                          <img src="{@docRoot}images/home/io-videos-2013.png" style="margin:60px 0 0;
-                          box-shadow: 3px 10px 18px 1px #999;">
-                        </a>
-                    </div>
-                    <div class="content-right col-4">
-                    <h1>Watch the Android talks from Google I/O</h1>
-                    <p>If you weren't able to attend Google I/O in person or couldn't make it
-                    to all the talks, you can catch up on the action
-                    with all the recordings, brought to you by
-                    <a href="http://developers.google.com/live">Google Developers Live</a>.</p>
-                    <p><a href="{@docRoot}channels/io2013.html" class="button"
-                    >See the Android talks</a></p>
-                    </div>
-                </li>
-
 
 
                 <li class="item carousel-home">
@@ -68,7 +51,7 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                               "ytapiplayer", "600", "336", "8", null, null, params, atts);
 
                             // Callback used to pause/resume carousel based on video state
-                            function onytplayerStateChange(newState) {              
+                            function onytplayerStateChange(newState) {
                                var isPaused = $("#pauseButton").hasClass("paused");
                                if ((newState == 1) || (newState == 3)) {
                                // if playing or buffering, pause the carousel
@@ -93,10 +76,11 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                       </div>
                     </div>
                     <div class="content-right col-4">
-                    <h1 style="white-space:nowrap;line-height:1.2em;">Developer Story: <br />redBus.in</h1>
-                    <p>Bangalore-based developers redBus.in talk about how Android is helping them deliver a superior booking and travel experience to millions of daily bus riders in India.</p>
+                    <h1 style="white-space:nowrap;line-height:1.2em;">Developer Story: <br />Colopl</h1>
+                    <p>The creators of Kuma The Bear, Japan-based Colopl, talk about how Google Play and Android allowed them to grow their business to become one of the most profitable games publishers in APAC to date. </p>
                     </div>
                 </li>
+
 
                 <li class="item carousel-home">
                     <div class="content-left col-11" style="padding-top:10px;">
@@ -118,17 +102,6 @@ page.metaDescription=The official site for Android developers. Provides the Andr
 
 
                 <li class="item carousel-home">
-                    <div class="content-left col-9">
-                        <a href="{@docRoot}about/versions/jelly-bean.html"><img src="{@docRoot}images/home/android-jellybean.png" ></a>
-                    </div>
-                    <div class="content-right col-6">
-                    <h1>Android 4.2 Jelly Bean!</h1>
-                    <p>The latest version of Jelly Bean is here, with performance optimizations, a refreshed UI, and great new features for developers. </p>
-                    <p>Android 4.2 includes APIs for developing lock sceen widgets and Daydream screensavers, using external displays, creating RTL layouts, building flexible UI with nested Fragments, and much more.</p>
-                    <p><a href="{@docRoot}about/versions/jelly-bean.html" class="button">Learn More</a></p>
-                    </div>
-                </li>
-                <li class="item carousel-home">
                     <div class="content-left col-10">
                         <img src="{@docRoot}images/home/design.png" style="margin-top:30px">
                     </div>
@@ -139,6 +112,8 @@ that are beautiful and easy to use.</p>
                     <p><a href="{@docRoot}design/index.html" class="button">Learn More</a></p>
                     </div>
                 </li>
+
+
                 <li class="item carousel-home">
                         <div class="content-left col-10">
                             <img src="{@docRoot}images/home/google-play.png"
@@ -149,16 +124,16 @@ that are beautiful and easy to use.</p>
                         <p>The most visited store in the world for Android apps. Cloud-connected and always synced, it's never been easier for users to find and download your apps.</p>
 
                         <p><a href="{@docRoot}distribute/index.html" class="button">Learn More</a></p>
-                        </div> 
+                        </div>
                 </li>
             </ul>
         </div>
     </div>
     <!-- /End slideshow -->
-    
+
     <a href="" id="pauseButton" style="display:none">pause</a>
-    
-    
+
+
 </div>
 <div class="wrap" style="padding-bottom:20px">
     <!-- Section links -->
@@ -172,4 +147,4 @@ that are beautiful and easy to use.</p>
         </ul>
     </div>
     <!-- /Section links -->
-</div>     
+</div>
