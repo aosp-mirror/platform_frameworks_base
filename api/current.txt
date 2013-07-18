@@ -8742,13 +8742,17 @@ package android.graphics {
     method public final boolean isPremultiplied();
     method public final boolean isRecycled();
     method public void prepareToDraw();
+    method public void reconfigure(int, int, android.graphics.Bitmap.Config);
     method public void recycle();
     method public boolean sameAs(android.graphics.Bitmap);
+    method public void setConfig(android.graphics.Bitmap.Config);
     method public void setDensity(int);
     method public void setHasAlpha(boolean);
     method public final void setHasMipMap(boolean);
+    method public void setHeight(int);
     method public void setPixel(int, int, int);
     method public void setPixels(int[], int, int, int, int, int, int);
+    method public void setWidth(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int DENSITY_NONE = 0; // 0x0

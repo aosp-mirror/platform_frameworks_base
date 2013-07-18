@@ -271,6 +271,26 @@ static jboolean Bitmap_recycle(JNIEnv* env, jobject, SkBitmap* bitmap) {
     return true;
 }
 
+static void Bitmap_reconfigure(JNIEnv* env, jobject clazz, jint bitmapInt,
+        int width, int height, SkBitmap::Config config, int allocSize) {
+    if (width * height * SkBitmap::ComputeBytesPerPixel(config) > allocSize) {
+        // done in native as there's no way to get BytesPerPixel in Java
+        doThrowIAE(env, "Bitmap not large enough to support new configuration");
+        return;
+    }
+    SkBitmap* bitmap = reinterpret_cast<SkBitmap*>(bitmapInt);
+    SkPixelRef* ref = bitmap->pixelRef();
+    SkSafeRef(ref);
+    bitmap->setConfig(config, width, height);
+    bitmap->setPixelRef(ref);
+
+    // notifyPixelsChanged will increment the generation ID even though the actual pixel data
+    // hasn't been touched. This signals the renderer that the bitmap (including width, height,
+    // and config) has changed.
+    ref->notifyPixelsChanged();
+    SkSafeUnref(ref);
+}
+
 // These must match the int values in Bitmap.java
 enum JavaEncodeFormat {
     kJPEG_JavaEncodeFormat = 0,
@@ -666,6 +686,7 @@ static JNINativeMethod gBitmapMethods[] = {
         (void*)Bitmap_copy },
     {   "nativeDestructor",         "(I)V", (void*)Bitmap_destructor },
     {   "nativeRecycle",            "(I)Z", (void*)Bitmap_recycle },
+    {   "nativeReconfigure",        "(IIIII)V", (void*)Bitmap_reconfigure },
     {   "nativeCompress",           "(IIILjava/io/OutputStream;[B)Z",
         (void*)Bitmap_compress },
     {   "nativeErase",              "(II)V", (void*)Bitmap_erase },

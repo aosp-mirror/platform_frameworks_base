@@ -48,34 +48,40 @@ public class BitmapFactory {
 
         /**
          * If set, decode methods that take the Options object will attempt to
-         * reuse this bitmap when loading content. If the decode operation cannot
-         * use this bitmap, the decode method will return <code>null</code> and
-         * will throw an IllegalArgumentException. The current implementation
-         * necessitates that the reused bitmap be mutable, and the resulting
-         * reused bitmap will continue to remain mutable even when decoding a
-         * resource which would normally result in an immutable bitmap.
+         * reuse this bitmap when loading content. If the decode operation
+         * cannot use this bitmap, the decode method will return
+         * <code>null</code> and will throw an IllegalArgumentException. The
+         * current implementation necessitates that the reused bitmap be
+         * mutable, and the resulting reused bitmap will continue to remain
+         * mutable even when decoding a resource which would normally result in
+         * an immutable bitmap.</p>
          *
-         * <p>As of {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, any mutable
-         * bitmap can be reused to decode any other bitmaps as long as the resulting
-         * {@link Bitmap#getByteCount() byte count} of the decoded bitmap is less
-         * than or equal to the {@link Bitmap#getAllocationByteCount() allocated byte count}
-         * of the reused bitmap. This can be because the intrinsic size is smaller,
-         * or the size after density / sampled size scaling is smaller.
+         * <p>As of {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, any
+         * mutable bitmap can be reused to decode any other bitmaps as long as
+         * the resulting {@link Bitmap#getByteCount() byte count} of the decoded
+         * bitmap is less than or equal to the {@link
+         * Bitmap#getAllocationByteCount() allocated byte count} of the reused
+         * bitmap. This can be because the intrinsic size is smaller, or its
+         * size post scaling (for density / sample size) is smaller.</p>
          *
-         * <p>Prior to {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE} additional
-         * constraints apply: The image being decoded (whether as a resource or
-         * as a stream) must be in jpeg or png format. Only equal sized bitmaps
-         * are supported, with {@link #inSampleSize} set to 1. Additionally, the
-         * {@link android.graphics.Bitmap.Config configuration} of the reused
-         * bitmap will override the setting of {@link #inPreferredConfig}, if set.
+         * <p>Prior to {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}
+         * additional constraints apply: The image being decoded (whether as a
+         * resource or as a stream) must be in jpeg or png format. Only equal
+         * sized bitmaps are supported, with {@link #inSampleSize} set to 1.
+         * Additionally, the {@link android.graphics.Bitmap.Config
+         * configuration} of the reused bitmap will override the setting of
+         * {@link #inPreferredConfig}, if set.</p>
          *
          * <p>You should still always use the returned Bitmap of the decode
          * method and not assume that reusing the bitmap worked, due to the
          * constraints outlined above and failure situations that can occur.
          * Checking whether the return value matches the value of the inBitmap
          * set in the Options structure will indicate if the bitmap was reused,
-         * but in all cases you should use the Bitmap returned by the decoding function to ensure
-         * that you are using the bitmap that was used as the decode destination.</p>
+         * but in all cases you should use the Bitmap returned by the decoding
+         * function to ensure that you are using the bitmap that was used as the
+         * decode destination.</p>
+         *
+         * @see Bitmap#reconfigure(int,int,Config)
          */
         public Bitmap inBitmap;
 
