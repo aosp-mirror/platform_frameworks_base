@@ -207,8 +207,8 @@ final class ProcessRecord {
                 pw.println(starting);
         pw.print(prefix); pw.print("lastActivityTime=");
                 TimeUtils.formatDuration(lastActivityTime, now, pw);
-                pw.print(" lruWeight="); pw.print(lruWeight);
-                pw.print(" serviceb="); pw.print(serviceb);
+                pw.print(" lruWeight="); pw.println(lruWeight);
+        pw.print(prefix); pw.print("serviceb="); pw.print(serviceb);
                 pw.print(" keeping="); pw.print(keeping);
                 pw.print(" cached="); pw.print(cached);
                 pw.print(" empty="); pw.println(empty);

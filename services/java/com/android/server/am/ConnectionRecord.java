@@ -89,11 +89,14 @@ final class ConnectionRecord {
         if ((flags&Context.BIND_ADJUST_WITH_ACTIVITY) != 0) {
             sb.append("ACT ");
         }
-        if ((flags&Context.BIND_NOT_VISIBLE) != 0) {
-            sb.append("!VIS ");
-        }
         if ((flags&Context.BIND_VISIBLE) != 0) {
             sb.append("VIS ");
+        }
+        if ((flags&Context.BIND_SHOWING_UI) != 0) {
+            sb.append("UI ");
+        }
+        if ((flags&Context.BIND_NOT_VISIBLE) != 0) {
+            sb.append("!VIS ");
         }
         if (serviceDead) {
             sb.append("DEAD ");
