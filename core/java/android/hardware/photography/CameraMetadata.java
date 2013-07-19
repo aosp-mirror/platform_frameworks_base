@@ -16,6 +16,10 @@
 
 package android.hardware.photography;
 
+import android.hardware.photography.impl.MetadataMarshalClass;
+import android.hardware.photography.impl.MetadataMarshalRect;
+import android.hardware.photography.impl.MetadataMarshalSize;
+import android.hardware.photography.impl.MetadataMarshalString;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.util.Log;
@@ -84,6 +88,11 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
      */
     public <T> void set(Key<T> key, T value) {
         int tag = key.getTag();
+
+        if (value == null) {
+            writeValues(tag, null);
+            return;
+        }
 
         int nativeType = getNativeType(tag);
 
@@ -264,6 +273,11 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
     @SuppressWarnings("unchecked")
     private static <T> int packClass(T value, ByteBuffer buffer, Class<T> type, int nativeType,
             boolean sizeOnly) {
+
+        MetadataMarshalClass<T> marshaler = getMarshaler(type, nativeType);
+        if (marshaler != null) {
+            return marshaler.marshal(value, buffer, nativeType, sizeOnly);
+        }
 
         /**
          * FIXME: This doesn't actually work because getFields() returns fields in an unordered
@@ -558,6 +572,11 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
 
     private static <T> T unpackClass(ByteBuffer buffer, Class<T> type, int nativeType) {
 
+        MetadataMarshalClass<T> marshaler = getMarshaler(type, nativeType);
+        if (marshaler != null) {
+            return marshaler.unmarshal(buffer, nativeType);
+        }
+
         /**
          * FIXME: This doesn't actually work because getFields() returns fields in an unordered
          * manner. Although we could sort and get the data to come out correctly on the *java* side,
@@ -611,14 +630,44 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
         Class<?> componentType = type.getComponentType();
         Object array;
 
-        int remaining = buffer.remaining();
-        // FIXME: Assumes that the rest of the ByteBuffer is part of the array.
-        int arraySize = remaining / getTypeSize(nativeType);
+        int elementSize = getTypeSize(nativeType);
 
-        array = Array.newInstance(componentType, arraySize);
-        for (int i = 0; i < arraySize; ++i) {
-           Object elem = unpackSingle(buffer, componentType, nativeType);
-           Array.set(array, i, elem);
+        MetadataMarshalClass<?> marshaler = getMarshaler(componentType, nativeType);
+        if (marshaler != null) {
+            elementSize = marshaler.getNativeSize(nativeType);
+        }
+
+        if (elementSize != MetadataMarshalClass.NATIVE_SIZE_DYNAMIC) {
+            int remaining = buffer.remaining();
+            int arraySize = remaining / elementSize;
+
+            Log.v(TAG,
+                    String.format(
+                            "Attempting to unpack array (count = %d, element size = %d, bytes " +
+                                    "remaining = %d) for type %s",
+                            arraySize, elementSize, remaining, type));
+
+            array = Array.newInstance(componentType, arraySize);
+            for (int i = 0; i < arraySize; ++i) {
+               Object elem = unpackSingle(buffer, componentType, nativeType);
+               Array.set(array, i, elem);
+            }
+        } else {
+            // Dynamic size, use an array list.
+            ArrayList<Object> arrayList = new ArrayList<Object>();
+
+            int primitiveSize = getTypeSize(nativeType);
+            while (buffer.remaining() >= primitiveSize) {
+                Object elem = unpackSingle(buffer, componentType, nativeType);
+                arrayList.add(elem);
+            }
+
+            array = arrayList.toArray((T[]) Array.newInstance(componentType, 0));
+        }
+
+        if (buffer.remaining() != 0) {
+            Log.e(TAG, "Trailing bytes (" + buffer.remaining() + ") left over after unpacking "
+                    + type);
         }
 
         return (T) array;
@@ -927,11 +976,39 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
         return values[ordinal];
     }
 
+    static HashMap<Class<?>, MetadataMarshalClass<?>> sMarshalerMap = new
+            HashMap<Class<?>, MetadataMarshalClass<?>>();
+
+    private static <T> void registerMarshaler(MetadataMarshalClass<T> marshaler) {
+        sMarshalerMap.put(marshaler.getMarshalingClass(), marshaler);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> MetadataMarshalClass<T> getMarshaler(Class<T> type, int nativeType) {
+        MetadataMarshalClass<T> marshaler = (MetadataMarshalClass<T>) sMarshalerMap.get(type);
+
+        if (marshaler != null && !marshaler.isNativeTypeSupported(nativeType)) {
+            throw new UnsupportedOperationException("Unsupported type " + nativeType +
+                    " to be marshalled to/from a " + type);
+        }
+
+        return marshaler;
+    }
+
     /**
      * We use a class initializer to allow the native code to cache some field offsets
      */
     static {
         System.loadLibrary("media_jni");
         nativeClassInit();
+
+        Log.v(TAG, "Shall register metadata marshalers");
+
+        // load built-in marshallers
+        registerMarshaler(new MetadataMarshalRect());
+        registerMarshaler(new MetadataMarshalSize());
+        registerMarshaler(new MetadataMarshalString());
+
+        Log.v(TAG, "Registered metadata marshalers");
     }
 }
