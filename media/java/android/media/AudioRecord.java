@@ -694,6 +694,9 @@ public class AudioRecord
      *  {@link #ERROR_INVALID_OPERATION}
      */
     public int setNotificationMarkerPosition(int markerInFrames) {
+        if (mState == STATE_UNINITIALIZED) {
+            return ERROR_INVALID_OPERATION;
+        }
         return native_set_marker_pos(markerInFrames);
     }
 
@@ -706,6 +709,9 @@ public class AudioRecord
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_INVALID_OPERATION}
      */
     public int setPositionNotificationPeriod(int periodInFrames) {
+        if (mState == STATE_UNINITIALIZED) {
+            return ERROR_INVALID_OPERATION;
+        }
         return native_set_pos_update_period(periodInFrames);
     }
 
