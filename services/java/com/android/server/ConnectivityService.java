@@ -179,7 +179,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static final int MAX_HOSTROUTE_CYCLE_COUNT = 10;
 
     private Tethering mTethering;
-    private boolean mTetheringConfigValid = false;
 
     private KeyStore mKeyStore;
 
@@ -595,12 +594,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         mTethering = new Tethering(mContext, mNetd, statsService, this, mHandler.getLooper());
-        mTetheringConfigValid = ((mTethering.getTetherableUsbRegexs().length != 0 ||
-                                  mTethering.getTetherableWifiRegexs().length != 0 ||
-                                  mTethering.getTetherableBluetoothRegexs().length != 0) &&
-                                 mTethering.getUpstreamIfaceTypes().length != 0);
-        //set up the listener for user state for creating user VPNs
 
+        //set up the listener for user state for creating user VPNs
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_USER_STARTING);
         intentFilter.addAction(Intent.ACTION_USER_STOPPING);
@@ -3027,7 +3022,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         int defaultVal = (SystemProperties.get("ro.tether.denied").equals("true") ? 0 : 1);
         boolean tetherEnabledInSettings = (Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.TETHER_SUPPORTED, defaultVal) != 0);
-        return tetherEnabledInSettings && mTetheringConfigValid;
+        return tetherEnabledInSettings && ((mTethering.getTetherableUsbRegexs().length != 0 ||
+                mTethering.getTetherableWifiRegexs().length != 0 ||
+                mTethering.getTetherableBluetoothRegexs().length != 0) &&
+                mTethering.getUpstreamIfaceTypes().length != 0);
     }
 
     // An API NetworkStateTrackers can call when they lose their network.
