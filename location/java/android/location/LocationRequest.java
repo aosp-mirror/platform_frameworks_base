@@ -19,6 +19,7 @@ package android.location;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.os.WorkSource;
 import android.util.TimeUtils;
 
 
@@ -145,6 +146,7 @@ public final class LocationRequest implements Parcelable {
     private long mExpireAt = Long.MAX_VALUE;  // no expiry
     private int mNumUpdates = Integer.MAX_VALUE;  // no expiry
     private float mSmallestDisplacement = 0.0f;    // meters
+    private WorkSource mWorkSource = new WorkSource();
 
     private String mProvider = LocationManager.FUSED_PROVIDER;  // for deprecated APIs that explicitly request a provider
 
@@ -233,6 +235,7 @@ public final class LocationRequest implements Parcelable {
         mNumUpdates = src.mNumUpdates;
         mSmallestDisplacement = src.mSmallestDisplacement;
         mProvider = src.mProvider;
+        mWorkSource = src.mWorkSource;
     }
 
     /**
@@ -493,6 +496,16 @@ public final class LocationRequest implements Parcelable {
         return mSmallestDisplacement;
     }
 
+    /** @hide */
+    public void setWorkSource(WorkSource workSource) {
+        mWorkSource = workSource;
+    }
+
+    /** @hide */
+    public WorkSource getWorkSource() {
+        return mWorkSource;
+    }
+
     private static void checkInterval(long millis) {
         if (millis < 0) {
             throw new IllegalArgumentException("invalid interval: " + millis);
@@ -538,6 +551,8 @@ public final class LocationRequest implements Parcelable {
             request.setSmallestDisplacement(in.readFloat());
             String provider = in.readString();
             if (provider != null) request.setProvider(provider);
+            WorkSource workSource = in.readParcelable(WorkSource.class.getClassLoader());
+            if (workSource != null) request.setWorkSource(workSource);
             return request;
         }
         @Override
@@ -560,6 +575,7 @@ public final class LocationRequest implements Parcelable {
         parcel.writeInt(mNumUpdates);
         parcel.writeFloat(mSmallestDisplacement);
         parcel.writeString(mProvider);
+        parcel.writeParcelable(mWorkSource, 0);
     }
 
     /** @hide */
