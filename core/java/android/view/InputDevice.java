@@ -51,6 +51,7 @@ public final class InputDevice implements Parcelable {
     private final int mKeyboardType;
     private final KeyCharacterMap mKeyCharacterMap;
     private final boolean mHasVibrator;
+    private final boolean mHasButtonUnderPad;
     private final ArrayList<MotionRange> mMotionRanges = new ArrayList<MotionRange>();
 
     private Vibrator mVibrator; // guarded by mMotionRanges during initialization
@@ -343,7 +344,8 @@ public final class InputDevice implements Parcelable {
     // Called by native code.
     private InputDevice(int id, int generation, String name, String descriptor,
             boolean isExternal, int sources,
-            int keyboardType, KeyCharacterMap keyCharacterMap, boolean hasVibrator) {
+            int keyboardType, KeyCharacterMap keyCharacterMap,
+            boolean hasVibrator, boolean hasButtonUnderPad) {
         mId = id;
         mGeneration = generation;
         mName = name;
@@ -353,6 +355,7 @@ public final class InputDevice implements Parcelable {
         mKeyboardType = keyboardType;
         mKeyCharacterMap = keyCharacterMap;
         mHasVibrator = hasVibrator;
+        mHasButtonUnderPad = hasButtonUnderPad;
     }
 
     private InputDevice(Parcel in) {
@@ -365,6 +368,7 @@ public final class InputDevice implements Parcelable {
         mKeyboardType = in.readInt();
         mKeyCharacterMap = KeyCharacterMap.CREATOR.createFromParcel(in);
         mHasVibrator = in.readInt() != 0;
+        mHasButtonUnderPad = in.readInt() != 0;
 
         for (;;) {
             int axis = in.readInt();
@@ -612,6 +616,15 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
+     * Reports whether the device has a button under its touchpad
+     * @return Whether the device has a button under its touchpad
+     * @hide
+     */
+    public boolean hasButtonUnderPad() {
+        return mHasButtonUnderPad;
+    }
+
+    /**
      * Provides information about the range of values for a particular {@link MotionEvent} axis.
      *
      * @see InputDevice#getMotionRange(int)
@@ -733,6 +746,7 @@ public final class InputDevice implements Parcelable {
         out.writeInt(mKeyboardType);
         mKeyCharacterMap.writeToParcel(out, flags);
         out.writeInt(mHasVibrator ? 1 : 0);
+        out.writeInt(mHasButtonUnderPad ? 1 : 0);
 
         final int numRanges = mMotionRanges.size();
         for (int i = 0; i < numRanges; i++) {
