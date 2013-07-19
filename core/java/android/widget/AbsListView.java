@@ -2843,6 +2843,23 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         return new AdapterContextMenuInfo(view, position, id);
     }
 
+    @Override
+    public void onCancelPendingInputEvents() {
+        super.onCancelPendingInputEvents();
+        if (mPerformClick != null) {
+            removeCallbacks(mPerformClick);
+        }
+        if (mPendingCheckForTap != null) {
+            removeCallbacks(mPendingCheckForTap);
+        }
+        if (mPendingCheckForLongPress != null) {
+            removeCallbacks(mPendingCheckForLongPress);
+        }
+        if (mPendingCheckForKeyLongPress != null) {
+            removeCallbacks(mPendingCheckForKeyLongPress);
+        }
+    }
+
     /**
      * A base class for Runnables that will check that their view is still attached to
      * the original window as when the Runnable was created.
