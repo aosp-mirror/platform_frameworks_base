@@ -247,6 +247,20 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     }
 
     /**
+     * @hide
+     * Like {@link #clear}, but doesn't reduce the capacity of the ArrayMap.
+     */
+    public void erase() {
+        if (mSize > 0) {
+            final int N = mSize<<1;
+            final Object[] array = mArray;
+            for (int i=0; i<N; i++) {
+                array[i] = null;
+            }
+        }
+    }
+
+    /**
      * Ensure the array map can hold at least <var>minimumCapacity</var>
      * items.
      */
@@ -421,8 +435,13 @@ public final class ArrayMap<K, V> implements Map<K, V> {
             throw new IllegalStateException("Array is full");
         }
         if (index > 0 && mHashes[index-1] > hash) {
-            throw new IllegalArgumentException("New hash " + hash
-                    + " is before end of array hash " + mHashes[index-1]);
+            RuntimeException e = new RuntimeException("here");
+            e.fillInStackTrace();
+            Log.w(TAG, "New hash " + hash
+                    + " is before end of array hash " + mHashes[index-1]
+                    + " at index " + index + " key " + key, e);
+            put(key, value);
+            return;
         }
         mSize = index+1;
         mHashes[index] = hash;

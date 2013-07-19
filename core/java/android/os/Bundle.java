@@ -217,6 +217,7 @@ public final class Bundle implements Parcelable, Cloneable {
         if (mMap == null) {
             mMap = new ArrayMap<String, Object>(N);
         } else {
+            mMap.erase();
             mMap.ensureCapacity(N);
         }
         mParcelledData.readArrayMapInternal(mMap, N, mClassLoader);
