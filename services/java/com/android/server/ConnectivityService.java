@@ -381,6 +381,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     TelephonyManager mTelephonyManager;
 
+    // We only want one checkMobileProvisioning after booting.
+    volatile boolean mFirstProvisioningCheckStarted = false;
+
     public ConnectivityService(Context context, INetworkManagementService netd,
             INetworkStatsService statsService, INetworkPolicyManager policyManager) {
         // Currently, omitting a NetworkFactory will create one internally
@@ -2755,6 +2758,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             state + "/" + info.getDetailedState());
                     }
 
+                    // After booting we'll check once for mobile provisioning
+                    // if we've provisioned by and connected.
+                    if (!mFirstProvisioningCheckStarted
+                            && (0 != Settings.Global.getInt(mContext.getContentResolver(),
+                                        Settings.Global.DEVICE_PROVISIONED, 0))
+                            && (state == NetworkInfo.State.CONNECTED)) {
+                        log("check provisioning after booting");
+                        mFirstProvisioningCheckStarted = true;
+                        checkMobileProvisioning(true, CheckMp.MAX_TIMEOUT_MS, null);
+                    }
+
                     EventLogTags.writeConnectivityStateChanged(
                             info.getType(), info.getSubtype(), info.getDetailedState().ordinal());
 
@@ -3676,6 +3690,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 + " suggestedTimeOutMs=" + suggestedTimeOutMs
                 + " resultReceiver=" + resultReceiver);
         enforceChangePermission();
+
+        mFirstProvisioningCheckStarted = true;
 
         int timeOutMs = suggestedTimeOutMs;
         if (suggestedTimeOutMs > CheckMp.MAX_TIMEOUT_MS) {
