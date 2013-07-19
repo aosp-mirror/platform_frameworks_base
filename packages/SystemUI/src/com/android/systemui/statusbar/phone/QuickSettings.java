@@ -44,6 +44,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.AlarmClock;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Profile;
@@ -605,12 +606,7 @@ class QuickSettings {
         alarmTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: Jump into the alarm application
-                Intent intent = new Intent();
-                intent.setComponent(new ComponentName(
-                        "com.google.android.deskclock",
-                        "com.android.deskclock.AlarmClock"));
-                startSettingsActivity(intent);
+                startSettingsActivity(AlarmClock.ACTION_SET_ALARM);
             }
         });
         mModel.addAlarmTile(alarmTile, new QuickSettingsModel.RefreshCallback() {
