@@ -157,6 +157,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         IntentFilter filter = new IntentFilter();
         filter.addAction(UsbManager.ACTION_USB_STATE);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         mContext.registerReceiver(mStateReceiver, filter);
 
         filter = new IntentFilter();
@@ -516,6 +517,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     if (VDBG) Log.d(TAG, "Tethering got CONNECTIVITY_ACTION");
                     mTetherMasterSM.sendMessage(TetherMasterSM.CMD_UPSTREAM_CHANGED);
                 }
+            } else if (action.equals(Intent.ACTION_CONFIGURATION_CHANGED)) {
+                updateConfiguration();
             }
         }
     }
@@ -618,7 +621,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     public int[] getUpstreamIfaceTypes() {
         int values[];
         synchronized (mPublicSync) {
-            updateConfiguration();
+            updateConfiguration();  // TODO - remove?
             values = new int[mUpstreamIfaceTypes.size()];
             Iterator<Integer> iterator = mUpstreamIfaceTypes.iterator();
             for (int i=0; i < mUpstreamIfaceTypes.size(); i++) {
@@ -1289,7 +1292,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 int upType = ConnectivityManager.TYPE_NONE;
                 String iface = null;
 
-                updateConfiguration();
+                updateConfiguration(); // TODO - remove?
 
                 synchronized (mPublicSync) {
                     if (VDBG) {
