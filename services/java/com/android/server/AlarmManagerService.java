@@ -1009,15 +1009,15 @@ class AlarmManagerService extends IAlarmManager.Stub {
 
     void recordWakeupAlarms(ArrayList<Batch> batches, long nowELAPSED, long nowRTC) {
         final int numBatches = batches.size();
-        for (int i = 0; i < numBatches; i++) {
-            Batch b = batches.get(i);
+        for (int nextBatch = 0; nextBatch < numBatches; nextBatch++) {
+            Batch b = batches.get(nextBatch);
             if (b.start > nowELAPSED) {
                 break;
             }
 
             final int numAlarms = b.alarms.size();
-            for (int j = 0; j < numAlarms; j++) {
-                Alarm a = b.alarms.get(i);
+            for (int nextAlarm = 0; nextAlarm < numAlarms; nextAlarm++) {
+                Alarm a = b.alarms.get(nextAlarm);
                 WakeupEvent e = new WakeupEvent(nowRTC,
                         a.operation.getCreatorUid(),
                         a.operation.getIntent().getAction());
