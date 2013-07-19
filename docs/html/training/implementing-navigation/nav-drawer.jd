@@ -124,6 +124,7 @@ android.widget.ArrayAdapter} or {@link android.widget.SimpleCursorAdapter}).</p>
 <pre>
 public class MainActivity extends Activity {
     private String[] mPlanetTitles;
+    private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     ...
 
@@ -133,6 +134,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         mPlanetTitles = getResources().getStringArray(R.array.planets_array);
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
         // Set the adapter for the list view
@@ -191,9 +193,9 @@ private void selectItem(int position) {
                    .commit();
 
     // Highlight the selected item, update the title, and close the drawer
-    mDrawer.setItemChecked(position, true);
+    mDrawerList.setItemChecked(position, true);
     setTitle(mPlanetTitles[position]);
-    mDrawerLayout.closeDrawer(mDrawer);
+    mDrawerLayout.closeDrawer(mDrawerList);
 }
 
 &#64;Override
