@@ -218,7 +218,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     uint32_t nativeChannelMask = ((uint32_t)javaChannelMask) >> 2;
 
     if (!audio_is_output_channel(nativeChannelMask)) {
-        ALOGE("Error creating AudioTrack: invalid channel mask.");
+        ALOGE("Error creating AudioTrack: invalid channel mask %#x.", javaChannelMask);
         return AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELMASK;
     }
 

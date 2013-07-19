@@ -156,18 +156,19 @@ static sp<AudioRecord> setAudioRecord(JNIEnv* env, jobject thiz, const sp<AudioR
 // ----------------------------------------------------------------------------
 static int
 android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
-        jint source, jint sampleRateInHertz, jint channels,
+        jint source, jint sampleRateInHertz, jint channelMask,
+                // Java channel masks map directly to the native definition
         jint audioFormat, jint buffSizeInBytes, jintArray jSession)
 {
     //ALOGV(">> Entering android_media_AudioRecord_setup");
-    //ALOGV("sampleRate=%d, audioFormat=%d, channels=%x, buffSizeInBytes=%d",
-    //     sampleRateInHertz, audioFormat, channels,     buffSizeInBytes);
+    //ALOGV("sampleRate=%d, audioFormat=%d, channel mask=%x, buffSizeInBytes=%d",
+    //     sampleRateInHertz, audioFormat, channelMask, buffSizeInBytes);
 
-    if (!audio_is_input_channel(channels)) {
-        ALOGE("Error creating AudioRecord: channel count is not 1 or 2.");
+    if (!audio_is_input_channel(channelMask)) {
+        ALOGE("Error creating AudioRecord: channel mask %#x is not valid.", channelMask);
         return AUDIORECORD_ERROR_SETUP_INVALIDCHANNELMASK;
     }
-    uint32_t nbChannels = popcount(channels);
+    uint32_t nbChannels = popcount(channelMask);
 
     // compare the format against the Java constants
     if ((audioFormat != javaAudioRecordFields.PCM16)
@@ -226,7 +227,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     lpRecorder->set((audio_source_t) source,
         sampleRateInHertz,
         format,        // word length, PCM
-        channels,
+        channelMask,
         frameCount,
         recorderCallback,// callback_t
         lpCallbackData,// void* user
