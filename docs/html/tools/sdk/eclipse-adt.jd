@@ -53,9 +53,46 @@ the ADT Plugin, as denoted by revision number. </p>
 <p>For a summary of all known issues in ADT, see <a
 href="http://tools.android.com/knownissues">http://tools.android.com/knownissues</a>.</p>
 
+
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>ADT 22.0.4</a> <em>(July 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 1.6 or higher is required for ADT 22.0.4.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 22.0.4.</li>
+      <li>ADT 22.0.4 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK
+      Tools r22.0.4</a>. If you haven't already installed SDK Tools r22.0.4 into your SDK, use the
+      Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+      <li>Fixed problem with compiling Renderscript code.</li>
+      <li>Improved Gradle export with better workflow and error reporting.</li>
+      <li>Improved Gradle multi-module export feature.</li>
+      <li>Updated build logic to force exporting of the classpath containers unless you are using
+        the Maven plugin.</li>
+    </ul>
+  </dd>
+
+</dl>
+</div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>ADT 22.0.1</a> <em>(May 2013)</em>
   </p>
 
