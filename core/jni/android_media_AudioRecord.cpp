@@ -402,10 +402,13 @@ static jint android_media_AudioRecord_readInShortArray(JNIEnv *env,  jobject thi
                                                         jshortArray javaAudioData,
                                                         jint offsetInShorts, jint sizeInShorts) {
 
-    return (android_media_AudioRecord_readInByteArray(env, thiz,
+    jint read = android_media_AudioRecord_readInByteArray(env, thiz,
                                                         (jbyteArray) javaAudioData,
-                                                        offsetInShorts*2, sizeInShorts*2)
-            / 2);
+                                                        offsetInShorts*2, sizeInShorts*2);
+    if (read > 0) {
+        read /= 2;
+    }
+    return read;
 }
 
 // ----------------------------------------------------------------------------
