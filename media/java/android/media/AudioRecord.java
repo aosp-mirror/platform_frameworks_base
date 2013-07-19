@@ -421,7 +421,9 @@ public class AudioRecord
      * @see AudioRecord#RECORDSTATE_RECORDING
      */
     public int getRecordingState() {
-        return mRecordingState;
+        synchronized (mRecordingStateLock) {
+            return mRecordingState;
+        }
     }
 
     /**
