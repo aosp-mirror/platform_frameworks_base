@@ -57,15 +57,15 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                 <li class="item carousel-home">
                     <div class="content-left col-11" style="padding-top:65px;">
                       <script src="//ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
-                      <div style="box-shadow: 3px 10px 18px 1px #999;width:600px;height:338px">
+                      <div style="box-shadow: 3px 10px 18px 1px #999;width:600px;height:336px">
                         <div id="ytapiplayer">
-                          You need Flash player 8+ and JavaScript enabled to view this video.
+                          <a href="http://www.youtube.com/watch?v=CbpoZeQCNe4"><img width=600 src="{@docRoot}images/video-Colopl.png"></a><!--You need Flash player 8+ and JavaScript enabled to view this video. -->
                         </div>
                         <script type="text/javascript">
                             var params = { allowScriptAccess: "always" };
                             var atts = { id: "ytapiplayer" };
-                            swfobject.embedSWF("//www.youtube.com/v/O8i4HUw7JYA?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1",
-                              "ytapiplayer", "600", "338", "8", null, null, params, atts);
+                            swfobject.embedSWF("//www.youtube.com/v/CbpoZeQCNe4?enablejsapi=1&playerapiid=ytplayer&version=3&HD=1;rel=0;showinfo=0;modestbranding;origin=developer.android.com;autohide=1",
+                              "ytapiplayer", "600", "336", "8", null, null, params, atts);
 
                             // Callback used to pause/resume carousel based on video state
                             function onytplayerStateChange(newState) {              
@@ -95,6 +95,37 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                     <div class="content-right col-4">
                     <h1 style="white-space:nowrap;line-height:1.2em;">Developer Story: <br />redBus.in</h1>
                     <p>Bangalore-based developers redBus.in talk about how Android is helping them deliver a superior booking and travel experience to millions of daily bus riders in India.</p>
+                    </div>
+                </li>
+
+                <li class="item carousel-home">
+                    <div class="content-left col-11" style="padding-top:10px;">
+                        <a href="{@docRoot}channels/io2013.html">
+                          <img src="{@docRoot}images/home/io-videos-2013.png" style="margin:60px 0 0;
+                          box-shadow: 3px 10px 18px 1px #999;">
+                        </a>
+                    </div>
+                    <div class="content-right col-4">
+                    <h1>Watch the Android talks from Google I/O</h1>
+                    <p>If you weren't able to attend Google I/O in person or couldn't make it
+                    to all the talks, you can catch up on the action
+                    with all the recordings, brought to you by
+                    <a href="http://developers.google.com/live">Google Developers Live</a>.</p>
+                    <p><a href="{@docRoot}channels/io2013.html" class="button"
+                    >See the Android talks</a></p>
+                    </div>
+                </li>
+
+
+                <li class="item carousel-home">
+                    <div class="content-left col-9">
+                        <a href="{@docRoot}about/versions/jelly-bean.html"><img src="{@docRoot}images/home/android-jellybean.png" ></a>
+                    </div>
+                    <div class="content-right col-6">
+                    <h1>Android 4.2 Jelly Bean!</h1>
+                    <p>The latest version of Jelly Bean is here, with performance optimizations, a refreshed UI, and great new features for developers. </p>
+                    <p>Android 4.2 includes APIs for developing lock sceen widgets and Daydream screensavers, using external displays, creating RTL layouts, building flexible UI with nested Fragments, and much more.</p>
+                    <p><a href="{@docRoot}about/versions/jelly-bean.html" class="button">Learn More</a></p>
                     </div>
                 </li>
                 <li class="item carousel-home">
