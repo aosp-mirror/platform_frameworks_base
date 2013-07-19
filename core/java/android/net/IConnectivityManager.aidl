@@ -137,4 +137,6 @@ interface IConnectivityManager
     int findConnectionTypeForIface(in String iface);
 
     int checkMobileProvisioning(boolean sendNotification, int suggestedTimeOutMs, in ResultReceiver resultReceiver);
+
+    String getMobileProvisioningUrl();
 }

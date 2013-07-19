@@ -1373,4 +1373,16 @@ public class ConnectivityManager {
         }
         return timeOutMs;
     }
+
+    /**
+     * Get the carrier provisioning url.
+     * {@hide}
+     */
+    public String getMobileProvisioningUrl() {
+        try {
+            return mService.getMobileProvisioningUrl();
+        } catch (RemoteException e) {
+        }
+        return null;
+    }
 }

@@ -42,6 +42,7 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.CaptivePortalTracker;
@@ -96,8 +97,9 @@ import android.security.KeyStore;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Slog;
-import android.util.SparseIntArray;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
+import android.util.Xml;
 
 import com.android.internal.R;
 import com.android.internal.net.LegacyVpnInfo;
@@ -107,6 +109,7 @@ import com.android.internal.telephony.DctConstants;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.connectivity.Nat464Xlat;
@@ -121,7 +124,13 @@ import com.android.internal.annotations.GuardedBy;
 
 import dalvik.system.DexClassLoader;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
@@ -3733,10 +3742,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         }
                         case ConnectivityManager.CMP_RESULT_CODE_REDIRECTED: {
                             log("CheckMp.onComplete: warm sim");
-                            String url = getProvisioningUrl();
+                            String url = getMobileProvisioningUrl();
                             if (TextUtils.isEmpty(url)) {
-                                url = mContext.getResources()
-                                        .getString(R.string.mobile_redirected_provisioning_url);
+                                url = getMobileRedirectedProvisioningUrl();
                             }
                             if (TextUtils.isEmpty(url) == false) {
                                 log("CheckMp.onComplete: warm sim (redirected), url=" + url);
@@ -3748,7 +3756,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         }
                         case ConnectivityManager.CMP_RESULT_CODE_NO_DNS:
                         case ConnectivityManager.CMP_RESULT_CODE_NO_TCP_CONNECTION: {
-                            String url = getProvisioningUrl();
+                            String url = getMobileProvisioningUrl();
                             if (TextUtils.isEmpty(url) == false) {
                                 log("CheckMp.onComplete: warm sim (no dns/tcp), url=" + url);
                                 setNotificationVisible(true, ni, url);
@@ -4122,10 +4130,114 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         log("setNotificationVisible: X visible=" + visible + " ni=" + networkInfo + " url=" + url);
     }
 
-    private String getProvisioningUrl() {
-        String url = mContext.getResources().getString(R.string.mobile_provisioning_url);
-        log("getProvisioningUrl: mobile_provisioning_url=" + url);
+    /** Location to an updatable file listing carrier provisioning urls.
+     *  An example:
+     *
+     * <?xml version="1.0" encoding="utf-8"?>
+     *  <provisioningUrls>
+     *   <provisioningUrl mcc="310" mnc="4">http://myserver.com/foo?mdn=%3$s&amp;iccid=%1$s&amp;imei=%2$s</provisioningUrl>
+     *   <redirectedUrl mcc="310" mnc="4">http://www.google.com</redirectedUrl>
+     *  </provisioningUrls>
+     */
+    private static final String PROVISIONING_URL_PATH =
+            "/data/misc/radio/provisioning_urls.xml";
+    private final File mProvisioningUrlFile = new File(PROVISIONING_URL_PATH);
 
+    /** XML tag for root element. */
+    private static final String TAG_PROVISIONING_URLS = "provisioningUrls";
+    /** XML tag for individual url */
+    private static final String TAG_PROVISIONING_URL = "provisioningUrl";
+    /** XML tag for redirected url */
+    private static final String TAG_REDIRECTED_URL = "redirectedUrl";
+    /** XML attribute for mcc */
+    private static final String ATTR_MCC = "mcc";
+    /** XML attribute for mnc */
+    private static final String ATTR_MNC = "mnc";
+
+    private static final int REDIRECTED_PROVISIONING = 1;
+    private static final int PROVISIONING = 2;
+
+    private String getProvisioningUrlBaseFromFile(int type) {
+        FileReader fileReader = null;
+        XmlPullParser parser = null;
+        Configuration config = mContext.getResources().getConfiguration();
+        String tagType;
+
+        switch (type) {
+            case PROVISIONING:
+                tagType = TAG_PROVISIONING_URL;
+                break;
+            case REDIRECTED_PROVISIONING:
+                tagType = TAG_REDIRECTED_URL;
+                break;
+            default:
+                throw new RuntimeException("getProvisioningUrlBaseFromFile: Unexpected parameter " +
+                        type);
+        }
+
+        try {
+            fileReader = new FileReader(mProvisioningUrlFile);
+            parser = Xml.newPullParser();
+            parser.setInput(fileReader);
+            XmlUtils.beginDocument(parser, TAG_PROVISIONING_URLS);
+
+            while (true) {
+                XmlUtils.nextElement(parser);
+
+                String element = parser.getName();
+                if (element == null) break;
+
+                if (element.equals(tagType)) {
+                    String mcc = parser.getAttributeValue(null, ATTR_MCC);
+                    try {
+                        if (mcc != null && Integer.parseInt(mcc) == config.mcc) {
+                            String mnc = parser.getAttributeValue(null, ATTR_MNC);
+                            if (mnc != null && Integer.parseInt(mnc) == config.mnc) {
+                                parser.next();
+                                if (parser.getEventType() == XmlPullParser.TEXT) {
+                                    return parser.getText();
+                                }
+                            }
+                        }
+                    } catch (NumberFormatException e) {
+                        loge("NumberFormatException in getProvisioningUrlBaseFromFile: " + e);
+                    }
+                }
+            }
+            return null;
+        } catch (FileNotFoundException e) {
+            loge("Carrier Provisioning Urls file not found");
+        } catch (XmlPullParserException e) {
+            loge("Xml parser exception reading Carrier Provisioning Urls file: " + e);
+        } catch (IOException e) {
+            loge("I/O exception reading Carrier Provisioning Urls file: " + e);
+        } finally {
+            if (fileReader != null) {
+                try {
+                    fileReader.close();
+                } catch (IOException e) {}
+            }
+        }
+        return null;
+    }
+
+    private String getMobileRedirectedProvisioningUrl() {
+        String url = getProvisioningUrlBaseFromFile(REDIRECTED_PROVISIONING);
+        if (TextUtils.isEmpty(url)) {
+            url = mContext.getResources().getString(R.string.mobile_redirected_provisioning_url);
+        }
+        return url;
+    }
+
+    public String getMobileProvisioningUrl() {
+        enforceConnectivityInternalPermission();
+        String url = getProvisioningUrlBaseFromFile(PROVISIONING);
+        if (TextUtils.isEmpty(url)) {
+            url = mContext.getResources().getString(R.string.mobile_provisioning_url);
+            log("getProvisioningUrl: mobile_provisioining_url from resource =" + url);
+        } else {
+            log("getProvisioningUrl: mobile_provisioning_url from File =" + url);
+        }
         // populate the iccid, imei and phone number in the provisioning url.
         if (!TextUtils.isEmpty(url)) {
             String phoneNumber = mTelephonyManager.getLine1Number();
