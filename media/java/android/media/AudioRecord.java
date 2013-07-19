@@ -587,6 +587,7 @@ public class AudioRecord
         }
 
         if ( (audioData == null) || (offsetInBytes < 0 ) || (sizeInBytes < 0)
+                || (offsetInBytes + sizeInBytes < 0)  // detect integer overflow
                 || (offsetInBytes + sizeInBytes > audioData.length)) {
             return ERROR_BAD_VALUE;
         }
@@ -611,6 +612,7 @@ public class AudioRecord
         }
 
         if ( (audioData == null) || (offsetInShorts < 0 ) || (sizeInShorts < 0)
+                || (offsetInShorts + sizeInShorts < 0)  // detect integer overflow
                 || (offsetInShorts + sizeInShorts > audioData.length)) {
             return ERROR_BAD_VALUE;
         }
