@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.os.Build;
 import com.android.internal.policy.PolicyManager;
 import com.android.internal.util.Preconditions;
 
@@ -704,6 +705,16 @@ class ContextImpl extends Context {
             if (packagePrefs == null) {
                 packagePrefs = new ArrayMap<String, SharedPreferencesImpl>();
                 sSharedPrefs.put(packageName, packagePrefs);
+            }
+
+            // At least one application in the world actually passes in a null
+            // name.  This happened to work because when we generated the file name
+            // we would stringify it to "null.xml".  Nice.
+            if (mPackageInfo.getApplicationInfo().targetSdkVersion <
+                    Build.VERSION_CODES.KEY_LIME_PIE) {
+                if (name == null) {
+                    name = "null";
+                }
             }
 
             sp = packagePrefs.get(name);
