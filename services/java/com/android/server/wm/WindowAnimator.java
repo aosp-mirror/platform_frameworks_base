@@ -542,7 +542,7 @@ public class WindowAnimator {
         boolean hasPendingLayoutChanges = false;
         final int numDisplays = mService.mDisplayContents.size();
         for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
-            final DisplayContent displayContent = mService.mDisplayContents.get(displayNdx);
+            final DisplayContent displayContent = mService.mDisplayContents.valueAt(displayNdx);
             final int pendingChanges = getPendingLayoutChanges(displayContent.getDisplayId());
             if ((pendingChanges & WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER) != 0) {
                 mBulkUpdateParams |= SET_WALLPAPER_ACTION_PENDING;
