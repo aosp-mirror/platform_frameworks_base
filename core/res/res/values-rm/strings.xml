@@ -757,6 +757,10 @@
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"leger il paraculp da frame"</string>
     <!-- no translation found for permdesc_readFrameBuffer (4937405521809454680) -->
     <skip />
+    <!-- no translation found for permlab_accessInputFlinger (5348635270689553857) -->
+    <skip />
+    <!-- no translation found for permdesc_accessInputFlinger (2104864941201226616) -->
+    <skip />
     <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
     <skip />
     <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
@@ -1075,6 +1079,10 @@
     <!-- no translation found for permlab_bindNotificationListenerService (7057764742211656654) -->
     <skip />
     <!-- no translation found for permdesc_bindNotificationListenerService (985697918576902986) -->
+    <skip />
+    <!-- no translation found for permlab_invokeCarrierSetup (3699600833975117478) -->
+    <skip />
+    <!-- no translation found for permdesc_invokeCarrierSetup (4159549152529111920) -->
     <skip />
     <!-- no translation found for policylab_limitPassword (4497420728857585791) -->
     <skip />
@@ -2537,6 +2545,10 @@
     <!-- no translation found for mediaSize_na_ledger (281871464896601236) -->
     <skip />
     <!-- no translation found for mediaSize_na_tabloid (5775966416333578127) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cancelled (7091258378121627624) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cannot_write (8132505417935337724) -->
     <skip />
     <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
     <skip />

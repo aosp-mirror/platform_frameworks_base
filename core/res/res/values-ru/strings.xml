@@ -470,6 +470,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Приложение сможет использовать низкоуровневые функции SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"Чтение данных в буфере кадров"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Приложение сможет считывать содержание буфера фреймов."</string>
+    <!-- no translation found for permlab_accessInputFlinger (5348635270689553857) -->
+    <skip />
+    <!-- no translation found for permdesc_accessInputFlinger (2104864941201226616) -->
+    <skip />
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"настраивать экраны, подключенные через Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Приложение сможет подключаться к экранам с помощью Wi-Fi и настраивать их."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Управление мониторами, подключенными через Wi-Fi"</string>
@@ -647,6 +651,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Приложение сможет получать, проверять и удалять уведомления, включая те, что опубликованы другими приложениями."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"Подключение к службе просмотра уведомлений"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Приложение сможет подключаться к базовому интерфейсу службы просмотра уведомлений. Это разрешение не используется обычными приложениями."</string>
+    <!-- no translation found for permlab_invokeCarrierSetup (3699600833975117478) -->
+    <skip />
+    <!-- no translation found for permdesc_invokeCarrierSetup (4159549152529111920) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Правила выбора паролей"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролировать длину и символы при вводе паролей для снятия блокировки экрана."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Отслеживать попытки снятия блокировки экрана"</string>
@@ -1596,6 +1604,10 @@
     <!-- no translation found for mediaSize_na_ledger (281871464896601236) -->
     <skip />
     <!-- no translation found for mediaSize_na_tabloid (5775966416333578127) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cancelled (7091258378121627624) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cannot_write (8132505417935337724) -->
     <skip />
     <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
     <skip />

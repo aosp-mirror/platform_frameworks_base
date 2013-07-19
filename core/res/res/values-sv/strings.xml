@@ -470,6 +470,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Tillåter att appen använder lågnivåfunktioner i SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"läsa rambuffert"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Tillåter att appen läser innehållet i rambufferten."</string>
+    <!-- no translation found for permlab_accessInputFlinger (5348635270689553857) -->
+    <skip />
+    <!-- no translation found for permdesc_accessInputFlinger (2104864941201226616) -->
+    <skip />
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"konfigurerar Wi-Fi-skärmar"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Tillåter att appen konfigurerar och ansluter till Wi-Fi-skärmar."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"kontrollerar Wi-Fi-skärmar"</string>
@@ -647,6 +651,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Tillåter att appen hämtar, granskar och raderar meddelanden, även sådana som skickats av andra appar."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"binda till en meddelandelyssnare"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en meddelandelyssnare. Ska inte behövas för vanliga appar."</string>
+    <!-- no translation found for permlab_invokeCarrierSetup (3699600833975117478) -->
+    <skip />
+    <!-- no translation found for permdesc_invokeCarrierSetup (4159549152529111920) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ange lösenordsregler"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Bestäm hur många och vilka tecken som är tillåtna i skärmlåsets lösenord."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Övervaka försök att låsa upp skärmen"</string>
@@ -1596,6 +1604,10 @@
     <!-- no translation found for mediaSize_na_ledger (281871464896601236) -->
     <skip />
     <!-- no translation found for mediaSize_na_tabloid (5775966416333578127) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cancelled (7091258378121627624) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cannot_write (8132505417935337724) -->
     <skip />
     <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
     <skip />

@@ -470,6 +470,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Uygulamaya, SurfaceFlinger\'a ait düşük düzey özellikleri kullanma izni verir."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"çerçeve arabelleğini oku"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Uygulamaya, çerçeve arabelleğinin içeriğini okuma izni verir."</string>
+    <!-- no translation found for permlab_accessInputFlinger (5348635270689553857) -->
+    <skip />
+    <!-- no translation found for permdesc_accessInputFlinger (2104864941201226616) -->
+    <skip />
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Kablosuz ekranları yapılandır"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Uygulamaya kablosuz ekranları yapılandırma ve bunlara bağlanma izni verir."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Kablosuz ekranları denetle"</string>
@@ -647,6 +651,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Uygulamanın bildirimler almasına, bildirimleri incelemesine ve temizlemesine izin verir. Buna diğer uygulamalar tarafından yayınlanan bildirimler de dahildir."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"bildirim dinleyici hizmetine bağlan"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"İzin sahibine bir bildirim dinleyici hizmetinin en üst düzey arayüzüne bağlanma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
+    <!-- no translation found for permlab_invokeCarrierSetup (3699600833975117478) -->
+    <skip />
+    <!-- no translation found for permdesc_invokeCarrierSetup (4159549152529111920) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Şifre kuralları ayarla"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ekran kilidini açma şifrelerinde izin verilen uzunluğu ve karakterleri denetleme."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekran kilidini açma denemelerini izle"</string>
@@ -1596,6 +1604,10 @@
     <!-- no translation found for mediaSize_na_ledger (281871464896601236) -->
     <skip />
     <!-- no translation found for mediaSize_na_tabloid (5775966416333578127) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cancelled (7091258378121627624) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cannot_write (8132505417935337724) -->
     <skip />
     <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
     <skip />

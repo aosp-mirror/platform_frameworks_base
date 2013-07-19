@@ -470,6 +470,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permite que o aplicativo use recursos com baixos níveis de SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"ler o buffer do frame"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Permite que o aplicativo leia o conteúdo do buffer de frame."</string>
+    <!-- no translation found for permlab_accessInputFlinger (5348635270689553857) -->
+    <skip />
+    <!-- no translation found for permdesc_accessInputFlinger (2104864941201226616) -->
+    <skip />
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configurar monitores Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Permite que o aplicativo configure e conecte a monitores Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"controlar monitores Wi-Fi"</string>
@@ -647,6 +651,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permite que o aplicativo recupere, examine e limpe notificações, inclusive as postadas por outros aplicativos."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"sujeitar a um serviço ouvinte de notificações"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite que o proprietário sujeite a interface de nível superior a um serviço ouvinte de notificações. Não deve ser necessário para aplicativos comuns."</string>
+    <!-- no translation found for permlab_invokeCarrierSetup (3699600833975117478) -->
+    <skip />
+    <!-- no translation found for permdesc_invokeCarrierSetup (4159549152529111920) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Definir regras para senha"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controle o tamanho e os caracteres permitidos nas senhas de desbloqueio de tela."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitorar tentativas de desbloqueio da tela"</string>
@@ -1596,6 +1604,10 @@
     <!-- no translation found for mediaSize_na_ledger (281871464896601236) -->
     <skip />
     <!-- no translation found for mediaSize_na_tabloid (5775966416333578127) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cancelled (7091258378121627624) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cannot_write (8132505417935337724) -->
     <skip />
     <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
     <skip />

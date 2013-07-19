@@ -470,6 +470,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permet que l\'aplicació utilitzi funcions SurfaceFlinger de baix nivell."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"llegir la memòria intermèdia de marcs"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Permet que l\'aplicació llegeixi el contingut de la memòria intermèdia de marcs."</string>
+    <!-- no translation found for permlab_accessInputFlinger (5348635270689553857) -->
+    <skip />
+    <!-- no translation found for permdesc_accessInputFlinger (2104864941201226616) -->
+    <skip />
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configuració de les pantalles Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Permet a l\'aplicació configurar-se i connectar-se a les pantalles Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"control de les pantalles Wi-Fi"</string>
@@ -647,6 +651,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permet que l\'aplicació recuperi, examini i esborri les notificacions, incloses les que han publicat altres aplicacions."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"vincula a un servei de processament de notificacions"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permet que el titular vinculi la interfície de nivell superior d\'un servei de processament de notificacions. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <!-- no translation found for permlab_invokeCarrierSetup (3699600833975117478) -->
+    <skip />
+    <!-- no translation found for permdesc_invokeCarrierSetup (4159549152529111920) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Defineix les normes de contrasenya"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controla la longitud i els caràcters permesos a les contrasenyes de desbloqueig de pantalla."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Control d\'intents de desbloqueig de pantalla"</string>
@@ -1596,6 +1604,10 @@
     <!-- no translation found for mediaSize_na_ledger (281871464896601236) -->
     <skip />
     <!-- no translation found for mediaSize_na_tabloid (5775966416333578127) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cancelled (7091258378121627624) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cannot_write (8132505417935337724) -->
     <skip />
     <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
     <skip />

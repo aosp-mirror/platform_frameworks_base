@@ -470,6 +470,10 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"एप्‍लिकेशन को SurfaceFlinger निम्‍न-स्‍तर सुविधाएं उपयोग करने देता है."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"फ़्रेम बफ़र पढ़ें"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"एप्‍लिकेशन को फ़्रेम बफ़र की सामग्री पढ़ने देता है."</string>
+    <!-- no translation found for permlab_accessInputFlinger (5348635270689553857) -->
+    <skip />
+    <!-- no translation found for permdesc_accessInputFlinger (2104864941201226616) -->
+    <skip />
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wifi डिस्प्ले को कॉन्फ़िगर करें"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"एप्लिकेशन को कॉन्फ़िगर करने देता है और Wifi डिस्प्ले से कनेक्ट करता है."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wifi डिस्प्ले को नियंत्रित करें"</string>
@@ -647,6 +651,10 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"एप्लिकेशन को सूचनाओं को प्राप्त करने, जांच करने, और साफ़ करने देता है, जिनमें अन्य एप्लिकेशन के द्वारा पोस्ट की गई सूचनाएं भी शामिल हैं."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"सूचना श्रवणकर्ता सेवा से जुड़ें"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"धारक को सूचना श्रवणकर्ता सेवा के शीर्ष स्तरीय इंटरफ़ेस से जुड़ने देती है. सामान्य एप्लिकेशन के लिए कभी भी आवश्यक नहीं होनी चाहिए."</string>
+    <!-- no translation found for permlab_invokeCarrierSetup (3699600833975117478) -->
+    <skip />
+    <!-- no translation found for permdesc_invokeCarrierSetup (4159549152529111920) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"पासवर्ड नियम सेट करें"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"स्‍क्रीन-अनलॉक पासवर्ड में अनुमति प्राप्त लंबाई और वर्णों को नियंत्रित करें."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"स्‍क्रीन-अनलॉक के प्रयासों पर निगरानी रखें"</string>
@@ -1596,6 +1604,10 @@
     <!-- no translation found for mediaSize_na_ledger (281871464896601236) -->
     <skip />
     <!-- no translation found for mediaSize_na_tabloid (5775966416333578127) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cancelled (7091258378121627624) -->
+    <skip />
+    <!-- no translation found for write_fail_reason_cannot_write (8132505417935337724) -->
     <skip />
     <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
     <skip />
