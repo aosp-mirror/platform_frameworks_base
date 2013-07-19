@@ -343,6 +343,9 @@ public final class BluetoothDevice implements Parcelable {
     /**@hide*/
     public static final int REQUEST_TYPE_PHONEBOOK_ACCESS = 2;
 
+    /**@hide*/
+    public static final int REQUEST_TYPE_MESSAGE_ACCESS = 3;
+
     /**
      * Used as an extra field in {@link #ACTION_CONNECTION_ACCESS_REQUEST} intents,
      * Contains package name to return reply intent to.
