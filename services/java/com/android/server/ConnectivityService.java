@@ -3670,7 +3670,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     @Override
-    public int checkMobileProvisioning(boolean sendNotification, int suggestedTimeOutMs,
+    public int checkMobileProvisioning(final boolean sendNotification, int suggestedTimeOutMs,
             final ResultReceiver resultReceiver) {
         log("checkMobileProvisioning: E sendNotification=" + sendNotification
                 + " suggestedTimeOutMs=" + suggestedTimeOutMs
@@ -3702,6 +3702,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (resultReceiver != null) {
                         log("CheckMp.onComplete: send result");
                         resultReceiver.send(result, null);
+                    }
+                    if (!sendNotification) {
+                        log("CheckMp.onComplete: done, not sending notification");
+                        return;
                     }
                     NetworkInfo ni =
                             mNetTrackers[ConnectivityManager.TYPE_MOBILE_HIPRI].getNetworkInfo();
