@@ -283,6 +283,9 @@ public class WindowManagerService extends IWindowManager.Stub
     private static final String SYSTEM_SECURE = "ro.secure";
     private static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
 
+    private static final String DENSITY_OVERRIDE = "ro.config.density_override";
+    private static final String SIZE_OVERRIDE = "ro.config.size_override";
+
     private static final int MAX_SCREENSHOT_RETRIES = 3;
 
     final private KeyguardDisableHandler mKeyguardDisableHandler;
@@ -7626,8 +7629,11 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private void readForcedDisplaySizeAndDensityLocked(final DisplayContent displayContent) {
-        final String sizeStr = Settings.Global.getString(mContext.getContentResolver(),
+        String sizeStr = Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.DISPLAY_SIZE_FORCED);
+        if (sizeStr == null) {
+            sizeStr = SystemProperties.get(SIZE_OVERRIDE, null);
+        }
         if (sizeStr != null && sizeStr.length() > 0) {
             final int pos = sizeStr.indexOf(',');
             if (pos > 0 && sizeStr.lastIndexOf(',') == pos) {
@@ -7647,8 +7653,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         }
-        final String densityStr = Settings.Global.getString(mContext.getContentResolver(),
+        String densityStr = Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.DISPLAY_DENSITY_FORCED);
+        if (densityStr == null) {
+            densityStr = SystemProperties.get(DENSITY_OVERRIDE, null);
+        }
         if (densityStr != null && densityStr.length() > 0) {
             int density;
             try {
