@@ -3374,7 +3374,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void addAppToken(int addPos, IApplicationToken token, int taskId, int stackId,
-            int requestedOrientation, boolean fullscreen, boolean showWhenLocked) {
+            int requestedOrientation, boolean fullscreen, boolean showWhenLocked, int userId) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "addAppToken()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
@@ -3407,7 +3407,7 @@ public class WindowManagerService extends IWindowManager.Stub
             atoken.showWhenLocked = showWhenLocked;
             atoken.requestedOrientation = requestedOrientation;
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG, "addAppToken: " + atoken
-                    + " at " + addPos);
+                    + " to stack=" + stackId + " task=" + taskId + " at " + addPos);
 
             Task task = mTaskIdToTask.get(taskId);
             if (task == null) {
@@ -3415,7 +3415,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (stack == null) {
                     throw new IllegalArgumentException("addAppToken: invalid stackId=" + stackId);
                 }
-                task = new Task(atoken, stack);
+                task = new Task(atoken, stack, userId);
                 stack.addTask(task, true);
                 stack.getDisplayContent().moveStack(stack, true);
                 mTaskIdToTask.put(taskId, task);

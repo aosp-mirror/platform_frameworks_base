@@ -339,6 +339,10 @@ final class ActivityRecord {
         }
     }
 
+    boolean isNotResolverActivity() {
+        return !ResolverActivity.class.getName().equals(realActivity.getClassName());
+    }
+
     ActivityRecord(ActivityManagerService _service, ProcessRecord _caller,
             int _launchedFromUid, String _launchedFromPackage, Intent _intent, String _resolvedType,
             ActivityInfo aInfo, Configuration _configuration,
@@ -442,21 +446,22 @@ final class ActivityRecord {
 
             // If we know the system has determined the component, then
             // we can consider this to be a home activity...
-            // Note the last check is so we don't count the resolver
-            // activity as being home...  really, we don't care about
-            // doing anything special with something that comes from
-            // the core framework package.
-            if ((!_componentSpecified || _launchedFromUid == Process.myUid()
+            String homePackageName = supervisor.getHomePackageName();
+            if (homePackageName != null && homePackageName.equals(packageName)) {
+                mActivityType = HOME_ACTIVITY_TYPE;
+            } else if ((!_componentSpecified || _launchedFromUid == Process.myUid()
                     || _launchedFromUid == 0) &&
                     Intent.ACTION_MAIN.equals(_intent.getAction()) &&
                     _intent.hasCategory(Intent.CATEGORY_HOME) &&
                     _intent.getCategories().size() == 1 &&
                     _intent.getData() == null &&
                     _intent.getType() == null &&
-                    (intent.getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) != 0 &&
-                    !ResolverActivity.class.getName().equals(realActivity.getClassName())) {
+                    (intent.getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) != 0) {
                 // This sure looks like a home activity!
                 mActivityType = HOME_ACTIVITY_TYPE;
+                if (isNotResolverActivity()) {
+                    supervisor.setHomePackageName(userId, packageName);
+                }
             } else if (realActivity.getClassName().contains("com.android.systemui.recent")) {
                 mActivityType = RECENTS_ACTIVITY_TYPE;
             } else {

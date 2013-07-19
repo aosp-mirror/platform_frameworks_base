@@ -371,6 +371,15 @@ public class StackBox {
         mSecond.stopDimmingIfNeeded();
     }
 
+    void switchUserStacks(int userId) {
+        if (mStack != null) {
+            mStack.switchUser(userId);
+            return;
+        }
+        mFirst.switchUserStacks(userId);
+        mSecond.switchUserStacks(userId);
+    }
+
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("mParent="); pw.println(mParent);
         pw.print(prefix); pw.print("mBounds="); pw.print(mBounds.toShortString());

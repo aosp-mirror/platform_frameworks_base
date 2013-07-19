@@ -21,11 +21,13 @@ class Task {
     TaskStack mStack;
     final AppTokenList mAppTokens = new AppTokenList();
     final int taskId;
+    final int mUserId;
 
-    Task(AppWindowToken wtoken, TaskStack stack) {
+    Task(AppWindowToken wtoken, TaskStack stack, int userId) {
         taskId = wtoken.groupId;
         mAppTokens.add(wtoken);
         mStack = stack;
+        mUserId = userId;
     }
 
     DisplayContent getDisplayContent() {

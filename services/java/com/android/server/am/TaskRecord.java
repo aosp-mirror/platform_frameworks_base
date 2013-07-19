@@ -59,11 +59,10 @@ final class TaskRecord extends ThumbnailHolder {
 
     private boolean mApplicationTask = true;
 
-    TaskRecord(int _taskId, ActivityInfo info, Intent _intent, ActivityStack _stack) {
+    TaskRecord(int _taskId, ActivityInfo info, Intent _intent) {
         taskId = _taskId;
         affinity = info.taskAffinity;
         setIntent(_intent, info);
-        stack = _stack;
     }
 
     void touchActiveTime() {
