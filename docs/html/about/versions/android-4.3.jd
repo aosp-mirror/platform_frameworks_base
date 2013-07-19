@@ -62,7 +62,6 @@ sdk.platform.apiLevel=18
   </li>
   <li><a href="#UserInput">User Input</a>
     <ol>
-      <li><a href="#SignificantMotion">Detect significant motion</a></li>
       <li><a href="#Sensors">New sensor types</a></li>
     </ol>
   </li>
@@ -847,14 +846,6 @@ protected void onCreate(Bundle savedInstanceState) {
 
 
 <h2 id="UserInput">User Input</h2>
-
-<h3 id="SignificantMotion">Detect significant motion</h3>
-
-<p>The {@link android.hardware.SensorManager} APIs now allow you to request a callback when the
-device sensors detect "significant motion." For instance, this event may be triggered by new
-motion such as when the user starts to walk.</p>
-
-<p>To register a listener for significant motion, extend the {@link android.hardware.TriggerEventListener} class and implement the {@link android.hardware.TriggerEventListener#onTrigger onTrigger()} callback method. Then register your event listener with the {@link android.hardware.SensorManager} by passing it to {@link android.hardware.SensorManager#requestTriggerSensor requestTriggerSensor()}, passing it your {@link android.hardware.TriggerEventListener} and {@link android.hardware.Sensor#TYPE_SIGNIFICANT_MOTION}.</p>
 
 <h3 id="Sensors">New sensor types</h3>
 <p>The new {@link android.hardware.Sensor#TYPE_GAME_ROTATION_VECTOR} sensor allows you to detect the device's rotations without worrying about magnetic interferences. Unlike the {@link android.hardware.Sensor#TYPE_ROTATION_VECTOR} sensor, the {@link android.hardware.Sensor#TYPE_GAME_ROTATION_VECTOR} is not based on magnetic north.</p>
