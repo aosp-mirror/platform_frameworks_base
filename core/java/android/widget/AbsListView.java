@@ -2925,9 +2925,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-        case KeyEvent.KEYCODE_DPAD_CENTER:
-        case KeyEvent.KEYCODE_ENTER:
+        if (KeyEvent.isConfirmKey(keyCode)) {
             if (!isEnabled()) {
                 return true;
             }
@@ -2943,7 +2941,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 setPressed(false);
                 return true;
             }
-            break;
         }
         return super.onKeyUp(keyCode, event);
     }
