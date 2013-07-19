@@ -93,25 +93,8 @@ public final class CaptureRequestKeys {
                 new AeAntibandingModeKey("android.control.aeAntibandingMode");
         public static final Key<Integer> AE_EXPOSURE_COMPENSATION =
                 new Key<Integer>("android.control.aeExposureCompensation", int.class);
-
-            public static final class AeLockKey extends Key<Control.AeLockKey.Enum> {
-                public enum Enum {
-                    OFF,
-                    ON;
-                }
-
-                public static final Enum OFF = Enum.OFF;
-                public static final Enum ON = Enum.ON;
-
-                // TODO: remove requirement for constructor by making Key an interface
-                private AeLockKey(String name) {
-                    super(name, Control.AeLockKey.Enum.class);
-                }
-
-            }
-
-        public static final Key<Control.AeLockKey.Enum> AE_LOCK =
-                new AeLockKey("android.control.aeLock");
+        public static final Key<Boolean> AE_LOCK =
+                new Key<Boolean>("android.control.aeLock", boolean.class);
 
             public static final class AeModeKey extends Key<Control.AeModeKey.Enum> {
                 public enum Enum {
@@ -210,25 +193,8 @@ public final class CaptureRequestKeys {
 
         public static final Key<Control.AfTriggerKey.Enum> AF_TRIGGER =
                 new AfTriggerKey("android.control.afTrigger");
-
-            public static final class AwbLockKey extends Key<Control.AwbLockKey.Enum> {
-                public enum Enum {
-                    OFF,
-                    ON;
-                }
-
-                public static final Enum OFF = Enum.OFF;
-                public static final Enum ON = Enum.ON;
-
-                // TODO: remove requirement for constructor by making Key an interface
-                private AwbLockKey(String name) {
-                    super(name, Control.AwbLockKey.Enum.class);
-                }
-
-            }
-
-        public static final Key<Control.AwbLockKey.Enum> AWB_LOCK =
-                new AwbLockKey("android.control.awbLock");
+        public static final Key<Boolean> AWB_LOCK =
+                new Key<Boolean>("android.control.awbLock", boolean.class);
 
             public static final class AwbModeKey extends Key<Control.AwbModeKey.Enum> {
                 public enum Enum {
@@ -415,25 +381,8 @@ public final class CaptureRequestKeys {
 
         public static final Key<Control.SceneModeKey.Enum> SCENE_MODE =
                 new SceneModeKey("android.control.sceneMode");
-
-            public static final class VideoStabilizationModeKey extends Key<Control.VideoStabilizationModeKey.Enum> {
-                public enum Enum {
-                    OFF,
-                    ON;
-                }
-
-                public static final Enum OFF = Enum.OFF;
-                public static final Enum ON = Enum.ON;
-
-                // TODO: remove requirement for constructor by making Key an interface
-                private VideoStabilizationModeKey(String name) {
-                    super(name, Control.VideoStabilizationModeKey.Enum.class);
-                }
-
-            }
-
-        public static final Key<Control.VideoStabilizationModeKey.Enum> VIDEO_STABILIZATION_MODE =
-                new VideoStabilizationModeKey("android.control.videoStabilizationMode");
+        public static final Key<Boolean> VIDEO_STABILIZATION_MODE =
+                new Key<Boolean>("android.control.videoStabilizationMode", boolean.class);
 
     }
 
@@ -490,8 +439,8 @@ public final class CaptureRequestKeys {
     public static final class Jpeg {
         public static final Key<double[]> GPS_COORDINATES =
                 new Key<double[]>("android.jpeg.gpsCoordinates", double[].class);
-        public static final Key<Byte> GPS_PROCESSING_METHOD =
-                new Key<Byte>("android.jpeg.gpsProcessingMethod", byte.class);
+        public static final Key<String> GPS_PROCESSING_METHOD =
+                new Key<String>("android.jpeg.gpsProcessingMethod", String.class);
         public static final Key<Long> GPS_TIMESTAMP =
                 new Key<Long>("android.jpeg.gpsTimestamp", long.class);
         public static final Key<Integer> ORIENTATION =
@@ -500,8 +449,8 @@ public final class CaptureRequestKeys {
                 new Key<Byte>("android.jpeg.quality", byte.class);
         public static final Key<Byte> THUMBNAIL_QUALITY =
                 new Key<Byte>("android.jpeg.thumbnailQuality", byte.class);
-        public static final Key<int[]> THUMBNAIL_SIZE =
-                new Key<int[]>("android.jpeg.thumbnailSize", int[].class);
+        public static final Key<android.hardware.photography.Size> THUMBNAIL_SIZE =
+                new Key<android.hardware.photography.Size>("android.jpeg.thumbnailSize", android.hardware.photography.Size.class);
 
     }
 
@@ -574,8 +523,8 @@ public final class CaptureRequestKeys {
     }
 
     public static final class Scaler {
-        public static final Key<int[]> CROP_REGION =
-                new Key<int[]>("android.scaler.cropRegion", int[].class);
+        public static final Key<android.graphics.Rect> CROP_REGION =
+                new Key<android.graphics.Rect>("android.scaler.cropRegion", android.graphics.Rect.class);
 
     }
 
@@ -649,54 +598,17 @@ public final class CaptureRequestKeys {
      * @hide
      */
     public static final class Led {
-
-            /**
-             * @hide
-             */
-            public static final class TransmitKey extends Key<Led.TransmitKey.Enum> {
-                public enum Enum {
-                    OFF,
-                    ON;
-                }
-
-                public static final Enum OFF = Enum.OFF;
-                public static final Enum ON = Enum.ON;
-
-                // TODO: remove requirement for constructor by making Key an interface
-                private TransmitKey(String name) {
-                    super(name, Led.TransmitKey.Enum.class);
-                }
-
-            }
-
         /**
          * @hide
          */
-        public static final Key<Led.TransmitKey.Enum> TRANSMIT =
-                new TransmitKey("android.led.transmit");
+        public static final Key<Boolean> TRANSMIT =
+                new Key<Boolean>("android.led.transmit", boolean.class);
 
     }
 
     public static final class BlackLevel {
-
-            public static final class LockKey extends Key<BlackLevel.LockKey.Enum> {
-                public enum Enum {
-                    OFF,
-                    ON;
-                }
-
-                public static final Enum OFF = Enum.OFF;
-                public static final Enum ON = Enum.ON;
-
-                // TODO: remove requirement for constructor by making Key an interface
-                private LockKey(String name) {
-                    super(name, BlackLevel.LockKey.Enum.class);
-                }
-
-            }
-
-        public static final Key<BlackLevel.LockKey.Enum> LOCK =
-                new LockKey("android.blackLevel.lock");
+        public static final Key<Boolean> LOCK =
+                new Key<Boolean>("android.blackLevel.lock", boolean.class);
 
     }
 

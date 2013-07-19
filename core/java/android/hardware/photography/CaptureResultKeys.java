@@ -300,8 +300,8 @@ public final class CaptureResultKeys {
     public static final class Jpeg {
         public static final Key<double[]> GPS_COORDINATES =
                 new Key<double[]>("android.jpeg.gpsCoordinates", double[].class);
-        public static final Key<Byte> GPS_PROCESSING_METHOD =
-                new Key<Byte>("android.jpeg.gpsProcessingMethod", byte.class);
+        public static final Key<String> GPS_PROCESSING_METHOD =
+                new Key<String>("android.jpeg.gpsProcessingMethod", String.class);
         public static final Key<Long> GPS_TIMESTAMP =
                 new Key<Long>("android.jpeg.gpsTimestamp", long.class);
         public static final Key<Integer> ORIENTATION =
@@ -310,8 +310,8 @@ public final class CaptureResultKeys {
                 new Key<Byte>("android.jpeg.quality", byte.class);
         public static final Key<Byte> THUMBNAIL_QUALITY =
                 new Key<Byte>("android.jpeg.thumbnailQuality", byte.class);
-        public static final Key<int[]> THUMBNAIL_SIZE =
-                new Key<int[]>("android.jpeg.thumbnailSize", int[].class);
+        public static final Key<android.hardware.photography.Size> THUMBNAIL_SIZE =
+                new Key<android.hardware.photography.Size>("android.jpeg.thumbnailSize", android.hardware.photography.Size.class);
 
     }
 
@@ -402,8 +402,8 @@ public final class CaptureResultKeys {
     }
 
     public static final class Scaler {
-        public static final Key<int[]> CROP_REGION =
-                new Key<int[]>("android.scaler.cropRegion", int[].class);
+        public static final Key<android.graphics.Rect> CROP_REGION =
+                new Key<android.graphics.Rect>("android.scaler.cropRegion", android.graphics.Rect.class);
 
     }
 
@@ -445,8 +445,8 @@ public final class CaptureResultKeys {
                 new Key<int[]>("android.statistics.faceIds", int[].class);
         public static final Key<int[]> FACE_LANDMARKS =
                 new Key<int[]>("android.statistics.faceLandmarks", int[].class);
-        public static final Key<int[]> FACE_RECTANGLES =
-                new Key<int[]>("android.statistics.faceRectangles", int[].class);
+        public static final Key<android.graphics.Rect[]> FACE_RECTANGLES =
+                new Key<android.graphics.Rect[]>("android.statistics.faceRectangles", android.graphics.Rect[].class);
         public static final Key<byte[]> FACE_SCORES =
                 new Key<byte[]>("android.statistics.faceScores", byte[].class);
         public static final Key<float[]> LENS_SHADING_MAP =
@@ -514,54 +514,17 @@ public final class CaptureResultKeys {
      * @hide
      */
     public static final class Led {
-
-            /**
-             * @hide
-             */
-            public static final class TransmitKey extends Key<Led.TransmitKey.Enum> {
-                public enum Enum {
-                    OFF,
-                    ON;
-                }
-
-                public static final Enum OFF = Enum.OFF;
-                public static final Enum ON = Enum.ON;
-
-                // TODO: remove requirement for constructor by making Key an interface
-                private TransmitKey(String name) {
-                    super(name, Led.TransmitKey.Enum.class);
-                }
-
-            }
-
         /**
          * @hide
          */
-        public static final Key<Led.TransmitKey.Enum> TRANSMIT =
-                new TransmitKey("android.led.transmit");
+        public static final Key<Boolean> TRANSMIT =
+                new Key<Boolean>("android.led.transmit", boolean.class);
 
     }
 
     public static final class BlackLevel {
-
-            public static final class LockKey extends Key<BlackLevel.LockKey.Enum> {
-                public enum Enum {
-                    OFF,
-                    ON;
-                }
-
-                public static final Enum OFF = Enum.OFF;
-                public static final Enum ON = Enum.ON;
-
-                // TODO: remove requirement for constructor by making Key an interface
-                private LockKey(String name) {
-                    super(name, BlackLevel.LockKey.Enum.class);
-                }
-
-            }
-
-        public static final Key<BlackLevel.LockKey.Enum> LOCK =
-                new LockKey("android.blackLevel.lock");
+        public static final Key<Boolean> LOCK =
+                new Key<Boolean>("android.blackLevel.lock", boolean.class);
 
     }
 

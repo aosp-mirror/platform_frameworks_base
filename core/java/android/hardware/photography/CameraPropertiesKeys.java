@@ -71,8 +71,8 @@ public final class CameraPropertiesKeys {
     }
 
     public static final class Jpeg {
-        public static final Key<int[]> AVAILABLE_THUMBNAIL_SIZES =
-                new Key<int[]>("android.jpeg.availableThumbnailSizes", int[].class);
+        public static final Key<android.hardware.photography.Size[]> AVAILABLE_THUMBNAIL_SIZES =
+                new Key<android.hardware.photography.Size[]>("android.jpeg.availableThumbnailSizes", android.hardware.photography.Size[].class);
 
     }
 
@@ -90,8 +90,8 @@ public final class CameraPropertiesKeys {
                     new Key<Float>("android.lens.info.hyperfocalDistance", float.class);
             public static final Key<Float> MINIMUM_FOCUS_DISTANCE =
                     new Key<Float>("android.lens.info.minimumFocusDistance", float.class);
-            public static final Key<int[]> SHADING_MAP_SIZE =
-                    new Key<int[]>("android.lens.info.shadingMapSize", int[].class);
+            public static final Key<android.hardware.photography.Size> SHADING_MAP_SIZE =
+                    new Key<android.hardware.photography.Size>("android.lens.info.shadingMapSize", android.hardware.photography.Size.class);
         }
 
             public static final class FacingKey extends Key<Lens.FacingKey.Enum> {
@@ -161,29 +161,29 @@ public final class CameraPropertiesKeys {
                 new AvailableFormatsKey("android.scaler.availableFormats");
         public static final Key<long[]> AVAILABLE_JPEG_MIN_DURATIONS =
                 new Key<long[]>("android.scaler.availableJpegMinDurations", long[].class);
-        public static final Key<int[]> AVAILABLE_JPEG_SIZES =
-                new Key<int[]>("android.scaler.availableJpegSizes", int[].class);
+        public static final Key<android.hardware.photography.Size[]> AVAILABLE_JPEG_SIZES =
+                new Key<android.hardware.photography.Size[]>("android.scaler.availableJpegSizes", android.hardware.photography.Size[].class);
         public static final Key<Float> AVAILABLE_MAX_DIGITAL_ZOOM =
                 new Key<Float>("android.scaler.availableMaxDigitalZoom", float.class);
         public static final Key<long[]> AVAILABLE_PROCESSED_MIN_DURATIONS =
                 new Key<long[]>("android.scaler.availableProcessedMinDurations", long[].class);
-        public static final Key<int[]> AVAILABLE_PROCESSED_SIZES =
-                new Key<int[]>("android.scaler.availableProcessedSizes", int[].class);
+        public static final Key<android.hardware.photography.Size[]> AVAILABLE_PROCESSED_SIZES =
+                new Key<android.hardware.photography.Size[]>("android.scaler.availableProcessedSizes", android.hardware.photography.Size[].class);
 
     }
 
     public static final class Sensor {
         public static final class Info {
-            public static final Key<int[]> ACTIVE_ARRAY_SIZE =
-                    new Key<int[]>("android.sensor.info.activeArraySize", int[].class);
+            public static final Key<android.graphics.Rect> ACTIVE_ARRAY_SIZE =
+                    new Key<android.graphics.Rect>("android.sensor.info.activeArraySize", android.graphics.Rect.class);
             public static final Key<int[]> SENSITIVITY_RANGE =
                     new Key<int[]>("android.sensor.info.sensitivityRange", int[].class);
             public static final Key<long[]> EXPOSURE_TIME_RANGE =
                     new Key<long[]>("android.sensor.info.exposureTimeRange", long[].class);
             public static final Key<Long> MAX_FRAME_DURATION =
                     new Key<Long>("android.sensor.info.maxFrameDuration", long.class);
-            public static final Key<float[]> PHYSICAL_SIZE =
-                    new Key<float[]>("android.sensor.info.physicalSize", float[].class);
+            public static final Key<android.hardware.photography.Size> PHYSICAL_SIZE =
+                    new Key<android.hardware.photography.Size>("android.sensor.info.physicalSize", android.hardware.photography.Size.class);
         }
         public static final Key<Rational> BASE_GAIN_FACTOR =
                 new Key<Rational>("android.sensor.baseGainFactor", Rational.class);
