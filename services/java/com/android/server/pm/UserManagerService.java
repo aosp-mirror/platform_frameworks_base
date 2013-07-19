@@ -21,11 +21,13 @@ import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
+import android.app.ActivityThread;
 import android.app.IStopUserCallback;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.RestrictionEntry;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
@@ -51,6 +53,7 @@ import android.util.SparseLongArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
+import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastXmlSerializer;
 
@@ -229,6 +232,13 @@ public class UserManagerService extends IUserManager.Stub {
                 sInstance = this;
             }
         }
+
+    }
+
+    void systemReady() {
+        mUserPackageMonitor.register(ActivityThread.systemMain().getSystemContext(),
+                null, UserHandle.ALL, false);
+        userForeground(UserHandle.USER_OWNER);
     }
 
     @Override
@@ -822,11 +832,6 @@ public class UserManagerService extends IUserManager.Stub {
                 pinState.failedAttempts = failedAttempts;
                 pinState.lastAttemptTime = lastAttemptTime;
             }
-            // If this is not a restricted profile and there is no restrictions pin, clean up
-            // any restrictions files that might have been left behind.
-            if (!userInfo.isRestricted() && salt == 0) {
-                cleanAppRestrictions(id);
-            }
             return userInfo;
 
         } catch (IOException ioe) {
@@ -878,11 +883,22 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
+    private boolean isPackageInstalled(String pkg, int userId) {
+        final ApplicationInfo info = mPm.getApplicationInfo(pkg,
+                PackageManager.GET_UNINSTALLED_PACKAGES,
+                userId);
+        if (info == null || (info.flags&ApplicationInfo.FLAG_INSTALLED) == 0) {
+            return false;
+        }
+        return true;
+    }
+
     /**
-     * Removes all the restrictions files (res_<packagename>) for a given user.
+     * Removes all the restrictions files (res_<packagename>) for a given user, if all is true,
+     * else removes only those packages that have been uninstalled.
      * Does not do any permissions checking.
      */
-    private void cleanAppRestrictions(int userId) {
+    private void cleanAppRestrictions(int userId, boolean all) {
         synchronized (mPackagesLock) {
             File dir = Environment.getUserSystemDirectory(userId);
             String[] files = dir.list();
@@ -891,9 +907,29 @@ public class UserManagerService extends IUserManager.Stub {
                 if (fileName.startsWith(RESTRICTIONS_FILE_PREFIX)) {
                     File resFile = new File(dir, fileName);
                     if (resFile.exists()) {
-                        resFile.delete();
+                        if (all) {
+                            resFile.delete();
+                        } else {
+                            String pkg = fileName.substring(RESTRICTIONS_FILE_PREFIX.length());
+                            if (!isPackageInstalled(pkg, userId)) {
+                                resFile.delete();
+                            }
+                        }
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Removes the app restrictions file for a specific package and user id, if it exists.
+     */
+    private void cleanAppRestrictionsForPackage(String pkg, int userId) {
+        synchronized (mPackagesLock) {
+            File dir = Environment.getUserSystemDirectory(userId);
+            File resFile = new File(dir, RESTRICTIONS_FILE_PREFIX + pkg);
+            if (resFile.exists()) {
+                resFile.delete();
             }
         }
     }
@@ -1168,6 +1204,40 @@ public class UserManagerService extends IUserManager.Stub {
         return true;
     }
 
+    @Override
+    public void removeRestrictions() {
+        checkManageUsersPermission("Only system can remove restrictions");
+        final int userHandle = UserHandle.getCallingUserId();
+        synchronized (mPackagesLock) {
+            // Remove all user restrictions
+            setUserRestrictions(new Bundle(), userHandle);
+            // Remove restrictions pin
+            changeRestrictionsPin(null);
+            // Remove any app restrictions
+            cleanAppRestrictions(userHandle, true);
+        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                List<ApplicationInfo> apps =
+                        mPm.getInstalledApplications(PackageManager.GET_UNINSTALLED_PACKAGES,
+                                userHandle).getList();
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    for (ApplicationInfo appInfo : apps) {
+                        if ((appInfo.flags & ApplicationInfo.FLAG_INSTALLED) != 0
+                                && (appInfo.flags & ApplicationInfo.FLAG_BLOCKED) != 0) {
+                            mPm.setApplicationBlockedSettingAsUser(appInfo.packageName, false,
+                                    userHandle);
+                        }
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
+            }
+        });
+    }
+
     /*
      * Generate a hash for the given password. To avoid brute force attacks, we use a salted hash.
      * Not the most secure, but it is at least a second level of protection. First level is that
@@ -1372,7 +1442,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-     * Make a note of the last started time of a user.
+     * Make a note of the last started time of a user and do some cleanup.
      * @param userId the user that was just foregrounded
      */
     public void userForeground(int userId) {
@@ -1387,6 +1457,12 @@ public class UserManagerService extends IUserManager.Stub {
                 user.lastLoggedInTime = now;
                 writeUserLocked(user);
             }
+            // If this is not a restricted profile and there is no restrictions pin, clean up
+            // all restrictions files that might have been left behind, else clean up just the
+            // ones with uninstalled packages
+            RestrictionsPinState pinState = mRestrictionsPinStates.get(userId);
+            final long salt = pinState == null ? 0 : pinState.salt;
+            cleanAppRestrictions(userId, (!user.isRestricted() && salt == 0));
         }
     }
 
@@ -1453,4 +1529,17 @@ public class UserManagerService extends IUserManager.Stub {
             }
         }
     }
+
+    private PackageMonitor mUserPackageMonitor = new PackageMonitor() {
+        @Override
+        public void onPackageRemoved(String pkg, int uid) {
+            final int userId = this.getChangingUserId();
+            // Package could be disappearing because it is being blocked, so also check if
+            // it has been uninstalled.
+            final boolean uninstalled = isPackageDisappearing(pkg) == PACKAGE_PERMANENT_CHANGE;
+            if (uninstalled && userId >= 0 && !isPackageInstalled(pkg, userId)) {
+                cleanAppRestrictionsForPackage(pkg, userId);
+            }
+        }
+    };
 }

@@ -678,4 +678,13 @@ public class UserManager {
         }
         return false;
     }
+
+    /** @hide */
+    public void removeRestrictions() {
+        try {
+            mService.removeRestrictions();
+        } catch (RemoteException re) {
+            Log.w(TAG, "Could not change restrictions pin");
+        }
+    }
 }

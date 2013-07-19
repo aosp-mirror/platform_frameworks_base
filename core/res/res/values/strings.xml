@@ -4256,12 +4256,16 @@
     <!-- Write fail reason: couldn't write the printed content. [CHAR LIMIT=none] -->
     <string name="write_fail_reason_cannot_write">Error writing content</string>
 
+    <!-- PIN entry dialog label/hint for PIN [CHAR LIMIT=none] -->
+    <string name="restr_pin_enter_pin">Enter PIN</string>
+    <!-- PIN entry dialog label/hint for old PIN [CHAR LIMIT=none] -->
+    <string name="restr_pin_enter_old_pin">Current PIN</string>
+    <!-- PIN entry dialog label for new PIN [CHAR LIMIT=none] -->
+    <string name="restr_pin_enter_new_pin">New PIN</string>
+    <!-- PIN entry dialog label for new PIN confirmation [CHAR LIMIT=none] -->
+    <string name="restr_pin_confirm_pin">Confirm new PIN</string>
     <!-- PIN creation dialog message [CHAR LIMIT=none] -->
     <string name="restr_pin_create_pin">Create a PIN for modifying restrictions</string>
-    <!-- PIN entry dialog label for PIN [CHAR LIMIT=none] -->
-    <string name="restr_pin_enter_pin">Enter PIN</string>
-    <!-- PIN entry dialog label for PIN confirmation [CHAR LIMIT=none] -->
-    <string name="restr_pin_confirm_pin">Confirm PIN</string>
     <!-- PIN entry dialog error when PINs are not the same [CHAR LIMIT=none] -->
     <string name="restr_pin_error_doesnt_match">PINs don\'t match. Try again.</string>
     <!-- PIN entry dialog error when PIN is too short [CHAR LIMIT=none] -->

@@ -26,6 +26,7 @@ import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -39,17 +40,24 @@ import com.android.internal.R;
 public class RestrictionsPinActivity extends AlertActivity
         implements DialogInterface.OnClickListener, TextWatcher, OnEditorActionListener {
 
-    private UserManager mUserManager;
+    protected UserManager mUserManager;
+    protected boolean mHasRestrictionsPin;
 
-    private EditText mPin1Text;
-    private EditText mPin2Text;
-    private TextView mPinErrorMessage;
-    private TextView mPinMessage;
+    protected EditText mPinText;
+    protected TextView mPinErrorMessage;
+    protected TextView mPinMessage;
 
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 
+        mUserManager = (UserManager) getSystemService(Context.USER_SERVICE);
+        mHasRestrictionsPin = mUserManager.hasRestrictionsPin();
+        initUi();
+        setupAlert();
+    }
+
+    protected void initUi() {
         AlertController.AlertParams ap = mAlertParams;
         ap.mTitle = getString(R.string.restr_pin_enter_pin);
         ap.mPositiveButtonText = getString(R.string.ok);
@@ -58,18 +66,12 @@ public class RestrictionsPinActivity extends AlertActivity
         ap.mNegativeButtonListener = this;
         LayoutInflater inflater =
                 (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        ap.mView = inflater.inflate(R.layout.pin_challenge, null);
+        ap.mView = inflater.inflate(R.layout.restrictions_pin_challenge, null);
 
         mPinMessage = (TextView) ap.mView.findViewById(R.id.pin_message);
-        mPin1Text = (EditText) ap.mView.findViewById(R.id.pin1_text);
-        mPin2Text = (EditText) ap.mView.findViewById(R.id.pin2_text);
+        mPinText = (EditText) ap.mView.findViewById(R.id.pin_text);
         mPinErrorMessage = (TextView) ap.mView.findViewById(R.id.pin_error_message);
-        mPin1Text.addTextChangedListener(this);
-        mPin2Text.addTextChangedListener(this);
-
-        mUserManager = (UserManager) getSystemService(Context.USER_SERVICE);
-
-        setupAlert();
+        mPinText.addTextChangedListener(this);
     }
 
     protected boolean verifyingPin() {
@@ -81,19 +83,12 @@ public class RestrictionsPinActivity extends AlertActivity
 
         setPositiveButtonState(false);
         boolean hasPin = mUserManager.hasRestrictionsPin();
-        if (verifyingPin()) {
-            if (hasPin) {
-                mPinMessage.setVisibility(View.GONE);
-                mPinErrorMessage.setVisibility(View.GONE);
-                mPin2Text.setVisibility(View.GONE);
-                mPin1Text.setOnEditorActionListener(this);
-                updatePinTimer(-1);
-            } else {
-                setResult(RESULT_OK);
-                finish();
-            }
-        } else if (hasPin) {
-            // Shouldn't really be in this state, exit
+        if (hasPin) {
+            mPinMessage.setVisibility(View.GONE);
+            mPinErrorMessage.setVisibility(View.GONE);
+            mPinText.setOnEditorActionListener(this);
+            updatePinTimer(-1);
+        } else if (verifyingPin()) {
             setResult(RESULT_OK);
             finish();
         }
@@ -114,14 +109,14 @@ public class RestrictionsPinActivity extends AlertActivity
                     seconds);
             mPinErrorMessage.setText(String.format(formatString, seconds));
             mPinErrorMessage.setVisibility(View.VISIBLE);
-            mPin1Text.setEnabled(false);
-            mPin1Text.setText("");
+            mPinText.setEnabled(false);
+            mPinText.setText("");
             setPositiveButtonState(false);
-            mPin1Text.postDelayed(mCountdownRunnable, Math.min(1000, pinTimerMs));
+            mPinText.postDelayed(mCountdownRunnable, Math.min(1000, pinTimerMs));
         } else {
             mPinErrorMessage.setVisibility(View.INVISIBLE);
-            mPin1Text.setEnabled(true);
-            mPin1Text.setText("");
+            mPinText.setEnabled(true);
+            mPinText.setText("");
         }
     }
 
@@ -134,20 +129,13 @@ public class RestrictionsPinActivity extends AlertActivity
         }
     }
 
-    private void performPositiveButtonAction() {
-        if (verifyingPin()) {
-            int result = mUserManager.checkRestrictionsPin(mPin1Text.getText().toString());
-            if (result == UserManager.PIN_VERIFICATION_SUCCESS) {
-                setResult(RESULT_OK);
-                finish();
-            } else if (result >= 0) {
-                updatePinTimer(result);
-            }
-        } else {
-            if (mUserManager.changeRestrictionsPin(mPin1Text.getText().toString())) {
-                setResult(RESULT_OK);
-                finish();
-            }
+    protected void performPositiveButtonAction() {
+        int result = mUserManager.checkRestrictionsPin(mPinText.getText().toString());
+        if (result == UserManager.PIN_VERIFICATION_SUCCESS) {
+            setResult(RESULT_OK);
+            finish();
+        } else if (result >= 0) {
+            updatePinTimer(result);
         }
     }
 
@@ -157,16 +145,8 @@ public class RestrictionsPinActivity extends AlertActivity
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-        CharSequence pin1 = mPin1Text.getText();
-        if (!verifyingPin()) {
-            CharSequence pin2 = mPin2Text.getText();
-            boolean match = pin1 != null && pin2 != null && pin1.length() >= 4
-                    && pin1.toString().equals(pin2.toString());
-            setPositiveButtonState(match);
-            mPinErrorMessage.setVisibility(match ? View.INVISIBLE : View.VISIBLE);
-        } else {
-            setPositiveButtonState(pin1 != null && pin1.length() >= 4);
-        }
+        CharSequence pin = mPinText.getText();
+        setPositiveButtonState(pin != null && pin.length() >= 4);
     }
 
     @Override

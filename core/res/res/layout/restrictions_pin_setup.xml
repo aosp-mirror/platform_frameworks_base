@@ -37,38 +37,31 @@
             android:text="@string/restr_pin_create_pin"
             android:textColor="?android:attr/textColorSecondary" />
 
-        <!-- TextView android:id="@+id/pin1_label"
-            style="?android:attr/textAppearanceSmall"
-            android:layout_marginBottom="16dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/restr_pin_enter_pin"
-            android:textColor="?android:attr/textColorSecondary" /-->
-
-        <EditText android:id="@+id/pin1_text"
+        <EditText android:id="@+id/pin_text"
             style="?android:attr/textAppearanceMedium"
             android:layout_marginBottom="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/restr_pin_enter_pin"
-            android:inputType="textPassword"
+            android:hint="@string/restr_pin_enter_old_pin"
+            android:inputType="numberPassword"
             android:textColor="?android:attr/textColorPrimary" />
 
-        <!-- TextView android:id="@+id/pin2_label"
-            style="?android:attr/textAppearanceSmall"
+        <EditText android:id="@+id/pin_new_text"
+            style="?android:attr/textAppearanceMedium"
             android:layout_marginBottom="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/restr_pin_confirm_pin"
-            android:textColor="?android:attr/textColorSecondary" /-->
+            android:hint="@string/restr_pin_enter_new_pin"
+            android:inputType="numberPassword"
+            android:textColor="?android:attr/textColorPrimary" />
 
-        <EditText android:id="@+id/pin2_text"
+        <EditText android:id="@+id/pin_confirm_text"
             style="?android:attr/textAppearanceMedium"
             android:layout_marginBottom="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/restr_pin_confirm_pin"
-            android:inputType="textPassword"
+            android:inputType="numberPassword"
             android:textColor="?android:attr/textColorPrimary" />
 
         <TextView android:id="@+id/pin_error_message"
