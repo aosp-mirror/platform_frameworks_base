@@ -1043,7 +1043,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      */
     public void setActiveAdmin(ComponentName adminReceiver, boolean refreshing, int userHandle) {
         mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.BIND_DEVICE_ADMIN, null);
+                android.Manifest.permission.MANAGE_DEVICE_ADMINS, null);
         enforceCrossUserPermission(userHandle);
 
         DevicePolicyData policy = getUserData(userHandle);
@@ -1146,7 +1146,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     return;
                 }
                 mContext.enforceCallingOrSelfPermission(
-                        android.Manifest.permission.BIND_DEVICE_ADMIN, null);
+                        android.Manifest.permission.MANAGE_DEVICE_ADMINS, null);
             }
             long ident = Binder.clearCallingIdentity();
             try {

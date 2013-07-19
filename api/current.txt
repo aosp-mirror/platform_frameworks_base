@@ -72,6 +72,7 @@ package android {
     field public static final java.lang.String LOCATION_HARDWARE = "android.permission.LOCATION_HARDWARE";
     field public static final java.lang.String MANAGE_ACCOUNTS = "android.permission.MANAGE_ACCOUNTS";
     field public static final java.lang.String MANAGE_APP_TOKENS = "android.permission.MANAGE_APP_TOKENS";
+    field public static final java.lang.String MANAGE_DEVICE_ADMINS = "android.permission.MANAGE_DEVICE_ADMINS";
     field public static final java.lang.String MANAGE_DOCUMENTS = "android.permission.MANAGE_DOCUMENTS";
     field public static final java.lang.String MASTER_CLEAR = "android.permission.MASTER_CLEAR";
     field public static final java.lang.String MODIFY_AUDIO_SETTINGS = "android.permission.MODIFY_AUDIO_SETTINGS";
