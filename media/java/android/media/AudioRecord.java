@@ -99,7 +99,7 @@ public class AudioRecord
      */
     private static final int NATIVE_EVENT_NEW_POS = 3;
 
-    private final static String TAG = "AudioRecord-Java";
+    private final static String TAG = "android.media.AudioRecord";
 
 
     //---------------------------------------------------------
@@ -779,9 +779,8 @@ public class AudioRecord
                 }
                 break;
             default:
-                Log.e(TAG, "[ android.media.AudioRecord.NativeEventHandler ] " +
-                        "Unknown event type: " + msg.what);
-            break;
+                loge("Unknown native event type: " + msg.what);
+                break;
             }
         }
     };
@@ -847,11 +846,11 @@ public class AudioRecord
     //------------------
 
     private static void logd(String msg) {
-        Log.d(TAG, "[ android.media.AudioRecord ] " + msg);
+        Log.d(TAG, msg);
     }
 
     private static void loge(String msg) {
-        Log.e(TAG, "[ android.media.AudioRecord ] " + msg);
+        Log.e(TAG, msg);
     }
 
 }
