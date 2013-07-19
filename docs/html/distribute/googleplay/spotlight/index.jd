@@ -22,6 +22,35 @@ header.hide=0
             margin-bottom:40px;
             margin-top:30px;">
    <div style="padding:0 0 0 29px;">
+        <h4>Developer Story: Colopl</h4>
+          <img alt="" class="screenshot thumbnail" style="-webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px height:78px;
+            width: 78px;
+            float: left;
+            margin: 17px 20px 9px 0;" 
+            src="//lh3.ggpht.com/sx2ILNaXQYOsHfR91T5tUWGlfXE1FutHCBN02Fll6mi9gIaG6RZCGbeJMtIvOoegCPTh=w124" >
+          <div style="width:700px;">
+          <p style="margin-top:26px;
+                    margin-bottom:12px;">
+          The creators of Kuma The Bear, Japan-based <a href="https://play.google.com/store/apps/developer?id=COLOPL,+Inc." target="_android">Colopl</a>, talk about how Google Play and Android allowed them to grow their business to become one of the most profitable games publishers in APAC to date. </p>
+           </div>
+           <iframe style="float:left;
+             margin-right:24px;
+             margin-top:14px;" width="700" height="394" src=
+             "http://www.youtube.com/embed/CbpoZeQCNe4?HD=1;rel=0;origin=developer.android.com;" frameborder="0" allowfullscreen>
+           </iframe>
+   </div> 
+</div>
+
+<div style="background: #F0F0F0;
+            border-top: 1px solid #DDD;
+            padding: 0px 0 24px 0;
+            overflow: auto;
+            clear:both;
+            margin-bottom:40px;
+            margin-top:30px;">
+   <div style="padding:0 0 0 29px;">
         <h4>Developer Story: redBus.in</h4>
           <img alt="" class="screenshot thumbnail" style="-webkit-border-radius: 5px;
             -moz-border-radius: 5px;
