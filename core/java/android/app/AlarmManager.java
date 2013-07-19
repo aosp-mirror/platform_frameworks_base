@@ -16,7 +16,9 @@
 
 package android.app;
 
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.RemoteException;
 
 /**
@@ -52,6 +54,8 @@ import android.os.RemoteException;
  */
 public class AlarmManager
 {
+    private static final String TAG = "AlarmManager";
+
     /**
      * Alarm time in {@link System#currentTimeMillis System.currentTimeMillis()}
      * (wall clock time in UTC), which will wake up the device when
@@ -81,12 +85,16 @@ public class AlarmManager
     public static final int ELAPSED_REALTIME = 3;
 
     private final IAlarmManager mService;
+    private final boolean mAlwaysExact;
 
     /**
      * package private on purpose
      */
-    AlarmManager(IAlarmManager service) {
+    AlarmManager(IAlarmManager service, Context ctx) {
         mService = service;
+
+        final int sdkVersion = ctx.getApplicationInfo().targetSdkVersion;
+        mAlwaysExact = (sdkVersion < Build.VERSION_CODES.KEY_LIME_PIE);
     }
     
     /**
@@ -133,10 +141,7 @@ public class AlarmManager
      * @see #RTC_WAKEUP
      */
     public void set(int type, long triggerAtMillis, PendingIntent operation) {
-        try {
-            mService.set(type, triggerAtMillis, operation);
-        } catch (RemoteException ex) {
-        }
+        setImpl(type, triggerAtMillis, 0, operation, mAlwaysExact);
     }
 
     /**
@@ -188,22 +193,60 @@ public class AlarmManager
      */
     public void setRepeating(int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
+        setImpl(type, triggerAtMillis, intervalMillis, operation, mAlwaysExact);
+    }
+
+    /**
+     * TBW: new 'exact' alarm that must be delivered as nearly as possible
+     * to the precise time specified.
+     */
+    public void setExact(int type, long triggerAtMillis, PendingIntent operation) {
+        setImpl(type, triggerAtMillis, 0, operation, true);
+    }
+
+    private void setImpl(int type, long triggerAtMillis, long intervalMillis,
+            PendingIntent operation, boolean isExact) {
         try {
-            mService.setRepeating(type, triggerAtMillis, intervalMillis, operation);
+            mService.set(type, triggerAtMillis, intervalMillis, operation, isExact);
         } catch (RemoteException ex) {
         }
     }
 
     /**
-     * Available inexact recurrence intervals recognized by
-     * {@link #setInexactRepeating(int, long, long, PendingIntent)} 
+     * @deprecated setInexactRepeating() is deprecated; as of API 19 all
+     * repeating alarms are inexact.
      */
+    @Deprecated
     public static final long INTERVAL_FIFTEEN_MINUTES = 15 * 60 * 1000;
+
+    /**
+     * @deprecated setInexactRepeating() is deprecated; as of API 19 all
+     * repeating alarms are inexact.
+     */
+    @Deprecated
     public static final long INTERVAL_HALF_HOUR = 2*INTERVAL_FIFTEEN_MINUTES;
+
+    /**
+     * @deprecated setInexactRepeating() is deprecated; as of API 19 all
+     * repeating alarms are inexact.
+     */
+    @Deprecated
     public static final long INTERVAL_HOUR = 2*INTERVAL_HALF_HOUR;
+
+    /**
+     * @deprecated setInexactRepeating() is deprecated; as of API 19 all
+     * repeating alarms are inexact.
+     */
+    @Deprecated
     public static final long INTERVAL_HALF_DAY = 12*INTERVAL_HOUR;
+
+    /**
+     * @deprecated setInexactRepeating() is deprecated; as of API 19 all
+     * repeating alarms are inexact.
+     */
+    @Deprecated
     public static final long INTERVAL_DAY = 2*INTERVAL_HALF_DAY;
-    
+
     /**
      * Schedule a repeating alarm that has inexact trigger time requirements;
      * for example, an alarm that repeats every hour, but not necessarily at
@@ -236,6 +279,8 @@ public class AlarmManager
      * typically comes from {@link PendingIntent#getBroadcast
      * IntentSender.getBroadcast()}.
      *
+     * @deprecated As of API 19, all repeating alarms are inexact.
+     *
      * @see android.os.Handler
      * @see #set
      * @see #cancel
@@ -252,12 +297,10 @@ public class AlarmManager
      * @see #INTERVAL_HALF_DAY
      * @see #INTERVAL_DAY
      */
+    @Deprecated
     public void setInexactRepeating(int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
-        try {
-            mService.setInexactRepeating(type, triggerAtMillis, intervalMillis, operation);
-        } catch (RemoteException ex) {
-        }
+        setRepeating(type, triggerAtMillis, intervalMillis, operation);
     }
     
     /**

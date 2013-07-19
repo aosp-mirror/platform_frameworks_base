@@ -309,11 +309,11 @@ class ContextImpl extends Context {
                     return new ActivityManager(ctx.getOuterContext(), ctx.mMainThread.getHandler());
                 }});
 
-        registerService(ALARM_SERVICE, new StaticServiceFetcher() {
-                public Object createStaticService() {
+        registerService(ALARM_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
                     IBinder b = ServiceManager.getService(ALARM_SERVICE);
                     IAlarmManager service = IAlarmManager.Stub.asInterface(b);
-                    return new AlarmManager(service);
+                    return new AlarmManager(service, ctx);
                 }});
 
         registerService(AUDIO_SERVICE, new ServiceFetcher() {
