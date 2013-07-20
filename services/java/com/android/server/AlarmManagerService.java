@@ -18,6 +18,7 @@ package com.android.server;
 
 import android.app.Activity;
 import android.app.ActivityManagerNative;
+import android.app.AlarmManager;
 import android.app.IAlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -314,7 +315,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
     }
     
     // minimum recurrence period or alarm futurity for us to be able to fuzz it
-    private static final long MAX_FUZZABLE_INTERVAL = 10000;
+    private static final long MIN_FUZZABLE_INTERVAL = 10000;
     private static final BatchTimeOrder sBatchOrder = new BatchTimeOrder();
     private final ArrayList<Batch> mAlarmBatches = new ArrayList<Batch>();
 
@@ -336,7 +337,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
         long futurity = (interval == 0)
                 ? (triggerAtTime - now)
                 : interval;
-        if (futurity < MAX_FUZZABLE_INTERVAL) {
+        if (futurity < MIN_FUZZABLE_INTERVAL) {
             futurity = 0;
         }
         return triggerAtTime + (long)(.75 * futurity);
@@ -499,32 +500,45 @@ class AlarmManagerService extends IAlarmManager.Stub {
     }
 
     @Override
-    public void set(int type, long triggerAtTime, long interval,
-            PendingIntent operation, boolean isExact) {
-        set(type, triggerAtTime, interval, operation, isExact, false);
+    public void set(int type, long triggerAtTime, long windowLength, long interval,
+            PendingIntent operation) {
+        set(type, triggerAtTime, windowLength, interval, operation, false);
     }
 
-    public void set(int type, long triggerAtTime, long interval,
-            PendingIntent operation, boolean isExact, boolean isStandalone) {
+    public void set(int type, long triggerAtTime, long windowLength, long interval,
+            PendingIntent operation, boolean isStandalone) {
         if (operation == null) {
             Slog.w(TAG, "set/setRepeating ignored because there is no intent");
             return;
+        }
+
+        // Sanity check the window length.  This will catch people mistakenly
+        // trying to pass an end-of-window timestamp rather than a duration.
+        if (windowLength > AlarmManager.INTERVAL_HALF_DAY) {
+            Slog.w(TAG, "Window length " + windowLength
+                    + "ms suspiciously long; limiting to 1 hour");
+            windowLength = AlarmManager.INTERVAL_HOUR;
         }
 
         if (type < RTC_WAKEUP || type > ELAPSED_REALTIME) {
             throw new IllegalArgumentException("Invalid alarm type " + type);
         }
 
-        long nowElapsed = SystemClock.elapsedRealtime();
-        long triggerElapsed = convertToElapsed(triggerAtTime, type);
-        long maxElapsed = (isExact)
-                ? triggerElapsed
-                : maxTriggerTime(nowElapsed, triggerElapsed, interval);
+        final long nowElapsed = SystemClock.elapsedRealtime();
+        final long triggerElapsed = convertToElapsed(triggerAtTime, type);
+        final long maxElapsed;
+        if (windowLength == AlarmManager.WINDOW_EXACT) {
+            maxElapsed = triggerElapsed;
+        } else if (windowLength < 0) {
+            maxElapsed = maxTriggerTime(nowElapsed, triggerElapsed, interval);
+        } else {
+            maxElapsed = triggerElapsed + windowLength;
+        }
 
         synchronized (mLock) {
             if (DEBUG_BATCH) {
                 Slog.v(TAG, "set(" + operation + ") : type=" + type
-                        + " triggerAtTime=" + triggerAtTime
+                        + " triggerAtTime=" + triggerAtTime + " win=" + windowLength
                         + " tElapsed=" + triggerElapsed + " maxElapsed=" + maxElapsed
                         + " interval=" + interval + " standalone=" + isStandalone);
             }
@@ -1218,8 +1232,8 @@ class AlarmManagerService extends IAlarmManager.Stub {
             // the top of the next minute.
             final long tickEventDelay = nextTime - currentTime;
 
-            set(ELAPSED_REALTIME, SystemClock.elapsedRealtime() + tickEventDelay,
-                    0, mTimeTickSender, true, true);
+            set(ELAPSED_REALTIME, SystemClock.elapsedRealtime() + tickEventDelay, 0,
+                    0, mTimeTickSender, true);
         }
 	
         public void scheduleDateChangedEvent() {
@@ -1231,7 +1245,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
             calendar.set(Calendar.MILLISECOND, 0);
             calendar.add(Calendar.DAY_OF_MONTH, 1);
       
-            set(RTC, calendar.getTimeInMillis(), 0, mDateChangeSender, true, true);
+            set(RTC, calendar.getTimeInMillis(), 0, 0, mDateChangeSender, true);
         }
     }
     

@@ -3057,6 +3057,7 @@ package android.app {
     method public void setRepeating(int, long, long, android.app.PendingIntent);
     method public void setTime(long);
     method public void setTimeZone(java.lang.String);
+    method public void setWindow(int, long, long, android.app.PendingIntent);
     field public static final int ELAPSED_REALTIME = 3; // 0x3
     field public static final int ELAPSED_REALTIME_WAKEUP = 2; // 0x2
     field public static final deprecated long INTERVAL_DAY = 86400000L; // 0x5265c00L

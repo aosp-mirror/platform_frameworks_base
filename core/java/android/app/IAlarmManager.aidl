@@ -24,7 +24,9 @@ import android.app.PendingIntent;
  * {@hide}
  */
 interface IAlarmManager {
-    void set(int type, long triggerAtTime, long interval, in PendingIntent operation, boolean isExact);
+	/** windowLength == 0 means exact; windowLength < 0 means the let the OS decide */
+    void set(int type, long triggerAtTime, long windowLength,
+            long interval, in PendingIntent operation);
     void setTime(long millis);
     void setTimeZone(String zone);
     void remove(in PendingIntent operation);
