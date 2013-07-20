@@ -197,11 +197,10 @@ static void SurfaceTexture_classInit(JNIEnv* env, jclass clazz)
     }
 }
 
-static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jint texName,
-        jobject weakThiz, jboolean allowSynchronous)
+static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jint texName, jobject weakThiz)
 {
-    sp<BufferQueue> bq = new BufferQueue(allowSynchronous);
-    sp<GLConsumer> surfaceTexture(new GLConsumer(bq, texName));
+    sp<BufferQueue> bq = new BufferQueue();
+    sp<GLConsumer> surfaceTexture(new GLConsumer(bq, texName, GL_TEXTURE_EXTERNAL_OES, true, true));
     if (surfaceTexture == 0) {
         jniThrowException(env, OutOfResourcesException,
                 "Unable to create native SurfaceTexture");
@@ -286,7 +285,7 @@ static void SurfaceTexture_release(JNIEnv* env, jobject thiz)
 
 static JNINativeMethod gSurfaceTextureMethods[] = {
     {"nativeClassInit",            "()V",   (void*)SurfaceTexture_classInit },
-    {"nativeInit",                 "(ILjava/lang/Object;Z)V", (void*)SurfaceTexture_init },
+    {"nativeInit",                 "(ILjava/lang/Object;)V", (void*)SurfaceTexture_init },
     {"nativeFinalize",             "()V",   (void*)SurfaceTexture_finalize },
     {"nativeSetDefaultBufferSize", "(II)V", (void*)SurfaceTexture_setDefaultBufferSize },
     {"nativeUpdateTexImage",       "()V",   (void*)SurfaceTexture_updateTexImage },

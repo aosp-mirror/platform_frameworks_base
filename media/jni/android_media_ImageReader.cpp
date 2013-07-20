@@ -542,7 +542,7 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz,
     nativeFormat = Image_getPixelFormat(env, format);
 
     sp<BufferQueue> bq = new BufferQueue();
-    sp<CpuConsumer> consumer = new CpuConsumer(bq, maxImages);
+    sp<CpuConsumer> consumer = new CpuConsumer(bq, true, maxImages);
     // TODO: throw dvm exOutOfMemoryError?
     if (consumer == NULL) {
         jniThrowRuntimeException(env, "Failed to allocate native CpuConsumer");
