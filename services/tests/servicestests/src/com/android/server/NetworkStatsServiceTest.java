@@ -878,7 +878,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mAlarmManager.remove(isA(PendingIntent.class));
         expectLastCall().anyTimes();
 
-        mAlarmManager.set(eq(AlarmManager.ELAPSED_REALTIME), anyLong(), anyLong(), isA(PendingIntent.class), false);
+        mAlarmManager.set(eq(AlarmManager.ELAPSED_REALTIME), anyLong(), anyLong(), anyLong(), isA(PendingIntent.class));
         expectLastCall().atLeastOnce();
 
         mNetManager.setGlobalAlert(anyLong());
