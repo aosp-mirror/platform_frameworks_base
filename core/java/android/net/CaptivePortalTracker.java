@@ -34,6 +34,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
@@ -52,7 +53,7 @@ import com.android.internal.R;
  * @hide
  */
 public class CaptivePortalTracker extends StateMachine {
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
     private static final String TAG = "CaptivePortalTracker";
 
     private static final String DEFAULT_SERVER = "clients3.google.com";
@@ -364,6 +365,7 @@ public class CaptivePortalTracker extends StateMachine {
     private void setNotificationVisible(boolean visible) {
         // if it should be hidden and it is already hidden, then noop
         if (!visible && !mNotificationShown) {
+            if (DBG) log("setNotivicationVisible: false and not shown, so noop");
             return;
         }
 
@@ -375,12 +377,14 @@ public class CaptivePortalTracker extends StateMachine {
             CharSequence title;
             CharSequence details;
             int icon;
+            String url = null;
             switch (mNetworkInfo.getType()) {
                 case ConnectivityManager.TYPE_WIFI:
                     title = r.getString(R.string.wifi_available_sign_in, 0);
                     details = r.getString(R.string.network_available_sign_in_detailed,
                             mNetworkInfo.getExtraInfo());
                     icon = R.drawable.stat_notify_wifi_in_range;
+                    url = mUrl;
                     break;
                 case ConnectivityManager.TYPE_MOBILE:
                     title = r.getString(R.string.network_available_sign_in, 0);
@@ -388,12 +392,24 @@ public class CaptivePortalTracker extends StateMachine {
                     // name has been added to it
                     details = mTelephonyManager.getNetworkOperatorName();
                     icon = R.drawable.stat_notify_rssi_in_range;
+                    try {
+                        url = mConnService.getMobileProvisioningUrl();
+                        if (TextUtils.isEmpty(url)) {
+                            url = mConnService.getMobileRedirectedProvisioningUrl();
+                        }
+                    } catch(RemoteException e) {
+                        e.printStackTrace();
+                    }
+                    if (TextUtils.isEmpty(url)) {
+                        url = mUrl;
+                    }
                     break;
                 default:
                     title = r.getString(R.string.network_available_sign_in, 0);
                     details = r.getString(R.string.network_available_sign_in_detailed,
                             mNetworkInfo.getExtraInfo());
                     icon = R.drawable.stat_notify_rssi_in_range;
+                    url = mUrl;
                     break;
             }
 
@@ -401,15 +417,17 @@ public class CaptivePortalTracker extends StateMachine {
             notification.when = 0;
             notification.icon = icon;
             notification.flags = Notification.FLAG_AUTO_CANCEL;
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUrl));
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
                     Intent.FLAG_ACTIVITY_NEW_TASK);
             notification.contentIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
             notification.tickerText = title;
             notification.setLatestEventInfo(mContext, title, details, notification.contentIntent);
 
+            if (DBG) log("setNotivicationVisible: make visible");
             notificationManager.notify(NOTIFICATION_ID, 1, notification);
         } else {
+            if (DBG) log("setNotivicationVisible: cancel notification");
             notificationManager.cancel(NOTIFICATION_ID, 1);
         }
         mNotificationShown = visible;
