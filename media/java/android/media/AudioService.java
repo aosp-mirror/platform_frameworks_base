@@ -22,6 +22,7 @@ import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.AppOpsManager;
 import android.app.KeyguardManager;
@@ -528,6 +529,7 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         updateStreamVolumeAlias(false /*updateVolumes*/);
         createStreamStates();
 
+        readAndSetLowRamDevice();
         mMediaServerOk = true;
 
         // Call setRingerModeInt() to apply correct mute
@@ -3468,6 +3470,8 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
                     // Note that MSG_MEDIA_SERVER_STARTED message is only received when the media server
                     // process restarts after a crash, not the first time it is started.
                     AudioSystem.setParameters("restarting=true");
+
+                    readAndSetLowRamDevice();
 
                     // Restore device connection states
                     synchronized (mConnectedDevices) {
@@ -6697,5 +6701,14 @@ public class AudioService extends IAudioService.Stub implements OnFinished {
         pw.println("\nAudio routes:");
         pw.print("  mMainType=0x"); pw.println(Integer.toHexString(mCurAudioRoutes.mMainType));
         pw.print("  mBluetoothName="); pw.println(mCurAudioRoutes.mBluetoothName);
+    }
+
+    // Inform AudioFlinger of our device's low RAM attribute
+    private static void readAndSetLowRamDevice()
+    {
+        int status = AudioSystem.setLowRamDevice(ActivityManager.isLowRamDeviceStatic());
+        if (status != 0) {
+            Log.w(TAG, "AudioFlinger informed of device's low RAM attribute; status " + status);
+        }
     }
 }

@@ -312,6 +312,12 @@ android_media_AudioSystem_getOutputLatency(JNIEnv *env, jobject clazz, jint stre
     return (jint) afLatency;
 }
 
+static jint
+android_media_AudioSystem_setLowRamDevice(JNIEnv *env, jobject clazz, jboolean isLowRamDevice)
+{
+    return (jint) AudioSystem::setLowRamDevice((bool) isLowRamDevice);
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -338,6 +344,7 @@ static JNINativeMethod gMethods[] = {
     {"getPrimaryOutputSamplingRate", "()I", (void *)android_media_AudioSystem_getPrimaryOutputSamplingRate},
     {"getPrimaryOutputFrameCount",   "()I", (void *)android_media_AudioSystem_getPrimaryOutputFrameCount},
     {"getOutputLatency",    "(I)I",     (void *)android_media_AudioSystem_getOutputLatency},
+    {"setLowRamDevice",     "(Z)I",     (void *)android_media_AudioSystem_setLowRamDevice},
 };
 
 int register_android_media_AudioSystem(JNIEnv *env)
