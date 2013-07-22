@@ -227,6 +227,12 @@ Versions dashboards page</a>.</p>
 <table>
   <tr><th>Platform Version</th><th>API Level</th><th>VERSION_CODE</th><th>Notes</th></tr>
 
+    <tr><td><a href="{@docRoot}about/versions/android-4.3.html">Android 4.3</a></td>
+    <td><a href="{@docRoot}sdk/api_diff/18/changes.html" title="Diff Report">18</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR2}</td>
+    <td><a href="{@docRoot}about/versions/jelly-bean.html">Platform
+Highlights</a></td></tr>
+
     <tr><td><a href="{@docRoot}about/versions/android-4.2.html">Android 4.2, 4.2.2</a></td>
     <td><a href="{@docRoot}sdk/api_diff/17/changes.html" title="Diff Report">17</a></td>
     <td>{@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}</td>
