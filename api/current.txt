@@ -18027,6 +18027,7 @@ package android.os {
     method public void setUserRestriction(java.lang.String, boolean);
     method public void setUserRestrictions(android.os.Bundle);
     method public void setUserRestrictions(android.os.Bundle, android.os.UserHandle);
+    field public static final java.lang.String DISALLOW_APP_RESTRICTIONS = "no_app_restrictions";
     field public static final java.lang.String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
     field public static final java.lang.String DISALLOW_CONFIG_CREDENTIALS = "no_config_credentials";
     field public static final java.lang.String DISALLOW_CONFIG_WIFI = "no_config_wifi";

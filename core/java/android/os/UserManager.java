@@ -140,6 +140,16 @@ public class UserManager {
      */
     public static final String DISALLOW_REMOVE_USER = "no_remove_user";
 
+    /**
+     * Key for user restrictions. Specifies if a user is disallowed from setting app restrictions
+     * via a restrictions PIN. The default is <code>false</code>. If app restrictions have already
+     * been set up, then this user restriction cannot be set to true.
+     * <p/>
+     * Type: Boolean
+     * @see #hasRestrictionsPin()
+     */
+    public static final String DISALLOW_APP_RESTRICTIONS = "no_app_restrictions";
+
     /** @hide */
     public static final int PIN_VERIFICATION_FAILED_INCORRECT = -3;
     /** @hide */

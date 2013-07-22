@@ -416,8 +416,15 @@ public class UserManagerService extends IUserManager.Stub {
     @Override
     public void setUserRestrictions(Bundle restrictions, int userId) {
         checkManageUsersPermission("setUserRestrictions");
+        if (restrictions == null) return;
 
         synchronized (mPackagesLock) {
+            // If the user has restrictions already and call is trying to disallow restrictions,
+            // don't modify the flag.
+            if (hasRestrictionsPinLocked(userId)
+                    && restrictions.getBoolean(UserManager.DISALLOW_APP_RESTRICTIONS, false)) {
+                restrictions.putBoolean(UserManager.DISALLOW_APP_RESTRICTIONS, false);
+            }
             mUserRestrictions.get(userId).putAll(restrictions);
             writeUserLocked(mUsers.get(userId));
         }
@@ -681,6 +688,7 @@ public class UserManagerService extends IUserManager.Stub {
                 writeBoolean(serializer, restrictions, UserManager.DISALLOW_USB_FILE_TRANSFER);
                 writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_CREDENTIALS);
                 writeBoolean(serializer, restrictions, UserManager.DISALLOW_REMOVE_USER);
+                writeBoolean(serializer, restrictions, UserManager.DISALLOW_APP_RESTRICTIONS);
                 serializer.endTag(null, TAG_RESTRICTIONS);
             }
             serializer.endTag(null, TAG_USER);
@@ -811,6 +819,7 @@ public class UserManagerService extends IUserManager.Stub {
                         readBoolean(parser, restrictions, UserManager.DISALLOW_USB_FILE_TRANSFER);
                         readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_CREDENTIALS);
                         readBoolean(parser, restrictions, UserManager.DISALLOW_REMOVE_USER);
+                        readBoolean(parser, restrictions, UserManager.DISALLOW_APP_RESTRICTIONS);
                     }
                 }
             }
@@ -1196,10 +1205,14 @@ public class UserManagerService extends IUserManager.Stub {
     public boolean hasRestrictionsPin() {
         int userId = UserHandle.getCallingUserId();
         synchronized (mPackagesLock) {
-            RestrictionsPinState pinState = mRestrictionsPinStates.get(userId);
-            if (pinState == null || pinState.salt == 0 || pinState.pinHash == null) {
-                return false;
-            }
+            return hasRestrictionsPinLocked(userId);
+        }
+    }
+
+    private boolean hasRestrictionsPinLocked(int userId) {
+        RestrictionsPinState pinState = mRestrictionsPinStates.get(userId);
+        if (pinState == null || pinState.salt == 0 || pinState.pinHash == null) {
+            return false;
         }
         return true;
     }
