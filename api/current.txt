@@ -7116,6 +7116,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_LOCATION_NETWORK = "android.hardware.location.network";
     field public static final java.lang.String FEATURE_MICROPHONE = "android.hardware.microphone";
     field public static final java.lang.String FEATURE_NFC = "android.hardware.nfc";
+    field public static final java.lang.String FEATURE_NFC_HCE = "android.hardware.nfc.hce";
     field public static final java.lang.String FEATURE_SCREEN_LANDSCAPE = "android.hardware.screen.landscape";
     field public static final java.lang.String FEATURE_SCREEN_PORTRAIT = "android.hardware.screen.portrait";
     field public static final java.lang.String FEATURE_SENSOR_ACCELEROMETER = "android.hardware.sensor.accelerometer";
