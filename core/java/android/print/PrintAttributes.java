@@ -1007,7 +1007,7 @@ public final class PrintAttributes implements Parcelable {
          *
          * @return The human readable label.
          */
-        public CharSequence getLabel(PackageManager packageManager) {
+        public CharSequence getLabel() {
             return mLabel;
         }
 
@@ -1203,7 +1203,7 @@ public final class PrintAttributes implements Parcelable {
          *
          * @return The human readable label.
          */
-        public CharSequence getLabel(PackageManager packageManager) {
+        public CharSequence getLabel() {
             return mLabel;
         }
 

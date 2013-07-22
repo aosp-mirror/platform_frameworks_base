@@ -24,10 +24,15 @@ import android.os.RemoteException;
 import android.print.IPrintClient;
 import android.print.IPrintSpoolerClient;
 import android.print.IPrinterDiscoveryObserver;
+import android.print.PageRange;
 import android.print.PrintAttributes;
+import android.print.PrintAttributes.Margins;
+import android.print.PrintAttributes.MediaSize;
+import android.print.PrintAttributes.Resolution;
+import android.print.PrintAttributes.Tray;
+import android.print.PrintDocumentInfo;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
-import android.print.PrintDocumentInfo;
 import android.print.PrinterId;
 import android.util.AtomicFile;
 import android.util.Log;
@@ -58,9 +63,9 @@ public class PrintSpooler {
 
     private static final boolean DEBUG_PRINT_JOB_LIFECYCLE = false;
 
-    private static final boolean DEBUG_PERSISTENCE = false;
+    private static final boolean DEBUG_PERSISTENCE = true;
 
-    private static final boolean PERSISTNECE_MANAGER_ENABLED = false;
+    private static final boolean PERSISTNECE_MANAGER_ENABLED = true;
 
     private static final String PRINT_FILE_EXTENSION = "pdf";
 
@@ -91,13 +96,18 @@ public class PrintSpooler {
 
     private PrintSpooler(Context context) {
         mContext = context;
-        mPersistanceManager = new PersistenceManager();
-        mPersistanceManager.readStateLocked();
+        mPersistanceManager = new PersistenceManager(context);
     }
 
     public void setCleint(IPrintSpoolerClient client) {
         synchronized (mLock) {
             mClient = client;
+        }
+    }
+
+    public void restorePersistedState() {
+        synchronized (mLock) {
+            mPersistanceManager.readStateLocked();
         }
     }
 
@@ -141,8 +151,10 @@ public class PrintSpooler {
                         && componentName.equals(printerId.getService())));
                 final boolean sameAppId = appId == PrintManager.APP_ID_ANY
                         || printJob.getAppId() == appId;
-                final boolean sameState = state == PrintJobInfo.STATE_ANY
-                        || state == printJob.getState();
+                final boolean sameState = (state == printJob.getState())
+                        || (state == PrintJobInfo.STATE_ANY)
+                        || (state == PrintJobInfo.STATE_ANY_VISIBLE_TO_CLIENTS
+                                && printJob.getState() > PrintJobInfo.STATE_CREATED);
                 if (sameComponent && sameAppId && sameState) {
                     if (foundPrintJobs == null) {
                         foundPrintJobs = new ArrayList<PrintJobInfo>();
@@ -192,9 +204,9 @@ public class PrintSpooler {
             printJob.setAppId(appId);
             printJob.setLabel(label);
             printJob.setAttributes(attributes);
+            printJob.setState(PrintJobInfo.STATE_CREATED);
 
             addPrintJobLocked(printJob);
-            setPrintJobState(printJobId, PrintJobInfo.STATE_CREATED);
 
             return printJob;
         }
@@ -425,12 +437,22 @@ public class PrintSpooler {
         }
     }
 
-    private void callOnAllPrintJobsHandledQuietly(IPrintSpoolerClient client) {
-        try {
-            client.onAllPrintJobsHandled();
-        } catch (RemoteException re) {
-            Slog.e(LOG_TAG, "Error notify for all print job handled.", re);
-        }
+    private void callOnAllPrintJobsHandledQuietly(final IPrintSpoolerClient client) {
+        // This has to run on the tread that is persisting the current state
+        // since this call may result in the system unbinding from the spooler
+        // and as a result the spooler process may get killed before the write
+        // completes.
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    client.onAllPrintJobsHandled();
+                } catch (RemoteException re) {
+                    Slog.e(LOG_TAG, "Error notify for all print job handled.", re);
+                }
+                return null;
+            }
+        }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
     }
 
     private boolean hasActivePrintJobsLocked() {
@@ -507,40 +529,77 @@ public class PrintSpooler {
         }
     }
 
+    public boolean setPrintJobPages(int printJobId, PageRange[] pages) {
+        synchronized (mLock) {
+            PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
+            if (printJob != null) {
+                printJob.setPages(pages);
+                mPersistanceManager.writeStateLocked();
+                return true;
+            }
+        }
+        return false;
+    }
+
     private final class PersistenceManager {
         private static final String PERSIST_FILE_NAME = "print_spooler_state.xml";
 
         private static final String TAG_SPOOLER = "spooler";
         private static final String TAG_JOB = "job";
-        private static final String TAG_ID = "id";
-        private static final String TAG_TAG = "tag";
-        private static final String TAG_APP_ID = "app-id";
-        private static final String TAG_STATE = "state";
-        private static final String TAG_ATTRIBUTES = "attributes";
-        private static final String TAG_LABEL = "label";
-        private static final String TAG_PRINTER = "printer";
 
-        private static final String ATTRIBUTE_MEDIA_SIZE = "mediaSize";
-        private static final String ATTRIBUTE_RESOLUTION = "resolution";
-        private static final String ATTRIBUTE_MARGINS = "margins";
-        private static final String ATTRIBUTE_INPUT_TRAY = "inputTray";
-        private static final String ATTRIBUTE_OUTPUT_TRAY = "outputTray";
-        private static final String ATTRIBUTE_DUPLEX_MODE = "duplexMode";
-        private static final String ATTRIBUTE_COLOR_MODE = "colorMode";
-        private static final String ATTRIBUTE_FITTING_MODE = "fittingMode";
-        private static final String ATTRIBUTE_ORIENTATION = "orientation";
+        private static final String TAG_PRINTER_ID = "printerId";
+        private static final String TAG_PAGE_RANGE = "pageRange";
+        private static final String TAG_ATTRIBUTES = "attributes";
+        private static final String TAG_DOCUMENT_INFO = "documentInfo";
+
+        private static final String ATTR_ID = "id";
+        private static final String ATTR_LABEL = "label";
+        private static final String ATTR_STATE = "state";
+        private static final String ATTR_APP_ID = "appId";
+        private static final String ATTR_USER_ID = "userId";
+        private static final String ATTR_TAG = "tag";
+
+        private static final String TAG_MEDIA_SIZE = "mediaSize";
+        private static final String TAG_RESOLUTION = "resolution";
+        private static final String TAG_MARGINS = "margins";
+        private static final String TAG_INPUT_TRAY = "inputTray";
+        private static final String TAG_OUTPUT_TRAY = "outputTray";
+
+        private static final String ATTR_DUPLEX_MODE = "duplexMode";
+        private static final String ATTR_COLOR_MODE = "colorMode";
+        private static final String ATTR_FITTING_MODE = "fittingMode";
+        private static final String ATTR_ORIENTATION = "orientation";
+
+        private static final String ATTR_LOCAL_ID = "localId";
+        private static final String ATTR_SERVICE = "service";
+
+        private static final String ATTR_WIDTH_MILS = "widthMils";
+        private static final String ATTR_HEIGHT_MILS = "heightMils";
+
+        private static final String ATTR_HORIZONTAL_DPI = "horizontalDip";
+        private static final String ATTR_VERTICAL_DPI = "verticalDpi";
+
+        private static final String ATTR_LEFT_MILS = "leftMils";
+        private static final String ATTR_TOP_MILS = "topMils";
+        private static final String ATTR_RIGHT_MILS = "rightMils";
+        private static final String ATTR_BOTTOM_MILS = "bottomMils";
+
+        private static final String ATTR_START = "start";
+        private static final String ATTR_END = "end";
+
+        private static final String ATTR_PAGE_COUNT = "pageCount";
+        private static final String ATTR_CONTENT_TYPE = "contentType";
 
         private final AtomicFile mStatePersistFile;
 
         private boolean mWriteStateScheduled;
 
-        private PersistenceManager() {
-            mStatePersistFile = new AtomicFile(new File(mContext.getFilesDir(),
+        private PersistenceManager(Context context) {
+            mStatePersistFile = new AtomicFile(new File(context.getFilesDir(),
                     PERSIST_FILE_NAME));
         }
 
         public void writeStateLocked() {
-            // TODO: Implement persistence of PrintableInfo
             if (!PERSISTNECE_MANAGER_ENABLED) {
                 return;
             }
@@ -578,97 +637,132 @@ public class PrintSpooler {
 
                     final int state = printJob.getState();
                     if (state < PrintJobInfo.STATE_QUEUED
-                            || state > PrintJobInfo.STATE_FAILED) {
+                            || state > PrintJobInfo.STATE_CANCELED) {
                         continue;
                     }
 
                     serializer.startTag(null, TAG_JOB);
 
-                    serializer.startTag(null, TAG_ID);
-                    serializer.text(String.valueOf(printJob.getId()));
-                    serializer.endTag(null, TAG_ID);
+                    serializer.attribute(null, ATTR_ID, String.valueOf(printJob.getId()));
+                    serializer.attribute(null, ATTR_LABEL, printJob.getLabel().toString());
+                    serializer.attribute(null, ATTR_STATE, String.valueOf(printJob.getState()));
+                    serializer.attribute(null, ATTR_APP_ID, String.valueOf(printJob.getAppId()));
+                    serializer.attribute(null, ATTR_USER_ID, String.valueOf(printJob.getUserId()));
+                    String tag = printJob.getTag();
+                    if (tag != null) {
+                        serializer.attribute(null, ATTR_TAG, tag);
+                    }
 
-                    serializer.startTag(null, TAG_TAG);
-                    serializer.text(printJob.getTag());
-                    serializer.endTag(null, TAG_TAG);
+                    PrinterId printerId = printJob.getPrinterId();
+                    if (printerId != null) {
+                        serializer.startTag(null, TAG_PRINTER_ID);
+                        serializer.attribute(null, ATTR_LOCAL_ID, printerId.getLocalId());
+                        serializer.attribute(null, ATTR_SERVICE, printerId.getService()
+                                .flattenToString());
+                        serializer.endTag(null, TAG_PRINTER_ID);
+                    }
 
-                    serializer.startTag(null, TAG_APP_ID);
-                    serializer.text(String.valueOf(printJob.getAppId()));
-                    serializer.endTag(null, TAG_APP_ID);
-
-                    serializer.startTag(null, TAG_LABEL);
-                    serializer.text(printJob.getLabel().toString());
-                    serializer.endTag(null, TAG_LABEL);
-
-                    serializer.startTag(null, TAG_STATE);
-                    serializer.text(String.valueOf(printJob.getState()));
-                    serializer.endTag(null, TAG_STATE);
-
-                    serializer.startTag(null, TAG_PRINTER);
-                    serializer.text(printJob.getPrinterId().flattenToString());
-                    serializer.endTag(null, TAG_PRINTER);
+                    PageRange[] pages = printJob.getPages();
+                    if (pages != null) {
+                        for (int i = 0; i < pages.length; i++) {
+                            serializer.startTag(null, TAG_PAGE_RANGE);
+                            serializer.attribute(null, ATTR_START, String.valueOf(
+                                    pages[i].getStart()));
+                            serializer.attribute(null, ATTR_END, String.valueOf(
+                                    pages[i].getEnd()));
+                            serializer.endTag(null, TAG_PAGE_RANGE);
+                        }
+                    }
 
                     PrintAttributes attributes = printJob.getAttributes();
                     if (attributes != null) {
                         serializer.startTag(null, TAG_ATTRIBUTES);
 
-                            //TODO: Implement persistence of the attributes below.
-
-//                            MediaSize mediaSize = attributes.getMediaSize();
-//                            if (mediaSize != null) {
-//                                serializer.attribute(null, ATTRIBUTE_MEDIA_SIZE,
-//                                        mediaSize.flattenToString());
-//                            }
-//
-//                            Resolution resolution = attributes.getResolution();
-//                            if (resolution != null) {
-//                                serializer.attribute(null, ATTRIBUTE_RESOLUTION,
-//                                        resolution.flattenToString());
-//                            }
-//
-//                            Margins margins = attributes.getMargins();
-//                            if (margins != null) {
-//                                serializer.attribute(null, ATTRIBUTE_MARGINS,
-//                                        margins.flattenToString());
-//                            }
-//
-//                            Tray inputTray = attributes.getInputTray();
-//                            if (inputTray != null) {
-//                                serializer.attribute(null, ATTRIBUTE_INPUT_TRAY,
-//                                        inputTray.flattenToString());
-//                            }
-//
-//                            Tray outputTray = attributes.getOutputTray();
-//                            if (outputTray != null) {
-//                                serializer.attribute(null, ATTRIBUTE_OUTPUT_TRAY,
-//                                        outputTray.flattenToString());
-//                            }
-
                         final int duplexMode = attributes.getDuplexMode();
-                        if (duplexMode > 0) {
-                            serializer.attribute(null, ATTRIBUTE_DUPLEX_MODE,
-                                    String.valueOf(duplexMode));
-                        }
+                        serializer.attribute(null, ATTR_DUPLEX_MODE,
+                                String.valueOf(duplexMode));
 
                         final int colorMode = attributes.getColorMode();
-                        if (colorMode > 0) {
-                            serializer.attribute(null, ATTRIBUTE_COLOR_MODE,
-                                    String.valueOf(colorMode));
-                        }
+                        serializer.attribute(null, ATTR_COLOR_MODE,
+                                String.valueOf(colorMode));
 
                         final int fittingMode = attributes.getFittingMode();
-                        if (fittingMode > 0) {
-                            serializer.attribute(null, ATTRIBUTE_FITTING_MODE,
-                                    String.valueOf(fittingMode));
-                        }
+                        serializer.attribute(null, ATTR_FITTING_MODE,
+                                String.valueOf(fittingMode));
 
                         final int orientation = attributes.getOrientation();
-                        if (orientation > 0) {
-                            serializer.attribute(null, ATTRIBUTE_ORIENTATION,
-                                    String.valueOf(orientation));
+                        serializer.attribute(null, ATTR_ORIENTATION,
+                                String.valueOf(orientation));
+
+                        MediaSize mediaSize = attributes.getMediaSize();
+                        if (mediaSize != null) {
+                            serializer.startTag(null, TAG_MEDIA_SIZE);
+                            serializer.attribute(null, ATTR_ID, mediaSize.getId());
+                            serializer.attribute(null, ATTR_LABEL, mediaSize.getLabel()
+                                    .toString());
+                            serializer.attribute(null, ATTR_WIDTH_MILS, String.valueOf(
+                                    mediaSize.getWidthMils()));
+                            serializer.attribute(null, ATTR_HEIGHT_MILS,String.valueOf(
+                                    mediaSize.getHeightMils()));
+                            serializer.endTag(null, TAG_MEDIA_SIZE);
+                        }
+
+                        Resolution resolution = attributes.getResolution();
+                        if (resolution != null) {
+                            serializer.startTag(null, TAG_RESOLUTION);
+                            serializer.attribute(null, ATTR_ID, resolution.getId());
+                            serializer.attribute(null, ATTR_LABEL, resolution.getLabel()
+                                    .toString());
+                            serializer.attribute(null, ATTR_HORIZONTAL_DPI, String.valueOf(
+                                     resolution.getHorizontalDpi()));
+                            serializer.attribute(null, ATTR_VERTICAL_DPI, String.valueOf(
+                                    resolution.getVerticalDpi()));
+                            serializer.endTag(null, TAG_RESOLUTION);
+                        }
+
+                        Margins margins = attributes.getMargins();
+                        if (margins != null) {
+                            serializer.startTag(null, TAG_MARGINS);
+                            serializer.attribute(null, ATTR_LEFT_MILS, String.valueOf(
+                                    margins.getLeftMils()));
+                            serializer.attribute(null, ATTR_TOP_MILS, String.valueOf(
+                                    margins.getTopMils()));
+                            serializer.attribute(null, ATTR_RIGHT_MILS, String.valueOf(
+                                    margins.getRightMils()));
+                            serializer.attribute(null, ATTR_BOTTOM_MILS, String.valueOf(
+                                    margins.getBottomMils()));
+                            serializer.endTag(null, TAG_MARGINS);
+                        }
+
+                        Tray inputTray = attributes.getInputTray();
+                        if (inputTray != null) {
+                            serializer.startTag(null, TAG_INPUT_TRAY);
+                            serializer.attribute(null, ATTR_ID, inputTray.getId());
+                            serializer.attribute(null, ATTR_LABEL, inputTray.getLabel()
+                                    .toString());
+                            serializer.endTag(null, TAG_INPUT_TRAY);
+                        }
+
+                        Tray outputTray = attributes.getOutputTray();
+                        if (outputTray != null) {
+                            serializer.startTag(null, TAG_OUTPUT_TRAY);
+                            serializer.attribute(null, ATTR_ID, outputTray.getId());
+                            serializer.attribute(null, ATTR_LABEL, outputTray.getLabel()
+                                    .toString());
+                            serializer.endTag(null, TAG_OUTPUT_TRAY);
                         }
 
                         serializer.endTag(null, TAG_ATTRIBUTES);
+                    }
+
+                    PrintDocumentInfo documentInfo = printJob.getDocumentInfo();
+                    if (documentInfo != null) {
+                        serializer.startTag(null, TAG_DOCUMENT_INFO);
+                        serializer.attribute(null, ATTR_CONTENT_TYPE, String.valueOf(
+                                documentInfo.getContentType()));
+                        serializer.attribute(null, ATTR_PAGE_COUNT, String.valueOf(
+                                documentInfo.getPageCount()));
+                        serializer.endTag(null, TAG_DOCUMENT_INFO);
                     }
 
                     serializer.endTag(null, TAG_JOB);
@@ -752,125 +846,169 @@ public class PrintSpooler {
             if (!accept(parser, XmlPullParser.START_TAG, TAG_JOB)) {
                 return false;
             }
-            parser.next();
-
-            skipEmptyTextTags(parser);
-            expect(parser, XmlPullParser.START_TAG, TAG_ID);
-            parser.next();
-            final int printJobId = Integer.parseInt(parser.getText());
-            parser.next();
-            skipEmptyTextTags(parser);
-            expect(parser, XmlPullParser.END_TAG, TAG_ID);
-            parser.next();
-
-            skipEmptyTextTags(parser);
-            expect(parser, XmlPullParser.START_TAG, TAG_TAG);
-            parser.next();
-            String tag = parser.getText();
-            parser.next();
-            skipEmptyTextTags(parser);
-            expect(parser, XmlPullParser.END_TAG, TAG_TAG);
-            parser.next();
-
-            skipEmptyTextTags(parser);
-            expect(parser, XmlPullParser.START_TAG, TAG_APP_ID);
-            parser.next();
-            final int appId = Integer.parseInt(parser.getText());
-            parser.next();
-            skipEmptyTextTags(parser);
-            expect(parser, XmlPullParser.END_TAG, TAG_APP_ID);
-            parser.next();
-
-            skipEmptyTextTags(parser);
-            expect(parser, XmlPullParser.START_TAG, TAG_LABEL);
-            parser.next();
-            String label = parser.getText();
-            parser.next();
-            skipEmptyTextTags(parser);
-            expect(parser, XmlPullParser.END_TAG, TAG_LABEL);
-            parser.next();
-
-            skipEmptyTextTags(parser);
-            expect(parser, XmlPullParser.START_TAG, TAG_STATE);
-            parser.next();
-            final int state = Integer.parseInt(parser.getText());
-            parser.next();
-            skipEmptyTextTags(parser);
-            expect(parser, XmlPullParser.END_TAG, TAG_STATE);
-            parser.next();
-
-            skipEmptyTextTags(parser);
-            expect(parser, XmlPullParser.START_TAG, TAG_PRINTER);
-            parser.next();
-            PrinterId printerId = PrinterId.unflattenFromString(parser.getText());
-            parser.next();
-            skipEmptyTextTags(parser);
-            expect(parser, XmlPullParser.END_TAG, TAG_PRINTER);
-            parser.next();
-
-            skipEmptyTextTags(parser);
-            expect(parser, XmlPullParser.START_TAG, TAG_ATTRIBUTES);
-
-            final int attributeCount = parser.getAttributeCount();
-            PrintAttributes attributes = null;
-            if (attributeCount > 0) {
-                PrintAttributes.Builder builder = new PrintAttributes.Builder();
-
-                // TODO: Implement reading of the attributes below.
-
-//                String mediaSize = parser.getAttributeValue(null, ATTRIBUTE_MEDIA_SIZE);
-//                if (mediaSize != null) {
-//                    builder.setMediaSize(MediaSize.unflattenFromString(mediaSize));
-//                }
-//
-//                String resolution = parser.getAttributeValue(null, ATTRIBUTE_RESOLUTION);
-//                if (resolution != null) {
-//                    builder.setMediaSize(Resolution.unflattenFromString(resolution));
-//                }
-//
-//                String margins = parser.getAttributeValue(null, ATTRIBUTE_MARGINS);
-//                if (margins != null) {
-//                    builder.setMediaSize(Margins.unflattenFromString(margins));
-//                }
-//
-//                String inputTray = parser.getAttributeValue(null, ATTRIBUTE_INPUT_TRAY);
-//                if (inputTray != null) {
-//                    builder.setMediaSize(Tray.unflattenFromString(inputTray));
-//                }
-//
-//                String outputTray = parser.getAttributeValue(null, ATTRIBUTE_OUTPUT_TRAY);
-//                if (outputTray != null) {
-//                    builder.setMediaSize(Tray.unflattenFromString(outputTray));
-//                }
-//
-//                String duplexMode = parser.getAttributeValue(null, ATTRIBUTE_DUPLEX_MODE);
-//                if (duplexMode != null) {
-//                    builder.setDuplexMode(Integer.parseInt(duplexMode));
-//                }
-
-                String colorMode = parser.getAttributeValue(null, ATTRIBUTE_COLOR_MODE);
-                if (colorMode != null) {
-                    builder.setColorMode(Integer.parseInt(colorMode));
-                }
-
-                String fittingMode = parser.getAttributeValue(null, ATTRIBUTE_COLOR_MODE);
-                if (fittingMode != null) {
-                    builder.setFittingMode(Integer.parseInt(fittingMode));
-                }
-            }
-            parser.next();
-            skipEmptyTextTags(parser);
-            expect(parser, XmlPullParser.END_TAG, TAG_ATTRIBUTES);
-            parser.next();
 
             PrintJobInfo printJob = new PrintJobInfo();
+
+            final int printJobId = Integer.parseInt(parser.getAttributeValue(null, ATTR_ID));
             printJob.setId(printJobId);
-            printJob.setTag(tag);
-            printJob.setAppId(appId);
+            String label = parser.getAttributeValue(null, ATTR_LABEL);
             printJob.setLabel(label);
+            final int state = Integer.parseInt(parser.getAttributeValue(null, ATTR_STATE));
             printJob.setState(state);
-            printJob.setAttributes(attributes);
-            printJob.setPrinterId(printerId);
+            final int appId = Integer.parseInt(parser.getAttributeValue(null, ATTR_APP_ID));
+            printJob.setAppId(appId);
+            final int userId = Integer.parseInt(parser.getAttributeValue(null, ATTR_USER_ID));
+            printJob.setUserId(userId);
+            String tag = parser.getAttributeValue(null, ATTR_TAG);
+            printJob.setTag(tag);
+
+            parser.next();
+
+            skipEmptyTextTags(parser);
+            if (accept(parser, XmlPullParser.START_TAG, TAG_PRINTER_ID)) {
+                String localId = parser.getAttributeValue(null, ATTR_LOCAL_ID);
+                ComponentName service = ComponentName.unflattenFromString(parser.getAttributeValue(
+                        null, ATTR_SERVICE));
+                printJob.setPrinterId(new PrinterId(service, localId));
+                parser.next();
+                skipEmptyTextTags(parser);
+                expect(parser, XmlPullParser.END_TAG, TAG_PRINTER_ID);
+                parser.next();
+            }
+
+            skipEmptyTextTags(parser);
+            List<PageRange> pageRanges = null;
+            while (accept(parser, XmlPullParser.START_TAG, TAG_PAGE_RANGE)) {
+                final int start = Integer.parseInt(parser.getAttributeValue(null, ATTR_START));
+                final int end = Integer.parseInt(parser.getAttributeValue(null, ATTR_END));
+                PageRange pageRange = new PageRange(start, end);
+                if (pageRanges == null) {
+                    pageRanges = new ArrayList<PageRange>();
+                }
+                pageRanges.add(pageRange);
+                parser.next();
+                skipEmptyTextTags(parser);
+                expect(parser, XmlPullParser.END_TAG, TAG_PAGE_RANGE);
+                parser.next();
+            }
+            if (pageRanges != null) {
+                printJob.setPages((PageRange[]) pageRanges.toArray());
+            }
+
+            skipEmptyTextTags(parser);
+            if (accept(parser, XmlPullParser.START_TAG, TAG_ATTRIBUTES)) {
+
+                PrintAttributes.Builder builder = new PrintAttributes.Builder();
+
+                String duplexMode = parser.getAttributeValue(null, ATTR_DUPLEX_MODE);
+                builder.setDuplexMode(Integer.parseInt(duplexMode));
+
+                String colorMode = parser.getAttributeValue(null, ATTR_COLOR_MODE);
+                builder.setColorMode(Integer.parseInt(colorMode));
+
+                String fittingMode = parser.getAttributeValue(null, ATTR_FITTING_MODE);
+                builder.setFittingMode(Integer.parseInt(fittingMode));
+
+                String orientation = parser.getAttributeValue(null, ATTR_ORIENTATION);
+                builder.setOrientation(Integer.parseInt(orientation));
+
+                parser.next();
+
+                skipEmptyTextTags(parser);
+                if (accept(parser, XmlPullParser.START_TAG, TAG_MEDIA_SIZE)) {
+                    String id = parser.getAttributeValue(null, ATTR_ID);
+                    label = parser.getAttributeValue(null, ATTR_LABEL);
+                    final int widthMils = Integer.parseInt(parser.getAttributeValue(null,
+                            ATTR_WIDTH_MILS));
+                    final int heightMils = Integer.parseInt(parser.getAttributeValue(null,
+                            ATTR_HEIGHT_MILS));
+                    MediaSize mediaSize = new MediaSize(id, label, widthMils, heightMils);
+                    builder.setMediaSize(mediaSize);
+                    parser.next();
+                    skipEmptyTextTags(parser);
+                    expect(parser, XmlPullParser.END_TAG, TAG_MEDIA_SIZE);
+                    parser.next();
+                }
+
+                skipEmptyTextTags(parser);
+                if (accept(parser, XmlPullParser.START_TAG, TAG_RESOLUTION)) {
+                    String id = parser.getAttributeValue(null, ATTR_ID);
+                    label = parser.getAttributeValue(null, ATTR_LABEL);
+                    final int horizontalDpi = Integer.parseInt(parser.getAttributeValue(null,
+                            ATTR_HORIZONTAL_DPI));
+                    final int verticalDpi = Integer.parseInt(parser.getAttributeValue(null,
+                            ATTR_VERTICAL_DPI));
+                    Resolution resolution = new Resolution(id, label, horizontalDpi, verticalDpi);
+                    builder.setResolution(resolution);
+                    parser.next();
+                    skipEmptyTextTags(parser);
+                    expect(parser, XmlPullParser.END_TAG, TAG_RESOLUTION);
+                    parser.next();
+                }
+
+                skipEmptyTextTags(parser);
+                if (accept(parser, XmlPullParser.START_TAG, TAG_MARGINS)) {
+                    final int leftMils = Integer.parseInt(parser.getAttributeValue(null,
+                            ATTR_LEFT_MILS));
+                    final int topMils = Integer.parseInt(parser.getAttributeValue(null,
+                            ATTR_TOP_MILS));
+                    final int rightMils = Integer.parseInt(parser.getAttributeValue(null,
+                            ATTR_RIGHT_MILS));
+                    final int bottomMils = Integer.parseInt(parser.getAttributeValue(null,
+                            ATTR_BOTTOM_MILS));
+                    Margins margins = new Margins(leftMils, topMils, rightMils, bottomMils);
+                    builder.setMargins(margins);
+                    parser.next();
+                    skipEmptyTextTags(parser);
+                    expect(parser, XmlPullParser.END_TAG, TAG_MARGINS);
+                    parser.next();
+                }
+
+                skipEmptyTextTags(parser);
+                if (accept(parser, XmlPullParser.START_TAG, TAG_INPUT_TRAY)) {
+                    String id = parser.getAttributeValue(null, ATTR_ID);
+                    label = parser.getAttributeValue(null, ATTR_LABEL);
+                    Tray tray = new Tray(id, label);
+                    builder.setInputTray(tray);
+                    parser.next();
+                    skipEmptyTextTags(parser);
+                    expect(parser, XmlPullParser.END_TAG, TAG_INPUT_TRAY);
+                    parser.next();
+                }
+
+                skipEmptyTextTags(parser);
+                if (accept(parser, XmlPullParser.START_TAG, TAG_OUTPUT_TRAY)) {
+                    String id = parser.getAttributeValue(null, ATTR_ID);
+                    label = parser.getAttributeValue(null, ATTR_LABEL);
+                    Tray tray = new Tray(id, label);
+                    builder.setOutputTray(tray);
+                    parser.next();
+                    skipEmptyTextTags(parser);
+                    expect(parser, XmlPullParser.END_TAG, TAG_OUTPUT_TRAY);
+                    parser.next();
+                }
+
+                printJob.setAttributes(builder.create());
+
+                skipEmptyTextTags(parser);
+                expect(parser, XmlPullParser.END_TAG, TAG_ATTRIBUTES);
+                parser.next();
+            }
+
+            skipEmptyTextTags(parser);
+            if (accept(parser, XmlPullParser.START_TAG, TAG_DOCUMENT_INFO)) {
+                final int pageCount = Integer.parseInt(parser.getAttributeValue(null,
+                        ATTR_PAGE_COUNT));
+                final int contentType = Integer.parseInt(parser.getAttributeValue(null,
+                        ATTR_CONTENT_TYPE));
+                PrintDocumentInfo info = new PrintDocumentInfo.Builder().setPageCount(pageCount)
+                        .setContentType(contentType).create();
+                printJob.setDocumentInfo(info);
+                parser.next();
+                skipEmptyTextTags(parser);
+                expect(parser, XmlPullParser.END_TAG, TAG_DOCUMENT_INFO);
+                parser.next();
+            }
 
             mPrintJobs.add(printJob);
 

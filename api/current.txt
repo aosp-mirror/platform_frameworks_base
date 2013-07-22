@@ -18560,14 +18560,14 @@ package android.print {
     ctor public PrintAttributes.Resolution(java.lang.String, java.lang.CharSequence, int, int);
     method public int getHorizontalDpi();
     method public java.lang.String getId();
-    method public java.lang.CharSequence getLabel(android.content.pm.PackageManager);
+    method public java.lang.CharSequence getLabel();
     method public int getVerticalDpi();
   }
 
   public static final class PrintAttributes.Tray {
     ctor public PrintAttributes.Tray(java.lang.String, java.lang.CharSequence);
     method public java.lang.String getId();
-    method public java.lang.CharSequence getLabel(android.content.pm.PackageManager);
+    method public java.lang.CharSequence getLabel();
   }
 
   public abstract class PrintDocumentAdapter {
@@ -18628,7 +18628,6 @@ package android.print {
     field public static final int PRINT_JOB_ID_UNDEFINED = -1; // 0xffffffff
     field public static final int STATE_CANCELED = 6; // 0x6
     field public static final int STATE_COMPLETED = 4; // 0x4
-    field public static final int STATE_CREATED = 1; // 0x1
     field public static final int STATE_FAILED = 5; // 0x5
     field public static final int STATE_QUEUED = 2; // 0x2
     field public static final int STATE_STARTED = 3; // 0x3
