@@ -112,10 +112,10 @@ interface IAudioService {
 
     oneway void setRemoteSubmixOn(boolean on, int address);
 
-    int requestAudioFocus(int mainStreamType, int durationHint, IBinder cb, IAudioFocusDispatcher l,
-            String clientId, String callingPackageName);
+    int requestAudioFocus(int mainStreamType, int durationHint, IBinder cb,
+            IAudioFocusDispatcher fd, String clientId, String callingPackageName);
 
-    int abandonAudioFocus(IAudioFocusDispatcher l, String clientId);
+    int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId);
     
     void unregisterAudioFocusClient(String clientId);
 
