@@ -109,7 +109,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             android.Manifest.permission.INSTALL_LOCATION_PROVIDER;
 
     private static final String NETWORK_LOCATION_SERVICE_ACTION =
-            "com.android.location.service.v2.NetworkLocationProvider";
+            "com.android.location.service.v3.NetworkLocationProvider";
     private static final String FUSED_LOCATION_SERVICE_ACTION =
             "com.android.location.service.FusedLocationProvider";
 
