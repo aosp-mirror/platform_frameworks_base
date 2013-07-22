@@ -213,7 +213,7 @@ public class Input {
                     lerp(y1, y2, alpha), 1.0f);
             now = SystemClock.uptimeMillis();
         }
-        injectMotionEvent(inputSource, MotionEvent.ACTION_UP, now, x1, y1, 0.0f);
+        injectMotionEvent(inputSource, MotionEvent.ACTION_UP, now, x2, y2, 0.0f);
     }
 
     /**
