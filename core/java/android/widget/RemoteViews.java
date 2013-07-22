@@ -37,6 +37,7 @@ import android.os.Parcelable;
 import android.os.StrictMode;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.LayoutInflater.Filter;
@@ -136,6 +137,16 @@ public class RemoteViews implements Parcelable, Filter {
 
     private static final OnClickHandler DEFAULT_ON_CLICK_HANDLER = new OnClickHandler();
 
+    private static final Object sMethodsLock = new Object[0];
+    private static final ArrayMap<Class<? extends View>, ArrayMap<String, Method>> sMethods =
+            new ArrayMap<Class<? extends View>, ArrayMap<String, Method>>();
+    private static final ThreadLocal<Object[]> sInvokeArgsTls = new ThreadLocal<Object[]>() {
+        @Override
+        protected Object[] initialValue() {
+            return new Object[1];
+        }
+    };
+
     /**
      * This annotation indicates that a subclass of View is alllowed to be used
      * with the {@link RemoteViews} mechanism.
@@ -206,9 +217,8 @@ public class RemoteViews implements Parcelable, Filter {
          * Overridden by each class to report on it's own memory usage
          */
         public void updateMemoryUsageEstimate(MemoryUsageCounter counter) {
-            // We currently only calculate Bitmap memory usage, so by default, don't do anything
-            // here
-            return;
+            // We currently only calculate Bitmap memory usage, so by default,
+            // don't do anything here
         }
 
         public void setBitmapCache(BitmapCache bitmapCache) {
@@ -346,7 +356,7 @@ public class RemoteViews implements Parcelable, Filter {
             }
             if (target == root) {
                 target.setTagInternal(com.android.internal.R.id.fillInIntent, fillInIntent);
-            } else if (target != null && fillInIntent != null) {
+            } else if (fillInIntent != null) {
                 OnClickListener listener = new OnClickListener() {
                     public void onClick(View v) {
                         // Insure that this view is a child of an AdapterView
@@ -372,16 +382,7 @@ public class RemoteViews implements Parcelable, Filter {
 
                         PendingIntent pendingIntent = (PendingIntent) parent.getTag();
 
-                        final float appScale = v.getContext().getResources()
-                                .getCompatibilityInfo().applicationScale;
-                        final int[] pos = new int[2];
-                        v.getLocationOnScreen(pos);
-
-                        final Rect rect = new Rect();
-                        rect.left = (int) (pos[0] * appScale + 0.5f);
-                        rect.top = (int) (pos[1] * appScale + 0.5f);
-                        rect.right = (int) ((pos[0] + v.getWidth()) * appScale + 0.5f);
-                        rect.bottom = (int) ((pos[1] + v.getHeight()) * appScale + 0.5f);
+                        final Rect rect = getSourceBounds(v);
 
                         fillInIntent.setSourceBounds(rect);
                         handler.onClickHandler(v, pendingIntent, fillInIntent);
@@ -452,16 +453,7 @@ public class RemoteViews implements Parcelable, Filter {
                             }
                             if (fillInIntent == null) return;
 
-                            final float appScale = view.getContext().getResources()
-                                    .getCompatibilityInfo().applicationScale;
-                            final int[] pos = new int[2];
-                            view.getLocationOnScreen(pos);
-
-                            final Rect rect = new Rect();
-                            rect.left = (int) (pos[0] * appScale + 0.5f);
-                            rect.top = (int) (pos[1] * appScale + 0.5f);
-                            rect.right = (int) ((pos[0] + view.getWidth()) * appScale + 0.5f);
-                            rect.bottom = (int) ((pos[1] + view.getHeight()) * appScale + 0.5f);
+                            final Rect rect = getSourceBounds(view);
 
                             final Intent intent = new Intent();
                             intent.setSourceBounds(rect);
@@ -679,33 +671,22 @@ public class RemoteViews implements Parcelable, Filter {
                 }
             }
 
-            if (target != null) {
-                // If the pendingIntent is null, we clear the onClickListener
-                OnClickListener listener = null;
-                if (pendingIntent != null) {
-                    listener = new OnClickListener() {
-                        public void onClick(View v) {
-                            // Find target view location in screen coordinates and
-                            // fill into PendingIntent before sending.
-                            final float appScale = v.getContext().getResources()
-                                    .getCompatibilityInfo().applicationScale;
-                            final int[] pos = new int[2];
-                            v.getLocationOnScreen(pos);
+            // If the pendingIntent is null, we clear the onClickListener
+            OnClickListener listener = null;
+            if (pendingIntent != null) {
+                listener = new OnClickListener() {
+                    public void onClick(View v) {
+                        // Find target view location in screen coordinates and
+                        // fill into PendingIntent before sending.
+                        final Rect rect = getSourceBounds(v);
 
-                            final Rect rect = new Rect();
-                            rect.left = (int) (pos[0] * appScale + 0.5f);
-                            rect.top = (int) (pos[1] * appScale + 0.5f);
-                            rect.right = (int) ((pos[0] + v.getWidth()) * appScale + 0.5f);
-                            rect.bottom = (int) ((pos[1] + v.getHeight()) * appScale + 0.5f);
-
-                            final Intent intent = new Intent();
-                            intent.setSourceBounds(rect);
-                            handler.onClickHandler(v, pendingIntent, intent);
-                        }
-                    };
-                }
-                target.setOnClickListener(listener);
+                        final Intent intent = new Intent();
+                        intent.setSourceBounds(rect);
+                        handler.onClickHandler(v, pendingIntent, intent);
+                    }
+                };
             }
+            target.setOnClickListener(listener);
         }
 
         public String getActionName() {
@@ -715,6 +696,64 @@ public class RemoteViews implements Parcelable, Filter {
         PendingIntent pendingIntent;
 
         public final static int TAG = 1;
+    }
+
+    private static Rect getSourceBounds(View v) {
+        final float appScale = v.getContext().getResources()
+                .getCompatibilityInfo().applicationScale;
+        final int[] pos = new int[2];
+        v.getLocationOnScreen(pos);
+
+        final Rect rect = new Rect();
+        rect.left = (int) (pos[0] * appScale + 0.5f);
+        rect.top = (int) (pos[1] * appScale + 0.5f);
+        rect.right = (int) ((pos[0] + v.getWidth()) * appScale + 0.5f);
+        rect.bottom = (int) ((pos[1] + v.getHeight()) * appScale + 0.5f);
+        return rect;
+    }
+
+    private static Method getMethod(View view, String methodName, Class<?> paramType) {
+        Method method;
+        Class<? extends View> klass = view.getClass();
+
+        synchronized (sMethodsLock) {
+            ArrayMap<String, Method> methods = sMethods.get(klass);
+            if (methods == null) {
+                methods = new ArrayMap<String, Method>();
+                sMethods.put(klass, methods);
+            }
+
+            method = methods.get(methodName);
+            if (method == null) {
+                try {
+                    method = klass.getMethod(methodName, paramType);
+                } catch (NoSuchMethodException ex) {
+                    throw new ActionException("view: " + klass.getName() + " doesn't have method: "
+                            + methodName + getParameters(paramType));
+                }
+
+                if (!method.isAnnotationPresent(RemotableViewMethod.class)) {
+                    throw new ActionException("view: " + klass.getName()
+                            + " can't use method with RemoteViews: "
+                            + methodName + getParameters(paramType));
+                }
+
+                methods.put(methodName, method);
+            }
+        }
+
+        return method;
+    }
+
+    private static String getParameters(Class<?> paramType) {
+        if (paramType == null) return "()";
+        return "(" + paramType + ")";
+    }
+
+    private static Object[] wrapArg(Object value) {
+        Object[] args = sInvokeArgsTls.get();
+        args[0] = value;
+        return args;
     }
 
     /**
@@ -836,28 +875,10 @@ public class RemoteViews implements Parcelable, Filter {
             final View view = root.findViewById(viewId);
             if (view == null) return;
 
-            Class klass = view.getClass();
-            Method method;
             try {
-                method = klass.getMethod(this.methodName);
-            } catch (NoSuchMethodException ex) {
-                throw new ActionException("view: " + klass.getName() + " doesn't have method: "
-                        + this.methodName + "()");
-            }
-
-            if (!method.isAnnotationPresent(RemotableViewMethod.class)) {
-                throw new ActionException("view: " + klass.getName()
-                        + " can't use method with RemoteViews: "
-                        + this.methodName + "()");
-            }
-
-            try {
-                //noinspection ConstantIfStatement
-                if (false) {
-                    Log.d(LOG_TAG, "view: " + klass.getName() + " calling method: "
-                        + this.methodName + "()");
-                }
-                method.invoke(view);
+                getMethod(view, this.methodName, null).invoke(view);
+            } catch (ActionException e) {
+                throw e;
             } catch (Exception ex) {
                 throw new ActionException(ex);
             }
@@ -1157,7 +1178,7 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        private Class getParameterType() {
+        private Class<?> getParameterType() {
             switch (this.type) {
                 case BOOLEAN:
                     return boolean.class;
@@ -1197,37 +1218,16 @@ public class RemoteViews implements Parcelable, Filter {
             final View view = root.findViewById(viewId);
             if (view == null) return;
 
-            Class param = getParameterType();
+            Class<?> param = getParameterType();
             if (param == null) {
                 throw new ActionException("bad type: " + this.type);
             }
 
-            Class klass = view.getClass();
-            Method method;
             try {
-                method = klass.getMethod(this.methodName, getParameterType());
-            }
-            catch (NoSuchMethodException ex) {
-                throw new ActionException("view: " + klass.getName() + " doesn't have method: "
-                        + this.methodName + "(" + param.getName() + ")");
-            }
-
-            if (!method.isAnnotationPresent(RemotableViewMethod.class)) {
-                throw new ActionException("view: " + klass.getName()
-                        + " can't use method with RemoteViews: "
-                        + this.methodName + "(" + param.getName() + ")");
-            }
-
-            try {
-                //noinspection ConstantIfStatement
-                if (false) {
-                    Log.d(LOG_TAG, "view: " + klass.getName() + " calling method: "
-                        + this.methodName + "(" + param.getName() + ") with "
-                        + (this.value == null ? "null" : this.value.getClass().getName()));
-                }
-                method.invoke(view, this.value);
-            }
-            catch (Exception ex) {
+                getMethod(view, this.methodName, param).invoke(view, wrapArg(this.value));
+            } catch (ActionException e) {
+                throw e;
+            } catch (Exception ex) {
                 throw new ActionException(ex);
             }
         }
@@ -1323,7 +1323,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         public String getActionName() {
-            return "ViewGroupAction" + this.nestedViews == null ? "Remove" : "Add";
+            return "ViewGroupAction" + (nestedViews == null ? "Remove" : "Add");
         }
 
         public int mergeBehavior() {
@@ -1370,7 +1370,6 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
-            final Context context = root.getContext();
             final TextView target = (TextView) root.findViewById(viewId);
             if (target == null) return;
             if (isRelative) {
@@ -1415,7 +1414,6 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
-            final Context context = root.getContext();
             final TextView target = (TextView) root.findViewById(viewId);
             if (target == null) return;
             target.setTextSize(units, size);
@@ -1462,7 +1460,6 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
-            final Context context = root.getContext();
             final View target = root.findViewById(viewId);
             if (target == null) return;
             target.setPadding(left, top, right, bottom);
@@ -1494,6 +1491,7 @@ public class RemoteViews implements Parcelable, Filter {
             return mMemoryUsage;
         }
 
+        @SuppressWarnings("deprecation")
         public void addBitmapMemory(Bitmap b) {
             final Bitmap.Config c = b.getConfig();
             // If we don't know, be pessimistic and assume 4
@@ -1597,7 +1595,7 @@ public class RemoteViews implements Parcelable, Filter {
         if (mode == MODE_NORMAL) {
             mPackage = parcel.readString();
             mLayoutId = parcel.readInt();
-            mIsWidgetCollectionChild = parcel.readInt() == 1 ? true : false;
+            mIsWidgetCollectionChild = parcel.readInt() == 1;
 
             int count = parcel.readInt();
             if (count > 0) {
