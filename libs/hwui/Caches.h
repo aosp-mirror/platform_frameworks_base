@@ -226,6 +226,11 @@ public:
     void activeTexture(GLuint textureUnit);
 
     /**
+     * Invalidate the cached value of the active texture unit.
+     */
+    void resetActiveTexture();
+
+    /**
      * Binds the specified texture as a GL_TEXTURE_2D texture.
      * All texture bindings must be performed with this method or
      * bindTexture(GLenum, GLuint).

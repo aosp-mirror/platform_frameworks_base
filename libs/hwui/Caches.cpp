@@ -495,6 +495,10 @@ void Caches::activeTexture(GLuint textureUnit) {
     }
 }
 
+void Caches::resetActiveTexture() {
+    mTextureUnit = -1;
+}
+
 void Caches::bindTexture(GLuint texture) {
     if (mBoundTextures[mTextureUnit] != texture) {
         glBindTexture(GL_TEXTURE_2D, texture);

@@ -360,6 +360,7 @@ void OpenGLRenderer::interrupt() {
             mCaches.currentProgram = NULL;
         }
     }
+    mCaches.resetActiveTexture();
     mCaches.unbindMeshBuffer();
     mCaches.unbindIndicesBuffer();
     mCaches.resetVertexPointers();
