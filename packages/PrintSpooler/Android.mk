@@ -22,7 +22,7 @@ LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_PACKAGE_NAME := PrintSpooler
 
-LOCAL_JAVA_LIBRARIES := framework
+LOCAL_JAVA_LIBRARIES := framework-base
 
 LOCAL_CERTIFICATE := platform
 

@@ -65,6 +65,8 @@ public final class PrintSpoolerService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        mSpooler.restorePersistedState();
+
         return new IPrintSpooler.Stub() {
             @Override
             public void getPrintJobInfos(IPrintSpoolerCallbacks callback,

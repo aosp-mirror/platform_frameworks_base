@@ -29,6 +29,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.print.PrintDocumentAdapter.LayoutResultCallback;
 import android.print.PrintDocumentAdapter.WriteResultCallback;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.os.SomeArgs;
@@ -184,6 +185,9 @@ public final class PrintManager {
      */
     public PrintJob print(String printJobName, PrintDocumentAdapter documentAdapter,
             PrintAttributes attributes) {
+        if (TextUtils.isEmpty(printJobName)) {
+            throw new IllegalArgumentException("priintJobName cannot be empty");
+        }
         PrintDocumentAdapterDelegate delegate = new PrintDocumentAdapterDelegate(documentAdapter,
                 mContext.getMainLooper());
         try {

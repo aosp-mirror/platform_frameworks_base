@@ -125,26 +125,6 @@ public final class PrinterId implements Parcelable {
         return builder.toString();
     }
 
-    /**
-     * @hide
-     */
-    public String flattenToString() {
-        return mServiceComponentName.flattenToString() + ":" + mLocalId;
-    }
-
-    /**
-     * @hide
-     */
-    public static PrinterId unflattenFromString(String string) {
-        String[] split = string.split(":");
-        if (split.length != 2) {
-            throw new IllegalArgumentException("Not well-formed printer id:" + string);
-        }
-        ComponentName component = ComponentName.unflattenFromString(split[0]);
-        String localId = String.valueOf(split[1]);
-        return new PrinterId(component, localId);
-    }
-
     public static final Parcelable.Creator<PrinterId> CREATOR =
             new Creator<PrinterId>() {
         @Override

@@ -110,6 +110,16 @@ public final class PrintDocumentInfo implements Parcelable {
         parcel.writeInt(mContentType);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("PrintDocumentInfo{");
+        builder.append("pageCount: ").append(mPageCount);
+        builder.append(", contentType: ").append(mContentType);
+        builder.append("}");
+        return builder.toString();
+    }
+
     /**
      * Builder for creating an {@link PrintDocumentInfo}.
      */

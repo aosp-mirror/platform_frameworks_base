@@ -105,7 +105,7 @@ final class RemotePrintService {
         throwIfDestroyed();
         if (isBound()) {
             if (DEBUG) {
-                Slog.i(LOG_TAG, "[user: " + mUserId + "] handleOnAllPrintJobsHandled");
+                Slog.i(LOG_TAG, "[user: " + mUserId + "] handleOnAllPrintJobsHandled()");
             }
             // If bound and all the work is completed, then unbind.
             ensureUnbound();
@@ -342,7 +342,7 @@ final class RemotePrintService {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     return service.mSpooler.getPrintJobInfos(service.mComponentName,
-                            PrintJobInfo.STATE_ANY, PrintManager.APP_ID_ANY);
+                            PrintJobInfo.STATE_ANY_VISIBLE_TO_CLIENTS, PrintManager.APP_ID_ANY);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }

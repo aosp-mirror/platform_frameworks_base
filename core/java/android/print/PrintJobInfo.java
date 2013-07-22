@@ -35,11 +35,20 @@ public final class PrintJobInfo implements Parcelable {
     public static final int STATE_ANY = -1;
 
     /**
+     * Constant for matching any print job state.
+     *
+     * @hide
+     */
+    public static final int STATE_ANY_VISIBLE_TO_CLIENTS = -2;
+
+    /**
      * Print job state: The print job is being created but not yet
      * ready to be printed.
      * <p>
      * Next valid states: {@link #STATE_QUEUED}
      * </p>
+     *
+     * @hide
      */
     public static final int STATE_CREATED = 1;
 
@@ -132,6 +141,7 @@ public final class PrintJobInfo implements Parcelable {
         mState = other.mState;
         mAppId = other.mAppId;
         mUserId = other.mUserId;
+        mTag = other.mTag;
         mAttributes = other.mAttributes;
         mDocumentInfo = other.mDocumentInfo;
     }
@@ -143,6 +153,7 @@ public final class PrintJobInfo implements Parcelable {
         mState = parcel.readInt();
         mAppId = parcel.readInt();
         mUserId = parcel.readInt();
+        mTag = parcel.readString();
         if (parcel.readInt() == 1) {
             mPageRanges = (PageRange[]) parcel.readParcelableArray(null);
         }
@@ -373,6 +384,7 @@ public final class PrintJobInfo implements Parcelable {
         parcel.writeInt(mState);
         parcel.writeInt(mAppId);
         parcel.writeInt(mUserId);
+        parcel.writeString(mTag);
         if (mPageRanges != null) {
             parcel.writeInt(1);
             parcel.writeParcelableArray(mPageRanges, flags);
