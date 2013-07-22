@@ -832,7 +832,10 @@ public class WebView extends AbsoluteLayout
      * <p>
      * If the base URL uses the data scheme, this method is equivalent to
      * calling {@link #loadData(String,String,String) loadData()} and the
-     * historyUrl is ignored.
+     * historyUrl is ignored, and the data will be treated as part of a data: URL.
+     * If the base URL uses any other scheme, then the data will be loaded into
+     * the WebView as a plain string (i.e. not part of a data URL) and any URL-encoded
+     * entities in the string will not be decoded.
      *
      * @param baseUrl the URL to use as the page's base URL. If null defaults to
      *                'about:blank'.
