@@ -31,7 +31,6 @@ namespace uirenderer {
 Layer::Layer(const uint32_t layerWidth, const uint32_t layerHeight):
         caches(Caches::getInstance()), texture(caches) {
     mesh = NULL;
-    meshIndices = NULL;
     meshElementCount = 0;
     cacheable = true;
     dirty = false;
@@ -57,7 +56,6 @@ Layer::~Layer() {
     deleteTexture();
 
     delete[] mesh;
-    delete[] meshIndices;
     delete deferredList;
 }
 

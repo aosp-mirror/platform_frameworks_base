@@ -850,6 +850,13 @@ private:
             bool ignoreTransform, bool ignoreScale = false, bool dirty = true);
 
     /**
+     * Draws the specified list of vertices as quads using indexed GL_TRIANGLES.
+     * If the number of vertices to draw exceeds the number of indices we have
+     * pre-allocated, this method will generate several glDrawElements() calls.
+     */
+    void drawIndexedQuads(Vertex* mesh, GLsizei quadsCount);
+
+    /**
      * Draws text underline and strike-through if needed.
      *
      * @param text The text to decor
@@ -988,7 +995,7 @@ private:
     void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords = NULL, GLuint vbo = 0);
     void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLvoid* colors);
     void setupDrawMeshIndices(GLvoid* vertices, GLvoid* texCoords, GLuint vbo = 0);
-    void setupDrawVertices(GLvoid* vertices);
+    void setupDrawIndexedVertices(GLvoid* vertices);
     void finishDrawTexture();
     void accountForClear(SkXfermode::Mode mode);
 
