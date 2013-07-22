@@ -107,6 +107,15 @@ static const Blender gBlendsSwap[] = {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// Functions
+///////////////////////////////////////////////////////////////////////////////
+
+template<typename T>
+static inline T min(T a, T b) {
+    return a < b ? a : b;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1284,7 +1293,6 @@ void OpenGLRenderer::drawRegionRects(const Region& region) {
 
 void OpenGLRenderer::drawRegionRects(const SkRegion& region, int color,
         SkXfermode::Mode mode, bool dirty) {
-    int count = 0;
     Vector<float> rects;
 
     SkRegion::Iterator it(region);
@@ -1294,11 +1302,10 @@ void OpenGLRenderer::drawRegionRects(const SkRegion& region, int color,
         rects.push(r.fTop);
         rects.push(r.fRight);
         rects.push(r.fBottom);
-        count += 4;
         it.next();
     }
 
-    drawColorRects(rects.array(), count, color, mode, true, dirty, false);
+    drawColorRects(rects.array(), rects.size(), color, mode, true, dirty, false);
 }
 
 void OpenGLRenderer::dirtyLayer(const float left, const float top,
@@ -1328,6 +1335,21 @@ void OpenGLRenderer::dirtyLayerUnchecked(Rect& bounds, Region* region) {
     }
 }
 
+void OpenGLRenderer::drawIndexedQuads(Vertex* mesh, GLsizei quadsCount) {
+    GLsizei elementsCount = quadsCount * 6;
+    while (elementsCount > 0) {
+        GLsizei drawCount = min(elementsCount, (GLsizei) gMaxNumberOfQuads * 6);
+
+        setupDrawIndexedVertices(&mesh[0].position[0]);
+        glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_SHORT, NULL);
+
+        elementsCount -= drawCount;
+        // Though there are 4 vertices in a quad, we use 6 indices per
+        // quad to draw with GL_TRIANGLES
+        mesh += (drawCount / 6) * 4;
+    }
+}
+
 void OpenGLRenderer::clearLayerRegions() {
     const size_t count = mLayers.size();
     if (count == 0) return;
@@ -1342,17 +1364,15 @@ void OpenGLRenderer::clearLayerRegions() {
         // is likely different so we need to disable clipping here
         bool scissorChanged = mCaches.disableScissor();
 
-        Vertex mesh[count * 6];
+        Vertex mesh[count * 4];
         Vertex* vertex = mesh;
 
         for (uint32_t i = 0; i < count; i++) {
             Rect* bounds = mLayers.itemAt(i);
 
-            Vertex::set(vertex++, bounds->left, bounds->bottom);
             Vertex::set(vertex++, bounds->left, bounds->top);
             Vertex::set(vertex++, bounds->right, bounds->top);
             Vertex::set(vertex++, bounds->left, bounds->bottom);
-            Vertex::set(vertex++, bounds->right, bounds->top);
             Vertex::set(vertex++, bounds->right, bounds->bottom);
 
             delete bounds;
@@ -1368,9 +1388,8 @@ void OpenGLRenderer::clearLayerRegions() {
         setupDrawProgram();
         setupDrawPureColorUniforms();
         setupDrawModelViewTranslate(0.0f, 0.0f, 0.0f, 0.0f, true);
-        setupDrawVertices(&mesh[0].position[0]);
 
-        glDrawArrays(GL_TRIANGLES, 0, count * 6);
+        drawIndexedQuads(&mesh[0], count);
 
         if (scissorChanged) mCaches.enableScissor();
     } else {
@@ -1976,10 +1995,10 @@ void OpenGLRenderer::setupDrawMeshIndices(GLvoid* vertices, GLvoid* texCoords, G
     }
 }
 
-void OpenGLRenderer::setupDrawVertices(GLvoid* vertices) {
+void OpenGLRenderer::setupDrawIndexedVertices(GLvoid* vertices) {
     bool force = mCaches.unbindMeshBuffer();
+    mCaches.bindIndicesBuffer();
     mCaches.bindPositionVertexPointer(force, vertices, gVertexStride);
-    mCaches.unbindIndicesBuffer();
 }
 
 void OpenGLRenderer::finishDrawTexture() {
@@ -3139,11 +3158,22 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
                 setupDrawModelViewTranslate(x, y,
                         x + layer->layer.getWidth(), y + layer->layer.getHeight());
             }
-            setupDrawMesh(&layer->mesh[0].position[0], &layer->mesh[0].texture[0]);
 
-            DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate,
-                    glDrawElements(GL_TRIANGLES, layer->meshElementCount,
-                            GL_UNSIGNED_SHORT, layer->meshIndices));
+            TextureVertex* mesh = &layer->mesh[0];
+            GLsizei elementsCount = layer->meshElementCount;
+
+            while (elementsCount > 0) {
+                GLsizei drawCount = min(elementsCount, (GLsizei) gMaxNumberOfQuads * 6);
+
+                setupDrawMeshIndices(&mesh[0].position[0], &mesh[0].texture[0]);
+                DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate,
+                        glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_SHORT, NULL));
+
+                elementsCount -= drawCount;
+                // Though there are 4 vertices in a quad, we use 6 indices per
+                // quad to draw with GL_TRIANGLES
+                mesh += (drawCount / 6) * 4;
+            }
 
             finishDrawTexture();
 
@@ -3361,8 +3391,7 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color
     float right = FLT_MIN;
     float bottom = FLT_MIN;
 
-    int vertexCount = 0;
-    Vertex mesh[count * 6];
+    Vertex mesh[count];
     Vertex* vertex = mesh;
 
     for (int index = 0; index < count; index += 4) {
@@ -3371,14 +3400,10 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color
         float r = rects[index + 2];
         float b = rects[index + 3];
 
-        Vertex::set(vertex++, l, b);
         Vertex::set(vertex++, l, t);
         Vertex::set(vertex++, r, t);
         Vertex::set(vertex++, l, b);
-        Vertex::set(vertex++, r, t);
         Vertex::set(vertex++, r, b);
-
-        vertexCount += 6;
 
         left = fminf(left, l);
         top = fminf(top, t);
@@ -3402,13 +3427,12 @@ status_t OpenGLRenderer::drawColorRects(const float* rects, int count, int color
     setupDrawColorUniforms();
     setupDrawShaderUniforms();
     setupDrawColorFilterUniforms();
-    setupDrawVertices((GLvoid*) &mesh[0].position[0]);
 
     if (dirty && hasLayer()) {
         dirtyLayer(left, top, right, bottom, currentTransform());
     }
 
-    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+    drawIndexedQuads(&mesh[0], count / 4);
 
     return DrawGlInfo::kStatusDrew;
 }

@@ -277,7 +277,6 @@ struct Layer {
      * If the layer can be rendered as a mesh, this is non-null.
      */
     TextureVertex* mesh;
-    uint16_t* meshIndices;
     GLsizei meshElementCount;
 
     /**
