@@ -1,29 +1,29 @@
 ndk=true
 page.template=sdk
 
-ndk.mac64_download=android-ndk-r8e-darwin-x86_64.tar.bz2
-ndk.mac64_bytes=508419298
-ndk.mac64_checksum=efac96fab20e6ddb1311d6ba5648ce72
+ndk.mac64_download=android-ndk-r9-darwin-x86_64.tar.bz2
+ndk.mac64_bytes=726430529
+ndk.mac64_checksum=b975271d8f064611e7e12bf87b736826
 
-ndk.mac32_download=android-ndk-r8e-darwin-x86.tar.bz2
-ndk.mac32_bytes=496238878
-ndk.mac32_checksum=e17e707464c45c0d5615e4d0ae6a5cf7
+ndk.mac32_download=android-ndk-r9-darwin-x86.tar.bz2
+ndk.mac32_bytes=710781553
+ndk.mac32_checksum=6f7c4dd38df9079bb4b13846add5c0da
 
-ndk.linux64_download=android-ndk-r8e-linux-x86_64.tar.bz2
-ndk.linux64_bytes=466853553
-ndk.linux64_checksum=fa812352956067e7a9eefc0274675e9a
+ndk.linux64_download=android-ndk-r9-linux-x86_64.tar.bz2
+ndk.linux64_bytes=669064468
+ndk.linux64_checksum=3eedc86b20ec09fcd1fd03f4481a706d
 
-ndk.linux32_download=android-ndk-r8e-linux-x86.tar.bz2
-ndk.linux32_bytes=461526099
-ndk.linux32_checksum=26d774b0884bcd98de08eb4de41ab532
+ndk.linux32_download=android-ndk-r9-linux-x86.tar.bz2
+ndk.linux32_bytes=660787157
+ndk.linux32_checksum=999d155ba772c49baacee6d41d664922
 
-ndk.win64_download=android-ndk-r8e-windows-x86_64.zip
-ndk.win64_bytes=461298980
-ndk.win64_checksum=11eb99b3b56fc86d9d231ebff5c41db3
+ndk.win64_download=android-ndk-r9-windows-x86_64.zip
+ndk.win64_bytes=826661995
+ndk.win64_checksum=cd56cc1036235f16369f2112fa27be91
 
-ndk.win32_download=android-ndk-r8e-windows-x86.zip
-ndk.win32_bytes=434701805
-ndk.win32_checksum=fb41ed2bff5610b14a7b6f085ab86213
+ndk.win32_download=android-ndk-r9-windows-x86.zip
+ndk.win32_bytes=777938252
+ndk.win32_checksum=9c1f66ff963cc61e338964c5f97a4d34
 
 page.title=Android NDK
 @jd:body
@@ -255,13 +255,286 @@ $('#Downloads').after($('#download-table'));
 
 <h2 id="Revisions">Revisions</h2>
 
-<p>The sections below provide information and notes about successive releases of
-the NDK, as denoted by revision number. </p>
-
+<p>The following sections provide information about releases of the NDK.</p>
 
 <div class="toggle-content opened">
+  <p>
+    <a href="#" onclick="return toggleContent(this)"> <img
+      src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
+    >Android NDK, Revision 9</a> <em>(July 2013)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Important changes:</dt>
+      <dd>
+        <ul>
+          <li>Added support for Android 4.3 (API level 18). For more information, see
+            {@code STABLE-APIS.html} and new code examples in {@code samples/gles3jni/README}.
+          <li>Added headers and libraries for OpenGL ES 3.0, which is supported by Android 4.3
+            (API level 18) and higher.</li>
+          <li>Added GNU Compiler Collection (GCC) 4.8 compiler to the NDK. Since GCC 4.6 is still
+            the default, you must explicitly enable this option:
+            <ul>
+              <li>For {@code ndk-build} builds, export {@code NDK_TOOLCHAIN_VERSION=4.8} or
+                add it in {@code Application.mk}.</li>
+              <li>For standalone builds, use the {@code --toolchain=} option in
+                {@code make-standalone-toolchain.sh}, for example:<br>
+                {@code --toolchain=arm-linux-androideabi-4.8}</li>
+            </ul>
+            <p class="note"><strong>Note:</strong>
+            The {@code -Wunused-local-typedefs} option is enabled by {@code -Wall}. Be
+            sure to add {@code __attribute__((unused))} if you use compile-time asserts like
+            {@code sources/cxx-stl/stlport/stlport/stl/config/features.h}, line #311. For more
+            information, see
+            <a href="https://android-review.googlesource.com/#/c/55460">Change 55460</a></p>
+            <p class="note"><strong>Note:</strong>
+            In the GCC 4.7 release and later, ARM compilers generate unaligned access code by
+            default for ARMv6 and higher build targets. You may need to add the
+            {@code -mno-unaligned-access} build option when building for kernels that do not support
+            this feature.</p>
+          </li>
+          <li>Added Clang 3.3 support. The {@code NDK_TOOLCHAIN_VERSION=clang} build option
+            now picks Clang 3.3 by default.
+            <p class="note"><strong>Note:</strong>
+             Both GCC 4.4.3 and Clang 3.1 are deprecated, and will be removed from the next NDK
+             release.</p></li>
+          <li>Updated GNU Project Debugger (GDB) to support python 2.7.5.</li>
+          <li>Added MCLinker to support Windows hosts. Since {@code ld.gold}
+            is the default where available, you must add {@code -fuse-ld=mcld} in
+            {@code LOCAL_LDFLAGS} or {@code APP_LDFLAGS} to enable MCLinker.</li>
+          <li>Added {@code ndk-depends} tool which prints ELF library dependencies.
+            For more information, see {@code NDK-DEPENDS.html}.
+            (<a href="http://b.android.com/53486">Issue 53486</a>)</li>
+        </ul>
+      </dd>
+
+      <dt>Important bug fixes:</dt>
+      <dd>
+        <ul>
+          <li>Fixed potential event handling issue in {@code android_native_app_glue}.
+            (<a href="http://b.android.com/41755">Issue 41755</a>)</li>
+          <li>Fixed ARM/GCC-4.7 build to generate sufficient alignment for NEON load and store
+            instructions VST and VLD.
+            (<a href="http://gcc.gnu.org/bugzilla/show_bug.cgi?id=57271">GCC Issue 57271</a>)</li>
+          <li>Fixed a GCC 4.4.3/4.6/4.7 internal compiler error (ICE) for a constant negative index
+            value on a string literal.
+            (<a href="http://b.android.com/54623">Issue 54623</a>)</li>
+          <li>Fixed GCC 4.7 segmentation fault for constant initialization with an object address.
+            (<a href="http://b.android.com/56508">Issue 56508</a>)</li>
+          <li>Fixed GCC 4.6 ARM segmentation fault for <code>-O</code> values when using Boost
+            1.52.0. (<a href="http://b.android.com/42891">Issue 42891</a>)
+          <li>Fixed {@code libc.so} and {@code libc.a} to support the {@code wait4()} function.
+            (<a href="http://b.android.com/19854">Issue 19854</a>)</li>
+          <li>Updated the x86 libc.so and libc.a files to include the {@code clone()}
+            function.</li>
+          <li>Fixed {@code LOCAL_SHORT_COMMANDS} bug where the {@code linker.list} file is
+            empty or not used.</li>
+          <li>Fixed GCC MIPS build on Mac OS to use CFI directives, without which
+            {@code ld.mcld --eh-frame-hdr} fails frequently.</li>
+          <li>Fixed Clang 3.2 X86/MIPS internal compiler error in {@code llvm/lib/VMCore/Value.cpp}.
+            (<a href="https://android-review.googlesource.com/#/c/59021">Change 59021</a>)</li>
+          <li>Fixed GCC 4.7 64-bit Windows assembler crash. (Error: {@code out of memory allocating
+            4294967280 bytes}).</li>
+          <li>Updated {@code ndk-gdb} script so that the {@code --start} or {@code --launch} actions
+            now wait for the GNU Debug Server, so that it can more reliably hit breakpoints set
+            early in the execution path (such as breakpoints in JNI code).
+            (<a href="http://b.android.com/41278">Issue 41278</a>)
+            <p class="note"><strong>Note:</strong>
+              This feature requires jdb and produces warning about pending breakpoints.
+              Specify the {@code --nowait} option to restore previous behavior.
+            </p>
+          </li>
+          <li>Fixed GDB crash when library list is empty.</li>
+          <li>Fixed GDB crash when using a {@code stepi} command past a {@code bx pc} or
+            {@code blx pc} Thumb instruction.
+            (<a href="http://b.android.com/56962">Issue 56962</a>,
+             <a href="http://b.android.com/36149">Issue 36149</a>)</li>
+          <li>Fixed MIPS {@code gdbserver} to look for {@code DT_MIPS_RLD_MAP} instead of
+            {@code DT_DEBUG}. (<a href="http://b.android.com/56586">Issue 56586</a>)</li>
+          <li>Fixed a circular dependency in the ndk-build script, for example: If A-&gt;B and
+            B-&gt;B, then B was dropped from build.
+            (<a href="http://b.android.com/56690">Issue 56690</a>)</li>
+        </ul>
+      </dd>
+
+      <dt>Other bug fixes:</dt>
+      <dd>
+        <ul>
+          <li>Fixed the {@code ndk-build} script to enable you to specify a version of Clang as a
+            command line option (e.g., {@code NDK_TOOLCHAIN_VERSION=clang3.2}). Previously, only
+            specifying the version as an environment variable worked.</li>
+          <li>Fixed gabi++ size of {@code _Unwind_Exception} to be 24 for MIPS build targets when
+            using the Clang compiler.
+            (<a href="https://android-review.googlesource.com/#/c/54141">Change 54141</a>)</li>
+          <li>Fixed the {@code ndk-build} script to ensure that built libraries are actually
+            removed from projects that include prebuilt static libraries when using the
+            {@code ndk-build clean} command.
+            (<a href="https://android-review.googlesource.com/#/c/54461">Change 54461</a>,
+             <a href="https://android-review.googlesource.com/#/c/54480">Change 54480</a>)</li>
+          <li>Modified the {@code NDK_ANALYZE=1} option to be less verbose.</li>
+          <li>Fixed {@code gnu-libstdc++/Android.mk} to include a {@code backward/} path for builds
+            that use backward compability.
+            (<a href="http://b.android.com/53404">Issue 53404</a>)</li>
+          <li>Fixed a problem where {@code stlport new} sometimes returned random values.</li>
+          <li>Fixed {@code ndk-gdb} to match the order of {@code CPU_ABIS}, not {@code APP_ABIS}.
+            (<a href="http://b.android.com/54033">Issue 54033</a>)</li>
+          <li>Fixed a problem where the NDK 64-bit build on MacOSX choses the wrong path for
+            compiler.
+            (<a href="http://b.android.com/53769">Issue 53769</a>)</li>
+          <li>Fixed build scripts to detect 64-bit Windows Vista.
+            (<a href="http://b.android.com/54485">Issue 54485</a>)</li>
+          <li>Fixed x86 {@code ntonl/swap32} error: {@code invalid 'asm': operand number
+            out of range}.
+            (<a href="http://b.android.com/54465">Issue 54465</a>,
+             <a href="https://android-review.googlesource.com/#/c/57242">Change 57242</a>)</li>
+          <li>Fixed {@code ld.gold} to merge string literals.</li>
+          <li>Fixed {@code ld.gold} to handle large symbol alignment.</li>
+          <li>Updated {@code ld.gold} to enable the {@code --sort-section=name} option.</li>
+          <li>Fixed GCC 4.4.3/4.6/4.7 to suppress the {@code -export-dynamic} option for
+            statically linked programs. GCC no longer adds an {@code .interp} section for statically
+            linked programs.</li>
+          <li>Fixed GCC 4.4.3 {@code stlport} compilation error about inconsistent {@code typedef}
+            of {@code _Unwind_Control_Block}.
+            (<a href="http://b.android.com/54426">Issue 54426</a>)</li>
+          <li>Fixed {@code awk} scripts to handle {@code AndroidManifest.xml} files created on
+            Windows which may contain trailing {@code \r} characters and cause build errors.
+            (<a href="http://b.android.com/42548">Issue 42548</a>)</li>
+          <li>Fixed {@code make-standalone-toolchain.sh} to probe the {@code prebuilts/}
+            directory to detect if the host is 32 bit or 64 bit.</li>
+          <li>Fixed the Clang 3.2 {@code -integrated-as} option.</li>
+          <li>Fixed the Clang 3.2 ARM EHABI compact model {@code pr1} and {@code pr2} handler data.
+            </li>
+          <li>Added clang {@code -mllvm -arm-enable-ehabi} option to fix the following clang error:
+            <pre>clang: for the -arm-enable-ehabi option: may only occur zero or one times!</pre>
+            </li>
+          <li>Fixed build failure when there is no {@code uses-sdk} element in application
+            manifest. (<a href="http://b.android.com/57015">Issue 57015</a>)</li>
+        </ul>
+
+      </dd>
+      <dt>Other changes:</dt>
+      <dd>
+        <ul>
+          <li>Header Fixes
+            <ul>
+              <li>Modified headers to make {@code __set_errno} an inlined function, since
+                {@code __set_errno} in {@code errno.h} is deprecated, and {@code libc.so} no longer
+                exports it.</li>
+              <li>Modified {@code elf.h} to include {@code stdint.h}.
+                (<a href="http://b.android.com/55443">Issue 55443</a>)</li>
+              <li>Fixed {@code sys/un.h} to be included independently of other headers.
+                (<a href="http://b.android.com/53646">Issue 53646</a>)</li>
+              <li>Fixed all of the {@code MotionEvent_getHistorical} API family to take the
+                {@code const AInputEvent* motion_event}.
+                (<a href="http://b.android.com/55873">Issue 55873</a>)</li>
+              <li>Fixed {@code malloc_usable_size} to take {@code const void*}.
+                (<a href="http://b.android.com/55725">Issue 55725</a>)</li>
+              <li>Fixed stdint.h to be more compatible with C99.
+                (<a href="https://android-review.googlesource.com/#/c/46821">Change 46821</a>)</li>
+              <li>Modified {@code wchar.h} to not redefine {@code WCHAR_MAX} and
+                {@code WCHAR_MIN}</li>
+              <li>Fixed {@code &lt;inttypes.h&gt;} declaration for pointer-related {@code PRI} and
+                {@code SCN} macros. (<a href="http://b.android.com/57218">Issue 57218</a>)</li>
+              <li>Changed the {@code sys/cdefs.h} header so that {@code __WCHAR_TYPE__} is 32-bit
+                for API levels less than 9, which means that {@code wchat_t} is 32-bit for all
+                API levels. To restore the previous behavior, define the {@code _WCHAR_IS_8BIT}
+                boolean variable. (<a href="http://b.android.com/57267">Issue 57267</a>)</li>
+            </ul>
+          </li>
+          <li>Added more formatting in NDK {@code docs/} and miscellaneous documentation fixes.
+            </li>
+          <li>Added support for a thin archive technique when building static libraries.
+            (<a href="http://b.android.com/40303">Issue 40303</a>)</li>
+          <li>Updated script {@code make-standalone-toolchain.sh} to support the {@code stlport}
+            library in addition to {@code gnustl}, when you specify the option
+            {@code --stl=stlport}. For more information, see {@code STANDALONE-TOOLCHAIN.html}.</li>
+          <li>Updated the {@code make-standalone-toolchain.sh} script so that the
+            {@code --llvm-version=} option creates the {@code $TOOLCHAIN_PREFIX-clang} and
+            {@code $TOOLCHAIN_PREFIX-clang++} scripts in addition to {@code clang} and
+            {@code clang++}, to avoid using the host's clang and clang++ definitions by accident.
+            </li>
+          <li>Added two flags to re-enable two optimizations in upstream Clang but disabled in
+              NDK for better compatibility with code compiled by GCC:
+            <ul>
+              <li>Added a {@code -fcxx-missing-return-semantics} flag to re-enable <em>missing return
+                semantics</em> in Clang 3.2+. Normally, all paths should terminate with a return
+                statement for a value-returning function. If this is not the case, clang inserts
+                an undefined instruction (or trap in debug mode) at the path without a return
+                statement. If you are sure your code is correct, use this flag to allow the
+                optimizer to take advantage of the undefined behavior. If you are not sure, do not
+                use this flag. The caller may still receive a random incorrect value, but the
+                optimizer will not exploit it and make your code harder to debug.</li>
+              <li>Added a {@code -fglobal-ctor-const-promotion} flag to re-enable
+                promoting global variables with static constructor to be constants. With this flag,
+                the global variable optimization pass of LLVM tries to evaluate the global
+                variables with static constructors and promote them to global constants. Although
+                this optimization is correct, it may cause some incompatability with code compiled
+                by GCC. For example, code may do {@code const_cast} to cast the constant to mutable
+                and modify it. In GCC, the variable is in read-write and the code is run by
+                accident. In Clang, the const variable is in read-only memory and may cause your
+                application to crash.</li>
+            </ul>
+          </li>
+          <li>Added {@code -mldc1-sdc1} to the MIPS GCC and Clang compilers. By default, compilers
+            align 8-byte objects properly and emit the {@code ldc1} and {@code sdc1} instructions
+            to move them around. If your app uses a custom allocator that does not always align
+            with a new object's 8-byte boundary in the same way as the default allocator, your app
+            may crash due to {@code ldc1} and {@code sdc1} operations on unaligned memory. In this
+            case, use the {@code -mno-ldc1-sdc1} flag to workaround the problem.</li>
+          <li>Downgraded the event severity from warning to info if {@code APP_PLATFORM_LEVEL} is
+            larger than {@code APP_MIN_PLATFORM_LEVEL}. The {@code APP_PLATFORM_LEVEL} may be lower
+            than {@code APP_PLATFORM} in {@code jni/Application.mk} because the NDK does not have
+            headers for all levels. In this case, the actual level is shifted downwards. The
+            {@code APP_MIN_PLATFORM_LEVEL} is specified by the {@code android:minSdkVersion} in
+            your application's manifest.
+            (<a href="http://b.android.com/39752">Issue 39752</a>)</li>
+          <li>Added the {@code android_getCpuIdArm()} and {@code android_setCpuArm()} methods to
+            {@code cpu-features.c}. This addition enables easier retrieval of the ARM CPUID
+            information. (<a href="http://b.android.com/53689">Issue 53689</a>)</li>
+          <li>Modified {@code ndk-build} to use GCC 4.7's {@code as/ld} for Clang compiling.
+            <p class="note"><strong>Note:</strong>
+              In GCC 4.7, {@code monotonic_clock} and {@code is_monotonic} have been renamed to
+              {@code steady_clock} and {@code is_steady}, respectively.</p></li>
+          <li>Added the following new warnings to the {@code ndk-build} script:
+            <ul>
+              <li>Added warnings if {@code LOCAL_LDLIBS/LDFLAGS} are used in static library
+                modules.</li>
+              <li>Added a warning if a configuration has no module to build.</li>
+              <li>Added a warning for non-system libraries being used in
+                {@code LOCAL_LDLIBS/LDFLAGS} of a shared library or executable modules.</li>
+            </ul>
+          </li>
+          <li>Updated build scripts, so that if {@code APP_MODULES} is not defined and only static
+            libraries are listed in {@code Android.mk}, the script force-builds all of them.
+            (<a href="http://b.android.com/53502">Issue 53502</a>)</li>
+          <li>Updated {@code ndk-build} to support absolute paths in {@code LOCAL_SRC_FILES}.</li>
+          <li>Removed the {@code *-gdbtui} executables, which are duplicates of the {@code *-gdb}
+            executables with the {@code -tui} option enabled.</li>
+          <li>Updated the build scripts to warn you when the Edison Design Group (EDG) compiler
+            front-end turns {@code _STLP_HAS_INCLUDE_NEXT} back on.
+            (<a href="http://b.android.com/53646">Issue 53646</a>)</li>
+          <li>Added the environment variable {@code NDK_LIBS_OUT} to allow overriding of the
+            path for {@code libraries/gdbserver} from the default {@code $PROJECT/libs}.
+            For more information, see {@code OVERVIEW.html}.</li>
+          <li>Changed ndk-build script defaults to compile code with format string protection
+            {@code -Wformat -Werror=format-security}. You may set
+            {@code LOCAL_DISABLE_FORMAT_STRING_CHECKS=true} to disable it.
+            For more information, see {@code ANDROID-MK.html}</li>
+          <li>Added STL pretty-print support in {@code ndk-gdb-py}. For more information, see
+            {@code NDK-GDB.html}.</li>
+          <li>Added tests based on the googletest frameworks.</li>
+          <li>Added a notification to the toolchain build script that warns you if the current shell
+            is not {@code bash}.</li>
+        </ul>
+      </dd>
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt="">Android NDK, Revision 8e</a> <em>(March 2013)</em>
   </p>
 
@@ -283,7 +556,7 @@ the NDK, as denoted by revision number. </p>
             build automatically sorts out the order of libraries specified in
             {@code LOCAL_STATIC_LIBRARIES}, {@code LOCAL_WHOLE_STATIC_LIBRARIES} and
             {@code LOCAL_SHARED_LIBRARIES}. For more information, see {@code CHANGES.HTML}.
-            (<a href="http://code.google.com/p/android/issues/detail?id=39378">Issue 39378</a>)</li>
+            (<a href="http://b.android.com/39378">Issue 39378</a>)</li>
         </ul>
       </dd>
 
@@ -295,23 +568,23 @@ the NDK, as denoted by revision number. </p>
           <li>Fixed build script which unconditionally builds Clang/llvm for MacOSX in 64-bit.</li>
           <li>Fixed GCC 4.6/4.7 internal compiler error:
             {@code gen_thumb_movhi_clobber at config/arm/arm.md:5832}.
-            (<a href="http://code.google.com/p/android/issues/detail?id=52732">Issue 52732</a>)</li>
+            (<a href="http://b.android.com/52732">Issue 52732</a>)</li>
           <li>Fixed build problem where GCC/ARM 4.6/4.7 fails to link code using 64-bit atomic
             built-in functions.
-            (<a href="http://code.google.com/p/android/issues/detail?id=41297">Issue 41297</a>)</li>
+            (<a href="http://b.android.com/41297">Issue 41297</a>)</li>
           <li>Fixed GCC 4.7 linker DIV usage mismatch errors.
           (<a href="http://sourceware.org/ml/binutils/2012-12/msg00202.html">Sourceware Issue</a>)
           <li>Fixed GCC 4.7 internal compiler error {@code build_data_member_initialization, at
             cp/semantics.c:5790}.</li>
           <li>Fixed GCC 4.7 internal compiler error {@code redirect_eh_edge_1, at tree-eh.c:2214}.
-            (<a href="http://code.google.com/p/android/issues/detail?id=52909">Issue 52909</a>)</li>
+            (<a href="http://b.android.com/52909">Issue 52909</a>)</li>
           <li>Fixed a GCC 4.7 segfault.
             (<a href="http://gcc.gnu.org/bugzilla/show_bug.cgi?id=55245">GCC Issue</a>)</li>
           <li>Fixed {@code &lt;chrono&gt;} clock resolution and enabled {@code steady_clock}.
-            (<a href="http://code.google.com/p/android/issues/detail?id=39680">Issue 39680</a>)</li>
+            (<a href="http://b.android.com/39680">Issue 39680</a>)</li>
           <li>Fixed toolchain to enable {@code _GLIBCXX_HAS_GTHREADS} for GCC 4.7 libstdc++.
-            (<a href="http://code.google.com/p/android/issues/detail?id=41770">Issue 41770</a>,
-             <a href="http://code.google.com/p/android/issues/detail?id=41859">Issue 41859</a>)</li>
+            (<a href="http://b.android.com/41770">Issue 41770</a>,
+             <a href="http://b.android.com/41859">Issue 41859</a>)</li>
           <li>Fixed problem with the X86 MXX/SSE code failing to link due to missing
             {@code posix_memalign}.
             (<a href="https://android-review.googlesource.com/#/c/51872">Change 51872</a>)</li>
@@ -321,24 +594,24 @@ the NDK, as denoted by revision number. </p>
           <li>Fixed GCC4.7/X86 to restore earlier {@code cmov} behavior.
             (<a href="http://gcc.gnu.org/viewcvs?view=revision&revision=193554">GCC Issue</a>)</li>
           <li>Fixed handling NULL return value of {@code setlocale()} in libstdc++/GCC4.7.
-            (<a href="http://code.google.com/p/android/issues/detail?id=46718">Issue 46718</a>)
+            (<a href="http://b.android.com/46718">Issue 46718</a>)
           <li>Fixed {@code ld.gold} runtime undefined reference to {@code __exidx_start} and
             {@code __exidx_start_end}.
             (<a href="https://android-review.googlesource.com/#/c/52134">Change 52134</a>)</li>
           <li>Fixed Clang 3.1 internal compiler error when using Eigen library.
-            (<a href="http://code.google.com/p/android/issues/detail?id=41246">Issue 41246</a>)</li>
+            (<a href="http://b.android.com/41246">Issue 41246</a>)</li>
           <li>Fixed Clang 3.1 internal compiler error including {@code &lt;chrono&gt;} in C++11 mode.
-            (<a href="http://code.google.com/p/android/issues/detail?id=39600">Issue 39600</a>)</li>
+            (<a href="http://b.android.com/39600">Issue 39600</a>)</li>
           <li>Fixed Clang 3.1 internal compiler error when generating object code for a method
             call to a uniform initialized {@code rvalue}.
-            (<a href="http://code.google.com/p/android/issues/detail?id=41387">Issue 41387</a>)</li>
+            (<a href="http://b.android.com/41387">Issue 41387</a>)</li>
           <li>Fixed Clang 3.1/X86 stack realignment.
             (<a href="https://android-review.googlesource.com/#/c/52154">Change 52154</a>)</li>
           <li>Fixed problem with GNU Debugger (GDB) SIGILL when debugging on Android 4.1.2.
-            (<a href="http://code.google.com/p/android/issues/detail?id=40941">Issue 40941</a>)</li>
+            (<a href="http://b.android.com/40941">Issue 40941</a>)</li>
           <li>Fixed problem where GDB cannot set {@code source:line} breakpoints when symbols contain
             long, indirect file paths.
-            (<a href="http://code.google.com/p/android/issues/detail?id=42448">Issue 42448</a>)</li>
+            (<a href="http://b.android.com/42448">Issue 42448</a>)</li>
           <li>Fixed GDB {@code read_program_header} for MIPS PIE executables.
             (<a href="https://android-review.googlesource.com/#/c/49592">Change 49592</a>)</li>
           <li>Fixed {@code STLport} segmentation fault in {@code uncaught_exception()}.
@@ -346,7 +619,7 @@ the NDK, as denoted by revision number. </p>
           <li>Fixed {@code STLport} bus error in exception handling due to unaligned access of
             {@code DW_EH_PE_udata2}, {@code DW_EH_PE_udata4}, and {@code DW_EH_PE_udata8}.</li>
           <li>Fixed Gabi++ infinite recursion problem with {@code nothrow new[]} operator.
-            (<a href="http://code.google.com/p/android/issues/detail?id=52833">Issue 52833</a>)</li>
+            (<a href="http://b.android.com/52833">Issue 52833</a>)</li>
           <li>Fixed Gabi++ wrong offset to exception handler pointer.
             (<a href="https://android-review.googlesource.com/#/c/53446">Change 53446</a>)</li>
           <li>Removed Gabi++ redundant free on exception object
@@ -365,11 +638,11 @@ the NDK, as denoted by revision number. </p>
               <li>Fixed {@code stddef.h} to not redefine {@code offsetof} since it already exists
                 in the toolchain.</li>
               <li>Fixed {@code elf.h} to contain {@code Elf32_auxv_t} and {@code Elf64_auxv_t}.
-                (<a href="http://code.google.com/p/android/issues/detail?id=38441">Issue 38441</a>)
+                (<a href="http://b.android.com/38441">Issue 38441</a>)
                 </li>
               <li>Fixed the {@code #ifdef} C++ definitions in the
                 {@code OpenSLES_AndroidConfiguration.h} header file.
-                (<a href="http://code.google.com/p/android/issues/detail?id=53163">Issue 53163</a>)
+                (<a href="http://b.android.com/53163">Issue 53163</a>)
                 </li>
             </ul>
           </li>
@@ -377,7 +650,7 @@ the NDK, as denoted by revision number. </p>
             </li>
           <li>Fixed system and Gabi++ headers to be able to compile with API level 8 and lower.</li>
           <li>Fixed {@code cpufeatures} to not parse {@code /proc/self/auxv}.
-            (<a href="http://code.google.com/p/android/issues/detail?id=43055">Issue 43055</a>)</li>
+            (<a href="http://b.android.com/43055">Issue 43055</a>)</li>
           <li>Fixed {@code ld.gold} to not depend on host libstdc++ and on Windows platforms,
             to not depend on the {@code libgcc_sjlj_1.dll} library.</li>
           <li>Fixed Clang 3.1 which emits inconsistent register list in {@code .vsave} and fails
@@ -394,16 +667,16 @@ the NDK, as denoted by revision number. </p>
             </li>
           <li>Fixed X86 {@code libc.so} and {@code lib.a} which were missing the {@code sigsetjmp}
             and {@code siglongjmp} functions already declared in {@code setjmp.h}.
-            (<a href="http://code.google.com/p/android/issues/detail?id=19851">Issue 19851</a>)</li>
+            (<a href="http://b.android.com/19851">Issue 19851</a>)</li>
           <li>Patched GCC 4.4.3/4.6/4.7 libstdc++ to work with Clang in C++ 11.
             (<a href="http://clang.llvm.org/cxx_status.html">Clang Issue</a>)</li>
           <li>Fixed cygwin path in argument passed to {@code HOST_AWK}.</li>
           <li>Fixed {@code ndk-build} script warning in windows when running from project's JNI
             directory.
-            (<a href="http://code.google.com/p/android/issues/detail?id=40192">Issue 40192</a>)</li>
+            (<a href="http://b.android.com/40192">Issue 40192</a>)</li>
           <li>Fixed problem where the {@code ndk-build} script does not build if makefile has
             trailing whitespace in the {@code LOCAL_PATH} definition.
-            (<a href="http://code.google.com/p/android/issues/detail?id=42841">Issue 42841</a>)</li>
+            (<a href="http://b.android.com/42841">Issue 42841</a>)</li>
         </ul>
       </dd>
 
@@ -419,13 +692,13 @@ the NDK, as denoted by revision number. </p>
             hidden visibility except for exception handling helpers.</li>
           <li>Updated build so that {@code STLport} is built for ARM in Thumb mode.</li>
           <li>Added support for {@code std::set_new_handler} in Gabi++.
-            (<a href="http://code.google.com/p/android/issues/detail?id=52805">Issue 52805</a>)</li>
+            (<a href="http://b.android.com/52805">Issue 52805</a>)</li>
           <li>Enabled {@code FUTEX} system call in GNU libstdc++.</li>
           <li>Updated {@code ndk-build} so that it  no longer copies prebuilt static library to
             a project's {@code obj/local/&lt;abi&gt;/} directory.
-            (<a href="http://code.google.com/p/android/issues/detail?id=40302">Issue 40302</a>)</li>
+            (<a href="http://b.android.com/40302">Issue 40302</a>)</li>
           <li>Removed {@code __ARM_ARCH_5*__} from ARM {@code toolchains/*/setup.mk} script.
-            (<a href="http://code.google.com/p/android/issues/detail?id=21132">Issue 21132</a>)</li>
+            (<a href="http://b.android.com/21132">Issue 21132</a>)</li>
           <li>Built additional GNU libstdc++ libraries in thumb for ARM.</li>
           <li>Enabled MIPS floating-point {@code madd/msub/nmadd/nmsub/recip/rsqrt}
             instructions with 32-bit FPU.</li>
@@ -458,7 +731,7 @@ the NDK, as denoted by revision number. </p>
                 which was preventing a significant amount of parallel build processing.</li>
               <li>Updated {@code build-gabi++.sh} and {@code build-stlport.sh} so they can now run
                 from the NDK package.
-                (<a href="http://code.google.com/p/android/issues/detail?id=52835">Issue 52835</a>)
+                (<a href="http://b.android.com/52835">Issue 52835</a>)
                 </li>
               <li>Fixed {@code run-tests.sh} in the {@code MSys} utilities collection.</li>
               <li>Improved 64-bit host toolchain and Canadian Cross build support.</li>
@@ -540,7 +813,7 @@ the NDK, as denoted by revision number. </p>
       <dd>
         <ul>
           <li>Fixed unnecessary rebuild of object files when using the {@code ndk-build} script.
-            (<a href="http://code.google.com/p/android/issues/detail?id=39810">Issue 39810</a>)</li>
+            (<a href="http://b.android.com/39810">Issue 39810</a>)</li>
           <li>Fixed a linker failure with the NDK 8c release for Mac OS X 10.6.x that produced the
             following error:
             <pre>
@@ -551,29 +824,29 @@ Expected in: /usr/lib/libSystem.B.dylib</pre>
             not compatible with Mac OS 10.6.x and the NDK.
           </li>
           <li>Removed the {@code -x c++} options from the Clang++ standalone build script.
-          (<a href="http://code.google.com/p/android/issues/detail?id=39089">Issue 39089</a>)</li>
+          (<a href="http://b.android.com/39089">Issue 39089</a>)</li>
           <li>Fixed issues using the {@code NDK_TOOLCHAIN_VERSION=clang3.1} option in Cygwin.
-           (<a href="http://code.google.com/p/android/issues/detail?id=39585">Issue 39585</a>)</li>
+           (<a href="http://b.android.com/39585">Issue 39585</a>)</li>
           <li>Fixed the {@code make-standalone-toolchain.sh} script to allow generation of a
             standalone toolchain using the Cygwin or MinGW environments. The resulting toolchain
             can be used in Cygwin, MingGW or CMD.exe environments.
-            (<a href="http://code.google.com/p/android/issues/detail?id=39915">Issue 39915</a>,
-            <a href="http://code.google.com/p/android/issues/detail?id=39585">Issue 39585</a>)</li>
+            (<a href="http://b.android.com/39915">Issue 39915</a>,
+            <a href="http://b.android.com/39585">Issue 39585</a>)</li>
           <li>Added missing {@code SL_IID_ANDROIDBUFFERQUEUESOURCE} option in android-14 builds for
             ARM and X86.
-            (<a href="http://code.google.com/p/android/issues/detail?id=40625">Issue 40625</a>)</li>
+            (<a href="http://b.android.com/40625">Issue 40625</a>)</li>
           <li>Fixed x86 CPU detection for the {@code ANDROID_CPU_X86_FEATURE_MOVBE} feature.
-            (<a href="http://code.google.com/p/android/issues/detail?id=39317">Issue 39317</a>)</li>
+            (<a href="http://b.android.com/39317">Issue 39317</a>)</li>
           <li>Fixed an issue preventing the Standard Template Library (STL) from using C++
             sources that do not have a {@code .cpp} file extension.</li>
           <li>Fixed GCC 4.6 ARM internal compiler error <em>at reload1.c:1061</em>.
-            (<a href="http://code.google.com/p/android/issues/detail?id=20862">Issue 20862</a>)</li>
+            (<a href="http://b.android.com/20862">Issue 20862</a>)</li>
           <li>Fixed GCC 4.4.3 ARM internal compiler error <em>at emit-rtl.c:1954</em>.
-            (<a href="http://code.google.com/p/android/issues/detail?id=22336">Issue 22336</a>)</li>
+            (<a href="http://b.android.com/22336">Issue 22336</a>)</li>
           <li>Fixed GCC 4.4.3 ARM internal compiler error <em>at postreload.c:396</em>.
-            (<a href="http://code.google.com/p/android/issues/detail?id=22345">Issue 22345</a>)</li>
+            (<a href="http://b.android.com/22345">Issue 22345</a>)</li>
           <li>Fixed problem with GCC 4.6/4.7 skipping lambda functions.
-            (<a href="http://code.google.com/p/android/issues/detail?id=35933">Issue 35933</a>)</li>
+            (<a href="http://b.android.com/35933">Issue 35933</a>)</li>
         </ul>
       </dd>
 
@@ -584,21 +857,21 @@ Expected in: /usr/lib/libSystem.B.dylib</pre>
             <ul>
               <li>Fixed {@code __WINT_TYPE__} and {@code wint_t} to be the same type.</li>
               <li>Corrected typo in {@code android/bitmap.h}.
-                (<a href="http://code.google.com/p/android/issues/detail?id=15134">Issue 15134</a>)
+                (<a href="http://b.android.com/15134">Issue 15134</a>)
               </li>
               <li>Corrected typo in {@code errno.h}.</li>
               <li>Added check for the presence of {@code __STDC_VERSION__} in {@code sys/cdefs.h}.
-                (<a href="http://code.google.com/p/android/issues/detail?id=14627">Issue 14627</a>)
+                (<a href="http://b.android.com/14627">Issue 14627</a>)
               </li>
               <li>Reorganized headers in {@code byteswap.h} and {@code dirent.h}.</li>
               <li>Fixed {@code limits.h} to include {@code page.h} which provides {@code PAGE_SIZE}
                 settings.
-                (<a href="http://code.google.com/p/android/issues/detail?id=39983">Issue 39983</a>)
+                (<a href="http://b.android.com/39983">Issue 39983</a>)
               </li>
               <li>Fixed return type of {@code glGetAttribLocation()} and
                 {@code glGetUniformLocation()} from {@code int} to {@code GLint}.</li>
               <li>Fixed {@code __BYTE_ORDER} constant for x86 builds.
-                (<a href="http://code.google.com/p/android/issues/detail?id=39824">Issue 39824</a>)
+                (<a href="http://b.android.com/39824">Issue 39824</a>)
               </li>
             </ul>
           </li>
@@ -611,7 +884,7 @@ Expected in: /usr/lib/libSystem.B.dylib</pre>
           <li>Fixed ARM EHABI support in Clang to conform to specifications.</li>
           <li>Fixed GNU Debugger (GDB) to shorten the time spent on walking the target's link map
             during {@code solib} events.
-            (<a href="http://code.google.com/p/android/issues/detail?id=38402">Issue 38402</a>)</li>
+            (<a href="http://b.android.com/38402">Issue 38402</a>)</li>
           <li>Fixed missing {@code libgcc.a} file when linking shared libraries.</li>
         </ul>
       </dd>
@@ -712,7 +985,7 @@ Expected in: /usr/lib/libSystem.B.dylib</pre>
         <ul>
           <li>Fixed an issue where running {@code make-standalone-toolchain.sh} with root privileges
             resulted in the stand alone tool chain being inaccessible to some users.
-            (<a href="http://code.google.com/p/android/issues/detail?id=35279">Issue 35279</a>)
+            (<a href="http://b.android.com/35279">Issue 35279</a>)
             <ul>
               <li>All files and executables in the NDK release package are set to have read and
                 execute permissions for all.</li>
@@ -722,23 +995,23 @@ Expected in: /usr/lib/libSystem.B.dylib</pre>
           <li>Removed redundant {@code \r} from Windows prebuilt {@code echo.exe}. The redundant
           {@code \r} caused {@code gdb.setup} to fail in the GNU Debugger (GDB) because it
           incorrectly became part of the path.
-          (<a href="http://code.google.com/p/android/issues/detail?id=36054">Issue 36054</a>)</li>
+          (<a href="http://b.android.com/36054">Issue 36054</a>)</li>
           <li>Fixed Windows parallel builds that sometimes failed due to timing issues in the
           {@code host-mkdir} implementation.
-          (<a href="http://code.google.com/p/android/issues/detail?id=25875">Issue 25875</a>)</li>
+          (<a href="http://b.android.com/25875">Issue 25875</a>)</li>
           <li>Fixed GCC 4.4.3 GNU {@code libstdc++} to <em>not</em> merge {@code typeinfo} names by
           default. For more details, see
           {@code toolchain repo gcc/gcc-4.4.3/libstdc++-v3/libsupc++/typeinfo}.
-          (<a href="http://code.google.com/p/android/issues/detail?id=22165">Issue 22165</a>)</li>
+          (<a href="http://b.android.com/22165">Issue 22165</a>)</li>
           <li>Fixed problem on {@code null} context in GCC 4.6
           {@code cp/mangle.c::write_unscoped_name}, where GCC may crash when the context is
           {@code null} and dereferenced in {@code TREE_CODE}.</li>
           <li>Fixed GCC 4.4.3 crashes on ARM NEON-specific type definitions for floats.
-          (<a href="http://code.google.com/p/android/issues/detail?id=34613">Issue 34613</a>)</li>
+          (<a href="http://b.android.com/34613">Issue 34613</a>)</li>
           <li>Fixed the {@code STLport} internal {@code _IteWrapper::operator*()} implementation
           where a stale stack location holding the dereferenced value was returned and caused
           runtime crashes.
-          (<a href="http://code.google.com/p/android/issues/detail?id=38630">Issue 38630</a>)</li>
+          (<a href="http://b.android.com/38630">Issue 38630</a>)</li>
 
           <li>ARM-specific fixes:
             <ul>
@@ -755,17 +1028,17 @@ Expected in: /usr/lib/libSystem.B.dylib</pre>
               <li>Fixed {@code binutils-2.21/ld.bfd} to be capable of linking object from older
               binutils without {@code tag_FP_arch}, which was producing <em>assertion fail</em>
               error messages in GNU Binutils.
-              (<a href="http://code.google.com/p/android/issues/detail?id=35209">Issue 35209</a>)
+              (<a href="http://b.android.com/35209">Issue 35209</a>)
               </li>
               <li>Removed <em>Unknown EABI object attribute 44</em> warning when
               {@code binutils-2.19/ld} links prebuilt object by newer {@code binutils-2.21}</li>
               <li>Fixed an issue in GNU {@code stdc++} compilation with both {@code -mthumb} and
               {@code -march=armv7-a}, by modifying {@code make-standalone-toolchain.sh} to populate
               {@code headers/libs} in sub-directory {@code armv7-a/thumb}.
-              (<a href="http://code.google.com/p/android/issues/detail?id=35616">Issue 35616</a>)
+              (<a href="http://b.android.com/35616">Issue 35616</a>)
               </li>
               <li>Fixed <em>unresolvable R_ARM_THM_CALL relocation</em> error.
-              (<a href="http://code.google.com/p/android/issues/detail?id=35342">Issue 35342</a>)
+              (<a href="http://b.android.com/35342">Issue 35342</a>)
               </li>
               <li>Fixed internal compiler error at {@code reload1.c:3633}, caused by the ARM
               back-end expecting the wrong operand type when sign-extend from {@code char}.
@@ -794,11 +1067,11 @@ Expected in: /usr/lib/libSystem.B.dylib</pre>
               <li>Disabled Python support in gdb-7.x at build, otherwise the gdb-7.x configure
               function may pick up whatever Python version is available on the host and build
               {@code gdb} with a hard-wired dependency on a specific version of Python.
-              (<a href="http://code.google.com/p/android/issues/detail?id=36120">Issue 36120</a>)
+              (<a href="http://b.android.com/36120">Issue 36120</a>)
               </li>
               <li>Fixed {@code ndk-gdb} when {@code APP_ABI} contains {@code all} and matchs none
               of the known architectures.
-              (<a href="http://code.google.com/p/android/issues/detail?id=35392">Issue 35392</a>)
+              (<a href="http://b.android.com/35392">Issue 35392</a>)
               </li>
               <li>Fixed Windows pathname support, by keeping the {@code :} character if it looks
               like it could be part of a Windows path starting with a drive letter.
@@ -809,7 +1082,7 @@ Expected in: /usr/lib/libSystem.B.dylib</pre>
               </li>
               <li>Added fix to only read the current {@code solibs} when the linker is consistent.
               This change speeds up {@code solib} event handling.
-              (<a href="http://code.google.com/p/android/issues/detail?id=37677">Issue 37677</a>)
+              (<a href="http://b.android.com/37677">Issue 37677</a>)
               </li>
               <li>Added fix to make repeated attempts to find {@code solib} breakpoints. GDB now
               retries {@code enable_break()} during every call to {@code svr4_current_sos()} until
@@ -817,13 +1090,13 @@ Expected in: /usr/lib/libSystem.B.dylib</pre>
               (<a href="https://android-review.googlesource.com/#/c/43563">Change 43563</a>)</li>
               <li>Fixed an issue where {@code gdb} would not stop on breakpoints placed in
               {@code dlopen-ed} libraries.
-              (<a href="http://code.google.com/p/android/issues/detail?id=34856">Issue 34856</a>)
+              (<a href="http://b.android.com/34856">Issue 34856</a>)
               </li>
               <li>Fixed {@code SIGILL} in dynamic linker when calling {@code dlopen()}, on system
               where {@code /system/bin/linker} is stripped of symbols and
               {@code rtld_db_dlactivity()} is implemented as {@code Thumb}, due to not preserving
               {@code LSB} of {@code sym_addr}.
-              (<a href="http://code.google.com/p/android/issues/detail?id=37147">Issue 37147</a>)
+              (<a href="http://b.android.com/37147">Issue 37147</a>)
               </li>
             </ul>
           </li>
@@ -848,7 +1121,7 @@ Expected in: /usr/lib/libSystem.B.dylib</pre>
               {@code __END_DECLS}.</li>
               <li>Removed unimplemented functions in {@code malloc.h}.</li>
               <li>Fixed {@code stdint.h} defintion of {@code uint64_t} for ANSI compilers.
-              (<a href="http://code.google.com/p/android/issues/detail?id=1952">Issue 1952</a>)</li>
+              (<a href="http://b.android.com/1952">Issue 1952</a>)</li>
               <li>Fixed preprocessor macros in {@code &lt;arch&gt;/include/machine/*}.</li>
               <li>Replaced {@code link.h} for MIPS with new version supporting all platforms.</li>
               <li>Removed {@code linux-unistd.h}</li>
@@ -904,7 +1177,7 @@ extern "C" {
           {@code platforms/android-[3,4,5,8]}. Those headers were incomplete, since both X86 and
           MIPS ABIs are only supported at API 9 or higher.</li>
           <li>Simplified c++ include path in standalone packages, as shown below.
-          (<a href="http://code.google.com/p/android/issues/detail?id=35279">Issue 35279</a>)
+          (<a href="http://b.android.com/35279">Issue 35279</a>)
 <pre>
 &lt;path&gt;/arm-linux-androideabi/include/c++/4.6.x-google
   to:
@@ -916,7 +1189,7 @@ extern "C" {
           <li>Fixed an issue in {@code samples/san-angeles} that caused a black screen or freeze
           frame on re-launch.</li>
           <li>Replaced deprecated APIs in NDK samples.
-          (<a href="http://code.google.com/p/android/issues/detail?id=20017">Issue 20017</a>)
+          (<a href="http://b.android.com/20017">Issue 20017</a>)
             <ul>
               <li>{@code hello-gl2} from android-5 to android-7</li>
               <li>{@code native-activity} from android-9 to android-10</li>
@@ -1196,7 +1469,7 @@ is compiled for the device's CPU architecture.</p>
           <li>Fixed a typo in GAbi++ implementation where the result of {@code
           dynamic_cast&lt;D&gt;(b)} of base class object {@code b} to derived class {@code D} is
           incorrectly adjusted in the opposite direction from the base class.
-          (<a href="http://code.google.com/p/android/issues/detail?id=28721">Issue 28721</a>)
+          (<a href="http://b.android.com/28721">Issue 28721</a>)
           </li>
           <li>Fixed an issue in which {@code make-standalone-toolchain.sh} fails to copy
           {@code libsupc++.*}.</li>
@@ -1710,7 +1983,7 @@ LOCAL_CPP_EXTENSION := .cpp .cxx
             <li>Fixed the standalone toolchain linker warnings about missing the definition and
             size for the <code>__dso_handle</code> symbol (ARM only).</li>
             <li>Fixed the inclusion order of <code>$(SYSROOT)/usr/include</code> for x86 builds.
-            See the <a href="http://code.google.com/p/android/issues/detail?id=18540">bug</a> for
+            See the <a href="http://b.android.com/18540">bug</a> for
             more information.</li>
             <li>Fixed the definitions of <code>ptrdiff_t</code> and <code>size_t</code> in
             x86-specific systems when they are used with the x86 standalone toolchain.</li>
