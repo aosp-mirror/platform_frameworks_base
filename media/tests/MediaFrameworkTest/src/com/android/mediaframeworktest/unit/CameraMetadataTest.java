@@ -19,8 +19,10 @@ package com.android.mediaframeworktest.unit;
 import android.os.Parcel;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.graphics.ImageFormat;
+import android.graphics.Rect;
 import android.hardware.photography.CameraMetadata;
 import android.hardware.photography.Rational;
+import android.hardware.photography.Size;
 
 import static android.hardware.photography.CameraMetadata.*;
 
@@ -223,6 +225,10 @@ public class CameraMetadataTest extends junit.framework.TestCase {
 
         assertEquals(null, mMetadata.readValues(ANDROID_COLOR_CORRECTION_MODE));
 
+        // Write/read null values
+        mMetadata.writeValues(ANDROID_COLOR_CORRECTION_MODE, null);
+        assertEquals(null, mMetadata.readValues(ANDROID_COLOR_CORRECTION_MODE));
+
         // Write 0 values
         mMetadata.writeValues(ANDROID_COLOR_CORRECTION_MODE, new byte[] {});
 
@@ -286,13 +292,21 @@ public class CameraMetadataTest extends junit.framework.TestCase {
     }
 
     private <T> void checkKeyGetAndSet(String keyStr, Class<T> type, T value) {
+        assertFalse("Use checkKeyGetAndSetArray to compare array Keys", type.isArray());
+
         Key<T> key = new Key<T>(keyStr, type);
         assertNull(mMetadata.get(key));
+        mMetadata.set(key, null);
+        assertNull(mMetadata.get(key));
         mMetadata.set(key, value);
-        assertEquals(value, mMetadata.get(key));
+
+        T actual = mMetadata.get(key);
+        assertEquals(value, actual);
     }
 
     private <T> void checkKeyGetAndSetArray(String keyStr, Class<T> type, T value) {
+        assertTrue(type.isArray());
+
         Key<T> key = new Key<T>(keyStr, type);
         assertNull(mMetadata.get(key));
         mMetadata.set(key, value);
@@ -507,5 +521,74 @@ public class CameraMetadataTest extends junit.framework.TestCase {
         for (int i = 0; i < expectedIntValues.length; ++i) {
             assertEquals(expectedIntValues[i], bf.getInt());
         }
+    }
+
+    @SmallTest
+    public void testReadWriteSize() {
+        // int32 x n
+        checkKeyGetAndSet("android.jpeg.thumbnailSize", Size.class, new Size(123, 456));
+
+        // int32 x 2 x n
+        checkKeyGetAndSetArray("android.scaler.availableJpegSizes", Size[].class, new Size[] {
+            new Size(123, 456),
+            new Size(0xDEAD, 0xF00D),
+            new Size(0xF00, 0xB00)
+        });
+    }
+
+    @SmallTest
+    public void testReadWriteRectangle() {
+        // int32 x n
+        checkKeyGetAndSet("android.scaler.cropRegion", Rect.class, new Rect(10, 11, 1280, 1024));
+
+        // int32 x 2 x n
+        checkKeyGetAndSetArray("android.statistics.faceRectangles", Rect[].class, new Rect[] {
+            new Rect(110, 111, 11280, 11024),
+            new Rect(210, 111, 21280, 21024),
+            new Rect(310, 111, 31280, 31024)
+        });
+    }
+
+    @SmallTest
+    public void testReadWriteString() {
+        // (byte) string
+        Key<String> gpsProcessingMethodKey =
+                new Key<String>("android.jpeg.gpsProcessingMethod", String.class);
+
+        String helloWorld = new String("HelloWorld");
+        byte[] helloWorldBytes = new byte[] {
+                'H', 'e', 'l', 'l', 'o', 'W', 'o', 'r', 'l', 'd', '\0' };
+
+        mMetadata.set(gpsProcessingMethodKey, helloWorld);
+
+        String actual = mMetadata.get(gpsProcessingMethodKey);
+        assertEquals(helloWorld, actual);
+
+        byte[] actualBytes = mMetadata.readValues(getTag(gpsProcessingMethodKey.getName()));
+        assertArrayEquals(helloWorldBytes, actualBytes);
+
+        // Does not yet test as a string[] since we don't support that in native code.
+
+        // (byte) string
+        Key<String[]> gpsProcessingMethodKeyArray =
+                new Key<String[]>("android.jpeg.gpsProcessingMethod", String[].class);
+
+        String[] gpsStrings = new String[] { "HelloWorld", "FooBar", "Shazbot" };
+        byte[] gpsBytes = new byte[] {
+                'H', 'e', 'l', 'l', 'o', 'W', 'o', 'r', 'l', 'd', '\0',
+                'F', 'o', 'o', 'B', 'a', 'r', '\0',
+                'S', 'h', 'a', 'z', 'b', 'o', 't', '\0'};
+
+        mMetadata.set(gpsProcessingMethodKeyArray, gpsStrings);
+
+        String[] actualArray = mMetadata.get(gpsProcessingMethodKeyArray);
+        assertArrayEquals(gpsStrings, actualArray);
+
+        byte[] actualBytes2 = mMetadata.readValues(getTag(gpsProcessingMethodKeyArray.getName()));
+        assertArrayEquals(gpsBytes, actualBytes2);
+    }
+
+    <T> void compareGeneric(T expected, T actual) {
+        assertEquals(expected, actual);
     }
 }

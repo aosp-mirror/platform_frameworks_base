@@ -267,7 +267,13 @@ static void CameraMetadata_writeValues(JNIEnv *env, jobject thiz, jint tag, jbyt
 
     if (src == NULL) {
         // If array is NULL, delete the entry
-        res = metadata->erase(tag);
+        if (metadata->exists(tag)) {
+            res = metadata->erase(tag);
+            ALOGV("%s: Erase values (res = %d)", __FUNCTION__, res);
+        } else {
+            res = OK;
+            ALOGV("%s: Don't need to erase", __FUNCTION__);
+        }
     } else {
         // Copy from java array into native array
         ScopedByteArrayRO arrayReader(env, src);
@@ -275,6 +281,8 @@ static void CameraMetadata_writeValues(JNIEnv *env, jobject thiz, jint tag, jbyt
 
         res = Helpers::updateAny(metadata, static_cast<uint32_t>(tag),
                                  tagType, arrayReader.get(), arrayReader.size());
+
+        ALOGV("%s: Update values (res = %d)", __FUNCTION__, res);
     }
 
     if (res == OK) {
