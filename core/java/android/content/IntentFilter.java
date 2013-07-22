@@ -733,10 +733,15 @@ public class IntentFilter implements Parcelable {
      * @see #addDataScheme
      */
     public final void addDataSchemeSpecificPart(String ssp, int type) {
+        addDataSchemeSpecificPart(new PatternMatcher(ssp, type));
+    }
+
+    /** @hide */
+    public final void addDataSchemeSpecificPart(PatternMatcher ssp) {
         if (mDataSchemeSpecificParts == null) {
             mDataSchemeSpecificParts = new ArrayList<PatternMatcher>();
         }
-        mDataSchemeSpecificParts.add(new PatternMatcher(ssp, type));
+        mDataSchemeSpecificParts.add(ssp);
     }
 
     /**
@@ -806,10 +811,15 @@ public class IntentFilter implements Parcelable {
      * @see #addDataScheme
      */
     public final void addDataAuthority(String host, String port) {
+        if (port != null) port = port.intern();
+        addDataAuthority(new AuthorityEntry(host.intern(), port));
+    }
+
+    /** @hide */
+    public final void addDataAuthority(AuthorityEntry ent) {
         if (mDataAuthorities == null) mDataAuthorities =
                 new ArrayList<AuthorityEntry>();
-        if (port != null) port = port.intern();
-        mDataAuthorities.add(new AuthorityEntry(host.intern(), port));
+        mDataAuthorities.add(ent);
     }
 
     /**
@@ -874,8 +884,13 @@ public class IntentFilter implements Parcelable {
      * @see #addDataAuthority
      */
     public final void addDataPath(String path, int type) {
+        addDataPath(new PatternMatcher(path.intern(), type));
+    }
+
+    /** @hide */
+    public final void addDataPath(PatternMatcher path) {
         if (mDataPaths == null) mDataPaths = new ArrayList<PatternMatcher>();
-        mDataPaths.add(new PatternMatcher(path.intern(), type));
+        mDataPaths.add(path);
     }
 
     /**
