@@ -95,7 +95,7 @@ static void recorderCallback(int event, void* user, void *info) {
     switch (event) {
     case AudioRecord::EVENT_MARKER: {
         JNIEnv *env = AndroidRuntime::getJNIEnv();
-        if (user && env) {
+        if (user != NULL && env != NULL) {
             env->CallStaticVoidMethod(
                 callbackInfo->audioRecord_class,
                 javaAudioRecordFields.postNativeEventInJava,
@@ -109,7 +109,7 @@ static void recorderCallback(int event, void* user, void *info) {
 
     case AudioRecord::EVENT_NEW_POS: {
         JNIEnv *env = AndroidRuntime::getJNIEnv();
-        if (user && env) {
+        if (user != NULL && env != NULL) {
             env->CallStaticVoidMethod(
                 callbackInfo->audioRecord_class,
                 javaAudioRecordFields.postNativeEventInJava,
