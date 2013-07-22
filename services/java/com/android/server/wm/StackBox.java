@@ -109,8 +109,8 @@ public class StackBox {
      * @return true if the specified StackBox matches this or one of its descendants.
      */
     boolean contains(int stackBoxId) {
-        return mStackBoxId == stackBoxId || mFirst.contains(stackBoxId)
-                || mSecond.contains(stackBoxId);
+        return mStackBoxId == stackBoxId ||
+                (mStack == null &&  (mFirst.contains(stackBoxId) || mSecond.contains(stackBoxId)));
     }
 
     /**
