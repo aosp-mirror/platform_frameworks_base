@@ -19,6 +19,7 @@ package android.os;
 
 import android.net.InterfaceConfiguration;
 import android.net.INetworkManagementEventObserver;
+import android.net.LinkAddress;
 import android.net.NetworkStats;
 import android.net.RouteInfo;
 import android.net.wifi.WifiConfiguration;
@@ -386,6 +387,17 @@ interface INetworkManagementService
      * Clear routes set by {@link setMarkedForwardingRoute}
      */
     void clearMarkedForwardingRoute(String iface, in RouteInfo route);
+
+    /**
+     * Exempts {@code host} from the routing set up by {@link setMarkedForwardingRoute}
+     * All connects to {@code host} will use the global routing table
+     */
+    void setHostExemption(in LinkAddress host);
+
+    /**
+     * Clears an exemption set by {@link setHostExemption}
+     */
+    void clearHostExemption(in LinkAddress host);
 
     /**
      * Set a process (pid) to use the name servers associated with the specified interface.

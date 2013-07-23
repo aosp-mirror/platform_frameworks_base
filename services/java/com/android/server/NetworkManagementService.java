@@ -1473,6 +1473,26 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     @Override
+    public void setHostExemption(LinkAddress host) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        try {
+            mConnector.execute("interface", "fwmark", "exempt", "add", host);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
+    public void clearHostExemption(LinkAddress host) {
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+        try {
+            mConnector.execute("interface", "fwmark", "exempt", "remove", host);
+        } catch (NativeDaemonConnectorException e) {
+            throw e.rethrowAsParcelableException();
+        }
+    }
+
+    @Override
     public void setDnsInterfaceForUidRange(String iface, int uid_start, int uid_end) {
         mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
         try {
