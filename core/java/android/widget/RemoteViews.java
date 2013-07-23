@@ -763,7 +763,11 @@ public class RemoteViews implements Parcelable, Filter {
             method = methods.get(mPair);
             if (method == null) {
                 try {
-                    method = klass.getMethod(methodName, paramType);
+                    if (paramType == null) {
+                        method = klass.getMethod(methodName);
+                    } else {
+                        method = klass.getMethod(methodName, paramType);
+                    }
                 } catch (NoSuchMethodException ex) {
                     throw new ActionException("view: " + klass.getName() + " doesn't have method: "
                             + methodName + getParameters(paramType));
