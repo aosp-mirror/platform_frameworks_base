@@ -822,15 +822,17 @@ public class MediaFocusControl implements OnFinished {
         if (needWakeLock) {
             mMediaEventWakeLock.acquire();
         }
+        final long identity = Binder.clearCallingIdentity();
         try {
             if (voiceIntent != null) {
                 voiceIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
                         | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-                mContext.startActivity(voiceIntent);
+                mContext.startActivityAsUser(voiceIntent, UserHandle.CURRENT);
             }
         } catch (ActivityNotFoundException e) {
             Log.w(TAG, "No activity for search: " + e);
         } finally {
+            Binder.restoreCallingIdentity(identity);
             if (needWakeLock) {
                 mMediaEventWakeLock.release();
             }
