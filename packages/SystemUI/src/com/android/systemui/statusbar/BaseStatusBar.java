@@ -19,6 +19,7 @@ package com.android.systemui.statusbar;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.KeyguardManager;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
@@ -91,7 +92,7 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected static final boolean ENABLE_HEADS_UP = true;
     // scores above this threshold should be displayed in heads up mode.
-    private static final int INTERRUPTION_THRESHOLD = 10;
+    private static final int INTERRUPTION_THRESHOLD = 11;
 
     // Should match the value in PhoneWindowManager
     public static final String SYSTEM_DIALOG_REASON_RECENT_APPS = "recentapps";
@@ -108,7 +109,8 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected NotificationData mNotificationData = new NotificationData();
     protected NotificationRowLayout mPile;
 
-    protected StatusBarNotification mCurrentlyInterruptingNotification;
+    protected NotificationData.Entry mInterruptingNotificationEntry;
+    protected long mInterruptingNotificationTime;
 
     // used to notify status bar for suppressing notification LED
     protected boolean mPanelSlightlyVisible;
@@ -127,6 +129,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected IDreamManager mDreamManager;
     KeyguardManager mKeyguardManager;
     PowerManager mPowerManager;
+    protected int mRowHeight;
 
     // UI-specific methods
 
@@ -432,7 +435,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    public void dismissHeadsUp() {
+    public void onHeadsUpDismissed() {
         // pass
     }
 
@@ -558,6 +561,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
+    public abstract void resetHeadsUpDecayTimer();
+
     protected class H extends Handler {
         public void handleMessage(Message m) {
             Intent intent;
@@ -615,7 +620,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected void workAroundBadLayerDrawableOpacity(View v) {
     }
 
-    protected  boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
+    public boolean inflateViews(NotificationData.Entry entry, ViewGroup parent) {
         int minHeight =
                 mContext.getResources().getDimensionPixelSize(R.dimen.notification_min_height);
         int maxHeight =
@@ -630,7 +635,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         // create the row view
         LayoutInflater inflater = (LayoutInflater)mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
+        ExpandableNotificationRow row = (ExpandableNotificationRow) inflater.inflate(
+                R.layout.status_bar_notification_row, parent, false);
 
         // for blaming (see SwipeHelper.setLongPressListener)
         row.setTag(sbn.getPackageName());
@@ -697,6 +703,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             }
         }
         entry.row = row;
+        entry.row.setRowHeight(mRowHeight);
         entry.content = content;
         entry.expanded = contentViewLocal;
         entry.setBigContentView(bigContentViewLocal);
@@ -851,33 +858,18 @@ public abstract class BaseStatusBar extends SystemUI implements
         return iconView;
     }
 
-    protected boolean expandView(NotificationData.Entry entry, boolean expand) {
-        int rowHeight =
-                mContext.getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
-        ViewGroup.LayoutParams lp = entry.row.getLayoutParams();
-        if (entry.expandable() && expand) {
-            if (DEBUG) Log.d(TAG, "setting expanded row height to WRAP_CONTENT");
-            lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-        } else {
-            if (DEBUG) Log.d(TAG, "setting collapsed row height to " + rowHeight);
-            lp.height = rowHeight;
-        }
-        entry.row.setLayoutParams(lp);
-        return expand;
-    }
-
     protected void updateExpansionStates() {
         int N = mNotificationData.size();
         for (int i = 0; i < N; i++) {
             NotificationData.Entry entry = mNotificationData.get(i);
-            if (!entry.userLocked()) {
+            if (!entry.row.isUserLocked()) {
                 if (i == (N-1)) {
                     if (DEBUG) Log.d(TAG, "expanding top notification at " + i);
-                    expandView(entry, true);
+                    entry.row.setExpanded(true);
                 } else {
-                    if (!entry.userExpanded()) {
+                    if (!entry.row.isUserExpanded()) {
                         if (DEBUG) Log.d(TAG, "collapsing notification at " + i);
-                        expandView(entry, false);
+                        entry.row.setExpanded(false);
                     } else {
                         if (DEBUG) Log.d(TAG, "ignoring user-modified notification at " + i);
                     }
@@ -997,13 +989,13 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (DEBUG) Log.d(TAG, "contents was " + (contentsUnchanged ? "unchanged" : "changed"));
             if (DEBUG) Log.d(TAG, "order was " + (orderUnchanged ? "unchanged" : "changed"));
             if (DEBUG) Log.d(TAG, "notification is " + (isTopAnyway ? "top" : "not top"));
-            final boolean wasExpanded = oldEntry.userExpanded();
+            final boolean wasExpanded = oldEntry.row.isUserExpanded();
             removeNotificationViews(key);
             addNotificationViews(key, notification);
             if (wasExpanded) {
                 final NotificationData.Entry newEntry = mNotificationData.findByKey(key);
-                expandView(newEntry, true);
-                newEntry.setUserExpanded(true);
+                newEntry.row.setExpanded(true);
+                newEntry.row.setUserExpanded(true);
             }
         }
 
@@ -1026,7 +1018,8 @@ public abstract class BaseStatusBar extends SystemUI implements
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
 
         // See if we need to update the heads up.
-        if (ENABLE_HEADS_UP && oldNotification == mCurrentlyInterruptingNotification) {
+        if (ENABLE_HEADS_UP && mInterruptingNotificationEntry != null
+                && oldNotification == mInterruptingNotificationEntry.notification) {
             if (DEBUG) Log.d(TAG, "updating the current heads up:" + notification);
             // XXX: this is a hack for Alarms. The real implementation will need to *update*
             // the heads up.
@@ -1037,15 +1030,28 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
     }
 
-    protected boolean shouldInterrupt(StatusBarNotification notification) {
-        boolean interrupt = notification.getNotification().fullScreenIntent == null
-                && notification.getScore() >= INTERRUPTION_THRESHOLD
-                && mPowerManager.isScreenOn() && !mKeyguardManager.isKeyguardLocked();
+    protected boolean shouldInterrupt(StatusBarNotification sbn) {
+        Notification notification = sbn.getNotification();
+        // some predicates to make the boolean logic legible
+        boolean isNoisy = (notification.defaults & Notification.DEFAULT_SOUND) != 0
+                || (notification.defaults & Notification.DEFAULT_VIBRATE) != 0
+                || notification.sound != null
+                || notification.vibrate != null;
+        boolean isHighPriority = sbn.getScore() >= INTERRUPTION_THRESHOLD;
+        boolean isFullscreen = notification.fullScreenIntent != null;
+        boolean isAllowed = notification.extras.getInt(Notification.EXTRA_AS_HEADS_UP,
+                Notification.HEADS_UP_ALLOWED) != Notification.HEADS_UP_NEVER;
+
+        boolean interrupt = (isFullscreen || (isHighPriority && isNoisy))
+                && isAllowed
+                && mPowerManager.isScreenOn()
+                && !mKeyguardManager.isKeyguardLocked();
         try {
             interrupt = interrupt && !mDreamManager.isDreaming();
         } catch (RemoteException e) {
             Log.d(TAG, "failed to query dream manager", e);
         }
+        if (DEBUG) Log.d(TAG, "interrupt: " + interrupt);
         return interrupt;
     }
 

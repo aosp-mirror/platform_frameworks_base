@@ -137,6 +137,10 @@ public class TvStatusBar extends BaseStatusBar {
     }
 
     @Override
+    public void resetHeadsUpDecayTimer() {
+    }
+
+    @Override
     public void animateExpandSettingsPanel() {
     }
 

@@ -457,6 +457,30 @@ public class Notification implements Parcelable
     public static final String EXTRA_PEOPLE = "android.people";
 
     /**
+     * Notification extra to specify heads up display preference.
+     * @hide
+     */
+    public static final String EXTRA_AS_HEADS_UP = "headsup";
+
+    /**
+     * Value for {@link #EXTRA_AS_HEADS_UP} indicating that heads up display is not appropriate.
+     * @hide
+     */
+    public static final int HEADS_UP_NEVER = 0;
+
+    /**
+     * Default value for {@link #EXTRA_AS_HEADS_UP} indicating that heads up display is appropriate.
+     * @hide
+     */
+    public static final int HEADS_UP_ALLOWED = 1;
+
+    /**
+     * Value for {@link #EXTRA_AS_HEADS_UP} that advocates for heads up display.
+     * @hide
+     */
+    public static final int HEADS_UP_REQUESTED = 2;
+
+    /**
      * Structure to encapsulate an "action", including title and icon, that can be attached to a Notification.
      */
     public static class Action implements Parcelable {
