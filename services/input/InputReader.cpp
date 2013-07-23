@@ -354,8 +354,9 @@ void InputReader::addDeviceLocked(nsecs_t when, int32_t deviceId) {
 
     InputDeviceIdentifier identifier = mEventHub->getDeviceIdentifier(deviceId);
     uint32_t classes = mEventHub->getDeviceClasses(deviceId);
+    int32_t controllerNumber = mEventHub->getDeviceControllerNumber(deviceId);
 
-    InputDevice* device = createDeviceLocked(deviceId, identifier, classes);
+    InputDevice* device = createDeviceLocked(deviceId, controllerNumber, identifier, classes);
     device->configure(when, &mConfig, 0);
     device->reset(when);
 
@@ -395,10 +396,10 @@ void InputReader::removeDeviceLocked(nsecs_t when, int32_t deviceId) {
     delete device;
 }
 
-InputDevice* InputReader::createDeviceLocked(int32_t deviceId,
+InputDevice* InputReader::createDeviceLocked(int32_t deviceId, int32_t controllerNumber,
         const InputDeviceIdentifier& identifier, uint32_t classes) {
     InputDevice* device = new InputDevice(&mContext, deviceId, bumpGenerationLocked(),
-            identifier, classes);
+            controllerNumber, identifier, classes);
 
     // External devices.
     if (classes & INPUT_DEVICE_CLASS_EXTERNAL) {
@@ -843,8 +844,8 @@ bool InputReaderThread::threadLoop() {
 // --- InputDevice ---
 
 InputDevice::InputDevice(InputReaderContext* context, int32_t id, int32_t generation,
-        const InputDeviceIdentifier& identifier, uint32_t classes) :
-        mContext(context), mId(id), mGeneration(generation),
+        int32_t controllerNumber, const InputDeviceIdentifier& identifier, uint32_t classes) :
+        mContext(context), mId(id), mGeneration(generation), mControllerNumber(controllerNumber),
         mIdentifier(identifier), mClasses(classes),
         mSources(0), mIsExternal(false), mDropUntilNextSync(false) {
 }
@@ -995,7 +996,8 @@ void InputDevice::timeoutExpired(nsecs_t when) {
 }
 
 void InputDevice::getDeviceInfo(InputDeviceInfo* outDeviceInfo) {
-    outDeviceInfo->initialize(mId, mGeneration, mIdentifier, mAlias, mIsExternal);
+    outDeviceInfo->initialize(mId, mGeneration, mControllerNumber, mIdentifier, mAlias,
+            mIsExternal);
 
     size_t numMappers = mMappers.size();
     for (size_t i = 0; i < numMappers; i++) {
