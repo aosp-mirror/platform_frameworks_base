@@ -48,9 +48,8 @@ import java.util.List;
 public class IntentFirewall {
     private static final String TAG = "IntentFirewall";
 
-    // e.g. /data/system/ifw/ifw.xml or /data/secure/system/ifw/ifw.xml
-    private static final File RULES_FILE =
-            new File(Environment.getSystemSecureDirectory(), "ifw/ifw.xml");
+    // e.g. /data/system/ifw or /data/secure/system/ifw
+    private static final File RULES_DIR = new File(Environment.getSystemSecureDirectory(), "ifw");
 
     private static final int LOG_PACKAGES_MAX_LENGTH = 150;
     private static final int LOG_PACKAGES_SUFFICIENT_LENGTH = 125;
@@ -106,12 +105,12 @@ public class IntentFirewall {
 
     public IntentFirewall(AMSInterface ams) {
         mAms = ams;
-        File rulesFile = getRulesFile();
-        rulesFile.getParentFile().mkdirs();
+        File rulesDir = getRulesDir();
+        rulesDir.mkdirs();
 
-        readRules(rulesFile);
+        readRulesDir(rulesDir);
 
-        mObserver = new RuleObserver(rulesFile);
+        mObserver = new RuleObserver(rulesDir);
         mObserver.startWatching();
     }
 
@@ -216,20 +215,56 @@ public class IntentFirewall {
         return null;
     }
 
-    public static File getRulesFile() {
-        return RULES_FILE;
+    public static File getRulesDir() {
+        return RULES_DIR;
     }
 
     /**
-     * Reads rules from the given file and replaces our set of rules with the newly read rules
+     * Reads rules from all xml files (*.xml) in the given directory, and replaces our set of rules
+     * with the newly read rules.
+     *
+     * We only check for files ending in ".xml", to allow for temporary files that are atomically
+     * renamed to .xml
      *
      * All calls to this method from the file observer come through a handler and are inherently
      * serialized
      */
-    private void readRules(File rulesFile) {
+    private void readRulesDir(File rulesDir) {
         FirewallIntentResolver[] resolvers = new FirewallIntentResolver[3];
         for (int i=0; i<resolvers.length; i++) {
             resolvers[i] = new FirewallIntentResolver();
+        }
+
+        File[] files = rulesDir.listFiles();
+        for (int i=0; i<files.length; i++) {
+            File file = files[i];
+
+            if (file.getName().endsWith(".xml")) {
+                readRules(file, resolvers);
+            }
+        }
+
+        Slog.i(TAG, "Read new rules (A:" + resolvers[TYPE_ACTIVITY].filterSet().size() +
+                " B:" + resolvers[TYPE_BROADCAST].filterSet().size() +
+                " S:" + resolvers[TYPE_SERVICE].filterSet().size() + ")");
+
+        synchronized (mAms.getAMSLock()) {
+            mActivityResolver = resolvers[TYPE_ACTIVITY];
+            mBroadcastResolver = resolvers[TYPE_BROADCAST];
+            mServiceResolver = resolvers[TYPE_SERVICE];
+        }
+    }
+
+    /**
+     * Reads rules from the given file and add them to the given resolvers
+     */
+    private void readRules(File rulesFile, FirewallIntentResolver[] resolvers) {
+        // some temporary lists to hold the rules while we parse the xml file, so that we can
+        // add the rules all at once, after we know there weren't any major structural problems
+        // with the xml file
+        List<List<Rule>> rulesByType = new ArrayList<List<Rule>>(3);
+        for (int i=0; i<3; i++) {
+            rulesByType.add(new ArrayList<Rule>());
         }
 
         FileInputStream fis;
@@ -247,8 +282,6 @@ public class IntentFirewall {
 
             XmlUtils.beginDocument(parser, TAG_RULES);
 
-            int[] numRules = new int[3];
-
             int outerDepth = parser.getDepth();
             while (XmlUtils.nextElementWithin(parser, outerDepth)) {
                 int ruleType = -1;
@@ -265,41 +298,28 @@ public class IntentFirewall {
                 if (ruleType != -1) {
                     Rule rule = new Rule();
 
-                    FirewallIntentResolver resolver = resolvers[ruleType];
+                    List<Rule> rules = rulesByType.get(ruleType);
 
                     // if we get an error while parsing a particular rule, we'll just ignore
                     // that rule and continue on with the next rule
                     try {
                         rule.readFromXml(parser);
                     } catch (XmlPullParserException ex) {
-                        Slog.e(TAG, "Error reading intent firewall rule", ex);
+                        Slog.e(TAG, "Error reading an intent firewall rule from " + rulesFile, ex);
                         continue;
                     }
 
-                    numRules[ruleType]++;
-
-                    for (int i=0; i<rule.getIntentFilterCount(); i++) {
-                        resolver.addFilter(rule.getIntentFilter(i));
-                    }
+                    rules.add(rule);
                 }
-            }
-
-            Slog.i(TAG, "Read new rules (A:" + numRules[TYPE_ACTIVITY] +
-                    " B:" + numRules[TYPE_BROADCAST] + " S:" + numRules[TYPE_SERVICE] + ")");
-
-            synchronized (mAms.getAMSLock()) {
-                mActivityResolver = resolvers[TYPE_ACTIVITY];
-                mBroadcastResolver = resolvers[TYPE_BROADCAST];
-                mServiceResolver = resolvers[TYPE_SERVICE];
             }
         } catch (XmlPullParserException ex) {
             // if there was an error outside of a specific rule, then there are probably
             // structural problems with the xml file, and we should completely ignore it
-            Slog.e(TAG, "Error reading intent firewall rules", ex);
-            clearRules();
+            Slog.e(TAG, "Error reading intent firewall rules from " + rulesFile, ex);
+            return;
         } catch (IOException ex) {
-            Slog.e(TAG, "Error reading intent firewall rules", ex);
-            clearRules();
+            Slog.e(TAG, "Error reading intent firewall rules from " + rulesFile, ex);
+            return;
         } finally {
             try {
                 fis.close();
@@ -307,21 +327,17 @@ public class IntentFirewall {
                 Slog.e(TAG, "Error while closing " + rulesFile, ex);
             }
         }
-    }
 
-    /**
-     * Clears out all of our rules
-     *
-     * All calls to this method from the file observer come through a handler and are inherently
-     * serialized
-     */
-    private void clearRules() {
-        Slog.i(TAG, "Clearing all rules");
+        for (int ruleType=0; ruleType<rulesByType.size(); ruleType++) {
+            List<Rule> rules = rulesByType.get(ruleType);
+            FirewallIntentResolver resolver = resolvers[ruleType];
 
-        synchronized (mAms.getAMSLock())  {
-            mActivityResolver = new FirewallIntentResolver();
-            mBroadcastResolver = new FirewallIntentResolver();
-            mServiceResolver = new FirewallIntentResolver();
+            for (int ruleIndex=0; ruleIndex<rules.size(); ruleIndex++) {
+                Rule rule = rules.get(ruleIndex);
+                for (int filterIndex=0; filterIndex<rule.getIntentFilterCount(); filterIndex++) {
+                    resolver.addFilter(rule.getIntentFilter(filterIndex));
+                }
+            }
         }
     }
 
@@ -421,54 +437,32 @@ public class IntentFirewall {
         }
     }
 
-    private static final int READ_RULES = 0;
-    private static final int CLEAR_RULES = 1;
-
     final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case READ_RULES:
-                    readRules(getRulesFile());
-                    break;
-                case CLEAR_RULES:
-                    clearRules();
-                    break;
-            }
+            readRulesDir(getRulesDir());
         }
     };
 
     /**
-     * Monitors for the creation/deletion/modification of the rule file
+     * Monitors for the creation/deletion/modification of any .xml files in the rule directory
      */
     private class RuleObserver extends FileObserver {
-        // The file name we're monitoring, with no path component
-        private final String mMonitoredFile;
+        private static final int MONITORED_EVENTS = FileObserver.CREATE|FileObserver.MOVED_TO|
+                FileObserver.CLOSE_WRITE|FileObserver.DELETE|FileObserver.MOVED_FROM;
 
-        private static final int CREATED_FLAGS = FileObserver.CREATE|FileObserver.MOVED_TO|
-                FileObserver.CLOSE_WRITE;
-        private static final int DELETED_FLAGS = FileObserver.DELETE|FileObserver.MOVED_FROM;
-
-        public RuleObserver(File monitoredFile) {
-            super(monitoredFile.getParentFile().getAbsolutePath(), CREATED_FLAGS|DELETED_FLAGS);
-            mMonitoredFile = monitoredFile.getName();
+        public RuleObserver(File monitoredDir) {
+            super(monitoredDir.getAbsolutePath(), MONITORED_EVENTS);
         }
 
         @Override
         public void onEvent(int event, String path) {
-            if (path.equals(mMonitoredFile)) {
+            if (path.endsWith(".xml")) {
                 // we wait 250ms before taking any action on an event, in order to dedup multiple
                 // events. E.g. a delete event followed by a create event followed by a subsequent
-                // write+close event;
-                if ((event & CREATED_FLAGS) != 0) {
-                    mHandler.removeMessages(READ_RULES);
-                    mHandler.removeMessages(CLEAR_RULES);
-                    mHandler.sendEmptyMessageDelayed(READ_RULES, 250);
-                } else if ((event & DELETED_FLAGS) != 0) {
-                    mHandler.removeMessages(READ_RULES);
-                    mHandler.removeMessages(CLEAR_RULES);
-                    mHandler.sendEmptyMessageDelayed(CLEAR_RULES, 250);
-                }
+                // write+close event
+                mHandler.removeMessages(0);
+                mHandler.sendEmptyMessageDelayed(0, 250);
             }
         }
     }
