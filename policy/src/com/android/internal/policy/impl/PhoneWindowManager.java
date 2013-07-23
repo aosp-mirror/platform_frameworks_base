@@ -3229,7 +3229,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        if ((fl & FLAG_LAYOUT_NO_LIMITS) != 0) {
+        // TYPE_SYSTEM_ERROR is above the NavigationBar so it can't be allowed to extend over it.
+        if ((fl & FLAG_LAYOUT_NO_LIMITS) != 0 && attrs.type != TYPE_SYSTEM_ERROR) {
             df.left = df.top = of.left = of.top = cf.left = cf.top = vf.left = vf.top = -10000;
             df.right = df.bottom = of.right = of.bottom = cf.right = cf.bottom
                     = vf.right = vf.bottom = 10000;
