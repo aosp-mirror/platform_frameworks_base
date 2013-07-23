@@ -271,10 +271,10 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         // (streaming)
 
         int requestId1;
-        requestId1 = mCameraUser.submitRequest(request, /* streaming */true);
+        requestId1 = mCameraUser.submitRequest(request, /* streaming */false);
         assertTrue("Request IDs should be non-negative", requestId1 >= 0);
 
-        int requestIdStreaming = mCameraUser.submitRequest(request, /* streaming */false);
+        int requestIdStreaming = mCameraUser.submitRequest(request, /* streaming */true);
         assertTrue("Request IDs should be non-negative", requestIdStreaming >= 0);
         assertNotSame("Request IDs should be unique for multiple requests", requestId1,
                 requestIdStreaming);
