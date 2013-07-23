@@ -2069,5 +2069,4 @@
   <public type="attr" name="addPrintersActivity" />
   <public type="attr" name="vendor" />
   <public type="attr" name="paymentService" />
-  <public type="attr" name="aid" />
 </resources>
