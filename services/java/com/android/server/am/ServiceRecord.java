@@ -73,7 +73,6 @@ final class ServiceRecord extends Binder {
     final String dataDir;   // where activity data should go
     final boolean exported; // from ServiceInfo.exported
     final Runnable restarter; // used to schedule retries of starting the service
-    final ProcessTracker.ServiceState tracker; // tracking service execution, may be null
     final long createTime;  // when this service was created
     final ArrayMap<Intent.FilterComparison, IntentBindRecord> bindings
             = new ArrayMap<Intent.FilterComparison, IntentBindRecord>();
@@ -84,6 +83,7 @@ final class ServiceRecord extends Binder {
 
     ProcessRecord app;      // where this service is running or null.
     ProcessRecord isolatedProc; // keep track of isolated process, if requested
+    ProcessTracker.ServiceState tracker; // tracking service execution, may be null
     boolean isForeground;   // is service currently in foreground mode?
     int foregroundId;       // Notification ID of last foreground req.
     Notification foregroundNoti; // Notification record of foreground state.
@@ -282,8 +282,7 @@ final class ServiceRecord extends Binder {
 
     ServiceRecord(ActivityManagerService ams,
             BatteryStatsImpl.Uid.Pkg.Serv servStats, ComponentName name,
-            Intent.FilterComparison intent, ServiceInfo sInfo, Runnable restarter,
-            ProcessTracker.ServiceState tracker) {
+            Intent.FilterComparison intent, ServiceInfo sInfo, Runnable restarter) {
         this.ams = ams;
         this.stats = servStats;
         this.name = name;
@@ -299,10 +298,20 @@ final class ServiceRecord extends Binder {
         dataDir = sInfo.applicationInfo.dataDir;
         exported = sInfo.exported;
         this.restarter = restarter;
-        this.tracker = tracker;
         createTime = SystemClock.elapsedRealtime();
         lastActivity = SystemClock.uptimeMillis();
         userId = UserHandle.getUserId(appInfo.uid);
+    }
+
+    public ProcessTracker.ServiceState getTracker() {
+        if (tracker != null) {
+            return tracker;
+        }
+        if ((serviceInfo.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) == 0) {
+            tracker = ams.mProcessTracker.getServiceStateLocked(serviceInfo.packageName,
+                    serviceInfo.applicationInfo.uid, serviceInfo.name);
+        }
+        return tracker;
     }
 
     public AppBindRecord retrieveAppBindingLocked(Intent intent,
