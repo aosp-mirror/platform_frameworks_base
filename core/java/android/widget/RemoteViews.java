@@ -46,6 +46,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView.OnItemClickListener;
+import libcore.util.Objects;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -137,15 +138,48 @@ public class RemoteViews implements Parcelable, Filter {
 
     private static final OnClickHandler DEFAULT_ON_CLICK_HANDLER = new OnClickHandler();
 
-    private static final Object sMethodsLock = new Object[0];
-    private static final ArrayMap<Class<? extends View>, ArrayMap<String, Method>> sMethods =
-            new ArrayMap<Class<? extends View>, ArrayMap<String, Method>>();
+    private static final Object[] sMethodsLock = new Object[0];
+    private static final ArrayMap<Class<? extends View>, ArrayMap<MutablePair<String, Class<?>>, Method>> sMethods =
+            new ArrayMap<Class<? extends View>, ArrayMap<MutablePair<String, Class<?>>, Method>>();
     private static final ThreadLocal<Object[]> sInvokeArgsTls = new ThreadLocal<Object[]>() {
         @Override
         protected Object[] initialValue() {
             return new Object[1];
         }
     };
+
+    /**
+     * Handle with care!
+     */
+    static class MutablePair<F, S> {
+        F first;
+        S second;
+
+        MutablePair(F first, S second) {
+            this.first = first;
+            this.second = second;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof MutablePair)) {
+                return false;
+            }
+            MutablePair<?, ?> p = (MutablePair<?, ?>) o;
+            return Objects.equal(p.first, first) && Objects.equal(p.second, second);
+        }
+
+        @Override
+        public int hashCode() {
+            return (first == null ? 0 : first.hashCode()) ^ (second == null ? 0 : second.hashCode());
+        }
+    }
+
+    /**
+     * This pair is used to perform lookups in sMethods without causing allocations.
+     */
+    private final MutablePair<String, Class<?>> mPair =
+            new MutablePair<String, Class<?>>(null, null);
 
     /**
      * This annotation indicates that a subclass of View is alllowed to be used
@@ -712,18 +746,21 @@ public class RemoteViews implements Parcelable, Filter {
         return rect;
     }
 
-    private static Method getMethod(View view, String methodName, Class<?> paramType) {
+    private Method getMethod(View view, String methodName, Class<?> paramType) {
         Method method;
         Class<? extends View> klass = view.getClass();
 
         synchronized (sMethodsLock) {
-            ArrayMap<String, Method> methods = sMethods.get(klass);
+            ArrayMap<MutablePair<String, Class<?>>, Method> methods = sMethods.get(klass);
             if (methods == null) {
-                methods = new ArrayMap<String, Method>();
+                methods = new ArrayMap<MutablePair<String, Class<?>>, Method>();
                 sMethods.put(klass, methods);
             }
 
-            method = methods.get(methodName);
+            mPair.first = methodName;
+            mPair.second = paramType;
+
+            method = methods.get(mPair);
             if (method == null) {
                 try {
                     method = klass.getMethod(methodName, paramType);
@@ -738,7 +775,7 @@ public class RemoteViews implements Parcelable, Filter {
                             + methodName + getParameters(paramType));
                 }
 
-                methods.put(methodName, method);
+                methods.put(new MutablePair<String, Class<?>>(methodName, paramType), method);
             }
         }
 
@@ -849,8 +886,8 @@ public class RemoteViews implements Parcelable, Filter {
         public final static int TAG = 3;
     }
 
-    private class ReflectionActionWithoutParams extends Action {
-        String methodName;
+    private final class ReflectionActionWithoutParams extends Action {
+        final String methodName;
 
         public final static int TAG = 5;
 
@@ -1011,7 +1048,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Base class for the reflection actions.
      */
-    private class ReflectionAction extends Action {
+    private final class ReflectionAction extends Action {
         static final int TAG = 2;
 
         static final int BOOLEAN = 1;
