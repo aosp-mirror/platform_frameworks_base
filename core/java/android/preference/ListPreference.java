@@ -16,13 +16,13 @@
 
 package android.preference;
 
-
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 
 /**
@@ -41,6 +41,7 @@ public class ListPreference extends DialogPreference {
     private String mValue;
     private String mSummary;
     private int mClickedDialogEntryIndex;
+    private boolean mValueSet;
     
     public ListPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -130,9 +131,16 @@ public class ListPreference extends DialogPreference {
      * @param value The value to set for the key.
      */
     public void setValue(String value) {
-        mValue = value;
-        
-        persistString(value);
+        // Always persist/notify the first time.
+        final boolean changed = !TextUtils.equals(mValue, value);
+        if (changed || !mValueSet) {
+            mValue = value;
+            mValueSet = true;
+            persistString(value);
+            if (changed) {
+                notifyChanged();
+            }
+        }
     }
 
     /**
