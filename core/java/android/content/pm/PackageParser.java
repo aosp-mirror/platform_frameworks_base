@@ -45,9 +45,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.CertPath;
-import java.security.cert.X509Certificate;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
@@ -2440,7 +2437,7 @@ public class PackageParser {
 
             if (parser.getName().equals("intent-filter")) {
                 ActivityIntentInfo intent = new ActivityIntentInfo(a);
-                if (!parseIntent(res, parser, attrs, flags, intent, outError, !receiver)) {
+                if (!parseIntent(res, parser, attrs, true, intent, outError)) {
                     return null;
                 }
                 if (intent.countActions() == 0) {
@@ -2449,6 +2446,21 @@ public class PackageParser {
                             + parser.getPositionDescription());
                 } else {
                     a.intents.add(intent);
+                }
+            } else if (!receiver && parser.getName().equals("preferred")) {
+                ActivityIntentInfo intent = new ActivityIntentInfo(a);
+                if (!parseIntent(res, parser, attrs, false, intent, outError)) {
+                    return null;
+                }
+                if (intent.countActions() == 0) {
+                    Slog.w(TAG, "No actions in preferred at "
+                            + mArchiveSourcePath + " "
+                            + parser.getPositionDescription());
+                } else {
+                    if (owner.preferredActivityFilters == null) {
+                        owner.preferredActivityFilters = new ArrayList<ActivityIntentInfo>();
+                    }
+                    owner.preferredActivityFilters.add(intent);
                 }
             } else if (parser.getName().equals("meta-data")) {
                 if ((a.metaData=parseMetaData(res, parser, attrs, a.metaData,
@@ -2613,7 +2625,7 @@ public class PackageParser {
 
             if (parser.getName().equals("intent-filter")) {
                 ActivityIntentInfo intent = new ActivityIntentInfo(a);
-                if (!parseIntent(res, parser, attrs, flags, intent, outError, true)) {
+                if (!parseIntent(res, parser, attrs, true, intent, outError)) {
                     return null;
                 }
                 if (intent.countActions() == 0) {
@@ -3037,7 +3049,7 @@ public class PackageParser {
 
             if (parser.getName().equals("intent-filter")) {
                 ServiceIntentInfo intent = new ServiceIntentInfo(s);
-                if (!parseIntent(res, parser, attrs, flags, intent, outError, false)) {
+                if (!parseIntent(res, parser, attrs, true, intent, outError)) {
                     return null;
                 }
 
@@ -3234,9 +3246,8 @@ public class PackageParser {
     private static final String ANDROID_RESOURCES
             = "http://schemas.android.com/apk/res/android";
 
-    private boolean parseIntent(Resources res,
-            XmlPullParser parser, AttributeSet attrs, int flags,
-            IntentInfo outInfo, String[] outError, boolean isActivity)
+    private boolean parseIntent(Resources res, XmlPullParser parser, AttributeSet attrs,
+            boolean allowGlobs, IntentInfo outInfo, String[] outError)
             throws XmlPullParserException, IOException {
 
         TypedArray sa = res.obtainAttributes(attrs,
@@ -3327,6 +3338,10 @@ public class PackageParser {
                 str = sa.getNonConfigurationString(
                         com.android.internal.R.styleable.AndroidManifestData_sspPattern, 0);
                 if (str != null) {
+                    if (!allowGlobs) {
+                        outError[0] = "sspPattern not allowed here; ssp must be literal";
+                        return false;
+                    }
                     outInfo.addDataSchemeSpecificPart(str, PatternMatcher.PATTERN_SIMPLE_GLOB);
                 }
 
@@ -3353,6 +3368,10 @@ public class PackageParser {
                 str = sa.getNonConfigurationString(
                         com.android.internal.R.styleable.AndroidManifestData_pathPattern, 0);
                 if (str != null) {
+                    if (!allowGlobs) {
+                        outError[0] = "pathPattern not allowed here; path must be literal";
+                        return false;
+                    }
                     outInfo.addDataPath(str, PatternMatcher.PATTERN_SIMPLE_GLOB);
                 }
 
@@ -3413,6 +3432,8 @@ public class PackageParser {
         public ArrayList<String> usesLibraries = null;
         public ArrayList<String> usesOptionalLibraries = null;
         public String[] usesLibraryFiles = null;
+
+        public ArrayList<ActivityIntentInfo> preferredActivityFilters = null;
 
         public ArrayList<String> mOriginalPackages = null;
         public String mRealPackage = null;
@@ -4020,6 +4041,7 @@ public class PackageParser {
         public CharSequence nonLocalizedLabel;
         public int icon;
         public int logo;
+        public int preferred;
     }
 
     public final static class ActivityIntentInfo extends IntentInfo {
