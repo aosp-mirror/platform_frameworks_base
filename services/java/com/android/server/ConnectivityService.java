@@ -3447,6 +3447,20 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     /**
+     * Returns the information of the ongoing VPN. This method is used by VpnDialogs and
+     * not available in ConnectivityManager.
+     * Permissions are checked in Vpn class.
+     * @hide
+     */
+    @Override
+    public VpnConfig getVpnConfig() {
+        int user = UserHandle.getUserId(Binder.getCallingUid());
+        synchronized(mVpns) {
+            return mVpns.get(user).getVpnConfig();
+        }
+    }
+
+    /**
      * Callback for VPN subsystem. Currently VPN is not adapted to the service
      * through NetworkStateTracker since it works differently. For example, it
      * needs to override DNS servers but never takes the default routes. It

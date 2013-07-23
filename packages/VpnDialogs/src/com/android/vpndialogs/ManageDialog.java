@@ -65,10 +65,17 @@ public class ManageDialog extends AlertActivity implements
         }
 
         try {
-            mConfig = getIntent().getParcelableExtra("config");
 
             mService = IConnectivityManager.Stub.asInterface(
                     ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
+
+            mConfig = mService.getVpnConfig();
+
+            // mConfig can be null if we are a restricted user, in that case don't show this dialog
+            if (mConfig == null) {
+                finish();
+                return;
+            }
 
             View view = View.inflate(this, R.layout.manage, null);
             if (mConfig.session != null) {
