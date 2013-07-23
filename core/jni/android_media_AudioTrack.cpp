@@ -40,8 +40,6 @@ static const char* const kClassPathName = "android/media/AudioTrack";
 struct fields_t {
     // these fields provide access from C++ to the...
     jmethodID postNativeEventInJava; //... event post callback method
-    int       PCM16;                 //...  format constants
-    int       PCM8;                  //...  format constants
     jfieldID  nativeTrackInJavaObj;  // stores in Java the native AudioTrack object
     jfieldID  jniData;      // stores in Java additional resources used by the native AudioTrack
 };
@@ -57,6 +55,9 @@ struct audiotrack_callback_cookie {
 // keep these values in sync with AudioTrack.java
 #define MODE_STATIC 0
 #define MODE_STREAM 1
+// keep these values in sync with AudioFormat.java
+#define ENCODING_PCM_16BIT 2
+#define ENCODING_PCM_8BIT  3
 
 // ----------------------------------------------------------------------------
 class AudioTrackJniStorage {
@@ -244,7 +245,8 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
 
     // check the format.
     // This function was called from Java, so we compare the format against the Java constants
-    if ((audioFormat != javaAudioTrackFields.PCM16) && (audioFormat != javaAudioTrackFields.PCM8)) {
+    if ((audioFormat != ENCODING_PCM_16BIT) && (audioFormat != ENCODING_PCM_8BIT)) {
+
         ALOGE("Error creating AudioTrack: unsupported audio format.");
         return AUDIOTRACK_ERROR_SETUP_INVALIDFORMAT;
     }
@@ -252,19 +254,19 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     // for the moment 8bitPCM in MODE_STATIC is not supported natively in the AudioTrack C++ class
     // so we declare everything as 16bitPCM, the 8->16bit conversion for MODE_STATIC will be handled
     // in android_media_AudioTrack_native_write_byte()
-    if ((audioFormat == javaAudioTrackFields.PCM8)
+    if ((audioFormat == ENCODING_PCM_8BIT)
         && (memoryMode == MODE_STATIC)) {
         ALOGV("android_media_AudioTrack_native_setup(): requesting MODE_STATIC for 8bit \
             buff size of %dbytes, switching to 16bit, buff size of %dbytes",
             buffSizeInBytes, 2*buffSizeInBytes);
-        audioFormat = javaAudioTrackFields.PCM16;
+        audioFormat = ENCODING_PCM_16BIT;
         // we will need twice the memory to store the data
         buffSizeInBytes *= 2;
     }
 
     // compute the frame count
-    int bytesPerSample = audioFormat == javaAudioTrackFields.PCM16 ? 2 : 1;
-    audio_format_t format = audioFormat == javaAudioTrackFields.PCM16 ?
+    int bytesPerSample = audioFormat == ENCODING_PCM_16BIT ? 2 : 1;
+    audio_format_t format = audioFormat == ENCODING_PCM_16BIT ?
             AUDIO_FORMAT_PCM_16_BIT : AUDIO_FORMAT_PCM_8_BIT;
     int frameCount = buffSizeInBytes / (nbChannels * bytesPerSample);
 
@@ -518,14 +520,14 @@ jint writeToTrack(const sp<AudioTrack>& track, jint audioFormat, jbyte* data,
             written = 0;
         }
     } else {
-        if (audioFormat == javaAudioTrackFields.PCM16) {
+        if (audioFormat == ENCODING_PCM_16BIT) {
             // writing to shared memory, check for capacity
             if ((size_t)sizeInBytes > track->sharedBuffer()->size()) {
                 sizeInBytes = track->sharedBuffer()->size();
             }
             memcpy(track->sharedBuffer()->pointer(), data + offsetInBytes, sizeInBytes);
             written = sizeInBytes;
-        } else if (audioFormat == javaAudioTrackFields.PCM8) {
+        } else if (audioFormat == ENCODING_PCM_8BIT) {
             // data contains 8bit data we need to expand to 16bit before copying
             // to the shared memory
             // writing to shared memory, check for capacity,
@@ -809,7 +811,7 @@ static jint android_media_AudioTrack_get_min_buff_size(JNIEnv *env,  jobject thi
             sampleRateInHertz) != NO_ERROR) {
         return -1;
     }
-    return frameCount * nbChannels * (audioFormat == javaAudioTrackFields.PCM16 ? 2 : 1);
+    return frameCount * nbChannels * (audioFormat == ENCODING_PCM_16BIT ? 2 : 1);
 }
 
 // ----------------------------------------------------------------------------
@@ -883,8 +885,6 @@ static JNINativeMethod gMethods[] = {
 
 // field names found in android/media/AudioTrack.java
 #define JAVA_POSTEVENT_CALLBACK_NAME                    "postEventFromNative"
-#define JAVA_CONST_PCM16_NAME                           "ENCODING_PCM_16BIT"
-#define JAVA_CONST_PCM8_NAME                            "ENCODING_PCM_8BIT"
 #define JAVA_CONST_BUFFER_COUNT_NAME                    "BUFFER_COUNT"
 #define JAVA_CONST_STREAM_VOICE_CALL_NAME               "STREAM_VOICE_CALL"
 #define JAVA_CONST_STREAM_SYSTEM_NAME                   "STREAM_SYSTEM"
@@ -962,15 +962,6 @@ int register_android_media_AudioTrack(JNIEnv *env)
     audioFormatClass = env->FindClass(JAVA_AUDIOFORMAT_CLASS_NAME);
     if (audioFormatClass == NULL) {
         ALOGE("Can't find %s", JAVA_AUDIOFORMAT_CLASS_NAME);
-        return -1;
-    }
-    if ( !android_media_getIntConstantFromClass(env, audioFormatClass,
-                JAVA_AUDIOFORMAT_CLASS_NAME,
-                JAVA_CONST_PCM16_NAME, &(javaAudioTrackFields.PCM16))
-           || !android_media_getIntConstantFromClass(env, audioFormatClass,
-                JAVA_AUDIOFORMAT_CLASS_NAME,
-                JAVA_CONST_PCM8_NAME, &(javaAudioTrackFields.PCM8)) ) {
-        // error log performed in android_media_getIntConstantFromClass()
         return -1;
     }
 
