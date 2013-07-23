@@ -974,10 +974,17 @@ public class MediaFocusControl implements OnFinished {
 
         @Override
         public String toString() {
-            return stateToString() + ", "
-                    + ((mPositionMs == RemoteControlClient.PLAYBACK_POSITION_INVALID) ?
-                            "PLAYBACK_POSITION_INVALID ," : String.valueOf(mPositionMs)) + "ms ,"
-                    + mSpeed + "X";
+            return stateToString() + ", " + posToString() + ", " + mSpeed + "X";
+        }
+
+        private String posToString() {
+            if (mPositionMs == RemoteControlClient.PLAYBACK_POSITION_INVALID) {
+                return "PLAYBACK_POSITION_INVALID";
+            } else if (mPositionMs == RemoteControlClient.PLAYBACK_POSITION_ALWAYS_UNKNOWN) {
+                return "PLAYBACK_POSITION_ALWAYS_UNKNOWN";
+            } else {
+                return (String.valueOf(mPositionMs) + "ms");
+            }
         }
 
         private String stateToString() {
