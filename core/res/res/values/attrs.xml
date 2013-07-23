@@ -2598,7 +2598,7 @@
          element to list the ISO7816 Application ID (AIDs) your service can handle.-->
     <declare-styleable name="AidFilter">
         <!-- The ISO7816 Application ID -->
-        <attr name="aid" format="string" />
+        <attr name="name" />
         <!-- Short description of what the AID implements.-->
         <attr name="description" />
     </declare-styleable>

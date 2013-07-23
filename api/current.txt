@@ -259,7 +259,6 @@ package android {
     field public static final int addPrintersActivity = 16843747; // 0x10103e3
     field public static final int addStatesFromChildren = 16842992; // 0x10100f0
     field public static final int adjustViewBounds = 16843038; // 0x101011e
-    field public static final int aid = 16843750; // 0x10103e6
     field public static final int alertDialogIcon = 16843605; // 0x1010355
     field public static final int alertDialogStyle = 16842845; // 0x101005d
     field public static final int alertDialogTheme = 16843529; // 0x1010309
