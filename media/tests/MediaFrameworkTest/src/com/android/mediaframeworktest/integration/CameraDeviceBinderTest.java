@@ -307,4 +307,49 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         assertNotNull(info.get(CameraPropertiesKeys.Scaler.AVAILABLE_FORMATS));
     }
 
+    @SmallTest
+    public void testWaitUntilIdle() throws Exception {
+        CameraMetadata metadata = new CameraMetadata();
+        assertTrue(metadata.isEmpty());
+
+        CaptureRequest request = new CaptureRequest();
+        assertTrue(request.isEmpty());
+
+        // Create default request from template.
+        int status = mCameraUser.createDefaultRequest(TEMPLATE_PREVIEW, /* out */metadata);
+        assertEquals(CameraBinderTestUtils.NO_ERROR, status);
+        assertFalse(metadata.isEmpty());
+
+        request.swap(metadata);
+        assertFalse(request.isEmpty());
+        assertTrue(metadata.isEmpty());
+
+        SurfaceTexture surfaceTexture = new SurfaceTexture(/* ignored */0);
+        surfaceTexture.setDefaultBufferSize(640, 480);
+        Surface surface = new Surface(surfaceTexture);
+
+        // Create stream first. Pre-requisite to submitting a request using that
+        // stream.
+
+        int streamId = mCameraUser.createStream(/* ignored */10, /* ignored */20, /* ignored */30,
+                surface);
+        assertEquals(0, streamId);
+
+        request.addTarget(surface);
+
+        int requestIdStreaming = mCameraUser.submitRequest(request, /* streaming */true);
+        assertTrue("Request IDs should be non-negative", requestIdStreaming >= 0);
+
+        // Test Bad case first: waitUntilIdle when there is active repeating request
+        status = mCameraUser.waitUntilIdle();
+        assertEquals("waitUntilIdle is invalid operation when there is active repeating request",
+            CameraBinderTestUtils.INVALID_OPERATION, status);
+
+        // Test good case, waitUntilIdle when there is no active repeating request
+        status = mCameraUser.cancelRequest(requestIdStreaming);
+        assertEquals(CameraBinderTestUtils.NO_ERROR, status);
+        status = mCameraUser.waitUntilIdle();
+        assertEquals(CameraBinderTestUtils.NO_ERROR, status);
+    }
+
 }
