@@ -203,10 +203,10 @@ public final class Bitmap implements Parcelable {
             throw new IllegalArgumentException("width and height must be > 0");
         }
         if (!isMutable()) {
-            throw new IllegalArgumentException("only mutable bitmaps may be reconfigured");
+            throw new IllegalStateException("only mutable bitmaps may be reconfigured");
         }
         if (mBuffer == null) {
-            throw new IllegalArgumentException("only non-inPurgeable bitmaps may be reconfigured");
+            throw new IllegalStateException("only non-purgeable bitmaps may be reconfigured");
         }
 
         nativeReconfigure(mNativeBitmap, width, height, config.nativeInt, mBuffer.length);
