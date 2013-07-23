@@ -476,21 +476,21 @@ public class AudioRecord
         case AudioFormat.CHANNEL_INVALID:
         default:
             loge("getMinBufferSize(): Invalid channel configuration.");
-            return AudioRecord.ERROR_BAD_VALUE;
+            return ERROR_BAD_VALUE;
         }
 
         // PCM_8BIT is not supported at the moment
         if (audioFormat != AudioFormat.ENCODING_PCM_16BIT) {
             loge("getMinBufferSize(): Invalid audio format.");
-            return AudioRecord.ERROR_BAD_VALUE;
+            return ERROR_BAD_VALUE;
         }
 
         int size = native_get_min_buff_size(sampleRateInHz, channelCount, audioFormat);
         if (size == 0) {
-            return AudioRecord.ERROR_BAD_VALUE;
+            return ERROR_BAD_VALUE;
         }
         else if (size == -1) {
-            return AudioRecord.ERROR;
+            return ERROR;
         }
         else {
             return size;
