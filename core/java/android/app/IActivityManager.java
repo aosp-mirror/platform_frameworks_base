@@ -396,6 +396,8 @@ public interface IActivityManager extends IInterface {
 
     public void reportActivityFullyDrawn(IBinder token) throws RemoteException;
 
+    public void restart() throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -676,4 +678,5 @@ public interface IActivityManager extends IInterface {
     int CONVERT_TO_TRANSLUCENT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+174;
     int NOTIFY_ACTIVITY_DRAWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+175;
     int REPORT_ACTIVITY_FULLY_DRAWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+176;
+    int RESTART_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+177;
 }

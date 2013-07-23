@@ -1896,6 +1896,11 @@ public class Intent implements Parcelable, Cloneable {
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
+     * <p>May include the following extras:
+     * <ul>
+     * <li> {@link #EXTRA_SHUTDOWN_USERSPACE_ONLY} a boolean that is set to true if this
+     * shutdown is only for userspace processes.  If not set, assumed to be false.
+     * </ul>
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SHUTDOWN = "android.intent.action.ACTION_SHUTDOWN";
@@ -3259,6 +3264,15 @@ public class Intent implements Parcelable, Cloneable {
      * extra is <code>ArrayList&lt;String&gt;</code>.
      */
     public static final String EXTRA_MIME_TYPES = "android.intent.extra.MIME_TYPES";
+
+    /**
+     * Optional extra for {@link #ACTION_SHUTDOWN} that allows the sender to qualify that
+     * this shutdown is only for the user space of the system, not a complete shutdown.
+     * Hardware should not be shut down when this is true.  The default if not supplied
+     * is false.
+     */
+    public static final String EXTRA_SHUTDOWN_USERSPACE_ONLY
+            = "android.intent.extra.SHUTDOWN_USERSPACE_ONLY";
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------

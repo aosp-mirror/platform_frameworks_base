@@ -99,6 +99,7 @@ public class Am extends BaseCommand {
                 "       am clear-debug-app\n" +
                 "       am monitor [--gdb <port>]\n" +
                 "       am hang [--allow-restart]\n" +
+                "       am restart\n" +
                 "       am screen-compat [on|off] <PACKAGE>\n" +
                 "       am to-uri [INTENT]\n" +
                 "       am to-intent-uri [INTENT]\n" +
@@ -185,6 +186,8 @@ public class Am extends BaseCommand {
                 "\n" +
                 "am hang: hang the system.\n" +
                 "    --allow-restart: allow watchdog to perform normal system restart\n" +
+                "\n" +
+                "am restart: restart the user-space system.\n" +
                 "\n" +
                 "am screen-compat: control screen compatibility mode of <PACKAGE>.\n" +
                 "\n" +
@@ -290,6 +293,8 @@ public class Am extends BaseCommand {
             runMonitor();
         } else if (op.equals("hang")) {
             runHang();
+        } else if (op.equals("restart")) {
+            runRestart();
         } else if (op.equals("screen-compat")) {
             runScreenCompat();
         } else if (op.equals("to-uri")) {
@@ -1375,6 +1380,17 @@ public class Am extends BaseCommand {
 
         System.out.println("Hanging the system...");
         mAm.hang(new Binder(), allowRestart);
+    }
+
+    private void runRestart() throws Exception {
+        String opt;
+        while ((opt=nextOption()) != null) {
+            System.err.println("Error: Unknown option: " + opt);
+            return;
+        }
+
+        System.out.println("Restart the system...");
+        mAm.restart();
     }
 
     private void runScreenCompat() throws Exception {

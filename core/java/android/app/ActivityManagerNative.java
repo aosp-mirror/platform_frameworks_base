@@ -1972,6 +1972,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
+
+        case RESTART_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            restart();
+            reply.writeNoException();
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -4515,6 +4522,16 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
         mRemote.transact(NOTIFY_ACTIVITY_DRAWN_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    public void restart() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(RESTART_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

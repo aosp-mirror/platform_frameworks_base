@@ -8330,6 +8330,38 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    @Override
+    public void restart() {
+        if (checkCallingPermission(android.Manifest.permission.SET_ACTIVITY_WATCHER)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission "
+                    + android.Manifest.permission.SET_ACTIVITY_WATCHER);
+        }
+
+        Log.i(TAG, "Sending shutdown broadcast...");
+
+        BroadcastReceiver br = new BroadcastReceiver() {
+            @Override public void onReceive(Context context, Intent intent) {
+                // Now the broadcast is done, finish up the low-level shutdown.
+                Log.i(TAG, "Shutting down activity manager...");
+                shutdown(10000);
+                Log.i(TAG, "Shutdown complete, restarting!");
+                Process.killProcess(Process.myPid());
+                System.exit(10);
+            }
+        };
+
+        // First send the high-level shut down broadcast.
+        Intent intent = new Intent(Intent.ACTION_SHUTDOWN);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.putExtra(Intent.EXTRA_SHUTDOWN_USERSPACE_ONLY, true);
+        /* For now we are not doing a clean shutdown, because things seem to get unhappy.
+        mContext.sendOrderedBroadcastAsUser(intent,
+                UserHandle.ALL, null, br, mHandler, 0, null, null);
+        */
+        br.onReceive(mContext, intent);
+    }
+
     public final void startRunning(String pkg, String cls, String action,
             String data) {
         synchronized(this) {
@@ -15508,6 +15540,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 final Intent stoppingIntent = new Intent(Intent.ACTION_USER_STOPPING);
                 stoppingIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                 stoppingIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+                stoppingIntent.putExtra(Intent.EXTRA_SHUTDOWN_USERSPACE_ONLY, true);
                 final Intent shutdownIntent = new Intent(Intent.ACTION_SHUTDOWN);
                 // This is the result receiver for the final shutdown broadcast.
                 final IIntentReceiver shutdownReceiver = new IIntentReceiver.Stub() {
