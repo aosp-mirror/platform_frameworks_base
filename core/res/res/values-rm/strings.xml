@@ -2550,11 +2550,15 @@
     <skip />
     <!-- no translation found for write_fail_reason_cannot_write (8132505417935337724) -->
     <skip />
-    <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
-    <skip />
     <!-- no translation found for restr_pin_enter_pin (3395953421368476103) -->
     <skip />
-    <!-- no translation found for restr_pin_confirm_pin (2891475237150965991) -->
+    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
+    <skip />
+    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
+    <skip />
+    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
+    <skip />
+    <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
     <skip />
     <!-- no translation found for restr_pin_error_doesnt_match (2224214190906994548) -->
     <skip />

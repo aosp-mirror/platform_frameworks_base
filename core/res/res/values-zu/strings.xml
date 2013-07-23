@@ -279,10 +279,8 @@
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Ivumela uhlelo lokusebenza ukugudluza imisebenzi ngaphambili nangasemuva. Uhlelo lokusebenza lungenza lokhu ngaphandle kwakho."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"misa izinsiza ezisebenzayo"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Vumela ukuthi insiza isuse okumele kwenziwe ibulale nezinsiza zakho. Izinsiza eziwubungozi zingaphazamisa ukusebenza kwezinye izinsiza."</string>
-    <!-- no translation found for permlab_manageActivityStacks (7391191384027303065) -->
-    <skip />
-    <!-- no translation found for permdesc_manageActivityStacks (1615881933034084440) -->
-    <skip />
+    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"phatha izitaki zomsebenzi"</string>
+    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"Ivumela uhlelo lokusebenza ukuthi lingeze, lisuse, noma lilungise izitaki zomsebenzi lapho ezinye izinhlelo zokusebenza ziqalisa khona. Izinhlelo zokusebenza ezinobungozi zingaphazamisa ukuziphatha kwezinye izinhlelo zokusebenza."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"qala noma imuphi umsebenzi"</string>
     <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Ivumela uhlelo lokusebenza ukuqala umsebenzi, ngaphandle kokuvukeleka kwemvume noma isimo sokukhishiwe."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"setha ukuhambelana kwesikrini"</string>
@@ -360,14 +358,10 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Ivumela isimeli ukuhlanganisa uxhumano nomsebenzisi wezinga eliphezulu lendlela yokufaka. Ayisoze yadingeka kwizinhlelo ezivamile."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"hlanganisa kusevisi yokufinyeleleka"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Ivumela isibambi ukuhlanganisa uxhumo nomsebenzisi kwezinga eliphezulu lesevisi yesinqunjwana. Akusoze kwadingekela izinhlelo zokusebenza ezivamile."</string>
-    <!-- no translation found for permlab_bindPrintService (8462815179572748761) -->
-    <skip />
-    <!-- no translation found for permdesc_bindPrintService (7960067623209111135) -->
-    <skip />
-    <!-- no translation found for permlab_accessAllPrintJobs (1120792468465711159) -->
-    <skip />
-    <!-- no translation found for permdesc_accessAllPrintJobs (2978185311041864762) -->
-    <skip />
+    <string name="permlab_bindPrintService" msgid="8462815179572748761">"bophezela kusevisi yokuphrinta"</string>
+    <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Ivumela umnikazi ukuthi abophezele isixhumanisi esibonakalayo sezinga eliphezulu sesevisi lokuphrinta. Akumele idingelwe izinhlelo zokusebenza ezijwayelekile."</string>
+    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"finyelela kuyo yonke imisebenzi yokuphrinta"</string>
+    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Ivumela umnikazi ukuthi afinyelele imisebenzi yokushicilela edalwe olunye uhlelo lokusebenza. Akumele idingelwe izinhlelo zokusebenza ezijwayelekile."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"bophezela kunsizakalo yombhalo"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Ivumela umbambi ukuhlanganisa uxhumano nomsebenzisi kwezinga eliphezulu lwesixhumi esibonakalayo sensizakalo yombhalo(isb. InsizakaloYokuhlolaUkubhala). Akusoze kwadingeka kwezinhlelo zokusebenza ezivamile."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"hlanganisa kwinsizakalo ye-VPN"</string>
@@ -470,10 +464,8 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Ivumela insiza ukuthi isebenzise okuqukethwe i-SurfaceFlinger okusezingeni eliphansi."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"funda isikhumbuli sesikhashana sendikimba"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Ivumela insiza ukuthi ifunde okuqukethwe ifreyimu yebhafa."</string>
-    <!-- no translation found for permlab_accessInputFlinger (5348635270689553857) -->
-    <skip />
-    <!-- no translation found for permdesc_accessInputFlinger (2104864941201226616) -->
-    <skip />
+    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"finyelela ku-InputFlinger"</string>
+    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Ivumela uhlelo lokusebenza ukuthi lusebenzise izici zezinga eliphansi ze-InputFlinger."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"lungisa ukubukwa kwe-Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Ivumela uhlelo lokusebenza ukulungisa nokuxhuma ekubukisweni kwe-Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"lawula ukubukwa kwe-Wi-Fi"</string>
@@ -643,18 +635,14 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Ivumela insiza ukuthi yengamele iigomo iphinde ichaze imithetho ehambisana ngqo nensiza."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"lungisa ukubala kokusebenza kohleloxhumano"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Ivumela insiza ukuthi iguqule ukuthii ukusetshenziswa kwenethiwekhi kumiswa kanjani ezinsizeni. Ayisetshenziswa izinsiza ezijwayelekile."</string>
-    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
-    <skip />
-    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
-    <skip />
+    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"shintsha izimpawu zesokhethi"</string>
+    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Ivumela uhlelo lokusebenza ukuthi lilungise izimpawu zesokhethi zomzila"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"finyelela kuzaziso"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Ivumela uhlelo lokusebenza ukuthi lithole, lihlole, liphinde lisuse izaziso, ezifaka lezo ezithunyelwe ezinye izinhlelo zokusebenza."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"bophezela kwisevisi yomlaleli wesaziso"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ivumela umbambi ukubophezela kwisixhumi esibonakalayo sezinga eliphezulu lesevisi yomlaleli wesaziso. Akusoze kwadingeka kwizinhlelo zokusebenza ezivamile."</string>
-    <!-- no translation found for permlab_invokeCarrierSetup (3699600833975117478) -->
-    <skip />
-    <!-- no translation found for permdesc_invokeCarrierSetup (4159549152529111920) -->
-    <skip />
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"buyisela uhlelo lokusebenza lokulungiselelwa okunikezwe yinkampani yenethiwekhi"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ivumela umnikazi ukuthi abuyisele uhlelo lokusebenza lokulungiselelwa. Akumele idingelwe izinhlelo zokusebenza ezijwayelekile."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Misa imithetho yephasiwedi"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Lawula ubude nezinhlamvu ezivunyelwe kumaphasiwedi okuvula isikrini"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Gaka imizamo yokuvula isikrini"</string>
@@ -764,8 +752,7 @@
     <string name="imProtocolYahoo" msgid="8271439408469021273">"i-Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"i-Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <!-- no translation found for imProtocolGoogleTalk (493902321140277304) -->
-    <skip />
+    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Ama-Hangout"</string>
     <string name="imProtocolIcq" msgid="1574870433606517315">"i-ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"i-Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"Umhlangano we-Net"</string>
@@ -1527,98 +1514,56 @@
     <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Lolu hlelo lokusebenza alusekeli ama-akhawunti wamaphrofayela akhawulelwe"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Alukho uhlelo lokusebenza olutholakele lokuphatha lesi senzo"</string>
     <string name="revoke" msgid="5404479185228271586">"Chitha"</string>
-    <!-- no translation found for mediaSize_iso_a0 (7875427489420821793) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a1 (3760734499050875356) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a2 (5973266378020144382) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a3 (1373407105687300884) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a4 (6689772807982597254) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a5 (5353549652015741040) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a6 (8585038048674911907) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a7 (6641836716963839119) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a8 (7571139437465693355) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a9 (1378455891957115079) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a10 (2480747457429475344) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b0 (3965935097661108039) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b1 (2505753285010115437) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b2 (8763874709859458453) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b3 (4210506688191764076) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b4 (5749404165888526034) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b5 (7640627414621904733) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b6 (7342988864712748544) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b7 (5069844065235382429) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b8 (7316818922278779774) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b9 (5414727094026532341) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b10 (5251253731832048185) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c0 (4003138342671964217) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c1 (1935188063393553008) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c2 (3197307969712069904) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c3 (4335826087321913508) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c4 (3745639598281015005) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c5 (8269457765822791013) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c6 (566666105260346930) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c7 (8678413180782608498) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c8 (8392376206627041730) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c9 (9191613372324845405) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c10 (7327709699184920822) -->
-    <skip />
-    <!-- no translation found for mediaSize_na_letter (4191805615829472953) -->
-    <skip />
-    <!-- no translation found for mediaSize_na_gvrnmt_letter (7853382192649405507) -->
-    <skip />
-    <!-- no translation found for mediaSize_na_legal (6697982988283823150) -->
-    <skip />
-    <!-- no translation found for mediaSize_na_junior_legal (3727743969902758948) -->
-    <skip />
-    <!-- no translation found for mediaSize_na_ledger (281871464896601236) -->
-    <skip />
-    <!-- no translation found for mediaSize_na_tabloid (5775966416333578127) -->
-    <skip />
-    <!-- no translation found for write_fail_reason_cancelled (7091258378121627624) -->
-    <skip />
-    <!-- no translation found for write_fail_reason_cannot_write (8132505417935337724) -->
-    <skip />
-    <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_pin (3395953421368476103) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (2891475237150965991) -->
-    <skip />
-    <!-- no translation found for restr_pin_error_doesnt_match (2224214190906994548) -->
-    <skip />
-    <!-- no translation found for restr_pin_error_too_short (8173982756265777792) -->
-    <skip />
-    <!-- no translation found for restr_pin_countdown:one (4835639969503729874) -->
-    <!-- no translation found for restr_pin_countdown:other (8030607343223287654) -->
+    <string name="mediaSize_iso_a0" msgid="7875427489420821793">"I-ISO A0"</string>
+    <string name="mediaSize_iso_a1" msgid="3760734499050875356">"I-ISO A1"</string>
+    <string name="mediaSize_iso_a2" msgid="5973266378020144382">"I-ISO A2"</string>
+    <string name="mediaSize_iso_a3" msgid="1373407105687300884">"I-ISO A3"</string>
+    <string name="mediaSize_iso_a4" msgid="6689772807982597254">"I-ISO A4"</string>
+    <string name="mediaSize_iso_a5" msgid="5353549652015741040">"I-ISO A5"</string>
+    <string name="mediaSize_iso_a6" msgid="8585038048674911907">"I-ISO A6"</string>
+    <string name="mediaSize_iso_a7" msgid="6641836716963839119">"I-ISO A7"</string>
+    <string name="mediaSize_iso_a8" msgid="7571139437465693355">"I-ISO A8"</string>
+    <string name="mediaSize_iso_a9" msgid="1378455891957115079">"I-ISO A9"</string>
+    <string name="mediaSize_iso_a10" msgid="2480747457429475344">"I-ISO A10"</string>
+    <string name="mediaSize_iso_b0" msgid="3965935097661108039">"I-ISO B0"</string>
+    <string name="mediaSize_iso_b1" msgid="2505753285010115437">"I-ISO B1"</string>
+    <string name="mediaSize_iso_b2" msgid="8763874709859458453">"I-ISO B2"</string>
+    <string name="mediaSize_iso_b3" msgid="4210506688191764076">"I-ISO B3"</string>
+    <string name="mediaSize_iso_b4" msgid="5749404165888526034">"I-ISO B4"</string>
+    <string name="mediaSize_iso_b5" msgid="7640627414621904733">"I-ISO B5"</string>
+    <string name="mediaSize_iso_b6" msgid="7342988864712748544">"I-ISO B6"</string>
+    <string name="mediaSize_iso_b7" msgid="5069844065235382429">"I-ISO B7"</string>
+    <string name="mediaSize_iso_b8" msgid="7316818922278779774">"I-ISO B8"</string>
+    <string name="mediaSize_iso_b9" msgid="5414727094026532341">"I-ISO B9"</string>
+    <string name="mediaSize_iso_b10" msgid="5251253731832048185">"I-ISO B10"</string>
+    <string name="mediaSize_iso_c0" msgid="4003138342671964217">"I-ISO C0"</string>
+    <string name="mediaSize_iso_c1" msgid="1935188063393553008">"I-ISO C1"</string>
+    <string name="mediaSize_iso_c2" msgid="3197307969712069904">"I-ISO C2"</string>
+    <string name="mediaSize_iso_c3" msgid="4335826087321913508">"I-ISO C3"</string>
+    <string name="mediaSize_iso_c4" msgid="3745639598281015005">"I-ISO C4"</string>
+    <string name="mediaSize_iso_c5" msgid="8269457765822791013">"I-ISO C5"</string>
+    <string name="mediaSize_iso_c6" msgid="566666105260346930">"I-ISO C6"</string>
+    <string name="mediaSize_iso_c7" msgid="8678413180782608498">"I-ISO C7"</string>
+    <string name="mediaSize_iso_c8" msgid="8392376206627041730">"I-ISO C8"</string>
+    <string name="mediaSize_iso_c9" msgid="9191613372324845405">"I-ISO C9"</string>
+    <string name="mediaSize_iso_c10" msgid="7327709699184920822">"I-ISO C10"</string>
+    <string name="mediaSize_na_letter" msgid="4191805615829472953">"Incwadi"</string>
+    <string name="mediaSize_na_gvrnmt_letter" msgid="7853382192649405507">"Incwadi kahulumeni"</string>
+    <string name="mediaSize_na_legal" msgid="6697982988283823150">"Okusemthethweni"</string>
+    <string name="mediaSize_na_junior_legal" msgid="3727743969902758948">"Ezomthetho ezincane"</string>
+    <string name="mediaSize_na_ledger" msgid="281871464896601236">"Ileja"</string>
+    <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Iphephandaba"</string>
+    <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Kukhanseliwe"</string>
+    <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Iphutha ekubhaleni okuqukethwe"</string>
+    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Faka i-PIN"</string>
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"I-PIN yamanje"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"I-PIN entsha"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Qinisekisa i-PIN entsha"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"Dala i-PIN yemikhawulo yokushintsha"</string>
+    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Ama-PIN awafani. Zama futhi."</string>
+    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"I-PIN yimfushane kakhulu. Okungenani kumele ibe namadijithi angu-4."</string>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="4835639969503729874">"I-PIN engalungile. Zama futhi ngesekhondi elingu-1."</item>
+    <item quantity="other" msgid="8030607343223287654">"I-PIN engalungile. Zama futhi kumasekhondi angu-<xliff:g id="COUNT">%d</xliff:g>."</item>
+  </plurals>
 </resources>
