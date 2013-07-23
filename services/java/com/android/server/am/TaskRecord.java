@@ -57,7 +57,8 @@ final class TaskRecord extends ThumbnailHolder {
     /** Current stack */
     ActivityStack stack;
 
-    private boolean mApplicationTask = true;
+    /** Takes on same set of values as ActivityRecord.mActivityType */
+    private int mTaskType;
 
     TaskRecord(int _taskId, ActivityInfo info, Intent _intent) {
         taskId = _taskId;
@@ -163,9 +164,12 @@ final class TaskRecord extends ThumbnailHolder {
             // Was not previously in list.
             numFullscreen++;
         }
-        // Only set this to be an application task if it has not already been set as home task.
-        if (mApplicationTask) {
-            mApplicationTask = r.isApplicationActivity();
+        // Only set this based on the first activity
+        if (mActivities.isEmpty()) {
+            mTaskType = r.mActivityType;
+        } else {
+            // Otherwise make all added activities match this one.
+            r.mActivityType = mTaskType;
         }
         mActivities.add(index, r);
     }
@@ -319,7 +323,7 @@ final class TaskRecord extends ThumbnailHolder {
     }
 
     boolean isApplicationTask() {
-        return mApplicationTask;
+        return mTaskType == ActivityRecord.APPLICATION_ACTIVITY_TYPE;
     }
 
     public TaskAccessInfo getTaskAccessInfoLocked(boolean inclThumbs) {

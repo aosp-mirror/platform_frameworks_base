@@ -80,7 +80,7 @@ final class ActivityRecord {
     static final int APPLICATION_ACTIVITY_TYPE = 0;
     static final int HOME_ACTIVITY_TYPE = 1;
     static final int RECENTS_ACTIVITY_TYPE = 2;
-    final int mActivityType;
+    int mActivityType;
 
     final String baseDir;   // where activity source (resources etc) located
     final String resDir;   // where public activity source (public resources etc) located
