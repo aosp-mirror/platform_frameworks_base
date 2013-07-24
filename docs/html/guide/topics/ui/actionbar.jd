@@ -253,11 +253,11 @@ showAsAction="ifRoom"} in the {@code &lt;item&gt;} tag. For example:</p>
 
 <pre>
 &lt;menu xmlns:android="http://schemas.android.com/apk/res/android"
-      <strong>xmlns:example.app="http://schemas.android.com/apk/res-auto"</strong> >
+      <strong>xmlns:yourapp="http://schemas.android.com/apk/res-auto"</strong> >
     &lt;item android:id="@+id/action_search"
           android:icon="@drawable/ic_action_search"
           android:title="@string/action_search"
-          <strong>example.app:showAsAction="ifRoom"</strong>  /&gt;
+          <strong>yourapp:showAsAction="ifRoom"</strong>  /&gt;
     ...
 &lt;/menu&gt;
 </pre>
@@ -281,7 +281,7 @@ want to display the text title, add {@code "withText"} to the {@code showAsActio
 attribute. For example:</p>
 
 <pre>
-&lt;item example.app:showAsAction="ifRoom|withText" ... /&gt;
+&lt;item yourapp:showAsAction="ifRoom|withText" ... /&gt;
 </pre>
 
 <p class="note"><strong>Note:</strong> The {@code "withText"} value is a <em>hint</em> to the
@@ -372,33 +372,29 @@ items on a narrow screen, while leaving room for navigation and title elements a
 
 <p>To enable split action bar when using the support library, you must do two things:</p>
 <ol>
-  <li>Add {@code uiOptions="splitActionBarWhenNarrow"} to your
-<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> or
+  <li>Add {@code uiOptions="splitActionBarWhenNarrow"} to each
+<a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+element or to the
 <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
-manifest element. This attribute is understood only by API level 14 and higher (it is ignored
-by older versions).
-  <li>For older versions, create a custom theme that extends one of the {@link
-  android.support.v7.appcompat.R.style#Theme_AppCompat Theme.AppCompat} themes, and include
-  the {@link android.support.v7.appcompat.R.attr#windowSplitActionBar windowSplitActionBar} style
-  set {@code true}. For example:
-  <p class="code-caption">res/values/styles.xml</p>
-  <pre>
-&lt;style name="MyAppTheme" parent="Theme.AppCompat.Light">
-  &lt;item name="windowSplitActionBar">true&lt;item>
-&lt;/style>
-</pre>
+element. This attribute is understood only by API level 14 and higher (it is ignored
+by older versions).</li>
+  <li>To support older versions, add a <a
+  href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code &lt;meta-data>}</a>
+  element as a child of each
+  <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a>
+  element that declares the same value for {@code "android.support.UI_OPTIONS"}.</li>
+</ol>
 
-  <p>Then set this as your activity theme:</p>
+<p>For example:</p>
 
-  <p class="code-caption">AndroidManifest.xml</p>
-  <pre>
+<pre>
 &lt;manifest ...>
-    &lt;activity android:theme="&#64;style/MyAppTheme" ...>
-    ...
+    &lt;activity uiOptions="splitActionBarWhenNarrow" ... >
+        &lt;meta-data android:name="android.support.UI_OPTIONS"
+                   android:value="splitActionBarWhenNarrow" />
+    &lt;/activity>
 &lt;/manifest ...>
 </pre>
-  </li>
-</ol>
 
 
 <p>Using split action bar also allows <a href="#Tabs">navigation tabs</a> to collapse into the
@@ -571,12 +567,12 @@ the {@link android.support.v7.widget.SearchView} widget:</p>
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:example.app="http://schemas.android.com/apk/res-auto" >
+      xmlns:yourapp="http://schemas.android.com/apk/res-auto" >
     &lt;item android:id="@+id/action_search"
           android:title="@string/action_search"
           android:icon="@drawable/ic_action_search"
-          example.app:showAsAction="ifRoom|collapseActionView"
-          <b>example.app:actionViewClass="android.support.v7.widget.SearchView"</b> /&gt;
+          yourapp:showAsAction="ifRoom|collapseActionView"
+          <b>yourapp:actionViewClass="android.support.v7.widget.SearchView"</b> /&gt;
 &lt;/menu>
 </pre>
 
@@ -719,11 +715,11 @@ the {@link android.support.v7.widget.ShareActionProvider} class. For example:</p
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?>
 &lt;menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:example.app="http://schemas.android.com/apk/res-auto" >
+      xmlns:yourapp="http://schemas.android.com/apk/res-auto" >
     &lt;item android:id="@+id/action_share"
           android:title="@string/share"
-          example.app:showAsAction="ifRoom"
-          <strong>example.app:actionProviderClass="android.support.v7.widget.ShareActionProvider"</strong>
+          yourapp:showAsAction="ifRoom"
+          <strong>yourapp:actionProviderClass="android.support.v7.widget.ShareActionProvider"</strong>
           /&gt;
     ...
 &lt;/menu>
