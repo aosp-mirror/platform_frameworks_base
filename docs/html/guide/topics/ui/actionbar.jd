@@ -393,7 +393,7 @@ by older versions).</li>
         &lt;meta-data android:name="android.support.UI_OPTIONS"
                    android:value="splitActionBarWhenNarrow" />
     &lt;/activity>
-&lt;/manifest ...>
+&lt;/manifest>
 </pre>
 
 
