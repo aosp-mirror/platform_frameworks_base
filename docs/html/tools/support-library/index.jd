@@ -3,52 +3,149 @@ page.title=Support Library
 @jd:body
 
 <div id="qv-wrapper">
-<div id="qv">
+  <div id="qv">
 
-<h2>In this document</h2>
-<ol>
-  <li><a href="#Notes">Revisions</a></li>
-  <li><a href="#Downloading">Downloading the Support Package</a></li>
-  <li><a href="#SettingUp">Setting Up a Project to Use a Library</a></li>
-  <li><a href="#Using">Using the v4 Library APIs</a></li>
-  <li><a href="#Docs">Reference Docs</a></li>
-  <li><a href="#Samples">Samples</a></li>
-</ol>
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#revisions">Revisions</a></li>
+    </ol>
 
-<h2>See also</h2>
-<ol>
-  <li><a
-href="{@docRoot}training/basics/fragments/support-lib.html">Using the Support Library</a></li>
-</ol>
+    <h2>See also</h2>
+    <ol>
+      <li><a href="{@docRoot}tools/support-library/features.html">
+        Support Library Features</a></li>
+      <li><a href="{@docRoot}tools/support-library/setup.html">
+        Support Library Setup </a></li>
+    </ol>
 
-</div>
+  </div>
 </div>
 
-<p><em>Minimum API level supported:</em> <b>4</b></p>
+<p>The Android Support Library package is a set of code libraries that provide useful and important
+  features for Android applications in addition to the framework APIs. These libraries provide
+  backward-compatible versions of framework APIs as well as features that are only available
+  through its API. Each Support Library is backward-compatible to a specific Android API level.
+  This design means that your applications can use the libraries' features and still be compatible
+  with devices running Android 1.6 (API level 4) and up.</p>
 
-<p>The Support Package includes static "support libraries" that you can add to your Android
-application in order to use APIs that are either not available for older platform versions or that
-offer "utility" APIs that aren't a part of the framework APIs. The goal is to simplify your
-development by offering more APIs that you can bundle with your application so you can
-worry less about platform versions.</p>
-
-<p class="note"><strong>Note:</strong> The Support Package includes more than one support
-library. Each one has a different <em>minimum API level</em>. For example, one library requires API
-level 4 or higher, while another requires API level 13 or higher (v13 is a superset of v4 and
-includes additional
-support classes to work with v13 APIs). The minimum version is indicated
-by the directory name, such as {@code v4/} and {@code v13/}.</p>
+<p>This guide provides information about what features are enabled by the different libraries,
+  how to use them in your development environment and information about the Support Library
+  releases.</p>
 
 
-<h2 id="Notes">Revisions</h2>
+<h2 id="overview">Overview</h2>
 
-<p>The sections below provide notes about successive releases of
-the Support Package, as denoted by revision number.</p>
+<p>Including the Support Libraries in your Android project is considered a best practice for
+  application developers. Using the features they provide can help you improve the look of your
+  application, increase performance and broaden the reach of your application to more users.
+  If you use the Android
+  <a href="{@docRoot}tools/projects/templates.html">code template</a> tools, you will notice that
+  all the Android application templates include one or more of the Support Libraries by default.</p>
+
+<p>The Support Libraries each target a base Android API level and each provides a different set
+  of features. In order to effectively use the libraries, it is important to consider what features
+  you want to support and understand what features are supported by each library at what Android
+  API level. To get started, review the
+  <a href="{@docRoot}tools/support-library/features.html">Support Library Features</a> guide.
+  After that, go to the
+  <a href="{@docRoot}tools/support-library/setup.html">Support Library Setup</a> topic to
+  learn how to incorporate the Support Libraries into your application. For more details
+  about Support Library APIs, see the {@link android.support.v4.app android.support}
+  packages in the API reference.</p>
+
+
+<h2 id="revisions">Revisions</h2>
+
+<p>This section provides details about the Support Library package releases.</p>
 
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt=""
-/>Support Package, revision 13</a> <em>(May 2013)</em>
+/>Android Support Library, revision 18</a> <em>(July 2013)</em>
+  </p>
+  <div class="toggle-content-toggleme">
+    <dl>
+      <dt>Changes for v4 support library:</dt>
+      <dd>
+      <ul>
+        <li>User interface
+          <ul>
+            <li>Added {@link android.support.v4.text.BidiFormatter} for handling
+              text strings that combine right to left and left to right-formatted text.</li>
+            <li>Modified {@link android.support.v4.view.ViewPager} to better handle cases where the
+              pager has a measured width of zero in the initial layout processing.</li>
+            <li>Modified {@link android.support.v4.widget.DrawerLayout} and
+              {@link android.support.v4.widget.SlidingPaneLayout} to not throw exceptions for
+              measurement while the project code is being edited.</li>
+          </ul>
+        </li>
+
+        <li>Accessibility
+          <ul>
+            <li>Added {@link android.support.v4.widget.ExploreByTouchHelper} to simplify the
+              implementation of accessibility for custom views.</li>
+            <li>Fixed a problem with {@link android.support.v4.view.ViewPager} incorrectly
+              populating {@link
+              android.support.v4.view.accessibility.AccessibilityEventCompat#TYPE_VIEW_SCROLLED
+              TYPE_VIEW_SCROLLED} accessibility events.</li>
+            <li>Fixed a null pointer exception in {@link android.support.v4.view.ViewPager} when
+              populating an accessibility event.</li>
+            <li>Simplified {@link android.support.v4.view.accessibility.AccessibilityNodeInfoCompat}
+              by changing {@link java.lang.CharSequence} inputs to {@link java.lang.String} objects.
+              </li>
+            <li>Deprecated an {@link android.support.v4.view.accessibility.AccessibilityRecordCompat}
+              constructor that used an {@link java.lang.Object} as input.</li>
+          </ul>
+        </li>
+
+        <li>Media
+          <ul>
+            <li>Added {@link android.support.v4.media.TransportMediator} helper class to manage
+              media transport control, such as play, pause, skip and other media actions.</li>
+            <li>Added {@link android.support.v4.hardware.display.DisplayManagerCompat} for managing
+              display output to one or more device displays.</li>
+          </ul>
+        </li>
+
+        <li>Other changes
+        <ul>
+            <li>Added {@link android.support.v4.content.WakefulBroadcastReceiver} helper class for
+              implementing a common pattern of detecting a device wakeup event and passing work off
+              to a {@link android.app.Service} while ensuring that the device does not go back to
+              sleep before the handoff is complete.</li>
+            <li>Added two new APIs,
+              {@link android.support.v4.content.AsyncTaskLoader#commitContentChanged
+              commitContentChanged()} and
+              {@link android.support.v4.content.AsyncTaskLoader#rollbackContentChanged
+              rollbackContentChanged()}, to {@link android.support.v4.content.AsyncTaskLoader} to
+              help deal with background updates for data changes that are subsequently canceled.
+              </li>
+          </ul>
+        </li>
+      </ul>
+      </dd>
+
+      <dt>New v7 appcompat library:</dt>
+      <dd>
+        <ul>
+          <li>Added {@link android.support.v7.app.ActionBar} to allow implementation of the
+            action bar user interface <a href="{@docRoot}/design/patterns/actionbar.html">design
+            pattern</a> back to Android 2.1 (API level 7) and higher. Use of this class requires
+            that you implement your activity by extending the new
+            {@link android.support.v7.app.ActionBarActivity} class.</li>
+        </ul>
+      </dd>
+
+    </dl>
+  </div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
+/>Android Support Library, revision 13</a> <em>(May 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
     <dl>
@@ -71,8 +168,9 @@ the Support Package, as denoted by revision number.</p>
           <li>Added {@link android.support.v4.content.FileProvider} to allow sharing of private
             files between applications.</li>
           <li>Updated {@link android.support.v4.view.ViewPager} to throw an exception if the
-            associated {@link android.support.v4.view.PagerAdapter} class is modified without a call
-            to {@link android.support.v4.view.PagerAdapter#notifyDataSetChanged notifyDataSetChanged()}.
+            associated {@link android.support.v4.view.PagerAdapter} class is modified without a
+            call to {@link android.support.v4.view.PagerAdapter#notifyDataSetChanged
+            notifyDataSetChanged()}.
             </li>
           <li>Fixed an issue with {@link android.support.v4.view.ViewPager} children drawing sort
             order.</li>
@@ -81,6 +179,15 @@ the Support Package, as denoted by revision number.</p>
             between tap timeout and long press events.</li>
         </ul>
       </dd>
+
+      <dt>New v7 gridlayout library:</dt>
+      <dd>
+        <ul>
+          <li>Added {@link android.support.v7.widget.GridLayout} to provide support for the
+            {@link android.widget.GridLayout} layout object.</li>
+          <li>Added {@link android.support.v7.widget.Space} which can be used to create blank areas
+            within a {@link android.support.v7.widget.GridLayout} layout object.</li>
+        </ul>
     </dl>
   </div>
 </div>
@@ -89,7 +196,7 @@ the Support Package, as denoted by revision number.</p>
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-/>Support Package, revision 12</a> <em>(February 2013)</em>
+/>Android Support Library, revision 12</a> <em>(February 2013)</em>
   </p>
   <div class="toggle-content-toggleme">
     <dl>
@@ -110,10 +217,11 @@ the Support Package, as denoted by revision number.</p>
   </div>
 </div>
 
+
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-/>Support Package, revision 11</a> <em>(November 2012)</em>
+/>Android Support Library, revision 11</a> <em>(November 2012)</em>
   </p>
   <div class="toggle-content-toggleme">
     <dl>
@@ -175,7 +283,7 @@ the Support Package, as denoted by revision number.</p>
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-/>Support Package, revision 10</a> <em>(August 2012)</em>
+/>Android Support Library, revision 10</a> <em>(August 2012)</em>
   </p>
   <div class="toggle-content-toggleme">
     <dl>
@@ -194,7 +302,7 @@ the Support Package, as denoted by revision number.</p>
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-/>Support Package, revision 9</a> <em>(June 2012)</em>
+/>Android Support Library, revision 9</a> <em>(June 2012)</em>
   </p>
   <div class="toggle-content-toggleme">
     <dl>
@@ -260,10 +368,11 @@ isActiveNetworkMetered()} method.</li>
   </div>
 </div>
 
+
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-/>Support Package, revision 8</a> <em>(April 2012)</em>
+/>Android Support Library, revision 8</a> <em>(April 2012)</em>
   </p>
   <div class="toggle-content-toggleme">
     <dl>
@@ -282,10 +391,11 @@ isActiveNetworkMetered()} method.</li>
   </div>
 </div>
 
+
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-/>Support Package, revision 7</a> <em>(March 2012)</em>
+/>Android Support Library, revision 7</a> <em>(March 2012)</em>
   </p>
   <div class="toggle-content-toggleme">
     <dl>
@@ -311,10 +421,11 @@ for creating standardized system notifications.</li>
   </div>
 </div>
 
+
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-/>Support Package, revision 6</a> <em>(December 2011)</em>
+/>Android Support Library, revision 6</a> <em>(December 2011)</em>
   </p>
   <div class="toggle-content-toggleme">
 
@@ -367,7 +478,7 @@ for creating standardized system notifications.</li>
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-/>Support Package, revision 5</a> <em>(December 2011)</em>
+/>Android Support Library, revision 5</a> <em>(December 2011)</em>
   </p>
   <div class="toggle-content-toggleme">
     <dl>
@@ -426,7 +537,7 @@ for creating standardized system notifications.</li>
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-/>Support Package, revision 4</a> <em>(October 2011)</em>
+/>Android Support Library, revision 4</a> <em>(October 2011)</em>
   </p>
   <div class="toggle-content-toggleme">
     <dl>
@@ -468,7 +579,7 @@ for creating standardized system notifications.</li>
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-/>Compatibility Package, revision 3</a> <em>(July 2011)</em>
+/>Android Support Library, revision 3</a> <em>(July 2011)</em>
   </p>
   <div class="toggle-content-toggleme">
     <dl>
@@ -519,7 +630,7 @@ Android 3.2 and higher (all other APIs in the v4 library are already available w
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-/>Compatibility Package, revision 2</a> <em>(May 2011)</em>
+/>Android Support Library, revision 2</a> <em>(May 2011)</em>
   </p>
   <div class="toggle-content-toggleme">
     <dl>
@@ -527,7 +638,7 @@ Android 3.2 and higher (all other APIs in the v4 library are already available w
     <dd>
       <ul>
         <li>Support for fragment animations</li>
-        <li>Fix {@code android.support.v4.app.Fragment#onActivityResult Fragment.onActivityResult()}
+        <li>Fix {@link android.support.v4.app.Fragment#onActivityResult Fragment.onActivityResult()}
           bug</li>
       </ul>
     </dd>
@@ -539,204 +650,10 @@ Android 3.2 and higher (all other APIs in the v4 library are already available w
 <div class="toggle-content closed">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt=""
-/>Compatibility Package, revision 1</a> <em>(March 2011)</em>
+/>Android Support Library, revision 1</a> <em>(March 2011)</em>
   </p>
   <div class="toggle-content-toggleme">
       <p>Initial release with the v4 library.</p>
   </div>
 </div>
-
-
-
-<h2 id="Downloading">Downloading the Support Package</h2>
-
-<p>The Support Package is provided as a downloadable package from the Android SDK
-Manager. To install:</p>
-
-<ol>
-  <li>Launch the Android SDK Manager.
-    <p>From Eclipse, you can select <strong>Window</strong>
-&gt; <strong>Android SDK Manager</strong>. Or, launch {@code SDK Manager.exe} from
-the {@code &lt;sdk&gt;/} directory (on Windows only) or {@code android} from the {@code
-&lt;sdk&gt;/tools/} directory.</p></li>
-  <li>Expand the Android Repository, check <strong>Android Support package</strong>
-and click <strong>Install selected</strong>.</li>
-  <li>Proceed to install the package.</li>
-</ol>
-
-<p>When done, all files (including source code, samples, and the JAR files) are saved
-into the <code>&lt;sdk&gt;/extras/android/support/</code> directory. This directory contains
-each of the different support libraries, such as the library for API level 4 and up and the library
-for API level 13 and up, each named with the respective version (such as {@code v4/}).</p>
-
-
-<h2 id="SettingUp">Setting Up a Project to Use a Library</h2>
-
-<p>To add one of the libraries to your Android project:</p>
-<dl>
-    <dt>
-        Add the JAR file to your project.
-    </dt>
-    <dd>
-        Copy the JAR file for the library you want to use into your Android project. To do this:
-        <ul>
-            <li>
-                Create the directory {@code libs/} at the root of your project
-                (next to {@code src/}, {@code res/}, and so forth).
-            </li>
-            <li>
-                Locate the JAR file for the library you want to use and copy it into the
-                {@code libs/} directory.
-                <p>
-                    For example, the library that supports API level 4 and up is located at
-                    {@code &lt;sdk&gt;/extras/android/support/v4/android-support-v4.jar}.
-                </p>
-            </li>
-        </ul>
-        <p>
-            Your build system may expect to find the JAR file in a directory other than
-            {@code libs}. Read the documentation for your build system to learn where to put the
-            JAR file.
-        </p>
-    </dd>
-    <dt>
-        If necessary, add the {@code libs/} directory to your build path.
-    </dt>
-    <dd>
-        Read the documentation for your build system to learn how to add the JAR file to the
-        build path.
-    </dd>
-</dl>
-<p>
-    To confirm that you've added the JAR file to the correct directory and added it to the build
-    path:
-</p>
-<ol>
-    <li>
-        Edit one of your source files to add an {@code import} statement that imports a
-        class from the {@code android.support.*} package.
-    </li>
-    <li>
-        Build your app. The code should compile cleanly.
-    </li>
-    <li>
-        As a double-check, run your app. It should run correctly, without any runtime exceptions
-        indicating that the class in {@code android.support.*} can't be found.
-    </li>
-</ol>
-<p>Your application is now ready to use the library APIs. All the
-provided APIs are available in the {@code android.support} package (for
-example, {@code android.support.v4}).</p>
-
-<p class="note"><strong>Tip:</strong> To see the library APIs in action, take a look at the sample
-apps in {@code &lt;sdk&gt;/extras/android/support/&lt;version&gt;/samples/}.</p>
-
-<p class="warning"><strong>Warning:</strong> Be certain that you not confuse the standard
-{@code android} packages with those in {@code android.support} library. Some code completion tools
-might
-get this wrong, especially if you're building against recent versions of the platform. To be safe,
-keep your build target set to the same version as you have defined for your <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
-and double check the import statements for classes that also exist in the support library, such as
-{@code SimpleCursorAdapter}.</p>
-
-
-<h2 id="Using">Using the v4 Library APIs</h2>
-
-<p>The support library for v4 provides access to several classes introduced with Android 3.0 and
-beyond, plus some updated version of existing classes, and even some APIs that currently don't
-exist in the Android platform. Some of the most useful and notable classes that have
-counterparts in the v4 support library are:</p>
-
-<ul>
-  <li>{@link android.app.Fragment}</li>
-  <li>{@link android.app.FragmentManager}</li>
-  <li>{@link android.app.FragmentTransaction}</li>
-  <li>{@link android.app.ListFragment}</li>
-  <li>{@link android.app.DialogFragment}</li>
-  <li>{@link android.app.LoaderManager}</li>
-  <li>{@link android.content.Loader}</li>
-  <li>{@link android.content.AsyncTaskLoader}</li>
-  <li>{@link android.content.CursorLoader}</li>
-</ul>
-
-<p>For each of the classes above (and others not listed), the APIs work almost exactly the same
-as the counterparts in the latest Android platform. Thus, you can usually refer to
-the online documentation for information about the supported APIs. There are some
-differences, however. Most notably:</p>
-
-<ul>
-  <li>When creating an activity to use fragments, you must declare your activity to extend the
-{@link android.support.v4.app.FragmentActivity} class (instead of the traditional
-{@link android.app.Activity} class).</li>
-  <li>To manage your fragments and loaders, you must use the methods
-  {@link android.support.v4.app.FragmentActivity#getSupportFragmentManager
-  FragmentActivity.getSupportFragmentManager()} and
-  {@link android.support.v4.app.FragmentActivity#getSupportLoaderManager
-  FragmentActivity.getSupportLoaderManager()} (instead of the
-  {@link android.app.Activity#getFragmentManager()} and
-  {@link android.app.Activity#getLoaderManager()} methods).</li>
-  <li>The {@link android.app.ActionBar} is <strong>not supported</strong> by the library.
-However, when creating your <a href="{@docRoot}guide/topics/ui/menus.html#options-menu">Options
-Menu</a>, you can declare which items should be added to the Action Bar when it's available (on
-Android 3.0 or later). You can do so with the
-{@link android.support.v4.view.MenuCompat#setShowAsAction MenuCompat.setShowAsAction()} method, for
-example:
-<pre>
-public boolean onCreateOptionsMenu(Menu menu) {
-    MenuInflater inflater = getMenuInflater();
-    inflater.inflate(R.menu.options, menu);
-    MenuCompat.setShowAsAction(menu.findItem(R.id.action_search), 1);
-    return true;
-}
-</pre>
-<p>Also see the <a href="{@docRoot}resources/samples/ActionBarCompat/index.html">Action Bar
-Compatibility</a> sample for a demonstration of how to use {@link android.app.ActionBar} on Android
-3.0+ and also support action bar functionality on older versions.</p>
-</li>
-</ul>
-
-<div class="note"><p><strong>Tip:</strong> To enable the Holographic theme on devices
-running Android 3.0 or higher, declare in your manifest file that your application targets
-API level 11, for example:</p>
-<pre>
-&lt;uses-sdk android:minSdkVersion="4" android:targetSdkVersion="11" /&gt;
-</pre>
-<p>This way, your application automatically receives the Holographic theme and the Action Bar for
-each activity when running on Android 3.0 and higher.</p>
-</div>
-
-<p>For more information about how you can optimize your application for the latest
-Android-powered devices, read <a href="{@docRoot}guide/practices/tablets-and-handsets.html"
->Supporting Tablets and Handsets</a>.</p>
-
-
-<h2 id="Docs">Reference Docs</h2>
-
-<p>The reference documentation for the Support Packages is included as part of the Android
-online developer documentation:</p>
-
-<ul>
-  <li><a href="{@docRoot}reference/android/support/v4/app/package-summary.html">Support Package
-    API 4 Reference</a></li>
-  <li><a href="{@docRoot}reference/android/support/v13/app/package-summary.html">Support Package
-    API 13 Reference</a></li>
-</ul>
-
-
-<h2 id="Samples">Samples</h2>
-
-<p>If you want to see some code that uses the support libraries, samples are included with the
-Support Package, inside each support library directory, for example; {@code
-&lt;sdk&gt;/extras/android/support/v4/samples/}. You can also view these samples as part of the
-Android online developer documentation:</p>
-
-<ul>
-  <li><a href="{@docRoot}resources/samples/Support4Demos/index.html">Support API 4 Demos</a></li>
-  <li><a href="{@docRoot}resources/samples/Support13Demos/index.html">Support API 13 Demos</a></li>
-</ul>
-
-<p>Additionally, the <a href="http://code.google.com/p/iosched/">Google I/O App</a> is a complete
-application that uses the v4 support library to provide a single APK for both handsets and tablets
-and also demonstrates some of Android's best practices in Android UI design.</p>
 
