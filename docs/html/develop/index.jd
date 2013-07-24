@@ -41,6 +41,20 @@ position:absolute;top:50%;left:0;width:100%;z-index:-1;text-align:center;display
 
               <li class="item carousel-home">
                  <div class="col-8">
+                   <img
+src="//lh4.ggpht.com/-lfjzgG5Dqrk/UHMThRtpRwI/AAAAAAAABpk/h4d3nsmkgPM/s400/mint.png"
+class="play no-shadow no-transform" />
+                 </div>
+                <div class="content-right col-6">
+                  <h2>Building Great Apps for Tablets</h2>
+                  <p>Tablets are a fast-growing part of the Android installed base and they offer new opportunities for user engagement and monetization. If you are targeting tablets, check out this list of tips and techniques on how to deliver a great app experience for tablet users.  </p>
+                  <p><a
+href="//android-developers.blogspot.com/2012/11/designing-for-tablets-were-here-to-help.html" class="button">Read
+more</a></p>
+                </div>            
+              </li>
+              <li class="item carousel-home">
+                 <div class="col-8">
                    <img src="{@docRoot}images/google/gps-location.png"
 class="play no-shadow no-transform" style="margin:0 0 0 70px;height:230px;width:340px" />
                  </div>
@@ -90,20 +104,6 @@ class="play no-shadow no-transform" style="margin:0 0 0 40px;max-height:250px;he
 href="{@docRoot}google/play-services/maps.html" class="button">Read more</a></p>
                 </div>            
               </li>
-              <li class="item carousel-home">
-                 <div class="col-8">
-                   <img
-src="//lh4.ggpht.com/-lfjzgG5Dqrk/UHMThRtpRwI/AAAAAAAABpk/h4d3nsmkgPM/s400/mint.png"
-class="play no-shadow no-transform" />
-                 </div>
-                <div class="content-right col-6">
-                  <h2>Building Great Apps for Tablets</h2>
-                  <p>Tablets are a growing part of the Android installed base and they offer new opportunities for user engagement and monetization. If you are targeting tablets, check out the <strong>Tablet App Quality Checklist</strong> for tips and techniques on how to deliver a great app experience for tablet users.  </p>
-                  <p><a
-href="/distribute/googleplay/quality/tablet.html" class="button">Read
-more</a></p>
-                </div>            
-              </li>
                <li class="item carousel-home">
                    <div class="col-8">
                      <img
@@ -132,25 +132,25 @@ more</a></p>
 			<div class="feed-frame">
                                 <!-- DEVELOPER NEWS -->
           <ul>
+            <li><a href="//android-developers.blogspot.com/2013/07/making-beautiful-android-app-icons.html">
+              <div class="feed-image" style="background:url('//2.bp.blogspot.com/-HfoO6KNFBKA/UeiyRoELb7I/AAAAAAAAAFs/bHR-5viktU4/s1000/icons.png') no-repeat 0 0;background-size:500px;background-position:center center;"></div>
+              <h4>Making Beautiful Android App Icons</h4>
+              <p>As higher density screens gain popularity, it's important to make sure your launcher icon is crisp and high quality...</p>
+              </a></li>
+            <li><a href="//android-developers.blogspot.com/2013/07/beautiful-design-collection-summer-2013.html">
+              <div class="feed-image" style="background:url('//1.bp.blogspot.com/-k8DZYu0daT4/UdRt1AzstvI/AAAAAAAAAFM/CvEkb2yh-i0/s965/beautifulapps_4.png') no-repeat 0 0"></div>
+              <h4>The Beautiful Design Summer 2013 Collection</h4>
+              <p>See the apps chosen by the Android Design for their masterfully crafted design details...</p>
+              </a></li>
+            <li><a href="//android-developers.blogspot.com/2013/06/google-play-developer-8-step-checkup.html">
+              <div class="feed-image" style="background:url('//4.bp.blogspot.com/-LeK74UYY1eM/UbD8L-2DpFI/AAAAAAAACZA/YMjwndr-ZgM/s400/DoctorDroidV2.png') no-repeat 0 0;background-size:130px;background-position:8px -4px;"></div>
+              <h4>Google Play Developer 8-Step Checkup</h4>
+              <p>Give your Google Play developer account this quick checkup to keep it in good order and help you deliver a more successful product to users...</p>
+            </a></li>
             <li><a href="//android-developers.blogspot.com/2013/05/new-ways-to-optimize-your-business-in.html">
               <div class="feed-image" style="background:url('//4.bp.blogspot.com/-VmHMT66JjxU/UZZdfPUaJsI/AAAAAAAACQc/kDx5-Ep5YRo/s1600/framed_designed-tablets.png') no-repeat 0 0;background-size:180px"></div>
               <h4>New Ways to Optimize Your Business in Google Play</h4>
               <p>Many of you have invested in making great tablet experiences for your users, and we want to ensure that that work pays off...</p>
-              </a></li>
-            <li><a href="//android-developers.blogspot.com/2013/05/android-studio-ide-built-for-android.html">
-              <div class="feed-image" style="background:url('//1.bp.blogspot.com/-u5dfSsMOMC0/UZO_5DC_W9I/AAAAAAAACM8/YCMn15HPzpE/s320/Studio_table.png') no-repeat 0 0;background-size:180px"></div>
-              <h4>Android Studio: An IDE built for Android</h4>
-              <p>To develop Android Studio, we cooperated with JetBrains, creators of one of the most advanced Java IDEs available today...</p>
-              </a></li>
-            <li><a href="//android-developers.blogspot.com/2013/01/verifying-back-end-calls-from-android.html">
-              <div class="feed-image" style="background:url('//lh4.ggpht.com/7z4NItEg-X21zvFGAarKonk-VaysBYthJ30u1JjaQ0-5fjyHNawnmoNeG--4FCACog=w124') no-repeat 0 0"></div>
-              <h4>Verifying Back-End Calls from Android Apps</h4>
-              <p>You can take advantage of the auth APIs in Google Play services to let your back end know which app is calling and for which user....</p>
-              </a></li>
-            <li><a href="//android-developers.blogspot.com/2012/12/daydream-interactive-screen-savers.html">
-              <div class="feed-image" style="background:url('//lh4.ggpht.com/-wVsUOo4xGE0/UNy9mZ1nmMI/AAAAAAAAB4w/f6rhyLn5KbI/s1600/daydream-example.jpg') no-repeat 0 0;background-position:right top;"></div>
-              <h4>Daydream: Interactive Screen Savers</h4>
-              <p>Daydream is an interactive screen-saver mode introduced in Android 4.2. Learn how to add Daydreams to your apps...</p>
               </a></li>
           </ul>
                                 <!-- FEATURED DOCS -->
