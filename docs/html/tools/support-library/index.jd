@@ -24,14 +24,13 @@ page.title=Support Library
 
 <p>The Android Support Library package is a set of code libraries that provide useful and important
   features for Android applications in addition to the framework APIs. These libraries provide
-  backward-compatible versions of framework APIs as well as features that are only available
-  through its API. Each Support Library is backward-compatible to a specific Android API level.
-  This design means that your applications can use the libraries' features and still be compatible
-  with devices running Android 1.6 (API level 4) and up.</p>
+  backward-compatible versions of Android framework APIs as well as features that are only available
+  through the library APIs. Each Support Library is backward-compatible to a specific Android API
+  level. This design means that your applications can use the libraries' features and still be
+  compatible with devices running Android 1.6 (API level 4) and up.</p>
 
-<p>This guide provides information about what features are enabled by the different libraries,
-  how to use them in your development environment and information about the Support Library
-  releases.</p>
+<p>This guide provides information about what features are enabled by the Support Libraries,
+  how to use them in your development environment and information about library releases.</p>
 
 
 <h2 id="overview">Overview</h2>
