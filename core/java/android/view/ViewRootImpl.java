@@ -3250,24 +3250,23 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private boolean enterTouchMode() {
-        if (mView != null) {
-            if (mView.hasFocus()) {
-                // note: not relying on mFocusedView here because this could
-                // be when the window is first being added, and mFocused isn't
-                // set yet.
-                final View focused = mView.findFocus();
-                if (focused != null && !focused.isFocusableInTouchMode()) {
-                    final ViewGroup ancestorToTakeFocus =
-                            findAncestorToTakeFocusInTouchMode(focused);
-                    if (ancestorToTakeFocus != null) {
-                        // there is an ancestor that wants focus after its descendants that
-                        // is focusable in touch mode.. give it focus
-                        return ancestorToTakeFocus.requestFocus();
-                    } else {
-                        // nothing appropriate to have focus in touch mode, clear it out
-                        focused.unFocus();
-                        return true;
-                    }
+        if (mView != null && mView.hasFocus()) {
+            // note: not relying on mFocusedView here because this could
+            // be when the window is first being added, and mFocused isn't
+            // set yet.
+            final View focused = mView.findFocus();
+            if (focused != null && !focused.isFocusableInTouchMode()) {
+                final ViewGroup ancestorToTakeFocus = findAncestorToTakeFocusInTouchMode(focused);
+                if (ancestorToTakeFocus != null) {
+                    // there is an ancestor that wants focus after its
+                    // descendants that is focusable in touch mode.. give it
+                    // focus
+                    return ancestorToTakeFocus.requestFocus();
+                } else {
+                    // nothing appropriate to have focus in touch mode, clear it
+                    // out
+                    focused.clearFocus();
+                    return true;
                 }
             }
         }
