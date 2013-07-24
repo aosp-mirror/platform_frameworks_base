@@ -1,0 +1,249 @@
+page.title=Support Library Features
+
+@jd:body
+
+<div id="qv-wrapper">
+  <div id="qv">
+
+    <h2>In this document</h2>
+    <ol>
+      <li><a href="#v4">v4 Support Library</a></li>
+      <li><a href="#v7">v7 Libraries</a>
+        <ol>
+          <li><a href="#v7-appcompat">v7 appcompat library</a></li>
+          <li><a href="#v7-gridlayout">v7 gridlayout library</a></li>
+        </ol>
+      </li>
+      <li><a href="#v13">v13 Support Library</a></li>
+    </ol>
+
+    <h2>See also</h2>
+    <ol>
+      <li><a href="{@docRoot}tools/support-library/index.html#revisions">
+        Support Library Revisions</a></li>
+      <li><a href="{@docRoot}tools/support-library/setup.html">
+        Support Library Setup</a></li>
+    </ol>
+
+  </div>
+</div>
+
+<p>The Android Support Library package contains several individual libraries that can be included
+  in your application. Each of these libraries supports a specific range of Android platform
+  versions and set of features.</p>
+
+<p>This guide explains the important features and version support provided by the Support
+  Libraries, to help you decide which of them you should include in your application. In general,
+  we recommend including the <a href="#v4">v4 support</a> and <a href="#v7-appcompat">v7
+  appcompat</a> libraries in your application, because they support a wide range of
+  Android versions and provide APIs for recommended user interface patterns.</p>
+
+<p>In order to use any of the following libraries, you must download the library files to your
+  Android SDK installation. Follow the directions for downloading the Support Libraries in
+  <a href="{@docRoot}tools/support-library/setup.html#download">Support Library Setup</a> to
+  complete this step. You must take additional steps to include a specific Support Library in
+  your application. See the end of each library section below for instructions on how to include
+  the library in your application.</p>
+
+
+<h2 id="v4">v4 Support Library</h2>
+
+<p>This library is designed to be used with Android 1.6 (API level 4) and higher. It includes the
+  largest set of APIs compared to the other packages, including support for application components,
+  user interface features, accessibility, data handling, network connectivity, and programming
+  utilities. Here are a few of the key classes included in the v4 package:</p>
+
+<ul>
+  <li>App Components
+    <ul>
+      <li>{@link android.support.v4.app.Fragment}
+        - Adds support encapsulation of user interface and functionality with Fragments, enabling
+        applications provide layouts that adjust between small and large-screen devices.</li>
+    </ul>
+    <ul>
+      <li>{@link android.support.v4.app.NotificationCompat} - Adds support for rich notification
+        features.</li>
+    </ul>
+    <ul>
+      <li>{@link android.support.v4.content.LocalBroadcastManager} - Allows applications to easily
+        register for and receive intents within a single application without broadcasting them
+        globally.</li>
+    </ul>
+  </li>
+  <li>User Interface
+    <ul>
+      <li>{@link android.support.v4.view.ViewPager} - Adds a
+      {@link android.view.ViewGroup} that manages the layout for the
+      child views, which the user can swipe between.</li>
+      <li>{@link android.support.v4.view.PagerTitleStrip}
+        - Adds a non-interactive title strip, that can be added as a child of
+        {@link android.support.v4.view.ViewPager}.</li>
+      <li>{@link android.support.v4.view.PagerTabStrip} - Adds a
+        navigation widget for switching between paged views, that can also be used with
+        {@link android.support.v4.view.ViewPager}.</li>
+      <li>{@link android.support.v4.widget.DrawerLayout} - Adds
+      support for creating a <a href="{@docRoot}training/implementing-navigation/nav-drawer.html"
+      >Navigation Drawer</a> that can be pulled in from the edge of a window.</li>
+      <li>{@link android.support.v4.widget.SlidingPaneLayout}
+        - Adds widget for creating linked summary and detail views that
+        appropriately adapt to various screen sizes.</li>
+    </ul>
+  </li>
+  <li>Accessibility
+    <ul>
+      <li>{@link android.support.v4.widget.ExploreByTouchHelper}
+        - Adds a helper class for implementing accessibility support for custom views.</li>
+    </ul>
+    <ul>
+      <li>{@link android.support.v4.view.accessibility.AccessibilityEventCompat} - Adds support for
+      {@link android.view.accessibility.AccessibilityEvent}. For more information about implementing
+      accessibility, see <a href="{@docRoot}guide/topics/ui/accessibility/index.html"
+      >Accessibility</a>.</li>
+    </ul>
+    <ul>
+      <li>{@link android.support.v4.view.accessibility.AccessibilityNodeInfoCompat} - Adds support
+      for {@link android.view.accessibility.AccessibilityNodeInfo}.</li>
+    </ul>
+    <ul>
+      <li>{@link android.support.v4.view.accessibility.AccessibilityNodeProviderCompat} - Adds
+      support for {@link android.view.accessibility.AccessibilityNodeProvider}.</li>
+    </ul>
+    <ul>
+      <li>{@link android.support.v4.view.AccessibilityDelegateCompat} - Adds support for
+      {@link android.view.View.AccessibilityDelegate}.</li>
+    </ul>
+  </li>
+  <li>Content
+    <ul>
+      <li>{@link android.support.v4.content.Loader} - Adds support for asynchronous loading of data.
+        The library also provides concrete implementations of this class, including
+        {@link android.support.v4.content.CursorLoader} and
+        {@link android.support.v4.content.AsyncTaskLoader}.</li>
+    </ul>
+    <ul>
+      <li>{@link android.support.v4.content.FileProvider} - Adds support for sharing of private
+        files between applications.</li>
+    </ul>
+  </li>
+</ul>
+
+<p>
+  There are many other APIs included in this package. For complete, detailed information about the
+  v4 Support Library APIs, see the {@link android.support.v4.app android.support.v4} package in the
+  API reference.
+</p>
+
+<p>This library is located in the {@code &lt;sdk&gt;/extras/android/support/v4/} directory after
+  you download the Android Support Libraries. This library does not contain user interface
+  resources. To include it in your application project, follow the instructions for
+  <a href="{@docRoot}tools/support-library/setup.html#libs-without-res">adding libraries without
+  resources</a>.</p>
+
+<p>The Gradle build script dependency identifier for this library is as follows:</p>
+
+<pre>
+com.android.support:support-v4:18.0.+
+</pre>
+
+<p>This dependency notation specifies the release version 18.0.0 or higher.</p>
+
+
+
+<h2 id="v7">v7 Libraries</h2>
+
+<p>There are several libraries designed to be used with Android 2.1 (API level 7) and higher.
+  These libraries provide specific feature sets and can be included in your application
+  independently from each other.</p>
+
+
+<h3 id="v7-appcompat">v7 appcompat library</h3>
+
+<p>This library adds support for the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action
+  Bar</a> user interface <a href="{@docRoot}design/patterns/actionbar.html">design pattern</a>.
+</p>
+
+<p class="note"><strong>Note:</strong>
+  This library depends on the v4 Support Library. If you are using Ant or Eclipse, make sure
+  you include the v4 Support Library as part of this library's classpath.
+</p>
+
+<p>Here are a few of the key classes included in the v7 appcompat library:</p>
+
+<ul>
+  <li>{@link android.support.v7.app.ActionBar} - Provides an implementation of the action bar
+      <a href="{@docRoot}design/patterns/actionbar.html">user interface pattern</a>. For more
+      information on using the Action Bar, see the
+      <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> developer guide.
+  </li>
+  <li>{@link android.support.v7.app.ActionBarActivity} - Adds an application activity class that
+      must be used as a base class for activities that uses the Support Library action bar
+      implementation.
+  </li>
+  <li>{@link android.support.v7.widget.ShareActionProvider} - Adds support for a standardized
+    sharing action (such as email or posting to social applications) that can be included in an
+    action bar.
+  </li>
+</ul>
+
+<p>This library is located in the {@code &lt;sdk&gt;/extras/android/support/v7/appcompat/}
+  directory after you download the Android Support Libraries. This library contains user
+  interface resources. To include it in your application project, follow the instructions for
+  <a href="{@docRoot}tools/support-library/setup.html#libs-with-res">adding libraries with
+  resources</a>.</p>
+
+<p>The Gradle build script dependency identifier for this library is as follows:</p>
+
+<pre>
+com.android.support:appcompat-v7:18.0.+
+</pre>
+
+<p>This dependency notation specifies release version 18.0.0 or higher.</p>
+
+
+
+<h3 id="v7-gridlayout">v7 gridlayout library</h3>
+
+<p>This library adds support for the {@link android.support.v7.widget.GridLayout} class, which
+  allows you to arrange user interface elements using a grid of rectangular cells.
+  For detailed information about the v7 gridlayout library APIs, see the
+  {@link android.support.v7.widget android.support.v7.widget} package in the API reference.</p>
+
+<p>This library is located in the {@code &lt;sdk&gt;/extras/android/support/v7/gridlayout/}
+  directory after you download the Android Support Libraries. This library contains user
+  interface resources. To include it in your application project, follow the instructions for
+  <a href="{@docRoot}tools/support-library/setup.html#libs-with-res">adding libraries with
+  resources</a>.</p>
+
+<p>The Gradle build script dependency identifier for this library is as follows:</p>
+
+<pre>
+com.android.support:gridlayout-v7:18.0.+
+</pre>
+
+<p>This dependency notation specifies release version 18.0.0 or higher.</p>
+
+
+<h2 id="v13">v13 Support Library</h2>
+
+<p>This library is designed to be used for Android 3.2 (API level 13) and higher. It adds support
+  for the <a href="{@docRoot}guide/components/fragments.html">Fragment</a> user interface pattern
+  with the ({@link android.support.v13.app.FragmentCompat}) class and additional fragment support
+  classes For more information about fragments, see the
+  <a href="{@docRoot}guide/components/fragments.html">Fragments</a> developer guide. For detailed
+  information about the v13 Support Library APIs, see the {@link android.support.v13.app
+  android.support.v13} package in the API reference.
+</p>
+
+<p>This library is located in the {@code &lt;sdk&gt;/extras/android/support/v13/} directory after
+  you download the Android Support Libraries. This library does not contain user interface
+  resources. To include it in your application project, follow the instructions for
+  <a href="{@docRoot}tools/support-library/setup.html#libs-without-res">adding libraries without
+  resources</a>.</p>
+
+<p>The Gradle build script dependency identifier for this library is as follows:</p>
+
+<pre>
+com.android.support:support-v13:18.0.+
+</pre>
+
+<p>This dependency notation specifies the release version 18.0.0 or higher.</p>
