@@ -56,7 +56,13 @@
           <li><a href="<?cs var:toroot ?>tools/devices/emulator.html"><span class="en">Using the Emulator</span></a></li>
         </ul>
       </li>
-      <li><a href="<?cs var:toroot ?>tools/device.html"><span class="en">Using Hardware Devices</span></a></li>
+      <li class="nav-section">
+        <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/device.html"><span class="en">Using Hardware Devices</span></a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>tools/extras/oem-usb.html"><span
+            class="en">USB Drivers</span></a></li>
+        </ul>
+      </li>
       <li class="nav-section">
         <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/projects/index.html"><span class="en">Setting Up Projects</span></a></div>
         <ul>
@@ -144,8 +150,18 @@
           <li><a href="<?cs var:toroot ?>tools/publishing/app-signing.html"><span class="en">Signing Your Apps</span></a></li>
         </ul>
       </li>
-</ul>
-</li>
+    </ul>
+  </li>
+
+  <li class="nav-section">
+    <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/support-library/index.html"><span
+class="en">Support Library</span></a></div>
+    <ul>
+      <li><a href="<?cs var:toroot ?>tools/support-library/features.html">Features</a></li>
+      <li><a href="<?cs var:toroot ?>tools/support-library/setup.html">Setup</a></li>
+    </ul>
+  </li>
+
   <li class="nav-section">
     <div class="nav-section-header"><a href="<?cs var:toroot ?>tools/help/index.html"><span
 class="en">Tools Help</span></a></div>
@@ -218,19 +234,6 @@ class="en">MonkeyRunner</span></a></li>
       -->
       <li><a href="<?cs var:toroot ?>tools/revisions/platforms.html"><span
 class="en">Platforms</span></a></li>
-    </ul>
-  </li>
-
-
-  <li class="nav-section">
-    <div class="nav-section-header"><a href="<?cs var:toroot
-?>tools/extras/index.html"><span class="en">Extras</span></a></div>
-    <ul>
-      <li><a href="<?cs var:toroot ?>tools/extras/support-library.html"><span class="en">Support
-Library</span></a></li>
-      <li><a href="<?cs var:toroot ?>tools/extras/oem-usb.html"><span
-class="en">USB Drivers</span></a>
-      </li>
     </ul>
   </li>
 
