@@ -377,6 +377,18 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         return mGravity;
     }
 
+    /**
+     * Sets the Adapter used to provide the data which backs this Spinner.
+     * <p>
+     * Note that Spinner overrides {@link Adapter#getViewTypeCount()} on the
+     * Adapter associated with this view. Calling
+     * {@link Adapter#getItemViewType(int) getItemViewType(int)} on the object
+     * returned from {@link #getAdapter()} will always return 0. Calling
+     * {@link Adapter#getViewTypeCount() getViewTypeCount()} will always return
+     * 1.
+     *
+     * @see AbsSpinner#setAdapter(SpinnerAdapter)
+     */
     @Override
     public void setAdapter(SpinnerAdapter adapter) {
         super.setAdapter(adapter);
