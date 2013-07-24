@@ -2586,7 +2586,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     // Caller must grab mDnsLock.
     private void updateDnsLocked(String network, String iface,
-            Collection<InetAddress> dnses, String domains) {
+            Collection<InetAddress> dnses, String domains, boolean defaultDns) {
         int last = 0;
         if (dnses.size() == 0 && mDefaultDns != null) {
             dnses = new ArrayList();
@@ -2598,6 +2598,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         try {
             mNetd.setDnsServersForInterface(iface, NetworkUtils.makeStrings(dnses), domains);
+            if (defaultDns) {
+                mNetd.setDefaultInterfaceForDns(iface);
+            }
+
             for (InetAddress dns : dnses) {
                 ++last;
                 String key = "net.dns" + last;
@@ -2625,7 +2629,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 String network = nt.getNetworkInfo().getTypeName();
                 synchronized (mDnsLock) {
                     if (!mDnsOverridden) {
-                        updateDnsLocked(network, p.getInterfaceName(), dnses, p.getDomains());
+                        updateDnsLocked(network, p.getInterfaceName(), dnses, p.getDomains(), true);
                     }
                 }
             } else {
@@ -3496,8 +3500,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
             // Apply DNS changes.
             synchronized (mDnsLock) {
-                updateDnsLocked("VPN", iface, addresses, domains);
-                mDnsOverridden = true;
+                updateDnsLocked("VPN", iface, addresses, domains, false);
             }
 
             // Temporarily disable the default proxy (not global).
