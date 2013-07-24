@@ -452,7 +452,7 @@ broadly in your apps, the BidiFormatter APIs are also now available for earlier
 platform versions through the Support Package in the Android SDK. </p>
 
 <p>To assist you with managing date formatting across locales, Android 4.3
-includes a new <strong>getBestAvaialbleDate()</strong> method that automatically
+includes a new <strong>getBestDateTimePattern()</strong> method that automatically
 generates the best possible localized form of a Unicode UTS date for a locale
 that you specify. It’s a convenient way to provide a more localized experience
 for your users. </p>
