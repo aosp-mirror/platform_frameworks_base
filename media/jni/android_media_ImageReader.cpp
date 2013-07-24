@@ -300,7 +300,7 @@ static void Image_getLockedBufferInfo(JNIEnv* env, CpuConsumer::LockedBuffer* bu
     ALOG_ASSERT(size != NULL, "size is NULL!!!");
     ALOG_ASSERT((idx < IMAGE_READER_MAX_NUM_PLANES) && (idx >= 0));
 
-    ALOGV("%s: buffer: 0x%p", __FUNCTION__, buffer);
+    ALOGV("%s: buffer: %p", __FUNCTION__, buffer);
 
     uint32_t dataSize, ySize, cSize, cStride;
     uint8_t *cb, *cr;
@@ -633,7 +633,7 @@ static jboolean ImageReader_imageSetup(JNIEnv* env, jobject thiz,
     }
     status_t res = consumer->lockNextBuffer(buffer);
     if (res != NO_ERROR) {
-        ALOGE("%s Fail to lockNextBuffer with error: 0x%x ", __FUNCTION__, res);
+        ALOGE("%s Fail to lockNextBuffer with error: %d ", __FUNCTION__, res);
         return false;
     }
 

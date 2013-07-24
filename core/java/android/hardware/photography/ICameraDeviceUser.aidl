@@ -43,4 +43,6 @@ interface ICameraDeviceUser
     int createDefaultRequest(int templateId, out CameraMetadata request);
 
     int getCameraInfo(out CameraMetadata info);
+
+    int waitUntilIdle();
 }

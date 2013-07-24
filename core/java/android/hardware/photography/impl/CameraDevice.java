@@ -65,9 +65,6 @@ public class CameraDevice implements android.hardware.photography.CameraDevice {
         return mCallbacks;
     }
 
-    /**
-     * @hide
-     */
     public void setRemoteDevice(ICameraDeviceUser remoteDevice) {
         mRemoteDevice = remoteDevice;
     }
@@ -209,7 +206,22 @@ public class CameraDevice implements android.hardware.photography.CameraDevice {
 
     @Override
     public void waitUntilIdle() throws CameraAccessException {
-        // TODO: implement
+
+        synchronized (mLock) {
+            checkIfCameraClosed();
+            if (!mRepeatingRequestIdStack.isEmpty()) {
+                throw new IllegalStateException("Active repeating request ongoing");
+            }
+
+            try {
+                mRemoteDevice.waitUntilIdle();
+            } catch (CameraRuntimeException e) {
+                throw e.asChecked();
+            } catch (RemoteException e) {
+                // impossible
+                return;
+            }
+      }
     }
 
     @Override
@@ -329,4 +341,9 @@ public class CameraDevice implements android.hardware.photography.CameraDevice {
 
     }
 
+    private void checkIfCameraClosed() {
+        if (mRemoteDevice == null) {
+            throw new IllegalStateException("CameraDevice was already closed");
+        }
+    }
 }
