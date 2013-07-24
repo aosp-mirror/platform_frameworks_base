@@ -772,8 +772,7 @@ public boolean onCreateOptionsMenu(Menu menu) {
 /** Defines a default (dummy) share intent to initialize the action provider.
   * However, as soon as the actual content to be used in the intent
   * is known or changes, you must update the share intent by again calling
-  * mShareActionProvider.{@link
-  * android.support.v7.widget.ShareActionProvider#setShareIntent setShareIntent()}
+  * mShareActionProvider.{@link android.support.v7.widget.ShareActionProvider#setShareIntent setShareIntent()}
   */
 private Intent getDefaultIntent() {
     Intent intent = new Intent(Intent.ACTION_SEND);
