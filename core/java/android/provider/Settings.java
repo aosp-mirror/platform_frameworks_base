@@ -3502,6 +3502,104 @@ public final class Settings {
                 "accessibility_display_magnification_auto_update";
 
         /**
+         * Setting that specifies whether timed text (captions) should be
+         * displayed in video content. Text display properties are controlled by
+         * the following settings:
+         * <ul>
+         * <li>{@link #ACCESSIBILITY_CAPTIONING_LOCALE}
+         * <li>{@link #ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR}
+         * <li>{@link #ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR}
+         * <li>{@link #ACCESSIBILITY_CAPTIONING_EDGE_COLOR}
+         * <li>{@link #ACCESSIBILITY_CAPTIONING_EDGE_TYPE}
+         * <li>{@link #ACCESSIBILITY_CAPTIONING_TYPEFACE}
+         * <li>{@link #ACCESSIBILITY_CAPTIONING_FONT_SIZE}
+         * </ul>
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_ENABLED =
+                "accessibility_captioning_enabled";
+
+        /**
+         * Setting that specifies the language for captions as a locale string,
+         * e.g. en_US.
+         *
+         * @see java.util.Locale#toString
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_LOCALE =
+                "accessibility_captioning_locale";
+
+        /**
+         * Integer property that specifes the background color for captions as a
+         * packed 32-bit color.
+         *
+         * @see android.graphics.Color#argb
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR =
+                "accessibility_captioning_background_color";
+
+        /**
+         * Integer property that specifes the foreground color for captions as a
+         * packed 32-bit color.
+         *
+         * @see android.graphics.Color#argb
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR =
+                "accessibility_captioning_foreground_color";
+
+        /**
+         * Integer property that specifes the edge type for captions, one of:
+         * <ul>
+         * <li>{@link android.view.accessibility.CaptioningPreferences#EDGE_TYPE_NONE}
+         * <li>{@link android.view.accessibility.CaptioningPreferences#EDGE_TYPE_UNIFORM}
+         * <li>{@link android.view.accessibility.CaptioningPreferences#EDGE_TYPE_DROP_SHADOWED}
+         * </ul>
+         *
+         * @see #ACCESSIBILITY_CAPTIONING_EDGE_COLOR
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_EDGE_TYPE =
+                "accessibility_captioning_edge_type";
+
+        /**
+         * Integer property that specifes the edge color for captions as a
+         * packed 32-bit color.
+         *
+         * @see #ACCESSIBILITY_CAPTIONING_EDGE_TYPE
+         * @see android.graphics.Color#argb
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_EDGE_COLOR =
+                "accessibility_captioning_edge_color";
+
+        /**
+         * String property that specifies the typeface for captions, one of:
+         * <ul>
+         * <li>DEFAULT
+         * <li>MONOSPACE
+         * <li>SANS_SERIF
+         * <li>SERIF
+         * </ul>
+         *
+         * @see android.graphics.Typeface
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_TYPEFACE =
+                "accessibility_captioning_typeface";
+
+        /**
+         * Integer point property that specifies font size for captions in
+         * scaled pixels (sp).
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_FONT_SIZE =
+                "accessibility_captioning_font_size";
+
+        /**
          * The timout for considering a press to be a long press in milliseconds.
          * @hide
          */
@@ -4132,6 +4230,14 @@ public final class Settings {
             TOUCH_EXPLORATION_ENABLED,
             ACCESSIBILITY_ENABLED,
             ACCESSIBILITY_SPEAK_PASSWORD,
+            ACCESSIBILITY_CAPTIONING_ENABLED,
+            ACCESSIBILITY_CAPTIONING_LOCALE,
+            ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR,
+            ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR,
+            ACCESSIBILITY_CAPTIONING_EDGE_TYPE,
+            ACCESSIBILITY_CAPTIONING_EDGE_COLOR,
+            ACCESSIBILITY_CAPTIONING_TYPEFACE,
+            ACCESSIBILITY_CAPTIONING_FONT_SIZE,
             TTS_USE_DEFAULTS,
             TTS_DEFAULT_RATE,
             TTS_DEFAULT_PITCH,
