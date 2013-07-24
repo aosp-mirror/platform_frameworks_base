@@ -19,7 +19,7 @@
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "jni.h"
-#include "cutils/logger.h"
+#include "log/logger.h"
 
 // The size of the tag number comes out of the payload size.
 #define MAX_EVENT_PAYLOAD (LOGGER_ENTRY_MAX_PAYLOAD - sizeof(int32_t))
