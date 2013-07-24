@@ -243,8 +243,9 @@ public final class ActiveServices {
         }
         r.lastActivity = SystemClock.uptimeMillis();
         r.startRequested = true;
-        if (r.tracker != null) {
-            r.tracker.setStarted(true, mAm.mProcessTracker.getMemFactorLocked(), r.lastActivity);
+        ProcessTracker.ServiceState stracker = r.getTracker();
+        if (stracker != null) {
+            stracker.setStarted(true, mAm.mProcessTracker.getMemFactorLocked(), r.lastActivity);
         }
         r.callStart = false;
         r.pendingStarts.add(new ServiceRecord.StartItem(r, false, r.makeNextStartId(),
@@ -505,8 +506,9 @@ public final class ActiveServices {
                 s.lastActivity = SystemClock.uptimeMillis();
                 if (!s.hasAutoCreateConnections()) {
                     // This is the first binding, let the tracker know.
-                    if (s.tracker != null) {
-                        s.tracker.setBound(true, mAm.mProcessTracker.getMemFactorLocked(),
+                    ProcessTracker.ServiceState stracker = s.getTracker();
+                    if (stracker != null) {
+                        stracker.setBound(true, mAm.mProcessTracker.getMemFactorLocked(),
                                 s.lastActivity);
                     }
                 }
@@ -771,12 +773,7 @@ public final class ActiveServices {
                                 sInfo.applicationInfo.uid, sInfo.packageName,
                                 sInfo.name);
                     }
-                    ProcessTracker.ServiceState tracker = null;
-                    if ((sInfo.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) == 0) {
-                        tracker = mAm.mProcessTracker.getServiceStateLocked(sInfo.packageName,
-                                sInfo.applicationInfo.uid, sInfo.name);
-                    }
-                    r = new ServiceRecord(mAm, ss, name, filter, sInfo, res, tracker);
+                    r = new ServiceRecord(mAm, ss, name, filter, sInfo, res);
                     res.setService(r);
                     mServiceMap.putServiceByName(name, UserHandle.getUserId(r.appInfo.uid), r);
                     mServiceMap.putServiceByIntent(filter, UserHandle.getUserId(r.appInfo.uid), r);
@@ -827,8 +824,9 @@ public final class ActiveServices {
                 + why + " of " + r.shortName);
         long now = SystemClock.uptimeMillis();
         if (r.executeNesting == 0) {
-            if (r.tracker != null) {
-                r.tracker.setExecuting(true, mAm.mProcessTracker.getMemFactorLocked(), now);
+            ProcessTracker.ServiceState stracker = r.getTracker();
+            if (stracker != null) {
+                stracker.setExecuting(true, mAm.mProcessTracker.getMemFactorLocked(), now);
             }
             if (r.app != null) {
                 if (r.app.executingServices.size() == 0) {
@@ -1340,6 +1338,10 @@ public final class ActiveServices {
         if (r.tracker != null) {
             r.tracker.setStarted(false, memFactor, now);
             r.tracker.setBound(false, memFactor, now);
+            if (r.executeNesting == 0) {
+                r.tracker.makeInactive();
+                r.tracker = null;
+            }
         }
     }
 
@@ -1500,6 +1502,10 @@ public final class ActiveServices {
             if (r.tracker != null) {
                 r.tracker.setExecuting(false, mAm.mProcessTracker.getMemFactorLocked(),
                         SystemClock.uptimeMillis());
+                if (inStopping) {
+                    r.tracker.makeInactive();
+                    r.tracker = null;
+                }
             }
         }
     }
