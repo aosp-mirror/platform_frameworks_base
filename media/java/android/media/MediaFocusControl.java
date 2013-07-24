@@ -66,6 +66,11 @@ public class MediaFocusControl implements OnFinished {
     /** Debug volumes */
     protected static final boolean DEBUG_VOL = false;
 
+    /**
+     * Used to indicate no audio focus has been gained or lost.
+     */
+    private static final int AUDIOFOCUS_NONE = 0;
+
     /** Used to alter media button redirection when the phone is ringing. */
     private boolean mIsRinging = false;
 
@@ -267,15 +272,15 @@ public class MediaFocusControl implements OnFinished {
         synchronized(mAudioFocusLock) {
             if (!mFocusStack.empty() && (mFocusStack.peek().mFocusDispatcher != null)) {
                 // notify the current focus owner it lost focus after removing it from stack
-                FocusStackEntry focusOwner = mFocusStack.pop();
+                final FocusStackEntry exFocusOwner = mFocusStack.pop();
                 try {
-                    focusOwner.mFocusDispatcher.dispatchAudioFocusChange(
-                            AudioManager.AUDIOFOCUS_LOSS, focusOwner.mClientId);
+                    exFocusOwner.mFocusDispatcher.dispatchAudioFocusChange(
+                            AudioManager.AUDIOFOCUS_LOSS, exFocusOwner.mClientId);
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failure to signal loss of audio focus due to "+ e);
                     e.printStackTrace();
                 }
-                focusOwner.unlinkToDeath();
+                exFocusOwner.unlinkToDeath();
                 // clear RCD
                 synchronized(mRCStack) {
                     clearRemoteControlDisplay_syncAfRcs();
@@ -288,9 +293,11 @@ public class MediaFocusControl implements OnFinished {
         // notify the top of the stack it gained focus
         if (!mFocusStack.empty() && (mFocusStack.peek().mFocusDispatcher != null)) {
             if (canReassignAudioFocus()) {
+                final FocusStackEntry newFocusOwner = mFocusStack.peek();
                 try {
-                    mFocusStack.peek().mFocusDispatcher.dispatchAudioFocusChange(
+                    newFocusOwner.mFocusDispatcher.dispatchAudioFocusChange(
                             AudioManager.AUDIOFOCUS_GAIN, mFocusStack.peek().mClientId);
+                    newFocusOwner.mFocusLossReceived = AUDIOFOCUS_NONE;
                 } catch (RemoteException e) {
                     Log.e(TAG, "Failure to signal gain of audio control focus due to "+ e);
                     e.printStackTrace();
@@ -304,22 +311,53 @@ public class MediaFocusControl implements OnFinished {
         public IAudioFocusDispatcher mFocusDispatcher = null;
         public IBinder mSourceRef = null;
         public String mClientId;
-        public int mFocusChangeType;
+        /** the audio focus gain request that caused the addition of this entry in the stack */
+        public int mFocusGainRequest;
+        public int mFocusLossReceived;
         public AudioFocusDeathHandler mHandler;
         public String mPackageName;
         public int mCallingUid;
 
-        public FocusStackEntry() {
+        private static String focusChangeToString(int focus) {
+            switch(focus) {
+                case AudioManager.AUDIOFOCUS_GAIN:
+                    return "GAIN";
+                case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT:
+                    return "GAIN_TRANSIENT";
+                case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK:
+                    return "GAIN_TRANSIENT_MAY_DUCK";
+                case AudioManager.AUDIOFOCUS_LOSS:
+                    return "LOSS";
+                case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                    return "LOSS_TRANSIENT";
+                case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                    return "LOSS_TRANSIENT_CAN_DUCK";
+                default:
+                    return "[invalid focus change" + focus + "]";
+            }
         }
 
-        public FocusStackEntry(int streamType, int duration,
+        String focusGainToString() {
+            return focusChangeToString(mFocusGainRequest);
+        }
+
+        String focusLossToString() {
+            if (mFocusLossReceived == 0) {
+                return "none";
+            } else {
+                return focusChangeToString(mFocusLossReceived);
+            }
+        }
+
+        FocusStackEntry(int streamType, int focusRequest,
                 IAudioFocusDispatcher afl, IBinder source, String id, AudioFocusDeathHandler hdlr,
                 String pn, int uid) {
             mStreamType = streamType;
             mFocusDispatcher = afl;
             mSourceRef = source;
             mClientId = id;
-            mFocusChangeType = duration;
+            mFocusGainRequest = focusRequest;
+            mFocusLossReceived = AUDIOFOCUS_NONE;
             mHandler = hdlr;
             mPackageName = pn;
             mCallingUid = uid;
@@ -358,7 +396,8 @@ public class MediaFocusControl implements OnFinished {
                 pw.println("  source:" + fse.mSourceRef
                         + " -- pack: " + fse.mPackageName
                         + " -- client: " + fse.mClientId
-                        + " -- duration: " + fse.mFocusChangeType
+                        + " -- gain: " + fse.focusGainToString()
+                        + " -- loss: " + fse.focusLossToString()
                         + " -- uid: " + fse.mCallingUid
                         + " -- stream: " + fse.mStreamType);
             }
@@ -513,7 +552,7 @@ public class MediaFocusControl implements OnFinished {
             if (!mFocusStack.empty() && mFocusStack.peek().mClientId.equals(clientId)) {
                 // if focus is already owned by this client and the reason for acquiring the focus
                 // hasn't changed, don't do anything
-                if (mFocusStack.peek().mFocusChangeType == focusChangeHint) {
+                if (mFocusStack.peek().mFocusGainRequest == focusChangeHint) {
                     // unlink death handler so it can be gc'ed.
                     // linkToDeath() creates a JNI global reference preventing collection.
                     cb.unlinkToDeath(afdh, 0);
@@ -527,12 +566,14 @@ public class MediaFocusControl implements OnFinished {
 
             // notify current top of stack it is losing focus
             if (!mFocusStack.empty() && (mFocusStack.peek().mFocusDispatcher != null)) {
+                final FocusStackEntry exFocusOwner = mFocusStack.peek();
                 try {
-                    mFocusStack.peek().mFocusDispatcher.dispatchAudioFocusChange(
+                    exFocusOwner.mFocusDispatcher.dispatchAudioFocusChange(
                             -1 * focusChangeHint, // loss and gain codes are inverse of each other
                             mFocusStack.peek().mClientId);
+                    exFocusOwner.mFocusLossReceived = -1 * focusChangeHint;
                 } catch (RemoteException e) {
-                    Log.e(TAG, " Failure to signal loss of focus due to "+ e);
+                    Log.e(TAG, " Failure to signal loss of focus: ", e);
                     e.printStackTrace();
                 }
             }
@@ -1557,7 +1598,7 @@ public class MediaFocusControl implements OnFinished {
             for (int index = mFocusStack.size()-1; index >= 0; index--) {
                 FocusStackEntry fse = mFocusStack.elementAt(index);
                 if ((fse.mStreamType == AudioManager.STREAM_MUSIC)
-                        || (fse.mFocusChangeType == AudioManager.AUDIOFOCUS_GAIN)) {
+                        || (fse.mFocusGainRequest == AudioManager.AUDIOFOCUS_GAIN)) {
                     af = fse;
                     break;
                 }
