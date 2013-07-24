@@ -94,7 +94,7 @@ page.title=Notifications
 <p class="note">
     <strong>Note:</strong> Except where noted, this guide refers to the
     {@link android.support.v4.app.NotificationCompat.Builder NotificationCompat.Builder} class
-    in the version 4 <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>.
+    in the version 4 <a href="{@docRoot}tools/support-library/index.html">Support Library</a>.
     The class {@link android.app.Notification.Builder Notification.Builder} was added in Android
     3.0.
 </p>

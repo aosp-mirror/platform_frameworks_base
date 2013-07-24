@@ -14,12 +14,12 @@ trainingnavtop=true
     </ol>
     <h2>You should also read</h2>
     <ul>
-      <li><a href="{@docRoot}tools/extras/support-library.html">Support Library</a></li>
+      <li><a href="{@docRoot}tools/support-library/index.html">Support Library</a></li>
     </ul>
   </div>
 </div>
 
-<p>The Android <a href="{@docRoot}tools/extras/support-library.html">Support Library</a> provides a JAR
+<p>The Android <a href="{@docRoot}tools/support-library/index.html">Support Library</a> provides a JAR
 file with an API library that allows you to use some of the more recent Android APIs in your app
 while running on earlier versions of Android. For instance, the Support Library provides a version
 of the {@link android.app.Fragment} APIs that you can use on Android 1.6 (API level 4) and

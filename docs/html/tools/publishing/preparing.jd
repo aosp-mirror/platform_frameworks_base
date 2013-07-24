@@ -271,7 +271,7 @@ doing the following:</p>
   <li><strong>Consider using the Support Library</strong>
     <p>If your application is designed for devices running Android 3.x, make your application
     compatible with older versions of Android by adding the
-    <a href="{@docRoot}tools/extras/support-library.html">Support Library</a> to your
+    <a href="{@docRoot}tools/support-library/index.html">Support Library</a> to your
     application project. The Support Library provides static support libraries that you can add to
     your Android application, which enables you to use APIs that are either not available on
     older platform versions or use utility APIs that are not part of the framework APIs.</p>

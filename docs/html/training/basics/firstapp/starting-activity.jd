@@ -350,7 +350,7 @@ to implement default navigation behaviors, such as <a
 href="{@docRoot}design/patterns/navigation.html">Up navigation</a> on
 Android 4.1 (API level 16) and higher. You can provide the same navigation behaviors for
 older versions of Android by using the
-<a href="{@docRoot}tools/extras/support-library.html">Support Library</a> and adding
+<a href="{@docRoot}tools/support-library/index.html">Support Library</a> and adding
 the <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code
 &lt;meta-data>}</a> element as shown here.</p>
 
@@ -361,7 +361,7 @@ a different IDE, you should have installed it during the
 When using the templates in Eclipse, the Support Library is automatically added to your app project
 (you can see the library's JAR file listed under <em>Android Dependencies</em>). If you're not using
 Eclipse, you need to manually add the library to your project&mdash;follow the guide for <a
-href="{@docRoot}tools/extras/support-library.html#SettingUp">setting up the Support Library</a>
+href="{@docRoot}tools/support-library/setup.html">setting up the Support Library</a>
 then return here.</p>
 
 <p>If you're developing with Eclipse, you can run the app now, but not much happens.

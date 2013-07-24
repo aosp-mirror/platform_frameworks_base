@@ -47,7 +47,7 @@ support all desired devices with a single APK</li>
   <li><a href="{@docRoot}google/play/expansion-files.html">APK Expansion Files</a></li>
   <li><a href="{@docRoot}google/play/filters.html">Filters on Google Play</a></li>
   <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
-  <li><a href="{@docRoot}tools/extras/support-library.html">Support Library</a></li>
+  <li><a href="{@docRoot}tools/support-library/index.html">Support Library</a></li>
   <li><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Android API Levels</a></li>
 </ol>
 
@@ -628,7 +628,7 @@ different screen sizes.</p>
 href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>.</p>
 
 <p>Additionally, you should consider using a support library from the <a
-href="{@docRoot}tools/extras/support-library.html">Compatibility Package</a> so that you can add <a
+href="{@docRoot}tools/support-library/index.html">Compatibility Package</a> so that you can add <a
 href="{@docRoot}guide/components/fragments.html">Fragments</a> to your activity designs
 when running on larger screens such as tablets.</p>
 
@@ -643,7 +643,7 @@ over 95% of Android-powered devices (as indicated by the <a
 href="{@docRoot}about/dashboards/index.html">Platform Versions</a> dashboard).</p>
 
 <p>By using a support library from the <a
-href="{@docRoot}tools/extras/support-library.html">Compatibility Package</a>, you can also use APIs
+href="{@docRoot}tools/support-library/index.html">Compatibility Package</a>, you can also use APIs
 from some of the latest versions (such as Android 3.0) while
 still supporting versions as low as Android 1.6. The support library includes APIs for <a
 href="{@docRoot}guide/components/fragments.html">Fragments</a>, <a

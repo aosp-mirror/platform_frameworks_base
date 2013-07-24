@@ -28,7 +28,7 @@ trainingnavtop=true
       Screen slides are transitions between one entire screen to another and are common with UIs
       like setup wizards or slideshows. This lesson shows you how to do screen slides with
       a {@link android.support.v4.view.ViewPager} provided by the <a href=
-      "{@docRoot}tools/extras/support-library.html">support library</a>.
+      "{@docRoot}tools/support-library/index.html">support library</a>.
       {@link android.support.v4.view.ViewPager}s can animate screen slides
       automatically. Here's what a screen slide looks like that transitions from
       one screen of content to the next:

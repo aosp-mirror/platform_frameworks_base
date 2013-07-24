@@ -351,7 +351,7 @@ following approaches:</p>
   <li>If your application targets Android 4.0 (API level 14) and higher, override and implement the
 accessibility methods listed above directly in your custom view class.</li>
   <li>If your custom view is intended to be compatible with Android 1.6 (API Level 4) and above, add
-the Android <a href="{@docRoot}tools/extras/support-library.html">Support Library</a>, revision 5 or
+the Android <a href="{@docRoot}tools/support-library/index.html">Support Library</a>, revision 5 or
 higher, to your project. Then, within your custom view class, call the
 {@link android.support.v4.view.ViewCompat#setAccessibilityDelegate
 ViewCompat.setAccessibilityDelegate()} method to implement the accessibility methods
@@ -490,7 +490,7 @@ appropriate feedback to users.</p>
 <p>The example code below shows how override these three methods by using
 {@link android.support.v4.view.ViewCompat#setAccessibilityDelegate
 ViewCompat.setAccessibilityDelegate()}. Note that this sample code requires that the Android
-<a href="{@docRoot}tools/extras/support-library.html">Support Library</a> for API Level 4 (revision
+<a href="{@docRoot}tools/support-library/index.html">Support Library</a> for API Level 4 (revision
 5 or higher) is added to your project.</p>
 
 <pre>
@@ -534,7 +534,7 @@ ViewCompat.setAccessibilityDelegate(new AccessibilityDelegateCompat() {
 
 <p>In applications targeting Android 4.0 (API Level 14) and higher, you can implement these methods
 directly in your custom view class. For another example of this approach, see the Android
-<a href="{@docRoot}tools/extras/support-library.html">Support Library</a> (revision 5 or higher)
+<a href="{@docRoot}tools/support-library/index.html">Support Library</a> (revision 5 or higher)
 sample {@code AccessibilityDelegateSupportActivity} in
 ({@code &lt;sdk&gt;/extras/android/support/v4/samples/Support4Demos/}).</p>
 
@@ -594,7 +594,7 @@ methods.</p>
   example implementation of this accessibility feature, see
   {@code AccessibilityNodeProviderActivity} in the ApiDemos sample project. You can implement a
   virtual view hierarchy that is compatible with Android 1.6 and later by using the
-  <a href="{@docRoot}tools/extras/support-library.html">Support Library</a> with the
+  <a href="{@docRoot}tools/support-library/index.html">Support Library</a> with the
   {@link android.support.v4.view.ViewCompat#getAccessibilityNodeProvider
   ViewCompat.getAccessibilityNodeProvider()} method and providing an implementation with
   {@link android.support.v4.view.accessibility.AccessibilityNodeProviderCompat}.</p>
