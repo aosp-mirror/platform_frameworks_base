@@ -822,7 +822,7 @@ the methods necessary for any given view without extending the {@link android.vi
 
 <p>If you want to maintain compatibility with Android versions prior to 4.0, while also supporting
 the new the accessibility APIs, you can do so with the latest version of the <em>v4 support
-library</em> (in <a href="{@docRoot}tools/extras/support-library.html">Compatibility Package, r4</a>)
+library</em> (in <a href="{@docRoot}tools/support-library/index.html">Compatibility Package, r4</a>)
 using a set of utility classes that provide the new accessibility APIs in a backward-compatible
 design.</p>
 

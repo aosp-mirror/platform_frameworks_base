@@ -13,7 +13,7 @@ startpage=true
 <ul>
   <li>Android 2.2 or higher</li>
   <li>Understanding of fragments and Android layouts</li>
-  <li><a href="{@docRoot}tools/extras/support-library.html">Android Support Library</a></li>
+  <li><a href="{@docRoot}tools/support-library/index.html">Android Support Library</a></li>
   <li><a href="{@docRoot}training/design-navigation/index.html">Designing Effective Navigation</a></li>
 </ul>
 
@@ -46,7 +46,7 @@ implement navigation patterns with tabs, swipe views, and a navigation drawer. Y
 understand how to provide proper <em>Up</em> and <em>Back</em> navigation.</p>
 
 <p class="note"><strong>Note:</strong> Several elements of this class require the
-<a href="{@docRoot}tools/extras/support-library.html">Support Library</a> APIs.
+<a href="{@docRoot}tools/support-library/index.html">Support Library</a> APIs.
 If you have not used the Support Library before, follow the lesson about <a
 href="{@docRoot}training/basics/fragments/support-lib.html">Using the Support Library</a>
 to get your project set up.</p>

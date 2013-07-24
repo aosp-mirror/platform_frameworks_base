@@ -91,7 +91,7 @@ determining factor in tracking a gesture's characteristics or even deciding
 whether the gesture occurred. To make velocity calculation easier, Android
 provides the {@link android.view.VelocityTracker} class and the  	
 {@link android.support.v4.view.VelocityTrackerCompat} class in the 
-<a href="{@docRoot}tools/extras/support-library.html">Support Library</a>.
+<a href="{@docRoot}tools/support-library/index.html">Support Library</a>.
 {@link
 android.view.VelocityTracker} helps you track the velocity of touch events. This
 is useful for gestures in which velocity is part of the criteria for the

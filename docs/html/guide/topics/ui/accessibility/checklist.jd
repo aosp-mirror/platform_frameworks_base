@@ -73,7 +73,7 @@ helps you focus on the key development issues to get the details of accessibilit
     your application, <a href="{@docRoot}guide/topics/ui/accessibility/apps.html#custom-views">
     implement accessibility interfaces</a> for your custom views and provide content descriptions.
     For custom controls that are intended to be compatible with versions of Android back to 1.6,
-    use the <a href="{@docRoot}tools/extras/support-library.html">Support Library</a> to implement
+    use the <a href="{@docRoot}tools/support-library/index.html">Support Library</a> to implement
     the latest accessibility features.</li>
   <li><strong>No audio-only feedback:</strong> Audio feedback must always have a secondary
     feedback mechanism to support users who are deaf or hard of hearing. For example, a sound alert

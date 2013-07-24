@@ -58,7 +58,7 @@ gestures your app supports. </li>
 
 <p>The examples in this lesson use the {@link android.support.v4.view.GestureDetectorCompat}
 and {@link android.support.v4.view.MotionEventCompat} classes. These classes are in the 
-<a href="{@docRoot}tools/extras/support-library.html">Support Library</a>. You should use
+<a href="{@docRoot}tools/support-library/index.html">Support Library</a>. You should use
 Support Library classes where possible to provide compatibility with devices 
 running Android 1.6 and higher. Note that {@link android.support.v4.view.MotionEventCompat} is <em>not</em> a 
 replacement for the {@link android.view.MotionEvent} class. Rather, it provides static utility 

@@ -77,7 +77,7 @@ Google APIs.</td>
   </tr>
   
   <tr>
-    <td><a href="{@docRoot}tools/extras/support-library.html">Android Support</a></td>
+    <td><a href="{@docRoot}tools/support-library/index.html">Android Support</a></td>
     <td>A static library you can include in your app sources in order to use powerful
 APIs that aren't available in the standard platform. For example, the support library
 contains versions of the {@link android.support.v4.app.Fragment} class that's compatible with

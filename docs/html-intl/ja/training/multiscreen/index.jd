@@ -19,7 +19,7 @@ href="http://developer.android.com/guide/components/activities.html">アクテ�
   <li>Android <a
 href="http://developer.android.com/guide/topics/ui/index.html">ユーザー インターフェース</a>の開発経験</li>
   <li><a
-href="{@docRoot}tools/extras/support-library.html">サポート ライブラリ</a>の利用（一部の機能で必要）</li>
+href="{@docRoot}tools/support-library/index.html">サポート ライブラリ</a>の利用（一部の機能で必要）</li>
 </ul>
 
 <h2>関連ドキュメント</h2>
@@ -47,7 +47,7 @@ href="{@docRoot}tools/extras/support-library.html">サポート ライブラリ<
 <p>各レッスンで紹介されているコードは、複数の画面に合わせて最適化する際、ベスト プラクティスとなるサンプル アプリから抜粋したものです。このサンプルを（右側から）ダウンロードして、再利用可能なコードのソースとしてご自分のアプリに使用することができます。</p>
 
 <p class="note"><strong>注:</strong> このクラスと関連サンプルでは、<a
-href="{@docRoot}tools/extras/support-library.html">サポート ライブラリ</a>を使用します。理由は、Android 3.0 未満のバージョンで <PH>{@link android.app.Fragment}</PH> API を使用するためです。このクラスのすべての API を使用するには、ライブラリをダウンロードして、アプリに追加する必要があります。</p>
+href="{@docRoot}tools/support-library/index.html">サポート ライブラリ</a>を使用します。理由は、Android 3.0 未満のバージョンで <PH>{@link android.app.Fragment}</PH> API を使用するためです。このクラスのすべての API を使用するには、ライブラリをダウンロードして、アプリに追加する必要があります。</p>
  
 
 <h2>レッスン</h2> 

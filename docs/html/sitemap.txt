@@ -164,7 +164,7 @@ http://developer.android.com/tools/sdk/tools-notes.html
 http://developer.android.com/tools/sdk/eclipse-adt.html
 http://developer.android.com/tools/revisions/platforms.html
 http://developer.android.com/tools/extras/index.html
-http://developer.android.com/tools/extras/support-library.html
+http://developer.android.com/tools/support-library/index.html
 http://developer.android.com/tools/extras/oem-usb.html
 http://developer.android.com/tools/samples/index.html
 http://developer.android.com/tools/adk/index.html

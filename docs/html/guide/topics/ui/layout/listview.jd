@@ -48,7 +48,7 @@ displays the results.</p>
 
 <p>Although the {@link android.support.v4.content.CursorLoader} APIs were first introduced in
 Android 3.0 (API level 11), they are also available in the <a
-href="{@docRoot}tools/extras/support-library.html">Support Library</a> so that your app may use them
+href="{@docRoot}tools/support-library/index.html">Support Library</a> so that your app may use them
 while supporting devices running Android 1.6 or higher.</p>
 
 <p>For more information about using a {@link

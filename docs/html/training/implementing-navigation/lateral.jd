@@ -57,7 +57,7 @@ Views</a> design guide.</p>
 
 <p>You can create swipe views in your app using the {@link android.support.v4.view.ViewPager}
 widget, available in the
-<a href="{@docRoot}tools/extras/support-library.html">Support Library</a>. The
+<a href="{@docRoot}tools/support-library/index.html">Support Library</a>. The
 {@link android.support.v4.view.ViewPager} is a layout widget in which each child view is
 a separate page (a separate tab) in the layout.</p>
 
