@@ -85,7 +85,7 @@ because it can determine the logical <em>Back</em> or <em>Up</em> navigation pat
 information.</p>
 
 <p>If your app supports Android 4.0 and lower, include the
-<a href="{@docRoot}tools/extras/support-library.html">Support Library</a> with your app and
+<a href="{@docRoot}tools/support-library/index.html">Support Library</a> with your app and
 add a <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code &lt;meta-data>}</a>
 element inside the <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
 &lt;activity>}</a>. Then specify the parent activity as the value

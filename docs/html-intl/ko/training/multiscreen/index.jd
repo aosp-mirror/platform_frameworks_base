@@ -19,7 +19,7 @@ href="http://developer.android.com/guide/components/activities.html">액티비�
   <li>Android <a
 href="http://developer.android.com/guide/topics/ui/index.html"> 사용자 인터페이스</a> 구축 경험</li>
   <li><a
-href="{@docRoot}tools/extras/support-library.html">호환성 라이브러리</a>를 사용해야 하는 여러 기능</li>
+href="{@docRoot}tools/support-library/index.html">호환성 라이브러리</a>를 사용해야 하는 여러 기능</li>
 </ul>
 
 <h2>참고자료</h2>
@@ -47,7 +47,7 @@ href="{@docRoot}tools/extras/support-library.html">호환성 라이브러리</a>
 <p>각 강의에서 사용되는 코드는 여러 화면에 대한 최적화의 모범 사례를 보여주는 샘플 애플리케이션에서 가져온 것입니다. 샘플(오른쪽)을 다운로드하여 본인의 애플리케이션에 코드로 재사용할 수 있습니다. </p>
 
 <p class="note"><strong>참고:</strong> 이 강의 및 강의와 관련된 샘플은 <a
-href="{@docRoot}tools/extras/support-library.html">호환성 라이브러리</a>를 사용하며 이는 Android 3.0 이하 버전에서 <PH>{@link android.app.Fragment}</PH> API를 사용하기 위해서입니다. 이 강의에서 API를 모두 사용하려면 라이브러리를 다운로드하여 애플리케이션에 추가해야 합니다.</p>
+href="{@docRoot}tools/support-library/index.html">호환성 라이브러리</a>를 사용하며 이는 Android 3.0 이하 버전에서 <PH>{@link android.app.Fragment}</PH> API를 사용하기 위해서입니다. 이 강의에서 API를 모두 사용하려면 라이브러리를 다운로드하여 애플리케이션에 추가해야 합니다.</p>
  
 
 <h2>강의</h2> 

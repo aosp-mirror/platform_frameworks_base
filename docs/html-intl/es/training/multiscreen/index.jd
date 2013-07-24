@@ -18,7 +18,7 @@ href="http://developer.android.com/guide/components/activities.html">Actividades
   <li>Experiencia en el desarrollo de una <a
 href="http://developer.android.com/guide/topics/ui/index.html">Interfaz de usuario</a> de Android</li>
   <li>Algunas funciones requieren el uso de la <a
-href="{@docRoot}tools/extras/support-library.html">biblioteca de compatibilidad</a></li>
+href="{@docRoot}tools/support-library/index.html">biblioteca de compatibilidad</a></li>
 </ul>
 
 <h2>También puedes consultar:</h2>
@@ -46,7 +46,7 @@ href="{@docRoot}tools/extras/support-library.html">biblioteca de compatibilidad<
 <p>El código que aparece en cada sección se ha extraído de una aplicación de ejemplo para explicar las prácticas recomendadas a la hora de optimizar tu aplicación para varias pantallas. Puedes descargar el ejemplo (situado a la derecha) y utilizarlo como fuente de código reutilizable para tu propia aplicación.</p>
 
 <p class="note"><strong>Nota:</strong> en esta sección y en el ejemplo correspondiente, se utiliza la <a
-href="{@docRoot}tools/extras/support-library.html">biblioteca de compatibilidad</a> para poder usar las API de <PH>{@link android.app.Fragment}</PH> en versiones anteriores a Android 3.0. Debes descargar y la biblioteca y añadirla a tu aplicación para poder utilizar todas las API que se indican en esta sección.</p>
+href="{@docRoot}tools/support-library/index.html">biblioteca de compatibilidad</a> para poder usar las API de <PH>{@link android.app.Fragment}</PH> en versiones anteriores a Android 3.0. Debes descargar y la biblioteca y añadirla a tu aplicación para poder utilizar todas las API que se indican en esta sección.</p>
  
 
 <h2>Secciones</h2> 

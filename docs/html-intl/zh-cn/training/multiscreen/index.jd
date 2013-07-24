@@ -19,7 +19,7 @@ href="http://developer.android.com/guide/components/activities.html">活动</a>�
   <li>构建 Android <a
 href="http://developer.android.com/guide/topics/ui/index.html">用户界面</a>的经验</li>
   <li>多个功能需要用到<a
-href="{@docRoot}tools/extras/support-library.html">支持库</a></li>
+href="{@docRoot}tools/support-library/index.html">支持库</a></li>
 </ul>
 
 <h2>您还应参阅</h2>
@@ -47,7 +47,7 @@ href="{@docRoot}tools/extras/support-library.html">支持库</a></li>
 <p>各教程中都提及了一种来自一个示例应用的代码，该应用展示了关于针对多种分辨率进行优化的最佳实践。您可以在右侧下载该示例，并在自己的应用内重复使用其中的代码。</p>
 
 <p class="note"><strong>请注意</strong>：本教程和相关的示例使用了<a
-href="{@docRoot}tools/extras/support-library.html">支持库</a>，以便在 3.0 版以下的 Android 上使用  <PH>{@link android.app.Fragment}</PH>  API。因此，您需要下载该库并将其添加到您的应用，才能使用本教程中涉及的所有 API。</p>
+href="{@docRoot}tools/support-library/index.html">支持库</a>，以便在 3.0 版以下的 Android 上使用  <PH>{@link android.app.Fragment}</PH>  API。因此，您需要下载该库并将其添加到您的应用，才能使用本教程中涉及的所有 API。</p>
  
 
 <h2>教程</h2> 

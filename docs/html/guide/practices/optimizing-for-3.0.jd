@@ -54,7 +54,7 @@ onclick="$('#naMessage').hide();$('#deprecatedSticker').show()" />
   <li><a href="tablets-and-handsets.html">Supporting Tablets
 and Handsets</a></li>
   <li><a
-href="{@docRoot}tools/extras/support-library.html">Compatibility Library</a></li>
+href="{@docRoot}tools/support-library/index.html">Compatibility Library</a></li>
   <li><a href="http://code.google.com/p/iosched/">Google I/O App source code</a></li>
 </ol>
 
@@ -281,7 +281,7 @@ use techniques such as reflection to check for the availability of certain APIs 
 to help you add features from Android 3.0 without requiring you to change your <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
 or build target, we're providing a static library called the <a
-href="{@docRoot}tools/extras/support-library.html">Compatibility Library</a>
+href="{@docRoot}tools/support-library/index.html">Compatibility Library</a>
 (downloadable from the Android SDK Manager).</p>
 <p>This library includes APIs for <a
 href="{@docRoot}guide/components/fragments.html">fragments</a>, <a
@@ -289,7 +289,7 @@ href="{@docRoot}guide/components/loaders.html">loaders</a>, and some updated cla
 simply adding this library to your Android project, you can use these APIs in your application and
 remain compatible with Android 1.6. For information about how to get the library and start
 using it in your application, see the <a
-href="{@docRoot}tools/extras/support-library.html">Compatibility Library</a> document.</p>
+href="{@docRoot}tools/support-library/index.html">Compatibility Library</a> document.</p>
 </div>
 </div>
 

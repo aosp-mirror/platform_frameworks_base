@@ -97,7 +97,7 @@ object. If you'd like to create a date or time picker, you should instead read t
 Because the {@link android.app.DialogFragment} class was originally added with
 Android 3.0 (API level 11), this document describes how to use the {@link
 android.support.v4.app.DialogFragment} class that's provided with the <a
-href="{@docRoot}tools/extras/support-library.html">Support Library</a>. By adding this library
+href="{@docRoot}tools/support-library/index.html">Support Library</a>. By adding this library
 to your app, you can use {@link android.support.v4.app.DialogFragment} and a variety of other
 APIs on devices running Android 1.6 or higher. If the minimum version your app supports
 is API level 11 or higher, then you can use the framework version of {@link

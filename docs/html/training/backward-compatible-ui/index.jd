@@ -13,7 +13,7 @@ startpage=true
 
 <ul>
   <li>API level 5</li>
-  <li><a href="{@docRoot}tools/extras/support-library.html">The Android Support Package</a></li>
+  <li><a href="{@docRoot}tools/support-library/index.html">The Android Support Package</a></li>
 </ul>
 
 <h2>You should also read</h2>

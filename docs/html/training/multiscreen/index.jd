@@ -19,7 +19,7 @@ href="http://developer.android.com/guide/components/activities.html">Activities<
   <li>Experience building an Android <a
 href="http://developer.android.com/guide/topics/ui/index.html"> User Interface</a></li>
   <li>Several features require the use of the <a
-href="{@docRoot}tools/extras/support-library.html">support library</a></li>
+href="{@docRoot}tools/support-library/index.html">support library</a></li>
 </ul>
 
 <h2>You should also read</h2>
@@ -58,7 +58,7 @@ optimizing for multiple screens. You can download the sample (to the right) and 
 of reusable code for your own application.</p>
 
 <p class="note"><strong>Note:</strong> This class and the associated sample use the <a
-href="{@docRoot}tools/extras/support-library.html">support library</a> in order to use the {@link
+href="{@docRoot}tools/support-library/index.html">support library</a> in order to use the {@link
 android.app.Fragment} APIs on versions lower than Android 3.0. You must download and add the
 library to your application in order to use all APIs in this class.</p>
  
