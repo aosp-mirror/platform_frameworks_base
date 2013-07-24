@@ -56,17 +56,14 @@ TextureVertex* Patch::createMesh(const float bitmapWidth, const float bitmapHeig
         float width, float height, const UvMapper& mapper, const Res_png_9patch* patch) {
     if (vertices) return vertices;
 
-    const uint32_t* colors = &patch->colors[0];
-    const int8_t numColors = patch->numColors;
-
-    mColorKey = 0;
     int8_t emptyQuads = 0;
+    mColors = patch->colors;
 
+    const int8_t numColors = patch->numColors;
     if (uint8_t(numColors) < sizeof(uint32_t) * 4) {
         for (int8_t i = 0; i < numColors; i++) {
-            if (colors[i] == 0x0) {
+            if (mColors[i] == 0x0) {
                 emptyQuads++;
-                mColorKey |= 0x1 << i;
             }
         }
     }
@@ -221,11 +218,11 @@ void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, f
     if (y2 < 0.0f) y2 = 0.0f;
 
     // Skip degenerate and transparent (empty) quads
-    if (((mColorKey >> oldQuadCount) & 0x1) || x1 >= x2 || y1 >= y2) {
+    if ((mColors[oldQuadCount] == 0) || x1 >= x2 || y1 >= y2) {
 #if DEBUG_PATCHES_EMPTY_VERTICES
         PATCH_LOGD("    quad %d (empty)", oldQuadCount);
-        PATCH_LOGD("        left,  top    = %.2f, %.2f\t\tu1, v1 = %.4f, %.4f", x1, y1, u1, v1);
-        PATCH_LOGD("        right, bottom = %.2f, %.2f\t\tu2, v2 = %.4f, %.4f", x2, y2, u2, v2);
+        PATCH_LOGD("        left,  top    = %.2f, %.2f\t\tu1, v1 = %.8f, %.8f", x1, y1, u1, v1);
+        PATCH_LOGD("        right, bottom = %.2f, %.2f\t\tu2, v2 = %.8f, %.8f", x2, y2, u2, v2);
 #endif
         return;
     }
@@ -248,8 +245,8 @@ void Patch::generateQuad(TextureVertex*& vertex, float x1, float y1, float x2, f
 
 #if DEBUG_PATCHES_VERTICES
     PATCH_LOGD("    quad %d", oldQuadCount);
-    PATCH_LOGD("        left,  top    = %.2f, %.2f\t\tu1, v1 = %.4f, %.4f", x1, y1, u1, v1);
-    PATCH_LOGD("        right, bottom = %.2f, %.2f\t\tu2, v2 = %.4f, %.4f", x2, y2, u2, v2);
+    PATCH_LOGD("        left,  top    = %.2f, %.2f\t\tu1, v1 = %.8f, %.8f", x1, y1, u1, v1);
+    PATCH_LOGD("        right, bottom = %.2f, %.2f\t\tu2, v2 = %.8f, %.8f", x2, y2, u2, v2);
 #endif
 }
 

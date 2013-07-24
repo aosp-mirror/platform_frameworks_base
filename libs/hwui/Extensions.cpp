@@ -86,7 +86,7 @@ Extensions::Extensions(): Singleton<Extensions>() {
     // or more digits. The release number and vendor specific information are
     // optional."
 
-    if (sscanf(version, "OpenGL ES %d.%d", &mVersionMajor, &mVersionMinor) !=2) {
+    if (sscanf(version, "OpenGL ES %d.%d", &mVersionMajor, &mVersionMinor) != 2) {
         // If we cannot parse the version number, assume OpenGL ES 2.0
         mVersionMajor = 2;
         mVersionMinor = 0;
