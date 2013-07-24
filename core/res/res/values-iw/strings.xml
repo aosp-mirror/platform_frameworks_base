@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"מאפשר למשתמש לבצע איגוד לממשק הרמה העליונה של שירות Widget. הרשאה זו לעולם אינה נחוצה ליישומים רגילים."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"קיים אינטראקציה עם מנהל המכשיר"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"מאפשר למשתמש לשלוח כוונות למנהל התקנים. הרשאה זו לעולם אינה נחוצה ליישומים רגילים."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"שנה את כיוון המסך"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"מאפשר ליישום לשנות את הסיבוב של המסך בכל עת. הרשאה זו לעולם אינה נחוצה ליישומים רגילים."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"שינוי מהירות המצביע"</string>

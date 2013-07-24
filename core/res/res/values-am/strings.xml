@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"ያዡ ግቤት ስልቱን ወደ ከፍተኛ-ደረጃ ፍርግም አገልግሎት ለመጠረዝ  ይፈቅዳሉ። ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"ከመሣሪያ አስተዳደር ጋር ተገናኝ"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"ያዡ በይነመረብን ለመሣሪያ አስተዳዳሪ ለመላክ ይፈቅዳሉ። ለመደበኛ መተግበሪያዎች በፍፁም አያስፈልግም።"</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"የማያ ገፀ አቀማመጥን ለውጥ"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"በማንኛውም ጊዜ  የማሳያውን መሽከርከር ለመለወጥ ለመተግበሪያው ይፈቅዳሉ፡፡ ለተለመዱ መተግበሪያዎች አያስፈልግም፡፡"</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"የጠቋሚ ፍጥነት ለውጥ"</string>
@@ -1556,12 +1560,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"ተትቷል"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"ይዘት መጻፍ ላይ ስህተት"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"ፒን ያስገቡ"</string>
-    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
-    <skip />
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"የአሁኑ ፒን"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"አዲስ ፒን"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"አዲስ ፒን ያረጋግጡ"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"ገደቦችን ለመቀየር ፒን ይፍጠሩ"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"ፒኖች አይዛመዱም። እንደገና ይሞክሩ።"</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"ፒን በጣም አጭር ነው። ቢያንስ 4 አኃዝ መሆን አለበት።"</string>

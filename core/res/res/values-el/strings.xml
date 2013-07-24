@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας υπηρεσίας γραφικών στοιχείων. Δεν απαιτείται για κανονικές εφαρμογές."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"επικοινωνία με έναν διαχειριστή συσκευής"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Επιτρέπει στον κάτοχο την αποστολή στόχων σε έναν διαχειριστή συσκευής. Δεν είναι απαραίτητο για συνήθεις εφαρμογές."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"αλλαγή προσανατολισμού οθόνης"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Επιτρέπει στην εφαρμογή την αλλαγή της περιστροφής της οθόνης ανά πάσα στιγμή. Δεν απαιτείται για συνήθεις εφαρμογές."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"αλλαγή ταχύτητας δείκτη"</string>
@@ -1556,17 +1560,14 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Ακυρώθηκε"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Σφάλμα κατά την εγγραφή περιεχομένου"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Εισαγωγή PIN"</string>
-    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
-    <skip />
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Ισχύων κωδικός PIN"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Νέος κωδικός PIN"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Επιβεβαίωση νέου κωδικού PIN"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Δημιουργία PIN για τροποποίηση περιορισμών"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Τα PIN δεν συμφωνούν. Προσπαθήστε ξανά."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Το PIN είναι υπερβολικά μικρό. Πρέπει να έχει μέγεθος τουλάχιστον 4 χαρακτήρων."</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"Εσφαλμένο PIN. Προσπαθήστε ξανά σε 1 δευτερόλεπτο."</item>
-    <item quantity="other" msgid="8030607343223287654">"Εσφαλμένο PIN. Προσπαθήστε ξανά σε <xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα."</item>
+    <item quantity="one" msgid="4835639969503729874">"Λάθος PIN. Προσπαθήστε ξανά σε 1 δευτερόλεπτο."</item>
+    <item quantity="other" msgid="8030607343223287654">"Λάθος PIN. Προσπαθήστε ξανά σε <xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα."</item>
   </plurals>
 </resources>

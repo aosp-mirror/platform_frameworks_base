@@ -279,7 +279,7 @@
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Inaruhusu programu kusongesha kazi hadi kwenye mandhari-mbele na mandari nyuma. Programu inaweza kufanya haya bila ya maingizo yako."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"Komesha programu zinazoendeshwa"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Huruhusu programu kuondoa majukumu na kuua programu zao. Programu hasidi zinaweza kutatiza tabia ya programu zingine."</string>
-    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"dhibiti bunda za shughuli"</string>
+    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"dhibiti mabunda ya shughuli"</string>
     <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"Inaruhusu programu kuongeza, kuondoa, na kubadilisha bunda za shughuli ambamo programu nyingine huendeshwa. Programu hasidi zinaweza kusitisha tabia ya programu nyingine."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"anzisha shughuli yoyote"</string>
     <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Huruhusu programu kuanzisha shughuli yoyote, pasi kujali ulinzi wa idhini au hali ya nje."</string>
@@ -358,7 +358,7 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Inaruhusu mmiliki kushurutisha kwenye kusano ya kiwango cha juu ya mbinu ya ingizo. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"funga kwa huduma ya ufikiaji"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Inamuruhusu mmiliki kufunga kipengee kinachojitokeza katika nyanja mbalimbali za kiwango cha juu cha huduma ya afikiaji. Hapaswi kuhitajika kwa programu za kawaida."</string>
-    <string name="permlab_bindPrintService" msgid="8462815179572748761">"shurutisha kwenye huduma ya kuchapisha"</string>
+    <string name="permlab_bindPrintService" msgid="8462815179572748761">"tundika kwenye huduma ya kuchapisha"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Inaruhusu kishikiliaji kujifungilia kiolesura cha kiwango cha juu cha huduma ya kuchapisha. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"fikia kazi zote za kuchapisha"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Huruhusu mmiliki kufikia kazi za kuchapisha zilizoundwa na programu nyingine. Haipaswi kuhitajika kwa programu za kawaida kamwe."</string>
@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Inaruhusu mmiliki kushurutisha kusano ya kiwango cha juu ya huduma ya wijeti. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"jiunge na msimamizi wa kifaa"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Inamruhusu mmiliki kutuma malengo kwa msimamizi wa kifaa. Haipaswi kuhitajika kwa programu za kawaida."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"badilisha uelekezo wa skrini"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Inaruhusu programu kubadilisha mzunguko wa skrini wakati wowote. Kamwe hazihitajiki kwa programu za kawaida."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"Badilisha kasi ya pointa"</string>
@@ -641,7 +645,7 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Huruhusu programu kurejesha, kuchunguza, na kuondoa arifa, ikiwa ni pamoja na zile zilizochapishwa na programu nyingine."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"unganisha kwenye huduma ya kisikilizi cha arifa"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Inaruhusu kishikilizi kuunganishwa kwenye kusano cha kiwango cha juu cha huduma ya kisikilizi cha arifa. Haipaswi kuhitajika tena kwa programu za kawaida."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"omba programu ya usakinishaji inayotolewa na mto huduma."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"omba programu ya usakinishaji inayotolewa na mtoa huduma."</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Inaruhusu kishikiliaji kuomba programu ya usakinishaji inayotolewa na mto huduma. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Weka kanuni za nenosiri"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Dhibiti urefu na vibambo vinavyoruhusiwa katika manenosiri ya kufungua skrini."</string>
@@ -752,7 +756,7 @@
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Hangout"</string>
+    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Hangouts"</string>
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
@@ -1552,7 +1556,7 @@
     <string name="mediaSize_na_legal" msgid="6697982988283823150">"Kisheria"</string>
     <string name="mediaSize_na_junior_legal" msgid="3727743969902758948">"Mwanasheria Mdogo"</string>
     <string name="mediaSize_na_ledger" msgid="281871464896601236">"Leja"</string>
-    <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Gazeti"</string>
+    <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Kijigazeti"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Imeghairiwa"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Hitilafu katika kuandika maudhui"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Ingiza PIN"</string>

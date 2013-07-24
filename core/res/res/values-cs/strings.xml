@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Umožňuje držiteli navázat se na nejvyšší úroveň služby widgetu. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"komunikovat se správcem zařízení"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Umožňuje držiteli oprávnění odesílat informace správci zařízení. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"změna orientace obrazovky"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Umožňuje aplikaci kdykoli změnit otočení obrazovky. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"změna rychlosti kurzoru"</string>
@@ -1556,12 +1560,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Zrušeno"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Při zápisu obsahu došlo k chybě"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Zadejte kód PIN"</string>
-    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
-    <skip />
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Aktuální kód PIN"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Nový kód PIN"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Potvrďte nový PIN"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Vytvořit kód PIN pro úpravy omezení"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Kódy PIN se neshodují. Zkuste to znovu."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Kód PIN je příliš krátký. Musí mít alespoň čtyři číslice."</string>

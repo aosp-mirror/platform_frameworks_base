@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Дозволяє власникові прив’язуватися до інтерфейсу верхнього рівня служби віджетів. Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"взаємодіяти з адмін. пристрою"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Дозволяє власнику надсилати задавані функції адміністратору пристрою. Ніколи не застосовується для звичайних програм."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"змінювати орієнтацію екрана"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Дозволяє програмі будь-коли змінювати обертання екрана. Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"змінювати швидкість указівника"</string>
@@ -1556,12 +1560,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Скасовано"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Помилка записування вмісту"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Введіть PIN-код"</string>
-    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
-    <skip />
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Поточний PIN-код"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Новий PIN-код"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Підтвердьте новий PIN-код"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Створіть PIN-код для змінення обмежень"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN-коди не збігаються. Повторіть спробу."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN-код закороткий. Має бути принаймні 4 цифри."</string>

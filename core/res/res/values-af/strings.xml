@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Dit laat die houer toe om aan die topvlak-koppelvlak van \'n legstuk-diens te bind. Dit moet nooit vir normale programme nodig wees nie."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"skakel met \'n toestel-admin"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Laat die houer toe om bedoelings na \'n toesteladministrateur te stuur. Dit moet nooit vir normale programme nodig wees nie."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"verander skermoriëntasie"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Laat die program toe om die skerm se rotasie te eniger tyd te verander. Dit moet nooit vir normale programme nodig wees nie."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"verander wyserspoed"</string>
@@ -641,8 +645,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Laat die program toe om kennisgewings op te haal, te bestudeer en te verwyder, insluitende die kennisgewings wat deur ander programme geplaas is."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"bind aan \'n kennisgewingluisteraardiens"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Laat die houer toe om aan die top-koppelvlak van \'n kennisgewingluisteraardiens te bind. Behoort nooit vir gewone programme nodig te wees nie."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"roep die opstellingprogram op wat deur die draer voorsien is"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Laat die houer toe om die opstellingsprogram wat deur die draer voorsien is, op te roep. Behoort nooit vir gewone programme nodig te wees nie."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"roep die opstellingprogram op wat deur die diensverskaffer voorsien is"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Laat die houer toe om die opstellingsprogram wat deur die diensverskaffer voorsien word, op te roep. Behoort nooit vir gewone programme nodig te wees nie."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Stel wagwoordreëls"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Beheer lengte en watter karakters wat in die skermontsluit-wagwoorde gebruik word."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitor pogings om skerm te ontsluit"</string>
@@ -1563,7 +1567,7 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN\'e kom nie ooreen nie. Probeer weer."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN is te kort. Moet ten minste 4 syfers wees."</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"Verkeerde PIN. Probeer weer na 1 sekonde."</item>
-    <item quantity="other" msgid="8030607343223287654">"Verkeerde PIN. Probeer weer na <xliff:g id="COUNT">%d</xliff:g> sekondes."</item>
+    <item quantity="one" msgid="4835639969503729874">"Verkeerde PIN. Probeer weer oor 1 sekonde."</item>
+    <item quantity="other" msgid="8030607343223287654">"Verkeerde PIN. Probeer weer oor <xliff:g id="COUNT">%d</xliff:g> sekondes."</item>
   </plurals>
 </resources>

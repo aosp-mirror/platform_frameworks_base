@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania služby miniaplikácií. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"komunikovať so správcom zariadenia"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Umožňuje držiteľovi odosielať informácie správcovi zariadenia. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"zmena orientácie obrazovky"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Umožňuje aplikácii kedykoľvek zmeniť otáčanie obrazovky. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"zmena rýchlosti ukazovateľa"</string>
@@ -1554,14 +1558,11 @@
     <string name="mediaSize_na_ledger" msgid="281871464896601236">"Ledger"</string>
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Zrušené"</string>
-    <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Pri zapisovaní obsahu došlo k chybe"</string>
+    <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Pri zapisovaní obsahu došlo ku chybe"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Zadajte kód PIN"</string>
-    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
-    <skip />
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Aktuálny kód PIN"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Nový kód PIN"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Potvrďte nový kód PIN"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Vytvoriť kód PIN pre obmedzenia upravovania"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Kódy PIN sa nezhodujú. Skúste to znova."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Kód PIN je príliš krátky. Musí mať minimálne 4 číslice."</string>

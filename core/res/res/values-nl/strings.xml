@@ -280,7 +280,7 @@
     <string name="permlab_removeTasks" msgid="6821513401870377403">"actieve apps stoppen"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Hiermee kan de app taken verwijderen en apps sluiten. Schadelijke apps kunnen het gedrag van andere apps verstoren."</string>
     <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"activiteitstacks beheren"</string>
-    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"Hiermee kan de app de activiteitstacks waarin andere apps worden uitgevoerd, toevoegen, verwijderen en aanpassen. Schadelijke apps kunnen het gedrag van andere apps verstoren."</string>
+    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"Hiermee kan de app de activiteitstacks waarin andere apps worden uitgevoerd, toevoegen, verwijderen en aanpassen. Schadelijke apps kunnen de werking van andere apps verstoren."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"elke activiteit starten"</string>
     <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Toestaan dat de app elke activiteit start, ongeacht rechtenbeveiliging of geëxporteerde status."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"schermcompatibiliteit instellen"</string>
@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Hiermee wordt de houder toegestaan verbinding te maken met de hoofdinterface van een widgetservice. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactie met apparaatbeheer"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Hiermee kan de houder intenties verzenden naar een apparaatbeheerder. Nooit vereist voor normale apps."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"schermstand wijzigen"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Hiermee kan de app de rotatie van het scherm op elk moment wijzigen. Nooit vereist voor normale apps."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"aanwijzersnelheid wijzigen"</string>
@@ -1556,12 +1560,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Geannuleerd"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Fout bij schrijven van inhoud"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Geef de pincode op"</string>
-    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
-    <skip />
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Huidige pincode"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Nieuwe pincode"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Nieuwe pincode bevestigen"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Maak een pincode voor het aanpassen van beperkingen"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"De pincodes komen niet overeen. Probeer het opnieuw."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Pincode is te kort. Moet ten minste vier cijfers lang zijn."</string>

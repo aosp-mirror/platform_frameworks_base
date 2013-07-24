@@ -358,7 +358,7 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Lastniku omogoča, da se poveže z vmesnikom načina vnosa najvišje ravni. Tega nikoli ni treba uporabiti za navadne programe."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"povezovanje s storitvijo za ljudi s posebnimi potrebami"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Lastniku omogoča povezovanje z vmesnikom najvišje ravni storitve za ljudi s posebnimi potrebami. Tega nikoli ni treba uporabiti za navadne aplikacije."</string>
-    <string name="permlab_bindPrintService" msgid="8462815179572748761">"vezava na storitev tiskanja"</string>
+    <string name="permlab_bindPrintService" msgid="8462815179572748761">"povezava s storitvijo tiskanja"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Lastniku omogoča povezovanje z vmesnikom storitve tiskanja najvišje ravni. Tega nikoli ni treba uporabiti za navadne aplikacije."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"dostop do vseh tiskalnih poslov"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Lastniku omogoča dostop do tiskalnih poslov, ki jih je ustvarila druga aplikacija. Tega nikoli ni treba uporabiti za navadne aplikacije."</string>
@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Lastniku omogoča povezovanje z vmesnikom storitve pripomočka najvišje ravni. Tega ni treba nikoli uporabiti za navadne programe."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interakcija s skrbnikom naprave"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Omogoča lastniku, da pošlje namere skrbniku naprave. Nikoli se ne uporablja za navadne programe."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"spreminjanje usmerjenosti zaslona"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Programu omogoča, da kadar koli zasuka zaslon. Ne uporabljajte za navadne programe."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"spreminjanje hitrosti kazalca"</string>
@@ -641,7 +645,7 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Dovoli aplikaciji, da prenese, razišče in izbriše obvestila, tudi tista, ki so jih objavile druge aplikacije."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"poveži se s storitvijo poslušalca obvestil"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Lastniku omogoča povezovanje z vmesnikom storitve poslušalca obvestil najvišje ravni. Tega nikoli ni treba uporabiti za navadne aplikacije."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"priklic operaterjeve aplikacije za konfiguracijo"</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"sprožitev operaterjeve aplikacije za konfiguracijo"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Lastniku omogoča sproženje operaterjeve aplikacije za konfiguracijo. Tega nikoli ni treba uporabiti za navadne aplikacije."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavitev pravil za geslo"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Nadzor nad dolžino in znaki, ki so dovoljeni v geslih za odklepanje zaslona."</string>
@@ -1556,12 +1560,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Preklicano"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Napaka pri pisanju vsebine"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Vnesite PIN"</string>
-    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
-    <skip />
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Trenutni PIN"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Novi PIN"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Potrdite novi PIN"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Ustvarite PIN za spreminjanje omejitev"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Kodi PIN se ne ujemata. Poskusite znova."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN je prekratek. Imeti mora vsaj 4 števke."</string>

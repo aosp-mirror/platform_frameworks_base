@@ -279,10 +279,8 @@
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Pinapayagan ang app na maglipat ng mga gawain sa foreground at background. Maaari itong gawin ng app nang wala ng iyong input."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"ihinto ang pagpapatakbo ng apps"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Pinapayagan ang app na mag-alis ng mga gawain at i-off ang apps nito. Maaaring maantala ng nakakahamak na apps ang pagkilos ng iba pang apps."</string>
-    <!-- no translation found for permlab_manageActivityStacks (7391191384027303065) -->
-    <skip />
-    <!-- no translation found for permdesc_manageActivityStacks (1615881933034084440) -->
-    <skip />
+    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"pamahalaan ang mga stack ng aktibidad"</string>
+    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"Nagbibigay-daan sa app na dagdagan, alisin, at baguhin ang mga stack ng aktibidad kung saan gumagana ang iba pang apps. Maaaring makaabala ang nakakahamak na apps sa pagkilos ng iba pang apps."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"magsimula ng anumang aktibidad"</string>
     <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Binibigyang-daan ang app na magsimula ng anumang aktibidad, may proteksyon man ng pahintulot o na-export na katayuan."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"itakda ang pagkakatugma ng screen"</string>
@@ -360,14 +358,10 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Pinapayagan ang may-hawak na sumailalim sa nangungunang interface ng pamamaraan ng pag-input. Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"sumailalim sa isang serbisyo sa accessibility"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Binibigyang-daan ang may-ari na sumailalim sa nasa nangungunang antas na interface ng isang serbisyo sa accessibility. Hindi dapat kailanman kailanganin para sa normal na apps."</string>
-    <!-- no translation found for permlab_bindPrintService (8462815179572748761) -->
-    <skip />
-    <!-- no translation found for permdesc_bindPrintService (7960067623209111135) -->
-    <skip />
-    <!-- no translation found for permlab_accessAllPrintJobs (1120792468465711159) -->
-    <skip />
-    <!-- no translation found for permdesc_accessAllPrintJobs (2978185311041864762) -->
-    <skip />
+    <string name="permlab_bindPrintService" msgid="8462815179572748761">"sumailalim sa isang serbisyo sa pag-print"</string>
+    <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Nagbibigay-daan sa may-ari na sumailalim sa interface sa nangungunang antas ng isang serbisyo sa pag-print. Hindi dapat kailanganin para sa normal na apps kahit kailan."</string>
+    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"i-access ang lahat ng pag-print"</string>
+    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Nagbibigay-daan sa may-ari na i-access ang mga pag-print na ginawa ng ibang app. Hindi dapat kailanganin para sa normal na apps kahit kailan."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"sumailalim sa serbisyo ng teksto"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Pinapayagan ang may-hawak na sumailalim sa nangungunang antas na interface (hal. SpellCheckerService). Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"sumailalim sa isang serbisyo ng VPN"</string>
@@ -378,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Pinapayagan ang may-hawak na sumailalim sa nangungunang interface ng serbisyo ng widget. Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"makipag-ugnay sa tagapangasiwa ng device"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Pinapayagan ang mga may-ari na magpadala ng mga layunin sa administrator ng device. Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"baguhin ang orientation ng screen"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Pinapayagan ang app na baguhin ang pag-ikot ng screen anumang oras. Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"baguhin ang bilis ng pointer"</string>
@@ -470,10 +468,8 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Pinapayagan ang app na gamitin ang mababang antas na mga tampok ng SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"basahin ang buffer ng frame"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Pinapayagan ang app na basahin ang nilalaman ng buffer ng frame."</string>
-    <!-- no translation found for permlab_accessInputFlinger (5348635270689553857) -->
-    <skip />
-    <!-- no translation found for permdesc_accessInputFlinger (2104864941201226616) -->
-    <skip />
+    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"i-access ang InputFlinger"</string>
+    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Nagbibigay-daan sa app na gumamit ng mga tampok ng InputFlinger sa mababang antas."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"mag-configure ng mga Wifi display"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Pinapayagan ang app na mag-configure at kumonekta sa mga Wifi display."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"magkontrol ng mga Wifi display"</string>
@@ -643,18 +639,14 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Pinapayagan ang app na pamahalaan ang mga patakaran ng network at ilarawan ang mga patakarang tukoy sa app."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"baguhin ang pagkukuwenta sa paggamit ng network"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Pinapayagan ang app na baguhin kung paano isinasaalang-alang ang paggamit ng network laban sa apps. Hindi para sa paggamit ng normal na apps."</string>
-    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
-    <skip />
-    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
-    <skip />
+    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"baguhin ang mga socket mark"</string>
+    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Nagbibigay-daan sa app na baguhin ang mga socket mark para sa pagruruta"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"i-access ang mga notification"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Pinapayagan ang app na kumuha, sumuri, at mag-clear ng mga notification, kabilang ang mga na-post ng iba pang apps."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"mapailalim sa isang serbisyo ng notification listener"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Nagbibigay-daan sa may-ari na mapailalim sa interface sa tuktok na antas ng isang serbisyo ng notification listener. Hindi dapat kailanganin para sa karaniwang apps kahit kailan."</string>
-    <!-- no translation found for permlab_invokeCarrierSetup (3699600833975117478) -->
-    <skip />
-    <!-- no translation found for permdesc_invokeCarrierSetup (4159549152529111920) -->
-    <skip />
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"paganahin ang app ng configuration na ibinigay ng carrier"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Nagbibigay-daan sa may-ari na paganahin ang app ng configuration na ibinigay ng carrier. Hindi dapat kailanganin para sa normal na apps kahit kailan."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Magtakda ng mga panuntunan sa password"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrolin ang haba at mga character na pinapayagan sa mga password sa pag-unlock ng screen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>
@@ -764,8 +756,7 @@
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <!-- no translation found for imProtocolGoogleTalk (493902321140277304) -->
-    <skip />
+    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Hangouts"</string>
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
@@ -1527,102 +1518,56 @@
     <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Hindi sinusuportahan ng app na ito ang mga account para sa mga pinaghihigpitang profile"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Walang nakitang application na mangangasiwa sa pagkilos na ito"</string>
     <string name="revoke" msgid="5404479185228271586">"Bawiin"</string>
-    <!-- no translation found for mediaSize_iso_a0 (7875427489420821793) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a1 (3760734499050875356) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a2 (5973266378020144382) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a3 (1373407105687300884) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a4 (6689772807982597254) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a5 (5353549652015741040) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a6 (8585038048674911907) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a7 (6641836716963839119) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a8 (7571139437465693355) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a9 (1378455891957115079) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a10 (2480747457429475344) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b0 (3965935097661108039) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b1 (2505753285010115437) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b2 (8763874709859458453) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b3 (4210506688191764076) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b4 (5749404165888526034) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b5 (7640627414621904733) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b6 (7342988864712748544) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b7 (5069844065235382429) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b8 (7316818922278779774) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b9 (5414727094026532341) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b10 (5251253731832048185) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c0 (4003138342671964217) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c1 (1935188063393553008) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c2 (3197307969712069904) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c3 (4335826087321913508) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c4 (3745639598281015005) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c5 (8269457765822791013) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c6 (566666105260346930) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c7 (8678413180782608498) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c8 (8392376206627041730) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c9 (9191613372324845405) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c10 (7327709699184920822) -->
-    <skip />
-    <!-- no translation found for mediaSize_na_letter (4191805615829472953) -->
-    <skip />
-    <!-- no translation found for mediaSize_na_gvrnmt_letter (7853382192649405507) -->
-    <skip />
-    <!-- no translation found for mediaSize_na_legal (6697982988283823150) -->
-    <skip />
-    <!-- no translation found for mediaSize_na_junior_legal (3727743969902758948) -->
-    <skip />
-    <!-- no translation found for mediaSize_na_ledger (281871464896601236) -->
-    <skip />
-    <!-- no translation found for mediaSize_na_tabloid (5775966416333578127) -->
-    <skip />
-    <!-- no translation found for write_fail_reason_cancelled (7091258378121627624) -->
-    <skip />
-    <!-- no translation found for write_fail_reason_cannot_write (8132505417935337724) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_pin (3395953421368476103) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
-    <skip />
-    <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
-    <skip />
-    <!-- no translation found for restr_pin_error_doesnt_match (2224214190906994548) -->
-    <skip />
-    <!-- no translation found for restr_pin_error_too_short (8173982756265777792) -->
-    <skip />
-    <!-- no translation found for restr_pin_countdown:one (4835639969503729874) -->
-    <!-- no translation found for restr_pin_countdown:other (8030607343223287654) -->
+    <string name="mediaSize_iso_a0" msgid="7875427489420821793">"ISO A0"</string>
+    <string name="mediaSize_iso_a1" msgid="3760734499050875356">"ISO A1"</string>
+    <string name="mediaSize_iso_a2" msgid="5973266378020144382">"ISO A2"</string>
+    <string name="mediaSize_iso_a3" msgid="1373407105687300884">"ISO A3"</string>
+    <string name="mediaSize_iso_a4" msgid="6689772807982597254">"ISO A4"</string>
+    <string name="mediaSize_iso_a5" msgid="5353549652015741040">"ISO A5"</string>
+    <string name="mediaSize_iso_a6" msgid="8585038048674911907">"ISO A6"</string>
+    <string name="mediaSize_iso_a7" msgid="6641836716963839119">"ISO A7"</string>
+    <string name="mediaSize_iso_a8" msgid="7571139437465693355">"ISO A8"</string>
+    <string name="mediaSize_iso_a9" msgid="1378455891957115079">"ISO A9"</string>
+    <string name="mediaSize_iso_a10" msgid="2480747457429475344">"ISO A10"</string>
+    <string name="mediaSize_iso_b0" msgid="3965935097661108039">"ISO B0"</string>
+    <string name="mediaSize_iso_b1" msgid="2505753285010115437">"ISO B1"</string>
+    <string name="mediaSize_iso_b2" msgid="8763874709859458453">"ISO B2"</string>
+    <string name="mediaSize_iso_b3" msgid="4210506688191764076">"ISO B3"</string>
+    <string name="mediaSize_iso_b4" msgid="5749404165888526034">"ISO B4"</string>
+    <string name="mediaSize_iso_b5" msgid="7640627414621904733">"ISO B5"</string>
+    <string name="mediaSize_iso_b6" msgid="7342988864712748544">"ISO B6"</string>
+    <string name="mediaSize_iso_b7" msgid="5069844065235382429">"ISO B7"</string>
+    <string name="mediaSize_iso_b8" msgid="7316818922278779774">"ISO B8"</string>
+    <string name="mediaSize_iso_b9" msgid="5414727094026532341">"ISO B9"</string>
+    <string name="mediaSize_iso_b10" msgid="5251253731832048185">"ISO B10"</string>
+    <string name="mediaSize_iso_c0" msgid="4003138342671964217">"ISO C0"</string>
+    <string name="mediaSize_iso_c1" msgid="1935188063393553008">"ISO C1"</string>
+    <string name="mediaSize_iso_c2" msgid="3197307969712069904">"ISO C2"</string>
+    <string name="mediaSize_iso_c3" msgid="4335826087321913508">"ISO C3"</string>
+    <string name="mediaSize_iso_c4" msgid="3745639598281015005">"ISO C4"</string>
+    <string name="mediaSize_iso_c5" msgid="8269457765822791013">"ISO C5"</string>
+    <string name="mediaSize_iso_c6" msgid="566666105260346930">"ISO C6"</string>
+    <string name="mediaSize_iso_c7" msgid="8678413180782608498">"ISO C7"</string>
+    <string name="mediaSize_iso_c8" msgid="8392376206627041730">"ISO C8"</string>
+    <string name="mediaSize_iso_c9" msgid="9191613372324845405">"ISO C9"</string>
+    <string name="mediaSize_iso_c10" msgid="7327709699184920822">"ISO C10"</string>
+    <string name="mediaSize_na_letter" msgid="4191805615829472953">"Letter"</string>
+    <string name="mediaSize_na_gvrnmt_letter" msgid="7853382192649405507">"Government Letter"</string>
+    <string name="mediaSize_na_legal" msgid="6697982988283823150">"Legal"</string>
+    <string name="mediaSize_na_junior_legal" msgid="3727743969902758948">"Junior Legal"</string>
+    <string name="mediaSize_na_ledger" msgid="281871464896601236">"Ledger"</string>
+    <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
+    <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Kinansela"</string>
+    <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"May error sa pagsusulat ng nilalaman"</string>
+    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Ilagay ang PIN"</string>
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Kasalukuyang PIN"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Bagong PIN"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Kumpirmahin ang bagong PIN"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"Gumawa ng PIN para sa pagbago sa mga paghihigpit"</string>
+    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Hindi nagtutugma ang mga PIN. Subukang muli."</string>
+    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Masyadong maikli ang PIN. Hindi dapat mas maikli sa 4 na digit."</string>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="4835639969503729874">"Mali ang PIN. Subukang muli pagkalipas ng 1 segundo."</item>
+    <item quantity="other" msgid="8030607343223287654">"Mali ang PIN. Subukang muli pagkalipas ng <xliff:g id="COUNT">%d</xliff:g> (na) segundo."</item>
+  </plurals>
 </resources>

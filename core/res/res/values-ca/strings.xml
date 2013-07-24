@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permet que el titular vinculi a la interfície de nivell superior d\'un servei de widget. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactuar amb un administrador del dispositiu"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Permet que el titular enviï intents a un administrador del sistema. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"canviar l\'orientació de la pantalla"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Permet que l\'aplicació canviï el gir de la pantalla en qualsevol moment. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"canvi de velocitat del punter"</string>
@@ -1556,12 +1560,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Cancel·lada"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Error en escriure el contingut"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Introdueix el PIN"</string>
-    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
-    <skip />
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN actual"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"PIN nou"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Confirma el PIN nou"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Crea un pin per modificar les restriccions"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Els PIN no coincideixen. Torna-ho a provar."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"El PIN és massa curt. Ha de tenir quatre dígits com a mínim."</string>

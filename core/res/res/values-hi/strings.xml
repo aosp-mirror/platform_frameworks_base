@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"धारक को किसी विजेट सेवा के शीर्ष-स्‍तर इंटरफ़ेस से आबद्ध होने देता है. सामान्‍य एप्‍लिकेशन के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"किसी उपकरण व्‍यवस्‍थापक के साथ सहभागिता करें"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"धारक को किसी उपकरण व्‍यवस्‍थापक को उद्देश्य भेजने देता है. सामान्‍य एप्‍लिकेशन के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"स्‍क्रीन अभिविन्‍यास बदलें"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"एप्‍लिकेशन को किसी भी समय स्‍क्रीन का रोटेशन बदलने देता है. सामान्‍य एप्‍लिकेशन के लिए कभी भी आवश्‍यक नहीं होना चाहिए."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"सूचक गति बदलें"</string>
@@ -1556,12 +1560,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"रद्द कर दी गई"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"सामग्री लिखने में त्रुटि"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN डालें"</string>
-    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
-    <skip />
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"वर्तमान पिन"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"नया पिन"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"नए पिन की पुष्टि करें"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"प्रतिबंधों को बदलने के लिए PIN बनाएं"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN मिलान नहीं करते हैं. पुनः प्रयास करें."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN बहुत छोटा है. कम से कम 4 अंकों का होना चाहिए."</string>
