@@ -26,12 +26,12 @@ page.metaDescription=The official site for Android developers. Provides the Andr
                         <a href="{@docRoot}about/versions/jelly-bean.html"><img src="{@docRoot}images/home/android-jellybean.png" ></a>
                     </div>
                     <div class="content-right col-6">
-                    <h1>More Jelly Beans!</h1>
+                    <h1>A Sweeter Jelly Bean!</h1>
                     <p>Android 4.3 is now available with a variety of performance improvements
-                    and new developer features. </p>
-                    <p>With this release, Android now supports Bluetooth Low Energy for battery
-                    savings with wireless peripherals, OpenGL ES 3.0 for the most advanced mobile 3D
-                    graphics, MPEG DASH support for high quality media streaming, and much more.</p>
+                    and new features. </p>
+                    <p>For developers, the new platform adds support for <span style="white-space:nowrap;">OpenGL ES 3.0</span>,
+                    connectivity with Bluetooth Smart devices and sensors, support for restricted profiles, a modular DRM framework,
+                    new profiling tools, and more.</p>
                     <p><a href="{@docRoot}about/versions/jelly-bean.html" class="button">Learn More</a></p>
                     </div>
                 </li>
