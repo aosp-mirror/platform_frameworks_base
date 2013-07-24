@@ -14786,10 +14786,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             int curLevel = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
             allChanged = mProcessTracker.setMemFactorLocked(memFactor, !mSleeping, now);
+            final int trackerMemFactor = mProcessTracker.getMemFactorLocked();
             for (int i=N-1; i>=0; i--) {
                 ProcessRecord app = mLruProcesses.get(i);
                 if (allChanged || app.procStateChanged) {
-                    app.setProcessTrackerState(memFactor, now);
+                    app.setProcessTrackerState(trackerMemFactor, now);
                 }
                 if (app.curProcState >= ActivityManager.PROCESS_STATE_HOME
                         && !app.killedBackground) {
@@ -14874,10 +14875,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         } else {
             allChanged = mProcessTracker.setMemFactorLocked(
                     ProcessTracker.ADJ_MEM_FACTOR_NORMAL, !mSleeping, now);
+            final int trackerMemFactor = mProcessTracker.getMemFactorLocked();
             for (int i=N-1; i>=0; i--) {
                 ProcessRecord app = mLruProcesses.get(i);
                 if (allChanged || app.procStateChanged) {
-                    app.setProcessTrackerState(ProcessTracker.ADJ_MEM_FACTOR_NORMAL, now);
+                    app.setProcessTrackerState(trackerMemFactor, now);
                 }
                 if ((app.curProcState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
                         || app.systemNoUi) && app.pendingUiClean) {
