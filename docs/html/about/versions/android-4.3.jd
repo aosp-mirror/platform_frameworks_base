@@ -36,7 +36,7 @@ sdk.platform.apiLevel=18
   </li>
   <li><a href="#Multimedia">Multimedia</a>
     <ol>
-      <li><a href="#DASH">MPEG DASH support</a></li>
+      <li><a href="#MediaExtractor">MediaExtractor and MediaCodec enhancements</a></li>
       <li><a href="#DRM">Media DRM</a></li>
       <li><a href="#EncodingSurface">Video encoding from a Surface</a></li>
       <li><a href="#MediaMuxing">Media muxing</a></li>
@@ -439,10 +439,11 @@ android.Manifest.permission#SEND_RESPOND_VIA_MESSAGE} permission.</p>
 
 <h2 id="Multimedia">Multimedia</h2>
 
-<h3 id="DASH">MPEG DASH support</h3>
+<h3 id="MediaExtractor">MediaExtractor and MediaCodec enhancements</h3>
 
-<p>Android now supports Dynamic Adaptive Streaming over HTTP (DASH) in accordance with the
-ISO/IEC 23009-1 standard, using existing APIs in {@link android.media.MediaCodec} and {@link
+<p>Android now makes it easier for you to write your own Dynamic Adaptive
+Streaming over HTTP (DASH) players in accordance with the ISO/IEC 23009-1 standard,
+using existing APIs in {@link android.media.MediaCodec} and {@link
 android.media.MediaExtractor}. The framework underlying these APIs has been updated to support
 parsing of fragmented MP4 files, but your app is still responsible for parsing the MPD metadata
 and passing the individual streams to {@link android.media.MediaExtractor}.</p>
