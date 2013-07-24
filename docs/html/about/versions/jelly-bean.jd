@@ -313,8 +313,7 @@ content. </p>
 
 <p>VP8 encoding is available in software on all compatible devices running
 Android 4.3. For highest performance, the platform also supports
-hardware-accelerated VP8 encoding on capable devices, such as Nexus 7 (2013),
-Nexus 4, and Nexus 10 devices.</p>
+hardware-accelerated VP8 encoding on capable devices.</p>
 
 <h4 id="43-surface">Video encoding from a surface</h4>
 
