@@ -150,7 +150,7 @@ href="{@docRoot}training/basics/supporting-devices/platforms.html">Supporting Di
 Platform Versions</a>.</p>
 
 <p>Various APIs are also available in the Android <a
-href="{@docRoot}tools/extras/support-library.html">Support Library</a> that allow you to implement
+href="{@docRoot}tools/support-library/index.html">Support Library</a> that allow you to implement
 new features on older versions of the platform.</p>
 
 <p>For more information about how API levels work, read <a
@@ -943,7 +943,7 @@ android.text.TextDirectionHeuristic} constants from {@link android.text.TextDire
 to {@link android.text.BidiFormatter#unicodeWrap(String,TextDirectionHeuristic) unicodeWrap()}.</p>
 
 <p class="note"><strong>Note:</strong> These new APIs are also available for previous versions
-of Android through the Android <a href="{@docRoot}tools/extras/support-library.html">Support
+of Android through the Android <a href="{@docRoot}tools/support-library/index.html">Support
 Library</a>, with the {@link android.support.v4.text.BidiFormatter} class and related APIs.</p>
 
 
@@ -981,7 +981,7 @@ android.view.accessibility.AccessibilityNodeInfo#ACTION_ARGUMENT_EXTEND_SELECTIO
 
 
 <p class="note"><strong>Note:</strong> These new APIs are also available for previous versions
-of Android through the Android <a href="{@docRoot}tools/extras/support-library.html">Support
+of Android through the Android <a href="{@docRoot}tools/support-library/index.html">Support
 Library</a>, with the {@link android.support.v4.view.accessibility.AccessibilityNodeInfoCompat}
 class.</p>
 

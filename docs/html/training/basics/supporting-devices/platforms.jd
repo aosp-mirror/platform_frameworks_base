@@ -23,7 +23,7 @@ previous.link=screens.html
     <ul>
       <li><a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#ApiLevels">Android API Levels</a></li>
       <li><a
-href="{@docRoot}tools/extras/support-library.html">Android Support Library</a></li>
+href="{@docRoot}tools/support-library/index.html">Android Support Library</a></li>
     </ul>
   </div>
 </div>
@@ -42,7 +42,7 @@ targeting your app to the latest version.</p>
 
 <p class="note"><strong>Tip:</strong> In order to provide the best features and 
 functionality across several Android versions, you should use the <a
-href="{@docRoot}tools/extras/support-library.html">Android Support Library</a> in your app,
+href="{@docRoot}tools/support-library/index.html">Android Support Library</a> in your app,
 which allows you to use several recent platform APIs on older versions.</p>
 
 

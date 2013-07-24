@@ -43,7 +43,7 @@ app, the user touches the app icon in the action bar.</p>
 
 <p>This lesson describes how to implement a navigation drawer using the
 {@link android.support.v4.widget.DrawerLayout} APIs available in the
-<a href="{@docRoot}tools/extras/support-library.html">Support Library</a>.</p>
+<a href="{@docRoot}tools/support-library/index.html">Support Library</a>.</p>
 
 <div class="note design">
 <p><strong>Navigation Drawer Design</strong></p>

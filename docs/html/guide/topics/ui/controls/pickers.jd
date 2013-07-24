@@ -47,11 +47,11 @@ such as in a basic dialog on handsets or as an embedded part of the layout on la
 <p>Although {@link android.app.DialogFragment} was first added to the platform in Android 3.0 (API
 level 11), if your app supports versions of Android older than 3.0&mdash;even as low as Android
 1.6&mdash;you can use the {@link android.support.v4.app.DialogFragment} class that's available in
-the <a href="{@docRoot}tools/extras/support-library.html">support library</a> for backward
+the <a href="{@docRoot}tools/support-library/index.html">support library</a> for backward
 compatibility.</p>
 
 <p class="note"><strong>Note:</strong> The code samples below show how to create dialogs for a time
-picker and date picker using the <a href="{@docRoot}tools/extras/support-library.html">support
+picker and date picker using the <a href="{@docRoot}tools/support-library/index.html">support
 library</a> APIs for {@link android.support.v4.app.DialogFragment}. If your app's <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> is 11 or
 higher, you can instead use the platform version of {@link android.app.DialogFragment}.</p>
@@ -67,7 +67,7 @@ fragment's {@link android.support.v4.app.DialogFragment#onCreateDialog onCreateD
 
 <p class="note"><strong>Note:</strong> If your app supports versions of Android older than 3.0,
 be sure you've set up your Android project with the support library as described in <a
-href="{@docRoot}tools/extras/support-library.html#SettingUp">Setting Up a Project to Use a
+href="{@docRoot}tools/support-library/setup.html">Setting Up a Project to Use a
 Library</a>.</p>
 
 <h3 id="TimePickerFragment">Extending DialogFragment for a time picker</h3>
@@ -172,7 +172,7 @@ fragment's {@link android.support.v4.app.DialogFragment#onCreateDialog onCreateD
 
 <p class="note"><strong>Note:</strong> If your app supports versions of Android older than 3.0,
 be sure you've set up your Android project with the support library as described in <a
-href="{@docRoot}tools/extras/support-library.html#SettingUp">Setting Up a Project to Use a
+href="{@docRoot}tools/support-library/setup.html">Setting Up a Project to Use a
 Library</a>.</p>
 
 <h3 id="DatePickerFragment">Extending DialogFragment for a date picker</h3>

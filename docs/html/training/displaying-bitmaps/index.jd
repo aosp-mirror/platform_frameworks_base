@@ -12,7 +12,7 @@ startpage=true
 <h2>Dependencies and prerequisites</h2>
 <ul>
   <li>Android 2.1 (API Level 7) or higher</li>
-  <li><a href="{@docRoot}tools/extras/support-library.html">Support Library</a></li>
+  <li><a href="{@docRoot}tools/support-library/index.html">Support Library</a></li>
 </ul>
 
 <h2>Try it out</h2>

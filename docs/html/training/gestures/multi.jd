@@ -123,7 +123,7 @@ the pointer associated with the action. This is illustrated in the snippet below
 <p class="note"><strong>Note:</strong> This example uses the 
 {@link android.support.v4.view.MotionEventCompat}
 class. This class is in the 
-<a href="{@docRoot}tools/extras/support-library.html">Support Library</a>. You should use
+<a href="{@docRoot}tools/support-library/index.html">Support Library</a>. You should use
 {@link android.support.v4.view.MotionEventCompat} to provide the best support for a wide range of
 platforms. Note that {@link android.support.v4.view.MotionEventCompat} is <em>not</em> a 
 replacement for the {@link android.view.MotionEvent} class. Rather, it provides static utility 

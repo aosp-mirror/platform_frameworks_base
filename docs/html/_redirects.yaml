@@ -19,7 +19,7 @@ redirects:
   to: /sdk/exploring.html
 
 - from: /sdk/compatibility-library.html
-  to: /tools/extras/support-library.html
+  to: /tools/support-library/index.html
 
 - from: /sdk/eclipse-adt.html
   to: /tools/sdk/eclipse-adt.html

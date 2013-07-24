@@ -55,7 +55,7 @@ accessibility service.</p>
 
 <p>The ability for you to build and deploy accessibility services was introduced with Android 1.6
   (API Level 4) and received significant improvements with Android 4.0 (API Level 14). The Android
-  <a href="{@docRoot}tools/extras/support-library.html">Support Library</a> was also updated with
+  <a href="{@docRoot}tools/support-library/index.html">Support Library</a> was also updated with
   the release of Android 4.0 to provide support for these enhanced accessibility features back to
   Android 1.6. Developers aiming for widely compatible accessibility services are encouraged to use
   the Support Library and develop for the more advanced accessibility features introduced in
@@ -448,7 +448,7 @@ android.accessibilityservice.AccessibilityService} and can be used as a base for
 accessibility services that are compatible with Android 1.6 (API Level 4) and higher.</li>
   <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/accessibility/TaskBackService.html">TaskBackService</a>
  - This service is based on the enhanced accessibility APIs introduced in Android 4.0 (API Level
-14). However, you can use the Android <a href="{@docRoot}tools/extras/support-library.html">Support
+14). However, you can use the Android <a href="{@docRoot}tools/support-library/index.html">Support
 Libary</a> to substitute classes introduced in later API levels (e.g.,
 {@link android.view.accessibility.AccessibilityRecord},
 {@link android.view.accessibility.AccessibilityNodeInfo}

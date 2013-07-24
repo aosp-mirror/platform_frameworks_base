@@ -398,7 +398,7 @@ href="{@docRoot}sdk/installing/studio-tips.html">Tips and Tricks</a>.</p>
 
 <p>As you continue developing apps, you may need to install additional versions
 of Android for the emulator and other packages such as the <a
-href="{@docRoot}tools/extras/support-library.html">Android Support Library</a>.
+href="{@docRoot}tools/support-library/index.html">Android Support Library</a>.
 To install more packages, use
 the <a href="{@docRoot}tools/help/sdk-manager.html">SDK Manager</a>, which you can
 open from Android Studio by clicking <strong>SDK Manager</strong>
