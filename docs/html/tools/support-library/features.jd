@@ -28,30 +28,30 @@ page.title=Support Library Features
   </div>
 </div>
 
-<p>The Android Support Library package contains several individual libraries that can be included
+<p>The Android Support Library package contains several libraries that can be included
   in your application. Each of these libraries supports a specific range of Android platform
   versions and set of features.</p>
 
 <p>This guide explains the important features and version support provided by the Support
-  Libraries, to help you decide which of them you should include in your application. In general,
+  Libraries to help you decide which of them you should include in your application. In general,
   we recommend including the <a href="#v4">v4 support</a> and <a href="#v7-appcompat">v7
-  appcompat</a> libraries in your application, because they support a wide range of
+  appcompat</a> libraries, because they support a wide range of
   Android versions and provide APIs for recommended user interface patterns.</p>
 
 <p>In order to use any of the following libraries, you must download the library files to your
   Android SDK installation. Follow the directions for downloading the Support Libraries in
   <a href="{@docRoot}tools/support-library/setup.html#download">Support Library Setup</a> to
   complete this step. You must take additional steps to include a specific Support Library in
-  your application. See the end of each library section below for instructions on how to include
-  the library in your application.</p>
+  your application. See the end of each library section below for important information on how to
+  include the library in your application.</p>
 
 
 <h2 id="v4">v4 Support Library</h2>
 
 <p>This library is designed to be used with Android 1.6 (API level 4) and higher. It includes the
-  largest set of APIs compared to the other packages, including support for application components,
+  largest set of APIs compared to the other libraries, including support for application components,
   user interface features, accessibility, data handling, network connectivity, and programming
-  utilities. Here are a few of the key classes included in the v4 package:</p>
+  utilities. Here are a few of the key classes included in the v4 library:</p>
 
 <ul>
   <li>App Components
@@ -128,7 +128,7 @@ page.title=Support Library Features
 </ul>
 
 <p>
-  There are many other APIs included in this package. For complete, detailed information about the
+  There are many other APIs included in this library. For complete, detailed information about the
   v4 Support Library APIs, see the {@link android.support.v4.app android.support.v4} package in the
   API reference.
 </p>
