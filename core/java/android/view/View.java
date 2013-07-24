@@ -4588,6 +4588,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Called internally by the view system when a new view is getting focus.
      * This is what clears the old focus.
+     * <p>
+     * <b>NOTE:</b> The parent view's focused child must be updated manually
+     * after calling this method. Otherwise, the view hierarchy may be left in
+     * an inconstent state.
      */
     void unFocus() {
         if (DBG) {
