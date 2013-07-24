@@ -1,4 +1,4 @@
-page.title=&lt;uses-sdk&gt;
+fpage.title=&lt;uses-sdk&gt;
 page.tags="api levels","sdk version","minsdkversion","targetsdkversion","maxsdkversion"
 @jd:body
 
@@ -236,13 +236,13 @@ Highlights</a></td></tr>
     <tr><td><a href="{@docRoot}about/versions/android-4.2.html">Android 4.2, 4.2.2</a></td>
     <td><a href="{@docRoot}sdk/api_diff/17/changes.html" title="Diff Report">17</a></td>
     <td>{@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}</td>
-    <td><a href="{@docRoot}about/versions/jelly-bean.html">Platform
+    <td><a href="{@docRoot}about/versions/jelly-bean.html#android-42">Platform
 Highlights</a></td></tr>
 
     <tr><td><a href="{@docRoot}about/versions/android-4.1.html">Android 4.1, 4.1.1</a></td>
     <td><a href="{@docRoot}sdk/api_diff/16/changes.html" title="Diff Report">16</a></td>
     <td>{@link android.os.Build.VERSION_CODES#JELLY_BEAN}</td>
-    <td><a href="{@docRoot}about/versions/jelly-bean.html">Platform
+    <td><a href="{@docRoot}about/versions/jelly-bean.html#android-41">Platform
 Highlights</a></td></tr>
 
     <tr><td><a href="{@docRoot}about/versions/android-4.0.3.html">Android 4.0.3, 4.0.4</a></td>
