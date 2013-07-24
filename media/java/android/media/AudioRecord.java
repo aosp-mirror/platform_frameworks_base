@@ -134,10 +134,6 @@ public class AudioRecord
      */
     private int mChannels = AudioFormat.CHANNEL_IN_MONO;
     /**
-     * The current audio channel configuration
-     */
-    private int mChannelConfiguration = AudioFormat.CHANNEL_IN_MONO;
-    /**
      * The encoding of the audio samples.
      * @see AudioFormat#ENCODING_PCM_8BIT
      * @see AudioFormat#ENCODING_PCM_16BIT
@@ -276,8 +272,6 @@ public class AudioRecord
 
         //--------------
         // channel config
-        mChannelConfiguration = channelConfig;
-
         switch (channelConfig) {
         case AudioFormat.CHANNEL_IN_DEFAULT: // AudioFormat.CHANNEL_CONFIGURATION_DEFAULT
         case AudioFormat.CHANNEL_IN_MONO:
@@ -297,7 +291,6 @@ public class AudioRecord
         default:
             mChannelCount = 0;
             mChannels = AudioFormat.CHANNEL_INVALID;
-            mChannelConfiguration = AudioFormat.CHANNEL_INVALID;
             throw (new IllegalArgumentException("Unsupported channel configuration."));
         }
 
@@ -393,7 +386,7 @@ public class AudioRecord
      * and {@link AudioFormat#CHANNEL_IN_STEREO}.
      */
     public int getChannelConfiguration() {
-        return mChannelConfiguration;
+        return mChannels;
     }
 
     /**
