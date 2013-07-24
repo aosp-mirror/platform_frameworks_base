@@ -34,6 +34,7 @@ import android.content.ISyncContext;
 import android.content.ISyncStatusObserver;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.PeriodicSync;
 import android.content.ServiceConnection;
 import android.content.SyncActivityTooManyDeletes;
 import android.content.SyncAdapterType;
@@ -83,6 +84,7 @@ import com.google.android.collect.Sets;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -190,6 +192,7 @@ public class SyncManager {
 
     private BroadcastReceiver mStorageIntentReceiver =
             new BroadcastReceiver() {
+                @Override
                 public void onReceive(Context context, Intent intent) {
                     String action = intent.getAction();
                     if (Intent.ACTION_DEVICE_STORAGE_LOW.equals(action)) {
@@ -210,36 +213,39 @@ public class SyncManager {
             };
 
     private BroadcastReceiver mBootCompletedReceiver = new BroadcastReceiver() {
+        @Override
         public void onReceive(Context context, Intent intent) {
             mSyncHandler.onBootCompleted();
         }
     };
 
     private BroadcastReceiver mBackgroundDataSettingChanged = new BroadcastReceiver() {
+        @Override
         public void onReceive(Context context, Intent intent) {
             if (getConnectivityManager().getBackgroundDataSetting()) {
                 scheduleSync(null /* account */, UserHandle.USER_ALL,
                         SyncOperation.REASON_BACKGROUND_DATA_SETTINGS_CHANGED,
                         null /* authority */,
-                        new Bundle(), 0 /* delay */,
+                        new Bundle(), 0 /* delay */, 0 /* delay */,
                         false /* onlyThoseWithUnknownSyncableState */);
             }
         }
     };
 
     private BroadcastReceiver mAccountsUpdatedReceiver = new BroadcastReceiver() {
+        @Override
         public void onReceive(Context context, Intent intent) {
             updateRunningAccounts();
 
             // Kick off sync for everyone, since this was a radical account change
             scheduleSync(null, UserHandle.USER_ALL, SyncOperation.REASON_ACCOUNTS_UPDATED, null,
-                    null, 0 /* no delay */, false);
+                    null, 0 /* no delay */, 0/* no delay */, false);
         }
     };
 
     private final PowerManager mPowerManager;
 
-    // Use this as a random offset to seed all periodic syncs
+    // Use this as a random offset to seed all periodic syncs.
     private int mSyncRandomOffsetMillis;
 
     private final UserManager mUserManager;
@@ -296,6 +302,7 @@ public class SyncManager {
 
     private BroadcastReceiver mConnectivityIntentReceiver =
             new BroadcastReceiver() {
+        @Override
         public void onReceive(Context context, Intent intent) {
             final boolean wasConnected = mDataConnectionIsConnected;
 
@@ -321,6 +328,7 @@ public class SyncManager {
 
     private BroadcastReceiver mShutdownIntentReceiver =
             new BroadcastReceiver() {
+        @Override
         public void onReceive(Context context, Intent intent) {
             Log.w(TAG, "Writing sync state before shutdown...");
             getSyncStorageEngine().writeAllState();
@@ -371,9 +379,13 @@ public class SyncManager {
         SyncStorageEngine.init(context);
         mSyncStorageEngine = SyncStorageEngine.getSingleton();
         mSyncStorageEngine.setOnSyncRequestListener(new OnSyncRequestListener() {
+            @Override
             public void onSyncRequest(Account account, int userId, int reason, String authority,
                     Bundle extras) {
-                scheduleSync(account, userId, reason, authority, extras, 0, false);
+                scheduleSync(account, userId, reason, authority, extras,
+                    0 /* no delay */,
+                    0 /* no delay */,
+                    false);
             }
         });
 
@@ -388,7 +400,7 @@ public class SyncManager {
                 if (!removed) {
                     scheduleSync(null, UserHandle.USER_ALL,
                             SyncOperation.REASON_SERVICE_CHANGED,
-                            type.authority, null, 0 /* no delay */,
+                            type.authority, null, 0 /* no delay */, 0 /* no delay */,
                             false /* onlyThoseWithUnkownSyncableState */);
                 }
             }
@@ -453,6 +465,7 @@ public class SyncManager {
 
         mSyncStorageEngine.addStatusChangeListener(
                 ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS, new ISyncStatusObserver.Stub() {
+            @Override
             public void onStatusChanged(int which) {
                 // force the sync loop to run if the settings change
                 sendCheckAlarmsMessage();
@@ -526,58 +539,35 @@ public class SyncManager {
     }
 
     /**
-     * Initiate a sync. This can start a sync for all providers
-     * (pass null to url, set onlyTicklable to false), only those
-     * providers that are marked as ticklable (pass null to url,
-     * set onlyTicklable to true), or a specific provider (set url
-     * to the content url of the provider).
-     *
-     * <p>If the ContentResolver.SYNC_EXTRAS_UPLOAD boolean in extras is
-     * true then initiate a sync that just checks for local changes to send
-     * to the server, otherwise initiate a sync that first gets any
-     * changes from the server before sending local changes back to
-     * the server.
-     *
-     * <p>If a specific provider is being synced (the url is non-null)
-     * then the extras can contain SyncAdapter-specific information
-     * to control what gets synced (e.g. which specific feed to sync).
-     *
-     * <p>You'll start getting callbacks after this.
-     *
-     * @param requestedAccount the account to sync, may be null to signify all accounts
+     * Initiate a sync using the new anonymous service API.
+     * TODO: Implement.
+     * @param cname SyncService component bound to in order to perform the sync. 
      * @param userId the id of the user whose accounts are to be synced. If userId is USER_ALL,
      *          then all users' accounts are considered.
-     * @param reason for sync request. If this is a positive integer, it is the Linux uid
-     * assigned to the process that requested the sync. If it's negative, the sync was requested by
-     * the SyncManager itself and could be one of the following:
-     *      {@link SyncOperation#REASON_BACKGROUND_DATA_SETTINGS_CHANGED}
-     *      {@link SyncOperation#REASON_ACCOUNTS_UPDATED}
-     *      {@link SyncOperation#REASON_SERVICE_CHANGED}
-     *      {@link SyncOperation#REASON_PERIODIC}
-     *      {@link SyncOperation#REASON_IS_SYNCABLE}
-     *      {@link SyncOperation#REASON_SYNC_AUTO}
-     *      {@link SyncOperation#REASON_MASTER_SYNC_AUTO}
-     *      {@link SyncOperation#REASON_USER_START}
-     * @param requestedAuthority the authority to sync, may be null to indicate all authorities
+     * @param uid Linux uid of the application that is performing the sync. 
      * @param extras a Map of SyncAdapter-specific information to control
-     *          syncs of a specific provider. Can be null. Is ignored
-     *          if the url is null.
-     * @param delay how many milliseconds in the future to wait before performing this
-     * @param onlyThoseWithUnkownSyncableState
+     *          syncs of a specific provider. Can be null.
+     * @param beforeRunTimeMillis
+     *  @param runtimeMillis
      */
-    public void scheduleSync(Account requestedAccount, int userId, int reason,
-            String requestedAuthority, Bundle extras, long delay,
-            boolean onlyThoseWithUnkownSyncableState) {
+    public void scheduleSync(ComponentName cname, int userId, int uid, Bundle extras,
+            long beforeRunTimeMillis, long runtimeMillis,
+            boolean onlyThoseWithUnknownSyncableState) {
+/**
         boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
 
         final boolean backgroundDataUsageAllowed = !mBootCompleted ||
                 getConnectivityManager().getBackgroundDataSetting();
 
-        if (extras == null) extras = new Bundle();
-
+        if (extras == null) {
+            extras = new Bundle();
+        }
+        if (isLoggable) {
+            Log.e(TAG, requestedAccount + " " + extras.toString() + " " + requestedAuthority);
+        }
         Boolean expedited = extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false);
         if (expedited) {
-            delay = -1; // this means schedule at the front of the queue
+            runtimeMillis = -1; // this means schedule at the front of the queue
         }
 
         AccountAndUser[] accounts;
@@ -682,11 +672,13 @@ public class SyncManager {
                         account.userId, authority);
                 final long backoffTime = backoff != null ? backoff.first : 0;
                 if (isSyncable < 0) {
+                    // Initialisation sync.
                     Bundle newExtras = new Bundle();
                     newExtras.putBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, true);
                     if (isLoggable) {
-                        Log.v(TAG, "scheduleSync:"
-                                + " delay " + delay
+                        Log.v(TAG, "schedule initialisation Sync:"
+                                + ", delay until " + delayUntil
+                                + ", run by " + 0
                                 + ", source " + source
                                 + ", account " + account
                                 + ", authority " + authority
@@ -694,13 +686,15 @@ public class SyncManager {
                     }
                     scheduleSyncOperation(
                             new SyncOperation(account.account, account.userId, reason, source,
-                                    authority, newExtras, 0, backoffTime, delayUntil,
-                                    allowParallelSyncs));
+                                    authority, newExtras, 0 /* immediate , 0 /* No flex time,
+                                    backoffTime, delayUntil, allowParallelSyncs));
                 }
                 if (!onlyThoseWithUnkownSyncableState) {
                     if (isLoggable) {
                         Log.v(TAG, "scheduleSync:"
-                                + " delay " + delay
+                                + " delay until " + delayUntil
+                                + " run by " + runtimeMillis
+                                + " flex " + beforeRuntimeMillis
                                 + ", source " + source
                                 + ", account " + account
                                 + ", authority " + authority
@@ -708,17 +702,223 @@ public class SyncManager {
                     }
                     scheduleSyncOperation(
                             new SyncOperation(account.account, account.userId, reason, source,
-                                    authority, extras, delay, backoffTime, delayUntil,
-                                    allowParallelSyncs));
+                                    authority, extras, runtimeMillis, beforeRuntimeMillis,
+                                    backoffTime, delayUntil, allowParallelSyncs));
+                }
+            }
+        }*/
+    }
+
+    /**
+     * Initiate a sync. This can start a sync for all providers
+     * (pass null to url, set onlyTicklable to false), only those
+     * providers that are marked as ticklable (pass null to url,
+     * set onlyTicklable to true), or a specific provider (set url
+     * to the content url of the provider).
+     *
+     * <p>If the ContentResolver.SYNC_EXTRAS_UPLOAD boolean in extras is
+     * true then initiate a sync that just checks for local changes to send
+     * to the server, otherwise initiate a sync that first gets any
+     * changes from the server before sending local changes back to
+     * the server.
+     *
+     * <p>If a specific provider is being synced (the url is non-null)
+     * then the extras can contain SyncAdapter-specific information
+     * to control what gets synced (e.g. which specific feed to sync).
+     *
+     * <p>You'll start getting callbacks after this.
+     *
+     * @param requestedAccount the account to sync, may be null to signify all accounts
+     * @param userId the id of the user whose accounts are to be synced. If userId is USER_ALL,
+     *          then all users' accounts are considered.
+     * @param reason for sync request. If this is a positive integer, it is the Linux uid
+     * assigned to the process that requested the sync. If it's negative, the sync was requested by
+     * the SyncManager itself and could be one of the following:
+     *      {@link SyncOperation#REASON_BACKGROUND_DATA_SETTINGS_CHANGED}
+     *      {@link SyncOperation#REASON_ACCOUNTS_UPDATED}
+     *      {@link SyncOperation#REASON_SERVICE_CHANGED}
+     *      {@link SyncOperation#REASON_PERIODIC}
+     *      {@link SyncOperation#REASON_IS_SYNCABLE}
+     *      {@link SyncOperation#REASON_SYNC_AUTO}
+     *      {@link SyncOperation#REASON_MASTER_SYNC_AUTO}
+     *      {@link SyncOperation#REASON_USER_START}
+     * @param requestedAuthority the authority to sync, may be null to indicate all authorities
+     * @param extras a Map of SyncAdapter-specific information to control
+     *          syncs of a specific provider. Can be null. Is ignored
+     *          if the url is null.
+     * @param beforeRuntimeMillis milliseconds before runtimeMillis that this sync can run.
+     * @param runtimeMillis maximum milliseconds in the future to wait before performing sync.
+     * @param onlyThoseWithUnkownSyncableState Only sync authorities that have unknown state.
+     */
+    public void scheduleSync(Account requestedAccount, int userId, int reason,
+            String requestedAuthority, Bundle extras, long beforeRuntimeMillis,
+            long runtimeMillis, boolean onlyThoseWithUnkownSyncableState) {
+        boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
+
+        final boolean backgroundDataUsageAllowed = !mBootCompleted ||
+                getConnectivityManager().getBackgroundDataSetting();
+
+        if (extras == null) {
+            extras = new Bundle();
+        }
+        if (isLoggable) {
+            Log.d(TAG, "one-time sync for: " + requestedAccount + " " + extras.toString() + " "
+                    + requestedAuthority);
+        }
+        Boolean expedited = extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false);
+        if (expedited) {
+            runtimeMillis = -1; // this means schedule at the front of the queue
+        }
+
+        AccountAndUser[] accounts;
+        if (requestedAccount != null && userId != UserHandle.USER_ALL) {
+            accounts = new AccountAndUser[] { new AccountAndUser(requestedAccount, userId) };
+        } else {
+            // if the accounts aren't configured yet then we can't support an account-less
+            // sync request
+            accounts = mRunningAccounts;
+            if (accounts.length == 0) {
+                if (isLoggable) {
+                    Log.v(TAG, "scheduleSync: no accounts configured, dropping");
+                }
+                return;
+            }
+        }
+
+        final boolean uploadOnly = extras.getBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, false);
+        final boolean manualSync = extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false);
+        if (manualSync) {
+            extras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, true);
+            extras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, true);
+        }
+        final boolean ignoreSettings =
+                extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, false);
+
+        int source;
+        if (uploadOnly) {
+            source = SyncStorageEngine.SOURCE_LOCAL;
+        } else if (manualSync) {
+            source = SyncStorageEngine.SOURCE_USER;
+        } else if (requestedAuthority == null) {
+            source = SyncStorageEngine.SOURCE_POLL;
+        } else {
+            // this isn't strictly server, since arbitrary callers can (and do) request
+            // a non-forced two-way sync on a specific url
+            source = SyncStorageEngine.SOURCE_SERVER;
+        }
+
+        for (AccountAndUser account : accounts) {
+            // Compile a list of authorities that have sync adapters.
+            // For each authority sync each account that matches a sync adapter.
+            final HashSet<String> syncableAuthorities = new HashSet<String>();
+            for (RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapter :
+                    mSyncAdapters.getAllServices(account.userId)) {
+                syncableAuthorities.add(syncAdapter.type.authority);
+            }
+
+            // if the url was specified then replace the list of authorities
+            // with just this authority or clear it if this authority isn't
+            // syncable
+            if (requestedAuthority != null) {
+                final boolean hasSyncAdapter = syncableAuthorities.contains(requestedAuthority);
+                syncableAuthorities.clear();
+                if (hasSyncAdapter) syncableAuthorities.add(requestedAuthority);
+            }
+
+            for (String authority : syncableAuthorities) {
+                int isSyncable = getIsSyncable(account.account, account.userId,
+                        authority);
+                if (isSyncable == 0) {
+                    continue;
+                }
+                final RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo;
+                syncAdapterInfo = mSyncAdapters.getServiceInfo(
+                        SyncAdapterType.newKey(authority, account.account.type), account.userId);
+                if (syncAdapterInfo == null) {
+                    continue;
+                }
+                final boolean allowParallelSyncs = syncAdapterInfo.type.allowParallelSyncs();
+                final boolean isAlwaysSyncable = syncAdapterInfo.type.isAlwaysSyncable();
+                if (isSyncable < 0 && isAlwaysSyncable) {
+                    mSyncStorageEngine.setIsSyncable(account.account, account.userId, authority, 1);
+                    isSyncable = 1;
+                }
+                if (onlyThoseWithUnkownSyncableState && isSyncable >= 0) {
+                    continue;
+                }
+                if (!syncAdapterInfo.type.supportsUploading() && uploadOnly) {
+                    continue;
+                }
+
+                // always allow if the isSyncable state is unknown
+                boolean syncAllowed =
+                        (isSyncable < 0)
+                        || ignoreSettings
+                        || (backgroundDataUsageAllowed
+                                && mSyncStorageEngine.getMasterSyncAutomatically(account.userId)
+                                && mSyncStorageEngine.getSyncAutomatically(account.account,
+                                        account.userId, authority));
+                if (!syncAllowed) {
+                    if (isLoggable) {
+                        Log.d(TAG, "scheduleSync: sync of " + account + ", " + authority
+                                + " is not allowed, dropping request");
+                    }
+                    continue;
+                }
+
+                Pair<Long, Long> backoff = mSyncStorageEngine
+                        .getBackoff(account.account, account.userId, authority);
+                long delayUntil = mSyncStorageEngine.getDelayUntilTime(account.account,
+                        account.userId, authority);
+                final long backoffTime = backoff != null ? backoff.first : 0;
+                if (isSyncable < 0) {
+                    // Initialisation sync.
+                    Bundle newExtras = new Bundle();
+                    newExtras.putBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, true);
+                    if (isLoggable) {
+                        Log.v(TAG, "schedule initialisation Sync:"
+                                + ", delay until " + delayUntil
+                                + ", run by " + 0
+                                + ", source " + source
+                                + ", account " + account
+                                + ", authority " + authority
+                                + ", extras " + newExtras);
+                    }
+                    scheduleSyncOperation(
+                            new SyncOperation(account.account, account.userId, reason, source,
+                                    authority, newExtras, 0 /* immediate */, 0 /* No flex time*/,
+                                    backoffTime, delayUntil, allowParallelSyncs));
+                }
+                if (!onlyThoseWithUnkownSyncableState) {
+                    if (isLoggable) {
+                        Log.v(TAG, "scheduleSync:"
+                                + " delay until " + delayUntil
+                                + " run by " + runtimeMillis
+                                + " flex " + beforeRuntimeMillis
+                                + ", source " + source
+                                + ", account " + account
+                                + ", authority " + authority
+                                + ", extras " + extras);
+                    }
+                    scheduleSyncOperation(
+                            new SyncOperation(account.account, account.userId, reason, source,
+                                    authority, extras, runtimeMillis, beforeRuntimeMillis,
+                                    backoffTime, delayUntil, allowParallelSyncs));
                 }
             }
         }
     }
 
+    /**
+     * Schedule sync based on local changes to a provider. Occurs within interval
+     * [LOCAL_SYNC_DELAY, 2*LOCAL_SYNC_DELAY].
+     */
     public void scheduleLocalSync(Account account, int userId, int reason, String authority) {
         final Bundle extras = new Bundle();
         extras.putBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, true);
-        scheduleSync(account, userId, reason, authority, extras, LOCAL_SYNC_DELAY,
+        scheduleSync(account, userId, reason, authority, extras,
+                LOCAL_SYNC_DELAY /* earliest run time */,
+                2 * LOCAL_SYNC_DELAY /* latest sync time. */,
                 false /* onlyThoseWithUnkownSyncableState */);
     }
 
@@ -775,6 +975,7 @@ public class SyncManager {
     }
 
     class SyncAlarmIntentReceiver extends BroadcastReceiver {
+        @Override
         public void onReceive(Context context, Intent intent) {
             mHandleAlarmWakeLock.acquire();
             sendSyncAlarmMessage();
@@ -943,11 +1144,13 @@ public class SyncManager {
                 Log.d(TAG, "retrying sync operation that failed because there was already a "
                         + "sync in progress: " + operation);
             }
-            scheduleSyncOperation(new SyncOperation(operation.account, operation.userId,
+            scheduleSyncOperation(
+                new SyncOperation(
+                    operation.account, operation.userId,
                     operation.reason,
                     operation.syncSource,
                     operation.authority, operation.extras,
-                    DELAY_RETRY_SYNC_IN_PROGRESS_IN_SECONDS * 1000,
+                    DELAY_RETRY_SYNC_IN_PROGRESS_IN_SECONDS * 1000, operation.flexTime,
                     operation.backoff, operation.delayUntil, operation.allowParallelSyncs));
         } else if (syncResult.hasSoftError()) {
             if (isLoggable) {
@@ -977,7 +1180,8 @@ public class SyncManager {
         final Account[] accounts = AccountManagerService.getSingleton().getAccounts(userId);
         for (Account account : accounts) {
             scheduleSync(account, userId, SyncOperation.REASON_USER_START, null, null,
-                    0 /* no delay */, true /* onlyThoseWithUnknownSyncableState */);
+                    0 /* no delay */, 0 /* No flex */,
+                    true /* onlyThoseWithUnknownSyncableState */);
         }
 
         sendCheckAlarmsMessage();
@@ -1204,7 +1408,10 @@ public class SyncManager {
         synchronized (mSyncQueue) {
             sb.setLength(0);
             mSyncQueue.dump(sb);
+            // Dump Pending Operations.
+            getSyncStorageEngine().dumpPendingOperations(sb);
         }
+
         pw.println();
         pw.print(sb.toString());
 
@@ -1271,12 +1478,15 @@ public class SyncManager {
 
 
                 for (int i = 0; i < settings.periodicSyncs.size(); i++) {
-                    final Pair<Bundle, Long> pair = settings.periodicSyncs.get(i);
-                    final String period = String.valueOf(pair.second);
-                    final String extras = pair.first.size() > 0 ? " " + pair.first.toString() : "";
-                    final String next = formatTime(status.getPeriodicSyncTime(i)
-                            + pair.second * 1000);
-                    table.set(row + i * 2, 12, period + extras);
+                    final PeriodicSync sync = settings.periodicSyncs.get(i);
+                    final String period =
+                            String.format("[p:%d s, f: %d s]", sync.period, sync.flexTime);
+                    final String extras =
+                            sync.extras.size() > 0 ?
+                                    sync.extras.toString() : "Bundle[]";
+                    final String next = "Next sync: " + formatTime(status.getPeriodicSyncTime(i)
+                            + sync.period * 1000);
+                    table.set(row + i * 2, 12, period + " " + extras);
                     table.set(row + i * 2 + 1, 12, next);
                 }
 
@@ -1810,6 +2020,7 @@ public class SyncManager {
             super(looper);
         }
 
+        @Override
         public void handleMessage(Message msg) {
             long earliestFuturePollTime = Long.MAX_VALUE;
             long nextPendingSyncTime = Long.MAX_VALUE;
@@ -1827,7 +2038,7 @@ public class SyncManager {
                 earliestFuturePollTime = scheduleReadyPeriodicSyncs();
                 switch (msg.what) {
                     case SyncHandler.MESSAGE_CANCEL: {
-                        Pair<Account, String> payload = (Pair<Account, String>)msg.obj;
+                        Pair<Account, String> payload = (Pair<Account, String>) msg.obj;
                         if (Log.isLoggable(TAG, Log.VERBOSE)) {
                             Log.d(TAG, "handleSyncHandlerMessage: MESSAGE_SERVICE_CANCEL: "
                                     + payload.first + ", " + payload.second);
@@ -1934,6 +2145,10 @@ public class SyncManager {
          * in milliseconds since boot
          */
         private long scheduleReadyPeriodicSyncs() {
+            final boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
+            if (isLoggable) {
+                Log.v(TAG, "scheduleReadyPeriodicSyncs");
+            }
             final boolean backgroundDataUsageAllowed =
                     getConnectivityManager().getBackgroundDataSetting();
             long earliestFuturePollTime = Long.MAX_VALUE;
@@ -1973,37 +2188,59 @@ public class SyncManager {
                 }
 
                 for (int i = 0, N = authorityInfo.periodicSyncs.size(); i < N; i++) {
-                    final Bundle extras = authorityInfo.periodicSyncs.get(i).first;
-                    final Long periodInMillis = authorityInfo.periodicSyncs.get(i).second * 1000;
-                    // Skip if the period is invalid
+                    final PeriodicSync sync = authorityInfo.periodicSyncs.get(i);
+                    final Bundle extras = sync.extras;
+                    final Long periodInMillis = sync.period * 1000;
+                    final Long flexInMillis = sync.flexTime * 1000;
+                    // Skip if the period is invalid.
                     if (periodInMillis <= 0) {
                         continue;
                     }
-                    // find when this periodic sync was last scheduled to run
+                    // Find when this periodic sync was last scheduled to run.
                     final long lastPollTimeAbsolute = status.getPeriodicSyncTime(i);
-
+                    final long shiftedLastPollTimeAbsolute =
+                            (0 < lastPollTimeAbsolute - mSyncRandomOffsetMillis) ?
+                                    (lastPollTimeAbsolute - mSyncRandomOffsetMillis) : 0;
                     long remainingMillis
-                    = periodInMillis - (shiftedNowAbsolute % periodInMillis);
-
+                        = periodInMillis - (shiftedNowAbsolute % periodInMillis);
+                    long timeSinceLastRunMillis
+                        = (nowAbsolute - lastPollTimeAbsolute);
+                    // Schedule this periodic sync to run early if it's close enough to its next
+                    // runtime, and far enough from its last run time.
+                    // If we are early, there will still be time remaining in this period.
+                    boolean runEarly = remainingMillis <= flexInMillis
+                            && timeSinceLastRunMillis > periodInMillis - flexInMillis;
+                    if (isLoggable) {
+                        Log.v(TAG, "sync: " + i + " for " + authorityInfo.authority + "."
+                        + " period: " + (periodInMillis)
+                        + " flex: " + (flexInMillis)
+                        + " remaining: " + (remainingMillis)
+                        + " time_since_last: " + timeSinceLastRunMillis
+                        + " last poll absol: " + lastPollTimeAbsolute
+                        + " last poll shifed: " + shiftedLastPollTimeAbsolute
+                        + " shifted now: " + shiftedNowAbsolute
+                        + " run_early: " + runEarly);
+                    }
                     /*
                      * Sync scheduling strategy: Set the next periodic sync
                      * based on a random offset (in seconds). Also sync right
                      * now if any of the following cases hold and mark it as
                      * having been scheduled
-                     * Case 1: This sync is ready to run
-                     * now.
+                     * Case 1: This sync is ready to run now.
                      * Case 2: If the lastPollTimeAbsolute is in the
                      * future, sync now and reinitialize. This can happen for
                      * example if the user changed the time, synced and changed
                      * back.
                      * Case 3: If we failed to sync at the last scheduled
-                     * time
+                     * time.
+                     * Case 4: This sync is close enough to the time that we can schedule it.
                      */
-                    if (remainingMillis == periodInMillis // Case 1
+                    if (runEarly // Case 4
+                            || remainingMillis == periodInMillis // Case 1
                             || lastPollTimeAbsolute > nowAbsolute // Case 2
-                            || (nowAbsolute - lastPollTimeAbsolute
-                                    >= periodInMillis)) { // Case 3
+                            || timeSinceLastRunMillis >= periodInMillis) { // Case 3
                         // Sync now
+                        
                         final Pair<Long, Long> backoff = mSyncStorageEngine.getBackoff(
                                 authorityInfo.account, authorityInfo.userId,
                                 authorityInfo.authority);
@@ -2015,24 +2252,29 @@ public class SyncManager {
                         if (syncAdapterInfo == null) {
                             continue;
                         }
+                        mSyncStorageEngine.setPeriodicSyncTime(authorityInfo.ident,
+                                authorityInfo.periodicSyncs.get(i), nowAbsolute);
                         scheduleSyncOperation(
                                 new SyncOperation(authorityInfo.account, authorityInfo.userId,
                                         SyncOperation.REASON_PERIODIC,
                                         SyncStorageEngine.SOURCE_PERIODIC,
-                                        authorityInfo.authority, extras, 0 /* delay */,
+                                        authorityInfo.authority, extras,
+                                        0 /* runtime */, 0 /* flex */,
                                                 backoff != null ? backoff.first : 0,
                                         mSyncStorageEngine.getDelayUntilTime(
                                                 authorityInfo.account, authorityInfo.userId,
                                                 authorityInfo.authority),
                                         syncAdapterInfo.type.allowParallelSyncs()));
-                        mSyncStorageEngine.setPeriodicSyncTime(authorityInfo.ident,
-                                authorityInfo.periodicSyncs.get(i), nowAbsolute);
+                        
                     }
-                    // Compute when this periodic sync should next run
-                    final long nextPollTimeAbsolute = nowAbsolute + remainingMillis;
-
-                    // remember this time if it is earlier than
-                    // earliestFuturePollTime
+                    // Compute when this periodic sync should next run.
+                    long nextPollTimeAbsolute;
+                    if (runEarly) {
+                        // Add the time remaining so we don't get out of phase.
+                        nextPollTimeAbsolute = nowAbsolute + periodInMillis + remainingMillis;
+                    } else {
+                        nextPollTimeAbsolute = nowAbsolute + remainingMillis;
+                    }
                     if (nextPollTimeAbsolute < earliestFuturePollTime) {
                         earliestFuturePollTime = nextPollTimeAbsolute;
                     }
@@ -2044,10 +2286,9 @@ public class SyncManager {
             }
 
             // convert absolute time to elapsed time
-            return SystemClock.elapsedRealtime()
-                    + ((earliestFuturePollTime < nowAbsolute)
-                            ? 0
-                            : (earliestFuturePollTime - nowAbsolute));
+            return SystemClock.elapsedRealtime() +
+                ((earliestFuturePollTime < nowAbsolute) ?
+                    0 : (earliestFuturePollTime - nowAbsolute));
         }
 
         private long maybeStartNextSyncLocked() {
@@ -2097,8 +2338,8 @@ public class SyncManager {
                     Log.v(TAG, "build the operation array, syncQueue size is "
                         + mSyncQueue.getOperations().size());
                 }
-                final Iterator<SyncOperation> operationIterator = mSyncQueue.getOperations()
-                        .iterator();
+                final Iterator<SyncOperation> operationIterator =
+                        mSyncQueue.getOperations().iterator();
 
                 final ActivityManager activityManager
                         = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
@@ -2106,40 +2347,52 @@ public class SyncManager {
                 while (operationIterator.hasNext()) {
                     final SyncOperation op = operationIterator.next();
 
-                    // drop the sync if the account of this operation no longer exists
+                    // Drop the sync if the account of this operation no longer exists.
                     if (!containsAccountAndUser(accounts, op.account, op.userId)) {
                         operationIterator.remove();
                         mSyncStorageEngine.deleteFromPending(op.pendingOperation);
+                        if (isLoggable) {
+                            Log.v(TAG, "    Dropping sync operation: account doesn't exist.");
+                        }
                         continue;
                     }
 
-                    // drop this sync request if it isn't syncable
+                    // Drop this sync request if it isn't syncable.
                     int syncableState = getIsSyncable(
                             op.account, op.userId, op.authority);
                     if (syncableState == 0) {
                         operationIterator.remove();
                         mSyncStorageEngine.deleteFromPending(op.pendingOperation);
+                        if (isLoggable) {
+                            Log.v(TAG, "    Dropping sync operation: isSyncable == 0.");
+                        }
                         continue;
                     }
 
-                    // if the user in not running, drop the request
+                    // If the user is not running, drop the request.
                     if (!activityManager.isUserRunning(op.userId)) {
                         final UserInfo userInfo = mUserManager.getUserInfo(op.userId);
                         if (userInfo == null) {
                             removedUsers.add(op.userId);
                         }
-                        continue;
-                    }
-
-                    // if the next run time is in the future, meaning there are no syncs ready
-                    // to run, return the time
-                    if (op.effectiveRunTime > now) {
-                        if (nextReadyToRunTime > op.effectiveRunTime) {
-                            nextReadyToRunTime = op.effectiveRunTime;
+                        if (isLoggable) {
+                            Log.v(TAG, "    Dropping sync operation: user not running.");
                         }
                         continue;
                     }
 
+                    // If the next run time is in the future, even given the flexible scheduling,
+                    // return the time.
+                    if (op.effectiveRunTime - op.flexTime > now) {
+                        if (nextReadyToRunTime > op.effectiveRunTime) {
+                            nextReadyToRunTime = op.effectiveRunTime;
+                        }
+                        if (isLoggable) {
+                            Log.v(TAG, "    Dropping sync operation: Sync too far in future.");
+                        }
+                        continue;
+                    }
+                    // TODO: change this behaviour for non-registered syncs.
                     final RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo;
                     syncAdapterInfo = mSyncAdapters.getServiceInfo(
                             SyncAdapterType.newKey(op.authority, op.account.type), op.userId);
@@ -2180,7 +2433,7 @@ public class SyncManager {
             }
 
             // find the next operation to dispatch, if one is ready
-            // iterate from the top, keep issuing (while potentially cancelling existing syncs)
+            // iterate from the top, keep issuing (while potentially canceling existing syncs)
             // until the quotas are filled.
             // once the quotas are filled iterate once more to find when the next one would be
             // (also considering pre-emption reasons).
@@ -2460,11 +2713,13 @@ public class SyncManager {
             }
 
             if (syncResult != null && syncResult.fullSyncRequested) {
-                scheduleSyncOperation(new SyncOperation(syncOperation.account, syncOperation.userId,
-                        syncOperation.reason,
-                        syncOperation.syncSource, syncOperation.authority, new Bundle(), 0,
-                        syncOperation.backoff, syncOperation.delayUntil,
-                        syncOperation.allowParallelSyncs));
+                scheduleSyncOperation(
+                        new SyncOperation(syncOperation.account, syncOperation.userId,
+                            syncOperation.reason,
+                            syncOperation.syncSource, syncOperation.authority, new Bundle(),
+                            0 /* delay */, 0 /* flex */,
+                            syncOperation.backoff, syncOperation.delayUntil,
+                            syncOperation.allowParallelSyncs));
             }
             // no need to schedule an alarm, as that will be done by our caller.
         }
@@ -2637,6 +2892,8 @@ public class SyncManager {
             final boolean alarmIsActive = mAlarmScheduleTime != null;
             final boolean needAlarm = alarmTime != Long.MAX_VALUE;
             if (needAlarm) {
+                // Need the alarm if it's currently not set, or if our time is before the currently
+                // set time.
                 if (!alarmIsActive || alarmTime < mAlarmScheduleTime) {
                     shouldSet = true;
                 }
@@ -2644,7 +2901,7 @@ public class SyncManager {
                 shouldCancel = alarmIsActive;
             }
 
-            // set or cancel the alarm as directed
+            // Set or cancel the alarm as directed.
             ensureAlarmService();
             if (shouldSet) {
                 if (Log.isLoggable(TAG, Log.VERBOSE)) {

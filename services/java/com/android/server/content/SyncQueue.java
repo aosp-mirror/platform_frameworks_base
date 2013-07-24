@@ -73,7 +73,7 @@ public class SyncQueue {
             }
             SyncOperation syncOperation = new SyncOperation(
                     op.account, op.userId, op.reason, op.syncSource, op.authority, op.extras,
-                    0 /* delay */, backoff != null ? backoff.first : 0,
+                    0 /* delay */, 0 /* flex */, backoff != null ? backoff.first : 0,
                     mSyncStorageEngine.getDelayUntilTime(op.account, op.userId, op.authority),
                     syncAdapterInfo.type.allowParallelSyncs());
             syncOperation.expedited = op.expedited;
@@ -86,35 +86,40 @@ public class SyncQueue {
         return add(operation, null /* this is not coming from the database */);
     }
 
+    /**
+     * Adds a SyncOperation to the queue and creates a PendingOperation object to track that sync.
+     * If an operation is added that already exists, the existing operation is updated if the newly
+     * added operation occurs before (or the interval overlaps).
+     */
     private boolean add(SyncOperation operation,
             SyncStorageEngine.PendingOperation pop) {
-        // - if an operation with the same key exists and this one should run earlier,
-        //   update the earliestRunTime of the existing to the new time
-        // - if an operation with the same key exists and if this one should run
-        //   later, ignore it
-        // - if no operation exists then add the new one
+        // If an operation with the same key exists and this one should run sooner/overlaps,
+        // replace the run interval of the existing operation with this new one.
+        // Complications: what if the existing operation is expedited but the new operation has an
+        // earlier run time? Will not be a problem for periodic syncs (no expedited flag), and for
+        // one-off syncs we only change it if the new sync is sooner.
         final String operationKey = operation.key;
         final SyncOperation existingOperation = mOperationsMap.get(operationKey);
 
         if (existingOperation != null) {
             boolean changed = false;
-            if (existingOperation.expedited == operation.expedited) {
-                final long newRunTime =
-                        Math.min(existingOperation.earliestRunTime, operation.earliestRunTime);
-                if (existingOperation.earliestRunTime != newRunTime) {
-                    existingOperation.earliestRunTime = newRunTime;
-                    changed = true;
-                }
-            } else {
-                if (operation.expedited) {
-                    existingOperation.expedited = true;
-                    changed = true;
-                }
+            if (operation.compareTo(existingOperation) <= 0 ) {
+                existingOperation.expedited = operation.expedited;
+                long newRunTime =
+                        Math.min(existingOperation.latestRunTime, operation.latestRunTime);
+                // Take smaller runtime.
+                existingOperation.latestRunTime = newRunTime;
+                // Take newer flextime.
+                existingOperation.flexTime = operation.flexTime;
+                changed = true;
             }
             return changed;
         }
 
         operation.pendingOperation = pop;
+        // Don't update the PendingOp if one already exists. This really is just a placeholder,
+        // no actual scheduling info is placed here.
+        // TODO: Change this to support service components.
         if (operation.pendingOperation == null) {
             pop = new SyncStorageEngine.PendingOperation(
                     operation.account, operation.userId, operation.reason, operation.syncSource,

@@ -104,6 +104,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/content/IIntentReceiver.aidl \
 	core/java/android/content/IIntentSender.aidl \
 	core/java/android/content/IOnPrimaryClipChangedListener.aidl \
+	core/java/android/content/IAnonymousSyncAdapter.aidl \
 	core/java/android/content/ISyncAdapter.aidl \
 	core/java/android/content/ISyncContext.aidl \
 	core/java/android/content/ISyncStatusObserver.aidl \
@@ -339,6 +340,7 @@ aidl_files := \
 	frameworks/base/core/java/android/content/Intent.aidl \
 	frameworks/base/core/java/android/content/IntentSender.aidl \
 	frameworks/base/core/java/android/content/PeriodicSync.aidl \
+	frameworks/base/core/java/android/content/SyncRequest.aidl \
 	frameworks/base/core/java/android/content/SyncStats.aidl \
 	frameworks/base/core/java/android/content/res/Configuration.aidl \
 	frameworks/base/core/java/android/database/CursorWindow.aidl \

@@ -18,13 +18,18 @@ package com.android.server.content;
 
 import android.accounts.Account;
 import android.content.pm.PackageManager;
+import android.content.ComponentName;
 import android.content.ContentResolver;
+import android.content.SyncRequest;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.Pair;
 
 /**
  * Value type that represents a sync operation.
- * @hide
+ * TODO: This is the class to flesh out with all the scheduling data - metered/unmetered,
+ * transfer-size, etc.
+ * {@hide}
  */
 public class SyncOperation implements Comparable {
     public static final int REASON_BACKGROUND_DATA_SETTINGS_CHANGED = -1;
@@ -32,7 +37,9 @@ public class SyncOperation implements Comparable {
     public static final int REASON_SERVICE_CHANGED = -3;
     public static final int REASON_PERIODIC = -4;
     public static final int REASON_IS_SYNCABLE = -5;
+    /** Sync started because it has just been set to sync automatically. */
     public static final int REASON_SYNC_AUTO = -6;
+    /** Sync started because master sync automatically has been set to true. */
     public static final int REASON_MASTER_SYNC_AUTO = -7;
     public static final int REASON_USER_START = -8;
 
@@ -47,75 +54,143 @@ public class SyncOperation implements Comparable {
             "UserStart",
     };
 
+    /** Account info to identify a SyncAdapter registered with the system. */
     public final Account account;
+    /** Authority info to identify a SyncAdapter registered with the system. */
+    public final String authority;
+    /** Service to which this operation will bind to perform the sync. */
+    public final ComponentName service;
     public final int userId;
     public final int reason;
     public int syncSource;
-    public String authority;
     public final boolean allowParallelSyncs;
     public Bundle extras;
     public final String key;
-    public long earliestRunTime;
     public boolean expedited;
     public SyncStorageEngine.PendingOperation pendingOperation;
+    /** Elapsed real time in millis at which to run this sync. */
+    public long latestRunTime;
+    /** Set by the SyncManager in order to delay retries. */
     public Long backoff;
+    /** Specified by the adapter to delay subsequent sync operations. */
     public long delayUntil;
+    /**
+     * Elapsed real time in millis when this sync will be run.
+     * Depends on max(backoff, latestRunTime, and delayUntil).
+     */
     public long effectiveRunTime;
+    /** Amount of time before {@link effectiveRunTime} from which this sync can run. */
+    public long flexTime;
 
     public SyncOperation(Account account, int userId, int reason, int source, String authority,
-            Bundle extras, long delayInMs, long backoff, long delayUntil,
-            boolean allowParallelSyncs) {
+            Bundle extras, long runTimeFromNow, long flexTime, long backoff,
+            long delayUntil, boolean allowParallelSyncs) {
+        this.service = null;
         this.account = account;
+        this.authority = authority;
         this.userId = userId;
         this.reason = reason;
         this.syncSource = source;
-        this.authority = authority;
         this.allowParallelSyncs = allowParallelSyncs;
         this.extras = new Bundle(extras);
-        removeFalseExtra(ContentResolver.SYNC_EXTRAS_UPLOAD);
-        removeFalseExtra(ContentResolver.SYNC_EXTRAS_MANUAL);
-        removeFalseExtra(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS);
-        removeFalseExtra(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF);
-        removeFalseExtra(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY);
-        removeFalseExtra(ContentResolver.SYNC_EXTRAS_DISCARD_LOCAL_DELETIONS);
-        removeFalseExtra(ContentResolver.SYNC_EXTRAS_EXPEDITED);
-        removeFalseExtra(ContentResolver.SYNC_EXTRAS_OVERRIDE_TOO_MANY_DELETIONS);
+        cleanBundle(this.extras);
         this.delayUntil = delayUntil;
         this.backoff = backoff;
         final long now = SystemClock.elapsedRealtime();
-        if (delayInMs < 0) {
+        // Check the extras bundle. Must occur after we set the internal bundle.
+        if (runTimeFromNow < 0 || isExpedited()) {
             this.expedited = true;
-            this.earliestRunTime = now;
+            this.latestRunTime = now;
+            this.flexTime = 0;
         } else {
             this.expedited = false;
-            this.earliestRunTime = now + delayInMs;
+            this.latestRunTime = now + runTimeFromNow;
+            this.flexTime = flexTime;
         }
         updateEffectiveRunTime();
         this.key = toKey();
     }
 
-    private void removeFalseExtra(String extraName) {
-        if (!extras.getBoolean(extraName, false)) {
-            extras.remove(extraName);
+    public SyncOperation(SyncRequest request, int userId, int reason, int source, long backoff,
+            long delayUntil, boolean allowParallelSyncs) {
+        if (request.hasAuthority()) {
+            Pair<Account, String> providerInfo = request.getProviderInfo();
+            this.account = providerInfo.first;
+            this.authority = providerInfo.second;
+            this.service = null;
+        } else {
+            this.service = request.getService();
+            this.account = null;
+            this.authority = null;
+        }
+        this.userId = userId;
+        this.reason = reason;
+        this.syncSource = source;
+        this.allowParallelSyncs = allowParallelSyncs;
+        this.extras = new Bundle(extras);
+        cleanBundle(this.extras);
+        this.delayUntil = delayUntil;
+        this.backoff = backoff;
+        final long now = SystemClock.elapsedRealtime();
+        if (request.isExpedited()) {
+            this.expedited = true;
+            this.latestRunTime = now;
+            this.flexTime = 0;
+        } else {
+            this.expedited = false;
+            this.latestRunTime = now + (request.getSyncRunTime() * 1000);
+            this.flexTime = request.getSyncFlexTime() * 1000;
+        }
+        updateEffectiveRunTime();
+        this.key = toKey();
+    }
+
+    /**
+     * Make sure the bundle attached to this SyncOperation doesn't have unnecessary
+     * flags set.
+     * @param bundle to clean.
+     */
+    private void cleanBundle(Bundle bundle) {
+        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_UPLOAD);
+        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_MANUAL);
+        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS);
+        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF);
+        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY);
+        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_DISCARD_LOCAL_DELETIONS);
+        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_EXPEDITED);
+        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_OVERRIDE_TOO_MANY_DELETIONS);
+        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_ALLOW_METERED);
+
+        // Remove Config data.
+        bundle.remove(ContentResolver.SYNC_EXTRAS_EXPECTED_UPLOAD);
+        bundle.remove(ContentResolver.SYNC_EXTRAS_EXPECTED_DOWNLOAD);
+    }
+
+    private void removeFalseExtra(Bundle bundle, String extraName) {
+        if (!bundle.getBoolean(extraName, false)) {
+            bundle.remove(extraName);
         }
     }
 
+    /** Only used to immediately reschedule a sync. */
     SyncOperation(SyncOperation other) {
+        this.service = other.service;
         this.account = other.account;
+        this.authority = other.authority;
         this.userId = other.userId;
         this.reason = other.reason;
         this.syncSource = other.syncSource;
-        this.authority = other.authority;
         this.extras = new Bundle(other.extras);
         this.expedited = other.expedited;
-        this.earliestRunTime = SystemClock.elapsedRealtime();
+        this.latestRunTime = SystemClock.elapsedRealtime();
+        this.flexTime = 0L;
         this.backoff = other.backoff;
-        this.delayUntil = other.delayUntil;
         this.allowParallelSyncs = other.allowParallelSyncs;
         this.updateEffectiveRunTime();
         this.key = toKey();
     }
 
+    @Override
     public String toString() {
         return dump(null, true);
     }
@@ -131,8 +206,8 @@ public class SyncOperation implements Comparable {
                 .append(authority)
                 .append(", ")
                 .append(SyncStorageEngine.SOURCES[syncSource])
-                .append(", earliestRunTime ")
-                .append(earliestRunTime);
+                .append(", latestRunTime ")
+                .append(latestRunTime);
         if (expedited) {
             sb.append(", EXPEDITED");
         }
@@ -170,23 +245,38 @@ public class SyncOperation implements Comparable {
         }
     }
 
+    public boolean isMetered() {
+        return extras.getBoolean(ContentResolver.SYNC_EXTRAS_ALLOW_METERED, false);
+    }
+
     public boolean isInitialization() {
         return extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false);
     }
 
     public boolean isExpedited() {
-        return extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false);
+        return extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false) || expedited;
     }
 
     public boolean ignoreBackoff() {
         return extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, false);
     }
 
+    /** Changed in V3. */
     private String toKey() {
         StringBuilder sb = new StringBuilder();
-        sb.append("authority: ").append(authority);
-        sb.append(" account {name=" + account.name + ", user=" + userId + ", type=" + account.type
-                + "}");
+        if (service == null) {
+            sb.append("authority: ").append(authority);
+            sb.append(" account {name=" + account.name + ", user=" + userId + ", type=" + account.type
+                    + "}");
+        } else {
+            sb.append("service {package=" )
+                .append(service.getPackageName())
+                .append(" user=")
+                .append(userId)
+                .append(", class=")
+                .append(service.getClassName())
+                .append("}");
+        }
         sb.append(" extras: ");
         extrasToStringBuilder(extras, sb);
         return sb.toString();
@@ -200,25 +290,40 @@ public class SyncOperation implements Comparable {
         sb.append("]");
     }
 
+    /**
+     * Update the effective run time of this Operation based on latestRunTime (specified at
+     * creation time of sync), delayUntil (specified by SyncAdapter), or backoff (specified by
+     * SyncManager on soft failures).
+     */
     public void updateEffectiveRunTime() {
-        effectiveRunTime = ignoreBackoff()
-                ? earliestRunTime
-                : Math.max(
-                    Math.max(earliestRunTime, delayUntil),
-                    backoff);
+        // Regardless of whether we're in backoff or honouring a delayUntil, we still incorporate
+        // the flex time provided by the developer.
+        effectiveRunTime = ignoreBackoff() ?
+                latestRunTime :
+                    Math.max(Math.max(latestRunTime, delayUntil), backoff);
     }
 
+    /**
+     * If two SyncOperation intervals are disjoint, the smaller is the interval that occurs before.
+     * If the intervals overlap, the two are considered equal.
+     */
+    @Override
     public int compareTo(Object o) {
-        SyncOperation other = (SyncOperation)o;
-
+        SyncOperation other = (SyncOperation) o;
         if (expedited != other.expedited) {
             return expedited ? -1 : 1;
         }
-
-        if (effectiveRunTime == other.effectiveRunTime) {
+        long x1 = effectiveRunTime - flexTime;
+        long y1 = effectiveRunTime;
+        long x2 = other.effectiveRunTime - other.flexTime;
+        long y2 = other.effectiveRunTime;
+        //  Overlapping intervals.
+        if ((x1 <= y2 && x1 >= x2) || (x2 <= y1 && x2 >= x1)) {
             return 0;
         }
-
-        return effectiveRunTime < other.effectiveRunTime ? -1 : 1;
+        if (x1 < x2 && y1 < x2) {
+            return -1;
+        }
+        return 1;
     }
 }

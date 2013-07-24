@@ -5574,6 +5574,7 @@ package android.content {
     method public final android.os.Bundle call(android.net.Uri, java.lang.String, java.lang.String, android.os.Bundle);
     method public deprecated void cancelSync(android.net.Uri);
     method public static void cancelSync(android.accounts.Account, java.lang.String);
+    method public static void cancelSync(android.content.SyncRequest);
     method public final int delete(android.net.Uri, java.lang.String, java.lang.String[]);
     method public static deprecated android.content.SyncInfo getCurrentSync();
     method public static java.util.List<android.content.SyncInfo> getCurrentSyncs();
@@ -5601,6 +5602,7 @@ package android.content {
     method public static void removePeriodicSync(android.accounts.Account, java.lang.String, android.os.Bundle);
     method public static void removeStatusChangeListener(java.lang.Object);
     method public static void requestSync(android.accounts.Account, java.lang.String, android.os.Bundle);
+    method public static void requestSync(android.content.SyncRequest);
     method public static void setIsSyncable(android.accounts.Account, java.lang.String, int);
     method public static void setMasterSyncAutomatically(boolean);
     method public static void setSyncAutomatically(android.accounts.Account, java.lang.String, boolean);
@@ -6537,7 +6539,9 @@ package android.content {
     field public final android.accounts.Account account;
     field public final java.lang.String authority;
     field public final android.os.Bundle extras;
+    field public final boolean isService;
     field public final long period;
+    field public final android.content.ComponentName service;
   }
 
   public class ReceiverCallNotAllowedException extends android.util.AndroidRuntimeException {
@@ -6656,6 +6660,31 @@ package android.content {
     field public final long startTime;
   }
 
+  public class SyncRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean isExpedited();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public static class SyncRequest.Builder {
+    ctor public SyncRequest.Builder();
+    method public android.content.SyncRequest build();
+    method public android.content.SyncRequest.Builder setAllowMetered(boolean);
+    method public android.content.SyncRequest.Builder setExpedited(boolean);
+    method public android.content.SyncRequest.Builder setExtras(android.os.Bundle);
+    method public android.content.SyncRequest.Builder setIgnoreBackoff(boolean);
+    method public android.content.SyncRequest.Builder setIgnoreSettings(boolean);
+    method public android.content.SyncRequest.Builder setManual(boolean);
+    method public android.content.SyncRequest.Builder setNoRetry(boolean);
+    method public android.content.SyncRequest.Builder setPriority(int);
+    method public android.content.SyncRequest.Builder setSyncAdapter(android.accounts.Account, java.lang.String);
+    method public android.content.SyncRequest.Builder setSyncAdapter(android.content.ComponentName);
+    method public android.content.SyncRequest.Builder setTransferSize(long, long);
+    method public android.content.SyncRequest.Builder syncOnce(long, long);
+    method public android.content.SyncRequest.Builder syncPeriodic(long, long);
+  }
+
   public final class SyncResult implements android.os.Parcelable {
     ctor public SyncResult();
     method public void clear();
@@ -6677,6 +6706,12 @@ package android.content {
     field public final boolean syncAlreadyInProgress;
     field public boolean tooManyDeletions;
     field public boolean tooManyRetries;
+  }
+
+  public abstract class SyncService extends android.app.Service {
+    ctor public SyncService();
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract void onPerformSync(android.os.Bundle, android.content.SyncResult);
   }
 
   public class SyncStats implements android.os.Parcelable {
