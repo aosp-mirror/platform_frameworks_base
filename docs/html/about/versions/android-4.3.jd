@@ -109,7 +109,7 @@ sdk.platform.apiLevel=18
 <li><a href="{@docRoot}sdk/api_diff/18/changes.html">API
 Differences Report &raquo;</a> </li>
 <li><a
-href="{@docRoot}tools/extras/support-library.html">Support Library</a></li>
+href="{@docRoot}tools/support-library/index.html">Support Library</a></li>
 </ol>
 
 </div>
@@ -584,7 +584,13 @@ tag and the {@code android:glEsVersion} attribute. For example:</p>
 &lt;/manifest>
 </pre>
 
-<p>And remember to specify the OpenGL ES context by calling {@link android.opengl.GLSurfaceView#setEGLContextClientVersion setEGLContextClientVersion()}, passing {@code 3} as the version.</p>
+<p>And remember to specify the OpenGL ES context by calling {@link
+android.opengl.GLSurfaceView#setEGLContextClientVersion setEGLContextClientVersion()},
+passing {@code 3} as the version.</p>
+
+<p>For more information about using OpenGL ES, including how to check the device's supported
+OpenGL ES version at runtime, see the <a href="{@docRoot}guide/topics/graphics/opengl.html"
+>OpenGL ES</a> API guide.</p>
 
 
 <h3 id="MipMap">Mipmapping for drawables</h3>

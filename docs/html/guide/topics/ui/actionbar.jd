@@ -1,7 +1,6 @@
 page.title=Action Bar
 page.tags="actionbar","menu"
-parent.title=User Interface
-parent.link=index.html
+
 @jd:body
 
 
@@ -89,7 +88,7 @@ design guide.</p>
 
 <p>The {@link android.app.ActionBar} APIs were first added in Android 3.0 (API level 11) but they
 are also available in the <a href="{@docRoot}tools/support-library/index.html">Support Library</a>
-for compatibility with Android 2.2 (API level 7) and above.</p>
+for compatibility with Android 2.1 (API level 7) and above.</p>
 
 <p><b>This guide focuses on how to use the
 support library's action bar</b>, but if your app supports <em>only</em> Android 3.0 or higher, you
@@ -133,7 +132,7 @@ Library Setup</a>.</p>
   </li>
 </ol>
 
-<p>Now your activity includes the action bar when running on Android 2.2 (API level 7) or higher.
+<p>Now your activity includes the action bar when running on Android 2.1 (API level 7) or higher.
 </p>
 
 <div class="note">
