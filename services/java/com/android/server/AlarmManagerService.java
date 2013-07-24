@@ -353,15 +353,16 @@ class AlarmManagerService extends IAlarmManager.Stub {
         return (index == 0);
     }
 
-    Batch attemptCoalesceLocked(long whenElapsed, long maxWhen) {
+    // Return the index of the matching batch, or -1 if none found.
+    int attemptCoalesceLocked(long whenElapsed, long maxWhen) {
         final int N = mAlarmBatches.size();
         for (int i = 0; i < N; i++) {
             Batch b = mAlarmBatches.get(i);
             if (!b.standalone && b.canHold(whenElapsed, maxWhen)) {
-                return b;
+                return i;
             }
         }
-        return null;
+        return -1;
     }
 
     // The RTC clock has moved arbitrarily, so we need to recalculate all the batching
@@ -553,16 +554,23 @@ class AlarmManagerService extends IAlarmManager.Stub {
         removeLocked(operation);
 
         final boolean reschedule;
-        Batch batch = (isStandalone) ? null : attemptCoalesceLocked(whenElapsed, maxWhen);
-        if (batch == null) {
-            batch = new Batch(a);
+        int whichBatch = (isStandalone) ? -1 : attemptCoalesceLocked(whenElapsed, maxWhen);
+        if (whichBatch < 0) {
+            Batch batch = new Batch(a);
             batch.standalone = isStandalone;
             if (DEBUG_BATCH) {
                 Slog.v(TAG, "Starting new alarm batch " + batch);
             }
             reschedule = addBatchLocked(mAlarmBatches, batch);
         } else {
+            Batch batch = mAlarmBatches.get(whichBatch);
             reschedule = batch.add(a);
+            if (reschedule) {
+                // The start time of this batch advanced, so batch ordering may
+                // have just been broken.  Move it to where it now belongs.
+                mAlarmBatches.remove(whichBatch);
+                addBatchLocked(mAlarmBatches, batch);
+            }
         }
 
         if (reschedule) {
@@ -1058,6 +1066,9 @@ class AlarmManagerService extends IAlarmManager.Stub {
                 triggerList.clear();
 
                 if ((result & TIME_CHANGED_MASK) != 0) {
+                    if (DEBUG_BATCH) {
+                        Slog.v(TAG, "Time changed notification from kernel");
+                    }
                     remove(mTimeTickSender);
                     rebatchAllAlarms();
                     mClockReceiver.scheduleTimeTickEvent();
@@ -1211,7 +1222,10 @@ class AlarmManagerService extends IAlarmManager.Stub {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_TIME_TICK)) {
-            	scheduleTimeTickEvent();
+                if (DEBUG_BATCH) {
+                    Slog.v(TAG, "Received TIME_TICK alarm; rescheduling");
+                }
+                scheduleTimeTickEvent();
             } else if (intent.getAction().equals(Intent.ACTION_DATE_CHANGED)) {
                 // Since the kernel does not keep track of DST, we need to
                 // reset the TZ information at the beginning of each day
@@ -1220,7 +1234,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
                 TimeZone zone = TimeZone.getTimeZone(SystemProperties.get(TIMEZONE_PROPERTY));
                 int gmtOffset = zone.getOffset(System.currentTimeMillis());
                 setKernelTimezone(mDescriptor, -(gmtOffset / 60000));
-            	scheduleDateChangedEvent();
+                scheduleDateChangedEvent();
             }
         }
         
@@ -1235,7 +1249,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
             set(ELAPSED_REALTIME, SystemClock.elapsedRealtime() + tickEventDelay, 0,
                     0, mTimeTickSender, true);
         }
-	
+
         public void scheduleDateChangedEvent() {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(System.currentTimeMillis());
