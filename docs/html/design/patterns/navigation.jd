@@ -1,5 +1,5 @@
 page.title=Navigation with Back and Up
-page.tags="navigation","activity","task"
+page.tags="navigation","activity","task","up navigation","back navigation"
 @jd:body
 
 <a class="notice-developers" href="{@docRoot}training/implementing-navigation/index.html">
