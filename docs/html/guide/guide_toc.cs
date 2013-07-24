@@ -312,7 +312,7 @@
             <span class="en">Canvas and Drawables</span>
           </a></li>
         <li><a href="<?cs var:toroot ?>guide/topics/graphics/opengl.html">
-            <span class="en">OpenGL</span>
+            <span class="en">OpenGL ES</span>
           </a></li>
         <li><a href="<?cs var:toroot ?>guide/topics/graphics/hardware-accel.html">
             <span class="en">Hardware Acceleration</span>
