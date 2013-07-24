@@ -72,6 +72,12 @@ public final class ProcessTracker {
             STATE_CACHED_ACTIVITY_CLIENT, STATE_CACHED_EMPTY
     };
 
+    static final int[] NON_CACHED_PROC_STATES = new int[] { STATE_PERSISTENT,
+            STATE_TOP, STATE_IMPORTANT_FOREGROUND,
+            STATE_IMPORTANT_BACKGROUND, STATE_BACKUP, STATE_HEAVY_WEIGHT,
+            STATE_SERVICE, STATE_RECEIVER, STATE_HOME
+    };
+
     public static final int PSS_SAMPLE_COUNT = 0;
     public static final int PSS_MINIMUM = 1;
     public static final int PSS_AVERAGE = 2;
@@ -116,7 +122,7 @@ public final class ProcessTracker {
     static final String[] STATE_NAMES = new String[] {
             "Persistent", "Top       ", "Imp Fg    ", "Imp Bg    ",
             "Backup    ", "Heavy Wght", "Service   ", "Receiver  ", "Home      ",
-            "Last Act  ", "Cch Actvty", "Cch Client", "Cch Empty "
+            "Last Act  ", "Cch Act   ", "Cch CliAct", "Cch Empty "
     };
 
     static final String[] ADJ_SCREEN_NAMES_CSV = new String[] {
@@ -1370,6 +1376,8 @@ public final class ProcessTracker {
         }
 
         void dumpLocked(PrintWriter pw, String reqPackage, long now, boolean dumpAll) {
+            long totalTime = dumpSingleTime(null, null, mMemFactorDurations, mMemFactor,
+                    mStartTime, now);
             ArrayMap<String, SparseArray<PackageState>> pkgMap = mPackages.getMap();
             boolean printedHeader = false;
             for (int ip=0; ip<pkgMap.size(); ip++) {
@@ -1391,42 +1399,46 @@ public final class ProcessTracker {
                         pw.print("  * "); pw.print(pkgName); pw.print(" / ");
                                 UserHandle.formatUid(pw, uid); pw.println(":");
                     }
-                    for (int iproc=0; iproc<NPROCS; iproc++) {
-                        ProcessState proc = pkgState.mProcesses.valueAt(iproc);
-                        pw.print("      Process ");
-                        pw.print(pkgState.mProcesses.keyAt(iproc));
-                        pw.print(" (");
-                        pw.print(proc.mDurationsTableSize);
-                        pw.print(" entries)");
-                        pw.println(":");
-                        dumpProcessState(pw, "        ", proc, ALL_SCREEN_ADJ, ALL_MEM_ADJ,
-                                ALL_PROC_STATES, now);
-                        dumpProcessPss(pw, "        ", proc, ALL_SCREEN_ADJ, ALL_MEM_ADJ,
-                                ALL_PROC_STATES);
+                    if (dumpAll) {
+                        for (int iproc=0; iproc<NPROCS; iproc++) {
+                            ProcessState proc = pkgState.mProcesses.valueAt(iproc);
+                            pw.print("      Process ");
+                            pw.print(pkgState.mProcesses.keyAt(iproc));
+                            pw.print(" (");
+                            pw.print(proc.mDurationsTableSize);
+                            pw.print(" entries)");
+                            pw.println(":");
+                            dumpProcessState(pw, "        ", proc, ALL_SCREEN_ADJ, ALL_MEM_ADJ,
+                                    ALL_PROC_STATES, now);
+                            dumpProcessPss(pw, "        ", proc, ALL_SCREEN_ADJ, ALL_MEM_ADJ,
+                                    ALL_PROC_STATES);
+                        }
+                    } else {
+                        ArrayList<ProcessState> procs = new ArrayList<ProcessState>();
+                        for (int iproc=0; iproc<NPROCS; iproc++) {
+                            procs.add(pkgState.mProcesses.valueAt(iproc));
+                        }
+                        dumpProcessSummaryLocked(pw, "      ", procs, ALL_SCREEN_ADJ, ALL_MEM_ADJ,
+                                NON_CACHED_PROC_STATES, now, totalTime);
                     }
                     for (int isvc=0; isvc<NSRVS; isvc++) {
-                        pw.print("      Service ");
+                        if (dumpAll) {
+                            pw.print("      Service ");
+                        } else {
+                            pw.print("      * ");
+                        }
                         pw.print(pkgState.mServices.keyAt(isvc));
                         pw.println(":");
                         ServiceState svc = pkgState.mServices.valueAt(isvc);
-                        if (svc.mStartedCount != 0) {
-                            pw.print("        Started op count "); pw.print(svc.mStartedCount);
-                            pw.println(":");
-                            dumpSingleTime(pw, "          ", svc.mStartedDurations, svc.mStartedState,
-                                    svc.mStartedStartTime, now);
-                        }
-                        if (svc.mBoundCount != 0) {
-                            pw.print("        Bound op count "); pw.print(svc.mBoundCount);
-                            pw.println(":");
-                            dumpSingleTime(pw, "          ", svc.mBoundDurations, svc.mBoundState,
-                                    svc.mBoundStartTime, now);
-                        }
-                        if (svc.mExecCount != 0) {
-                            pw.print("        Executing op count "); pw.print(svc.mExecCount);
-                            pw.println(":");
-                            dumpSingleTime(pw, "          ", svc.mExecDurations, svc.mExecState,
-                                    svc.mExecStartTime, now);
-                        }
+                        dumpServiceStats(pw, "        ", "          ", "    ", "Started",
+                                svc.mStartedCount, svc.mStartedDurations, svc.mStartedState,
+                                svc.mStartedStartTime, now, totalTime, dumpAll);
+                        dumpServiceStats(pw, "        ", "          ", "      ", "Bound",
+                                svc.mBoundCount, svc.mBoundDurations, svc.mBoundState,
+                                svc.mBoundStartTime, now, totalTime, dumpAll);
+                        dumpServiceStats(pw, "        ", "          ", "  ", "Executing",
+                                svc.mExecCount, svc.mExecDurations, svc.mExecState,
+                                svc.mExecStartTime, now, totalTime, dumpAll);
                     }
                 }
             }
@@ -1462,6 +1474,9 @@ public final class ProcessTracker {
                 pw.println();
                 pw.println("Summary:");
                 dumpSummaryLocked(pw, reqPackage, now);
+            } else {
+                pw.println();
+                dumpTotalsLocked(pw, now);
             }
 
             if (dumpAll) {
@@ -1474,15 +1489,36 @@ public final class ProcessTracker {
             }
         }
 
+        void dumpServiceStats(PrintWriter pw, String prefix, String prefixInner,
+                String headerPrefix, String header,
+                int count, long[] durations, int state, long startTime, long now, long totalTime,
+                boolean dumpAll) {
+            if (count != 0) {
+                if (dumpAll) {
+                    pw.print(prefix); pw.print(header);
+                    pw.print(" op count "); pw.print(count); pw.println(":");
+                    dumpSingleTime(pw, prefixInner, durations, state, startTime, now);
+                } else {
+                    long myTime = dumpSingleTime(null, null, durations, state, startTime, now);
+                    pw.print(prefix); pw.print(headerPrefix); pw.print(header);
+                    pw.print(" count "); pw.print(count);
+                    pw.print(" / time ");
+                    printPercent(pw, (double)myTime/(double)totalTime);
+                    pw.println();
+                }
+            }
+        }
+
         void dumpSummaryLocked(PrintWriter pw, String reqPackage, long now) {
             long totalTime = dumpSingleTime(null, null, mMemFactorDurations, mMemFactor,
                     mStartTime, now);
             dumpFilteredSummaryLocked(pw, null, "  ", ALL_SCREEN_ADJ, ALL_MEM_ADJ,
-                    new int[] { STATE_PERSISTENT, STATE_TOP, STATE_IMPORTANT_FOREGROUND,
-                            STATE_IMPORTANT_BACKGROUND, STATE_BACKUP, STATE_HEAVY_WEIGHT,
-                            STATE_SERVICE, STATE_RECEIVER, STATE_HOME },
-                    now, totalTime, reqPackage);
+                    NON_CACHED_PROC_STATES, now, totalTime, reqPackage);
             pw.println();
+            dumpTotalsLocked(pw, now);
+        }
+
+        void dumpTotalsLocked(PrintWriter pw, long now) {
             pw.println("Run time Stats:");
             dumpSingleTime(pw, "  ", mMemFactorDurations, mMemFactor, mStartTime, now);
             pw.println();
@@ -1986,15 +2022,7 @@ public final class ProcessTracker {
         }
 
         void print(PrintWriter pw, long overallTime, boolean full) {
-            double percent = ((double)totalTime/(double)overallTime) * 100;
-            if (percent < 1) {
-                pw.print(String.format("%.2f", percent));
-            } else if (percent < 10) {
-                pw.print(String.format("%.1f", percent));
-            } else {
-                pw.print(String.format("%.0f", percent));
-            }
-            pw.print("%");
+            printPercent(pw, (double)totalTime/(double)overallTime);
             if (numPss > 0) {
                 pw.print(" (");
                 printSizeValue(pw, minPss * 1024);
@@ -2341,12 +2369,24 @@ public final class ProcessTracker {
             dumpProcessSummaryDetails(pw, proc, prefix, "    (Last Act): ", screenStates, memStates,
                     new int[] {STATE_LAST_ACTIVITY}, now, totalTime, true);
             dumpProcessSummaryDetails(pw, proc, prefix, "      (Cached): ", screenStates, memStates,
-                    new int[] {STATE_CACHED_ACTIVITY_CLIENT, STATE_CACHED_ACTIVITY_CLIENT,
+                    new int[] {STATE_CACHED_ACTIVITY, STATE_CACHED_ACTIVITY_CLIENT,
                             STATE_CACHED_EMPTY}, now, totalTime, true);
         }
     }
 
-    private static void printSizeValue(PrintWriter pw, long number) {
+    static void printPercent(PrintWriter pw, double fraction) {
+        fraction *= 100;
+        if (fraction < 1) {
+            pw.print(String.format("%.2f", fraction));
+        } else if (fraction < 10) {
+            pw.print(String.format("%.1f", fraction));
+        } else {
+            pw.print(String.format("%.0f", fraction));
+        }
+        pw.print("%");
+    }
+
+    static void printSizeValue(PrintWriter pw, long number) {
         float result = number;
         String suffix = "";
         if (result > 900) {
@@ -2579,11 +2619,7 @@ public final class ProcessTracker {
         boolean csvSepMemStats = false;
         int[] csvMemStats = new int[] {ADJ_MEM_FACTOR_CRITICAL};
         boolean csvSepProcStats = true;
-        int[] csvProcStats = new int[] {
-                STATE_PERSISTENT, STATE_TOP, STATE_IMPORTANT_FOREGROUND,
-                STATE_IMPORTANT_BACKGROUND, STATE_BACKUP, STATE_HEAVY_WEIGHT, STATE_SERVICE,
-                STATE_RECEIVER, STATE_HOME, STATE_LAST_ACTIVITY,
-                STATE_CACHED_ACTIVITY, STATE_CACHED_ACTIVITY_CLIENT, STATE_CACHED_EMPTY };
+        int[] csvProcStats = ALL_PROC_STATES;
         if (args != null) {
             for (int i=0; i<args.length; i++) {
                 String arg = args[i];
