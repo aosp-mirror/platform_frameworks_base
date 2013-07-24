@@ -16,8 +16,8 @@
 
 <resources>
 
-    <integer name="page_option_value_all">1</integer>
-    <integer name="page_option_value_page_range">2</integer>
+    <integer name="page_option_value_all">0</integer>
+    <integer name="page_option_value_page_range">1</integer>
 
     <integer-array name="page_options_values" translatable="false">
         <item>@integer/page_option_value_all</item>

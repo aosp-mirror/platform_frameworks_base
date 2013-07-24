@@ -384,6 +384,22 @@ public final class PrintAttributes implements Parcelable {
     }
 
     /**
+     * @hide
+     */
+    public void copyFrom(PrintAttributes other) {
+        mMediaSize = other.mMediaSize;
+        mResolution = other.mResolution;
+        mMargins = other.mMargins;
+        mInputTray = other.mInputTray;
+        mOutputTray = other.mOutputTray;
+        mDuplexMode = other.mDuplexMode;
+        mColorMode = other.mColorMode;
+        mFittingMode = other.mFittingMode;
+        mOrientation = other.mOrientation;
+        mCopies = other.mCopies;
+    }
+
+    /**
      * This class specifies a supported media size.
      */
     public static final class MediaSize {
