@@ -142,9 +142,8 @@ started Task A. Now, Task A comes to the
 foreground&mdash;all three activities in its stack are intact and the activity at the top of the
 stack resumes. At
 this point, the user can also switch back to Task B by going Home and selecting the application icon
-that started that task (or by touching and holding the <em>Home</em> button to reveal recent tasks
-and selecting
-one). This is an example of multitasking on Android.</p>
+that started that task (or by selecting the app's task from the <em>recent apps</em> screen).
+This is an example of multitasking on Android.</p>
 
 <p class="note"><strong>Note:</strong> Multiple tasks can be held in the background at once.
 However, if the user is running many background tasks at the same time, the system might begin
