@@ -461,8 +461,13 @@ public final class BluetoothSocket implements Closeable {
                     mSocket.close();
                     mSocket = null;
                 }
-                if(mPfd != null)
-                    mPfd.detachFd();
+                if(mPfd != null) {
+                    try {
+                        mPfd.detachFd();
+                    } catch (IllegalArgumentException e) {
+                        Log.w(TAG, "ignore IllegalArgumentException");
+                    }
+                }
            }
         }
     }
