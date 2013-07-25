@@ -48,15 +48,17 @@ public class ArrayMapTests {
 
             OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD,
             OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD,
+            OP_ADD, OP_ADD, OP_ADD,
             OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM,
+            OP_REM, OP_REM, OP_REM,
             OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM,
     };
 
     static int[] KEYS = new int[] {
             // General adding and removing.
-             100,   1900,    600,    200,   1200,   1500,   1800,    100,   1900,
+             -1,    1900,    600,    200,   1200,   1500,   1800,    100,   1900,
             2100,    300,    800,    600,   1100,   1300,   2000,   1000,   1400,
-             600,    100,   1900,    600,    300,   2100,    200,    800,    800,
+             600,    -1,    1900,    600,    300,   2100,    200,    800,    800,
             1800,   1500,   1300,   1100,   2000,   1400,   1000,   1200,   1900,
 
             // Shrink when removing item from end.
@@ -74,7 +76,9 @@ public class ArrayMapTests {
             // Test hash collisions.
              105,    106,    108,    104,    102,    102,    107,      5,    205,
                4,    202,    203,      3,      5,    101,    109,    200,    201,
+               0,     -1,    100,
              106,    108,    104,    102,    103,    105,    107,    101,    109,
+              -1,    100,      0,
                4,      5,      3,      5,    200,    203,    202,    201,    205,
     };
 
@@ -87,6 +91,9 @@ public class ArrayMapTests {
 
         @Override
         public final boolean equals(Object o) {
+            if (o == null) {
+                return false;
+            }
             return mValue == ((ControlledHash)o).mValue;
         }
 
@@ -277,20 +284,21 @@ public class ArrayMapTests {
             Integer oldArray;
             boolean hashChanged;
             boolean arrayChanged;
+            ControlledHash key = KEYS[i] < 0 ? null : new ControlledHash(KEYS[i]);
             switch (OPS[i]) {
                 case OP_ADD:
                     Log.i("test", "Adding key: " + KEYS[i]);
-                    oldHash = hashMap.put(new ControlledHash(KEYS[i]), i);
-                    oldArray = arrayMap.put(new ControlledHash(KEYS[i]), i);
-                    hashChanged = hashSet.add(new ControlledHash(KEYS[i]));
-                    arrayChanged = arraySet.add(new ControlledHash(KEYS[i]));
+                    oldHash = hashMap.put(key, i);
+                    oldArray = arrayMap.put(key, i);
+                    hashChanged = hashSet.add(key);
+                    arrayChanged = arraySet.add(key);
                     break;
                 case OP_REM:
                     Log.i("test", "Removing key: " + KEYS[i]);
-                    oldHash = hashMap.remove(new ControlledHash(KEYS[i]));
-                    oldArray = arrayMap.remove(new ControlledHash(KEYS[i]));
-                    hashChanged = hashSet.remove(new ControlledHash(KEYS[i]));
-                    arrayChanged = arraySet.remove(new ControlledHash(KEYS[i]));
+                    oldHash = hashMap.remove(key);
+                    oldArray = arrayMap.remove(key);
+                    hashChanged = hashSet.remove(key);
+                    arrayChanged = arraySet.remove(key);
                     break;
                 default:
                     Log.e("test", "Bad operation " + OPS[i] + " @ " + i);
