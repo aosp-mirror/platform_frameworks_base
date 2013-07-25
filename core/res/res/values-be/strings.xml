@@ -378,6 +378,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Дазваляе ўладальніку прывязвацца да інтэрфейсу верхняга ўзроўню службы віджэта. Не патрабуецца для звычайных прыкладанняў."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"узаемадзейнічаць з адміністратарам прылады"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Дазваляе ўладальніку адпраўляць намеры да адміністратара прылады. Не патрабуецца для звычайных прыкладанняў."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"змяняць арыентацыю экрана"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Дазваляе прыкладанням змяняць паварот экрана ў любы час. Не патрабуецца для звычайных прыкладанняў."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"змена хутк. перамяшч. ўказ."</string>

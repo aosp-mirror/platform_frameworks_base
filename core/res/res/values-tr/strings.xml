@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Cihazın sahibine bir widget hizmetinin en üst düzey arayüzüne bağlanma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"bir cihaz yöneticisi ile etkileşimde bulun"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Cihazın sahibinin cihaz yöneticisine amaç göndermesine izin verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ekran yönünü değiştir"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Uygulamaya, istediği zaman ekran dönüşünü değiştirme izni verir. Normal uygulamalar için gerekli değildir."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"işaretçi hızını değiştir"</string>
@@ -635,8 +639,8 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Uygulamaya, ağ politikalarını yönetme ve uygulamaya özgü kuralları tanımlama izni verir."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"ağ kullanım hesaplamasını değiştir"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Uygulamaya, ağın uygulamalara göre nasıl kullanılacağını değiştirme izni verir. Normal uygulamalar tarafından kullanılmak için değildir."</string>
-    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"soket işaretlerini değiştir"</string>
-    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Uygulamaya, yönlendirme için soket işaretlerini değiştirme izni verir"</string>
+    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"yuva işaretlerini değiştir"</string>
+    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Uygulamaya, yönlendirme için yuva işaretlerini değiştirme izni verir"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"bildirimlere eriş"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Uygulamanın bildirimler almasına, bildirimleri incelemesine ve temizlemesine izin verir. Buna diğer uygulamalar tarafından yayınlanan bildirimler de dahildir."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"bildirim dinleyici hizmetine bağlan"</string>
@@ -1556,12 +1560,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"İptal edildi"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"İçerik yazılırken hata oluştu"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN\'i girin"</string>
-    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
-    <skip />
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Mevcut PIN"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Yeni PIN"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Yeni PIN\'i doğrulayın"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Kısıtlamaları değiştirmek için PIN oluşturun"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN\'ler eşleşmiyor. Tekrar deneyin."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN çok kısa. En az 4 basamaklı olmalı."</string>

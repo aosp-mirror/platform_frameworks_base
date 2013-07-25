@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Дозвољава власнику да се обавеже на интерфејс услуге виџета највишег нивоа. Уобичајене апликације никада не би требало да је користе."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"интеракција са администратором уређаја"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Омогућава да власник шаље своје намере администратору уређаја. Уобичајене апликације никада не би требало да је користе."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"промена положаја екрана"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Дозвољава апликацији да у сваком тренутку промени ротацију екрана. Уобичајене апликације никада не би требало да је користе."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"промена брзине показивача"</string>
@@ -1556,12 +1560,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Отказано је"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Грешка при исписивању садржаја"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Унесите PIN"</string>
-    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
-    <skip />
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Актуелни PIN"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Нови PIN"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Потврдите нови PIN"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Направите PIN за измену ограничења"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN-ови се не подударају. Покушајте поново."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN је прекратак. Мора да садржи најмање 4 цифре."</string>

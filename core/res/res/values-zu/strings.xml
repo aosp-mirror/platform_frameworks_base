@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Ivumela umbambi ukuhlanganisa uxhumano nomsebenzisi kwezinga eliphezulu lensizakalo yesinqunjwana. Akusoze kwadingeka kwezinhlelo zokusebenza ezivamile."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"xhumana nomphathi wedivaysi"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Ivumela ummeli ukuthumela okuqukethwe kumphathi wedivaysi. Akusoze kwadingeka kwizinhlelo zokusebenza ezivamile."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"shintsha ukujikeleza kwesikrini"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Ivumela insiza ukuthi iguqule ukujikeleza kweskrini nganoma isiphi isikhathi. Akudingakeli izinsiza ezejwayelekile."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"guqula isivinini sesikhombi"</string>
@@ -1563,7 +1567,7 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Ama-PIN awafani. Zama futhi."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"I-PIN yimfushane kakhulu. Okungenani kumele ibe namadijithi angu-4."</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"I-PIN engalungile. Zama futhi ngesekhondi elingu-1."</item>
-    <item quantity="other" msgid="8030607343223287654">"I-PIN engalungile. Zama futhi kumasekhondi angu-<xliff:g id="COUNT">%d</xliff:g>."</item>
+    <item quantity="one" msgid="4835639969503729874">"I-PIN engalungile. Zama futhi esekhondini elingu-1."</item>
+    <item quantity="other" msgid="8030607343223287654">"I-PIN engalungile. Zama futhi emasekhondini angu-<xliff:g id="COUNT">%d</xliff:g>."</item>
   </plurals>
 </resources>

@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Nositelju omogućuje vezanje uz sučelje najviše razine usluge widgeta. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interakcija s administratorom uređaja"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Nositelju omogućuje slanje namjera administratoru uređaja. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"promjena orijentacije zaslona"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Omogućuje aplikaciji promjenu rotacije zaslona u bilo kojem trenutku. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"promjena brzine pokazivača"</string>
@@ -641,8 +645,8 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Omogućuje aplikaciji dohvaćanje, pregledavanje i brisanje obavijesti, uključujući obavijesti drugih aplikacija."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"vezanje uz uslugu slušatelja obavijesti"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Nositelju omogućuje vezanje uz sučelje najviše razine usluge slušatelja obavijesti. Ne bi smjelo biti potrebno za uobičajene aplikacije."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"dozovi operaterovu aplikaciju za konfiguraciju"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Dopušta nositelju dozivanje operaterove aplikacije za konfiguraciju. Ne bi smjelo biti potrebno za uobičajene aplikacije."</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"pozovi operaterovu aplikaciju za konfiguraciju"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Dopušta nositelju pozivanje operaterove aplikacije za konfiguraciju. Ne bi smjelo biti potrebno za uobičajene aplikacije."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Postavi pravila zaporke"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Upravljajte duljinom zaporki za otključavanje zaslona i dopuštenim znakovima u tim zaporkama."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Nadgledaj pokušaje otključavanja zaslona"</string>
@@ -1556,12 +1560,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Otkazano"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Pogreška prilikom pisanja sadržaja"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Unesite PIN"</string>
-    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
-    <skip />
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Trenutačni PIN"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Novi PIN"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Potvrdite novi PIN"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Izradite PIN za izmjenu ograničenja"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN-ovi se ne podudaraju. Pokušajte ponovo."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN je prekratak. Mora imati barem 4 znamenke."</string>

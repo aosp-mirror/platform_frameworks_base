@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Tillader, at brugeren kan forpligte sig til en grænseflade for en widgettjeneste på øverste niveau. Bør aldrig være nødvendigt til almindelige apps."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"kommunikere med en enhedsadministrator"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Tillader, at brugeren kan sende hensigter til en enhedsadministrator. Dette bør aldrig være nødvendigt for almindelige apps."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"skift skærmretning"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Tillader, at appen kan ændre skærmretningen på et hvilket som helst tidspunkt. Bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"ændre markørens hastighed"</string>
@@ -642,7 +646,7 @@
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"forpligte sig til en underretningslyttertjeneste"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Tillader brugeren at forpligte sig til en underretningslyttertjenestes grænseflade på øverste niveau. Bør aldrig være nødvendigt til almindelige apps."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"aktivere konfigurationsappen, der leveres af mobilselskabet"</string>
-    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Tillader, at brugeren aktiverer konfigurationsappen, der er ydet af mobilselskabet. Dette bør aldrig være nødvendigt for almindelige apps."</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Tillader, at brugeren aktiverer konfigurationsappen, der er forsynet af mobilselskabet. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Indstil regler for adgangskode"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontroller længden samt tilladte tegn i adgangskoder til oplåsning af skærmen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåg forsøg på oplåsning af skærm"</string>
@@ -1556,12 +1560,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Annulleret"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Fejl ved skrivning af indhold"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Indtast pinkode"</string>
-    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
-    <skip />
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Aktuel pinkode:"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Ny pinkode"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Bekræft den nye pinkode"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Opret en pinkode til ændring af begrænsninger"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Pinkoderne stemmer ikke overens. Prøv igen."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Pinkoden er for kort. Den skal være på mindst 4 tal."</string>

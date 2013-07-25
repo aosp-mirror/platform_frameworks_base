@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permite al propietario vincularse a la interfaz de nivel superior del servicio de widget. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactuar con un administrador de dispositivos"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Permite enviar intentos a un administrador de dispositivos. Las aplicaciones normales no deberían necesitar este permiso."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"cambiar la orientación de la pantalla"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Permite que la aplicación cambie la rotación de la pantalla en cualquier momento. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"cambiar velocidad del puntero"</string>
@@ -1547,26 +1551,23 @@
     <string name="mediaSize_iso_c8" msgid="8392376206627041730">"ISO C8"</string>
     <string name="mediaSize_iso_c9" msgid="9191613372324845405">"ISO C9"</string>
     <string name="mediaSize_iso_c10" msgid="7327709699184920822">"ISO C10"</string>
-    <string name="mediaSize_na_letter" msgid="4191805615829472953">"Letter"</string>
-    <string name="mediaSize_na_gvrnmt_letter" msgid="7853382192649405507">"Government Letter"</string>
-    <string name="mediaSize_na_legal" msgid="6697982988283823150">"Legal"</string>
-    <string name="mediaSize_na_junior_legal" msgid="3727743969902758948">"Junior Legal"</string>
-    <string name="mediaSize_na_ledger" msgid="281871464896601236">"Ledger"</string>
-    <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
+    <string name="mediaSize_na_letter" msgid="4191805615829472953">"Carta"</string>
+    <string name="mediaSize_na_gvrnmt_letter" msgid="7853382192649405507">"Carta del gobierno (EE. UU.)"</string>
+    <string name="mediaSize_na_legal" msgid="6697982988283823150">"Oficio"</string>
+    <string name="mediaSize_na_junior_legal" msgid="3727743969902758948">"Oficio Junior"</string>
+    <string name="mediaSize_na_ledger" msgid="281871464896601236">"Doble carta"</string>
+    <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloide"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Cancelada"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Error al escribir contenido"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Ingresar PIN"</string>
-    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
-    <skip />
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN actual"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"PIN nuevo"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Confirmar PIN nuevo"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Crear PIN para modificar restricciones"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Los PIN no coinciden. Vuelve a intentarlo."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"El PIN es demasiado corto. Debe tener al menos 4 dígitos."</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"Reintentar en 1 s"</item>
-    <item quantity="other" msgid="8030607343223287654">"Reintentar en <xliff:g id="COUNT">%d</xliff:g> s"</item>
+    <item quantity="one" msgid="4835639969503729874">"PIN incorrecto. Reintentar en 1 s"</item>
+    <item quantity="other" msgid="8030607343223287654">"PIN incorrecto. Reintentar en <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
 </resources>

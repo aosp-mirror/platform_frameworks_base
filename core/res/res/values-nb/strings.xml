@@ -361,7 +361,7 @@
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"binding til en utskriftstjeneste"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Gir innehaveren tillatelse til å binde til toppnivået av brukergrensesnittet for en utskriftstjeneste. Dette skal ikke være nødvendig for vanlige apper."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"tilgang til alle utskriftsjobber"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Gir innehaveren tillatelse til å åpne utskriftsjobber som ble opprettet av andre apper. Dette skal ikke være nødvendig for vanlige apper."</string>
+    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Gir innehaveren tillatelse til å åpne utskriftsjobber som er opprettet av andre apper. Dette skal ikke være nødvendig for vanlige apper."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"binde til en teksttjeneste"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Lar innehaveren binde seg til øverste grensesnittnivå for en teksttjeneste (f.eks. SpellCheckerService). Skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"binde deg til en VPN-tjeneste"</string>
@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Lar innehaveren binde seg til det øverste nivået av grensesnittet for en modultjeneste. Skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"kommuniser med enhetsadministrator"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Lar innehaveren sende hensikter til en enhetsadministrator. Skal aldri være nødvendig for normale apper."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"snu skjermen"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Gir appen tillatelse til når som helst å endre rotasjonen av skjermen. Skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"endre pekerhastighet"</string>
@@ -641,7 +645,7 @@
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Lar appen hente, gjennomgå og fjerne varsler, inkludert de som sendes fra andre apper."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"binding til en varsellyttertjeneste"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Lar innehaveren binde seg til det øverste grensesnittnivået for en varsellyttertjeneste. Skal aldri være nødvendig for vanlige apper."</string>
-    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"anrop av konfigurasjonsappen som ble levert av operatøren"</string>
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"starte konfigurasjonsappen som ble levert av operatøren"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Gir innehaveren tillatelse til å kalle opp den konfigurasjonsappen som ble levert av operatøren. Dette skal ikke være nødvendig for vanlige apper."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Angi passordregler"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontroller tillatt lengde og tillatte tegn i passord for opplåsing av skjerm."</string>
@@ -1550,21 +1554,18 @@
     <string name="mediaSize_na_letter" msgid="4191805615829472953">"Letter"</string>
     <string name="mediaSize_na_gvrnmt_letter" msgid="7853382192649405507">"Government Letter"</string>
     <string name="mediaSize_na_legal" msgid="6697982988283823150">"Legal"</string>
-    <string name="mediaSize_na_junior_legal" msgid="3727743969902758948">"Junior Legal (Nord-Amerika)"</string>
+    <string name="mediaSize_na_junior_legal" msgid="3727743969902758948">"Junior Legal"</string>
     <string name="mediaSize_na_ledger" msgid="281871464896601236">"Ledger"</string>
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Kansellert"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Feil under skriving av innhold"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Skriv inn PIN-koden"</string>
-    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
-    <skip />
-    <string name="restr_pin_create_pin" msgid="8017600000263450337">"Angi en PIN-kode for endring av begresninger"</string>
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Gjeldende PIN-kode:"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Ny PIN-kode"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Bekreft ny PIN-kode"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"Angi en PIN-kode for endring av begrensninger"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN-kodene stemmer ikke overens. Prøv på nytt."</string>
-    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN-koden er for kort. Den må bestå av minst fire tegn."</string>
+    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN-koden er for kort. Den må bestå av minst fire sifre."</string>
   <plurals name="restr_pin_countdown">
     <item quantity="one" msgid="4835639969503729874">"Feil PIN-kode. Prøv på nytt om 1 sekund."</item>
     <item quantity="other" msgid="8030607343223287654">"Feil PIN-kode. Prøv på nytt om <xliff:g id="COUNT">%d</xliff:g> sekunder."</item>

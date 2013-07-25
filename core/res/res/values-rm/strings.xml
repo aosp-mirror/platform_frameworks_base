@@ -583,6 +583,10 @@
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interacziun cun in administratur dad apparats"</string>
     <!-- no translation found for permdesc_bindDeviceAdmin (569715419543907930) -->
     <skip />
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"midar l\'orientaziun dal visur"</string>
     <!-- no translation found for permdesc_setOrientation (3046126619316671476) -->
     <skip />

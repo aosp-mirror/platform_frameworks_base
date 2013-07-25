@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permite enlazar con la interfaz de nivel superior de un servicio de widget. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactuar con el administrador de un dispositivo"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Permite que se envíen intentos a un administrador de dispositivos. Las aplicaciones normales nunca deberían necesitar este permiso."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"cambiar orientación de la pantalla"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Permite que la aplicación cambie la rotación de la pantalla en cualquier momento. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"cambiar velocidad del puntero"</string>
@@ -1556,12 +1560,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Cancelado"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Error al escribir contenido"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Introducir PIN"</string>
-    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
-    <skip />
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN actual"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"PIN nuevo"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Confirma tu nuevo PIN"</string>
     <string name="restr_pin_create_pin" msgid="8017600000263450337">"Crear PIN para modificar restricciones"</string>
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Los números PIN no coinciden. Inténtalo de nuevo."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"El PIN es demasiado corto. Debe tener al menos 4 dígitos."</string>

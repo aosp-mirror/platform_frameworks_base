@@ -372,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Allows the holder to bind to the top-level interface of a widget service. Should never be needed for normal apps."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interact with device admin"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Allows the holder to send intents to a device administrator. Should never be needed for normal apps."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"change screen orientation"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Allows the app to change the rotation of the screen at any time. Should never be needed for normal apps."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"change pointer speed"</string>

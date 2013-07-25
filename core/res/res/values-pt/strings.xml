@@ -279,10 +279,8 @@
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Permite que o aplicativo mova tarefas para o primeiro plano e o plano de fundo, sem sua intervenção."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"parar os aplicativos em execução"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Permite que um aplicativo remova tarefas e elimine seus aplicativos. Aplicativos maliciosos podem interferir no comportamento de outros aplicativos."</string>
-    <!-- no translation found for permlab_manageActivityStacks (7391191384027303065) -->
-    <skip />
-    <!-- no translation found for permdesc_manageActivityStacks (1615881933034084440) -->
-    <skip />
+    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"gerenciar pilhas de atividades"</string>
+    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"Permite que o aplicativo adicione, remova e modifique as pilhas de atividades nas quais outros aplicativos são executados. Aplicativos mal-intencionados podem comprometer o funcionamento de outros aplicativos."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"iniciar qualquer atividade"</string>
     <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Permite que o aplicativo inicie qualquer atividade, independentemente da permissão ou do estado exportado."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"definir a compatibilidade de tela"</string>
@@ -360,14 +358,10 @@
     <string name="permdesc_bindInputMethod" msgid="3250440322807286331">"Permite que o proprietário utilize a interface de nível superior de um método de entrada. Nunca deve ser necessário para aplicativos normais."</string>
     <string name="permlab_bindAccessibilityService" msgid="5357733942556031593">"usar um serviço de acessibilidade"</string>
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Permite que o proprietário use a interface de nível superior de um serviço de acessibilidade. Nunca deve ser necessário para aplicativos comuns."</string>
-    <!-- no translation found for permlab_bindPrintService (8462815179572748761) -->
-    <skip />
-    <!-- no translation found for permdesc_bindPrintService (7960067623209111135) -->
-    <skip />
-    <!-- no translation found for permlab_accessAllPrintJobs (1120792468465711159) -->
-    <skip />
-    <!-- no translation found for permdesc_accessAllPrintJobs (2978185311041864762) -->
-    <skip />
+    <string name="permlab_bindPrintService" msgid="8462815179572748761">"associar a um serviço de impressão"</string>
+    <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Permite que o proprietário use a interface de nível superior de um serviço de impressão. Não deve ser necessário para aplicativos comuns."</string>
+    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"acessar todos os trabalhos de impressão"</string>
+    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Permite que o proprietário acesse trabalhos de impressão criados por outro aplicativo. Não deve ser necessário para aplicativos comuns."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"sujeitar-se a um serviço de texto"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Permite que o proprietário utilize interface de nível superior de um serviço de texto (por exemplo, SpellCheckerService). Nunca deve ser necessário para aplicativos normais."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"se ligam a um serviço de VPN"</string>
@@ -378,6 +372,10 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permite que o proprietário utilize a interface de nível superior de um serviço de widget. Nunca deve ser necessário para aplicativos normais."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interagir com o administrador de um dispositivo"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Permite que o proprietário envie tentativas ao administrador de um aparelho. Nunca deve ser necessário para aplicativos normais."</string>
+    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
+    <skip />
+    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
+    <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"alterar orientação da tela"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Permite que o aplicativo gire a tela a qualquer momento. Nunca deve ser necessário para aplicativos normais."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"alterar velocidade do ponteiro"</string>
@@ -470,10 +468,8 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permite que o aplicativo use recursos com baixos níveis de SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"ler o buffer do frame"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Permite que o aplicativo leia o conteúdo do buffer de frame."</string>
-    <!-- no translation found for permlab_accessInputFlinger (5348635270689553857) -->
-    <skip />
-    <!-- no translation found for permdesc_accessInputFlinger (2104864941201226616) -->
-    <skip />
+    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"acessar InputFlinger"</string>
+    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Permite que o aplicativo use recursos com baixos níveis de InputFinger."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configurar monitores Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Permite que o aplicativo configure e conecte a monitores Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"controlar monitores Wi-Fi"</string>
@@ -643,18 +639,14 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"Permite que o aplicativo gerencie políticas de rede e definia regras específicas para o aplicativo."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"modificar contagem de uso da rede"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"Permite que o aplicativo modifique como o uso da rede é contabilizado em relação aos aplicativos. Não deve ser usado em aplicativos normais."</string>
-    <!-- no translation found for permlab_markNetworkSocket (3658527214914959749) -->
-    <skip />
-    <!-- no translation found for permdesc_markNetworkSocket (7655568433696356578) -->
-    <skip />
+    <string name="permlab_markNetworkSocket" msgid="3658527214914959749">"modificar marcas de soquetes"</string>
+    <string name="permdesc_markNetworkSocket" msgid="7655568433696356578">"Permite que o aplicativo modifique marcas de soquetes para roteamento"</string>
     <string name="permlab_accessNotifications" msgid="7673416487873432268">"acessar notificações"</string>
     <string name="permdesc_accessNotifications" msgid="458457742683431387">"Permite que o aplicativo recupere, examine e limpe notificações, inclusive as postadas por outros aplicativos."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"sujeitar a um serviço ouvinte de notificações"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite que o proprietário sujeite a interface de nível superior a um serviço ouvinte de notificações. Não deve ser necessário para aplicativos comuns."</string>
-    <!-- no translation found for permlab_invokeCarrierSetup (3699600833975117478) -->
-    <skip />
-    <!-- no translation found for permdesc_invokeCarrierSetup (4159549152529111920) -->
-    <skip />
+    <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invocar o aplicativo de configuração fornecido pela operadora"</string>
+    <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite que o proprietário invoque o aplicativo de configuração fornecido pela operadora. Não deve ser necessário para aplicativos comuns."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Definir regras para senha"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controle o tamanho e os caracteres permitidos nas senhas de desbloqueio de tela."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitorar tentativas de desbloqueio da tela"</string>
@@ -764,8 +756,7 @@
     <string name="imProtocolYahoo" msgid="8271439408469021273">"Yahoo"</string>
     <string name="imProtocolSkype" msgid="9019296744622832951">"Skype"</string>
     <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
-    <!-- no translation found for imProtocolGoogleTalk (493902321140277304) -->
-    <skip />
+    <string name="imProtocolGoogleTalk" msgid="493902321140277304">"Hangouts"</string>
     <string name="imProtocolIcq" msgid="1574870433606517315">"ICQ"</string>
     <string name="imProtocolJabber" msgid="2279917630875771722">"Jabber"</string>
     <string name="imProtocolNetMeeting" msgid="8287625655986827971">"NetMeeting"</string>
@@ -1527,102 +1518,56 @@
     <string name="app_no_restricted_accounts" msgid="5739463249673727736">"Este aplicativo não suporta contas para perfis restritos"</string>
     <string name="app_not_found" msgid="3429141853498927379">"Nenhum aplicativo encontrado para executar a ação"</string>
     <string name="revoke" msgid="5404479185228271586">"Revogar"</string>
-    <!-- no translation found for mediaSize_iso_a0 (7875427489420821793) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a1 (3760734499050875356) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a2 (5973266378020144382) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a3 (1373407105687300884) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a4 (6689772807982597254) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a5 (5353549652015741040) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a6 (8585038048674911907) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a7 (6641836716963839119) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a8 (7571139437465693355) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a9 (1378455891957115079) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_a10 (2480747457429475344) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b0 (3965935097661108039) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b1 (2505753285010115437) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b2 (8763874709859458453) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b3 (4210506688191764076) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b4 (5749404165888526034) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b5 (7640627414621904733) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b6 (7342988864712748544) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b7 (5069844065235382429) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b8 (7316818922278779774) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b9 (5414727094026532341) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_b10 (5251253731832048185) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c0 (4003138342671964217) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c1 (1935188063393553008) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c2 (3197307969712069904) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c3 (4335826087321913508) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c4 (3745639598281015005) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c5 (8269457765822791013) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c6 (566666105260346930) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c7 (8678413180782608498) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c8 (8392376206627041730) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c9 (9191613372324845405) -->
-    <skip />
-    <!-- no translation found for mediaSize_iso_c10 (7327709699184920822) -->
-    <skip />
-    <!-- no translation found for mediaSize_na_letter (4191805615829472953) -->
-    <skip />
-    <!-- no translation found for mediaSize_na_gvrnmt_letter (7853382192649405507) -->
-    <skip />
-    <!-- no translation found for mediaSize_na_legal (6697982988283823150) -->
-    <skip />
-    <!-- no translation found for mediaSize_na_junior_legal (3727743969902758948) -->
-    <skip />
-    <!-- no translation found for mediaSize_na_ledger (281871464896601236) -->
-    <skip />
-    <!-- no translation found for mediaSize_na_tabloid (5775966416333578127) -->
-    <skip />
-    <!-- no translation found for write_fail_reason_cancelled (7091258378121627624) -->
-    <skip />
-    <!-- no translation found for write_fail_reason_cannot_write (8132505417935337724) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_pin (3395953421368476103) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
-    <skip />
-    <!-- no translation found for restr_pin_enter_new_pin (5959606691619959184) -->
-    <skip />
-    <!-- no translation found for restr_pin_confirm_pin (8501523829633146239) -->
-    <skip />
-    <!-- no translation found for restr_pin_create_pin (8017600000263450337) -->
-    <skip />
-    <!-- no translation found for restr_pin_error_doesnt_match (2224214190906994548) -->
-    <skip />
-    <!-- no translation found for restr_pin_error_too_short (8173982756265777792) -->
-    <skip />
-    <!-- no translation found for restr_pin_countdown:one (4835639969503729874) -->
-    <!-- no translation found for restr_pin_countdown:other (8030607343223287654) -->
+    <string name="mediaSize_iso_a0" msgid="7875427489420821793">"ISO A0"</string>
+    <string name="mediaSize_iso_a1" msgid="3760734499050875356">"ISO A1"</string>
+    <string name="mediaSize_iso_a2" msgid="5973266378020144382">"ISO A2"</string>
+    <string name="mediaSize_iso_a3" msgid="1373407105687300884">"ISO A3"</string>
+    <string name="mediaSize_iso_a4" msgid="6689772807982597254">"ISO A4"</string>
+    <string name="mediaSize_iso_a5" msgid="5353549652015741040">"ISO A5"</string>
+    <string name="mediaSize_iso_a6" msgid="8585038048674911907">"ISO A6"</string>
+    <string name="mediaSize_iso_a7" msgid="6641836716963839119">"ISO A7"</string>
+    <string name="mediaSize_iso_a8" msgid="7571139437465693355">"ISO A8"</string>
+    <string name="mediaSize_iso_a9" msgid="1378455891957115079">"ISO A9"</string>
+    <string name="mediaSize_iso_a10" msgid="2480747457429475344">"ISO A10"</string>
+    <string name="mediaSize_iso_b0" msgid="3965935097661108039">"ISO B0"</string>
+    <string name="mediaSize_iso_b1" msgid="2505753285010115437">"ISO B1"</string>
+    <string name="mediaSize_iso_b2" msgid="8763874709859458453">"ISO B2"</string>
+    <string name="mediaSize_iso_b3" msgid="4210506688191764076">"ISO B3"</string>
+    <string name="mediaSize_iso_b4" msgid="5749404165888526034">"ISO B4"</string>
+    <string name="mediaSize_iso_b5" msgid="7640627414621904733">"ISO B5"</string>
+    <string name="mediaSize_iso_b6" msgid="7342988864712748544">"ISO B6"</string>
+    <string name="mediaSize_iso_b7" msgid="5069844065235382429">"ISO B7"</string>
+    <string name="mediaSize_iso_b8" msgid="7316818922278779774">"ISO B8"</string>
+    <string name="mediaSize_iso_b9" msgid="5414727094026532341">"ISO B9"</string>
+    <string name="mediaSize_iso_b10" msgid="5251253731832048185">"ISO B10"</string>
+    <string name="mediaSize_iso_c0" msgid="4003138342671964217">"ISO C0"</string>
+    <string name="mediaSize_iso_c1" msgid="1935188063393553008">"ISO C1"</string>
+    <string name="mediaSize_iso_c2" msgid="3197307969712069904">"ISO C2"</string>
+    <string name="mediaSize_iso_c3" msgid="4335826087321913508">"ISO C3"</string>
+    <string name="mediaSize_iso_c4" msgid="3745639598281015005">"ISO C4"</string>
+    <string name="mediaSize_iso_c5" msgid="8269457765822791013">"ISO C5"</string>
+    <string name="mediaSize_iso_c6" msgid="566666105260346930">"ISO C6"</string>
+    <string name="mediaSize_iso_c7" msgid="8678413180782608498">"ISO C7"</string>
+    <string name="mediaSize_iso_c8" msgid="8392376206627041730">"ISO C8"</string>
+    <string name="mediaSize_iso_c9" msgid="9191613372324845405">"ISO C9"</string>
+    <string name="mediaSize_iso_c10" msgid="7327709699184920822">"ISO C10"</string>
+    <string name="mediaSize_na_letter" msgid="4191805615829472953">"Carta"</string>
+    <string name="mediaSize_na_gvrnmt_letter" msgid="7853382192649405507">"Government Letter"</string>
+    <string name="mediaSize_na_legal" msgid="6697982988283823150">"Ofício"</string>
+    <string name="mediaSize_na_junior_legal" msgid="3727743969902758948">"Junior Legal"</string>
+    <string name="mediaSize_na_ledger" msgid="281871464896601236">"Ledger"</string>
+    <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloide"</string>
+    <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Cancelado"</string>
+    <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Erro ao gravar o conteúdo"</string>
+    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Insira o PIN"</string>
+    <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN atual"</string>
+    <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Novo PIN"</string>
+    <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Confirme o novo PIN"</string>
+    <string name="restr_pin_create_pin" msgid="8017600000263450337">"Crie um PIN para modificar restrições"</string>
+    <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Os PINs não coincidem. Tente novamente."</string>
+    <string name="restr_pin_error_too_short" msgid="8173982756265777792">"O PIN é curto demais. Deve ter pelo menos 4 dígitos."</string>
+  <plurals name="restr_pin_countdown">
+    <item quantity="one" msgid="4835639969503729874">"PIN incorreto. Tente novamente em 1 segundo."</item>
+    <item quantity="other" msgid="8030607343223287654">"PIN incorreto. Tente novamente em <xliff:g id="COUNT">%d</xliff:g> segundos."</item>
+  </plurals>
 </resources>
