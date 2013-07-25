@@ -24,6 +24,7 @@ import com.android.server.wm.WindowManagerService;
 
 import android.content.res.Resources;
 import android.graphics.Point;
+import android.os.SystemProperties;
 import android.util.Slog;
 import android.view.Display;
 
@@ -237,10 +238,28 @@ final class ProcessList {
             memString.append((mOomMinFree[i]*1024)/PAGE_SIZE);
         }
 
+        // Ask the kernel to try to keep enough memory free to allocate 3 full
+        // screen 32bpp buffers without entering direct reclaim.
+        int reserve = displayWidth * displayHeight * 4 * 3 / 1024;
+        int reserve_adj = Resources.getSystem().getInteger(com.android.internal.R.integer.config_extraFreeKbytesAdjust);
+        int reserve_abs = Resources.getSystem().getInteger(com.android.internal.R.integer.config_extraFreeKbytesAbsolute);
+
+        if (reserve_abs >= 0) {
+            reserve = reserve_abs;
+        }
+
+        if (reserve_adj != 0) {
+            reserve += reserve_adj;
+            if (reserve < 0) {
+                reserve = 0;
+            }
+        }
+
         //Slog.i("XXXXXXX", "******************************* MINFREE: " + memString);
         if (write) {
             writeFile("/sys/module/lowmemorykiller/parameters/adj", adjString.toString());
             writeFile("/sys/module/lowmemorykiller/parameters/minfree", memString.toString());
+            SystemProperties.set("sys.sysctl.extra_free_kbytes", Integer.toString(reserve));
         }
         // GB: 2048,3072,4096,6144,7168,8192
         // HC: 8192,10240,12288,14336,16384,20480

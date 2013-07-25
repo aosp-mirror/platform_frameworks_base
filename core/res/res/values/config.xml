@@ -152,6 +152,24 @@
          bucket, and scaled proportionally to the smaller buckets. 0 keeps the default. -->
     <integer name="config_lowMemoryKillerMinFreeKbytesAdjust">0</integer>
 
+    <!-- Device configuration setting the /proc/sys/vm/extra_free_kbytes tunable in the kernel
+         (if it exists).  A high value will increase the amount of memory that the kernel
+         tries to keep free, reducing allocation time and causing the lowmemorykiller to kill
+         earlier.  A low value allows more memory to be used by processes but may cause more
+         allocations to block waiting on disk I/O or lowmemorykiller.  Overrides the default
+         value chosen by ActivityManager based on screen size.  0 prevents keeping any extra
+         memory over what the kernel keeps by default.  -1 keeps the default. -->
+    <integer name="config_extraFreeKbytesAbsolute">-1</integer>
+
+    <!-- Device configuration adjusting the /proc/sys/vm/extra_free_kbytes tunable in the kernel
+         (if it exists).  0 uses the default value chosen by ActivityManager.  A positive value
+         will increase the amount of memory that the kernel tries to keep free, reducing
+         allocation time and causing the lowmemorykiller to kill earlier.  A negative value
+         allows more memory to be used by processes but may cause more allocations to block
+         waiting on disk I/O or lowmemorykiller.  Directly added to the default value chosen by
+         ActivityManager based on screen size. -->
+    <integer name="config_extraFreeKbytesAdjust">0</integer>
+
     <!-- The duration (in milliseconds) that the radio will scan for a signal
          when there's no network connection. If the scan doesn't timeout, use zero -->
     <integer name="config_radioScanningTimeout">0</integer>
