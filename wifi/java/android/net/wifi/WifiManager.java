@@ -759,7 +759,18 @@ public class WifiManager {
      */
     public boolean startScan() {
         try {
-            mService.startScan();
+            final WorkSource workSource = null;
+            mService.startScan(workSource);
+            return true;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /** @hide */
+    public boolean startScan(WorkSource workSource) {
+        try {
+            mService.startScan(workSource);
             return true;
         } catch (RemoteException e) {
             return false;

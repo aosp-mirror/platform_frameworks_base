@@ -303,10 +303,15 @@ public final class WifiService extends IWifiManager.Stub {
 
     /**
      * see {@link android.net.wifi.WifiManager#startScan()}
+     *
+     * <p>If workSource is null, all blame is given to the calling uid.
      */
-    public void startScan() {
+    public void startScan(WorkSource workSource) {
         enforceChangePermission();
-        mWifiStateMachine.startScan(Binder.getCallingUid());
+        if (workSource != null) {
+            enforceWorkSourcePermission();
+        }
+        mWifiStateMachine.startScan(Binder.getCallingUid(), workSource);
     }
 
     private void enforceAccessPermission() {
@@ -316,6 +321,12 @@ public final class WifiService extends IWifiManager.Stub {
 
     private void enforceChangePermission() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CHANGE_WIFI_STATE,
+                                                "WifiService");
+
+    }
+
+    private void enforceWorkSourcePermission() {
+        mContext.enforceCallingPermission(android.Manifest.permission.UPDATE_DEVICE_STATS,
                                                 "WifiService");
 
     }
