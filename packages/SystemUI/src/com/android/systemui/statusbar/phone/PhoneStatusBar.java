@@ -341,7 +341,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         @Override
         public void run() {
             int requested = mSystemUiVisibility & ~STATUS_OR_NAV_OVERLAY;
-            notifyUiVisibilityChanged(requested);
+            if (mSystemUiVisibility != requested) {
+                notifyUiVisibilityChanged(requested);
+            }
         }};
 
     @Override
@@ -379,6 +381,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         mStatusBarWindow.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                checkUserAutohide(v, event);
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     if (mExpandedVisible) {
                         animateCollapsePanels();
@@ -435,6 +438,12 @@ public class PhoneStatusBar extends BaseStatusBar {
 
                 mNavigationBarView.setDisabledFlags(mDisabled);
                 mNavigationBarView.setBar(this);
+                mNavigationBarView.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        checkUserAutohide(v, event);
+                        return false;
+                    }});
             }
         } catch (RemoteException ex) {
             // no window manager? good luck with that
@@ -1948,6 +1957,20 @@ public class PhoneStatusBar extends BaseStatusBar {
         mHandler.postDelayed(mAutohide, AUTOHIDE_TIMEOUT_MS);
     }
 
+    private void checkUserAutohide(View v, MotionEvent event) {
+        if ((mSystemUiVisibility & STATUS_OR_NAV_OVERLAY) != 0  // an overlay bar is revealed
+                && event.getAction() == MotionEvent.ACTION_OUTSIDE // touch outside the source bar
+                && event.getX() == 0 && event.getY() == 0  // a touch outside both bars
+                ) {
+            userAutohide();
+        }
+    }
+
+    private void userAutohide() {
+        cancelAutohide();
+        mHandler.postDelayed(mAutohide, 25);
+    }
+
     private void setTransparent(View view, boolean transparent) {
         float alpha = transparent ? TRANSPARENT_ALPHA : 1;
         if (DEBUG) Log.d(TAG, "Setting " + (view == mStatusBarView ? "status bar" :
@@ -2216,7 +2239,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                 WindowManager.LayoutParams.TYPE_STATUS_BAR,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
-                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+                    | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSLUCENT);
 
         lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
