@@ -95,15 +95,26 @@ public class SurfaceTexture {
      * @param texName the OpenGL texture object name (e.g. generated via glGenTextures)
      */
     public SurfaceTexture(int texName) {
-        Looper looper;
-        if ((looper = Looper.myLooper()) != null) {
-            mEventHandler = new EventHandler(looper);
-        } else if ((looper = Looper.getMainLooper()) != null) {
-            mEventHandler = new EventHandler(looper);
-        } else {
-            mEventHandler = null;
-        }
-        nativeInit(texName, new WeakReference<SurfaceTexture>(this));
+        init(texName, false);
+    }
+
+    /**
+     * Construct a new SurfaceTexture to stream images to a given OpenGL texture.
+     *
+     * In single buffered mode the application is responsible for serializing access to the image
+     * content buffer. Each time the image content is to be updated, the
+     * {@link #releaseTexImage()} method must be called before the image content producer takes
+     * ownership of the buffer. For example, when producing image content with the NDK
+     * ANativeWindow_lock and ANativeWindow_unlockAndPost functions, {@link #releaseTexImage()}
+     * must be called before each ANativeWindow_lock, or that call will fail. When producing
+     * image content with OpenGL ES, {@link #releaseTexImage()} must be called before the first
+     * OpenGL ES function call each frame.
+     *
+     * @param texName the OpenGL texture object name (e.g. generated via glGenTextures)
+     * @param singleBufferMode whether the SurfaceTexture will be in single buffered mode.
+     */
+    public SurfaceTexture(int texName, boolean singleBufferMode) {
+        init(texName, singleBufferMode);
     }
 
     /**
@@ -146,6 +157,15 @@ public class SurfaceTexture {
      */
     public void updateTexImage() {
         nativeUpdateTexImage();
+    }
+
+    /**
+     * Releases the the texture content. This is needed in single buffered mode to allow the image
+     * content producer to take ownership of the image buffer.
+     * For more information see {@link SurfaceTexture(int, boolean)}.
+     */
+    public void releaseTexImage() {
+        nativeReleaseTexImage();
     }
 
     /**
@@ -284,12 +304,25 @@ public class SurfaceTexture {
         }
     }
 
-    private native void nativeInit(int texName, Object weakSelf);
+    private void init(int texName, boolean singleBufferMode) {
+        Looper looper;
+        if ((looper = Looper.myLooper()) != null) {
+            mEventHandler = new EventHandler(looper);
+        } else if ((looper = Looper.getMainLooper()) != null) {
+            mEventHandler = new EventHandler(looper);
+        } else {
+            mEventHandler = null;
+        }
+        nativeInit(texName, singleBufferMode, new WeakReference<SurfaceTexture>(this));
+    }
+
+    private native void nativeInit(int texName, boolean singleBufferMode, Object weakSelf);
     private native void nativeFinalize();
     private native void nativeGetTransformMatrix(float[] mtx);
     private native long nativeGetTimestamp();
     private native void nativeSetDefaultBufferSize(int width, int height);
     private native void nativeUpdateTexImage();
+    private native void nativeReleaseTexImage();
     private native int nativeDetachFromGLContext();
     private native int nativeAttachToGLContext(int texName);
     private native int nativeGetQueuedCount();

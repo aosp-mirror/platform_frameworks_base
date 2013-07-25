@@ -197,9 +197,16 @@ static void SurfaceTexture_classInit(JNIEnv* env, jclass clazz)
     }
 }
 
-static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jint texName, jobject weakThiz)
+static void SurfaceTexture_init(JNIEnv* env, jobject thiz,
+        jint texName, jboolean singleBufferMode, jobject weakThiz)
 {
     sp<BufferQueue> bq = new BufferQueue();
+
+    if (singleBufferMode) {
+        bq->disableAsyncBuffer();
+        bq->setDefaultMaxBufferCount(1);
+    }
+
     sp<GLConsumer> surfaceTexture(new GLConsumer(bq, texName, GL_TEXTURE_EXTERNAL_OES, true, true));
     if (surfaceTexture == 0) {
         jniThrowException(env, OutOfResourcesException,
@@ -248,6 +255,18 @@ static void SurfaceTexture_updateTexImage(JNIEnv* env, jobject thiz)
     }
 }
 
+static void SurfaceTexture_releaseTexImage(JNIEnv* env, jobject thiz)
+{
+    sp<GLConsumer> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
+    status_t err = surfaceTexture->releaseTexImage();
+    if (err == INVALID_OPERATION) {
+        jniThrowException(env, IllegalStateException, "Unable to release texture contents (see "
+                "logcat for details)");
+    } else if (err < 0) {
+        jniThrowRuntimeException(env, "Error during updateTexImage (see logcat for details)");
+    }
+}
+
 static jint SurfaceTexture_detachFromGLContext(JNIEnv* env, jobject thiz)
 {
     sp<GLConsumer> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
@@ -285,10 +304,11 @@ static void SurfaceTexture_release(JNIEnv* env, jobject thiz)
 
 static JNINativeMethod gSurfaceTextureMethods[] = {
     {"nativeClassInit",            "()V",   (void*)SurfaceTexture_classInit },
-    {"nativeInit",                 "(ILjava/lang/Object;)V", (void*)SurfaceTexture_init },
+    {"nativeInit",                 "(IZLjava/lang/Object;)V", (void*)SurfaceTexture_init },
     {"nativeFinalize",             "()V",   (void*)SurfaceTexture_finalize },
     {"nativeSetDefaultBufferSize", "(II)V", (void*)SurfaceTexture_setDefaultBufferSize },
     {"nativeUpdateTexImage",       "()V",   (void*)SurfaceTexture_updateTexImage },
+    {"nativeReleaseTexImage",      "()V",   (void*)SurfaceTexture_releaseTexImage },
     {"nativeDetachFromGLContext",  "()I",   (void*)SurfaceTexture_detachFromGLContext },
     {"nativeAttachToGLContext",    "(I)I",   (void*)SurfaceTexture_attachToGLContext },
     {"nativeGetTransformMatrix",   "([F)V", (void*)SurfaceTexture_getTransformMatrix },
