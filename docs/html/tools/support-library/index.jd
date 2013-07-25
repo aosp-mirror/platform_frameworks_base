@@ -129,7 +129,7 @@ page.title=Support Library
       <dd>
         <ul>
           <li>Added {@link android.support.v7.app.ActionBar} to allow implementation of the
-            action bar user interface <a href="{@docRoot}/design/patterns/actionbar.html">design
+            action bar user interface <a href="{@docRoot}design/patterns/actionbar.html">design
             pattern</a> back to Android 2.1 (API level 7) and higher. Use of this class requires
             that you implement your activity by extending the new
             {@link android.support.v7.app.ActionBarActivity} class.</li>
