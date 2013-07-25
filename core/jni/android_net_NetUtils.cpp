@@ -37,7 +37,8 @@ int dhcp_do_request(const char * const ifname,
                     const char *server,
                     uint32_t *lease,
                     const char *vendorInfo,
-                    const char *domains);
+                    const char *domains,
+                    const char *mtu);
 
 int dhcp_do_request_renew(const char * const ifname,
                     const char *ipaddr,
@@ -47,7 +48,8 @@ int dhcp_do_request_renew(const char * const ifname,
                     const char *server,
                     uint32_t *lease,
                     const char *vendorInfo,
-                    const char *domains);
+                    const char *domains,
+                    const char *mtu);
 
 int dhcp_stop(const char *ifname);
 int dhcp_release_lease(const char *ifname);
@@ -126,16 +128,17 @@ static jboolean android_net_utils_runDhcpCommon(JNIEnv* env, jobject clazz, jstr
     uint32_t lease;
     char vendorInfo[PROPERTY_VALUE_MAX];
     char domains[PROPERTY_VALUE_MAX];
+    char mtu[PROPERTY_VALUE_MAX];
 
     const char *nameStr = env->GetStringUTFChars(ifname, NULL);
     if (nameStr == NULL) return (jboolean)false;
 
     if (renew) {
         result = ::dhcp_do_request_renew(nameStr, ipaddr, gateway, &prefixLength,
-                dns, server, &lease, vendorInfo, domains);
+                dns, server, &lease, vendorInfo, domains, mtu);
     } else {
         result = ::dhcp_do_request(nameStr, ipaddr, gateway, &prefixLength,
-                dns, server, &lease, vendorInfo, domains);
+                dns, server, &lease, vendorInfo, domains, mtu);
     }
     if (result != 0) {
         ALOGD("dhcp_do_request failed");
