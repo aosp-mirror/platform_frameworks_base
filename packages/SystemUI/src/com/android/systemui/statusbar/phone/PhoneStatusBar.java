@@ -939,7 +939,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     public void resetHeadsUpDecayTimer() {
         mHandler.removeMessages(MSG_HIDE_HEADS_UP);
-        if (mHeadsUpNotificationDecay > 0) {
+        if (mUseHeadsUp && mHeadsUpNotificationDecay > 0
+                && !mHeadsUpNotificationView.isInsistent()) {
             mHandler.sendEmptyMessageDelayed(MSG_HIDE_HEADS_UP, mHeadsUpNotificationDecay);
         }
     }
