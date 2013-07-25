@@ -81,7 +81,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
     private static final String TAG = "AlarmManager";
     private static final String ClockReceiver_TAG = "ClockReceiver";
     private static final boolean localLOGV = false;
-    private static final boolean DEBUG_BATCH = localLOGV || false;
+    private static final boolean DEBUG_BATCH = localLOGV || true;
     private static final int ALARM_EVENT = 1;
     private static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
     
