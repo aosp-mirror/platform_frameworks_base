@@ -93,8 +93,38 @@ public final class PageRange implements Parcelable {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + mEnd;
+        result = prime * result + mStart;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        PageRange other = (PageRange) obj;
+        if (mEnd != other.mEnd) {
+            return false;
+        }
+        if (mStart != other.mStart) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public String toString() {
-        if (this == ALL_PAGES) {
+        if (mStart == 0 && mEnd == Integer.MAX_VALUE) {
             return "PageRange[<all pages>]";
         }
         StringBuilder builder = new StringBuilder();

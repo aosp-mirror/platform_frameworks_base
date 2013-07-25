@@ -22,7 +22,6 @@ import android.content.IntentSender.SendIntentException;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
-import android.os.ICancellationSignal;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -223,6 +222,11 @@ public final class PrintManager {
     }
 
     private static final class PrintDocumentAdapterDelegate extends IPrintDocumentAdapter.Stub {
+
+        private final Object mLock = new Object();
+
+        private CancellationSignal mLayoutOrWriteCancellation;
+
         private PrintDocumentAdapter mDocumentAdapter; // Strong reference OK - cleared in finish()
 
         private Handler mHandler; // Strong reference OK - cleared in finish()
@@ -239,22 +243,36 @@ public final class PrintManager {
 
         @Override
         public void layout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
-                ILayoutResultCallback callback, Bundle metadata) {
+                ILayoutResultCallback callback, Bundle metadata, int sequence) {
+            synchronized (mLock) {
+                if (mLayoutOrWriteCancellation != null) {
+                    mLayoutOrWriteCancellation.cancel();
+                }
+            }
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = oldAttributes;
             args.arg2 = newAttributes;
             args.arg3 = callback;
             args.arg4 = metadata;
+            args.argi1 = sequence;
+            mHandler.removeMessages(MyHandler.MSG_LAYOUT);
             mHandler.obtainMessage(MyHandler.MSG_LAYOUT, args).sendToTarget();
         }
 
         @Override
-        public void write(List<PageRange> pages, ParcelFileDescriptor fd,
-            IWriteResultCallback callback) {
+        public void write(PageRange[] pages, ParcelFileDescriptor fd,
+            IWriteResultCallback callback, int sequence) {
+            synchronized (mLock) {
+                if (mLayoutOrWriteCancellation != null) {
+                    mLayoutOrWriteCancellation.cancel();
+                }
+            }
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = pages;
             args.arg2 = fd.getFileDescriptor();
             args.arg3 = callback;
+            args.argi1 = sequence;
+            mHandler.removeMessages(MyHandler.MSG_WRITE);
             mHandler.obtainMessage(MyHandler.MSG_WRITE, args).sendToTarget();
         }
 
@@ -283,7 +301,6 @@ public final class PrintManager {
             }
 
             @Override
-            @SuppressWarnings("unchecked")
             public void handleMessage(Message message) {
                 if (isFinished()) {
                     return;
@@ -295,42 +312,116 @@ public final class PrintManager {
 
                     case MSG_LAYOUT: {
                         SomeArgs args = (SomeArgs) message.obj;
-                        PrintAttributes oldAttributes = (PrintAttributes) args.arg1;
-                        PrintAttributes newAttributes = (PrintAttributes) args.arg2;
-                        ILayoutResultCallback callback = (ILayoutResultCallback) args.arg3;
-                        Bundle metadata = (Bundle) args.arg4;
+                        final PrintAttributes oldAttributes = (PrintAttributes) args.arg1;
+                        final PrintAttributes newAttributes = (PrintAttributes) args.arg2;
+                        final ILayoutResultCallback callback = (ILayoutResultCallback) args.arg3;
+                        final Bundle metadata = (Bundle) args.arg4;
+                        final int sequence = args.argi1;
                         args.recycle();
 
-                        try {
-                            ICancellationSignal remoteSignal = CancellationSignal.createTransport();
-                            callback.onLayoutStarted(remoteSignal);
-
-                            mDocumentAdapter.onLayout(oldAttributes, newAttributes,
-                                    CancellationSignal.fromTransport(remoteSignal),
-                                    new LayoutResultCallbackWrapper(callback), metadata);
-                        } catch (RemoteException re) {
-                            Log.e(LOG_TAG, "Error printing", re);
+                        CancellationSignal cancellation = new CancellationSignal();
+                        synchronized (mLock) {
+                            mLayoutOrWriteCancellation = cancellation;
                         }
+
+                        mDocumentAdapter.onLayout(oldAttributes, newAttributes,
+                                cancellation, new LayoutResultCallback() {
+                            @Override
+                            public void onLayoutFinished(PrintDocumentInfo info, boolean changed) {
+                                if (info == null) {
+                                    throw new IllegalArgumentException("info cannot be null");
+                                }
+                                synchronized (mLock) {
+                                    mLayoutOrWriteCancellation = null;
+                                }
+                                try {
+                                    callback.onLayoutFinished(info, changed, sequence);
+                                } catch (RemoteException re) {
+                                    Log.e(LOG_TAG, "Error calling onLayoutFinished", re);
+                                }
+                            }
+
+                            @Override
+                            public void onLayoutFailed(CharSequence error) {
+                                synchronized (mLock) {
+                                    mLayoutOrWriteCancellation = null;
+                                }
+                                try {
+                                    callback.onLayoutFailed(error, sequence);
+                                } catch (RemoteException re) {
+                                    Log.e(LOG_TAG, "Error calling onLayoutFailed", re);
+                                }
+                            }
+
+                            @Override
+                            public void onLayoutCancelled() {
+                                synchronized (mLock) {
+                                    mLayoutOrWriteCancellation = null;
+                                }
+                            }
+                        }, metadata);
                     } break;
 
                     case MSG_WRITE: {
                         SomeArgs args = (SomeArgs) message.obj;
-                        List<PageRange> pages = (List<PageRange>) args.arg1;
-                        FileDescriptor fd = (FileDescriptor) args.arg2;
-                        IWriteResultCallback callback = (IWriteResultCallback) args.arg3;
+                        final PageRange[] pages = (PageRange[]) args.arg1;
+                        final FileDescriptor fd = (FileDescriptor) args.arg2;
+                        final IWriteResultCallback callback = (IWriteResultCallback) args.arg3;
+                        final int sequence = args.argi1;
                         args.recycle();
 
-                        try {
-                            ICancellationSignal remoteSignal = CancellationSignal.createTransport();
-                            callback.onWriteStarted(remoteSignal);
-
-                            mDocumentAdapter.onWrite(pages, fd,
-                                    CancellationSignal.fromTransport(remoteSignal),
-                                    new WriteResultCallbackWrapper(callback, fd));
-                        } catch (RemoteException re) {
-                            Log.e(LOG_TAG, "Error printing", re);
-                            IoUtils.closeQuietly(fd);
+                        CancellationSignal cancellation = new CancellationSignal();
+                        synchronized (mLock) {
+                            mLayoutOrWriteCancellation = cancellation;
                         }
+
+                        mDocumentAdapter.onWrite(pages, fd, cancellation,
+                                new WriteResultCallback() {
+                            @Override
+                            public void onWriteFinished(PageRange[] pages) {
+                                if (pages == null) {
+                                    throw new IllegalArgumentException("pages cannot be null");
+                                }
+                                if (pages.length == 0) {
+                                    throw new IllegalArgumentException("pages cannot be empty");
+                                }
+                                synchronized (mLock) {
+                                    mLayoutOrWriteCancellation = null;
+                                }
+                                // Close before notifying the other end. We want
+                                // to be ready by the time we announce it.
+                                IoUtils.closeQuietly(fd);
+                                try {
+                                    callback.onWriteFinished(pages, sequence);
+                                } catch (RemoteException re) {
+                                    Log.e(LOG_TAG, "Error calling onWriteFinished", re);
+                                }
+                            }
+
+                            @Override
+                            public void onWriteFailed(CharSequence error) {
+                                synchronized (mLock) {
+                                    mLayoutOrWriteCancellation = null;
+                                }
+                                // Close before notifying the other end. We want
+                                // to be ready by the time we announce it.
+                                IoUtils.closeQuietly(fd);
+                                try {
+                                    callback.onWriteFailed(error, sequence);
+                                } catch (RemoteException re) {
+                                    Log.e(LOG_TAG, "Error calling onWriteFailed", re);
+                                }
+                            }
+
+                            @Override
+                            public void onWriteCancelled() {
+                                synchronized (mLock) {
+                                    mLayoutOrWriteCancellation = null;
+                                }
+                                // Just close the fd for now.
+                                IoUtils.closeQuietly(fd);
+                            }
+                        });
                     } break;
 
                     case MSG_FINISH: {
@@ -343,69 +434,6 @@ public final class PrintManager {
                                 + message.what);
                     }
                 }
-            }
-        }
-    }
-
-    private static final class WriteResultCallbackWrapper extends WriteResultCallback {
-
-        private final IWriteResultCallback mWrappedCallback;
-        private final FileDescriptor mFd;
-
-        public WriteResultCallbackWrapper(IWriteResultCallback callback,
-                FileDescriptor fd) {
-            mWrappedCallback = callback;
-            mFd = fd;
-        }
-
-        @Override
-        public void onWriteFinished(List<PageRange> pages) {
-            try {
-                // Close before notifying the other end. We want
-                // to be ready by the time we announce it.
-                IoUtils.closeQuietly(mFd);
-                mWrappedCallback.onWriteFinished(pages);
-            } catch (RemoteException re) {
-                Log.e(LOG_TAG, "Error calling onWriteFinished", re);
-            }
-        }
-
-        @Override
-        public void onWriteFailed(CharSequence error) {
-            try {
-                // Close before notifying the other end. We want
-                // to be ready by the time we announce it.
-                IoUtils.closeQuietly(mFd);
-                mWrappedCallback.onWriteFailed(error);
-            } catch (RemoteException re) {
-                Log.e(LOG_TAG, "Error calling onWriteFailed", re);
-            }
-        }
-    }
-
-    private static final class LayoutResultCallbackWrapper extends LayoutResultCallback {
-
-        private final ILayoutResultCallback mWrappedCallback;
-
-        public LayoutResultCallbackWrapper(ILayoutResultCallback callback) {
-            mWrappedCallback = callback;
-        }
-
-        @Override
-        public void onLayoutFinished(PrintDocumentInfo info, boolean changed) {
-            try {
-                mWrappedCallback.onLayoutFinished(info, changed);
-            } catch (RemoteException re) {
-                Log.e(LOG_TAG, "Error calling onLayoutFinished", re);
-            }
-        }
-
-        @Override
-        public void onLayoutFailed(CharSequence error) {
-            try {
-                mWrappedCallback.onLayoutFailed(error);
-            } catch (RemoteException re) {
-                Log.e(LOG_TAG, "Error calling onLayoutFailed", re);
             }
         }
     }

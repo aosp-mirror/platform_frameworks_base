@@ -61,6 +61,9 @@ public final class PrintJob {
      * @return The print job info.
      */
     public PrintJobInfo getInfo() {
+        if (isInImmutableState()) {
+            return mCachedInfo;
+        }
         PrintJobInfo info = null;
         try {
             info = mPrintServiceClient.getPrintJobInfo(mCachedInfo.getId());
@@ -182,6 +185,9 @@ public final class PrintJob {
      * @return True if the tag was set, false otherwise.
      */
     public boolean setTag(String tag) {
+        if (isInImmutableState()) {
+            return false;
+        }
         try {
             return mPrintServiceClient.setPrintJobTag(mCachedInfo.getId(), tag);
         } catch (RemoteException re) {
@@ -208,6 +214,12 @@ public final class PrintJob {
     @Override
     public int hashCode() {
         return mCachedInfo.getId();
+    }
+
+    private boolean isInImmutableState() {
+        final int state = mCachedInfo.getState();
+        return state == PrintJobInfo.STATE_COMPLETED
+                || state == PrintJobInfo.STATE_CANCELED;
     }
 
     private boolean setState(int state) {

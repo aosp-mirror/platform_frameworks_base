@@ -77,7 +77,6 @@ public final class PrintAttributes implements Parcelable {
     private int mColorMode;
     private int mFittingMode;
     private int mOrientation;
-    private int mCopies;
 
     PrintAttributes() {
         /* hide constructor */
@@ -93,7 +92,6 @@ public final class PrintAttributes implements Parcelable {
         mColorMode = parcel.readInt();
         mFittingMode = parcel.readInt();
         mOrientation = parcel.readInt();
-        mCopies = parcel.readInt();
     }
 
     /**
@@ -302,29 +300,6 @@ public final class PrintAttributes implements Parcelable {
         mOrientation = orientation;
     }
 
-    /**
-     * Gets the number of copies.
-     *
-     * @return The number of copies or zero if not set.
-     */
-    public int getCopies() {
-        return mCopies;
-    }
-
-    /**
-     * Sets the number of copies.
-     *
-     * @param copyCount The number of copies.
-     *
-     * @hide
-     */
-    public void setCopies(int copyCount) {
-        if (copyCount < 1) {
-            throw new IllegalArgumentException("Copies must be more than one.");
-        }
-        mCopies = copyCount;
-    }
-
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         if (mMediaSize != null) {
@@ -361,12 +336,106 @@ public final class PrintAttributes implements Parcelable {
         parcel.writeInt(mColorMode);
         parcel.writeInt(mFittingMode);
         parcel.writeInt(mOrientation);
-        parcel.writeInt(mCopies);
     }
 
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + mColorMode;
+        result = prime * result + mDuplexMode;
+        result = prime * result + mFittingMode;
+        result = prime * result + mOrientation;
+        result = prime * result + ((mInputTray == null) ? 0 : mInputTray.hashCode());
+        result = prime * result + ((mMargins == null) ? 0 : mMargins.hashCode());
+        result = prime * result + ((mMediaSize == null) ? 0 : mMediaSize.hashCode());
+        result = prime * result + ((mOutputTray == null) ? 0 : mOutputTray.hashCode());
+        result = prime * result + ((mResolution == null) ? 0 : mResolution.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        PrintAttributes other = (PrintAttributes) obj;
+        if (mColorMode != other.mColorMode) {
+            return false;
+        }
+        if (mDuplexMode != other.mDuplexMode) {
+            return false;
+        }
+        if (mFittingMode != other.mFittingMode) {
+            return false;
+        }
+        if (mOrientation != other.mOrientation) {
+            return false;
+        }
+        if (mInputTray == null) {
+            if (other.mInputTray != null) {
+                return false;
+            }
+        } else if (!mInputTray.equals(other.mInputTray)) {
+            return false;
+        }
+        if (mOutputTray == null) {
+            if (other.mOutputTray != null) {
+                return false;
+            }
+        } else if (!mOutputTray.equals(other.mOutputTray)) {
+            return false;
+        }
+        if (mMargins == null) {
+            if (other.mMargins != null) {
+                return false;
+            }
+        } else if (!mMargins.equals(other.mMargins)) {
+            return false;
+        }
+        if (mMediaSize == null) {
+            if (other.mMediaSize != null) {
+                return false;
+            }
+        } else if (!mMediaSize.equals(other.mMediaSize)) {
+            return false;
+        }
+        if (mResolution == null) {
+            if (other.mResolution != null) {
+                return false;
+            }
+        } else if (!mResolution.equals(other.mResolution)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("PrintAttributes{");
+        builder.append("mediaSize: ").append(mMediaSize);
+        builder.append(", resolution: ").append(mResolution);
+        builder.append(", margins: ").append(mMargins);
+        builder.append(", inputTray: ").append(mInputTray);
+        builder.append(", outputTray: ").append(mOutputTray);
+        builder.append(", colorMode: ").append(colorModeToString(mColorMode));
+        builder.append(", duplexMode: ").append(duplexModeToString(mDuplexMode));
+        builder.append(", fittingMode: ").append(fittingModeToString(mFittingMode));
+        builder.append(", orientation: ").append(orientationToString(mOrientation));
+        builder.append("}");
+        return builder.toString();
     }
 
     /** hide */
@@ -380,7 +449,6 @@ public final class PrintAttributes implements Parcelable {
         mColorMode = 0;
         mFittingMode = 0;
         mOrientation = 0;
-        mCopies = 0;
     }
 
     /**
@@ -396,7 +464,6 @@ public final class PrintAttributes implements Parcelable {
         mColorMode = other.mColorMode;
         mFittingMode = other.mFittingMode;
         mOrientation = other.mOrientation;
-        mCopies = other.mCopies;
     }
 
     /**
@@ -954,6 +1021,44 @@ public final class PrintAttributes implements Parcelable {
         }
 
         @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((mId == null) ? 0 : mId.hashCode());
+            result = prime * result + ((mLabel == null) ? 0 : mLabel.hashCode());
+            result = prime * result + mWidthMils;
+            result = prime * result + mHeightMils;
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            MediaSize other = (MediaSize) obj;
+            if (!TextUtils.equals(mId, other.mId)) {
+                return false;
+            }
+            if (!TextUtils.equals(mLabel, other.mLabel)) {
+                return false;
+            }
+            if (mWidthMils != other.mWidthMils) {
+                return false;
+            }
+            if (mHeightMils != other.mHeightMils) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
             builder.append("MediaSize{");
@@ -1058,6 +1163,44 @@ public final class PrintAttributes implements Parcelable {
                     parcel.readCharSequence(),
                     parcel.readInt(),
                     parcel.readInt());
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((mId == null) ? 0 : mId.hashCode());
+            result = prime * result + ((mLabel == null) ? 0 : mLabel.hashCode());
+            result = prime * result + mHorizontalDpi;
+            result = prime * result + mVerticalDpi;
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            Resolution other = (Resolution) obj;
+            if (!TextUtils.equals(mId, other.mId)) {
+                return false;
+            }
+            if (!TextUtils.equals(mLabel, other.mLabel)) {
+                return false;
+            }
+            if (mHorizontalDpi != other.mHorizontalDpi) {
+                return false;
+            }
+            if (mVerticalDpi != other.mVerticalDpi) {
+                return false;
+            }
+            return true;
         }
 
         @Override
@@ -1166,6 +1309,44 @@ public final class PrintAttributes implements Parcelable {
         }
 
         @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + mBottomMils;
+            result = prime * result + mLeftMils;
+            result = prime * result + mRightMils;
+            result = prime * result + mTopMils;
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            Margins other = (Margins) obj;
+            if (mBottomMils != other.mBottomMils) {
+                return false;
+            }
+            if (mLeftMils != other.mLeftMils) {
+                return false;
+            }
+            if (mRightMils != other.mRightMils) {
+                return false;
+            }
+            if (mTopMils != other.mTopMils) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
             builder.append("Margins{");
@@ -1235,6 +1416,36 @@ public final class PrintAttributes implements Parcelable {
         }
 
         @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((mId == null) ? 0 : mId.hashCode());
+            result = prime * result + ((mLabel == null) ? 0 : mLabel.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            Tray other = (Tray) obj;
+            if (!TextUtils.equals(mId, other.mId)) {
+                return false;
+            }
+            if (!TextUtils.equals(mLabel, other.mLabel)) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
         public String toString() {
             StringBuilder builder = new StringBuilder();
             builder.append("Tray{");
@@ -1244,21 +1455,6 @@ public final class PrintAttributes implements Parcelable {
             builder.append("}");
             return builder.toString();
         }
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("PrintAttributes{");
-        builder.append("mediaSize: ").append(mMediaSize);
-        builder.append(", resolution: ").append(mResolution);
-        builder.append(", margins: ").append(mMargins);
-        builder.append(", duplexMode: ").append(duplexModeToString(mDuplexMode));
-        builder.append(", colorMode: ").append(colorModeToString(mColorMode));
-        builder.append(", fittingMode: ").append(fittingModeToString(mFittingMode));
-        builder.append(", orientation: ").append(orientationToString(mOrientation));
-        builder.append(", copies: ").append(mCopies);
-        return builder.toString();
     }
 
     private static String duplexModeToString(int duplexMode) {
@@ -1412,7 +1608,7 @@ public final class PrintAttributes implements Parcelable {
          * @see PrintAttributes#DUPLEX_MODE_LONG_EDGE
          */
         public Builder setDuplexMode(int duplexMode) {
-            if (Integer.bitCount(duplexMode) != 1) {
+            if (Integer.bitCount(duplexMode) > 1) {
                 throw new IllegalArgumentException("can specify at most one duplexMode bit.");
             }
             mAttributes.setDuplexMode(duplexMode);
@@ -1467,17 +1663,6 @@ public final class PrintAttributes implements Parcelable {
                 throw new IllegalArgumentException("can specify at most one orientation bit.");
             }
             mAttributes.setOrientation(orientation);
-            return this;
-        }
-
-        /**
-         * Sets the number of copies.
-         *
-         * @param copyCount A greater or equal to zero copy count.
-         * @return This builder.
-         */
-        public Builder setCopyCount(int copyCount) {
-            mAttributes.setCopies(copyCount);
             return this;
         }
 

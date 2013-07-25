@@ -28,9 +28,9 @@ import java.util.List;
  */
 oneway interface IPrintSpoolerCallbacks {
     void onGetPrintJobInfosResult(in List<PrintJobInfo> printJob, int sequence);
-    void onGetPrintJobInfoResult(in PrintJobInfo printJob, int sequence);
     void onCreatePrintJobResult(in PrintJobInfo printJob, int sequence);
     void onCancelPrintJobResult(boolean canceled, int sequence);
     void onSetPrintJobStateResult(boolean success, int sequence);
     void onSetPrintJobTagResult(boolean success, int sequence);
+    void onGetPrintJobInfoResult(in PrintJobInfo printJob, int sequence);
 }

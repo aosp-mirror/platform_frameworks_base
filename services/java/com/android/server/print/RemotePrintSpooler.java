@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -54,7 +55,7 @@ final class RemotePrintSpooler {
 
     private static final String LOG_TAG = "RemotePrintSpooler";
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = true && Build.IS_DEBUGGABLE;
 
     private static final long BIND_SPOOLER_SERVICE_TIMEOUT = 10000;
 
@@ -88,6 +89,8 @@ final class RemotePrintSpooler {
 
     private boolean mDestroyed;
 
+    private boolean mCanUnbind;
+
     public static interface PrintSpoolerCallbacks {
         public void onPrintJobQueued(PrintJobInfo printJob);
         public void onStartPrinterDiscovery(IPrinterDiscoveryObserver observer);
@@ -111,6 +114,7 @@ final class RemotePrintSpooler {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
             throwIfDestroyedLocked();
+            mCanUnbind = false;
         }
         if (DEBUG) {
             Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] getPrintJobInfos()");
@@ -122,6 +126,11 @@ final class RemotePrintSpooler {
             Slog.e(LOG_TAG, "Error getting print jobs.", re);
         } catch (TimeoutException te) {
             Slog.e(LOG_TAG, "Error getting print jobs.", te);
+        } finally {
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
         }
         return null;
     }
@@ -131,6 +140,7 @@ final class RemotePrintSpooler {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
             throwIfDestroyedLocked();
+            mCanUnbind = false;
         }
         if (DEBUG) {
             Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] createPrintJob()");
@@ -142,6 +152,11 @@ final class RemotePrintSpooler {
             Slog.e(LOG_TAG, "Error creating print job.", re);
         } catch (TimeoutException te) {
             Slog.e(LOG_TAG, "Error creating print job.", te);
+        } finally {
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
         }
         return null;
     }
@@ -150,6 +165,7 @@ final class RemotePrintSpooler {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
             throwIfDestroyedLocked();
+            mCanUnbind = false;
         }
         if (DEBUG) {
             Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] cancelPrintJob()");
@@ -161,6 +177,11 @@ final class RemotePrintSpooler {
             Slog.e(LOG_TAG, "Error canceling print job.", re);
         } catch (TimeoutException te) {
             Slog.e(LOG_TAG, "Error canceling print job.", te);
+        } finally {
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
         }
         return false;
     }
@@ -169,6 +190,7 @@ final class RemotePrintSpooler {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
             throwIfDestroyedLocked();
+            mCanUnbind = false;
         }
         if (DEBUG) {
             Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] writePrintJobData()");
@@ -183,6 +205,10 @@ final class RemotePrintSpooler {
             // We passed the file descriptor across and now the other
             // side is responsible to close it, so close the local copy.
             IoUtils.closeQuietly(fd);
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
         }
     }
 
@@ -190,6 +216,7 @@ final class RemotePrintSpooler {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
             throwIfDestroyedLocked();
+            mCanUnbind = false;
         }
         if (DEBUG) {
             Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] getPrintJobInfo()");
@@ -201,6 +228,11 @@ final class RemotePrintSpooler {
             Slog.e(LOG_TAG, "Error getting print job info.", re);
         } catch (TimeoutException te) {
             Slog.e(LOG_TAG, "Error getting print job info.", te);
+        } finally {
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
         }
         return null;
     }
@@ -209,6 +241,7 @@ final class RemotePrintSpooler {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
             throwIfDestroyedLocked();
+            mCanUnbind = false;
         }
         if (DEBUG) {
             Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] setPrintJobState()");
@@ -220,6 +253,11 @@ final class RemotePrintSpooler {
             Slog.e(LOG_TAG, "Error setting print job state.", re);
         } catch (TimeoutException te) {
             Slog.e(LOG_TAG, "Error setting print job state.", te);
+        } finally {
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
         }
         return false;
     }
@@ -228,6 +266,7 @@ final class RemotePrintSpooler {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
             throwIfDestroyedLocked();
+            mCanUnbind = false;
         }
         if (DEBUG) {
             Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] setPrintJobTag()");
@@ -239,6 +278,11 @@ final class RemotePrintSpooler {
             Slog.e(LOG_TAG, "Error setting print job tag.", re);
         } catch (TimeoutException te) {
             Slog.e(LOG_TAG, "Error setting print job tag.", te);
+        } finally {
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
         }
         return false;
     }
@@ -247,6 +291,7 @@ final class RemotePrintSpooler {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
             throwIfDestroyedLocked();
+            mCanUnbind = false;
         }
         if (DEBUG) {
             Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier()
@@ -258,6 +303,11 @@ final class RemotePrintSpooler {
             Slog.e(LOG_TAG, "Error asking for active print job notification.", re);
         } catch (TimeoutException te) {
             Slog.e(LOG_TAG, "Error asking for active print job notification.", te);
+        } finally {
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
         }
     }
 
@@ -270,6 +320,7 @@ final class RemotePrintSpooler {
             throwIfDestroyedLocked();
             unbindLocked();
             mDestroyed = true;
+            mCanUnbind = false;
         }
     }
 
@@ -314,15 +365,29 @@ final class RemotePrintSpooler {
                 /* ignore */
             }
         }
+
+        mCanUnbind = true;
+        mLock.notifyAll();
     }
 
     private void unbindLocked() {
-        if (DEBUG) {
-            Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] unbindLocked()");
+        while (true) {
+            if (mCanUnbind) {
+                if (DEBUG) {
+                    Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] unbindLocked()");
+                }
+                clearClientLocked();
+                mRemoteInstance = null;
+                mContext.unbindService(mServiceConnection);
+                return;
+            }
+            try {
+                mLock.wait();
+            } catch (InterruptedException ie) {
+                /* ignore */
+            }
         }
-        clearClientLocked();
-        mRemoteInstance = null;
-        mContext.unbindService(mServiceConnection);
+
     }
 
     private void setClientLocked() {

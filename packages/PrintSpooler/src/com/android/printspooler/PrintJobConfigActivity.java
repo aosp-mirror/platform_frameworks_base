@@ -24,9 +24,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -34,24 +32,27 @@ import android.os.IBinder.DeathRecipient;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
-import android.os.UserHandle;
+import android.print.ILayoutResultCallback;
 import android.print.IPrintDocumentAdapter;
 import android.print.IPrinterDiscoveryObserver;
+import android.print.IWriteResultCallback;
 import android.print.PageRange;
 import android.print.PrintAttributes;
 import android.print.PrintAttributes.MediaSize;
-import android.print.PrintDocumentAdapter.LayoutResultCallback;
-import android.print.PrintDocumentAdapter.WriteResultCallback;
+import android.print.PrintDocumentAdapter;
 import android.print.PrintDocumentInfo;
 import android.print.PrintJobInfo;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
 import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextUtils.SimpleStringSplitter;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Choreographer;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -64,10 +65,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,14 +80,30 @@ import java.util.regex.Pattern;
  */
 public class PrintJobConfigActivity extends Activity {
 
-    private static final boolean DEBUG = false;
+    private static final String LOG_TAG = "PrintJobConfigActivity";
 
-    private static final String LOG_TAG = PrintJobConfigActivity.class.getSimpleName();
+    private static final boolean DEBUG = true && Build.IS_DEBUGGABLE;
 
-    public static final String EXTRA_PRINTABLE = "printable";
-    public static final String EXTRA_APP_ID = "appId";
-    public static final String EXTRA_ATTRIBUTES = "attributes";
+    private static final boolean LIVE_PREVIEW_SUPPORTED = false;
+
+    public static final String EXTRA_PRINT_DOCUMENT_ADAPTER = "printDocumentAdapter";
+    public static final String EXTRA_PRINT_ATTRIBUTES = "printAttributes";
     public static final String EXTRA_PRINT_JOB_ID = "printJobId";
+
+    private static final int CONTROLLER_STATE_INITIALIZED = 1;
+    private static final int CONTROLLER_STATE_STARTED = 2;
+    private static final int CONTROLLER_STATE_LAYOUT_STARTED = 3;
+    private static final int CONTROLLER_STATE_LAYOUT_COMPLETED = 4;
+    private static final int CONTROLLER_STATE_WRITE_STARTED = 5;
+    private static final int CONTROLLER_STATE_WRITE_COMPLETED = 6;
+    private static final int CONTROLLER_STATE_FINISHED = 7;
+    private static final int CONTROLLER_STATE_FAILED = 8;
+    private static final int CONTROLLER_STATE_CANCELLED = 9;
+
+    private static final int EDITOR_STATE_INITIALIZED = 1;
+    private static final int EDITOR_STATE_CONFIRMED_PRINT = 2;
+    private static final int EDITOR_STATE_CONFIRMED_PREVIEW = 3;
+    private static final int EDITOR_STATE_CANCELLED = 4;
 
     private static final int MIN_COPIES = 1;
 
@@ -95,30 +115,11 @@ public class PrintJobConfigActivity extends Activity {
     private static final Pattern PATTERN_PAGE_RANGE = Pattern.compile(
             "([0-9]+[\\s]*[\\-]?[\\s]*[0-9]*[\\s]*[,]?[\\s]*)+");
 
-    private final PrintSpooler mPrintSpooler = PrintSpooler.getInstance(this);
-
-    private Handler mHandler;
-
-    private Editor mEditor;
-
-    private IPrinterDiscoveryObserver mPrinterDiscoveryObserver;
-
-    private int mAppId;
-    private int mPrintJobId;
+    public static final PageRange[] ALL_PAGES_ARRAY = new PageRange[] {PageRange.ALL_PAGES};
 
     private final PrintAttributes mOldPrintAttributes = new PrintAttributes.Builder().create();
     private final PrintAttributes mCurrPrintAttributes = new PrintAttributes.Builder().create();
     private final PrintAttributes mTempPrintAttributes = new PrintAttributes.Builder().create();
-
-    private RemotePrintDocumentAdapter mRemotePrintAdapter;
-
-    private boolean mPrintConfirmed;
-
-    private boolean mStarted;
-
-    private IBinder mIPrintDocumentAdapter;
-
-    private PrintDocumentInfo mPrintDocumentInfo;
 
     private final DeathRecipient mDeathRecipient = new DeathRecipient() {
         @Override
@@ -127,369 +128,484 @@ public class PrintJobConfigActivity extends Activity {
         }
     };
 
-    @Override
-    protected void onDestroy() {
-        mIPrintDocumentAdapter.unlinkToDeath(mDeathRecipient, 0);
-        super.onDestroy();
-    }
+    private PrintSpooler mSpooler;
+    private Editor mEditor;
+    private Document mDocument;
+    private PrintController mController;
+    private PrinterDiscoveryObserver mPrinterDiscoveryObserver;
+
+    private int mPrintJobId;
+
+    private IBinder mIPrintDocumentAdapter;
 
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContentView(R.layout.print_job_config_activity);
 
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
-                | WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
-        mHandler = new MyHandler(Looper.getMainLooper());
+        Bundle extras = getIntent().getExtras();
+
+        mPrintJobId = extras.getInt(EXTRA_PRINT_JOB_ID, -1);
+        if (mPrintJobId < 0) {
+            throw new IllegalArgumentException("Invalid print job id: " + mPrintJobId);
+        }
+
+        mIPrintDocumentAdapter = extras.getBinder(EXTRA_PRINT_DOCUMENT_ADAPTER);
+        if (mIPrintDocumentAdapter == null) {
+            throw new IllegalArgumentException("PrintDocumentAdapter cannot be null");
+        }
+
+        PrintAttributes attributes = getIntent().getParcelableExtra(EXTRA_PRINT_ATTRIBUTES);
+        if (attributes != null) {
+            mCurrPrintAttributes.copyFrom(attributes);
+        }
+
+        mSpooler = PrintSpooler.getInstance(this);
         mEditor = new Editor();
+        mDocument = new Document();
+        mController = new PrintController(new RemotePrintDocumentAdapter(
+                IPrintDocumentAdapter.Stub.asInterface(mIPrintDocumentAdapter),
+                mSpooler.generateFileForPrintJob(mPrintJobId)));
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mPrintSpooler.startPrinterDiscovery(mPrinterDiscoveryObserver);
-        notifyPrintableStartIfNeeded();
+        try {
+            mIPrintDocumentAdapter.linkToDeath(mDeathRecipient, 0);
+        } catch (RemoteException re) {
+            finish();
+            return;
+        }
+        mController.initialize();
+        mEditor.initialize();
+        mPrinterDiscoveryObserver = new PrinterDiscoveryObserver(mEditor, getMainLooper());
+        mSpooler.startPrinterDiscovery(mPrinterDiscoveryObserver);
     }
 
     @Override
     protected void onPause() {
-        super.onPause();
-        mPrintSpooler.stopPrinterDiscovery();
-        notifyPrintableFinishIfNeeded();
-    }
-
-    private void notifyPrintableStartIfNeeded() {
-        if (mEditor.getCurrentPrinter() == null
-                || mStarted) {
-            return;
-        }
-        mStarted = true;
-        mRemotePrintAdapter.start();
-    }
-
-    private void updatePrintableContentIfNeeded() {
-        if (!mStarted) {
-            return;
-        }
-
-        mPrintSpooler.setPrintJobAttributes(mPrintJobId, mCurrPrintAttributes);
-
-        mRemotePrintAdapter.cancel();
-        mHandler.removeMessages(MyHandler.MSG_ON_LAYOUT_FINISHED);
-        mHandler.removeMessages(MyHandler.MSG_ON_LAYOUT_FAILED);
-
-        // TODO: Implement setting the print preview attribute
-        mRemotePrintAdapter.layout(mOldPrintAttributes,
-                mCurrPrintAttributes, new LayoutResultCallback() {
-            @Override
-            public void onLayoutFinished(PrintDocumentInfo info, boolean changed) {
-                mHandler.obtainMessage(MyHandler.MSG_ON_LAYOUT_FINISHED, changed ? 1 : 0,
-                        0, info).sendToTarget();
-            }
-
-            @Override
-            public void onLayoutFailed(CharSequence error) {
-                mHandler.obtainMessage(MyHandler.MSG_ON_LAYOUT_FAILED, error).sendToTarget();
-            }
-        }, new Bundle());
-    }
-
-    private void handleOnLayoutFinished(PrintDocumentInfo info, boolean changed) {
-        mPrintDocumentInfo = info;
-
-        mEditor.updateUiIfNeeded();
-
-        // TODO: Handle the case of unchanged content
-        mPrintSpooler.setPrintJobPrintDocumentInfo(mPrintJobId, info);
-
-        // TODO: Implement page selector.
-        final List<PageRange> pages = new ArrayList<PageRange>();
-        pages.add(PageRange.ALL_PAGES);
-
-        mRemotePrintAdapter.write(pages, new WriteResultCallback() {
-            @Override
-            public void onWriteFinished(List<PageRange> pages) {
-                mHandler.obtainMessage(MyHandler.MSG_ON_WRITE_FINISHED, pages).sendToTarget();
-            }
-
-            @Override
-            public void onWriteFailed(CharSequence error) {
-                mHandler.obtainMessage(MyHandler.MSG_ON_WRITE_FAILED, error).sendToTarget();
-            }
-        });
-    }
-
-    private void handleOnLayoutFailed(CharSequence error) {
-        Log.e(LOG_TAG, "Error during layout: " + error);
-        finishActivity(Activity.RESULT_CANCELED);
-    }
-
-    private void handleOnWriteFinished(List<PageRange> pages) {
-        // TODO: Now we have to allow the preview button
-        mEditor.updatePrintPreview(mRemotePrintAdapter.getFile());
-    }
-
-    private void handleOnWriteFailed(CharSequence error) {
-        Log.e(LOG_TAG, "Error write layout: " + error);
-        finishActivity(Activity.RESULT_CANCELED);
-    }
-
-    private void notifyPrintableFinishIfNeeded() {
-        if (!mStarted) {
-            return;
-        }
-
-        if (!mPrintConfirmed) {
-            mRemotePrintAdapter.cancel();
-        }
-        mRemotePrintAdapter.finish();
-
-        PrinterInfo printer = mEditor.getCurrentPrinter();
-        // If canceled or no printer, nothing to do.
-        if (!mPrintConfirmed || printer == null) {
-            // Update the print job's status.
-            mPrintSpooler.setPrintJobState(mPrintJobId,
+        mSpooler.stopPrinterDiscovery();
+        mPrinterDiscoveryObserver.destroy();
+        mPrinterDiscoveryObserver = null;
+        if (mController.isCancelled() || mController.isFailed()) {
+            mSpooler.setPrintJobState(mPrintJobId,
                     PrintJobInfo.STATE_CANCELED);
-            return;
-        }
-
-        // Update the print job's printer.
-        mPrintSpooler.setPrintJobPrinterId(mPrintJobId, printer.getId());
-
-        // Update the print job's status.
-        mPrintSpooler.setPrintJobState(mPrintJobId,
-                PrintJobInfo.STATE_QUEUED);
-
-        if (DEBUG) {
-            if (mPrintConfirmed) {
-                File file = mRemotePrintAdapter.getFile();
-                if (file.exists()) {
-                    new ViewSpooledFileAsyncTask(file).executeOnExecutor(
-                          AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
+        } else if (mController.hasStarted()) {
+            mController.finish();
+            if (mEditor.isPrintConfirmed()) {
+                if (mController.isFinished()) {
+                    mSpooler.setPrintJobState(mPrintJobId,
+                            PrintJobInfo.STATE_QUEUED);
+                } else {
+                    mSpooler.setPrintJobState(mPrintJobId,
+                            PrintJobInfo.STATE_CANCELED);
                 }
             }
         }
+        mIPrintDocumentAdapter.unlinkToDeath(mDeathRecipient, 0);
+        super.onPause();
     }
 
-    private boolean hasPdfViewer() {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setType("application/pdf");
-        return !getPackageManager().queryIntentActivities(intent,
-                PackageManager.MATCH_DEFAULT_ONLY).isEmpty();
-    }
-
-    // Caution: Use this only for debugging
-    private final class ViewSpooledFileAsyncTask extends AsyncTask<Void, Void, Void> {
-
-        private final File mFile;
-
-        public ViewSpooledFileAsyncTask(File file) {
-            mFile = file;
+    public boolean onTouchEvent(MotionEvent event) {
+        if (!mEditor.isPrintConfirmed() && !mEditor.isPreviewConfirmed()
+                && getWindow().shouldCloseOnTouch(this, event)) {
+            if (!mController.isWorking()) {
+                PrintJobConfigActivity.this.finish();
+            }
+            mEditor.cancel();
+            return true;
         }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            mFile.setExecutable(true, false);
-            mFile.setWritable(true, false);
-            mFile.setReadable(true, false);
-
-            final long identity = Binder.clearCallingIdentity();
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(Uri.fromFile(mFile), "application/pdf");
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivityAsUser(intent, null, UserHandle.CURRENT);
-            Binder.restoreCallingIdentity(identity);
-            return null;
-        }
+        return super.onTouchEvent(event);
     }
 
-    private final class PrintDiscoveryObserver extends IPrinterDiscoveryObserver.Stub {
-        private static final int MESSAGE_ADD_DICOVERED_PRINTERS = 1;
-        private static final int MESSAGE_REMOVE_DICOVERED_PRINTERS = 2;
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            event.startTracking();
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.isTracking()
+                && !event.isCanceled()) {
+            if (!mController.isWorking()) {
+                PrintJobConfigActivity.this.finish();
+            }
+            mEditor.cancel();
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
+    private boolean printAttributesChanged() {
+        return !mOldPrintAttributes.equals(mCurrPrintAttributes);
+    }
+
+    private class PrintController {
+        private final AtomicInteger mRequestCounter = new AtomicInteger();
+
+        private final RemotePrintDocumentAdapter mRemotePrintAdapter;
 
         private final Handler mHandler;
 
-        @SuppressWarnings("unchecked")
-        public PrintDiscoveryObserver(Looper looper) {
-            mHandler = new Handler(looper, null, true) {
-                @Override
-                public void handleMessage(Message message) {
-                    switch (message.what) {
-                        case MESSAGE_ADD_DICOVERED_PRINTERS: {
-                            List<PrinterInfo> printers = (List<PrinterInfo>) message.obj;
-                            mEditor.addPrinters(printers);
-                        } break;
-                        case MESSAGE_REMOVE_DICOVERED_PRINTERS: {
-                            List<PrinterId> printerIds = (List<PrinterId>) message.obj;
-                            mEditor.removePrinters(printerIds);
-                        } break;
-                    }
+        private int mControllerState = CONTROLLER_STATE_INITIALIZED;
+
+        private PageRange[] mRequestedPages;
+
+        private Bundle mMetadata = new Bundle();
+
+        private final ILayoutResultCallback mILayoutResultCallback =
+                new ILayoutResultCallback.Stub() {
+            @Override
+            public void onLayoutFinished(PrintDocumentInfo info, boolean changed, int sequence) {
+                if (mRequestCounter.get() == sequence) {
+                    mHandler.obtainMessage(MyHandler.MSG_ON_LAYOUT_FINISHED, changed ? 1 : 0,
+                            0, info).sendToTarget();
                 }
-            };
-        }
-
-        @Override
-        public void addDiscoveredPrinters(List<PrinterInfo> printers) {
-            mHandler.obtainMessage(MESSAGE_ADD_DICOVERED_PRINTERS, printers).sendToTarget();
-        }
-
-        @Override
-        public void removeDiscoveredPrinters(List<PrinterId> printers) {
-            mHandler.obtainMessage(MESSAGE_REMOVE_DICOVERED_PRINTERS, printers).sendToTarget();
-        }
-    }
-
-    private final class SpinnerItem<T> {
-        final T value;
-        CharSequence label;
-
-        public SpinnerItem(T value, CharSequence label) {
-            this.value = value;
-            this.label = label;
-        }
-
-        public String toString() {
-            return label.toString();
-        }
-    }
-
-    /**
-     * An instance of this class class is intended to be the first focusable
-     * in a layout to which the system automatically gives focus. It performs
-     * some voodoo to avoid the first tap on it to start an edit mode, rather
-     * to bring up the IME, i.e. to get the behavior as if the view was not
-     * focused.
-     */
-    public static final class CustomEditText extends EditText {
-        private boolean mClickedBeforeFocus;
-
-        public CustomEditText(Context context, AttributeSet attrs) {
-            super(context, attrs);
-        }
-
-        @Override
-        public boolean performClick() {
-            super.performClick();
-            if (isFocused() && !mClickedBeforeFocus) {
-                clearFocus();
-                requestFocus();
             }
-            mClickedBeforeFocus = true;
-            return true;
-        }
 
-        @Override
-        public void setError(CharSequence error, Drawable icon) {
-            setCompoundDrawables(null, null, icon, null);
-        }
-
-        protected void onFocusChanged(boolean gainFocus, int direction,
-                Rect previouslyFocusedRect) {
-            if (!gainFocus) {
-                mClickedBeforeFocus = false;
+            @Override
+            public void onLayoutFailed(CharSequence error, int sequence) {
+                if (mRequestCounter.get() == sequence) {
+                    mHandler.obtainMessage(MyHandler.MSG_ON_LAYOUT_FAILED, error).sendToTarget();
+                }
             }
-            super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
+        };
+
+        private IWriteResultCallback mIWriteResultCallback = new IWriteResultCallback.Stub() {
+            @Override
+            public void onWriteFinished(PageRange[] pages, int sequence) {
+                if (mRequestCounter.get() == sequence) {
+                    mHandler.obtainMessage(MyHandler.MSG_ON_WRITE_FINISHED, pages).sendToTarget();
+                }
+            }
+
+            @Override
+            public void onWriteFailed(CharSequence error, int sequence) {
+                if (mRequestCounter.get() == sequence) {
+                    mHandler.obtainMessage(MyHandler.MSG_ON_WRITE_FAILED, error).sendToTarget();
+                }
+            }
+        };
+
+        public PrintController(RemotePrintDocumentAdapter adapter) {
+            mRemotePrintAdapter = adapter;
+            mHandler = new MyHandler(Looper.getMainLooper());
         }
-    }
 
-    private final class MyHandler extends Handler {
-        public static final int MSG_ON_LAYOUT_FINISHED = 1;
-        public static final int MSG_ON_LAYOUT_FAILED = 2;
-        public static final int MSG_ON_WRITE_FINISHED = 3;
-        public static final int MSG_ON_WRITE_FAILED = 4;
-
-        public MyHandler(Looper looper) {
-            super(looper, null, false);
+        public void initialize() {
+            mControllerState = CONTROLLER_STATE_INITIALIZED;
         }
 
-        @Override
-        @SuppressWarnings("unchecked")
-        public void handleMessage(Message message) {
-            switch (message.what) {
-                case MSG_ON_LAYOUT_FINISHED: {
-                    PrintDocumentInfo info = (PrintDocumentInfo) message.obj;
-                    final boolean changed = (message.arg1 == 1);
-                    handleOnLayoutFinished(info, changed);
-                } break;
+        public void cancel() {
+            mControllerState = CONTROLLER_STATE_CANCELLED;
+        }
 
-                case MSG_ON_LAYOUT_FAILED: {
-                    CharSequence error = (CharSequence) message.obj;
-                    handleOnLayoutFailed(error);
-                } break;
+        public boolean isCancelled() {
+            return (mControllerState == CONTROLLER_STATE_CANCELLED);
+        }
 
-                case MSG_ON_WRITE_FINISHED: {
-                    List<PageRange> pages = (List<PageRange>) message.obj;
-                    handleOnWriteFinished(pages);
-                } break;
+        public boolean isFinished() {
+            return (mControllerState == CONTROLLER_STATE_FINISHED);
+        }
 
-                case MSG_ON_WRITE_FAILED: {
-                    CharSequence error = (CharSequence) message.obj;
-                    handleOnWriteFailed(error);
-                } break;
+        public boolean isFailed() {
+            return (mControllerState == CONTROLLER_STATE_FAILED);
+        }
+
+        public boolean hasStarted() {
+            return mControllerState >= CONTROLLER_STATE_STARTED;
+        }
+
+        public boolean hasPerformedLayout() {
+            return mControllerState >= CONTROLLER_STATE_LAYOUT_COMPLETED;
+        }
+
+        public boolean isWorking() {
+            return mControllerState == CONTROLLER_STATE_LAYOUT_STARTED
+                    || mControllerState == CONTROLLER_STATE_WRITE_STARTED;
+        }
+
+        public void start() {
+            mControllerState = CONTROLLER_STATE_STARTED;
+            mRemotePrintAdapter.start();
+        }
+
+        public void update() {
+            if (!printAttributesChanged()) {
+                // If the attributes changes, then we do not do a layout but may
+                // have to ask the app to write some pages. Hence, pretend layout
+                // completed and nothing changed, so we handle writing as usual.
+                handleOnLayoutFinished(mDocument.info, false);
+            } else {
+                mSpooler.setPrintJobAttributesNoPersistence(mPrintJobId, mCurrPrintAttributes);
+
+                mMetadata.putBoolean(PrintDocumentAdapter.METADATA_KEY_PRINT_PREVIEW,
+                        !mEditor.isPrintConfirmed());
+
+                mControllerState = CONTROLLER_STATE_LAYOUT_STARTED;
+
+                mRemotePrintAdapter.layout(mOldPrintAttributes, mCurrPrintAttributes,
+                        mILayoutResultCallback, mMetadata, mRequestCounter.incrementAndGet());
+
+                mOldPrintAttributes.copyFrom(mCurrPrintAttributes);
             }
         }
+
+        public void finish() {
+            mControllerState = CONTROLLER_STATE_FINISHED;
+            mRemotePrintAdapter.finish();
+        }
+
+        private void handleOnLayoutFinished(PrintDocumentInfo info, boolean layoutChanged) {
+            if (isCancelled()) {
+                if (mEditor.isDone()) {
+                    PrintJobConfigActivity.this.finish();
+                }
+                return;
+            }
+
+            mControllerState = CONTROLLER_STATE_LAYOUT_COMPLETED;
+
+            // If the info changed, we update the document and the print job,
+            // and update the UI since the the page range selection may have
+            // become invalid.
+            final boolean infoChanged = !info.equals(mDocument.info);
+            if (infoChanged) {
+                mDocument.info = info;
+                mSpooler.setPrintJobPrintDocumentInfoNoPersistence(mPrintJobId, info);
+                mEditor.updateUi();
+            }
+
+            // If the document info or the layout changed, then
+            // drop the pages since we have to fetch them again.
+            if (infoChanged || layoutChanged) {
+                mDocument.pages = null;
+            }
+
+            // No pages means that the user selected an invalid range while we
+            // were doing a layout or the layout returned a document info for
+            // which the selected range is invalid. In such a case we do not
+            // write anything and wait for the user to fix the range which will
+            // trigger an update.
+            mRequestedPages = mEditor.getRequestedPages();
+            if (mRequestedPages == null) {
+                if (mEditor.isDone()) {
+                    PrintJobConfigActivity.this.finish();
+                }
+                return;
+            }
+
+            // If the info and the layout did not change and we already have
+            // the requested pages, then nothing else to do.
+            if (!infoChanged && !layoutChanged
+                    && PageRangeUtils.contains(mDocument.pages, mRequestedPages)) {
+                if (mEditor.isDone()) {
+                    PrintJobConfigActivity.this.finish();
+                }
+                return;
+            }
+
+            // If we do not support live preview and the current layout is
+            // not for preview purposes, i.e. the user did not poke the
+            // preview button, then just skip the write.
+            if (!LIVE_PREVIEW_SUPPORTED && !mEditor.isPreviewConfirmed()
+                    && mMetadata.getBoolean(PrintDocumentAdapter.METADATA_KEY_PRINT_PREVIEW)) {
+                if (mEditor.isDone()) {
+                    PrintJobConfigActivity.this.finish();
+                }
+                return;
+            }
+
+            // Request a write of the pages of interest.
+            mControllerState = CONTROLLER_STATE_WRITE_STARTED;
+            mRemotePrintAdapter.write(mRequestedPages, mIWriteResultCallback,
+                    mRequestCounter.incrementAndGet());
+        }
+
+        private void handleOnLayoutFailed(CharSequence error) {
+            mControllerState = CONTROLLER_STATE_FAILED;
+            // TODO: We need some UI for announcing an error.
+            Log.e(LOG_TAG, "Error during layout: " + error);
+            PrintJobConfigActivity.this.finish();
+        }
+
+        private void handleOnWriteFinished(PageRange[] pages) {
+            if (isCancelled()) {
+                if (mEditor.isDone()) {
+                    PrintJobConfigActivity.this.finish();
+                }
+                return;
+            }
+
+            mControllerState = CONTROLLER_STATE_WRITE_COMPLETED;
+
+            // Update which pages we have fetched.
+            mDocument.pages = PageRangeUtils.normalize(pages);
+
+            if (DEBUG) {
+                Log.i(LOG_TAG, "Requested: " + Arrays.toString(mRequestedPages)
+                        + " and got: " + Arrays.toString(mDocument.pages));
+            }
+
+            // Adjust the print job pages based on what was requested and written.
+            // The cases are ordered in the most expected to the least expected.
+            if (Arrays.equals(mDocument.pages, mRequestedPages)) {
+                // We got a document with exactly the pages we wanted. Hence,
+                // the printer has to print all pages in the data.
+                mSpooler.setPrintJobPagesNoPersistence(mPrintJobId, ALL_PAGES_ARRAY);
+            } else if (Arrays.equals(mDocument.pages, ALL_PAGES_ARRAY)) {
+                // We requested specific pages but got all of them. Hence,
+                // the printer has to print only the requested pages.
+                mSpooler.setPrintJobPagesNoPersistence(mPrintJobId, mRequestedPages);
+            } else if (PageRangeUtils.contains(mDocument.pages, mRequestedPages)) {
+                // We requested specific pages and got more but not all pages.
+                // Hence, we have to offset appropriately the printed pages to
+                // exclude the pages we did not request. Note that pages is
+                // guaranteed to be not null and not empty.
+                final int offset = mDocument.pages[0].getStart() - pages[0].getStart();
+                PageRange[] offsetPages = Arrays.copyOf(mDocument.pages, mDocument.pages.length);
+                PageRangeUtils.offsetStart(offsetPages, offset);
+                mSpooler.setPrintJobPagesNoPersistence(mPrintJobId, offsetPages);
+            } else if (Arrays.equals(mRequestedPages, ALL_PAGES_ARRAY)
+                    && mDocument.pages.length == 1 && mDocument.pages[0].getStart() == 0
+                    && mDocument.pages[0].getEnd() == mDocument.info.getPageCount() - 1) {
+                // We requested all pages via the special constant and got all
+                // of them as an explicit enumeration. Hence, the printer has
+                // to print only the requested pages.
+                mSpooler.setPrintJobPagesNoPersistence(mPrintJobId, mDocument.pages);
+            } else {
+                // We did not get the pages we requested, then the application
+                // misbehaves, so we fail quickly.
+                // TODO: We need some UI for announcing an error.
+                mControllerState = CONTROLLER_STATE_FAILED;
+                Log.e(LOG_TAG, "Received invalid pages from the app");
+                PrintJobConfigActivity.this.finish();
+            }
+
+            if (mEditor.isDone()) {
+                PrintJobConfigActivity.this.finish();
+            }
+        }
+
+        private void handleOnWriteFailed(CharSequence error) {
+            mControllerState = CONTROLLER_STATE_FAILED;
+            Log.e(LOG_TAG, "Error during write: " + error);
+            PrintJobConfigActivity.this.finish();
+        }
+
+        private final class MyHandler extends Handler {
+            public static final int MSG_ON_LAYOUT_FINISHED = 1;
+            public static final int MSG_ON_LAYOUT_FAILED = 2;
+            public static final int MSG_ON_WRITE_FINISHED = 3;
+            public static final int MSG_ON_WRITE_FAILED = 4;
+
+            public MyHandler(Looper looper) {
+                super(looper, null, false);
+            }
+
+            @Override
+            public void handleMessage(Message message) {
+                switch (message.what) {
+                    case MSG_ON_LAYOUT_FINISHED: {
+                        PrintDocumentInfo info = (PrintDocumentInfo) message.obj;
+                        final boolean changed = (message.arg1 == 1);
+                        mController.handleOnLayoutFinished(info, changed);
+                    } break;
+
+                    case MSG_ON_LAYOUT_FAILED: {
+                        CharSequence error = (CharSequence) message.obj;
+                        mController.handleOnLayoutFailed(error);
+                    } break;
+
+                    case MSG_ON_WRITE_FINISHED: {
+                        PageRange[] pages = (PageRange[]) message.obj;
+                        mController.handleOnWriteFinished(pages);
+                    } break;
+
+                    case MSG_ON_WRITE_FAILED: {
+                        CharSequence error = (CharSequence) message.obj;
+                        mController.handleOnWriteFailed(error);
+                    } break;
+                }
+            }
+        }
     }
 
-    private class Editor {
-        private EditText mCopiesEditText;
+    private final class Editor {
+        private final EditText mCopiesEditText;
 
-        private EditText mRangeEditText;
+        private final TextView mRangeTitle;
+        private final EditText mRangeEditText;
 
-        private Spinner mDestinationSpinner;
-        public ArrayAdapter<SpinnerItem<PrinterInfo>> mDestinationSpinnerAdapter;
+        private final Spinner mDestinationSpinner;
+        private final ArrayAdapter<SpinnerItem<PrinterInfo>> mDestinationSpinnerAdapter;
 
-        private Spinner mMediaSizeSpinner;
-        public ArrayAdapter<SpinnerItem<MediaSize>> mMediaSizeSpinnerAdapter;
+        private final Spinner mMediaSizeSpinner;
+        private final ArrayAdapter<SpinnerItem<MediaSize>> mMediaSizeSpinnerAdapter;
 
-        private Spinner mColorModeSpinner;
-        public ArrayAdapter<SpinnerItem<Integer>> mColorModeSpinnerAdapter;
+        private final Spinner mColorModeSpinner;
+        private final ArrayAdapter<SpinnerItem<Integer>> mColorModeSpinnerAdapter;
 
-        private Spinner mOrientationSpinner;
-        public ArrayAdapter<SpinnerItem<Integer>> mOrientationSpinnerAdapter;
+        private final Spinner mOrientationSpinner;
+        private final  ArrayAdapter<SpinnerItem<Integer>> mOrientationSpinnerAdapter;
 
-        private Spinner mRangeOptionsSpinner;
-        public ArrayAdapter<SpinnerItem<Integer>> mRangeOptionsSpinnerAdapter;
+        private final Spinner mRangeOptionsSpinner;
+        private final ArrayAdapter<SpinnerItem<Integer>> mRangeOptionsSpinnerAdapter;
 
-        private Button mPrintPreviewButton;
+        private final SimpleStringSplitter mStringCommaSplitter =
+                new SimpleStringSplitter(',');
 
-        private Button mPrintButton;
+        private final Button mPrintPreviewButton;
+
+        private final Button mPrintButton;
 
         private final OnItemSelectedListener mOnItemSelectedListener =
                 new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> spinner, View view, int position, long id) {
                 if (spinner == mDestinationSpinner) {
-                    mOldPrintAttributes.copyFrom(mCurrPrintAttributes);
                     mCurrPrintAttributes.clear();
-                    final int selectedIndex = mDestinationSpinner.getSelectedItemPosition();
-                    if (selectedIndex >= 0) {
-                        mDestinationSpinnerAdapter.getItem(selectedIndex).value.getDefaults(
-                                mCurrPrintAttributes);
+                    SpinnerItem<PrinterInfo> dstItem = mDestinationSpinnerAdapter.getItem(position);
+                    if (dstItem != null) {
+                        mSpooler.setPrintJobPrinterIdNoPersistence(mPrintJobId, dstItem.value.getId());
+                        dstItem.value.getDefaults(mCurrPrintAttributes);
                     }
-                    updateUiIfNeeded();
-                    notifyPrintableStartIfNeeded();
-                    updatePrintableContentIfNeeded();
+                    updateUi();
+                    if (!mController.hasStarted()) {
+                        mController.start();
+                    }
+                    if (!hasErrors()) {
+                        mController.update();
+                    }
                 } else if (spinner == mMediaSizeSpinner) {
                     SpinnerItem<MediaSize> mediaItem = mMediaSizeSpinnerAdapter.getItem(position);
-                    mOldPrintAttributes.copyFrom(mCurrPrintAttributes);
                     mCurrPrintAttributes.setMediaSize(mediaItem.value);
-                    updatePrintableContentIfNeeded();
+                    if (!hasErrors()) {
+                        mController.update();
+                    }
                 } else if (spinner == mColorModeSpinner) {
                     SpinnerItem<Integer> colorModeItem =
                             mColorModeSpinnerAdapter.getItem(position);
-                    mOldPrintAttributes.copyFrom(mCurrPrintAttributes);
                     mCurrPrintAttributes.setColorMode(colorModeItem.value);
-                    updatePrintableContentIfNeeded();
+                    if (!hasErrors()) {
+                        mController.update();
+                    }
                 } else if (spinner == mOrientationSpinner) {
                     SpinnerItem<Integer> orientationItem =
                             mOrientationSpinnerAdapter.getItem(position);
-                    mOldPrintAttributes.copyFrom(mCurrPrintAttributes);
                     mCurrPrintAttributes.setOrientation(orientationItem.value);
-                    updatePrintableContentIfNeeded();
+                    if (!hasErrors()) {
+                        mController.update();
+                    }
                 } else if (spinner == mRangeOptionsSpinner) {
-                    updateUiIfNeeded();
-                    updatePrintableContentIfNeeded();
+                    updateUi();
+                    if (!hasErrors()) {
+                        mController.update();
+                    }
                 }
             }
 
@@ -512,19 +628,28 @@ public class PrintJobConfigActivity extends Activity {
 
             @Override
             public void afterTextChanged(Editable editable) {
+                final boolean hadErrors = hasErrors();
+
                 if (editable.length() == 0) {
                     mCopiesEditText.setError("");
-                    mPrintButton.setEnabled(false);
+                    updateUi();
                     return;
                 }
+
                 final int copies = Integer.parseInt(editable.toString());
                 if (copies < MIN_COPIES) {
                     mCopiesEditText.setError("");
-                    mPrintButton.setEnabled(false);
+                    updateUi();
                     return;
                 }
-                mOldPrintAttributes.copyFrom(mCurrPrintAttributes);
-                mCurrPrintAttributes.setCopies(copies);
+
+                mCopiesEditText.setError(null);
+                mSpooler.setPrintJobCopiesNoPersistence(mPrintJobId, copies);
+                updateUi();
+
+                if (hadErrors && !hasErrors() && printAttributesChanged()) {
+                    mController.update();
+                }
             }
         };
 
@@ -541,18 +666,20 @@ public class PrintJobConfigActivity extends Activity {
 
             @Override
             public void afterTextChanged(Editable editable) {
+                final boolean hadErrors = hasErrors();
+
                 String text = editable.toString();
 
                 if (TextUtils.isEmpty(text)) {
                     mRangeEditText.setError("");
-                    mPrintButton.setEnabled(false);
+                    updateUi();
                     return;
                 }
 
                 String escapedText = PATTERN_ESCAPE_SPECIAL_CHARS.matcher(text).replaceAll("////");
                 if (!PATTERN_PAGE_RANGE.matcher(escapedText).matches()) {
                     mRangeEditText.setError("");
-                    mPrintButton.setEnabled(false);
+                    updateUi();
                     return;
                 }
 
@@ -560,100 +687,36 @@ public class PrintJobConfigActivity extends Activity {
                 while (matcher.find()) {
                     String numericString = text.substring(matcher.start(), matcher.end());
                     final int pageIndex = Integer.parseInt(numericString);
-                    if (pageIndex < 1 || pageIndex > mPrintDocumentInfo.getPageCount()) {
+                    if (pageIndex < 1 || pageIndex > mDocument.info.getPageCount()) {
                         mRangeEditText.setError("");
-                        mPrintButton.setEnabled(false);
+                        updateUi();
                         return;
                     }
                 }
 
+                //TODO: Catch the error if start is less grater than the end.
+
                 mRangeEditText.setError(null);
                 mPrintButton.setEnabled(true);
+                updateUi();
+
+                if (hadErrors && !hasErrors() && printAttributesChanged()) {
+                    updateUi();
+                }
             }
         };
 
+        private int mEditorState;
+
         public Editor() {
-            Bundle extras = getIntent().getExtras();
-
-            mPrintJobId = extras.getInt(EXTRA_PRINT_JOB_ID, -1);
-            if (mPrintJobId < 0) {
-                throw new IllegalArgumentException("Invalid print job id: " + mPrintJobId);
-            }
-
-            mAppId = extras.getInt(EXTRA_APP_ID, -1);
-            if (mAppId < 0) {
-                throw new IllegalArgumentException("Invalid app id: " + mAppId);
-            }
-
-            PrintAttributes attributes = getIntent().getParcelableExtra(EXTRA_ATTRIBUTES);
-            if (attributes == null) {
-                mCurrPrintAttributes.copyFrom(attributes);
-            }
-
-            mIPrintDocumentAdapter = extras.getBinder(EXTRA_PRINTABLE);
-            if (mIPrintDocumentAdapter == null) {
-                throw new IllegalArgumentException("Printable cannot be null");
-            }
-            mRemotePrintAdapter = new RemotePrintDocumentAdapter(
-                    IPrintDocumentAdapter.Stub.asInterface(mIPrintDocumentAdapter),
-                    mPrintSpooler.generateFileForPrintJob(mPrintJobId));
-
-            try {
-                mIPrintDocumentAdapter.linkToDeath(mDeathRecipient, 0);
-            } catch (RemoteException re) {
-                finish();
-            }
-
-            mPrinterDiscoveryObserver = new PrintDiscoveryObserver(getMainLooper());
-
-            bindUi();
-        }
-
-        private void bindUi() {
             // Copies
             mCopiesEditText = (EditText) findViewById(R.id.copies_edittext);
-            mCopiesEditText.setText(String.valueOf(MIN_COPIES));
             mCopiesEditText.addTextChangedListener(mCopiesTextWatcher);
-            mCopiesEditText.setText(String.valueOf(
-                    Math.max(mCurrPrintAttributes.getCopies(), MIN_COPIES)));
             mCopiesEditText.selectAll();
 
             // Destination.
             mDestinationSpinner = (Spinner) findViewById(R.id.destination_spinner);
-            mDestinationSpinnerAdapter = new ArrayAdapter<SpinnerItem<PrinterInfo>>(
-                    PrintJobConfigActivity.this, R.layout.spinner_dropdown_item) {
-                        @Override
-                        public View getDropDownView(int position, View convertView,
-                                ViewGroup parent) {
-                            return getView(position, convertView, parent);
-                        }
-
-                        @Override
-                        public View getView(int position, View convertView, ViewGroup parent) {
-                            if (convertView == null) {
-                                convertView = getLayoutInflater().inflate(
-                                        R.layout.spinner_dropdown_item, parent, false);
-                            }
-
-                            PrinterInfo printerInfo = getItem(position).value;
-                            TextView title = (TextView) convertView.findViewById(R.id.title);
-                            title.setText(printerInfo.getLabel());
-
-                            try {
-                                TextView subtitle = (TextView)
-                                        convertView.findViewById(R.id.subtitle);
-                                PackageManager pm = getPackageManager();
-                                PackageInfo packageInfo = pm.getPackageInfo(
-                                        printerInfo.getId().getService().getPackageName(), 0);
-                                subtitle.setText(packageInfo.applicationInfo.loadLabel(pm));
-                                subtitle.setVisibility(View.VISIBLE);
-                            } catch (NameNotFoundException nnfe) {
-                                /* ignore */
-                            }
-
-                            return convertView;
-                        }
-            };
+            mDestinationSpinnerAdapter = new DestinationAdapter();
             mDestinationSpinner.setAdapter(mDestinationSpinnerAdapter);
             mDestinationSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
 
@@ -682,6 +745,7 @@ public class PrintJobConfigActivity extends Activity {
             mOrientationSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
 
             // Range
+            mRangeTitle = (TextView) findViewById(R.id.page_range_title);
             mRangeEditText = (EditText) findViewById(R.id.page_range_edittext);
             mRangeEditText.addTextChangedListener(mRangeTextWatcher);
 
@@ -690,8 +754,6 @@ public class PrintJobConfigActivity extends Activity {
             mRangeOptionsSpinnerAdapter = new ArrayAdapter<SpinnerItem<Integer>>(
                     PrintJobConfigActivity.this,
                     R.layout.spinner_dropdown_item, R.id.title);
-            mRangeOptionsSpinner.setAdapter(mRangeOptionsSpinnerAdapter);
-            mRangeOptionsSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
             final int[] rangeOptionsValues = getResources().getIntArray(
                     R.array.page_options_values);
             String[] rangeOptionsLabels = getResources().getStringArray(
@@ -701,13 +763,29 @@ public class PrintJobConfigActivity extends Activity {
                 mRangeOptionsSpinnerAdapter.add(new SpinnerItem<Integer>(
                         rangeOptionsValues[i], rangeOptionsLabels[i]));
             }
+            mRangeOptionsSpinner.setAdapter(mRangeOptionsSpinnerAdapter);
             mRangeOptionsSpinner.setSelection(0);
+            // Here is some voodoo to circumvent the weird behavior of AdapterView
+            // in which a selection listener may get a callback for an event that
+            // happened before the listener was registered. The reason for that is
+            // that the selection change is handled on the next layout pass.
+            Choreographer.getInstance().postCallbackDelayed(Choreographer.CALLBACK_TRAVERSAL,
+                    new Runnable() {
+                @Override
+                public void run() {
+                    mRangeOptionsSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
+                }
+            }, null, Choreographer.getFrameDelay() * 2);
 
             mPrintPreviewButton = (Button) findViewById(R.id.print_preview_button);
             mPrintPreviewButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // TODO: Implement
+                    mEditor.confirmPreview();
+                    // TODO: Implement me
+                    Toast.makeText(PrintJobConfigActivity.this,
+                            "Stop poking me! Not implemented yet :)",
+                            Toast.LENGTH_LONG).show();
                 }
             });
 
@@ -715,21 +793,106 @@ public class PrintJobConfigActivity extends Activity {
             mPrintButton.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mPrintConfirmed = true;
-                    finish();
+                    mEditor.confirmPrint();
+                    updateUi();
+                    mController.update();
                 }
             });
         }
 
-        private void updateUiIfNeeded() {
+        public void initialize() {
+            mEditorState = EDITOR_STATE_INITIALIZED;
+            mDestinationSpinner.setSelection(AdapterView.INVALID_POSITION);
+        }
+
+        public boolean isCancelled() {
+            return mEditorState == EDITOR_STATE_CANCELLED;
+        }
+
+        public void cancel() {
+            mEditorState = EDITOR_STATE_CANCELLED;
+            mController.cancel();
+            updateUi();
+        }
+
+        public boolean isDone() {
+            return isPrintConfirmed() || isPreviewConfirmed() || isCancelled();
+        }
+
+        public boolean isPrintConfirmed() {
+            return mEditorState == EDITOR_STATE_CONFIRMED_PRINT;
+        }
+
+        public void confirmPrint() {
+            mEditorState = EDITOR_STATE_CONFIRMED_PRINT;
+        }
+
+        public boolean isPreviewConfirmed() {
+            return mEditorState == EDITOR_STATE_CONFIRMED_PRINT;
+        }
+
+        public void confirmPreview() {
+            mEditorState = EDITOR_STATE_CONFIRMED_PREVIEW;
+        }
+
+        public PageRange[] getRequestedPages() {
+            if (hasErrors()) {
+                return null;
+            }
+            if (mRangeOptionsSpinner.getSelectedItemPosition() > 0) {
+                List<PageRange> pageRanges = new ArrayList<PageRange>();
+                mStringCommaSplitter.setString(mRangeEditText.getText().toString());
+
+                while (mStringCommaSplitter.hasNext()) {
+                    String range = mStringCommaSplitter.next().trim();
+                    final int dashIndex = range.indexOf('-');
+                    final int fromIndex;
+                    final int toIndex;
+
+                    if (dashIndex > 0) {
+                        fromIndex = Integer.parseInt(range.substring(0, dashIndex)) - 1;
+                        toIndex = Integer.parseInt(range.substring(
+                                dashIndex + 1, range.length())) - 1;
+                    } else {
+                        fromIndex = toIndex = Integer.parseInt(range);
+                    }
+
+                    PageRange pageRange = new PageRange(fromIndex, toIndex);
+                    pageRanges.add(pageRange);
+                }
+
+                PageRange[] pageRangesArray = new PageRange[pageRanges.size()];
+                pageRanges.toArray(pageRangesArray);
+
+                return PageRangeUtils.normalize(pageRangesArray);
+            }
+
+            return ALL_PAGES_ARRAY;
+        }
+
+        public void updateUi() {
+            if (isPrintConfirmed() || isPreviewConfirmed() || isCancelled()) {
+                mDestinationSpinner.setEnabled(false);
+                mCopiesEditText.setEnabled(false);
+                mMediaSizeSpinner.setEnabled(false);
+                mColorModeSpinner.setEnabled(false);
+                mOrientationSpinner.setEnabled(false);
+                mRangeOptionsSpinner.setEnabled(false);
+                mRangeEditText.setEnabled(false);
+                mPrintPreviewButton.setEnabled(false);
+                mPrintButton.setEnabled(false);
+                return;
+            }
+
             final int selectedIndex = mDestinationSpinner.getSelectedItemPosition();
 
             if (selectedIndex < 0) {
                 // Destination
                 mDestinationSpinner.setEnabled(false);
 
-                // Copies
-                mCopiesEditText.setText("1");
+                mCopiesEditText.removeTextChangedListener(mCopiesTextWatcher);
+                mCopiesEditText.setText(String.valueOf(MIN_COPIES));
+                mCopiesEditText.addTextChangedListener(mCopiesTextWatcher);
                 mCopiesEditText.setEnabled(false);
 
                 // Media size
@@ -751,7 +914,11 @@ public class PrintJobConfigActivity extends Activity {
                 mRangeOptionsSpinner.setOnItemSelectedListener(null);
                 mRangeOptionsSpinner.setSelection(0);
                 mRangeOptionsSpinner.setEnabled(false);
+                mRangeTitle.setText(getString(R.string.label_pages,
+                        getString(R.string.page_count_unknown)));
+                mRangeEditText.removeTextChangedListener(mRangeTextWatcher);
                 mRangeEditText.setText("");
+                mRangeEditText.addTextChangedListener(mRangeTextWatcher);
                 mRangeEditText.setEnabled(false);
                 mRangeEditText.setVisibility(View.INVISIBLE);
 
@@ -884,46 +1051,65 @@ public class PrintJobConfigActivity extends Activity {
                 }
 
                 // Range options
-                if (mPrintDocumentInfo != null && (mPrintDocumentInfo.getPageCount() > 1
-                        || mPrintDocumentInfo.getPageCount()
-                            == PrintDocumentInfo.PAGE_COUNT_UNKNOWN)) {
+                PrintDocumentInfo info = mDocument.info;
+                if (info != null && (info.getPageCount() > 1
+                        || info.getPageCount() == PrintDocumentInfo.PAGE_COUNT_UNKNOWN)) {
                     mRangeOptionsSpinner.setEnabled(true);
                     if (mRangeOptionsSpinner.getSelectedItemPosition() > 0
                             && !mRangeEditText.isEnabled()) {
                         mRangeEditText.setEnabled(true);
-                        mRangeEditText.setError("");
                         mRangeEditText.setVisibility(View.VISIBLE);
                         mRangeEditText.requestFocus();
                         InputMethodManager imm = (InputMethodManager)
                                 getSystemService(INPUT_METHOD_SERVICE);
                         imm.showSoftInput(mRangeEditText, 0);
                     }
+                    final int pageCount = mDocument.info.getPageCount();
+                    mRangeTitle.setText(getString(R.string.label_pages,
+                            (pageCount == PrintDocumentInfo.PAGE_COUNT_UNKNOWN)
+                                    ? getString(R.string.page_count_unknown)
+                                    : String.valueOf(pageCount)));
                 } else {
                     mRangeOptionsSpinner.setOnItemSelectedListener(null);
                     mRangeOptionsSpinner.setSelection(0);
                     mRangeOptionsSpinner.setEnabled(false);
+                    mRangeTitle.setText(getString(R.string.label_pages,
+                            getString(R.string.page_count_unknown)));
                     mRangeEditText.setEnabled(false);
-                    mRangeEditText.setText("");
                     mRangeEditText.setVisibility(View.INVISIBLE);
                 }
 
-                // Print preview
-                mPrintPreviewButton.setEnabled(true);
-                if (hasPdfViewer()) {
-                    mPrintPreviewButton.setText(getString(R.string.print_preview));
+                // Print/Print preview
+                if ((mRangeOptionsSpinner.getSelectedItemPosition() == 1
+                            && (TextUtils.isEmpty(mRangeEditText.getText()) || hasErrors()))
+                        || (mRangeOptionsSpinner.getSelectedItemPosition() == 0
+                            && (!mController.hasPerformedLayout() || hasErrors()))) {
+                    mPrintPreviewButton.setEnabled(false);
+                    mPrintButton.setEnabled(false);
                 } else {
-                    mPrintPreviewButton.setText(getString(R.string.install_for_print_preview));
+                    mPrintPreviewButton.setEnabled(true);
+                    if (hasPdfViewer()) {
+                        mPrintPreviewButton.setText(getString(R.string.print_preview));
+                    } else {
+                        mPrintPreviewButton.setText(getString(R.string.install_for_print_preview));
+                    }
+                    mPrintButton.setEnabled(true);
                 }
 
-                // Print
-                mPrintButton.setEnabled(true);
+                // Copies
+                if (mCopiesEditText.getError() == null
+                        && TextUtils.isEmpty(mCopiesEditText.getText())) {
+                    mCopiesEditText.setText(String.valueOf(MIN_COPIES));
+                    mCopiesEditText.selectAll();
+                    mCopiesEditText.requestFocus();
+                }
             }
 
             // Here is some voodoo to circumvent the weird behavior of AdapterView
             // in which a selection listener may get a callback for an event that
             // happened before the listener was registered. The reason for that is
             // that the selection change is handled on the next layout pass.
-            Choreographer.getInstance().postCallback(Choreographer.CALLBACK_TRAVERSAL,
+            Choreographer.getInstance().postCallbackDelayed(Choreographer.CALLBACK_TRAVERSAL,
                     new Runnable() {
                 @Override
                 public void run() {
@@ -932,15 +1118,7 @@ public class PrintJobConfigActivity extends Activity {
                     mOrientationSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
                     mRangeOptionsSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
                 }
-            }, null);
-        }
-
-        public PrinterInfo getCurrentPrinter() {
-            final int selectedIndex = mDestinationSpinner.getSelectedItemPosition();
-            if (selectedIndex >= 0) {
-                return mDestinationSpinnerAdapter.getItem(selectedIndex).value;
-            }
-            return null;
+            }, null, Choreographer.getFrameDelay() * 2);
         }
 
         public void addPrinters(List<PrinterInfo> addedPrinters) {
@@ -995,8 +1173,261 @@ public class PrintJobConfigActivity extends Activity {
             }
         }
 
-        private void updatePrintPreview(File file) {
-            // TODO: Implement
+        private boolean hasErrors() {
+            return mRangeEditText.getError() != null
+                    || mCopiesEditText.getError() != null;
+        }
+
+        private boolean hasPdfViewer() {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setType("application/pdf");
+            return !getPackageManager().queryIntentActivities(intent,
+                    PackageManager.MATCH_DEFAULT_ONLY).isEmpty();
+        }
+
+        private final class SpinnerItem<T> {
+            final T value;
+            CharSequence label;
+
+            public SpinnerItem(T value, CharSequence label) {
+                this.value = value;
+                this.label = label;
+            }
+
+            public String toString() {
+                return label.toString();
+            }
+        }
+
+        private final class DestinationAdapter extends ArrayAdapter<SpinnerItem<PrinterInfo>> {
+
+            public DestinationAdapter() {
+                super( PrintJobConfigActivity.this, R.layout.spinner_dropdown_item);
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView,
+                    ViewGroup parent) {
+                return getView(position, convertView, parent);
+            }
+
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                if (convertView == null) {
+                    convertView = getLayoutInflater().inflate(
+                            R.layout.spinner_dropdown_item, parent, false);
+                }
+
+                PrinterInfo printerInfo = getItem(position).value;
+                TextView title = (TextView) convertView.findViewById(R.id.title);
+                title.setText(printerInfo.getLabel());
+
+                try {
+                    TextView subtitle = (TextView)
+                            convertView.findViewById(R.id.subtitle);
+                    PackageManager pm = getPackageManager();
+                    PackageInfo packageInfo = pm.getPackageInfo(
+                            printerInfo.getId().getService().getPackageName(), 0);
+                    subtitle.setText(packageInfo.applicationInfo.loadLabel(pm));
+                    subtitle.setVisibility(View.VISIBLE);
+                } catch (NameNotFoundException nnfe) {
+                    /* ignore */
+                }
+
+                return convertView;
+            }
+        }
+    }
+
+    private static final class PrinterDiscoveryObserver extends IPrinterDiscoveryObserver.Stub {
+        private static final int MESSAGE_ADD_DICOVERED_PRINTERS = 1;
+        private static final int MESSAGE_REMOVE_DICOVERED_PRINTERS = 2;
+
+        private Handler mHandler;
+        private Editor mEditor;
+
+        @SuppressWarnings("unchecked")
+        public PrinterDiscoveryObserver(Editor editor, Looper looper) {
+            mEditor = editor;
+            mHandler = new Handler(looper, null, true) {
+                @Override
+                public void handleMessage(Message message) {
+                    switch (message.what) {
+                        case MESSAGE_ADD_DICOVERED_PRINTERS: {
+                            List<PrinterInfo> printers = (List<PrinterInfo>) message.obj;
+                            mEditor.addPrinters(printers);
+                        } break;
+                        case MESSAGE_REMOVE_DICOVERED_PRINTERS: {
+                            List<PrinterId> printerIds = (List<PrinterId>) message.obj;
+                            mEditor.removePrinters(printerIds);
+                        } break;
+                    }
+                }
+            };
+        }
+
+        @Override
+        public void addDiscoveredPrinters(List<PrinterInfo> printers) {
+            synchronized (this) {
+                if (mHandler != null) {
+                    mHandler.obtainMessage(MESSAGE_ADD_DICOVERED_PRINTERS, printers)
+                        .sendToTarget();
+                }
+            }
+        }
+
+        @Override
+        public void removeDiscoveredPrinters(List<PrinterId> printers) {
+            synchronized (this) {
+                if (mHandler != null) {
+                    mHandler.obtainMessage(MESSAGE_REMOVE_DICOVERED_PRINTERS, printers)
+                        .sendToTarget();
+                }
+            }
+        }
+
+        public void destroy() {
+            synchronized (this) {
+                mHandler = null;
+                mEditor = null;
+            }
+        }
+    }
+
+    /**
+     * An instance of this class class is intended to be the first focusable
+     * in a layout to which the system automatically gives focus. It performs
+     * some voodoo to avoid the first tap on it to start an edit mode, rather
+     * to bring up the IME, i.e. to get the behavior as if the view was not
+     * focused.
+     */
+    public static final class CustomEditText extends EditText {
+        private boolean mClickedBeforeFocus;
+        private CharSequence mError;
+
+        public CustomEditText(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        @Override
+        public boolean performClick() {
+            super.performClick();
+            if (isFocused() && !mClickedBeforeFocus) {
+                clearFocus();
+                requestFocus();
+            }
+            mClickedBeforeFocus = true;
+            return true;
+        }
+
+        @Override
+        public CharSequence getError() {
+            return mError;
+        }
+
+        @Override
+        public void setError(CharSequence error, Drawable icon) {
+            setCompoundDrawables(null, null, icon, null);
+            mError = error;
+        }
+
+        protected void onFocusChanged(boolean gainFocus, int direction,
+                Rect previouslyFocusedRect) {
+            if (!gainFocus) {
+                mClickedBeforeFocus = false;
+            }
+            super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
+        }
+    }
+
+    private static final class Document {
+        public PrintDocumentInfo info;
+        public PageRange[] pages;
+    }
+
+    private static final class PageRangeUtils {
+
+        private static final Comparator<PageRange> sComparator = new Comparator<PageRange>() {
+            @Override
+            public int compare(PageRange lhs, PageRange rhs) {
+                return lhs.getStart() - rhs.getStart();
+            }
+        };
+
+        private PageRangeUtils() {
+            throw new UnsupportedOperationException();
+        }
+
+        public static boolean contains(PageRange[] ourPageRanges, PageRange[] otherPageRanges) {
+            if (ourPageRanges == null || otherPageRanges == null) {
+                return false;
+            }
+
+            otherPageRanges = normalize(otherPageRanges);
+
+            int otherPageIdx = 0;
+            final int myPageCount = ourPageRanges.length;
+            final int otherPageCount = otherPageRanges.length;
+            for (int i= 0; i < myPageCount; i++) {
+                PageRange myPage = ourPageRanges[i];
+                for (; otherPageIdx < otherPageCount; otherPageIdx++) {
+                    PageRange otherPage = otherPageRanges[otherPageIdx];
+                    if (otherPage.getStart() > myPage.getStart()) {
+                        break;
+                    }
+                    if ((otherPage.getStart() < myPage.getStart()
+                                    && otherPage.getEnd() > myPage.getStart())
+                            || (otherPage.getEnd() > myPage.getEnd()
+                                    && otherPage.getStart() < myPage.getEnd())
+                            || (otherPage.getEnd() < myPage.getStart())) {
+                        return false;
+                    }
+                }
+            }
+            if (otherPageIdx < otherPageCount) {
+                return false;
+            }
+            return true;
+        }
+
+        public static PageRange[] normalize(PageRange[] pageRanges) {
+            if (pageRanges == null) {
+                return null;
+            }
+            final int oldPageCount = pageRanges.length;
+            if (oldPageCount <= 1) {
+                return pageRanges;
+            }
+            Arrays.sort(pageRanges, sComparator);
+            int newRangeCount = 0;
+            for (int i = 0; i < oldPageCount - 1; i++) {
+                newRangeCount++;
+                PageRange currentRange = pageRanges[i];
+                PageRange nextRange = pageRanges[i + 1];
+                if (currentRange.getEnd() >= nextRange.getStart()) {
+                    newRangeCount--;
+                    pageRanges[i] = null;
+                    pageRanges[i + 1] = new PageRange(currentRange.getStart(),
+                            nextRange.getEnd());
+                }
+            }
+            if (newRangeCount == oldPageCount) {
+                return pageRanges;
+            }
+            return Arrays.copyOfRange(pageRanges, oldPageCount - newRangeCount,
+                    oldPageCount - 1);
+        }
+
+        public static void offsetStart(PageRange[] pageRanges, int offset) {
+            if (offset == 0) {
+                return;
+            }
+            final int pageRangeCount = pageRanges.length;
+            for (int i = 0; i < pageRangeCount; i++) {
+                final int start = pageRanges[i].getStart() + offset;
+                final int end = pageRanges[i].getEnd() + offset;
+                pageRanges[i] = new PageRange(start, end);
+            }
         }
     }
 }

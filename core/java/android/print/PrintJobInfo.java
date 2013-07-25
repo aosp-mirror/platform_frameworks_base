@@ -19,6 +19,8 @@ package android.print;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Arrays;
+
 /**
  * This class represents the description of a print job.
  */
@@ -119,6 +121,9 @@ public final class PrintJobInfo implements Parcelable {
     /** Optional tag assigned by a print service.*/
     private String mTag;
 
+    /** How many copies to print. */
+    private int mCopies;
+
     /** The pages to print */
     private PageRange[] mPageRanges;
 
@@ -142,6 +147,8 @@ public final class PrintJobInfo implements Parcelable {
         mAppId = other.mAppId;
         mUserId = other.mUserId;
         mTag = other.mTag;
+        mCopies = other.mCopies;
+        mPageRanges = other.mPageRanges;
         mAttributes = other.mAttributes;
         mDocumentInfo = other.mDocumentInfo;
     }
@@ -154,8 +161,13 @@ public final class PrintJobInfo implements Parcelable {
         mAppId = parcel.readInt();
         mUserId = parcel.readInt();
         mTag = parcel.readString();
+        mCopies = parcel.readInt();
         if (parcel.readInt() == 1) {
-            mPageRanges = (PageRange[]) parcel.readParcelableArray(null);
+            Parcelable[] parcelables = parcel.readParcelableArray(null);
+            mPageRanges = new PageRange[parcelables.length];
+            for (int i = 0; i < parcelables.length; i++) {
+                mPageRanges[i] = (PageRange) parcelables[i];
+            }
         }
         if (parcel.readInt() == 1) {
             mAttributes = PrintAttributes.CREATOR.createFromParcel(parcel);
@@ -310,6 +322,29 @@ public final class PrintJobInfo implements Parcelable {
     }
 
     /**
+     * Gets the number of copies.
+     *
+     * @return The number of copies or zero if not set.
+     */
+    public int getCopies() {
+        return mCopies;
+    }
+
+    /**
+     * Sets the number of copies.
+     *
+     * @param copyCount The number of copies.
+     *
+     * @hide
+     */
+    public void setCopies(int copyCount) {
+        if (copyCount < 1) {
+            throw new IllegalArgumentException("Copies must be more than one.");
+        }
+        mCopies = copyCount;
+    }
+
+    /**
      * Gets the included pages.
      *
      * @return The included pages or <code>null</code> if not set.
@@ -385,6 +420,7 @@ public final class PrintJobInfo implements Parcelable {
         parcel.writeInt(mAppId);
         parcel.writeInt(mUserId);
         parcel.writeString(mTag);
+        parcel.writeInt(mCopies);
         if (mPageRanges != null) {
             parcel.writeInt(1);
             parcel.writeParcelableArray(mPageRanges, flags);
@@ -413,10 +449,14 @@ public final class PrintJobInfo implements Parcelable {
         builder.append(", id: ").append(mId);
         builder.append(", status: ").append(stateToString(mState));
         builder.append(", printer: " + mPrinterId);
+        builder.append(", tag: ").append(mTag);
+        builder.append(", copies: ").append(mCopies);
         builder.append(", attributes: " + (mAttributes != null
                 ? mAttributes.toString() : null));
         builder.append(", documentInfo: " + (mDocumentInfo != null
                 ? mDocumentInfo.toString() : null));
+        builder.append(", pages: " + (mPageRanges != null
+                ? Arrays.toString(mPageRanges) : null));
         builder.append("}");
         return builder.toString();
     }

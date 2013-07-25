@@ -111,6 +111,36 @@ public final class PrintDocumentInfo implements Parcelable {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + mContentType;
+        result = prime * result + mPageCount;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        PrintDocumentInfo other = (PrintDocumentInfo) obj;
+        if (mContentType != other.mContentType) {
+            return false;
+        }
+        if (mPageCount != other.mPageCount) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("PrintDocumentInfo{");

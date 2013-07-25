@@ -31,8 +31,8 @@ import android.print.PrintAttributes;
 oneway interface IPrintDocumentAdapter {
     void start();
     void layout(in PrintAttributes oldAttributes, in PrintAttributes newAttributes,
-            ILayoutResultCallback callback, in Bundle metadata);
-    void write(in List<PageRange> pages, in ParcelFileDescriptor fd,
-            IWriteResultCallback callback);
+            ILayoutResultCallback callback, in Bundle metadata, int sequence);
+    void write(in PageRange[] pages, in ParcelFileDescriptor fd,
+            IWriteResultCallback callback, int sequence);
     void finish();
 }

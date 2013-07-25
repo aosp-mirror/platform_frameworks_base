@@ -114,12 +114,11 @@ public final class PrintSpoolerService extends Service {
                             attributes, appId);
                     if (printJob != null) {
                         Intent intent = mStartPrintJobConfigActivityIntent;
-                        intent.putExtra(PrintJobConfigActivity.EXTRA_PRINTABLE,
+                        intent.putExtra(PrintJobConfigActivity.EXTRA_PRINT_DOCUMENT_ADAPTER,
                                 printAdapter.asBinder());
-                        intent.putExtra(PrintJobConfigActivity.EXTRA_APP_ID, appId);
                         intent.putExtra(PrintJobConfigActivity.EXTRA_PRINT_JOB_ID,
                                 printJob.getId());
-                        intent.putExtra(PrintJobConfigActivity.EXTRA_ATTRIBUTES, attributes);
+                        intent.putExtra(PrintJobConfigActivity.EXTRA_PRINT_ATTRIBUTES, attributes);
 
                         IntentSender sender = PendingIntent.getActivity(
                                 PrintSpoolerService.this, 0, intent, PendingIntent.FLAG_ONE_SHOT
