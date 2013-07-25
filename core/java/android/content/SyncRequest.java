@@ -204,6 +204,9 @@ public class SyncRequest implements Parcelable {
         mIsAuthority = (b.mSyncTarget == Builder.SYNC_TARGET_ADAPTER);
         mIsExpedited = b.mExpedited;
         mExtras = new Bundle(b.mCustomExtras);
+        // For now we merge the sync config extras & the custom extras into one bundle.
+        // TODO: pass the configuration extras through separately.
+        mExtras.putAll(b.mSyncConfigExtras);
         mAllowMetered = b.mAllowMetered;
         mTxBytes = b.mTxBytes;
         mRxBytes = b.mRxBytes;
@@ -567,50 +570,37 @@ public class SyncRequest implements Parcelable {
          */
         public SyncRequest build() {
             // Validate the extras bundle
-            try {
-                ContentResolver.validateSyncExtrasBundle(mCustomExtras);
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException(e.getMessage());
-            }
+            ContentResolver.validateSyncExtrasBundle(mCustomExtras);
             if (mCustomExtras == null) {
                 mCustomExtras = new Bundle();
             }
-            // Combine the builder extra flags into the copy of the bundle.
+            // Combine builder extra flags into the config bundle.
+            mSyncConfigExtras = new Bundle();
             if (mIgnoreBackoff) {
-                mCustomExtras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, true);
+                mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, true);
             }
             if (mAllowMetered) {
-                mCustomExtras.putBoolean(ContentResolver.SYNC_EXTRAS_ALLOW_METERED, true);
+                mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_ALLOW_METERED, true);
             }
             if (mIgnoreSettings) {
-                mCustomExtras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, true);
+                mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, true);
             }
             if (mNoRetry) {
-                mCustomExtras.putBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, true);
+                mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, true);
             }
             if (mExpedited) {
-                mCustomExtras.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+                mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
             }
             if (mIsManual) {
-                mCustomExtras.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+                mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
             }
-            // Upload/download expectations.
-            mCustomExtras.putLong(ContentResolver.SYNC_EXTRAS_EXPECTED_UPLOAD, mTxBytes);
-            mCustomExtras.putLong(ContentResolver.SYNC_EXTRAS_EXPECTED_DOWNLOAD, mRxBytes);
-            // Priority.
-            mCustomExtras.putInt(ContentResolver.SYNC_EXTRAS_PRIORITY, mPriority);
+            mSyncConfigExtras.putLong(ContentResolver.SYNC_EXTRAS_EXPECTED_UPLOAD, mTxBytes);
+            mSyncConfigExtras.putLong(ContentResolver.SYNC_EXTRAS_EXPECTED_DOWNLOAD, mRxBytes);
+            mSyncConfigExtras.putInt(ContentResolver.SYNC_EXTRAS_PRIORITY, mPriority);
             if (mSyncType == SYNC_TYPE_PERIODIC) {
-                // If this is a periodic sync ensure than invalid extras were
-                // not set.
-                if (mCustomExtras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false)
-                        || mCustomExtras.getBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, false)
-                        || mCustomExtras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, false)
-                        || mCustomExtras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, false)
-                        || mCustomExtras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false)
-                        || mCustomExtras.getBoolean(ContentResolver.SYNC_EXTRAS_FORCE, false)
-                        || mCustomExtras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false)) {
-                    throw new IllegalArgumentException("Illegal extras were set");
-                }
+                // If this is a periodic sync ensure than invalid extras were not set.
+                validatePeriodicExtras(mCustomExtras);
+                validatePeriodicExtras(mSyncConfigExtras);
             } else if (mSyncType == SYNC_TYPE_UNKNOWN) {
                 throw new IllegalArgumentException("Must call either syncOnce() or syncPeriodic()");
             }
@@ -620,6 +610,24 @@ public class SyncRequest implements Parcelable {
                     + "setSyncAdapter(ComponentName) or setSyncAdapter(Account, String");
             }
             return new SyncRequest(this);
+        }
+
+        /**
+         * Helper function to throw an <code>IllegalArgumentException</code> if any illegal
+         * extras were set for a periodic sync.
+         *
+         * @param extras bundle to validate.
+         */
+        private void validatePeriodicExtras(Bundle extras) {
+            if (extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false)
+                    || extras.getBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, false)
+                    || extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, false)
+                    || extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, false)
+                    || extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false)
+                    || extras.getBoolean(ContentResolver.SYNC_EXTRAS_FORCE, false)
+                    || extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false)) {
+                throw new IllegalArgumentException("Illegal extras were set");
+            }
         }
     }
 }
