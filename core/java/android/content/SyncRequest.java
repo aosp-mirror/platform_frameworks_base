@@ -357,13 +357,13 @@ public class SyncRequest implements Parcelable {
          * </pre>
          *
          * N.B.: Periodic syncs are not allowed to have any of
-         * {@link #SYNC_EXTRAS_DO_NOT_RETRY},
-         * {@link #SYNC_EXTRAS_IGNORE_BACKOFF},
-         * {@link #SYNC_EXTRAS_IGNORE_SETTINGS},
-         * {@link #SYNC_EXTRAS_INITIALIZE},
-         * {@link #SYNC_EXTRAS_FORCE},
-         * {@link #SYNC_EXTRAS_EXPEDITED},
-         * {@link #SYNC_EXTRAS_MANUAL}
+         * {@link ContentResolver#SYNC_EXTRAS_DO_NOT_RETRY},
+         * {@link ContentResolver#SYNC_EXTRAS_IGNORE_BACKOFF},
+         * {@link ContentResolver#SYNC_EXTRAS_IGNORE_SETTINGS},
+         * {@link ContentResolver#SYNC_EXTRAS_INITIALIZE},
+         * {@link ContentResolver#SYNC_EXTRAS_FORCE},
+         * {@link ContentResolver#SYNC_EXTRAS_EXPEDITED},
+         * {@link ContentResolver#SYNC_EXTRAS_MANUAL}
          * set to true. If any are supplied then an {@link IllegalArgumentException} will
          * be thrown.
          *
@@ -495,7 +495,7 @@ public class SyncRequest implements Parcelable {
         }
 
         /**
-         * Convenience function for setting {@link ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY}. A
+         * Convenience function for setting {@link ContentResolver#SYNC_EXTRAS_DO_NOT_RETRY}. A
          * one-off sync operation that fails will be retried at a later date unless this is
          * set to false. Default is true. Not valid for periodic sync and will throw an
          * IllegalArgumentException in Builder.build().
@@ -508,7 +508,7 @@ public class SyncRequest implements Parcelable {
         }
 
         /**
-         * {@link ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS}. Not valid for
+         * {@link ContentResolver#SYNC_EXTRAS_IGNORE_SETTINGS}. Not valid for
          * periodic sync and will throw an IllegalArgumentException in
          * Builder.build(). Default false.
          */
@@ -518,7 +518,7 @@ public class SyncRequest implements Parcelable {
         }
 
         /**
-         * Convenience function for setting {@link ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF}.
+         * Convenience function for setting {@link ContentResolver#SYNC_EXTRAS_IGNORE_BACKOFF}.
          *
          * @param ignoreBackoff
          */
@@ -528,7 +528,7 @@ public class SyncRequest implements Parcelable {
         }
 
         /**
-         * {@link ContentResolver.SYNC_EXTRAS_MANUAL}. Default false.
+         * {@link ContentResolver#SYNC_EXTRAS_MANUAL}. Default false.
          */
         public Builder setManual(boolean isManual) {
             mIsManual = isManual;
@@ -536,7 +536,7 @@ public class SyncRequest implements Parcelable {
         }
 
         /**
-         * {@link ContentResolver.SYNC_EXTRAS_} Default false.
+         * {@link ContentResolver#SYNC_EXTRAS_EXPEDITED} Default false.
          */
         public Builder setExpedited(boolean expedited) {
             mExpedited = expedited;
@@ -545,7 +545,7 @@ public class SyncRequest implements Parcelable {
 
         /**
          * Priority of this request among all requests from the calling app.
-         * Range of [-2,2] similar to {@link android.app.Notification.priority}.
+         * Range of [-2,2] similar to {@link android.app.Notification#priority}.
          */
         public Builder setPriority(int priority) {
             if (priority < -2 || priority > 2) {
