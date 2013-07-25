@@ -2233,7 +2233,6 @@ public class SyncStorageEngine extends Handler {
     private void readPendingAsXml() throws XmlPullParserException {
         FileInputStream fis = null;
         try {
-            Log.v(TAG, "is this thing on");
             fis = mPendingFile.openRead();
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(fis, null);
@@ -2241,14 +2240,10 @@ public class SyncStorageEngine extends Handler {
             while (eventType != XmlPullParser.START_TAG &&
                     eventType != XmlPullParser.END_DOCUMENT) {
                 eventType = parser.next();
-                Log.v(TAG, "go: " + eventType);
             }
             if (eventType == XmlPullParser.END_DOCUMENT) return;
 
             String tagName = parser.getName();
-            if (DEBUG_FILE) {
-                Log.v(TAG, "got " + tagName);
-            }
             if ("pending".equals(tagName)) {
                 int version = -1;
                 String versionString = parser.getAttributeValue(null, "version");
@@ -2261,9 +2256,6 @@ public class SyncStorageEngine extends Handler {
                 eventType = parser.next();
                 PendingOperation pop = null;
                 do {
-                    if (DEBUG_FILE) {
-                        Log.v(TAG, "parsing xml file");
-                    }
                     if (eventType == XmlPullParser.START_TAG) {
                         try {
                             tagName = parser.getName();
@@ -2317,7 +2309,6 @@ public class SyncStorageEngine extends Handler {
             else Log.w(TAG, "Error reading pending data.", e);
             return;
         } finally {
-            if (DEBUG_FILE) Log.v(TAG, "Done reading pending ops");
             if (fis != null) {
                 try {
                     fis.close();
