@@ -1353,7 +1353,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     };
 
-    void makeExpandedVisible(boolean revealAfterDraw) {
+    void makeExpandedVisible() {
         if (SPEW) Log.d(TAG, "Make expanded visible: expanded visible=" + mExpandedVisible);
         if (mExpandedVisible) {
             return;
@@ -1375,12 +1375,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         lp.flags |= WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
         lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
         mWindowManager.updateViewLayout(mStatusBarWindow, lp);
-
-        // Updating the window layout will force an expensive traversal/redraw.
-        // Kick off the reveal animation after this is complete to avoid animation latency.
-        if (revealAfterDraw) {
-//            mHandler.post(mStartRevealAnimation);
-        }
 
         visibilityChanged(true);
 
@@ -1766,7 +1760,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 editor.putBoolean(Prefs.SHOWN_QUICK_SETTINGS_HELP, true);
                 editor.apply();
 
-                makeExpandedVisible(true); // enforce visibility in case the shade is still animating closed
+                makeExpandedVisible(); // enforce visibility in case the shade is still animating closed
                 animateExpandNotificationsPanel();
 
                 mSuppressStatusBarDrags = false;
