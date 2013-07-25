@@ -154,7 +154,7 @@ public final class MediaFormat {
 
     /**
      * A key describing the AAC profile to be used (AAC audio formats only).
-     * Constants are declared in {@link android.media.MediaCodecInfo.CodecCapabilities}.
+     * Constants are declared in {@link android.media.MediaCodecInfo.CodecProfileLevel}.
      */
     public static final String KEY_AAC_PROFILE = "aac-profile";
 
