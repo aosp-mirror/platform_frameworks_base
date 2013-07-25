@@ -5357,6 +5357,18 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * Returns whether layout calls on this container are currently being
+     * suppressed, due to an earlier call to {@link #suppressLayout(boolean)}.
+     *
+     * @return true if layout calls are currently suppressed, false otherwise.
+     *
+     * @hide
+     */
+    public boolean isLayoutSuppressed() {
+        return mSuppressLayout;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

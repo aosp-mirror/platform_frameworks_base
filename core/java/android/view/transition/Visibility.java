@@ -19,6 +19,7 @@ package android.view.transition;
 import android.animation.Animator;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewOverlay;
 import android.view.ViewParent;
 
 /**
@@ -38,6 +39,10 @@ public abstract class Visibility extends Transition {
 
     private static final String PROPNAME_VISIBILITY = "android:visibility:visibility";
     private static final String PROPNAME_PARENT = "android:visibility:parent";
+    private static String[] sTransitionProperties = {
+            PROPNAME_VISIBILITY,
+            PROPNAME_PARENT,
+    };
 
     private static class VisibilityInfo {
         boolean visibilityChange;
@@ -52,10 +57,40 @@ public abstract class Visibility extends Transition {
     private VisibilityInfo mTmpVisibilityInfo = new VisibilityInfo();
 
     @Override
+    public String[] getTransitionProperties() {
+        return sTransitionProperties;
+    }
+
+    @Override
     protected void captureValues(TransitionValues values, boolean start) {
         int visibility = values.view.getVisibility();
         values.values.put(PROPNAME_VISIBILITY, visibility);
         values.values.put(PROPNAME_PARENT, values.view.getParent());
+    }
+
+    /**
+     * Returns whether the view is 'visible' according to the given values
+     * object. This is determined by testing the same properties in the values
+     * object that are used to determine whether the object is appearing or
+     * disappearing in the {@link
+     * #play(android.view.ViewGroup, TransitionValues, TransitionValues)}
+     * method. This method can be called by, for example, subclasses that want
+     * to know whether the object is visible in the same way that Visibility
+     * determines it for the actual animation.
+     *
+     * @param values The TransitionValues object that holds the information by
+     * which visibility is determined.
+     * @return True if the view reference by <code>values</code> is visible,
+     * false otherwise.
+     */
+    public boolean isVisible(TransitionValues values) {
+        if (values == null) {
+            return false;
+        }
+        int visibility = (Integer) values.values.get(PROPNAME_VISIBILITY);
+        View parent = (View) values.values.get(PROPNAME_PARENT);
+
+        return visibility == View.VISIBLE && parent != null;
     }
 
     private boolean isHierarchyVisibilityChanging(ViewGroup sceneRoot, ViewGroup view) {
@@ -197,5 +232,4 @@ public abstract class Visibility extends Transition {
             TransitionValues endValues, int endVisibility) {
         return null;
     }
-
 }

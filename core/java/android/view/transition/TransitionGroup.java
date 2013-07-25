@@ -164,7 +164,7 @@ public class TransitionGroup extends Transition {
         @Override
         public void onTransitionStart(Transition transition) {
             if (!mTransitionGroup.mStarted) {
-                mTransitionGroup.startTransition();
+                mTransitionGroup.start();
                 mTransitionGroup.mStarted = true;
             }
         }
@@ -175,7 +175,7 @@ public class TransitionGroup extends Transition {
             if (mTransitionGroup.mCurrentListeners == 0) {
                 // All child trans
                 mTransitionGroup.mStarted = false;
-                mTransitionGroup.endTransition();
+                mTransitionGroup.end();
             }
             transition.removeListener(this);
         }
@@ -233,12 +233,32 @@ public class TransitionGroup extends Transition {
         }
     }
 
+    /** @hide */
     @Override
-    protected void cancelTransition() {
-        super.cancelTransition();
+    public void pause() {
+        super.pause();
         int numTransitions = mTransitions.size();
         for (int i = 0; i < numTransitions; ++i) {
-            mTransitions.get(i).cancelTransition();
+            mTransitions.get(i).pause();
+        }
+    }
+
+    /** @hide */
+    @Override
+    public void resume() {
+        super.resume();
+        int numTransitions = mTransitions.size();
+        for (int i = 0; i < numTransitions; ++i) {
+            mTransitions.get(i).resume();
+        }
+    }
+
+    @Override
+    protected void cancel() {
+        super.cancel();
+        int numTransitions = mTransitions.size();
+        for (int i = 0; i < numTransitions; ++i) {
+            mTransitions.get(i).cancel();
         }
     }
 

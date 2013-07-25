@@ -22,7 +22,6 @@ import android.animation.TimeInterpolator;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.LongSparseArray;
-import android.util.Pair;
 import android.util.SparseArray;
 import android.view.SurfaceView;
 import android.view.TextureView;
@@ -60,6 +59,8 @@ public abstract class Transition implements Cloneable {
     private static final String LOG_TAG = "Transition";
     static final boolean DBG = false;
 
+    private String mName = getClass().getName();
+
     long mStartDelay = -1;
     long mDuration = -1;
     TimeInterpolator mInterpolator = null;
@@ -69,29 +70,29 @@ public abstract class Transition implements Cloneable {
     private TransitionValuesMaps mEndValues = new TransitionValuesMaps();
     TransitionGroup mParent = null;
 
+    // Per-animator information used for later canceling when future transitions overlap
+    private static ThreadLocal<ArrayMap<Animator, AnimationInfo>> sRunningAnimators =
+            new ThreadLocal<ArrayMap<Animator, AnimationInfo>>();
+
     // Scene Root is set at play() time in the cloned Transition
     ViewGroup mSceneRoot = null;
-
-    // Used to carry data between setup() and play(), cleared before every scene transition
-    private ArrayList<TransitionValues> mPlayStartValuesList = new ArrayList<TransitionValues>();
-    private ArrayList<TransitionValues> mPlayEndValuesList = new ArrayList<TransitionValues>();
 
     // Track all animators in use in case the transition gets canceled and needs to
     // cancel running animators
     private ArrayList<Animator> mCurrentAnimators = new ArrayList<Animator>();
 
     // Number of per-target instances of this Transition currently running. This count is
-    // determined by calls to startTransition() and endTransition()
+    // determined by calls to start() and end()
     int mNumInstances = 0;
 
-
+    // Whether this transition is currently paused, due to a call to pause()
+    boolean mPaused = false;
 
     // The set of listeners to be sent transition lifecycle events.
     ArrayList<TransitionListener> mListeners = null;
 
     // The set of animators collected from calls to play(), to be run in runAnimations()
-    ArrayMap<Pair<TransitionValues, TransitionValues>, Animator> mAnimatorMap =
-            new ArrayMap<Pair<TransitionValues, TransitionValues>, Animator>();
+    ArrayList<Animator> mAnimators = new ArrayList<Animator>();
 
     /**
      * Constructs a Transition object with no target objects. A transition with
@@ -115,6 +116,14 @@ public abstract class Transition implements Cloneable {
         return this;
     }
 
+    /**
+     * Returns the duration set on this transition. If no duration has been set,
+     * the returned value will be negative, indicating that resulting animators will
+     * retain their own durations.
+     *
+     * @return The duration set on this transition, if one has been set, otherwise
+     * returns a negative number.
+     */
     public long getDuration() {
         return mDuration;
     }
@@ -131,6 +140,14 @@ public abstract class Transition implements Cloneable {
         mStartDelay = startDelay;
     }
 
+    /**
+     * Returns the startDelay set on this transition. If no startDelay has been set,
+     * the returned value will be negative, indicating that resulting animators will
+     * retain their own startDelays.
+     *
+     * @return The startDealy set on this transition, if one has been set, otherwise
+     * returns a negative number.
+     */
     public long getStartDelay() {
         return mStartDelay;
     }
@@ -147,8 +164,41 @@ public abstract class Transition implements Cloneable {
         mInterpolator = interpolator;
     }
 
+    /**
+     * Returns the interpolator set on this transition. If no interpolator has been set,
+     * the returned value will be null, indicating that resulting animators will
+     * retain their own interpolators.
+     *
+     * @return The interpolator set on this transition, if one has been set, otherwise
+     * returns null.
+     */
     public TimeInterpolator getInterpolator() {
         return mInterpolator;
+    }
+
+    /**
+     * Returns the set of property names used stored in the {@link TransitionValues}
+     * object passed into {@link #captureValues(TransitionValues, boolean)} that
+     * this transition cares about for the purposes of canceling overlapping animations.
+     * When any transition is started on a given scene root, all transitions
+     * currently running on that same scene root are checked to see whether the
+     * properties on which they based their animations agree with the end values of
+     * the same properties in the new transition. If the end values are not equal,
+     * then the old animation is canceled since the new transition will start a new
+     * animation to these new values. If the values are equal, the old animation is
+     * allowed to continue and no new animation is started for that transition.
+     *
+     * <p>A transition does not need to override this method. However, not doing so
+     * will mean that the cancellation logic outlined in the previous paragraph
+     * will be skipped for that transition, possibly leading to artifacts as
+     * old transitions and new transitions on the same targets run in parallel,
+     * animating views toward potentially different end values.</p>
+     *
+     * @return An array of property names as described in the class documentation for
+     * {@link TransitionValues}. The default implementation returns <code>null</code>.
+     */
+    public String[] getTransitionProperties() {
+        return null;
     }
 
     /**
@@ -210,8 +260,6 @@ public abstract class Transition implements Cloneable {
         if (DBG) {
             Log.d(LOG_TAG, "play() for " + this);
         }
-        mPlayStartValuesList.clear();
-        mPlayEndValuesList.clear();
         ArrayMap<View, TransitionValues> endCopy =
                 new ArrayMap<View, TransitionValues>(endValues.viewValues);
         SparseArray<TransitionValues> endIdCopy =
@@ -316,6 +364,7 @@ public abstract class Transition implements Cloneable {
             startValuesList.add(start);
             endValuesList.add(end);
         }
+        ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
         for (int i = 0; i < startValuesList.size(); ++i) {
             TransitionValues start = startValuesList.get(i);
             TransitionValues end = endValuesList.get(i);
@@ -345,14 +394,46 @@ public abstract class Transition implements Cloneable {
                     // TODO: what to do about targetIds and itemIds?
                     Animator animator = play(sceneRoot, start, end);
                     if (animator != null) {
-                        mAnimatorMap.put(new Pair(start, end), animator);
-                        // Note: we've already done the check against targetIDs in these lists
-                        mPlayStartValuesList.add(start);
-                        mPlayEndValuesList.add(end);
+                        // Save animation info for future cancellation purposes
+                        View view = null;
+                        TransitionValues infoValues = null;
+                        if (end != null) {
+                            view = end.view;
+                            String[] properties = getTransitionProperties();
+                            if (view != null && properties != null && properties.length > 0) {
+                                infoValues = new TransitionValues();
+                                infoValues.view = view;
+                                TransitionValues newValues = endValues.viewValues.get(view);
+                                if (newValues != null) {
+                                    for (int j = 0; j < properties.length; ++j) {
+                                        infoValues.values.put(properties[j],
+                                                newValues.values.get(properties[j]));
+                                    }
+                                }
+                                int numExistingAnims = runningAnimators.size();
+                                for (int j = 0; j < numExistingAnims; ++j) {
+                                    Animator anim = runningAnimators.keyAt(j);
+                                    AnimationInfo info = runningAnimators.get(anim);
+                                    if (info.values != null && info.view == view &&
+                                            ((info.name == null && getName() == null) ||
+                                            info.name.equals(getName()))) {
+                                        if (info.values.equals(infoValues)) {
+                                            // Favor the old animator
+                                            animator = null;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            view = (start != null) ? start.view : null;
+                        }
+                        if (animator != null) {
+                            AnimationInfo info = new AnimationInfo(view, getName(), infoValues);
+                            runningAnimators.put(animator, info);
+                            mAnimators.add(animator);
+                        }
                     }
-                } else if (DBG) {
-                    View view = (end != null) ? end.view : start.view;
-                    Log.d(LOG_TAG, "  No change for view " + view);
                 }
             }
         }
@@ -389,6 +470,15 @@ public abstract class Transition implements Cloneable {
         return false;
     }
 
+    private static ArrayMap<Animator, AnimationInfo> getRunningAnimators() {
+        ArrayMap<Animator, AnimationInfo> runningAnimators = sRunningAnimators.get();
+        if (runningAnimators == null) {
+            runningAnimators = new ArrayMap<Animator, AnimationInfo>();
+            sRunningAnimators.set(runningAnimators);
+        }
+        return runningAnimators;
+    }
+
     /**
      * This is called internally once all animations have been set up by the
      * transition hierarchy. \
@@ -396,28 +486,27 @@ public abstract class Transition implements Cloneable {
      * @hide
      */
     protected void runAnimations() {
-        if (DBG && mPlayStartValuesList.size() > 0) {
-            Log.d(LOG_TAG, "runAnimations (" + mPlayStartValuesList.size() + ") on " + this);
+        if (DBG) {
+            Log.d(LOG_TAG, "runAnimations() on " + this);
         }
-        startTransition();
-        // Now walk the list of TransitionValues, calling play for each pair
-        for (int i = 0; i < mPlayStartValuesList.size(); ++i) {
-            TransitionValues start = mPlayStartValuesList.get(i);
-            TransitionValues end = mPlayEndValuesList.get(i);
-            Animator anim = mAnimatorMap.get(new Pair(start, end));
+        start();
+        ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
+        // Now start every Animator that was previously created for this transition in play()
+        for (Animator anim : mAnimators) {
             if (DBG) {
                 Log.d(LOG_TAG, "  anim: " + anim);
             }
-            startTransition();
-            runAnimator(anim);
+            if (runningAnimators.containsKey(anim)) {
+                start();
+                runAnimator(anim, runningAnimators);
+            }
         }
-        mPlayStartValuesList.clear();
-        mPlayEndValuesList.clear();
-        mAnimatorMap.clear();
-        endTransition();
+        mAnimators.clear();
+        end();
     }
 
-    private void runAnimator(Animator animator) {
+    private void runAnimator(Animator animator,
+            final ArrayMap<Animator, AnimationInfo> runningAnimators) {
         if (animator != null) {
             // TODO: could be a single listener instance for all of them since it uses the param
             animator.addListener(new AnimatorListenerAdapter() {
@@ -427,6 +516,7 @@ public abstract class Transition implements Cloneable {
                 }
                 @Override
                 public void onAnimationEnd(Animator animation) {
+                    runningAnimators.remove(animation);
                     mCurrentAnimators.remove(animation);
                 }
             });
@@ -691,11 +781,112 @@ public abstract class Transition implements Cloneable {
     }
 
     /**
+     * Pauses this transition, sending out calls to {@link
+     * TransitionListener#onTransitionPause(Transition)} to all listeners
+     * and pausing all running animators started by this transition.
+     *
+     * @hide
+     */
+    public void pause() {
+        ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
+        int numOldAnims = runningAnimators.size();
+        for (int i = numOldAnims - 1; i >= 0; i--) {
+            Animator anim = runningAnimators.keyAt(i);
+            anim.pause();
+        }
+        if (mListeners != null && mListeners.size() > 0) {
+            ArrayList<TransitionListener> tmpListeners =
+                    (ArrayList<TransitionListener>) mListeners.clone();
+            int numListeners = tmpListeners.size();
+            for (int i = 0; i < numListeners; ++i) {
+                tmpListeners.get(i).onTransitionPause(this);
+            }
+        }
+        mPaused = true;
+    }
+
+    /**
+     * Resumes this transition, sending out calls to {@link
+     * TransitionListener#onTransitionPause(Transition)} to all listeners
+     * and pausing all running animators started by this transition.
+     *
+     * @hide
+     */
+    public void resume() {
+        if (mPaused) {
+            ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
+            int numOldAnims = runningAnimators.size();
+            for (int i = numOldAnims - 1; i >= 0; i--) {
+                Animator anim = runningAnimators.keyAt(i);
+                anim.resume();
+            }
+            if (mListeners != null && mListeners.size() > 0) {
+                ArrayList<TransitionListener> tmpListeners =
+                        (ArrayList<TransitionListener>) mListeners.clone();
+                int numListeners = tmpListeners.size();
+                for (int i = 0; i < numListeners; ++i) {
+                    tmpListeners.get(i).onTransitionResume(this);
+                }
+            }
+            mPaused = false;
+        }
+    }
+
+    /**
      * Called by TransitionManager to play the transition. This calls
      * play() to set things up and create all of the animations and then
      * runAnimations() to actually start the animations.
      */
     void playTransition(ViewGroup sceneRoot) {
+        ArrayMap<Animator, AnimationInfo> runningAnimators = getRunningAnimators();
+        int numOldAnims = runningAnimators.size();
+        for (int i = numOldAnims - 1; i >= 0; i--) {
+            Animator anim = runningAnimators.keyAt(i);
+            if (anim != null) {
+                anim.resume();
+                AnimationInfo oldInfo = runningAnimators.get(anim);
+                if (oldInfo != null) {
+                    boolean cancel = false;
+                    TransitionValues oldValues = oldInfo.values;
+                    View oldView = oldInfo.view;
+                    TransitionValues newValues = mEndValues.viewValues != null ?
+                            mEndValues.viewValues.get(oldView) : null;
+                    if (oldValues == null || newValues == null) {
+                        if (oldValues != null || newValues != null) {
+                            cancel = true;
+                        }
+                    } else {
+                        for (String key : oldValues.values.keySet()) {
+                            Object oldValue = oldValues.values.get(key);
+                            Object newValue = newValues.values.get(key);
+                            if ((oldValue == null && newValue != null) ||
+                                    (oldValue != null && !oldValue.equals(newValue))) {
+                                cancel = true;
+                                if (DBG) {
+                                    Log.d(LOG_TAG, "Transition.play: oldValue != newValue for " +
+                                            key + ": old, new = " + oldValue + ", " + newValue);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    if (cancel) {
+                        if (anim.isRunning() || anim.isStarted()) {
+                            if (DBG) {
+                                Log.d(LOG_TAG, "Canceling anim " + anim);
+                            }
+                            anim.cancel();
+                        } else {
+                            if (DBG) {
+                                Log.d(LOG_TAG, "removing anim from info list: " + anim);
+                            }
+                            runningAnimators.remove(anim);
+                        }
+                    }
+                }
+            }
+        }
+
         // setup() must be called on entire transition hierarchy and set of views
         // before calling play() on anything; every transition needs a chance to set up
         // target views appropriately before transitions begin running
@@ -707,7 +898,7 @@ public abstract class Transition implements Cloneable {
      * This is a utility method used by subclasses to handle standard parts of
      * setting up and running an Animator: it sets the {@link #getDuration()
      * duration} and the {@link #getStartDelay() startDelay}, starts the
-     * animation, and, when the animator ends, calls {@link #endTransition()}.
+     * animation, and, when the animator ends, calls {@link #end()}.
      *
      * @param animator The Animator to be run during this transition.
      *
@@ -716,7 +907,7 @@ public abstract class Transition implements Cloneable {
     protected void animate(Animator animator) {
         // TODO: maybe pass auto-end as a boolean parameter?
         if (animator == null) {
-            endTransition();
+            end();
         } else {
             if (getDuration() >= 0) {
                 animator.setDuration(getDuration());
@@ -730,36 +921,12 @@ public abstract class Transition implements Cloneable {
             animator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    endTransition();
+                    end();
                     animation.removeListener(this);
                 }
             });
             animator.start();
         }
-    }
-
-    /**
-     * Subclasses may override to receive notice of when the transition starts.
-     * This is equivalent to listening for the
-     * {@link TransitionListener#onTransitionStart(Transition)} callback.
-     */
-    protected void onTransitionStart() {
-    }
-
-    /**
-     * Subclasses may override to receive notice of when the transition is
-     * canceled. This is equivalent to listening for the
-     * {@link TransitionListener#onTransitionCancel(Transition)} callback.
-     */
-    protected void onTransitionCancel() {
-    }
-
-    /**
-     * Subclasses may override to receive notice of when the transition ends.
-     * This is equivalent to listening for the
-     * {@link TransitionListener#onTransitionEnd(Transition)} callback.
-     */
-    protected void onTransitionEnd() {
     }
 
     /**
@@ -769,9 +936,8 @@ public abstract class Transition implements Cloneable {
      *
      * @hide
      */
-    protected void startTransition() {
+    protected void start() {
         if (mNumInstances == 0) {
-            onTransitionStart();
             if (mListeners != null && mListeners.size() > 0) {
                 ArrayList<TransitionListener> tmpListeners =
                         (ArrayList<TransitionListener>) mListeners.clone();
@@ -790,15 +956,14 @@ public abstract class Transition implements Cloneable {
      * a transition did nothing (returned a null Animator from
      * {@link Transition#play(ViewGroup, TransitionValues,
      * TransitionValues)}) or because the transition returned a valid
-     * Animator and endTransition() was called in the onAnimationEnd()
+     * Animator and end() was called in the onAnimationEnd()
      * callback of the AnimatorListener.
      *
      * @hide
      */
-    protected void endTransition() {
+    protected void end() {
         --mNumInstances;
         if (mNumInstances == 0) {
-            onTransitionEnd();
             if (mListeners != null && mListeners.size() > 0) {
                 ArrayList<TransitionListener> tmpListeners =
                         (ArrayList<TransitionListener>) mListeners.clone();
@@ -828,7 +993,7 @@ public abstract class Transition implements Cloneable {
      * This method cancels a transition that is currently running.
      * Implementation TBD.
      */
-    protected void cancelTransition() {
+    protected void cancel() {
         // TODO: how does this work with instances?
         // TODO: this doesn't actually do *anything* yet
         int numAnimators = mCurrentAnimators.size();
@@ -836,7 +1001,6 @@ public abstract class Transition implements Cloneable {
             Animator animator = mCurrentAnimators.get(i);
             animator.cancel();
         }
-        onTransitionCancel();
         if (mListeners != null && mListeners.size() > 0) {
             ArrayList<TransitionListener> tmpListeners =
                     (ArrayList<TransitionListener>) mListeners.clone();
@@ -901,9 +1065,26 @@ public abstract class Transition implements Cloneable {
         Transition clone = null;
         try {
             clone = (Transition) super.clone();
+            clone.mAnimators = new ArrayList<Animator>();
         } catch (CloneNotSupportedException e) {}
 
         return clone;
+    }
+
+    /**
+     * Returns the name of this Transition. This name is used internally to distinguish
+     * between different transitions to determine when interrupting transitions overlap.
+     * For example, a Move running on the same target view as another Move should determine
+     * whether the old transition is animating to different end values and should be
+     * canceled in favor of the new transition.
+     *
+     * <p>By default, a Transition's name is simply the value of {@link Class#getName()},
+     * but subclasses are free to override and return something different.</p>
+     *
+     * @return The name of this transition.
+     */
+    public String getName() {
+        return mName;
     }
 
     String toString(String indent) {
@@ -943,8 +1124,7 @@ public abstract class Transition implements Cloneable {
 
     /**
      * A transition listener receives notifications from a transition.
-     * Notifications indicate transition lifecycle events: when the transition
-     * begins, ends, or is canceled.
+     * Notifications indicate transition lifecycle events.
      */
     public static interface TransitionListener {
         /**
@@ -957,7 +1137,7 @@ public abstract class Transition implements Cloneable {
         /**
          * Notification about the end of the transition. Canceled transitions
          * will always notify listeners of both the cancellation and end
-         * events. That is, {@link #onTransitionEnd()} is always called,
+         * events. That is, {@link #onTransitionEnd(Transition)} is always called,
          * regardless of whether the transition was canceled or played
          * through to completion.
          *
@@ -967,10 +1147,38 @@ public abstract class Transition implements Cloneable {
 
         /**
          * Notification about the cancellation of the transition.
+         * Note that cancel() may be called by a parent {@link TransitionGroup} on
+         * a child transition which has not yet started. This allows the child
+         * transition to restore state on target objects which was set at
+         * {@link #play(android.view.ViewGroup, TransitionValues, TransitionValues)
+         * play()} time.
          *
          * @param transition The transition which was canceled.
          */
         void onTransitionCancel(Transition transition);
+
+        /**
+         * Notification when a transition is paused.
+         * Note that play() may be called by a parent {@link TransitionGroup} on
+         * a child transition which has not yet started. This allows the child
+         * transition to restore state on target objects which was set at
+         * {@link #play(android.view.ViewGroup, TransitionValues, TransitionValues)
+         * play()} time.
+         *
+         * @param transition The transition which was paused.
+         */
+        void onTransitionPause(Transition transition);
+
+        /**
+         * Notification when a transition is resumed.
+         * Note that resume() may be called by a parent {@link TransitionGroup} on
+         * a child transition which has not yet started. This allows the child
+         * transition to restore state which may have changed in an earlier call
+         * to {@link #onTransitionPause(Transition)}.
+         *
+         * @param transition The transition which was resumed.
+         */
+        void onTransitionResume(Transition transition);
     }
 
     /**
@@ -991,6 +1199,32 @@ public abstract class Transition implements Cloneable {
         @Override
         public void onTransitionCancel(Transition transition) {
         }
+
+        @Override
+        public void onTransitionPause(Transition transition) {
+        }
+
+        @Override
+        public void onTransitionResume(Transition transition) {
+        }
     }
 
+    /**
+     * Holds information about each animator used when a new transition starts
+     * while other transitions are still running to determine whether a running
+     * animation should be canceled or a new animation noop'd. The structure holds
+     * information about the state that an animation is going to, to be compared to
+     * end state of a new animation.
+     */
+    private static class AnimationInfo {
+        View view;
+        String name;
+        TransitionValues values;
+
+        AnimationInfo(View view, String name, TransitionValues values) {
+            this.view = view;
+            this.name = name;
+            this.values = values;
+        }
+    }
 }
