@@ -362,6 +362,12 @@ public class SyncStorageEngine extends Handler {
                 periodicSyncs.add(defaultSync);
             }
         }
+
+        @Override
+        public String toString() {
+            return target + ", enabled=" + enabled + ", syncable=" + syncable + ", backoff="
+                    + backoffTime + ", delay=" + delayUntil;
+        }
     }
 
     public static class SyncHistoryItem {
@@ -1084,7 +1090,7 @@ public class SyncStorageEngine extends Handler {
             pop = new PendingOperation(authority, op.reason, op.syncSource, op.extras,
                     op.expedited);
             mPendingOperations.add(pop);
-            writePendingOperationsLocked();
+            appendPendingOperationLocked(pop);
 
             SyncStatusInfo status = getOrCreateSyncStatusLocked(authority.ident);
             status.pending = true;
@@ -2416,6 +2422,9 @@ public class SyncStorageEngine extends Handler {
         }
         try {
             fis = mPendingFile.openRead();
+            if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+                Log.v(TAG_FILE, "Reading " + mPendingFile.getBaseFile());
+            }
             XmlPullParser parser;
             parser = Xml.newPullParser();
             parser.setInput(fis, null);
@@ -2427,12 +2436,11 @@ public class SyncStorageEngine extends Handler {
             }
             if (eventType == XmlPullParser.END_DOCUMENT) return; // Nothing to read.
 
-            String tagName = parser.getName();
             do {
                 PendingOperation pop = null;
                 if (eventType == XmlPullParser.START_TAG) {
                     try {
-                        tagName = parser.getName();
+                        String tagName = parser.getName();
                         if (parser.getDepth() == 1 && "op".equals(tagName)) {
                             // Verify version.
                             String versionString =
@@ -2556,17 +2564,11 @@ public class SyncStorageEngine extends Handler {
             fos = mPendingFile.startWrite();
             XmlSerializer out = new FastXmlSerializer();
             out.setOutput(fos, "utf-8");
-            out.startDocument(null, true);
-            out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
-
-            out.startTag(null, "pending");
-            out.attribute(null, "version", Integer.toString(PENDING_OPERATION_VERSION));
 
             for (int i = 0; i < N; i++) {
                 PendingOperation pop = mPendingOperations.get(i);
                 writePendingOperationLocked(pop, out);
              }
-             out.endTag(null, "pending");
              out.endDocument();
              mPendingFile.finishWrite(fos);
         } catch (java.io.IOException e1) {
