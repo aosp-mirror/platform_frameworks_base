@@ -654,7 +654,13 @@ public class MediaRouter {
             if (info == sStatic.mSelectedRoute) {
                 // Removing the currently selected route? Select the default before we remove it.
                 // TODO: Be smarter about the route types here; this selects for all valid.
-                selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO | ROUTE_TYPE_USER, sStatic.mDefaultAudioVideo);
+                if (info != sStatic.mBluetoothA2dpRoute && sStatic.mBluetoothA2dpRoute != null) {
+                    selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO | ROUTE_TYPE_USER,
+                            sStatic.mBluetoothA2dpRoute);
+                } else {
+                    selectRouteStatic(ROUTE_TYPE_LIVE_AUDIO | ROUTE_TYPE_USER,
+                            sStatic.mDefaultAudioVideo);
+                }
             }
             if (!found) {
                 sStatic.mCategories.remove(removingCat);
