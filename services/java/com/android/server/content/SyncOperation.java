@@ -97,7 +97,7 @@ public class SyncOperation implements Comparable {
         this.delayUntil = delayUntil;
         this.backoff = backoff;
         final long now = SystemClock.elapsedRealtime();
-        // Check the extras bundle. Must occur after we set the internal bundle.
+        // Checks the extras bundle. Must occur after we set the internal bundle.
         if (runTimeFromNow < 0 || isExpedited()) {
             this.expedited = true;
             this.latestRunTime = now;
