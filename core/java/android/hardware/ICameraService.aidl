@@ -20,8 +20,8 @@ import android.hardware.ICamera;
 import android.hardware.ICameraClient;
 import android.hardware.IProCameraUser;
 import android.hardware.IProCameraCallbacks;
-import android.hardware.photography.ICameraDeviceUser;
-import android.hardware.photography.ICameraDeviceCallbacks;
+import android.hardware.camera2.ICameraDeviceUser;
+import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.ICameraServiceListener;
 import android.hardware.CameraInfo;
 

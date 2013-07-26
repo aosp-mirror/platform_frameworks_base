@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.hardware.photography;
+package android.hardware.camera2;
 
 import android.graphics.Point;
 import android.graphics.Rect;

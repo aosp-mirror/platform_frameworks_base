@@ -32,7 +32,7 @@ import java.nio.ByteOrder;
  *
  * <p>Several Android media API classes accept Surface objects as targets to
  * render to, including {@link MediaPlayer}, {@link MediaCodec},
- * {@link android.hardware.photography.CameraDevice}, and
+ * {@link android.hardware.camera2.CameraDevice}, and
  * {@link android.renderscript.Allocation RenderScript Allocations}. The image
  * sizes and formats that can be used with each source vary, and should be
  * checked in the documentation for the specific API.</p>

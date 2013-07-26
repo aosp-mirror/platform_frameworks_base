@@ -17,18 +17,18 @@
 package com.android.mediaframeworktest.integration;
 
 import android.graphics.SurfaceTexture;
-import android.hardware.photography.CameraMetadata;
-import android.hardware.photography.CameraPropertiesKeys;
-import android.hardware.photography.CaptureRequest;
-import android.hardware.photography.ICameraDeviceCallbacks;
-import android.hardware.photography.ICameraDeviceUser;
+import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CameraPropertiesKeys;
+import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.ICameraDeviceCallbacks;
+import android.hardware.camera2.ICameraDeviceUser;
 import android.os.RemoteException;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
 import android.view.Surface;
 
-import static android.hardware.photography.CameraDevice.TEMPLATE_PREVIEW;
+import static android.hardware.camera2.CameraDevice.TEMPLATE_PREVIEW;
 
 import com.android.mediaframeworktest.MediaFrameworkIntegrationTestRunner;
 import com.android.mediaframeworktest.integration.CameraBinderTest.DummyBase;

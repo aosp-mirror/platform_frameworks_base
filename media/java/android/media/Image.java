@@ -23,7 +23,7 @@ import java.lang.AutoCloseable;
 /**
  * <p>A single complete image buffer to use with a media source such as a
  * {@link MediaCodec} or a
- * {@link android.hardware.photography.CameraDevice}.</p>
+ * {@link android.hardware.camera2.CameraDevice}.</p>
  *
  * <p>This class allows for efficient direct application access to the pixel
  * data of the Image through one or more
@@ -80,7 +80,7 @@ public interface Image extends AutoCloseable {
      *   <td>A single plane of raw sensor image data, with 16 bits per color
      *     sample. The details of the layout need to be queried from the source of
      *     the raw sensor data, such as
-     *     {@link android.hardware.photography.CameraDevice}.
+     *     {@link android.hardware.camera2.CameraDevice}.
      *   </td>
      * </tr>
      * </table>

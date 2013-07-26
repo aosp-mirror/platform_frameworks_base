@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.hardware.photography.impl;
+package android.hardware.camera2.impl;
 
-import android.hardware.photography.CameraMetadata;
+import android.hardware.camera2.CameraMetadata;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;

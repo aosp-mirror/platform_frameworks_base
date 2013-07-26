@@ -1,12 +1,12 @@
 
-package android.hardware.photography.utils;
+package android.hardware.camera2.utils;
 
 import java.lang.reflect.*;
 
 /**
  * This is an implementation of the 'decorator' design pattern using Java's proxy mechanism.
  *
- * @see android.hardware.photography.utils.Decorator#newInstance
+ * @see android.hardware.camera2.utils.Decorator#newInstance
  *
  * @hide
  */

@@ -90,13 +90,13 @@ public class ImageFormat {
      * <pre> y_size = stride * height </pre>
      *
      * <p>For example, the {@link android.media.Image} object can provide data
-     * in this format from a {@link android.hardware.photography.CameraDevice}
+     * in this format from a {@link android.hardware.camera2.CameraDevice}
      * through a {@link android.media.ImageReader} object if this format is
-     * supported by {@link android.hardware.photography.CameraDevice}.</p>
+     * supported by {@link android.hardware.camera2.CameraDevice}.</p>
      *
      * @see android.media.Image
      * @see android.media.ImageReader
-     * @see android.hardware.photography.CameraDevice
+     * @see android.hardware.camera2.CameraDevice
      *
      * @hide
      */
@@ -120,13 +120,13 @@ public class ImageFormat {
      * <pre> y_size = stride * height </pre>
      *
      * <p>For example, the {@link android.media.Image} object can provide data
-     * in this format from a {@link android.hardware.photography.CameraDevice}
+     * in this format from a {@link android.hardware.camera2.CameraDevice}
      * through a {@link android.media.ImageReader} object if this format is
-     * supported by {@link android.hardware.photography.CameraDevice}.</p>
+     * supported by {@link android.hardware.camera2.CameraDevice}.</p>
      *
      * @see android.media.Image
      * @see android.media.ImageReader
-     * @see android.hardware.photography.CameraDevice
+     * @see android.hardware.camera2.CameraDevice
      *
      * @hide
      */
@@ -172,12 +172,12 @@ public class ImageFormat {
      * for each plane.</p>
      *
      * <p>For example, the {@link android.media.Image} object can provide data
-     * in this format from a {@link android.hardware.photography.CameraDevice}
+     * in this format from a {@link android.hardware.camera2.CameraDevice}
      * through a {@link android.media.ImageReader} object.</p>
      *
      * @see android.media.Image
      * @see android.media.ImageReader
-     * @see android.hardware.photography.CameraDevice
+     * @see android.hardware.camera2.CameraDevice
      */
     public static final int YUV_420_888 = 0x23;
 
@@ -189,7 +189,7 @@ public class ImageFormat {
      * <p>The layout of the color mosaic, the maximum and minimum encoding
      * values of the raw pixel data, the color space of the image, and all other
      * needed information to interpret a raw sensor image must be queried from
-     * the {@link android.hardware.photography.CameraDevice} which produced the
+     * the {@link android.hardware.camera2.CameraDevice} which produced the
      * image.</p>
      */
     public static final int RAW_SENSOR = 0x20;

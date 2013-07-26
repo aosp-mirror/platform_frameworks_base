@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.hardware.photography;
+package android.hardware.camera2;
 
 /**
  * A simple immutable class for describing the dimensions of camera image

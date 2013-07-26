@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package android.hardware.photography.impl;
+package android.hardware.camera2.impl;
 
-import android.hardware.photography.CameraMetadata;
-import android.hardware.photography.CaptureResult;
-import android.hardware.photography.ICameraDeviceUser;
-import android.hardware.photography.ICameraDeviceCallbacks;
-import android.hardware.photography.CameraAccessException;
-import android.hardware.photography.CameraProperties;
-import android.hardware.photography.CaptureRequest;
-import android.hardware.photography.utils.CameraRuntimeException;
+import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.ICameraDeviceUser;
+import android.hardware.camera2.ICameraDeviceCallbacks;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraProperties;
+import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.utils.CameraRuntimeException;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -37,7 +37,7 @@ import java.util.Stack;
 /**
  * HAL2.1+ implementation of CameraDevice Use CameraManager#open to instantiate
  */
-public class CameraDevice implements android.hardware.photography.CameraDevice {
+public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
     private final String TAG;
 

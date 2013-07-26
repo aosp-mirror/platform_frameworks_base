@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.hardware.photography;
+package android.hardware.camera2;
 
 /**
  * The rational data type used by CameraMetadata keys. Contains a pair of ints representing the

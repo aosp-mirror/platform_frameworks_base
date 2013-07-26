@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package android.hardware.photography;
+package android.hardware.camera2;
 
-import android.hardware.photography.impl.MetadataMarshalClass;
-import android.hardware.photography.impl.MetadataMarshalRect;
-import android.hardware.photography.impl.MetadataMarshalSize;
-import android.hardware.photography.impl.MetadataMarshalString;
+import android.hardware.camera2.impl.MetadataMarshalClass;
+import android.hardware.camera2.impl.MetadataMarshalRect;
+import android.hardware.camera2.impl.MetadataMarshalSize;
+import android.hardware.camera2.impl.MetadataMarshalString;
 import android.os.Parcelable;
 import android.os.Parcel;
 import android.util.Log;

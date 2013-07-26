@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.hardware.photography.utils;
+package android.hardware.camera2.utils;
 
 /**
  * @hide

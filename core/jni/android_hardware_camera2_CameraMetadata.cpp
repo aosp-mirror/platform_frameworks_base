@@ -38,7 +38,7 @@
 #endif
 
 // fully-qualified class name
-#define CAMERA_METADATA_CLASS_NAME "android/hardware/photography/CameraMetadata"
+#define CAMERA_METADATA_CLASS_NAME "android/hardware/camera2/CameraMetadata"
 
 using namespace android;
 
@@ -418,7 +418,7 @@ static int find_fields(JNIEnv *env, field *fields, int count)
 }
 
 // Get all the required offsets in java class and register native functions
-int register_android_hardware_photography_CameraMetadata(JNIEnv *env)
+int register_android_hardware_camera2_CameraMetadata(JNIEnv *env)
 {
     // Register native functions
     return AndroidRuntime::registerNativeMethods(env,
