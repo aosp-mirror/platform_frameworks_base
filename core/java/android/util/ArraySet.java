@@ -35,9 +35,6 @@ import java.util.Set;
  * and deleting entries in the array.  For containers holding up to hundreds of items,
  * the performance difference is not significant, less than 50%.</p>
  *
- * <p><b>Note:</b> unlike {@link java.util.HashSet}, this container does not support
- * null values.</p>
- *
  * <p>Because this container is intended to better balance memory use, unlike most other
  * standard Java containers it will shrink its array as items are removed from it.  Currently
  * you have no control over this shrinking -- if you set a capacity and then remove an
@@ -93,19 +90,57 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         }
 
         // If the key at the returned index matches, that's what we want.
-        if (mArray[index].equals(key)) {
+        if (key.equals(mArray[index])) {
             return index;
         }
 
         // Search for a matching key after the index.
         int end;
         for (end = index + 1; end < N && mHashes[end] == hash; end++) {
-            if (mArray[end].equals(key)) return end;
+            if (key.equals(mArray[end])) return end;
         }
 
         // Search for a matching key before the index.
         for (int i = index - 1; i >= 0 && mHashes[i] == hash; i--) {
-            if (mArray[i].equals(key)) return i;
+            if (key.equals(mArray[i])) return i;
+        }
+
+        // Key not found -- return negative value indicating where a
+        // new entry for this key should go.  We use the end of the
+        // hash chain to reduce the number of array entries that will
+        // need to be copied when inserting.
+        return ~end;
+    }
+
+    private int indexOfNull() {
+        final int N = mSize;
+
+        // Important fast case: if nothing is in here, nothing to look for.
+        if (N == 0) {
+            return ~0;
+        }
+
+        int index = ContainerHelpers.binarySearch(mHashes, N, 0);
+
+        // If the hash code wasn't found, then we have no entry for this key.
+        if (index < 0) {
+            return index;
+        }
+
+        // If the key at the returned index matches, that's what we want.
+        if (null == mArray[index]) {
+            return index;
+        }
+
+        // Search for a matching key after the index.
+        int end;
+        for (end = index + 1; end < N && mHashes[end] == 0; end++) {
+            if (null == mArray[end]) return end;
+        }
+
+        // Search for a matching key before the index.
+        for (int i = index - 1; i >= 0 && mHashes[i] == 0; i--) {
+            if (null == mArray[i]) return i;
         }
 
         // Key not found -- return negative value indicating where a
@@ -254,7 +289,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
      */
     @Override
     public boolean contains(Object key) {
-        return indexOf(key, key.hashCode()) >= 0;
+        return key == null ? (indexOfNull() >= 0) : (indexOf(key, key.hashCode()) >= 0);
     }
 
     /**
@@ -285,8 +320,15 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
      */
     @Override
     public boolean add(E value) {
-        final int hash = value.hashCode();
-        int index = indexOf(value, hash);
+        final int hash;
+        int index;
+        if (value == null) {
+            hash = 0;
+            index = indexOfNull();
+        } else {
+            hash = value.hashCode();
+            index = indexOf(value, hash);
+        }
         if (index >= 0) {
             return false;
         }
@@ -352,7 +394,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
      */
     @Override
     public boolean remove(Object object) {
-        int index = indexOf(object, object.hashCode());
+        int index = object == null ? indexOfNull() : indexOf(object, object.hashCode());
         if (index >= 0) {
             removeAt(index);
             return true;
@@ -366,7 +408,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
      * @return Returns the value that was stored at this index.
      */
     public E removeAt(int index) {
-        final E old = (E)mArray[index];
+        final Object old = mArray[index];
         if (mSize <= 1) {
             // Now empty.
             if (DEBUG) Log.d(TAG, "remove: shrink from " + mHashes.length + " to 0");
@@ -410,7 +452,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
                 mArray[mSize] = null;
             }
         }
-        return old;
+        return (E)old;
     }
 
     /**
@@ -542,12 +584,12 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
 
                 @Override
                 protected int colIndexOfKey(Object key) {
-                    return indexOf(key, key.hashCode());
+                    return key == null ? indexOfNull() : indexOf(key, key.hashCode());
                 }
 
                 @Override
                 protected int colIndexOfValue(Object value) {
-                    return indexOf(value, value.hashCode());
+                    return value == null ? indexOfNull() : indexOf(value, value.hashCode());
                 }
 
                 @Override

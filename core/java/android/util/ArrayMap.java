@@ -36,9 +36,6 @@ import java.util.Set;
  * and deleting entries in the array.  For containers holding up to hundreds of items,
  * the performance difference is not significant, less than 50%.</p>
  *
- * <p><b>Note:</b> unlike {@link java.util.HashMap}, this container does not support
- * null keys.</p>
- *
  * <p>Because this container is intended to better balance memory use, unlike most other
  * standard Java containers it will shrink its array as items are removed from it.  Currently
  * you have no control over this shrinking -- if you set a capacity and then remove an
@@ -86,7 +83,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
     int mSize;
     MapCollections<K, V> mCollections;
 
-    private int indexOf(Object key, int hash) {
+    int indexOf(Object key, int hash) {
         final int N = mSize;
 
         // Important fast case: if nothing is in here, nothing to look for.
@@ -102,19 +99,57 @@ public final class ArrayMap<K, V> implements Map<K, V> {
         }
 
         // If the key at the returned index matches, that's what we want.
-        if (mArray[index<<1].equals(key)) {
+        if (key.equals(mArray[index<<1])) {
             return index;
         }
 
         // Search for a matching key after the index.
         int end;
         for (end = index + 1; end < N && mHashes[end] == hash; end++) {
-            if (mArray[end << 1].equals(key)) return end;
+            if (key.equals(mArray[end << 1])) return end;
         }
 
         // Search for a matching key before the index.
         for (int i = index - 1; i >= 0 && mHashes[i] == hash; i--) {
-            if (mArray[i << 1].equals(key)) return i;
+            if (key.equals(mArray[i << 1])) return i;
+        }
+
+        // Key not found -- return negative value indicating where a
+        // new entry for this key should go.  We use the end of the
+        // hash chain to reduce the number of array entries that will
+        // need to be copied when inserting.
+        return ~end;
+    }
+
+    int indexOfNull() {
+        final int N = mSize;
+
+        // Important fast case: if nothing is in here, nothing to look for.
+        if (N == 0) {
+            return ~0;
+        }
+
+        int index = ContainerHelpers.binarySearch(mHashes, N, 0);
+
+        // If the hash code wasn't found, then we have no entry for this key.
+        if (index < 0) {
+            return index;
+        }
+
+        // If the key at the returned index matches, that's what we want.
+        if (null == mArray[index<<1]) {
+            return index;
+        }
+
+        // Search for a matching key after the index.
+        int end;
+        for (end = index + 1; end < N && mHashes[end] == 0; end++) {
+            if (null == mArray[end << 1]) return end;
+        }
+
+        // Search for a matching key before the index.
+        for (int i = index - 1; i >= 0 && mHashes[i] == 0; i--) {
+            if (null == mArray[i << 1]) return i;
         }
 
         // Key not found -- return negative value indicating where a
@@ -285,10 +320,10 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     @Override
     public boolean containsKey(Object key) {
-        return indexOf(key, key.hashCode()) >= 0;
+        return key == null ? (indexOfNull() >= 0) : (indexOf(key, key.hashCode()) >= 0);
     }
 
-    private int indexOfValue(Object value) {
+    int indexOfValue(Object value) {
         final int N = mSize*2;
         final Object[] array = mArray;
         if (value == null) {
@@ -327,7 +362,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     @Override
     public V get(Object key) {
-        final int index = indexOf(key, key.hashCode());
+        final int index = key == null ? indexOfNull() : indexOf(key, key.hashCode());
         return index >= 0 ? (V)mArray[(index<<1)+1] : null;
     }
 
@@ -380,8 +415,15 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     @Override
     public V put(K key, V value) {
-        final int hash = key.hashCode();
-        int index = indexOf(key, hash);
+        final int hash;
+        int index;
+        if (key == null) {
+            hash = 0;
+            index = indexOfNull();
+        } else {
+            hash = key.hashCode();
+            index = indexOf(key, hash);
+        }
         if (index >= 0) {
             index = (index<<1) + 1;
             final V old = (V)mArray[index];
@@ -430,7 +472,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     public void append(K key, V value) {
         int index = mSize;
-        final int hash = key.hashCode();
+        final int hash = key == null ? 0 : key.hashCode();
         if (index >= mHashes.length) {
             throw new IllegalStateException("Array is full");
         }
@@ -478,7 +520,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      */
     @Override
     public V remove(Object key) {
-        int index = indexOf(key, key.hashCode());
+        int index = key == null ? indexOfNull() : indexOf(key, key.hashCode());
         if (index >= 0) {
             return removeAt(index);
         }
@@ -492,7 +534,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
      * @return Returns the value that was stored at this index.
      */
     public V removeAt(int index) {
-        final V old = (V)mArray[(index << 1) + 1];
+        final Object old = mArray[(index << 1) + 1];
         if (mSize <= 1) {
             // Now empty.
             if (DEBUG) Log.d(TAG, "remove: shrink from " + mHashes.length + " to 0");
@@ -539,7 +581,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
                 mArray[(mSize << 1) + 1] = null;
             }
         }
-        return old;
+        return (V)old;
     }
 
     /**
@@ -664,7 +706,7 @@ public final class ArrayMap<K, V> implements Map<K, V> {
 
                 @Override
                 protected int colIndexOfKey(Object key) {
-                    return indexOf(key, key.hashCode());
+                    return key == null ? indexOfNull() : indexOf(key, key.hashCode());
                 }
 
                 @Override
