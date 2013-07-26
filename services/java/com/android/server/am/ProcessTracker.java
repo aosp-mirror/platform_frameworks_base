@@ -21,6 +21,7 @@ import android.content.pm.IPackageManager;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
@@ -29,9 +30,11 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
+import android.webkit.WebViewFactory;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.ProcessMap;
+import dalvik.system.VMRuntime;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -43,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 
 public final class ProcessTracker {
@@ -689,12 +693,13 @@ public final class ProcessTracker {
 
     static final class State {
         // Current version of the parcel format.
-        private static final int PARCEL_VERSION = 6;
+        private static final int PARCEL_VERSION = 7;
         // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
         private static final int MAGIC = 0x50535453;
 
         static final int FLAG_COMPLETE = 1<<0;
         static final int FLAG_SHUTDOWN = 1<<1;
+        static final int FLAG_SYSPROPS = 1<<2;
 
         final File mBaseDir;
         final ProcessTracker mProcessTracker;
@@ -705,6 +710,8 @@ public final class ProcessTracker {
         String mTimePeriodStartClockStr;
         long mTimePeriodStartRealtime;
         long mTimePeriodEndRealtime;
+        String mRuntime;
+        String mWebView;
         boolean mRunning;
         int mFlags;
 
@@ -795,6 +802,28 @@ public final class ProcessTracker {
             mStartTime = 0;
             mReadError = null;
             mFlags = 0;
+            evaluateSystemProperties(true);
+        }
+
+        public boolean evaluateSystemProperties(boolean update) {
+            boolean changed = false;
+            String runtime = SystemProperties.get("persist.sys.dalvik.vm.lib",
+                    VMRuntime.getRuntime().vmLibrary());
+            if (!Objects.equals(runtime, mRuntime)) {
+                changed = true;
+                if (update) {
+                    mRuntime = runtime;
+                }
+            }
+            String webview = SystemProperties.getBoolean(
+                    WebViewFactory.WEBVIEW_EXPERIMENTAL_PROPERTY, false) ? "chromeview" : "webview";
+            if (!Objects.equals(webview, mWebView)) {
+                changed = true;
+                if (update) {
+                    mWebView = webview;
+                }
+            }
+            return changed;
         }
 
         private void buildTimePeriodStartClockStr() {
@@ -963,6 +992,8 @@ public final class ProcessTracker {
             out.writeLong(mTimePeriodStartClock);
             out.writeLong(mTimePeriodStartRealtime);
             out.writeLong(mTimePeriodEndRealtime);
+            out.writeString(mRuntime);
+            out.writeString(mWebView);
             out.writeInt(mFlags);
 
             out.writeInt(mLongs.size());
@@ -1052,7 +1083,9 @@ public final class ProcessTracker {
             if (!readCheckedInt(in, MAGIC, "magic number")) {
                 return;
             }
-            if (!readCheckedInt(in, PARCEL_VERSION, "version")) {
+            int version = in.readInt();
+            if (version != PARCEL_VERSION && version != 6) {
+                mReadError = "bad version: " + version;
                 return;
             }
             if (!readCheckedInt(in, STATE_COUNT, "state count")) {
@@ -1072,6 +1105,10 @@ public final class ProcessTracker {
             buildTimePeriodStartClockStr();
             mTimePeriodStartRealtime = in.readLong();
             mTimePeriodEndRealtime = in.readLong();
+            if (version ==  PARCEL_VERSION) {
+                mRuntime = in.readString();
+                mWebView = in.readString();
+            }
             mFlags = in.readInt();
 
             final int NLONGS = in.readInt();
@@ -1529,9 +1566,26 @@ public final class ProcessTracker {
             TimeUtils.formatDuration(
                     (mRunning ? SystemClock.elapsedRealtime() : mTimePeriodEndRealtime)
                             - mTimePeriodStartRealtime, pw);
-            if ((mFlags&FLAG_COMPLETE) != 0) pw.print(" (complete)");
-            else if ((mFlags&FLAG_SHUTDOWN) != 0) pw.print(" (shutdown)");
-            else pw.print(" (partial)");
+            boolean partial = true;
+            if ((mFlags&FLAG_SHUTDOWN) != 0) {
+                pw.print(" (shutdown)");
+                partial = false;
+            }
+            if ((mFlags&FLAG_SYSPROPS) != 0) {
+                pw.print(" (sysprops)");
+                partial = false;
+            }
+            if ((mFlags&FLAG_COMPLETE) != 0) {
+                pw.print(" (complete)");
+                partial = false;
+            }
+            if (partial) {
+                pw.print(" (partial)");
+            }
+            pw.print(' ');
+            pw.print(mRuntime);
+            pw.print(' ');
+            pw.print(mWebView);
             pw.println();
         }
 
@@ -1611,10 +1665,24 @@ public final class ProcessTracker {
             pw.print("period,"); pw.print(mTimePeriodStartClockStr);
             pw.print(","); pw.print(mTimePeriodStartRealtime); pw.print(",");
             pw.print(mRunning ? SystemClock.elapsedRealtime() : mTimePeriodEndRealtime);
-            if ((mFlags&FLAG_COMPLETE) != 0) pw.print(",complete");
-            else if ((mFlags&FLAG_SHUTDOWN) != 0) pw.print(",shutdown");
-            else pw.print(",partial");
+            boolean partial = true;
+            if ((mFlags&FLAG_SHUTDOWN) != 0) {
+                pw.print(",shutdown");
+                partial = false;
+            }
+            if ((mFlags&FLAG_SYSPROPS) != 0) {
+                pw.print(",sysprops");
+                partial = false;
+            }
+            if ((mFlags&FLAG_COMPLETE) != 0) {
+                pw.print(",complete");
+                partial = false;
+            }
+            if (partial) {
+                pw.print(",partial");
+            }
             pw.println();
+            pw.print("config,"); pw.print(mRuntime); pw.print(','); pw.println(mWebView);
             for (int ip=0; ip<pkgMap.size(); ip++) {
                 String pkgName = pkgMap.keyAt(ip);
                 if (reqPackage != null && !reqPackage.equals(pkgName)) {
@@ -1726,6 +1794,17 @@ public final class ProcessTracker {
         mBaseDir.mkdirs();
         mState = new State(mBaseDir, this);
         mState.mRunning = true;
+        SystemProperties.addChangeCallback(new Runnable() {
+            @Override public void run() {
+                synchronized (mLock) {
+                    if (mState.evaluateSystemProperties(false)) {
+                        mState.mFlags |= State.FLAG_SYSPROPS;
+                        mState.writeStateLocked(true, true);
+                        mState.evaluateSystemProperties(true);
+                    }
+                }
+            }
+        });
     }
 
     public ProcessState getProcessStateLocked(String packageName, int uid, String processName) {
@@ -2022,7 +2101,7 @@ public final class ProcessTracker {
         }
 
         void print(PrintWriter pw, long overallTime, boolean full) {
-            printPercent(pw, (double)totalTime/(double)overallTime);
+            printPercent(pw, (double) totalTime / (double) overallTime);
             if (numPss > 0) {
                 pw.print(" (");
                 printSizeValue(pw, minPss * 1024);
