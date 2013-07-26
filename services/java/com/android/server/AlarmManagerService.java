@@ -42,6 +42,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.TimeUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -81,7 +82,8 @@ class AlarmManagerService extends IAlarmManager.Stub {
     private static final String TAG = "AlarmManager";
     private static final String ClockReceiver_TAG = "ClockReceiver";
     private static final boolean localLOGV = false;
-    private static final boolean DEBUG_BATCH = localLOGV || true;
+    private static final boolean DEBUG_BATCH = localLOGV || false;
+    private static final boolean DEBUG_VALIDATE = localLOGV || true;
     private static final int ALARM_EVENT = 1;
     private static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
     
@@ -367,33 +369,27 @@ class AlarmManagerService extends IAlarmManager.Stub {
 
     // The RTC clock has moved arbitrarily, so we need to recalculate all the batching
     void rebatchAllAlarms() {
-        if (DEBUG_BATCH) {
-            Slog.v(TAG, "RTC changed; rebatching");
-        }
         synchronized (mLock) {
-            ArrayList<Batch> oldSet = (ArrayList<Batch>) mAlarmBatches.clone();
-            mAlarmBatches.clear();
-            final long nowElapsed = SystemClock.elapsedRealtime();
-            for (Batch batch : oldSet) {
-                final int N = batch.size();
-                for (int i = 0; i < N; i++) {
-                    Alarm a = batch.get(i);
-                    long whenElapsed = convertToElapsed(a.when, a.type);
-                    long maxElapsed = (a.whenElapsed == a.maxWhen)
-                            ? whenElapsed
-                            : maxTriggerTime(nowElapsed, whenElapsed, a.repeatInterval);
-                    if (batch.standalone) {
-                        // this will also be the only alarm in the batch
-                        a = new Alarm(a.type, a.when, whenElapsed, maxElapsed,
-                                a.repeatInterval, a.operation);
-                        Batch newBatch = new Batch(a);
-                        newBatch.standalone = true;
-                        addBatchLocked(mAlarmBatches, newBatch);
-                    } else {
-                        setImplLocked(a.type, a.when, whenElapsed, maxElapsed,
-                                a.repeatInterval, a.operation, false);
-                    }
-                }
+            rebatchAllAlarmsLocked(true);
+        }
+    }
+
+    void rebatchAllAlarmsLocked(boolean doValidate) {
+        ArrayList<Batch> oldSet = (ArrayList<Batch>) mAlarmBatches.clone();
+        mAlarmBatches.clear();
+        final long nowElapsed = SystemClock.elapsedRealtime();
+        final int oldBatches = oldSet.size();
+        for (int batchNum = 0; batchNum < oldBatches; batchNum++) {
+            Batch batch = oldSet.get(batchNum);
+            final int N = batch.size();
+            for (int i = 0; i < N; i++) {
+                Alarm a = batch.get(i);
+                long whenElapsed = convertToElapsed(a.when, a.type);
+                long maxElapsed = (a.whenElapsed == a.maxWhen)
+                        ? whenElapsed
+                                : maxTriggerTime(nowElapsed, whenElapsed, a.repeatInterval);
+                setImplLocked(a.type, a.when, whenElapsed, maxElapsed,
+                        a.repeatInterval, a.operation, batch.standalone, doValidate);
             }
         }
     }
@@ -544,23 +540,20 @@ class AlarmManagerService extends IAlarmManager.Stub {
                         + " interval=" + interval + " standalone=" + isStandalone);
             }
             setImplLocked(type, triggerAtTime, triggerElapsed, maxElapsed,
-                    interval, operation, isStandalone);
+                    interval, operation, isStandalone, true);
         }
     }
 
     private void setImplLocked(int type, long when, long whenElapsed, long maxWhen, long interval,
-            PendingIntent operation, boolean isStandalone) {
+            PendingIntent operation, boolean isStandalone, boolean doValidate) {
         Alarm a = new Alarm(type, when, whenElapsed, maxWhen, interval, operation);
         removeLocked(operation);
 
-        final boolean reschedule;
+        boolean reschedule;
         int whichBatch = (isStandalone) ? -1 : attemptCoalesceLocked(whenElapsed, maxWhen);
         if (whichBatch < 0) {
             Batch batch = new Batch(a);
             batch.standalone = isStandalone;
-            if (DEBUG_BATCH) {
-                Slog.v(TAG, "Starting new alarm batch " + batch);
-            }
             reschedule = addBatchLocked(mAlarmBatches, batch);
         } else {
             Batch batch = mAlarmBatches.get(whichBatch);
@@ -573,9 +566,50 @@ class AlarmManagerService extends IAlarmManager.Stub {
             }
         }
 
+        if (DEBUG_VALIDATE) {
+            if (doValidate && validateConsistencyLocked()) {
+                rebatchAllAlarmsLocked(false);
+                reschedule = true;
+            }
+        }
+
         if (reschedule) {
             rescheduleKernelAlarmsLocked();
         }
+    }
+
+    private void logBatchesLocked() {
+        ByteArrayOutputStream bs = new ByteArrayOutputStream(2048);
+        PrintWriter pw = new PrintWriter(bs);
+        final long nowRTC = System.currentTimeMillis();
+        final long nowELAPSED = SystemClock.elapsedRealtime();
+        final int NZ = mAlarmBatches.size();
+        for (int iz = 0; iz < NZ; iz++) {
+            Batch bz = mAlarmBatches.get(iz);
+            Slog.v(TAG, "Batch " + iz + ": " + bz);
+            dumpAlarmList(pw, bz.alarms, "  ", nowELAPSED, nowRTC);
+            Slog.v(TAG, bs.toString());
+            bs.reset();
+        }
+    }
+
+    private boolean validateConsistencyLocked() {
+        if (DEBUG_VALIDATE) {
+            long lastTime = Long.MIN_VALUE;
+            final int N = mAlarmBatches.size();
+            for (int i = 0; i < N; i++) {
+                Batch b = mAlarmBatches.get(i);
+                if (b.start >= lastTime) {
+                    // duplicate start times are okay because of standalone batches
+                    lastTime = b.start;
+                } else {
+                    Slog.e(TAG, "CONSISTENCY FAILURE: Batch " + i + " is out of order");
+                    logBatchesLocked();
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     private Batch findFirstWakeupBatchLocked() {
@@ -663,32 +697,59 @@ class AlarmManagerService extends IAlarmManager.Stub {
     }
     
     public void removeLocked(PendingIntent operation) {
+        boolean didRemove = false;
         for (int i = mAlarmBatches.size() - 1; i >= 0; i--) {
             Batch b = mAlarmBatches.get(i);
-            b.remove(operation);
+            didRemove |= b.remove(operation);
             if (b.size() == 0) {
                 mAlarmBatches.remove(i);
             }
+        }
+
+        if (didRemove) {
+            if (DEBUG_BATCH) {
+                Slog.v(TAG, "remove(operation) changed bounds; rebatching");
+            }
+            rebatchAllAlarmsLocked(true);
+            rescheduleKernelAlarmsLocked();
         }
     }
 
     public void removeLocked(String packageName) {
+        boolean didRemove = false;
         for (int i = mAlarmBatches.size() - 1; i >= 0; i--) {
             Batch b = mAlarmBatches.get(i);
-            b.remove(packageName);
+            didRemove |= b.remove(packageName);
             if (b.size() == 0) {
                 mAlarmBatches.remove(i);
             }
         }
+
+        if (didRemove) {
+            if (DEBUG_BATCH) {
+                Slog.v(TAG, "remove(package) changed bounds; rebatching");
+            }
+            rebatchAllAlarmsLocked(true);
+            rescheduleKernelAlarmsLocked();
+        }
     }
 
     public void removeUserLocked(int userHandle) {
+        boolean didRemove = false;
         for (int i = mAlarmBatches.size() - 1; i >= 0; i--) {
             Batch b = mAlarmBatches.get(i);
-            b.remove(userHandle);
+            didRemove |= b.remove(userHandle);
             if (b.size() == 0) {
                 mAlarmBatches.remove(i);
             }
+        }
+
+        if (didRemove) {
+            if (DEBUG_BATCH) {
+                Slog.v(TAG, "remove(user) changed bounds; rebatching");
+            }
+            rebatchAllAlarmsLocked(true);
+            rescheduleKernelAlarmsLocked();
         }
     }
 
@@ -962,7 +1023,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
                     final long nextElapsed = alarm.whenElapsed + delta;
                     setImplLocked(alarm.type, alarm.when + delta, nextElapsed,
                             maxTriggerTime(nowELAPSED, nextElapsed, alarm.repeatInterval),
-                            alarm.repeatInterval, alarm.operation, batch.standalone);
+                            alarm.repeatInterval, alarm.operation, batch.standalone, true);
                 }
 
             }
@@ -1067,7 +1128,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
 
                 if ((result & TIME_CHANGED_MASK) != 0) {
                     if (DEBUG_BATCH) {
-                        Slog.v(TAG, "Time changed notification from kernel");
+                        Slog.v(TAG, "Time changed notification from kernel; rebatching");
                     }
                     remove(mTimeTickSender);
                     rebatchAllAlarms();
