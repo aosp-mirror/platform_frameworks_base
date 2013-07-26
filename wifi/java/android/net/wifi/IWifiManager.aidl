@@ -43,7 +43,7 @@ interface IWifiManager
 
     boolean pingSupplicant();
 
-    void startScan();
+    void startScan(in WorkSource ws);
 
     List<ScanResult> getScanResults(String callingPackage);
 

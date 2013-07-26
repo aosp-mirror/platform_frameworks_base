@@ -607,7 +607,8 @@ public class WifiStateMachine extends StateMachine {
                 new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        startScan(UNKNOWN_SCAN_SOURCE);
+                        final WorkSource workSource = null;
+                        startScan(UNKNOWN_SCAN_SOURCE, workSource);
                     }
                 },
                 new IntentFilter(ACTION_START_SCAN));
@@ -725,15 +726,21 @@ public class WifiStateMachine extends StateMachine {
     }
 
     /**
-     * TODO: doc
+     * Initiate a wifi scan.  If workSource is not null, blame is given to it,
+     * otherwise blame is given to callingUid.
+     *
+     * @param callingUid The uid initiating the wifi scan.  Blame will be given
+     *                   here unless workSource is specified.
+     * @param workSource If not null, blame is given to workSource.
      */
-    public void startScan(int callingUid) {
-        sendMessage(CMD_START_SCAN, callingUid);
+    public void startScan(int callingUid, WorkSource workSource) {
+        sendMessage(CMD_START_SCAN, callingUid, 0, workSource);
     }
 
-    private void noteScanStart(int callingUid) {
-        if (mScanWorkSource == null && callingUid != UNKNOWN_SCAN_SOURCE) {
-            mScanWorkSource = new WorkSource(callingUid);
+    // If workSource is not null, blame is given to it, otherwise blame is given to callingUid.
+    private void noteScanStart(int callingUid, WorkSource workSource) {
+        if (mScanWorkSource == null && (callingUid != UNKNOWN_SCAN_SOURCE || workSource != null)) {
+            mScanWorkSource = workSource != null ? workSource : new WorkSource(callingUid);
             try {
                 mBatteryStats.noteWifiScanStartedFromSource(mScanWorkSource);
             } catch (RemoteException e) {
@@ -2502,7 +2509,7 @@ public class WifiStateMachine extends StateMachine {
         public boolean processMessage(Message message) {
             switch(message.what) {
                 case CMD_START_SCAN:
-                    noteScanStart(message.arg1);
+                    noteScanStart(message.arg1, (WorkSource) message.obj);
                     startScanNative(WifiNative.SCAN_WITH_CONNECTION_SETUP);
                     break;
                 case CMD_SET_COUNTRY_CODE:
@@ -2788,7 +2795,7 @@ public class WifiStateMachine extends StateMachine {
                 // Handle scan. All the connection related commands are
                 // handled only in ConnectModeState
                 case CMD_START_SCAN:
-                    noteScanStart(message.arg1);
+                    noteScanStart(message.arg1, (WorkSource) message.obj);
                     startScanNative(WifiNative.SCAN_WITHOUT_CONNECTION_SETUP);
                     break;
                 default:
@@ -3054,7 +3061,7 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case CMD_START_SCAN:
                     /* Do not attempt to connect when we are already connected */
-                    noteScanStart(message.arg1);
+                    noteScanStart(message.arg1, (WorkSource) message.obj);
                     startScanNative(WifiNative.SCAN_WITHOUT_CONNECTION_SETUP);
                     break;
                     /* Ignore connection to same network */
@@ -3372,7 +3379,7 @@ public class WifiStateMachine extends StateMachine {
                     if (mP2pConnected.get()) break;
                     if (message.arg1 == mPeriodicScanToken &&
                             mWifiConfigStore.getConfiguredNetworks().size() == 0) {
-                        sendMessage(CMD_START_SCAN, UNKNOWN_SCAN_SOURCE);
+                        sendMessage(CMD_START_SCAN, UNKNOWN_SCAN_SOURCE, 0, (WorkSource) null);
                         sendMessageDelayed(obtainMessage(CMD_NO_NETWORKS_PERIODIC_SCAN,
                                     ++mPeriodicScanToken, 0), mSupplicantScanIntervalMs);
                     }
