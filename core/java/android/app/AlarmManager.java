@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.RemoteException;
+import android.os.WorkSource;
 
 /**
  * This class provides access to the system alarm services.  These allow you
@@ -155,7 +156,7 @@ public class AlarmManager
      * @see #RTC_WAKEUP
      */
     public void set(int type, long triggerAtMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, legacyExactLength(), 0, operation);
+        setImpl(type, triggerAtMillis, legacyExactLength(), 0, operation, null);
     }
 
     /**
@@ -209,7 +210,7 @@ public class AlarmManager
      */
     public void setRepeating(int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, legacyExactLength(), intervalMillis, operation);
+        setImpl(type, triggerAtMillis, legacyExactLength(), intervalMillis, operation, null);
     }
 
     /**
@@ -244,7 +245,7 @@ public class AlarmManager
      */
     public void setWindow(int type, long windowStartMillis, long windowLengthMillis,
             PendingIntent operation) {
-        setImpl(type, windowStartMillis, windowLengthMillis, 0, operation);
+        setImpl(type, windowStartMillis, windowLengthMillis, 0, operation, null);
     }
 
     /**
@@ -252,13 +253,20 @@ public class AlarmManager
      * to the precise time specified.
      */
     public void setExact(int type, long triggerAtMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, operation);
+        setImpl(type, triggerAtMillis, WINDOW_EXACT, 0, operation, null);
+    }
+
+    /** @hide */
+    public void set(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
+            PendingIntent operation, WorkSource workSource) {
+        setImpl(type, triggerAtMillis, windowMillis, intervalMillis, operation, workSource);
     }
 
     private void setImpl(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
-            PendingIntent operation) {
+            PendingIntent operation, WorkSource workSource) {
         try {
-            mService.set(type, triggerAtMillis, windowMillis, intervalMillis, operation);
+            mService.set(type, triggerAtMillis, windowMillis, intervalMillis, operation,
+                    workSource);
         } catch (RemoteException ex) {
         }
     }
@@ -351,7 +359,7 @@ public class AlarmManager
     @Deprecated
     public void setInexactRepeating(int type, long triggerAtMillis,
             long intervalMillis, PendingIntent operation) {
-        setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, intervalMillis, operation);
+        setImpl(type, triggerAtMillis, WINDOW_HEURISTIC, intervalMillis, operation, null);
     }
     
     /**
