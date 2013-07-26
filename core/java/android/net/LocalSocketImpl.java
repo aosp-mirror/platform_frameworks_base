@@ -39,6 +39,8 @@ class LocalSocketImpl
 
     /** null if closed or not yet created */
     private FileDescriptor fd;
+    /** whether fd is created internally */
+    private boolean mFdCreatedInternally;
 
     // These fields are accessed by native code;
     /** file descriptor array received during a previous read */
@@ -247,6 +249,7 @@ class LocalSocketImpl
             }
             try {
                 fd = Libcore.os.socket(OsConstants.AF_UNIX, osType, 0);
+                mFdCreatedInternally = true;
             } catch (ErrnoException e) {
                 e.rethrowAsIOException();
             }
@@ -260,7 +263,10 @@ class LocalSocketImpl
      */
     public void close() throws IOException {
         synchronized (LocalSocketImpl.this) {
-            if (fd == null) return;
+            if ((fd == null) || (mFdCreatedInternally == false)) {
+                fd = null;
+                return;
+            }
             try {
                 Libcore.os.close(fd);
             } catch (ErrnoException e) {
