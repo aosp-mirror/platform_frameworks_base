@@ -22,6 +22,7 @@ import java.io.IOException;
 import com.android.internal.util.MemInfoReader;
 import com.android.server.wm.WindowManagerService;
 
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.util.Slog;
 import android.view.Display;
@@ -203,11 +204,31 @@ final class ProcessList {
         float scale = scaleMem > scaleDisp ? scaleMem : scaleDisp;
         if (scale < 0) scale = 0;
         else if (scale > 1) scale = 1;
+        int minfree_adj = Resources.getSystem().getInteger(com.android.internal.R.integer.config_lowMemoryKillerMinFreeKbytesAdjust);
+        int minfree_abs = Resources.getSystem().getInteger(com.android.internal.R.integer.config_lowMemoryKillerMinFreeKbytesAbsolute);
+
         for (int i=0; i<mOomAdj.length; i++) {
             long low = mOomMinFreeLow[i];
             long high = mOomMinFreeHigh[i];
             mOomMinFree[i] = (long)(low + ((high-low)*scale));
+        }
 
+        if (minfree_abs >= 0) {
+            for (int i=0; i<mOomAdj.length; i++) {
+                mOomMinFree[i] = (long)((float)minfree_abs * mOomMinFree[i] / mOomMinFree[mOomAdj.length - 1]);
+            }
+        }
+
+        if (minfree_adj != 0) {
+            for (int i=0; i<mOomAdj.length; i++) {
+                mOomMinFree[i] += (long)((float)minfree_adj * mOomMinFree[i] / mOomMinFree[mOomAdj.length - 1]);
+                if (mOomMinFree[i] < 0) {
+                    mOomMinFree[i] = 0;
+                }
+            }
+        }
+
+        for (int i=0; i<mOomAdj.length; i++) {
             if (i > 0) {
                 adjString.append(',');
                 memString.append(',');

@@ -134,6 +134,24 @@
          off features. -->
     <bool name="config_avoidGfxAccel">false</bool>
 
+    <!-- Device configuration setting the minfree tunable in the lowmemorykiller in the kernel.
+         A high value will cause the lowmemorykiller to fire earlier, keeping more memory
+         in the file cache and preventing I/O thrashing, but allowing fewer processes to
+         stay in memory.  A low value will keep more processes in memory but may cause
+         thrashing if set too low.  Overrides the default value chosen by ActivityManager
+         based on screen size and total memory for the largest lowmemorykiller bucket, and
+         scaled proportionally to the smaller buckets.  -1 keeps the default. -->
+    <integer name="config_lowMemoryKillerMinFreeKbytesAbsolute">-1</integer>
+
+    <!-- Device configuration adjusting the minfree tunable in the lowmemorykiller in the
+         kernel.  A high value will cause the lowmemorykiller to fire earlier, keeping more
+         memory in the file cache and preventing I/O thrashing, but allowing fewer processes
+         to stay in memory.  A low value will keep more processes in memory but may cause
+         thrashing if set too low.  Directly added to the default value chosen by
+         ActivityManager based on screen size and total memory for the largest lowmemorykiller
+         bucket, and scaled proportionally to the smaller buckets. 0 keeps the default. -->
+    <integer name="config_lowMemoryKillerMinFreeKbytesAdjust">0</integer>
+
     <!-- The duration (in milliseconds) that the radio will scan for a signal
          when there's no network connection. If the scan doesn't timeout, use zero -->
     <integer name="config_radioScanningTimeout">0</integer>

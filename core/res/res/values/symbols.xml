@@ -284,6 +284,8 @@
 
   <java-symbol type="integer" name="config_cursorWindowSize" />
   <java-symbol type="integer" name="config_longPressOnPowerBehavior" />
+  <java-symbol type="integer" name="config_lowMemoryKillerMinFreeKbytesAdjust" />
+  <java-symbol type="integer" name="config_lowMemoryKillerMinFreeKbytesAbsolute" />
   <java-symbol type="integer" name="config_max_pan_devices" />
   <java-symbol type="integer" name="config_ntpPollingInterval" />
   <java-symbol type="integer" name="config_ntpPollingIntervalShorter" />
@@ -302,7 +304,6 @@
   <java-symbol type="integer" name="config_lockSoundVolumeDb" />
   <java-symbol type="integer" name="config_multiuserMaximumUsers" />
   <java-symbol type="integer" name="config_safe_media_volume_index" />
-
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
   <java-symbol type="dimen" name="accessibility_touch_slop" />
