@@ -331,6 +331,7 @@ package android {
     field public static final int canRetrieveWindowContent = 16843653; // 0x1010385
     field public static final int candidatesTextStyleSpans = 16843312; // 0x1010230
     field public static final deprecated int capitalize = 16843113; // 0x1010169
+    field public static final int category = 16843749; // 0x10103e5
     field public static final int centerBright = 16842956; // 0x10100cc
     field public static final int centerColor = 16843275; // 0x101020b
     field public static final int centerDark = 16842952; // 0x10100c8
@@ -794,7 +795,6 @@ package android {
     field public static final int path = 16842794; // 0x101002a
     field public static final int pathPattern = 16842796; // 0x101002c
     field public static final int pathPrefix = 16842795; // 0x101002b
-    field public static final int paymentService = 16843749; // 0x10103e5
     field public static final int permission = 16842758; // 0x1010006
     field public static final int permissionFlags = 16843719; // 0x10103c7
     field public static final int permissionGroup = 16842762; // 0x101000a
@@ -14795,13 +14795,11 @@ package android.nfc.cardemulation {
     field public static final java.lang.String SERVICE_META_DATA = "android.nfc.HostApduService";
   }
 
-  public abstract class SeApduService extends android.app.Service {
-    ctor public SeApduService();
-    method public abstract void onAidSelected(byte[]);
-    method public final android.os.IBinder onBind(android.content.Intent);
-    method public abstract void onHciTransactionEvent(byte[], byte[]);
-    field public static final java.lang.String SERVICE_INTERFACE = "android.nfc.SeApduService";
-    field public static final java.lang.String SERVICE_META_DATA = "android.nfc.SeApduService";
+  public abstract class OffHostApduService extends android.app.Service {
+    ctor public OffHostApduService();
+    method public abstract android.os.IBinder onBind(android.content.Intent);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.nfc.OffHostApduService";
+    field public static final java.lang.String SERVICE_META_DATA = "android.nfc.OffHostApduService";
   }
 
 }
