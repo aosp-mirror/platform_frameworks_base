@@ -110,7 +110,6 @@ LOCAL_SRC_FILES:= \
 	android/graphics/Path.cpp \
 	android/graphics/PathMeasure.cpp \
 	android/graphics/PathEffect.cpp \
-	android_graphics_PixelFormat.cpp \
 	android/graphics/Picture.cpp \
 	android/graphics/PorterDuff.cpp \
 	android/graphics/BitmapRegionDecoder.cpp \

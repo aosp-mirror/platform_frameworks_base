@@ -43,7 +43,9 @@ public class PixelFormat
     public static final int RGBA_5551   = 6;
     @Deprecated
     public static final int RGBA_4444   = 7;
+    @Deprecated
     public static final int A_8         = 8;
+    @Deprecated
     public static final int L_8         = 9;
     @Deprecated
     public static final int LA_88       = 0xA;
@@ -79,14 +81,43 @@ public class PixelFormat
     @Deprecated
     public static final int JPEG        = 0x100;
 
-    /*
-     * We use a class initializer to allow the native code to cache some
-     * field offsets.
-     */
-    native private static void nativeClassInit();
-    static { nativeClassInit(); }
+    public static void getPixelFormatInfo(int format, PixelFormat info) {
+        switch (format) {
+            case RGBA_8888:
+            case RGBX_8888:
+                info.bitsPerPixel = 32;
+                info.bytesPerPixel = 4;
+                break;
+            case RGB_888:
+                info.bitsPerPixel = 24;
+                info.bytesPerPixel = 3;
+                break;
+            case RGB_565:
+            case RGBA_5551:
+            case RGBA_4444:
+                info.bitsPerPixel = 16;
+                info.bytesPerPixel = 2;
+                break;
+            case A_8:
+            case L_8:
+            case RGB_332:
+                info.bitsPerPixel = 8;
+                info.bytesPerPixel = 1;
+                break;
+            case YCbCr_422_SP:
+            case YCbCr_422_I:
+                info.bitsPerPixel = 16;
+                info.bytesPerPixel = 1;
+                break;
+            case YCbCr_420_SP:
+                info.bitsPerPixel = 12;
+                info.bytesPerPixel = 1;
+                break;
+            default:
+                throw new IllegalArgumentException("unkonwon pixel format " + format);
+        }
+    }
 
-    public static native void getPixelFormatInfo(int format, PixelFormat info);
     public static boolean formatHasAlpha(int format) {
         switch (format) {
             case PixelFormat.A_8:
