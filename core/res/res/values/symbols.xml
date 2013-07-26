@@ -283,6 +283,8 @@
   <java-symbol type="bool" name="config_useFixedVolume" />
 
   <java-symbol type="integer" name="config_cursorWindowSize" />
+  <java-symbol type="integer" name="config_extraFreeKbytesAdjust" />
+  <java-symbol type="integer" name="config_extraFreeKbytesAbsolute" />
   <java-symbol type="integer" name="config_longPressOnPowerBehavior" />
   <java-symbol type="integer" name="config_lowMemoryKillerMinFreeKbytesAdjust" />
   <java-symbol type="integer" name="config_lowMemoryKillerMinFreeKbytesAbsolute" />
