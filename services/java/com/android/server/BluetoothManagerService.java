@@ -788,10 +788,20 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                         } // else must be SERVICE_IBLUETOOTH
 
                         //Remove timeout
-                            mHandler.removeMessages(MESSAGE_TIMEOUT_BIND);
+                        mHandler.removeMessages(MESSAGE_TIMEOUT_BIND);
 
                         mBinding = false;
                         mBluetooth = IBluetooth.Stub.asInterface(service);
+
+                        try {
+                            boolean enableHciSnoopLog = (Settings.Secure.getInt(mContentResolver,
+                                Settings.Secure.BLUETOOTH_HCI_LOG, 0) == 1);
+                            if (!mBluetooth.configHciSnoopLog(enableHciSnoopLog)) {
+                                Log.e(TAG,"IBluetooth.configHciSnoopLog return false");
+                            }
+                        } catch (RemoteException e) {
+                            Log.e(TAG,"Unable to call configHciSnoopLog", e);
+                        }
 
                         if (mConnection.isGetNameAddressOnly()) {
                             //Request GET NAME AND ADDRESS
