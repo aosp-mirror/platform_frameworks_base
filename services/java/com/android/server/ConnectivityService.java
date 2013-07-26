@@ -235,7 +235,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private Object mDnsLock = new Object();
     private int mNumDnsEntries;
-    private boolean mDnsOverridden = false;
 
     private boolean mTestMode;
     private static ConnectivityService sServiceInstance;
@@ -310,28 +309,22 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static final int EVENT_SET_DEPENDENCY_MET = 10;
 
     /**
-     * used internally to restore DNS properties back to the
-     * default network
-     */
-    private static final int EVENT_RESTORE_DNS = 11;
-
-    /**
      * used internally to send a sticky broadcast delayed.
      */
-    private static final int EVENT_SEND_STICKY_BROADCAST_INTENT = 12;
+    private static final int EVENT_SEND_STICKY_BROADCAST_INTENT = 11;
 
     /**
      * Used internally to
      * {@link NetworkStateTracker#setPolicyDataEnable(boolean)}.
      */
-    private static final int EVENT_SET_POLICY_DATA_ENABLE = 13;
+    private static final int EVENT_SET_POLICY_DATA_ENABLE = 12;
 
-    private static final int EVENT_VPN_STATE_CHANGED = 14;
+    private static final int EVENT_VPN_STATE_CHANGED = 13;
 
     /**
      * Used internally to disable fail fast of mobile data
      */
-    private static final int EVENT_ENABLE_FAIL_FAST_MOBILE_DATA = 15;
+    private static final int EVENT_ENABLE_FAIL_FAST_MOBILE_DATA = 14;
 
     /** Handler used for internal events. */
     private InternalHandler mHandler;
@@ -2661,9 +2654,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (mNetConfigs[netType].isDefault()) {
                 String network = nt.getNetworkInfo().getTypeName();
                 synchronized (mDnsLock) {
-                    if (!mDnsOverridden) {
-                        updateDnsLocked(network, p.getInterfaceName(), dnses, p.getDomains(), true);
-                    }
+                    updateDnsLocked(network, p.getInterfaceName(), dnses, p.getDomains(), true);
                 }
             } else {
                 try {
@@ -2914,13 +2905,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 {
                     boolean met = (msg.arg1 == ENABLED);
                     handleSetDependencyMet(msg.arg2, met);
-                    break;
-                }
-                case EVENT_RESTORE_DNS:
-                {
-                    if (mActiveDefaultNetwork != -1) {
-                        handleDnsConfigurationChange(mActiveDefaultNetwork);
-                    }
                     break;
                 }
                 case EVENT_SEND_STICKY_BROADCAST_INTENT:
@@ -3562,12 +3546,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         public void restore() {
-            synchronized (mDnsLock) {
-                if (mDnsOverridden) {
-                    mDnsOverridden = false;
-                    mHandler.sendEmptyMessage(EVENT_RESTORE_DNS);
-                }
-            }
             synchronized (mProxyLock) {
                 mDefaultProxyDisabled = false;
                 if (mGlobalProxy == null && mDefaultProxy != null) {
