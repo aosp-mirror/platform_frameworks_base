@@ -6950,11 +6950,19 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             final DisplayContent displayContent = getDefaultDisplayContentLocked();
             readForcedDisplaySizeAndDensityLocked(displayContent);
-
             mDisplayReady = true;
+        }
+
+        try {
+            mActivityManager.updateConfiguration(null);
+        } catch (RemoteException e) {
+        }
+
+        synchronized(mWindowMap) {
             mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_TOUCHSCREEN);
 
+            final DisplayContent displayContent = getDefaultDisplayContentLocked();
             mPolicy.setInitialDisplaySize(displayContent.getDisplay(),
                     displayContent.mInitialDisplayWidth,
                     displayContent.mInitialDisplayHeight,
