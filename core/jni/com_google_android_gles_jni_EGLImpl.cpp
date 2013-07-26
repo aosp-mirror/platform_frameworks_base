@@ -258,7 +258,6 @@ static PixelFormat convertPixelFormat(SkBitmap::Config format)
     case SkBitmap::kARGB_8888_Config:   return PIXEL_FORMAT_RGBA_8888;
     case SkBitmap::kARGB_4444_Config:   return PIXEL_FORMAT_RGBA_4444;
     case SkBitmap::kRGB_565_Config:     return PIXEL_FORMAT_RGB_565;
-    case SkBitmap::kA8_Config:          return PIXEL_FORMAT_A_8;
     default:                            return PIXEL_FORMAT_NONE;
     }
 }

@@ -9509,10 +9509,10 @@ package android.graphics {
     ctor public PixelFormat();
     method public static boolean formatHasAlpha(int);
     method public static void getPixelFormatInfo(int, android.graphics.PixelFormat);
-    field public static final int A_8 = 8; // 0x8
+    field public static final deprecated int A_8 = 8; // 0x8
     field public static final deprecated int JPEG = 256; // 0x100
     field public static final deprecated int LA_88 = 10; // 0xa
-    field public static final int L_8 = 9; // 0x9
+    field public static final deprecated int L_8 = 9; // 0x9
     field public static final int OPAQUE = -1; // 0xffffffff
     field public static final deprecated int RGBA_4444 = 7; // 0x7
     field public static final deprecated int RGBA_5551 = 6; // 0x6
