@@ -7,10 +7,10 @@
 #include "SkMallocPixelRef.h"
 #include "SkPoint.h"
 #include "SkRect.h"
-#include "../images/SkBitmapRegionDecoder.h"
-#include "../images/SkImageDecoder.h"
+#include "SkImageDecoder.h"
 #include <jni.h>
 
+class SkBitmapRegionDecoder;
 class SkCanvas;
 class SkPaint;
 class SkPicture;

@@ -17,10 +17,6 @@ endif
 
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
 
-# When built as part of the system image we can enable certian non-NDK compliant
-# Skia optimizations.
-LOCAL_CFLAGS += -DSK_BUILD_FOR_ANDROID_FRAMEWORK
-
 LOCAL_SRC_FILES:= \
 	AndroidRuntime.cpp \
 	Time.cpp \

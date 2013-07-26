@@ -27,7 +27,6 @@
 #include <core/SkPixelRef.h>
 #include <core/SkStream.h>
 #include <core/SkTemplates.h>
-#include <images/SkImageDecoder.h>
 
 #include <androidfw/Asset.h>
 #include <androidfw/AssetManager.h>

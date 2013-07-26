@@ -2,6 +2,7 @@
 
 #include "BitmapFactory.h"
 #include "NinePatchPeeker.h"
+#include "SkData.h"
 #include "SkImageDecoder.h"
 #include "SkImageRef_ashmem.h"
 #include "SkImageRef_GlobalPool.h"
@@ -137,7 +138,6 @@ static SkBitmap::Config configForScaledOutput(SkBitmap::Config config) {
     switch (config) {
         case SkBitmap::kNo_Config:
         case SkBitmap::kIndex8_Config:
-        case SkBitmap::kRLE_Index8_Config:
             return SkBitmap::kARGB_8888_Config;
         default:
             break;
@@ -475,6 +475,12 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
 
     jint descriptor = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
+    struct stat fdStat;
+    if (fstat(descriptor, &fdStat) == -1) {
+        doThrowIOE(env, "broken file descriptor");
+        return nullObjectReturn("fstat return -1");
+    }
+
     bool isPurgeable = optionsPurgeable(env, bitmapFactoryOptions);
     bool isShareable = optionsShareable(env, bitmapFactoryOptions);
     bool weOwnTheFD = false;
@@ -486,17 +492,8 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
         }
     }
 
-    SkFDStream* stream = new SkFDStream(descriptor, weOwnTheFD);
-    SkAutoUnref aur(stream);
-    if (!stream->isValid()) {
-        return NULL;
-    }
-
-    /* Restore our offset when we leave, so we can be called more than once
-       with the same descriptor. This is only required if we didn't dup the
-       file descriptor, but it is OK to do it all the time.
-    */
-    AutoFDSeek as(descriptor);
+    SkAutoTUnref<SkData> data(SkData::NewFromFD(descriptor));
+    SkAutoTUnref<SkMemoryStream> stream(new SkMemoryStream(data));
 
     /* Allow purgeable iff we own the FD, i.e., in the puregeable and
        shareable case.
