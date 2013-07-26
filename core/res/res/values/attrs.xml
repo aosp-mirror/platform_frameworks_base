@@ -2578,29 +2578,36 @@
         <attr name="vendor" format="string"/>
     </declare-styleable>
 
-    <!-- Use <code>apdu-service</code> as the root tag of the XML resource that
-         describes an {@link android.nfc.cardemulation.HostApduService} or
-         {@link android.nfc.cardemulation.SeApduService} service, which is referenced
-         from its SERVICE_META_DATA entry. -->
-    <declare-styleable name="ApduService">
-        <!-- Set to true to let the NFC subsystem know that this service implements
-             a payment instrument. That will allow this service to be enumerated in
-             a list of payment services, where the user can pick his preferred payment
-             service. The preferred service will be bound to persistently, to make sure
-             it can immediately process APDUs without service startup delay. This is vital
-             for existing payment infrastructure that has very strict timing requirements. -->
-        <attr name="paymentService" format="boolean" />
-        <!-- Short description of the functionality the serivce implements.-->
+    <!-- Use <code>host-apdu-service</code> as the root tag of the XML resource that
+         describes an {@link android.nfc.cardemulation.HostApduService} service, which
+         is referenced from its {@link android.nfc.cardemulation.HostApduService#SERVICE_META_DATA}
+         entry. -->
+    <declare-styleable name="HostApduService">
+        <!-- Short description of the functionality the service implements. This attribute
+             is mandatory.-->
         <attr name="description" />
     </declare-styleable>
 
-    <!-- Specify one or more <code>aid-filter</code> elements inside a <code>apdu-service</code>
+    <!-- Use <code>offhost-apdu-service</code> as the root tag of the XML resource that
+         describes an {@link android.nfc.cardemulation.OffHostApduService}
+         service, which is referenced from its
+         {@link android.nfc.cardemulation.OffHostApduService#SERVICE_META_DATA} entry. -->
+    <declare-styleable name="OffHostApduService">
+        <!-- Short description of the functionality the service implements. This attribute
+             is mandatory.-->
+        <attr name="description" />
+    </declare-styleable>
+
+    <!-- Specify one or more <code>aid-filter</code> elements inside a
+         <code>host-apdu-service</code> or <code>offhost-apdu-service</code>
          element to list the ISO7816 Application ID (AIDs) your service can handle.-->
     <declare-styleable name="AidFilter">
-        <!-- The ISO7816 Application ID -->
+        <!-- The ISO7816 Application ID. This attribute is mandatory. -->
         <attr name="name" />
-        <!-- Short description of what the AID implements.-->
+        <!-- Short description of what the AID implements. This attribute is mandatory.-->
         <attr name="description" />
+        <!-- Category. This attribute is optional.-->
+        <attr name="category" format="string" />
     </declare-styleable>
 
     <declare-styleable name="ActionMenuItemView">
