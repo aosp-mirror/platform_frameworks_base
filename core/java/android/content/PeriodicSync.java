@@ -35,7 +35,7 @@ public class PeriodicSync implements Parcelable {
     public final Bundle extras;
     /** How frequently the sync should be scheduled, in seconds. Kept around for API purposes. */
     public final long period;
-    /** Whether this periodic sync uses a service. */
+    /** Whether this periodic sync runs on a {@link SyncService}. */
     public final boolean isService;
     /**
      * How much flexibility can be taken in scheduling the sync, in seconds.
@@ -63,8 +63,6 @@ public class PeriodicSync implements Parcelable {
         // Old API uses default flex time. No-one should be using this ctor anyway.
         this.flexTime = 0L;
     }
-
-    // TODO: Add copy ctor from SyncRequest?
 
     /**
      * Create a copy of a periodic sync.
@@ -183,7 +181,8 @@ public class PeriodicSync implements Parcelable {
     }
 
     /**
-     * Periodic sync extra comparison function.
+     * Periodic sync extra comparison function. Duplicated from
+     * {@link com.android.server.content.SyncManager#syncExtrasEquals(Bundle b1, Bundle b2)}
      * {@hide}
      */
     public static boolean syncExtrasEquals(Bundle b1, Bundle b2) {

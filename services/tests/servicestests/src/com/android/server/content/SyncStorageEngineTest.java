@@ -17,6 +17,7 @@
 package com.android.server.content;
 
 import android.accounts.Account;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -41,9 +42,16 @@ import java.util.List;
 public class SyncStorageEngineTest extends AndroidTestCase {
 
     protected Account account1;
+    protected ComponentName syncService1;
     protected String authority1 = "testprovider";
     protected Bundle defaultBundle;
     protected final int DEFAULT_USER = 0;
+
+    /* Some default poll frequencies. */
+    final long dayPoll = (60 * 60 * 24);
+    final long dayFuzz = 60;
+    final long thousandSecs = 1000;
+    final long thousandSecsFuzz = 100;
     
     MockContentResolver mockResolver;
     SyncStorageEngine engine;
@@ -55,6 +63,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
     @Override
     public void setUp() {
         account1 = new Account("a@example.com", "example.type");
+        syncService1 = new ComponentName("com.example", "SyncService");
         // Default bundle.
         defaultBundle = new Bundle();
         defaultBundle.putInt("int_key", 0);
@@ -259,11 +268,6 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         PeriodicSync sync4 = new PeriodicSync(account1, authority2, extras2, period2, flex2);
         PeriodicSync sync5 = new PeriodicSync(account2, authority1, extras1, period1, flex1);
 
-        MockContentResolver mockResolver = new MockContentResolver();
-
-        SyncStorageEngine engine = SyncStorageEngine.newTestInstance(
-                new TestContext(mockResolver, getContext()));
-
         removePeriodicSyncs(engine, account1, 0, authority1);
         removePeriodicSyncs(engine, account2, 0, authority1);
         removePeriodicSyncs(engine, account1, 0, authority2);
@@ -317,6 +321,41 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         assertEquals(0, engine.getIsSyncable(account2, 0, authority2));
     }
 
+    @SmallTest
+    public void testComponentParsing() throws Exception {
+        // Sync Service component.
+        PeriodicSync sync1 = new PeriodicSync(syncService1, Bundle.EMPTY, dayPoll, dayFuzz);
+
+        byte[] accountsFileData = ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
+                + "<accounts version=\"2\" >\n"
+                + "<authority id=\"0\" user=\"0\" package=\"" + syncService1.getPackageName() + "\" class=\"" + syncService1.getClassName() + "\" syncable=\"true\">"
+                + "\n<periodicSync period=\"" + dayPoll + "\" flex=\"" + dayFuzz + "\"/>"
+                + "\n</authority>"
+                + "</accounts>").getBytes();
+
+        File syncDir = getSyncDir();
+        syncDir.mkdirs();
+        AtomicFile accountInfoFile = new AtomicFile(new File(syncDir, "accounts.xml"));
+        FileOutputStream fos = accountInfoFile.startWrite();
+        fos.write(accountsFileData);
+        accountInfoFile.finishWrite(fos);
+
+        engine.clearAndReadState();
+
+        // Test service component read
+        List<PeriodicSync> syncs = engine.getPeriodicSyncs(syncService1, 0);
+        assertEquals(1, syncs.size());
+        assertEquals(1, engine.getIsEnabled(syncService1, 0));
+    }
+
+    @SmallTest
+    public void testComponentSettings() throws Exception {
+        PeriodicSync sync1 = new PeriodicSync(syncService1, Bundle.EMPTY, dayPoll, dayFuzz);
+        engine.addPeriodicSync(sync1, 0);
+
+        engine.set
+    }
+
     @MediumTest
     /**
      * V2 introduces flex time as well as service components.
@@ -328,20 +367,12 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         final String authority2 = "auth2";
         final String authority3 = "auth3";
 
-        final long dayPoll = (60 * 60 * 24);
-        final long dayFuzz = 60;
-        final long thousandSecs = 1000;
-        final long thousandSecsFuzz = 100;
-        final Bundle extras = new Bundle();
-        PeriodicSync sync1 = new PeriodicSync(account, authority1, extras, dayPoll, dayFuzz);
-        PeriodicSync sync2 = new PeriodicSync(account, authority2, extras, dayPoll, dayFuzz);
-        PeriodicSync sync3 = new PeriodicSync(account, authority3, extras, dayPoll, dayFuzz);
-        PeriodicSync sync1s = new PeriodicSync(account, authority1, extras, thousandSecs, thousandSecsFuzz);
-        PeriodicSync sync2s = new PeriodicSync(account, authority2, extras, thousandSecs, thousandSecsFuzz);
-        PeriodicSync sync3s = new PeriodicSync(account, authority3, extras, thousandSecs, thousandSecsFuzz);
-        MockContentResolver mockResolver = new MockContentResolver();
-
-        final TestContext testContext = new TestContext(mockResolver, getContext());
+        PeriodicSync sync1 = new PeriodicSync(account, authority1, Bundle.EMPTY, dayPoll, dayFuzz);
+        PeriodicSync sync2 = new PeriodicSync(account, authority2, Bundle.EMPTY, dayPoll, dayFuzz);
+        PeriodicSync sync3 = new PeriodicSync(account, authority3, Bundle.EMPTY, dayPoll, dayFuzz);
+        PeriodicSync sync1s = new PeriodicSync(account, authority1, Bundle.EMPTY, thousandSecs, thousandSecsFuzz);
+        PeriodicSync sync2s = new PeriodicSync(account, authority2, Bundle.EMPTY, thousandSecs, thousandSecsFuzz);
+        PeriodicSync sync3s = new PeriodicSync(account, authority3, Bundle.EMPTY, thousandSecs, thousandSecsFuzz);
 
         byte[] accountsFileData = ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
                 + "<accounts version=\"2\" >\n"
@@ -367,7 +398,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         fos.write(accountsFileData);
         accountInfoFile.finishWrite(fos);
 
-        SyncStorageEngine engine = SyncStorageEngine.newTestInstance(testContext);
+        engine.clearAndReadState();
 
         List<PeriodicSync> syncs = engine.getPeriodicSyncs(account, 0, authority1);
         assertEquals("Got incorrect # of syncs", 1, syncs.size());

@@ -20,10 +20,9 @@ import android.accounts.Account;
 import android.content.pm.PackageManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
-import android.content.SyncRequest;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.util.Pair;
+import android.util.Log;
 
 /**
  * Value type that represents a sync operation.
@@ -32,10 +31,13 @@ import android.util.Pair;
  * {@hide}
  */
 public class SyncOperation implements Comparable {
+    public static final String TAG = "SyncManager";
+
     public static final int REASON_BACKGROUND_DATA_SETTINGS_CHANGED = -1;
     public static final int REASON_ACCOUNTS_UPDATED = -2;
     public static final int REASON_SERVICE_CHANGED = -3;
     public static final int REASON_PERIODIC = -4;
+    /** Sync started because it has just been set to isSyncable. */
     public static final int REASON_IS_SYNCABLE = -5;
     /** Sync started because it has just been set to sync automatically. */
     public static final int REASON_SYNC_AUTO = -6;
@@ -54,19 +56,21 @@ public class SyncOperation implements Comparable {
             "UserStart",
     };
 
-    /** Account info to identify a SyncAdapter registered with the system. */
-    public final Account account;
-    /** Authority info to identify a SyncAdapter registered with the system. */
-    public final String authority;
-    /** Service to which this operation will bind to perform the sync. */
-    public final ComponentName service;
-    public final int userId;
+    public static final int SYNC_TARGET_UNKNOWN = 0;
+    public static final int SYNC_TARGET_ADAPTER = 1;
+    public static final int SYNC_TARGET_SERVICE = 2;
+
+    /** Identifying info for the authority for this operation. */
+    public final SyncStorageEngine.EndPoint target;
+    /** Why this sync was kicked off. {@link #REASON_NAMES} */
     public final int reason;
+    /** Where this sync was initiated. */
     public int syncSource;
     public final boolean allowParallelSyncs;
     public Bundle extras;
     public final String key;
     public boolean expedited;
+    /** Bare-bones version of this operation that is persisted across reboots. */
     public SyncStorageEngine.PendingOperation pendingOperation;
     /** Elapsed real time in millis at which to run this sync. */
     public long latestRunTime;
@@ -79,25 +83,56 @@ public class SyncOperation implements Comparable {
      * Depends on max(backoff, latestRunTime, and delayUntil).
      */
     public long effectiveRunTime;
-    /** Amount of time before {@link effectiveRunTime} from which this sync can run. */
+    /** Amount of time before {@link #effectiveRunTime} from which this sync can run. */
     public long flexTime;
 
-    public SyncOperation(Account account, int userId, int reason, int source, String authority,
+    public SyncOperation(Account account, int userId, int reason, int source, String provider,
             Bundle extras, long runTimeFromNow, long flexTime, long backoff,
             long delayUntil, boolean allowParallelSyncs) {
-        this.service = null;
-        this.account = account;
-        this.authority = authority;
-        this.userId = userId;
+        this.target = new SyncStorageEngine.EndPoint(account, provider, userId);
         this.reason = reason;
-        this.syncSource = source;
         this.allowParallelSyncs = allowParallelSyncs;
+        this.key = initialiseOperation(this.target, source, extras, runTimeFromNow, flexTime,
+                backoff, delayUntil);
+    }
+
+    public SyncOperation(ComponentName service, int userId, int reason, int source,
+            Bundle extras, long runTimeFromNow, long flexTime, long backoff,
+            long delayUntil) {
+        this.target = new SyncStorageEngine.EndPoint(service, userId);
+        // Default to true for sync service. The service itself decides how to handle this.
+        this.allowParallelSyncs = true;
+        this.reason = reason;
+        this.key =
+                initialiseOperation(this.target,
+                        source, extras, runTimeFromNow, flexTime, backoff, delayUntil);
+    }
+
+    /** Used to reschedule a sync at a new point in time. */
+    SyncOperation(SyncOperation other, long newRunTimeFromNow) {
+        this.target = other.target;
+        this.reason = other.reason;
+        this.expedited = other.expedited;
+        this.allowParallelSyncs = other.allowParallelSyncs;
+        // re-use old flex, but only 
+        long newFlexTime = Math.min(other.flexTime, newRunTimeFromNow);
+        this.key =
+                initialiseOperation(this.target,
+                    other.syncSource, other.extras,
+                    newRunTimeFromNow /* runTimeFromNow*/,
+                    newFlexTime /* flexTime */,
+                    other.backoff,
+                    0L /* delayUntil */);
+    }
+
+    private String initialiseOperation(SyncStorageEngine.EndPoint info, int source, Bundle extras,
+            long runTimeFromNow, long flexTime, long backoff, long delayUntil) {
+        this.syncSource = source;
         this.extras = new Bundle(extras);
         cleanBundle(this.extras);
         this.delayUntil = delayUntil;
         this.backoff = backoff;
         final long now = SystemClock.elapsedRealtime();
-        // Checks the extras bundle. Must occur after we set the internal bundle.
         if (runTimeFromNow < 0 || isExpedited()) {
             this.expedited = true;
             this.latestRunTime = now;
@@ -108,41 +143,11 @@ public class SyncOperation implements Comparable {
             this.flexTime = flexTime;
         }
         updateEffectiveRunTime();
-        this.key = toKey();
+        return toKey(info, extras);
     }
 
-    public SyncOperation(SyncRequest request, int userId, int reason, int source, long backoff,
-            long delayUntil, boolean allowParallelSyncs) {
-        if (request.hasAuthority()) {
-            Pair<Account, String> providerInfo = request.getProviderInfo();
-            this.account = providerInfo.first;
-            this.authority = providerInfo.second;
-            this.service = null;
-        } else {
-            this.service = request.getService();
-            this.account = null;
-            this.authority = null;
-        }
-        this.userId = userId;
-        this.reason = reason;
-        this.syncSource = source;
-        this.allowParallelSyncs = allowParallelSyncs;
-        this.extras = new Bundle(extras);
-        cleanBundle(this.extras);
-        this.delayUntil = delayUntil;
-        this.backoff = backoff;
-        final long now = SystemClock.elapsedRealtime();
-        if (request.isExpedited()) {
-            this.expedited = true;
-            this.latestRunTime = now;
-            this.flexTime = 0;
-        } else {
-            this.expedited = false;
-            this.latestRunTime = now + (request.getSyncRunTime() * 1000);
-            this.flexTime = request.getSyncFlexTime() * 1000;
-        }
-        updateEffectiveRunTime();
-        this.key = toKey();
+    public boolean matchesAuthority(SyncOperation other) {
+        return this.target.matches(other.target);
     }
 
     /**
@@ -159,11 +164,7 @@ public class SyncOperation implements Comparable {
         removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_DISCARD_LOCAL_DELETIONS);
         removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_EXPEDITED);
         removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_OVERRIDE_TOO_MANY_DELETIONS);
-        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_ALLOW_METERED);
-
-        // Remove Config data.
-        bundle.remove(ContentResolver.SYNC_EXTRAS_EXPECTED_UPLOAD);
-        bundle.remove(ContentResolver.SYNC_EXTRAS_EXPECTED_DOWNLOAD);
+        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_DISALLOW_METERED);
     }
 
     private void removeFalseExtra(Bundle bundle, String extraName) {
@@ -172,22 +173,24 @@ public class SyncOperation implements Comparable {
         }
     }
 
-    /** Only used to immediately reschedule a sync. */
-    SyncOperation(SyncOperation other) {
-        this.service = other.service;
-        this.account = other.account;
-        this.authority = other.authority;
-        this.userId = other.userId;
-        this.reason = other.reason;
-        this.syncSource = other.syncSource;
-        this.extras = new Bundle(other.extras);
-        this.expedited = other.expedited;
-        this.latestRunTime = SystemClock.elapsedRealtime();
-        this.flexTime = 0L;
-        this.backoff = other.backoff;
-        this.allowParallelSyncs = other.allowParallelSyncs;
-        this.updateEffectiveRunTime();
-        this.key = toKey();
+    /**
+     * Determine whether if this sync operation is running, the provided operation would conflict
+     * with it.
+     * Parallel syncs allow multiple accounts to be synced at the same time. 
+     */
+    public boolean isConflict(SyncOperation toRun) {
+        final SyncStorageEngine.EndPoint other = toRun.target;
+        if (target.target_provider) {
+            return target.account.type.equals(other.account.type)
+                    && target.provider.equals(other.provider)
+                    && target.userId == other.userId
+                    && (!allowParallelSyncs
+                            || target.account.name.equals(other.account.name));
+        } else {
+            // Ops that target a service default to allow parallel syncs, which is handled by the
+            // service returning SYNC_IN_PROGRESS if they don't.
+            return target.service.equals(other.service) && !allowParallelSyncs;
+        }
     }
 
     @Override
@@ -196,18 +199,26 @@ public class SyncOperation implements Comparable {
     }
 
     public String dump(PackageManager pm, boolean useOneLine) {
-        StringBuilder sb = new StringBuilder()
-                .append(account.name)
+        StringBuilder sb = new StringBuilder();
+        if (target.target_provider) {
+            sb.append(target.account.name)
                 .append(" u")
-                .append(userId).append(" (")
-                .append(account.type)
+                .append(target.userId).append(" (")
+                .append(target.account.type)
                 .append(")")
                 .append(", ")
-                .append(authority)
-                .append(", ")
-                .append(SyncStorageEngine.SOURCES[syncSource])
-                .append(", latestRunTime ")
-                .append(latestRunTime);
+                .append(target.provider)
+                .append(", ");
+        } else if (target.target_service) {
+            sb.append(target.service.getPackageName())
+                .append(" u")
+                .append(target.userId).append(" (")
+                .append(target.service.getClassName()).append(")")
+                .append(", ");
+        }
+        sb.append(SyncStorageEngine.SOURCES[syncSource])
+            .append(", currentRunTime ")
+            .append(effectiveRunTime);
         if (expedited) {
             sb.append(", EXPEDITED");
         }
@@ -245,10 +256,6 @@ public class SyncOperation implements Comparable {
         }
     }
 
-    public boolean isMetered() {
-        return extras.getBoolean(ContentResolver.SYNC_EXTRAS_ALLOW_METERED, false);
-    }
-
     public boolean isInitialization() {
         return extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false);
     }
@@ -261,33 +268,69 @@ public class SyncOperation implements Comparable {
         return extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, false);
     }
 
+    public boolean isNotAllowedOnMetered() {
+        return extras.getBoolean(ContentResolver.SYNC_EXTRAS_DISALLOW_METERED, false);
+    }
+
     /** Changed in V3. */
-    private String toKey() {
+    public static String toKey(SyncStorageEngine.EndPoint info, Bundle extras) {
         StringBuilder sb = new StringBuilder();
-        if (service == null) {
-            sb.append("authority: ").append(authority);
-            sb.append(" account {name=" + account.name + ", user=" + userId + ", type=" + account.type
+        if (info.target_provider) {
+            sb.append("provider: ").append(info.provider);
+            sb.append(" account {name=" + info.account.name
+                    + ", user="
+                    + info.userId
+                    + ", type="
+                    + info.account.type
                     + "}");
-        } else {
+        } else if (info.target_service) {
             sb.append("service {package=" )
-                .append(service.getPackageName())
+                .append(info.service.getPackageName())
                 .append(" user=")
-                .append(userId)
+                .append(info.userId)
                 .append(", class=")
-                .append(service.getClassName())
+                .append(info.service.getClassName())
                 .append("}");
+        } else {
+            Log.v(TAG, "Converting SyncOperaton to key, invalid target: " + info.toString());
+            return "";
         }
         sb.append(" extras: ");
         extrasToStringBuilder(extras, sb);
         return sb.toString();
     }
 
-    public static void extrasToStringBuilder(Bundle bundle, StringBuilder sb) {
+    private static void extrasToStringBuilder(Bundle bundle, StringBuilder sb) {
         sb.append("[");
         for (String key : bundle.keySet()) {
             sb.append(key).append("=").append(bundle.get(key)).append(" ");
         }
         sb.append("]");
+    }
+
+    public String wakeLockKey() {
+        if (target.target_provider) {
+            return target.account.name + "/" + target.account.type + ":" + target.provider;
+        } else if (target.target_service) {
+            return target.service.getPackageName() + "/" + target.service.getClassName();
+        } else {
+            Log.wtf(TAG, "Invalid target getting wakelock for operation - " + key);
+            return null;
+        }
+    }
+
+    public String wakeLockName() {
+        if (target.target_provider) {
+            return "/" + target.provider
+                    + "/" + target.account.type
+                    + "/" + target.account.name;
+        } else if (target.target_service) {
+            return "/" + target.service.getPackageName()
+                    + "/" + target.service.getClassName();
+        } else {
+            Log.wtf(TAG, "Invalid target getting wakelock name for operation - " + key);
+            return null;
+        }
     }
 
     /**
@@ -324,5 +367,22 @@ public class SyncOperation implements Comparable {
         } else {
             return 0;
         }
+    }
+
+    // TODO: Test this to make sure that casting to object doesn't lose the type info for EventLog.
+    public Object[] toEventLog(int event) {
+        Object[] logArray = new Object[4];
+        logArray[1] = event;
+        logArray[2] = syncSource;
+        if (target.target_provider) {
+            logArray[0] = target.provider;
+            logArray[3] = target.account.name.hashCode();
+        } else if (target.target_service) {
+            logArray[0] = target.service.getPackageName();
+            logArray[3] = target.service.hashCode();
+        } else {
+            Log.wtf(TAG, "sync op with invalid target: " + key);
+        }
+        return logArray;
     }
 }
