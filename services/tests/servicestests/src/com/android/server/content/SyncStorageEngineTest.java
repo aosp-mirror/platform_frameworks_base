@@ -120,13 +120,13 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         // Force engine to read from disk.
         engine.clearAndReadState();
 
-        assert(engine.getPendingOperationCount() == 1);
+        assertTrue(engine.getPendingOperationCount() == 1);
         List<SyncStorageEngine.PendingOperation> pops = engine.getPendingOperations();
         SyncStorageEngine.PendingOperation popRetrieved = pops.get(0);
-        assertEquals(sop.target.account, popRetrieved.authority.account);
-        assertEquals(sop.target.provider, popRetrieved.authority.provider);
-        assertEquals(sop.target.service, popRetrieved.authority.service);
-        assertEquals(sop.target.userId, popRetrieved.authority.userId);
+        assertEquals(sop.target.account, popRetrieved.target.account);
+        assertEquals(sop.target.provider, popRetrieved.target.provider);
+        assertEquals(sop.target.service, popRetrieved.target.service);
+        assertEquals(sop.target.userId, popRetrieved.target.userId);
         assertEquals(sop.reason, popRetrieved.reason);
         assertEquals(sop.syncSource, popRetrieved.syncSource);
         assertEquals(sop.expedited, popRetrieved.expedited);
@@ -360,8 +360,6 @@ public class SyncStorageEngineTest extends AndroidTestCase {
 
     @SmallTest
     public void testComponentParsing() throws Exception {
-        // Sync Service component.
-        PeriodicSync sync1 = new PeriodicSync(syncService1, Bundle.EMPTY, dayPoll, dayFuzz);
 
         byte[] accountsFileData = ("<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
                 + "<accounts version=\"2\" >\n"
@@ -380,11 +378,28 @@ public class SyncStorageEngineTest extends AndroidTestCase {
 
         engine.clearAndReadState();
 
+        SyncStorageEngine.AuthorityInfo aInfo = engine.getAuthority(0);
+        assertNotNull(aInfo);
+
         // Test service component read
         List<PeriodicSync> syncs = engine.getPeriodicSyncs(
                 new SyncStorageEngine.EndPoint(syncService1, 0));
         assertEquals(1, syncs.size());
-        assertEquals(1, engine.getIsTargetServiceActive(syncService1, 0));
+        assertEquals(true, engine.getIsTargetServiceActive(syncService1, 0));
+    }
+
+    @SmallTest
+    public void testComponentSettings() throws Exception {
+        EndPoint target1 = new EndPoint(syncService1, 0);
+        engine.updateOrAddPeriodicSync(target1, dayPoll, dayFuzz, Bundle.EMPTY);
+        
+        engine.setIsTargetServiceActive(target1.service, 0, true);
+        boolean active = engine.getIsTargetServiceActive(target1.service, 0);
+        assert(active);
+
+        engine.setIsTargetServiceActive(target1.service, 1, false);
+        active = engine.getIsTargetServiceActive(target1.service, 1);
+        assert(!active);
     }
 
     @MediumTest

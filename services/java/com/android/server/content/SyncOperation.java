@@ -60,7 +60,7 @@ public class SyncOperation implements Comparable {
     public static final int SYNC_TARGET_ADAPTER = 1;
     public static final int SYNC_TARGET_SERVICE = 2;
 
-    /** Identifying info for the authority for this operation. */
+    /** Identifying info for the target for this operation. */
     public final SyncStorageEngine.EndPoint target;
     /** Why this sync was kicked off. {@link #REASON_NAMES} */
     public final int reason;
@@ -143,11 +143,11 @@ public class SyncOperation implements Comparable {
             this.flexTime = flexTime;
         }
         updateEffectiveRunTime();
-        return toKey(info, extras);
+        return toKey(info, this.extras);
     }
 
     public boolean matchesAuthority(SyncOperation other) {
-        return this.target.matches(other.target);
+        return this.target.matchesSpec(other.target);
     }
 
     /**

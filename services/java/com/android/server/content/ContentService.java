@@ -649,7 +649,8 @@ public final class ContentService extends IContentService.Stub {
     public boolean isServiceActive(ComponentName cname) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_SYNC_SETTINGS,
                 "no permission to read the sync settings");
-        verifySignatureForPackage(Binder.getCallingUid(), cname.getPackageName(), "getIsEnabled");
+        verifySignatureForPackage(Binder.getCallingUid(), cname.getPackageName(),
+                "isServiceActive");
 
         int userId = UserHandle.getCallingUserId();
         long identityToken = clearCallingIdentity();

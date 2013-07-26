@@ -536,7 +536,7 @@ public class SyncManager {
      *          then all users' accounts are considered.
      * @param uid Linux uid of the application that is performing the sync. 
      * @param extras a Map of SyncAdapter-specific information to control
-     *          syncs of a specific provider. Can be null.
+     *          syncs of a specific provider. Cannot be null.
      * @param beforeRunTimeMillis milliseconds before <code>runtimeMillis</code> that this sync may
      * be run.
      * @param runtimeMillis milliseconds from now by which this sync must be run.
@@ -547,7 +547,6 @@ public class SyncManager {
         if (isLoggable) {
             Log.d(TAG, "one off sync for: " + cname + " " + extras.toString());
         }
-
         Boolean expedited = extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false);
         if (expedited) {
             runtimeMillis = -1; // this means schedule at the front of the queue
@@ -569,7 +568,7 @@ public class SyncManager {
             }
             return;
         }
-        if (isEnabled) {
+        if (!isEnabled) {
             if (isLoggable) {
                 Log.d(TAG, "scheduleSync: " + cname + " is not enabled, dropping request");
             }
@@ -579,26 +578,7 @@ public class SyncManager {
         Pair<Long, Long> backoff = mSyncStorageEngine.getBackoff(info);
         long delayUntil = mSyncStorageEngine.getDelayUntilTime(info);
         final long backoffTime = backoff != null ? backoff.first : 0;
-        if (isEnabled) {
-            // Initialisation sync.
-            Bundle newExtras = new Bundle();
-            newExtras.putBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, true);
-            if (isLoggable) {
-                Log.v(TAG, "schedule initialisation Sync:"
-                        + ", delay until " + delayUntil
-                        + ", run now "
-                        + ", source " + source
-                        + ", sync service " + cname
-                        + ", extras " + newExtras);
-            }
-            scheduleSyncOperation(
-                    new SyncOperation(cname, userId, uid, source, newExtras,
-                            0 /* runtime */,
-                            0 /* flextime */,
-                            backoffTime,
-                            delayUntil));
-        } else {
-            if (isLoggable) {
+        if (isLoggable) {
                 Log.v(TAG, "schedule Sync:"
                         + ", delay until " + delayUntil
                         + ", run by " + runtimeMillis
@@ -606,15 +586,13 @@ public class SyncManager {
                         + ", source " + source
                         + ", sync service " + cname
                         + ", extras " + extras);
-            }
-            scheduleSyncOperation(
-                    new SyncOperation(cname, userId, uid, source, extras,
-                            runtimeMillis /* runtime */,
-                            beforeRunTimeMillis /* flextime */,
-                            backoffTime,
-                            delayUntil));
         }
-
+        scheduleSyncOperation(
+                new SyncOperation(cname, userId, uid, source, extras,
+                        runtimeMillis /* runtime */,
+                        beforeRunTimeMillis /* flextime */,
+                        backoffTime,
+                        delayUntil));
     }
 
     /**
@@ -955,8 +933,8 @@ public class SyncManager {
     }
 
     /**
-     * Cancel the active sync if it matches the authority and account.
-     * @param info object containing info about which syncs to cancel. The authority can
+     * Cancel the active sync if it matches the target.
+     * @param info object containing info about which syncs to cancel. The target can
      * have null account/provider info to specify all accounts/providers.
      * @param extras if non-null, specifies the exact sync to remove.
      */
@@ -990,7 +968,7 @@ public class SyncManager {
 
     /**
      * Remove scheduled sync operations.
-     * @param info limit the removals to operations that match this authority. The authority can
+     * @param info limit the removals to operations that match this target. The target can
      * have null account/provider info to specify all accounts/providers.
      */
     public void clearScheduledSyncOperations(SyncStorageEngine.EndPoint info) {
@@ -1193,11 +1171,6 @@ public class SyncManager {
         public void onServiceConnected(ComponentName name, IBinder service) {
             Message msg = mSyncHandler.obtainMessage();
             msg.what = SyncHandler.MESSAGE_SERVICE_CONNECTED;
-            if (mSyncOperation.target.target_provider) {
-                msg.arg1 = SyncOperation.SYNC_TARGET_ADAPTER;
-            } else {
-                msg.arg1 = SyncOperation.SYNC_TARGET_SERVICE;
-            }
             msg.obj = new ServiceConnectionData(this, service);
             mSyncHandler.sendMessage(msg);
         }
@@ -1392,8 +1365,7 @@ public class SyncManager {
                                         account.userId));
                 SyncStorageEngine.AuthorityInfo settings = syncAuthoritySyncStatus.first;
                 SyncStatusInfo status = syncAuthoritySyncStatus.second;
-
-                String authority = settings.base.provider;
+                String authority = settings.target.provider;
                 if (authority.length() > 50) {
                     authority = authority.substring(authority.length() - 50);
                 }
@@ -1519,15 +1491,15 @@ public class SyncManager {
                 final String authorityName;
                 final String accountKey;
                 if (authorityInfo != null) {
-                    if (authorityInfo.base.target_provider) {
-                        authorityName = authorityInfo.base.provider;
-                        accountKey = authorityInfo.base.account.name + "/"
-                                + authorityInfo.base.account.type
-                                + " u" + authorityInfo.base.userId;
-                    } else if (authorityInfo.base.target_service) {
-                        authorityName = authorityInfo.base.service.getPackageName() + "/"
-                                + authorityInfo.base.service.getClassName()
-                                + " u" + authorityInfo.base.userId;
+                    if (authorityInfo.target.target_provider) {
+                        authorityName = authorityInfo.target.provider;
+                        accountKey = authorityInfo.target.account.name + "/"
+                                + authorityInfo.target.account.type
+                                + " u" + authorityInfo.target.userId;
+                    } else if (authorityInfo.target.target_service) {
+                        authorityName = authorityInfo.target.service.getPackageName() + "/"
+                                + authorityInfo.target.service.getClassName()
+                                + " u" + authorityInfo.target.userId;
                         accountKey = "no account";
                     } else {
                         authorityName = "Unknown";
@@ -1658,15 +1630,15 @@ public class SyncManager {
                 final String authorityName;
                 final String accountKey;
                 if (authorityInfo != null) {
-                    if (authorityInfo.base.target_provider) {
-                        authorityName = authorityInfo.base.provider;
-                        accountKey = authorityInfo.base.account.name + "/"
-                                + authorityInfo.base.account.type
-                                + " u" + authorityInfo.base.userId;
-                    } else if (authorityInfo.base.target_service) {
-                        authorityName = authorityInfo.base.service.getPackageName() + "/"
-                                + authorityInfo.base.service.getClassName()
-                                + " u" + authorityInfo.base.userId;
+                    if (authorityInfo.target.target_provider) {
+                        authorityName = authorityInfo.target.provider;
+                        accountKey = authorityInfo.target.account.name + "/"
+                                + authorityInfo.target.account.type
+                                + " u" + authorityInfo.target.userId;
+                    } else if (authorityInfo.target.target_service) {
+                        authorityName = authorityInfo.target.service.getPackageName() + "/"
+                                + authorityInfo.target.service.getClassName()
+                                + " u" + authorityInfo.target.userId;
                         accountKey = "none";
                     } else {
                         authorityName = "Unknown";
@@ -1735,15 +1707,15 @@ public class SyncManager {
                 final String authorityName;
                 final String accountKey;
                 if (authorityInfo != null) {
-                    if (authorityInfo.base.target_provider) {
-                        authorityName = authorityInfo.base.provider;
-                        accountKey = authorityInfo.base.account.name + "/"
-                                + authorityInfo.base.account.type
-                                + " u" + authorityInfo.base.userId;
-                    } else if (authorityInfo.base.target_service) {
-                        authorityName = authorityInfo.base.service.getPackageName() + "/"
-                                + authorityInfo.base.service.getClassName()
-                                + " u" + authorityInfo.base.userId;
+                    if (authorityInfo.target.target_provider) {
+                        authorityName = authorityInfo.target.provider;
+                        accountKey = authorityInfo.target.account.name + "/"
+                                + authorityInfo.target.account.type
+                                + " u" + authorityInfo.target.userId;
+                    } else if (authorityInfo.target.target_service) {
+                        authorityName = authorityInfo.target.service.getPackageName() + "/"
+                                + authorityInfo.target.service.getClassName()
+                                + " u" + authorityInfo.target.userId;
                         accountKey = "none";
                     } else {
                         authorityName = "Unknown";
@@ -2039,8 +2011,7 @@ public class SyncManager {
                         if (isSyncStillActive(msgData.activeSyncContext)) {
                             runBoundToAdapter(
                                     msgData.activeSyncContext,
-                                    msgData.adapter,
-                                    msg.arg1 /* target */);
+                                    msgData.adapter);
                         }
                         break;
                     }
@@ -2167,8 +2138,7 @@ public class SyncManager {
             for (Pair<AuthorityInfo, SyncStatusInfo> info : infos) {
                 final AuthorityInfo authorityInfo = info.first;
                 final SyncStatusInfo status = info.second;
-                
-                if (!isDispatchable(authorityInfo.base)) {
+                if (!isDispatchable(authorityInfo.target)) {
                     continue;
                 }
 
@@ -2196,7 +2166,7 @@ public class SyncManager {
                     boolean runEarly = remainingMillis <= flexInMillis
                             && timeSinceLastRunMillis > periodInMillis - flexInMillis;
                     if (isLoggable) {
-                        Log.v(TAG, "sync: " + i + " for " + authorityInfo.base + "."
+                        Log.v(TAG, "sync: " + i + " for " + authorityInfo.target + "."
                         + " period: " + (periodInMillis)
                         + " flex: " + (flexInMillis)
                         + " remaining: " + (remainingMillis)
@@ -2224,7 +2194,7 @@ public class SyncManager {
                             || timeSinceLastRunMillis >= periodInMillis // Case 3
                             || runEarly) { // Case 4
                         // Sync now
-                        SyncStorageEngine.EndPoint target = authorityInfo.base;
+                        SyncStorageEngine.EndPoint target = authorityInfo.target;
                         final Pair<Long, Long> backoff =
                                 mSyncStorageEngine.getBackoff(target);
                         mSyncStorageEngine.setPeriodicSyncTime(authorityInfo.ident,
@@ -2660,7 +2630,7 @@ public class SyncManager {
         }
 
         private void runBoundToAdapter(final ActiveSyncContext activeSyncContext,
-                IBinder syncAdapter, int target) {
+                IBinder syncAdapter) {
             final SyncOperation syncOperation = activeSyncContext.mSyncOperation;
             try {
                 activeSyncContext.mIsLinkedToDeath = true;
@@ -2690,8 +2660,8 @@ public class SyncManager {
         }
 
         /**
-         * Cancel the sync for the provided authority that matches the given bundle. Info here
-         * can have null fields to indicate all the active syncs for that field.
+         * Cancel the sync for the provided target that matches the given bundle.
+         * @param info can have null fields to indicate all the active syncs for that field.
          */
         private void cancelActiveSyncLocked(SyncStorageEngine.EndPoint info, Bundle extras) {
             ArrayList<ActiveSyncContext> activeSyncs =
@@ -2700,7 +2670,7 @@ public class SyncManager {
                 if (activeSyncContext != null) {
                     final SyncStorageEngine.EndPoint opInfo =
                             activeSyncContext.mSyncOperation.target;
-                    if (!opInfo.matches(info)) {
+                    if (!opInfo.matchesSpec(info)) {
                         continue;
                     }
                     if (extras != null &&
@@ -2726,7 +2696,8 @@ public class SyncManager {
                 if (info.target_provider) {
                     activeSyncContext.mSyncAdapter.asBinder().unlinkToDeath(activeSyncContext, 0);
                 } else {
-                    activeSyncContext.mSyncServiceAdapter.asBinder().unlinkToDeath(activeSyncContext, 0);
+                    activeSyncContext.mSyncServiceAdapter.asBinder()
+                        .unlinkToDeath(activeSyncContext, 0);
                 }
                 activeSyncContext.mIsLinkedToDeath = false;
             }
@@ -3122,17 +3093,20 @@ public class SyncManager {
         if (b1 == b2) {
             return true;
         }
+        // Exit early if we can.
         if (includeSyncSettings && b1.size() != b2.size()) {
             return false;
         }
-        for (String key : b1.keySet()) {
+        Bundle bigger = b1.size() > b2.size() ? b1 : b2;
+        Bundle smaller = b1.size() > b2.size() ? b2 : b1;
+        for (String key : bigger.keySet()) {
             if (!includeSyncSettings && isSyncSetting(key)) {
                 continue;
             }
-            if (!b2.containsKey(key)) {
+            if (!smaller.containsKey(key)) {
                 return false;
             }
-            if (!b1.get(key).equals(b2.get(key))) {
+            if (!bigger.get(key).equals(smaller.get(key))) {
                 return false;
             }
         }
@@ -3140,6 +3114,7 @@ public class SyncManager {
     }
 
     /**
+     * TODO: Get rid of this when we separate sync settings extras from dev specified extras.
      * @return true if the provided key is used by the SyncManager in scheduling the sync.
      */
     private static boolean isSyncSetting(String key) {

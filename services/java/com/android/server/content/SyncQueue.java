@@ -59,7 +59,7 @@ public class SyncQueue {
 
     public void addPendingOperations(int userId) {
         for (SyncStorageEngine.PendingOperation op : mSyncStorageEngine.getPendingOperations()) {
-            final SyncStorageEngine.EndPoint info = op.authority;
+            final SyncStorageEngine.EndPoint info = op.target;
             if (info.userId != userId) continue;
 
             final Pair<Long, Long> backoff = mSyncStorageEngine.getBackoff(info);
@@ -69,7 +69,7 @@ public class SyncQueue {
                         SyncAdapterType.newKey(info.provider, info.account.type), info.userId);
                 if (syncAdapterInfo == null) {
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.w(TAG, "Missing sync adapter info for authority " + op.authority);
+                        Log.v(TAG, "Missing sync adapter info for authority " + op.target);
                     }
                     continue;
                 }
@@ -89,7 +89,7 @@ public class SyncQueue {
                     mPackageManager.getServiceInfo(info.service, 0);
                 } catch (PackageManager.NameNotFoundException e) {
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                        Log.w(TAG, "Missing sync servce for authority " + op.authority);
+                        Log.w(TAG, "Missing sync service for authority " + op.target);
                     }
                     continue;
                 }
@@ -174,14 +174,14 @@ public class SyncQueue {
      * @param operation the operation to remove
      */
     public void remove(SyncOperation operation) {
-        boolean isLoggable = Log.isLoggable(TAG, Log.DEBUG);
+        boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
         SyncOperation operationToRemove = mOperationsMap.remove(operation.key);
         if (isLoggable) {
-            Log.d(TAG, "Attempting to remove: " + operation.key);
+            Log.v(TAG, "Attempting to remove: " + operation.key);
         }
         if (operationToRemove == null) {
             if (isLoggable) {
-                Log.d(TAG, "Could not find: " + operation.key);
+                Log.v(TAG, "Could not find: " + operation.key);
             }
             return;
         }
@@ -200,10 +200,10 @@ public class SyncQueue {
     }
 
     public void onBackoffChanged(SyncStorageEngine.EndPoint target, long backoff) {
-        // For each op that matches the authority of the changed op, update its
+        // For each op that matches the target of the changed op, update its
         // backoff and effectiveStartTime
         for (SyncOperation op : mOperationsMap.values()) {
-            if (op.target.matches(target)) {
+            if (op.target.matchesSpec(target)) {
                 op.backoff = backoff;
                 op.updateEffectiveRunTime();
             }
@@ -211,9 +211,9 @@ public class SyncQueue {
     }
 
     public void onDelayUntilTimeChanged(SyncStorageEngine.EndPoint target, long delayUntil) {
-        // for each op that matches the authority info of the provided op, change the delay time.
+        // for each op that matches the target info of the provided op, change the delay time.
         for (SyncOperation op : mOperationsMap.values()) {
-            if (op.target.matches(target)) {
+            if (op.target.matchesSpec(target)) {
                 op.delayUntil = delayUntil;
                 op.updateEffectiveRunTime();
             }
@@ -235,7 +235,7 @@ public class SyncQueue {
             Map.Entry<String, SyncOperation> entry = entries.next();
             SyncOperation syncOperation = entry.getValue();
             final SyncStorageEngine.EndPoint opInfo = syncOperation.target;
-            if (!opInfo.matches(info)) {
+            if (!opInfo.matchesSpec(info)) {
                 continue;
             }
             if (extras != null
