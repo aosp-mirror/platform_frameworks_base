@@ -24,6 +24,7 @@
 #include "SkRect.h"
 #include "SkSize.h"
 #include "CreateJavaOutputStreamAdaptor.h"
+#include "JNIHelp.h"
 
 namespace android {
 
