@@ -385,13 +385,13 @@ class AlarmManagerService extends IAlarmManager.Stub {
                     if (batch.standalone) {
                         // this will also be the only alarm in the batch
                         a = new Alarm(a.type, a.when, whenElapsed, maxElapsed,
-                                a.repeatInterval, a.operation, a.workSource);
+                                a.repeatInterval, a.operation);
                         Batch newBatch = new Batch(a);
                         newBatch.standalone = true;
                         addBatchLocked(mAlarmBatches, newBatch);
                     } else {
                         setImplLocked(a.type, a.when, whenElapsed, maxElapsed,
-                                a.repeatInterval, a.operation, false, a.workSource);
+                                a.repeatInterval, a.operation, false);
                     }
                 }
             }
@@ -400,14 +400,12 @@ class AlarmManagerService extends IAlarmManager.Stub {
 
     private static final class InFlight extends Intent {
         final PendingIntent mPendingIntent;
-        final WorkSource mWorkSource;
         final Pair<String, ComponentName> mTarget;
         final BroadcastStats mBroadcastStats;
         final FilterStats mFilterStats;
 
-        InFlight(AlarmManagerService service, PendingIntent pendingIntent, WorkSource workSource) {
+        InFlight(AlarmManagerService service, PendingIntent pendingIntent) {
             mPendingIntent = pendingIntent;
-            mWorkSource = workSource;
             Intent intent = pendingIntent.getIntent();
             mTarget = intent != null
                     ? new Pair<String, ComponentName>(intent.getAction(), intent.getComponent())
@@ -504,17 +502,12 @@ class AlarmManagerService extends IAlarmManager.Stub {
 
     @Override
     public void set(int type, long triggerAtTime, long windowLength, long interval,
-            PendingIntent operation, WorkSource workSource) {
-        if (workSource != null) {
-            mContext.enforceCallingPermission(
-                    android.Manifest.permission.UPDATE_DEVICE_STATS,
-                    "AlarmManager.set");
-        }
-        set(type, triggerAtTime, windowLength, interval, operation, false, workSource);
+            PendingIntent operation) {
+        set(type, triggerAtTime, windowLength, interval, operation, false);
     }
 
     public void set(int type, long triggerAtTime, long windowLength, long interval,
-            PendingIntent operation, boolean isStandalone, WorkSource workSource) {
+            PendingIntent operation, boolean isStandalone) {
         if (operation == null) {
             Slog.w(TAG, "set/setRepeating ignored because there is no intent");
             return;
@@ -551,13 +544,13 @@ class AlarmManagerService extends IAlarmManager.Stub {
                         + " interval=" + interval + " standalone=" + isStandalone);
             }
             setImplLocked(type, triggerAtTime, triggerElapsed, maxElapsed,
-                    interval, operation, isStandalone, workSource);
+                    interval, operation, isStandalone);
         }
     }
 
     private void setImplLocked(int type, long when, long whenElapsed, long maxWhen, long interval,
-            PendingIntent operation, boolean isStandalone, WorkSource workSource) {
-        Alarm a = new Alarm(type, when, whenElapsed, maxWhen, interval, operation, workSource);
+            PendingIntent operation, boolean isStandalone) {
+        Alarm a = new Alarm(type, when, whenElapsed, maxWhen, interval, operation);
         removeLocked(operation);
 
         final boolean reschedule;
@@ -969,8 +962,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
                     final long nextElapsed = alarm.whenElapsed + delta;
                     setImplLocked(alarm.type, alarm.when + delta, nextElapsed,
                             maxTriggerTime(nowELAPSED, nextElapsed, alarm.repeatInterval),
-                            alarm.repeatInterval, alarm.operation, batch.standalone,
-                            alarm.workSource);
+                            alarm.repeatInterval, alarm.operation, batch.standalone);
                 }
 
             }
@@ -1002,17 +994,15 @@ class AlarmManagerService extends IAlarmManager.Stub {
         public long maxWhen;        // also in the elapsed time base
         public long repeatInterval;
         public PendingIntent operation;
-        public WorkSource workSource;
         
         public Alarm(int _type, long _when, long _whenElapsed, long _maxWhen,
-                long _interval, PendingIntent _op, WorkSource _ws) {
+                long _interval, PendingIntent _op) {
             type = _type;
             when = _when;
             whenElapsed = _whenElapsed;
             maxWhen = _maxWhen;
             repeatInterval = _interval;
             operation = _op;
-            workSource = _ws;
         }
 
         @Override
@@ -1126,11 +1116,11 @@ class AlarmManagerService extends IAlarmManager.Stub {
                             
                             // we have an active broadcast so stay awake.
                             if (mBroadcastRefCount == 0) {
-                                setWakelockWorkSource(alarm.operation, alarm.workSource);
+                                setWakelockWorkSource(alarm.operation);
                                 mWakeLock.acquire();
                             }
                             final InFlight inflight = new InFlight(AlarmManagerService.this,
-                                    alarm.operation, alarm.workSource);
+                                    alarm.operation);
                             mInFlight.add(inflight);
                             mBroadcastRefCount++;
 
@@ -1172,18 +1162,8 @@ class AlarmManagerService extends IAlarmManager.Stub {
         }
     }
 
-    /**
-     * Attribute blame for a WakeLock.
-     * @param pi PendingIntent to attribute blame to if ws is null.
-     * @param ws WorkSource to attribute blame.
-     */
-    void setWakelockWorkSource(PendingIntent pi, WorkSource ws) {
+    void setWakelockWorkSource(PendingIntent pi) {
         try {
-            if (ws != null) {
-                mWakeLock.setWorkSource(ws);
-                return;
-            }
-
             final int uid = ActivityManagerNative.getDefault()
                     .getUidForIntentSender(pi.getTarget());
             if (uid >= 0) {
@@ -1266,9 +1246,8 @@ class AlarmManagerService extends IAlarmManager.Stub {
             // the top of the next minute.
             final long tickEventDelay = nextTime - currentTime;
 
-            final WorkSource workSource = null; // Let system take blame for time tick events.
             set(ELAPSED_REALTIME, SystemClock.elapsedRealtime() + tickEventDelay, 0,
-                    0, mTimeTickSender, true, workSource);
+                    0, mTimeTickSender, true);
         }
 
         public void scheduleDateChangedEvent() {
@@ -1279,9 +1258,8 @@ class AlarmManagerService extends IAlarmManager.Stub {
             calendar.set(Calendar.SECOND, 0);
             calendar.set(Calendar.MILLISECOND, 0);
             calendar.add(Calendar.DAY_OF_MONTH, 1);
-
-            final WorkSource workSource = null; // Let system take blame for date change events.
-            set(RTC, calendar.getTimeInMillis(), 0, 0, mDateChangeSender, true, workSource);
+      
+            set(RTC, calendar.getTimeInMillis(), 0, 0, mDateChangeSender, true);
         }
     }
     
@@ -1397,8 +1375,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
                 } else {
                     // the next of our alarms is now in flight.  reattribute the wakelock.
                     if (mInFlight.size() > 0) {
-                        InFlight inFlight = mInFlight.get(0);
-                        setWakelockWorkSource(inFlight.mPendingIntent, inFlight.mWorkSource);
+                        setWakelockWorkSource(mInFlight.get(0).mPendingIntent);
                     } else {
                         // should never happen
                         mLog.w("Alarm wakelock still held but sent queue empty");
