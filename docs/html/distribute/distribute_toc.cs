@@ -80,6 +80,7 @@
     <div class="nav-section-header"><a href="<?cs var:toroot ?>distribute/googleplay/spotlight/index.html">Spotlight</a></div>
     <ul>
        <li><a href="<?cs var:toroot ?>distribute/googleplay/spotlight/tablets.html">Tablet Stories</a></li>
+       <li><a href="<?cs var:toroot ?>distribute/googleplay/spotlight/games.html">Game Stories</a></li>
     </ul>
   </li> 
 
