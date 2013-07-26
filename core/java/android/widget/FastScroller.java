@@ -300,8 +300,7 @@ class FastScroller {
         getSectionsFromIndexer();
         refreshDrawablePressedState();
         setScrollbarPosition(mList.getVerticalScrollbarPosition());
-
-        mList.postDelayed(mDeferHide, FADE_TIMEOUT);
+        postAutoHide();
     }
 
     /**
@@ -346,7 +345,7 @@ class FastScroller {
         if (alwaysShow) {
             setState(STATE_VISIBLE);
         } else if (mState == STATE_VISIBLE) {
-            mList.postDelayed(mDeferHide, FADE_TIMEOUT);
+            postAutoHide();
         }
     }
 
@@ -708,6 +707,11 @@ class FastScroller {
         mDecorAnimation.start();
     }
 
+    private void postAutoHide() {
+        mList.removeCallbacks(mDeferHide);
+        mList.postDelayed(mDeferHide, FADE_TIMEOUT);
+    }
+
     private boolean isLongList(int visibleItemCount, int totalItemCount) {
         // Are there enough pages to require fast scroll? Recompute only if
         // total count changes.
@@ -738,7 +742,7 @@ class FastScroller {
             // Show the thumb, if necessary, and set up auto-fade.
             if (mState != STATE_DRAGGING) {
                 setState(STATE_VISIBLE);
-                mList.postDelayed(mDeferHide, FADE_TIMEOUT);
+                postAutoHide();
             }
         }
     }
@@ -1161,6 +1165,22 @@ class FastScroller {
         return false;
     }
 
+    public boolean onInterceptHoverEvent(MotionEvent ev) {
+        if (!mEnabled) {
+            return false;
+        }
+
+        final int actionMasked = ev.getActionMasked();
+        if ((actionMasked == MotionEvent.ACTION_HOVER_ENTER
+                || actionMasked == MotionEvent.ACTION_HOVER_MOVE) && mState == STATE_NONE
+                && isPointInside(ev.getX(), ev.getY())) {
+            setState(STATE_VISIBLE);
+            postAutoHide();
+        }
+
+        return false;
+    }
+
     public boolean onTouchEvent(MotionEvent me) {
         if (!mEnabled) {
             return false;
@@ -1197,7 +1217,7 @@ class FastScroller {
                     }
 
                     setState(STATE_VISIBLE);
-                    mList.postDelayed(mDeferHide, FADE_TIMEOUT);
+                    postAutoHide();
 
                     return true;
                 }

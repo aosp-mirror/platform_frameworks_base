@@ -3784,6 +3784,15 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     @Override
+    public boolean onInterceptHoverEvent(MotionEvent event) {
+        if (mFastScroller != null && mFastScroller.onInterceptHoverEvent(event)) {
+            return true;
+        }
+
+        return super.onInterceptHoverEvent(event);
+    }
+
+    @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         int action = ev.getAction();
         View v;
