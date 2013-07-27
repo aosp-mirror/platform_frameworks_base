@@ -9770,11 +9770,13 @@ package android.graphics {
 
   public class SurfaceTexture {
     ctor public SurfaceTexture(int);
+    ctor public SurfaceTexture(int, boolean);
     method public void attachToGLContext(int);
     method public void detachFromGLContext();
     method public long getTimestamp();
     method public void getTransformMatrix(float[]);
     method public void release();
+    method public void releaseTexImage();
     method public void setDefaultBufferSize(int, int);
     method public void setOnFrameAvailableListener(android.graphics.SurfaceTexture.OnFrameAvailableListener);
     method public void updateTexImage();
