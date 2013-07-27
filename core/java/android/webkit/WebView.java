@@ -2191,7 +2191,6 @@ public class WebView extends AbsoluteLayout
         return mProvider.getViewDelegate().requestFocus(direction, previouslyFocusedRect);
     }
 
-    @Deprecated
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
