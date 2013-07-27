@@ -68,6 +68,9 @@ public final class ActiveServices {
     // How long we wait for a service to finish executing.
     static final int SERVICE_TIMEOUT = 20*1000;
 
+    // How long we wait for a service to finish executing.
+    static final int SERVICE_BACKGROUND_TIMEOUT = SERVICE_TIMEOUT * 10;
+
     // How long a service needs to be running until restarting its process
     // is no longer considered to be a relaunch of the service.
     static final int SERVICE_RESTART_DURATION = 5*1000;
@@ -215,6 +218,7 @@ public final class ActiveServices {
         if (DEBUG_SERVICE) Slog.v(TAG, "startService: " + service
                 + " type=" + resolvedType + " args=" + service.getExtras());
 
+        final boolean callerFg;
         if (caller != null) {
             final ProcessRecord callerApp = mAm.getRecordForAppLocked(caller);
             if (callerApp == null) {
@@ -223,11 +227,15 @@ public final class ActiveServices {
                         + " (pid=" + Binder.getCallingPid()
                         + ") when starting service " + service);
             }
+            callerFg = callerApp.setSchedGroup != Process.THREAD_GROUP_BG_NONINTERACTIVE;
+        } else {
+            callerFg = true;
         }
+
 
         ServiceLookupResult res =
             retrieveServiceLocked(service, resolvedType,
-                    callingPid, callingUid, userId, true);
+                    callingPid, callingUid, userId, true, callerFg);
         if (res == null) {
             return null;
         }
@@ -253,7 +261,7 @@ public final class ActiveServices {
         synchronized (r.stats.getBatteryStats()) {
             r.stats.startRunningLocked();
         }
-        String error = bringUpServiceLocked(r, service.getFlags(), false);
+        String error = bringUpServiceLocked(r, service.getFlags(), callerFg, false);
         if (error != null) {
             return new ComponentName("!!", error);
         }
@@ -288,7 +296,7 @@ public final class ActiveServices {
 
         // If this service is active, make sure it is stopped.
         ServiceLookupResult r = retrieveServiceLocked(service, resolvedType,
-                Binder.getCallingPid(), Binder.getCallingUid(), userId, false);
+                Binder.getCallingPid(), Binder.getCallingUid(), userId, false, false);
         if (r != null) {
             if (r.record != null) {
                 final long origId = Binder.clearCallingIdentity();
@@ -308,7 +316,7 @@ public final class ActiveServices {
     IBinder peekServiceLocked(Intent service, String resolvedType) {
         ServiceLookupResult r = retrieveServiceLocked(service, resolvedType,
                 Binder.getCallingPid(), Binder.getCallingUid(),
-                UserHandle.getCallingUserId(), false);
+                UserHandle.getCallingUserId(), false, false);
 
         IBinder ret = null;
         if (r != null) {
@@ -483,9 +491,11 @@ public final class ActiveServices {
             }
         }
 
+        final boolean callerFg = callerApp.setSchedGroup != Process.THREAD_GROUP_BG_NONINTERACTIVE;
+
         ServiceLookupResult res =
             retrieveServiceLocked(service, resolvedType,
-                    Binder.getCallingPid(), Binder.getCallingUid(), userId, true);
+                    Binder.getCallingPid(), Binder.getCallingUid(), userId, true, callerFg);
         if (res == null) {
             return 0;
         }
@@ -545,7 +555,7 @@ public final class ActiveServices {
 
             if ((flags&Context.BIND_AUTO_CREATE) != 0) {
                 s.lastActivity = SystemClock.uptimeMillis();
-                if (bringUpServiceLocked(s, service.getFlags(), false) != null) {
+                if (bringUpServiceLocked(s, service.getFlags(), callerFg, false) != null) {
                     return 0;
                 }
             }
@@ -575,10 +585,10 @@ public final class ActiveServices {
                 // and the service had previously asked to be told when
                 // rebound, then do so.
                 if (b.intent.apps.size() == 1 && b.intent.doRebind) {
-                    requestServiceBindingLocked(s, b.intent, true);
+                    requestServiceBindingLocked(s, b.intent, callerFg, true);
                 }
             } else if (!b.intent.requested) {
-                requestServiceBindingLocked(s, b.intent, false);
+                requestServiceBindingLocked(s, b.intent, callerFg, false);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -676,7 +686,16 @@ public final class ActiveServices {
                     if (b.apps.size() > 0 && !inStopping) {
                         // Applications have already bound since the last
                         // unbind, so just rebind right here.
-                        requestServiceBindingLocked(r, b, true);
+                        boolean inFg = false;
+                        for (int i=b.apps.size()-1; i>=0; i--) {
+                            ProcessRecord client = b.apps.valueAt(i).client;
+                            if (client != null && client.setSchedGroup
+                                    != Process.THREAD_GROUP_BG_NONINTERACTIVE) {
+                                inFg = true;
+                                break;
+                            }
+                        }
+                        requestServiceBindingLocked(r, b, inFg, true);
                     } else {
                         // Note to tell the service the next time there is
                         // a new client.
@@ -723,7 +742,7 @@ public final class ActiveServices {
 
     private ServiceLookupResult retrieveServiceLocked(Intent service,
             String resolvedType, int callingPid, int callingUid, int userId,
-            boolean createIfNeeded) {
+            boolean createIfNeeded, boolean callingFromFg) {
         ServiceRecord r = null;
         if (DEBUG_SERVICE) Slog.v(TAG, "retrieveServiceLocked: " + service
                 + " type=" + resolvedType + " callingUid=" + callingUid);
@@ -773,7 +792,7 @@ public final class ActiveServices {
                                 sInfo.applicationInfo.uid, sInfo.packageName,
                                 sInfo.name);
                     }
-                    r = new ServiceRecord(mAm, ss, name, filter, sInfo, res);
+                    r = new ServiceRecord(mAm, ss, name, filter, sInfo, callingFromFg, res);
                     res.setService(r);
                     mServiceMap.putServiceByName(name, UserHandle.getUserId(r.appInfo.uid), r);
                     mServiceMap.putServiceByIntent(filter, UserHandle.getUserId(r.appInfo.uid), r);
@@ -817,13 +836,14 @@ public final class ActiveServices {
         return null;
     }
 
-    private final void bumpServiceExecutingLocked(ServiceRecord r, String why) {
+    private final void bumpServiceExecutingLocked(ServiceRecord r, boolean fg, String why) {
         if (DEBUG_SERVICE) Log.v(TAG, ">>> EXECUTING "
                 + why + " of " + r + " in app " + r.app);
         else if (DEBUG_SERVICE_EXECUTING) Log.v(TAG, ">>> EXECUTING "
                 + why + " of " + r.shortName);
         long now = SystemClock.uptimeMillis();
         if (r.executeNesting == 0) {
+            r.executeFg = fg;
             ProcessTracker.ServiceState stracker = r.getTracker();
             if (stracker != null) {
                 stracker.setExecuting(true, mAm.mProcessTracker.getMemFactorLocked(), now);
@@ -833,24 +853,34 @@ public final class ActiveServices {
                     Message msg = mAm.mHandler.obtainMessage(
                             ActivityManagerService.SERVICE_TIMEOUT_MSG);
                     msg.obj = r.app;
-                    mAm.mHandler.sendMessageAtTime(msg, now+SERVICE_TIMEOUT);
+                    mAm.mHandler.sendMessageAtTime(msg,
+                            fg ? (now+SERVICE_TIMEOUT) : (now+ SERVICE_BACKGROUND_TIMEOUT));
                 }
                 r.app.executingServices.add(r);
+                r.app.execServicesFg |= fg;
             }
+        } else if (r.app != null && fg && !r.app.execServicesFg) {
+            mAm.mHandler.removeMessages(ActivityManagerService.SERVICE_TIMEOUT_MSG);
+            Message msg = mAm.mHandler.obtainMessage(
+                    ActivityManagerService.SERVICE_TIMEOUT_MSG);
+            msg.obj = r.app;
+            mAm.mHandler.sendMessageAtTime(msg,now+SERVICE_TIMEOUT);
+            r.app.execServicesFg = true;
         }
+        r.executeFg |= fg;
         r.executeNesting++;
         r.executingStart = now;
     }
 
     private final boolean requestServiceBindingLocked(ServiceRecord r,
-            IntentBindRecord i, boolean rebind) {
+            IntentBindRecord i, boolean execInFg, boolean rebind) {
         if (r.app == null || r.app.thread == null) {
             // If service is not currently running, can't yet bind.
             return false;
         }
         if ((!i.requested || rebind) && i.apps.size() > 0) {
             try {
-                bumpServiceExecutingLocked(r, "bind");
+                bumpServiceExecutingLocked(r, execInFg, "bind");
                 r.app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_SERVICE);
                 r.app.thread.scheduleBindService(r, i.intent.getIntent(), rebind,
                         r.app.repProcState);
@@ -962,6 +992,7 @@ public final class ActiveServices {
         }
 
         if (!mRestartingServices.contains(r)) {
+            r.createdFromFg = false;
             mRestartingServices.add(r);
         }
 
@@ -982,7 +1013,7 @@ public final class ActiveServices {
         if (!mRestartingServices.contains(r)) {
             return;
         }
-        bringUpServiceLocked(r, r.intent.getIntent().getFlags(), true);
+        bringUpServiceLocked(r, r.intent.getIntent().getFlags(), r.createdFromFg, true);
     }
 
     private final boolean unscheduleServiceRestartLocked(ServiceRecord r) {
@@ -996,12 +1027,12 @@ public final class ActiveServices {
     }
 
     private final String bringUpServiceLocked(ServiceRecord r,
-            int intentFlags, boolean whileRestarting) {
+            int intentFlags, boolean execInFg, boolean whileRestarting) {
         //Slog.i(TAG, "Bring up service:");
         //r.dump("  ");
 
         if (r.app != null && r.app.thread != null) {
-            sendServiceArgsLocked(r, false);
+            sendServiceArgsLocked(r, execInFg, false);
             return null;
         }
 
@@ -1049,7 +1080,7 @@ public final class ActiveServices {
             if (app != null && app.thread != null) {
                 try {
                     app.addPackage(r.appInfo.packageName, mAm.mProcessTracker);
-                    realStartServiceLocked(r, app);
+                    realStartServiceLocked(r, app, execInFg);
                     return null;
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Exception when starting service " + r.shortName, e);
@@ -1093,17 +1124,17 @@ public final class ActiveServices {
         return null;
     }
 
-    private final void requestServiceBindingsLocked(ServiceRecord r) {
+    private final void requestServiceBindingsLocked(ServiceRecord r, boolean execInFg) {
         for (int i=r.bindings.size()-1; i>=0; i--) {
             IntentBindRecord ibr = r.bindings.valueAt(i);
-            if (!requestServiceBindingLocked(r, ibr, false)) {
+            if (!requestServiceBindingLocked(r, ibr, execInFg, false)) {
                 break;
             }
         }
     }
 
     private final void realStartServiceLocked(ServiceRecord r,
-            ProcessRecord app) throws RemoteException {
+            ProcessRecord app, boolean execInFg) throws RemoteException {
         if (app.thread == null) {
             throw new RemoteException();
         }
@@ -1114,7 +1145,7 @@ public final class ActiveServices {
         r.restartTime = r.lastActivity = SystemClock.uptimeMillis();
 
         app.services.add(r);
-        bumpServiceExecutingLocked(r, "create");
+        bumpServiceExecutingLocked(r, execInFg, "create");
         mAm.updateLruProcessLocked(app, true);
 
         boolean created = false;
@@ -1141,7 +1172,7 @@ public final class ActiveServices {
             }
         }
 
-        requestServiceBindingsLocked(r);
+        requestServiceBindingsLocked(r, execInFg);
 
         // If the service is in the started state, and there are no
         // pending arguments, then fake up one so its onStartCommand() will
@@ -1151,10 +1182,10 @@ public final class ActiveServices {
                     null, null));
         }
 
-        sendServiceArgsLocked(r, true);
+        sendServiceArgsLocked(r, execInFg, true);
     }
 
-    private final void sendServiceArgsLocked(ServiceRecord r,
+    private final void sendServiceArgsLocked(ServiceRecord r, boolean execInFg,
             boolean oomAdjusted) {
         final int N = r.pendingStarts.size();
         if (N == 0) {
@@ -1180,7 +1211,7 @@ public final class ActiveServices {
                     mAm.grantUriPermissionUncheckedFromIntentLocked(si.neededGrants,
                             si.getUriPermissionsLocked());
                 }
-                bumpServiceExecutingLocked(r, "start");
+                bumpServiceExecutingLocked(r, execInFg, "start");
                 if (!oomAdjusted) {
                     oomAdjusted = true;
                     mAm.updateOomAdjLocked(r.app);
@@ -1256,7 +1287,7 @@ public final class ActiveServices {
                         + ": hasBound=" + ibr.hasBound);
                 if (ibr.hasBound) {
                     try {
-                        bumpServiceExecutingLocked(r, "bring down unbind");
+                        bumpServiceExecutingLocked(r, false, "bring down unbind");
                         mAm.updateOomAdjLocked(r.app);
                         ibr.hasBound = false;
                         r.app.thread.scheduleUnbindService(r,
@@ -1306,7 +1337,7 @@ public final class ActiveServices {
             r.app.services.remove(r);
             if (r.app.thread != null) {
                 try {
-                    bumpServiceExecutingLocked(r, "stop");
+                    bumpServiceExecutingLocked(r, false, "stop");
                     mStoppingServices.add(r);
                     mAm.updateOomAdjLocked(r.app);
                     r.app.thread.scheduleStopService(r);
@@ -1387,7 +1418,7 @@ public final class ActiveServices {
             if (s.app != null && s.app.thread != null && b.intent.apps.size() == 0
                     && b.intent.hasBound) {
                 try {
-                    bumpServiceExecutingLocked(s, "unbind");
+                    bumpServiceExecutingLocked(s, false, "unbind");
                     mAm.updateOomAdjLocked(s.app);
                     b.intent.hasBound = false;
                     // Assume the client doesn't want to know about a rebind;
@@ -1485,11 +1516,20 @@ public final class ActiveServices {
             if (r.app != null) {
                 if (DEBUG_SERVICE) Slog.v(TAG,
                         "Nesting at 0 of " + r.shortName);
+                r.app.execServicesFg = false;
                 r.app.executingServices.remove(r);
                 if (r.app.executingServices.size() == 0) {
                     if (DEBUG_SERVICE || DEBUG_SERVICE_EXECUTING) Slog.v(TAG,
                             "No more executingServices of " + r.shortName);
                     mAm.mHandler.removeMessages(ActivityManagerService.SERVICE_TIMEOUT_MSG, r.app);
+                } else if (r.executeFg) {
+                    // Need to re-evaluate whether the app still needs to be in the foreground.
+                    for (int i=r.app.executingServices.size()-1; i>=0; i--) {
+                        if (r.app.executingServices.valueAt(i).executeFg) {
+                            r.app.execServicesFg = true;
+                            break;
+                        }
+                    }
                 }
                 if (inStopping) {
                     if (DEBUG_SERVICE) Slog.v(TAG,
@@ -1499,6 +1539,7 @@ public final class ActiveServices {
                 }
                 mAm.updateOomAdjLocked(r.app);
             }
+            r.executeFg = false;
             if (r.tracker != null) {
                 r.tracker.setExecuting(false, mAm.mProcessTracker.getMemFactorLocked(),
                         SystemClock.uptimeMillis());
@@ -1526,7 +1567,7 @@ public final class ActiveServices {
                     mPendingServices.remove(i);
                     i--;
                     proc.addPackage(sr.appInfo.packageName, mAm.mProcessTracker);
-                    realStartServiceLocked(sr, proc);
+                    realStartServiceLocked(sr, proc, sr.createdFromFg);
                     didSomething = true;
                 }
             } catch (Exception e) {
@@ -1639,7 +1680,9 @@ public final class ActiveServices {
                     sr.pendingStarts.add(new ServiceRecord.StartItem(sr, true,
                             sr.makeNextStartId(), baseIntent, null));
                     if (sr.app != null && sr.app.thread != null) {
-                        sendServiceArgsLocked(sr, false);
+                        // We always run in the foreground, since this is called as
+                        // part of the "remove task" UI operation.
+                        sendServiceArgsLocked(sr, true, false);
                     }
                 }
             }
@@ -1880,7 +1923,8 @@ public final class ActiveServices {
             if (proc.executingServices.size() == 0 || proc.thread == null) {
                 return;
             }
-            long maxTime = SystemClock.uptimeMillis() - SERVICE_TIMEOUT;
+            long maxTime = SystemClock.uptimeMillis() -
+                    (proc.execServicesFg ? SERVICE_TIMEOUT : SERVICE_BACKGROUND_TIMEOUT);
             ServiceRecord timeout = null;
             long nextTime = 0;
             for (int i=proc.executingServices.size()-1; i>=0; i--) {
@@ -1900,7 +1944,8 @@ public final class ActiveServices {
                 Message msg = mAm.mHandler.obtainMessage(
                         ActivityManagerService.SERVICE_TIMEOUT_MSG);
                 msg.obj = proc;
-                mAm.mHandler.sendMessageAtTime(msg, nextTime+SERVICE_TIMEOUT);
+                mAm.mHandler.sendMessageAtTime(msg, proc.execServicesFg
+                        ? (nextTime+SERVICE_TIMEOUT) : (nextTime+ SERVICE_BACKGROUND_TIMEOUT));
             }
         }
 

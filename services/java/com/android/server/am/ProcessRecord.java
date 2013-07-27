@@ -39,7 +39,6 @@ import android.util.TimeUtils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 /**
  * Full information about a particular process that
@@ -138,7 +137,8 @@ final class ProcessRecord {
     // All ContentProviderRecord process is using
     final ArrayList<ContentProviderConnection> conProviders
             = new ArrayList<ContentProviderConnection>();
-    
+
+    boolean execServicesFg;     // do we need to be executing services in the foreground?
     boolean persistent;         // always keep this application running?
     boolean crashing;           // are we in the process of crashing?
     Dialog crashDialog;         // dialog being displayed due to crash.
@@ -301,7 +301,8 @@ final class ProcessRecord {
             }
         }
         if (executingServices.size() > 0) {
-            pw.print(prefix); pw.println("Executing Services:");
+            pw.print(prefix); pw.print("Executing Services (fg=");
+            pw.print(execServicesFg); pw.println(")");
             for (int i=0; i<executingServices.size(); i++) {
                 pw.print(prefix); pw.print("  - "); pw.println(executingServices.valueAt(i));
             }

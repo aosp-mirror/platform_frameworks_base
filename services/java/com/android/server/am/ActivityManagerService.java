@@ -4491,12 +4491,12 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         app.thread = thread;
         app.curAdj = app.setAdj = -100;
-        app.curSchedGroup = Process.THREAD_GROUP_DEFAULT;
-        app.setSchedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
+        app.curSchedGroup = app.setSchedGroup = Process.THREAD_GROUP_DEFAULT;
         app.forcingToForeground = null;
         app.foregroundServices = false;
         app.hasShownUi = false;
         app.debugging = false;
+        app.cached = false;
 
         mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
 
@@ -13558,9 +13558,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             // An app that is currently executing a service callback also
             // counts as being in the foreground.
             adj = ProcessList.FOREGROUND_APP_ADJ;
-            schedGroup = Process.THREAD_GROUP_DEFAULT;
+            schedGroup = app.execServicesFg ?
+                    Process.THREAD_GROUP_DEFAULT : Process.THREAD_GROUP_BG_NONINTERACTIVE;
             app.adjType = "exec-service";
             procState = ActivityManager.PROCESS_STATE_SERVICE;
+            //Slog.i(TAG, "EXEC " + (app.execServicesFg ? "FG" : "BG") + ": " + app);
         } else {
             // As far as we know the process is empty.  We may change our mind later.
             schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
@@ -14879,7 +14881,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=N-1; i>=0; i--) {
                 ProcessRecord app = mLruProcesses.get(i);
                 if (allChanged || app.procStateChanged) {
-                    app.setProcessTrackerState(trackerMemFactor, now);
+                    app.setProcessTrackerState(ProcessTracker.ADJ_MEM_FACTOR_NORMAL, now);
                 }
                 if ((app.curProcState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
                         || app.systemNoUi) && app.pendingUiClean) {

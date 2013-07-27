@@ -92,7 +92,9 @@ final class ServiceRecord extends Binder {
     boolean stopIfKilled;   // last onStart() said to stop if service killed?
     boolean callStart;      // last onStart() has asked to alway be called on restart.
     int executeNesting;     // number of outstanding operations keeping foreground.
+    boolean executeFg;      // should we be executing in the foreground?
     long executingStart;    // start time of last execute request.
+    boolean createdFromFg;  // was this service last created due to a foreground process call?
     int crashCount;         // number of times proc has crashed with service running
     int totalRestartCount;  // number of times we have had to restart.
     int restartCount;       // number of restarts performed in a row.
@@ -226,22 +228,25 @@ final class ServiceRecord extends Binder {
                 TimeUtils.formatDuration(createTime, nowReal, pw);
                 pw.print(" lastActivity=");
                 TimeUtils.formatDuration(lastActivity, now, pw);
-                pw.println("");
-        pw.print(prefix); pw.print("executingStart=");
-                TimeUtils.formatDuration(executingStart, now, pw);
-                pw.print(" restartTime=");
+                pw.println();
+        pw.print(prefix); pw.print("restartTime=");
                 TimeUtils.formatDuration(restartTime, now, pw);
-                pw.println("");
+                pw.print(" createdFromFg="); pw.println(createdFromFg);
         if (startRequested || lastStartId != 0) {
             pw.print(prefix); pw.print("startRequested="); pw.print(startRequested);
                     pw.print(" stopIfKilled="); pw.print(stopIfKilled);
                     pw.print(" callStart="); pw.print(callStart);
                     pw.print(" lastStartId="); pw.println(lastStartId);
         }
-        if (executeNesting != 0 || crashCount != 0 || restartCount != 0
-                || restartDelay != 0 || nextRestartTime != 0) {
+        if (executeNesting != 0) {
             pw.print(prefix); pw.print("executeNesting="); pw.print(executeNesting);
-                    pw.print(" restartCount="); pw.print(restartCount);
+                    pw.print(" executeFg="); pw.print(executeFg);
+                    pw.print(" executingStart=");
+                    TimeUtils.formatDuration(executingStart, now, pw);
+        }
+        if (crashCount != 0 || restartCount != 0
+                || restartDelay != 0 || nextRestartTime != 0) {
+            pw.print(prefix); pw.print("restartCount="); pw.print(restartCount);
                     pw.print(" restartDelay=");
                     TimeUtils.formatDuration(restartDelay, now, pw);
                     pw.print(" nextRestartTime=");
@@ -282,7 +287,8 @@ final class ServiceRecord extends Binder {
 
     ServiceRecord(ActivityManagerService ams,
             BatteryStatsImpl.Uid.Pkg.Serv servStats, ComponentName name,
-            Intent.FilterComparison intent, ServiceInfo sInfo, Runnable restarter) {
+            Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
+            Runnable restarter) {
         this.ams = ams;
         this.stats = servStats;
         this.name = name;
@@ -301,6 +307,7 @@ final class ServiceRecord extends Binder {
         createTime = SystemClock.elapsedRealtime();
         lastActivity = SystemClock.uptimeMillis();
         userId = UserHandle.getUserId(appInfo.uid);
+        createdFromFg = callerIsFg;
     }
 
     public ProcessTracker.ServiceState getTracker() {
