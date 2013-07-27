@@ -1063,6 +1063,11 @@ public class PhoneNumberUtils
      */
     private static byte[]
     numberToCalledPartyBCDHelper(String number, boolean includeLength) {
+        // returns null if number is empty
+        if (TextUtils.isEmpty(number)) {
+            return null;
+        }
+
         int numberLenReal = number.length();
         int numberLenEffective = numberLenReal;
         boolean hasPlus = number.indexOf('+') != -1;
