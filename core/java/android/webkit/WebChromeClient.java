@@ -92,7 +92,7 @@ public class WebChromeClient {
     @Deprecated
     public void onShowCustomView(View view, int requestedOrientation,
             CustomViewCallback callback) {};
-    
+
     /**
      * Notify the host application that the current page would
      * like to hide its custom view.
@@ -392,6 +392,79 @@ public class WebChromeClient {
     }
 
     /**
+     * Tell the client to show a file chooser.
+     *
+     * This is called to handle HTML forms with 'file' input type, in response to the
+     * user pressing the "Select File" button.
+     * To cancel the request, call <code>filePathCallback.onReceiveValue(null)</code> and
+     * return true.
+     *
+     * @param webView The WebView instance that is initiating the request.
+     * @param filePathCallback Invoke this callback to supply the list of paths to files to upload,
+     *                         or NULL to cancel. Must only be called if the
+     *                         <code>showFileChooser</code> implementations returns true.
+     * @param fileChooserParams Describes the mode of file chooser to be opened, and options to be
+     *                          used with it.
+     * @return true if filePathCallback will be invoked, false to use default handling.
+     *
+     * @see FileChooserParams
+     * @hide For API approval
+     */
+    public boolean showFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback,
+            FileChooserParams fileChooserParams) {
+        return false;
+    }
+
+    /**
+     * Parameters used in the {@link #showFileChooser(WebView,ValueCallback<String[]>,FileChooserParams)}
+     * method.
+     *
+     * This is intended to be used as a read-only data struct by the application.
+     * @hide For API approval
+     */
+    public static class FileChooserParams {
+        // Flags for mode
+        /** Bitflag for <code>mode</code> indicating multiple files maybe selected */
+        public static final int MODE_OPEN_MULTIPLE = 1 << 0;
+        /** Bitflag for <code>mode</code> indicating a folder  maybe selected.
+         * The implementation should enumerate all files selected by this operation */
+        public static final int MODE_OPEN_FOLDER = 1 << 1;
+        /** Bitflag for <code>mode</code> indicating a non-existant filename maybe returned */
+        public static final int MODE_SAVE = 1 << 2;
+
+        /**
+         * Bit-field of the <code>MODE_</code> flags.
+         *
+         * 0 indicates plain single file open.
+         */
+        public int mode;
+
+        /**
+         * Comma-seperated list of acceptable MIME types.
+         */
+        public String acceptTypes;
+
+        /**
+         * true indicates a preference for a live media captured value (e.g. Camera, Microphone).
+         *
+         * Use <code>acceptTypes</code> to determine suitable capture devices.
+         */
+        public boolean capture;
+
+        /**
+         * The title to use for this file selector, or null.
+         *
+         * Maybe null, in which case a default title should be used.
+         */
+        public String title;
+
+        /**
+         * Name of a default selection if appropriate, or null.
+         */
+        public String defaultFilename;
+    };
+
+    /**
      * Tell the client to open a file chooser.
      * @param uploadFile A ValueCallback to set the URI of the file to upload.
      *      onReceiveValue must be called to wake up the thread.a
@@ -399,8 +472,11 @@ public class WebChromeClient {
      *         associated with this file picker.
      * @param capture The value of the 'capture' attribute of the input tag
      *         associated with this file picker.
-     * @hide
+     *
+     * @deprecated Use {@link #showFileChooser} instead.
+     * @hide This method was not published in any SDK version.
      */
+    @Deprecated
     public void openFileChooser(ValueCallback<Uri> uploadFile, String acceptType, String capture) {
         uploadFile.onReceiveValue(null);
     }
