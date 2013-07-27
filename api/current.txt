@@ -21746,8 +21746,11 @@ package android.renderscript {
 
   public final class ScriptIntrinsicColorMatrix extends android.renderscript.ScriptIntrinsic {
     method public static android.renderscript.ScriptIntrinsicColorMatrix create(android.renderscript.RenderScript, android.renderscript.Element);
+    method public static android.renderscript.ScriptIntrinsicColorMatrix create(android.renderscript.RenderScript);
     method public void forEach(android.renderscript.Allocation, android.renderscript.Allocation);
     method public android.renderscript.Script.KernelID getKernelID();
+    method public void setAdd(android.renderscript.Float4);
+    method public void setAdd(float, float, float, float);
     method public void setColorMatrix(android.renderscript.Matrix4f);
     method public void setColorMatrix(android.renderscript.Matrix3f);
     method public void setGreyscale();
