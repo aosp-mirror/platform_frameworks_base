@@ -162,7 +162,7 @@ public class SurfaceTexture {
     /**
      * Releases the the texture content. This is needed in single buffered mode to allow the image
      * content producer to take ownership of the image buffer.
-     * For more information see {@link SurfaceTexture(int, boolean)}.
+     * For more information see {@link #SurfaceTexture(int, boolean)}.
      */
     public void releaseTexImage() {
         nativeReleaseTexImage();
