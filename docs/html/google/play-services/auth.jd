@@ -23,7 +23,7 @@ page.tags="AccountManager","oauth2"
 </p>
 
 <p>For implementation details, see the sample in <code>&lt;android-sdk&gt;/extras/google-play-services/samples/auth</code>,
-which shows you how to carry out these basic steps for obtaining an acesss token.</p>
+which shows you how to carry out these basic steps for obtaining an access token.</p>
 
 <h2 id="choose">Choosing an Account</h2>
 <p>
