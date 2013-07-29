@@ -142,7 +142,7 @@ public class InputMethodUtils {
                 || isSystemImeThatHasEnglishKeyboardSubtype(imi);
     }
 
-    private static boolean containsSubtypeOf(InputMethodInfo imi, String language, String mode) {
+    public static boolean containsSubtypeOf(InputMethodInfo imi, String language, String mode) {
         final int N = imi.getSubtypeCount();
         for (int i = 0; i < N; ++i) {
             if (!imi.getSubtypeAt(i).getLocale().startsWith(language)) {
