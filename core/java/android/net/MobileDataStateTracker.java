@@ -51,8 +51,8 @@ import java.io.PrintWriter;
 public class MobileDataStateTracker implements NetworkStateTracker {
 
     private static final String TAG = "MobileDataStateTracker";
-    private static final boolean DBG = false;
-    private static final boolean VDBG = false;
+    private static final boolean DBG = true;
+    private static final boolean VDBG = true;
 
     private PhoneConstants.DataState mMobileDataState;
     private ITelephony mPhoneService;
@@ -597,6 +597,8 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                 return PhoneConstants.APN_TYPE_IMS;
             case ConnectivityManager.TYPE_MOBILE_CBS:
                 return PhoneConstants.APN_TYPE_CBS;
+            case ConnectivityManager.TYPE_MOBILE_IA:
+                return PhoneConstants.APN_TYPE_IA;
             default:
                 sloge("Error mapping networkType " + netType + " to apnType.");
                 return null;
