@@ -36,6 +36,10 @@ import libcore.icu.ICU;
 public class DateView extends TextView {
     private static final String TAG = "DateView";
 
+    private final Date mCurrentTime = new Date();
+
+    private SimpleDateFormat mDateFormat;
+    private boolean mChangedLocale;
     private boolean mAttachedToWindow;
     private boolean mWindowVisible;
     private boolean mUpdating;
@@ -48,6 +52,9 @@ public class DateView extends TextView {
                     || Intent.ACTION_TIME_CHANGED.equals(action)
                     || Intent.ACTION_TIMEZONE_CHANGED.equals(action)
                     || Intent.ACTION_LOCALE_CHANGED.equals(action)) {
+                if (Intent.ACTION_LOCALE_CHANGED.equals(action)) {
+                    mChangedLocale = true;
+                }
                 updateClock();
             }
         }
@@ -91,11 +98,16 @@ public class DateView extends TextView {
     }
 
     protected void updateClock() {
-        final String dateFormat = getContext().getString(R.string.system_ui_date_pattern);
-        final Locale l = Locale.getDefault();
-        String fmt = ICU.getBestDateTimePattern(dateFormat, l.toString());
-        SimpleDateFormat sdf = new SimpleDateFormat(fmt, l);
-        setText(sdf.format(new Date()));
+        if (mDateFormat == null || mChangedLocale) {
+            final String dateFormat = getContext().getString(R.string.system_ui_date_pattern);
+            final Locale l = Locale.getDefault();
+            final String fmt = ICU.getBestDateTimePattern(dateFormat, l.toString());
+            mDateFormat = new SimpleDateFormat(fmt, l);
+            mChangedLocale = false;
+        }
+
+        mCurrentTime.setTime(System.currentTimeMillis());
+        setText(mDateFormat.format(mCurrentTime));
     }
 
     private boolean isVisible() {
