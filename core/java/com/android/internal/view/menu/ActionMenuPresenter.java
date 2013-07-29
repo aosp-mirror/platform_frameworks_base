@@ -16,9 +16,6 @@
 
 package com.android.internal.view.menu;
 
-import com.android.internal.view.ActionBarPolicy;
-import com.android.internal.view.menu.ActionMenuView.ActionMenuChildView;
-
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -27,11 +24,18 @@ import android.os.Parcelable;
 import android.util.SparseBooleanArray;
 import android.view.ActionProvider;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ImageButton;
+import android.widget.ListPopupWindow;
+
+import com.android.internal.view.ActionBarPolicy;
+import com.android.internal.view.menu.ActionMenuView.ActionMenuChildView;
 
 import java.util.ArrayList;
 
@@ -559,6 +563,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
             setFocusable(true);
             setVisibility(VISIBLE);
             setEnabled(true);
+            setOnTouchListener(new OverflowForwardListener(context));
         }
 
         @Override
@@ -572,10 +577,12 @@ public class ActionMenuPresenter extends BaseMenuPresenter
             return true;
         }
 
+        @Override
         public boolean needsDividerBefore() {
             return false;
         }
 
+        @Override
         public boolean needsDividerAfter() {
             return false;
         }
@@ -673,6 +680,47 @@ public class ActionMenuPresenter extends BaseMenuPresenter
                 mOverflowPopup = mPopup;
             }
             mPostedOpenRunnable = null;
+        }
+    }
+
+    private class OverflowForwardListener extends TouchForwardingListener {
+        /** Scaled touch slop, used for detecting movement outside bounds. */
+        private final float mScaledTouchSlop;
+
+        private int mActivePointerId = MotionEvent.INVALID_POINTER_ID;
+
+        public OverflowForwardListener(Context context) {
+            mScaledTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        }
+
+        @Override
+        public boolean onTouchObserved(View v, MotionEvent ev) {
+            if (ev.getActionMasked() == MotionEvent.ACTION_MOVE && v.isEnabled()
+                    && !v.pointInView(ev.getX(), ev.getY(), mScaledTouchSlop)) {
+                mActivePointerId = ev.getPointerId(0);
+                v.performClick();
+                return true;
+            }
+
+            return false;
+        }
+
+        @Override
+        public boolean onTouchForwarded(View v, MotionEvent ev) {
+            if (!v.isEnabled() || mOverflowPopup == null || !mOverflowPopup.isShowing()) {
+                return false;
+            }
+
+            if (mActivePointerId != MotionEvent.INVALID_POINTER_ID) {
+                if (mOverflowPopup.forwardMotionEvent(v, ev, mActivePointerId)) {
+                    return true;
+                }
+
+                mActivePointerId = MotionEvent.INVALID_POINTER_ID;
+            }
+
+            mOverflowPopup.dismiss();
+            return false;
         }
     }
 }
