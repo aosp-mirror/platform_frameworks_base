@@ -117,6 +117,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private static final long NANOS_PER_MILLI = 1000000L;
 
+    // The maximum interval a location request can have and still be considered "high power".
+    private static final long HIGH_POWER_INTERVAL_MS = 5 * 60 * 1000;
+
     // Location Providers may sometimes deliver location updates
     // slightly faster that requested - provide grace period so
     // we don't unnecessarily filter events that are otherwise on
@@ -463,7 +466,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         final HashMap<String,UpdateRecord> mUpdateRecords = new HashMap<String,UpdateRecord>();
 
+        // True if app ops has started monitoring this receiver for locations.
         boolean mOpMonitoring;
+        // True if app ops has started monitoring this receiver for high power (gps) locations.
+        boolean mOpHighPowerMonitoring;
         int mPendingBroadcasts;
         PowerManager.WakeLock mWakeLock;
 
@@ -526,18 +532,48 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         public void updateMonitoring(boolean allow) {
-            if (!mOpMonitoring) {
-                if (allow) {
-                    mOpMonitoring = mAppOps.startOpNoThrow(AppOpsManager.OP_MONITOR_LOCATION,
-                            mUid, mPackageName) == AppOpsManager.MODE_ALLOWED;
-                }
-            } else {
-                if (!allow || mAppOps.checkOpNoThrow(AppOpsManager.OP_MONITOR_LOCATION,
-                        mUid, mPackageName) != AppOpsManager.MODE_ALLOWED) {
-                    mAppOps.finishOp(AppOpsManager.OP_MONITOR_LOCATION, mUid, mPackageName);
-                    mOpMonitoring = false;
+            // First update monitoring of any location request (including high power).
+            mOpMonitoring = updateMonitoring(allow, mOpMonitoring,
+                    AppOpsManager.OP_MONITOR_LOCATION);
+
+            // Now update monitoring of high power requests only.
+            // A high power request is any gps request with interval under a threshold.
+            boolean allowHighPower = allow;
+            if (allowHighPower) {
+                UpdateRecord gpsRecord = mUpdateRecords.get(LocationManager.GPS_PROVIDER);
+                if (gpsRecord == null
+                        || gpsRecord.mRequest.getInterval() > HIGH_POWER_INTERVAL_MS) {
+                    allowHighPower = false;
                 }
             }
+            mOpHighPowerMonitoring = updateMonitoring(allowHighPower, mOpHighPowerMonitoring,
+                    AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION);
+        }
+
+        /**
+         * Update AppOps monitoring for a single location request and op type.
+         *
+         * @param allowMonitoring True if monitoring is allowed for this request/op.
+         * @param currentlyMonitoring True if AppOps is currently monitoring this request/op.
+         * @param op AppOps code for the op to update.
+         * @return True if monitoring is on for this request/op after updating.
+         */
+        private boolean updateMonitoring(boolean allowMonitoring, boolean currentlyMonitoring,
+                int op) {
+            if (!currentlyMonitoring) {
+                if (allowMonitoring) {
+                    return mAppOps.startOpNoThrow(op, mUid, mPackageName)
+                            == AppOpsManager.MODE_ALLOWED;
+                }
+            } else {
+                if (!allowMonitoring || mAppOps.checkOpNoThrow(op, mUid, mPackageName)
+                        != AppOpsManager.MODE_ALLOWED) {
+                    mAppOps.finishOp(op, mUid, mPackageName);
+                    return false;
+                }
+            }
+
+            return currentlyMonitoring;
         }
 
         public boolean isListener() {
@@ -1383,6 +1419,9 @@ public class LocationManagerService extends ILocationManager.Stub {
             // Notify the listener that updates are currently disabled
             receiver.callProviderEnabledLocked(name, false);
         }
+        // Update the monitoring here just in case multiple location requests were added to the
+        // same receiver (this request may be high power and the initial might not have been).
+        receiver.updateMonitoring(true);
     }
 
     @Override
