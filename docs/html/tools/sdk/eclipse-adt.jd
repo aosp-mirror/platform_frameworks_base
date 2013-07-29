@@ -57,6 +57,41 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 <div class="toggle-content opened">
   <p><a href="#" onclick="return toggleContent(this)">
     <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img"
+      alt=""/>ADT 22.0.5</a> <em>(July 2013)</em>
+  </p>
+
+  <div class="toggle-content-toggleme">
+<dl>
+  <dt>Dependencies:</dt>
+
+  <dd>
+    <ul>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r22.0.5</a>.
+        If you haven't already installed SDK Tools r22.0.5 into your SDK, use the
+        Android SDK Manager to do so.</li>
+    </ul>
+  </dd>
+
+  <dt>General Notes:</dt>
+  <dd>
+    <ul>
+      <li>Fixed Renderscript compiling issue for Windows platforms.</li>
+      <li>Updated <a href="{@docRoot}tools/help/systrace.html">Systrace</a> report generation
+        in the Monitor and DDMS perspectives.</li>
+    </ul>
+  </dd>
+
+</dl>
+</div>
+</div>
+
+
+<div class="toggle-content closed">
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img"
       alt=""/>ADT 22.0.4</a> <em>(July 2013)</em>
   </p>
 
@@ -66,11 +101,12 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
   <dd>
     <ul>
-      <li>Java 1.6 or higher is required for ADT 22.0.4.</li>
-      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 22.0.4.</li>
-      <li>ADT 22.0.4 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK
-      Tools r22.0.4</a>. If you haven't already installed SDK Tools r22.0.4 into your SDK, use the
-      Android SDK Manager to do so.</li>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r22.0.4</a>.
+        If you haven't already installed SDK Tools r22.0.4 into your SDK, use the
+        Android SDK Manager to do so.</li>
     </ul>
   </dd>
 
@@ -102,11 +138,12 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
   <dd>
     <ul>
-      <li>Java 1.6 or higher is required for ADT 22.0.1.</li>
-      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 22.0.1.</li>
-      <li>ADT 22.0.1 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK
-      Tools r22.0.1</a>. If you haven't already installed SDK Tools r22 into your SDK, use the
-      Android SDK Manager to do so.</li>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r22.0.1</a>.
+        If you haven't already installed SDK Tools r22.0.1 into your SDK, use the
+        Android SDK Manager to do so.</li>
     </ul>
   </dd>
 
@@ -138,11 +175,12 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
   <dd>
     <ul>
-      <li>Java 1.6 or higher is required for ADT 22.0.0.</li>
-      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 22.0.0.</li>
-      <li>ADT 22.0.0 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK
-      Tools r22</a>. If you haven't already installed SDK Tools r22 into your SDK, use the
-      Android SDK Manager to do so.</li>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r22</a>.
+        If you haven't already installed SDK Tools r22 into your SDK, use the
+        Android SDK Manager to do so.</li>
     </ul>
   </dd>
 
@@ -181,11 +219,12 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
   <dd>
     <ul>
-      <li>Java 1.6 or higher is required for ADT 21.1.0.</li>
-      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 21.1.0.</li>
-      <li>ADT 21.1.0 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK
-      Tools r21.1</a>. If you haven't already installed SDK Tools r21.1 into your SDK, use the
-      Android SDK Manager to do so.</li>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r21.1</a>.
+        If you haven't already installed SDK Tools r21.1 into your SDK, use the
+        Android SDK Manager to do so.</li>
     </ul>
   </dd>
 
@@ -238,11 +277,12 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
   <dd>
     <ul>
-      <li>Java 1.6 or higher is required for ADT 21.0.1.</li>
-      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 21.0.1.</li>
-      <li>ADT 21.0.1 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK
-      Tools r21.0.1</a>. If you haven't already installed SDK Tools r21.0.1 into your SDK, use the
-      Android SDK Manager to do so.</li>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r21.0.1</a>.
+        If you haven't already installed SDK Tools r21.0.1 into your SDK, use the
+        Android SDK Manager to do so.</li>
     </ul>
   </dd>
 
@@ -357,11 +397,12 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
   <dd>
     <ul>
-      <li>Java 1.6 or higher is required for ADT 20.0.3.</li>
-      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 21.0.0.</li>
-      <li>ADT 21.0.0 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK
-      Tools r21</a>. If you haven't already installed SDK Tools r21.0.0 into your SDK, use the
-      Android SDK Manager to do so.</li>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r21</a>.
+        If you haven't already installed SDK Tools r21.0.0 into your SDK, use the
+        Android SDK Manager to do so.</li>
     </ul>
   </dd>
 
@@ -478,11 +519,12 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
   <dd>
     <ul>
-      <li>Java 1.6 or higher is required for ADT 20.0.3.</li>
-      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 20.0.3.</li>
-      <li>ADT 20.0.3 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK
-      Tools r20.0.3</a>. If you haven't already installed SDK Tools r20.0.3 into your SDK, use the
-      Android SDK Manager to do so.</li>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r20.0.3</a>.
+        If you haven't already installed SDK Tools r20.0.3 into your SDK, use the
+        Android SDK Manager to do so.</li>
     </ul>
   </dd>
 
@@ -512,11 +554,12 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
   <dd>
     <ul>
-      <li>Java 1.6 or higher is required for ADT 20.0.2.</li>
-      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 20.0.2.</li>
-      <li>ADT 20.0.2 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK
-      Tools r20.0.1</a>. If you haven't already installed SDK Tools r20.0.1 into your SDK, use the
-      Android SDK Manager to do so.</li>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r20.0.1</a>.
+        If you haven't already installed SDK Tools r20.0.1 into your SDK, use the
+        Android SDK Manager to do so.</li>
     </ul>
   </dd>
 
@@ -547,11 +590,12 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
 
   <dd>
     <ul>
-      <li>Java 1.6 or higher is required for ADT 20.0.1.</li>
-      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 20.0.1.</li>
-      <li>ADT 20.0.1 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK
-      Tools r20.0.1</a>. If you haven't already installed SDK Tools r20.0.1 into your SDK, use the
-      Android SDK Manager to do so.</li>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r20.0.1</a>.
+        If you haven't already installed SDK Tools r20.0.1 into your SDK, use the
+        Android SDK Manager to do so.</li>
     </ul>
   </dd>
 
@@ -588,11 +632,12 @@ unprotected receivers for default Android actions.</li>
 
   <dd>
     <ul>
-      <li>Java 1.6 or higher is required for ADT 20.0.0.</li>
-      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 20.0.0.</li>
-      <li>ADT 20.0.0 is designed for use with <a href="{@docRoot}sdk/tools-notes.html">SDK Tools
-      r20</a>. If you haven't already installed SDK Tools r20 into your SDK, use the Android SDK
-      Manager to do so.</li>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}sdk/tools-notes.html">SDK Tools r20</a>.
+        If you haven't already installed SDK Tools r20 into your SDK, use the Android SDK
+        Manager to do so.</li>
     </ul>
   </dd>
 
@@ -711,11 +756,12 @@ functions.</li>
 
   <dd>
     <ul>
-      <li>Java 1.6 or higher is required for ADT 18.0.0.</li>
-      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 18.0.0.</li>
-      <li>ADT 18.0.0 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools
-      r18</a>. If you haven't already installed SDK Tools r18 into your SDK, use the Android SDK
-      Manager to do so.</li>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r18</a>.
+        If you haven't already installed SDK Tools r18 into your SDK, use the Android SDK
+        Manager to do so.</li>
     </ul>
   </dd>
 
@@ -746,11 +792,12 @@ functions.</li>
 
   <dd>
     <ul>
-      <li>Java 1.6 or higher is required for ADT 17.0.0.</li>
-      <li>Eclipse Helios (Version 3.6.2) or higher is required for ADT 17.0.0.</li>
-      <li>ADT 17.0.0 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools
-      r17</a>. If you haven't already installed SDK Tools r17 into your SDK, use the Android SDK
-      Manager to do so.</li>
+      <li>Java 1.6 or higher is required.</li>
+      <li>Eclipse Helios (Version 3.6.2) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r17</a>.
+        If you haven't already installed SDK Tools r17 into your SDK, use the Android SDK
+        Manager to do so.</li>
     </ul>
   </dd>
 
@@ -848,9 +895,10 @@ select. (<a href="http://code.google.com/p/android/issues/detail?id=20589">Issue
 
   <dd>
     <ul>
-      <li>Eclipse Helios (Version 3.6) or higher is required for ADT 16.0.1.</li>
-      <li>ADT 16.0.1 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools
-        r16</a>. If you haven't already installed SDK Tools r16 into your SDK, use the Android SDK
+      <li>Eclipse Helios (Version 3.6) or higher is required.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r16</a>.
+        If you haven't already installed SDK Tools r16 into your SDK, use the Android SDK
         Manager to do so.</li>
     </ul>
   </dd>
@@ -882,11 +930,11 @@ select. (<a href="http://code.google.com/p/android/issues/detail?id=20589">Issue
 
   <dd>
     <ul>
-      <li>Eclipse Helios (Version 3.6) or higher is required for ADT
-16.0.0.</li>
-      <li>ADT 16.0.0 is designed for use with <a
-href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r16</a>. If you haven't already installed SDK Tools
-r16 into your SDK, use the Android SDK Manager to do so.</li>
+      <li>Eclipse Helios (Version 3.6) or higher is required for ADT 16.0.0.</li>
+      <li>This version of ADT is designed for use with
+        <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r16</a>.
+        If you haven't already installed SDK Tools r16 into your SDK, use
+        the Android SDK Manager to do so.</li>
     </ul>
   </dd>
 
@@ -913,9 +961,10 @@ href="http://tools.android.com/recent/lint">more info</a>)</li>
 <dl>
   <dt>Dependencies:</dt>
 
-  <dd>ADT 15.0.1 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r15</a>.
-  If you haven't already installed SDK Tools r15 into your SDK, use the Android SDK Manager to
-  do so.</dd>
+  <dd>This version of ADT is designed for use with
+    <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r15</a>.
+    If you haven't already installed SDK Tools r15 into your SDK, use the Android SDK Manager to
+    do so.</dd>
 
   <dt>Bug fixes:</dt>
   <dd>
@@ -948,9 +997,10 @@ href="http://tools.android.com/recent/lint">more info</a>)</li>
 
 <dt>Dependencies:</dt>
 
-<dd>ADT 15.0.0 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r15</a>.
-If you haven't already installed SDK Tools r15 into your SDK, use the Android SDK Manager to
-do so.</dd>
+<dd>This version of ADT is designed for use with
+  <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r15</a>.
+  If you haven't already installed SDK Tools r15 into your SDK, use the Android SDK Manager to
+  do so.</dd>
 
 <dt>Bug fixes:</dt>
 <dd>
@@ -980,9 +1030,10 @@ do so.</dd>
 
 <dt>Dependencies:</dt>
 
-<dd>ADT 14.0.0 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r14</a>.
-If you haven't already installed SDK Tools r14 into your SDK, use the Android SDK Manager to
-do so.</dd>
+<dd>This version of ADT is designed for use with
+  <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r14</a>.
+  If you haven't already installed SDK Tools r14 into your SDK, use the Android SDK Manager to
+  do so.</dd>
 
 <dt>Build system:</dt>
 <dd>
@@ -1099,7 +1150,8 @@ Linux</a>.</dd>
 
 <dt>Dependencies:</dt>
 
-<dd>ADT 12.0.0 is designed for use with <a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r12</a>. If you haven't
+<dd>This version of ADT is designed for use with
+<a href="{@docRoot}tools/sdk/tools-notes.html">SDK Tools r12</a>. If you haven't
 already installed SDK Tools r12 into your SDK, use
 the Android SDK Manager to do so.</dd>
 
@@ -1152,7 +1204,7 @@ the Android SDK Manager to do so.</dd>
 
 <dt>Dependencies:</dt>
 
-<dd>ADT 11.0.0 is designed for use with SDK Tools r11. If you haven't
+<dd>This version of ADT is designed for use with SDK Tools r11. If you haven't
 already installed SDK Tools r11 into your SDK, use the Android SDK Manager to do
 so.</dd>
 
@@ -1289,7 +1341,7 @@ href="http://tools.android.com/recent">Android Tools Project Site</a>.</p>
 
 <dt>Dependencies:</dt>
 
-<dd>ADT 10.0.1 is designed for use with SDK Tools r10. If you haven't
+<dd>This version of ADT is designed for use with SDK Tools r10. If you haven't
 already installed SDK Tools r10 into your SDK, use the Android SDK Manager to do
 so.</dd>
 
@@ -1319,7 +1371,7 @@ requires Eclipse 3.5 or higher (as of 10.0.0).</li>
 
 <dt>Dependencies:</dt>
 
-<dd>ADT 10.0.0 is designed for use with SDK Tools r10. If you haven't
+<dd>This version of ADT is designed for use with SDK Tools r10. If you haven't
 already installed SDK Tools r10 into your SDK, use the Android SDK Manager to do
 so.</dd>
 
@@ -1369,7 +1421,7 @@ so.</dd>
 
 <dt>Dependencies:</dt>
 
-<dd>ADT 9.0.0 is designed for use with SDK Tools r9. If you haven't
+<dd>This version of ADT is designed for use with SDK Tools r9. If you haven't
 already installed SDK Tools r9 into your SDK, use the Android SDK Manager to do
 so.</dd>
 
@@ -1478,7 +1530,7 @@ so.</dd>
 
 <dt>Dependencies:</dt>
 
-<p><p>ADT 8.0.1 is designed for use with SDK Tools r8. If you haven't
+<p>This version of ADT is designed for use with SDK Tools r8. If you haven't
 already installed SDK Tools r8 into your SDK, use the Android SDK Manager to do
 so.</p></dd>
 
@@ -1507,7 +1559,7 @@ so.</p></dd>
 
 <dt>Dependencies:</dt>
 
-<p><p>ADT 8.0.0 is designed for use with SDK Tools r8. If you haven't
+<p>This version of ADT is designed for use with SDK Tools r8. If you haven't
 already installed SDK Tools r8 into your SDK, use the Android SDK Manager to do
 so.</p></dd>
 
@@ -1656,7 +1708,7 @@ project support through the Ant build system.</p>
 <dl>
 <dt>Dependencies:</dt>
 
-<dd><p>ADT 0.9.6 is designed for use with SDK Tools r5 and later. Before
+<dd><p>This version of ADT is designed for use with SDK Tools r5 and later. Before
 updating to ADT 0.9.6, we highly recommend that you use the Android SDK Manager to install SDK
 Tools r5 into your SDK.</p></dd>
 
@@ -1725,7 +1777,7 @@ targets for application launches.</li>
 <dl>
 <dt>Dependencies:</dt>
 
-<dd><p>ADT 0.9.5 requires features provided in SDK Tools r4 or higher. If you install
+<dd><p>This version of ADT requires features provided in SDK Tools r4 or higher. If you install
 ADT 0.9.5, which is highly recommended, you should use the Android SDK
 Manager to download the latest SDK Tools into your SDK. For more information,
 see <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.</p>
@@ -1755,7 +1807,7 @@ see <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.</p>
 <dl>
 <dt>Dependencies:</dt>
 
-<dd><p>ADT 0.9.4 requires features provided in SDK Tools r3 or higher. If you install
+<dd><p>This version of ADT requires features provided in SDK Tools r3 or higher. If you install
 ADT 0.9.4, which is highly recommended, you should use the Android SDK
 Manager to download the latest SDK Tools into your SDK. For more information,
 see <a href="{@docRoot}sdk/exploring.html">Exploring the SDK</a>.</p>
