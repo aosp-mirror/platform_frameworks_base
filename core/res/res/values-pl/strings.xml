@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Zezwala na tworzenie powiązania z interfejsem najwyższego poziomu usługi widżetów. Nie powinno być nigdy potrzebne w przypadku zwykłych aplikacji."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interakcja z administratorem urządzenia"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Zezwala na wysyłanie intencji do administratora urządzenia. Nie powinno być nigdy potrzebne w przypadku zwykłych aplikacji."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"dodaj lub usuń administratora urządzenia"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Umożliwia właścicielowi dodawanie i usuwanie aktywnych administratorów urządzenia. Ta opcja nie jest wykorzystywana w przypadku standardowych aplikacji."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"zmienianie orientacji ekranu"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Pozwala aplikacji na zmianę obrotu ekranu w dowolnym momencie. To uprawnienie nie powinno być potrzebne zwykłym aplikacjom."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"zmiana szybkości wskaźnika"</string>

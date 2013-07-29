@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Ermöglicht dem Halter, sich an die Oberfläche eines Widget-Dienstes auf oberster Ebene zu binden. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"Interaktion mit einem Geräteadministrator"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Ermöglicht dem Halter, Intents an einen Geräteadministrator zu senden. Sollte nie für normale Apps benötigt werden."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"Geräteadministrator hinzufügen oder entfernen"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Ermöglicht dem Inhaber, aktive Geräteadministratoren hinzuzufügen oder zu entfernen. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"Bildschirmausrichtung ändern"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Ermöglicht der App, die Bildschirmdrehung jederzeit zu ändern. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"Zeigergeschwindigkeit ändern"</string>
@@ -652,13 +650,13 @@
     <string name="policylab_watchLogin" msgid="914130646942199503">"Versuche zum Entsperren des Displays überwachen"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Displays überwachen und Tablet sperren oder alle Daten auf dem Tablet löschen, wenn zu häufig ein falsches Passwort eingegeben wird"</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Anzahl der falsch eingegebenen Passwörter beim Entsperren des Bildschirms überwachen und Telefon sperren oder alle Daten auf dem Telefon löschen, wenn zu häufig ein falsches Passwort eingegeben wird"</string>
-    <string name="policylab_resetPassword" msgid="2620077191242688955">"Passwort zum Entsperren des Displays ändern"</string>
-    <string name="policydesc_resetPassword" msgid="605963962301904458">"Passwort zum Entsperren des Bildschirms ändern"</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"Passwort zum Entsperren des Bildschirms ändern"</string>
+    <string name="policydesc_resetPassword" msgid="605963962301904458">"Ändern Sie das Passwort zum Entsperren des Bildschirms."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Display sperren"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Legen Sie fest, wie und wann der Bildschirm gesperrt wird."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Alle Daten löschen"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Auf Werkseinstellungen zurücksetzen und Daten auf dem Tablet ohne Warnung löschen"</string>
-    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Auf Werkseinstellungen zurücksetzen und Daten auf dem Telefon ohne Warnung löschen"</string>
+    <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Setzen Sie das Telefon auf Werkseinstellungen zurück. Dabei werden alle Daten ohne Warnung gelöscht."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Den globalen Proxy des Geräts festlegen"</string>
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Den bei aktivierter Richtlinie zu verwendenden globalen Proxy des Geräts festlegen. Nur der erste Geräteadministrator kann den gültigen globalen Proxy festlegen."</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"Ablauf von Sperr-Passwort festlegen"</string>

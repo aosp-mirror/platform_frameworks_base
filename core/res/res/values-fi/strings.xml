@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Antaa sovelluksen sitoutua widget-palvelun ylemmän tason käyttöliittymään. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"kommunikoi laitteen järjestelmänvalvojan kanssa"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Antaa sovelluksen lähettää aikomuksia laitteen järjestelmänvalvojalle. Ei tavallisten sovellusten käyttöön."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"lisää tai poista laitteen järjestelmänvalvoja"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Haltija voi lisätä tai poistaa aktiivisen laitteen järjestelmänvalvojia. Tätä ei pitäisi tarvita tavallisille sovelluksille."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"muuta näytön suuntaa"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Antaa sovelluksen muuttaa näytön kiertoa milloin tahansa. Ei tavallisten sovellusten käyttöön."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"muuta osoittimen nopeutta"</string>

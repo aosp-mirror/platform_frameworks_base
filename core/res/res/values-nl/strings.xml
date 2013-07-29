@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Hiermee wordt de houder toegestaan verbinding te maken met de hoofdinterface van een widgetservice. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interactie met apparaatbeheer"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Hiermee kan de houder intenties verzenden naar een apparaatbeheerder. Nooit vereist voor normale apps."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"een apparaatbeheerder toevoegen of verwijderen"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Hiermee kan de rechtenhouder actieve apparaatbeheerders toevoegen of verwijderen. Nooit vereist voor normale apps."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"schermstand wijzigen"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Hiermee kan de app de rotatie van het scherm op elk moment wijzigen. Nooit vereist voor normale apps."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"aanwijzersnelheid wijzigen"</string>

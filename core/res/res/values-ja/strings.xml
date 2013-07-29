@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"ウィジェットサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"デバイス管理者との通信"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"デバイス管理者へのintentの送信を所有者に許可します。通常のアプリでは不要です。"</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"端末の管理者の追加または削除"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"有効な端末の管理者を追加または削除することを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"画面の向きの変更"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"いつでも画面の向きを変更することをアプリに許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"ポインタの速度の変更"</string>

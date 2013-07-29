@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Cihazın sahibine bir widget hizmetinin en üst düzey arayüzüne bağlanma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"bir cihaz yöneticisi ile etkileşimde bulun"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Cihazın sahibinin cihaz yöneticisine amaç göndermesine izin verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"cihaz yöneticisi ekle veya kaldır"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"İzin sahibine, etkin cihaz yöneticileri ekleyip kaldırma izni verir. Normal uygulamalar için hiçbir zaman gerekmez."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ekran yönünü değiştir"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Uygulamaya, istediği zaman ekran dönüşünü değiştirme izni verir. Normal uygulamalar için gerekli değildir."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"işaretçi hızını değiştir"</string>

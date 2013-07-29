@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لخدمة الأداة. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"التفاعل مع مشرف الجهاز"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"للسماح للمالك بإرسال الأهداف إلى أحد مشرفي الجهاز. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"إضافة مشرف جهاز أو إزالته"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"للسماح بحامل البطاقة بإضافة مشرفي أجهزة نشطين أو إزالتهم. لا يلزم ذلك أبدًا للتطبيقات العادية."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"تغيير اتجاه الشاشة"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"للسماح للتطبيق بتغيير تدوير الشاشة في أي وقت. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"تغيير سرعة المؤشر"</string>

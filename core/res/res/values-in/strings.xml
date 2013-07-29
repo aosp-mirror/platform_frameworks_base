@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Mengizinkan pemegang mengikat antarmuka tingkat tinggi dari suatu layanan widget. Tidak pernah diperlukan oleh apl normal."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"berinteraksi dengan admin perangkat"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Mengizinkan pemegang mengirimkan tujuan kepada administrator perangkat. Tidak pernah diperlukan oleh apl normal."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"menambah atau menghapus admin perangkat"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Memungkinkan pemegang menambahkan atau menghapus administrator perangkat aktif. Tidak pernah dibutuhkan oleh aplikasi normal."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ubah orientasi layar"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Mengizinkan apl mengubah rotasi layar kapan saja. Tidak pernah dibutuhkan oleh apl normal."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"ubah kecepatan penunjuk"</string>

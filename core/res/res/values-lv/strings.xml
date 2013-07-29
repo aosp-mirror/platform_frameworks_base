@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Ļauj īpašniekam izveidot saiti ar logrīka pakalpojuma augšējā līmeņa saskarni. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"mijiedarboties ar ierīces administratoru"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Ļauj īpašniekam nosūtīt informāciju par nodomiem ierīces administratoram. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"pievienot vai noņemt ierīces administratoru"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Ļauj īpašniekam pievienot vai noņemt aktīvos ierīces administratorus. Nekad nav nepieciešama parastām lietotnēm."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"mainīt ekrāna orientāciju"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Ļauj lietotnei jebkurā laikā mainīt ekrāna pozīciju. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"Rādītāja ātruma mainīšana"</string>

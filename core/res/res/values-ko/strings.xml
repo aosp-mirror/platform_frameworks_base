@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"권한을 가진 프로그램이 위젯 서비스에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"기기 관리자와 상호 작용"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"권한을 가진 프로그램이 기기 관리자에게 인텐트를 보낼 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"기기 관리자 추가 또는 삭제"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"권한을 가진 프로그램이 활성화된 기기의 관리자를 추가 또는 삭제하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"화면 방향 변경"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"앱이 언제든지 화면 회전을 변경할 수 있도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"포인터 속도 변경"</string>

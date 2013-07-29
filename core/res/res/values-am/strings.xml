@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"ያዡ ግቤት ስልቱን ወደ ከፍተኛ-ደረጃ ፍርግም አገልግሎት ለመጠረዝ  ይፈቅዳሉ። ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"ከመሣሪያ አስተዳደር ጋር ተገናኝ"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"ያዡ በይነመረብን ለመሣሪያ አስተዳዳሪ ለመላክ ይፈቅዳሉ። ለመደበኛ መተግበሪያዎች በፍፁም አያስፈልግም።"</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"የመሣሪያ አስተዳዳሪ ያክሉ ወይም ያስወግዱ"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"ያዢው ንቁ የመሣሪያ አስተዳዳሪዎች እንዲያክል ወይም እንዲያስወግድ ያስችለዋል። ለመደበኛ መተግበሪያዎች ጭራሽ ሊያስፈልግ አይገባም።"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"የማያ ገፀ አቀማመጥን ለውጥ"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"በማንኛውም ጊዜ  የማሳያውን መሽከርከር ለመለወጥ ለመተግበሪያው ይፈቅዳሉ፡፡ ለተለመዱ መተግበሪያዎች አያስፈልግም፡፡"</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"የጠቋሚ ፍጥነት ለውጥ"</string>

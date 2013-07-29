@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Leidžiama savininkui susisaistyti su aukščiausio lygio valdiklio paslaugos sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"sąveikauti su įrenginio administratoriumi"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Leidžiama savininkui siųsti tikslus įrenginio administratoriui. Įprastoms programoms to neturėtų prireikti."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"pridėti arba pašalinti įrenginio administratorių"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Savininkui leidžiama pridėti aktyvių įrenginio administratorių arba juos pašalinti. Neturėtų reikėti įprastoms programoms."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"keisti ekrano padėtį"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Leidžiama programai bet kada kaitalioti ekraną. Įprastoms programoms to neturėtų prireikti."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"keisti žymiklio greitį"</string>

@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Pinapayagan ang may-hawak na sumailalim sa nangungunang interface ng serbisyo ng widget. Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"makipag-ugnay sa tagapangasiwa ng device"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Pinapayagan ang mga may-ari na magpadala ng mga layunin sa administrator ng device. Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"magdagdag o mag-alis ng admin ng device"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Pinapayagan ang may-ari na magdagdag o mag-alis ng mga aktibong administrator ng device. Hindi dapat kailanganin kailanman para sa normal na apps."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"baguhin ang orientation ng screen"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Pinapayagan ang app na baguhin ang pag-ikot ng screen anumang oras. Hindi kailanman dapat na kailanganin para sa normal na apps."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"baguhin ang bilis ng pointer"</string>

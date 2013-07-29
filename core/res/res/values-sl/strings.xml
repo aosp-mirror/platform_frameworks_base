@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Lastniku omogoča povezovanje z vmesnikom storitve pripomočka najvišje ravni. Tega ni treba nikoli uporabiti za navadne programe."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interakcija s skrbnikom naprave"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Omogoča lastniku, da pošlje namere skrbniku naprave. Nikoli se ne uporablja za navadne programe."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"dodajanje ali odstranjevanje skrbnikov naprave"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Imetniku omogoča, da doda ali odstrani aktivne skrbnike naprave. Normalne aplikacije tega načeloma ne potrebujejo."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"spreminjanje usmerjenosti zaslona"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Programu omogoča, da kadar koli zasuka zaslon. Ne uporabljajte za navadne programe."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"spreminjanje hitrosti kazalca"</string>
