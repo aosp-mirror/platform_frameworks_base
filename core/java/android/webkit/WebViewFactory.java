@@ -28,8 +28,15 @@ import android.util.Log;
  * @hide
  */
 public final class WebViewFactory {
-    public static final boolean DEFAULT_TO_EXPERIMENTAL_WEBVIEW = false;
-    public static final String WEBVIEW_EXPERIMENTAL_PROPERTY = "persist.sys.webview.exp";
+    private static final boolean DEFAULT_TO_EXPERIMENTAL_WEBVIEW = false;
+    private static final String EXPERIMENTAL_PROPERTY_DEFAULT_OFF = "persist.sys.webview.exp";
+    private static final String EXPERIMENTAL_PROPERTY_DEFAULT_ON  = "persist.sys.webview.exp_on";
+
+    // Modify the persisted property name when the experiment is on-by-default, so that any user
+    // setting override lives in a different property namespace.
+    private static final String WEBVIEW_EXPERIMENTAL_PROPERTY = DEFAULT_TO_EXPERIMENTAL_WEBVIEW ?
+        EXPERIMENTAL_PROPERTY_DEFAULT_ON : EXPERIMENTAL_PROPERTY_DEFAULT_OFF;
+
     private static final String FORCE_PROVIDER_PROPERTY = "webview.force_provider";
     private static final String FORCE_PROVIDER_PROPERTY_VALUE_CHROMIUM = "chromium";
     private static final String FORCE_PROVIDER_PROPERTY_VALUE_CLASSIC = "classic";
@@ -69,6 +76,18 @@ public final class WebViewFactory {
         } catch (ClassNotFoundException e) {
             return false;
         }
+    }
+
+    /** @hide */
+    public static void setUseExperimentalWebView(boolean enable) {
+        SystemProperties.set(WebViewFactory.WEBVIEW_EXPERIMENTAL_PROPERTY,
+                enable ? "true" : "false");
+    }
+
+    /** @hide */
+    public static boolean useExperimentalWebView() {
+        return SystemProperties.getBoolean(WEBVIEW_EXPERIMENTAL_PROPERTY,
+            DEFAULT_TO_EXPERIMENTAL_WEBVIEW);
     }
 
     static WebViewFactoryProvider getProvider() {
@@ -112,17 +131,15 @@ public final class WebViewFactory {
     // WebView. This enables us to switch between implementations at runtime.
     private static boolean isExperimentalWebViewEnabled() {
         if (!isExperimentalWebViewAvailable()) return false;
-        boolean use_experimental_webview = SystemProperties.getBoolean(
-                WEBVIEW_EXPERIMENTAL_PROPERTY, DEFAULT_TO_EXPERIMENTAL_WEBVIEW);
         String forceProviderName = SystemProperties.get(FORCE_PROVIDER_PROPERTY);
-        if (forceProviderName.isEmpty()) return use_experimental_webview;
+        if (forceProviderName.isEmpty()) return useExperimentalWebView();
 
         Log.i(LOGTAG, String.format("Provider overridden by property: %s=%s",
                 FORCE_PROVIDER_PROPERTY, forceProviderName));
         if (forceProviderName.equals(FORCE_PROVIDER_PROPERTY_VALUE_CHROMIUM)) return true;
         if (forceProviderName.equals(FORCE_PROVIDER_PROPERTY_VALUE_CLASSIC)) return false;
         Log.e(LOGTAG, String.format("Unrecognized provider: %s", forceProviderName));
-        return use_experimental_webview;
+        return useExperimentalWebView();
     }
 
     private static Class<WebViewFactoryProvider> getFactoryClass() throws ClassNotFoundException {
