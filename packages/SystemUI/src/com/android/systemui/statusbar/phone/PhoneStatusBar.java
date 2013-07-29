@@ -164,6 +164,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     StatusBarWindowView mStatusBarWindow;
     PhoneStatusBarView mStatusBarView;
+    private int mStatusBarWindowState;
 
     int mPixelFormat;
     Object mQueueLock = new Object();
@@ -227,6 +228,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     // on-screen navigation buttons
     private NavigationBarView mNavigationBarView = null;
+    private int mNavigationBarWindowState;
 
     // the tracker view
     int mTrackingPosition; // the position of the top of the tracking view.
@@ -1363,9 +1365,14 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     };
 
+    boolean panelsEnabled() {
+        return ((mDisabled & StatusBarManager.DISABLE_EXPAND) == 0
+                && mStatusBarWindowState != StatusBarManager.WINDOW_STATE_HIDING);
+    }
+
     void makeExpandedVisible() {
         if (SPEW) Log.d(TAG, "Make expanded visible: expanded visible=" + mExpandedVisible);
-        if (mExpandedVisible) {
+        if (mExpandedVisible || !panelsEnabled()) {
             return;
         }
 
@@ -1466,7 +1473,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     public void animateExpandNotificationsPanel() {
         if (SPEW) Log.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);
-        if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
+        if (!panelsEnabled()) {
             return ;
         }
 
@@ -1521,7 +1528,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     public void animateExpandSettingsPanel() {
         if (SPEW) Log.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);
-        if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
+        if (!panelsEnabled()) {
             return;
         }
 
@@ -1837,6 +1844,39 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mNavigationBarView != null) {
             mNavigationBarView.setNavigationIconHints(hints);
         }
+    }
+
+    @Override // CommandQueue
+    public void setWindowState(int window, int state) {
+        if (mStatusBarWindow != null
+                && window == StatusBarManager.WINDOW_STATUS_BAR
+                && mStatusBarWindowState != state) {
+            mStatusBarWindowState = state;
+            if (DEBUG) Log.d(TAG, "Status bar window " + stateString(state));
+            if (state == StatusBarManager.WINDOW_STATE_HIDING) {
+                mStatusBarWindow.setEnabled(false);
+                mStatusBarView.collapseAllPanels(false);
+            } else if (state == StatusBarManager.WINDOW_STATE_SHOWING) {
+                mStatusBarWindow.setEnabled(true);
+            }
+        }
+        if (mNavigationBarView != null
+                && window == StatusBarManager.WINDOW_NAVIGATION_BAR
+                && mNavigationBarWindowState != state) {
+            mNavigationBarWindowState = state;
+            if (DEBUG) Log.d(TAG, "Navigation bar window " + stateString(state));
+            if (state == StatusBarManager.WINDOW_STATE_HIDING) {
+                mNavigationBarView.setEnabled(false);
+            } else if (state == StatusBarManager.WINDOW_STATE_SHOWING) {
+                mNavigationBarView.setEnabled(true);
+            }
+        }
+    }
+
+    private static String stateString(int state) {
+        if (state == StatusBarManager.WINDOW_STATE_HIDING) return "hiding";
+        if (state == StatusBarManager.WINDOW_STATE_SHOWING) return "showing";
+        return "unknown";
     }
 
     @Override // CommandQueue

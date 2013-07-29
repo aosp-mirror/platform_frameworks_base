@@ -89,7 +89,7 @@ public class PhoneStatusBarView extends PanelBar {
 
     @Override
     public boolean panelsEnabled() {
-        return ((mBar.mDisabled & StatusBarManager.DISABLE_EXPAND) == 0);
+        return mBar.panelsEnabled();
     }
 
     @Override

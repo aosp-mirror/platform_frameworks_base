@@ -40,8 +40,7 @@ public class PanelView extends FrameLayout {
 
     public static final boolean DEBUG_NAN = true; // http://b/7686690
 
-    public final void LOG(String fmt, Object... args) {
-        if (!DEBUG) return;
+    private final void logf(String fmt, Object... args) {
         Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
     }
 
@@ -221,7 +220,7 @@ public class PanelView extends FrameLayout {
     }
 
     private void runPeekAnimation() {
-        if (DEBUG) LOG("peek to height=%.1f", mPeekHeight);
+        if (DEBUG) logf("peek to height=%.1f", mPeekHeight);
         if (mTimeAnimator.isStarted()) {
             return;
         }
@@ -256,8 +255,8 @@ public class PanelView extends FrameLayout {
             }
         } else if (dtms > 0) {
             final float dt = dtms * 0.001f;                  // ms -> s
-            if (DEBUG) LOG("tick: v=%.2fpx/s dt=%.4fs", mVel, dt);
-            if (DEBUG) LOG("tick: before: h=%d", (int) mExpandedHeight);
+            if (DEBUG) logf("tick: v=%.2fpx/s dt=%.4fs", mVel, dt);
+            if (DEBUG) logf("tick: before: h=%d", (int) mExpandedHeight);
 
             final float fh = getFullHeight();
             boolean braking = false;
@@ -295,7 +294,7 @@ public class PanelView extends FrameLayout {
                 h = fh;
             }
 
-            if (DEBUG) LOG("tick: new h=%d closing=%s", (int) h, mClosing?"true":"false");
+            if (DEBUG) logf("tick: new h=%d closing=%s", (int) h, mClosing?"true":"false");
 
             setExpandedHeightInternal(h);
 
@@ -367,14 +366,14 @@ public class PanelView extends FrameLayout {
 
         loadDimens();
 
-        if (DEBUG) LOG("handle view: " + mHandleView);
+        if (DEBUG) logf("handle view: " + mHandleView);
         if (mHandleView != null) {
             mHandleView.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     final float y = event.getY();
                     final float rawY = event.getRawY();
-                    if (DEBUG) LOG("handle.onTouch: a=%s y=%.1f rawY=%.1f off=%.1f",
+                    if (DEBUG) logf("handle.onTouch: a=%s y=%.1f rawY=%.1f off=%.1f",
                             MotionEvent.actionToString(event.getAction()),
                             y, rawY, mTouchOffset);
                     PanelView.this.getLocationOnScreen(mAbsPos);
@@ -461,7 +460,7 @@ public class PanelView extends FrameLayout {
                                 vel = -vel;
                             }
 
-                            if (DEBUG) LOG("gesture: dy=%f vel=(%f,%f) vlinear=%f",
+                            if (DEBUG) logf("gesture: dy=%f vel=(%f,%f) vlinear=%f",
                                     deltaY,
                                     xVel, yVel,
                                     vel);
@@ -476,7 +475,7 @@ public class PanelView extends FrameLayout {
     }
 
     public void fling(float vel, boolean always) {
-        if (DEBUG) LOG("fling: vel=%.3f, this=%s", vel, this);
+        if (DEBUG) logf("fling: vel=%.3f, this=%s", vel, this);
         mVel = vel;
 
         if (always||mVel != 0) {
@@ -496,7 +495,7 @@ public class PanelView extends FrameLayout {
 
     @Override
     protected void onViewAdded(View child) {
-        if (DEBUG) LOG("onViewAdded: " + child);
+        if (DEBUG) logf("onViewAdded: " + child);
     }
 
     public View getHandle() {
@@ -508,7 +507,7 @@ public class PanelView extends FrameLayout {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        if (DEBUG) LOG("onMeasure(%d, %d) -> (%d, %d)",
+        if (DEBUG) logf("onMeasure(%d, %d) -> (%d, %d)",
                 widthMeasureSpec, heightMeasureSpec, getMeasuredWidth(), getMeasuredHeight());
 
         // Did one of our children change size?
@@ -528,7 +527,7 @@ public class PanelView extends FrameLayout {
 
 
     public void setExpandedHeight(float height) {
-        if (DEBUG) LOG("setExpandedHeight(%.1f)", height);
+        if (DEBUG) logf("setExpandedHeight(%.1f)", height);
         mRubberbanding = false;
         if (mTimeAnimator.isStarted()) {
             post(mStopAnimator);
@@ -539,7 +538,7 @@ public class PanelView extends FrameLayout {
 
     @Override
     protected void onLayout (boolean changed, int left, int top, int right, int bottom) {
-        if (DEBUG) LOG("onLayout: changed=%s, bottom=%d eh=%d fh=%d", changed?"T":"f", bottom, (int)mExpandedHeight, mFullHeight);
+        if (DEBUG) logf("onLayout: changed=%s, bottom=%d eh=%d fh=%d", changed?"T":"f", bottom, (int)mExpandedHeight, mFullHeight);
         super.onLayout(changed, left, top, right, bottom);
     }
 
@@ -563,7 +562,7 @@ public class PanelView extends FrameLayout {
 
         mExpandedHeight = h;
 
-        if (DEBUG) LOG("setExpansion: height=%.1f fh=%.1f tracking=%s rubber=%s", h, fh, mTracking?"T":"f", mRubberbanding?"T":"f");
+        if (DEBUG) logf("setExpansion: height=%.1f fh=%.1f tracking=%s rubber=%s", h, fh, mTracking?"T":"f", mRubberbanding?"T":"f");
 
         requestLayout();
 //        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
@@ -575,7 +574,7 @@ public class PanelView extends FrameLayout {
 
     private float getFullHeight() {
         if (mFullHeight <= 0) {
-            if (DEBUG) LOG("Forcing measure() since fullHeight=" + mFullHeight);
+            if (DEBUG) logf("Forcing measure() since fullHeight=" + mFullHeight);
             measure(MeasureSpec.makeMeasureSpec(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(android.view.ViewGroup.LayoutParams.WRAP_CONTENT, MeasureSpec.EXACTLY));
         }
@@ -620,7 +619,7 @@ public class PanelView extends FrameLayout {
 
     public void collapse() {
         // TODO: abort animation or ongoing touch
-        if (DEBUG) LOG("collapse: " + this);
+        if (DEBUG) logf("collapse: " + this);
         if (!isFullyCollapsed()) {
             mTimeAnimator.cancel();
             mClosing = true;
@@ -631,12 +630,18 @@ public class PanelView extends FrameLayout {
     }
 
     public void expand() {
-        if (DEBUG) LOG("expand: " + this);
+        if (DEBUG) logf("expand: " + this);
         if (isFullyCollapsed()) {
             mBar.startOpeningPanel(this);
             fling(mSelfExpandVelocityPx, /*always=*/ true);
         } else if (DEBUG) {
-            if (DEBUG) LOG("skipping expansion: is expanded");
+            if (DEBUG) logf("skipping expansion: is expanded");
+        }
+    }
+
+    public void cancelPeek() {
+        if (mPeekAnimator != null && mPeekAnimator.isStarted()) {
+            mPeekAnimator.cancel();
         }
     }
 
