@@ -38,7 +38,7 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
     private static final int SWIPE_FROM_RIGHT = 3;
 
     private final int mSwipeStartThreshold;
-    private final int mSwipeEndThreshold;
+    private final int mSwipeDistanceThreshold;
     private final Callbacks mCallbacks;
     private final int[] mDownPointerId = new int[MAX_TRACKED_POINTERS];
     private final float[] mDownX = new float[MAX_TRACKED_POINTERS];
@@ -55,7 +55,9 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
         mCallbacks = checkNull("callbacks", callbacks);
         mSwipeStartThreshold = checkNull("context", context).getResources()
                 .getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
-        mSwipeEndThreshold = mSwipeStartThreshold * 2;
+        mSwipeDistanceThreshold = mSwipeStartThreshold;
+        if (DEBUG) Slog.d(TAG,  "mSwipeStartThreshold=" + mSwipeStartThreshold
+                + " mSwipeDistanceThreshold=" + mSwipeDistanceThreshold);
     }
 
     private static <T> T checkNull(String name, T arg) {
@@ -169,17 +171,17 @@ public class SystemGesturesPointerEventListener implements PointerEventListener 
         if (DEBUG) Slog.d(TAG, "pointer " + mDownPointerId[i]
                 + " moved (" + fromX + "->" + x + "," + fromY + "->" + y + ") in " + elapsed);
         if (fromY <= mSwipeStartThreshold
-                && y > fromY + mSwipeEndThreshold
+                && y > fromY + mSwipeDistanceThreshold
                 && elapsed < SWIPE_TIMEOUT_MS) {
             return SWIPE_FROM_TOP;
         }
         if (fromY >= screenHeight - mSwipeStartThreshold
-                && y < fromY - mSwipeEndThreshold
+                && y < fromY - mSwipeDistanceThreshold
                 && elapsed < SWIPE_TIMEOUT_MS) {
             return SWIPE_FROM_BOTTOM;
         }
         if (fromX >= screenWidth - mSwipeStartThreshold
-                && x < fromX - mSwipeEndThreshold
+                && x < fromX - mSwipeDistanceThreshold
                 && elapsed < SWIPE_TIMEOUT_MS) {
             return SWIPE_FROM_RIGHT;
         }
