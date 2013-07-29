@@ -472,6 +472,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 com.android.internal.R.array.radioAttributes);
         for (String raString : raStrings) {
             RadioAttributes r = new RadioAttributes(raString);
+            if (VDBG) log("raString=" + raString + " r=" + r);
             if (r.mType > ConnectivityManager.MAX_RADIO_TYPE) {
                 loge("Error in radioAttributes - ignoring attempt to define type " + r.mType);
                 continue;
@@ -492,6 +493,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         for (String naString : naStrings) {
             try {
                 NetworkConfig n = new NetworkConfig(naString);
+                if (VDBG) log("naString=" + naString + " config=" + n);
                 if (n.type > ConnectivityManager.MAX_NETWORK_TYPE) {
                     loge("Error in networkAttributes - ignoring attempt to define type " +
                             n.type);
@@ -518,6 +520,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 // ignore it - leave the entry null
             }
         }
+        if (VDBG) log("mNetworksDefined=" + mNetworksDefined);
 
         mProtectedNetworks = new ArrayList<Integer>();
         int[] protectedNetworks = context.getResources().getIntArray(
