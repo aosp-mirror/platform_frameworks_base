@@ -10295,6 +10295,22 @@ public final class ActivityManagerService extends ActivityManagerNative
         return needSep;
     }
 
+    void printOomLevel(PrintWriter pw, String name, int adj) {
+        pw.print("    ");
+        if (adj >= 0) {
+            pw.print(' ');
+            if (adj < 10) pw.print(' ');
+        } else {
+            if (adj > -10) pw.print(' ');
+        }
+        pw.print(adj);
+        pw.print(": ");
+        pw.print(name);
+        pw.print(" (");
+        pw.print(mProcessList.getMemLevel(adj)/1024);
+        pw.println(" kB)");
+    }
+
     boolean dumpOomLocked(FileDescriptor fd, PrintWriter pw, String[] args,
             int opti, boolean dumpAll) {
         boolean needSep = false;
@@ -10303,19 +10319,19 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (needSep) pw.println();
             needSep = true;
             pw.println("  OOM levels:");
-            pw.print("    SYSTEM_ADJ: "); pw.println(ProcessList.SYSTEM_ADJ);
-            pw.print("    PERSISTENT_PROC_ADJ: "); pw.println(ProcessList.PERSISTENT_PROC_ADJ);
-            pw.print("    FOREGROUND_APP_ADJ: "); pw.println(ProcessList.FOREGROUND_APP_ADJ);
-            pw.print("    VISIBLE_APP_ADJ: "); pw.println(ProcessList.VISIBLE_APP_ADJ);
-            pw.print("    PERCEPTIBLE_APP_ADJ: "); pw.println(ProcessList.PERCEPTIBLE_APP_ADJ);
-            pw.print("    BACKUP_APP_ADJ: "); pw.println(ProcessList.BACKUP_APP_ADJ);
-            pw.print("    HEAVY_WEIGHT_APP_ADJ: "); pw.println(ProcessList.HEAVY_WEIGHT_APP_ADJ);
-            pw.print("    SERVICE_ADJ: "); pw.println(ProcessList.SERVICE_ADJ);
-            pw.print("    HOME_APP_ADJ: "); pw.println(ProcessList.HOME_APP_ADJ);
-            pw.print("    PREVIOUS_APP_ADJ: "); pw.println(ProcessList.PREVIOUS_APP_ADJ);
-            pw.print("    SERVICE_B_ADJ: "); pw.println(ProcessList.SERVICE_B_ADJ);
-            pw.print("    CACHED_APP_MIN_ADJ: "); pw.println(ProcessList.CACHED_APP_MIN_ADJ);
-            pw.print("    CACHED_APP_MAX_ADJ: "); pw.println(ProcessList.CACHED_APP_MAX_ADJ);
+            printOomLevel(pw, "SYSTEM_ADJ", ProcessList.SYSTEM_ADJ);
+            printOomLevel(pw, "PERSISTENT_PROC_ADJ", ProcessList.PERSISTENT_PROC_ADJ);
+            printOomLevel(pw, "FOREGROUND_APP_ADJ", ProcessList.FOREGROUND_APP_ADJ);
+            printOomLevel(pw, "VISIBLE_APP_ADJ", ProcessList.VISIBLE_APP_ADJ);
+            printOomLevel(pw, "PERCEPTIBLE_APP_ADJ", ProcessList.PERCEPTIBLE_APP_ADJ);
+            printOomLevel(pw, "BACKUP_APP_ADJ", ProcessList.BACKUP_APP_ADJ);
+            printOomLevel(pw, "HEAVY_WEIGHT_APP_ADJ", ProcessList.HEAVY_WEIGHT_APP_ADJ);
+            printOomLevel(pw, "SERVICE_ADJ", ProcessList.SERVICE_ADJ);
+            printOomLevel(pw, "HOME_APP_ADJ", ProcessList.HOME_APP_ADJ);
+            printOomLevel(pw, "PREVIOUS_APP_ADJ", ProcessList.PREVIOUS_APP_ADJ);
+            printOomLevel(pw, "SERVICE_B_ADJ", ProcessList.SERVICE_B_ADJ);
+            printOomLevel(pw, "CACHED_APP_MIN_ADJ", ProcessList.CACHED_APP_MIN_ADJ);
+            printOomLevel(pw, "CACHED_APP_MAX_ADJ", ProcessList.CACHED_APP_MAX_ADJ);
 
             if (needSep) pw.println();
             needSep = true;
@@ -11515,10 +11531,29 @@ public final class ActivityManagerService extends ActivityManagerNative
                         pw.print("           "); pw.print(unshared); pw.print(" kB unshared; ");
                                 pw.print(voltile); pw.println(" kB volatile");
                     }
+                    pw.print("   TUNING: ");
+                    pw.print(mProcessList.getMemLevel(ProcessList.CACHED_APP_MAX_ADJ)/1024);
+                    pw.print(" kB");
+                    if (ActivityManager.isLowRamDeviceStatic()) {
+                        pw.print(" (low-ram)");
+                    }
+                    if (ActivityManager.isHighEndGfx()) {
+                        pw.print(" (high-end-gfx)");
+                    }
+                    pw.println();
                 } else {
                     pw.print("ksm,"); pw.print(sharing); pw.print(",");
                     pw.print(shared); pw.print(","); pw.print(unshared); pw.print(",");
                     pw.println(voltile);
+                    pw.print("tuning,");
+                    pw.print(mProcessList.getMemLevel(ProcessList.CACHED_APP_MAX_ADJ)/1024);
+                    if (ActivityManager.isLowRamDeviceStatic()) {
+                        pw.print(",low-ram");
+                    }
+                    if (ActivityManager.isHighEndGfx()) {
+                        pw.print(",high-end-gfx");
+                    }
+                    pw.println();
                 }
             }
         }
