@@ -11531,7 +11531,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                         pw.print("           "); pw.print(unshared); pw.print(" kB unshared; ");
                                 pw.print(voltile); pw.println(" kB volatile");
                     }
-                    pw.print("   TUNING: ");
+                    pw.print("   Tuning: ");
+                    pw.print(ActivityManager.staticGetMemoryClass());
+                    pw.print(" (large ");
+                    pw.print(ActivityManager.staticGetLargeMemoryClass());
+                    pw.print("), oom ");
                     pw.print(mProcessList.getMemLevel(ProcessList.CACHED_APP_MAX_ADJ)/1024);
                     pw.print(" kB");
                     if (ActivityManager.isLowRamDeviceStatic()) {
@@ -11546,6 +11550,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     pw.print(shared); pw.print(","); pw.print(unshared); pw.print(",");
                     pw.println(voltile);
                     pw.print("tuning,");
+                    pw.print(ActivityManager.staticGetMemoryClass());
+                    pw.print(',');
+                    pw.print(ActivityManager.staticGetLargeMemoryClass());
+                    pw.print(',');
                     pw.print(mProcessList.getMemLevel(ProcessList.CACHED_APP_MAX_ADJ)/1024);
                     if (ActivityManager.isLowRamDeviceStatic()) {
                         pw.print(",low-ram");
