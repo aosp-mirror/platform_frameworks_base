@@ -236,6 +236,8 @@ public class PhoneStatusBarView extends PanelBar {
             panel.setAlpha(alpha);
         }
 
+        mBar.animateHeadsUp(mNotificationPanel == panel, mPanelExpandedFractionSum);
+
         mBar.updateCarrierLabelVisibility(false);
     }
 }
