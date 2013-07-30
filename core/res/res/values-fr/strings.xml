@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service widget. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interagir avec l\'administrateur du périphérique"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Permet à l\'application autorisée d\'envoyer des intentions à l\'administrateur de l\'appareil. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"ajouter ou supprimer un administrateur de l\'appareil"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Permet à l\'application autorisée d\'ajouter ou de supprimer des administrateurs actifs de l\'appareil. Les applications standards ne devraient pas nécessiter cette autorisation."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"Changement d\'orientation de l\'écran"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Permet à l\'application de changer l\'orientation de l\'écran à tout moment. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"changer la vitesse du pointeur"</string>

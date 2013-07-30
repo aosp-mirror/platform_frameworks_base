@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"允許應用程式繫結至小工具服務的頂層介面 (一般應用程式不需使用)。"</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"與裝置管理員互動"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"允許應用程式將調用請求傳送至裝置管理員 (一般應用程式不需使用)。"</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"新增或移除裝置管理員"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"允許應用程式新增或移除有效的裝置管理員 (一般應用程式並不需要)。"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"變更螢幕顯示方向"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"允許應用程式隨時變更螢幕旋轉狀態 (一般應用程式不需使用)。"</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"變更指標速度"</string>

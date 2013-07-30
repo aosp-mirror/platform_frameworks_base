@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"به دارنده اجازه می‌دهد که به رابط سطح بالای سرویس ابزارک متصل شود. هرگز برای برنامه‌های معمولی مورد نیاز نیست."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"تعامل با یک سرپرست دستگاه"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"به دارنده اجازه می‎دهد اهداف خود را به سرپرست دستگاه ارسال کند. برنامه‎های معمولی هیچگاه به این ویژگی نیازی ندارند."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"اضافه یا حذف سرپرست دستگاه"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"به دارنده اجازه می‌دهد سرپرستان دستگاه فعال را اضافه یا حذف کند.هرگز نباید برای برنامه‌های عادی مورد نیاز باشد."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"تغییر جهت صفحه"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"به برنامه اجازه می‎دهد تا چرخش صفحه را هر وقت بخواهد تغییر دهد. برای برنامه‎های عادی نیاز نیست."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"تغییر سرعت اشاره‌گر"</string>

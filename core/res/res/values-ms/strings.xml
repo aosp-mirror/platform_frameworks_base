@@ -279,8 +279,8 @@
     <string name="permdesc_reorderTasks" msgid="7734217754877439351">"Membenarkan apl memindahkan tugasan ke latar depan dan latar belakang. Apl boleh melakukan ini tanpa input anda."</string>
     <string name="permlab_removeTasks" msgid="6821513401870377403">"hentikan apl yang sedang dijalankan"</string>
     <string name="permdesc_removeTasks" msgid="1394714352062635493">"Membenarkan apl untuk mengalih keluar tugasan dan melupuskan aplnya. Apl hasad boleh mengganggu tingkah laku apl lain."</string>
-    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"urus susunan aktiviti"</string>
-    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"Membenarkan apl menambah, membuang dan mengubah suai susunan aktiviti tempat apl lain berjalan. Apl hasad boleh mengganggu tingkah laku apl lain."</string>
+    <string name="permlab_manageActivityStacks" msgid="7391191384027303065">"urus tindanan aktiviti"</string>
+    <string name="permdesc_manageActivityStacks" msgid="1615881933034084440">"Membenarkan apl menambah, mengalih keluar dan mengubah suai tindanan aktiviti tempat apl lain berjalan. Apl hasad boleh mengganggu tingkah laku apl lain."</string>
     <string name="permlab_startAnyActivity" msgid="2918768238045206456">"mulakan sebarang aktiviti"</string>
     <string name="permdesc_startAnyActivity" msgid="997823695343584001">"Membenarkan apl untuk memulakan apa-apa aktiviti, tanpa mengira perlindungan kebenaran atau keadaan eksport."</string>
     <string name="permlab_setScreenCompatibility" msgid="6975387118861842061">"tetapkan keserasian skrin"</string>
@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan widget. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"berinteraksi dengan pentadbir peranti"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Membenarkan pemegang menghantar tujuan kepada pentadbir peranti. Tidak sekali-kali diperlukan untuk apl biasa."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"tambah atau alih keluar pentadbir peranti"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Membenarkan pemegang menambah atau mengalih keluar pentadbir peranti aktif. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"tukar orientasi skrin"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Membenarkan apl untuk menukar putaran skrin pada bila-bila masa. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"tukar kelajuan penuding"</string>

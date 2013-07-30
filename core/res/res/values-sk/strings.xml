@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Umožňuje držiteľovi viazať sa na najvyššiu úroveň rozhrania služby miniaplikácií. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"komunikovať so správcom zariadenia"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Umožňuje držiteľovi odosielať informácie správcovi zariadenia. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"pridanie alebo odstránenie správcu zariadenia"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Umožňuje držiteľovi pridať alebo odstrániť správcov aktívnych zariadení. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"zmena orientácie obrazovky"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Umožňuje aplikácii kedykoľvek zmeniť otáčanie obrazovky. Bežné aplikácie by toto nastavenie nemali nikdy potrebovať."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"zmena rýchlosti ukazovateľa"</string>

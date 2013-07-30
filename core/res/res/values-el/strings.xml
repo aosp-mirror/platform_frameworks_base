@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας υπηρεσίας γραφικών στοιχείων. Δεν απαιτείται για κανονικές εφαρμογές."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"επικοινωνία με έναν διαχειριστή συσκευής"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Επιτρέπει στον κάτοχο την αποστολή στόχων σε έναν διαχειριστή συσκευής. Δεν είναι απαραίτητο για συνήθεις εφαρμογές."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"προσθήκη ή κατάργηση ενός διαχειριστή συσκευής"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Επιτρέπει στον κάτοχο να προσθέτει ή να καταργεί ενεργούς διαχειριστές συσκευών. Δεν θα πρέπει να ζητείται ποτέ για κανονικές εφαρμογές."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"αλλαγή προσανατολισμού οθόνης"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Επιτρέπει στην εφαρμογή την αλλαγή της περιστροφής της οθόνης ανά πάσα στιγμή. Δεν απαιτείται για συνήθεις εφαρμογές."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"αλλαγή ταχύτητας δείκτη"</string>

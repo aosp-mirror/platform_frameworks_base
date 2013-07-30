@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Lehetővé teszi a használó számára, hogy csatlakozzon egy modulszolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szüksége."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"az eszközkezelő használata"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Lehetővé teszi a tulajdonos számára, hogy célokat küldjön egy eszközkezelőnek. A normál alkalmazásoknak erre soha nincs szüksége."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"eszközrendszergazda hozzáadása vagy eltávolítása"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Lehetővé teszi a tulajdonos számára, hogy aktív eszközrendszergazdákat adjon meg vagy távolítson el. A normál alkalmazásoknál erre soha nincs szükség."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"képernyő irányának módosítása"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Lehetővé teszi az alkalmazás számára a képernyő elforgatásának bármikori módosítását. A normál alkalmazásoknak erre soha nincs szüksége."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"mutató sebességének módosítása"</string>

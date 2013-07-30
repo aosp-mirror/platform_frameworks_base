@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Дозволяє власникові прив’язуватися до інтерфейсу верхнього рівня служби віджетів. Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"взаємодіяти з адмін. пристрою"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Дозволяє власнику надсилати задавані функції адміністратору пристрою. Ніколи не застосовується для звичайних програм."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"додавати чи вилучати адміністраторів пристрою"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Дозволяє власнику додавати чи вилучати активних адміністраторів пристрою. Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"змінювати орієнтацію екрана"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Дозволяє програмі будь-коли змінювати обертання екрана. Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"змінювати швидкість указівника"</string>
@@ -1567,7 +1565,7 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN-коди не збігаються. Повторіть спробу."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN-код закороткий. Має бути принаймні 4 цифри."</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"Неправильний PIN. Повторіть через 1 с"</item>
-    <item quantity="other" msgid="8030607343223287654">"Неправильний PIN. Повторіть через <xliff:g id="COUNT">%d</xliff:g> с"</item>
+    <item quantity="one" msgid="4835639969503729874">"Неправильний PIN. Повторіть через 1 с."</item>
+    <item quantity="other" msgid="8030607343223287654">"Неправильний PIN. Повторіть через <xliff:g id="COUNT">%d</xliff:g> с."</item>
   </plurals>
 </resources>

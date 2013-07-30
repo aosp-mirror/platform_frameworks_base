@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Permite que o proprietário utilize a interface de nível superior de um serviço de widget. Nunca deve ser necessário para aplicativos normais."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interagir com o administrador de um dispositivo"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Permite que o proprietário envie tentativas ao administrador de um aparelho. Nunca deve ser necessário para aplicativos normais."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"adicionar ou remover um administrador do dispositivo"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Permite que o proprietário adicione ou remova administradores do dispositivo ativos. Não deve ser necessário para aplicativos comuns."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"alterar orientação da tela"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Permite que o aplicativo gire a tela a qualquer momento. Nunca deve ser necessário para aplicativos normais."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"alterar velocidade do ponteiro"</string>

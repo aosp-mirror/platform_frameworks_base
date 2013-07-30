@@ -372,10 +372,8 @@
     <string name="permdesc_bindRemoteViews" msgid="4717987810137692572">"Lubab omanikul siduda vidina teenuse ülataseme liidesega. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"seadme administraatoriga suhtlemine"</string>
     <string name="permdesc_bindDeviceAdmin" msgid="569715419543907930">"Võimaldab omanikul saata kavatsusi seadme administraatorile. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
-    <!-- no translation found for permlab_manageDeviceAdmins (4248828900045808722) -->
-    <skip />
-    <!-- no translation found for permdesc_manageDeviceAdmins (5025608167709942485) -->
-    <skip />
+    <string name="permlab_manageDeviceAdmins" msgid="4248828900045808722">"seadme administraatori lisamine või eemaldamine"</string>
+    <string name="permdesc_manageDeviceAdmins" msgid="5025608167709942485">"Võimaldab omanikul lisada või eemaldada aktiivseid seadme administraatoreid. Tavarakenduste puhul ei tohiks see kunagi vajalik olla."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"muuda ekraani paigutust"</string>
     <string name="permdesc_setOrientation" msgid="3046126619316671476">"Võimaldab rakendusel muuta ekraani pööramist mis tahes ajal. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"kursorikiiruse muutmine"</string>
