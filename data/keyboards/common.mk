@@ -31,7 +31,6 @@ keylayouts := \
     Vendor_046d_Product_c219.kl \
     Vendor_046d_Product_c21f.kl \
     Vendor_0583_Product_2060.kl \
-    Vendor_0a5c_Product_8502.kl \
     Vendor_1038_Product_1412.kl \
     Vendor_12bd_Product_d015.kl \
     Vendor_1689_Product_fd00.kl \
