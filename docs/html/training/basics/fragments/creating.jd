@@ -6,7 +6,7 @@ trainingnavtop=true
 
 <div id="tb-wrapper">
   <div id="tb">
-    
+
     <h2>This lesson teaches you to</h2>
 <ol>
   <li><a href="#Create">Create a Fragment Class</a></li>
@@ -19,7 +19,7 @@ trainingnavtop=true
     </ul>
 
 <h2>Try it out</h2>
-    
+
 <div class="download-box">
  <a href="http://developer.android.com/shareables/training/FragmentBasics.zip"
 class="button">Download the sample</a>
@@ -32,21 +32,30 @@ class="button">Download the sample</a>
 <p>You can think of a fragment as a modular section of an activity, which has its own lifecycle,
 receives its own input events, and which you can add or remove while the activity is running (sort
 of like a "sub activity" that you can reuse in different activities). This lesson shows how to
-extend the {@link android.support.v4.app.Fragment} class using the Support Library so your app
-remains compatible with devices running system versions as old as Android 1.6.</p>
+extend the {@link android.support.v4.app.Fragment} class using the <a
+href="{@docRoot}tools/support-library/index.html">Support Library</a> so your app
+remains compatible with devices running system versions as low as Android 1.6.</p>
 
-<p class="note"><strong>Note:</strong> If you decide for other reasons that the minimum
+<p class="note"><strong>Note:</strong> If you decide that the minimum
 API level your app requires is 11 or higher, you don't need to use the Support
 Library and can instead use the framework's built in {@link android.app.Fragment} class and related
 APIs. Just be aware that this lesson is focused on using the APIs from the Support Library, which
 use a specific package signature and sometimes slightly different API names than the versions
 included in the platform.</p>
 
+<p>Before you begin this lesson, you must set up your Android project to use the Support Library.
+If you have not used the Support Library before, set up your project to use the <strong>v4</strong>
+library by following the <a href="{@docRoot}tools/support-library/setup.html">Support Library
+Setup</a> document. However, you can also include the <a href=
+"{@docRoot}guide/topics/ui/actionbar.html">action bar</a> in your activities by instead using the
+<strong>v7 appcompat</strong> library, which is compatible with Android 2.1 (API level 7)
+and also includes the {@link android.support.v4.app.Fragment} APIs.</p>
+
 
 
 <h2 id="Create">Create a Fragment Class</h2>
 
-<p>To create a fragment, extend the {@link android.support.v4.app.Fragment} class, then override 
+<p>To create a fragment, extend the {@link android.support.v4.app.Fragment} class, then override
 key lifecycle methods to insert your app logic, similar to the way you would with an {@link
 android.app.Activity} class.</p>
 
@@ -63,7 +72,7 @@ import android.view.ViewGroup;
 
 public class ArticleFragment extends Fragment {
     &#64;Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, 
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
         Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.article_view, container, false);
@@ -82,7 +91,7 @@ href="{@docRoot}guide/components/fragments.html">Fragments</a> developer guide.<
 
 
 
-<h2 id="AddInLayout">Add a Fragment to an Activity using XML</h2> 
+<h2 id="AddInLayout">Add a Fragment to an Activity using XML</h2>
 
 <p>While fragments are reusable, modular UI components, each instance of a {@link
 android.support.v4.app.Fragment} class must be associated with a parent {@link
@@ -98,7 +107,7 @@ regular {@link android.app.Activity}.</p>
 screen is considered "large" (specified by the <code>large</code> qualifier in the directory
 name).</p>
 
-<p><code>res/layout-large/news_articles.xml:</code></p>
+<p class="code-caption">res/layout-large/news_articles.xml</p>
 <pre>
 &lt;LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
@@ -120,11 +129,11 @@ name).</p>
 &lt;/LinearLayout>
 </pre>
 
-<p class="note"><strong>Tip:</strong> For more information about creating layouts for different
+<p class="note"><strong>Tip:</strong> For more about creating layouts for different
 screen sizes, read <a href="{@docRoot}training/multiscreen/screensizes.html">Supporting Different
 Screen Sizes</a>.</p>
 
-<p>Here's how an activity applies this layout:</p>
+<p>Then apply the layout to your activity:</p>
 
 <pre>
 import android.os.Bundle;
@@ -138,6 +147,12 @@ public class MainActivity extends FragmentActivity {
     }
 }
 </pre>
+
+<p>If you're using the <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7
+appcompat library</a>, your activity should instead extend {@link
+android.support.v7.app.ActionBarActivity}, which is a subclass of {@link
+android.support.v4.app.FragmentActivity} (for more information,
+read <a href="{@docRoot}training/basics/actionbar/index.html">Adding the Action Bar</a>).</p>
 
 
 <p class="note"><strong>Note:</strong> When you add a fragment to an activity layout by defining

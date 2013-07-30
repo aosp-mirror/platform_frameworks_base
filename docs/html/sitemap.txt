@@ -362,7 +362,6 @@ http://developer.android.com/training/basics/supporting-devices/index.html
 http://developer.android.com/training/basics/supporting-devices/languages.html
 http://developer.android.com/training/basics/supporting-devices/screens.html
 http://developer.android.com/training/basics/supporting-devices/platforms.html
-http://developer.android.com/training/basics/fragments/support-lib.html
 http://developer.android.com/training/basics/fragments/creating.html
 http://developer.android.com/training/basics/fragments/fragment-ui.html
 http://developer.android.com/training/basics/fragments/communicating.html
