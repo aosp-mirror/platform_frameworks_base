@@ -937,6 +937,9 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         }
 
         public void show(int textDirection, int textAlignment) {
+            if (mListAdapter == null) {
+                return;
+            }
             AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
             if (mPrompt != null) {
                 builder.setTitle(mPrompt);
