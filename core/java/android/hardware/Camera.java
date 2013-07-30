@@ -4233,6 +4233,7 @@ public class Camera {
         private static final String KEY_QC_ZSL = "zsl";
         private static final String KEY_QC_CAMERA_MODE = "camera-mode";
         private static final String KEY_QC_VIDEO_HIGH_FRAME_RATE = "video-hfr";
+        private static final String KEY_QC_VIDEO_HDR = "video-hdr";
         /** @hide
         * KEY_QC_AE_BRACKET_HDR
         **/
@@ -4532,6 +4533,17 @@ public class Camera {
          */
          public List<String> getSupportedZSLModes() {
             String str = get(KEY_QC_ZSL + SUPPORTED_VALUES_SUFFIX);
+            return split(str);
+         }
+
+         /** @hide
+         * Gets the supported Video HDR modes.
+         *
+         * @return a List of Video HDR_OFF/OFF string constants. null if
+         * Video HDR mode setting is not supported.
+         */
+         public List<String> getSupportedVideoHDRModes() {
+            String str = get(KEY_QC_VIDEO_HDR + SUPPORTED_VALUES_SUFFIX);
             return split(str);
          }
 
@@ -5009,6 +5021,24 @@ public class Camera {
          */
          public void setVideoHighFrameRate(String hfr) {
             set(KEY_QC_VIDEO_HIGH_FRAME_RATE, hfr);
+         }
+
+         /** @hide
+         * Gets the current Video HDR Mode.
+         *
+         * @return Video HDR mode value
+         */
+         public String getVideoHDRMode() {
+            return get(KEY_QC_VIDEO_HDR);
+         }
+
+         /** @hide
+         * Sets the current Video HDR Mode.
+         *
+         * @return null
+         */
+         public void setVideoHDRMode(String videohdr) {
+            set(KEY_QC_VIDEO_HDR, videohdr);
          }
 
          /** @hide
