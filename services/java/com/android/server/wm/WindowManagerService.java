@@ -7637,7 +7637,7 @@ public class WindowManagerService extends IWindowManager.Stub
     private void readForcedDisplaySizeAndDensityLocked(final DisplayContent displayContent) {
         String sizeStr = Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.DISPLAY_SIZE_FORCED);
-        if (sizeStr == null) {
+        if (sizeStr == null || sizeStr.length() == 0) {
             sizeStr = SystemProperties.get(SIZE_OVERRIDE, null);
         }
         if (sizeStr != null && sizeStr.length() > 0) {
@@ -7661,7 +7661,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         String densityStr = Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.DISPLAY_DENSITY_FORCED);
-        if (densityStr == null) {
+        if (densityStr == null || densityStr.length() == 0) {
             densityStr = SystemProperties.get(DENSITY_OVERRIDE, null);
         }
         if (densityStr != null && densityStr.length() > 0) {
