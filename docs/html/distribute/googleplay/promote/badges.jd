@@ -1,13 +1,5 @@
 page.title=Google Play Badges
 @jd:body
-<div id="butterbar-wrapper" >
-  <div id="butterbar" >
-    <div id="butterbar-message">
-<a target="_blank" href="https://docs.google.com/a/google.com/forms/d/1EHLPGqhbxj2HungHRRN4_0K9TGpc-Izy-u46vBDgS8Q/viewform">
-      Take the Android Developer Survey</a>
-    </div>
-  </div>
-</div>
 
 <p itemprop="description">Google Play badges allow you to promote your app with official branding
 in your online ads, promotional materials, or anywhere else you want a link to your app.</p>
