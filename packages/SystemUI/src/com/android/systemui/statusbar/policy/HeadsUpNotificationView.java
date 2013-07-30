@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.app.Notification;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -198,5 +199,10 @@ public class HeadsUpNotificationView extends LinearLayout implements SwipeHelper
         if (mHeadsUp != null && mHeadsUp.row == v) {
             mHeadsUp.row.setUserLocked(userLocked);
         }
+    }
+
+    public boolean isInsistent() {
+        return mHeadsUp != null
+            && (mHeadsUp.notification.getNotification().flags & Notification.FLAG_INSISTENT) != 0;
     }
 }
