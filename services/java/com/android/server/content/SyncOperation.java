@@ -304,8 +304,9 @@ public class SyncOperation implements Comparable {
     }
 
     /**
-     * If two SyncOperation intervals are disjoint, the smaller is the interval that occurs before.
-     * If the intervals overlap, the two are considered equal.
+     * SyncOperations are sorted based on their earliest effective run time.
+     * This comparator is used to sort the SyncOps at a given time when
+     * deciding which to run, so earliest run time is the best criteria.
      */
     @Override
     public int compareTo(Object o) {
@@ -313,17 +314,15 @@ public class SyncOperation implements Comparable {
         if (expedited != other.expedited) {
             return expedited ? -1 : 1;
         }
-        long x1 = effectiveRunTime - flexTime;
-        long y1 = effectiveRunTime;
-        long x2 = other.effectiveRunTime - other.flexTime;
-        long y2 = other.effectiveRunTime;
-        //  Overlapping intervals.
-        if ((x1 <= y2 && x1 >= x2) || (x2 <= y1 && x2 >= x1)) {
+        long thisIntervalStart = Math.max(effectiveRunTime - flexTime, 0);
+        long otherIntervalStart = Math.max(
+            other.effectiveRunTime - other.flexTime, 0);
+        if (thisIntervalStart < otherIntervalStart) {
+            return -1;
+        } else if (otherIntervalStart < thisIntervalStart) {
+            return 1;
+        } else {
             return 0;
         }
-        if (x1 < x2 && y1 < x2) {
-            return -1;
-        }
-        return 1;
     }
 }
