@@ -22,10 +22,12 @@ import android.os.Parcelable;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
@@ -45,6 +47,8 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     private static final String TAG = "MenuPopupHelper";
 
     static final int ITEM_LAYOUT = com.android.internal.R.layout.popup_menu_item_layout;
+
+    private final int[] mTempLocation = new int[2];
 
     private final Context mContext;
     private final LayoutInflater mInflater;
@@ -156,6 +160,69 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
 
     public boolean isShowing() {
         return mPopup != null && mPopup.isShowing();
+    }
+
+    public boolean forwardMotionEvent(View v, MotionEvent ev, int activePointerId) {
+        if (mPopup == null || !mPopup.isShowing()) {
+            return false;
+        }
+
+        final AbsListView dstView = mPopup.getListView();
+        if (dstView == null || !dstView.isShown()) {
+            return false;
+        }
+
+        boolean cancelForwarding = false;
+        final int actionMasked = ev.getActionMasked();
+        switch (actionMasked) {
+            case MotionEvent.ACTION_CANCEL:
+                cancelForwarding = true;
+                break;
+            case MotionEvent.ACTION_UP:
+                cancelForwarding = true;
+                // $FALL-THROUGH$
+            case MotionEvent.ACTION_MOVE:
+                final int activeIndex = ev.findPointerIndex(activePointerId);
+                if (activeIndex < 0) {
+                    return false;
+                }
+
+                final int[] location = mTempLocation;
+                int x = (int) ev.getX(activeIndex);
+                int y = (int) ev.getY(activeIndex);
+
+                // Convert to global coordinates.
+                v.getLocationOnScreen(location);
+                x += location[0];
+                y += location[1];
+
+                // Convert to local coordinates.
+                dstView.getLocationOnScreen(location);
+                x -= location[0];
+                y -= location[1];
+
+                final int position = dstView.pointToPosition(x, y);
+                if (position >= 0) {
+                    final int childCount = dstView.getChildCount();
+                    final int firstVisiblePosition = dstView.getFirstVisiblePosition();
+                    final int index = position - firstVisiblePosition;
+                    if (index < childCount) {
+                        final View child = dstView.getChildAt(index);
+                        if (actionMasked == MotionEvent.ACTION_UP) {
+                            // Touch ended, click highlighted item.
+                            final long id = dstView.getItemIdAtPosition(position);
+                            dstView.performItemClick(child, position, id);
+                        } else if (actionMasked == MotionEvent.ACTION_MOVE) {
+                            // TODO: Highlight touched item, activate after
+                            // long-hover. Consider forwarding events as HOVER and
+                            // letting ListView handle this.
+                        }
+                    }
+                }
+                break;
+        }
+
+        return true;
     }
 
     @Override
