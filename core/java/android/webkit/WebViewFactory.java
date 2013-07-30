@@ -82,6 +82,8 @@ public final class WebViewFactory {
     public static void setUseExperimentalWebView(boolean enable) {
         SystemProperties.set(WebViewFactory.WEBVIEW_EXPERIMENTAL_PROPERTY,
                 enable ? "true" : "false");
+        Log.i(LOGTAG, "Use Experimental WebView changed: "
+                + SystemProperties.get(WebViewFactory.WEBVIEW_EXPERIMENTAL_PROPERTY, ""));
     }
 
     /** @hide */
