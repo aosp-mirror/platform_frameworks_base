@@ -7446,6 +7446,7 @@ package android.content.res {
     field public static final int KEYBOARD_NOKEYS = 1; // 0x1
     field public static final int KEYBOARD_QWERTY = 2; // 0x2
     field public static final int KEYBOARD_UNDEFINED = 0; // 0x0
+    field public static final int MNC_ZERO = 65535; // 0xffff
     field public static final int NAVIGATIONHIDDEN_NO = 1; // 0x1
     field public static final int NAVIGATIONHIDDEN_UNDEFINED = 0; // 0x0
     field public static final int NAVIGATIONHIDDEN_YES = 2; // 0x2
