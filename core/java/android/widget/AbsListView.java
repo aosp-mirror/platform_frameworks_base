@@ -919,9 +919,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * the choice mode has not been set to {@link #CHOICE_MODE_NONE}.
      *
      * @return  A SparseBooleanArray which will return true for each call to
-     *          get(int position) where position is a position in the list,
-     *          or <code>null</code> if the choice mode is set to
-     *          {@link #CHOICE_MODE_NONE}.
+     *          get(int position) where position is a checked position in the
+     *          list and false otherwise, or <code>null</code> if the choice
+     *          mode is set to {@link #CHOICE_MODE_NONE}.
      */
     public SparseBooleanArray getCheckedItemPositions() {
         if (mChoiceMode != CHOICE_MODE_NONE) {
