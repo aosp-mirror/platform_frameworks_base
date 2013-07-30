@@ -170,20 +170,52 @@ class FocusRequester {
 
     /**
      * For a given audio focus gain request, return the audio focus loss type that will result
-     * from it.
+     * from it, taking into account any previous focus loss.
      * @param gainRequest
      * @return the audio focus loss type that matches the gain request
      */
     private int focusLossForGainRequest(int gainRequest) {
-        // FIXME to be updated to take into account mFocusLossReceived
-        return -gainRequest; // focus loss codes are the inverse of the gain codes
+        switch(gainRequest) {
+            case AudioManager.AUDIOFOCUS_GAIN:
+                switch(mFocusLossReceived) {
+                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                    case AudioManager.AUDIOFOCUS_LOSS:
+                    case AUDIOFOCUS_NONE:
+                        return AudioManager.AUDIOFOCUS_LOSS;
+                }
+            case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT:
+                switch(mFocusLossReceived) {
+                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                    case AUDIOFOCUS_NONE:
+                        return AudioManager.AUDIOFOCUS_LOSS_TRANSIENT;
+                    case AudioManager.AUDIOFOCUS_LOSS:
+                        return AudioManager.AUDIOFOCUS_LOSS;
+                }
+            case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK:
+                switch(mFocusLossReceived) {
+                    case AUDIOFOCUS_NONE:
+                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                        return AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK;
+                    case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                        return AudioManager.AUDIOFOCUS_LOSS_TRANSIENT;
+                    case AudioManager.AUDIOFOCUS_LOSS:
+                        return AudioManager.AUDIOFOCUS_LOSS;
+                }
+            default:
+                Log.e(TAG, "focusLossForGainRequest() for invalid focus request "+ gainRequest);
+                        return AUDIOFOCUS_NONE;
+        }
     }
 
     void handleExternalFocusGain(int focusGain) {
         try {
             int focusLoss = focusLossForGainRequest(focusGain);
-            mFocusDispatcher.dispatchAudioFocusChange(focusLoss, mClientId);
-            mFocusLossReceived = focusLoss;
+            if (focusLoss != mFocusLossReceived) {
+                mFocusDispatcher.dispatchAudioFocusChange(focusLoss, mClientId);
+                mFocusLossReceived = focusLoss;
+            }
         } catch (android.os.RemoteException e) {
             Log.e(TAG, "Failure to signal loss of focus: ", e);
         }
@@ -202,6 +234,7 @@ class FocusRequester {
         try {
             mFocusDispatcher.dispatchAudioFocusChange(
                     focusLoss, mClientId);
+            mFocusLossReceived = focusLoss;
         } catch (android.os.RemoteException e) {
             Log.e(TAG, "Failure to signal loss of audio focus due to:", e);
         }
