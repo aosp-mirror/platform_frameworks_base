@@ -97,7 +97,9 @@ public class DdmHandleHello extends ChunkHandler {
     }
 
     /*
-     * Handle introductory packet.
+     * Handle introductory packet. This is called during JNI_CreateJavaVM
+     * before frameworks native methods are registered, so be careful not
+     * to call any APIs that depend on frameworks native code.
      */
     private Chunk handleHELO(Chunk request) {
         if (false)
