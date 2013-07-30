@@ -28,13 +28,13 @@ import android.util.Log;
  * @hide
  */
 public final class WebViewFactory {
-    public static final boolean DEFAULT_TO_EXPERIMENTAL_WEBVIEW = false;
+    private static final boolean DEFAULT_TO_EXPERIMENTAL_WEBVIEW = false;
     private static final String EXPERIMENTAL_PROPERTY_DEFAULT_OFF = "persist.sys.webview.exp";
     private static final String EXPERIMENTAL_PROPERTY_DEFAULT_ON  = "persist.sys.webview.exp_on";
 
     // Modify the persisted property name when the experiment is on-by-default, so that any user
     // setting override lives in a different property namespace.
-    public static final String WEBVIEW_EXPERIMENTAL_PROPERTY = DEFAULT_TO_EXPERIMENTAL_WEBVIEW ?
+    private static final String WEBVIEW_EXPERIMENTAL_PROPERTY = DEFAULT_TO_EXPERIMENTAL_WEBVIEW ?
         EXPERIMENTAL_PROPERTY_DEFAULT_ON : EXPERIMENTAL_PROPERTY_DEFAULT_OFF;
 
     private static final String FORCE_PROVIDER_PROPERTY = "webview.force_provider";

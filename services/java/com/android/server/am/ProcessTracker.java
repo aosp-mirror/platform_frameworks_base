@@ -815,8 +815,7 @@ public final class ProcessTracker {
                     mRuntime = runtime;
                 }
             }
-            String webview = SystemProperties.getBoolean(
-                    WebViewFactory.WEBVIEW_EXPERIMENTAL_PROPERTY, false) ? "chromeview" : "webview";
+            String webview = WebViewFactory.useExperimentalWebView() ? "chromeview" : "webview";
             if (!Objects.equals(webview, mWebView)) {
                 changed = true;
                 if (update) {
