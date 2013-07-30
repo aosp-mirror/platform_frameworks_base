@@ -22,8 +22,7 @@ page.title=Support Library
   </div>
 </div>
 
-<p>The Android Support Library package is a set of code libraries that provide useful and important
-  features for Android applications in addition to the framework APIs. These libraries provide
+<p>The Android Support Library package is a set of code libraries that provide
   backward-compatible versions of Android framework APIs as well as features that are only available
   through the library APIs. Each Support Library is backward-compatible to a specific Android API
   level. This design means that your applications can use the libraries' features and still be
@@ -36,7 +35,8 @@ page.title=Support Library
 <h2 id="overview">Overview</h2>
 
 <p>Including the Support Libraries in your Android project is considered a best practice for
-  application developers. Using the features they provide can help you improve the look of your
+  application developers, depending on the range of platform versions your app is targeting
+  and the APIs that it uses. Using the features the libraries provide can help you improve the look of your
   application, increase performance and broaden the reach of your application to more users.
   If you use the Android
   <a href="{@docRoot}tools/projects/templates.html">code template</a> tools, you will notice that
@@ -134,6 +134,24 @@ page.title=Support Library
             that you implement your activity by extending the new
             {@link android.support.v7.app.ActionBarActivity} class.</li>
         </ul>
+      </dd>
+
+      <dt>New v7 mediarouter library:</dt>
+      <dd>
+        <p>Added a new mediarouter library that provides support for the <a
+        href="https://developers.google.com/cast/">Google Cast developer preview</a>.
+        The v7 mediarouter library APIs provide a means of controlling the routing of
+        media channels and streams from the current device to external screens,
+        speakers, and other destination devices, with compatibility back to Android 2.1
+        (API level 7). See <a
+        href="{@docRoot}tools/support-library/features.html#v7-mediarouter">V7
+        mediarouter library</a> for more information. </p>
+
+        <p class="caution">The v7 mediarouter library APIs introduced in Support
+        Library r18 are subject to change in later revisions of the Support
+        Library. At this time, we recommend using the library only in connection
+        with the <a href="https://developers.google.com/cast/">Google Cast
+        developer preview</a>.</p>
       </dd>
 
     </dl>
