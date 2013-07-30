@@ -55,10 +55,11 @@ href="http://tools.android.com/knownissues">http://tools.android.com/knownissues
     <dt>General Notes:</dt>
     <dd>
       <ul>
-        <li>Fixed Renderscript compiling issue for Windows platforms with ant.</li>
+        <li>Fixed Renderscript compilation issue for Windows platforms with ant.</li>
         <li>Updated <a href="{@docRoot}tools/help/systrace.html">Systrace</a> to work with the
           Android 4.3 platform image.</li>
-        <li>Fixed problem with Renderscript packaging.</li>
+        <li>Fixed packaging of Renderscript compiler.</li>
+        <li>Build tools 18.0.0 is obsolete and 18.0.1 should be used instead.</li>
       </ul>
     </dd>
     </dl>
