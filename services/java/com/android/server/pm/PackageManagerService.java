@@ -5383,7 +5383,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         == PackageManager.SIGNATURE_MATCH);
         if (!allowed && (bp.protectionLevel
                 & PermissionInfo.PROTECTION_FLAG_SYSTEM) != 0) {
-            if (isPrivilegedApp(pkg)) {
+            if (isSystemApp(pkg)) {
                 // For updated system applications, a system permission
                 // is granted only if it had been defined by the original application.
                 if (isUpdatedSystemApp(pkg)) {
@@ -5391,7 +5391,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                             .getDisabledSystemPkgLPr(pkg.packageName);
                     final GrantedPermissions origGp = sysPs.sharedUser != null
                             ? sysPs.sharedUser : sysPs;
+
                     if (origGp.grantedPermissions.contains(perm)) {
+                        // If the original was granted this permission, we take
+                        // that grant decision as read and propagate it to the
+                        // update.
                         allowed = true;
                     } else {
                         // The system apk may have been updated with an older
@@ -5413,7 +5417,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         }
                     }
                 } else {
-                    allowed = true;
+                    allowed = isPrivilegedApp(pkg);
                 }
             }
         }
