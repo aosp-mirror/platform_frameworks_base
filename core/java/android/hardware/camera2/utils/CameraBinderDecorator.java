@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package android.hardware.photography.utils;
+package android.hardware.camera2.utils;
 
-import static android.hardware.photography.CameraAccessException.CAMERA_DISABLED;
-import static android.hardware.photography.CameraAccessException.CAMERA_DISCONNECTED;
-import static android.hardware.photography.CameraAccessException.CAMERA_IN_USE;
+import static android.hardware.camera2.CameraAccessException.CAMERA_DISABLED;
+import static android.hardware.camera2.CameraAccessException.CAMERA_DISCONNECTED;
+import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
 
 import android.os.DeadObjectException;
 import android.os.RemoteException;
@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
 /**
  * Translate camera service status_t return values into exceptions.
  *
- * @see android.hardware.photography.utils.CameraBinderDecorator#newInstance
+ * @see android.hardware.camera2.utils.CameraBinderDecorator#newInstance
  * @hide
  */
 public class CameraBinderDecorator {

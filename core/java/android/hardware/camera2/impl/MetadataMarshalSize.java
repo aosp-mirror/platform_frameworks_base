@@ -13,47 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.hardware.photography.impl;
+package android.hardware.camera2.impl;
 
-import android.graphics.Rect;
-import android.hardware.photography.CameraMetadata;
+import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.Size;
 
 import java.nio.ByteBuffer;
 
-public class MetadataMarshalRect implements MetadataMarshalClass<Rect> {
-    private static final int SIZE = 16;
+public class MetadataMarshalSize implements MetadataMarshalClass<Size> {
+
+    private static final int SIZE = 8;
 
     @Override
-    public int marshal(Rect value, ByteBuffer buffer, int nativeType, boolean sizeOnly) {
+    public int marshal(Size value, ByteBuffer buffer, int nativeType, boolean sizeOnly) {
         if (sizeOnly) {
             return SIZE;
         }
 
-        buffer.putInt(value.left);
-        buffer.putInt(value.top);
-        buffer.putInt(value.width());
-        buffer.putInt(value.height());
+        buffer.putInt(value.getWidth());
+        buffer.putInt(value.getHeight());
 
         return SIZE;
     }
 
     @Override
-    public Rect unmarshal(ByteBuffer buffer, int nativeType) {
-
-        int left = buffer.getInt();
-        int top = buffer.getInt();
+    public Size unmarshal(ByteBuffer buffer, int nativeType) {
         int width = buffer.getInt();
         int height = buffer.getInt();
 
-        int right = left + width;
-        int bottom = top + height;
-
-        return new Rect(left, top, right, bottom);
+        return new Size(width, height);
     }
 
     @Override
-    public Class<Rect> getMarshalingClass() {
-        return Rect.class;
+    public Class<Size> getMarshalingClass() {
+        return Size.class;
     }
 
     @Override

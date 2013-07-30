@@ -16,17 +16,17 @@
 
 package com.android.mediaframeworktest.unit;
 
-import android.hardware.photography.CameraAccessException;
-import android.hardware.photography.utils.CameraBinderDecorator;
-import android.hardware.photography.utils.CameraRuntimeException;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.utils.CameraBinderDecorator;
+import android.hardware.camera2.utils.CameraRuntimeException;
 import android.os.DeadObjectException;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import static org.mockito.Mockito.*;
-import static android.hardware.photography.utils.CameraBinderDecorator.*;
-import static android.hardware.photography.CameraAccessException.*;
+import static android.hardware.camera2.utils.CameraBinderDecorator.*;
+import static android.hardware.camera2.CameraAccessException.*;
 
 import junit.framework.Assert;
 

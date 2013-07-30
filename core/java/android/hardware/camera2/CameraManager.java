@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package android.hardware.photography;
+package android.hardware.camera2;
 
 import android.content.Context;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceListener;
 import android.hardware.IProCameraUser;
-import android.hardware.photography.utils.CameraBinderDecorator;
-import android.hardware.photography.utils.CameraRuntimeException;
+import android.hardware.camera2.utils.CameraBinderDecorator;
+import android.hardware.camera2.utils.CameraRuntimeException;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -42,7 +42,7 @@ import java.util.HashSet;
  * <pre>CameraManager manager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);</pre>
  *
  * <p>For more details about communicating with camera devices, read the Camera
- * developer guide or the {@link android.hardware.photography photography}
+ * developer guide or the {@link android.hardware.camera2 camera2}
  * package documentation.</p>
  */
 public final class CameraManager {
@@ -190,8 +190,8 @@ public final class CameraManager {
 
                 ICameraDeviceUser cameraUser;
 
-                android.hardware.photography.impl.CameraDevice device =
-                        new android.hardware.photography.impl.CameraDevice(cameraId);
+                android.hardware.camera2.impl.CameraDevice device =
+                        new android.hardware.camera2.impl.CameraDevice(cameraId);
 
                 cameraUser = mCameraService.connectDevice(device.getCallbacks(),
                         Integer.parseInt(cameraId),

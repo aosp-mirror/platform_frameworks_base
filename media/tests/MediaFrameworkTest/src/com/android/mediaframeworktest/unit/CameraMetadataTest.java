@@ -20,11 +20,11 @@ import android.os.Parcel;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
-import android.hardware.photography.CameraMetadata;
-import android.hardware.photography.Rational;
-import android.hardware.photography.Size;
+import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.Rational;
+import android.hardware.camera2.Size;
 
-import static android.hardware.photography.CameraMetadata.*;
+import static android.hardware.camera2.CameraMetadata.*;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;

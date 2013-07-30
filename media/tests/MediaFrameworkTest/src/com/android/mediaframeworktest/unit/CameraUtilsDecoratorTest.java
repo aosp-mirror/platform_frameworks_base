@@ -17,8 +17,8 @@
 package com.android.mediaframeworktest.unit;
 
 import android.test.suitebuilder.annotation.SmallTest;
-import android.hardware.photography.utils.*;
-import android.hardware.photography.utils.Decorator.DecoratorListener;
+import android.hardware.camera2.utils.*;
+import android.hardware.camera2.utils.Decorator.DecoratorListener;
 
 import junit.framework.Assert;
 

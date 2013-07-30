@@ -1,6 +1,6 @@
-package android.hardware.photography.utils;
+package android.hardware.camera2.utils;
 
-import android.hardware.photography.CameraAccessException;
+import android.hardware.camera2.CameraAccessException;
 
 /**
  * @hide

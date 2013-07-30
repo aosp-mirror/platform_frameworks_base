@@ -50,7 +50,7 @@ import android.graphics.drawable.Drawable;
 import android.hardware.ISerialManager;
 import android.hardware.SerialManager;
 import android.hardware.SystemSensorManager;
-import android.hardware.photography.CameraManager;
+import android.hardware.camera2.CameraManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.input.InputManager;
 import android.hardware.usb.IUsbManager;

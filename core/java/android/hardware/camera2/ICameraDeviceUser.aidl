@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package android.hardware.photography;
+package android.hardware.camera2;
 
 import android.view.Surface;
-import android.hardware.photography.CameraMetadata;
-import android.hardware.photography.CaptureRequest;
+import android.hardware.camera2.CameraMetadata;
+import android.hardware.camera2.CaptureRequest;
 
 /** @hide */
 interface ICameraDeviceUser
 {
     /**
-     * Keep up-to-date with frameworks/av/include/camera/photography/ICameraDeviceUser.h
+     * Keep up-to-date with frameworks/av/include/camera/camera2/ICameraDeviceUser.h
      */
     void disconnect();
 

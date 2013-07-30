@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package android.hardware.photography;
+package android.hardware.camera2;
 
-import android.hardware.photography.CameraMetadata;
+import android.hardware.camera2.CameraMetadata;
 
 /** @hide */
 interface ICameraDeviceCallbacks
 {
     /**
-     * Keep up-to-date with frameworks/av/include/camera/photography/ICameraDeviceCallbacks.h
+     * Keep up-to-date with frameworks/av/include/camera/camera2/ICameraDeviceCallbacks.h
      */
 
     void notifyCallback(int msgType, int ext1, int ext2);

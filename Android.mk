@@ -121,8 +121,8 @@ LOCAL_SRC_FILES += \
 	core/java/android/hardware/ICameraClient.aidl \
 	core/java/android/hardware/IProCameraUser.aidl \
 	core/java/android/hardware/IProCameraCallbacks.aidl \
-	core/java/android/hardware/photography/ICameraDeviceUser.aidl \
-	core/java/android/hardware/photography/ICameraDeviceCallbacks.aidl \
+	core/java/android/hardware/camera2/ICameraDeviceUser.aidl \
+	core/java/android/hardware/camera2/ICameraDeviceCallbacks.aidl \
 	core/java/android/hardware/ISerialManager.aidl \
 	core/java/android/hardware/display/IDisplayManager.aidl \
 	core/java/android/hardware/display/IDisplayManagerCallback.aidl \
