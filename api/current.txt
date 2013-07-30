@@ -9432,6 +9432,8 @@ package android.graphics {
     method public void moveTo(float, float);
     method public void offset(float, float, android.graphics.Path);
     method public void offset(float, float);
+    method public boolean op(android.graphics.Path, android.graphics.Path.Op);
+    method public boolean op(android.graphics.Path, android.graphics.Path, android.graphics.Path.Op);
     method public void quadTo(float, float, float, float);
     method public void rCubicTo(float, float, float, float, float, float);
     method public void rLineTo(float, float);
@@ -9461,6 +9463,16 @@ package android.graphics {
     enum_constant public static final android.graphics.Path.FillType INVERSE_EVEN_ODD;
     enum_constant public static final android.graphics.Path.FillType INVERSE_WINDING;
     enum_constant public static final android.graphics.Path.FillType WINDING;
+  }
+
+  public static final class Path.Op extends java.lang.Enum {
+    method public static android.graphics.Path.Op valueOf(java.lang.String);
+    method public static final android.graphics.Path.Op[] values();
+    enum_constant public static final android.graphics.Path.Op DIFFERENCE;
+    enum_constant public static final android.graphics.Path.Op INTERSECT;
+    enum_constant public static final android.graphics.Path.Op REVERSE_DIFFERENCE;
+    enum_constant public static final android.graphics.Path.Op UNION;
+    enum_constant public static final android.graphics.Path.Op XOR;
   }
 
   public class PathDashPathEffect extends android.graphics.PathEffect {
