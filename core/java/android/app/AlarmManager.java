@@ -258,11 +258,13 @@ public class AlarmManager
     private void setImpl(int type, long triggerAtMillis, long windowMillis, long intervalMillis,
             PendingIntent operation) {
         if (triggerAtMillis < 0) {
+            /* NOTYET
             if (mAlwaysExact) {
                 // Fatal error for KLP+ apps to use negative trigger times
                 throw new IllegalArgumentException("Invalid alarm trigger time "
                         + triggerAtMillis);
             }
+            */
             triggerAtMillis = 0;
         }
         try {
