@@ -16,6 +16,7 @@
 
 package com.android.server.firewall;
 
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import org.xmlpull.v1.XmlPullParser;
@@ -25,11 +26,11 @@ import java.io.IOException;
 
 class OrFilter extends FilterList {
     @Override
-    public boolean matches(IntentFirewall ifw, Intent intent, int callerUid, int callerPid,
-            String resolvedType, ApplicationInfo resolvedApp) {
+    public boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
+            int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
         for (int i=0; i<children.size(); i++) {
-            if (children.get(i).matches(ifw, intent, callerUid, callerPid, resolvedType,
-                    resolvedApp)) {
+            if (children.get(i).matches(ifw, resolvedComponent, intent, callerUid, callerPid,
+                    resolvedType, resolvedApp)) {
                 return true;
             }
         }

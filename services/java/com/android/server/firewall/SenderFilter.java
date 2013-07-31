@@ -17,6 +17,7 @@
 package com.android.server.firewall;
 
 import android.app.AppGlobals;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
@@ -77,24 +78,24 @@ class SenderFilter {
 
     private static final Filter SIGNATURE = new Filter() {
         @Override
-        public boolean matches(IntentFirewall ifw, Intent intent, int callerUid, int callerPid,
-                String resolvedType, ApplicationInfo resolvedApp) {
+        public boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
+                int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
             return ifw.signaturesMatch(callerUid, resolvedApp.uid);
         }
     };
 
     private static final Filter SYSTEM = new Filter() {
         @Override
-        public boolean matches(IntentFirewall ifw, Intent intent, int callerUid, int callerPid,
-                String resolvedType,  ApplicationInfo resolvedApp) {
+        public boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
+                int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
             return isPrivilegedApp(callerUid, callerPid);
         }
     };
 
     private static final Filter SYSTEM_OR_SIGNATURE = new Filter() {
         @Override
-        public boolean matches(IntentFirewall ifw, Intent intent, int callerUid, int callerPid,
-                String resolvedType, ApplicationInfo resolvedApp) {
+        public boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
+                int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
             return isPrivilegedApp(callerUid, callerPid) ||
                     ifw.signaturesMatch(callerUid, resolvedApp.uid);
         }
@@ -102,8 +103,8 @@ class SenderFilter {
 
     private static final Filter USER_ID = new Filter() {
         @Override
-        public boolean matches(IntentFirewall ifw, Intent intent, int callerUid, int callerPid,
-                String resolvedType, ApplicationInfo resolvedApp) {
+        public boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
+                int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
             // This checks whether the caller is either the system process, or has the same user id
             // I.e. the same app, or an app that uses the same shared user id.
             // This is the same set of applications that would be able to access the component if

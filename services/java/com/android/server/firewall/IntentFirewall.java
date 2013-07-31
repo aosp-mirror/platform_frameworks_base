@@ -120,25 +120,27 @@ public class IntentFirewall {
      */
     public boolean checkStartActivity(Intent intent, int callerUid, int callerPid,
             String resolvedType, ApplicationInfo resolvedApp) {
-        return checkIntent(mActivityResolver, TYPE_ACTIVITY, intent, callerUid, callerPid,
-                resolvedType, resolvedApp);
+        return checkIntent(mActivityResolver, intent.getComponent(), TYPE_ACTIVITY, intent,
+                callerUid, callerPid, resolvedType, resolvedApp);
     }
 
-    public boolean checkService(Intent intent, int callerUid, int callerPid, String resolvedType,
+    public boolean checkService(ComponentName resolvedService, Intent intent, int callerUid,
+            int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
+        return checkIntent(mServiceResolver, resolvedService, TYPE_SERVICE, intent, callerUid,
+                callerPid, resolvedType, resolvedApp);
+    }
+
+    public boolean checkIntent(FirewallIntentResolver resolver, ComponentName resolvedComponent,
+            int intentType, Intent intent, int callerUid, int callerPid, String resolvedType,
             ApplicationInfo resolvedApp) {
-        return checkIntent(mServiceResolver, TYPE_SERVICE, intent, callerUid, callerPid,
-                resolvedType, resolvedApp);
-    }
-
-    public boolean checkIntent(FirewallIntentResolver resolver, int intentType, Intent intent,
-            int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
         List<Rule> matchingRules = resolver.queryIntent(intent, resolvedType, false, 0);
         boolean log = false;
         boolean block = false;
 
         for (int i=0; i< matchingRules.size(); i++) {
             Rule rule = matchingRules.get(i);
-            if (rule.matches(this, intent, callerUid, callerPid, resolvedType, resolvedApp)) {
+            if (rule.matches(this, resolvedComponent, intent, callerUid, callerPid, resolvedType,
+                    resolvedApp)) {
                 block |= rule.getBlock();
                 log |= rule.getLog();
 
