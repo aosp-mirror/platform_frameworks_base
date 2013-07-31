@@ -12,6 +12,7 @@ page.title=Support Library Features
         <ol>
           <li><a href="#v7-appcompat">v7 appcompat library</a></li>
           <li><a href="#v7-gridlayout">v7 gridlayout library</a></li>
+          <li><a href="#v7-mediarouter">v7 mediarouter library</a></li>
         </ol>
       </li>
       <li><a href="#v13">v13 Support Library</a></li>
@@ -148,7 +149,6 @@ com.android.support:support-v4:18.0.+
 <p>This dependency notation specifies the release version 18.0.0 or higher.</p>
 
 
-
 <h2 id="v7">v7 Libraries</h2>
 
 <p>There are several libraries designed to be used with Android 2.1 (API level 7) and higher.
@@ -197,9 +197,7 @@ com.android.support:support-v4:18.0.+
 com.android.support:appcompat-v7:18.0.+
 </pre>
 
-<p>This dependency notation specifies release version 18.0.0 or higher.</p>
-
-
+<p>This dependency notation specifies the release version 18.0.0 or higher.</p>
 
 <h3 id="v7-gridlayout">v7 gridlayout library</h3>
 
@@ -220,7 +218,48 @@ com.android.support:appcompat-v7:18.0.+
 com.android.support:gridlayout-v7:18.0.+
 </pre>
 
-<p>This dependency notation specifies release version 18.0.0 or higher.</p>
+<p>This dependency notation specifies the release version 18.0.0 or higher.</p>
+
+<h3 id="v7-mediarouter">v7 mediarouter library</h3>
+
+<p>This library provides {@link android.support.v7.media.MediaRouter}, {@link
+android.support.v7.media.MediaRouteProvider}, and related media classes that
+support the <a href="https://developers.google.com/cast/">Google Cast
+developer preview</a>. </p>
+
+<p>In general, the APIs in the v7 mediarouter library provide a means of
+controlling the routing of media channels and streams from the current device to
+external screens, speakers, and other destination devices. The library includes
+APIs for publishing app-specific media route providers, for discovering and
+selecting destination devices, for checking media status, and more. For detailed
+information about the v7 mediarouter library APIs, see the
+{@link android.support.v7.media android.support.v7.media} package in the API
+reference.</p>
+
+<p>The v7 mediarouter library is located in the
+<code>&lt;sdk&gt;/extras/android/support/v7/mediarouter/</code> directory after
+you download the Android Support Library. It's provided as a library project
+with a dependency on the v7 appcompat library, so you'll need to include both
+libraries in your build path when setting up your project. For more information
+on how to set up your project, follow the instructions in <a
+href="{@docRoot}tools/support-library/setup.html#libs-with-res">adding libraries
+with resources</a>. If you are developing in Eclipse/ADT, make sure to include
+both the <code>android-support-v7-mediarouter.jar</code> and
+<code>android-support-v7-appcompat.jar</code> files.</p>
+
+<p>If you are using Android Studio, all you need to do is specify the Gradle build
+script dependency identifier <code>com.android.support:support-v7-mediarouter:&lt;revision&gt;</code>,
+where "18.0.0" is the minimum revision at which the library is available. For example:</p>
+
+<pre>
+com.android.support:support-v7-mediarouter:18.0.0
+</pre>
+
+<p class="caution">The v7 mediarouter library APIs introduced in Support Library
+r18 are subject to change in later revisions of the Support Library. At this
+time, we recommend using the library only in connection with the <a
+href="https://developers.google.com/cast/">Google Cast
+developer preview</a>. </p>
 
 
 <h2 id="v13">v13 Support Library</h2>
