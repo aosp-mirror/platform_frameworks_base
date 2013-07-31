@@ -261,6 +261,13 @@ public class InsetDrawable extends Drawable implements Drawable.Callback
         return this;
     }
 
+    /**
+     * Returns the drawable wrapped by this InsetDrawable. May be null.
+     */
+    public Drawable getDrawable() {
+        return mInsetState.mDrawable;
+    }
+
     final static class InsetState extends ConstantState {
         Drawable mDrawable;
         int mChangingConfigurations;
