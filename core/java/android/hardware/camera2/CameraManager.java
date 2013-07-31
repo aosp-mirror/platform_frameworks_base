@@ -22,7 +22,6 @@ import android.hardware.ICameraServiceListener;
 import android.hardware.IProCameraUser;
 import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -279,7 +278,7 @@ public final class CameraManager {
 
     // TODO: this class needs unit tests
     // TODO: extract class into top level
-    private class CameraServiceListener extends Binder implements ICameraServiceListener  {
+    private class CameraServiceListener extends ICameraServiceListener.Stub {
 
         // Keep up-to-date with ICameraServiceListener.h
 

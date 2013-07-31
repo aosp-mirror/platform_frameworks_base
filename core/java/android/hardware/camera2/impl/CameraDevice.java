@@ -24,7 +24,6 @@ import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraProperties;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.utils.CameraRuntimeException;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -40,6 +39,7 @@ import java.util.Stack;
 public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
     private final String TAG;
+    private final boolean DEBUG;
 
     // TODO: guard every function with if (!mRemoteDevice) check (if it was closed)
     private ICameraDeviceUser mRemoteDevice;
@@ -59,6 +59,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     public CameraDevice(String cameraId) {
         mCameraId = cameraId;
         TAG = String.format("CameraDevice-%s-JV", mCameraId);
+        DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     }
 
     public CameraDeviceCallbacks getCallbacks() {
@@ -288,7 +289,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     }
 
     // TODO: unit tests
-    public class CameraDeviceCallbacks extends Binder implements ICameraDeviceCallbacks {
+    public class CameraDeviceCallbacks extends ICameraDeviceCallbacks.Stub {
 
         @Override
         public IBinder asBinder() {
@@ -298,14 +299,17 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         // TODO: consider rename to onMessageReceived
         @Override
         public void notifyCallback(int msgType, int ext1, int ext2) throws RemoteException {
-            Log.d(TAG, "Got message " + msgType + " ext1: " + ext1 + " , ext2: " + ext2);
+            if (DEBUG) {
+                Log.d(TAG, "Got message " + msgType + " ext1: " + ext1 + " , ext2: " + ext2);
+            }
             // TODO implement rest
         }
 
         @Override
-        public void onResultReceived(int frameId, CameraMetadata result) throws RemoteException {
-            Log.d(TAG, "Received result for frameId " + frameId);
-
+        public void onResultReceived(int requestId, CameraMetadata result) throws RemoteException {
+            if (DEBUG) {
+                Log.d(TAG, "Received result for id " + requestId);
+            }
             CaptureListenerHolder holder;
 
             synchronized (mLock) {
@@ -313,7 +317,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 //        exposing the methods necessary like subscribeToRequest, unsubscribe..
                 // TODO: make class static class
 
-                holder = CameraDevice.this.mCaptureListenerMap.get(frameId);
+                holder = CameraDevice.this.mCaptureListenerMap.get(requestId);
 
                 // Clean up listener once we no longer expect to see it.
 
@@ -321,7 +325,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 // we probably want cancelRequest to return # of times it already enqueued and
                 // keep a counter.
                 if (holder != null && !holder.isRepeating()) {
-                    CameraDevice.this.mCaptureListenerMap.remove(frameId);
+                    CameraDevice.this.mCaptureListenerMap.remove(requestId);
                 }
             }
 
