@@ -163,13 +163,29 @@ public class ImageFormat {
      * <p>Multi-plane Android YUV format</p>
      *
      * <p>This format is a generic YCbCr format, capable of describing any 4:2:0
-     * chroma-subsampled planar or semiplanar buffer, with 8 bits per color
-     * sample.</p>
+     * chroma-subsampled planar or semiplanar buffer (but not fully interleaved),
+     * with 8 bits per color sample.</p>
      *
      * <p>Images in this format are always represented by three separate buffers
      * of data, one for each color plane. Additional information always
      * accompanies the buffers, describing the row stride and the pixel stride
      * for each plane.</p>
+     *
+     * <p>The order of planes in the array returned by
+     * {@link android.media.Image#getPlanes() Image#getPlanes()} is guaranteed such that
+     * plane #0 is always Y, plane #1 is always U (Cb), and plane #2 is always V (Cr).</p>
+     *
+     * <p>The Y-plane is guaranteed not to be interleaved with the U/V planes
+     * (in particular, pixel stride is always 1 in
+     * {@link android.media.Image.Plane#getPixelStride() yPlane.getPixelStride()}).</p>
+     *
+     * <p>The U/V planes are guaranteed to have the same row stride and pixel stride
+     * (in particular,
+     * {@link android.media.Image.Plane#getRowStride() uPlane.getRowStride()}
+     * == {@link android.media.Image.Plane#getRowStride() vPlane.getRowStride()} and
+     * {@link android.media.Image.Plane#getPixelStride() uPlane.getPixelStride()}
+     * == {@link android.media.Image.Plane#getPixelStride() vPlane.getPixelStride()};
+     * ).</p>
      *
      * <p>For example, the {@link android.media.Image} object can provide data
      * in this format from a {@link android.hardware.photography.CameraDevice}
