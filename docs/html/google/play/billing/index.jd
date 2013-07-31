@@ -1,13 +1,5 @@
 page.title=Google Play In-app Billing
 @jd:body
-<div id="butterbar-wrapper" >
-  <div id="butterbar" >
-    <div id="butterbar-message">
-<a target="_blank" href="https://docs.google.com/a/google.com/forms/d/1EHLPGqhbxj2HungHRRN4_0K9TGpc-Izy-u46vBDgS8Q/viewform">
-      Take the Android Developer Survey</a>
-    </div>
-  </div>
-</div>
 
 <p>In-app Billing is a Google Play service that lets you sell digital content from inside
 your applications. You can use the service to sell a wide range of content, including downloadable
