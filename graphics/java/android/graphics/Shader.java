@@ -90,6 +90,28 @@ public class Shader {
         }
     }
 
+    /**
+     * @hide
+     */
+    protected Shader copy() {
+        final Shader copy = new Shader();
+        copyLocalMatrix(copy);
+        return copy;
+    }
+
+    /**
+     * @hide
+     */
+    protected void copyLocalMatrix(Shader dest) {
+        if (mLocalMatrix != null) {
+            final Matrix lm = new Matrix();
+            getLocalMatrix(lm);
+            dest.setLocalMatrix(lm);
+        } else {
+            dest.setLocalMatrix(null);
+        }
+    }
+
     private static native void nativeDestructor(int native_shader, int native_skiaShader);
     private static native void nativeSetLocalMatrix(int native_shader,
             int native_skiaShader, int matrix_instance);
