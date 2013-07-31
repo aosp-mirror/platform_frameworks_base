@@ -265,7 +265,7 @@ public class MediaFocusControl implements OnFinished {
      */
     protected void discardAudioFocusOwner() {
         synchronized(mAudioFocusLock) {
-            if (!mFocusStack.empty() && mFocusStack.peek().canDispatchFocus()) {
+            if (!mFocusStack.empty()) {
                 // notify the current focus owner it lost focus after removing it from stack
                 final FocusRequester exFocusOwner = mFocusStack.pop();
                 exFocusOwner.handleFocusLoss(AudioManager.AUDIOFOCUS_LOSS);
@@ -280,10 +280,23 @@ public class MediaFocusControl implements OnFinished {
 
     private void notifyTopOfAudioFocusStack() {
         // notify the top of the stack it gained focus
-        if (!mFocusStack.empty() && mFocusStack.peek().canDispatchFocus()) {
+        if (!mFocusStack.empty()) {
             if (canReassignAudioFocus()) {
                 mFocusStack.peek().handleFocusGain(AudioManager.AUDIOFOCUS_GAIN);
             }
+        }
+    }
+
+    /**
+     * Focus is requested, propagate the associated loss throughout the stack.
+     * @param focusGain the new focus gain that will later be added at the top of the stack
+     */
+    private void propagateFocusLossFromGain_syncAf(int focusGain) {
+        // going through the audio focus stack to signal new focus, traversing order doesn't
+        // matter as all entries respond to the same external focus gain
+        Iterator<FocusRequester> stackIterator = mFocusStack.iterator();
+        while(stackIterator.hasNext()) {
+            stackIterator.next().handleExternalFocusGain(focusGain);
         }
     }
 
@@ -462,13 +475,13 @@ public class MediaFocusControl implements OnFinished {
                 fr.release();
             }
 
-            // notify current top of stack it is losing focus
-            if (!mFocusStack.empty() && mFocusStack.peek().canDispatchFocus()) {
-                mFocusStack.peek().handleExternalFocusGain(focusChangeHint);
-            }
-
             // focus requester might already be somewhere below in the stack, remove it
             removeFocusStackEntry(clientId, false /* signal */);
+
+            // propagate the focus change through the stack
+            if (!mFocusStack.empty()) {
+                propagateFocusLossFromGain_syncAf(focusChangeHint);
+            }
 
             // push focus requester at the top of the audio focus stack
             mFocusStack.push(new FocusRequester(mainStreamType, focusChangeHint, fd, cb,

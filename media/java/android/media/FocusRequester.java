@@ -37,9 +37,10 @@ class FocusRequester {
 
     // on purpose not using this classe's name, as it will only be used from MediaFocusControl
     private static final String TAG = "MediaFocusControl";
+    private static final boolean DEBUG = false;
 
     private AudioFocusDeathHandler mDeathHandler;
-    private final IAudioFocusDispatcher mFocusDispatcher;
+    private final IAudioFocusDispatcher mFocusDispatcher; // may be null
     private final IBinder mSourceRef;
     private final String mClientId;
     private final String mPackageName;
@@ -72,10 +73,6 @@ class FocusRequester {
         mFocusLossReceived = AUDIOFOCUS_NONE;
     }
 
-
-    boolean canDispatchFocus() {
-        return (mFocusDispatcher != null);
-    }
 
     boolean hasSameClient(String otherClient) {
         try {
@@ -197,7 +194,7 @@ class FocusRequester {
                 switch(mFocusLossReceived) {
                     case AUDIOFOCUS_NONE:
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                        return AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK;
+                        return AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK;
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                         return AudioManager.AUDIOFOCUS_LOSS_TRANSIENT;
                     case AudioManager.AUDIOFOCUS_LOSS:
@@ -210,20 +207,19 @@ class FocusRequester {
     }
 
     void handleExternalFocusGain(int focusGain) {
-        try {
-            int focusLoss = focusLossForGainRequest(focusGain);
-            if (focusLoss != mFocusLossReceived) {
-                mFocusDispatcher.dispatchAudioFocusChange(focusLoss, mClientId);
-                mFocusLossReceived = focusLoss;
-            }
-        } catch (android.os.RemoteException e) {
-            Log.e(TAG, "Failure to signal loss of focus: ", e);
-        }
+        int focusLoss = focusLossForGainRequest(focusGain);
+        handleFocusLoss(focusLoss);
     }
 
     void handleFocusGain(int focusGain) {
         try {
-            mFocusDispatcher.dispatchAudioFocusChange(focusGain, mClientId);
+            if (mFocusDispatcher != null) {
+                if (DEBUG) {
+                    Log.v(TAG, "dispatching " + focusChangeToString(focusGain) + " to "
+                        + mClientId);
+                }
+                mFocusDispatcher.dispatchAudioFocusChange(focusGain, mClientId);
+            }
             mFocusLossReceived = AUDIOFOCUS_NONE;
         } catch (android.os.RemoteException e) {
             Log.e(TAG, "Failure to signal gain of audio focus due to: ", e);
@@ -232,9 +228,16 @@ class FocusRequester {
 
     void handleFocusLoss(int focusLoss) {
         try {
-            mFocusDispatcher.dispatchAudioFocusChange(
-                    focusLoss, mClientId);
-            mFocusLossReceived = focusLoss;
+            if (focusLoss != mFocusLossReceived) {
+                if (mFocusDispatcher != null) {
+                    if (DEBUG) {
+                        Log.v(TAG, "dispatching " + focusChangeToString(focusLoss) + " to "
+                            + mClientId);
+                    }
+                    mFocusDispatcher.dispatchAudioFocusChange(focusLoss, mClientId);
+                }
+                mFocusLossReceived = focusLoss;
+            }
         } catch (android.os.RemoteException e) {
             Log.e(TAG, "Failure to signal loss of audio focus due to:", e);
         }
