@@ -299,6 +299,9 @@ redirects:
 
 # ------------------- TRAINING -------------------
 
+- from: /guide/topics/ui/layout/tabs.html
+  to: /training/implementing-navigation/lateral.html
+
 - from: /training/cloudsync/aesync.html
   to: /google/gcm/index.html
 

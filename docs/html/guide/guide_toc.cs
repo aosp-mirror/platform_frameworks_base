@@ -146,9 +146,6 @@
           <li><a href="<?cs var:toroot ?>guide/topics/ui/layout/grid.html">
               <span class="en">Grid Layout</span>
             </a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/ui/layout/tabs.html">
-              <span class="en">Tab Layout</span>
-            </a></li>
        -->
           <li><a href="<?cs var:toroot ?>guide/topics/ui/layout/listview.html">
               <span class="en">List View</span>
