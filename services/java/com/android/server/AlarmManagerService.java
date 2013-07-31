@@ -521,6 +521,14 @@ class AlarmManagerService extends IAlarmManager.Stub {
             throw new IllegalArgumentException("Invalid alarm type " + type);
         }
 
+        if (triggerAtTime < 0) {
+            final long who = Binder.getCallingUid();
+            final long what = Binder.getCallingPid();
+            Slog.w(TAG, "Invalid alarm trigger time! " + triggerAtTime + " from uid=" + who
+                    + " pid=" + what);
+            triggerAtTime = 0;
+        }
+
         final long nowElapsed = SystemClock.elapsedRealtime();
         final long triggerElapsed = convertToElapsed(triggerAtTime, type);
         final long maxElapsed;
@@ -567,7 +575,12 @@ class AlarmManagerService extends IAlarmManager.Stub {
         }
 
         if (DEBUG_VALIDATE) {
-            if (doValidate && validateConsistencyLocked()) {
+            if (doValidate && !validateConsistencyLocked()) {
+                Slog.v(TAG, "Tipping-point operation: type=" + type + " when=" + when
+                        + " when(hex)=" + Long.toHexString(when)
+                        + " whenElapsed=" + whenElapsed + " maxWhen=" + maxWhen
+                        + " interval=" + interval + " op=" + operation
+                        + " standalone=" + isStandalone);
                 rebatchAllAlarmsLocked(false);
                 reschedule = true;
             }
@@ -586,8 +599,9 @@ class AlarmManagerService extends IAlarmManager.Stub {
         final int NZ = mAlarmBatches.size();
         for (int iz = 0; iz < NZ; iz++) {
             Batch bz = mAlarmBatches.get(iz);
-            Slog.v(TAG, "Batch " + iz + ": " + bz);
+            pw.append("Batch "); pw.print(iz); pw.append(": "); pw.println(bz);
             dumpAlarmList(pw, bz.alarms, "  ", nowELAPSED, nowRTC);
+            pw.flush();
             Slog.v(TAG, bs.toString());
             bs.reset();
         }
