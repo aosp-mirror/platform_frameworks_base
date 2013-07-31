@@ -569,7 +569,7 @@ sample_dir := development/samples
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
-framework_docs_SDK_VERSION:=4.2
+framework_docs_SDK_VERSION:=4.3
   # release version (ie "Release x")  (full releases only)
 framework_docs_SDK_REL_ID:=1
 
