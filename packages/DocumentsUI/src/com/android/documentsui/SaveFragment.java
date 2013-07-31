@@ -82,7 +82,7 @@ public class SaveFragment extends Fragment {
         @Override
         public void onClick(View v) {
             final String mimeType = getArguments().getString(EXTRA_MIME_TYPE);
-            final String displayName = getArguments().getString(EXTRA_DISPLAY_NAME);
+            final String displayName = mDisplayName.getText().toString();
             ((DocumentsActivity) getActivity()).onSaveRequested(mimeType, displayName);
         }
     };

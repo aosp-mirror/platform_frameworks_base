@@ -14,7 +14,14 @@
      limitations under the License.
 -->
 
-<resources>
-    <string name="app_label">External Storage</string>
-    <string name="root_internal_storage">Internal storage</string>
-</resources>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="?android:attr/listPreferredItemPaddingEnd">
+
+    <EditText
+        android:id="@android:id/text1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</FrameLayout>
