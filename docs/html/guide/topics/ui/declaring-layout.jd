@@ -359,23 +359,6 @@ partially or totally obscuring them (unless the newer object is transparent).
   <p>Enables you to specify the location of child objects relative to each other (child A to
 the left of child B) or to the parent (aligned to the top of the parent).</p>
 </div>
-      
-<!--
-<div class="layout">
-  <h4><a href="layout/tabs.html">Tabs</a></h4>
-  <a href="layout/tabs.html"><img src="{@docRoot}images/ui/tabs-small.png" alt="" /></a>
-  <p>Provides a tab selection list that monitors clicks and enables the application to change
-the screen whenever a tab is clicked.</p>
-</div>
-      
-<div class="layout first">
-  <h4><a href="layout/grid.html">Table Layout</a></h4>
-  <a href="layout/table.html"><img src="{@docRoot}images/ui/gridlayout-small.png" alt="" /></a>
-  <p>A tabular layout with an arbitrary number of rows and columns, each cell holding the
-widget of your choice. The rows resize to fit the largest column. The cell borders are not
-visible.</p>
-</div>
--->
 
 <div class="layout">
   <h4><a href="{@docRoot}guide/webapps/webview.html">Web View</a></h4>
