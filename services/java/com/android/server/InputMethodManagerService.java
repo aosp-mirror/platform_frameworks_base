@@ -919,7 +919,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
             return true;
         }
-        Slog.w(TAG, "--- IPC called from background users. Ignore. \n" + getStackTrace());
+        Slog.w(TAG, "--- IPC called from background users. Ignore. \n"
+                + InputMethodUtils.getStackTrace());
         return false;
     }
 
@@ -2473,7 +2474,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             HashMap<String, InputMethodInfo> map, boolean resetDefaultEnabledIme) {
         if (DEBUG) {
             Slog.d(TAG, "--- re-buildInputMethodList reset = " + resetDefaultEnabledIme
-                    + " \n ------ \n" + getStackTrace());
+                    + " \n ------ \n" + InputMethodUtils.getStackTrace());
         }
         list.clear();
         map.clear();
@@ -3466,22 +3467,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
         }
-    }
-
-    // ----------------------------------------------------------------------
-    // Utilities for debug
-    private static String getStackTrace() {
-        final StringBuilder sb = new StringBuilder();
-        try {
-            throw new RuntimeException();
-        } catch (RuntimeException e) {
-            final StackTraceElement[] frames = e.getStackTrace();
-            // Start at 1 because the first frame is here and we don't care about it
-            for (int j = 1; j < frames.length; ++j) {
-                sb.append(frames[j].toString() + "\n");
-            }
-        }
-        return sb.toString();
     }
 
     @Override
