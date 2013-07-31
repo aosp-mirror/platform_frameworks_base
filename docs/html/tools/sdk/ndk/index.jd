@@ -63,7 +63,7 @@ page.title=Android NDK
 
 <div id="tos" style="display:none;width:760px;height:0;margin:0 auto">
 
-<div class="ndk" style="
+<div id="download" class="ndk" style="
 z-index: 99;
 width: 720px;
 position: absolute;
