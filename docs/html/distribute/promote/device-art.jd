@@ -47,7 +47,9 @@ feature image or screenshots for your Google Play app listing.</p>
     </p>
   </div>
   <div class="layout-content-col span-10">
-    <div id="output">No input image.</div>
+    <!-- position:relative fixes an issue where dragging an image out of a inline-block container
+         produced no drag feedback image in Chrome 28. -->
+    <div id="output" style="position:relative">No input image.</div>
   </div>
 </div>
 
@@ -143,6 +145,8 @@ feature image or screenshots for your Google Play app listing.</p>
   // Global variables
   var g_currentImage;
   var g_currentDevice;
+  var g_currentObjectURL;
+  var g_currentBlob;
 
   // Global constants
   var MSG_INVALID_INPUT_IMAGE = 'Invalid screenshot provided. Screenshots must be PNG files '
@@ -267,14 +271,15 @@ feature image or screenshots for your Google Play app listing.</p>
       return;
     }
 
+    polyfillCanvasToBlob();
     setupUI();
 
     // Set up Chrome drag-out
     $.event.props.push("dataTransfer");
     document.body.addEventListener('dragstart', function(e) {
-      var a = e.target;
-      if (a.classList.contains('dragout')) {
-        e.dataTransfer.setData('DownloadURL', a.dataset.downloadurl);
+      var target = e.target;
+      if (target.classList.contains('dragout')) {
+        e.dataTransfer.setData('DownloadURL', target.dataset.downloadurl);
       }
     }, false);
   });
@@ -419,7 +424,7 @@ feature image or screenshots for your Google Play app listing.</p>
       ctx.translate(-h, 0);
       ctx.drawImage(g_currentImage, 0, 0);
 
-      loadImageFromUri(canvas.toDataURL(), function(img) {
+      loadImageFromUri(canvas.toDataURL('image/png'), function(img) {
         g_currentImage = img;
         createFrame();
       });
@@ -459,10 +464,10 @@ feature image or screenshots for your Google Play app listing.</p>
     var resourceImages = {};
     loadImageResources(resList, function(r) {
       resourceImages = r;
-      continuation_();
+      continueWithResources_();
     });
 
-    function continuation_() {
+    function continueWithResources_() {
       var width = resourceImages['back'].naturalWidth;
       var height = resourceImages['back'].naturalHeight;
       var offset = port ? g_currentDevice.portOffset : g_currentDevice.landOffset;
@@ -486,17 +491,46 @@ feature image or screenshots for your Google Play app listing.</p>
         ctx.drawImage(resourceImages['fore'], 0, 0);
       }
 
-      var dataUrl = canvas.toDataURL();
+      window.URL = window.URL || window.webkitURL;
+      if (canvas.toBlob && window.URL.createObjectURL) {
+        if (g_currentObjectURL) {
+          window.URL.revokeObjectURL(g_currentObjectURL);
+          g_currentObjectURL = null;
+        }
+        if (g_currentBlob) {
+          if (g_currentBlob.close) {
+            g_currentBlob.close();
+          }
+          g_currentBlob = null;
+        }
+
+        canvas.toBlob(function(blob) {
+          if (!blob) {
+            continueWithFinalUrl_(canvas.toDataURL('image/png'));
+            return;
+          }
+          g_currentBlob = blob;
+          g_currentObjectURL = window.URL.createObjectURL(blob);
+          continueWithFinalUrl_(g_currentObjectURL);
+        }, 'image/png');
+      } else {
+        continueWithFinalUrl_(canvas.toDataURL('image/png'));
+      }
+    }
+
+    function continueWithFinalUrl_(imageUrl) {
       var filename = g_currentFilename
-          ? ('framed_' + g_currentFilename)
+          ? g_currentFilename.replace(/^(.+?)(\.\w+)?$/, '$1_framed.png')
           : 'framed_screenshot.png';
 
       var $link = $('<a>')
           .attr('download', filename)
-          .attr('href', dataUrl)
-          .attr('draggable', true)
-          .attr('data-downloadurl', ['image/png', filename, dataUrl].join(':'))
-          .append($('<img>').attr('src', dataUrl))
+          .attr('href', imageUrl)
+          .append($('<img>')
+              .addClass('dragout')
+              .attr('src', imageUrl)
+              .attr('draggable', true)
+              .attr('data-downloadurl', ['image/png', filename, imageUrl].join(':')))
           .appendTo($('#output').empty());
 
       $('#frame-customizations').show();
@@ -566,14 +600,14 @@ feature image or screenshots for your Google Play app listing.</p>
 
     var file = null;
     for (var i = 0; i < fileList.length; i++) {
-      if (fileList[i].type.toLowerCase().match(/^image\/png/)) {
+      if (fileList[i].type.toLowerCase().match(/^image\/(png|jpeg|jpg)/)) {
         file = fileList[i];
         break;
       }
     }
 
     if (!file) {
-      alert('Please use a valid screenshot file (PNG format).');
+      alert('Please use a valid screenshot file (PNG or JPEG format).');
       callback(null);
       return;
     }
@@ -608,5 +642,29 @@ feature image or screenshots for your Google Play app listing.</p>
     };
 
     fileReader.readAsDataURL(file);
+  }
+
+  /**
+   * Adds a simple version of Canvas.toBlob if toBlob isn't available.
+   */
+  function polyfillCanvasToBlob() {
+    if (!HTMLCanvasElement.prototype.toBlob && window.Blob) {
+      HTMLCanvasElement.prototype.toBlob = function(callback, mimeType, quality) {
+        if (typeof callback != 'function') {
+          throw new TypeError('Function expected');
+        }
+        var dataURL = this.toDataURL(mimeType, quality);
+        mimeType = dataURL.split(';')[0].split(':')[1];
+        var bs = window.atob(dataURL.split(',')[1]);
+        if (dataURL == 'data:,' || !bs.length) {
+          callback(null);
+          return;
+        }
+        for (var ui8arr = new Uint8Array(bs.length), i = 0; i < bs.length; ++i) {
+          ui8arr[i] = bs.charCodeAt(i);
+        }
+        callback(new Blob([ui8arr.buffer /* req'd for Safari */ || ui8arr], {type: mimeType}));
+      };
+    }
   }
 </script>
