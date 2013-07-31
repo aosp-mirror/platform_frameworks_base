@@ -640,15 +640,17 @@ class AlarmManagerService extends IAlarmManager.Stub {
     private void rescheduleKernelAlarmsLocked() {
         // Schedule the next upcoming wakeup alarm.  If there is a deliverable batch
         // prior to that which contains no wakeups, we schedule that as well.
-        final Batch firstWakeup = findFirstWakeupBatchLocked();
-        final Batch firstBatch = mAlarmBatches.get(0);
-        if (firstWakeup != null && mNextWakeup != firstWakeup.start) {
-            mNextWakeup = firstWakeup.start;
-            setLocked(ELAPSED_REALTIME_WAKEUP, firstWakeup.start);
-        }
-        if (firstBatch != firstWakeup && mNextNonWakeup != firstBatch.start) {
-            mNextNonWakeup = firstBatch.start;
-            setLocked(ELAPSED_REALTIME, firstBatch.start);
+        if (mAlarmBatches.size() > 0) {
+            final Batch firstWakeup = findFirstWakeupBatchLocked();
+            final Batch firstBatch = mAlarmBatches.get(0);
+            if (firstWakeup != null && mNextWakeup != firstWakeup.start) {
+                mNextWakeup = firstWakeup.start;
+                setLocked(ELAPSED_REALTIME_WAKEUP, firstWakeup.start);
+            }
+            if (firstBatch != firstWakeup && mNextNonWakeup != firstBatch.start) {
+                mNextNonWakeup = firstBatch.start;
+                setLocked(ELAPSED_REALTIME, firstBatch.start);
+            }
         }
     }
 
