@@ -21,11 +21,15 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.location.LocationManager;
+import android.os.Handler;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 
 import com.android.systemui.R;
@@ -43,9 +47,27 @@ public class LocationController extends BroadcastReceiver {
 
     private ArrayList<LocationGpsStateChangeCallback> mChangeCallbacks =
             new ArrayList<LocationGpsStateChangeCallback>();
+    private ArrayList<LocationSettingsChangeCallback> mSettingsChangeCallbacks =
+            new ArrayList<LocationSettingsChangeCallback>();
 
+    /**
+     * A callback for change in gps status (enabled/disabled, have lock, etc).
+     */
     public interface LocationGpsStateChangeCallback {
         public void onLocationGpsStateChanged(boolean inUse, String description);
+    }
+
+    /**
+     * A callback for change in location settings (the user has enabled/disabled location).
+     */
+    public interface LocationSettingsChangeCallback {
+        /**
+         * Called whenever location settings change.
+         *
+         * @param locationEnabled A value of true indicates that at least one type of location
+         *                        is enabled in settings.
+         */
+        public void onLocationSettingsChanged(boolean locationEnabled);
     }
 
     public LocationController(Context context) {
@@ -59,10 +81,68 @@ public class LocationController extends BroadcastReceiver {
         NotificationManager nm = (NotificationManager)context.getSystemService(
                 Context.NOTIFICATION_SERVICE);
         mNotificationService = nm.getService();
+
+        // Register to listen for changes to the location settings
+        context.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.LOCATION_PROVIDERS_ALLOWED), true,
+                new ContentObserver(new Handler()) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        boolean isEnabled = isLocationEnabled();
+                        for (LocationSettingsChangeCallback cb : mSettingsChangeCallbacks) {
+                            cb.onLocationSettingsChanged(isEnabled);
+                        }
+                    }
+                });
     }
 
+    /**
+     * Add a callback to listen for changes in gps status.
+     */
     public void addStateChangedCallback(LocationGpsStateChangeCallback cb) {
         mChangeCallbacks.add(cb);
+    }
+
+    /**
+     * Add a callback to listen for changes in location settings.
+     */
+    public void addSettingsChangedCallback(LocationSettingsChangeCallback cb) {
+        mSettingsChangeCallbacks.add(cb);
+    }
+
+    /**
+     * Enable or disable location in settings.
+     *
+     * <p>This will attempt to enable/disable every type of location setting
+     * (e.g. high and balanced power).
+     *
+     * <p>If enabling, a user consent dialog will pop up prompting the user to accept.
+     * If the user doesn't accept, network location won't be enabled.
+     */
+    public void setLocationEnabled(boolean enabled) {
+        final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        if (um.hasUserRestriction(UserManager.DISALLOW_SHARE_LOCATION)) {
+            return;
+        }
+        final ContentResolver cr = mContext.getContentResolver();
+        Settings.Secure.setLocationProviderEnabled(
+                cr, LocationManager.GPS_PROVIDER, enabled);
+        // When enabling the NETWORK_PROVIDER, a user consent dialog will pop up, and the
+        // setting won't actually be enabled until the user accepts the agreement.
+        Settings.Secure.setLocationProviderEnabled(
+                cr, LocationManager.NETWORK_PROVIDER, enabled);
+    }
+
+    /**
+     * Returns true if either gps or network location are enabled in settings.
+     */
+    public boolean isLocationEnabled() {
+        ContentResolver contentResolver = mContext.getContentResolver();
+        boolean isGpsEnabled = Settings.Secure.isLocationProviderEnabled(
+                contentResolver, LocationManager.GPS_PROVIDER);
+        boolean isNetworkEnabled = Settings.Secure.isLocationProviderEnabled(
+                contentResolver, LocationManager.NETWORK_PROVIDER);
+       return isGpsEnabled || isNetworkEnabled;
     }
 
     @Override

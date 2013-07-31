@@ -97,6 +97,7 @@ class QuickSettings {
 
     private BluetoothController mBluetoothController;
     private RotationLockController mRotationLockController;
+    private LocationController mLocationController;
 
     private AsyncTask<Void, Void, Pair<String, Drawable>> mUserInfoTask;
 
@@ -166,15 +167,17 @@ class QuickSettings {
             RotationLockController rotationLockController) {
         mBluetoothController = bluetoothController;
         mRotationLockController = rotationLockController;
+        mLocationController = locationController;
 
         setupQuickSettings();
         updateWifiDisplayStatus();
         updateResources();
+        applyLocationEnabledStatus();
 
         networkController.addNetworkSignalChangedCallback(mModel);
         bluetoothController.addStateChangedCallback(mModel);
         batteryController.addStateChangedCallback(mModel);
-        locationController.addStateChangedCallback(mModel);
+        locationController.addSettingsChangedCallback(mModel);
         rotationLockController.addRotationLockControllerCallback(mModel);
     }
 
@@ -596,6 +599,35 @@ class QuickSettings {
             parent.addView(bluetoothTile);
         }
 
+        // Location
+        final QuickSettingsBasicTile locationTile
+                = new QuickSettingsBasicTile(mContext);
+        locationTile.setImageResource(R.drawable.ic_qs_location_on);
+        locationTile.setTextResource(R.string.quick_settings_location_label);
+        locationTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startSettingsActivity(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            }
+        });
+        if (LONG_PRESS_TOGGLES) {
+            locationTile.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    boolean newLocationEnabledState = !mLocationController.isLocationEnabled();
+                    mLocationController.setLocationEnabled(newLocationEnabledState);
+                    if (newLocationEnabledState) {
+                        // Close the notifications tray so that the network location provider
+                        // consent dialog can be shown.
+                        Intent closeDialog = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+                        mContext.sendBroadcast(closeDialog);
+                    }
+                    return true; // Consume click
+                }} );
+        }
+        mModel.addLocationTile(locationTile,
+                new QuickSettingsModel.BasicRefreshCallback(locationTile));
+        parent.addView(locationTile);
     }
 
     private void addTemporaryTiles(final ViewGroup parent, final LayoutInflater inflater) {
@@ -619,22 +651,6 @@ class QuickSettings {
             }
         });
         parent.addView(alarmTile);
-
-        // Location
-        final QuickSettingsBasicTile locationTile
-                = new QuickSettingsBasicTile(mContext);
-        locationTile.setImageResource(R.drawable.ic_qs_location);
-        locationTile.setTextResource(R.string.quick_settings_location_label);
-        locationTile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startSettingsActivity(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            }
-        });
-        mModel.addLocationTile(locationTile,
-                new QuickSettingsModel.BasicRefreshCallback(locationTile)
-                        .setShowWhenEnabled(true));
-        parent.addView(locationTile);
 
         // Wifi Display
         QuickSettingsBasicTile wifiDisplayTile
@@ -775,6 +791,10 @@ class QuickSettings {
 
     private void applyBluetoothStatus() {
         mModel.onBluetoothStateChange(mBluetoothState);
+    }
+
+    private void applyLocationEnabledStatus() {
+        mModel.onLocationSettingsChanged(mLocationController.isLocationEnabled());
     }
 
     void reloadUserInfo() {

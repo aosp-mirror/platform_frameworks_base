@@ -43,7 +43,7 @@ import com.android.systemui.R;
 import com.android.systemui.settings.BrightnessController.BrightnessStateChangeCallback;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
-import com.android.systemui.statusbar.policy.LocationController.LocationGpsStateChangeCallback;
+import com.android.systemui.statusbar.policy.LocationController.LocationSettingsChangeCallback;
 import com.android.systemui.statusbar.policy.NetworkController.NetworkSignalChangedCallback;
 import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.policy.RotationLockController.RotationLockControllerCallback;
@@ -53,9 +53,9 @@ import java.util.List;
 class QuickSettingsModel implements BluetoothStateChangeCallback,
         NetworkSignalChangedCallback,
         BatteryStateChangeCallback,
-        LocationGpsStateChangeCallback,
         BrightnessStateChangeCallback,
-        RotationLockControllerCallback {
+        RotationLockControllerCallback,
+        LocationSettingsChangeCallback {
 
     // Sett InputMethoManagerService
     private static final String TAG_TRY_SUPPRESSING_IME_SWITCHER = "TrySuppressingImeSwitcher";
@@ -557,11 +557,17 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         mLocationCallback = cb;
         mLocationCallback.refreshView(mLocationTile, mLocationState);
     }
-    // LocationController callback
+
     @Override
-    public void onLocationGpsStateChanged(boolean inUse, String description) {
-        mLocationState.enabled = inUse;
-        mLocationState.label = description;
+    public void onLocationSettingsChanged(boolean locationEnabled) {
+        int textResId = locationEnabled ? R.string.quick_settings_location_label
+                : R.string.quick_settings_location_off_label;
+        String label = mContext.getText(textResId).toString();
+        int locationIconId = locationEnabled
+                ? R.drawable.ic_qs_location_on : R.drawable.ic_qs_location_off;
+        mLocationState.enabled = locationEnabled;
+        mLocationState.label = label;
+        mLocationState.iconId = locationIconId;
         mLocationCallback.refreshView(mLocationTile, mLocationState);
     }
 
