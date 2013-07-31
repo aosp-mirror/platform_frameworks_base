@@ -25,6 +25,6 @@ interface ICameraDeviceCallbacks
      * Keep up-to-date with frameworks/av/include/camera/camera2/ICameraDeviceCallbacks.h
      */
 
-    void notifyCallback(int msgType, int ext1, int ext2);
-    void onResultReceived(int frameId, in CameraMetadata result);
+    oneway void notifyCallback(int msgType, int ext1, int ext2);
+    oneway void onResultReceived(int frameId, in CameraMetadata result);
 }
