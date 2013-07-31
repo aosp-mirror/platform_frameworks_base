@@ -2433,7 +2433,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         CompareResult<RouteInfo> routeDiff = new CompareResult<RouteInfo>();
         if (curLp != null) {
             // check for the delta between the current set and the new
-            routeDiff = curLp.compareRoutes(newLp);
+            routeDiff = curLp.compareAllRoutes(newLp);
             dnsDiff = curLp.compareDnses(newLp);
         } else if (newLp != null) {
             routeDiff.added = newLp.getAllRoutes();

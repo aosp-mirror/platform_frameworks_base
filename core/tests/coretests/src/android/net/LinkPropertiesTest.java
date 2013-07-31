@@ -273,28 +273,47 @@ public class LinkPropertiesTest extends TestCase {
         // Check comparisons work.
         LinkProperties lp2 = new LinkProperties(lp);
         assertAllRoutesHaveInterface("wlan0", lp);
-        assertEquals(0, lp.compareRoutes(lp2).added.size());
-        assertEquals(0, lp.compareRoutes(lp2).removed.size());
+        assertEquals(0, lp.compareAllRoutes(lp2).added.size());
+        assertEquals(0, lp.compareAllRoutes(lp2).removed.size());
 
         lp2.setInterfaceName("p2p0");
         assertAllRoutesHaveInterface("p2p0", lp2);
-        assertEquals(3, lp.compareRoutes(lp2).added.size());
-        assertEquals(3, lp.compareRoutes(lp2).removed.size());
+        assertEquals(3, lp.compareAllRoutes(lp2).added.size());
+        assertEquals(3, lp.compareAllRoutes(lp2).removed.size());
     }
 
     @SmallTest
     public void testStackedInterfaces() {
         LinkProperties rmnet0 = new LinkProperties();
         rmnet0.setInterfaceName("rmnet0");
+        rmnet0.addLinkAddress(new LinkAddress(
+                    NetworkUtils.numericToInetAddress(ADDRV6), 128));
 
         LinkProperties clat4 = new LinkProperties();
         clat4.setInterfaceName("clat4");
+        clat4.addLinkAddress(new LinkAddress(
+                    NetworkUtils.numericToInetAddress(ADDRV4), 32));
 
         assertEquals(0, rmnet0.getStackedLinks().size());
+        assertEquals(1, rmnet0.getAddresses().size());
+        assertEquals(1, rmnet0.getLinkAddresses().size());
+        assertEquals(1, rmnet0.getAllAddresses().size());
+        assertEquals(1, rmnet0.getAllLinkAddresses().size());
+
         rmnet0.addStackedLink(clat4);
         assertEquals(1, rmnet0.getStackedLinks().size());
+        assertEquals(1, rmnet0.getAddresses().size());
+        assertEquals(1, rmnet0.getLinkAddresses().size());
+        assertEquals(2, rmnet0.getAllAddresses().size());
+        assertEquals(2, rmnet0.getAllLinkAddresses().size());
+
         rmnet0.addStackedLink(clat4);
         assertEquals(1, rmnet0.getStackedLinks().size());
+        assertEquals(1, rmnet0.getAddresses().size());
+        assertEquals(1, rmnet0.getLinkAddresses().size());
+        assertEquals(2, rmnet0.getAllAddresses().size());
+        assertEquals(2, rmnet0.getAllLinkAddresses().size());
+
         assertEquals(0, clat4.getStackedLinks().size());
 
         // Modify an item in the returned collection to see what happens.
