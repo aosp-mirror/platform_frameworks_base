@@ -2985,6 +2985,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         mActionBar.initIndeterminateProgress();
                     }
 
+                    final ActionBarOverlayLayout abol = (ActionBarOverlayLayout) findViewById(
+                            com.android.internal.R.id.action_bar_overlay_layout);
+                    if (abol != null) {
+                        abol.setOverlayMode(
+                                (localFeatures & (1 << FEATURE_ACTION_BAR_OVERLAY)) != 0);
+                    }
+
                     boolean splitActionBar = false;
                     final boolean splitWhenNarrow =
                             (mUiOptions & ActivityInfo.UIOPTION_SPLIT_ACTION_BAR_WHEN_NARROW) != 0;
