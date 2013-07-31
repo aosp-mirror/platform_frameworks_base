@@ -3909,8 +3909,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         NetworkInfo.State state = mCs
                                 .getNetworkInfo(ConnectivityManager.TYPE_MOBILE_HIPRI).getState();
                         if (state != NetworkInfo.State.CONNECTED) {
-                            log("isMobileOk: not connected ni=" +
+                            if (VDBG) {
+                                log("isMobileOk: not connected ni=" +
                                     mCs.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_HIPRI));
+                            }
                             sleep(1);
                             result = ConnectivityManager.CMP_RESULT_CODE_NO_CONNECTION;
                             continue;
