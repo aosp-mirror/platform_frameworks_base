@@ -1,13 +1,6 @@
 page.title=Developer Tools
 @jd:body
-<div id="butterbar-wrapper" >
-  <div id="butterbar" >
-    <div id="butterbar-message">
-<a target="_blank" href="https://docs.google.com/a/google.com/forms/d/1EHLPGqhbxj2HungHRRN4_0K9TGpc-Izy-u46vBDgS8Q/viewform">
-      Take the Android Developer Survey</a>
-    </div>
-  </div>
-</div>
+
     
 <img src="{@docRoot}images/tools-home.png" style="float:right;" height="415" width="763" />
 
