@@ -862,7 +862,6 @@ public class WebView extends AbsoluteLayout
      * @param resultCallback A callback to be invoked when the script execution
      *                       completes with the result of the execution (if any).
      *                       May be null if no notificaion of the result is required.
-     * @hide pending API council approval and CTS test coverage.
      */
     public void evaluateJavascript(String script, ValueCallback<String> resultCallback) {
         checkThread();

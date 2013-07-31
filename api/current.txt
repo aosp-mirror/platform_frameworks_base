@@ -29554,6 +29554,7 @@ package android.webkit {
     method public android.webkit.WebBackForwardList copyBackForwardList();
     method public void destroy();
     method public void documentHasImages(android.os.Message);
+    method public void evaluateJavascript(java.lang.String, android.webkit.ValueCallback<java.lang.String>);
     method public static java.lang.String findAddress(java.lang.String);
     method public deprecated int findAll(java.lang.String);
     method public void findAllAsync(java.lang.String);
