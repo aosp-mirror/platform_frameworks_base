@@ -21,9 +21,15 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ProviderInfo;
+import android.content.res.Resources.NotFoundException;
+import android.database.Cursor;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
+import android.provider.DocumentsContract.RootColumns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,11 +45,11 @@ import com.google.android.collect.Lists;
 import java.util.List;
 
 /**
- * Display all known storage backends.
+ * Display all known storage roots.
  */
 public class BackendFragment extends Fragment {
 
-    // TODO: handle multiple accounts from single backend
+    // TODO: cluster backends by type
 
     private GridView mGridView;
     private BackendAdapter mAdapter;
@@ -57,19 +63,69 @@ public class BackendFragment extends Fragment {
         ft.commitAllowingStateLoss();
     }
 
+    public static class Root {
+        public int rootType;
+        public Uri uri;
+        public Drawable icon;
+        public String title;
+        public String summary;
+
+        public static Root fromCursor(Context context, ProviderInfo info, Cursor cursor) {
+            final Root root = new Root();
+
+            root.rootType = cursor.getInt(cursor.getColumnIndex(RootColumns.ROOT_TYPE));
+            root.uri = DocumentsContract.buildDocumentUri(
+                    info.authority, cursor.getString(cursor.getColumnIndex(RootColumns.GUID)));
+
+            final PackageManager pm = context.getPackageManager();
+            final int icon = cursor.getInt(cursor.getColumnIndex(RootColumns.ICON));
+            if (icon != 0) {
+                try {
+                    root.icon = pm.getResourcesForApplication(info.applicationInfo)
+                            .getDrawable(icon);
+                } catch (NotFoundException e) {
+                    throw new RuntimeException(e);
+                } catch (NameNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                root.icon = info.loadIcon(pm);
+            }
+
+            root.title = cursor.getString(cursor.getColumnIndex(RootColumns.TITLE));
+            if (root.title == null) {
+                root.title = info.loadLabel(pm).toString();
+            }
+
+            root.summary = cursor.getString(cursor.getColumnIndex(RootColumns.SUMMARY));
+
+            return root;
+        }
+    }
+
     @Override
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final Context context = inflater.getContext();
 
-        // Gather known storage providers
+        // Gather roots from known storage providers
         final List<ProviderInfo> providers = context.getPackageManager()
                 .queryContentProviders(null, -1, PackageManager.GET_META_DATA);
-        final List<ProviderInfo> backends = Lists.newArrayList();
+        final List<Root> roots = Lists.newArrayList();
         for (ProviderInfo info : providers) {
             if (info.metaData != null
                     && info.metaData.containsKey(DocumentsContract.META_DATA_DOCUMENT_PROVIDER)) {
-                backends.add(info);
+                // TODO: populate roots on background thread, and cache results
+                final Uri uri = DocumentsContract.buildRootsUri(info.authority);
+                final Cursor cursor = context.getContentResolver()
+                        .query(uri, null, null, null, null);
+                try {
+                    while (cursor.moveToNext()) {
+                        roots.add(Root.fromCursor(context, info, cursor));
+                    }
+                } finally {
+                    cursor.close();
+                }
             }
         }
 
@@ -78,7 +134,7 @@ public class BackendFragment extends Fragment {
         mGridView = (GridView) view.findViewById(R.id.grid);
         mGridView.setOnItemClickListener(mItemListener);
 
-        mAdapter = new BackendAdapter(context, backends);
+        mAdapter = new BackendAdapter(context, roots);
         mGridView.setAdapter(mAdapter);
         mGridView.setNumColumns(GridView.AUTO_FIT);
 
@@ -88,13 +144,13 @@ public class BackendFragment extends Fragment {
     private OnItemClickListener mItemListener = new OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            final ProviderInfo info = mAdapter.getItem(position);
-            ((DocumentsActivity) getActivity()).onBackendPicked(info);
+            final Root root = mAdapter.getItem(position);
+            ((DocumentsActivity) getActivity()).onRootPicked(root);
         }
     };
 
-    public static class BackendAdapter extends ArrayAdapter<ProviderInfo> {
-        public BackendAdapter(Context context, List<ProviderInfo> list) {
+    public static class BackendAdapter extends ArrayAdapter<Root> {
+        public BackendAdapter(Context context, List<Root> list) {
             super(context, android.R.layout.simple_list_item_1, list);
         }
 
@@ -109,9 +165,9 @@ public class BackendFragment extends Fragment {
             final TextView text1 = (TextView) convertView.findViewById(android.R.id.text1);
 
             final PackageManager pm = parent.getContext().getPackageManager();
-            final ProviderInfo info = getItem(position);
-            icon.setImageDrawable(info.loadIcon(pm));
-            text1.setText(info.loadLabel(pm));
+            final Root root = getItem(position);
+            icon.setImageDrawable(root.icon);
+            text1.setText(root.title);
 
             return convertView;
         }

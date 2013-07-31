@@ -21,15 +21,20 @@ import static com.android.documentsui.DirectoryFragment.getCursorString;
 import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.app.FragmentManager.BackStackEntry;
 import android.app.FragmentManager.OnBackStackChangedListener;
 import android.content.ClipData;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
@@ -44,7 +49,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.TextView;
+
+import com.android.documentsui.BackendFragment.Root;
 
 import java.util.Arrays;
 import java.util.List;
@@ -160,7 +168,7 @@ public class DocumentsActivity extends Activity {
             getFragmentManager().popBackStack();
             updateActionBar();
         } else if (id == R.id.menu_create_dir) {
-            // TODO: show dialog to create directory
+            CreateDirectoryFragment.show(getFragmentManager());
         }
         return super.onOptionsItemSelected(item);
     }
@@ -232,11 +240,8 @@ public class DocumentsActivity extends Activity {
         invalidateOptionsMenu();
     }
 
-    public void onBackendPicked(ProviderInfo info) {
-        final Uri uri = DocumentsContract.buildDocumentUri(
-                info.authority, DocumentsContract.ROOT_GUID);
-        final CharSequence displayName = info.loadLabel(getPackageManager());
-        DirectoryFragment.show(getFragmentManager(), uri, displayName.toString());
+    public void onRootPicked(Root root) {
+        DirectoryFragment.show(getFragmentManager(), root.uri, root.title);
     }
 
     public void onDocumentPicked(Document doc) {
@@ -263,8 +268,12 @@ public class DocumentsActivity extends Activity {
     }
 
     public void onSaveRequested(String mimeType, String displayName) {
-        // TODO: create file, confirming before overwriting
-        final Uri uri = null;
+        final ContentValues values = new ContentValues();
+        values.put(DocumentColumns.MIME_TYPE, mimeType);
+        values.put(DocumentColumns.DISPLAY_NAME, displayName);
+
+        // TODO: handle errors from remote side
+        final Uri uri = getContentResolver().insert(mCurrentDir, values);
         onFinished(uri);
     }
 
@@ -283,11 +292,10 @@ public class DocumentsActivity extends Activity {
             intent.setClipData(clipData);
         }
 
-        intent.addFlags(
-                Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_PERSIST_GRANT_URI_PERMISSION);
-        if (mAction == ACTION_CREATE) {
-            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        }
+        // TODO: omit WRITE and PERSIST for GET_CONTENT
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                | Intent.FLAG_PERSIST_GRANT_URI_PERMISSION);
 
         setResult(Activity.RESULT_OK, intent);
         finish();
@@ -316,6 +324,24 @@ public class DocumentsActivity extends Activity {
             doc.uri = DocumentsContract.buildDocumentUri(authority, guid);
             doc.mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
             doc.displayName = getCursorString(cursor, DocumentColumns.DISPLAY_NAME);
+            return doc;
+        }
+
+        public static Document fromUri(ContentResolver resolver, Uri uri) {
+            final Document doc = new Document();
+            doc.uri = uri;
+
+            final Cursor cursor = resolver.query(uri, null, null, null, null);
+            try {
+                if (!cursor.moveToFirst()) {
+                    throw new IllegalArgumentException("Missing details for " + uri);
+                }
+                doc.mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
+                doc.displayName = getCursorString(cursor, DocumentColumns.DISPLAY_NAME);
+            } finally {
+                cursor.close();
+            }
+
             return doc;
         }
     }
@@ -357,6 +383,52 @@ public class DocumentsActivity extends Activity {
             } else {
                 return null;
             }
+        }
+    }
+
+    private static final String TAG_CREATE_DIRECTORY = "create_directory";
+
+    public static class CreateDirectoryFragment extends DialogFragment {
+        public static void show(FragmentManager fm) {
+            final CreateDirectoryFragment dialog = new CreateDirectoryFragment();
+            dialog.show(fm, TAG_CREATE_DIRECTORY);
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Context context = getActivity();
+            final ContentResolver resolver = context.getContentResolver();
+
+            final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            final LayoutInflater dialogInflater = LayoutInflater.from(builder.getContext());
+
+            final View view = dialogInflater.inflate(R.layout.dialog_create_dir, null, false);
+            final EditText text1 = (EditText)view.findViewById(android.R.id.text1);
+
+            builder.setTitle(R.string.menu_create_dir);
+            builder.setView(view);
+
+            builder.setPositiveButton(android.R.string.ok, new OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    final String displayName = text1.getText().toString();
+
+                    final ContentValues values = new ContentValues();
+                    values.put(DocumentColumns.MIME_TYPE, DocumentsContract.MIME_TYPE_DIRECTORY);
+                    values.put(DocumentColumns.DISPLAY_NAME, displayName);
+
+                    // TODO: handle errors from remote side
+                    final DocumentsActivity activity = (DocumentsActivity) getActivity();
+                    final Uri uri = resolver.insert(activity.mCurrentDir, values);
+
+                    // Navigate into newly created child
+                    final Document doc = Document.fromUri(resolver, uri);
+                    activity.onDocumentPicked(doc);
+                }
+            });
+            builder.setNegativeButton(android.R.string.cancel, null);
+
+            return builder.create();
         }
     }
 }
