@@ -118,13 +118,13 @@ Purchase Status API. For security reasons, the app should not normally attempt t
 the purchase itself using the Purchase Status API.</p>
 
 <p>If the backend server determines that the purchase is valid, it notifies the
-app and grant access to the content. For improved performance, the backend servers
-should store the purchase details and order status in a local database, updated a
+app and grants access to the content. For improved performance, the backend servers
+should store the purchase details and order status in a local database, updated at
 intervals or as-needed.</p>
 
-<p>Keep in mind that users will want to be able to use your app at any time, including
+<p>Keep in mind that users will want the ability to use your app at any time, including
 when there may be no network connection available. Make sure that your approach to
-purchase verification takes account of the offline use-case.</p>
+purchase verification accounts for the offline use-case.</p>
 
 <h2 id="practices">Using the API Efficiently</h2>
 
@@ -154,7 +154,7 @@ minimize your access using the techniques below. </p>
   query each day to check the status of expiring subscriptions, then update the database.
   Note that:
     <ul>
-      <li>Your servers should not query all subscriptions every day</li>
+      <li>Your servers should not query all subscriptions every day.</li>
       <li>Your servers should never query subscription status dynamically, based on
       individual requests from your Android application.</li>
     </ul>
@@ -162,5 +162,6 @@ minimize your access using the techniques below. </p>
 </ul>
 
 <p>By following those general guidelines, your implementation will offer the
-best possible performance for users and minimize use of the Google Play Android
-Developer API.</p>
+best possible performance for users and minimize use of the <a
+href="https://developers.google.com/android-publisher/v1_1/">Google Play Android
+Developer API</a>.</p>
