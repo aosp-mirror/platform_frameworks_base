@@ -4198,6 +4198,10 @@ public class AudioService extends IAudioService.Stub {
         mMediaFocusControl.unregisterAudioFocusClient(clientId);
     }
 
+    public int getCurrentAudioFocus() {
+        return mMediaFocusControl.getCurrentAudioFocus();
+    }
+
     //==========================================================================================
     // Device orientation
     //==========================================================================================
