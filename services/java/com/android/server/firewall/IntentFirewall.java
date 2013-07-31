@@ -86,6 +86,7 @@ public class IntentFirewall {
                 StringFilter.DATA,
                 StringFilter.HOST,
                 StringFilter.MIME_TYPE,
+                StringFilter.SCHEME,
                 StringFilter.PATH,
                 StringFilter.SSP,
 
