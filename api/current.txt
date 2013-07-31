@@ -23,6 +23,7 @@ package android {
     field public static final java.lang.String BIND_APPWIDGET = "android.permission.BIND_APPWIDGET";
     field public static final java.lang.String BIND_DEVICE_ADMIN = "android.permission.BIND_DEVICE_ADMIN";
     field public static final java.lang.String BIND_INPUT_METHOD = "android.permission.BIND_INPUT_METHOD";
+    field public static final java.lang.String BIND_NFC_SERVICE = "android.permission.BIND_NFC_SERVICE";
     field public static final java.lang.String BIND_NOTIFICATION_LISTENER_SERVICE = "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE";
     field public static final java.lang.String BIND_PRINT_SERVICE = "android.permission.BIND_PRINT_SERVICE";
     field public static final java.lang.String BIND_REMOTEVIEWS = "android.permission.BIND_REMOTEVIEWS";
@@ -14784,6 +14785,18 @@ package android.nfc {
 }
 
 package android.nfc.cardemulation {
+
+  public final class CardEmulationManager {
+    method public static synchronized android.nfc.cardemulation.CardEmulationManager getInstance(android.nfc.NfcAdapter);
+    method public boolean isDefaultServiceForAid(android.content.ComponentName, java.lang.String);
+    method public boolean isDefaultServiceForCategory(android.content.ComponentName, java.lang.String);
+    method public boolean setDefaultServiceForCategory(android.content.ComponentName, java.lang.String);
+    field public static final java.lang.String ACTION_CHANGE_DEFAULT = "android.nfc.cardemulation.ACTION_CHANGE_DEFAULT";
+    field public static final java.lang.String CATEGORY_OTHER = "other";
+    field public static final java.lang.String CATEGORY_PAYMENT = "payment";
+    field public static final java.lang.String EXTRA_CATEGORY = "category";
+    field public static final java.lang.String EXTRA_SERVICE_COMPONENT = "component";
+  }
 
   public abstract class HostApduService extends android.app.Service {
     ctor public HostApduService();

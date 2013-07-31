@@ -990,6 +990,13 @@
     <string name="permdesc_accessAllPrintJobs">Allows the holder to access print jobs
         created by another app. Should never be needed for normal apps.</string>
 
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindNfcService">bind to NFC service</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindNfcService">Allows the holder to bind to applications
+        that are emulating NFC cards. Should never be needed for normal apps.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bindTextService">bind to a text service</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

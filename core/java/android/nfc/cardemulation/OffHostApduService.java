@@ -32,7 +32,8 @@ import android.os.IBinder;
  *     &lt;meta-data android:name="android.nfc.OffHostApduService" android:resource="@xml/apduservice.xml"/&gt;
  * &lt;/service&gt;</pre>
  * <p>For more details refer to {@link #SERVICE_META_DATA},
- * <code>&lt;{@link android.R.styleable#OffHostApduService offhost-apdu-service}&gt;</code> and
+ * <code>&lt;{@link android.R.styleable#OffHostApduService offhost-apdu-service}&gt;</code>,
+ * <code>&lt;{@link android.R.styleable#AidGroup aid-group}&gt;</code> and
  * <code>&lt;{@link android.R.styleable#AidFilter aid-filter}&gt;</code>.
  */
 public abstract class OffHostApduService extends Service {

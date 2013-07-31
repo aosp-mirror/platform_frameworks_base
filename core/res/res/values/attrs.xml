@@ -2598,16 +2598,27 @@
         <attr name="description" />
     </declare-styleable>
 
-    <!-- Specify one or more <code>aid-filter</code> elements inside a
+    <!-- Specify one or more <code>aid-group</code> elements inside a
          <code>host-apdu-service</code> or <code>offhost-apdu-service</code>
-         element to list the ISO7816 Application ID (AIDs) your service can handle.-->
+         element to define a group of ISO7816 Application ID (AIDs) that
+         your service can handle.-->
+    <declare-styleable name="AidGroup">
+        <!-- Short description of what the AID group implements. This attribute is mandatory.-->
+        <attr name="description" />
+        <!-- The category attribute will be used by the Android platform to present
+             multiple applications that register AIDs in the same category uniformly.
+             Additionally, when a category is specified, Android will ensure that either
+             all AIDs in this group are routed to this application, or none at all.
+             This attribute is optional.-->
+        <attr name="category" format="string" />
+    </declare-styleable>
+
+    <!-- Specify one or more <code>aid-filter</code> elements inside a
+         <code>aid-group</code> element to specify an ISO7816 Application ID (AID)
+         your service can handle. -->
     <declare-styleable name="AidFilter">
         <!-- The ISO7816 Application ID. This attribute is mandatory. -->
         <attr name="name" />
-        <!-- Short description of what the AID implements. This attribute is mandatory.-->
-        <attr name="description" />
-        <!-- Category. This attribute is optional.-->
-        <attr name="category" format="string" />
     </declare-styleable>
 
     <declare-styleable name="ActionMenuItemView">

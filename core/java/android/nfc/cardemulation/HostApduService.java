@@ -28,7 +28,8 @@ import android.util.Log;
  *     &lt;meta-data android:name="android.nfc.HostApduService" android:resource="@xml/apduservice.xml"/&gt;
  * &lt;/service&gt;</pre>
  * <p>For more details refer to {@link #SERVICE_META_DATA},
- * <code>&lt;{@link android.R.styleable#HostApduService host-apdu-service}&gt;</code> and
+ * <code>&lt;{@link android.R.styleable#HostApduService host-apdu-service}&gt;</code>,
+ * <code>&lt;{@link android.R.styleable#AidGroup aid-group}&gt;</code> and
  * <code>&lt;{@link android.R.styleable#AidFilter aid-filter}&gt;</code>.
  * <p class="note">The Android platform currently only supports a single
  * logical channel.
