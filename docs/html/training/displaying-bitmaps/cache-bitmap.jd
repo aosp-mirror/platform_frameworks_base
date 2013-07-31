@@ -324,14 +324,14 @@ private LruCache&lt;String, Bitmap&gt; mMemoryCache;
 &#64;Override
 protected void onCreate(Bundle savedInstanceState) {
     ...
-    RetainFragment mRetainFragment =
+    RetainFragment retainFragment =
             RetainFragment.findOrCreateRetainFragment(getFragmentManager());
-    mMemoryCache = RetainFragment.mRetainedCache;
+    mMemoryCache = retainFragment.mRetainedCache;
     if (mMemoryCache == null) {
         mMemoryCache = new LruCache&lt;String, Bitmap&gt;(cacheSize) {
             ... // Initialize cache here as usual
         }
-        mRetainFragment.mRetainedCache = mMemoryCache;
+        retainFragment.mRetainedCache = mMemoryCache;
     }
     ...
 }
