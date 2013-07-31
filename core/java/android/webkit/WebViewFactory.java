@@ -28,7 +28,7 @@ import android.util.Log;
  * @hide
  */
 public final class WebViewFactory {
-    private static final boolean DEFAULT_TO_EXPERIMENTAL_WEBVIEW = false;
+    private static final boolean DEFAULT_TO_EXPERIMENTAL_WEBVIEW = true;
     private static final String EXPERIMENTAL_PROPERTY_DEFAULT_OFF = "persist.sys.webview.exp";
     private static final String EXPERIMENTAL_PROPERTY_DEFAULT_ON  = "persist.sys.webview.exp_on";
 
