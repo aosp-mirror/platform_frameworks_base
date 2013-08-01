@@ -41,7 +41,7 @@ import java.util.List;
  * <li>
  * After every call to {@link #onLayout(PrintAttributes, PrintAttributes,
  * CancellationSignal, LayoutResultCallback, Bundle)}, you may get a call to
- * {@link #onWrite(List, FileDescriptor, CancellationSignal, WriteResultCallback)}
+ * {@link #onWrite(PageRange[], FileDescriptor, CancellationSignal, WriteResultCallback)}
  * asking you to write a PDF file with the content for specific pages.
  * </li>
  * <li>
@@ -64,7 +64,7 @@ import java.util.List;
  * PrintAttributes, CancellationSignal, LayoutResultCallback, Bundle)} on
  * the UI thread (assuming onStart initializes resources needed for layout).
  * This will ensure that the UI does not change while you are laying out the
- * printed content. Then you can handle {@link #onWrite(List, FileDescriptor,
+ * printed content. Then you can handle {@link #onWrite(PageRange[], FileDescriptor,
  * CancellationSignal, WriteResultCallback)} and {@link #onFinish()} on another
  * thread. This will ensure that the UI is frozen for the minimal amount of
  * time. Also this assumes that you will generate the printed content in
@@ -141,7 +141,7 @@ public abstract class PrintDocumentAdapter {
      * made on the main thread.
      * </p>
      *
-     * @param pages The pages whose content to print.
+     * @param pages The pages whose content to print - non-overlapping in ascending order.
      * @param destination The destination file descriptor to which to write.
      * @param cancellationSignal Signal for observing cancel writing requests.
      * @param callback Callback to inform the system for the write result.
@@ -149,7 +149,7 @@ public abstract class PrintDocumentAdapter {
      * @see WriteResultCallback
      * @see CancellationSignal
      */
-    public abstract void onWrite(List<PageRange> pages, FileDescriptor destination,
+    public abstract void onWrite(PageRange[] pages, FileDescriptor destination,
             CancellationSignal cancellationSignal, WriteResultCallback callback);
 
     /**
@@ -163,7 +163,7 @@ public abstract class PrintDocumentAdapter {
 
     /**
      * Base class for implementing a callback for the result of {@link
-     * PrintDocumentAdapter#onWrite(List, FileDescriptor, CancellationSignal,
+     * PrintDocumentAdapter#onWrite(PageRange[], FileDescriptor, CancellationSignal,
      * WriteResultCallback)}.
      */
     public static abstract class WriteResultCallback {
@@ -178,9 +178,9 @@ public abstract class PrintDocumentAdapter {
         /**
          * Notifies that all the data was written.
          *
-         * @param pages The pages that were written.
+         * @param pages The pages that were written. Cannot be null or empty.
          */
-        public void onWriteFinished(List<PageRange> pages) {
+        public void onWriteFinished(PageRange[] pages) {
             /* do nothing - stub */
         }
 
@@ -190,6 +190,13 @@ public abstract class PrintDocumentAdapter {
          * @param error Error message. May be null if error is unknown.
          */
         public void onWriteFailed(CharSequence error) {
+            /* do nothing - stub */
+        }
+
+        /**
+         * Notifies that write was cancelled as a result of a cancellation request.
+         */
+        public void onWriteCancelled() {
             /* do nothing - stub */
         }
     }
@@ -211,7 +218,7 @@ public abstract class PrintDocumentAdapter {
         /**
          * Notifies that the layout finished and whether the content changed.
          *
-         * @param info An info object describing the document.
+         * @param info An info object describing the document. Cannot be null.
          * @param changed Whether the layout changed.
          *
          * @see PrintDocumentInfo
@@ -226,6 +233,13 @@ public abstract class PrintDocumentAdapter {
          * @param error Error message. May be null if error is unknown.
          */
         public void onLayoutFailed(CharSequence error) {
+            /* do nothing - stub */
+        }
+
+        /**
+         * Notifies that layout was cancelled as a result of a cancellation request.
+         */
+        public void onLayoutCancelled() {
             /* do nothing - stub */
         }
     }

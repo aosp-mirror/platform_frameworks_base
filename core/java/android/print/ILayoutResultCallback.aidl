@@ -16,7 +16,6 @@
 
 package android.print;
 
-import android.os.ICancellationSignal;
 import android.print.PrintDocumentInfo;
 
 /**
@@ -25,7 +24,6 @@ import android.print.PrintDocumentInfo;
  * @hide
  */
 oneway interface ILayoutResultCallback {
-    void onLayoutStarted(ICancellationSignal cancellationSignal);
-    void onLayoutFinished(in PrintDocumentInfo info, boolean changed);
-    void onLayoutFailed(CharSequence error);
+    void onLayoutFinished(in PrintDocumentInfo info, boolean changed, int sequence);
+    void onLayoutFailed(CharSequence error, int sequence);
 }

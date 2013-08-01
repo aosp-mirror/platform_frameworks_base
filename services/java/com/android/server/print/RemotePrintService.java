@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -28,6 +29,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.IBinder.DeathRecipient;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
@@ -46,11 +48,11 @@ import java.util.List;
  * and unbinding from the remote implementation. Clients can call methods of
  * this class without worrying about when and how to bind/unbind.
  */
-final class RemotePrintService {
+final class RemotePrintService implements DeathRecipient {
 
     private static final String LOG_TAG = "RemotePrintService";
 
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = true && Build.IS_DEBUGGABLE;
 
     private final Context mContext;
 
@@ -99,6 +101,15 @@ final class RemotePrintService {
 
     public void onAllPrintJobsHandled() {
         mHandler.sendEmptyMessage(MyHandler.MSG_ALL_PRINT_JOBS_HANDLED);
+    }
+
+    @Override
+    public void binderDied() {
+        mHandler.sendEmptyMessage(MyHandler.MSG_BINDER_DIED);
+    }
+
+    private void handleBinderDied() {
+        ensureBound();
     }
 
     private void handleOnAllPrintJobsHandled() {
@@ -289,6 +300,7 @@ final class RemotePrintService {
         public static final int MSG_START_PRINTER_DISCOVERY = 4;
         public static final int MSG_STOP_PRINTER_DISCOVERY = 5;
         public static final int MSG_DESTROY = 6;
+        public static final int MSG_BINDER_DIED = 7;
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
@@ -323,6 +335,10 @@ final class RemotePrintService {
 
                 case MSG_DESTROY: {
                     handleDestroy();
+                } break;
+
+                case MSG_BINDER_DIED: {
+                    handleBinderDied();
                 } break;
             }
         }

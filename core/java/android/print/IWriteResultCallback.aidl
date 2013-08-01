@@ -16,7 +16,6 @@
 
 package android.print;
 
-import android.os.ICancellationSignal;
 import android.print.PageRange;
 
 /**
@@ -25,7 +24,6 @@ import android.print.PageRange;
  * @hide
  */
 oneway interface IWriteResultCallback {
-    void onWriteStarted(ICancellationSignal cancellationSignal);
-    void onWriteFinished(in List<PageRange> pages);
-    void onWriteFailed(CharSequence error);
+    void onWriteFinished(in PageRange[] pages, int sequence);
+    void onWriteFailed(CharSequence error, int sequence);
 }

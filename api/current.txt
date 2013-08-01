@@ -18542,7 +18542,6 @@ package android.print {
     method public void clear();
     method public int describeContents();
     method public int getColorMode();
-    method public int getCopies();
     method public int getDuplexMode();
     method public int getFittingMode();
     method public android.print.PrintAttributes.Tray getInputTray();
@@ -18568,7 +18567,6 @@ package android.print {
     ctor public PrintAttributes.Builder();
     method public android.print.PrintAttributes create();
     method public android.print.PrintAttributes.Builder setColorMode(int);
-    method public android.print.PrintAttributes.Builder setCopyCount(int);
     method public android.print.PrintAttributes.Builder setDuplexMode(int);
     method public android.print.PrintAttributes.Builder setFittingMode(int);
     method public android.print.PrintAttributes.Builder setInputTray(android.print.PrintAttributes.Tray);
@@ -18654,18 +18652,20 @@ package android.print {
     method public void onFinish();
     method public abstract void onLayout(android.print.PrintAttributes, android.print.PrintAttributes, android.os.CancellationSignal, android.print.PrintDocumentAdapter.LayoutResultCallback, android.os.Bundle);
     method public void onStart();
-    method public abstract void onWrite(java.util.List<android.print.PageRange>, java.io.FileDescriptor, android.os.CancellationSignal, android.print.PrintDocumentAdapter.WriteResultCallback);
+    method public abstract void onWrite(android.print.PageRange[], java.io.FileDescriptor, android.os.CancellationSignal, android.print.PrintDocumentAdapter.WriteResultCallback);
     field public static final java.lang.String METADATA_KEY_PRINT_PREVIEW = "KEY_METADATA_PRINT_PREVIEW";
   }
 
   public static abstract class PrintDocumentAdapter.LayoutResultCallback {
+    method public void onLayoutCancelled();
     method public void onLayoutFailed(java.lang.CharSequence);
     method public void onLayoutFinished(android.print.PrintDocumentInfo, boolean);
   }
 
   public static abstract class PrintDocumentAdapter.WriteResultCallback {
+    method public void onWriteCancelled();
     method public void onWriteFailed(java.lang.CharSequence);
-    method public void onWriteFinished(java.util.List<android.print.PageRange>);
+    method public void onWriteFinished(android.print.PageRange[]);
   }
 
   public final class PrintDocumentInfo implements android.os.Parcelable {
@@ -18696,6 +18696,7 @@ package android.print {
   public final class PrintJobInfo implements android.os.Parcelable {
     method public int describeContents();
     method public android.print.PrintAttributes getAttributes();
+    method public int getCopies();
     method public int getId();
     method public java.lang.CharSequence getLabel();
     method public android.print.PageRange[] getPages();

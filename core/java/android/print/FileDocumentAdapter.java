@@ -34,8 +34,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Adapter for printing files.
@@ -69,7 +67,7 @@ final class FileDocumentAdapter extends PrintDocumentAdapter {
     }
 
     @Override
-    public void onWrite(List<PageRange> pages, FileDescriptor destination,
+    public void onWrite(PageRange[] pages, FileDescriptor destination,
             CancellationSignal cancellationSignal, WriteResultCallback callback) {
         mWriteFileAsyncTask = new WriteFileAsyncTask(destination, cancellationSignal, callback);
         mWriteFileAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
@@ -127,9 +125,7 @@ final class FileDocumentAdapter extends PrintDocumentAdapter {
 
         @Override
         protected void onPostExecute(Void result) {
-            List<PageRange> pages = new ArrayList<PageRange>();
-            pages.add(PageRange.ALL_PAGES);
-            mResultCallback.onWriteFinished(pages);
+            mResultCallback.onWriteFinished(new PageRange[] {PageRange.ALL_PAGES});
         }
 
         @Override

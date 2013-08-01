@@ -41,8 +41,6 @@ public final class PrinterInfo implements Parcelable {
      */
     public static final int DEFAULT_UNDEFINED = -1;
 
-    private static final int MIN_COPIES = 1;
-
     private static final int PROPERTY_MEDIA_SIZE = 0;
     private static final int PROPERTY_RESOLUTION = 1;
     private static final int PROPERTY_INPUT_TRAY = 2;
@@ -239,9 +237,6 @@ public final class PrinterInfo implements Parcelable {
      */
     public void getDefaults(PrintAttributes outAttributes) {
         outAttributes.clear();
-
-        // TODO: Do we want a printer to specify default copies?
-        outAttributes.setCopies(MIN_COPIES);
 
         outAttributes.setMargins(mDefaultMargins);
 

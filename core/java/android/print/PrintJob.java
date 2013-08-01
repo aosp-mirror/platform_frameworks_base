@@ -55,6 +55,9 @@ public final class PrintJob {
      * @return The print job info.
      */
     public PrintJobInfo getInfo() {
+        if (isInImmutableState()) {
+            return mCachedInfo;
+        }
         PrintJobInfo info = mPrintManager.getPrintJobInfo(mId);
         if (info != null) {
             mCachedInfo = info;
@@ -66,7 +69,15 @@ public final class PrintJob {
      * Cancels this print job.
      */
     public void cancel() {
-        mPrintManager.cancelPrintJob(mId);
+        if (!isInImmutableState()) {
+            mPrintManager.cancelPrintJob(mId);
+        }
+    }
+
+    private boolean isInImmutableState() {
+        final int state = mCachedInfo.getState();
+        return state == PrintJobInfo.STATE_COMPLETED
+                || state == PrintJobInfo.STATE_CANCELED;
     }
 
     @Override
