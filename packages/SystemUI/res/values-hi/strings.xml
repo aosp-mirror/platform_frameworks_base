@@ -35,7 +35,7 @@
     <string name="battery_low_title" msgid="2783104807551211639">"चार्जर कनेक्‍ट करें"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"बैटरी कम हो रही है."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> शेष"</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"USB चार्जिंग समर्थित नहीं है."\n"केवल आपूर्ति किए गए चार्जर का उपयोग करें."</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"USB चार्जिंग समर्थित नहीं है.\nकेवल आपूर्ति किए गए चार्जर का उपयोग करें."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"बैटरी उपयोग"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"सेटिंग"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
@@ -57,7 +57,7 @@
     <string name="always_use_device" msgid="1450287437017315906">"इस USB उपकरण के लिए डिफ़ॉल्‍ट रूप से उपयोग करें"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"इस USB एसेसरी के लिए डिफ़ॉल्‍ट रूप से उपयोग करें"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"USB डीबगिंग करने दें?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"कंप्यूटर का RSA कुंजी फ़िंगरप्रिंट है:"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"कंप्यूटर का RSA कुंजी फ़िंगरप्रिंट है:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"इस कंप्यूटर से हमेशा अनुमति दें"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"स्‍क्रीन भरने हेतु ज़ूम करें"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"स्‍क्रीन को भरने के लिए खींचें"</string>
@@ -158,7 +158,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G डेटा अक्षम"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"मोबाइल डेटा अक्षम"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"डेटा अक्षम"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"आप निर्दिष्ट डेटा उपयोग सीमा तक पहुंच चुके हैं."\n\n"यदि आप डेटा को पुनः सक्षम करते हैं, तो ऑपरेटर द्वारा आपसे शुल्क लिया जा सकता है."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"आप निर्दिष्ट डेटा उपयोग सीमा तक पहुंच चुके हैं.\n\nयदि आप डेटा को पुनः सक्षम करते हैं, तो ऑपरेटर द्वारा आपसे शुल्क लिया जा सकता है."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"डेटा पुन: सक्षम करें"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"कोई इंटरनेट कनेक्शन नहीं"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi कनेक्‍ट किया गया"</string>
@@ -198,7 +198,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"चमक"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"स्वत:"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"सूचनाएं यहां दिखाई देती हैं"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"नीचे स्वाइप करके उन तक कभी भी पहुंचें."\n"सिस्टम नियंत्रणों के लिए पुन: नीचे स्वाइप करें."</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"नीचे स्वाइप करके उन तक कभी भी पहुंचें.\nसिस्टम नियंत्रणों के लिए पुन: नीचे स्वाइप करें."</string>
     <string name="hideybar_confirmation_message" msgid="9050869548951044371">"बार दिखाने के लिए स्क्रीन के किनारे को स्वाइप करें"</string>
     <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"सिस्टम बार दिखाने के लिए स्क्रीन के किनारे से स्वाइप करें"</string>
 </resources>

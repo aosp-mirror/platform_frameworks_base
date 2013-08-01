@@ -35,7 +35,7 @@
     <string name="battery_low_title" msgid="2783104807551211639">"Priključite polnilnik"</string>
     <string name="battery_low_subtitle" msgid="1752040062087829196">"Baterija je skoraj prazna."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> preostalo"</string>
-    <string name="invalid_charger" msgid="4549105996740522523">"Polnjenje po povezavi USB ni podprto."\n"Uporabite priloženi polnilnik."</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"Polnjenje po povezavi USB ni podprto.\nUporabite priloženi polnilnik."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"Uporaba baterije"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Nastavitve"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
@@ -57,7 +57,7 @@
     <string name="always_use_device" msgid="1450287437017315906">"Privzeto uporabi za to napravo USB"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Privzeto uporabi za ta dodatek USB"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Ali dovolite odpravljanje težav prek USB?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"Računalnikov prstni odtis ključa RSA je:"\n"<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"Računalnikov prstni odtis ključa RSA je:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Vedno dovoli iz tega računalnika"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Povečava čez cel zaslon"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Raztegnitev čez zaslon"</string>
@@ -158,7 +158,7 @@
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Podatki 4G so onemogočeni"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobilni podatki so onemogočeni"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Podatki onemogočeni"</string>
-    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Dosegli ste omejitev količine prenesenih podatkov."\n\n"Če prenos podatkov znova omogočite, vam ga lahko operater zaračuna."</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Dosegli ste omejitev količine prenesenih podatkov.\n\nČe prenos podatkov znova omogočite, vam ga lahko operater zaračuna."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Znova omogoči podatke"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ni internetne povez."</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi povezan"</string>
@@ -198,7 +198,7 @@
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Svetlost"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"SAMODEJNO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Obvestila so prikazana tukaj"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"Do njih lahko kadar koli dostopate tako, da povlečete navzdol."\n"Za prikaz sistemskih kontrolnikov znova povlecite navzdol."</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"Do njih lahko kadar koli dostopate tako, da povlečete navzdol.\nZa prikaz sistemskih kontrolnikov znova povlecite navzdol."</string>
     <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Vrstico prikažete tako, da povlečete z roba zaslona"</string>
     <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Sistemsko vrstico prikažete tako, da povlečete z roba zaslona"</string>
 </resources>
