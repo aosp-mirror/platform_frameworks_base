@@ -128,6 +128,9 @@ public class LinkProperties implements Parcelable {
         return interfaceNames;
     }
 
+    /**
+     * Returns all the addresses on this link.
+     */
     public Collection<InetAddress> getAddresses() {
         Collection<InetAddress> addresses = new ArrayList<InetAddress>();
         for (LinkAddress linkAddress : mLinkAddresses) {
@@ -136,12 +139,41 @@ public class LinkProperties implements Parcelable {
         return Collections.unmodifiableCollection(addresses);
     }
 
+    /**
+     * Returns all the addresses on this link and all the links stacked above it.
+     */
+    public Collection<InetAddress> getAllAddresses() {
+        Collection<InetAddress> addresses = new ArrayList<InetAddress>();
+        for (LinkAddress linkAddress : mLinkAddresses) {
+            addresses.add(linkAddress.getAddress());
+        }
+        for (LinkProperties stacked: mStackedLinks.values()) {
+            addresses.addAll(stacked.getAllAddresses());
+        }
+        return addresses;
+    }
+
     public void addLinkAddress(LinkAddress address) {
         if (address != null) mLinkAddresses.add(address);
     }
 
+    /**
+     * Returns all the addresses on this link.
+     */
     public Collection<LinkAddress> getLinkAddresses() {
         return Collections.unmodifiableCollection(mLinkAddresses);
+    }
+
+    /**
+     * Returns all the addresses on this link and all the links stacked above it.
+     */
+    public Collection<LinkAddress> getAllLinkAddresses() {
+        Collection<LinkAddress> addresses = new ArrayList<LinkAddress>();
+        addresses.addAll(mLinkAddresses);
+        for (LinkProperties stacked: mStackedLinks.values()) {
+            addresses.addAll(stacked.getAllLinkAddresses());
+        }
+        return addresses;
     }
 
     public void addDns(InetAddress dns) {
@@ -426,13 +458,11 @@ public class LinkProperties implements Parcelable {
     }
 
     /**
-     * Return two lists, a list of addresses that would be removed from
-     * mLinkAddresses and a list of addresses that would be added to
-     * mLinkAddress which would then result in target and mLinkAddresses
-     * being the same list.
+     * Compares the addresses in this LinkProperties with another
+     * LinkProperties, examining only addresses on the base link.
      *
-     * @param target is a LinkProperties with the new list of addresses
-     * @return the removed and added lists.
+     * @param target a LinkProperties with the new list of addresses
+     * @return the differences between the addresses.
      */
     public CompareResult<LinkAddress> compareAddresses(LinkProperties target) {
         /*
@@ -456,13 +486,11 @@ public class LinkProperties implements Parcelable {
     }
 
     /**
-     * Return two lists, a list of dns addresses that would be removed from
-     * mDnses and a list of addresses that would be added to
-     * mDnses which would then result in target and mDnses
-     * being the same list.
+     * Compares the DNS addresses in this LinkProperties with another
+     * LinkProperties, examining only DNS addresses on the base link.
      *
-     * @param target is a LinkProperties with the new list of dns addresses
-     * @return the removed and added lists.
+     * @param target a LinkProperties with the new list of dns addresses
+     * @return the differences between the DNS addresses.
      */
     public CompareResult<InetAddress> compareDnses(LinkProperties target) {
         /*
@@ -487,15 +515,13 @@ public class LinkProperties implements Parcelable {
     }
 
     /**
-     * Return two lists, a list of routes that would be removed from
-     * mRoutes and a list of routes that would be added to
-     * mRoutes which would then result in target and mRoutes
-     * being the same list.
+     * Compares all routes in this LinkProperties with another LinkProperties,
+     * examining both the the base link and all stacked links.
      *
-     * @param target is a LinkProperties with the new list of routes
-     * @return the removed and added lists.
+     * @param target a LinkProperties with the new list of routes
+     * @return the differences between the routes.
      */
-    public CompareResult<RouteInfo> compareRoutes(LinkProperties target) {
+    public CompareResult<RouteInfo> compareAllRoutes(LinkProperties target) {
         /*
          * Duplicate the RouteInfos into removed, we will be removing
          * routes which are common between mRoutes and target
