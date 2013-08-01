@@ -11,12 +11,12 @@ excludeFromSuggestions=true
         <li><a href="#model">Application Model</a></li>
         <li><a href="#token">Purchase Token</a></li>
         <li><a href="#version">Checking the In-app Billing API Version</a></li>
-        <li><a href="purchase">Purchasing a Subscription</a></li>
+        <li><a href="#purchase">Purchasing a Subscription</a></li>
         <li><a href="#restore">Restoring Transactions</a></li>
         <li><a href="#validity">Checking Subscription Validity</a></li>
         <li><a href="#viewstatus">Letting Users Cancel or View Status</a></li>
         <li><a href="#purchase-state-changes">Recurring Billing and Changes in Purchase State</a></li>
-        <li><a href="modifying">Modifying Your App for Subscriptions</a></li>
+        <li><a href="#modifying">Modifying Your App for Subscriptions</a></li>
    </ol>
 </div>
 </div>
