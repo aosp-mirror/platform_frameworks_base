@@ -594,7 +594,6 @@ public:
 
 private:
     SkRegion* mRegion;
-    SkRegion::Op mOp;
 };
 
 class ResetShaderOp : public StateOp {
