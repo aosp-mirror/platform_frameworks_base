@@ -2071,4 +2071,6 @@
   <public type="attr" name="category" />
   <public type="attr" name="isAsciiCapable" />
   <public type="attr" name="customRoots" />
+  <public type="attr" name="autoMirrored" />
+
 </resources>

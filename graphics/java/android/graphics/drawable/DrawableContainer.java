@@ -173,6 +173,19 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
     }
 
     @Override
+    public void setAutoMirrored(boolean mirrored) {
+        mDrawableContainerState.mAutoMirrored = mirrored;
+        if (mCurrDrawable != null) {
+            mCurrDrawable.mutate().setAutoMirrored(mDrawableContainerState.mAutoMirrored);
+        }
+    }
+
+    @Override
+    public boolean isAutoMirrored() {
+        return mDrawableContainerState.mAutoMirrored;
+    }
+
+    @Override
     public void jumpToCurrentState() {
         boolean changed = false;
         if (mLastDrawable != null) {
@@ -334,6 +347,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 d.setLevel(getLevel());
                 d.setBounds(getBounds());
                 d.setLayoutDirection(getLayoutDirection());
+                d.setAutoMirrored(mDrawableContainerState.mAutoMirrored);
             }
         } else {
             mCurrDrawable = null;
@@ -471,6 +485,8 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         int mEnterFadeDuration;
         int mExitFadeDuration;
 
+        boolean mAutoMirrored;
+
         DrawableContainerState(DrawableContainerState orig, DrawableContainer owner,
                 Resources res) {
             mOwner = owner;
@@ -490,6 +506,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
                 mLayoutDirection = orig.mLayoutDirection;
                 mEnterFadeDuration = orig.mEnterFadeDuration;
                 mExitFadeDuration = orig.mExitFadeDuration;
+                mAutoMirrored = orig.mAutoMirrored;
 
                 // Cloning the following values may require creating futures.
                 mConstantPadding = orig.getConstantPadding();

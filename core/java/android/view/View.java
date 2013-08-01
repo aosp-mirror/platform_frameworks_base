@@ -51,6 +51,7 @@ import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
+import android.util.LayoutDirection;
 import android.util.Log;
 import android.util.LongSparseLongArray;
 import android.util.Pools.SynchronizedPool;
@@ -1801,25 +1802,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Horizontal layout direction of this view is from Left to Right.
      * Use with {@link #setLayoutDirection}.
      */
-    public static final int LAYOUT_DIRECTION_LTR = 0;
+    public static final int LAYOUT_DIRECTION_LTR = LayoutDirection.LTR;
 
     /**
      * Horizontal layout direction of this view is from Right to Left.
      * Use with {@link #setLayoutDirection}.
      */
-    public static final int LAYOUT_DIRECTION_RTL = 1;
+    public static final int LAYOUT_DIRECTION_RTL = LayoutDirection.RTL;
 
     /**
      * Horizontal layout direction of this view is inherited from its parent.
      * Use with {@link #setLayoutDirection}.
      */
-    public static final int LAYOUT_DIRECTION_INHERIT = 2;
+    public static final int LAYOUT_DIRECTION_INHERIT = LayoutDirection.INHERIT;
 
     /**
      * Horizontal layout direction of this view is from deduced from the default language
      * script for the locale. Use with {@link #setLayoutDirection}.
      */
-    public static final int LAYOUT_DIRECTION_LOCALE = 3;
+    public static final int LAYOUT_DIRECTION_LOCALE = LayoutDirection.LOCALE;
 
     /**
      * Bit shift to get the horizontal layout direction. (bits after DRAG_HOVERED)

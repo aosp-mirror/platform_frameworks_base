@@ -132,6 +132,9 @@ public class StateListDrawable extends DrawableContainer {
         setDither(a.getBoolean(com.android.internal.R.styleable.StateListDrawable_dither,
                                DEFAULT_DITHER));
 
+        setAutoMirrored(a.getBoolean(
+                com.android.internal.R.styleable.StateListDrawable_autoMirrored, false));
+
         a.recycle();
 
         int type;
