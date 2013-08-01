@@ -33,6 +33,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.util.Xml;
 import android.view.LayoutInflater;
@@ -124,6 +125,8 @@ public abstract class PreferenceActivity extends ListActivity implements
         PreferenceManager.OnPreferenceTreeClickListener,
         PreferenceFragment.OnPreferenceStartFragmentCallback {
 
+    private static final String TAG = "PreferenceActivity";
+
     // Constants for state save/restore
     private static final String HEADERS_TAG = ":android:headers";
     private static final String CUR_HEADER_TAG = ":android:cur_header";
@@ -132,6 +135,9 @@ public abstract class PreferenceActivity extends ListActivity implements
     /**
      * When starting this activity, the invoking Intent can contain this extra
      * string to specify which fragment should be initially displayed.
+     * <p/>Starting from Key Lime Pie, when this argument is passed in, the PreferenceActivity
+     * will call isValidFragment() to confirm that the fragment class name is valid for this
+     * activity.
      */
     public static final String EXTRA_SHOW_FRAGMENT = ":android:show_fragment";
 
@@ -299,7 +305,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      * are valid.
      */
     public static final long HEADER_ID_UNDEFINED = -1;
-    
+
     /**
      * Description of a single Header item that the user can select.
      */
@@ -877,7 +883,27 @@ public abstract class PreferenceActivity extends ListActivity implements
         } finally {
             if (parser != null) parser.close();
         }
+    }
 
+    /**
+     * Subclasses should override this method and verify that the given fragment is a valid type
+     * to be attached to this activity. The default implementation returns <code>true</code> prior
+     * to Key Lime Pie, <code>false</code> otherwise.
+     * @param f the class name of the Fragment about to be attached to this activity.
+     * @return true if the fragment class name is valid for this Activity and false otherwise.
+     */
+    protected boolean isValidFragment(String fragmentName) {
+        if (getApplicationInfo().targetSdkVersion  >= android.os.Build.VERSION_CODES.KEY_LIME_PIE) {
+            Log.w(TAG, "Subclasses of PreferenceActivity must override isValidFragment(String)"
+                    + " to verify that the Fragment class is valid! " + this.getClass().getName()
+                    + " has not checked if fragment " + fragmentName + " is valid.");
+            // Return true for now, but will eventually return false when all bundled apps
+            // have been modified. TODO: change to return false
+            return true;
+        } else {
+            Log.i(TAG, "PreferenceActivity built on pre-KLP launching fragment: " + fragmentName);
+            return true;
+        }
     }
 
     /**
@@ -1146,6 +1172,10 @@ public abstract class PreferenceActivity extends ListActivity implements
     private void switchToHeaderInner(String fragmentName, Bundle args, int direction) {
         getFragmentManager().popBackStack(BACK_STACK_PREFS,
                 FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        if (!isValidFragment(fragmentName)) {
+            throw new IllegalArgumentException("Invalid fragment for this activity: "
+                    + fragmentName);
+        }
         Fragment f = Fragment.instantiate(this, fragmentName, args);
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
@@ -1275,6 +1305,10 @@ public abstract class PreferenceActivity extends ListActivity implements
         if (mSinglePane) {
             startWithFragment(fragmentClass, args, resultTo, resultRequestCode, titleRes, 0);
         } else {
+            if (!isValidFragment(fragmentClass)) {
+                throw new IllegalArgumentException("Invalid fragment for this activity: "
+                        + fragmentClass);
+            }
             Fragment f = Fragment.instantiate(this, fragmentClass, args);
             if (resultTo != null) {
                 f.setTargetFragment(resultTo, resultRequestCode);
@@ -1291,7 +1325,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             transaction.commitAllowingStateLoss();
         }
     }
-    
+
     /**
      * Called by a preference panel fragment to finish itself.
      * 

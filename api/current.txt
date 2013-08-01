@@ -18355,6 +18355,7 @@ package android.preference {
     method public boolean hasHeaders();
     method public void invalidateHeaders();
     method public boolean isMultiPane();
+    method protected boolean isValidFragment(java.lang.String);
     method public void loadHeadersFromResource(int, java.util.List<android.preference.PreferenceActivity.Header>);
     method public void onBuildHeaders(java.util.List<android.preference.PreferenceActivity.Header>);
     method public android.content.Intent onBuildStartFragmentIntent(java.lang.String, android.os.Bundle, int, int);
