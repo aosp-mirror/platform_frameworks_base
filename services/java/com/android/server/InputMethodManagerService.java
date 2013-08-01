@@ -899,7 +899,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             Slog.d(TAG, "--- calledFromForegroundUserOrSystemProcess ? "
                     + "calling uid = " + uid + " system uid = " + Process.SYSTEM_UID
                     + " calling userId = " + userId + ", foreground user id = "
-                    + mSettings.getCurrentUserId() + ", calling pid = " + Binder.getCallingPid());
+                    + mSettings.getCurrentUserId() + ", calling pid = " + Binder.getCallingPid()
+                    + InputMethodUtils.getApiCallStack());
         }
         if (uid == Process.SYSTEM_UID || userId == mSettings.getCurrentUserId()) {
             return true;
