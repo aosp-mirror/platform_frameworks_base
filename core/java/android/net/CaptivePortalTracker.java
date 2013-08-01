@@ -28,11 +28,23 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.UserHandle;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.provider.Settings;
+import android.telephony.CellIdentityCdma;
+import android.telephony.CellIdentityGsm;
+import android.telephony.CellIdentityLte;
+import android.telephony.CellIdentityWcdma;
+import android.telephony.CellInfo;
+import android.telephony.CellInfoCdma;
+import android.telephony.CellInfoGsm;
+import android.telephony.CellInfoLte;
+import android.telephony.CellInfoWcdma;
 import android.telephony.TelephonyManager;
 
 import com.android.internal.util.State;
@@ -44,6 +56,7 @@ import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.List;
 
 import com.android.internal.R;
 
@@ -60,12 +73,29 @@ public class CaptivePortalTracker extends StateMachine {
 
     private static final int SOCKET_TIMEOUT_MS = 10000;
 
+    public static final String ACTION_NETWORK_CONDITIONS_MEASURED =
+            "android.net.conn.NETWORK_CONDITIONS_MEASURED";
+    public static final String EXTRA_CONNECTIVITY_TYPE = "extra_connectivity_type";
+    public static final String EXTRA_NETWORK_TYPE = "extra_network_type";
+    public static final String EXTRA_RESPONSE_RECEIVED = "extra_response_received";
+    public static final String EXTRA_IS_CAPTIVE_PORTAL = "extra_is_captive_portal";
+    public static final String EXTRA_CELL_ID = "extra_cellid";
+    public static final String EXTRA_SSID = "extra_ssid";
+    public static final String EXTRA_BSSID = "extra_bssid";
+    /** real time since boot */
+    public static final String EXTRA_REQUEST_TIMESTAMP_MS = "extra_request_timestamp_ms";
+    public static final String EXTRA_RESPONSE_TIMESTAMP_MS = "extra_response_timestamp_ms";
+
+    private static final String PERMISSION_ACCESS_NETWORK_CONDITIONS =
+            "android.permission.ACCESS_NETWORK_CONDITIONS";
+
     private String mServer;
     private String mUrl;
     private boolean mNotificationShown = false;
     private boolean mIsCaptivePortalCheckEnabled = false;
     private IConnectivityManager mConnService;
     private TelephonyManager mTelephonyManager;
+    private WifiManager mWifiManager;
     private Context mContext;
     private NetworkInfo mNetworkInfo;
 
@@ -92,6 +122,7 @@ public class CaptivePortalTracker extends StateMachine {
         mContext = context;
         mConnService = cs;
         mTelephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         mProvisioningObserver = new ProvisioningObserver();
 
         IntentFilter filter = new IntentFilter();
@@ -319,7 +350,8 @@ public class CaptivePortalTracker extends StateMachine {
     }
 
     /**
-     * Do a URL fetch on a known server to see if we get the data we expect
+     * Do a URL fetch on a known server to see if we get the data we expect.
+     * Measure the response time and broadcast that.
      */
     private boolean isCaptivePortal(InetAddress server) {
         HttpURLConnection urlConnection = null;
@@ -327,6 +359,7 @@ public class CaptivePortalTracker extends StateMachine {
 
         mUrl = "http://" + server.getHostAddress() + "/generate_204";
         if (DBG) log("Checking " + mUrl);
+        long requestTimestamp = -1;
         try {
             URL url = new URL(mUrl);
             urlConnection = (HttpURLConnection) url.openConnection();
@@ -334,11 +367,26 @@ public class CaptivePortalTracker extends StateMachine {
             urlConnection.setConnectTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setReadTimeout(SOCKET_TIMEOUT_MS);
             urlConnection.setUseCaches(false);
+
+            // Time how long it takes to get a response to our request
+            requestTimestamp = SystemClock.elapsedRealtime();
+
             urlConnection.getInputStream();
+
+            // Time how long it takes to get a response to our request
+            long responseTimestamp = SystemClock.elapsedRealtime();
+
             // we got a valid response, but not from the real google
-            return urlConnection.getResponseCode() != 204;
+            boolean isCaptivePortal = urlConnection.getResponseCode() != 204;
+
+            sendNetworkConditionsBroadcast(true /* response received */, isCaptivePortal,
+                    requestTimestamp, responseTimestamp);
+            return isCaptivePortal;
         } catch (IOException e) {
             if (DBG) log("Probably not a portal: exception " + e);
+            if (requestTimestamp != -1) {
+                sendFailedCaptivePortalCheckBroadcast(requestTimestamp);
+            } // else something went wrong with setting up the urlConnection
             return false;
         } finally {
             if (urlConnection != null) {
@@ -352,12 +400,15 @@ public class CaptivePortalTracker extends StateMachine {
         try {
             inetAddress = InetAddress.getAllByName(hostname);
         } catch (UnknownHostException e) {
+            sendFailedCaptivePortalCheckBroadcast(SystemClock.elapsedRealtime());
             return null;
         }
 
         for (InetAddress a : inetAddress) {
             if (a instanceof Inet4Address) return a;
         }
+
+        sendFailedCaptivePortalCheckBroadcast(SystemClock.elapsedRealtime());
         return null;
     }
 
@@ -413,5 +464,81 @@ public class CaptivePortalTracker extends StateMachine {
             notificationManager.cancel(NOTIFICATION_ID, 1);
         }
         mNotificationShown = visible;
+    }
+
+    private void sendFailedCaptivePortalCheckBroadcast(long requestTimestampMs) {
+        sendNetworkConditionsBroadcast(false /* response received */, false /* ignored */,
+                requestTimestampMs, 0 /* ignored */);
+    }
+
+    /**
+     * @param responseReceived - whether or not we received a valid HTTP response to our request.
+     * If false, isCaptivePortal and responseTimestampMs are ignored
+     */
+    private void sendNetworkConditionsBroadcast(boolean responseReceived, boolean isCaptivePortal,
+            long requestTimestampMs, long responseTimestampMs) {
+        if (Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.WIFI_SCAN_ALWAYS_AVAILABLE, 0) == 0) {
+            if (DBG) log("Don't send network conditions - lacking user consent.");
+            return;
+        }
+
+        Intent latencyBroadcast = new Intent(ACTION_NETWORK_CONDITIONS_MEASURED);
+        switch (mNetworkInfo.getType()) {
+            case ConnectivityManager.TYPE_WIFI:
+                WifiInfo currentWifiInfo = mWifiManager.getConnectionInfo();
+                if (currentWifiInfo != null) {
+                    latencyBroadcast.putExtra(EXTRA_SSID, currentWifiInfo.getSSID());
+                    latencyBroadcast.putExtra(EXTRA_BSSID, currentWifiInfo.getBSSID());
+                } else {
+                    if (DBG) logw("network info is TYPE_WIFI but no ConnectionInfo found");
+                    return;
+                }
+                break;
+            case ConnectivityManager.TYPE_MOBILE:
+                latencyBroadcast.putExtra(EXTRA_NETWORK_TYPE, mTelephonyManager.getNetworkType());
+                List<CellInfo> info = mTelephonyManager.getAllCellInfo();
+                if (info == null) return;
+                StringBuffer uniqueCellId = new StringBuffer();
+                int numRegisteredCellInfo = 0;
+                for (CellInfo cellInfo : info) {
+                    if (cellInfo.isRegistered()) {
+                        numRegisteredCellInfo++;
+                        if (numRegisteredCellInfo > 1) {
+                            if (DBG) log("more than one registered CellInfo.  Can't " +
+                                    "tell which is active.  Bailing.");
+                            return;
+                        }
+                        if (cellInfo instanceof CellInfoCdma) {
+                            CellIdentityCdma cellId = ((CellInfoCdma) cellInfo).getCellIdentity();
+                            latencyBroadcast.putExtra(EXTRA_CELL_ID, cellId);
+                        } else if (cellInfo instanceof CellInfoGsm) {
+                            CellIdentityGsm cellId = ((CellInfoGsm) cellInfo).getCellIdentity();
+                            latencyBroadcast.putExtra(EXTRA_CELL_ID, cellId);
+                        } else if (cellInfo instanceof CellInfoLte) {
+                            CellIdentityLte cellId = ((CellInfoLte) cellInfo).getCellIdentity();
+                            latencyBroadcast.putExtra(EXTRA_CELL_ID, cellId);
+                        } else if (cellInfo instanceof CellInfoWcdma) {
+                            CellIdentityWcdma cellId = ((CellInfoWcdma) cellInfo).getCellIdentity();
+                            latencyBroadcast.putExtra(EXTRA_CELL_ID, cellId);
+                        } else {
+                            if (DBG) logw("Registered cellinfo is unrecognized");
+                            return;
+                        }
+                    }
+                }
+                break;
+            default:
+                return;
+        }
+        latencyBroadcast.putExtra(EXTRA_CONNECTIVITY_TYPE, mNetworkInfo.getType());
+        latencyBroadcast.putExtra(EXTRA_RESPONSE_RECEIVED, responseReceived);
+        latencyBroadcast.putExtra(EXTRA_REQUEST_TIMESTAMP_MS, requestTimestampMs);
+
+        if (responseReceived) {
+            latencyBroadcast.putExtra(EXTRA_IS_CAPTIVE_PORTAL, isCaptivePortal);
+            latencyBroadcast.putExtra(EXTRA_RESPONSE_TIMESTAMP_MS, responseTimestampMs);
+        }
+        mContext.sendBroadcast(latencyBroadcast, PERMISSION_ACCESS_NETWORK_CONDITIONS);
     }
 }
