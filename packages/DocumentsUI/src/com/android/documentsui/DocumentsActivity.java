@@ -25,7 +25,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
-import android.app.FragmentManager.BackStackEntry;
 import android.app.FragmentManager.OnBackStackChangedListener;
 import android.content.ClipData;
 import android.content.ContentResolver;
@@ -35,25 +34,42 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources.NotFoundException;
 import android.database.Cursor;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.DocumentColumns;
+import android.provider.DocumentsContract.RootColumns;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.SearchView;
+import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
 
-import com.android.documentsui.BackendFragment.Root;
+import com.google.android.collect.Lists;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -63,18 +79,30 @@ public class DocumentsActivity extends Activity {
     // TODO: fragment to show recently opened documents
     // TODO: pull actionbar icon from current backend
 
+    private static final String TAG_CREATE_DIRECTORY = "create_directory";
+
     private static final int ACTION_OPEN = 1;
     private static final int ACTION_CREATE = 2;
 
     private int mAction;
     private String[] mAcceptMimes;
 
+    private SearchView mSearchView;
+
+    private DrawerLayout mDrawerLayout;
+    private ActionBarDrawerToggle mDrawerToggle;
+
+    private ArrayList<Root> mRoots = Lists.newArrayList();
+    private RootsAdapter mRootsAdapter;
+    private ListView mRootsList;
+
     private final DisplayState mDisplayState = new DisplayState();
 
-    private boolean mIgnoreNextNavigation;
+    private Root mCurrentRoot;
 
     private Uri mCurrentDir;
     private boolean mCurrentSupportsCreate;
+    private boolean mCurrentSupportsSearch;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -106,39 +134,90 @@ public class DocumentsActivity extends Activity {
         setContentView(R.layout.activity);
 
         getFragmentManager().addOnBackStackChangedListener(mStackListener);
-        BackendFragment.show(getFragmentManager());
-
-        updateActionBar();
 
         if (mAction == ACTION_CREATE) {
             final String mimeType = getIntent().getType();
             final String title = getIntent().getStringExtra(Intent.EXTRA_TITLE);
             SaveFragment.show(getFragmentManager(), mimeType, title);
         }
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mRootsAdapter = new RootsAdapter(this, mRoots);
+        mRootsList = (ListView) findViewById(R.id.roots_list);
+        mRootsList.setAdapter(mRootsAdapter);
+        mRootsList.setOnItemClickListener(mRootsListener);
+
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+                R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close);
+
+        mDrawerLayout.setDrawerListener(mDrawerListener);
+        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+
+        mDrawerLayout.openDrawer(mRootsList);
+
+        updateActionBar();
+        updateRoots();
+    }
+
+    private DrawerListener mDrawerListener = new DrawerListener() {
+        @Override
+        public void onDrawerSlide(View drawerView, float slideOffset) {
+            mDrawerToggle.onDrawerSlide(drawerView, slideOffset);
+        }
+
+        @Override
+        public void onDrawerOpened(View drawerView) {
+            mDrawerToggle.onDrawerOpened(drawerView);
+            updateActionBar();
+        }
+
+        @Override
+        public void onDrawerClosed(View drawerView) {
+            mDrawerToggle.onDrawerClosed(drawerView);
+            updateActionBar();
+        }
+
+        @Override
+        public void onDrawerStateChanged(int newState) {
+            mDrawerToggle.onDrawerStateChanged(newState);
+        }
+    };
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        mDrawerToggle.syncState();
     }
 
     public void updateActionBar() {
         final FragmentManager fm = getFragmentManager();
         final ActionBar actionBar = getActionBar();
 
-        if (fm.getBackStackEntryCount() > 0) {
-            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-            actionBar.setDisplayShowHomeEnabled(true);
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setTitle(null);
-            actionBar.setListNavigationCallbacks(mStackAdapter, mNavigationListener);
-            actionBar.setSelectedNavigationItem(mStackAdapter.getCount() - 1);
-            mIgnoreNextNavigation = true;
+        actionBar.setDisplayShowHomeEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
-        } else {
+        if (mDrawerLayout.isDrawerOpen(mRootsList)) {
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-            actionBar.setDisplayShowHomeEnabled(false);
-            actionBar.setDisplayHomeAsUpEnabled(false);
+            actionBar.setIcon(new ColorDrawable());
 
             if (mAction == ACTION_OPEN) {
                 actionBar.setTitle(R.string.title_open);
             } else if (mAction == ACTION_CREATE) {
                 actionBar.setTitle(R.string.title_save);
+            }
+
+        } else {
+            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+            if (mCurrentRoot != null) {
+                actionBar.setIcon(mCurrentRoot.icon);
+            }
+            actionBar.setTitle(null);
+            actionBar.setListNavigationCallbacks(mSortAdapter, mSortListener);
+
+            if (fm.getBackStackEntryCount() > 0) {
+                mDrawerToggle.setDrawerIndicatorEnabled(false);
+            } else {
+                mDrawerToggle.setDrawerIndicatorEnabled(true);
             }
         }
     }
@@ -147,6 +226,25 @@ public class DocumentsActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.activity, menu);
+
+        final MenuItem searchMenu = menu.findItem(R.id.menu_search);
+        mSearchView = (SearchView) searchMenu.getActionView();
+        mSearchView.setOnQueryTextListener(new OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // TODO: clear existing directory stack?
+                final Uri searchUri = DocumentsContract.buildSearchUri(mCurrentDir, query);
+                DirectoryFragment.show(getFragmentManager(), searchUri, query, true);
+                mSearchView.setIconified(true);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
         return true;
     }
 
@@ -158,17 +256,29 @@ public class DocumentsActivity extends Activity {
         createDir.setVisible(mAction == ACTION_CREATE);
         createDir.setEnabled(mCurrentSupportsCreate);
 
+        // TODO: close any search in-progress when hiding
+        final MenuItem search = menu.findItem(R.id.menu_search);
+        search.setVisible(mCurrentSupportsSearch);
+
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+
         final int id = item.getItemId();
         if (id == android.R.id.home) {
             getFragmentManager().popBackStack();
             updateActionBar();
+            return true;
         } else if (id == R.id.menu_create_dir) {
             CreateDirectoryFragment.show(getFragmentManager());
+            return true;
+        } else if (id == R.id.menu_search) {
+            return false;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -180,46 +290,73 @@ public class DocumentsActivity extends Activity {
         }
     };
 
-    private BaseAdapter mStackAdapter = new BaseAdapter() {
+    // TODO: support additional sort orders
+    private BaseAdapter mSortAdapter = new BaseAdapter() {
         @Override
         public int getCount() {
-            return getFragmentManager().getBackStackEntryCount();
+            return 2;
         }
 
         @Override
         public Object getItem(int position) {
-            return getFragmentManager().getBackStackEntryAt(position);
+            switch (position) {
+                case 0:
+                    return getText(R.string.sort_name);
+                case 1:
+                    return getText(R.string.sort_date);
+                default:
+                    return null;
+            }
         }
 
         @Override
         public long getItemId(int position) {
-            return getFragmentManager().getBackStackEntryAt(position).getId();
+            return position;
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 convertView = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.item_title, parent, false);
+            }
+
+            final TextView title = (TextView) convertView.findViewById(android.R.id.title);
+            final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
+
+            final FragmentManager fm = getFragmentManager();
+            final int count = fm.getBackStackEntryCount();
+            if (count > 0) {
+                title.setText(fm.getBackStackEntryAt(count - 1).getBreadCrumbTitle());
+            } else if (mCurrentRoot != null) {
+                title.setText(mCurrentRoot.title);
+            } else {
+                title.setText(null);
+            }
+
+            summary.setText((String) getItem(position));
+
+            return convertView;
+        }
+
+        @Override
+        public View getDropDownView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = LayoutInflater.from(parent.getContext())
                         .inflate(android.R.layout.simple_dropdown_item_1line, parent, false);
             }
 
-            final BackStackEntry entry = getFragmentManager().getBackStackEntryAt(position);
             final TextView text1 = (TextView) convertView.findViewById(android.R.id.text1);
-            text1.setText(entry.getBreadCrumbTitle());
+            text1.setText((String) getItem(position));
 
             return convertView;
         }
     };
 
-    private OnNavigationListener mNavigationListener = new OnNavigationListener() {
+    private OnNavigationListener mSortListener = new OnNavigationListener() {
         @Override
         public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-            if (mIgnoreNextNavigation) {
-                mIgnoreNextNavigation = false;
-                return false;
-            }
-
-            getFragmentManager().popBackStack((int) itemId, 0);
+            // TODO: request updated sort order
             return true;
         }
     };
@@ -231,6 +368,7 @@ public class DocumentsActivity extends Activity {
     public void onDirectoryChanged(Uri uri, int flags) {
         mCurrentDir = uri;
         mCurrentSupportsCreate = (flags & DocumentsContract.FLAG_SUPPORTS_CREATE) != 0;
+        mCurrentSupportsSearch = (flags & DocumentsContract.FLAG_SUPPORTS_SEARCH) != 0;
 
         if (mAction == ACTION_CREATE) {
             final FragmentManager fm = getFragmentManager();
@@ -240,15 +378,11 @@ public class DocumentsActivity extends Activity {
         invalidateOptionsMenu();
     }
 
-    public void onRootPicked(Root root) {
-        DirectoryFragment.show(getFragmentManager(), root.uri, root.title);
-    }
-
     public void onDocumentPicked(Document doc) {
         final FragmentManager fm = getFragmentManager();
         if (DocumentsContract.MIME_TYPE_DIRECTORY.equals(doc.mimeType)) {
             // Nested directory picked, recurse using new fragment
-            DirectoryFragment.show(fm, doc.uri, doc.displayName);
+            DirectoryFragment.show(fm, doc.uri, doc.displayName, true);
         } else if (mAction == ACTION_OPEN) {
             // Explicit file picked, return
             onFinished(doc.uri);
@@ -311,6 +445,46 @@ public class DocumentsActivity extends Activity {
 
         public static final int SORT_BY_NAME = 0;
         public static final int SORT_BY_DATE = 1;
+    }
+
+    public static class Root {
+        public int rootType;
+        public Uri uri;
+        public Drawable icon;
+        public String title;
+        public String summary;
+
+        public static Root fromCursor(Context context, ProviderInfo info, Cursor cursor) {
+            final Root root = new Root();
+
+            root.rootType = cursor.getInt(cursor.getColumnIndex(RootColumns.ROOT_TYPE));
+            root.uri = DocumentsContract.buildDocumentUri(
+                    info.authority, cursor.getString(cursor.getColumnIndex(RootColumns.GUID)));
+
+            final PackageManager pm = context.getPackageManager();
+            final int icon = cursor.getInt(cursor.getColumnIndex(RootColumns.ICON));
+            if (icon != 0) {
+                try {
+                    root.icon = pm.getResourcesForApplication(info.applicationInfo)
+                            .getDrawable(icon);
+                } catch (NotFoundException e) {
+                    throw new RuntimeException(e);
+                } catch (NameNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                root.icon = info.loadIcon(pm);
+            }
+
+            root.title = cursor.getString(cursor.getColumnIndex(RootColumns.TITLE));
+            if (root.title == null) {
+                root.title = info.loadLabel(pm).toString();
+            }
+
+            root.summary = cursor.getString(cursor.getColumnIndex(RootColumns.SUMMARY));
+
+            return root;
+        }
     }
 
     public static class Document {
@@ -386,7 +560,74 @@ public class DocumentsActivity extends Activity {
         }
     }
 
-    private static final String TAG_CREATE_DIRECTORY = "create_directory";
+    /**
+     * Gather roots from all known storage providers.
+     */
+    private void updateRoots() {
+        mRoots.clear();
+
+        final List<ProviderInfo> providers = getPackageManager()
+                .queryContentProviders(null, -1, PackageManager.GET_META_DATA);
+        for (ProviderInfo info : providers) {
+            if (info.metaData != null
+                    && info.metaData.containsKey(DocumentsContract.META_DATA_DOCUMENT_PROVIDER)) {
+                // TODO: populate roots on background thread, and cache results
+                final Uri uri = DocumentsContract.buildRootsUri(info.authority);
+                final Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+                try {
+                    while (cursor.moveToNext()) {
+                        mRoots.add(Root.fromCursor(this, info, cursor));
+                    }
+                } finally {
+                    cursor.close();
+                }
+            }
+        }
+    }
+
+    private OnItemClickListener mRootsListener = new OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            // Clear entire backstack and start in new root
+            final FragmentManager fm = getFragmentManager();
+            while (fm.getBackStackEntryCount() > 0) {
+                fm.popBackStackImmediate();
+            }
+
+            mCurrentRoot = mRootsAdapter.getItem(position);
+            DirectoryFragment.show(
+                    getFragmentManager(), mCurrentRoot.uri, mCurrentRoot.title, false);
+
+            mDrawerLayout.closeDrawers();
+        }
+    };
+
+    public static class RootsAdapter extends ArrayAdapter<Root> {
+        public RootsAdapter(Context context, List<Root> list) {
+            super(context, android.R.layout.simple_list_item_1, list);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.item_root, parent, false);
+            }
+
+            final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
+            final TextView title = (TextView) convertView.findViewById(android.R.id.title);
+            final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
+
+            final Root root = getItem(position);
+            icon.setImageDrawable(root.icon);
+            title.setText(root.title);
+
+            summary.setText(root.summary);
+            summary.setVisibility(root.summary != null ? View.VISIBLE : View.GONE);
+
+            return convertView;
+        }
+    }
 
     public static class CreateDirectoryFragment extends DialogFragment {
         public static void show(FragmentManager fm) {

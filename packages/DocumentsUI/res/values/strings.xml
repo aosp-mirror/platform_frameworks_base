@@ -17,20 +17,24 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label">Documents</string>
 
-    <string name="title_open">Open</string>
-    <string name="title_save">Save</string>
+    <string name="title_open">Open from</string>
+    <string name="title_save">Save to</string>
 
     <string name="menu_create_dir">Create folder</string>
     <string name="menu_grid">Grid view</string>
     <string name="menu_list">List view</string>
     <string name="menu_sort">Sort by</string>
+    <string name="menu_search">Search</string>
 
     <string name="menu_open">Open</string>
     <string name="menu_save">Save</string>
 
     <string name="mode_selected_count"><xliff:g id="count" example="3">%1$d</xliff:g> selected</string>
 
-    <string name="sort_name">Name</string>
-    <string name="sort_date">Date modified</string>
+    <string name="sort_name">By name</string>
+    <string name="sort_date">By date modified</string>
+
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
 
 </resources>

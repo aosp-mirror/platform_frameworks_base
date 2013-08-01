@@ -25,9 +25,4 @@
         android:title="@string/menu_list"
         android:icon="@drawable/ic_menu_list"
         android:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/menu_sort"
-        android:title="@string/menu_sort"
-        android:icon="@drawable/ic_menu_sort"
-        android:showAsAction="ifRoom" />
 </menu>
