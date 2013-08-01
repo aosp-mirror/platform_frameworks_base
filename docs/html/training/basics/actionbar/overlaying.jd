@@ -1,0 +1,141 @@
+page.title=Overlaying the Action Bar
+
+trainingnavtop=true
+
+@jd:body
+
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#EnableOverlay">Enable Overlay Mode</a>
+    <ol>
+      <li><a href="#Overlay11">For Android 3.0 and higher only</a></li>
+      <li><a href="#Overlay7">For Android 2.1 and higher</a></li>
+    </ol>
+  </li>
+  <li><a href="#TopMargin">Specify Layout Top-margin</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/ui/themes.html">Styles and Themes</a></li>
+</ul>
+  </div>
+</div>
+
+
+<p>By default, the action bar appears at the top of your activity window,
+slightly reducing the amount of space available for the rest of your activity's layout.
+If, during the course of user interaction, you want to hide and show the action bar, you can do so
+by calling {@link android.app.ActionBar#hide()} and
+{@link android.app.ActionBar#show()} on the {@link android.app.ActionBar}. However,
+this causes your activity to recompute and redraw the layout based on its new size.</p>
+
+
+<div class="figure" style="width:280px">
+  <img src="{@docRoot}images/training/basics/actionbar-overlay@2x.png" width="280" alt="" />
+  <p class="img-caption"><strong>Figure 1.</strong> Gallery's action bar in overlay mode.</p>
+</div>
+
+<p>To avoid resizing your layout when the action bar hides and shows, you can enable <em>overlay
+mode</em> for the action bar. When in overlay mode, your activity layout uses all the space
+available as if the action bar is not there and the system draws the action bar in front of
+your layout. This obscures some of the layout at the top, but now when the action bar hides or
+appears, the system does not need to resize your layout and the transition is seamless.</p>
+
+<p class="note"><strong>Tip:</strong>
+If you want your layout to be partially visible behind the action bar, create a custom
+style for the action bar with a partially transparent background, such as the one shown
+in figure 1. For information about how to define the action bar background, read
+<a href="{@docRoot}training/basics/actionbar/styling.html">Styling the Action Bar</a>.</p>
+
+
+<h2 id="EnableOverlay">Enable Overlay Mode</h2>
+
+<p>To enable overlay mode for the action bar, you need to create a custom theme that
+extends an existing action bar theme and set the {@code android:windowActionBarOverlay} property to
+{@code true}.</p>
+
+
+<h3 id="Overlay11">For Android 3.0 and higher only</h3>
+
+<p>If your
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a>
+is set to {@code 11} or higher, your custom theme should use
+{@link android.R.style#Theme_Holo Theme.Holo} theme (or one of its descendants) as your parent
+theme. For example:</p>
+
+<pre>
+&lt;resources>
+    &lt;!-- the theme applied to the application or activity -->
+    &lt;style name="CustomActionBarTheme"
+           parent="&#64;android:style/Theme.Holo">
+        &lt;item name="android:windowActionBarOverlay">true&lt;/item>
+    &lt;/style>
+&lt;/resources>
+</pre>
+
+
+<h3 id="Overlay7">For Android 2.1 and higher</h3>
+
+<p>If your app is using the Support Library for compatibility on devices
+running versions lower than Android 3.0, your custom theme should use
+{@link android.support.v7.appcompat.R.style#Theme_AppCompat Theme.AppCompat} theme
+(or one of its descendants) as your parent theme. For example:</p>
+
+<pre>
+&lt;resources>
+    &lt;!-- the theme applied to the application or activity -->
+    &lt;style name="CustomActionBarTheme"
+           parent="&#64;android:style/Theme.<strong>AppCompat</strong>">
+        &lt;item name="android:windowActionBarOverlay">true&lt;/item>
+
+        &lt;!-- Support library compatibility -->
+        &lt;item name="windowActionBarOverlay">true&lt;/item>
+    &lt;/style>
+&lt;/resources>
+</pre>
+
+<p>Also notice that this theme includes two definitions for the {@code windowActionBarOverlay}
+style: one with the {@code android:} prefix and one without. The one with the {@code android:}
+prefix is for versions of Android that include the style in the platform and the one
+without the prefix is for older versions that read the style from the Support Library.</p>
+
+
+
+
+
+<h2 id="TopMargin">Specify Layout Top-margin</h2>
+
+<p>When the action bar is in overlay mode, it might obscure some of your layout that should
+remain visible. To ensure that such items remain below the action bar at all times,
+add either margin or padding to the top of the view(s)
+using the height specified by {@link android.R.attr#actionBarSize}. For example:</p>
+
+<pre>
+&lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="?android:attr/actionBarSize">
+    ...
+&lt;/RelativeLayout>
+</pre>
+
+<p>If you're using the Support Library for the action bar, you need to remove the
+{@code android:} prefix. For example:</p>
+
+<pre>
+&lt;!-- Support library compatibility -->
+&lt;RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="?attr/actionBarSize">
+    ...
+&lt;/RelativeLayout>
+</pre>
+
+<p>In this case, the {@code ?attr/actionBarSize} value without the
+prefix works on all versions, including Android 3.0 and higher.</p>

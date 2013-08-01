@@ -1,0 +1,112 @@
+page.title=Setting Up the Action Bar
+
+trainingnavtop=true
+
+@jd:body
+
+<div id="tb-wrapper">
+  <div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#ApiLevel11">Support Android 3.0 and Above Only</a></li>
+  <li><a href="#ApiLevel7">Support Android 2.1 and Above</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}tools/support-library/setup.html"
+>Setting Up the Support Library</a></li>
+</ul>
+  </div>
+</div>
+
+
+<p>In its most basic form, the action bar displays the title for the activity
+and the app icon on the left. Even in this simple form, the action bar
+is useful for all activities to inform
+users about where they are and to maintain a consistent identity for your app.</p>
+
+<img src="{@docRoot}images/training/basics/actionbar-basic.png" height="100" alt=""/>
+<p class="img-caption"><strong>Figure 1.</strong> An action bar with the app icon and
+activity title.</a>
+
+<p>Setting up a basic action bar requires that your app use an activity theme that enables
+the action bar. How to request such a theme depends on which version of Android is the
+lowest supported by your app. So this
+lesson is divided into two sections depending on which Android
+version is your lowest supported.</p>
+
+
+<h2 id="ApiLevel11">Support Android 3.0 and Above Only</h2>
+
+<p>Beginning with Android 3.0 (API level 11), the action bar is included in all
+activities that use the {@link android.R.style#Theme_Holo Theme.Holo} theme (or one of its
+descendants), which is the default theme when either the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> or
+<a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a>
+attribute is set to <code>"11"</code> or greater.</p>
+
+<p>So to add the action bar to your activities, simply set either attribute to
+{@code 11} or higher. For example:</p>
+
+<pre>
+&lt;manifest ... &gt;
+    &lt;uses-sdk android:minSdkVersion="11" ... /&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+
+<p class="note"><strong>Note:</strong> If you've created a custom theme, be sure it uses one
+of the {@link android.R.style#Theme_Holo Theme.Holo} themes as its parent. For details,
+see <a href="{@docRoot}training/basics/actionbar/styling.html">Styling the Action Bar</a>.</p>
+
+<p>Now the {@link android.R.style#Theme_Holo Theme.Holo} theme is applied to your app and
+all activities show the action bar. That's it.</p>
+
+
+
+<h2 id="ApiLevel7">Support Android 2.1 and Above</h2>
+
+<p>Adding the action bar when running on versions older than Android 3.0 (down to Android 2.1)
+requires that you include the Android Support Library in your application.</p>
+
+<p>To get started, read the <a href="{@docRoot}tools/support-library/setup.html"
+>Support Library Setup</a> document and set up the <strong>v7 appcompat</strong>
+library (once you've downloaded the library package, follow the instructions for <a
+href="{@docRoot}tools/support-library/setup.html#libs-with-res">Adding libraries with
+resources</a>).</p>
+
+<p>Once you have the Support Library integrated with your app project:</p>
+
+<ol>
+  <li>Update your activity so that it extends {@link android.support.v7.app.ActionBarActivity}.
+  For example:
+<pre>
+public class MainActivity extends ActionBarActivity { ... }
+</pre>
+  </li>
+  <li>In your manifest file, update either the <a
+  href="{@docRoot}guide/topics/manifest/application-element.html">{@code
+  &lt;application>}</a> element or individual
+  <a href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;activity>}</a>
+  elements to use one of the {@link android.support.v7.appcompat.R.style#Theme_AppCompat
+  Theme.AppCompat} themes. For example:
+  <pre>&lt;activity android:theme="@style/Theme.AppCompat.Light" ... ></pre>
+  <p class="note"><strong>Note:</strong> If you've created a custom theme, be sure it uses one
+of the {@link android.support.v7.appcompat.R.style#Theme_AppCompat Theme.AppCompat} themes as
+its parent. For details, see <a href="{@docRoot}training/basics/actionbar/styling.html">Styling
+the Action Bar</a>.</p>
+  </li>
+</ol>
+
+<p>Now your activity includes the action bar when running on Android 2.1 (API level 7) or higher.
+</p>
+
+<p>Remember to properly set your app's API level support in the manifest:</p>
+<pre>
+&lt;manifest ... &gt;
+    &lt;uses-sdk android:minSdkVersion="7"  android:targetSdkVersion="18" /&gt;
+    ...
+&lt;/manifest&gt;
+</pre>

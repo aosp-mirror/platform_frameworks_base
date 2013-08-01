@@ -240,7 +240,7 @@ Intent intent = new Intent(Intent.ACTION_SEND);
 
 // Always use string resources for UI text.
 // This says something like "Share this photo with"
-String title = (String) getResources().getText(R.string.chooser_title);
+String title = getResources().getString(R.string.chooser_title);
 // Create and start the chooser
 Intent chooser = Intent.createChooser(intent, title);
 startActivity(chooser);
