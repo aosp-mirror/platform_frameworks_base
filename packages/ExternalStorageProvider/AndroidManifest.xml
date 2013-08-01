@@ -13,7 +13,7 @@
             android:permission="android.permission.MANAGE_DOCUMENTS">
             <meta-data
                 android:name="android.content.DOCUMENT_PROVIDER"
-                android:value="true" />
+                android:resource="@xml/document_provider" />
         </provider>
     </application>
 </manifest>

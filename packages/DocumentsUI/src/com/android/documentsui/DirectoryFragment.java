@@ -342,12 +342,15 @@ public class DirectoryFragment extends Fragment {
             final long lastModified = getCursorLong(cursor, DocumentColumns.LAST_MODIFIED);
             final int flags = getCursorInt(cursor, DocumentColumns.FLAGS);
 
+            final Uri uri = getArguments().getParcelable(EXTRA_URI);
+            final String authority = uri.getAuthority();
+
             if ((flags & DocumentsContract.FLAG_SUPPORTS_THUMBNAIL) != 0) {
-                final Uri uri = getArguments().getParcelable(EXTRA_URI);
-                final Uri childUri = DocumentsContract.buildDocumentUri(uri.getAuthority(), guid);
+                final Uri childUri = DocumentsContract.buildDocumentUri(authority, guid);
                 icon.setImageURI(childUri);
             } else {
-                icon.setImageDrawable(DocumentsActivity.resolveDocumentIcon(context, mimeType));
+                icon.setImageDrawable(
+                        DocumentsActivity.resolveDocumentIcon(context, authority, mimeType));
             }
 
             title.setText(displayName);
