@@ -462,6 +462,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         final ILocationListener mListener;
         final PendingIntent mPendingIntent;
         final WorkSource mWorkSource; // WorkSource for battery blame, or null to assign to caller.
+        final boolean mHideFromAppOps; // True if AppOps should not monitor this receiver.
         final Object mKey;
 
         final HashMap<String,UpdateRecord> mUpdateRecords = new HashMap<String,UpdateRecord>();
@@ -474,7 +475,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         PowerManager.WakeLock mWakeLock;
 
         Receiver(ILocationListener listener, PendingIntent intent, int pid, int uid,
-                String packageName, WorkSource workSource) {
+                String packageName, WorkSource workSource, boolean hideFromAppOps) {
             mListener = listener;
             mPendingIntent = intent;
             if (listener != null) {
@@ -490,6 +491,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 workSource = null;
             }
             mWorkSource = workSource;
+            mHideFromAppOps = hideFromAppOps;
 
             updateMonitoring(true);
 
@@ -532,6 +534,10 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         public void updateMonitoring(boolean allow) {
+            if (mHideFromAppOps) {
+                return;
+            }
+
             // First update monitoring of any location request (including high power).
             mOpMonitoring = updateMonitoring(allow, mOpMonitoring,
                     AppOpsManager.OP_MONITOR_LOCATION);
@@ -931,9 +937,14 @@ public class LocationManagerService extends ILocationManager.Stub {
      * Throw SecurityException if WorkSource use is not allowed (i.e. can't blame other packages
      * for battery).
      */
-    private void checkWorkSourceAllowed() {
+    private void checkDeviceStatsAllowed() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.UPDATE_DEVICE_STATS, null);
+    }
+
+    private void checkUpdateAppOpsAllowed() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.UPDATE_APP_OPS_STATS, null);
     }
 
     public static int resolutionLevelToOp(int allowedResolutionLevel) {
@@ -1260,11 +1271,12 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     private Receiver getReceiverLocked(ILocationListener listener, int pid, int uid,
-            String packageName, WorkSource workSource) {
+            String packageName, WorkSource workSource, boolean hideFromAppOps) {
         IBinder binder = listener.asBinder();
         Receiver receiver = mReceivers.get(binder);
         if (receiver == null) {
-            receiver = new Receiver(listener, null, pid, uid, packageName, workSource);
+            receiver = new Receiver(listener, null, pid, uid, packageName, workSource,
+                    hideFromAppOps);
             mReceivers.put(binder, receiver);
 
             try {
@@ -1278,10 +1290,11 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     private Receiver getReceiverLocked(PendingIntent intent, int pid, int uid, String packageName,
-            WorkSource workSource) {
+            WorkSource workSource, boolean hideFromAppOps) {
         Receiver receiver = mReceivers.get(intent);
         if (receiver == null) {
-            receiver = new Receiver(null, intent, pid, uid, packageName, workSource);
+            receiver = new Receiver(null, intent, pid, uid, packageName, workSource,
+                    hideFromAppOps);
             mReceivers.put(intent, receiver);
         }
         return receiver;
@@ -1343,16 +1356,16 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     private Receiver checkListenerOrIntentLocked(ILocationListener listener, PendingIntent intent,
-            int pid, int uid, String packageName, WorkSource workSource) {
+            int pid, int uid, String packageName, WorkSource workSource, boolean hideFromAppOps) {
         if (intent == null && listener == null) {
             throw new IllegalArgumentException("need either listener or intent");
         } else if (intent != null && listener != null) {
             throw new IllegalArgumentException("cannot register both listener and intent");
         } else if (intent != null) {
             checkPendingIntent(intent);
-            return getReceiverLocked(intent, pid, uid, packageName, workSource);
+            return getReceiverLocked(intent, pid, uid, packageName, workSource, hideFromAppOps);
         } else {
-            return getReceiverLocked(listener, pid, uid, packageName, workSource);
+            return getReceiverLocked(listener, pid, uid, packageName, workSource, hideFromAppOps);
         }
     }
 
@@ -1366,7 +1379,11 @@ public class LocationManagerService extends ILocationManager.Stub {
                 request.getProvider());
         WorkSource workSource = request.getWorkSource();
         if (workSource != null && workSource.size() > 0) {
-            checkWorkSourceAllowed();
+            checkDeviceStatsAllowed();
+        }
+        boolean hideFromAppOps = request.getHideFromAppOps();
+        if (hideFromAppOps) {
+            checkUpdateAppOpsAllowed();
         }
         LocationRequest sanitizedRequest = createSanitizedRequest(request, allowedResolutionLevel);
 
@@ -1381,7 +1398,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             synchronized (mLock) {
                 Receiver recevier = checkListenerOrIntentLocked(listener, intent, pid, uid,
-                        packageName, workSource);
+                        packageName, workSource, hideFromAppOps);
                 requestLocationUpdatesLocked(sanitizedRequest, recevier, pid, uid, packageName);
             }
         } finally {
@@ -1434,8 +1451,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         synchronized (mLock) {
             WorkSource workSource = null;
-            Receiver receiver = checkListenerOrIntentLocked(listener, intent, pid, uid, packageName,
-                    workSource);
+            boolean hideFromAppOps = false;
+            Receiver receiver = checkListenerOrIntentLocked(listener, intent, pid, uid,
+                    packageName, workSource, hideFromAppOps);
 
             // providers may use public location API's, need to clear identity
             long identity = Binder.clearCallingIdentity();

@@ -147,6 +147,7 @@ public final class LocationRequest implements Parcelable {
     private int mNumUpdates = Integer.MAX_VALUE;  // no expiry
     private float mSmallestDisplacement = 0.0f;    // meters
     private WorkSource mWorkSource = new WorkSource();
+    private boolean mHideFromAppOps = false; // True if this request shouldn't be counted by AppOps
 
     private String mProvider = LocationManager.FUSED_PROVIDER;  // for deprecated APIs that explicitly request a provider
 
@@ -236,6 +237,7 @@ public final class LocationRequest implements Parcelable {
         mSmallestDisplacement = src.mSmallestDisplacement;
         mProvider = src.mProvider;
         mWorkSource = src.mWorkSource;
+        mHideFromAppOps = src.mHideFromAppOps;
     }
 
     /**
@@ -506,6 +508,16 @@ public final class LocationRequest implements Parcelable {
         return mWorkSource;
     }
 
+    /** @hide */
+    public void setHideFromAppOps(boolean hideFromAppOps) {
+        mHideFromAppOps = hideFromAppOps;
+    }
+
+    /** @hide */
+    public boolean getHideFromAppOps() {
+        return mHideFromAppOps;
+    }
+
     private static void checkInterval(long millis) {
         if (millis < 0) {
             throw new IllegalArgumentException("invalid interval: " + millis);
@@ -549,6 +561,7 @@ public final class LocationRequest implements Parcelable {
             request.setExpireAt(in.readLong());
             request.setNumUpdates(in.readInt());
             request.setSmallestDisplacement(in.readFloat());
+            request.setHideFromAppOps(in.readInt() != 0);
             String provider = in.readString();
             if (provider != null) request.setProvider(provider);
             WorkSource workSource = in.readParcelable(WorkSource.class.getClassLoader());
@@ -574,6 +587,7 @@ public final class LocationRequest implements Parcelable {
         parcel.writeLong(mExpireAt);
         parcel.writeInt(mNumUpdates);
         parcel.writeFloat(mSmallestDisplacement);
+        parcel.writeInt(mHideFromAppOps ? 1 : 0);
         parcel.writeString(mProvider);
         parcel.writeParcelable(mWorkSource, 0);
     }
