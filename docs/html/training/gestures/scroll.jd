@@ -95,7 +95,7 @@ two different types of scrolling, dragging and flinging:</p>
 finger across the touch screen. Simple dragging is often implemented by overriding 
 {@link android.view.GestureDetector.OnGestureListener#onScroll onScroll()} in 
 {@link android.view.GestureDetector.OnGestureListener}. For more discussion of dragging, see 
-<a href="dragging.jd">Dragging and Scaling</a>.</li>
+<a href="dragging.html">Dragging and Scaling</a>.</li>
 
     <li><strong>Flinging</strong> is the type of scrolling that occurs when a user 
 drags and lifts her finger quickly. After the user lifts her finger, you generally 

@@ -10,7 +10,7 @@ page.title=Support Library Setup
     <ol>
       <li><a href="#download">Downloading the Support Library</a></li>
       <li><a href="#choosing">Choosing Support Libraries</a></li>
-      <li><a href="add-library">Adding Support Libraries</a>
+      <li><a href="#add-library">Adding Support Libraries</a>
         <ol>
           <li><a href="#libs-without-res">Adding libraries without resources</a></li>
           <li><a href="#libs-with-res">Adding libraries with resources</a></li>
@@ -90,9 +90,9 @@ Android Support Library selected.</p>
   each Support Library you want to use.</p>
 
 <p>Some Support Libraries contain resources beyond compiled code classes, such as images or XML
-  files. For example, the <a href="tools/support-library/features.html#v7-appcompat">v7
-  appcompat</a> and <a href="tools/support-library/features.html#v7-gridlayout">v7 gridlayout</a>
-  libraries include resources.</p>
+  files. For example, the <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7
+  appcompat</a> and <a href="{@docRoot}tools/support-library/features.html#v7-gridlayout">v7
+  gridlayout</a> libraries include resources.</p>
 
 <p>If you are not sure if a library contains resources, check the
   <a href="{@docRoot}tools/support-library/features.html">Support Library Features</a> page.
