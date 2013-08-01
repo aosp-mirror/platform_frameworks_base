@@ -37,7 +37,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
+import android.content.res.TypedArray;
+import android.content.res.XmlResourceParser;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -50,7 +53,9 @@ import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -66,11 +71,20 @@ import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.collect.Lists;
+import com.google.android.collect.Maps;
 
+import libcore.io.IoUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class DocumentsActivity extends Activity {
@@ -92,7 +106,9 @@ public class DocumentsActivity extends Activity {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
 
-    private ArrayList<Root> mRoots = Lists.newArrayList();
+    private static HashMap<String, DocumentsProviderInfo> sProviders = Maps.newHashMap();
+    private static ArrayList<Root> sRoots = Lists.newArrayList();
+
     private RootsAdapter mRootsAdapter;
     private ListView mRootsList;
 
@@ -142,7 +158,7 @@ public class DocumentsActivity extends Activity {
         }
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mRootsAdapter = new RootsAdapter(this, mRoots);
+        mRootsAdapter = new RootsAdapter(this, sRoots);
         mRootsList = (ListView) findViewById(R.id.roots_list);
         mRootsList.setAdapter(mRootsAdapter);
         mRootsList.setOnItemClickListener(mRootsListener);
@@ -406,9 +422,13 @@ public class DocumentsActivity extends Activity {
         values.put(DocumentColumns.MIME_TYPE, mimeType);
         values.put(DocumentColumns.DISPLAY_NAME, displayName);
 
-        // TODO: handle errors from remote side
         final Uri uri = getContentResolver().insert(mCurrentDir, values);
-        onFinished(uri);
+        if (uri != null) {
+            onFinished(uri);
+        } else {
+            // TODO: ask for overwrite confirmation
+            Toast.makeText(this, R.string.save_error, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void onFinished(Uri... uris) {
@@ -448,43 +468,69 @@ public class DocumentsActivity extends Activity {
     }
 
     public static class Root {
+        public DocumentsProviderInfo info;
         public int rootType;
         public Uri uri;
         public Drawable icon;
         public String title;
         public String summary;
 
-        public static Root fromCursor(Context context, ProviderInfo info, Cursor cursor) {
+        public static Root fromInfo(Context context, DocumentsProviderInfo info) {
             final Root root = new Root();
+            final PackageManager pm = context.getPackageManager();
+
+            root.info = info;
+            root.rootType = DocumentsContract.ROOT_TYPE_SERVICE;
+            root.uri = DocumentsContract.buildDocumentUri(
+                    info.providerInfo.authority, DocumentsContract.ROOT_GUID);
+            root.icon = info.providerInfo.loadIcon(pm);
+            root.title = info.providerInfo.loadLabel(pm).toString();
+            root.summary = null;
+
+            return root;
+        }
+
+        public static Root fromCursor(
+                Context context, DocumentsProviderInfo info, Cursor cursor) {
+            final Root root = fromInfo(context, info);
 
             root.rootType = cursor.getInt(cursor.getColumnIndex(RootColumns.ROOT_TYPE));
-            root.uri = DocumentsContract.buildDocumentUri(
-                    info.authority, cursor.getString(cursor.getColumnIndex(RootColumns.GUID)));
+            root.uri = DocumentsContract.buildDocumentUri(info.providerInfo.authority,
+                    cursor.getString(cursor.getColumnIndex(RootColumns.GUID)));
 
             final PackageManager pm = context.getPackageManager();
             final int icon = cursor.getInt(cursor.getColumnIndex(RootColumns.ICON));
             if (icon != 0) {
                 try {
-                    root.icon = pm.getResourcesForApplication(info.applicationInfo)
+                    root.icon = pm.getResourcesForApplication(info.providerInfo.applicationInfo)
                             .getDrawable(icon);
                 } catch (NotFoundException e) {
                     throw new RuntimeException(e);
                 } catch (NameNotFoundException e) {
                     throw new RuntimeException(e);
                 }
-            } else {
-                root.icon = info.loadIcon(pm);
             }
 
-            root.title = cursor.getString(cursor.getColumnIndex(RootColumns.TITLE));
-            if (root.title == null) {
-                root.title = info.loadLabel(pm).toString();
+            final String title = cursor.getString(cursor.getColumnIndex(RootColumns.TITLE));
+            if (title != null) {
+                root.title = title;
             }
 
             root.summary = cursor.getString(cursor.getColumnIndex(RootColumns.SUMMARY));
 
             return root;
         }
+    }
+
+    public static class DocumentsProviderInfo {
+        public ProviderInfo providerInfo;
+        public boolean customRoots;
+        public List<Icon> customIcons;
+    }
+
+    public static class Icon {
+        public String mimeType;
+        public Drawable icon;
     }
 
     public static class Document {
@@ -541,8 +587,17 @@ public class DocumentsActivity extends Activity {
         }
     }
 
-    public static Drawable resolveDocumentIcon(Context context, String mimeType) {
-        // TODO: allow backends to provide custom MIME icons
+    public static Drawable resolveDocumentIcon(Context context, String authority, String mimeType) {
+        // Custom icons take precedence
+        final DocumentsProviderInfo info = sProviders.get(authority);
+        if (info != null) {
+            for (Icon icon : info.customIcons) {
+                if (mimeMatches(icon.mimeType, mimeType)) {
+                    return icon.icon;
+                }
+            }
+        }
+
         if (DocumentsContract.MIME_TYPE_DIRECTORY.equals(mimeType)) {
             return context.getResources().getDrawable(R.drawable.ic_dir);
         } else {
@@ -550,39 +605,110 @@ public class DocumentsActivity extends Activity {
             final Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setType(mimeType);
 
-            final ResolveInfo info = pm.resolveActivity(
+            final ResolveInfo activityInfo = pm.resolveActivity(
                     intent, PackageManager.MATCH_DEFAULT_ONLY);
-            if (info != null) {
-                return info.loadIcon(pm);
+            if (activityInfo != null) {
+                return activityInfo.loadIcon(pm);
             } else {
                 return null;
             }
         }
     }
 
+    private static final String TAG_DOCUMENTS_PROVIDER = "documents-provider";
+    private static final String TAG_ICON = "icon";
+
     /**
      * Gather roots from all known storage providers.
      */
     private void updateRoots() {
-        mRoots.clear();
+        sProviders.clear();
+        sRoots.clear();
 
-        final List<ProviderInfo> providers = getPackageManager()
-                .queryContentProviders(null, -1, PackageManager.GET_META_DATA);
-        for (ProviderInfo info : providers) {
-            if (info.metaData != null
-                    && info.metaData.containsKey(DocumentsContract.META_DATA_DOCUMENT_PROVIDER)) {
-                // TODO: populate roots on background thread, and cache results
-                final Uri uri = DocumentsContract.buildRootsUri(info.authority);
-                final Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-                try {
-                    while (cursor.moveToNext()) {
-                        mRoots.add(Root.fromCursor(this, info, cursor));
+        final PackageManager pm = getPackageManager();
+        final List<ProviderInfo> providers = pm.queryContentProviders(
+                null, -1, PackageManager.GET_META_DATA);
+        for (ProviderInfo providerInfo : providers) {
+            if (providerInfo.metaData != null && providerInfo.metaData.containsKey(
+                    DocumentsContract.META_DATA_DOCUMENT_PROVIDER)) {
+                final DocumentsProviderInfo info = parseInfo(this, providerInfo);
+                if (info == null) {
+                    Log.w(TAG, "Missing info for " + providerInfo);
+                    continue;
+                }
+
+                sProviders.put(info.providerInfo.authority, info);
+
+                if (info.customRoots) {
+                    // TODO: populate roots on background thread, and cache results
+                    final Uri uri = DocumentsContract.buildRootsUri(providerInfo.authority);
+                    final Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+                    try {
+                        while (cursor.moveToNext()) {
+                            sRoots.add(Root.fromCursor(this, info, cursor));
+                        }
+                    } finally {
+                        cursor.close();
                     }
-                } finally {
-                    cursor.close();
+                } else if (info != null) {
+                    sRoots.add(Root.fromInfo(this, info));
                 }
             }
         }
+    }
+
+    private static DocumentsProviderInfo parseInfo(Context context, ProviderInfo providerInfo) {
+        final DocumentsProviderInfo info = new DocumentsProviderInfo();
+        info.providerInfo = providerInfo;
+        info.customIcons = Lists.newArrayList();
+
+        final PackageManager pm = context.getPackageManager();
+        final Resources res;
+        try {
+            res = pm.getResourcesForApplication(providerInfo.applicationInfo);
+        } catch (NameNotFoundException e) {
+            Log.w(TAG, "Failed to find resources for " + providerInfo, e);
+            return null;
+        }
+
+        XmlResourceParser parser = null;
+        try {
+            parser = providerInfo.loadXmlMetaData(
+                    pm, DocumentsContract.META_DATA_DOCUMENT_PROVIDER);
+            AttributeSet attrs = Xml.asAttributeSet(parser);
+
+            int type = 0;
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                final String tag = parser.getName();
+                if (type == XmlPullParser.START_TAG && TAG_DOCUMENTS_PROVIDER.equals(tag)) {
+                    final TypedArray a = res.obtainAttributes(
+                            attrs, com.android.internal.R.styleable.DocumentsProviderInfo);
+                    info.customRoots = a.getBoolean(
+                            com.android.internal.R.styleable.DocumentsProviderInfo_customRoots,
+                            false);
+                    a.recycle();
+
+                } else if (type == XmlPullParser.START_TAG && TAG_ICON.equals(tag)) {
+                    final TypedArray a = res.obtainAttributes(
+                            attrs, com.android.internal.R.styleable.Icon);
+                    final Icon icon = new Icon();
+                    icon.mimeType = a.getString(com.android.internal.R.styleable.Icon_mimeType);
+                    icon.icon = a.getDrawable(com.android.internal.R.styleable.Icon_icon);
+                    info.customIcons.add(icon);
+                    a.recycle();
+                }
+            }
+        } catch (IOException e){
+            Log.w(TAG, "Failed to parse metadata", e);
+            return null;
+        } catch (XmlPullParserException e) {
+            Log.w(TAG, "Failed to parse metadata", e);
+            return null;
+        } finally {
+            IoUtils.closeQuietly(parser);
+        }
+
+        return info;
     }
 
     private OnItemClickListener mRootsListener = new OnItemClickListener() {

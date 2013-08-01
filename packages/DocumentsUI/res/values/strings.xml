@@ -34,7 +34,9 @@
     <string name="sort_name">By name</string>
     <string name="sort_date">By date modified</string>
 
-    <string name="drawer_open">Open navigation drawer</string>
-    <string name="drawer_close">Close navigation drawer</string>
+    <string name="drawer_open">Show roots</string>
+    <string name="drawer_close">Hide roots</string>
+
+    <string name="save_error">Failed to save document</string>
 
 </resources>

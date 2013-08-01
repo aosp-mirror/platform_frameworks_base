@@ -26,7 +26,7 @@ import android.util.AttributeSet;
  * an additional close() method on this interface for the client to indicate
  * when it is done reading the resource.
  */
-public interface XmlResourceParser extends XmlPullParser, AttributeSet {
+public interface XmlResourceParser extends XmlPullParser, AttributeSet, AutoCloseable {
     /**
      * Close this interface to the resource.  Calls on the interface are no
      * longer value after this call.

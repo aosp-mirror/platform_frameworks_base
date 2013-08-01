@@ -2070,4 +2070,5 @@
   <public type="attr" name="vendor" />
   <public type="attr" name="category" />
   <public type="attr" name="isAsciiCapable" />
+  <public type="attr" name="customRoots" />
 </resources>
