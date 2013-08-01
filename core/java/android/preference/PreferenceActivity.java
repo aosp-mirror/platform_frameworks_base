@@ -889,7 +889,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      * Subclasses should override this method and verify that the given fragment is a valid type
      * to be attached to this activity. The default implementation returns <code>true</code> prior
      * to Key Lime Pie, <code>false</code> otherwise.
-     * @param f the class name of the Fragment about to be attached to this activity.
+     * @param fragmentName the class name of the Fragment about to be attached to this activity.
      * @return true if the fragment class name is valid for this Activity and false otherwise.
      */
     protected boolean isValidFragment(String fragmentName) {
