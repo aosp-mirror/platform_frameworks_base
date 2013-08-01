@@ -19,5 +19,12 @@
         android:id="@+id/menu_create_dir"
         android:title="@string/menu_create_dir"
         android:icon="@drawable/ic_menu_create_dir"
-        android:showAsAction="always" />
+        android:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_search"
+        android:title="@string/menu_search"
+        android:icon="@drawable/ic_menu_search"
+        android:showAsAction="always|collapseActionView"
+        android:actionViewClass="android.widget.SearchView"
+        android:imeOptions="actionSearch" />
 </menu>

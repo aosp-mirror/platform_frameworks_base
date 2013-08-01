@@ -16,17 +16,12 @@
 
 package com.android.documentsui;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.content.CursorLoader;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
@@ -65,8 +60,6 @@ public class DirectoryFragment extends Fragment {
 
     // TODO: show storage backend in item views when requested
 
-    private static final String TAG_SORT = "sort";
-
     private ListView mListView;
     private GridView mGridView;
 
@@ -81,7 +74,8 @@ public class DirectoryFragment extends Fragment {
 
     private static final int LOADER_DOCUMENTS = 2;
 
-    public static void show(FragmentManager fm, Uri uri, String displayName) {
+    public static void show(
+            FragmentManager fm, Uri uri, String displayName, boolean addToBackStack) {
         final Bundle args = new Bundle();
         args.putParcelable(EXTRA_URI, uri);
 
@@ -90,7 +84,9 @@ public class DirectoryFragment extends Fragment {
 
         final FragmentTransaction ft = fm.beginTransaction();
         ft.replace(R.id.directory, fragment);
-        ft.addToBackStack(displayName);
+        if (addToBackStack) {
+            ft.addToBackStack(displayName);
+        }
         ft.setBreadCrumbTitle(displayName);
         ft.commitAllowingStateLoss();
     }
@@ -136,7 +132,13 @@ public class DirectoryFragment extends Fragment {
                     sortOrder = null;
                 }
 
-                final Uri contentsUri = DocumentsContract.buildContentsUri(uri);
+                final Uri contentsUri;
+                if (uri.getQueryParameter(DocumentsContract.PARAM_QUERY) != null) {
+                    contentsUri = uri;
+                } else {
+                    contentsUri = DocumentsContract.buildContentsUri(uri);
+                }
+
                 return new CursorLoader(context, contentsUri, null, null, null, sortOrder);
             }
 
@@ -198,9 +200,6 @@ public class DirectoryFragment extends Fragment {
             updateMode();
             getFragmentManager().invalidateOptionsMenu();
             return true;
-        } else if (id == R.id.menu_sort) {
-            SortFragment.show(this);
-            return true;
         } else {
             return super.onOptionsItemSelected(item);
         }
@@ -238,7 +237,7 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    private void updateSortBy() {
+    public void updateSortBy() {
         getLoaderManager().restartLoader(LOADER_DOCUMENTS, getArguments(), mCallbacks);
     }
 
@@ -355,38 +354,6 @@ public class DirectoryFragment extends Fragment {
             if (summary != null) {
                 summary.setText(DateUtils.getRelativeTimeSpanString(lastModified));
             }
-        }
-    }
-
-    public static class SortFragment extends DialogFragment {
-        public static void show(DirectoryFragment parent) {
-            if (!parent.isAdded()) return;
-
-            final SortFragment dialog = new SortFragment();
-            dialog.setTargetFragment(parent, 0);
-            dialog.show(parent.getFragmentManager(), TAG_SORT);
-        }
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            final Context context = getActivity();
-            final DisplayState state = getDisplayState(this);
-
-            final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            builder.setTitle(R.string.menu_sort);
-            builder.setSingleChoiceItems(new CharSequence[] {
-                    getText(R.string.sort_name),
-                    getText(R.string.sort_date),
-            }, state.sortBy, new OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    state.sortBy = which;
-                    ((DirectoryFragment) getTargetFragment()).updateSortBy();
-                    dismiss();
-                }
-            });
-
-            return builder.create();
         }
     }
 
