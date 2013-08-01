@@ -175,7 +175,6 @@
   <java-symbol type="id" name="to_common" />
   <java-symbol type="id" name="to_org" />
   <java-symbol type="id" name="to_org_unit" />
-  <java-symbol type="id" name="top_action_bar" />
   <java-symbol type="id" name="topPanel" />
   <java-symbol type="id" name="up" />
   <java-symbol type="id" name="value" />
