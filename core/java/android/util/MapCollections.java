@@ -183,13 +183,27 @@ abstract class MapCollections<K, V> {
         }
 
         @Override
-        public boolean contains(Object object) {
-            throw new UnsupportedOperationException();
+        public boolean contains(Object o) {
+            if (!(o instanceof Map.Entry))
+                return false;
+            Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
+            int index = colIndexOfKey(e.getKey());
+            if (index < 0) {
+                return false;
+            }
+            Object foundVal = colGetEntry(index, 1);
+            return Objects.equal(foundVal, e.getValue());
         }
 
         @Override
         public boolean containsAll(Collection<?> collection) {
-            throw new UnsupportedOperationException();
+            Iterator<?> it = collection.iterator();
+            while (it.hasNext()) {
+                if (!contains(it.next())) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         @Override
@@ -231,6 +245,23 @@ abstract class MapCollections<K, V> {
         public <T> T[] toArray(T[] array) {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public boolean equals(Object object) {
+            return equalsSetHelper(this, object);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = 0;
+            for (int i=colGetSize()-1; i>=0; i--) {
+                final Object key = colGetEntry(i, 0);
+                final Object value = colGetEntry(i, 1);
+                result += ( (key == null ? 0 : key.hashCode()) ^
+                        (value == null ? 0 : value.hashCode()) );
+            }
+            return result;
+        }
     };
 
     final class KeySet implements Set<K> {
@@ -257,7 +288,7 @@ abstract class MapCollections<K, V> {
 
         @Override
         public boolean containsAll(Collection<?> collection) {
-            return removeAllHelper(colGetMap(), collection);
+            return containsAllHelper(colGetMap(), collection);
         }
 
         @Override
@@ -303,6 +334,21 @@ abstract class MapCollections<K, V> {
         @Override
         public <T> T[] toArray(T[] array) {
             return toArrayHelper(array, 1);
+        }
+
+        @Override
+        public boolean equals(Object object) {
+            return equalsSetHelper(this, object);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = 0;
+            for (int i=colGetSize()-1; i>=0; i--) {
+                Object obj = colGetEntry(i, 0);
+                result += obj == null ? 0 : obj.hashCode();
+            }
+            return result;
         }
     };
 
@@ -437,7 +483,6 @@ abstract class MapCollections<K, V> {
         return oldSize != map.size();
     }
 
-
     public Object[] toArrayHelper(int offset) {
         final int N = colGetSize();
         Object[] result = new Object[N];
@@ -461,6 +506,24 @@ abstract class MapCollections<K, V> {
             array[N] = null;
         }
         return array;
+    }
+
+    public static <T> boolean equalsSetHelper(Set<T> set, Object object) {
+        if (set == object) {
+            return true;
+        }
+        if (object instanceof Set) {
+            Set<?> s = (Set<?>) object;
+
+            try {
+                return set.size() == s.size() && set.containsAll(s);
+            } catch (NullPointerException ignored) {
+                return false;
+            } catch (ClassCastException ignored) {
+                return false;
+            }
+        }
+        return false;
     }
 
     public Set<Map.Entry<K, V>> getEntrySet() {
