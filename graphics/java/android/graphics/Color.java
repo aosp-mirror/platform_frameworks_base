@@ -406,18 +406,18 @@ public class Color {
         sColorNameMap.put("yellow", YELLOW);
         sColorNameMap.put("cyan", CYAN);
         sColorNameMap.put("magenta", MAGENTA);
-        sColorNameMap.put("aqua", 0x00FFFF);
-        sColorNameMap.put("fuchsia", 0xFF00FF);
+        sColorNameMap.put("aqua", 0xFF00FFFF);
+        sColorNameMap.put("fuchsia", 0xFFFF00FF);
         sColorNameMap.put("darkgrey", DKGRAY);
         sColorNameMap.put("grey", GRAY);
         sColorNameMap.put("lightgrey", LTGRAY);
-        sColorNameMap.put("lime", 0x00FF00);
-        sColorNameMap.put("maroon", 0x800000);
-        sColorNameMap.put("navy", 0x000080);
-        sColorNameMap.put("olive", 0x808000);
-        sColorNameMap.put("purple", 0x800080);
-        sColorNameMap.put("silver", 0xC0C0C0);
-        sColorNameMap.put("teal", 0x008080);
+        sColorNameMap.put("lime", 0xFF00FF00);
+        sColorNameMap.put("maroon", 0xFF800000);
+        sColorNameMap.put("navy", 0xFF000080);
+        sColorNameMap.put("olive", 0xFF808000);
+        sColorNameMap.put("purple", 0xFF800080);
+        sColorNameMap.put("silver", 0xFFC0C0C0);
+        sColorNameMap.put("teal", 0xFF008080);
 
     }
 }
