@@ -438,9 +438,6 @@ public class MediaFocusControl implements OnFinished {
     protected int requestAudioFocus(int mainStreamType, int focusChangeHint, IBinder cb,
             IAudioFocusDispatcher fd, String clientId, String callingPackageName) {
         Log.i(TAG, " AudioFocus  requestAudioFocus() from " + clientId);
-        // the main stream type for the audio focus request is currently not used. It may
-        // potentially be used to handle multiple stream type-dependent audio focuses.
-
         // we need a valid binder callback for clients
         if (!cb.pingBinder()) {
             Log.e(TAG, " AudioFocus DOA client for requestAudioFocus(), aborting.");
