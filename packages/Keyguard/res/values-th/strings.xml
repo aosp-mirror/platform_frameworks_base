@@ -41,7 +41,7 @@
     <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"ใส่ซิมการ์ด"</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"ไม่มีหรือไม่สามารถอ่านซิมการ์ดได้ โปรดใส่ซิมการ์ด"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"ซิมการ์ดใช้ไม่ได้"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"ซิมการ์ดของคุณถูกปิดใช้งานอย่างถาวร"\n"ติดต่อผู้ให้บริการระบบไร้สายของคุณเพื่อรับซิมการ์ดใหม่"</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"ซิมการ์ดของคุณถูกปิดใช้งานอย่างถาวร\nติดต่อผู้ให้บริการระบบไร้สายของคุณเพื่อรับซิมการ์ดใหม่"</string>
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"ซิมการ์ดถูกล็อก"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"ซิมการ์ดถูกล็อกด้วย PUK"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"กำลังปลดล็อกซิมการ์ด…"</string>
@@ -116,17 +116,17 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"รหัสผ่าน"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"ลงชื่อเข้าใช้"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"หากลืมชื่อผู้ใช้หรือรหัสผ่าน"\n"โปรดไปที่ "<b>"google.com/accounts/recovery"</b></string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"หากลืมชื่อผู้ใช้หรือรหัสผ่าน\nโปรดไปที่ "<b>"google.com/accounts/recovery"</b></string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"กำลังตรวจสอบบัญชี…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"คุณพิมพ์ PIN ไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว "\n\n"โปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"คุณพิมพ์รหัสผ่านไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว "\n\n"โปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว "\n\n"โปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"คุณพิมพ์ PIN ไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว \n\nโปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"คุณพิมพ์รหัสผ่านไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว \n\nโปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว \n\nโปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"คุณพยายามปลดล็อกแท็บเล็ตอย่างไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากพยายามแล้วไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง แท็บเล็ตจะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงานและข้อมูลผู้ใช้ทั้งหมดจะหายไป"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"คุณพยายามปลดล็อกโทรศัพท์อย่างไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากพยายามแล้วไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง โทรศัพท์จะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงานและข้อมูลผู้ใช้ทั้งหมดจะหายไป"</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"คุณพยายามปลดล็อกแท็บเล็ตอย่างไม่ถูกต้อง <xliff:g id="NUMBER">%d</xliff:g> ครั้งแล้ว ขณะนี้แท็บเล็ตจะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงาน"</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"คุณพยายามปลดล็อกโทรศัพท์อย่างไม่ถูกต้อง <xliff:g id="NUMBER">%d</xliff:g> ครั้งแล้ว ขณะนี้โทรศัพท์จะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงาน"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกแท็บเล็ตโดยใช้บัญชีอีเมล"\n\n" โปรดลองอีกครั้งใน <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้ับัญชีอีเมล"\n\n" โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกแท็บเล็ตโดยใช้บัญชีอีเมล\n\n โปรดลองอีกครั้งใน <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้ับัญชีอีเมล\n\n โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"นำออก"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"ปุ่มแทร็กก่อนหน้า"</string>
