@@ -811,7 +811,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Masukkan kad SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Kad SIM tiada atau tidak boleh dibaca. Sila masukkan kad SIM."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Kad SIM tidak boleh digunakan."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Kad SIM anda telah dilumpuhkan secara kekal."\n" Hubungi pembekal perkhidmatan wayarles anda untuk mendapatkan kad SIM lain."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Kad SIM anda telah dilumpuhkan secara kekal.\n Hubungi pembekal perkhidmatan wayarles anda untuk mendapatkan kad SIM lain."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Butang lagu sebelumnya"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Butang lagu seterusnya"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Butang Jeda"</string>
@@ -823,11 +823,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Lihat Panduan Pengguna atau hubungi Penjagaan Pelanggan."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Kad SIM dikunci."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Membuka kunci kad SIM..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Anda telah tersilap melukis corak buka kunci anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. "\n\n"Sila cuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Anda telah tersilap taip menaip kata laluan anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. "\n\n"Cuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Anda telah tersilap taip PIN anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. "\n\n"Cuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Anda telah tersilap melukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci tablet anda menggunakan log masuk Google anda."\n\n" Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci telefon anda menggunakan log masuk Google anda."\n\n" Sila cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Anda telah tersilap melukis corak buka kunci anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nSila cuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Anda telah tersilap taip menaip kata laluan anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Anda telah tersilap taip PIN anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Anda telah tersilap melukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci tablet anda menggunakan log masuk Google anda.\n\n Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci telefon anda menggunakan log masuk Google anda.\n\n Sila cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Anda telah mencuba untuk membuka kunci tablet dengan salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, tablet akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Anda telah mencuba untuk membuka kunci telefon dengan salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, telefon akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Anda telah mencuba untuk membuka kunci tablet secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Tablet kini akan ditetapkan semula ke tetapan lalai kilang."</string>
@@ -841,7 +841,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Kata laluan"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Log masuk"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nama pengguna atau kata laluan tidak sah."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Lupa nama pengguna atau kata laluan anda?"\n"Lawati "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Lupa nama pengguna atau kata laluan anda?\nLawati "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Menyemak…"</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Buka kunci"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Bunyi dihidupkan"</string>
@@ -889,7 +889,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Sahkan Navigasi"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Tinggalkan Halaman ini"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Kekal di Halaman ini"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Adakah anda pasti anda mahu menavigasi keluar dari halaman ini?"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nAdakah anda pasti anda mahu menavigasi keluar dari halaman ini?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Sahkan"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Petua: Ketik dua kali untuk mengezum masuk dan keluar."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Auto isi"</string>
@@ -1095,14 +1095,14 @@
     <string name="aerr_application" msgid="932628488013092776">"Malangnya, <xliff:g id="APPLICATION">%1$s</xliff:g> telah berhenti."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Malangnya, proses <xliff:g id="PROCESS">%1$s</xliff:g> telah berhenti."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> tidak bertindak balas."\n\n"Adakah anda mahu menutupnya?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Aktiviti <xliff:g id="ACTIVITY">%1$s</xliff:g> tidak bertindak balas. "\n\n" Adakah anda mahu menutupnya?"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> tidak bertindak balas.\n\nAdakah anda mahu menutupnya?"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"Aktiviti <xliff:g id="ACTIVITY">%1$s</xliff:g> tidak bertindak balas. \n\n Adakah anda mahu menutupnya?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> tidak bertindak balas. Adakah anda mahu menutupnya?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> tidak bertindak balas. "\n\n"Adakah anda mahu menutupnya?"</string>
+    <string name="anr_process" msgid="6513209874880517125">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> tidak bertindak balas. \n\nAdakah anda mahu menutupnya?"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Laporkan"</string>
     <string name="wait" msgid="7147118217226317732">"Tunggu"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"Laman ini tidak bertindak balas. "\n\n"Adakah anda mahu menutupnya?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Laman ini tidak bertindak balas. \n\nAdakah anda mahu menutupnya?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Apl diubah hala"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> kini sedang berjalan."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> pada asalnya telah dilancarkan."</string>
@@ -1284,15 +1284,15 @@
     <string name="ime_action_done" msgid="8971516117910934605">"Selesai"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Sblm"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Laksanakan"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"Dail nombor"\n"menggunakan <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"Wujudkan kenalan"\n"menggunakan <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Dail nombor\nmenggunakan <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Wujudkan kenalan\nmenggunakan <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Satu atau lebih apl berikut meminta kebenaran untuk mengakses akaun anda, sekarang dan pada masa hadapan."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Adakah anda mahu membenarkan permintaan ini?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Permintaan akses"</string>
     <string name="allow" msgid="7225948811296386551">"Benarkan"</string>
     <string name="deny" msgid="2081879885755434506">"Nafi"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Kebenaran diminta"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Kebenaran diminta"\n"untuk akaun <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Kebenaran diminta\nuntuk akaun <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Kaedah input"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Penyegerakan"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Kebolehaksesan"</string>
@@ -1493,20 +1493,20 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Kata laluan"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Log masuk"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nama pengguna atau kata laluan tidak sah."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Lupa nama pengguna atau kata laluan anda?"\n"Lawati"<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Lupa nama pengguna atau kata laluan anda?\nLawati"<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Menyemak akaun…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Anda telah menaip PIN anda secara salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. "\n\n"Cuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Anda telah menaip kata laluan anda secara salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. "\n\n"Cuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Anda telah tersilap melukis corak buka kunci anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. "\n\n"Cuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Anda telah menaip PIN anda secara salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Anda telah menaip kata laluan anda secara salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Anda telah tersilap melukis corak buka kunci anda sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. \n\nCuba lagi dalam <xliff:g id="NUMBER_1">%d</xliff:g> saat."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Anda telah mencuba untuk membuka kunci tablet dengan salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, tablet akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Anda telah mencuba untuk membuka kunci telefon dengan salah sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, telefon akan ditetapkan semula kepada tetapan lalai kilang dan semua data pengguna akan hilang."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Anda telah mencuba untuk membuka kunci tablet secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Tablet kini akan ditetapkan semula ke tetapan lalai kilang."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Anda telah mencuba untuk membuka kunci telefon secara salah sebanyak <xliff:g id="NUMBER">%d</xliff:g> kali. Telefon kini akan ditetapkan semula ke tetapan lalai kilang."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Anda telah tersilap melukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci tablet anda menggunakan log masuk Google anda."\n\n" Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci telefon anda menggunakan log masuk Google anda."\n\n" Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Anda telah tersilap melukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci tablet anda menggunakan log masuk Google anda.\n\n Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Anda telah tersilap lukis corak buka kunci sebanyak <xliff:g id="NUMBER_0">%d</xliff:g> kali. Selepas <xliff:g id="NUMBER_1">%d</xliff:g> lagi percubaan yang tidak berjaya, anda akan diminta membuka kunci telefon anda menggunakan log masuk Google anda.\n\n Cuba lagi dalam <xliff:g id="NUMBER_2">%d</xliff:g> saat."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Alih keluar"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Tingkatkan kelantangan melebihi aras yang dicadangkan?"\n"Mendengar pada kelantangan tinggi untuk tempoh yang panjang boleh merosakkan pendengaran anda."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Tingkatkan kelantangan melebihi aras yang dicadangkan?\nMendengar pada kelantangan tinggi untuk tempoh yang panjang boleh merosakkan pendengaran anda."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Teruskan menahan dengan dua jari untuk mendayakan kebolehcapaian."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Kebolehcapaian didayakan."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Kebolehcapaian dibatalkan."</string>

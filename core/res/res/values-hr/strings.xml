@@ -811,7 +811,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Umetnite SIM karticu."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM kartica nedostaje ili nije čitljiva. Umetnite SIM karticu."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Neupotrebljiva SIM kartica."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Vaša SIM kartica trajno je onemogućena."\n" Obratite se svom pružatelju bežičnih usluga da biste dobili drugu SIM karticu."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Vaša SIM kartica trajno je onemogućena.\n Obratite se svom pružatelju bežičnih usluga da biste dobili drugu SIM karticu."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Gumb Prethodni zapis"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Gumb Sljedeći zapis"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Gumb Pauza"</string>
@@ -823,11 +823,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Pogledajte korisnički priručnik ili kontaktirajte korisničku službu."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM kartica je zaključana."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Otključavanje SIM kartice…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Netočno ste iscrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. "\n\n"Pokušajte ponovo za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Netočno ste napisali zaporku <xliff:g id="NUMBER_0">%d</xliff:g> puta. "\n\n"Pokušajte ponovo za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Netočno ste napisali PIN <xliff:g id="NUMBER_0">%d</xliff:g> puta. "\n\n"Pokušajte ponovo za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Netočno ste iscrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g> zamolit ćemo vas da otključate tabletno računalo putem prijave na Google."\n\n" Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Netočno ste iscrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g> morat ćete otključati telefon putem prijave na Google."\n\n" Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Netočno ste iscrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Netočno ste napisali zaporku <xliff:g id="NUMBER_0">%d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Netočno ste napisali PIN <xliff:g id="NUMBER_0">%d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Netočno ste iscrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g> zamolit ćemo vas da otključate tabletno računalo putem prijave na Google.\n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Netočno ste iscrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g> morat ćete otključati telefon putem prijave na Google.\n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Neispravno ste pokušali otključati tabletno računalo ovoliko puta: <xliff:g id="NUMBER_0">%d</xliff:g>. Ono će se vratiti na tvorničke postavke i svi korisnički podaci bit će izgubljeni nakon još ovoliko neuspjelih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Neispravno ste pokušali otključati telefon ovoliko puta: <xliff:g id="NUMBER_0">%d</xliff:g>. On će se vratiti na tvorničke postavke i svi korisnički podaci bit će izgubljeni nakon još ovoliko neuspjelih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Neispravno ste pokušali otključati tabletno računalo ovoliko puta: <xliff:g id="NUMBER">%d</xliff:g>. Sada će biti vraćeno na tvorničke postavke."</string>
@@ -841,7 +841,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Zaporka"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Prijava"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nevažeće korisničko ime ili zaporka."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Zaboravili ste korisničko ime ili zaporku?"\n"Posjetite "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Zaboravili ste korisničko ime ili zaporku?\nPosjetite "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Provjeravanje..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Otključaj"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Zvuk je uključen"</string>
@@ -889,7 +889,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Potvrda kretanja"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Napusti stranicu"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Ostani na ovoj stranici"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Jeste li sigurni da želite napustiti ovu stranicu?"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nJeste li sigurni da želite napustiti ovu stranicu?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Potvrdi"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Savjet: Dvaput dotaknite za povećavanje i smanjivanje."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Aut.pop."</string>
@@ -1095,14 +1095,14 @@
     <string name="aerr_application" msgid="932628488013092776">"Nažalost, aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> prekinula je s radom."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Nažalost, zaustavljen je proces <xliff:g id="PROCESS">%1$s</xliff:g>."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"Aplikacija <xliff:g id="APPLICATION">%2$s</xliff:g> ne reagira."\n\n"Želite li je zatvoriti?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Aktivnost <xliff:g id="ACTIVITY">%1$s</xliff:g> ne reagira."\n\n"Želite li je zatvoriti?"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"Aplikacija <xliff:g id="APPLICATION">%2$s</xliff:g> ne reagira.\n\nŽelite li je zatvoriti?"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"Aktivnost <xliff:g id="ACTIVITY">%1$s</xliff:g> ne reagira.\n\nŽelite li je zatvoriti?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> ne reagira. Želite li je zatvoriti?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Postupak <xliff:g id="PROCESS">%1$s</xliff:g> ne reagira."\n\n"Želite li ga zatvoriti?"</string>
+    <string name="anr_process" msgid="6513209874880517125">"Postupak <xliff:g id="PROCESS">%1$s</xliff:g> ne reagira.\n\nŽelite li ga zatvoriti?"</string>
     <string name="force_close" msgid="8346072094521265605">"U redu"</string>
     <string name="report" msgid="4060218260984795706">"Izvješće"</string>
     <string name="wait" msgid="7147118217226317732">"Pričekaj"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"Stranica ne reagira."\n\n"Želite li ju zatvoriti?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Stranica ne reagira.\n\nŽelite li ju zatvoriti?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Aplikacija preusmjerena"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> se izvodi sada."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> pokrenuta je prva."</string>
@@ -1284,15 +1284,15 @@
     <string name="ime_action_done" msgid="8971516117910934605">"Gotovo"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Preth."</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Pokreni"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"Biraj broj"\n"koristeći <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"Stvori kontakt"\n"koristeći <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Biraj broj\nkoristeći <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Stvori kontakt\nkoristeći <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Sljedeća aplikacija ili više njih zahtijevaju dozvolu za pristup vašem računu, sad i u budućnosti."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Dopuštate li taj zahtjev?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Zahtjev za pristup"</string>
     <string name="allow" msgid="7225948811296386551">"Dopusti"</string>
     <string name="deny" msgid="2081879885755434506">"Odbij"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Zatražena je dozvola"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Zatražena je dozvola"\n"za račun <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Zatražena je dozvola\nza račun <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Način unosa"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sinkronizacija"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Dostupnost"</string>
@@ -1493,20 +1493,20 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Zaporka"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Prijava"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nevažeće korisničko ime ili zaporka."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Zaboravili ste korisničko ime ili zaporku?"\n"Posjetite "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Zaboravili ste korisničko ime ili zaporku?\nPosjetite "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Provjera računa..."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Netočno ste napisali PIN <xliff:g id="NUMBER_0">%d</xliff:g> puta. "\n\n"Pokušajte ponovo za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Netočno ste napisali zaporku <xliff:g id="NUMBER_0">%d</xliff:g> puta. "\n\n"Pokušajte ponovo za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Netočno ste iscrtali obrazac za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. "\n\n"Pokušajte ponovo za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Netočno ste napisali PIN <xliff:g id="NUMBER_0">%d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Netočno ste napisali zaporku <xliff:g id="NUMBER_0">%d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Netočno ste iscrtali obrazac za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. \n\nPokušajte ponovo za <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Netočno ste pokušali otključati tabletno računalo <xliff:g id="NUMBER_0">%d</xliff:g> puta. Ono će se vratiti na tvorničke postavke i svi korisnički podaci bit će izgubljeni nakon još ovoliko neuspjelih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Netočno ste pokušali otključati telefon <xliff:g id="NUMBER_0">%d</xliff:g> puta. On će se vratiti na tvorničke postavke i svi korisnički podaci bit će izgubljeni nakon još ovoliko neuspjelih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Netočno ste pokušali otključati tabletno računalo <xliff:g id="NUMBER">%d</xliff:g> puta. Sada će se vratiti na tvorničke postavke."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Netočno ste pokušali otključati telefon <xliff:g id="NUMBER">%d</xliff:g> puta. Sada će se vratiti na tvorničke postavke."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Netočno ste iscrtali obrazac za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g> morat ćete otključati tabletno računalo pomoću računa e-pošte."\n\n" Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Netočno ste iscrtali obrazac za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g> morat ćete otključati telefon pomoću računa e-pošte."\n\n" Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Netočno ste iscrtali obrazac za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g> morat ćete otključati tabletno računalo pomoću računa e-pošte.\n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Netočno ste iscrtali obrazac za otključavanje <xliff:g id="NUMBER_0">%d</xliff:g> puta. Nakon još ovoliko neuspješnih pokušaja: <xliff:g id="NUMBER_1">%d</xliff:g> morat ćete otključati telefon pomoću računa e-pošte.\n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Ukloni"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Želite li pojačati iznad preporučene razine?"\n"Dulje slušanje preglasne glazbe može vam oštetiti sluh."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Želite li pojačati iznad preporučene razine?\nDulje slušanje preglasne glazbe može vam oštetiti sluh."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Nastavite držati s dva prsta kako biste omogućili pristupačnost."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Dostupnost je omogućena."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Pristupačnost otkazana."</string>

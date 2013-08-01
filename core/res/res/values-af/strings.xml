@@ -811,7 +811,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Steek \'n SIM-kaart in."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Die SIM-kaart is weg of nie leesbaar nie. Steek \'n SIM-kaart in."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Onbruikbare SIM-kaart."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Jou SIM-kaart is permanent gedeaktiveer."\n" Kontak jou draadlose diensverskaffer vir \'n ander SIM-kaart."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Jou SIM-kaart is permanent gedeaktiveer.\n Kontak jou draadlose diensverskaffer vir \'n ander SIM-kaart."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Vorigesnit-knoppie"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Volgendesnit-knoppie"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Laatwag-knoppie"</string>
@@ -823,11 +823,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Sien die handleiding of kontak kliëntediens."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM-kaart is gesluit."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Ontsluit tans SIM-kaart…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerd geteken. "\n\n"Probeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Jy het jou wagwoord <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerd ingevoer. "\n\n"Probeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Jy het jou wagwoord <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerd ingevoer. "\n\n"Probeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerd geteken. Na <xliff:g id="NUMBER_1">%d</xliff:g> nóg onsuksesvolle pogings sal jy gevra word om jou tablet te ontsluit met gebruik van jou Google-aanmelddetails."\n\n" Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerd geteken. Na nóg <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings sal jy gevra word om jou foon te ontsluit met gebruik van jou Google-aanmelddetails."\n\n" Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerd geteken. \n\nProbeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Jy het jou wagwoord <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerd ingevoer. \n\nProbeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Jy het jou wagwoord <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerd ingevoer. \n\nProbeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerd geteken. Na <xliff:g id="NUMBER_1">%d</xliff:g> nóg onsuksesvolle pogings sal jy gevra word om jou tablet te ontsluit met gebruik van jou Google-aanmelddetails.\n\n Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerd geteken. Na nóg <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings sal jy gevra word om jou foon te ontsluit met gebruik van jou Google-aanmelddetails.\n\n Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Jy het <xliff:g id="NUMBER_0">%d</xliff:g> keer probeer om die tablet verkeerde te ontsluit. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle poging, sal die tablet terug gestel word nia die fabrieksverstek en alle gebruikerdata sal verlore wees."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Jy het <xliff:g id="NUMBER_0">%d</xliff:g> keer probeer om die foon verkeerde te ontsluit. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle poging sal die foon terug gestel word na die fabrieksverstek en alle gebruikerdata sal verlore wees."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Jy het die tablet <xliff:g id="NUMBER">%d</xliff:g> keer verkeerd probeer ontsluit. Die tablet sal nou terug gestel word na die fabrieksverstek."</string>
@@ -841,7 +841,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Wagwoord"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Meld aan"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Ongeldige gebruikernaam of wagwoord."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Jou gebruikernaam of wagwoord vergeet?"\n"Besoek "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Jou gebruikernaam of wagwoord vergeet?\nBesoek "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Kontroleer tans..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Ontsluit"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Klank aan"</string>
@@ -889,7 +889,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Bevestig navigasie"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Verlaat hierdie bladsy"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Bly op hierdie bladsy"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Is jy seker dat jy weg van hierdie bladsy af wil navigeer?"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nIs jy seker dat jy weg van hierdie bladsy af wil navigeer?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Bevestig"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Wenk: Dubbeltik om in en uit te zoem."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Outovul"</string>
@@ -1095,14 +1095,14 @@
     <string name="aerr_application" msgid="932628488013092776">"Ongelukkig het <xliff:g id="APPLICATION">%1$s</xliff:g> gestop."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Ongelukkig het die proses <xliff:g id="PROCESS">%1$s</xliff:g> gestop."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> reageer nie."\n\n"Wil jy dit sluit?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Aktiwiteit <xliff:g id="ACTIVITY">%1$s</xliff:g> reageer nie."\n\n"Wil jy dit afsluit?"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> reageer nie.\n\nWil jy dit sluit?"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"Aktiwiteit <xliff:g id="ACTIVITY">%1$s</xliff:g> reageer nie.\n\nWil jy dit afsluit?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> reageer nie. Wil jy dit sluit?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> reageer nie."\n\n"Wil jy dit afsluit?"</string>
+    <string name="anr_process" msgid="6513209874880517125">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> reageer nie.\n\nWil jy dit afsluit?"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Verslag"</string>
     <string name="wait" msgid="7147118217226317732">"Wag"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"Die bladsy reageer nie meer nie."\n\n"Wil jy dit toemaak?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Die bladsy reageer nie meer nie.\n\nWil jy dit toemaak?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Program herlei"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> loop nou."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> is oorspronklik laat loop."</string>
@@ -1284,15 +1284,15 @@
     <string name="ime_action_done" msgid="8971516117910934605">"Klaar"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Vorige"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Voer uit"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"Skakel nommer"\n"met <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"Skep kontak"\n"met <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Skakel nommer\nmet <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Skep kontak\nmet <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Die volgende een of meer programme versoek toestemming om jou rekening gebruik (nou én in die toekoms)."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Wil jy hierdie versoek toestaan?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Toegangsversoek"</string>
     <string name="allow" msgid="7225948811296386551">"Laat toe"</string>
     <string name="deny" msgid="2081879885755434506">"Weier"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Toestemming versoek"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Toestemming versoek"\n"vir rekening <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Toestemming versoek\nvir rekening <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Invoermetode"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sinkroniseer"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Toeganklikheid"</string>
@@ -1493,20 +1493,20 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Wagwoord"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Meld aan"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Ongeldige gebruikernaam of wagwoord."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Het jy jou gebruikernaam of wagwoord vergeet?"\n"Besoek "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Het jy jou gebruikernaam of wagwoord vergeet?\nBesoek "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Kontroleer tans rekening..."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Jy het jou PIN <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerd ingetik. "\n\n"Probeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Jy het <xliff:g id="NUMBER_0">%d</xliff:g> keer jou wagwoord verkeerdelik getik. "\n\n"Probeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. "\n\n"Probeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Jy het jou PIN <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerd ingetik. \n\nProbeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Jy het <xliff:g id="NUMBER_0">%d</xliff:g> keer jou wagwoord verkeerdelik getik. \n\nProbeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. \n\nProbeer weer oor <xliff:g id="NUMBER_1">%d</xliff:g> sekondes."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Jy het <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik gepoog om die tablet te ontsluit. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal die tablet na die fabrieksverstek teruggestel word en al die gebruikerdata sal verlore wees."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Jy het <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik gepoog om die foon te ontsluit. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal die foon na die fabrieksverstek teruggestel word en al die gebruikerdata sal verlore wees."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Jy het <xliff:g id="NUMBER">%d</xliff:g> keer verkeerdelik gepoog om die tablet te ontsluit. Die tablet sal nou na fabrieksverstek teruggestel word."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Jy het <xliff:g id="NUMBER">%d</xliff:g> keer verkeerdelik gepoog om die foon te ontsluit. Die foon sal nou na fabrieksverstek teruggestel word."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou tablet te ontsluit deur middel van \'n e-posrekening."\n\n" Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou foon te ontsluit deur middel van \'n e-posrekening."\n\n" Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou tablet te ontsluit deur middel van \'n e-posrekening.\n\n Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Jy het jou ontsluitpatroon <xliff:g id="NUMBER_0">%d</xliff:g> keer verkeerdelik geteken. Na nog <xliff:g id="NUMBER_1">%d</xliff:g> onsuksesvolle pogings, sal jy gevra word om jou foon te ontsluit deur middel van \'n e-posrekening.\n\n Probeer weer oor <xliff:g id="NUMBER_2">%d</xliff:g> sekondes."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Verwyder"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Verhoog volume bo aanbevole vlak?"\n"Deur vir lang tydperke teen hoë volume te luister, kan jou gehoor beskadig word."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Verhoog volume bo aanbevole vlak?\nDeur vir lang tydperke teen hoë volume te luister, kan jou gehoor beskadig word."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Hou aan met twee vingers inhou om toeganklikheid te aktiveer."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Toeganklikheid geaktiveer."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Toeganklikheid gekanselleer."</string>

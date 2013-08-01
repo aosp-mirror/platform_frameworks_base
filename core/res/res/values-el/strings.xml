@@ -811,7 +811,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Τοποθετήστε μια κάρτα SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Η κάρτα SIM δεν υπάρχει ή δεν είναι δυνατή η ανάγνωσή της. Τοποθετήστε μια κάρτα SIM."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Η κάρτα SIM δεν μπορεί να χρησιμοποιηθεί."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Η κάρτα SIM έχει απενεργοποιηθεί οριστικά."\n" Επικοινωνήστε με τον παροχέα υπηρεσιών ασύρματου δικτύου για να λάβετε μια νέα κάρτα SIM."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Η κάρτα SIM έχει απενεργοποιηθεί οριστικά.\n Επικοινωνήστε με τον παροχέα υπηρεσιών ασύρματου δικτύου για να λάβετε μια νέα κάρτα SIM."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Κουμπί προηγούμενου κομματιού"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Κουμπί επόμενου κομματιού"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Κουμπί παύσης"</string>
@@ -823,11 +823,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Ανατρέξτε στον Οδηγό χρήσης ή επικοινωνήστε με την Εξυπηρέτηση πελατών."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Η κάρτα SIM είναι κλειδωμένη."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Ξεκλείδωμα κάρτας SIM..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Σχεδιάσατε εσφαλμένα το μοτίβο ξεκλειδώματος<xliff:g id="NUMBER_0">%d</xliff:g> φορές. "\n\n"Προσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλεπτα."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Έχετε πληκτρολογήσει τον κωδικό πρόσβασης εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. "\n\n"Προσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλεπτα."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Έχετε πληκτρολογήσει τον αριθμό σας PIN εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. "\n\n"Προσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλεπτα."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το tablet σας με τη χρήση της σύνδεσής σας Google."\n\n" Προσπαθήστε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> δευτερόλεπτα."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το τηλέφωνό σας με τη χρήση της σύνδεσής σας Google."\n\n" Προσπαθήστε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> δευτερόλεπτα."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Σχεδιάσατε εσφαλμένα το μοτίβο ξεκλειδώματος<xliff:g id="NUMBER_0">%d</xliff:g> φορές. \n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλεπτα."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Έχετε πληκτρολογήσει τον κωδικό πρόσβασης εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. \n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλεπτα."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Έχετε πληκτρολογήσει τον αριθμό σας PIN εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. \n\nΠροσπαθήστε ξανά σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλεπτα."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το tablet σας με τη χρήση της σύνδεσής σας Google.\n\n Προσπαθήστε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> δευτερόλεπτα."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το τηλέφωνό σας με τη χρήση της σύνδεσής σας Google.\n\n Προσπαθήστε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> δευτερόλεπτα."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Προσπαθήσατε να ξεκλειδώσετε εσφαλμένα το tablet <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> προσπάθειες, το tablet θα επαναφερθεί στις εργοστασιακές ρυθμίσεις και όλα τα δεδομένα χρήστη θα χαθούν."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Προσπαθήσατε να ξεκλειδώσετε εσφαλμένα το τηλέφωνο <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> προσπάθειες, το τηλέφωνο θα επαναφερθεί στις εργοστασιακές ρυθμίσεις και όλα τα δεδομένα χρήστη θα χαθούν."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Προσπαθήσατε να ξεκλειδώσετε εσφαλμένα το tablet <xliff:g id="NUMBER">%d</xliff:g> φορές. Το tablet θα επαναφερθεί στην εργοστασιακή προεπιλογή."</string>
@@ -841,7 +841,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Κωδικός πρόσβασης"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Σύνδεση"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Μη έγκυρο όνομα χρήστη ή κωδικός πρόσβασης."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Ξεχάσατε το όνομα χρήστη ή τον κωδικό πρόσβασής σας;"\n"Επισκεφτείτε τη διεύθυνση "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Ξεχάσατε το όνομα χρήστη ή τον κωδικό πρόσβασής σας;\nΕπισκεφτείτε τη διεύθυνση "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Έλεγχος..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Ξεκλείδωμα"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Ενεργοποίηση ήχου"</string>
@@ -889,7 +889,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Επιβεβαίωση πλοήγησης"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Αποχώρηση από αυτήν τη σελίδα"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Παραμονή σε αυτήν τη σελίδα"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Είστε βέβαιοι ότι θέλετε να απομακρυνθείτε από αυτήν τη σελίδα;"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nΕίστε βέβαιοι ότι θέλετε να απομακρυνθείτε από αυτήν τη σελίδα;"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Επιβεβαίωση"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Συμβουλή: Πατήστε δύο φορές για μεγέθυνση και σμίκρυνση."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Αυτόματη συμπλήρωση"</string>
@@ -1095,14 +1095,14 @@
     <string name="aerr_application" msgid="932628488013092776">"Δυστυχώς, η εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> έχει σταματήσει."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Δυστυχώς, η διαδικασία <xliff:g id="PROCESS">%1$s</xliff:g> έχει σταματήσει."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"Η εφαρμογή <xliff:g id="APPLICATION">%2$s</xliff:g> δεν ανταποκρίνεται."\n\n"Θέλετε να την κλείσετε;"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Η δραστηριότητα <xliff:g id="ACTIVITY">%1$s</xliff:g> δεν ανταποκρίνεται."\n\n"Θέλετε να την κλείσετε;"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"Η εφαρμογή <xliff:g id="APPLICATION">%2$s</xliff:g> δεν ανταποκρίνεται.\n\nΘέλετε να την κλείσετε;"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"Η δραστηριότητα <xliff:g id="ACTIVITY">%1$s</xliff:g> δεν ανταποκρίνεται.\n\nΘέλετε να την κλείσετε;"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"Η εφαρμογή <xliff:g id="APPLICATION">%1$s</xliff:g> δεν ανταποκρίνεται. Θέλετε να την κλείσετε;"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Η διεργασία <xliff:g id="PROCESS">%1$s</xliff:g> δεν ανταποκρίνεται."\n\n"Θέλετε να την κλείσετε;"</string>
+    <string name="anr_process" msgid="6513209874880517125">"Η διεργασία <xliff:g id="PROCESS">%1$s</xliff:g> δεν ανταποκρίνεται.\n\nΘέλετε να την κλείσετε;"</string>
     <string name="force_close" msgid="8346072094521265605">"ΟΚ"</string>
     <string name="report" msgid="4060218260984795706">"Αναφορά"</string>
     <string name="wait" msgid="7147118217226317732">"Αναμονή"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"Η σελίδα δεν ανταποκρίνεται πια."\n\n"Θέλετε να την κλείσετε;"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Η σελίδα δεν ανταποκρίνεται πια.\n\nΘέλετε να την κλείσετε;"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Ανακατεύθυνση εφαρμογής"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> εκτελείται τώρα."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Έγινε εκκίνηση πρώτα της εφαρμογής <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
@@ -1284,15 +1284,15 @@
     <string name="ime_action_done" msgid="8971516117910934605">"Τέλος"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Προηγ."</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Εκτέλεση"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"Κλήση αριθμού"\n"με τη χρήση <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"Δημιουργία επαφής"\n"με τη χρήση του <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Κλήση αριθμού\nμε τη χρήση <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Δημιουργία επαφής\nμε τη χρήση του <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Η παρακάτω εφαρμογή ή οι παρακάτω εφαρμογές ζητούν άδεια για άμεση πρόσβαση στο λογαριασμό σας, η οποία θα ισχύει και για μελλοντική χρήση."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Θέλετε να επιτρέψετε αυτή την αίτηση;"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Αίτημα πρόσβασης"</string>
     <string name="allow" msgid="7225948811296386551">"Να επιτρέπεται"</string>
     <string name="deny" msgid="2081879885755434506">"Άρνηση"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Απαιτείται άδεια"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Ζητήθηκε άδεια"\n"για τον λογαριασμό <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Ζητήθηκε άδεια\nγια τον λογαριασμό <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Μέθοδος εισόδου"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Συγχρονισμός"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Προσβασιμότητα"</string>
@@ -1493,20 +1493,20 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Κωδικός πρόσβασης"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Σύνδεση"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Μη έγκυρο όνομα χρήστη ή κωδικός πρόσβασης."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Ξεχάσατε το όνομα χρήστη ή τον κωδικό πρόσβασής σας;"\n"Επισκεφτείτε τη διεύθυνση "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Ξεχάσατε το όνομα χρήστη ή τον κωδικό πρόσβασής σας;\nΕπισκεφτείτε τη διεύθυνση "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Έλεγχος λογαριασμού…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Έχετε πληκτρολογήσει εσφαλμένα τον κωδικό σας PIN <xliff:g id="NUMBER_0">%d</xliff:g> φορές. "\n\n"Δοκιμάστε ξανά σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλεπτα."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Έχετε πληκτρολογήσει τον κωδικό πρόσβασης εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. "\n\n"Δοκιμάστε ξανά σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλεπτα."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Σχεδιάσατε εσφαλμένα το μοτίβο ξεκλειδώματος <xliff:g id="NUMBER_0">%d</xliff:g> φορές. "\n\n"Δοκιμάστε ξανά σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλετπα."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Έχετε πληκτρολογήσει εσφαλμένα τον κωδικό σας PIN <xliff:g id="NUMBER_0">%d</xliff:g> φορές. \n\nΔοκιμάστε ξανά σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλεπτα."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Έχετε πληκτρολογήσει τον κωδικό πρόσβασης εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. \n\nΔοκιμάστε ξανά σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλεπτα."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Σχεδιάσατε εσφαλμένα το μοτίβο ξεκλειδώματος <xliff:g id="NUMBER_0">%d</xliff:g> φορές. \n\nΔοκιμάστε ξανά σε <xliff:g id="NUMBER_1">%d</xliff:g> δευτερόλετπα."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Προσπαθήσατε να ξεκλειδώσετε εσφαλμένα το tablet <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> προσπάθειες, το tablet θα επαναφερθεί στις εργοστασιακές ρυθμίσεις και όλα τα δεδομένα χρήστη θα χαθούν."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Προσπαθήσατε να ξεκλειδώσετε εσφαλμένα το τηλέφωνο <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> προσπάθειες, το τηλέφωνο θα επαναφερθεί στις εργοστασιακές ρυθμίσεις και όλα τα δεδομένα χρήστη θα χαθούν."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Προσπαθήσατε να ξεκλειδώσετε εσφαλμένα το tablet <xliff:g id="NUMBER">%d</xliff:g> φορές. Το tablet θα επαναφερθεί στις εργοστασιακές ρυθμίσεις."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Προσπαθήσατε να ξεκλειδώσετε εσφαλμένα το τηλέφωνο <xliff:g id="NUMBER">%d</xliff:g> φορές. Το τηλέφωνο θα επαναφερθεί στις εργοστασιακές ρυθμίσεις."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το tablet σας με τη χρήση ενός λογαριασμού ηλεκτρονικού ταχυδρομείου."\n\n" Δοκιμάστε να συνδεθείτε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> δευτερόλεπτα."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το τηλέφωνό σας με τη χρήση ενός λογαριασμού ηλεκτρονικού ταχυδρομείου."\n\n" Δοκιμάστε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> δευτερόλεπτα."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το tablet σας με τη χρήση ενός λογαριασμού ηλεκτρονικού ταχυδρομείου.\n\n Δοκιμάστε να συνδεθείτε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> δευτερόλεπτα."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Σχεδιάσατε το μοτίβο ξεκλειδώματος εσφαλμένα <xliff:g id="NUMBER_0">%d</xliff:g> φορές. Μετά από <xliff:g id="NUMBER_1">%d</xliff:g> ανεπιτυχείς προσπάθειες ακόμη, θα σας ζητηθεί να ξεκλειδώσετε το τηλέφωνό σας με τη χρήση ενός λογαριασμού ηλεκτρονικού ταχυδρομείου.\n\n Δοκιμάστε ξανά σε <xliff:g id="NUMBER_2">%d</xliff:g> δευτερόλεπτα."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Κατάργηση"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Αυξάνετε την ένταση ήχου πάνω από το επίπεδο ασφαλείας;"\n"Αν ακούτε μουσική σε υψηλή ένταση για μεγάλο χρονικό διάστημα ενδέχεται να προκληθεί βλάβη στην ακοή σας."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Αυξάνετε την ένταση ήχου πάνω από το επίπεδο ασφαλείας;\nΑν ακούτε μουσική σε υψηλή ένταση για μεγάλο χρονικό διάστημα ενδέχεται να προκληθεί βλάβη στην ακοή σας."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Αγγίξτε παρατεταμένα με δύο δάχτυλα για να ενεργοποιήσετε τη λειτουργία προσβασιμότητας."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Ενεργοποιήθηκε η προσβασιμότητα."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Η λειτουργία προσβασιμότητας ακυρώθηκε."</string>

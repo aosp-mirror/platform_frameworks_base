@@ -811,7 +811,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Уметните SIM картицу."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM недостаје или не може да се прочита. Уметните SIM картицу."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"SIM картица је неупотребљива."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM картица је трајно онемогућена."\n" Обратите се добављачу услуге бежичне мреже да бисте добили другу SIM картицу."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM картица је трајно онемогућена.\n Обратите се добављачу услуге бежичне мреже да бисте добили другу SIM картицу."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Дугме за претходну песму"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Дугме за следећу песму"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Дугме за паузу"</string>
@@ -823,11 +823,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Погледајте Кориснички водич или контактирајте Корисничку подршку."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM картица је закључана."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Откључавање SIM картице…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте неправилно нацртали шаблон за откључавање. "\n\n"Покушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте погрешно унели лозинку. "\n\n"Покушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте погрешно унели PIN. "\n\n"Покушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте нетачно унели шаблон за откључавање. Након још <xliff:g id="NUMBER_1">%d</xliff:g> несупешна(их) покушаја, од вас ће бити затражено да откључате таблет помоћу података за пријављивање на Google."\n\n" Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте нетачно унели шаблон за откључавање. Након још <xliff:g id="NUMBER_1">%d</xliff:g> несупешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу података за пријављивање на Google."\n\n" Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте неправилно нацртали шаблон за откључавање. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте погрешно унели лозинку. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте погрешно унели PIN. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте нетачно унели шаблон за откључавање. Након још <xliff:g id="NUMBER_1">%d</xliff:g> несупешна(их) покушаја, од вас ће бити затражено да откључате таблет помоћу података за пријављивање на Google.\n\n Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"<xliff:g id="NUMBER_0">%d</xliff:g> пута сте нетачно унели шаблон за откључавање. Након још <xliff:g id="NUMBER_1">%d</xliff:g> несупешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу података за пријављивање на Google.\n\n Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Неправилно сте покушали да откључате таблет <xliff:g id="NUMBER_0">%d</xliff:g> пута. Након још неуспешних покушаја (<xliff:g id="NUMBER_1">%d</xliff:g>) таблет ће бити враћен на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Неисправно сте покушали да откључате телефон <xliff:g id="NUMBER_0">%d</xliff:g> пута. Након још неуспешних покушаја (<xliff:g id="NUMBER_1">%d</xliff:g>) телефон ће бити враћен на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Неисправно сте покушали да откључате таблет <xliff:g id="NUMBER">%d</xliff:g> пута. Таблет ће сада бити враћен на подразумевана фабричка подешавања."</string>
@@ -841,7 +841,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Лозинка"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Пријави ме"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Неважеће корисничко име или лозинка."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Заборавили сте корисничко име или лозинку?"\n"Посетите адресу "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Заборавили сте корисничко име или лозинку?\nПосетите адресу "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Проверавање..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Откључај"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Укључи звук"</string>
@@ -889,7 +889,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Потврда навигације"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Напусти ову страницу"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Остани на овој страници"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Да ли стварно желите да напустите ову страницу?"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nДа ли стварно желите да напустите ову страницу?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Потврда"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Савет: Додирните двапут да бисте увећали и умањили приказ."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Аутом. поп."</string>
@@ -1095,14 +1095,14 @@
     <string name="aerr_application" msgid="932628488013092776">"Нажалост, апликација <xliff:g id="APPLICATION">%1$s</xliff:g> је престала с радом."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Нажалост, процес <xliff:g id="PROCESS">%1$s</xliff:g> је заустављен."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> не реагује."\n\n"Да ли желите да је затворите?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Активност <xliff:g id="ACTIVITY">%1$s</xliff:g> не рeагује."\n\n"Да ли желите да је затворите?"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> не реагује.\n\nДа ли желите да је затворите?"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"Активност <xliff:g id="ACTIVITY">%1$s</xliff:g> не рeагује.\n\nДа ли желите да је затворите?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> не реагује. Да ли желите да је затворите?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> не раегује."\n\n"Да ли желите да га затворите?"</string>
+    <string name="anr_process" msgid="6513209874880517125">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> не раегује.\n\nДа ли желите да га затворите?"</string>
     <string name="force_close" msgid="8346072094521265605">"Потврди"</string>
     <string name="report" msgid="4060218260984795706">"Пријави"</string>
     <string name="wait" msgid="7147118217226317732">"Сачекај"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"Страница је престала да се одазива."\n\n" Да ли желите да је затворите?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Страница је престала да се одазива.\n\n Да ли желите да је затворите?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Апликација је преусмерена"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"Апликација <xliff:g id="APP_NAME">%1$s</xliff:g> је сада покренута."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Првобитно је покренута апликација <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
@@ -1284,15 +1284,15 @@
     <string name="ime_action_done" msgid="8971516117910934605">"Готово"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Претходно"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Изврши"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"Бирај број"\n"користећи <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"Креирајте контакт"\n"користећи <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Бирај број\nкористећи <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Креирајте контакт\nкористећи <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Следеће апликације захтевају дозволу за приступ налогу, како сада, тако и убудуће."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Желите да одобрите овај захтев?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Захтев за приступ"</string>
     <string name="allow" msgid="7225948811296386551">"Дозволи"</string>
     <string name="deny" msgid="2081879885755434506">"Одбиј"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Затражена је дозвола"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Затражена је дозвола"\n"за налог <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Затражена је дозвола\nза налог <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Метод уноса"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Синхронизација"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Приступачност"</string>
@@ -1493,20 +1493,20 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Лозинка"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Пријави ме"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Неважеће корисничко име или лозинка."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Заборавили сте корисничко име или лозинку?"\n"Посетите адресу "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Заборавили сте корисничко име или лозинку?\nПосетите адресу "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Провера налога…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Унели сте PIN неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. "\n\n"Покушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Унели сте лозинку неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. "\n\n"Покушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. "\n\n"Покушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Унели сте PIN неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Унели сте лозинку неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. \n\nПокушајте поново за <xliff:g id="NUMBER_1">%d</xliff:g> секунде(и)."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Покушали сте да откључате таблет неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. Након још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја таблет ће бити враћен на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Покушали сте да откључате телефон неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја телефон ће бити враћен на подразумевана фабричка подешавања и сви кориснички подаци ће бити изгубљени."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Покушали сте да откључате таблет неисправно <xliff:g id="NUMBER">%d</xliff:g> пута. Таблет ће сада бити враћен на подразумевана фабричка подешавања."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Покушали сте да откључате телефон неисправно <xliff:g id="NUMBER">%d</xliff:g> пута. Телефон ће сада бити враћен на подразумевана фабричка подешавања."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате таблет помоћу налога е-поште."\n\n"Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу налога е-поште."\n\n"Покушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате таблет помоћу налога е-поште.\n\nПокушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Нацртали сте шаблон за откључавање неисправно <xliff:g id="NUMBER_0">%d</xliff:g> пута. После још <xliff:g id="NUMBER_1">%d</xliff:g> неуспешна(их) покушаја, од вас ће бити затражено да откључате телефон помоћу налога е-поште.\n\nПокушајте поново за <xliff:g id="NUMBER_2">%d</xliff:g> секунде(и)."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Уклони"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Желите ли да појачате звук преко препорученог нивоа?"\n"Ако слушате гласну музику током дужег периода, може да дође до оштећења слуха."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Желите ли да појачате звук преко препорученог нивоа?\nАко слушате гласну музику током дужег периода, може да дође до оштећења слуха."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Држите са два прста да бисте омогућили приступачност."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Приступачност је омогућена."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Приступачност је отказана."</string>

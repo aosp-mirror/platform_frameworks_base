@@ -811,7 +811,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Insira um cartão SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"O cartão SIM está em falta ou não é legível. Introduza um cartão SIM."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Cartão SIM inutilizável."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"O cartão SIM foi desativado definitivamente. "\n" Contacte o seu fornecedor de serviços de rede sem fios para obter outro cartão SIM."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"O cartão SIM foi desativado definitivamente. \n Contacte o seu fornecedor de serviços de rede sem fios para obter outro cartão SIM."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Botão Faixa anterior"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Botão Faixa seguinte"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Botão Pausa"</string>
@@ -823,11 +823,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Consulte o Manual de utilizador ou contacte a Assistência a Clientes."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"O cartão SIM está bloqueado."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"A desbloquear cartão SIM..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Desenhou a sua sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. "\n\n"Tente novamente dentro de <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Escreveu a sua palavra-passe incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. "\n\n" Tente novamente dentro de <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Escreveu o seu número PIN incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. "\n\n" Tente novamente dentro de <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Após outras <xliff:g id="NUMBER_1">%d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o tablet com as suas credenciais de início de sessão do Google."\n\n" Tente novamente dentro de <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Após outras <xliff:g id="NUMBER_1">%d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o telemóvel com as suas credenciais de início de sessão do Google."\n\n" Tente novamente dentro de <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Desenhou a sua sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. \n\nTente novamente dentro de <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Escreveu a sua palavra-passe incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. \n\n Tente novamente dentro de <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Escreveu o seu número PIN incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. \n\n Tente novamente dentro de <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Após outras <xliff:g id="NUMBER_1">%d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o tablet com as suas credenciais de início de sessão do Google.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Após outras <xliff:g id="NUMBER_1">%d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o telemóvel com as suas credenciais de início de sessão do Google.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Tentou desbloquear o tablet <xliff:g id="NUMBER_0">%d</xliff:g> vezes de forma incorreta. Após mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativa(s) sem êxito, as definições de origem do tablet serão repostas e todos os dados de utilizador serão perdidos."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Tentou desbloquear o telemóvel <xliff:g id="NUMBER_0">%d</xliff:g> vezes de forma incorreta. Após mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativa(s) sem êxito, as definições de origem do telemóvel serão repostas e todos os dados de utilizador serão perdidos."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Tentou desbloquear o tablet <xliff:g id="NUMBER">%d</xliff:g> vezes de forma incorreta, pelo que serão repostas as respetivas definições de origem."</string>
@@ -841,7 +841,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Palavra-passe"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Iniciar sessão"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nome de utilizador ou palavra-passe inválidos."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Esqueceu-se do nome de utilizador ou da palavra-passe?"\n"Visite "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Esqueceu-se do nome de utilizador ou da palavra-passe?\nVisite "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"A verificar…"</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Desbloquear"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Som ativado"</string>
@@ -889,7 +889,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Confirmar Navegação"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Sair desta Página"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Permanecer nesta Página"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Tem a certeza de que pretende navegar para outra página?"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nTem a certeza de que pretende navegar para outra página?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Confirmar"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Sugestão: toque duas vezes para aumentar ou diminuir o zoom."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Preenchimento Automático"</string>
@@ -1095,14 +1095,14 @@
     <string name="aerr_application" msgid="932628488013092776">"Lamentamos, o <xliff:g id="APPLICATION">%1$s</xliff:g> foi interrompido."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Lamentamos, o processo <xliff:g id="PROCESS">%1$s</xliff:g> foi interrompido."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> não está a responder. "\n\n"Pretende fechá-la?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"A atividade <xliff:g id="ACTIVITY">%1$s</xliff:g> não está a responder. "\n\n" Pretende fechá-la?"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> não está a responder. \n\nPretende fechá-la?"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"A atividade <xliff:g id="ACTIVITY">%1$s</xliff:g> não está a responder. \n\n Pretende fechá-la?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> não está a responder. Pretende fechá-la?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"O processo <xliff:g id="PROCESS">%1$s</xliff:g> não está a responder. "\n\n" Pretende fechá-lo?"</string>
+    <string name="anr_process" msgid="6513209874880517125">"O processo <xliff:g id="PROCESS">%1$s</xliff:g> não está a responder. \n\n Pretende fechá-lo?"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Relatório"</string>
     <string name="wait" msgid="7147118217226317732">"Esperar"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"A página deixou de responder. "\n" "\n" Pretende fechá-la?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"A página deixou de responder. \n \n Pretende fechá-la?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Aplicação redirecionada"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> está agora a ser executado."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> foi originalmente iniciado."</string>
@@ -1284,15 +1284,15 @@
     <string name="ime_action_done" msgid="8971516117910934605">"Concluído"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Ant"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Executar"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"Marcar número"\n"utilizando <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"Criar contacto"\n"utilizando <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Marcar número\nutilizando <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Criar contacto\nutilizando <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Uma ou várias das aplicações seguintes solicitam permissão para aceder à sua conta, agora e no futuro."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Pretende autorizar este pedido?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Pedido de acesso"</string>
     <string name="allow" msgid="7225948811296386551">"Permitir"</string>
     <string name="deny" msgid="2081879885755434506">"Recusar"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Permissão solicitada"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Permissão solicitada"\n"para a conta <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Permissão solicitada\npara a conta <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Método de entrada"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sincronização"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Acessibilidade"</string>
@@ -1493,20 +1493,20 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Palavra-passe"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Iniciar sessão"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Nome de utilizador ou palavra-passe inválidos."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Esqueceu-se do nome de utilizador ou da palavra-passe?"\n"Aceda a "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Esqueceu-se do nome de utilizador ou da palavra-passe?\nAceda a "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"A verificar a conta…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Escreveu o PIN incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. "\n\n"Tente novamente dentro de <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Escreveu a palavra-passe incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. "\n\n"Tente novamente dentro de <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Desenhou a sua sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. "\n\n"Tente novamente dentro de <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Escreveu o PIN incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. \n\nTente novamente dentro de <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Escreveu a palavra-passe incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. \n\nTente novamente dentro de <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Desenhou a sua sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. \n\nTente novamente dentro de <xliff:g id="NUMBER_1">%d</xliff:g> segundos."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Tentou desbloquear o tablet <xliff:g id="NUMBER_0">%d</xliff:g> vezes de forma incorreta. Depois de mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas sem êxito, as definições de origem do telemóvel serão repostas e todos os dados do utilizador serão perdidos."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Tentou desbloquear o telemóvel <xliff:g id="NUMBER_0">%d</xliff:g> vezes de forma incorreta. Depois de mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas sem êxito, as definições de origem do telemóvel serão repostas e todos os dados do utilizador serão perdidos."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Tentou desbloquear o tablet <xliff:g id="NUMBER">%d</xliff:g> vezes de forma incorreta, pelo que será reposta a predefinição de fábrica."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Tentou desbloquear o telemóvel <xliff:g id="NUMBER">%d</xliff:g> vezes de forma incorreta, pelo que será reposta a predefinição de fábrica."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Depois de mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o tablet através de uma conta de email."\n\n" Tente novamente dentro de <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Depois de mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o telemóvel através de uma conta de email."\n\n" Tente novamente dentro de <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Depois de mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o tablet através de uma conta de email.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Desenhou a sequência de desbloqueio incorretamente <xliff:g id="NUMBER_0">%d</xliff:g> vezes. Depois de mais <xliff:g id="NUMBER_1">%d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o telemóvel através de uma conta de email.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%d</xliff:g> segundos."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Remover"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Aumentar o volume acima do nível recomendado?"\n"Ouvir em volume alto durante longos períodos de tempo poderá prejudicar a sua audição."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Aumentar o volume acima do nível recomendado?\nOuvir em volume alto durante longos períodos de tempo poderá prejudicar a sua audição."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Mantenha os dois dedos para ativar a acessibilidade."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Acessibilidade ativada."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Acessibilidade cancelada."</string>

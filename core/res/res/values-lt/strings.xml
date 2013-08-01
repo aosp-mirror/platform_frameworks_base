@@ -138,7 +138,7 @@
     <string name="turn_on_radio" msgid="3912793092339962371">"Įjungti bevielį"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Išjungti bevielį"</string>
     <string name="screen_lock" msgid="799094655496098153">"Ekrano užraktas"</string>
-    <string name="power_off" msgid="4266614107412865048">"Išjungti maitinimą"</string>
+    <string name="power_off" msgid="4266614107412865048">"Išjungiamas maitinimas"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"Skambutis išjungtas"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Vibracija skambinant"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Skambutis įjungtas"</string>
@@ -153,7 +153,7 @@
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Planšetinio kompiuterio parinktys"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Telefono parinktys"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Ekrano užraktas"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"Išjungti maitinimą"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"Išjungiamas maitinimas"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Pranešimas apie triktį"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Pranešti apie triktį"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Bus surinkta informacija apie dabartinę įrenginio būseną ir išsiųsta el. pašto pranešimu. Šiek tiek užtruks, kol pranešimas apie triktį bus paruoštas siųsti; būkite kantrūs."</string>
@@ -811,7 +811,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Įdėkite SIM kortelę."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Trūksta SIM kortelės arba ji neskaitoma. Įdėkite SIM kortelę."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Negalima naudoti SIM kortelės."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM kortelė visam laikui neleidžiama."\n" Jei norite gauti kitą SIM kortelę, susisiekite su belaidžio ryšio paslaugos teikėju."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM kortelė visam laikui neleidžiama.\n Jei norite gauti kitą SIM kortelę, susisiekite su belaidžio ryšio paslaugos teikėju."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Ankstesnio takelio mygtukas"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Kito takelio mygtukas"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Pristabdymo mygtukas"</string>
@@ -823,11 +823,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Žr. naudotojo vadovą arba susisiekite su klientų priežiūros tarnyba."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM kortelė užrakinta."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Atrakinama SD kortelė..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Neteisingai apibrėžėte atrakinimo modelį <xliff:g id="NUMBER_0">%d</xliff:g> k. "\n\n"Bandykite dar kartą po <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Neteisingai įvedėte slaptažodį <xliff:g id="NUMBER_0">%d</xliff:g> k. "\n\n"Bandykite dar kartą po <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"PIN kodą neteisingai įvedėte <xliff:g id="NUMBER_0">%d</xliff:g> k. "\n\n"Bandykite dar kartą po <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Neteisingai nurodėte savo atrakinimo modelį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti planšetinį kompiuterį naudodami „Google“ prisijungimo duomenis."\n\n" Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Neteisingai nurodėte savo atrakinimo modelį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti telefoną naudodami „Google“ prisijungimo duomenis."\n\n" Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Neteisingai apibrėžėte atrakinimo modelį <xliff:g id="NUMBER_0">%d</xliff:g> k. \n\nBandykite dar kartą po <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Neteisingai įvedėte slaptažodį <xliff:g id="NUMBER_0">%d</xliff:g> k. \n\nBandykite dar kartą po <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"PIN kodą neteisingai įvedėte <xliff:g id="NUMBER_0">%d</xliff:g> k. \n\nBandykite dar kartą po <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Neteisingai nurodėte savo atrakinimo modelį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti planšetinį kompiuterį naudodami „Google“ prisijungimo duomenis.\n\n Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Neteisingai nurodėte savo atrakinimo modelį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti telefoną naudodami „Google“ prisijungimo duomenis.\n\n Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"<xliff:g id="NUMBER_0">%d</xliff:g> kart. bandėte netinkamai atrakinti planšetinį kompiuterį. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. planšetiniame kompiuteryje bus iš naujo nustatyti numatytieji gamyklos nustatymai ir bus prarasti visi naudotojo duomenys."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"<xliff:g id="NUMBER_0">%d</xliff:g> kart. bandėte netinkamai atrakinti telefoną. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. telefone bus iš naujo nustatyti numatytieji gamyklos nustatymai ir bus prarasti visi naudotojo duomenys."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"<xliff:g id="NUMBER">%d</xliff:g> kart. bandėte netinkamai atrakinti planšetinį kompiuterį. Planšetinis kompiuteris bus iš naujo nustatytas į numatytuosius gamyklos nustatymus."</string>
@@ -841,7 +841,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Slaptažodis"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Prisijungti"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Neteisingas naudotojo vardas ar slaptažodis."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Pamiršote naudotojo vardą ar slaptažodį?"\n"Apsilankykite šiuo adresu: "<b>"google.com/accounts/recovery?hl=lt"</b></string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Pamiršote naudotojo vardą ar slaptažodį?\nApsilankykite šiuo adresu: "<b>"google.com/accounts/recovery?hl=lt"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Tikrinama..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Atblokuoti"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Garsas įjungtas"</string>
@@ -889,7 +889,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Patvirtinti išėjimą"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Išeiti iš šio puslapio"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Likti šiame puslapyje"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Tikrai norite išeiti iš šio puslapio?"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nTikrai norite išeiti iš šio puslapio?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Patvirtinti"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Patarimas: palieskite dukart, kad padidintumėte ar sumažintumėte mastelį."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Automatinis pildymas"</string>
@@ -1095,14 +1095,14 @@
     <string name="aerr_application" msgid="932628488013092776">"Deja, <xliff:g id="APPLICATION">%1$s</xliff:g> sustojo."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Deja, <xliff:g id="PROCESS">%1$s</xliff:g> sustojo."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"„<xliff:g id="APPLICATION">%2$s</xliff:g>“ neatsako."\n\n"Ar norite ją uždaryti?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Veiksmas „<xliff:g id="ACTIVITY">%1$s</xliff:g>“ neatsako."\n\n"Ar norite jį uždaryti?"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"„<xliff:g id="APPLICATION">%2$s</xliff:g>“ neatsako.\n\nAr norite ją uždaryti?"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"Veiksmas „<xliff:g id="ACTIVITY">%1$s</xliff:g>“ neatsako.\n\nAr norite jį uždaryti?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"„<xliff:g id="APPLICATION">%1$s</xliff:g>“ neatsako. Ar norite ją uždaryti?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Procesas „<xliff:g id="PROCESS">%1$s</xliff:g>“ neatsako."\n\n"Ar norite jį uždaryti?"</string>
+    <string name="anr_process" msgid="6513209874880517125">"Procesas „<xliff:g id="PROCESS">%1$s</xliff:g>“ neatsako.\n\nAr norite jį uždaryti?"</string>
     <string name="force_close" msgid="8346072094521265605">"Gerai"</string>
     <string name="report" msgid="4060218260984795706">"Ataskaita"</string>
     <string name="wait" msgid="7147118217226317732">"Palaukti"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"Puslapis neatsako."\n\n"Ar norite jį uždaryti?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Puslapis neatsako.\n\nAr norite jį uždaryti?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Programa peradresuota"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"„<xliff:g id="APP_NAME">%1$s</xliff:g>“ dabar vykdoma."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"„<xliff:g id="APP_NAME">%1$s</xliff:g>“ buvo iš pradžių paleista."</string>
@@ -1284,15 +1284,15 @@
     <string name="ime_action_done" msgid="8971516117910934605">"Atlikta"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Perž."</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Vykdyti"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"Rinkti numerį "\n"naudojant <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"Sukurti adresatą"\n"naudojant <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Rinkti numerį \nnaudojant <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Sukurti adresatą\nnaudojant <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Pateikta mažiausiai vienos toliau nurodytos programos užklausa dėl leidimo dabar ir ateityje pasiekti jūsų paskyrą."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Ar norite leisti šią užklausą?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Užklausa dėl prieigos"</string>
     <string name="allow" msgid="7225948811296386551">"Leisti"</string>
     <string name="deny" msgid="2081879885755434506">"Atmesti"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Pateikta užklausa dėl leidimo"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Pateikta leidimo užklausa"\n"dėl <xliff:g id="ACCOUNT">%s</xliff:g> paskyros"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Pateikta leidimo užklausa\ndėl <xliff:g id="ACCOUNT">%s</xliff:g> paskyros"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Įvesties būdas"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sinchronizuoti"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Pasiekiamumas"</string>
@@ -1493,20 +1493,20 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Slaptažodis"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Prisijungti"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Netinkamas naudotojo vardas ar slaptažodis."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Pamiršote naudotojo vardą ar slaptažodį?"\n"Apsilankykite šiuo adresu: "<b>"google.com/accounts/recovery"</b></string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Pamiršote naudotojo vardą ar slaptažodį?\nApsilankykite šiuo adresu: "<b>"google.com/accounts/recovery"</b></string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Tikrinama paskyra…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN kodą netinkamai įvedėte <xliff:g id="NUMBER_0">%d</xliff:g> k. "\n\n"Bandykite dar kartą po <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Neteisingai įvedėte slaptažodį <xliff:g id="NUMBER_0">%d</xliff:g> k. "\n\n"Bandykite dar kartą po <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. "\n\n"Bandykite dar kartą po <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN kodą netinkamai įvedėte <xliff:g id="NUMBER_0">%d</xliff:g> k. \n\nBandykite dar kartą po <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Neteisingai įvedėte slaptažodį <xliff:g id="NUMBER_0">%d</xliff:g> k. \n\nBandykite dar kartą po <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. \n\nBandykite dar kartą po <xliff:g id="NUMBER_1">%d</xliff:g> sek."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"<xliff:g id="NUMBER_0">%d</xliff:g> k. bandėte netinkamai atrakinti planšetinį kompiuterį. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. planšetiniame kompiuteryje bus iš naujo nustatyti numatytieji gamyklos nustatymai ir bus prarasti visi naudotojo duomenys."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"<xliff:g id="NUMBER_0">%d</xliff:g> k. bandėte netinkamai atrakinti telefoną. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. telefone bus iš naujo nustatyti numatytieji gamyklos nustatymai ir bus prarasti visi naudotojo duomenys."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"<xliff:g id="NUMBER">%d</xliff:g> k. bandėte netinkamai atrakinti planšetinį kompiuterį. Planšetiniame kompiuteryje bus iš naujo nustatyti numatytieji gamyklos nustatymai."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"<xliff:g id="NUMBER">%d</xliff:g> k. bandėte netinkamai atrakinti telefoną. Telefone bus iš naujo nustatyti numatytieji gamyklos nustatymai."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti planšetinį kompiuterį naudodami „Google“ prisijungimo duomenis."\n\n" Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti telefoną naudodami „Google“ prisijungimo duomenis."\n\n" Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti planšetinį kompiuterį naudodami „Google“ prisijungimo duomenis.\n\n Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Netinkamai nupiešėte atrakinimo piešinį <xliff:g id="NUMBER_0">%d</xliff:g> k. Po dar <xliff:g id="NUMBER_1">%d</xliff:g> nesėkm. band. būsite paprašyti atrakinti telefoną naudodami „Google“ prisijungimo duomenis.\n\n Bandykite dar kartą po <xliff:g id="NUMBER_2">%d</xliff:g> sek."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Pašalinti"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Padidinti garsumą viršijant saugų lygį?"\n"Ilgai klausantis dideliu garsumu gali sutrikti klausa."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Padidinti garsumą viršijant saugų lygį?\nIlgai klausantis dideliu garsumu gali sutrikti klausa."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Laikykite palietę dviem pirštais, kad įgalintumėte pritaikymo neįgaliesiems režimą."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Pritaikymas neįgaliesiems įgalintas."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Pritaikymo neįgaliesiems režimas atšauktas."</string>

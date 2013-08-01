@@ -2034,8 +2034,8 @@
     <!-- no translation found for ime_action_previous (1443550039250105948) -->
     <skip />
     <string name="ime_action_default" msgid="2840921885558045721">"Exequir"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"Cumponer il numer"\n"cun utilisar <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"Agiuntar in contact"\n"cun il numer <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Cumponer il numer\ncun utilisar <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Agiuntar in contact\ncun il numer <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <!-- no translation found for grant_credentials_permission_message_header (2106103817937859662) -->
     <skip />
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Vulais Vus autorisar questa dumonda?"</string>

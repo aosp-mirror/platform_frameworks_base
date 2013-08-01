@@ -811,7 +811,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Ingiza SIM kadi."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM kadi haipatikani au haisomeki. Tafadhali ingiza SIM kadi."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"SIM kadi isiyotumika."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM kadi yako imelemezwa kabisa."\n" Wasiliana na mtoa huduma wako wa pasi waya ili upate SIM kadi nyingine."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM kadi yako imelemezwa kabisa.\n Wasiliana na mtoa huduma wako wa pasi waya ili upate SIM kadi nyingine."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Kitufe cha awali cha wimbo"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Kitufe cha wimbo unaofuata"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Kitufe cha kusitisha"</string>
@@ -823,11 +823,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Angalia Mwongozo wa Mtumiaji au wasiliana na Huduma ya Wateja."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM kadi imefungwa."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Inafungua SIM kadi..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Umekosea katika kuchora ruwaza yako ya kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n" Jaribu tena kwa sekunde <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Umekosea mara <xliff:g id="NUMBER_0">%d</xliff:g> katika kuingiza nenosiri lako. "\n\n" Jaribu tena katika sekunde <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Umekosea katika kuingiza PIN yako mara <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n" Jaribu tena katika sekunde <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Umekosea katika kuweka mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> bila kufaulu, utaulizwa kufungua kompyuta yako ndogo kwa kuingia kwa Google."\n\n" Jaribu tena katika sekunde <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Umekosea kuchora mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> yasiyofaulu, utaulizwa kufungua simu kupitia kuingia Google."\n\n" Jaribu tena katika sekunde <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Umekosea katika kuchora ruwaza yako ya kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. \n\n Jaribu tena kwa sekunde <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Umekosea mara <xliff:g id="NUMBER_0">%d</xliff:g> katika kuingiza nenosiri lako. \n\n Jaribu tena katika sekunde <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Umekosea katika kuingiza PIN yako mara <xliff:g id="NUMBER_0">%d</xliff:g>. \n\n Jaribu tena katika sekunde <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Umekosea katika kuweka mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> bila kufaulu, utaulizwa kufungua kompyuta yako ndogo kwa kuingia kwa Google.\n\n Jaribu tena katika sekunde <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Umekosea kuchora mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> yasiyofaulu, utaulizwa kufungua simu kupitia kuingia Google.\n\n Jaribu tena katika sekunde <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya zaidi ya <xliff:g id="NUMBER_1">%d</xliff:g> majaribio yasiyofanikiwa, kompyuta ndogo itawekwa upya kwa kiwanda chaguo-msingi na data yote ya mtumiaji itapotea."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Umejaribu kufungua simu kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> zaidi yasiyofanikiwa, simu itawekwa upya kwa kiwanda chaguo-msingi na data yote ya mtumiaji itapotea."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Kompyuta ndogo haitaweza kuwekwa upya kwa kiwanda chaguo-msingi."</string>
@@ -841,7 +841,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Nenosiri"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Ingia"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Jina la mtumiaji au nenosiri batili."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Umesahau jina lako la mtumiaji au nenosiri?"\n"Tembela "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Umesahau jina lako la mtumiaji au nenosiri?\nTembela "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Inakagua..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Fungua"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Sauti imewezeshwa"</string>
@@ -889,7 +889,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Thibitisha jinsi ya kuelekea"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Toka kwenye Ukurasa huu"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Bakia kwenye Ukurasa huu"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Je, una uhakika unataka kutoka kwenye ukurasa huu?"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nJe, una uhakika unataka kutoka kwenye ukurasa huu?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Thibitisha"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Kidokezo: Gonga mara mbili ili kukuza ndani na nje."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Kujaza kiotomatiki"</string>
@@ -1095,14 +1095,14 @@
     <string name="aerr_application" msgid="932628488013092776">"Kwa bahati mbaya, <xliff:g id="APPLICATION">%1$s</xliff:g> imekoma."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Kwa bahati mbaya, mchakato <xliff:g id="PROCESS">%1$s</xliff:g> umekoma."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> haifanyi kazi."\n\n"Unataka kuifunga?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Shughuli <xliff:g id="ACTIVITY">%1$s</xliff:g> haijibu. "\n\n" Unataka kuifunga?"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> haifanyi kazi.\n\nUnataka kuifunga?"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"Shughuli <xliff:g id="ACTIVITY">%1$s</xliff:g> haijibu. \n\n Unataka kuifunga?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> haijibu. Unataka kufunga?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Mchakato <xliff:g id="PROCESS">%1$s</xliff:g> haijibu. "\n\n" Unataka kuifunga?"</string>
+    <string name="anr_process" msgid="6513209874880517125">"Mchakato <xliff:g id="PROCESS">%1$s</xliff:g> haijibu. \n\n Unataka kuifunga?"</string>
     <string name="force_close" msgid="8346072094521265605">"Sawa"</string>
     <string name="report" msgid="4060218260984795706">"Ripoti"</string>
     <string name="wait" msgid="7147118217226317732">"Subiri"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"Ukurasa umekwama. "\n" "\n" Je, unataka kuufunga?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Ukurasa umekwama. \n \n Je, unataka kuufunga?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Programu imeelekezwa kwingine"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g>inaendesha sasa."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilizinduliwa mwanzoni."</string>
@@ -1284,15 +1284,15 @@
     <string name="ime_action_done" msgid="8971516117910934605">"Nimemaliza"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Iliyotangulia"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Tekeleza"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"Piga nambari "\n" kwa kutumia <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"Unda anwani "\n" kwa kutumia <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Piga nambari \n kwa kutumia <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Unda anwani \n kwa kutumia <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Programu moja au zaidi zifuatazo zinaomba ruhusa ya kufikia akaunti yako, sasa na baadaye."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Unataka kuruhusu ombi hili?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Fikia ombi"</string>
     <string name="allow" msgid="7225948811296386551">"Ruhusu"</string>
     <string name="deny" msgid="2081879885755434506">"Kataza"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Idhini imeitishwa"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Idhini imeombwa"\n"ya akaunti<xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Idhini imeombwa\nya akaunti<xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Mbinu ya uingizaji"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Sawazisha"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Ufikiaji"</string>
@@ -1493,20 +1493,20 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Nenosiri"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Ingia"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Jina la mtumiaji au nenosiri batili."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Je, umesahau jina lako la mtumiaji au nenosiri?"\n"Tembela "<b>"Bgoogle.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Je, umesahau jina lako la mtumiaji au nenosiri?\nTembela "<b>"Bgoogle.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Inakagua akaunti…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Umeingiza nenosiri lako kwa makosa mara <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n" Jaribu tena baada ya sekunde <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Umeingiza nenosiri lako kwa makosa mara <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n" Jaribu tena baada ya sekunde <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Umechora ruwaza yako ya kufunga kwa makosa mara <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n" Jaribu tena baada ya sekunde <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Umeingiza nenosiri lako kwa makosa mara <xliff:g id="NUMBER_0">%d</xliff:g>. \n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Umeingiza nenosiri lako kwa makosa mara <xliff:g id="NUMBER_0">%d</xliff:g>. \n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Umechora ruwaza yako ya kufunga kwa makosa mara <xliff:g id="NUMBER_0">%d</xliff:g>. \n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> zaidi yasiyofaulu, kompyuta ndogo itarejeshwa katika mfumo chaguo-msingi ilivyotoka kiwandani data yote ya mtumiaji itapotea."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Umejaribu kufungua simu kwa njia isiyo sahihi mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> zaidi yasiyofaulu, simu itarejeshwa katika mfumo chaguo-msingi ilivyotoka kiwandani na data yote ya mtumiaji itapotea."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Umejaribu kufungua kompyuta ndogo kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Sasa kompyuta ndogo itarejeshwa katika mfumo chaguo-msingi ilivyotoka kiwandani."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Umejaribu kufungua simu kwa njia isiyo sahihi mara <xliff:g id="NUMBER">%d</xliff:g>. Sasa simu  itarejeshwa katika mfumo chaguo-msingi ilivyotoka kiwandani."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Umekosea katika kuweka mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> bila kufaulu, utaombwa kufungua kompyuta yako ndogo kwa kutumia akaunti yako ya barua pepe."\n\n" Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Umekosea kuchora mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> yasiyofaulu, utaombwa kufungua simu yako kwa kutumia akaunti ya barua pepe."\n\n" Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Umekosea katika kuweka mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> bila kufaulu, utaombwa kufungua kompyuta yako ndogo kwa kutumia akaunti yako ya barua pepe.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Umekosea kuchora mchoro wako wa kufungua mara <xliff:g id="NUMBER_0">%d</xliff:g>. Baada ya majaribio <xliff:g id="NUMBER_1">%d</xliff:g> yasiyofaulu, utaombwa kufungua simu yako kwa kutumia akaunti ya barua pepe.\n\n Jaribu tena baada ya sekunde <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Ondoa"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Ungependa kuongeza sauti kupita kiwango kinachopendekezwa?"\n"Kusikiliza kwa sauti ya juu kwa muda mrefu kunaweza kuharibu uwezo wako wa kusikia."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Ungependa kuongeza sauti kupita kiwango kinachopendekezwa?\nKusikiliza kwa sauti ya juu kwa muda mrefu kunaweza kuharibu uwezo wako wa kusikia."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Endelea kushikilia chini kwa vidole vyako viwili ili kuwezesha ufikivu."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Ufikivu umewezeshwa."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Ufikivu umeghairiwa."</string>

@@ -811,7 +811,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"הכנס כרטיס SIM."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"כרטיס ה-SIM חסר או שלא ניתן לקרוא אותו. הכנס כרטיס SIM."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"לא ניתן להשתמש בכרטיס SIM זה."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"כרטיס ה-SIM שלך הושבת לצמיתות."\n"פנה לספק השירות האלחוטי שלך לקבלת כרטיס SIM אחר."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"כרטיס ה-SIM שלך הושבת לצמיתות.\nפנה לספק השירות האלחוטי שלך לקבלת כרטיס SIM אחר."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"לחצן הרצועה הקודמת"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"לחצן הרצועה הבאה"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"לחצן ההשהיה"</string>
@@ -823,11 +823,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"עיין במדריך למשתמש או פנה לשירות הלקוחות."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"כרטיס ה-SIM נעול."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"מבטל נעילה של כרטיס SIM…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. "\n\n"נסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"הקלדת סיסמה שגויה <xliff:g id="NUMBER_0">%d</xliff:g> פעמים."\n\n"נסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"הקלדת קוד PIN שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים."\n\n"נסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"שרטטת באופן שגוי את קו ביטול הנעילה <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטבלט באמצעות פרטי הכניסה שלך ל-Google."\n\n"נסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. בעוד <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות פרטי הכניסה שלך ל-Google‏."\n\n" נסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. \n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"הקלדת סיסמה שגויה <xliff:g id="NUMBER_0">%d</xliff:g> פעמים.\n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"הקלדת קוד PIN שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים.\n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"שרטטת באופן שגוי את קו ביטול הנעילה <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטבלט באמצעות פרטי הכניסה שלך ל-Google.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. בעוד <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות פרטי הכניסה שלך ל-Google‏.\n\n נסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"ביצעת <xliff:g id="NUMBER_0">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטבלט. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, הטבלט יעבור איפוס לברירת המחדל של היצרן וכל נתוני המשתמש יאבדו."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"ביצעת <xliff:g id="NUMBER_0">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, הטלפון יעבור איפוס לברירת המחדל של היצרן וכל נתוני המשתמש יאבדו."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"ביצעת <xliff:g id="NUMBER">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטבלט. הטבלט יעבור כעת איפוס לברירת המחדל של היצרן."</string>
@@ -841,7 +841,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"סיסמה"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"כניסה"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"שם משתמש או סיסמה לא חוקיים."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"שכחת את שם המשתמש או הסיסמה?"\n"בקר בכתובת "<b>"google.com/accounts/recovery"</b></string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"שכחת את שם המשתמש או הסיסמה?\nבקר בכתובת "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"בודק..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"בטל נעילה"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"קול פועל"</string>
@@ -889,7 +889,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"אישור ניווט"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"צא מדף זה"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"הישאר בדף זה"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"האם אתה בטוח שברצונך לנווט אל מחוץ לדף זה?"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nהאם אתה בטוח שברצונך לנווט אל מחוץ לדף זה?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"אשר"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"טיפ: הקש פעמיים כדי להגדיל ולהקטין."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"מילוי אוטומטי"</string>
@@ -1095,14 +1095,14 @@
     <string name="aerr_application" msgid="932628488013092776">"לצערנו, פעולת <xliff:g id="APPLICATION">%1$s</xliff:g> הופסקה."</string>
     <string name="aerr_process" msgid="4507058997035697579">"לצערנו, התהליך <xliff:g id="PROCESS">%1$s</xliff:g> הופסק."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> אינו מגיב."\n\n"תרצה לסגור אותו?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"הפעילות <xliff:g id="ACTIVITY">%1$s</xliff:g> אינה מגיבה."\n\n"תרצה לסגור אותה?"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> אינו מגיב.\n\nתרצה לסגור אותו?"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"הפעילות <xliff:g id="ACTIVITY">%1$s</xliff:g> אינה מגיבה.\n\nתרצה לסגור אותה?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> אינו מגיב. תרצה לסגור אותו?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"תהליך <xliff:g id="PROCESS">%1$s</xliff:g> אינו מגיב."\n\n"תרצה לסגור אותו?"</string>
+    <string name="anr_process" msgid="6513209874880517125">"תהליך <xliff:g id="PROCESS">%1$s</xliff:g> אינו מגיב.\n\nתרצה לסגור אותו?"</string>
     <string name="force_close" msgid="8346072094521265605">"אישור"</string>
     <string name="report" msgid="4060218260984795706">"שלח דוח"</string>
     <string name="wait" msgid="7147118217226317732">"המתן"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"הדף אינו מגיב."\n\n"האם אתה רוצה לסגור אותו?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"הדף אינו מגיב.\n\nהאם אתה רוצה לסגור אותו?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"הפנייה מחדש של יישום"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> פועל כעת."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> הופעל במקור."</string>
@@ -1284,15 +1284,15 @@
     <string name="ime_action_done" msgid="8971516117910934605">"סיום"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"הקודם"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"בצע"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"חייג למספר"\n"באמצעות <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"צור איש קשר"\n"באמצעות <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"חייג למספר\nבאמצעות <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"צור איש קשר\nבאמצעות <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"היישומים הבאים מבקשים אישור לגשת לחשבונך, כעת ובעתיד."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"האם ברצונך לאפשר בקשה זו?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"בקשת גישה"</string>
     <string name="allow" msgid="7225948811296386551">"אפשר"</string>
     <string name="deny" msgid="2081879885755434506">"דחה"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"בקשת הרשאה"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"נדרשת הרשאה"\n"לחשבון <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"נדרשת הרשאה\nלחשבון <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"שיטת קלט"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"סינכרון"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"נגישות"</string>
@@ -1493,20 +1493,20 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"סיסמה"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"היכנס"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"שם משתמש או סיסמה לא חוקיים."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"שכחת את שם המשתמש או הסיסמה?"\n"בקר בכתובת "<b>"google.com/accounts/recovery"</b></string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"שכחת את שם המשתמש או הסיסמה?\nבקר בכתובת "<b>"google.com/accounts/recovery"</b></string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"בודק חשבון…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"הקלדת מספר PIN שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. "\n\n"נסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"הקלדת סיסמה שגויה <xliff:g id="NUMBER_0">%d</xliff:g> פעמים."\n\n"נסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. "\n\n"נסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"הקלדת מספר PIN שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. \n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"הקלדת סיסמה שגויה <xliff:g id="NUMBER_0">%d</xliff:g> פעמים.\n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. \n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"ביצעת <xliff:g id="NUMBER_0">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, הטאבלט יעבור איפוס לברירת המחדל של היצרן וכל נתוני המשתמש יאבדו."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"ביצעת <xliff:g id="NUMBER_0">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, הטלפון יעבור איפוס לברירת המחדל של היצרן וכל נתוני המשתמש יאבדו."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"ביצעת <xliff:g id="NUMBER">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטאבלט. הטאבלט יעבור כעת איפוס לברירת המחדל של היצרן."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"ביצעת <xliff:g id="NUMBER">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. הטלפון יעבור כעת איפוס לברירת המחדל של היצרן."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטאבלט באמצעות חשבון דוא\"ל‏."\n\n"נסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות חשבון דוא\"ל‏."\n\n"נסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטאבלט באמצעות חשבון דוא\"ל‏.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות חשבון דוא\"ל‏.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"הסר"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"האם להעלות את עוצמת הקול מעל לרמה המומלצת?"\n"האזנה בעוצמת קול גבוהה למשך זמן ארוך עלולה לפגוע בשמיעה."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"האם להעלות את עוצמת הקול מעל לרמה המומלצת?\nהאזנה בעוצמת קול גבוהה למשך זמן ארוך עלולה לפגוע בשמיעה."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"המשך לגעת בשתי אצבעות כדי להפעיל נגישות."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"נגישות הופעלה."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"נגישות בוטלה."</string>

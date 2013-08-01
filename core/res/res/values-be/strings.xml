@@ -826,7 +826,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Усталюйце SIM-карту."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-карта адсутнічае ці не чытаецца. Устаўце SIM-карту."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"SIM-карту немагчыма выкарыстоўваць"</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Ваша SIM-карта была адключана назаўсёды."\n" Звяжыцеся з аператарам бесправадной сувязі, каб атрымаць іншую SIM-карту."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Ваша SIM-карта была адключана назаўсёды.\n Звяжыцеся з аператарам бесправадной сувязі, каб атрымаць іншую SIM-карту."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Кнопка папярэдняй кампазiцыi"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Кнопка наступнай кампазiцыi"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Кнопка паўзы"</string>
@@ -838,11 +838,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Глядзіце \"Інструкцыю для карыстальніка\" або звяжыцеся са службай тэхнiчнай падтрымкі."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM-карта заблакаваная."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Разблакаванне SIM-карты..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Вы няправільна ўвялі графічны ключ разблакавання пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Паўтарыце спробу праз наступную колькасць секунд: <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Вы няправільна ўвялі пароль пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Паўтарыце спробу праз наступную колькасць секунд: <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Вы няправільна ўвялі PIN-код пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Паўтарыце спробу праз наступную колькасць секунд: <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Вы няправільна ўвялі графічны ключ разблакавання пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%d</xliff:g>) вам будзе прапанавана разблакаваць планшэт з дапамогай уваходу ў Google."\n\n" Паўтарыце спробу праз наступную колькасць секунд: <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Вы няправільна ўвялі графічны ключ разблакавання пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%d</xliff:g>) вам будзе прапанавана разблакаваць тэлефон з дапамогай уваходу ў Google."\n\n" Паўтарыце спробу праз наступную колькасць секунд: <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Вы няправільна ўвялі графічны ключ разблакавання пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. \n\nПаўтарыце спробу праз наступную колькасць секунд: <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Вы няправільна ўвялі пароль пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. \n\nПаўтарыце спробу праз наступную колькасць секунд: <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Вы няправільна ўвялі PIN-код пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. \n\nПаўтарыце спробу праз наступную колькасць секунд: <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Вы няправільна ўвялі графічны ключ разблакавання пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%d</xliff:g>) вам будзе прапанавана разблакаваць планшэт з дапамогай уваходу ў Google.\n\n Паўтарыце спробу праз наступную колькасць секунд: <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Вы няправільна ўвялі графічны ключ разблакавання пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%d</xliff:g>) вам будзе прапанавана разблакаваць тэлефон з дапамогай уваходу ў Google.\n\n Паўтарыце спробу праз наступную колькасць секунд: <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Вы няправільна спрабавалі разблакаваць планшэт некалькi разоў (<xliff:g id="NUMBER_0">%d</xliff:g>). Пасля яшчэ некалькiх спробаў (<xliff:g id="NUMBER_1">%d</xliff:g>) ён будзе скінуты да заводскіх налад i карыстальнiцкiя дадзеныя будуць згубленыя."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Вы няправільна спрабавалі разблакаваць планшэт некалькi разоў (<xliff:g id="NUMBER_0">%d</xliff:g>). Пасля яшчэ некалькiх спробаў (<xliff:g id="NUMBER_1">%d</xliff:g>) ён будзе скінуты да заводскіх налад i карыстальнiцкiя дадзеныя будуць згубленыя."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Вы няправільна спрабавалі разблакаваць планшэт некалькi разоў (<xliff:g id="NUMBER">%d</xliff:g>). Цяпер ён будзе скінуты да заводскіх налад."</string>
@@ -856,7 +856,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Пароль"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Увайсці"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Няправільнае імя карыстальніка ці пароль."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Забыліся на імя карыстальніка або пароль?"\n"Наведайце "<b>"google.com/accounts/recovery"</b></string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Забыліся на імя карыстальніка або пароль?\nНаведайце "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Праверка..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Разблакаваць"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Гук уключаны"</string>
@@ -904,7 +904,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Пацвердзіце пераход"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Пакінуць гэту старонку"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Заставацца на гэтай старонцы"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Вы ўпэўнены, што хочаце пакiнуць гэту старонку?"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nВы ўпэўнены, што хочаце пакiнуць гэту старонку?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Пацвердзіць"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Падказка: двойчы націсніце, каб павялічыць або паменшыць."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Аўтазапаўненне"</string>
@@ -1110,14 +1110,14 @@
     <string name="aerr_application" msgid="932628488013092776">"На жаль, прыкладанне <xliff:g id="APPLICATION">%1$s</xliff:g> спынілася."</string>
     <string name="aerr_process" msgid="4507058997035697579">"На жаль, працэс <xliff:g id="PROCESS">%1$s</xliff:g> спыніўся."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"Прыкладанне <xliff:g id="APPLICATION">%2$s</xliff:g> не адказвае."\n\n"Закрыць яго?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Працэс <xliff:g id="ACTIVITY">%1$s</xliff:g> не адказвае."\n\n"Закрыць яго?"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"Прыкладанне <xliff:g id="APPLICATION">%2$s</xliff:g> не адказвае.\n\nЗакрыць яго?"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"Працэс <xliff:g id="ACTIVITY">%1$s</xliff:g> не адказвае.\n\nЗакрыць яго?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"Прыкладанне <xliff:g id="APPLICATION">%1$s</xliff:g> не адказвае. Закрыць яго?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Працэс <xliff:g id="PROCESS">%1$s</xliff:g> не адказвае."\n\n"Закрыць яго?"</string>
+    <string name="anr_process" msgid="6513209874880517125">"Працэс <xliff:g id="PROCESS">%1$s</xliff:g> не адказвае.\n\nЗакрыць яго?"</string>
     <string name="force_close" msgid="8346072094521265605">"ОК"</string>
     <string name="report" msgid="4060218260984795706">"Справаздача"</string>
     <string name="wait" msgid="7147118217226317732">"Чакаць"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"Старонка не адказвае на запыты."\n\n"Закрыць яе?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Старонка не адказвае на запыты.\n\nЗакрыць яе?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Прыкл. перанакіраванае"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"Прыкладанне <xliff:g id="APP_NAME">%1$s</xliff:g> зараз запушчанае."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Прыкладанне <xliff:g id="APP_NAME">%1$s</xliff:g> запушчанае."</string>
@@ -1299,15 +1299,15 @@
     <string name="ime_action_done" msgid="8971516117910934605">"Гатова"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Назад"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Выканаць"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"Набраць нумар"\n"з выкарыстаннем <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"Стварыць кантакт"\n"з дапамогай<xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Набраць нумар\nз выкарыстаннем <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Стварыць кантакт\nз дапамогай<xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Гэтыя адно або некалькі прыкладанняў запытваюць дазвол на доступ да вашага ўліковага запісу цяпер і ў будучыні."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Дазволіць гэты запыт?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Запыт на доступ"</string>
     <string name="allow" msgid="7225948811296386551">"Дазволіць"</string>
     <string name="deny" msgid="2081879885755434506">"Забараніць"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Дазвол запытаны"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Запытаны дазвол"\n"для ўліковага запісу <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Запытаны дазвол\nдля ўліковага запісу <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Метад уводу"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Сінхранізацыя"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Спецыяльныя магчымасці"</string>
@@ -1509,20 +1509,20 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Пароль"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Увайсцi"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Няправільнае імя карыстальніка ці пароль."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Забыліся на імя карыстальніка або пароль?"\n"Наведайце "<b>"google.com/accounts/recovery"</b></string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Забыліся на імя карыстальніка або пароль?\nНаведайце "<b>"google.com/accounts/recovery"</b></string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Праверка ўлiковага запiсу..."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Вы няправільна ўвялі PIN-код пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Паўтарыце спробу праз <xliff:g id="NUMBER_1">%d</xliff:g> с."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Вы няправільна ўвялі пароль пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Паўтарыце спробу праз <xliff:g id="NUMBER_1">%d</xliff:g> с."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Вы няправільна ўвялі графічны ключ разблакiроўкi пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Паўтарыце спробу праз <xliff:g id="NUMBER_1">%d</xliff:g> с."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Вы няправільна ўвялі PIN-код пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. \n\nПаўтарыце спробу праз <xliff:g id="NUMBER_1">%d</xliff:g> с."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Вы няправільна ўвялі пароль пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. \n\nПаўтарыце спробу праз <xliff:g id="NUMBER_1">%d</xliff:g> с."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Вы няправільна ўвялі графічны ключ разблакiроўкi пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. \n\nПаўтарыце спробу праз <xliff:g id="NUMBER_1">%d</xliff:g> с."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Вы няправільна спрабавалі разблакiраваць планшэт некалькi разоў (<xliff:g id="NUMBER_0">%d</xliff:g>). Пасля яшчэ некалькiх спроб (<xliff:g id="NUMBER_1">%d</xliff:g>) ён будзе скінуты да заводскіх налад i карыстальнiцкiя дадзеныя будуць згубленыя."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Вы няправільна спрабавалі разблакiраваць планшэт некалькi разоў (<xliff:g id="NUMBER_0">%d</xliff:g>). Пасля яшчэ некалькiх спроб (<xliff:g id="NUMBER_1">%d</xliff:g>) ён будзе скінуты да завадскіх налад i карыстальнiцкiя дадзеныя будуць згубленыя."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Вы няправільна спрабавалі разблакiраваць планшэт некалькi разоў (<xliff:g id="NUMBER">%d</xliff:g>). Цяпер ён будзе скінуты да завадскіх налад."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Вы няправільна спрабавалі разблакiраваць тэлефон некалькi разоў (<xliff:g id="NUMBER">%d</xliff:g>). Цяпер ён будзе скінуты да завадскіх налад."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Вы няправільна ўвялі графічны ключ разблакiроўкi пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%d</xliff:g>) вам будзе прапанавана разблакiраваць тэлефон, увайшоўшы ў Google."\n\n" Паўтарыце спробу праз <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Вы няправільна ўвялі графічны ключ разблакiроўкi пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%d</xliff:g>) вам будзе прапанавана разблакiраваць тэлефон, увайшоўшы ў Google."\n\n" Паўтарыце спробу праз <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Вы няправільна ўвялі графічны ключ разблакiроўкi пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%d</xliff:g>) вам будзе прапанавана разблакiраваць тэлефон, увайшоўшы ў Google.\n\n Паўтарыце спробу праз <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Вы няправільна ўвялі графічны ключ разблакiроўкi пэўную колькасць разоў: <xliff:g id="NUMBER_0">%d</xliff:g>. Пасля яшчэ некалькiх няўдалых спроб (<xliff:g id="NUMBER_1">%d</xliff:g>) вам будзе прапанавана разблакiраваць тэлефон, увайшоўшы ў Google.\n\n Паўтарыце спробу праз <xliff:g id="NUMBER_2">%d</xliff:g> с."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Выдалiць"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Павялiчыць гук больш за рэкамендаваны ўзровень?"\n"Доўгае слуханне музыкi на вялiкай гучнасцi можа пашкодзiць ваш слых."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Павялiчыць гук больш за рэкамендаваны ўзровень?\nДоўгае слуханне музыкi на вялiкай гучнасцi можа пашкодзiць ваш слых."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Утрымлiвайце два пальцы, каб уключыць доступ."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Даступнасць уключана."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Даступнасць адменена."</string>

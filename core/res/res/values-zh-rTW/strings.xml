@@ -811,7 +811,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"插入 SIM 卡。"</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"找不到或無法讀取 SIM 卡。請插入 SIM 卡。"</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"SIM 卡無法使用。"</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"您的 SIM 卡已遭永久停用。"\n"請與您的無線網路服務供應商聯絡，以取得其他 SIM 卡。"</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"您的 SIM 卡已遭永久停用。\n請與您的無線網路服務供應商聯絡，以取得其他 SIM 卡。"</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"[上一首曲目] 按鈕"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"[下一首曲目] 按鈕"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"[暫停] 按鈕"</string>
@@ -823,11 +823,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"參閱《使用者指南》或與客戶服務中心聯絡。"</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM 卡已鎖定。"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"解鎖 SIM 卡中…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。"\n\n"請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"您的密碼已輸錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。"\n\n"請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"您的 PIN 已輸錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。"\n\n"請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您使用您的 Google 登入資訊解除平板電腦的鎖定狀態。"\n\n"請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您使用您的 Google 登入資訊解除手機的鎖定狀態。"\n\n"請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"您的密碼已輸錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"您的 PIN 已輸錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您使用您的 Google 登入資訊解除平板電腦的鎖定狀態。\n\n請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您使用您的 Google 登入資訊解除手機的鎖定狀態。\n\n請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"您嘗試解除這個平板電腦的鎖定已失敗 <xliff:g id="NUMBER_0">%d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%d</xliff:g> 次機會。如果失敗次數超過限制，平板電腦將恢復原廠設定，所有使用者資料都會遺失。"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"您嘗試解除這支手機的鎖定已失敗 <xliff:g id="NUMBER_0">%d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%d</xliff:g> 次機會。如果失敗次數超過限制，手機將恢復原廠設定，所有使用者資料都會遺失。"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"您嘗試解除這個平板電腦的鎖定已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次，平板電腦現在將恢復原廠設定。"</string>
@@ -841,7 +841,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"密碼"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"登入"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"使用者名稱或密碼錯誤。"</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"忘了使用者名稱或密碼？"\n"請造訪 "<b>"google.com/accounts/recovery"</b>"。"</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"忘了使用者名稱或密碼？\n請造訪 "<b>"google.com/accounts/recovery"</b>"。"</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"檢查中…"</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"解除封鎖"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"開啟音效"</string>
@@ -889,7 +889,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"確認瀏覽"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"離開這一頁"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"停留在這一頁"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"您確定要前往其他網頁瀏覽嗎？"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\n您確定要前往其他網頁瀏覽嗎？"</string>
     <string name="save_password_label" msgid="6860261758665825069">"確認"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"提示：輕按兩下即可縮放。"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"自動填入功能"</string>
@@ -1095,14 +1095,14 @@
     <string name="aerr_application" msgid="932628488013092776">"很抱歉，<xliff:g id="APPLICATION">%1$s</xliff:g> 已停止。"</string>
     <string name="aerr_process" msgid="4507058997035697579">"很抱歉，處理程序 <xliff:g id="PROCESS">%1$s</xliff:g> 已停止。"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> 沒有回應。"\n\n"您要結束嗎？"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 活動沒有回應。"\n\n"您要結束嗎？"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> 沒有回應。\n\n您要結束嗎？"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 活動沒有回應。\n\n您要結束嗎？"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> 沒有回應。您要結束嗎？"</string>
-    <string name="anr_process" msgid="6513209874880517125">"<xliff:g id="PROCESS">%1$s</xliff:g> 處理程序沒有回應。"\n\n"您要結束嗎？"</string>
+    <string name="anr_process" msgid="6513209874880517125">"<xliff:g id="PROCESS">%1$s</xliff:g> 處理程序沒有回應。\n\n您要結束嗎？"</string>
     <string name="force_close" msgid="8346072094521265605">"確定"</string>
     <string name="report" msgid="4060218260984795706">"回報"</string>
     <string name="wait" msgid="7147118217226317732">"等待"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"網頁沒有回應。"\n\n"您要結束嗎？"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"網頁沒有回應。\n\n您要結束嗎？"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"應用程式已重新導向"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」現在正在執行。"</string>
     <string name="launch_warning_original" msgid="188102023021668683">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」原先已啟動。"</string>
@@ -1284,15 +1284,15 @@
     <string name="ime_action_done" msgid="8971516117910934605">"完成"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"上一步"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"執行"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"使用 <xliff:g id="NUMBER">%s</xliff:g>"\n"撥號"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"建立手機號碼為 <xliff:g id="NUMBER">%s</xliff:g>"\n"的聯絡人"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"使用 <xliff:g id="NUMBER">%s</xliff:g>\n撥號"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"建立手機號碼為 <xliff:g id="NUMBER">%s</xliff:g>\n的聯絡人"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"下列一或多個應用程式要求取得今後都可存取您帳戶的權限。"</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"您確定要允許這個要求嗎？"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"存取權限要求"</string>
     <string name="allow" msgid="7225948811296386551">"允許"</string>
     <string name="deny" msgid="2081879885755434506">"拒絕"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"已要求權限"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"帳戶 <xliff:g id="ACCOUNT">%s</xliff:g> 已提出"\n"權限要求。"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"帳戶 <xliff:g id="ACCOUNT">%s</xliff:g> 已提出\n權限要求。"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"輸入法"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"同步處理"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"協助工具"</string>
@@ -1493,20 +1493,20 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"密碼"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"登入"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"使用者名稱或密碼無效。"</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"忘了使用者名稱或密碼？"\n"請前往 "<b>"google.com/accounts/recovery"</b>"。"</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"忘了使用者名稱或密碼？\n請前往 "<b>"google.com/accounts/recovery"</b>"。"</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"正在檢查帳戶…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"您的 PIN 已輸錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。"\n\n"請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"您的密碼已輸錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。"\n\n"請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。"\n\n"請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"您的 PIN 已輸錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"您的密碼已輸錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"您嘗試解除這個平板電腦的鎖定已失敗 <xliff:g id="NUMBER_0">%d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%d</xliff:g> 次機會。如果失敗次數超過限制，平板電腦將恢復原廠設定，所有使用者資料都會遺失。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"您嘗試解除這支手機的鎖定已失敗 <xliff:g id="NUMBER_0">%d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%d</xliff:g> 次機會。如果失敗次數超過限制，手機將恢復原廠設定，所有使用者資料都會遺失。"</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"您嘗試解除這個平板電腦的鎖定已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次，平板電腦現在將恢復原廠設定。"</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"您嘗試解除這支手機的鎖定已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次，手機現在將恢復原廠設定。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除平板電腦的鎖定狀態。"\n\n"請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除手機的鎖定狀態。"\n\n"請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除平板電腦的鎖定狀態。\n\n請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除手機的鎖定狀態。\n\n請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"移除"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"要將音量調高到建議等級以上嗎？"\n"長時間聆聽高音量可能會損害您的聽力。"</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"要將音量調高到建議等級以上嗎？\n長時間聆聽高音量可能會損害您的聽力。"</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"持續用兩指按住即可啟用協助工具。"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"協助工具已啟用。"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"協助工具已取消。"</string>
