@@ -36,6 +36,7 @@ import android.util.AttributeSet;
 import android.util.Printer;
 import android.util.Slog;
 import android.util.Xml;
+import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -162,24 +163,26 @@ public final class InputMethodInfo implements Parcelable {
                     }
                     final TypedArray a = res.obtainAttributes(
                             attrs, com.android.internal.R.styleable.InputMethod_Subtype);
-                    InputMethodSubtype subtype = new InputMethodSubtype(
-                            a.getResourceId(com.android.internal.R.styleable
-                                    .InputMethod_Subtype_label, 0),
-                            a.getResourceId(com.android.internal.R.styleable
-                                    .InputMethod_Subtype_icon, 0),
-                            a.getString(com.android.internal.R.styleable
-                                    .InputMethod_Subtype_imeSubtypeLocale),
-                            a.getString(com.android.internal.R.styleable
-                                    .InputMethod_Subtype_imeSubtypeMode),
-                            a.getString(com.android.internal.R.styleable
-                                    .InputMethod_Subtype_imeSubtypeExtraValue),
-                            a.getBoolean(com.android.internal.R.styleable
-                                    .InputMethod_Subtype_isAuxiliary, false),
-                            a.getBoolean(com.android.internal.R.styleable
-                                    .InputMethod_Subtype_overridesImplicitlyEnabledSubtype, false),
-                            a.getInt(com.android.internal.R.styleable
-                                    .InputMethod_Subtype_subtypeId, 0 /* use Arrays.hashCode */)
-                            );
+                    final InputMethodSubtype subtype = new InputMethodSubtypeBuilder()
+                            .setSubtypeNameResId(a.getResourceId(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_label, 0))
+                            .setSubtypeIconResId(a.getResourceId(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_icon, 0))
+                            .setSubtypeLocale(a.getString(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_imeSubtypeLocale))
+                            .setSubtypeMode(a.getString(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_imeSubtypeMode))
+                            .setSubtypeExtraValue(a.getString(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_imeSubtypeExtraValue))
+                            .setIsAuxiliary(a.getBoolean(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_isAuxiliary, false))
+                            .setOverridesImplicitlyEnabledSubtype(a.getBoolean(
+                                    com.android.internal.R.styleable
+                                    .InputMethod_Subtype_overridesImplicitlyEnabledSubtype, false))
+                            .setSubtypeId(a.getInt(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_subtypeId, 0 /* use Arrays.hashCode */))
+                            .setIsAsciiCapable(a.getBoolean(com.android.internal.R.styleable
+                                    .InputMethod_Subtype_isAsciiCapable, false)).build();
                     if (!subtype.isAuxiliary()) {
                         mIsAuxIme = false;
                     }

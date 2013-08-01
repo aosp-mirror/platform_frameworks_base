@@ -605,6 +605,7 @@ package android {
     field public static final int installLocation = 16843447; // 0x10102b7
     field public static final int interpolator = 16843073; // 0x1010141
     field public static final int isAlwaysSyncable = 16843571; // 0x1010333
+    field public static final int isAsciiCapable = 16843750; // 0x10103e6
     field public static final int isAuxiliary = 16843647; // 0x101037f
     field public static final int isDefault = 16843297; // 0x1010221
     field public static final int isIndicator = 16843079; // 0x1010147
@@ -28908,8 +28909,8 @@ package android.view.inputmethod {
   }
 
   public final class InputMethodSubtype implements android.os.Parcelable {
-    ctor public InputMethodSubtype(int, int, java.lang.String, java.lang.String, java.lang.String, boolean, boolean);
-    ctor public InputMethodSubtype(int, int, java.lang.String, java.lang.String, java.lang.String, boolean, boolean, int);
+    ctor public deprecated InputMethodSubtype(int, int, java.lang.String, java.lang.String, java.lang.String, boolean, boolean);
+    ctor public deprecated InputMethodSubtype(int, int, java.lang.String, java.lang.String, java.lang.String, boolean, boolean, int);
     method public boolean containsExtraValueKey(java.lang.String);
     method public int describeContents();
     method public java.lang.CharSequence getDisplayName(android.content.Context, java.lang.String, android.content.pm.ApplicationInfo);
@@ -28919,10 +28920,25 @@ package android.view.inputmethod {
     method public java.lang.String getLocale();
     method public java.lang.String getMode();
     method public int getNameResId();
+    method public boolean isAsciiCapable();
     method public boolean isAuxiliary();
     method public boolean overridesImplicitlyEnabledSubtype();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public static class InputMethodSubtype.InputMethodSubtypeBuilder {
+    ctor public InputMethodSubtype.InputMethodSubtypeBuilder();
+    method public android.view.inputmethod.InputMethodSubtype build();
+    method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setIsAsciiCapable(boolean);
+    method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setIsAuxiliary(boolean);
+    method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setOverridesImplicitlyEnabledSubtype(boolean);
+    method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeExtraValue(java.lang.String);
+    method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeIconResId(int);
+    method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeId(int);
+    method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeLocale(java.lang.String);
+    method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeMode(java.lang.String);
+    method public android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder setSubtypeNameResId(int);
   }
 
 }

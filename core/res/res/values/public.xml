@@ -2069,4 +2069,5 @@
   <public type="attr" name="addPrintersActivity" />
   <public type="attr" name="vendor" />
   <public type="attr" name="category" />
+  <public type="attr" name="isAsciiCapable" />
 </resources>
