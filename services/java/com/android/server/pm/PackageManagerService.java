@@ -293,12 +293,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     // LOCK HELD.  Can be called with mInstallLock held.
     final Installer mInstaller;
 
-    final File mFrameworkDir;
-    final File mSystemAppDir;
-    final File mPrivilegedAppDir;
-    final File mVendorAppDir;
     final File mAppInstallDir;
-    final File mDalvikCacheDir;
 
     /**
      * Directory to which applications installed internally have native
@@ -1133,40 +1128,27 @@ public class PackageManagerService extends IPackageManager.Stub {
                 scanMode |= SCAN_NO_DEX;
             }
 
-            final HashSet<String> libFiles = new HashSet<String>();
-
-            mFrameworkDir = new File(Environment.getRootDirectory(), "framework");
-            mDalvikCacheDir = new File(dataDir, "dalvik-cache");
-
-            boolean didDexOpt = false;
+            final HashSet<String> alreadyDexOpted = new HashSet<String>();
 
             /**
-             * Out of paranoia, ensure that everything in the boot class
-             * path has been dexed.
+             * Add everything in the in the boot class path to the
+             * list of process files because dexopt will have been run
+             * if necessary during zygote startup.
              */
             String bootClassPath = System.getProperty("java.boot.class.path");
             if (bootClassPath != null) {
                 String[] paths = splitString(bootClassPath, ':');
                 for (int i=0; i<paths.length; i++) {
-                    try {
-                        if (dalvik.system.DexFile.isDexOptNeeded(paths[i])) {
-                            libFiles.add(paths[i]);
-                            mInstaller.dexopt(paths[i], Process.SYSTEM_UID, true);
-                            didDexOpt = true;
-                        }
-                    } catch (FileNotFoundException e) {
-                        Slog.w(TAG, "Boot class path not found: " + paths[i]);
-                    } catch (IOException e) {
-                        Slog.w(TAG, "Cannot dexopt " + paths[i] + "; is it an APK or JAR? "
-                                + e.getMessage());
-                    }
+                    alreadyDexOpted.add(paths[i]);
                 }
             } else {
                 Slog.w(TAG, "No BOOTCLASSPATH found!");
             }
 
+            boolean didDexOpt = false;
+
             /**
-             * Also ensure all external libraries have had dexopt run on them.
+             * Ensure all external libraries have had dexopt run on them.
              */
             if (mSharedLibraries.size() > 0) {
                 Iterator<SharedLibraryEntry> libs = mSharedLibraries.values().iterator();
@@ -1177,7 +1159,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     try {
                         if (dalvik.system.DexFile.isDexOptNeeded(lib)) {
-                            libFiles.add(lib);
+                            alreadyDexOpted.add(lib);
                             mInstaller.dexopt(lib, Process.SYSTEM_UID, true);
                             didDexOpt = true;
                         }
@@ -1190,22 +1172,29 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
 
+            File frameworkDir = new File(Environment.getRootDirectory(), "framework");
+
             // Gross hack for now: we know this file doesn't contain any
             // code, so don't dexopt it to avoid the resulting log spew.
-            libFiles.add(mFrameworkDir.getPath() + "/framework-res.apk");
+            alreadyDexOpted.add(frameworkDir.getPath() + "/framework-res.apk");
+
+            // Gross hack for now: we know this file is only part of
+            // the boot class path for art, so don't dexopt it to
+            // avoid the resulting log spew.
+            alreadyDexOpted.add(frameworkDir.getPath() + "/core-libart.jar");
 
             /**
              * And there are a number of commands implemented in Java, which
              * we currently need to do the dexopt on so that they can be
              * run from a non-root shell.
              */
-            String[] frameworkFiles = mFrameworkDir.list();
+            String[] frameworkFiles = frameworkDir.list();
             if (frameworkFiles != null) {
                 for (int i=0; i<frameworkFiles.length; i++) {
-                    File libPath = new File(mFrameworkDir, frameworkFiles[i]);
+                    File libPath = new File(frameworkDir, frameworkFiles[i]);
                     String path = libPath.getPath();
                     // Skip the file if we alrady did it.
-                    if (libFiles.contains(path)) {
+                    if (alreadyDexOpted.contains(path)) {
                         continue;
                     }
                     // Skip the file if it is not a type we want to dexopt.
@@ -1226,19 +1215,21 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (didDexOpt) {
+                File dalvikCacheDir = new File(dataDir, "dalvik-cache");
+
                 // If we had to do a dexopt of one of the previous
                 // things, then something on the system has changed.
                 // Consider this significant, and wipe away all other
                 // existing dexopt files to ensure we don't leave any
                 // dangling around.
-                String[] files = mDalvikCacheDir.list();
+                String[] files = dalvikCacheDir.list();
                 if (files != null) {
                     for (int i=0; i<files.length; i++) {
                         String fn = files[i];
                         if (fn.startsWith("data@app@")
                                 || fn.startsWith("data@app-private@")) {
                             Slog.i(TAG, "Pruning dalvik file: " + fn);
-                            (new File(mDalvikCacheDir, fn)).delete();
+                            (new File(dalvikCacheDir, fn)).delete();
                         }
                     }
                 }
@@ -1246,14 +1237,14 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Find base frameworks (resource packages without code).
             mFrameworkInstallObserver = new AppDirObserver(
-                mFrameworkDir.getPath(), OBSERVER_EVENTS, true, false);
+                frameworkDir.getPath(), OBSERVER_EVENTS, true, false);
             mFrameworkInstallObserver.startWatching();
-            scanDirLI(mFrameworkDir, PackageParser.PARSE_IS_SYSTEM
+            scanDirLI(frameworkDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR,
                     scanMode | SCAN_NO_DEX, 0);
 
             // Collected privileged system packages.
-            mPrivilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
+            File mPrivilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
             mPrivilegedInstallObserver = new AppDirObserver(
                     mPrivilegedAppDir.getPath(), OBSERVER_EVENTS, true, true);
             mPrivilegedInstallObserver.startWatching();
@@ -1262,7 +1253,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         | PackageParser.PARSE_IS_PRIVILEGED, scanMode, 0);
 
             // Collect ordinary system packages.
-            mSystemAppDir = new File(Environment.getRootDirectory(), "app");
+            File mSystemAppDir = new File(Environment.getRootDirectory(), "app");
             mSystemInstallObserver = new AppDirObserver(
                 mSystemAppDir.getPath(), OBSERVER_EVENTS, true, false);
             mSystemInstallObserver.startWatching();
@@ -1270,7 +1261,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode, 0);
 
             // Collect all vendor packages.
-            mVendorAppDir = new File("/vendor/app");
+            File mVendorAppDir = new File("/vendor/app");
             mVendorInstallObserver = new AppDirObserver(
                 mVendorAppDir.getPath(), OBSERVER_EVENTS, true, false);
             mVendorInstallObserver.startWatching();
