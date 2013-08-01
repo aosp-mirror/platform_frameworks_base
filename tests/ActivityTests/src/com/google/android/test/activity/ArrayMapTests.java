@@ -146,6 +146,65 @@ public class ArrayMapTests {
             }
         }
 
+        if (map.entrySet().hashCode() != array.entrySet().hashCode()) {
+            Log.e("test", "Entry set hash codes differ: map=0x"
+                    + Integer.toHexString(map.entrySet().hashCode()) + " array=0x"
+                    + Integer.toHexString(array.entrySet().hashCode()));
+            return false;
+        }
+
+        if (!map.entrySet().equals(array.entrySet())) {
+            Log.e("test", "Failed calling equals on map entry set against array set");
+            return false;
+        }
+
+        if (!array.entrySet().equals(map.entrySet())) {
+            Log.e("test", "Failed calling equals on array entry set against map set");
+            return false;
+        }
+
+        if (map.keySet().hashCode() != array.keySet().hashCode()) {
+            Log.e("test", "Key set hash codes differ: map=0x"
+                    + Integer.toHexString(map.keySet().hashCode()) + " array=0x"
+                    + Integer.toHexString(array.keySet().hashCode()));
+            return false;
+        }
+
+        if (!map.keySet().equals(array.keySet())) {
+            Log.e("test", "Failed calling equals on map key set against array set");
+            return false;
+        }
+
+        if (!array.keySet().equals(map.keySet())) {
+            Log.e("test", "Failed calling equals on array key set against map set");
+            return false;
+        }
+
+        if (!map.keySet().containsAll(array.keySet())) {
+            Log.e("test", "Failed map key set contains all of array key set");
+            return false;
+        }
+
+        if (!array.keySet().containsAll(map.keySet())) {
+            Log.e("test", "Failed array key set contains all of map key set");
+            return false;
+        }
+
+        if (!array.containsAll(map.keySet())) {
+            Log.e("test", "Failed array contains all of map key set");
+            return false;
+        }
+
+        if (!map.entrySet().containsAll(array.entrySet())) {
+            Log.e("test", "Failed map entry set contains all of array entry set");
+            return false;
+        }
+
+        if (!array.entrySet().containsAll(map.entrySet())) {
+            Log.e("test", "Failed array entry set contains all of map entry set");
+            return false;
+        }
+
         return true;
     }
 
