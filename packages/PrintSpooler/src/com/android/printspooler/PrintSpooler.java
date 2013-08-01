@@ -118,19 +118,29 @@ public class PrintSpooler {
         }
     }
 
+    public void onReqeustUpdatePrinters(List<PrinterId> printers) {
+        synchronized (mLock) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = mClient;
+            args.arg2 = printers;
+            mHandler.obtainMessage(MyHandler.MSG_REQUEST_UPDATE_PRINTERS,
+                    args).sendToTarget();
+        }
+    }
+
     public void startPrinterDiscovery(IPrinterDiscoveryObserver observer) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = mClient;
             args.arg2 = observer;
-            mHandler.obtainMessage(MyHandler.MSG_ON_START_PRINTER_DISCOVERY,
+            mHandler.obtainMessage(MyHandler.MSG_START_PRINTER_DISCOVERY,
                     args).sendToTarget();
         }
     }
 
     public void stopPrinterDiscovery() {
         synchronized (mLock) {
-            mHandler.obtainMessage(MyHandler.MSG_ON_STOP_PRINTER_DISCOVERY,
+            mHandler.obtainMessage(MyHandler.MSG_STOP_PRINTER_DISCOVERY,
                     mClient).sendToTarget();
         }
     }
@@ -265,7 +275,7 @@ public class PrintSpooler {
                         SomeArgs args = SomeArgs.obtain();
                         args.arg1 = client;
                         args.arg2 = new PrintJobInfo(printJob);
-                        mHandler.obtainMessage(MyHandler.MSG_ON_PRINT_JOB_QUEUED,
+                        mHandler.obtainMessage(MyHandler.MSG_PRINT_JOB_QUEUED,
                                 args).sendToTarget();
                     }
                 }
@@ -273,13 +283,13 @@ public class PrintSpooler {
                 SomeArgs args = SomeArgs.obtain();
                 args.arg1 = client;
                 args.arg2 = service;
-                mHandler.obtainMessage(MyHandler.MSG_ON_ALL_PRINT_JOBS_FOR_SERIVICE_HANDLED,
+                mHandler.obtainMessage(MyHandler.MSG_ALL_PRINT_JOBS_FOR_SERIVICE_HANDLED,
                         args).sendToTarget();
             }
         }
 
         if (allPrintJobsHandled) {
-            mHandler.obtainMessage(MyHandler.MSG_ON_ALL_PRINT_JOBS_HANDLED,
+            mHandler.obtainMessage(MyHandler.MSG_ALL_PRINT_JOBS_HANDLED,
                     client).sendToTarget();
         }
     }
@@ -401,12 +411,12 @@ public class PrintSpooler {
                             args.arg1 = mClient;
                             args.arg2 = service;
                             mHandler.obtainMessage(
-                                    MyHandler.MSG_ON_ALL_PRINT_JOBS_FOR_SERIVICE_HANDLED,
+                                    MyHandler.MSG_ALL_PRINT_JOBS_FOR_SERIVICE_HANDLED,
                                     args).sendToTarget();
                         }
 
                         if (!hasActivePrintJobsLocked()) {
-                            mHandler.obtainMessage(MyHandler.MSG_ON_ALL_PRINT_JOBS_HANDLED,
+                            mHandler.obtainMessage(MyHandler.MSG_ALL_PRINT_JOBS_HANDLED,
                                     mClient).sendToTarget();
                         }
                     } break;
@@ -415,7 +425,7 @@ public class PrintSpooler {
                         SomeArgs args = SomeArgs.obtain();
                         args.arg1 = mClient;
                         args.arg2 = new PrintJobInfo(printJob);
-                        mHandler.obtainMessage(MyHandler.MSG_ON_PRINT_JOB_QUEUED,
+                        mHandler.obtainMessage(MyHandler.MSG_PRINT_JOB_QUEUED,
                                 args).sendToTarget();
                     } break;
                 }
@@ -1056,20 +1066,22 @@ public class PrintSpooler {
     }
 
     private final class MyHandler extends Handler {
-        public static final int MSG_ON_START_PRINTER_DISCOVERY = 1;
-        public static final int MSG_ON_STOP_PRINTER_DISCOVERY = 2;
-        public static final int MSG_ON_PRINT_JOB_QUEUED = 3;
-        public static final int MSG_ON_ALL_PRINT_JOBS_FOR_SERIVICE_HANDLED = 4;
-        public static final int MSG_ON_ALL_PRINT_JOBS_HANDLED = 5;
+        public static final int MSG_START_PRINTER_DISCOVERY = 1;
+        public static final int MSG_STOP_PRINTER_DISCOVERY = 2;
+        public static final int MSG_PRINT_JOB_QUEUED = 3;
+        public static final int MSG_ALL_PRINT_JOBS_FOR_SERIVICE_HANDLED = 4;
+        public static final int MSG_ALL_PRINT_JOBS_HANDLED = 5;
+        public static final int MSG_REQUEST_UPDATE_PRINTERS = 6;
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public void handleMessage(Message message) {
             switch (message.what) {
-                case MSG_ON_START_PRINTER_DISCOVERY: {
+                case MSG_START_PRINTER_DISCOVERY: {
                     SomeArgs args = (SomeArgs) message.obj;
                     IPrintSpoolerClient client = (IPrintSpoolerClient) args.arg1;
                     IPrinterDiscoveryObserver observer = (IPrinterDiscoveryObserver) args.arg2;
@@ -1083,7 +1095,7 @@ public class PrintSpooler {
                     }
                 } break;
 
-                case MSG_ON_STOP_PRINTER_DISCOVERY: {
+                case MSG_STOP_PRINTER_DISCOVERY: {
                     IPrintSpoolerClient client = (IPrintSpoolerClient) message.obj;
                     if (client != null) {
                         try {
@@ -1094,7 +1106,7 @@ public class PrintSpooler {
                     }
                 } break;
 
-                case MSG_ON_PRINT_JOB_QUEUED: {
+                case MSG_PRINT_JOB_QUEUED: {
                     SomeArgs args = (SomeArgs) message.obj;
                     IPrintSpoolerClient client = (IPrintSpoolerClient) args.arg1;
                     PrintJobInfo printJob = (PrintJobInfo) args.arg2;
@@ -1108,7 +1120,7 @@ public class PrintSpooler {
                     }
                 } break;
 
-                case MSG_ON_ALL_PRINT_JOBS_FOR_SERIVICE_HANDLED: {
+                case MSG_ALL_PRINT_JOBS_FOR_SERIVICE_HANDLED: {
                     SomeArgs args = (SomeArgs) message.obj;
                     IPrintSpoolerClient client = (IPrintSpoolerClient) args.arg1;
                     ComponentName service = (ComponentName) args.arg2;
@@ -1117,12 +1129,13 @@ public class PrintSpooler {
                         try {
                             client.onAllPrintJobsForServiceHandled(service);
                         } catch (RemoteException re) {
-                            Slog.e(LOG_TAG, "Error notify for all print jobs per service handled.", re);
+                            Slog.e(LOG_TAG, "Error notify for all print jobs per service"
+                                    + " handled.", re);
                         }
                     }
                 } break;
 
-                case MSG_ON_ALL_PRINT_JOBS_HANDLED: {
+                case MSG_ALL_PRINT_JOBS_HANDLED: {
                     final IPrintSpoolerClient client = (IPrintSpoolerClient) message.obj;
                     // This has to run on the tread that is persisting the current state
                     // since this call may result in the system unbinding from the spooler
@@ -1139,6 +1152,18 @@ public class PrintSpooler {
                             return null;
                         }
                     }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
+                } break;
+
+                case MSG_REQUEST_UPDATE_PRINTERS: {
+                    SomeArgs args = (SomeArgs) message.obj;
+                    IPrintSpoolerClient client = (IPrintSpoolerClient) args.arg1;
+                    List<PrinterId> printerIds = (List<PrinterId>) args.arg2;
+                    args.recycle();
+                    try {
+                        client.onRequestUpdatePrinters(printerIds);
+                    } catch (RemoteException re) {
+                        Slog.e(LOG_TAG, "Error requesting to update pritners.", re);
+                    }
                 } break;
             }
         }

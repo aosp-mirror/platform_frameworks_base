@@ -18,6 +18,7 @@ package android.print;
 
 import android.content.ComponentName;
 import android.print.IPrinterDiscoveryObserver;
+import android.print.PrinterId;
 import android.print.PrintJobInfo;
 
 
@@ -30,6 +31,7 @@ oneway interface IPrintSpoolerClient {
     void onPrintJobQueued(in PrintJobInfo printJob);
     void onStartPrinterDiscovery(IPrinterDiscoveryObserver observer);
     void onStopPrinterDiscovery();
+    void onRequestUpdatePrinters(in List<PrinterId> printerIds);
     void onAllPrintJobsForServiceHandled(in ComponentName printService);
     void onAllPrintJobsHandled();
 }

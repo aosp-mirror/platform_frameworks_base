@@ -19,6 +19,7 @@ package android.print;
 import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 /**
  * This class represents the unique id of a printer.
@@ -98,7 +99,7 @@ public final class PrinterId implements Parcelable {
         } else if (!mServiceComponentName.equals(other.mServiceComponentName)) {
             return false;
         }
-        if (mLocalId != other.mLocalId) {
+        if (!TextUtils.equals(mLocalId, other.mLocalId)) {
             return false;
         }
         return true;
