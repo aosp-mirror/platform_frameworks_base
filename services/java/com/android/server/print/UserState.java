@@ -23,6 +23,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintJobInfo;
+import android.print.PrinterId;
 import android.printservice.PrintServiceInfo;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -135,6 +136,21 @@ final class UserState implements PrintSpoolerCallbacks {
         for (int i = 0; i < serviceCount; i++) {
             RemotePrintService service = services.get(i);
             service.onStopPrinterDiscovery();
+        }
+    }
+
+    @Override
+    public void onRequestUpdatePrinters(List<PrinterId> printerIds) {
+        final RemotePrintService service;
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            if (mActiveServices.isEmpty()) {
+                return;
+            }
+            service = mActiveServices.get(printerIds.get(0).getService());
+        }
+        if (service != null) {
+            service.onRequestUpdatePrinters(printerIds);
         }
     }
 

@@ -18741,6 +18741,7 @@ package android.print {
     method public java.util.List<android.print.PrintAttributes.Tray> getOutputTrays();
     method public java.util.List<android.print.PrintAttributes.Resolution> getResolutions();
     method public int getStatus();
+    method public boolean hasAllRequiredAttributes();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int STATUS_READY = 1; // 0x1
@@ -18826,9 +18827,11 @@ package android.printservice {
     method protected void onDisconnected();
     method protected abstract void onPrintJobQueued(android.printservice.PrintJob);
     method protected void onRequestCancelPrintJob(android.printservice.PrintJob);
+    method protected void onRequestUpdatePrinters(java.util.List<android.print.PrinterId>);
     method protected abstract void onStartPrinterDiscovery();
     method protected abstract void onStopPrinterDiscovery();
     method public final void removeDiscoveredPrinters(java.util.List<android.print.PrinterId>);
+    method public final void updateDiscoveredPrinters(java.util.List<android.print.PrinterInfo>);
     field public static final java.lang.String SERVICE_INTERFACE = "android.printservice.PrintService";
     field public static final java.lang.String SERVICE_META_DATA = "android.printservice";
   }

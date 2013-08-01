@@ -25,6 +25,7 @@ import android.print.PrinterInfo;
  * @hide
  */
 oneway interface IPrinterDiscoveryObserver {
-    void addDiscoveredPrinters(in List<PrinterInfo> printers);
-    void removeDiscoveredPrinters(in List<PrinterId> printers);
+    void onPrintersAdded(in List<PrinterInfo> printers);
+    void onPrintersRemoved(in List<PrinterId> printers);
+    void onPrintersUpdated(in List<PrinterInfo> printers);
 }

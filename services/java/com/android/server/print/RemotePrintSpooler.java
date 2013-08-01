@@ -35,6 +35,7 @@ import android.print.IPrintSpoolerClient;
 import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintAttributes;
 import android.print.PrintJobInfo;
+import android.print.PrinterId;
 import android.util.Slog;
 import android.util.TimedRemoteCaller;
 
@@ -96,6 +97,7 @@ final class RemotePrintSpooler {
         public void onStartPrinterDiscovery(IPrinterDiscoveryObserver observer);
         public void onStopPrinterDiscovery();
         public void onAllPrintJobsForServiceHandled(ComponentName printService);
+        public void onRequestUpdatePrinters(List<PrinterId> printerIds);
     }
 
     public RemotePrintSpooler(Context context, int userId,
@@ -662,12 +664,25 @@ final class RemotePrintSpooler {
         }
 
         @Override
-        public void onStopPrinterDiscovery() throws RemoteException {
+        public void onStopPrinterDiscovery() {
             RemotePrintSpooler spooler = mWeakSpooler.get();
             if (spooler != null) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     spooler.mCallbacks.onStopPrinterDiscovery();
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            }
+        }
+
+        @Override
+        public void onRequestUpdatePrinters(List<PrinterId> printerIds) {
+            RemotePrintSpooler spooler = mWeakSpooler.get();
+            if (spooler != null) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    spooler.mCallbacks.onRequestUpdatePrinters(printerIds);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }

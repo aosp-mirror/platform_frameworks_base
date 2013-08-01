@@ -207,13 +207,14 @@ public abstract class PrintService extends Service {
      * Callback requesting from this service to start printer discovery.
      * At the end of the printer discovery period the system will call
      * {@link #onStopPrinterDiscovery()}. Discovered printers should be
-     * reported by calling #addDiscoveredPrinters(List) and reported ones
-     * that disappear should be reported by calling
+     * reported by calling {@link #addDiscoveredPrinters(List)} and reported
+     * ones that disappear should be reported by calling
      * {@link #removeDiscoveredPrinters(List)}.
      *
      * @see #onStopPrinterDiscovery()
      * @see #addDiscoveredPrinters(List)
      * @see #removeDiscoveredPrinters(List)
+     * @see #updateDiscoveredPrinters(List)
      */
     protected abstract void onStartPrinterDiscovery();
 
@@ -223,6 +224,7 @@ public abstract class PrintService extends Service {
      * @see #onStartPrinterDiscovery()
      * @see #addDiscoveredPrinters(List)
      * @see #removeDiscoveredPrinters(List)
+     * @see #updateDiscoveredPrinters(List)
      */
     protected abstract void onStopPrinterDiscovery();
 
@@ -236,12 +238,23 @@ public abstract class PrintService extends Service {
      * printers have to be added. You can call this method as many times as
      * necessary during the discovery period but should not pass in already
      * added printers. If a printer is already added in the same printer
-     * discovery period, it will be ignored. If you want to update an already
-     * added printer, you should removed it and then re-add it.
+     * discovery period, it will be ignored.
      * </p>
+     * <p>
+     * A {@link PrinterInfo} can have all of its required attributes specified,
+     * or not. Whether all attributes are specified can be verified by calling
+     * {@link PrinterInfo#hasAllRequiredAttributes()}. You can add printers
+     * regardless if all required attributes are specified. When the system
+     * (and the user) needs to interact with a printer, you will receive a
+     * call to {@link #onRequestUpdatePrinters(List)}. If you fail to update
+     * a printer that was added without all required attributes via calling
+     * {@link #updateDiscoveredPrinters(List)}, then this printer will be
+     * ignored, i.e. considered unavailable.
+     * <p>
      *
      * @param printers A list with discovered printers.
      *
+     * @see #updateDiscoveredPrinters(List)
      * @see #removeDiscoveredPrinters(List)
      * @see #onStartPrinterDiscovery()
      * @see #onStopPrinterDiscovery()
@@ -253,7 +266,7 @@ public abstract class PrintService extends Service {
         }
         if (observer != null) {
             try {
-                observer.addDiscoveredPrinters(printers);
+                observer.onPrintersAdded(printers);
             } catch (RemoteException re) {
                 Log.e(LOG_TAG, "Error adding discovered printers", re);
             }
@@ -271,14 +284,13 @@ public abstract class PrintService extends Service {
      * period by a call to {@link #addDiscoveredPrinters(List)}. You can call
      * this method as many times as necessary during the discovery period
      * but should not pass in already removed printer ids. If a printer with
-     * a given id is already removed in the same discovery period, it will
-     * be ignored. If you want to update an already added printer, you should
-     * removed it and then re-add it.
+     * a given id is already removed, it will be ignored.
      * </p>
      *
      * @param printerIds A list with disappeared printer ids.
      *
      * @see #addDiscoveredPrinters(List)
+     * @see #updateDiscoveredPrinters(List)
      * @see #onStartPrinterDiscovery()
      * @see #onStopPrinterDiscovery()
      */
@@ -289,11 +301,70 @@ public abstract class PrintService extends Service {
         }
         if (observer != null) {
             try {
-                observer.removeDiscoveredPrinters(printerIds);
+                observer.onPrintersRemoved(printerIds);
             } catch (RemoteException re) {
                 Log.e(LOG_TAG, "Error removing discovered printers", re);
             }
         }
+    }
+
+    /**
+     * Updates discovered printers that are already added. This method should
+     * be called during a printer discovery period, i.e. after a call to
+     * {@link #onStartPrinterDiscovery()} and before the corresponding
+     * call to {@link #onStopPrinterDiscovery()}, otherwise it does nothing.
+     * <p>
+     * For every printer discovery period all printers have to be added. You
+     * should update only printers that were added in this printer discovery
+     * period by a call to {@link #addDiscoveredPrinters(List)}. You can call
+     * this method as many times as necessary during the discovery period
+     * but should not try to update already removed or never added printers.
+     * If a printer is already removed or never added, it will be ignored.
+     * </p>
+     *
+     * @param printers A list with updated printers.
+     *
+     * @see #addDiscoveredPrinters(List)
+     * @see #removeDiscoveredPrinters(List)
+     * @see #onStartPrinterDiscovery()
+     * @see #onStopPrinterDiscovery()
+     */
+    public final void updateDiscoveredPrinters(List<PrinterInfo> printers) {
+        final IPrinterDiscoveryObserver observer;
+        synchronized (mLock) {
+            observer = mDiscoveryObserver;
+        }
+        if (observer != null) {
+            try {
+                observer.onPrintersUpdated(printers);
+            } catch (RemoteException re) {
+                Log.e(LOG_TAG, "Error updating discovered printers", re);
+            }
+        }
+    }
+
+    /**
+     * Called when the system will start interacting with a printer
+     * giving you a change to update it in case some of its capabilities
+     * have changed. For example, this method will be called when the
+     * user selects a printer. Hence, it updating this printer should
+     * be done as quickly as possible in order to achieve maximally
+     * smooth user experience.
+     * <p>
+     * A {@link PrinterInfo} can have all of its required attributes specified,
+     * or not. Whether all attributes are specified can be verified by calling
+     * {@link PrinterInfo#hasAllRequiredAttributes()}. You can add printers
+     * regardless if all required attributes are specified. When the system
+     * (and the user) needs to interact with a printer, you will receive a
+     * call to this method. If you fail to update a printer that was added
+     * without all required attributes via calling
+     * {@link #updateDiscoveredPrinters(List)}, then this printer will be
+     * ignored, i.e. considered unavailable.
+     * </p>
+     *
+     * @param printerIds The printers to be updated.
+     */
+    protected void onRequestUpdatePrinters(List<PrinterId> printerIds) {
     }
 
     /**
@@ -373,74 +444,87 @@ public abstract class PrintService extends Service {
         return new IPrintService.Stub() {
             @Override
             public void setClient(IPrintServiceClient client) {
-                mHandler.obtainMessage(MyHandler.MESSAGE_SET_CLEINT, client).sendToTarget();
+                mHandler.obtainMessage(MyHandler.MSG_SET_CLEINT, client).sendToTarget();
             }
 
             @Override
-            public void startPrinterDiscovery(IPrinterDiscoveryObserver observer) {
-                mHandler.obtainMessage(MyHandler.MESSAGE_START_PRINTER_DISCOVERY,
+            public void onStartPrinterDiscovery(IPrinterDiscoveryObserver observer) {
+                mHandler.obtainMessage(MyHandler.MSG_ON_START_PRINTER_DISCOVERY,
                         observer).sendToTarget();
             }
 
             @Override
-            public void stopPrinterDiscovery() {
-                mHandler.sendEmptyMessage(MyHandler.MESSAGE_STOP_PRINTER_DISCOVERY);
+            public void onStopPrinterDiscovery() {
+                mHandler.sendEmptyMessage(MyHandler.MSG_ON_STOP_PRINTER_DISCOVERY);
             }
 
             @Override
-            public void requestCancelPrintJob(PrintJobInfo printJobInfo) {
-                mHandler.obtainMessage(MyHandler.MESSAGE_CANCEL_PRINTJOB,
+            public void onRequestUpdatePrinters(List<PrinterId> printerIds) {
+                mHandler.obtainMessage(MyHandler.MSG_ON_REQUEST_UPDATE_PRINTERS,
+                        printerIds).sendToTarget();
+            }
+
+            @Override
+            public void onRequestCancelPrintJob(PrintJobInfo printJobInfo) {
+                mHandler.obtainMessage(MyHandler.MSG_ON_REQUEST_CANCEL_PRINTJOB,
                         printJobInfo).sendToTarget();
             }
 
             @Override
             public void onPrintJobQueued(PrintJobInfo printJobInfo) {
-                mHandler.obtainMessage(MyHandler.MESSAGE_ON_PRINTJOB_QUEUED,
+                mHandler.obtainMessage(MyHandler.MSG_ON_PRINTJOB_QUEUED,
                         printJobInfo).sendToTarget();
             }
         };
     }
 
     private final class MyHandler extends Handler {
-        public static final int MESSAGE_START_PRINTER_DISCOVERY = 1;
-        public static final int MESSAGE_STOP_PRINTER_DISCOVERY = 2;
-        public static final int MESSAGE_CANCEL_PRINTJOB = 3;
-        public static final int MESSAGE_ON_PRINTJOB_QUEUED = 4;
-        public static final int MESSAGE_SET_CLEINT = 5;
+        public static final int MSG_ON_START_PRINTER_DISCOVERY = 1;
+        public static final int MSG_ON_STOP_PRINTER_DISCOVERY = 2;
+        public static final int MSG_ON_REQUEST_CANCEL_PRINTJOB = 3;
+        public static final int MSG_ON_REQUEST_UPDATE_PRINTERS = 4;
+        public static final int MSG_ON_PRINTJOB_QUEUED = 5;
+        public static final int MSG_SET_CLEINT = 6;
 
         public MyHandler(Looper looper) {
             super(looper, null, true);
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public void handleMessage(Message message) {
             final int action = message.what;
             switch (action) {
-                case MESSAGE_START_PRINTER_DISCOVERY: {
+                case MSG_ON_START_PRINTER_DISCOVERY: {
                     synchronized (mLock) {
                         mDiscoveryObserver = (IPrinterDiscoveryObserver) message.obj;
                     }
                     onStartPrinterDiscovery();
                 } break;
 
-                case MESSAGE_STOP_PRINTER_DISCOVERY: {
+                case MSG_ON_STOP_PRINTER_DISCOVERY: {
                     synchronized (mLock) {
                         mDiscoveryObserver = null;
                     }
                     onStopPrinterDiscovery();
                 } break;
 
-                case MESSAGE_CANCEL_PRINTJOB: {
+                case MSG_ON_REQUEST_CANCEL_PRINTJOB: {
                     PrintJobInfo printJobInfo = (PrintJobInfo) message.obj;
                     onRequestCancelPrintJob(new PrintJob(printJobInfo, mClient));
                 } break;
 
-                case MESSAGE_ON_PRINTJOB_QUEUED: {
+                case MSG_ON_REQUEST_UPDATE_PRINTERS: {
+                    List<PrinterId> printerIds = (List<PrinterId>) message.obj;
+                    onRequestUpdatePrinters(printerIds);
+                } break;
+
+                case MSG_ON_PRINTJOB_QUEUED: {
                     PrintJobInfo printJobInfo = (PrintJobInfo) message.obj;
                     onPrintJobQueued(new PrintJob(printJobInfo, mClient));
                 } break;
 
-                case MESSAGE_SET_CLEINT: {
+                case MSG_SET_CLEINT: {
                     IPrintServiceClient client = (IPrintServiceClient) message.obj;
                     synchronized (mLock) {
                         mClient = client;

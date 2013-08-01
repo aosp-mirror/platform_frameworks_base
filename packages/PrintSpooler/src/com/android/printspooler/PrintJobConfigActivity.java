@@ -464,7 +464,7 @@ public class PrintJobConfigActivity extends Activity {
             } else if (PageRangeUtils.contains(mDocument.pages, mRequestedPages)) {
                 // We requested specific pages and got more but not all pages.
                 // Hence, we have to offset appropriately the printed pages to
-                // exclude the pages we did not request. Note that pages is
+                // excle the pages we did not request. Note that pages is
                 // guaranteed to be not null and not empty.
                 final int offset = mDocument.pages[0].getStart() - pages[0].getStart();
                 PageRange[] offsetPages = Arrays.copyOf(mDocument.pages, mDocument.pages.length);
@@ -571,16 +571,24 @@ public class PrintJobConfigActivity extends Activity {
                     mCurrPrintAttributes.clear();
                     SpinnerItem<PrinterInfo> dstItem = mDestinationSpinnerAdapter.getItem(position);
                     if (dstItem != null) {
-                        mSpooler.setPrintJobPrinterIdNoPersistence(mPrintJobId, dstItem.value.getId());
-                        dstItem.value.getDefaults(mCurrPrintAttributes);
+                        PrinterInfo printer = dstItem.value;
+                        mSpooler.setPrintJobPrinterIdNoPersistence(mPrintJobId, printer.getId());
+                        printer.getDefaults(mCurrPrintAttributes);
+                        if (!printer.hasAllRequiredAttributes()) {
+                            List<PrinterId> printerIds = new ArrayList<PrinterId>();
+                            printerIds.add(printer.getId());
+                            mSpooler.onReqeustUpdatePrinters(printerIds);
+                            //TODO: We need a timeout for the update.
+                        } else {
+                            if (!mController.hasStarted()) {
+                                mController.start();
+                            }
+                            if (!hasErrors()) {
+                                mController.update();
+                            }
+                        }
                     }
                     updateUi();
-                    if (!mController.hasStarted()) {
-                        mController.start();
-                    }
-                    if (!hasErrors()) {
-                        mController.update();
-                    }
                 } else if (spinner == mMediaSizeSpinner) {
                     SpinnerItem<MediaSize> mediaItem = mMediaSizeSpinnerAdapter.getItem(position);
                     mCurrPrintAttributes.setMediaSize(mediaItem.value);
@@ -886,7 +894,9 @@ public class PrintJobConfigActivity extends Activity {
 
             final int selectedIndex = mDestinationSpinner.getSelectedItemPosition();
 
-            if (selectedIndex < 0) {
+            if (selectedIndex < 0 || !mDestinationSpinnerAdapter.getItem(
+                    selectedIndex).value.hasAllRequiredAttributes()) {
+
                 // Destination
                 mDestinationSpinner.setEnabled(false);
 
@@ -1173,6 +1183,45 @@ public class PrintJobConfigActivity extends Activity {
             }
         }
 
+        @SuppressWarnings("unchecked")
+        public void updatePrinters(List<PrinterInfo> pritners) {
+            SpinnerItem<PrinterInfo> selectedItem =
+                    (SpinnerItem<PrinterInfo>) mDestinationSpinner.getSelectedItem();
+            PrinterId selectedPrinterId = (selectedItem != null)
+                    ? selectedItem.value.getId() : null;
+
+            boolean updated = false;
+
+            final int printerCount = pritners.size();
+            for (int i = 0; i < printerCount; i++) {
+                PrinterInfo updatedPrinter = pritners.get(i);
+                final int existingPrinterCount = mDestinationSpinnerAdapter.getCount();
+                for (int j = 0; j < existingPrinterCount; j++) {
+                    PrinterInfo existingPrinter = mDestinationSpinnerAdapter.getItem(j).value;
+                    if (updatedPrinter.getId().equals(existingPrinter.getId())) {
+                        existingPrinter.copyFrom(updatedPrinter);
+                        updated = true;
+                        if (selectedPrinterId != null
+                                && selectedPrinterId.equals(updatedPrinter.getId())) {
+                            // The selected printer was updated. We simulate a fake
+                            // selection to reuse the normal printer change handling.
+                            mOnItemSelectedListener.onItemSelected(mDestinationSpinner,
+                                    mDestinationSpinner.getSelectedView(),
+                                    mDestinationSpinner.getSelectedItemPosition(),
+                                    mDestinationSpinner.getSelectedItemId());
+                            // TODO: This will reset the UI to the defaults for the
+                            // printer. We may need to revisit this.
+                            
+                        }
+                        break;
+                    }
+                }
+            }
+            if (updated) {
+                mDestinationSpinnerAdapter.notifyDataSetChanged();
+            }
+        }
+
         private boolean hasErrors() {
             return mRangeEditText.getError() != null
                     || mCopiesEditText.getError() != null;
@@ -1240,8 +1289,9 @@ public class PrintJobConfigActivity extends Activity {
     }
 
     private static final class PrinterDiscoveryObserver extends IPrinterDiscoveryObserver.Stub {
-        private static final int MESSAGE_ADD_DICOVERED_PRINTERS = 1;
-        private static final int MESSAGE_REMOVE_DICOVERED_PRINTERS = 2;
+        private static final int MSG_ON_PRINTERS_ADDED = 1;
+        private static final int MSG_ON_PRINTERS_REMOVED = 2;
+        private static final int MSG_ON_PRINTERS_UPDATED = 3;
 
         private Handler mHandler;
         private Editor mEditor;
@@ -1253,13 +1303,19 @@ public class PrintJobConfigActivity extends Activity {
                 @Override
                 public void handleMessage(Message message) {
                     switch (message.what) {
-                        case MESSAGE_ADD_DICOVERED_PRINTERS: {
+                        case MSG_ON_PRINTERS_ADDED: {
                             List<PrinterInfo> printers = (List<PrinterInfo>) message.obj;
                             mEditor.addPrinters(printers);
                         } break;
-                        case MESSAGE_REMOVE_DICOVERED_PRINTERS: {
+
+                        case MSG_ON_PRINTERS_REMOVED: {
                             List<PrinterId> printerIds = (List<PrinterId>) message.obj;
                             mEditor.removePrinters(printerIds);
+                        } break;
+
+                        case MSG_ON_PRINTERS_UPDATED: {
+                            List<PrinterInfo> printers = (List<PrinterInfo>) message.obj;
+                            mEditor.updatePrinters(printers);
                         } break;
                     }
                 }
@@ -1267,20 +1323,30 @@ public class PrintJobConfigActivity extends Activity {
         }
 
         @Override
-        public void addDiscoveredPrinters(List<PrinterInfo> printers) {
+        public void onPrintersAdded(List<PrinterInfo> printers) {
             synchronized (this) {
                 if (mHandler != null) {
-                    mHandler.obtainMessage(MESSAGE_ADD_DICOVERED_PRINTERS, printers)
+                    mHandler.obtainMessage(MSG_ON_PRINTERS_ADDED, printers)
                         .sendToTarget();
                 }
             }
         }
 
         @Override
-        public void removeDiscoveredPrinters(List<PrinterId> printers) {
+        public void onPrintersRemoved(List<PrinterId> printers) {
             synchronized (this) {
                 if (mHandler != null) {
-                    mHandler.obtainMessage(MESSAGE_REMOVE_DICOVERED_PRINTERS, printers)
+                    mHandler.obtainMessage(MSG_ON_PRINTERS_REMOVED, printers)
+                        .sendToTarget();
+                }
+            }
+        }
+
+        @Override
+        public void onPrintersUpdated(List<PrinterInfo> printers) {
+            synchronized (this) {
+                if (mHandler != null) {
+                    mHandler.obtainMessage(MSG_ON_PRINTERS_UPDATED, printers)
                         .sendToTarget();
                 }
             }
