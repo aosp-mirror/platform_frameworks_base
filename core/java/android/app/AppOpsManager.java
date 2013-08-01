@@ -67,6 +67,7 @@ public class AppOpsManager {
     //  - increment _NUM_OP
     //  - add rows to sOpToSwitch, sOpNames, sOpPerms
     //  - add descriptive strings to Settings/res/values/arrays.xml
+    //  - add the op to the appropriate template in AppOpsState.OpsTemplate (settings app)
 
     /** No operation specified. */
     public static final int OP_NONE = -1;
@@ -154,15 +155,17 @@ public class AppOpsManager {
     public static final int OP_WAKE_LOCK = 40;
     /** Continually monitoring location data. */
     public static final int OP_MONITOR_LOCATION = 41;
+    /** Continually monitoring location data with a relatively high power request. */
+    public static final int OP_MONITOR_HIGH_POWER_LOCATION = 42;
     /** @hide */
-    public static final int _NUM_OP = 42;
+    public static final int _NUM_OP = 43;
 
     /**
      * This maps each operation to the operation that serves as the
      * switch to determine whether it is allowed.  Generally this is
      * a 1:1 mapping, but for some things (like location) that have
      * multiple low-level operations being tracked that should be
-     * presented to hte user as one switch then this can be used to
+     * presented to the user as one switch then this can be used to
      * make them all controlled by the same single operation.
      */
     private static int[] sOpToSwitch = new int[] {
@@ -207,6 +210,7 @@ public class AppOpsManager {
             OP_AUDIO_NOTIFICATION_VOLUME,
             OP_AUDIO_BLUETOOTH_VOLUME,
             OP_WAKE_LOCK,
+            OP_COARSE_LOCATION,
             OP_COARSE_LOCATION,
     };
 
@@ -257,6 +261,7 @@ public class AppOpsManager {
             "AUDIO_BLUETOOTH_VOLUME",
             "WAKE_LOCK",
             "MONITOR_LOCATION",
+            "MONITOR_HIGH_POWER_LOCATION",
     };
 
     /**
@@ -306,6 +311,7 @@ public class AppOpsManager {
             null, // no permission for changing bluetooth volume
             android.Manifest.permission.WAKE_LOCK,
             null, // no permission for generic location monitoring
+            null, // no permission for high power location monitoring
     };
 
     /**
