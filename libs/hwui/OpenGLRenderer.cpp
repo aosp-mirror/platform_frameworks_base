@@ -1668,7 +1668,7 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom, 
     SkPath path;
     path.addRect(left, top, right, bottom);
 
-    return clipPath(&path, op);
+    return OpenGLRenderer::clipPath(&path, op);
 }
 
 bool OpenGLRenderer::clipPath(SkPath* path, SkRegion::Op op) {
@@ -1679,11 +1679,15 @@ bool OpenGLRenderer::clipPath(SkPath* path, SkRegion::Op op) {
     path->transform(transform, &transformed);
 
     SkRegion clip;
-    if (!mSnapshot->clipRegion->isEmpty()) {
-        clip.setRegion(*mSnapshot->clipRegion);
+    if (!mSnapshot->previous->clipRegion->isEmpty()) {
+        clip.setRegion(*mSnapshot->previous->clipRegion);
     } else {
-        Rect* bounds = mSnapshot->clipRect;
-        clip.setRect(bounds->left, bounds->top, bounds->right, bounds->bottom);
+        if (mSnapshot->previous == mFirstSnapshot) {
+            clip.setRect(0, 0, mWidth, mHeight);
+        } else {
+            Rect* bounds = mSnapshot->previous->clipRect;
+            clip.setRect(bounds->left, bounds->top, bounds->right, bounds->bottom);
+        }
     }
 
     SkRegion region;
