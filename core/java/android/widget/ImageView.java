@@ -732,6 +732,15 @@ public class ImageView extends View {
         }
     }
 
+    @Override
+    public void onRtlPropertiesChanged(int layoutDirection) {
+        super.onRtlPropertiesChanged(layoutDirection);
+
+        if (mDrawable != null) {
+            mDrawable.setLayoutDirection(layoutDirection);
+        }
+    }
+
     private static final Matrix.ScaleToFit[] sS2FArray = {
         Matrix.ScaleToFit.FILL,
         Matrix.ScaleToFit.START,

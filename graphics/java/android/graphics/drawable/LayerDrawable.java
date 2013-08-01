@@ -119,6 +119,9 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         mOpacityOverride = a.getInt(com.android.internal.R.styleable.LayerDrawable_opacity,
                 PixelFormat.UNKNOWN);
 
+        setAutoMirrored(a.getBoolean(com.android.internal.R.styleable.LayerDrawable_autoMirrored,
+                false));
+
         a.recycle();
 
         final int innerDepth = parser.getDepth() + 1;
@@ -200,6 +203,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         st.mChildren[i] = childDrawable;
         childDrawable.mId = id;
         childDrawable.mDrawable = layer;
+        childDrawable.mDrawable.setAutoMirrored(isAutoMirrored());
         childDrawable.mInsetL = left;
         childDrawable.mInsetT = top;
         childDrawable.mInsetR = right;
@@ -448,6 +452,21 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
     }
 
     @Override
+    public void setAutoMirrored(boolean mirrored) {
+        mLayerState.mAutoMirrored = mirrored;
+        final ChildDrawable[] array = mLayerState.mChildren;
+        final int N = mLayerState.mNum;
+        for (int i=0; i<N; i++) {
+            array[i].mDrawable.setAutoMirrored(mirrored);
+        }
+    }
+
+    @Override
+    public boolean isAutoMirrored() {
+        return mLayerState.mAutoMirrored;
+    }
+
+    @Override
     public boolean isStateful() {
         return mLayerState.isStateful();
     }
@@ -630,6 +649,8 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
         private boolean mCheckedConstantState;
         private boolean mCanConstantState;
 
+        private boolean mAutoMirrored;
+
         LayerState(LayerState orig, LayerDrawable owner, Resources res) {
             if (orig != null) {
                 final ChildDrawable[] origChildDrawable = orig.mChildren;
@@ -663,6 +684,7 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
                 mHaveStateful = orig.mHaveStateful;
                 mStateful = orig.mStateful;
                 mCheckedConstantState = mCanConstantState = true;
+                mAutoMirrored = orig.mAutoMirrored;
             } else {
                 mNum = 0;
                 mChildren = null;

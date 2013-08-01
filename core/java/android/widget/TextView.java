@@ -2042,6 +2042,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             dr.mDrawableRightInitial = right;
         }
 
+        resetResolvedDrawables();
+        resolveDrawables();
         invalidate();
         requestLayout();
     }

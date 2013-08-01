@@ -572,6 +572,25 @@ public abstract class Drawable {
     }
 
     /**
+     * Set whether this Drawable is automatically mirrored when its layout direction is RTL
+     * (right-to left). See {@link android.util.LayoutDirection}.
+     *
+     * @param mirrored Set to true if the Drawable should be mirrored, false if not.
+     */
+    public void setAutoMirrored(boolean mirrored) {
+    }
+
+    /**
+     * Tells if this Drawable will be automatically mirrored  when its layout direction is RTL
+     * right-to-left. See {@link android.util.LayoutDirection}.
+     *
+     * @return boolean Returns true if this Drawable will be automatically mirrored.
+     */
+    public boolean isAutoMirrored() {
+        return false;
+    }
+
+    /**
      * Return the opacity/transparency of this Drawable.  The returned value is
      * one of the abstract format constants in
      * {@link android.graphics.PixelFormat}:
