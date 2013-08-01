@@ -429,7 +429,9 @@ public class Paint {
         mMaskFilter = paint.mMaskFilter;
         mPathEffect = paint.mPathEffect;
         mRasterizer = paint.mRasterizer;
-        mShader = paint.mShader;
+        if (paint.mShader != null) {
+            mShader = paint.mShader.copy();
+        }
         mTypeface = paint.mTypeface;
         mXfermode = paint.mXfermode;
 
