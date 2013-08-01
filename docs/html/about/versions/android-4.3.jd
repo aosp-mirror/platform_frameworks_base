@@ -214,7 +214,7 @@ information, see the section
 below about <a href="#AccountsInProfile">Supporting accounts in a restricted profile</a>.</p>
 
 
-<h3 id="#BehaviorsVideoView">If your app uses VideoView...</h3>
+<h3 id="BehaviorsVideoView">If your app uses VideoView...</h3>
 
 <p>Your video might appear smaller on Android 4.3.</p>
 
