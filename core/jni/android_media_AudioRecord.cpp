@@ -37,8 +37,6 @@ static const char* const kClassPathName = "android/media/AudioRecord";
 struct fields_t {
     // these fields provide access from C++ to the...
     jmethodID postNativeEventInJava; //... event post callback method
-    int       PCM16;                 //...  format constants
-    int       PCM8;                  //...  format constants
     jfieldID  nativeRecorderInJavaObj; // provides access to the C++ AudioRecord object
     jfieldID  nativeCallbackCookie;    // provides access to the AudioRecord callback data
 };
@@ -50,6 +48,10 @@ struct audiorecord_callback_cookie {
     bool        busy;
     Condition   cond;
 };
+
+// keep these values in sync with AudioFormat.java
+#define ENCODING_PCM_16BIT 2
+#define ENCODING_PCM_8BIT  3
 
 static Mutex sLock;
 static SortedVector <audiorecord_callback_cookie *> sAudioRecordCallBackCookies;
@@ -171,14 +173,14 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     uint32_t nbChannels = popcount(channelMask);
 
     // compare the format against the Java constants
-    if ((audioFormat != javaAudioRecordFields.PCM16)
-        && (audioFormat != javaAudioRecordFields.PCM8)) {
+    if ((audioFormat != ENCODING_PCM_16BIT)
+        && (audioFormat != ENCODING_PCM_8BIT)) {
         ALOGE("Error creating AudioRecord: unsupported audio format.");
         return AUDIORECORD_ERROR_SETUP_INVALIDFORMAT;
     }
 
-    int bytesPerSample = audioFormat==javaAudioRecordFields.PCM16 ? 2 : 1;
-    audio_format_t format = audioFormat==javaAudioRecordFields.PCM16 ?
+    int bytesPerSample = audioFormat == ENCODING_PCM_16BIT ? 2 : 1;
+    audio_format_t format = audioFormat == ENCODING_PCM_16BIT ?
             AUDIO_FORMAT_PCM_16_BIT : AUDIO_FORMAT_PCM_8_BIT;
 
     if (buffSizeInBytes == 0) {
@@ -504,7 +506,7 @@ static jint android_media_AudioRecord_get_min_buff_size(JNIEnv *env,  jobject th
     size_t frameCount = 0;
     status_t result = AudioRecord::getMinFrameCount(&frameCount,
             sampleRateInHertz,
-            (audioFormat == javaAudioRecordFields.PCM16 ?
+            (audioFormat == ENCODING_PCM_16BIT ?
                 AUDIO_FORMAT_PCM_16_BIT : AUDIO_FORMAT_PCM_8_BIT),
             audio_channel_in_mask_from_count(nbChannels));
 
@@ -514,7 +516,7 @@ static jint android_media_AudioRecord_get_min_buff_size(JNIEnv *env,  jobject th
     if (result != NO_ERROR) {
         return -1;
     }
-    return frameCount * nbChannels * (audioFormat == javaAudioRecordFields.PCM16 ? 2 : 1);
+    return frameCount * nbChannels * (audioFormat == ENCODING_PCM_16BIT ? 2 : 1);
 }
 
 
@@ -546,17 +548,8 @@ static JNINativeMethod gMethods[] = {
 
 // field names found in android/media/AudioRecord.java
 #define JAVA_POSTEVENT_CALLBACK_NAME  "postEventFromNative"
-#define JAVA_CONST_PCM16_NAME         "ENCODING_PCM_16BIT"
-#define JAVA_CONST_PCM8_NAME          "ENCODING_PCM_8BIT"
 #define JAVA_NATIVERECORDERINJAVAOBJ_FIELD_NAME  "mNativeRecorderInJavaObj"
 #define JAVA_NATIVECALLBACKINFO_FIELD_NAME       "mNativeCallbackCookie"
-
-#define JAVA_AUDIOFORMAT_CLASS_NAME "android/media/AudioFormat"
-
-// ----------------------------------------------------------------------------
-
-extern bool android_media_getIntConstantFromClass(JNIEnv* pEnv,
-                jclass theClass, const char* className, const char* constName, int* constVal);
 
 // ----------------------------------------------------------------------------
 int register_android_media_AudioRecord(JNIEnv *env)
@@ -596,23 +589,6 @@ int register_android_media_AudioRecord(JNIEnv *env)
             JAVA_NATIVECALLBACKINFO_FIELD_NAME, "I");
     if (javaAudioRecordFields.nativeCallbackCookie == NULL) {
         ALOGE("Can't find AudioRecord.%s", JAVA_NATIVECALLBACKINFO_FIELD_NAME);
-        return -1;
-    }
-
-    // Get the format constants from the AudioFormat class
-    jclass audioFormatClass = NULL;
-    audioFormatClass = env->FindClass(JAVA_AUDIOFORMAT_CLASS_NAME);
-    if (audioFormatClass == NULL) {
-        ALOGE("Can't find %s", JAVA_AUDIOFORMAT_CLASS_NAME);
-        return -1;
-    }
-    if ( !android_media_getIntConstantFromClass(env, audioFormatClass,
-                JAVA_AUDIOFORMAT_CLASS_NAME,
-                JAVA_CONST_PCM16_NAME, &(javaAudioRecordFields.PCM16))
-           || !android_media_getIntConstantFromClass(env, audioFormatClass,
-                JAVA_AUDIOFORMAT_CLASS_NAME,
-                JAVA_CONST_PCM8_NAME, &(javaAudioRecordFields.PCM8)) ) {
-        // error log performed in getIntConstantFromClass()
         return -1;
     }
 
