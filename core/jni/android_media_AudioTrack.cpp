@@ -884,20 +884,8 @@ static JNINativeMethod gMethods[] = {
 
 // field names found in android/media/AudioTrack.java
 #define JAVA_POSTEVENT_CALLBACK_NAME                    "postEventFromNative"
-#define JAVA_CONST_BUFFER_COUNT_NAME                    "BUFFER_COUNT"
-#define JAVA_CONST_STREAM_VOICE_CALL_NAME               "STREAM_VOICE_CALL"
-#define JAVA_CONST_STREAM_SYSTEM_NAME                   "STREAM_SYSTEM"
-#define JAVA_CONST_STREAM_RING_NAME                     "STREAM_RING"
-#define JAVA_CONST_STREAM_MUSIC_NAME                    "STREAM_MUSIC"
-#define JAVA_CONST_STREAM_ALARM_NAME                    "STREAM_ALARM"
-#define JAVA_CONST_STREAM_NOTIFICATION_NAME             "STREAM_NOTIFICATION"
-#define JAVA_CONST_STREAM_BLUETOOTH_SCO_NAME            "STREAM_BLUETOOTH_SCO"
-#define JAVA_CONST_STREAM_DTMF_NAME                     "STREAM_DTMF"
 #define JAVA_NATIVETRACKINJAVAOBJ_FIELD_NAME            "mNativeTrackInJavaObj"
 #define JAVA_JNIDATA_FIELD_NAME                         "mJniData"
-
-#define JAVA_AUDIOFORMAT_CLASS_NAME             "android/media/AudioFormat"
-#define JAVA_AUDIOMANAGER_CLASS_NAME            "android/media/AudioManager"
 
 // ----------------------------------------------------------------------------
 // preconditions:
@@ -953,14 +941,6 @@ int register_android_media_AudioTrack(JNIEnv *env)
             JAVA_JNIDATA_FIELD_NAME, "I");
     if (javaAudioTrackFields.jniData == NULL) {
         ALOGE("Can't find AudioTrack.%s", JAVA_JNIDATA_FIELD_NAME);
-        return -1;
-    }
-
-    // Get the format constants from the AudioFormat class
-    jclass audioFormatClass = NULL;
-    audioFormatClass = env->FindClass(JAVA_AUDIOFORMAT_CLASS_NAME);
-    if (audioFormatClass == NULL) {
-        ALOGE("Can't find %s", JAVA_AUDIOFORMAT_CLASS_NAME);
         return -1;
     }
 
