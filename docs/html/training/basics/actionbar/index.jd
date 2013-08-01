@@ -1,0 +1,68 @@
+page.title=Adding the Action Bar
+page.tags="actionbar"
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li>Android 2.1 or higher</li>
+</ul>
+
+
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a></li>
+  <li><a href="{@docRoot}training/implementing-navigation/index.html">Implementing
+  Effective Navigation</a></li>
+</ul>
+
+</div>
+</div>
+
+<a class="notice-designers wide" href="{@docRoot}design/patterns/actionbar.html">
+  <div>
+    <h3>Design Guide</h3>
+    <p>Action Bar</p>
+  </div>
+</a>
+
+<p>The action bar is one of the most important design elements you can implement for your
+app's activities. It provides several user interface features that make your app immediately
+familiar to users by offering consistency between other Android apps. Key functions include:</p>
+
+<ul>
+  <li>A dedicated space for giving your app an identity and indicating the user's location
+  in the app.</li>
+  <li>Access to important actions in a predictable way (such as Search).</li>
+  <li>Support for navigation and view switching (with tabs or drop-down lists).</li>
+</ul>
+
+<img src="{@docRoot}images/training/basics/actionbar-actions.png" height="100" alt="">
+
+<p>This training class offers a quick guide to the action bar's basics. For more information
+about action bar's various features, see the
+<a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> guide.</p>
+
+
+<h2>Lessons</h2>
+
+<dl>
+  <dt><b><a href="setting-up.html">Setting Up the Action Bar</a></b></dt>
+  <dd>Learn how to add a basic action bar to your activity, whether your app
+  supports only Android 3.0 and higher or also supports versions as low as Android 2.1
+  (by using the Android Support Library).</dd>
+  <dt><b><a href="adding-buttons.html">Adding Action Buttons</a></b></dt>
+  <dd>Learn how to add and respond to user actions in the action bar.</dd>
+  <dt><b><a href="styling.html">Styling the Action Bar</a></b></dt>
+  <dd>Learn how to customize the appearance of your action bar.</dd>
+  <dt><b><a href="overlaying.html">Overlaying the Action Bar</a></b></dt>
+  <dd>Learn how to overlay the action bar in front of your layout, allowing for
+  seamless transitions when hiding the action bar.</dd>
+</dl>
+

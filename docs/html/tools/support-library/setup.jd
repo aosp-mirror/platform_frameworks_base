@@ -149,7 +149,9 @@ dependencies {
 
 <h3 id="libs-with-res">Adding libraries with resources</h3>
 
-<p>To add a Support Library with resources to your application project:</p>
+<p>To add a Support Library with resources (such as
+  <a href="{@docRoot}tools/support-library/features.html#v7-appcompat">v7
+  appcompat</a> for action bar) to your application project:</p>
 
 <div class="toggle-content closed">
   <p style="margin-top:5px"><a href="#" onclick="return toggleContent(this)">
