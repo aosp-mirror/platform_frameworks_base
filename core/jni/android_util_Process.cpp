@@ -94,11 +94,6 @@ static void signalExceptionForGroupError(JNIEnv* env, int err)
     }
 }
 
-jint android_os_Process_myTid(JNIEnv* env, jobject clazz)
-{
-    return androidGetTid();
-}
-
 jint android_os_Process_getUidForName(JNIEnv* env, jobject clazz, jstring name)
 {
     if (name == NULL) {
@@ -333,8 +328,7 @@ void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
 void android_os_Process_setCallingThreadPriority(JNIEnv* env, jobject clazz,
                                                         jint pri)
 {
-    jint tid = android_os_Process_myTid(env, clazz);
-    android_os_Process_setThreadPriority(env, clazz, tid, pri);
+    android_os_Process_setThreadPriority(env, clazz, androidGetTid(), pri);
 }
 
 jint android_os_Process_getThreadPriority(JNIEnv* env, jobject clazz,
@@ -979,7 +973,6 @@ jintArray android_os_Process_getPidsForCommands(JNIEnv* env, jobject clazz,
 }
 
 static const JNINativeMethod methods[] = {
-    {"myTid",       "()I", (void*)android_os_Process_myTid},
     {"getUidForName",       "(Ljava/lang/String;)I", (void*)android_os_Process_getUidForName},
     {"getGidForName",       "(Ljava/lang/String;)I", (void*)android_os_Process_getGidForName},
     {"setThreadPriority",   "(II)V", (void*)android_os_Process_setThreadPriority},

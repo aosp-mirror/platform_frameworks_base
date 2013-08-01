@@ -657,7 +657,9 @@ public class Process {
      * Returns the identifier of the calling thread, which be used with
      * {@link #setThreadPriority(int, int)}.
      */
-    public static final native int myTid();
+    public static final int myTid() {
+        return Libcore.os.gettid();
+    }
 
     /**
      * Returns the identifier of this process's uid.  This is the kernel uid
