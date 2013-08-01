@@ -7796,6 +7796,37 @@ public final class ContactsContract {
         public static final int UNPINNED = 0x7FFFFFFF;
 
         /**
+         * Value of pinned position for a contact that a user has indicated should be considered
+         * of the lowest priority. It is up to the client application to determine how to present
+         * such a contact - for example all the way at the bottom of a contact list, or simply
+         * just hidden from view.
+         */
+        public static final int DEMOTED = -1;
+
+        /**
+         * <p> Clients can provide this value as a pinned position to undemote a formerly demoted
+         * contact. If the contact was formerly demoted, it will be restored to an
+         * {@link #UNPINNED} position. If it was otherwise already pinned at another position,
+         * it will not be affected.
+         * </p>
+         *
+         * <p>
+         * Example:
+         * <pre>
+         * ContentValues values = new ContentValues();
+         * values.put("15", PinnedPositions.UNDEMOTE);
+         * int count = resolver.update(ContactsContract.PinnedPositions.UPDATE_URI.buildUpon()
+         *          .build(), values, null, null);
+         * </pre>
+         *
+         * This restores the contact with id 15 to an {@link #UNPINNED} position, meaning that
+         * other apps (e.g. the Dialer) that were formerly hiding this contact from view based on
+         * its {@link #DEMOTED} position will start displaying it again.
+         * </p>
+         */
+        public static final String UNDEMOTE = "undemote";
+
+        /**
          * <p>
          * A boolean query parameter that can be used with {@link #UPDATE_URI}.
          * If "1" or "true", any contact that is pinned or unpinned will be correspondingly
