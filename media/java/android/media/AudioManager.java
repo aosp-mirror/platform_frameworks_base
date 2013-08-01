@@ -1555,6 +1555,22 @@ public class AudioManager {
 
     /**
      * @hide
+     * Checks whether the current audio focus is exclusive.
+     * @return true if the top of the audio focus stack requested focus
+     *     with {@link #AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE}
+     */
+    public boolean isAudioFocusExclusive() {
+        IAudioService service = getService();
+        try {
+            return service.getCurrentAudioFocus() == AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in isAudioFocusExclusive()", e);
+            return false;
+        }
+    }
+
+    /**
+     * @hide
      * If the stream is active locally or remotely, adjust its volume according to the enforced
      * priority rules.
      * Note: only AudioManager.STREAM_MUSIC is supported at the moment
@@ -1771,6 +1787,12 @@ public class AudioManager {
     }
 
     /**
+     * @hide
+     * Used to indicate no audio focus has been gained or lost.
+     */
+    public static final int AUDIOFOCUS_NONE = 0;
+
+    /**
      * Used to indicate a gain of audio focus, or a request of audio focus, of unknown duration.
      * @see OnAudioFocusChangeListener#onAudioFocusChange(int)
      * @see #requestAudioFocus(OnAudioFocusChangeListener, int, int)
@@ -1794,6 +1816,17 @@ public class AudioManager {
      * @see #requestAudioFocus(OnAudioFocusChangeListener, int, int)
      */
     public static final int AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK = 3;
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * Used to indicate a temporary request of audio focus, anticipated to last a short
+     * amount of time, during which no other applications, or system components, should play
+     * anything. Examples of exclusive and transient audio focus requests are voice
+     * memo recording and speech recognition, during which the system shouldn't play any
+     * notifications, and media playback should have paused.
+     * @see #requestAudioFocus(OnAudioFocusChangeListener, int, int)
+     */
+    public static final int AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE = 4;
     /**
      * Used to indicate a loss of audio focus of unknown duration.
      * @see OnAudioFocusChangeListener#onAudioFocusChange(int)
@@ -1964,8 +1997,8 @@ public class AudioManager {
      */
     public int requestAudioFocus(OnAudioFocusChangeListener l, int streamType, int durationHint) {
         int status = AUDIOFOCUS_REQUEST_FAILED;
-        if ((durationHint < AUDIOFOCUS_GAIN) || (durationHint > AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK))
-        {
+        if ((durationHint < AUDIOFOCUS_GAIN) ||
+                (durationHint > AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)) {
             Log.e(TAG, "Invalid duration hint, audio focus request denied");
             return status;
         }

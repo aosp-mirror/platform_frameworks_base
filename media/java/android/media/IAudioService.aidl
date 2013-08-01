@@ -119,6 +119,8 @@ interface IAudioService {
     
     void unregisterAudioFocusClient(String clientId);
 
+    int getCurrentAudioFocus();
+
     oneway void dispatchMediaKeyEvent(in KeyEvent keyEvent);
     void dispatchMediaKeyEventUnderWakelock(in KeyEvent keyEvent);
 

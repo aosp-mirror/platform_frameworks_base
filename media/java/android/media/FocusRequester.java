@@ -30,11 +30,6 @@ import java.io.PrintWriter;
  */
 class FocusRequester {
 
-    /**
-     * Used to indicate no audio focus has been gained or lost.
-     */
-    private static final int AUDIOFOCUS_NONE = 0;
-
     // on purpose not using this classe's name, as it will only be used from MediaFocusControl
     private static final String TAG = "MediaFocusControl";
     private static final boolean DEBUG = false;
@@ -50,7 +45,7 @@ class FocusRequester {
      */
     private final int mFocusGainRequest;
     /**
-     * the audio focus loss received my mFocusDispatcher, is MediaFocusControl.AUDIOFOCUS_NONE if
+     * the audio focus loss received my mFocusDispatcher, is AudioManager.AUDIOFOCUS_NONE if
      *  it never lost focus.
      */
     private int mFocusLossReceived;
@@ -70,7 +65,7 @@ class FocusRequester {
         mPackageName = pn;
         mCallingUid = uid;
         mFocusGainRequest = focusRequest;
-        mFocusLossReceived = AUDIOFOCUS_NONE;
+        mFocusLossReceived = AudioManager.AUDIOFOCUS_NONE;
     }
 
 
@@ -110,7 +105,7 @@ class FocusRequester {
 
     private static String focusChangeToString(int focus) {
         switch(focus) {
-            case AUDIOFOCUS_NONE:
+            case AudioManager.AUDIOFOCUS_NONE:
                 return "none";
             case AudioManager.AUDIOFOCUS_GAIN:
                 return "GAIN";
@@ -118,6 +113,8 @@ class FocusRequester {
                 return "GAIN_TRANSIENT";
             case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK:
                 return "GAIN_TRANSIENT_MAY_DUCK";
+            case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE:
+                return "GAIN_TRANSIENT_EXCLUSIVE";
             case AudioManager.AUDIOFOCUS_LOSS:
                 return "LOSS";
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
@@ -178,21 +175,22 @@ class FocusRequester {
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                     case AudioManager.AUDIOFOCUS_LOSS:
-                    case AUDIOFOCUS_NONE:
+                    case AudioManager.AUDIOFOCUS_NONE:
                         return AudioManager.AUDIOFOCUS_LOSS;
                 }
+            case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE:
             case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT:
                 switch(mFocusLossReceived) {
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                    case AUDIOFOCUS_NONE:
+                    case AudioManager.AUDIOFOCUS_NONE:
                         return AudioManager.AUDIOFOCUS_LOSS_TRANSIENT;
                     case AudioManager.AUDIOFOCUS_LOSS:
                         return AudioManager.AUDIOFOCUS_LOSS;
                 }
             case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK:
                 switch(mFocusLossReceived) {
-                    case AUDIOFOCUS_NONE:
+                    case AudioManager.AUDIOFOCUS_NONE:
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                         return AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK;
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
@@ -202,7 +200,7 @@ class FocusRequester {
                 }
             default:
                 Log.e(TAG, "focusLossForGainRequest() for invalid focus request "+ gainRequest);
-                        return AUDIOFOCUS_NONE;
+                        return AudioManager.AUDIOFOCUS_NONE;
         }
     }
 
@@ -220,7 +218,7 @@ class FocusRequester {
                 }
                 mFocusDispatcher.dispatchAudioFocusChange(focusGain, mClientId);
             }
-            mFocusLossReceived = AUDIOFOCUS_NONE;
+            mFocusLossReceived = AudioManager.AUDIOFOCUS_NONE;
         } catch (android.os.RemoteException e) {
             Log.e(TAG, "Failure to signal gain of audio focus due to: ", e);
         }

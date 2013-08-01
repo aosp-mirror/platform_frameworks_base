@@ -424,6 +424,15 @@ public class MediaFocusControl implements OnFinished {
         }
     }
 
+    protected int getCurrentAudioFocus() {
+        synchronized(mAudioFocusLock) {
+            if (mFocusStack.empty()) {
+                return AudioManager.AUDIOFOCUS_NONE;
+            } else {
+                return mFocusStack.peek().getGainRequest();
+            }
+        }
+    }
 
     /** @see AudioManager#requestAudioFocus(AudioManager.OnAudioFocusChangeListener, int, int)  */
     protected int requestAudioFocus(int mainStreamType, int focusChangeHint, IBinder cb,
