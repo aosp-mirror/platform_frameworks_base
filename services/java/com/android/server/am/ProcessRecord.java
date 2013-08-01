@@ -62,7 +62,9 @@ final class ProcessRecord {
     boolean starting;           // True if the process is being started
     long lastActivityTime;      // For managing the LRU list
     long lruWeight;             // Weight for ordering in LRU list
-    long lastPssTime;           // Last time we requested PSS data
+    long lastPssTime;           // Last time we retrieved PSS data
+    long nextPssTime;           // Next time we want to request PSS data
+    long lastStateTime;         // Last time setProcState changed
     int maxAdj;                 // Maximum OOM adjustment for this process
     int curRawAdj;              // Current OOM unlimited adjustment for this process
     int setRawAdj;              // Last set OOM unlimited adjustment for this process
@@ -75,6 +77,7 @@ final class ProcessRecord {
     int curProcState = -1;      // Currently computed process state: ActivityManager.PROCESS_STATE_*
     int repProcState = -1;      // Last reported process state
     int setProcState = -1;      // Last set process state in process tracker
+    int pssProcState = -1;      // The proc state we are currently requesting pss for
     boolean serviceb;           // Process currently is on the service B list
     boolean keeping;            // Actively running code so don't kill due to that?
     boolean setIsForeground;    // Running foreground UI when last set?
@@ -223,10 +226,18 @@ final class ProcessRecord {
                 pw.print(" trimMemoryLevel="); pw.println(trimMemoryLevel);
         pw.print(prefix); pw.print("curProcState="); pw.print(curProcState);
                 pw.print(" repProcState="); pw.print(repProcState);
-                pw.print(" setProcState="); pw.println(setProcState);
+                pw.print(" pssProcState="); pw.print(pssProcState);
+                pw.print(" setProcState="); pw.print(setProcState);
+                pw.print(" lastStateTime=");
+                TimeUtils.formatDuration(lastStateTime, now, pw);
+                pw.println();
         pw.print(prefix); pw.print("adjSeq="); pw.print(adjSeq);
                 pw.print(" lruSeq="); pw.print(lruSeq);
-                pw.print(" lastPssTime="); pw.println(lastPssTime);
+                pw.print(" lastPssTime=");
+                TimeUtils.formatDuration(lastPssTime, now, pw);
+                pw.print(" nextPssTime=");
+                TimeUtils.formatDuration(nextPssTime, now, pw);
+                pw.println();
         if (hasShownUi || pendingUiClean || hasAboveClient) {
             pw.print(prefix); pw.print("hasShownUi="); pw.print(hasShownUi);
                     pw.print(" pendingUiClean="); pw.print(pendingUiClean);
@@ -354,7 +365,7 @@ final class ProcessRecord {
         curAdj = setAdj = -100;
         persistent = false;
         removed = false;
-        lastPssTime = SystemClock.uptimeMillis();
+        lastStateTime = lastPssTime = nextPssTime = SystemClock.uptimeMillis();
     }
 
     public void setPid(int _pid) {
@@ -497,10 +508,6 @@ final class ProcessRecord {
         if (repProcState > newState) {
             curProcState = repProcState = newState;
         }
-    }
-
-    public void setProcessTrackerState(int memFactor, long now) {
-        baseProcessTracker.setState(repProcState, memFactor, now, pkgList);
     }
 
     /*

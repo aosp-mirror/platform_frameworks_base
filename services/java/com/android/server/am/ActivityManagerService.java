@@ -229,6 +229,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_URI_PERMISSION = localLOGV || false;
     static final boolean DEBUG_USER_LEAVING = localLOGV || false;
     static final boolean DEBUG_VISBILITY = localLOGV || false;
+    static final boolean DEBUG_PSS = localLOGV || false;
     static final boolean VALIDATE_TOKENS = true;
     static final boolean SHOW_ACTIVITY_START_TIME = true;
 
@@ -270,22 +271,11 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int GC_MIN_INTERVAL = 60*1000;
 
     // The minimum amount of time between successive PSS requests for a process.
-    static final int PSS_MIN_INTERVAL = 2*60*1000;
-
-    // The amount of time we will sample PSS of the current top process while the
-    // screen is on.
-    static final int PSS_TOP_INTERVAL = 2*60*1000;
-
-    // The amount of time we will sample PSS of any processes that more at least as
-    // important as perceptible while the screen is on.
-    static final int PSS_PERCEPTIBLE_INTERVAL = 10*60*1000;
-
-    // The maximum amount of time for a process to be around until we will take
-    // a PSS snapshot on its next oom change.
-    static final int PSS_MAX_INTERVAL = 30*60*1000;
-
-    // The minimum amount of time between successive PSS requests for a process.
     static final int FULL_PSS_MIN_INTERVAL = 10*60*1000;
+
+    // The minimum amount of time between successive PSS requests for a process
+    // when the request is due to the memory state being lowered.
+    static final int FULL_PSS_LOWERED_INTERVAL = 2*60*1000;
 
     // The rate at which we check for apps using excessive power -- 15 mins.
     static final int POWER_CHECK_DELAY = (DEBUG_POWER_QUICK ? 2 : 15) * 60*1000;
@@ -1497,27 +1487,26 @@ public final class ActivityManagerService extends ActivityManagerNative
         public void handleMessage(Message msg) {
             switch (msg.what) {
             case COLLECT_PSS_BG_MSG: {
-                int i=0;
+                int i=0, num=0;
                 long start = SystemClock.uptimeMillis();
                 long[] tmp = new long[1];
                 do {
                     ProcessRecord proc;
-                    int oomAdj;
+                    int procState;
                     int pid;
                     synchronized (ActivityManagerService.this) {
                         if (i >= mPendingPssProcesses.size()) {
-                            Slog.i(TAG, "Collected PSS of " + i + " processes in "
-                                    + (SystemClock.uptimeMillis()-start) + "ms");
+                            if (DEBUG_PSS) Slog.i(TAG, "Collected PSS of " + num + " of " + i
+                                    + " processes in " + (SystemClock.uptimeMillis()-start) + "ms");
                             mPendingPssProcesses.clear();
                             return;
                         }
                         proc = mPendingPssProcesses.get(i);
-                        if (proc.thread != null) {
-                            oomAdj = proc.setAdj;
+                        procState = proc.pssProcState;
+                        if (proc.thread != null && procState == proc.setProcState) {
                             pid = proc.pid;
                         } else {
                             proc = null;
-                            oomAdj = 0;
                             pid = 0;
                         }
                         i++;
@@ -1525,7 +1514,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                     if (proc != null) {
                         long pss = Debug.getPss(pid, tmp);
                         synchronized (ActivityManagerService.this) {
-                            if (proc.thread != null && proc.setAdj == oomAdj && proc.pid == pid) {
+                            if (proc.thread != null && proc.setProcState == procState
+                                    && proc.pid == pid) {
+                                num++;
+                                proc.lastPssTime = SystemClock.uptimeMillis();
                                 proc.baseProcessTracker.addPss(pss, tmp[0], true);
                             }
                         }
@@ -4770,7 +4762,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                             boolean sticky, int sendingUser) {
                                         synchronized (ActivityManagerService.this) {
                                             requestPssAllProcsLocked(SystemClock.uptimeMillis(),
-                                                    true);
+                                                    true, false);
                                         }
                                     }
                                 },
@@ -14173,34 +14165,40 @@ public final class ActivityManagerService extends ActivityManagerNative
     /**
      * Schedule PSS collection of a process.
      */
-    void requestPssLocked(ProcessRecord proc, long now, boolean always) {
-        if (!always && now < (proc.lastPssTime+PSS_MIN_INTERVAL)) {
-            return;
-        }
+    void requestPssLocked(ProcessRecord proc, int procState) {
         if (mPendingPssProcesses.contains(proc)) {
             return;
         }
-        proc.lastPssTime = now;
         if (mPendingPssProcesses.size() == 0) {
             mBgHandler.sendEmptyMessage(COLLECT_PSS_BG_MSG);
         }
+        if (DEBUG_PSS) Slog.d(TAG, "Requesting PSS of: " + proc);
+        proc.pssProcState = procState;
         mPendingPssProcesses.add(proc);
     }
 
     /**
      * Schedule PSS collection of all processes.
      */
-    void requestPssAllProcsLocked(long now, boolean always) {
-        if (!always && now < (mLastFullPssTime+FULL_PSS_MIN_INTERVAL)) {
-            return;
+    void requestPssAllProcsLocked(long now, boolean always, boolean memLowered) {
+        if (!always) {
+            if (now < (mLastFullPssTime +
+                    (memLowered ? FULL_PSS_LOWERED_INTERVAL : FULL_PSS_MIN_INTERVAL))) {
+                return;
+            }
         }
+        if (DEBUG_PSS) Slog.d(TAG, "Requesting PSS of all procs!  memLowered=" + memLowered);
         mLastFullPssTime = now;
         mPendingPssProcesses.ensureCapacity(mLruProcesses.size());
         mPendingPssProcesses.clear();
         for (int i=mLruProcesses.size()-1; i>=0; i--) {
             ProcessRecord app = mLruProcesses.get(i);
-            app.lastPssTime = now;
-            mPendingPssProcesses.add(app);
+            if (memLowered || now > (app.lastStateTime+ProcessList.PSS_ALL_INTERVAL)) {
+                app.pssProcState = app.setProcState;
+                app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, true,
+                        mSleeping, now);
+                mPendingPssProcesses.add(app);
+            }
         }
         mBgHandler.sendEmptyMessage(COLLECT_PSS_BG_MSG);
     }
@@ -14459,32 +14457,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.setRawAdj = app.curRawAdj;
         }
 
-        if (!mSleeping) {
-            if (app == TOP_APP && now > (app.lastPssTime+PSS_TOP_INTERVAL)) {
-                // For the current top application we will very aggressively collect
-                // PSS data to have a good measure of memory use while in the foreground.
-                requestPssLocked(app, now, true);
-            } else if (app.curAdj <= ProcessList.PERCEPTIBLE_APP_ADJ
-                    && now > (app.lastPssTime+PSS_TOP_INTERVAL)) {
-                // For any unkillable processes, we will more regularly collect their PSS
-                // since they have a significant impact on the memory state of the device.
-                requestPssLocked(app, now, true);
-            }
-        }
-
         if (app.curAdj != app.setAdj) {
             if (Process.setOomAdj(app.pid, app.curAdj)) {
                 if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(
                     TAG, "Set " + app.pid + " " + app.processName +
                     " adj " + app.curAdj + ": " + app.adjType);
-                if (app.setAdj == ProcessList.SERVICE_ADJ
-                        && app.curAdj == ProcessList.SERVICE_B_ADJ) {
-                    // If a service is dropping to the B list, it has been running for
-                    // a while, take a PSS snapshot.
-                    requestPssLocked(app, now, false);
-                } else if (now > (app.lastPssTime+PSS_MAX_INTERVAL)) {
-                    requestPssLocked(app, now, true);
-                }
                 app.setAdj = app.curAdj;
             } else {
                 success = false;
@@ -14542,17 +14519,37 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         }
+        if (app.setProcState < 0 || ProcessList.procStatesDifferForMem(app.curProcState,
+                app.setProcState)) {
+            if (DEBUG_PSS) Slog.d(TAG, "Process state change from " + app.setProcState
+                    + " to " + app.curProcState + ": " + app);
+            app.lastStateTime = now;
+            app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, true,
+                    mSleeping, now);
+        } else {
+            if (now > app.nextPssTime || (now > (app.lastPssTime+ProcessList.PSS_MAX_INTERVAL)
+                    && now > (app.lastStateTime+ProcessList.PSS_MIN_TIME_FROM_STATE_CHANGE))) {
+                requestPssLocked(app, app.setProcState);
+                app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, false,
+                        mSleeping, now);
+            }
+        }
         if (app.setProcState != app.curProcState) {
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG,
                     "Proc state change of " + app.processName
                     + " to " + app.curProcState);
             app.setProcState = app.curProcState;
-            app.procStateChanged = true;
             if (!doingAll) {
-                app.setProcessTrackerState(mProcessTracker.getMemFactorLocked(), now);
+                setProcessTrackerState(app, mProcessTracker.getMemFactorLocked(), now);
+            } else {
+                app.procStateChanged = true;
             }
         }
         return success;
+    }
+
+    private final void setProcessTrackerState(ProcessRecord proc, int memFactor, long now) {
+        proc.baseProcessTracker.setState(proc.repProcState, memFactor, now, proc.pkgList);
     }
 
     private final boolean updateOomAdjLocked(ProcessRecord app, int cachedAdj,
@@ -14835,7 +14832,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=N-1; i>=0; i--) {
                 ProcessRecord app = mLruProcesses.get(i);
                 if (allChanged || app.procStateChanged) {
-                    app.setProcessTrackerState(trackerMemFactor, now);
+                    setProcessTrackerState(app, trackerMemFactor, now);
+                    app.procStateChanged = false;
                 }
                 if (app.curProcState >= ActivityManager.PROCESS_STATE_HOME
                         && !app.killedBackground) {
@@ -14924,7 +14922,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=N-1; i>=0; i--) {
                 ProcessRecord app = mLruProcesses.get(i);
                 if (allChanged || app.procStateChanged) {
-                    app.setProcessTrackerState(ProcessTracker.ADJ_MEM_FACTOR_NORMAL, now);
+                    setProcessTrackerState(app, trackerMemFactor, now);
+                    app.procStateChanged = false;
                 }
                 if ((app.curProcState >= ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND
                         || app.systemNoUi) && app.pendingUiClean) {
@@ -14952,7 +14951,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (allChanged) {
-            requestPssAllProcsLocked(now, false);
+            requestPssAllProcsLocked(now, false, mProcessTracker.isMemFactorLowered());
         }
 
         if (mProcessTracker.shouldWriteNowLocked(now)) {
