@@ -688,7 +688,7 @@ Summary:
 
 
   
-    extends Object<br/>
+    extends <a href="http://developer.android.com/reference/java/lang/Object.html">Object</a><br/>
   
   
   
@@ -713,7 +713,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
+        <td colspan="2" class="jd-inheritance-class-cell"><a href="http://developer.android.com/reference/java/lang/Object.html">java.lang.Object</a></td>
     </tr>
     
 
@@ -756,7 +756,7 @@ Summary:
  ActivityRecognitionClient mActivityRecognitionClient =
          new ActivityRecognitionClient(this, this, this);
  mActivityRecognitionClient.connect();
-
+ 
   // Called when a connection to the ActivityRecognitionService has been established.
  public void onConnected(Bundle connectionHint) {
      Intent intent = new Intent(this, MyIntentService.class);
@@ -765,7 +765,7 @@ Summary:
      mActivityRecognitionClient.requestActivityUpdates(30000, callbackIntent);
  }
  </pre>
- To receive activity detections, put the following in a class that extends <code><a href="/reference/android/app/IntentService.html">IntentService</a></code>:
+ To receive activity detections, put the following in a class that extends <code><a href="/http://developer.android.com/reference/android/app/IntentService.html">IntentService</a></code>:
  <pre class="prettyprint">
  protected void onHandleIntent(Intent intent) {
      if (ActivityRecognitionResult.hasResult(intent)) {
@@ -842,7 +842,7 @@ Summary:
             </nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#ActivityRecognitionClient(android.content.Context, com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks, com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">ActivityRecognitionClient</a></span>(Context context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectedListener, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#ActivityRecognitionClient(android.content.Context, com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks, com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener)">ActivityRecognitionClient</a></span>(<a href="http://developer.android.com/reference/android/content/Context.html">Context</a> context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectedListener, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</nobr>
         
         <div class="jd-descrdiv">Creates a <code><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html">ActivityRecognitionClient</a></code>.</div>
   
@@ -1021,7 +1021,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#removeActivityUpdates(android.app.PendingIntent)">removeActivityUpdates</a></span>(PendingIntent callbackIntent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#removeActivityUpdates(android.app.PendingIntent)">removeActivityUpdates</a></span>(<a href="http://developer.android.com/reference/android/app/PendingIntent.html">PendingIntent</a> callbackIntent)</nobr>
         
         <div class="jd-descrdiv">Removes all activity updates for the specified PendingIntent.</div>
   
@@ -1039,7 +1039,7 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#requestActivityUpdates(long, android.app.PendingIntent)">requestActivityUpdates</a></span>(long detectionIntervalMillis, PendingIntent callbackIntent)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/location/ActivityRecognitionClient.html#requestActivityUpdates(long, android.app.PendingIntent)">requestActivityUpdates</a></span>(long detectionIntervalMillis, <a href="http://developer.android.com/reference/android/app/PendingIntent.html">PendingIntent</a> callbackIntent)</nobr>
         
         <div class="jd-descrdiv">Register for activity recognition updates.</div>
   
@@ -1105,7 +1105,7 @@ Summary:
           class="jd-expando-trigger-img" /></a>
 From class
 
-  java.lang.Object
+  <a href="http://developer.android.com/reference/java/lang/Object.html">java.lang.Object</a>
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -1124,7 +1124,7 @@ From class
             
             
             
-            Object</nobr>
+            <a href="http://developer.android.com/reference/java/lang/Object.html">Object</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -1143,7 +1143,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(Object arg0)</nobr>
+        <span class="sympad">equals</span>(<a href="http://developer.android.com/reference/java/lang/Object.html">Object</a> arg0)</nobr>
         
   </td></tr>
 
@@ -1172,7 +1172,7 @@ From class
             final
             
             
-            Class&lt;?&gt;</nobr>
+            <a href="http://developer.android.com/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -1236,7 +1236,7 @@ From class
             
             
             
-            String</nobr>
+            <a href="http://developer.android.com/reference/java/lang/String.html">String</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -1555,7 +1555,7 @@ From interface
         
       </span>
       <span class="sympad">ActivityRecognitionClient</span>
-      <span class="normal">(Context context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectedListener, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</span>
+      <span class="normal">(<a href="http://developer.android.com/reference/android/content/Context.html">Context</a> context, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.ConnectionCallbacks.html">GooglePlayServicesClient.ConnectionCallbacks</a> connectedListener, <a href="/reference/com/google/android/gms/common/GooglePlayServicesClient.OnConnectionFailedListener.html">GooglePlayServicesClient.OnConnectionFailedListener</a> connectionFailedListener)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1944,7 +1944,7 @@ From interface
         void
       </span>
       <span class="sympad">removeActivityUpdates</span>
-      <span class="normal">(PendingIntent callbackIntent)</span>
+      <span class="normal">(<a href="http://developer.android.com/reference/android/app/PendingIntent.html">PendingIntent</a> callbackIntent)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1972,7 +1972,7 @@ From interface
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th>IllegalStateException</td>
+            <th><a href="http://developer.android.com/reference/java/lang/IllegalStateException.html">IllegalStateException</a></td>
             <td>if this method was called at an
              inappropriate time, such as before the LocationServiceClient
              has bound to the remote service.
@@ -1998,7 +1998,7 @@ From interface
         void
       </span>
       <span class="sympad">requestActivityUpdates</span>
-      <span class="normal">(long detectionIntervalMillis, PendingIntent callbackIntent)</span>
+      <span class="normal">(long detectionIntervalMillis, <a href="http://developer.android.com/reference/android/app/PendingIntent.html">PendingIntent</a> callbackIntent)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2039,7 +2039,7 @@ From interface
  background consuming resources, detected activities are delivered via an
  intent. The application specifies a PendingIntent callback (typically an
  IntentService) which will be called when activities are detected. See the
- documentation of <code><a href="/reference/android/app/PendingIntent.html">PendingIntent</a></code> for more details.
+ documentation of <code><a href="/http://developer.android.com/reference/android/app/PendingIntent.html">PendingIntent</a></code> for more details.
  <p>
  Applications can call this function several times in a row with the same
  callbackIntent to change the desired activity detection interval.
@@ -2067,7 +2067,7 @@ From interface
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th>IllegalStateException</td>
+            <th><a href="http://developer.android.com/reference/java/lang/IllegalStateException.html">IllegalStateException</a></td>
             <td>if this method was called at an
              inappropriate time, such as before the LocationServiceClient
              has bound to the remote service.

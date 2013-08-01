@@ -680,13 +680,15 @@ onkeyup="return search_changed(event, false, '/')" />
 
 
 <h2>Class Overview</h2>
-<p itemprop="articleBody">Listener interface for when a collection of people are loaded.</p>
+<p itemprop="articleBody">Listener interface for when a collection of people are loaded.
+
+     # @see #loadVisiblePeople</p>
 
 
 
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int)">loadPeople(OnPeopleLoadedListener, int)</a></code></li>
+      <ul class="nolist"><li><code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int)">loadPeople(PlusClient.OnPeopleLoadedListener, int)</a></code></li>
       </ul>
   </div>
 
@@ -755,7 +757,7 @@ onkeyup="return search_changed(event, false, '/')" />
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html#onPeopleLoaded(com.google.android.gms.common.ConnectionResult, com.google.android.gms.plus.model.people.PersonBuffer, java.lang.String)">onPeopleLoaded</a></span>(<a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a> status, <a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a> personBuffer, String nextPageToken)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/PlusClient.OnPeopleLoadedListener.html#onPeopleLoaded(com.google.android.gms.common.ConnectionResult, com.google.android.gms.plus.model.people.PersonBuffer, java.lang.String)">onPeopleLoaded</a></span>(<a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a> status, <a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a> personBuffer, <a href="http://developer.android.com/reference/java/lang/String.html">String</a> nextPageToken)</nobr>
         
   </td></tr>
 
@@ -821,7 +823,7 @@ onkeyup="return search_changed(event, false, '/')" />
         void
       </span>
       <span class="sympad">onPeopleLoaded</span>
-      <span class="normal">(<a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a> status, <a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a> personBuffer, String nextPageToken)</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/common/ConnectionResult.html">ConnectionResult</a> status, <a href="/reference/com/google/android/gms/plus/model/people/PersonBuffer.html">PersonBuffer</a> personBuffer, <a href="http://developer.android.com/reference/java/lang/String.html">String</a> nextPageToken)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -837,20 +839,13 @@ onkeyup="return search_changed(event, false, '/')" />
       <table class="jd-tagtable">
         <tr>
           <th>status</td>
-          <td>The resulting connection status of the
-            <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int)">loadPeople(OnPeopleLoadedListener, int)</a></code>
-            request.</td>
+          <td>The resulting connection status of the <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadPeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int)">loadPeople(PlusClient.OnPeopleLoadedListener, int)</a></code> or
+            <code><a href="/reference/com/google/android/gms/plus/PlusClient.html#loadVisiblePeople(com.google.android.gms.plus.PlusClient.OnPeopleLoadedListener, int, java.lang.String)">loadVisiblePeople(PlusClient.OnPeopleLoadedListener, int, String)</a></code> request.</td>
         </tr>
         <tr>
           <th>personBuffer</td>
           <td>The requested collection of people.  The listener must close this
-            object when finished.</td>
-        </tr>
-        <tr>
-          <th>nextPageToken</td>
-          <td>The continuation token, which is used to page through large result
-            sets. Provide this value in a subsequent request to return the next page of
-            results.
+            object when finished.
 </td>
         </tr>
       </table>
