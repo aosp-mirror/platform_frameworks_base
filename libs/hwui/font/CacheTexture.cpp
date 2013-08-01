@@ -108,8 +108,8 @@ CacheBlock* CacheBlock::removeBlock(CacheBlock* head, CacheBlock* blockToRemove)
 // CacheTexture
 ///////////////////////////////////////////////////////////////////////////////
 
-CacheTexture::CacheTexture(uint16_t width, uint16_t height, uint32_t maxQuadCount) :
-            mTexture(NULL), mTextureId(0), mWidth(width), mHeight(height),
+CacheTexture::CacheTexture(uint16_t width, uint16_t height, GLenum format, uint32_t maxQuadCount) :
+            mTexture(NULL), mTextureId(0), mWidth(width), mHeight(height), mFormat(format),
             mLinearFiltering(false), mDirty(false), mNumGlyphs(0),
             mMesh(NULL), mCurrentQuad(0), mMaxQuadCount(maxQuadCount),
             mCaches(Caches::getInstance()) {
@@ -182,7 +182,7 @@ void CacheTexture::allocateMesh() {
 
 void CacheTexture::allocateTexture() {
     if (!mTexture) {
-        mTexture = PixelBuffer::create(GL_ALPHA, mWidth, mHeight);
+        mTexture = PixelBuffer::create(mFormat, mWidth, mHeight);
     }
 
     if (!mTextureId) {
@@ -191,8 +191,8 @@ void CacheTexture::allocateTexture() {
         mCaches.bindTexture(mTextureId);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         // Initialize texture dimensions
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, mWidth, mHeight, 0,
-                GL_ALPHA, GL_UNSIGNED_BYTE, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, mFormat, mWidth, mHeight, 0,
+                mFormat, GL_UNSIGNED_BYTE, 0);
 
         const GLenum filtering = getLinearFiltering() ? GL_LINEAR : GL_NEAREST;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
@@ -217,8 +217,7 @@ bool CacheTexture::upload() {
         glPixelStorei(GL_UNPACK_ROW_LENGTH, mWidth);
     }
 
-    mTexture->upload(x, y, width, height, y * mWidth + x);
-
+    mTexture->upload(x, y, width, height);
     setDirty(false);
 
     return mHasES3;
@@ -232,6 +231,30 @@ void CacheTexture::setDirty(bool dirty) {
 }
 
 bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_t* retOriginY) {
+    switch (glyph.fMaskFormat) {
+        case SkMask::kA8_Format:
+            if (mFormat != GL_ALPHA) {
+#if DEBUG_FONT_RENDERER
+                ALOGD("fitBitmap: kA8_Format glyph cannot fit into texture format %x", mFormat);
+#endif
+                return false;
+            }
+            break;
+        case SkMask::kARGB32_Format:
+            if (mFormat != GL_RGBA) {
+#if DEBUG_FONT_RENDERER
+                ALOGD("fitBitmap: kARGB32_Format glyph cannot fit into texture format %x", mFormat);
+#endif
+                return false;
+            }
+            break;
+        default:
+#if DEBUG_FONT_RENDERER
+            ALOGD("fitBitmap: unknown glyph format %x encountered", glyph.fMaskFormat);
+#endif
+            return false;
+    }
+
     if (glyph.fHeight + TEXTURE_BORDER_SIZE * 2 > mHeight) {
         return false;
     }

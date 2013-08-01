@@ -9343,6 +9343,7 @@ package android.graphics {
     field public static final int ANTI_ALIAS_FLAG = 1; // 0x1
     field public static final int DEV_KERN_TEXT_FLAG = 256; // 0x100
     field public static final int DITHER_FLAG = 4; // 0x4
+    field public static final int EMBEDDED_BITMAP_TEXT_FLAG = 1024; // 0x400
     field public static final int FAKE_BOLD_TEXT_FLAG = 32; // 0x20
     field public static final int FILTER_BITMAP_FLAG = 2; // 0x2
     field public static final int HINTING_OFF = 0; // 0x0
