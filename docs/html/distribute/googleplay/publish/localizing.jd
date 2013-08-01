@@ -111,8 +111,8 @@ UI</a> for more information.</p>
 
 <p>In cases where your UI can't accommodate text in one of your target
 languages, you can create an <a
-href="{@docRoot}guide/topics/resources/providing-resources.
-html#AlternativeResources">alternative layout</a> for that language only.
+href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">alternative
+layout</a> for that language only.
 Android makes it easy to declare sets of layouts and other resources to load for
 specific languages, locales, screen sizes, and so on, simply by tagging them
 with the appropriate resource qualifiers. </p>

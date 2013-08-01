@@ -54,7 +54,8 @@ startpage=true
 </p>
 <p>
     This class describes how to use a {@link android.support.v4.content.CursorLoader} to run a
-    background query. Examples in this class use the {@link android.support.v4 v4 support library}
+    background query. Examples in this class use the <a
+    href="{@docRoot}tools/support-library/features.html#v4">v4 Support Library</a>
     versions of classes, which support platforms starting with Android 1.6.
 </p>
 <h2>Lessons</h2>
