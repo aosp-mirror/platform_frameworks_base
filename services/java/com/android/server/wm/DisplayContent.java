@@ -176,8 +176,18 @@ class DisplayContent {
         return mHomeStack;
     }
 
-    public void updateDisplayInfo() {
+    void updateDisplayInfo() {
         mDisplay.getDisplayInfo(mDisplayInfo);
+    }
+
+    void getLogicalDisplayRect(Rect out) {
+        updateDisplayInfo();
+        // Uses same calculation as in LogicalDisplay#configureDisplayInTransactionLocked.
+        int width = mDisplayInfo.logicalWidth;
+        int left = (mBaseDisplayWidth - width) / 2;
+        int height = mDisplayInfo.logicalHeight;
+        int top = (mBaseDisplayHeight - height) / 2;
+        out.set(left, top, left + width, top + height);
     }
 
     /** @return The number of tokens in all of the Tasks on this display. */

@@ -478,6 +478,11 @@ public interface WindowManagerPolicy {
             WindowManagerFuncs windowManagerFuncs);
 
     /**
+     * @return true if com.android.internal.R.bool#config_forceDefaultOrientation is true.
+     */
+    public boolean isDefaultOrientationForced();
+
+    /**
      * Called by window manager once it has the initial, default native
      * display dimensions.
      */

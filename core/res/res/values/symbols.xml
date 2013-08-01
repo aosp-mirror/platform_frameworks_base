@@ -281,7 +281,8 @@
   <java-symbol type="bool" name="config_dontPreferApn" />
   <java-symbol type="bool" name="config_speed_up_audio_on_mt_calls" />
   <java-symbol type="bool" name="config_useFixedVolume" />
-
+  <java-symbol type="bool" name="config_forceDefaultOrientation" />
+  
   <java-symbol type="integer" name="config_cursorWindowSize" />
   <java-symbol type="integer" name="config_extraFreeKbytesAdjust" />
   <java-symbol type="integer" name="config_extraFreeKbytesAbsolute" />
