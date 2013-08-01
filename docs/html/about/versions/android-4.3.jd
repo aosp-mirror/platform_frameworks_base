@@ -19,6 +19,7 @@ sdk.platform.apiLevel=18
     <ol>
       <li><a href="#BehaviorsIntents">If your app uses implicit intents...</a></li>
       <li><a href="#BehaviorsAccounts">If your app depends on accounts...</a></li>
+      <li><a href="#BehaviorsVideoView">If your app uses VideoView...</a></li>
     </ol>
   </li>
   <li><a href="#RestrictedProfiles">Restricted Profiles</a>
@@ -211,6 +212,21 @@ create their own accounts, then you can either disable your app features that re
 or allow restricted profiles to access the accounts created by the primary user. For more
 information, see the section
 below about <a href="#AccountsInProfile">Supporting accounts in a restricted profile</a>.</p>
+
+
+<h3 id="#BehaviorsVideoView">If your app uses VideoView...</h3>
+
+<p>Your video might appear smaller on Android 4.3.</p>
+
+<p>On previous versions of Android, the {@link android.widget.VideoView} widget incorrectly
+calculated the {@code "wrap_content"} value for {@link android.R.attr#layout_height} and {@link
+android.R.attr#layout_width} to be the same as {@code "match_parent"}. So while using {@code
+"wrap_content"} for the height or width may have previously provided your desired video layout,
+doing so may result in a much smaller video on Android 4.3 and higher. To fix the issue, replace
+{@code "wrap_content"} with {@code "match_parent"} and verify your video appears as expected on
+Android 4.3 as well as on older versions.</p>
+
+
 
 
 
