@@ -47,9 +47,9 @@ understand how to provide proper <em>Up</em> and <em>Back</em> navigation.</p>
 
 <p class="note"><strong>Note:</strong> Several elements of this class require the
 <a href="{@docRoot}tools/support-library/index.html">Support Library</a> APIs.
-If you have not used the Support Library before, follow the lesson about <a
-href="{@docRoot}training/basics/fragments/support-lib.html">Using the Support Library</a>
-to get your project set up.</p>
+If you have not used the Support Library before, follow the instructions
+in the <a href="{@docRoot}tools/support-library/setup.html">Support Library Setup</a>
+document.</p>
 
 
 <h2 id="lessons">Lessons</h2>
