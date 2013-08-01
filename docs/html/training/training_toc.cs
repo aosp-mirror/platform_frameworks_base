@@ -129,10 +129,6 @@ include the action bar on devices running Android 2.1 or higher."
             >Building a Dynamic UI with Fragments</a>
         </div>
         <ul>
-          <li><a href="<?cs var:toroot ?>training/basics/fragments/support-lib.html">
-            Using the Support Library
-          </a>
-          </li>
           <li><a href="<?cs var:toroot ?>training/basics/fragments/creating.html">
             Creating a Fragment
           </a>
