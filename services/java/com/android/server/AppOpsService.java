@@ -63,6 +63,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     // Write at most every 30 minutes.
     static final long WRITE_DELAY = DEBUG ? 1000 : 30*60*1000;
 
+    static final int CURRENT_VERSION = 1;
+
     Context mContext;
     final AtomicFile mFile;
     final Handler mHandler;
@@ -631,6 +633,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                         throw new IllegalStateException("no start tag found");
                     }
 
+                    String versStr = parser.getAttributeValue(null, "vers");
+                    int vers = versStr != null ? Integer.parseInt(versStr) : 0;
+
                     int outerDepth = parser.getDepth();
                     while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
                             && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
@@ -640,7 +645,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                         String tagName = parser.getName();
                         if (tagName.equals("pkg")) {
-                            readPackage(parser);
+                            readPackage(parser, vers);
                         } else {
                             Slog.w(TAG, "Unknown element under <app-ops>: "
                                     + parser.getName());
@@ -673,7 +678,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    void readPackage(XmlPullParser parser) throws NumberFormatException,
+    void readPackage(XmlPullParser parser, int vers) throws NumberFormatException,
             XmlPullParserException, IOException {
         String pkgName = parser.getAttributeValue(null, "n");
         int outerDepth = parser.getDepth();
@@ -686,7 +691,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
             String tagName = parser.getName();
             if (tagName.equals("uid")) {
-                readUid(parser, pkgName);
+                readUid(parser, vers, pkgName);
             } else {
                 Slog.w(TAG, "Unknown element under <pkg>: "
                         + parser.getName());
@@ -695,7 +700,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    void readUid(XmlPullParser parser, String pkgName) throws NumberFormatException,
+    void readUid(XmlPullParser parser, int vers, String pkgName) throws NumberFormatException,
             XmlPullParserException, IOException {
         int uid = Integer.parseInt(parser.getAttributeValue(null, "n"));
         int outerDepth = parser.getDepth();
@@ -711,7 +716,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                 Op op = new Op(Integer.parseInt(parser.getAttributeValue(null, "n")));
                 String mode = parser.getAttributeValue(null, "m");
                 if (mode != null) {
-                    op.mode = Integer.parseInt(mode);
+                    if (vers < CURRENT_VERSION && op.op != AppOpsManager.OP_POST_NOTIFICATION) {
+                        Slog.w(TAG, "AppOps vers " + vers + ": drop mode from "
+                                + pkgName + "/" + uid + " op " + op.op);
+                    } else {
+                        op.mode = Integer.parseInt(mode);
+                    }
                 }
                 String time = parser.getAttributeValue(null, "t");
                 if (time != null) {
@@ -761,6 +771,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 out.setOutput(stream, "utf-8");
                 out.startDocument(null, true);
                 out.startTag(null, "app-ops");
+                out.attribute(null, "vers", Integer.toString(CURRENT_VERSION));
 
                 if (allOps != null) {
                     String lastPkg = null;
