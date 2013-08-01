@@ -1606,7 +1606,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             Slog.v(TAG, "enqueueNotificationInternal: pkg=" + pkg + " id=" + id + " notification=" + notification);
         }
         checkCallerIsSystemOrSameApp(pkg);
-        final boolean isSystemNotification = isCallerSystem() || ("android".equals(pkg));
+        final boolean isSystemNotification = isUidSystem(callingUid) || ("android".equals(pkg));
 
         userId = ActivityManager.handleIncomingUser(callingPid,
                 callingUid, userId, true, false, "enqueueNotification", pkg);
@@ -2084,12 +2084,16 @@ public class NotificationManagerService extends INotificationManager.Stub
         cancelAllNotificationsInt(pkg, 0, Notification.FLAG_FOREGROUND_SERVICE, true, userId);
     }
 
-    // Return true if the caller is a system or phone UID and therefore should not have
+    // Return true if the UID is a system or phone UID and therefore should not have
     // any notifications or toasts blocked.
-    boolean isCallerSystem() {
-        final int uid = Binder.getCallingUid();
+    boolean isUidSystem(int uid) {
         final int appid = UserHandle.getAppId(uid);
         return (appid == Process.SYSTEM_UID || appid == Process.PHONE_UID || uid == 0);
+    }
+
+    // same as isUidSystem(int, int) for the Binder caller's UID.
+    boolean isCallerSystem() {
+        return isUidSystem(Binder.getCallingUid());
     }
 
     void checkCallerIsSystem() {
