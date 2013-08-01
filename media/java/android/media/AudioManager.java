@@ -1817,8 +1817,6 @@ public class AudioManager {
      */
     public static final int AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK = 3;
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
      * Used to indicate a temporary request of audio focus, anticipated to last a short
      * amount of time, during which no other applications, or system components, should play
      * anything. Examples of exclusive and transient audio focus requests are voice
@@ -1991,6 +1989,9 @@ public class AudioManager {
      *      for the playback of driving directions, or notifications sounds.
      *      Use {@link #AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK} to indicate also that it's ok for
      *      the previous focus owner to keep playing if it ducks its audio output.
+     *      Alternatively use {@link #AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE} for a temporary request
+     *      that benefits from the system not playing disruptive sounds like notifications, for
+     *      usecases such as voice memo recording, or speech recognition.
      *      Use {@link #AUDIOFOCUS_GAIN} for a focus request of unknown duration such
      *      as the playback of a song or a video.
      *  @return {@link #AUDIOFOCUS_REQUEST_FAILED} or {@link #AUDIOFOCUS_REQUEST_GRANTED}

@@ -11651,6 +11651,7 @@ package android.media {
     field public static final int ADJUST_SAME = 0; // 0x0
     field public static final int AUDIOFOCUS_GAIN = 1; // 0x1
     field public static final int AUDIOFOCUS_GAIN_TRANSIENT = 2; // 0x2
+    field public static final int AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE = 4; // 0x4
     field public static final int AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK = 3; // 0x3
     field public static final int AUDIOFOCUS_LOSS = -1; // 0xffffffff
     field public static final int AUDIOFOCUS_LOSS_TRANSIENT = -2; // 0xfffffffe
