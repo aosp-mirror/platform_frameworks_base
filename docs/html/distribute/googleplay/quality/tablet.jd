@@ -501,8 +501,11 @@ to a replacement feature (also see the section below on hardware features).</li>
 
 <p>To ensure the broadest possible distribution to tablets, make sure that your
 app properly targets the Android versions that support tablets. Initial support for
-tablets was added in <a href="{@docRoot}about/versions/android-3.0">Android 3.0</a> (API level 11). Unified UI
-framework support for tablets, phones, and other devices was introduced in <a href="{@docRoot}about/versions/android-4.0">Android 4.0</a> (API level 14) and is supported in later versions.
+tablets was added in <a href="{@docRoot}about/versions/android-3.0.html">Android 3.0</a>
+(API level 11). Unified UI
+framework support for tablets, phones, and other devices was introduced in <a
+href="{@docRoot}about/versions/android-4.0.html">Android 4.0</a> (API level 14) and is
+supported in later versions.
 
 <p>You can set the app's
 range of targeted Android versions in the manifest file, in the
@@ -809,7 +812,7 @@ element in your app.</p>
     </li>
     <li>
       <a href=
-      "{@docRoot}distribute/googleplay/promote/device-art.html">Device Art
+      "{@docRoot}distribute/promote/device-art.html">Device Art
       Generator</a>&mdash;Drag and drop tool that lets you instantly create production-
       ready art showing your app running on a tablet device. 
     </li>
