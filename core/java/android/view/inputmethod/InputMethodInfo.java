@@ -79,7 +79,7 @@ public final class InputMethodInfo implements Parcelable {
      */
     private final ArrayList<InputMethodSubtype> mSubtypes = new ArrayList<InputMethodSubtype>();
 
-    private boolean mIsAuxIme;
+    private final boolean mIsAuxIme;
 
     /**
      * Cavert: mForceDefault must be false for production. This flag is only for test.
@@ -113,7 +113,7 @@ public final class InputMethodInfo implements Parcelable {
         mService = service;
         ServiceInfo si = service.serviceInfo;
         mId = new ComponentName(si.packageName, si.name).flattenToShortString();
-        mIsAuxIme = true;
+        boolean isAuxIme = true;
         mForceDefault = false;
 
         PackageManager pm = context.getPackageManager();
@@ -184,7 +184,7 @@ public final class InputMethodInfo implements Parcelable {
                             .setIsAsciiCapable(a.getBoolean(com.android.internal.R.styleable
                                     .InputMethod_Subtype_isAsciiCapable, false)).build();
                     if (!subtype.isAuxiliary()) {
-                        mIsAuxIme = false;
+                        isAuxIme = false;
                     }
                     mSubtypes.add(subtype);
                 }
@@ -197,7 +197,7 @@ public final class InputMethodInfo implements Parcelable {
         }
 
         if (mSubtypes.size() == 0) {
-            mIsAuxIme = false;
+            isAuxIme = false;
         }
 
         if (additionalSubtypesMap != null && additionalSubtypesMap.containsKey(mId)) {
@@ -215,6 +215,7 @@ public final class InputMethodInfo implements Parcelable {
         }
         mSettingsActivityName = settingsActivityComponent;
         mIsDefaultResId = isDefaultResId;
+        mIsAuxIme = isAuxIme;
     }
 
     InputMethodInfo(Parcel source) {
