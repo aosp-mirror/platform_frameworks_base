@@ -729,7 +729,7 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, int
     if (width * height * radius >= RS_MIN_INPUT_CUTOFF) {
         uint8_t* outImage = (uint8_t*) memalign(RS_CPU_ALLOCATION_ALIGNMENT, width * height);
 
-        if (mRs.get() == 0) {
+        if (mRs == 0) {
             mRs = new RSC::RS();
             if (!mRs->init(true, true)) {
                 ALOGE("blur RS failed to init");
@@ -739,11 +739,13 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, int
             mRsScript = new RSC::ScriptIntrinsicBlur(mRs, mRsElement);
         }
 
-        sp<const RSC::Type> t = RSC::Type::create(mRs, mRsElement, width, height, 0);
-        sp<RSC::Allocation> ain = RSC::Allocation::createTyped(mRs, t, RS_ALLOCATION_MIPMAP_NONE,
-                RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_SHARED, *image);
-        sp<RSC::Allocation> aout = RSC::Allocation::createTyped(mRs, t, RS_ALLOCATION_MIPMAP_NONE,
-                RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_SHARED, outImage);
+        RSC::sp<const RSC::Type> t = RSC::Type::create(mRs, mRsElement, width, height, 0);
+        RSC::sp<RSC::Allocation> ain = RSC::Allocation::createTyped(mRs, t,
+                RS_ALLOCATION_MIPMAP_NONE, RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_SHARED,
+                *image);
+        RSC::sp<RSC::Allocation> aout = RSC::Allocation::createTyped(mRs, t,
+                RS_ALLOCATION_MIPMAP_NONE, RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_SHARED,
+                outImage);
 
         mRsScript->setRadius(radius);
         mRsScript->blur(ain, aout);

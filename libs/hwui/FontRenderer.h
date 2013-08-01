@@ -35,10 +35,12 @@
 #include "Properties.h"
 
 #ifdef ANDROID_ENABLE_RENDERSCRIPT
+#include "RenderScript.h"
 namespace RSC {
     class Element;
     class RS;
     class ScriptIntrinsicBlur;
+    class sp;
 }
 #endif
 
@@ -206,9 +208,9 @@ private:
 
 #ifdef ANDROID_ENABLE_RENDERSCRIPT
     // RS constructs
-    sp<RSC::RS> mRs;
-    sp<const RSC::Element> mRsElement;
-    sp<RSC::ScriptIntrinsicBlur> mRsScript;
+    RSC::sp<RSC::RS> mRs;
+    RSC::sp<const RSC::Element> mRsElement;
+    RSC::sp<RSC::ScriptIntrinsicBlur> mRsScript;
 #endif
 
     static void computeGaussianWeights(float* weights, int32_t radius);
