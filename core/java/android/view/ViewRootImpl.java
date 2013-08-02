@@ -608,6 +608,11 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    /** Whether the window is in local focus mode or not */
+    private boolean isInLocalFocusMode() {
+        return (mWindowAttributes.flags & WindowManager.LayoutParams.FLAG_LOCAL_FOCUS_MODE) != 0;
+    }
+
     void destroyHardwareResources() {
         if (mAttachInfo.mHardwareRenderer != null) {
             if (mAttachInfo.mHardwareRenderer.isEnabled()) {
@@ -1818,7 +1823,7 @@ public final class ViewRootImpl implements ViewParent,
         mNewSurfaceNeeded = false;
         mViewVisibility = viewVisibility;
 
-        if (mAttachInfo.mHasWindowFocus) {
+        if (mAttachInfo.mHasWindowFocus && !isInLocalFocusMode()) {
             final boolean imTarget = WindowManager.LayoutParams
                     .mayUseInputMethod(mWindowAttributes.flags);
             if (imTarget != mLastWasImTarget) {
@@ -2906,7 +2911,7 @@ public final class ViewRootImpl implements ViewParent,
     private final static int MSG_RESIZED = 4;
     private final static int MSG_RESIZED_REPORT = 5;
     private final static int MSG_WINDOW_FOCUS_CHANGED = 6;
-    private final static int MSG_DISPATCH_KEY = 7;
+    private final static int MSG_DISPATCH_INPUT_EVENT = 7;
     private final static int MSG_DISPATCH_APP_VISIBILITY = 8;
     private final static int MSG_DISPATCH_GET_NEW_SURFACE = 9;
     private final static int MSG_DISPATCH_KEY_FROM_IME = 11;
@@ -2941,8 +2946,8 @@ public final class ViewRootImpl implements ViewParent,
                     return "MSG_RESIZED_REPORT";
                 case MSG_WINDOW_FOCUS_CHANGED:
                     return "MSG_WINDOW_FOCUS_CHANGED";
-                case MSG_DISPATCH_KEY:
-                    return "MSG_DISPATCH_KEY";
+                case MSG_DISPATCH_INPUT_EVENT:
+                    return "MSG_DISPATCH_INPUT_EVENT";
                 case MSG_DISPATCH_APP_VISIBILITY:
                     return "MSG_DISPATCH_APP_VISIBILITY";
                 case MSG_DISPATCH_GET_NEW_SURFACE:
@@ -3092,7 +3097,8 @@ public final class ViewRootImpl implements ViewParent,
 
                     InputMethodManager imm = InputMethodManager.peekInstance();
                     if (mView != null) {
-                        if (hasWindowFocus && imm != null && mLastWasImTarget) {
+                        if (hasWindowFocus && imm != null && mLastWasImTarget &&
+                                !isInLocalFocusMode()) {
                             imm.startGettingWindowFocus(mView);
                         }
                         mAttachInfo.mKeyDispatchState.reset();
@@ -3103,7 +3109,7 @@ public final class ViewRootImpl implements ViewParent,
                     // Note: must be done after the focus change callbacks,
                     // so all of the view state is set up correctly.
                     if (hasWindowFocus) {
-                        if (imm != null && mLastWasImTarget) {
+                        if (imm != null && mLastWasImTarget && !isInLocalFocusMode()) {
                             imm.onWindowFocus(mView, mView.findFocus(),
                                     mWindowAttributes.softInputMode,
                                     !mHasHadWindowFocus, mWindowAttributes.flags);
@@ -3131,8 +3137,8 @@ public final class ViewRootImpl implements ViewParent,
             case MSG_DIE:
                 doDie();
                 break;
-            case MSG_DISPATCH_KEY: {
-                KeyEvent event = (KeyEvent)msg.obj;
+            case MSG_DISPATCH_INPUT_EVENT: {
+                InputEvent event = (InputEvent)msg.obj;
                 enqueueInputEvent(event, null, 0, true);
             } break;
             case MSG_DISPATCH_KEY_FROM_IME: {
@@ -3222,7 +3228,9 @@ public final class ViewRootImpl implements ViewParent,
 
         // tell the window manager
         try {
-            mWindowSession.setInTouchMode(inTouchMode);
+            if (!isInLocalFocusMode()) {
+                mWindowSession.setInTouchMode(inTouchMode);
+            }
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
@@ -3624,7 +3632,7 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         protected int onProcess(QueuedInputEvent q) {
-            if (mLastWasImTarget) {
+            if (mLastWasImTarget && !isInLocalFocusMode()) {
                 InputMethodManager imm = InputMethodManager.peekInstance();
                 if (imm != null) {
                     final InputEvent event = q.mEvent;
@@ -5666,8 +5674,8 @@ public final class ViewRootImpl implements ViewParent,
         mInvalidateOnAnimationRunnable.removeView(view);
     }
 
-    public void dispatchKey(KeyEvent event) {
-        Message msg = mHandler.obtainMessage(MSG_DISPATCH_KEY, event);
+    public void dispatchInputEvent(InputEvent event) {
+        Message msg = mHandler.obtainMessage(MSG_DISPATCH_INPUT_EVENT, event);
         msg.setAsynchronous(true);
         mHandler.sendMessage(msg);
     }
@@ -5697,7 +5705,7 @@ public final class ViewRootImpl implements ViewParent,
                         flags, event.getSource(), null);
                 fallbackAction.recycle();
 
-                dispatchKey(fallbackEvent);
+                dispatchInputEvent(fallbackEvent);
             }
         }
     }
