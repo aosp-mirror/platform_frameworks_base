@@ -169,7 +169,7 @@ public class WifiP2pServiceRequest implements Parcelable {
         }
 
         // check whether query is hex string.
-        query = query.toLowerCase();
+        query = query.toLowerCase(Locale.ROOT);
         char[] chars = query.toCharArray();
         for (char c: chars) {
             if (!((c >= '0' && c <= '9') ||
