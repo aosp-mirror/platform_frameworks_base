@@ -66,6 +66,8 @@ final class RemotePrintSpooler {
 
     private final CreatePrintJobCaller mCreatePrintJobCaller = new CreatePrintJobCaller();
 
+    private final CancelPrintJobCaller mCancelPrintJobCaller = new CancelPrintJobCaller();
+
     private final GetPrintJobInfoCaller mGetPrintJobInfoCaller = new GetPrintJobInfoCaller();
 
     private final SetPrintJobStateCaller mSetPrintJobStatusCaller = new SetPrintJobStateCaller();
@@ -161,6 +163,31 @@ final class RemotePrintSpooler {
         return null;
     }
 
+    public final boolean cancelPrintJob(int printJobId, int appId) {
+        throwIfCalledOnMainThread();
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            mCanUnbind = false;
+        }
+        if (DEBUG) {
+            Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] cancelPrintJob()");
+        }
+        try {
+            return mCancelPrintJobCaller.cancelPrintJob(getRemoteInstanceLazy(),
+                    printJobId, appId);
+        } catch (RemoteException re) {
+            Slog.e(LOG_TAG, "Error canceling print job.", re);
+        } catch (TimeoutException te) {
+            Slog.e(LOG_TAG, "Error canceling print job.", te);
+        } finally {
+            synchronized (mLock) {
+                mCanUnbind = true;
+                mLock.notifyAll();
+            }
+        }
+        return false;
+    }
+
     public final void writePrintJobData(ParcelFileDescriptor fd, int printJobId) {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
@@ -212,7 +239,7 @@ final class RemotePrintSpooler {
         return null;
     }
 
-    public final boolean setPrintJobState(int printJobId, int state, CharSequence error) {
+    public final boolean setPrintJobState(int printJobId, int state) {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
             throwIfDestroyedLocked();
@@ -223,7 +250,7 @@ final class RemotePrintSpooler {
         }
         try {
             return mSetPrintJobStatusCaller.setPrintJobState(getRemoteInstanceLazy(),
-                    printJobId, state, error);
+                    printJobId, state);
         } catch (RemoteException re) {
             Slog.e(LOG_TAG, "Error setting print job state.", re);
         } catch (TimeoutException te) {
@@ -459,6 +486,27 @@ final class RemotePrintSpooler {
         }
     }
 
+    private static final class CancelPrintJobCaller extends TimedRemoteCaller<Boolean> {
+        private final IPrintSpoolerCallbacks mCallback;
+
+        public CancelPrintJobCaller() {
+            super(TimedRemoteCaller.DEFAULT_CALL_TIMEOUT_MILLIS);
+            mCallback = new BasePrintSpoolerServiceCallbacks() {
+                @Override
+                public void onCancelPrintJobResult(boolean canceled, int sequence) {
+                    onRemoteMethodResult(canceled, sequence);
+                }
+            };
+        }
+
+        public boolean cancelPrintJob(IPrintSpooler target, int printJobId,
+                int appId) throws RemoteException, TimeoutException {
+            final int sequence = onBeforeRemoteCall();
+            target.cancelPrintJob(printJobId, mCallback, appId, sequence);
+            return getResultTimed(sequence);
+        }
+    }
+
     private static final class GetPrintJobInfoCaller extends TimedRemoteCaller<PrintJobInfo> {
         private final IPrintSpoolerCallbacks mCallback;
 
@@ -494,9 +542,9 @@ final class RemotePrintSpooler {
         }
 
         public boolean setPrintJobState(IPrintSpooler target, int printJobId,
-                int status, CharSequence error) throws RemoteException, TimeoutException {
+                int status) throws RemoteException, TimeoutException {
             final int sequence = onBeforeRemoteCall();
-            target.setPrintJobState(printJobId, status, error, mCallback, sequence);
+            target.setPrintJobState(printJobId, status, mCallback, sequence);
             return getResultTimed(sequence);
         }
     }

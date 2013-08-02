@@ -22,6 +22,7 @@ import android.print.PrintAttributes.Margins;
 import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Resolution;
 import android.print.PrintAttributes.Tray;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,6 +59,7 @@ public final class PrinterInfo implements Parcelable {
     // TODO: Add printer status constants.
 
     private PrinterId mId;
+    private CharSequence mLabel;
     private int mStatus;
 
     private Margins mMinMargins = DEFAULT_MARGINS;
@@ -90,6 +92,7 @@ public final class PrinterInfo implements Parcelable {
      */
     public void copyFrom(PrinterInfo other) {
         mId = other.mId;
+        mLabel = other.mLabel;
         mStatus = other.mStatus;
 
         mMinMargins = other.mMinMargins;
@@ -156,6 +159,15 @@ public final class PrinterInfo implements Parcelable {
      */
     public PrinterId getId() {
         return mId;
+    }
+
+    /**
+     * Gets the human readable printer label.
+     *
+     * @return The human readable label.
+     */
+    public CharSequence getLabel() {
+        return mLabel;
     }
 
     /**
@@ -331,6 +343,7 @@ public final class PrinterInfo implements Parcelable {
 
     private PrinterInfo(Parcel parcel) {
         mId = parcel.readParcelable(null);
+        mLabel = parcel.readCharSequence();
         mStatus = parcel.readInt();
 
         mMinMargins = readMargins(parcel);
@@ -356,6 +369,7 @@ public final class PrinterInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeParcelable(mId, flags);
+        parcel.writeCharSequence(mLabel);
         parcel.writeInt(mStatus);
 
         writeMargins(mMinMargins, parcel);
@@ -378,6 +392,7 @@ public final class PrinterInfo implements Parcelable {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((mId == null) ? 0 : mId.hashCode());
+        result = prime * result + ((mLabel == null) ? 0 : mLabel.hashCode());
         result = prime * result + mStatus;
         result = prime * result + ((mMinMargins == null) ? 0 : mMinMargins.hashCode());
         result = prime * result + ((mMediaSizes == null) ? 0 : mMediaSizes.hashCode());
@@ -410,6 +425,9 @@ public final class PrinterInfo implements Parcelable {
                 return false;
             }
         } else if (!mId.equals(other.mId)) {
+            return false;
+        }
+        if (!TextUtils.equals(mLabel, other.mLabel)) {
             return false;
         }
         if (mStatus != other.mStatus) {
@@ -480,6 +498,7 @@ public final class PrinterInfo implements Parcelable {
         StringBuilder builder = new StringBuilder();
         builder.append("PrinterInfo{");
         builder.append(mId).append(", \"");
+        builder.append(mLabel);
         builder.append("\"}");
         return builder.toString();
     }
@@ -620,14 +639,20 @@ public final class PrinterInfo implements Parcelable {
          * Creates a new instance.
          *
          * @param printerId The printer id. Cannot be null.
+         * @param label The human readable printer label. Cannot be null or empty.
          *
          * @throws IllegalArgumentException If the printer id is null.
+         * @throws IllegalArgumentException If the label is empty.
          */
-        public Builder(PrinterId printerId) {
+        public Builder(PrinterId printerId, CharSequence label) {
             if (printerId == null) {
                 throw new IllegalArgumentException("printerId cannot be null.");
             }
+            if (TextUtils.isEmpty(label)) {
+                throw new IllegalArgumentException("label cannot be empty.");
+            }
             mPrototype = new PrinterInfo();
+            mPrototype.mLabel = label;
             mPrototype.mId = printerId;
         }
 

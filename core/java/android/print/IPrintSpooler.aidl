@@ -40,8 +40,10 @@ oneway interface IPrintSpooler {
     void createPrintJob(String printJobName, in IPrintClient client,
             in IPrintDocumentAdapter printAdapter, in PrintAttributes attributes,
             IPrintSpoolerCallbacks callback, int appId, int sequence);
-    void setPrintJobState(int printJobId, int status, CharSequence error,
-            IPrintSpoolerCallbacks callback, int sequence);
+    void cancelPrintJob(int printJobId, IPrintSpoolerCallbacks callback,
+            int appId, int sequence);
+    void setPrintJobState(int printJobId, int status, IPrintSpoolerCallbacks callback,
+            int sequence);
     void setPrintJobTag(int printJobId, String tag, IPrintSpoolerCallbacks callback,
             int sequence);
     void writePrintJobData(in ParcelFileDescriptor fd, int printJobId);

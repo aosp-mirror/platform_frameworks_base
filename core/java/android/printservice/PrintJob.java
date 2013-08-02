@@ -121,7 +121,7 @@ public final class PrintJob {
      */
     public boolean start() {
         if (isQueued()) {
-            return setState(PrintJobInfo.STATE_STARTED, null);
+            return setState(PrintJobInfo.STATE_STARTED);
         }
         return false;
     }
@@ -136,43 +136,41 @@ public final class PrintJob {
      */
     public boolean complete() {
         if (isStarted()) {
-            return setState(PrintJobInfo.STATE_COMPLETED, null);
+            return setState(PrintJobInfo.STATE_COMPLETED);
         }
         return false;
     }
 
     /**
      * Fails the print job. You should call this method if {@link
-     * #isQueued()} or {@link #isStarted()} returns true you failed
-     * while printing.
+     * #isStarted()} returns true you filed while printing.
      *
-     * @param error The human readable, short, and translated reason
-     * for the failure.
+     * @param error The reason for the failure.
      * @return Whether the job was failed.
      *
-     * @see #isQueued()
      * @see #isStarted()
      */
     public boolean fail(CharSequence error) {
-        if (isQueued() || isStarted()) {
-            return setState(PrintJobInfo.STATE_FAILED, error);
+        // TODO: Propagate the error message to the UI.
+        if (isStarted()) {
+            return setState(PrintJobInfo.STATE_FAILED);
         }
         return false;
     }
 
     /**
      * Cancels the print job. You should call this method if {@link
-     * #isQueued()} or {@link #isStarted()} returns true and you canceled
-     * the print job as a response to a call to {@link PrintService
-     * #onRequestCancelPrintJob(PrintJob)}.
+     * #isStarted()} returns true and you canceled the print job as a
+     * response to a call to {@link PrintService#onRequestCancelPrintJob(
+     * PrintJob)}.
      *
      * @return Whether the job as canceled.
      *
      * @see #isStarted()
      */
     public boolean cancel() {
-        if (isQueued() || isStarted()) {
-            return setState(PrintJobInfo.STATE_CANCELED, null);
+        if (isStarted()) {
+            return setState(PrintJobInfo.STATE_CANCELED);
         }
         return false;
     }
@@ -224,14 +222,13 @@ public final class PrintJob {
                 || state == PrintJobInfo.STATE_CANCELED;
     }
 
-    private boolean setState(int state, CharSequence error) {
+    private boolean setState(int state) {
         try {
-            if (mPrintServiceClient.setPrintJobState(mCachedInfo.getId(), state, error)) {
+            if (mPrintServiceClient.setPrintJobState(mCachedInfo.getId(), state)) {
                 // Best effort - update the state of the cached info since
                 // we may not be able to re-fetch it later if the job gets
                 // removed from the spooler as a result of the state change.
                 mCachedInfo.setState(state);
-                mCachedInfo.setFailureReason(error);
                 return true;
             }
         } catch (RemoteException re) {

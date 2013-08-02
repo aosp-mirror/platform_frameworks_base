@@ -144,45 +144,22 @@ public final class PrintManagerService extends IPrintManager.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
+            if (spooler.cancelPrintJob(printJobId, resolvedAppId)) {
+                return;
+            }
             PrintJobInfo printJobInfo = getPrintJobInfo(printJobId, resolvedAppId, resolvedUserId);
             if (printJobInfo == null) {
                 return;
             }
-            if (printJobInfo.getState() != PrintJobInfo.STATE_FAILED) {
-                ComponentName printServiceName = printJobInfo.getPrinterId().getServiceName();
-                RemotePrintService printService = null;
-                synchronized (mLock) {
-                    printService = userState.getActiveServices().get(printServiceName);
-                }
-                if (printService == null) {
-                    return;
-                }
-                printService.onRequestCancelPrintJob(printJobInfo);
-            } else {
-                // If the print job is failed we do not need cooperation
-                // from the print service.
-                spooler.setPrintJobState(printJobId, PrintJobInfo.STATE_CANCELED, null);
+            ComponentName printServiceName = printJobInfo.getPrinterId().getService();
+            RemotePrintService printService = null;
+            synchronized (mLock) {
+                printService = userState.getActiveServices().get(printServiceName);
             }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    @Override
-    public void restartPrintJob(int printJobId, int appId, int userId) {
-        final int resolvedAppId = resolveCallingAppEnforcingPermissions(appId);
-        final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
-        final RemotePrintSpooler spooler;
-        synchronized (mLock) {
-            spooler = getOrCreateUserStateLocked(resolvedUserId).getSpoolerLocked();
-        }
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            PrintJobInfo printJobInfo = getPrintJobInfo(printJobId, resolvedAppId, resolvedUserId);
-            if (printJobInfo == null || printJobInfo.getState() != PrintJobInfo.STATE_FAILED) {
+            if (printService == null) {
                 return;
             }
-            spooler.setPrintJobState(printJobId, PrintJobInfo.STATE_QUEUED, null);
+            printService.onRequestCancelPrintJob(printJobInfo);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

@@ -124,9 +124,6 @@ public final class PrintJobInfo implements Parcelable {
     /** How many copies to print. */
     private int mCopies;
 
-    /** Failure reason if this job failed. */
-    private CharSequence mFailureReason;
-
     /** The pages to print */
     private PageRange[] mPageRanges;
 
@@ -151,7 +148,6 @@ public final class PrintJobInfo implements Parcelable {
         mUserId = other.mUserId;
         mTag = other.mTag;
         mCopies = other.mCopies;
-        mFailureReason = other.mFailureReason;
         mPageRanges = other.mPageRanges;
         mAttributes = other.mAttributes;
         mDocumentInfo = other.mDocumentInfo;
@@ -166,9 +162,6 @@ public final class PrintJobInfo implements Parcelable {
         mUserId = parcel.readInt();
         mTag = parcel.readString();
         mCopies = parcel.readInt();
-        if (parcel.readInt() == 1) {
-            mFailureReason = parcel.readCharSequence();
-        }
         if (parcel.readInt() == 1) {
             Parcelable[] parcelables = parcel.readParcelableArray(null);
             mPageRanges = new PageRange[parcelables.length];
@@ -352,28 +345,6 @@ public final class PrintJobInfo implements Parcelable {
     }
 
     /**
-     * The failure reason if this print job failed.
-     *
-     * @return The failure reason.
-     *
-     * @hide
-     */
-    public CharSequence getFailureReason() {
-        return mFailureReason;
-    }
-
-    /**
-     * The failure reason if this print job failed.
-     *
-     * @param failureReason The failure reason.
-     *
-     * @hide
-     */
-    public void setFailureReason(CharSequence failureReason) {
-        mFailureReason = failureReason;
-    }
-
-    /**
      * Gets the included pages.
      *
      * @return The included pages or <code>null</code> if not set.
@@ -450,12 +421,6 @@ public final class PrintJobInfo implements Parcelable {
         parcel.writeInt(mUserId);
         parcel.writeString(mTag);
         parcel.writeInt(mCopies);
-        if (mFailureReason != null) {
-            parcel.writeInt(1);
-            parcel.writeCharSequence(mFailureReason);
-        } else {
-            parcel.writeInt(0);
-        }
         if (mPageRanges != null) {
             parcel.writeInt(1);
             parcel.writeParcelableArray(mPageRanges, flags);
