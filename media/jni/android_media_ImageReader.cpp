@@ -78,9 +78,11 @@ public:
 
     void returnLockedBuffer(CpuConsumer::LockedBuffer* buffer);
 
+    void setCpuConsumer(const sp<CpuConsumer>& consumer) { mConsumer = consumer; }
     CpuConsumer* getCpuConsumer() { return mConsumer.get(); }
 
-    void setCpuConsumer(sp<CpuConsumer> consumer) { mConsumer = consumer; }
+    void setBufferQueue(const sp<BufferQueue>& bq) { mBufferQueue = bq; }
+    BufferQueue* getBufferQueue() { return mBufferQueue.get(); }
 
     void setBufferFormat(int format) { mFormat = format; }
     int getBufferFormat() { return mFormat; }
@@ -97,6 +99,7 @@ private:
 
     List<CpuConsumer::LockedBuffer*> mBuffers;
     sp<CpuConsumer> mConsumer;
+    sp<BufferQueue> mBufferQueue;
     jobject mWeakThiz;
     jclass mClazz;
     int mFormat;
@@ -212,6 +215,17 @@ static CpuConsumer* ImageReader_getCpuConsumer(JNIEnv* env, jobject thiz)
         return NULL;
     }
     return ctx->getCpuConsumer();
+}
+
+static BufferQueue* ImageReader_getBufferQueue(JNIEnv* env, jobject thiz)
+{
+    ALOGV("%s:", __FUNCTION__);
+    JNIImageReaderContext* const ctx = ImageReader_getContext(env, thiz);
+    if (ctx == NULL) {
+        jniThrowRuntimeException(env, "ImageReaderContext is not initialized");
+        return NULL;
+    }
+    return ctx->getBufferQueue();
 }
 
 static void ImageReader_setNativeContext(JNIEnv* env,
@@ -609,6 +623,7 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz,
     }
     sp<JNIImageReaderContext> ctx(new JNIImageReaderContext(env, weakThiz, clazz, maxImages));
     ctx->setCpuConsumer(consumer);
+    ctx->setBufferQueue(bq);
     consumer->setFrameAvailableListener(ctx);
     ImageReader_setNativeContext(env, thiz, ctx);
     ctx->setBufferFormat(nativeFormat);
@@ -751,15 +766,14 @@ static jobject ImageReader_getSurface(JNIEnv* env, jobject thiz)
 {
     ALOGV("%s: ", __FUNCTION__);
 
-    CpuConsumer* consumer = ImageReader_getCpuConsumer(env, thiz);
-    if (consumer == NULL) {
+    BufferQueue* bq = ImageReader_getBufferQueue(env, thiz);
+    if (bq == NULL) {
         jniThrowRuntimeException(env, "CpuConsumer is uninitialized");
         return NULL;
     }
 
     // Wrap the IGBP in a Java-language Surface.
-    return android_view_Surface_createFromIGraphicBufferProducer(
-            env, consumer->getProducerInterface());
+    return android_view_Surface_createFromIGraphicBufferProducer(env, bq);
 }
 
 static jobject Image_createSurfacePlane(JNIEnv* env, jobject thiz, int idx)

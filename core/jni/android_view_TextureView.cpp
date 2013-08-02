@@ -69,13 +69,6 @@ static struct {
 // Native layer
 // ----------------------------------------------------------------------------
 
-static void android_view_TextureView_setDefaultBufferSize(JNIEnv* env, jobject,
-    jobject surface, jint width, jint height) {
-
-    sp<GLConsumer> glConsumer(SurfaceTexture_getSurfaceTexture(env, surface));
-    glConsumer->setDefaultBufferSize(width, height);
-}
-
 static inline SkBitmap::Config convertPixelFormat(int32_t format) {
     switch (format) {
         case WINDOW_FORMAT_RGBA_8888:
@@ -106,8 +99,8 @@ static int32_t native_window_unlockAndPost(ANativeWindow* window) {
 static void android_view_TextureView_createNativeWindow(JNIEnv* env, jobject textureView,
         jobject surface) {
 
-    sp<GLConsumer> glConsumer(SurfaceTexture_getSurfaceTexture(env, surface));
-    sp<ANativeWindow> window = new Surface(glConsumer->getBufferQueue());
+    sp<IGraphicBufferProducer> producer(SurfaceTexture_getProducer(env, surface));
+    sp<ANativeWindow> window = new Surface(producer);
 
     window->incStrong((void*)android_view_TextureView_createNativeWindow);
     SET_INT(textureView, gTextureViewClassInfo.nativeWindow, jint(window.get()));
@@ -208,9 +201,6 @@ static void android_view_TextureView_unlockCanvasAndPost(JNIEnv* env, jobject,
 const char* const kClassPathName = "android/view/TextureView";
 
 static JNINativeMethod gMethods[] = {
-    {   "nSetDefaultBufferSize", "(Landroid/graphics/SurfaceTexture;II)V",
-            (void*) android_view_TextureView_setDefaultBufferSize },
-
     {   "nCreateNativeWindow", "(Landroid/graphics/SurfaceTexture;)V",
             (void*) android_view_TextureView_createNativeWindow },
     {   "nDestroyNativeWindow", "()V",

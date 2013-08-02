@@ -40,6 +40,7 @@ const char* const kSurfaceTextureClassPathName = "android/graphics/SurfaceTextur
 
 struct fields_t {
     jfieldID  surfaceTexture;
+    jfieldID  bufferQueue;
     jfieldID  frameAvailableListener;
     jmethodID postEvent;
 };
@@ -61,6 +62,20 @@ static void SurfaceTexture_setSurfaceTexture(JNIEnv* env, jobject thiz,
     env->SetIntField(thiz, fields.surfaceTexture, (int)surfaceTexture.get());
 }
 
+static void SurfaceTexture_setBufferQueue(JNIEnv* env, jobject thiz,
+        const sp<BufferQueue>& bq)
+{
+    BufferQueue* const p =
+        (BufferQueue*)env->GetIntField(thiz, fields.bufferQueue);
+    if (bq.get()) {
+        bq->incStrong((void*)SurfaceTexture_setBufferQueue);
+    }
+    if (p) {
+        p->decStrong((void*)SurfaceTexture_setBufferQueue);
+    }
+    env->SetIntField(thiz, fields.bufferQueue, (int)bq.get());
+}
+
 static void SurfaceTexture_setFrameAvailableListener(JNIEnv* env,
         jobject thiz, sp<GLConsumer::FrameAvailableListener> listener)
 {
@@ -76,23 +91,22 @@ static void SurfaceTexture_setFrameAvailableListener(JNIEnv* env,
     env->SetIntField(thiz, fields.frameAvailableListener, (int)listener.get());
 }
 
-sp<GLConsumer> SurfaceTexture_getSurfaceTexture(JNIEnv* env,
-        jobject thiz)
-{
+sp<GLConsumer> SurfaceTexture_getSurfaceTexture(JNIEnv* env, jobject thiz) {
     return (GLConsumer*)env->GetIntField(thiz, fields.surfaceTexture);
 }
 
-sp<ANativeWindow> android_SurfaceTexture_getNativeWindow(
-        JNIEnv* env, jobject thiz)
-{
+sp<IGraphicBufferProducer> SurfaceTexture_getProducer(JNIEnv* env, jobject thiz) {
+    return (BufferQueue*)env->GetIntField(thiz, fields.bufferQueue);
+}
+
+sp<ANativeWindow> android_SurfaceTexture_getNativeWindow(JNIEnv* env, jobject thiz) {
     sp<GLConsumer> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
-    sp<Surface> surfaceTextureClient(surfaceTexture != NULL ?
-            new Surface(surfaceTexture->getBufferQueue()) : NULL);
+    sp<IGraphicBufferProducer> producer(SurfaceTexture_getProducer(env, thiz));
+    sp<Surface> surfaceTextureClient(surfaceTexture != NULL ? new Surface(producer) : NULL);
     return surfaceTextureClient;
 }
 
-bool android_SurfaceTexture_isInstanceOf(JNIEnv* env, jobject thiz)
-{
+bool android_SurfaceTexture_isInstanceOf(JNIEnv* env, jobject thiz) {
     jclass surfaceTextureClass = env->FindClass(kSurfaceTextureClassPathName);
     return env->IsInstanceOf(thiz, surfaceTextureClass);
 }
@@ -175,6 +189,12 @@ void JNISurfaceTextureContext::onFrameAvailable()
 
 // ----------------------------------------------------------------------------
 
+
+#define ANDROID_GRAPHICS_SURFACETEXTURE_JNI_ID "mSurfaceTexture"
+#define ANDROID_GRAPHICS_BUFFERQUEUE_JNI_ID "mBufferQueue"
+#define ANDROID_GRAPHICS_FRAMEAVAILABLELISTENER_JNI_ID \
+                                         "mFrameAvailableListener"
+
 static void SurfaceTexture_classInit(JNIEnv* env, jclass clazz)
 {
     fields.surfaceTexture = env->GetFieldID(clazz,
@@ -182,6 +202,12 @@ static void SurfaceTexture_classInit(JNIEnv* env, jclass clazz)
     if (fields.surfaceTexture == NULL) {
         ALOGE("can't find android/graphics/SurfaceTexture.%s",
                 ANDROID_GRAPHICS_SURFACETEXTURE_JNI_ID);
+    }
+    fields.bufferQueue = env->GetFieldID(clazz,
+            ANDROID_GRAPHICS_BUFFERQUEUE_JNI_ID, "I");
+    if (fields.bufferQueue == NULL) {
+        ALOGE("can't find android/graphics/SurfaceTexture.%s",
+                ANDROID_GRAPHICS_BUFFERQUEUE_JNI_ID);
     }
     fields.frameAvailableListener = env->GetFieldID(clazz,
             ANDROID_GRAPHICS_FRAMEAVAILABLELISTENER_JNI_ID, "I");
@@ -214,6 +240,7 @@ static void SurfaceTexture_init(JNIEnv* env, jobject thiz,
         return;
     }
     SurfaceTexture_setSurfaceTexture(env, thiz, surfaceTexture);
+    SurfaceTexture_setBufferQueue(env, thiz, bq);
 
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
@@ -234,11 +261,11 @@ static void SurfaceTexture_finalize(JNIEnv* env, jobject thiz)
     surfaceTexture->setFrameAvailableListener(0);
     SurfaceTexture_setFrameAvailableListener(env, thiz, 0);
     SurfaceTexture_setSurfaceTexture(env, thiz, 0);
+    SurfaceTexture_setBufferQueue(env, thiz, 0);
 }
 
 static void SurfaceTexture_setDefaultBufferSize(
-        JNIEnv* env, jobject thiz, jint width, jint height)
-{
+        JNIEnv* env, jobject thiz, jint width, jint height) {
     sp<GLConsumer> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
     surfaceTexture->setDefaultBufferSize(width, height);
 }

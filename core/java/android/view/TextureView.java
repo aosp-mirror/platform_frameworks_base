@@ -322,7 +322,7 @@ public class TextureView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         if (mSurface != null) {
-            nSetDefaultBufferSize(mSurface, getWidth(), getHeight());
+            mSurface.setDefaultBufferSize(getWidth(), getHeight());
             updateLayer();
             if (mListener != null) {
                 mListener.onSurfaceTextureSizeChanged(mSurface, getWidth(), getHeight());
@@ -362,7 +362,7 @@ public class TextureView extends View {
                 // Create a new SurfaceTexture for the layer.
                 mSurface = mAttachInfo.mHardwareRenderer.createSurfaceTexture(mLayer);
             }
-            nSetDefaultBufferSize(mSurface, getWidth(), getHeight());
+            mSurface.setDefaultBufferSize(getWidth(), getHeight());
             nCreateNativeWindow(mSurface);
 
             mUpdateListener = new SurfaceTexture.OnFrameAvailableListener() {
@@ -399,7 +399,7 @@ public class TextureView extends View {
             mMatrixChanged = true;
 
             mAttachInfo.mHardwareRenderer.setSurfaceTexture(mLayer, mSurface);
-            nSetDefaultBufferSize(mSurface, getWidth(), getHeight());
+            mSurface.setDefaultBufferSize(getWidth(), getHeight());
         }
 
         applyUpdate();
@@ -815,9 +815,6 @@ public class TextureView extends View {
 
     private native void nCreateNativeWindow(SurfaceTexture surface);
     private native void nDestroyNativeWindow();
-
-    private static native void nSetDefaultBufferSize(SurfaceTexture surfaceTexture,
-            int width, int height);
 
     private static native boolean nLockCanvas(int nativeWindow, Canvas canvas, Rect dirty);
     private static native void nUnlockCanvasAndPost(int nativeWindow, Canvas canvas);

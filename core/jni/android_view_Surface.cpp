@@ -135,15 +135,14 @@ static inline bool isSurfaceValid(const sp<Surface>& sur) {
 
 static jint nativeCreateFromSurfaceTexture(JNIEnv* env, jclass clazz,
         jobject surfaceTextureObj) {
-    sp<GLConsumer> st(SurfaceTexture_getSurfaceTexture(env, surfaceTextureObj));
-    if (st == NULL) {
+    sp<IGraphicBufferProducer> producer(SurfaceTexture_getProducer(env, surfaceTextureObj));
+    if (producer == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException",
                 "SurfaceTexture has already been released");
         return 0;
     }
 
-    sp<IGraphicBufferProducer> bq = st->getBufferQueue();
-    sp<Surface> surface(new Surface(bq, true));
+    sp<Surface> surface(new Surface(producer, true));
     if (surface == NULL) {
         jniThrowException(env, OutOfResourcesException, NULL);
         return 0;

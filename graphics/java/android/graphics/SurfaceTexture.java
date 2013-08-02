@@ -69,6 +69,7 @@ public class SurfaceTexture {
      * These fields are used by native code, do not access or modify.
      */
     private int mSurfaceTexture;
+    private int mBufferQueue;
     private int mFrameAvailableListener;
 
     /**

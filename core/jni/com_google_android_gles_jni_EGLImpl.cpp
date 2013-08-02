@@ -352,9 +352,8 @@ not_valid_surface:
         return 0;
     }
     
-    sp<GLConsumer> glConsumer(SurfaceTexture_getSurfaceTexture(_env, native_window));
-
-    window = new Surface(glConsumer->getBufferQueue());
+    sp<IGraphicBufferProducer> producer(SurfaceTexture_getProducer(_env, native_window));
+    window = new Surface(producer);
     if (window == NULL)
         goto not_valid_surface;
 

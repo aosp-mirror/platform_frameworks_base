@@ -565,14 +565,10 @@ static void android_hardware_Camera_setPreviewTexture(JNIEnv *env,
     sp<Camera> camera = get_native_camera(env, thiz, NULL);
     if (camera == 0) return;
 
-    sp<BufferQueue> bufferQueue = NULL;
+    sp<IGraphicBufferProducer> producer = NULL;
     if (jSurfaceTexture != NULL) {
-        sp<GLConsumer> surfaceTexture =
-            SurfaceTexture_getSurfaceTexture(env, jSurfaceTexture);
-        if (surfaceTexture != NULL) {
-            bufferQueue = surfaceTexture->getBufferQueue();
-        }
-        else {
+        producer = SurfaceTexture_getProducer(env, jSurfaceTexture);
+        if (producer == NULL) {
             jniThrowException(env, "java/lang/IllegalArgumentException",
                     "SurfaceTexture already released in setPreviewTexture");
             return;
@@ -580,7 +576,7 @@ static void android_hardware_Camera_setPreviewTexture(JNIEnv *env,
 
     }
 
-    if (camera->setPreviewTexture(bufferQueue) != NO_ERROR) {
+    if (camera->setPreviewTexture(producer) != NO_ERROR) {
         jniThrowException(env, "java/io/IOException",
                 "setPreviewTexture failed");
     }
