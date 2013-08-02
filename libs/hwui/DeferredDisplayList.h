@@ -79,7 +79,7 @@ public:
 
     /**
      * Add a draw op into the DeferredDisplayList, reordering as needed (for performance) if
-     * disallowReorder is false, respecting draw order when overlaps occur
+     * disallowReorder is false, respecting draw order when overlaps occur.
      */
     void addDrawOp(OpenGLRenderer& renderer, DrawOp* op);
 

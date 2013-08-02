@@ -256,14 +256,15 @@ public:
     ANDROID_API const Rect& getClipBounds();
 
     /**
-     * Performs a quick reject but adjust the bounds to account for stroke width if necessary
+     * Performs a quick reject but adjust the bounds to account for stroke width if necessary,
+     * and handling snapOut for AA geometry.
      */
     bool quickRejectPreStroke(float left, float top, float right, float bottom, SkPaint* paint);
 
     /**
      * Returns false and sets scissor based upon bounds if drawing won't be clipped out
      */
-    bool quickReject(float left, float top, float right, float bottom);
+    bool quickReject(float left, float top, float right, float bottom, bool snapOut = false);
     bool quickReject(const Rect& bounds) {
         return quickReject(bounds.left, bounds.top, bounds.right, bounds.bottom);
     }
@@ -273,7 +274,7 @@ public:
      * clipRequired will be only set if not rejected
      */
     ANDROID_API bool quickRejectNoScissor(float left, float top, float right, float bottom,
-            bool* clipRequired = NULL);
+            bool snapOut = false, bool* clipRequired = NULL);
     bool quickRejectNoScissor(const Rect& bounds, bool* clipRequired = NULL) {
         return quickRejectNoScissor(bounds.left, bounds.top, bounds.right, bounds.bottom,
                 clipRequired);
@@ -340,6 +341,12 @@ public:
 
     SkPaint* filterPaint(SkPaint* paint);
 
+    /**
+     * Store the current display state (most importantly, the current clip and transform), and
+     * additionally map the state's bounds from local to window coordinates.
+     *
+     * Returns true if quick-rejected
+     */
     bool storeDisplayState(DeferredDisplayState& state, int stateDeferFlags);
     void restoreDisplayState(const DeferredDisplayState& state, bool skipClipRestore = false);
     void setupMergedMultiDraw(const Rect* clipRect);

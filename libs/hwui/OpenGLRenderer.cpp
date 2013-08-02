@@ -1414,6 +1414,10 @@ bool OpenGLRenderer::storeDisplayState(DeferredDisplayState& state, int stateDef
         if (!state.mBounds.isEmpty()) {
             currentMatrix.mapRect(state.mBounds);
             Rect clippedBounds(state.mBounds);
+            // NOTE: if we ever want to use this clipping info to drive whether the scissor
+            // is used, it should more closely duplicate the quickReject logic (in how it uses
+            // snapToPixelBoundaries)
+
             if(!clippedBounds.intersect(currentClip)) {
                 // quick rejected
                 return true;
@@ -1608,14 +1612,21 @@ const Rect& OpenGLRenderer::getClipBounds() {
 }
 
 bool OpenGLRenderer::quickRejectNoScissor(float left, float top, float right, float bottom,
-        bool* clipRequired) {
+        bool snapOut, bool* clipRequired) {
     if (mSnapshot->isIgnored() || bottom <= top || right <= left) {
         return true;
     }
 
     Rect r(left, top, right, bottom);
     currentTransform().mapRect(r);
-    r.snapToPixelBoundaries();
+
+    if (snapOut) {
+        // snapOut is generally used to account for 1 pixel ramp (in window coordinates)
+        // outside of the provided rect boundaries in tessellated AA geometry
+        r.snapOutToPixelBoundaries();
+    } else {
+        r.snapToPixelBoundaries();
+    }
 
     Rect clipRect(*mSnapshot->clipRect);
     clipRect.snapToPixelBoundaries();
@@ -1628,17 +1639,21 @@ bool OpenGLRenderer::quickRejectNoScissor(float left, float top, float right, fl
 
 bool OpenGLRenderer::quickRejectPreStroke(float left, float top, float right, float bottom,
         SkPaint* paint) {
+    // AA geometry will likely have a ramp around it (not accounted for in local bounds). Snap out
+    // the final mapped rect to ensure correct clipping behavior for the ramp.
+    bool snapOut = paint->isAntiAlias();
+
     if (paint->getStyle() != SkPaint::kFill_Style) {
         float outset = paint->getStrokeWidth() * 0.5f;
-        return quickReject(left - outset, top - outset, right + outset, bottom + outset);
+        return quickReject(left - outset, top - outset, right + outset, bottom + outset, snapOut);
     } else {
-        return quickReject(left, top, right, bottom);
+        return quickReject(left, top, right, bottom, snapOut);
     }
 }
 
-bool OpenGLRenderer::quickReject(float left, float top, float right, float bottom) {
+bool OpenGLRenderer::quickReject(float left, float top, float right, float bottom, bool snapOut) {
     bool clipRequired = false;
-    if (quickRejectNoScissor(left, top, right, bottom, &clipRequired)) {
+    if (quickRejectNoScissor(left, top, right, bottom, snapOut, &clipRequired)) {
         return true;
     }
 
@@ -3058,7 +3073,7 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
 
     bool clipRequired = false;
     const bool rejected = quickRejectNoScissor(x, y,
-            x + layer->layer.getWidth(), y + layer->layer.getHeight(), &clipRequired);
+            x + layer->layer.getWidth(), y + layer->layer.getHeight(), false, &clipRequired);
 
     if (rejected) {
         if (transform && !transform->isIdentity()) {

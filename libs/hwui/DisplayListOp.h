@@ -180,7 +180,11 @@ public:
      */
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {}
 
-    // returns true if bounds exist
+    /**
+     * Query the conservative, local bounds (unmapped) bounds of the op.
+     *
+     * returns true if bounds exist
+     */
     virtual bool getLocalBounds(Rect& localBounds) { return false; }
 
     // TODO: better refine localbounds usage

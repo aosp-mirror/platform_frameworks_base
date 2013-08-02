@@ -170,6 +170,20 @@ public:
         bottom += delta;
     }
 
+    /**
+     * Similar to snapToPixelBoundaries, but used for AA geometry with a ramp perimeter.
+     *
+     * We inset the data by a fudge factor of slightly over 1/16 (similar to when drawing non-AA
+     * lines) before rounding out so that insignificant amounts of ramp geometry (esp. from rounding
+     * errors) are ignored.
+     */
+    void snapOutToPixelBoundaries() {
+        left = floorf(left + 0.065f);
+        top = floorf(top + 0.065f);
+        right = ceilf(right - 0.065f);
+        bottom = ceilf(bottom - 0.065f);
+    }
+
     void snapToPixelBoundaries() {
         left = floorf(left + 0.5f);
         top = floorf(top + 0.5f);
