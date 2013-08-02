@@ -91,7 +91,6 @@ public class DocumentsActivity extends Activity {
     private static final String TAG = "Documents";
 
     // TODO: fragment to show recently opened documents
-    // TODO: pull actionbar icon from current backend
 
     private static final String TAG_CREATE_DIRECTORY = "create_directory";
 
@@ -250,7 +249,8 @@ public class DocumentsActivity extends Activity {
             public boolean onQueryTextSubmit(String query) {
                 // TODO: clear existing directory stack?
                 final Uri searchUri = DocumentsContract.buildSearchUri(mCurrentDir, query);
-                DirectoryFragment.show(getFragmentManager(), searchUri, query, true);
+                DirectoryFragment.show(
+                        getFragmentManager(), mCurrentRoot.rootUri, searchUri, query, true);
                 mSearchView.setIconified(true);
                 return true;
             }
@@ -398,7 +398,7 @@ public class DocumentsActivity extends Activity {
         final FragmentManager fm = getFragmentManager();
         if (DocumentsContract.MIME_TYPE_DIRECTORY.equals(doc.mimeType)) {
             // Nested directory picked, recurse using new fragment
-            DirectoryFragment.show(fm, doc.uri, doc.displayName, true);
+            DirectoryFragment.show(fm, doc.rootUri, doc.uri, doc.displayName, true);
         } else if (mAction == ACTION_OPEN) {
             // Explicit file picked, return
             onFinished(doc.uri);
@@ -418,6 +418,8 @@ public class DocumentsActivity extends Activity {
     }
 
     public void onSaveRequested(String mimeType, String displayName) {
+        // TODO: handle overwrite by using last-selected GUID
+
         final ContentValues values = new ContentValues();
         values.put(DocumentColumns.MIME_TYPE, mimeType);
         values.put(DocumentColumns.DISPLAY_NAME, displayName);
@@ -426,7 +428,6 @@ public class DocumentsActivity extends Activity {
         if (uri != null) {
             onFinished(uri);
         } else {
-            // TODO: ask for overwrite confirmation
             Toast.makeText(this, R.string.save_error, Toast.LENGTH_SHORT).show();
         }
     }
@@ -470,35 +471,29 @@ public class DocumentsActivity extends Activity {
     public static class Root {
         public DocumentsProviderInfo info;
         public int rootType;
+        public Uri rootUri;
         public Uri uri;
         public Drawable icon;
         public String title;
         public String summary;
 
-        public static Root fromInfo(Context context, DocumentsProviderInfo info) {
+        public static Root fromCursor(
+                Context context, DocumentsProviderInfo info, Cursor cursor) {
+            final String rootId = cursor.getString(cursor.getColumnIndex(RootColumns.ROOT_ID));
+
             final Root root = new Root();
             final PackageManager pm = context.getPackageManager();
 
             root.info = info;
-            root.rootType = DocumentsContract.ROOT_TYPE_SERVICE;
+            root.rootType = cursor.getInt(cursor.getColumnIndex(RootColumns.ROOT_TYPE));
+            root.rootUri = DocumentsContract.buildRootUri(info.providerInfo.authority, rootId);
             root.uri = DocumentsContract.buildDocumentUri(
-                    info.providerInfo.authority, DocumentsContract.ROOT_GUID);
+                    root.rootUri, DocumentsContract.ROOT_DOC_ID);
             root.icon = info.providerInfo.loadIcon(pm);
             root.title = info.providerInfo.loadLabel(pm).toString();
             root.summary = null;
 
-            return root;
-        }
 
-        public static Root fromCursor(
-                Context context, DocumentsProviderInfo info, Cursor cursor) {
-            final Root root = fromInfo(context, info);
-
-            root.rootType = cursor.getInt(cursor.getColumnIndex(RootColumns.ROOT_TYPE));
-            root.uri = DocumentsContract.buildDocumentUri(info.providerInfo.authority,
-                    cursor.getString(cursor.getColumnIndex(RootColumns.GUID)));
-
-            final PackageManager pm = context.getPackageManager();
             final int icon = cursor.getInt(cursor.getColumnIndex(RootColumns.ICON));
             if (icon != 0) {
                 try {
@@ -534,21 +529,24 @@ public class DocumentsActivity extends Activity {
     }
 
     public static class Document {
+        public Uri rootUri;
         public Uri uri;
         public String mimeType;
         public String displayName;
 
-        public static Document fromCursor(String authority, Cursor cursor) {
+        public static Document fromCursor(Uri rootUri, Cursor cursor) {
             final Document doc = new Document();
-            final String guid = getCursorString(cursor, DocumentColumns.GUID);
-            doc.uri = DocumentsContract.buildDocumentUri(authority, guid);
+            final String docId = getCursorString(cursor, DocumentColumns.DOC_ID);
+            doc.rootUri = rootUri;
+            doc.uri = DocumentsContract.buildDocumentUri(rootUri, docId);
             doc.mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
             doc.displayName = getCursorString(cursor, DocumentColumns.DISPLAY_NAME);
             return doc;
         }
 
-        public static Document fromUri(ContentResolver resolver, Uri uri) {
+        public static Document fromUri(ContentResolver resolver, Uri rootUri, Uri uri) {
             final Document doc = new Document();
+            doc.rootUri = rootUri;
             doc.uri = uri;
 
             final Cursor cursor = resolver.query(uri, null, null, null, null);
@@ -639,19 +637,16 @@ public class DocumentsActivity extends Activity {
 
                 sProviders.put(info.providerInfo.authority, info);
 
-                if (info.customRoots) {
-                    // TODO: populate roots on background thread, and cache results
-                    final Uri uri = DocumentsContract.buildRootsUri(providerInfo.authority);
-                    final Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-                    try {
-                        while (cursor.moveToNext()) {
-                            sRoots.add(Root.fromCursor(this, info, cursor));
-                        }
-                    } finally {
-                        cursor.close();
+                // TODO: remove deprecated customRoots flag
+                // TODO: populate roots on background thread, and cache results
+                final Uri uri = DocumentsContract.buildRootsUri(providerInfo.authority);
+                final Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+                try {
+                    while (cursor.moveToNext()) {
+                        sRoots.add(Root.fromCursor(this, info, cursor));
                     }
-                } else if (info != null) {
-                    sRoots.add(Root.fromInfo(this, info));
+                } finally {
+                    cursor.close();
                 }
             }
         }
@@ -721,8 +716,8 @@ public class DocumentsActivity extends Activity {
             }
 
             mCurrentRoot = mRootsAdapter.getItem(position);
-            DirectoryFragment.show(
-                    getFragmentManager(), mCurrentRoot.uri, mCurrentRoot.title, false);
+            DirectoryFragment.show(getFragmentManager(), mCurrentRoot.rootUri, mCurrentRoot.uri,
+                    mCurrentRoot.title, false);
 
             mDrawerLayout.closeDrawers();
         }
@@ -784,13 +779,16 @@ public class DocumentsActivity extends Activity {
                     values.put(DocumentColumns.MIME_TYPE, DocumentsContract.MIME_TYPE_DIRECTORY);
                     values.put(DocumentColumns.DISPLAY_NAME, displayName);
 
-                    // TODO: handle errors from remote side
                     final DocumentsActivity activity = (DocumentsActivity) getActivity();
                     final Uri uri = resolver.insert(activity.mCurrentDir, values);
-
-                    // Navigate into newly created child
-                    final Document doc = Document.fromUri(resolver, uri);
-                    activity.onDocumentPicked(doc);
+                    if (uri != null) {
+                        // Navigate into newly created child
+                        final Document doc = Document.fromUri(
+                                resolver, activity.mCurrentRoot.rootUri, uri);
+                        activity.onDocumentPicked(doc);
+                    } else {
+                        Toast.makeText(context, R.string.save_error, Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
             builder.setNegativeButton(android.R.string.cancel, null);
