@@ -40,7 +40,7 @@ public:
         SkPicture* picture = NULL;
         SkStream* strm = CreateJavaInputStreamAdaptor(env, jstream, jstorage);
         if (strm) {
-            picture = new SkPicture(strm);
+            picture = SkPicture::CreateFromStream(strm);
             delete strm;
         }
         return picture;

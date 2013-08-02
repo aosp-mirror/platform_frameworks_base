@@ -17,6 +17,7 @@
 #define LOG_TAG "BitmapRegionDecoder"
 
 #include "SkBitmap.h"
+#include "SkData.h"
 #include "SkImageEncoder.h"
 #include "GraphicsJNI.h"
 #include "SkUtils.h"
@@ -25,7 +26,6 @@
 #include "SkStream.h"
 #include "BitmapFactory.h"
 #include "AutoDecodeCancel.h"
-#include "SkBitmapRegionDecoder.h"
 #include "CreateJavaOutputStreamAdaptor.h"
 #include "Utils.h"
 #include "JNIHelp.h"
@@ -49,6 +49,33 @@
 
 using namespace android;
 
+class SkBitmapRegionDecoder {
+public:
+    SkBitmapRegionDecoder(SkImageDecoder* decoder, int width, int height) {
+        fDecoder = decoder;
+        fWidth = width;
+        fHeight = height;
+    }
+    ~SkBitmapRegionDecoder() {
+        SkDELETE(fDecoder);
+    }
+
+    bool decodeRegion(SkBitmap* bitmap, const SkIRect& rect,
+                      SkBitmap::Config pref, int sampleSize) {
+        fDecoder->setSampleSize(sampleSize);
+        return fDecoder->decodeRegion(bitmap, rect, pref);
+    }
+
+    SkImageDecoder* getDecoder() const { return fDecoder; }
+    int getWidth() const { return fWidth; }
+    int getHeight() const { return fHeight; }
+
+private:
+    SkImageDecoder* fDecoder;
+    int fWidth;
+    int fHeight;
+};
+
 static SkMemoryStream* buildSkMemoryStream(SkStream *stream) {
     size_t bufferSize = 4096;
     size_t streamLen = 0;
@@ -70,7 +97,7 @@ static SkMemoryStream* buildSkMemoryStream(SkStream *stream) {
     return streamMem;
 }
 
-static jobject doBuildTileIndex(JNIEnv* env, SkStream* stream) {
+static jobject createBitmapRegionDecoder(JNIEnv* env, SkStream* stream) {
     SkImageDecoder* decoder = SkImageDecoder::Factory(stream);
     int width, height;
     if (NULL == decoder) {
@@ -87,11 +114,11 @@ static jobject doBuildTileIndex(JNIEnv* env, SkStream* stream) {
         snprintf(msg, sizeof(msg), "Image failed to decode using %s decoder",
                 decoder->getFormatName());
         doThrowIOE(env, msg);
+        SkDELETE(decoder);
         return nullObjectReturn("decoder->buildTileIndex returned false");
     }
 
-    SkBitmapRegionDecoder *bm = new SkBitmapRegionDecoder(decoder, stream, width, height);
-
+    SkBitmapRegionDecoder *bm = new SkBitmapRegionDecoder(decoder, width, height);
     return GraphicsJNI::createBitmapRegionDecoder(env, bm);
 }
 
@@ -103,7 +130,10 @@ static jobject nativeNewInstanceFromByteArray(JNIEnv* env, jobject, jbyteArray b
      */
     AutoJavaByteArray ar(env, byteArray);
     SkStream* stream = new SkMemoryStream(ar.ptr() + offset, length, true);
-    return doBuildTileIndex(env, stream);
+
+    jobject brd = createBitmapRegionDecoder(env, stream);
+    SkSafeUnref(stream); // the decoder now holds a reference
+    return brd;
 }
 
 static jobject nativeNewInstanceFromFileDescriptor(JNIEnv* env, jobject clazz,
@@ -111,56 +141,36 @@ static jobject nativeNewInstanceFromFileDescriptor(JNIEnv* env, jobject clazz,
     NPE_CHECK_RETURN_ZERO(env, fileDescriptor);
 
     jint descriptor = jniGetFDFromFileDescriptor(env, fileDescriptor);
-    SkStream *stream = NULL;
+
     struct stat fdStat;
-    int newFD;
     if (fstat(descriptor, &fdStat) == -1) {
         doThrowIOE(env, "broken file descriptor");
         return nullObjectReturn("fstat return -1");
     }
 
-    if (isShareable &&
-            S_ISREG(fdStat.st_mode) &&
-            (newFD = ::dup(descriptor)) != -1) {
-        SkFDStream* fdStream = new SkFDStream(newFD, true);
-        if (!fdStream->isValid()) {
-            fdStream->unref();
-            return NULL;
-        }
-        stream = fdStream;
-    } else {
-        /* Restore our offset when we leave, so we can be called more than once
-           with the same descriptor. This is only required if we didn't dup the
-           file descriptor, but it is OK to do it all the time.
-        */
-        AutoFDSeek as(descriptor);
+    SkAutoTUnref<SkData> data(SkData::NewFromFD(descriptor));
+    SkMemoryStream* stream = new SkMemoryStream(data);
 
-        SkFDStream* fdStream = new SkFDStream(descriptor, false);
-        if (!fdStream->isValid()) {
-            fdStream->unref();
-            return NULL;
-        }
-        stream = buildSkMemoryStream(fdStream);
-        fdStream->unref();
-    }
-
-    return doBuildTileIndex(env, stream);
+    jobject brd = createBitmapRegionDecoder(env, stream);
+    SkSafeUnref(stream); // the decoder now holds a reference
+    return brd;
 }
 
 static jobject nativeNewInstanceFromStream(JNIEnv* env, jobject clazz,
                                   jobject is,       // InputStream
                                   jbyteArray storage, // byte[]
                                   jboolean isShareable) {
-    jobject largeBitmap = NULL;
+    jobject brd = NULL;
     SkStream* stream = CreateJavaInputStreamAdaptor(env, is, storage, 1024);
 
     if (stream) {
         // for now we don't allow shareable with java inputstreams
-        SkMemoryStream *mStream = buildSkMemoryStream(stream);
-        largeBitmap = doBuildTileIndex(env, mStream);
+        SkMemoryStream* mStream = buildSkMemoryStream(stream);
+        brd = createBitmapRegionDecoder(env, mStream);
+        SkSafeUnref(mStream); // the decoder now holds a reference
         stream->unref();
     }
-    return largeBitmap;
+    return brd;
 }
 
 static jobject nativeNewInstanceFromAsset(JNIEnv* env, jobject clazz,
@@ -171,7 +181,10 @@ static jobject nativeNewInstanceFromAsset(JNIEnv* env, jobject clazz,
     assStream = new AssetStreamAdaptor(asset);
     stream = buildSkMemoryStream(assStream);
     assStream->unref();
-    return doBuildTileIndex(env, stream);
+
+    jobject brd = createBitmapRegionDecoder(env, stream);
+    SkSafeUnref(stream); // the decoder now holds a reference
+    return brd;
 }
 
 /*
