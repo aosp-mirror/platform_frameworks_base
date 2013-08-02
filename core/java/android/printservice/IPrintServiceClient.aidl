@@ -29,7 +29,7 @@ import android.print.PrinterInfo;
 interface IPrintServiceClient {
     List<PrintJobInfo> getPrintJobInfos();
     PrintJobInfo getPrintJobInfo(int printJobId);
-    boolean setPrintJobState(int printJobId, int status);
+    boolean setPrintJobState(int printJobId, int state, CharSequence error);
     boolean setPrintJobTag(int printJobId, String tag);
     oneway void writePrintJobData(in ParcelFileDescriptor fd, int printJobId);
 }
