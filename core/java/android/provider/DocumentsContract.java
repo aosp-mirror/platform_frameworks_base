@@ -34,6 +34,7 @@ import libcore.io.IoUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * The contract between a storage backend and the platform. Contains definitions
@@ -152,36 +153,71 @@ public final class DocumentsContract {
                 .authority(authority).appendPath(PATH_ROOTS).appendPath(rootId).build();
     }
 
-    public static Uri buildDocumentUri(String authority, String rootId, String docId) {
-        return buildDocumentUri(buildRootUri(authority, rootId), docId);
-    }
-
     /**
      * Build URI representing the given {@link DocumentColumns#DOC_ID} in a
      * storage root.
      */
-    public static Uri buildDocumentUri(Uri rootUri, String docId) {
-        return rootUri.buildUpon().appendPath(PATH_DOCS).appendPath(docId).build();
-    }
-
-    /**
-     * Build URI representing a search for matching documents under a directory
-     * in a storage backend.
-     *
-     * @param documentUri directory to search under, which must have
-     *            {@link #FLAG_SUPPORTS_SEARCH}.
-     */
-    public static Uri buildSearchUri(Uri documentUri, String query) {
-        return documentUri.buildUpon()
-                .appendPath(PATH_SEARCH).appendQueryParameter(PARAM_QUERY, query).build();
+    public static Uri buildDocumentUri(String authority, String rootId, String docId) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(authority)
+                .appendPath(PATH_ROOTS).appendPath(rootId).appendPath(PATH_DOCS).appendPath(docId)
+                .build();
     }
 
     /**
      * Build URI representing the contents of the given directory in a storage
      * backend. The given document must be {@link #MIME_TYPE_DIRECTORY}.
      */
-    public static Uri buildContentsUri(Uri documentUri) {
-        return documentUri.buildUpon().appendPath(PATH_CONTENTS).build();
+    public static Uri buildContentsUri(String authority, String rootId, String docId) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(authority)
+                .appendPath(PATH_ROOTS).appendPath(rootId).appendPath(PATH_DOCS).appendPath(docId)
+                .appendPath(PATH_CONTENTS).build();
+    }
+
+    /**
+     * Build URI representing a search for matching documents under a directory
+     * in a storage backend.
+     */
+    public static Uri buildSearchUri(String authority, String rootId, String docId, String query) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(authority)
+                .appendPath(PATH_ROOTS).appendPath(rootId).appendPath(PATH_DOCS).appendPath(docId)
+                .appendPath(PATH_SEARCH).appendQueryParameter(PARAM_QUERY, query).build();
+    }
+
+    public static Uri buildDocumentUri(Uri relatedUri, String docId) {
+        return buildDocumentUri(relatedUri.getAuthority(), getRootId(relatedUri), docId);
+    }
+
+    public static Uri buildContentsUri(Uri relatedUri) {
+        return buildContentsUri(
+                relatedUri.getAuthority(), getRootId(relatedUri), getDocId(relatedUri));
+    }
+
+    public static Uri buildSearchUri(Uri relatedUri, String query) {
+        return buildSearchUri(
+                relatedUri.getAuthority(), getRootId(relatedUri), getDocId(relatedUri), query);
+    }
+
+    public static String getRootId(Uri documentUri) {
+        final List<String> paths = documentUri.getPathSegments();
+        if (!PATH_ROOTS.equals(paths.get(0))) {
+            throw new IllegalArgumentException();
+        }
+        return paths.get(1);
+    }
+
+    public static String getDocId(Uri documentUri) {
+        final List<String> paths = documentUri.getPathSegments();
+        if (!PATH_ROOTS.equals(paths.get(0))) {
+            throw new IllegalArgumentException();
+        }
+        if (!PATH_DOCS.equals(paths.get(2))) {
+            throw new IllegalArgumentException();
+        }
+        return paths.get(3);
+    }
+
+    public static String getSearchQuery(Uri documentUri) {
+        return documentUri.getQueryParameter(PARAM_QUERY);
     }
 
     /**

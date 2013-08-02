@@ -110,15 +110,15 @@ public class ExternalStorageProvider extends ContentProvider {
                 return cursor;
             }
             case URI_ROOTS_ID: {
-                final String root = uri.getPathSegments().get(1);
+                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
 
                 final MatrixCursor cursor = new MatrixCursor(rootsProjection);
-                includeRoot(cursor, mRoots.get(root));
+                includeRoot(cursor, root);
                 return cursor;
             }
             case URI_DOCS_ID: {
-                final Root root = mRoots.get(uri.getPathSegments().get(1));
-                final String docId = uri.getPathSegments().get(3);
+                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
+                final String docId = DocumentsContract.getDocId(uri);
 
                 final MatrixCursor cursor = new MatrixCursor(docsProjection);
                 final File file = docIdToFile(root, docId);
@@ -126,20 +126,22 @@ public class ExternalStorageProvider extends ContentProvider {
                 return cursor;
             }
             case URI_DOCS_ID_CONTENTS: {
-                final Root root = mRoots.get(uri.getPathSegments().get(1));
-                final String docId = uri.getPathSegments().get(3);
+                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
+                final String docId = DocumentsContract.getDocId(uri);
 
                 final MatrixCursor cursor = new MatrixCursor(docsProjection);
                 final File parent = docIdToFile(root, docId);
+
                 for (File file : parent.listFiles()) {
                     includeFile(cursor, root, file);
                 }
+
                 return cursor;
             }
             case URI_DOCS_ID_SEARCH: {
-                final Root root = mRoots.get(uri.getPathSegments().get(1));
-                final String docId = uri.getPathSegments().get(3);
-                final String query = uri.getQueryParameter(DocumentsContract.PARAM_QUERY).toLowerCase();
+                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
+                final String docId = DocumentsContract.getDocId(uri);
+                final String query = DocumentsContract.getSearchQuery(uri).toLowerCase();
 
                 final MatrixCursor cursor = new MatrixCursor(docsProjection);
                 final File parent = docIdToFile(root, docId);
@@ -158,6 +160,7 @@ public class ExternalStorageProvider extends ContentProvider {
                         }
                     }
                 }
+
                 return cursor;
             }
             default: {
@@ -218,16 +221,24 @@ public class ExternalStorageProvider extends ContentProvider {
 
         final String docId = fileToDocId(root, file);
         final long id = docId.hashCode();
+
+        final String displayName;
+        if (DocumentsContract.ROOT_DOC_ID.equals(docId)) {
+            displayName = root.title;
+        } else {
+            displayName = file.getName();
+        }
+
         cursor.addRow(new Object[] {
-                id, file.getName(), file.length(), docId, mimeType, file.lastModified(), flags });
+                id, displayName, file.length(), docId, mimeType, file.lastModified(), flags });
     }
 
     @Override
     public String getType(Uri uri) {
         switch (sMatcher.match(uri)) {
             case URI_DOCS_ID: {
-                final Root root = mRoots.get(uri.getPathSegments().get(1));
-                final String docId = uri.getPathSegments().get(3);
+                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
+                final String docId = DocumentsContract.getDocId(uri);
                 return getTypeForFile(docIdToFile(root, docId));
             }
             default: {
@@ -261,8 +272,8 @@ public class ExternalStorageProvider extends ContentProvider {
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
         switch (sMatcher.match(uri)) {
             case URI_DOCS_ID: {
-                final Root root = mRoots.get(uri.getPathSegments().get(1));
-                final String docId = uri.getPathSegments().get(3);
+                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
+                final String docId = DocumentsContract.getDocId(uri);
 
                 // TODO: offer as thumbnail
                 final File file = docIdToFile(root, docId);
@@ -278,8 +289,8 @@ public class ExternalStorageProvider extends ContentProvider {
     public Uri insert(Uri uri, ContentValues values) {
         switch (sMatcher.match(uri)) {
             case URI_DOCS_ID: {
-                final Root root = mRoots.get(uri.getPathSegments().get(1));
-                final String docId = uri.getPathSegments().get(3);
+                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
+                final String docId = DocumentsContract.getDocId(uri);
 
                 final File parent = docIdToFile(root, docId);
 
@@ -317,8 +328,8 @@ public class ExternalStorageProvider extends ContentProvider {
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         switch (sMatcher.match(uri)) {
             case URI_DOCS_ID: {
-                final Root root = mRoots.get(uri.getPathSegments().get(1));
-                final String docId = uri.getPathSegments().get(3);
+                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
+                final String docId = DocumentsContract.getDocId(uri);
 
                 final File file = docIdToFile(root, docId);
                 final File newFile = new File(
@@ -335,8 +346,8 @@ public class ExternalStorageProvider extends ContentProvider {
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         switch (sMatcher.match(uri)) {
             case URI_DOCS_ID: {
-                final Root root = mRoots.get(uri.getPathSegments().get(1));
-                final String docId = uri.getPathSegments().get(3);
+                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
+                final String docId = DocumentsContract.getDocId(uri);
 
                 final File file = docIdToFile(root, docId);
                 return file.delete() ? 1 : 0;
