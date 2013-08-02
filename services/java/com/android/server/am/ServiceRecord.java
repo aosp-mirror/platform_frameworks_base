@@ -316,7 +316,7 @@ final class ServiceRecord extends Binder {
         }
         if ((serviceInfo.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) == 0) {
             tracker = ams.mProcessTracker.getServiceStateLocked(serviceInfo.packageName,
-                    serviceInfo.applicationInfo.uid, serviceInfo.name);
+                    serviceInfo.applicationInfo.uid, serviceInfo.processName, serviceInfo.name);
         }
         return tracker;
     }

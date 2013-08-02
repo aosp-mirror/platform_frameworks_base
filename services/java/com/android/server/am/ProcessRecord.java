@@ -515,7 +515,8 @@ final class ProcessRecord {
      */
     public void resetPackageList(ProcessTracker tracker) {
         long now = SystemClock.uptimeMillis();
-        baseProcessTracker.setState(ProcessTracker.STATE_NOTHING, 0, now, pkgList);
+        baseProcessTracker.setState(ProcessTracker.STATE_NOTHING,
+                tracker.getMemFactorLocked(), now, pkgList);
         if (pkgList.size() != 1) {
             pkgList.clear();
             pkgList.put(info.packageName, tracker.getProcessStateLocked(
