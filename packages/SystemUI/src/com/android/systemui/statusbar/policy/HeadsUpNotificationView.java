@@ -26,6 +26,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.android.systemui.ExpandHelper;
@@ -34,7 +35,7 @@ import com.android.systemui.SwipeHelper;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.NotificationData;
 
-public class HeadsUpNotificationView extends LinearLayout implements SwipeHelper.Callback, ExpandHelper.Callback {
+public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.Callback, ExpandHelper.Callback {
     private static final String TAG = "HeadsUpNotificationView";
     private static final boolean DEBUG = false;
 
@@ -47,11 +48,8 @@ public class HeadsUpNotificationView extends LinearLayout implements SwipeHelper
     private ExpandHelper mExpandHelper;
     private long mStartTouchTime;
 
-    public ViewGroup getHolder() {
-        return mContentHolder;
-    }
-
     private ViewGroup mContentHolder;
+    private ViewGroup mContentSlider;
 
     private NotificationData.Entry mHeadsUp;
 
@@ -61,99 +59,16 @@ public class HeadsUpNotificationView extends LinearLayout implements SwipeHelper
 
     public HeadsUpNotificationView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        setOrientation(LinearLayout.VERTICAL);
         mTouchSensitivityDelay = getResources().getInteger(R.integer.heads_up_sensitivity_delay);
         if (DEBUG) Log.v(TAG, "create() " + mTouchSensitivityDelay);
-    }
-
-    @Override
-    public void onAttachedToWindow() {
-        float densityScale = getResources().getDisplayMetrics().density;
-        float pagingTouchSlop = ViewConfiguration.get(getContext()).getScaledPagingTouchSlop();
-        mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
-
-        int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
-        int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_max_height);
-        mExpandHelper = new ExpandHelper(mContext, this, minHeight, maxHeight);
-
-        mContentHolder = (ViewGroup) findViewById(R.id.contentHolder);
-        if (mHeadsUp != null) {
-            // whoops, we're on already!
-            setNotification(mHeadsUp);
-        }
     }
 
     public void setBar(BaseStatusBar bar) {
         mBar = bar;
     }
 
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (DEBUG) Log.v(TAG, "onInterceptTouchEvent()");
-        if (System.currentTimeMillis() < mStartTouchTime) {
-            return true;
-        }
-        return mSwipeHelper.onInterceptTouchEvent(ev)
-                || mExpandHelper.onInterceptTouchEvent(ev)
-                || super.onInterceptTouchEvent(ev);
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        if (System.currentTimeMillis() < mStartTouchTime) {
-            return false;
-        }
-        mBar.resetHeadsUpDecayTimer();
-        return mSwipeHelper.onTouchEvent(ev)
-                || mExpandHelper.onTouchEvent(ev)
-                || super.onTouchEvent(ev);
-    }
-
-    public boolean canChildBeDismissed(View v) {
-        return true;
-    }
-
-    public void onChildDismissed(View v) {
-        Log.v(TAG, "User swiped heads up to dismiss");
-        mBar.onHeadsUpDismissed();
-    }
-
-    public void onBeginDrag(View v) {
-    }
-
-    public void onDragCancelled(View v) {
-        mContentHolder.setAlpha(1f); // sometimes this isn't quite reset
-    }
-
-    public View getChildAtPosition(MotionEvent ev) {
+    public ViewGroup getHolder() {
         return mContentHolder;
-    }
-
-    public View getChildContentView(View v) {
-        return v;
-    }
-
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        float densityScale = getResources().getDisplayMetrics().density;
-        mSwipeHelper.setDensityScale(densityScale);
-        float pagingTouchSlop = ViewConfiguration.get(getContext()).getScaledPagingTouchSlop();
-        mSwipeHelper.setPagingTouchSlop(pagingTouchSlop);
-    }
-
-    @Override
-    public void onDraw(android.graphics.Canvas c) {
-        super.onDraw(c);
-        if (DEBUG) {
-            //Log.d(TAG, "onDraw: canvas height: " + c.getHeight() + "px; measured height: "
-            //        + getMeasuredHeight() + "px");
-            c.save();
-            c.clipRect(6, 6, c.getWidth() - 6, getMeasuredHeight() - 6,
-                    android.graphics.Region.Op.DIFFERENCE);
-            c.drawColor(0xFFcc00cc);
-            c.restore();
-        }
     }
 
     public boolean setNotification(NotificationData.Entry headsUp) {
@@ -171,6 +86,92 @@ public class HeadsUpNotificationView extends LinearLayout implements SwipeHelper
         mStartTouchTime = System.currentTimeMillis() + mTouchSensitivityDelay;
         return true;
     }
+
+    public boolean isInsistent() {
+        return mHeadsUp != null
+                && (mHeadsUp.notification.getNotification().flags & Notification.FLAG_INSISTENT) != 0;
+    }
+
+    public void setMargin(int notificationPanelMarginPx) {
+        if (DEBUG) Log.v(TAG, "setMargin() " + notificationPanelMarginPx);
+        if (mContentSlider != null) {
+            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mContentSlider.getLayoutParams();
+            lp.setMarginStart(notificationPanelMarginPx);
+            mContentSlider.setLayoutParams(lp);
+        }
+    }
+
+    // LinearLayout methods
+
+    @Override
+    public void onDraw(android.graphics.Canvas c) {
+        super.onDraw(c);
+        if (DEBUG) {
+            //Log.d(TAG, "onDraw: canvas height: " + c.getHeight() + "px; measured height: "
+            //        + getMeasuredHeight() + "px");
+            c.save();
+            c.clipRect(6, 6, c.getWidth() - 6, getMeasuredHeight() - 6,
+                    android.graphics.Region.Op.DIFFERENCE);
+            c.drawColor(0xFFcc00cc);
+            c.restore();
+        }
+    }
+
+    // ViewGroup methods
+
+    @Override
+    public void onAttachedToWindow() {
+        float densityScale = getResources().getDisplayMetrics().density;
+        float pagingTouchSlop = ViewConfiguration.get(getContext()).getScaledPagingTouchSlop();
+        mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
+
+        int minHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_min_height);
+        int maxHeight = getResources().getDimensionPixelSize(R.dimen.notification_row_max_height);
+        mExpandHelper = new ExpandHelper(mContext, this, minHeight, maxHeight);
+
+        mContentHolder = (ViewGroup) findViewById(R.id.content_holder);
+        mContentSlider = (ViewGroup) findViewById(R.id.content_slider);
+
+        if (mHeadsUp != null) {
+            // whoops, we're on already!
+            setNotification(mHeadsUp);
+        }
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (DEBUG) Log.v(TAG, "onInterceptTouchEvent()");
+        if (System.currentTimeMillis() < mStartTouchTime) {
+            return true;
+        }
+        return mSwipeHelper.onInterceptTouchEvent(ev)
+                || mExpandHelper.onInterceptTouchEvent(ev)
+                || super.onInterceptTouchEvent(ev);
+    }
+
+    // View methods
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        if (System.currentTimeMillis() < mStartTouchTime) {
+            return false;
+        }
+        mBar.resetHeadsUpDecayTimer();
+        return mSwipeHelper.onTouchEvent(ev)
+                || mExpandHelper.onTouchEvent(ev)
+                || super.onTouchEvent(ev);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        float densityScale = getResources().getDisplayMetrics().density;
+        mSwipeHelper.setDensityScale(densityScale);
+        float pagingTouchSlop = ViewConfiguration.get(getContext()).getScaledPagingTouchSlop();
+        mSwipeHelper.setPagingTouchSlop(pagingTouchSlop);
+    }
+
+    // ExpandHelper.Callback methods
 
     @Override
     public View getChildAtRawPosition(float x, float y) {
@@ -201,8 +202,35 @@ public class HeadsUpNotificationView extends LinearLayout implements SwipeHelper
         }
     }
 
-    public boolean isInsistent() {
-        return mHeadsUp != null
-            && (mHeadsUp.notification.getNotification().flags & Notification.FLAG_INSISTENT) != 0;
+    // SwipeHelper.Callback methods
+
+    @Override
+    public boolean canChildBeDismissed(View v) {
+        return true;
+    }
+
+    @Override
+    public void onChildDismissed(View v) {
+        Log.v(TAG, "User swiped heads up to dismiss");
+        mBar.onHeadsUpDismissed();
+    }
+
+    @Override
+    public void onBeginDrag(View v) {
+    }
+
+    @Override
+    public void onDragCancelled(View v) {
+        mContentHolder.setAlpha(1f); // sometimes this isn't quite reset
+    }
+
+    @Override
+    public View getChildAtPosition(MotionEvent ev) {
+        return mContentSlider;
+    }
+
+    @Override
+    public View getChildContentView(View v) {
+        return v;
     }
 }

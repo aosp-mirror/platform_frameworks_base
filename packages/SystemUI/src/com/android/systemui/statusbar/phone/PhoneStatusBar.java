@@ -362,8 +362,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         addNavigationBar();
 
-        if (ENABLE_HEADS_UP) addHeadsUpView();
-
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext);
     }
@@ -840,9 +838,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private void addHeadsUpView() {
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL, // above the status bar!
+                LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL, // below the status bar!
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -851,7 +848,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.TRANSLUCENT);
         lp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
-        lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
+        lp.gravity = Gravity.TOP;
+        lp.y = getStatusBarHeight();
         lp.setTitle("Heads Up");
         lp.packageName = mContext.getPackageName();
         lp.windowAnimations = R.style.Animation_StatusBar_HeadsUp;
@@ -2293,6 +2291,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     public void createAndAddWindows() {
         addStatusBarWindow();
+        if (ENABLE_HEADS_UP) addHeadsUpView();
     }
 
     private void addStatusBarWindow() {
@@ -2362,6 +2361,10 @@ public class PhoneStatusBar extends BaseStatusBar {
             lp.gravity = mSettingsPanelGravity;
             lp.setMarginEnd(mNotificationPanelMarginPx);
             mSettingsPanel.setLayoutParams(lp);
+        }
+
+        if (ENABLE_HEADS_UP && mHeadsUpNotificationView != null) {
+            mHeadsUpNotificationView.setMargin(mNotificationPanelMarginPx);
         }
 
         updateCarrierLabelVisibility(false);
