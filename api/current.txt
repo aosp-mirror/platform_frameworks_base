@@ -28351,18 +28351,22 @@ package android.view.accessibility {
 
   public class CaptioningPreferences {
     ctor public CaptioningPreferences();
-    method public static final int getBackgroundColor(android.content.ContentResolver);
-    method public static final int getEdgeColor(android.content.ContentResolver);
-    method public static final int getEdgeType(android.content.ContentResolver);
     method public static final float getFontSize(android.content.ContentResolver);
-    method public static final int getForegroundColor(android.content.ContentResolver);
     method public static final java.util.Locale getLocale(android.content.ContentResolver);
-    method public static final android.graphics.Typeface getTypeface(android.content.ContentResolver);
     method public static final boolean isEnabled(android.content.ContentResolver);
     field public static final java.lang.String ACTION_CAPTIONING_SETTINGS = "android.settings.CAPTIONING_SETTINGS";
-    field public static final int EDGE_TYPE_DROP_SHADOWED = 2; // 0x2
+  }
+
+  public static final class CaptioningPreferences.CaptionStyle {
+    method public static android.view.accessibility.CaptioningPreferences.CaptionStyle defaultUserStyle(android.content.ContentResolver);
+    method public android.graphics.Typeface getTypeface();
+    field public static final int EDGE_TYPE_DROP_SHADOW = 2; // 0x2
     field public static final int EDGE_TYPE_NONE = 0; // 0x0
-    field public static final int EDGE_TYPE_UNIFORM = 1; // 0x1
+    field public static final int EDGE_TYPE_OUTLINE = 1; // 0x1
+    field public final int backgroundColor;
+    field public final int edgeColor;
+    field public final int edgeType;
+    field public final int foregroundColor;
   }
 
 }

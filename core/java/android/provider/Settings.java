@@ -3539,6 +3539,21 @@ public final class Settings {
                 "accessibility_captioning_locale";
 
         /**
+         * Integer property that specifies the preset style for captions, one
+         * of:
+         * <ul>
+         * <li>{@link android.view.accessibility.CaptioningManager#PRESET_WHITE_ON_BLACK}
+         * <li>{@link android.view.accessibility.CaptioningManager#PRESET_BLACK_ON_WHITE}
+         * <li>{@link android.view.accessibility.CaptioningManager#PRESET_CUSTOM}
+         * </ul>
+         *
+         * @see java.util.Locale#toString
+         * @hide
+         */
+        public static final String ACCESSIBILITY_CAPTIONING_PRESET =
+                "accessibility_captioning_preset";
+
+        /**
          * Integer property that specifes the background color for captions as a
          * packed 32-bit color.
          *
@@ -3561,9 +3576,9 @@ public final class Settings {
         /**
          * Integer property that specifes the edge type for captions, one of:
          * <ul>
-         * <li>{@link android.view.accessibility.CaptioningPreferences#EDGE_TYPE_NONE}
-         * <li>{@link android.view.accessibility.CaptioningPreferences#EDGE_TYPE_UNIFORM}
-         * <li>{@link android.view.accessibility.CaptioningPreferences#EDGE_TYPE_DROP_SHADOWED}
+         * <li>{@link android.view.accessibility.CaptioningManager#EDGE_TYPE_NONE}
+         * <li>{@link android.view.accessibility.CaptioningManager#EDGE_TYPE_OUTLINE}
+         * <li>{@link android.view.accessibility.CaptioningManager#EDGE_TYPE_DROP_SHADOWED}
          * </ul>
          *
          * @see #ACCESSIBILITY_CAPTIONING_EDGE_COLOR
