@@ -142,7 +142,7 @@ public class CameraBinderTest extends AndroidTestCase {
         }
     }
 
-    static class DummyCameraDeviceCallbacks extends DummyBase implements ICameraDeviceCallbacks {
+    static class DummyCameraDeviceCallbacks extends ICameraDeviceCallbacks.Stub {
 
         @Override
         public void notifyCallback(int msgType, int ext1, int ext2) throws RemoteException {
@@ -172,7 +172,7 @@ public class CameraBinderTest extends AndroidTestCase {
         }
     }
 
-    static class DummyCameraServiceListener extends DummyBase implements ICameraServiceListener {
+    static class DummyCameraServiceListener extends ICameraServiceListener.Stub {
         @Override
         public void onStatusChanged(int status, int cameraId)
                 throws RemoteException {

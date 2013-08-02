@@ -31,19 +31,30 @@ import android.view.Surface;
 import static android.hardware.camera2.CameraDevice.TEMPLATE_PREVIEW;
 
 import com.android.mediaframeworktest.MediaFrameworkIntegrationTestRunner;
-import com.android.mediaframeworktest.integration.CameraBinderTest.DummyBase;
+
+import org.mockito.ArgumentMatcher;
+import static org.mockito.Mockito.*;
 
 public class CameraDeviceBinderTest extends AndroidTestCase {
     private static String TAG = "CameraDeviceBinderTest";
+    // Number of streaming callbacks need to check.
+    private static int NUM_CALLBACKS_CHECKED = 10;
+    // Wait for capture result timeout value: 1000ms
+    private final static int WAIT_FOR_COMPLETE_TIMEOUT_MS = 1000;
 
     private int mCameraId;
     private ICameraDeviceUser mCameraUser;
     private CameraBinderTestUtils mUtils;
+    private ICameraDeviceCallbacks.Stub mMockCb;
+    private Surface mSurface;
+    // Need hold a Surfacetexture reference during a test execution, otherwise,
+    // it could be GCed during a test, which causes camera run into bad state.
+    private SurfaceTexture mSurfaceTexture;
 
     public CameraDeviceBinderTest() {
     }
 
-    static class DummyCameraDeviceCallbacks extends DummyBase implements ICameraDeviceCallbacks {
+    public class DummyCameraDeviceCallbacks extends ICameraDeviceCallbacks.Stub {
 
         @Override
         public void notifyCallback(int msgType, int ext1, int ext2) throws RemoteException {
@@ -54,23 +65,74 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         }
     }
 
+    class IsMetadataNotEmpty extends ArgumentMatcher<CameraMetadata> {
+        public boolean matches(Object obj) {
+            return !((CameraMetadata) obj).isEmpty();
+        }
+     }
+
+    private void createDefaultSurface() {
+        mSurfaceTexture = new SurfaceTexture(/* ignored */0);
+        mSurfaceTexture.setDefaultBufferSize(640, 480);
+        mSurface = new Surface(mSurfaceTexture);
+    }
+
+    private CaptureRequest createDefaultRequest(boolean needStream) throws Exception {
+        CameraMetadata metadata = new CameraMetadata();
+        assertTrue(metadata.isEmpty());
+
+        CaptureRequest request = new CaptureRequest();
+        assertTrue(request.isEmpty());
+
+        int status = mCameraUser.createDefaultRequest(TEMPLATE_PREVIEW, /* out */metadata);
+        assertEquals(CameraBinderTestUtils.NO_ERROR, status);
+        assertFalse(metadata.isEmpty());
+
+        request.swap(metadata);
+        assertFalse(request.isEmpty());
+        assertTrue(metadata.isEmpty());
+        if (needStream) {
+            int streamId = mCameraUser.createStream(/* ignored */10, /* ignored */20,
+                    /* ignored */30, mSurface);
+            assertEquals(0, streamId);
+            request.addTarget(mSurface);
+        }
+        return request;
+    }
+
+    private int submitCameraRequest(CaptureRequest request, boolean streaming) throws Exception {
+        int requestId = mCameraUser.submitRequest(request, streaming);
+        assertTrue("Request IDs should be non-negative", requestId >= 0);
+        return requestId;
+    }
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
+        /**
+         * Workaround for mockito and JB-MR2 incompatibility
+         *
+         * Avoid java.lang.IllegalArgumentException: dexcache == null
+         * https://code.google.com/p/dexmaker/issues/detail?id=2
+         */
+        System.setProperty("dexmaker.dexcache", getContext().getCacheDir().toString());
         mUtils = new CameraBinderTestUtils(getContext());
 
         // This cannot be set in the constructor, since the onCreate isn't
         // called yet
         mCameraId = MediaFrameworkIntegrationTestRunner.mCameraId;
 
-        ICameraDeviceCallbacks dummyCallbacks = new DummyCameraDeviceCallbacks();
+        ICameraDeviceCallbacks.Stub dummyCallbacks = new DummyCameraDeviceCallbacks();
 
         String clientPackageName = getContext().getPackageName();
 
-        mCameraUser = mUtils.getCameraService().connectDevice(dummyCallbacks, mCameraId,
+        mMockCb = spy(dummyCallbacks);
+
+        mCameraUser = mUtils.getCameraService().connectDevice(mMockCb, mCameraId,
                 clientPackageName, CameraBinderTestUtils.USE_CALLING_UID);
         assertNotNull(String.format("Camera %s was null", mCameraId), mCameraUser);
+        createDefaultSurface();
 
         Log.v(TAG, String.format("Camera %s connected", mCameraId));
     }
@@ -79,6 +141,8 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
     protected void tearDown() throws Exception {
         mCameraUser.disconnect();
         mCameraUser = null;
+        mSurface.release();
+        mSurfaceTexture.release();
     }
 
     @SmallTest
@@ -95,17 +159,12 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
 
     @SmallTest
     public void testCreateStream() throws Exception {
-        SurfaceTexture surfaceTexture = new SurfaceTexture(/* ignored */0);
-        surfaceTexture.setDefaultBufferSize(640, 480);
-        Surface surface = new Surface(surfaceTexture);
-
         int streamId = mCameraUser.createStream(/* ignored */10, /* ignored */20, /* ignored */30,
-                surface);
-
+                mSurface);
         assertEquals(0, streamId);
 
         assertEquals(CameraBinderTestUtils.ALREADY_EXISTS,
-                mCameraUser.createStream(/* ignored */0, /* ignored */0, /* ignored */0, surface));
+                mCameraUser.createStream(/* ignored */0, /* ignored */0, /* ignored */0, mSurface));
 
         assertEquals(CameraBinderTestUtils.NO_ERROR, mCameraUser.deleteStream(streamId));
     }
@@ -122,32 +181,23 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
     public void testCreateStreamTwo() throws Exception {
 
         // Create first stream
-
-        SurfaceTexture surfaceTexture = new SurfaceTexture(/* ignored */0);
-        surfaceTexture.setDefaultBufferSize(640, 480);
-        Surface surface = new Surface(surfaceTexture);
-
         int streamId = mCameraUser.createStream(/* ignored */0, /* ignored */0, /* ignored */0,
-                surface);
-
+                mSurface);
         assertEquals(0, streamId);
 
         assertEquals(CameraBinderTestUtils.ALREADY_EXISTS,
-                mCameraUser.createStream(/* ignored */0, /* ignored */0, /* ignored */0, surface));
+                mCameraUser.createStream(/* ignored */0, /* ignored */0, /* ignored */0, mSurface));
 
-        // Create second stream.
-
-        SurfaceTexture surfaceTexture2 = new SurfaceTexture(/* ignored */0);
-        surfaceTexture2.setDefaultBufferSize(640, 480);
-        Surface surface2 = new Surface(surfaceTexture2);
+        // Create second stream with a different surface.
+        SurfaceTexture surfaceTexture = new SurfaceTexture(/* ignored */0);
+        surfaceTexture.setDefaultBufferSize(640, 480);
+        Surface surface2 = new Surface(surfaceTexture);
 
         int streamId2 = mCameraUser.createStream(/* ignored */0, /* ignored */0, /* ignored */0,
                 surface2);
-
         assertEquals(1, streamId2);
 
         // Clean up streams
-
         assertEquals(CameraBinderTestUtils.NO_ERROR, mCameraUser.deleteStream(streamId));
         assertEquals(CameraBinderTestUtils.NO_ERROR, mCameraUser.deleteStream(streamId2));
     }
@@ -155,131 +205,47 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
     @SmallTest
     public void testSubmitBadRequest() throws Exception {
 
-        CameraMetadata metadata = new CameraMetadata();
-        assertTrue(metadata.isEmpty());
-
-        CaptureRequest request = new CaptureRequest();
-        assertTrue(request.isEmpty());
-
-        int status = mCameraUser.createDefaultRequest(TEMPLATE_PREVIEW, /* out */metadata);
-        assertEquals(CameraBinderTestUtils.NO_ERROR, status);
-        assertFalse(metadata.isEmpty());
-
-        request.swap(metadata);
-        assertFalse(request.isEmpty());
-        assertTrue(metadata.isEmpty());
-
-        status = mCameraUser.submitRequest(request, /* streaming */false);
+        CaptureRequest request = createDefaultRequest(/* needStream */false);
+        int status = mCameraUser.submitRequest(request, /* streaming */false);
         assertEquals("Expected submitRequest to return BAD_VALUE " +
                 "since we had 0 surface targets set.", CameraBinderTestUtils.BAD_VALUE, status);
 
-        SurfaceTexture surfaceTexture = new SurfaceTexture(/* ignored */0);
-        surfaceTexture.setDefaultBufferSize(640, 480);
-        Surface surface = new Surface(surfaceTexture);
-        request.addTarget(surface);
-
+        request.addTarget(mSurface);
         status = mCameraUser.submitRequest(request, /* streaming */false);
         assertEquals("Expected submitRequest to return BAD_VALUE since " +
                 "the target surface wasn't registered with createStream.",
                 CameraBinderTestUtils.BAD_VALUE, status);
 
         request.close();
-        metadata.close();
-        surface.release();
     }
 
     @SmallTest
     public void testSubmitGoodRequest() throws Exception {
 
-        CameraMetadata metadata = new CameraMetadata();
-        assertTrue(metadata.isEmpty());
-
-        CaptureRequest request = new CaptureRequest();
-        assertTrue(request.isEmpty());
-
-        // Create default request from template.
-
-        int status = mCameraUser.createDefaultRequest(TEMPLATE_PREVIEW, /* out */metadata);
-        assertEquals(CameraBinderTestUtils.NO_ERROR, status);
-        assertFalse(metadata.isEmpty());
-
-        request.swap(metadata);
-        assertFalse(request.isEmpty());
-        assertTrue(metadata.isEmpty());
-
-        SurfaceTexture surfaceTexture = new SurfaceTexture(/* ignored */0);
-        surfaceTexture.setDefaultBufferSize(640, 480);
-        Surface surface = new Surface(surfaceTexture);
-
-        // Create stream first. Pre-requisite to submitting a request using that
-        // stream.
-
-        int streamId = mCameraUser.createStream(/* ignored */10, /* ignored */20, /* ignored */30,
-                surface);
-        assertEquals(0, streamId);
-
-        request.addTarget(surface);
+        CaptureRequest request = createDefaultRequest(/* needStream */true);
 
         // Submit valid request twice.
-
-        int requestId1;
-        requestId1 = mCameraUser.submitRequest(request, /* streaming */false);
-        assertTrue("Request IDs should be non-negative", requestId1 >= 0);
-
-        int requestId2 = mCameraUser.submitRequest(request, /* streaming */false);
-        assertTrue("Request IDs should be non-negative", requestId2 >= 0);
+        int requestId1 = submitCameraRequest(request, /* streaming */false);
+        int requestId2 = submitCameraRequest(request, /* streaming */false);
         assertNotSame("Request IDs should be unique for multiple requests", requestId1, requestId2);
 
-        surface.release();
         request.close();
-        metadata.close();
     }
 
     @SmallTest
     public void testSubmitStreamingRequest() throws Exception {
 
-        CameraMetadata metadata = new CameraMetadata();
-        assertTrue(metadata.isEmpty());
-
-        CaptureRequest request = new CaptureRequest();
-        assertTrue(request.isEmpty());
-
-        // Create default request from template.
-
-        int status = mCameraUser.createDefaultRequest(TEMPLATE_PREVIEW, /* out */metadata);
-        assertEquals(CameraBinderTestUtils.NO_ERROR, status);
-        assertFalse(metadata.isEmpty());
-
-        request.swap(metadata);
-        assertFalse(request.isEmpty());
-        assertTrue(metadata.isEmpty());
-
-        SurfaceTexture surfaceTexture = new SurfaceTexture(/* ignored */0);
-        surfaceTexture.setDefaultBufferSize(640, 480);
-        Surface surface = new Surface(surfaceTexture);
-
-        // Create stream first. Pre-requisite to submitting a request using that
-        // stream.
-
-        int streamId = mCameraUser.createStream(/* ignored */10, /* ignored */20, /* ignored */30,
-                surface);
-        assertEquals(0, streamId);
-
-        request.addTarget(surface);
+        CaptureRequest request = createDefaultRequest(/* needStream */true);
 
         // Submit valid request once (non-streaming), and another time
         // (streaming)
+        int requestId1 = submitCameraRequest(request, /* streaming */false);
 
-        int requestId1;
-        requestId1 = mCameraUser.submitRequest(request, /* streaming */false);
-        assertTrue("Request IDs should be non-negative", requestId1 >= 0);
-
-        int requestIdStreaming = mCameraUser.submitRequest(request, /* streaming */true);
-        assertTrue("Request IDs should be non-negative", requestIdStreaming >= 0);
+        int requestIdStreaming = submitCameraRequest(request, /* streaming */true);
         assertNotSame("Request IDs should be unique for multiple requests", requestId1,
                 requestIdStreaming);
 
-        status = mCameraUser.cancelRequest(-1);
+        int status = mCameraUser.cancelRequest(-1);
         assertEquals("Invalid request IDs should not be cancellable",
                 CameraBinderTestUtils.BAD_VALUE, status);
 
@@ -291,9 +257,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         assertEquals("Streaming request IDs should be cancellable", CameraBinderTestUtils.NO_ERROR,
                 status);
 
-        surface.release();
         request.close();
-        metadata.close();
     }
 
     @SmallTest
@@ -309,39 +273,11 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
 
     @SmallTest
     public void testWaitUntilIdle() throws Exception {
-        CameraMetadata metadata = new CameraMetadata();
-        assertTrue(metadata.isEmpty());
-
-        CaptureRequest request = new CaptureRequest();
-        assertTrue(request.isEmpty());
-
-        // Create default request from template.
-        int status = mCameraUser.createDefaultRequest(TEMPLATE_PREVIEW, /* out */metadata);
-        assertEquals(CameraBinderTestUtils.NO_ERROR, status);
-        assertFalse(metadata.isEmpty());
-
-        request.swap(metadata);
-        assertFalse(request.isEmpty());
-        assertTrue(metadata.isEmpty());
-
-        SurfaceTexture surfaceTexture = new SurfaceTexture(/* ignored */0);
-        surfaceTexture.setDefaultBufferSize(640, 480);
-        Surface surface = new Surface(surfaceTexture);
-
-        // Create stream first. Pre-requisite to submitting a request using that
-        // stream.
-
-        int streamId = mCameraUser.createStream(/* ignored */10, /* ignored */20, /* ignored */30,
-                surface);
-        assertEquals(0, streamId);
-
-        request.addTarget(surface);
-
-        int requestIdStreaming = mCameraUser.submitRequest(request, /* streaming */true);
-        assertTrue("Request IDs should be non-negative", requestIdStreaming >= 0);
+        CaptureRequest request = createDefaultRequest(/* needStream */true);
+        int requestIdStreaming = submitCameraRequest(request, /* streaming */true);
 
         // Test Bad case first: waitUntilIdle when there is active repeating request
-        status = mCameraUser.waitUntilIdle();
+        int status = mCameraUser.waitUntilIdle();
         assertEquals("waitUntilIdle is invalid operation when there is active repeating request",
             CameraBinderTestUtils.INVALID_OPERATION, status);
 
@@ -352,4 +288,22 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         assertEquals(CameraBinderTestUtils.NO_ERROR, status);
     }
 
+    @SmallTest
+    public void testCaptureResultCallbacks() throws Exception {
+        IsMetadataNotEmpty matcher = new IsMetadataNotEmpty();
+        CaptureRequest request = createDefaultRequest(/* needStream */true);
+
+        // Test both single request and streaming request.
+        int requestId1 = submitCameraRequest(request, /* streaming */false);
+        verify(mMockCb, timeout(WAIT_FOR_COMPLETE_TIMEOUT_MS).times(1)).onResultReceived(
+                eq(requestId1),
+                argThat(matcher));
+
+        int streamingId = submitCameraRequest(request, /* streaming */true);
+        verify(mMockCb, timeout(WAIT_FOR_COMPLETE_TIMEOUT_MS).atLeast(NUM_CALLBACKS_CHECKED))
+                .onResultReceived(
+                        eq(streamingId),
+                        argThat(matcher));
+        request.close();
+    }
 }
