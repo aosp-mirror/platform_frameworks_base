@@ -55,28 +55,6 @@
     <!-- Title if the number of pages in a printed document is unknown. [CHAR LIMIT=20] -->
     <string name="page_count_unknown">unknown</string>
 
-    <!-- Notifications -->
-
-    <!-- Template for the notificaiton label for a queued print job. [CHAR LIMIT=25] -->
-    <string name="queued_notification_title_template">Queued <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
-
-    <!-- Template for the notificaiton label for a printing print job. [CHAR LIMIT=25] -->
-    <string name="printing_notification_title_template">Printing <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
-
-    <!-- Template for the notificaiton label for a cancelling print job. [CHAR LIMIT=25] -->
-    <string name="cancelling_notification_title_template">Cancelling <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
-
-    <!-- Template for the notificaiton label for a failed print job. [CHAR LIMIT=25] -->
-    <string name="failed_notification_title_template">Printer error <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
-
-    <!-- Label for the notification button for cancelling a print job. [CHAR LIMIT=25] -->
-    <string name="cancel">Cancel</string>
-
-    <!-- Label for the notification button for restrating a filed print job. [CHAR LIMIT=25] -->
-    <string name="restart">Restart</string>
-
-    <!-- Arrays -->
-
     <!-- Color mode labels. -->
     <string-array name="color_mode_labels">
         <!-- Color modelabel: Monochrome color scheme, e.g. one color is used. [CHAR LIMIT=20] -->

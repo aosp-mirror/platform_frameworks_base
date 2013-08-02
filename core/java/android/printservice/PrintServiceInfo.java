@@ -113,22 +113,23 @@ public final class PrintServiceInfo implements Parcelable {
 
                 String nodeName = parser.getName();
                 if (!TAG_PRINT_SERVICE.equals(nodeName)) {
-                    Log.e(LOG_TAG, "Meta-data does not start with " + TAG_PRINT_SERVICE + " tag");
-                } else {
-                    Resources resources = packageManager.getResourcesForApplication(
-                            resolveInfo.serviceInfo.applicationInfo);
-                    AttributeSet allAttributes = Xml.asAttributeSet(parser);
-                    TypedArray attributes = resources.obtainAttributes(allAttributes,
-                            com.android.internal.R.styleable.PrintService);
-
-                    settingsActivityName = attributes.getString(
-                            com.android.internal.R.styleable.PrintService_settingsActivity);
-
-                    addPrintersActivityName = attributes.getString(
-                            com.android.internal.R.styleable.PrintService_addPrintersActivity);
-
-                    attributes.recycle();
+                    throw new XmlPullParserException(
+                            "Meta-data does not start with " + TAG_PRINT_SERVICE + " tag");
                 }
+
+                Resources resources = packageManager.getResourcesForApplication(
+                        resolveInfo.serviceInfo.applicationInfo);
+                AttributeSet allAttributes = Xml.asAttributeSet(parser);
+                TypedArray attributes = resources.obtainAttributes(allAttributes,
+                        com.android.internal.R.styleable.PrintService);
+
+                settingsActivityName = attributes.getString(
+                        com.android.internal.R.styleable.PrintService_settingsActivity);
+
+                addPrintersActivityName = attributes.getString(
+                        com.android.internal.R.styleable.PrintService_addPrintersActivity);
+
+                attributes.recycle();
             } catch (IOException ioe) {
                 Log.w(LOG_TAG, "Error reading meta-data:" + ioe);
             } catch (XmlPullParserException xppe) {

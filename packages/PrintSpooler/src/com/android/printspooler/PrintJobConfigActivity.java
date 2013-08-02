@@ -50,6 +50,7 @@ import android.text.TextUtils.SimpleStringSplitter;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Choreographer;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -191,16 +192,16 @@ public class PrintJobConfigActivity extends Activity {
         mPrinterDiscoveryObserver = null;
         if (mController.isCancelled() || mController.isFailed()) {
             mSpooler.setPrintJobState(mPrintJobId,
-                    PrintJobInfo.STATE_CANCELED, null);
+                    PrintJobInfo.STATE_CANCELED);
         } else if (mController.hasStarted()) {
             mController.finish();
             if (mEditor.isPrintConfirmed()) {
                 if (mController.isFinished()) {
                     mSpooler.setPrintJobState(mPrintJobId,
-                            PrintJobInfo.STATE_QUEUED, null);
+                            PrintJobInfo.STATE_QUEUED);
                 } else {
                     mSpooler.setPrintJobState(mPrintJobId,
-                            PrintJobInfo.STATE_CANCELED, null);
+                            PrintJobInfo.STATE_CANCELED);
                 }
             }
         }
@@ -567,10 +568,6 @@ public class PrintJobConfigActivity extends Activity {
             @Override
             public void onItemSelected(AdapterView<?> spinner, View view, int position, long id) {
                 if (spinner == mDestinationSpinner) {
-                    if (mIgnoreNextDestinationChange) {
-                        mIgnoreNextDestinationChange = false;
-                        return;
-                    }
                     mCurrPrintAttributes.clear();
                     SpinnerItem<PrinterInfo> dstItem = mDestinationSpinnerAdapter.getItem(position);
                     if (dstItem != null) {
@@ -593,20 +590,12 @@ public class PrintJobConfigActivity extends Activity {
                     }
                     updateUi();
                 } else if (spinner == mMediaSizeSpinner) {
-                    if (mIgnoreNextMediaSizeChange) {
-                        mIgnoreNextMediaSizeChange = false;
-                        return;
-                    }
                     SpinnerItem<MediaSize> mediaItem = mMediaSizeSpinnerAdapter.getItem(position);
                     mCurrPrintAttributes.setMediaSize(mediaItem.value);
                     if (!hasErrors()) {
                         mController.update();
                     }
                 } else if (spinner == mColorModeSpinner) {
-                    if (mIgnoreNextColorModeChange) {
-                        mIgnoreNextColorModeChange = false;
-                        return;
-                    }
                     SpinnerItem<Integer> colorModeItem =
                             mColorModeSpinnerAdapter.getItem(position);
                     mCurrPrintAttributes.setColorMode(colorModeItem.value);
@@ -614,10 +603,6 @@ public class PrintJobConfigActivity extends Activity {
                         mController.update();
                     }
                 } else if (spinner == mOrientationSpinner) {
-                    if (mIgnoreNextOrientationChange) {
-                        mIgnoreNextOrientationChange = false;
-                        return;
-                    }
                     SpinnerItem<Integer> orientationItem =
                             mOrientationSpinnerAdapter.getItem(position);
                     mCurrPrintAttributes.setOrientation(orientationItem.value);
@@ -625,10 +610,6 @@ public class PrintJobConfigActivity extends Activity {
                         mController.update();
                     }
                 } else if (spinner == mRangeOptionsSpinner) {
-                    if (mIgnoreNextRangeOptionChange) {
-                        mIgnoreNextRangeOptionChange = false;
-                        return;
-                    }
                     updateUi();
                     if (!hasErrors()) {
                         mController.update();
@@ -655,11 +636,6 @@ public class PrintJobConfigActivity extends Activity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (mIgnoreNextCopiesChange) {
-                    mIgnoreNextCopiesChange = false;
-                    return;
-                }
-
                 final boolean hadErrors = hasErrors();
 
                 if (editable.length() == 0) {
@@ -698,11 +674,6 @@ public class PrintJobConfigActivity extends Activity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (mIgnoreNextRangeChange) {
-                    mIgnoreNextRangeChange = false;
-                    return;
-                }
-
                 final boolean hadErrors = hasErrors();
 
                 String text = editable.toString();
@@ -745,19 +716,9 @@ public class PrintJobConfigActivity extends Activity {
 
         private int mEditorState;
 
-        private boolean mIgnoreNextDestinationChange;
-        private boolean mIgnoreNextMediaSizeChange;
-        private boolean mIgnoreNextColorModeChange;
-        private boolean mIgnoreNextOrientationChange;
-        private boolean mIgnoreNextRangeOptionChange;
-        private boolean mIgnoreNextCopiesChange;
-        private boolean mIgnoreNextRangeChange;
-
         public Editor() {
             // Copies
             mCopiesEditText = (EditText) findViewById(R.id.copies_edittext);
-            mCopiesEditText.setText(String.valueOf(MIN_COPIES));
-            mSpooler.setPrintJobCopiesNoPersistence(mPrintJobId, MIN_COPIES);
             mCopiesEditText.addTextChangedListener(mCopiesTextWatcher);
             mCopiesEditText.selectAll();
 
@@ -811,12 +772,19 @@ public class PrintJobConfigActivity extends Activity {
                         rangeOptionsValues[i], rangeOptionsLabels[i]));
             }
             mRangeOptionsSpinner.setAdapter(mRangeOptionsSpinnerAdapter);
-            if (mRangeOptionsSpinner.getSelectedItemPosition() != 0) {
-                mIgnoreNextRangeOptionChange = true;
-                mRangeOptionsSpinner.setSelection(0);
-            }
+            mRangeOptionsSpinner.setSelection(0);
+            // Here is some voodoo to circumvent the weird behavior of AdapterView
+            // in which a selection listener may get a callback for an event that
+            // happened before the listener was registered. The reason for that is
+            // that the selection change is handled on the next layout pass.
+            Choreographer.getInstance().postCallbackDelayed(Choreographer.CALLBACK_TRAVERSAL,
+                    new Runnable() {
+                @Override
+                public void run() {
+                    mRangeOptionsSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
+                }
+            }, null, Choreographer.getFrameDelay() * 2);
 
-            // Preview button
             mPrintPreviewButton = (Button) findViewById(R.id.print_preview_button);
             mPrintPreviewButton.setOnClickListener(new OnClickListener() {
                 @Override
@@ -829,7 +797,6 @@ public class PrintJobConfigActivity extends Activity {
                 }
             });
 
-            // Print button
             mPrintButton = (Button) findViewById(R.id.print_button);
             mPrintButton.setOnClickListener(new OnClickListener() {
                 @Override
@@ -839,16 +806,11 @@ public class PrintJobConfigActivity extends Activity {
                     mController.update();
                 }
             });
-
-            updateUi();
         }
 
         public void initialize() {
             mEditorState = EDITOR_STATE_INITIALIZED;
-            if (mDestinationSpinner.getSelectedItemPosition() != AdapterView.INVALID_POSITION) {
-                mIgnoreNextDestinationChange = true;
-                mDestinationSpinner.setSelection(AdapterView.INVALID_POSITION);
-            }
+            mDestinationSpinner.setSelection(AdapterView.INVALID_POSITION);
         }
 
         public boolean isCancelled() {
@@ -938,46 +900,35 @@ public class PrintJobConfigActivity extends Activity {
                 // Destination
                 mDestinationSpinner.setEnabled(false);
 
-                if (!TextUtils.equals(mCopiesEditText.getText(), String.valueOf(MIN_COPIES))) {
-                    mIgnoreNextCopiesChange = true;
-                    mCopiesEditText.setText(String.valueOf(MIN_COPIES));
-                }
+                mCopiesEditText.removeTextChangedListener(mCopiesTextWatcher);
+                mCopiesEditText.setText(String.valueOf(MIN_COPIES));
+                mCopiesEditText.addTextChangedListener(mCopiesTextWatcher);
                 mCopiesEditText.setEnabled(false);
 
                 // Media size
-                if (mMediaSizeSpinner.getSelectedItemPosition() != AdapterView.INVALID_POSITION) {
-                    mIgnoreNextMediaSizeChange = true;
-                    mMediaSizeSpinner.setSelection(AdapterView.INVALID_POSITION);
-                }
+                mMediaSizeSpinner.setOnItemSelectedListener(null);
+                mMediaSizeSpinner.setSelection(AdapterView.INVALID_POSITION);
                 mMediaSizeSpinner.setEnabled(false);
 
                 // Color mode
-                if (mColorModeSpinner.getSelectedItemPosition() != AdapterView.INVALID_POSITION) {
-                    mIgnoreNextColorModeChange = true;
-                    mColorModeSpinner.setSelection(AdapterView.INVALID_POSITION);
-                }
+                mColorModeSpinner.setOnItemSelectedListener(null);
+                mColorModeSpinner.setSelection(AdapterView.INVALID_POSITION);
                 mColorModeSpinner.setEnabled(false);
 
                 // Orientation
-                if (mOrientationSpinner.getSelectedItemPosition() != AdapterView.INVALID_POSITION) {
-                    mIgnoreNextOrientationChange = true;
-                    mOrientationSpinner.setSelection(AdapterView.INVALID_POSITION);
-                }
+                mOrientationSpinner.setOnItemSelectedListener(null);
+                mOrientationSpinner.setSelection(AdapterView.INVALID_POSITION);
                 mOrientationSpinner.setEnabled(false);
 
                 // Range
-                if (mRangeOptionsSpinner.getSelectedItemPosition() != 0) {
-                    mIgnoreNextRangeOptionChange = true;
-                    mRangeOptionsSpinner.setSelection(0);
-                }
+                mRangeOptionsSpinner.setOnItemSelectedListener(null);
+                mRangeOptionsSpinner.setSelection(0);
                 mRangeOptionsSpinner.setEnabled(false);
                 mRangeTitle.setText(getString(R.string.label_pages,
                         getString(R.string.page_count_unknown)));
-                if (!TextUtils.equals(mRangeEditText.getText(), "")) {
-                    mIgnoreNextRangeChange = true;
-                    mRangeEditText.setText("");
-                }
-                
+                mRangeEditText.removeTextChangedListener(mRangeTextWatcher);
+                mRangeEditText.setText("");
+                mRangeEditText.addTextChangedListener(mRangeTextWatcher);
                 mRangeEditText.setEnabled(false);
                 mRangeEditText.setVisibility(View.INVISIBLE);
 
@@ -1023,10 +974,8 @@ public class PrintJobConfigActivity extends Activity {
                         mMediaSizeSpinner.setEnabled(true);
                         final int selectedMediaSizeIndex = Math.max(mediaSizes.indexOf(
                                 defaultAttributes.getMediaSize()), 0);
-                        if (mMediaSizeSpinner.getSelectedItemPosition() != selectedMediaSizeIndex) {
-                            mIgnoreNextMediaSizeChange = true;
-                            mMediaSizeSpinner.setSelection(selectedMediaSizeIndex);
-                        }
+                        mMediaSizeSpinner.setOnItemSelectedListener(null);
+                        mMediaSizeSpinner.setSelection(selectedMediaSizeIndex);
                     }
                 }
 
@@ -1065,10 +1014,8 @@ public class PrintJobConfigActivity extends Activity {
                         mColorModeSpinner.setEnabled(true);
                         final int selectedColorModeIndex = Integer.numberOfTrailingZeros(
                                 (colorModes & defaultAttributes.getColorMode()));
-                        if (mColorModeSpinner.getSelectedItemPosition() != selectedColorModeIndex) {
-                            mIgnoreNextColorModeChange = true;
-                            mColorModeSpinner.setSelection(selectedColorModeIndex);
-                        }
+                        mColorModeSpinner.setOnItemSelectedListener(null);
+                        mColorModeSpinner.setSelection(selectedColorModeIndex);
                     }
                 }
 
@@ -1108,11 +1055,8 @@ public class PrintJobConfigActivity extends Activity {
                         mOrientationSpinner.setEnabled(true);
                         final int selectedOrientationIndex = Integer.numberOfTrailingZeros(
                                 (orientations & defaultAttributes.getOrientation()));
-                        if (mOrientationSpinner.getSelectedItemPosition()
-                                != selectedOrientationIndex) {
-                            mIgnoreNextOrientationChange = true;
-                            mOrientationSpinner.setSelection(selectedOrientationIndex);
-                        }
+                        mOrientationSpinner.setOnItemSelectedListener(null);
+                        mOrientationSpinner.setSelection(selectedOrientationIndex);
                     }
                 }
 
@@ -1136,10 +1080,8 @@ public class PrintJobConfigActivity extends Activity {
                                     ? getString(R.string.page_count_unknown)
                                     : String.valueOf(pageCount)));
                 } else {
-                    if (mRangeOptionsSpinner.getSelectedItemPosition() != 0) {
-                        mIgnoreNextRangeOptionChange = true;
-                        mRangeOptionsSpinner.setSelection(0);
-                    }
+                    mRangeOptionsSpinner.setOnItemSelectedListener(null);
+                    mRangeOptionsSpinner.setSelection(0);
                     mRangeOptionsSpinner.setEnabled(false);
                     mRangeTitle.setText(getString(R.string.label_pages,
                             getString(R.string.page_count_unknown)));
@@ -1167,12 +1109,26 @@ public class PrintJobConfigActivity extends Activity {
                 // Copies
                 if (mCopiesEditText.getError() == null
                         && TextUtils.isEmpty(mCopiesEditText.getText())) {
-                    mIgnoreNextCopiesChange = true;
                     mCopiesEditText.setText(String.valueOf(MIN_COPIES));
                     mCopiesEditText.selectAll();
                     mCopiesEditText.requestFocus();
                 }
             }
+
+            // Here is some voodoo to circumvent the weird behavior of AdapterView
+            // in which a selection listener may get a callback for an event that
+            // happened before the listener was registered. The reason for that is
+            // that the selection change is handled on the next layout pass.
+            Choreographer.getInstance().postCallbackDelayed(Choreographer.CALLBACK_TRAVERSAL,
+                    new Runnable() {
+                @Override
+                public void run() {
+                    mMediaSizeSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
+                    mColorModeSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
+                    mOrientationSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
+                    mRangeOptionsSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
+                }
+            }, null, Choreographer.getFrameDelay() * 2);
         }
 
         public void addPrinters(List<PrinterInfo> addedPrinters) {
@@ -1190,7 +1146,7 @@ public class PrintJobConfigActivity extends Activity {
                 }
                 if (!duplicate) {
                     mDestinationSpinnerAdapter.add(new SpinnerItem<PrinterInfo>(
-                            addedPrinter, addedPrinter.getId().getPrinterName()));
+                            addedPrinter, addedPrinter.getLabel()));
                 } else {
                     Log.w(LOG_TAG, "Skipping a duplicate printer: " + addedPrinter);
                 }
@@ -1313,14 +1269,14 @@ public class PrintJobConfigActivity extends Activity {
 
                 PrinterInfo printerInfo = getItem(position).value;
                 TextView title = (TextView) convertView.findViewById(R.id.title);
-                title.setText(printerInfo.getId().getPrinterName());
+                title.setText(printerInfo.getLabel());
 
                 try {
                     TextView subtitle = (TextView)
                             convertView.findViewById(R.id.subtitle);
                     PackageManager pm = getPackageManager();
                     PackageInfo packageInfo = pm.getPackageInfo(
-                            printerInfo.getId().getServiceName().getPackageName(), 0);
+                            printerInfo.getId().getService().getPackageName(), 0);
                     subtitle.setText(packageInfo.applicationInfo.loadLabel(pm));
                     subtitle.setVisibility(View.VISIBLE);
                 } catch (NameNotFoundException nnfe) {

@@ -91,6 +91,17 @@ public final class PrintSpoolerService extends Service {
                 }
             }
 
+            @Override
+            public void cancelPrintJob(int printJobId, IPrintSpoolerCallbacks callback,
+                    int appId, int sequence) throws RemoteException {
+                boolean success = false;
+                try {
+                    success = mSpooler.cancelPrintJob(printJobId, appId);
+                } finally {
+                    callback.onCancelPrintJobResult(success, sequence);
+                }
+            }
+
             @SuppressWarnings("deprecation")
             @Override
             public void createPrintJob(String printJobName, IPrintClient client,
@@ -124,11 +135,14 @@ public final class PrintSpoolerService extends Service {
             }
 
             @Override
-            public void setPrintJobState(int printJobId, int state, CharSequence error,
-                    IPrintSpoolerCallbacks callback, int sequece) throws RemoteException {
+            public void setPrintJobState(int printJobId, int state,
+                    IPrintSpoolerCallbacks callback, int sequece)
+                            throws RemoteException {
                 boolean success = false;
                 try {
-                    success = mSpooler.setPrintJobState(printJobId, state, error);
+                    // TODO: Make sure the clients (print services) can set the state
+                    //       only to acceptable ones, e.g. not settings STATE_CREATED.
+                    success = mSpooler.setPrintJobState(printJobId, state);
                 } finally {
                     callback.onSetPrintJobStateResult(success, sequece);
                 }

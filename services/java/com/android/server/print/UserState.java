@@ -85,7 +85,7 @@ final class UserState implements PrintSpoolerCallbacks {
         final RemotePrintService service;
         synchronized (mLock) {
             throwIfDestroyedLocked();
-            ComponentName printServiceName = printJob.getPrinterId().getServiceName();
+            ComponentName printServiceName = printJob.getPrinterId().getService();
             service = mActiveServices.get(printServiceName);
         }
         if (service != null) {
@@ -147,7 +147,7 @@ final class UserState implements PrintSpoolerCallbacks {
             if (mActiveServices.isEmpty()) {
                 return;
             }
-            service = mActiveServices.get(printerIds.get(0).getServiceName());
+            service = mActiveServices.get(printerIds.get(0).getService());
         }
         if (service != null) {
             service.onRequestUpdatePrinters(printerIds);

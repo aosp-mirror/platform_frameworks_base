@@ -423,12 +423,12 @@ final class RemotePrintService implements DeathRecipient {
         }
 
         @Override
-        public boolean setPrintJobState(int printJobId, int state, CharSequence error) {
+        public boolean setPrintJobState(int printJobId, int state) {
             RemotePrintService service = mWeakService.get();
             if (service != null) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return service.mSpooler.setPrintJobState(printJobId, state, error);
+                    return service.mSpooler.setPrintJobState(printJobId, state);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -524,8 +524,8 @@ final class RemotePrintService implements DeathRecipient {
         }
 
         private void throwIfPrinterIdTampered(PrinterId printerId) {
-            if (printerId == null || printerId.getServiceName() == null
-                    || !printerId.getServiceName().equals(mComponentName)) {
+            if (printerId == null || printerId.getService() == null
+                    || !printerId.getService().equals(mComponentName)) {
                 throw new IllegalArgumentException("Invalid printer id: " + printerId);
             }
         }

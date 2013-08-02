@@ -428,14 +428,15 @@ public abstract class PrintService extends Service {
     }
 
     /**
-     * Generates a global printer id given the printer's locally unique name.
+     * Generates a global printer id from a local id. The local id is unique
+     * only within this print service.
      *
-     * @param printerName The printerName.
+     * @param localId The local id.
      * @return Global printer id.
      */
-    public final PrinterId generatePrinterId(String printerName) {
+    public final PrinterId generatePrinterId(String localId) {
         return new PrinterId(new ComponentName(getPackageName(),
-                getClass().getName()), printerName);
+                getClass().getName()), localId);
     }
 
     @Override
