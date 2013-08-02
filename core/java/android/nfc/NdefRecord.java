@@ -456,8 +456,8 @@ public final class NdefRecord implements Parcelable {
         if (domain == null) throw new NullPointerException("domain is null");
         if (type == null) throw new NullPointerException("type is null");
 
-        domain = domain.trim().toLowerCase(Locale.US);
-        type = type.trim().toLowerCase(Locale.US);
+        domain = domain.trim().toLowerCase(Locale.ROOT);
+        type = type.trim().toLowerCase(Locale.ROOT);
 
         if (domain.length() == 0) throw new IllegalArgumentException("domain is empty");
         if (type.length() == 0) throw new IllegalArgumentException("type is empty");
