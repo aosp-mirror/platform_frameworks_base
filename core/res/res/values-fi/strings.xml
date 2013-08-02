@@ -811,7 +811,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Aseta SIM-kortti."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM-korttia ei löydy tai ei voi lukea. Kytke SIM-kortti."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"SIM-kortti ei kelpaa."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM-kortti on poistettu pysyvästi käytöstä."\n" Ota yhteyttä operaattoriisi ja hanki uusi SIM-kortti."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM-kortti on poistettu pysyvästi käytöstä.\n Ota yhteyttä operaattoriisi ja hanki uusi SIM-kortti."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Edellinen kappale -painike"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Seuraava kappale -painike"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Tauko-painike"</string>
@@ -823,11 +823,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Katso ohjeita käyttöoppaasta tai ota yhteyttä asiakaspalveluun."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM-kortti on lukittu."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM-kortin lukitusta poistetaan…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Olet piirtänyt lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. "\n\n"Yritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Olet kirjoittanut salasanan väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. "\n\n"Yritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Olet kirjoittanut PIN-koodin väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. "\n\n"Yritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan tablet-laitteesi lukitus Google-sisäänkirjautumisen avulla."\n\n" Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan puhelimesi lukitus Google-sisäänkirjautumisen avulla."\n\n" Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Olet piirtänyt lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Olet kirjoittanut salasanan väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Olet kirjoittanut PIN-koodin väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan tablet-laitteesi lukitus Google-sisäänkirjautumisen avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan puhelimesi lukitus Google-sisäänkirjautumisen avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Tablet-laitteen lukituksen poisto epäonnistui <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos teet vielä <xliff:g id="NUMBER_1">%d</xliff:g> epäonnistunutta yritystä, tablet-laitteeseen palautetaan tehdasasetukset ja kaikki käyttäjätiedot häviävät."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Puhelimen lukituksen poisto epäonnistui <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos teet vielä <xliff:g id="NUMBER_1">%d</xliff:g> epäonnistunutta yritystä, puhelimeen palautetaan tehdasasetukset ja kaikki käyttäjätiedot häviävät."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Tablet-laitteen lukituksen poisto epäonnistui <xliff:g id="NUMBER">%d</xliff:g> kertaa. Laitteeseen palautetaan nyt tehdasasetukset."</string>
@@ -841,7 +841,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Salasana"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Kirjaudu sisään"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Virheellinen käyttäjänimi tai salasana."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Unohditko käyttäjänimesi tai salasanasi?"\n"Käy osoitteessa "<b>"google.com/accounts/recovery"</b></string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Unohditko käyttäjänimesi tai salasanasi?\nKäy osoitteessa "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Tarkistetaan..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"Poista lukitus"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Ääni käytössä"</string>
@@ -889,7 +889,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Vahvista siirtyminen"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Poistu tältä sivulta"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Pysy tällä sivulla"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Haluatko varmasti siirtyä pois tältä sivulta?"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nHaluatko varmasti siirtyä pois tältä sivulta?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Vahvista"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Vinkki: lähennä ja loitonna kaksoisnapauttamalla."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Aut. täyttö"</string>
@@ -1095,14 +1095,14 @@
     <string name="aerr_application" msgid="932628488013092776">"<xliff:g id="APPLICATION">%1$s</xliff:g> on pysähtynyt."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Prosessi <xliff:g id="PROCESS">%1$s</xliff:g> on pysähtynyt."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> ei vastaa."\n\n"Haluatko sulkea sen?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Toiminto <xliff:g id="ACTIVITY">%1$s</xliff:g> ei vastaa."\n\n"Haluatko sulkea sen?"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> ei vastaa.\n\nHaluatko sulkea sen?"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"Toiminto <xliff:g id="ACTIVITY">%1$s</xliff:g> ei vastaa.\n\nHaluatko sulkea sen?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> ei vastaa. Haluatko sulkea sen?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Prosessi <xliff:g id="PROCESS">%1$s</xliff:g> ei vastaa."\n\n"Haluatko sulkea sen?"</string>
+    <string name="anr_process" msgid="6513209874880517125">"Prosessi <xliff:g id="PROCESS">%1$s</xliff:g> ei vastaa.\n\nHaluatko sulkea sen?"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Ilmoita"</string>
     <string name="wait" msgid="7147118217226317732">"Odota"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"Sivu ei vastaa."\n\n"Haluatko sulkea sen?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Sivu ei vastaa.\n\nHaluatko sulkea sen?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Sovelluksen uud.ohjaus"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> on nyt käynnissä."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> käynnistettiin alun perin."</string>
@@ -1284,15 +1284,15 @@
     <string name="ime_action_done" msgid="8971516117910934605">"Valmis"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Edell."</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Suorita"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"Valitse numero"\n" <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"Luo yhteystieto"\n"käyttäen numeroa <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Valitse numero\n <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Luo yhteystieto\nkäyttäen numeroa <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Seuraavat sovellukset pyytävät lupaa käyttää tiliäsi nyt ja tulevaisuudessa."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Sallitko tämän pyynnön?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Käyttöoikeuspyyntö"</string>
     <string name="allow" msgid="7225948811296386551">"Salli"</string>
     <string name="deny" msgid="2081879885755434506">"Kiellä"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Lupa pyydetty"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Pyydetään lupaa"\n"tilille <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Pyydetään lupaa\ntilille <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Syöttötapa"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Synkronointi"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Esteettömyys"</string>
@@ -1493,20 +1493,20 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Salasana"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Kirjaudu sisään"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Virheellinen käyttäjänimi tai salasana."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Unohditko käyttäjänimesi tai salasanasi?"\n"Käy osoitteessa "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Unohditko käyttäjänimesi tai salasanasi?\nKäy osoitteessa "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Tarkistetaan tiliä..."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Olet kirjoittanut PIN-koodin väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. "\n\n"Yritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Olet kirjoittanut salasanan väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. "\n\n"Yritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Olet piirtänyt lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. "\n\n"Yritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Olet kirjoittanut PIN-koodin väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Olet kirjoittanut salasanan väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Olet piirtänyt lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. \n\nYritä uudelleen <xliff:g id="NUMBER_1">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Tablet-laitteen lukituksen poisto epäonnistui <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos teet vielä <xliff:g id="NUMBER_1">%d</xliff:g> epäonnistunutta yritystä, tablet-laitteeseen palautetaan tehdasasetukset ja kaikki käyttäjätiedot häviävät."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Puhelimen lukituksen poisto epäonnistui <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos teet vielä <xliff:g id="NUMBER_1">%d</xliff:g> epäonnistunutta yritystä, puhelimeen palautetaan tehdasasetukset ja kaikki käyttäjätiedot häviävät."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Tablet-laitteen lukituksen poisto epäonnistui <xliff:g id="NUMBER">%d</xliff:g> kertaa. Laitteeseen palautetaan nyt tehdasasetukset."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Puhelimen lukituksen poisto epäonnistui <xliff:g id="NUMBER">%d</xliff:g> kertaa. Puhelimeen palautetaan nyt tehdasasetukset."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan tablet-laitteesi lukitus sähköpostitilin avulla."\n\n" Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan puhelimesi lukitus sähköpostitilin avulla."\n\n" Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan tablet-laitteesi lukitus sähköpostitilin avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%d</xliff:g> kertaa, sinua pyydetään poistamaan puhelimesi lukitus sähköpostitilin avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Poista"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Nostetaanko äänenvoimakkuus suositeltua tasoa voimakkaammaksi?"\n"Jos kuuntelet suurella äänenvoimakkuudella pitkiä aikoja, kuulosi voi vahingoittua."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Nostetaanko äänenvoimakkuus suositeltua tasoa voimakkaammaksi?\nJos kuuntelet suurella äänenvoimakkuudella pitkiä aikoja, kuulosi voi vahingoittua."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Ota esteettömyystila käyttöön koskettamalla pitkään kahdella sormella."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Esteettömyystila käytössä."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Esteettömyystila peruutettu."</string>

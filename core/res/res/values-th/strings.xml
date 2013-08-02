@@ -811,7 +811,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"ใส่ซิมการ์ด"</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"ไม่มีซิมการ์ดหรือไม่สามารถอ่านได้ โปรดใส่ซิมการ์ด"</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"ซิมการ์ดใช้ไม่ได้"</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"ซิมการ์ดของคุณถูกปิดใช้งานอย่างถาวร"\n"ติดต่อผู้ให้บริการไร้สายของคุณเพื่อรับซิมการ์ดอีกอันหนึ่ง"</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"ซิมการ์ดของคุณถูกปิดใช้งานอย่างถาวร\nติดต่อผู้ให้บริการไร้สายของคุณเพื่อรับซิมการ์ดอีกอันหนึ่ง"</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"ปุ่มแทร็กก่อนหน้า"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"ปุ่มแทร็กถัดไป"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"ปุ่มหยุดชั่วคราว"</string>
@@ -823,11 +823,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"ดูคู่มือผู้ใช้หรือติดต่อศูนย์บริการลูกค้า"</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"ซิมการ์ดถูกล็อก"</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"กำลังปลดล็อกซิมการ์ด…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว"\n\n"โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"คุณพิมพ์รหัสผ่านไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว"\n\n"ลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"คุณพิมพ์ PIN ไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว"\n\n"ลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกแท็บเล็ตโดยใช้การลงชื่อเข้าใช้ Google"\n\n"โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้ง หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้การลงชื่อเข้าใช้ Google"\n\n"โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว\n\nโปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"คุณพิมพ์รหัสผ่านไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว\n\nลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"คุณพิมพ์ PIN ไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว\n\nลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกแท็บเล็ตโดยใช้การลงชื่อเข้าใช้ Google\n\nโปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้ง หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้การลงชื่อเข้าใช้ Google\n\nโปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"คุณพยายามปลดล็อกแท็บเล็ตอย่างไม่ถูกต้องแล้ว <xliff:g id="NUMBER_0">%d</xliff:g> ครั้ง หากการพยายามไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง แท็บเล็ตจะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงานและข้อมูลทั้งหมดของผู้ใช้จะหายไป"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"คุณพยายามปลดล็อกโทรศัพท์อย่างไม่ถูกต้องแล้ว <xliff:g id="NUMBER_0">%d</xliff:g> ครั้ง หากการพยายามไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง โทรศัพท์จะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงานและข้อมูลทั้งหมดของผู้ใช้จะหายไป"</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"คุณพยายามปลดล็อกแท็บเล็ตอย่างไม่ถูกต้องแล้ว <xliff:g id="NUMBER">%d</xliff:g> ครั้ง ขณะนี้แท็บเล็ตจะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงาน"</string>
@@ -841,7 +841,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"รหัสผ่าน"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"ลงชื่อเข้าใช้"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"หากลืมชื่อผู้ใช้หรือรหัสผ่าน"\n"โปรดไปที่ "<b>"google.com/accounts/recovery"</b></string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"หากลืมชื่อผู้ใช้หรือรหัสผ่าน\nโปรดไปที่ "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"กำลังตรวจสอบ…"</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"ปลดล็อก"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"เปิดเสียง"</string>
@@ -889,7 +889,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"ยืนยันการนำทาง"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"ออกจากหน้านี้"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"อยู่ในหน้านี้"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"คุณแน่ใจไหมว่าต้องการออกจากหน้านี้"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nคุณแน่ใจไหมว่าต้องการออกจากหน้านี้"</string>
     <string name="save_password_label" msgid="6860261758665825069">"ยืนยัน"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"เคล็ดลับ: แตะสองครั้งเพื่อขยายและย่อ"</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"ป้อนอัตโนมัติ"</string>
@@ -1095,14 +1095,14 @@
     <string name="aerr_application" msgid="932628488013092776">"ขออภัย <xliff:g id="APPLICATION">%1$s</xliff:g> หยุดการทำงานแล้ว"</string>
     <string name="aerr_process" msgid="4507058997035697579">"ขออภัย กระบวนการ <xliff:g id="PROCESS">%1$s</xliff:g> หยุดการทำงานแล้ว"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> ไม่ตอบสนอง"\n\n"คุณต้องการปิดหรือไม่"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"กิจกรรม <xliff:g id="ACTIVITY">%1$s</xliff:g> ไม่ตอบสนอง"\n\n"คุณต้องการปิดหรือไม่"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g> ไม่ตอบสนอง\n\nคุณต้องการปิดหรือไม่"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"กิจกรรม <xliff:g id="ACTIVITY">%1$s</xliff:g> ไม่ตอบสนอง\n\nคุณต้องการปิดหรือไม่"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> ไม่ตอบสนอง คุณต้องการปิดหรือไม่"</string>
-    <string name="anr_process" msgid="6513209874880517125">"กระบวนการ <xliff:g id="PROCESS">%1$s</xliff:g> ไม่ตอบสนอง"\n\n"คุณต้องการปิดหรือไม่"</string>
+    <string name="anr_process" msgid="6513209874880517125">"กระบวนการ <xliff:g id="PROCESS">%1$s</xliff:g> ไม่ตอบสนอง\n\nคุณต้องการปิดหรือไม่"</string>
     <string name="force_close" msgid="8346072094521265605">"ตกลง"</string>
     <string name="report" msgid="4060218260984795706">"รายงาน"</string>
     <string name="wait" msgid="7147118217226317732">"รอ"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"หน้าเว็บนี้ไม่ตอบสนอง"\n\n"คุณต้องการปิดหรือไม่"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"หน้าเว็บนี้ไม่ตอบสนอง\n\nคุณต้องการปิดหรือไม่"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"แอปฯ ที่เปลี่ยนเส้นทาง"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> กำลังทำงานอยู่ในขณะนี้"</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> เปิดใช้ไว้แล้ว"</string>
@@ -1284,15 +1284,15 @@
     <string name="ime_action_done" msgid="8971516117910934605">"เสร็จสิ้น"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"ก่อนหน้า"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"ปฏิบัติ"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"หมุนหมายเลข "\n" โดยใช้ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"สร้างที่อยู่ติดต่อ "\n"โดยใช้ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"หมุนหมายเลข \n โดยใช้ <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"สร้างที่อยู่ติดต่อ \nโดยใช้ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"แอปพลิเคชันต่อไปนี้ขอให้มีการอนุญาตให้เข้าถึงบัญชีของคุณในขณะนี้และในอนาคต"</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"คุณต้องการอนุญาตหรือไม่"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"คำขอเข้าถึง"</string>
     <string name="allow" msgid="7225948811296386551">"อนุญาต"</string>
     <string name="deny" msgid="2081879885755434506">"ปฏิเสธ"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"การอนุญาตที่ขอ"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"การอนุญาตที่ขอ"\n"สำหรับบัญชี <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"การอนุญาตที่ขอ\nสำหรับบัญชี <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"วิธีป้อนข้อมูล"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"ซิงค์"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"การเข้าถึง"</string>
@@ -1493,20 +1493,20 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"รหัสผ่าน"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"ลงชื่อเข้าใช้"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"หากลืมชื่อผู้ใช้หรือรหัสผ่าน"\n"โปรดไปที่ "<b>"google.com/accounts/recovery"</b></string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"หากลืมชื่อผู้ใช้หรือรหัสผ่าน\nโปรดไปที่ "<b>"google.com/accounts/recovery"</b></string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"กำลังตรวจสอบบัญชี…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"คุณพิมพ์ PIN ไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว "\n\n"โปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"คุณพิมพ์รหัสผ่านไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว "\n\n"โปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว "\n\n"โปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"คุณพิมพ์ PIN ไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว \n\nโปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"คุณพิมพ์รหัสผ่านไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว \n\nโปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้องไป <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว \n\nโปรดลองอีกครั้งใน <xliff:g id="NUMBER_1">%d</xliff:g> วินาที"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"คุณพยายามปลดล็อกแท็บเล็ตอย่างไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากพยายามแล้วไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง แท็บเล็ตจะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงานและข้อมูลผู้ใช้ทั้งหมดจะหายไป"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"คุณพยายามปลดล็อกโทรศัพท์อย่างไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากพยายามแล้วไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง โทรศัพท์จะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงานและข้อมูลผู้ใช้ทั้งหมดจะหายไป"</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"คุณพยายามปลดล็อกแท็บเล็ตอย่างไม่ถูกต้อง <xliff:g id="NUMBER">%d</xliff:g> ครั้งแล้ว ขณะนี้แท็บเล็ตจะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงาน"</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"คุณพยายามปลดล็อกโทรศัพท์อย่างไม่ถูกต้อง <xliff:g id="NUMBER">%d</xliff:g> ครั้งแล้ว ขณะนี้โทรศัพท์จะถูกรีเซ็ตเป็นค่าเริ่มต้นจากโรงงาน"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกแท็บเล็ตโดยใช้บัญชีอีเมล"\n\n" โปรดลองอีกครั้งใน <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้ับัญชีอีเมล"\n\n" โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกแท็บเล็ตโดยใช้บัญชีอีเมล\n\n โปรดลองอีกครั้งใน <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้ับัญชีอีเมล\n\n โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%d</xliff:g> วินาที"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"นำออก"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"ในกรณีที่ต้องการเพิ่มระดับเสียงจนเกินระดับที่แนะนำ"\n"การฟังเสียงดังเป็นเวลานานอาจทำให้การได้ยินของคุณบกพร่องได้"</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"ในกรณีที่ต้องการเพิ่มระดับเสียงจนเกินระดับที่แนะนำ\nการฟังเสียงดังเป็นเวลานานอาจทำให้การได้ยินของคุณบกพร่องได้"</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"ใช้สองนิ้วแตะค้างไว้เพื่อเปิดใช้งานการเข้าถึง"</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"เปิดใช้งานการเข้าถึงแล้ว"</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"ยกเลิกการเข้าถึงแล้ว"</string>

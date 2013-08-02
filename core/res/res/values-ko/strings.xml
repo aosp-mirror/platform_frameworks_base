@@ -811,7 +811,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"SIM 카드를 삽입하세요."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"SIM 카드가 없거나 읽을 수 없습니다. SIM 카드를 삽입하세요."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"사용할 수 없는 SIM 카드입니다."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM 카드 사용이 영구적으로 사용중지되었습니다."\n"다른 SIM 카드를 사용하려면 무선 서비스 제공업체에 문의하시기 바랍니다."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"SIM 카드 사용이 영구적으로 사용중지되었습니다.\n다른 SIM 카드를 사용하려면 무선 서비스 제공업체에 문의하시기 바랍니다."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"이전 트랙 버튼"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"다음 트랙 버튼"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"일시중지 버튼"</string>
@@ -823,11 +823,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"사용자 가이드를 참조하거나 고객지원팀에 문의하세요."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"SIM 카드가 잠겨 있습니다."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"SIM 카드 잠금해제 중..."</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. "\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도하세요."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"비밀번호를 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 입력했습니다. "\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도하세요."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"PIN을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 입력했습니다. "\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도하세요."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 Google 로그인을 통해 태블릿을 잠금해제해야 합니다."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도하세요."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 Google 로그인을 통해 휴대전화를 잠금해제해야 합니다."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도하세요."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. \n\n<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도하세요."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"비밀번호를 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도하세요."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"PIN을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도하세요."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 Google 로그인을 통해 태블릿을 잠금해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도하세요."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 Google 로그인을 통해 휴대전화를 잠금해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도하세요."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"태블릿을 잠금 해제하려는 시도가 <xliff:g id="NUMBER_0">%d</xliff:g>번 잘못되었습니다. <xliff:g id="NUMBER_1">%d</xliff:g>번 더 실패하면 태블릿이 초기화되고 사용자 데이터가 모두 손실됩니다."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"휴대전화를 잠금 해제하려는 시도가 <xliff:g id="NUMBER_0">%d</xliff:g>번 잘못되었습니다. <xliff:g id="NUMBER_1">%d</xliff:g>번 더 실패하면 휴대전화가 초기화되고 사용자 데이터가 모두 손실됩니다."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"태블릿을 잠금 해제하려는 시도가 <xliff:g id="NUMBER">%d</xliff:g>번 잘못되었습니다. 태블릿이 초기화됩니다."</string>
@@ -841,7 +841,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"비밀번호"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"로그인"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"사용자 이름 또는 비밀번호가 잘못되었습니다."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"사용자 이름이나 비밀번호를 잊어버렸습니까?"\n<b>"google.com/accounts/recovery"</b>"를 방문하세요."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"사용자 이름이나 비밀번호를 잊어버렸습니까?\n"<b>"google.com/accounts/recovery"</b>"를 방문하세요."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"확인 중…"</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"잠금해제"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"사운드 켜기"</string>
@@ -889,7 +889,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"탐색 확인"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"이 페이지 닫기"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"이 페이지에 머무르기"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"다른 페이지로 이동하시겠습니까?"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\n다른 페이지로 이동하시겠습니까?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"확인"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"도움말: 확대/축소하려면 두 번 탭합니다."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"자동완성"</string>
@@ -1095,14 +1095,14 @@
     <string name="aerr_application" msgid="932628488013092776">"<xliff:g id="APPLICATION">%1$s</xliff:g>(이)가 중지되었습니다."</string>
     <string name="aerr_process" msgid="4507058997035697579">"<xliff:g id="PROCESS">%1$s</xliff:g> 프로세스가 중지되었습니다."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g>이(가) 응답하지 않습니다."\n\n"닫으시겠습니까?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"<xliff:g id="ACTIVITY">%1$s</xliff:g>이(가) 응답하지 않습니다."\n\n"닫으시겠습니까?"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"<xliff:g id="APPLICATION">%2$s</xliff:g>이(가) 응답하지 않습니다.\n\n닫으시겠습니까?"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"<xliff:g id="ACTIVITY">%1$s</xliff:g>이(가) 응답하지 않습니다.\n\n닫으시겠습니까?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g>이(가) 응답하지 않습니다. 닫으시겠습니까?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"<xliff:g id="PROCESS">%1$s</xliff:g> 프로세스가 응답하지 않습니다."\n\n"닫으시겠습니까?"</string>
+    <string name="anr_process" msgid="6513209874880517125">"<xliff:g id="PROCESS">%1$s</xliff:g> 프로세스가 응답하지 않습니다.\n\n닫으시겠습니까?"</string>
     <string name="force_close" msgid="8346072094521265605">"확인"</string>
     <string name="report" msgid="4060218260984795706">"신고"</string>
     <string name="wait" msgid="7147118217226317732">"대기"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"페이지가 응답하지 않습니다."\n\n"페이지를 닫으시겠습니까?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"페이지가 응답하지 않습니다.\n\n페이지를 닫으시겠습니까?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"앱 리디렉션됨"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g>이(가) 실행 중입니다."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"원래 <xliff:g id="APP_NAME">%1$s</xliff:g>을(를) 실행했습니다."</string>
@@ -1284,15 +1284,15 @@
     <string name="ime_action_done" msgid="8971516117910934605">"완료"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"이전"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"실행"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"전화하기 "\n"<xliff:g id="NUMBER">%s</xliff:g>에 연결"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"전화번호부에"\n"<xliff:g id="NUMBER">%s</xliff:g> 추가"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"전화하기 \n<xliff:g id="NUMBER">%s</xliff:g>에 연결"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"전화번호부에\n<xliff:g id="NUMBER">%s</xliff:g> 추가"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"다음 앱에서 앞으로 계정에 액세스할 수 있도록 권한을 요청합니다."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"요청을 허용하시겠습니까?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"액세스 요청"</string>
     <string name="allow" msgid="7225948811296386551">"허용"</string>
     <string name="deny" msgid="2081879885755434506">"거부"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"권한 요청됨"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> 계정에 대해"\n"권한 요청"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"<xliff:g id="ACCOUNT">%s</xliff:g> 계정에 대해\n권한 요청"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"입력 방법"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"동기화"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"접근성"</string>
@@ -1493,20 +1493,20 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"비밀번호"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"로그인"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"사용자 이름 또는 비밀번호가 잘못되었습니다."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"사용자 이름이나 비밀번호를 잊어버렸습니까?"\n<b>"google.com/accounts/recovery"</b>" 페이지를 방문하세요."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"사용자 이름이나 비밀번호를 잊어버렸습니까?\n"<b>"google.com/accounts/recovery"</b>" 페이지를 방문하세요."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"계정 확인 중…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 입력했습니다. "\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"비밀번호를 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 입력했습니다. "\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. "\n\n"<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"비밀번호를 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 입력했습니다. \n\n<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. \n\n<xliff:g id="NUMBER_1">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"태블릿을 잠금해제하려는 시도가 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못되었습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 태블릿이 초기화되고 사용자 데이터가 모두 사라집니다."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"휴대전화를 잠금해제하려는 시도가 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못되었습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 휴대전화가 초기화되고 사용자 데이터가 모두 사라집니다."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"태블릿을 잠금해제하려는 시도가 <xliff:g id="NUMBER">%d</xliff:g>회 잘못되었습니다. 태블릿이 초기화됩니다."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"휴대전화를 잠금해제하려는 시도가 <xliff:g id="NUMBER">%d</xliff:g>회 잘못되었습니다. 휴대전화가 초기화됩니다."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 태블릿을 잠금해제해야 합니다."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금해제해야 합니다."\n\n" <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 태블릿을 잠금해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"잠금해제 패턴을 <xliff:g id="NUMBER_0">%d</xliff:g>회 잘못 그렸습니다. <xliff:g id="NUMBER_1">%d</xliff:g>회 더 실패하면 이메일 계정을 사용하여 휴대전화를 잠금해제해야 합니다.\n\n <xliff:g id="NUMBER_2">%d</xliff:g>초 후에 다시 시도해 주세요."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"삭제"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"안전한 수준 이상으로 볼륨을 높이시겠습니까?"\n"높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"안전한 수준 이상으로 볼륨을 높이시겠습니까?\n높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"두 손가락으로 길게 누르면 접근성을 사용하도록 설정됩니다."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"접근성을 사용 설정했습니다."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"접근성이 취소되었습니다."</string>

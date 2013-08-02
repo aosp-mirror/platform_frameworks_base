@@ -811,7 +811,7 @@
     <string name="lockscreen_missing_sim_instructions" msgid="5372787138023272615">"Maglagay ng isang SIM card."</string>
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Nawawala o hindi nababasa ang SIM card. Maglagay ng isang SIM card."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Hindi nagagamit na SIM card."</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Ang iyong SIM card ay permanenteng hindi pinagana."\n" Makipag-ugnay sa iyong wireless service provider para sa isa pang SIM card."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"Ang iyong SIM card ay permanenteng hindi pinagana.\n Makipag-ugnay sa iyong wireless service provider para sa isa pang SIM card."</string>
     <string name="lockscreen_transport_prev_description" msgid="201594905152746886">"Button na nakaraang track"</string>
     <string name="lockscreen_transport_next_description" msgid="6089297650481292363">"Button na Susunod na track"</string>
     <string name="lockscreen_transport_pause_description" msgid="7659088786780128001">"Button na I-pause"</string>
@@ -823,11 +823,11 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Tingnan ang Gabay ng User o makipag-ugnay sa Pangangalaga sa Customer."</string>
     <string name="lockscreen_sim_locked_message" msgid="8066660129206001039">"Naka-lock ang SIM card."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="595323214052881264">"Ina-unlock ang SIM card…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Mali mong naguhit ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. "\n\n"Subukang muli sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> (na) segundo."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Na-type mo nang mali ang iyong password nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. "\n\n"Subukang muli sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> (na) segundo."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Na-type mo nang mali ang iyong PIN nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. "\n\n"Subukang muli sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> (na) segundo."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Naiguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang iyong tablet gamit ang iyong pag-sign-in sa Google."\n\n" Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Naguhit mo nang mali ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang iyong telepono gamit ang iyong pag-sign-in sa Google."\n\n" Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6481623830344107222">"Mali mong naguhit ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. \n\nSubukang muli sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> (na) segundo."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Na-type mo nang mali ang iyong password nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. \n\nSubukang muli sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> (na) segundo."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Na-type mo nang mali ang iyong PIN nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. \n\nSubukang muli sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> (na) segundo."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Naiguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang iyong tablet gamit ang iyong pag-sign-in sa Google.\n\n Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Naguhit mo nang mali ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang iyong telepono gamit ang iyong pag-sign-in sa Google.\n\n Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Mali mong tinangkang ma-unlock ang tablet nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang mga hindi matagumpay na pagtatangka, mare-reset ang tablet sa factory default at mawawala ang lahat ng data ng user."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="8603565142156826565">"Mali mong tinangkang ma-unlock ang telepono nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang mga hindi matagumpay na pagtatangka, mare-reset ang telepono sa factory default at mawawala ang lahat ng data ng user."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="280873516493934365">"Mali mong tinangkang ma-unlock ang tablet nang <xliff:g id="NUMBER">%d</xliff:g> (na) beses. Mare-reset na ngayon ang tablet sa factory default."</string>
@@ -841,7 +841,7 @@
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Password"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Mag-sign in"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Di-wastong username o password."</string>
-    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Nakalimutan ang iyong username o password?"\n"Bisitahin ang "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"Nakalimutan ang iyong username o password?\nBisitahin ang "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"Tinitingnan..."</string>
     <string name="lockscreen_unlock_label" msgid="737440483220667054">"I-unlock"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"I-on ang tunog"</string>
@@ -889,7 +889,7 @@
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Kumpirmahin ang Pag-navigate"</string>
     <string name="js_dialog_before_unload_positive_button" msgid="3112752010600484130">"Umalis sa Pahinang ito"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"Manatili sa Pahinang ito"</string>
-    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Sigurado ka bang gusto mong mag-navigate paalis sa pahinang ito?"</string>
+    <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nSigurado ka bang gusto mong mag-navigate paalis sa pahinang ito?"</string>
     <string name="save_password_label" msgid="6860261758665825069">"Kumpirmahin"</string>
     <string name="double_tap_toast" msgid="4595046515400268881">"Tip: Mag-double tap upang mag-zoom in at out."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"Autofill"</string>
@@ -1095,14 +1095,14 @@
     <string name="aerr_application" msgid="932628488013092776">"Sa kasamaang palad, huminto ang <xliff:g id="APPLICATION">%1$s</xliff:g>."</string>
     <string name="aerr_process" msgid="4507058997035697579">"Sa kasamaang palad, nahinto ang prosesong <xliff:g id="PROCESS">%1$s</xliff:g>."</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <string name="anr_activity_application" msgid="1904477189057199066">"Hindi tumutugon ang <xliff:g id="APPLICATION">%2$s</xliff:g>."\n\n"Nais mo ba itong isara?"</string>
-    <string name="anr_activity_process" msgid="5776209883299089767">"Hindi tumutugon ang aktibidad na <xliff:g id="ACTIVITY">%1$s</xliff:g>."\n\n"Nais mo ba itong isara?"</string>
+    <string name="anr_activity_application" msgid="1904477189057199066">"Hindi tumutugon ang <xliff:g id="APPLICATION">%2$s</xliff:g>.\n\nNais mo ba itong isara?"</string>
+    <string name="anr_activity_process" msgid="5776209883299089767">"Hindi tumutugon ang aktibidad na <xliff:g id="ACTIVITY">%1$s</xliff:g>.\n\nNais mo ba itong isara?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"Hindi tumutugon ang <xliff:g id="APPLICATION">%1$s</xliff:g>. Nais mo ba itong isara?"</string>
-    <string name="anr_process" msgid="6513209874880517125">"Hindi tumutugon ang prosesong <xliff:g id="PROCESS">%1$s</xliff:g>."\n\n"Nais mo ba itong isara?"</string>
+    <string name="anr_process" msgid="6513209874880517125">"Hindi tumutugon ang prosesong <xliff:g id="PROCESS">%1$s</xliff:g>.\n\nNais mo ba itong isara?"</string>
     <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Ulat"</string>
     <string name="wait" msgid="7147118217226317732">"Maghintay"</string>
-    <string name="webpage_unresponsive" msgid="3272758351138122503">"Hindi na tumutugon ang pahina."\n\n"Nais mo ba itong isara?"</string>
+    <string name="webpage_unresponsive" msgid="3272758351138122503">"Hindi na tumutugon ang pahina.\n\nNais mo ba itong isara?"</string>
     <string name="launch_warning_title" msgid="1547997780506713581">"Na-redirect ang app"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"Tumatakbo na ngayon ang <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Orihinal na nalunsad ang <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
@@ -1284,15 +1284,15 @@
     <string name="ime_action_done" msgid="8971516117910934605">"Tapos na"</string>
     <string name="ime_action_previous" msgid="1443550039250105948">"Nkraan"</string>
     <string name="ime_action_default" msgid="2840921885558045721">"Isakatuparan"</string>
-    <string name="dial_number_using" msgid="5789176425167573586">"Mag-dial ng numero"\n"gamit ang <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="create_contact_using" msgid="4947405226788104538">"Lumikha ng contact"\n"gamit ang <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Mag-dial ng numero\ngamit ang <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Lumikha ng contact\ngamit ang <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="2106103817937859662">"Ang sumusunod na isa o higit pang mga app ay humihiling ng pahintulot na i-access ang iyong account, ngayon at sa hinaharap."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Gusto mo bang payagan ang kahilingang ito?"</string>
     <string name="grant_permissions_header_text" msgid="6874497408201826708">"Kahilingan sa pag-access"</string>
     <string name="allow" msgid="7225948811296386551">"Payagan"</string>
     <string name="deny" msgid="2081879885755434506">"Tanggihan"</string>
     <string name="permission_request_notification_title" msgid="6486759795926237907">"Hiniling ang pahintulot"</string>
-    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Hiniling ang pahintulot"\n"para sa account na <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
+    <string name="permission_request_notification_with_subtitle" msgid="8530393139639560189">"Hiniling ang pahintulot\npara sa account na <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Pamamaraan ng pag-input"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"I-sync"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Kakayahang Ma-access"</string>
@@ -1493,20 +1493,20 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Password"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Mag-sign in"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Di-wastong username o password."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Nakalimutan ang iyong username o password?"\n"Bisitahin ang "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Nakalimutan ang iyong username o password?\nBisitahin ang "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Tinitingnan ang account…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Na-type mo nang hindi tama ang iyong PIN nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. "\n\n"Subukang muli sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> (na) segundo."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Na-type mo nang hindi tama ang iyong password nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. "\n\n"Subukang muli sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> (na) segundo."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. "\n\n"Subukang muli sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> (na) segundo."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"Na-type mo nang hindi tama ang iyong PIN nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. \n\nSubukang muli sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> (na) segundo."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Na-type mo nang hindi tama ang iyong password nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. \n\nSubukang muli sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> (na) segundo."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. \n\nSubukang muli sa loob ng <xliff:g id="NUMBER_1">%d</xliff:g> (na) segundo."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Tinangka mo sa hindi tamang paraan na i-unlock ang tabelt nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, ire-reset ang tablet sa factory default at mawawala ang lahat ng data ng user."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Tinangka mo sa hindi tamang paraan na i-unlock ang telepono nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, ire-reset ang telepono sa factory default at mawawala ang lahat ng data ng user."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Tinangka mo sa hindi tamang paraan na i-unlock ang tablet nang <xliff:g id="NUMBER">%d</xliff:g> (na) beses. Ire-reset na ngayon ang tablet sa factory default."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Tinangka mo sa hindi tamang paraan na i-unlock ang telepono nang <xliff:g id="NUMBER">%d</xliff:g> (na) beses. Ire-reset na ngayon ang telepono sa factory default."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang tablet mo gamit ang isang email account."\n\n" Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang telepono mo gamit ang isang email account."\n\n" Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang tablet mo gamit ang isang email account.\n\n Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Naguhit mo nang hindi tama ang iyong pattern sa pag-unlock nang <xliff:g id="NUMBER_0">%d</xliff:g> (na) beses. Pagkatapos ng <xliff:g id="NUMBER_1">%d</xliff:g> pang hindi matagumpay na pagtatangka, hihilingin sa iyong i-unlock ang telepono mo gamit ang isang email account.\n\n Subukang muli sa loob ng <xliff:g id="NUMBER_2">%d</xliff:g> (na) segundo."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Alisin"</string>
-    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Lakasan ang volume nang lagpas sa ligtas na antas?"\n"Maaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
+    <string name="safe_media_volume_warning" product="default" msgid="7324161939475478066">"Lakasan ang volume nang lagpas sa ligtas na antas?\nMaaaring mapinsala ng pakikinig sa malakas na volume sa loob ng mahahabang panahon ang iyong pandinig."</string>
     <string name="continue_to_enable_accessibility" msgid="1626427372316070258">"Panatilihing nakapindot nang matagal ang iyong dalawang daliri upang paganahin ang pagiging naa-access."</string>
     <string name="accessibility_enabled" msgid="1381972048564547685">"Pinagana ang accessibility."</string>
     <string name="enable_accessibility_canceled" msgid="3833923257966635673">"Nakansela ang pagiging naa-access."</string>
