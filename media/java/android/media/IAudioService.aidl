@@ -33,7 +33,7 @@ import android.view.KeyEvent;
  * {@hide}
  */
 interface IAudioService {
-    
+
     void adjustVolume(int direction, int flags, String callingPackage);
 
     oneway void adjustLocalOrRemoteStreamVolume(int streamType, int direction,
@@ -51,9 +51,9 @@ interface IAudioService {
     oneway void setRemoteStreamVolume(int index);
 
     void setMasterVolume(int index, int flags, String callingPackage);
-    
+
     void setStreamSolo(int streamType, boolean state, IBinder cb);
-   	
+
     void setStreamMute(int streamType, boolean state, IBinder cb);
 
     boolean isStreamMute(int streamType);
@@ -69,19 +69,19 @@ interface IAudioService {
     int getStreamMaxVolume(int streamType);
 
     int getMasterMaxVolume();
-    
+
     int getLastAudibleStreamVolume(int streamType);
 
     int getLastAudibleMasterVolume();
 
     void setRingerMode(int ringerMode);
-    
+
     int getRingerMode();
 
     void setVibrateSetting(int vibrateType, int vibrateSetting);
-    
+
     int getVibrateSetting(int vibrateType);
-    
+
     boolean shouldVibrate(int vibrateType);
 
     void setMode(int mode, IBinder cb);
@@ -89,11 +89,11 @@ interface IAudioService {
     int getMode();
 
     oneway void playSoundEffect(int effectType);
-  
+
     oneway void playSoundEffectVolume(int effectType, float volume);
 
     boolean loadSoundEffects();
-  
+
     oneway void unloadSoundEffects();
 
     oneway void reloadAudioSettings();
@@ -116,7 +116,7 @@ interface IAudioService {
             IAudioFocusDispatcher fd, String clientId, String callingPackageName);
 
     int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId);
-    
+
     void unregisterAudioFocusClient(String clientId);
 
     int getCurrentAudioFocus();
