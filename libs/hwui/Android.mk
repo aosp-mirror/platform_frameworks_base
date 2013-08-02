@@ -65,11 +65,14 @@ ifeq ($(USE_OPENGL_RENDERER),true)
 
 	ifneq (false,$(ANDROID_ENABLE_RENDERSCRIPT))
 		LOCAL_CFLAGS += -DANDROID_ENABLE_RENDERSCRIPT
-		LOCAL_SHARED_LIBRARIES += libRS libRScpp
+		LOCAL_SHARED_LIBRARIES += libRS libRScpp libstlport
 		LOCAL_C_INCLUDES += \
 			$(intermediates) \
 			frameworks/rs/cpp \
-			frameworks/rs
+			frameworks/rs \
+			external/stlport/stlport \
+			bionic/ \
+			bionic/libstdc++/include
 	endif
 
 	ifndef HWUI_COMPILE_SYMBOLS
