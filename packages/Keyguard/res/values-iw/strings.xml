@@ -41,7 +41,7 @@
     <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"הכנס כרטיס SIM."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"כרטיס ה-SIM חסר או שלא ניתן לקרוא אותו. הכנס כרטיס SIM."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"לא ניתן להשתמש בכרטיס SIM זה."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"כרטיס ה-SIM שלך הושבת לצמיתות."\n"פנה לספק השירות האלחוטי שלך לקבלת כרטיס SIM אחר."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"כרטיס ה-SIM שלך הושבת לצמיתות.\nפנה לספק השירות האלחוטי שלך לקבלת כרטיס SIM אחר."</string>
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"כרטיס ה-SIM נעול."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"כרטיס SIM נעול באמצעות PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"מבטל נעילה של כרטיס SIM…"</string>
@@ -116,17 +116,17 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"סיסמה"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"היכנס"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"שם משתמש או סיסמה לא חוקיים."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"שכחת את שם המשתמש או הסיסמה?"\n"בקר בכתובת "<b>"google.com/accounts/recovery"</b></string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"שכחת את שם המשתמש או הסיסמה?\nבקר בכתובת "<b>"google.com/accounts/recovery"</b></string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"בודק חשבון…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"הקלדת מספר PIN שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. "\n\n"נסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"הקלדת סיסמה שגויה <xliff:g id="NUMBER_0">%d</xliff:g> פעמים."\n\n"נסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. "\n\n"נסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"הקלדת מספר PIN שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. \n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"הקלדת סיסמה שגויה <xliff:g id="NUMBER_0">%d</xliff:g> פעמים.\n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. \n\nנסה שוב בעוד <xliff:g id="NUMBER_1">%d</xliff:g> שניות."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"ביצעת <xliff:g id="NUMBER_0">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, הטאבלט יעבור איפוס לברירת המחדל של היצרן וכל נתוני המשתמש יאבדו."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"ביצעת <xliff:g id="NUMBER_0">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, הטלפון יעבור איפוס לברירת המחדל של היצרן וכל נתוני המשתמש יאבדו."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"ביצעת <xliff:g id="NUMBER">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטאבלט. הטאבלט יעבור כעת איפוס לברירת המחדל של היצרן."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"ביצעת <xliff:g id="NUMBER">%d</xliff:g> ניסיונות שגויים לביטול נעילת הטלפון. הטלפון יעבור כעת איפוס לברירת המחדל של היצרן."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטאבלט באמצעות חשבון דוא\"ל‏."\n\n"נסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות חשבון דוא\"ל‏."\n\n"נסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטאבלט באמצעות חשבון דוא\"ל‏.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"שרטטת את קו ביטול הנעילה באופן שגוי <xliff:g id="NUMBER_0">%d</xliff:g> פעמים. לאחר <xliff:g id="NUMBER_1">%d</xliff:g> ניסיונות כושלים נוספים, תתבקש לבטל את נעילת הטלפון באמצעות חשבון דוא\"ל‏.\n\nנסה שוב בעוד <xliff:g id="NUMBER_2">%d</xliff:g> שניות."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"הסר"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"לחצן \'הרצועה הקודמת\'"</string>

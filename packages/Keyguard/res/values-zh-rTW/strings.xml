@@ -41,7 +41,7 @@
     <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"插入 SIM 卡。"</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"找不到或無法讀取 SIM 卡。請插入 SIM 卡。"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"SIM 卡無法使用。"</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"您的 SIM 卡已遭永久停用。"\n"請與您的無線網路服務供應商聯絡，以取得別張 SIM 卡。"</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"您的 SIM 卡已遭永久停用。\n請與您的無線網路服務供應商聯絡，以取得別張 SIM 卡。"</string>
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"SIM 卡處於鎖定狀態。"</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"SIM 卡處於 PUK 鎖定狀態"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"正在解除 SIM 卡鎖定..."</string>
@@ -116,17 +116,17 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"密碼"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"登入"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"使用者名稱或密碼無效。"</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"忘了使用者名稱或密碼？"\n"請前往 "<b>"google.com/accounts/recovery"</b>"。"</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"忘了使用者名稱或密碼？\n請前往 "<b>"google.com/accounts/recovery"</b>"。"</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"正在檢查帳戶…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"您的 PIN 已輸錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。"\n\n"請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"您的密碼已輸錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。"\n\n"請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。"\n\n"請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"您的 PIN 已輸錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"您的密碼已輸錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次。\n\n請在 <xliff:g id="NUMBER_1">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"您嘗試解除這個平板電腦的鎖定已失敗 <xliff:g id="NUMBER_0">%d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%d</xliff:g> 次機會。如果失敗次數超過限制，平板電腦將恢復原廠設定，所有使用者資料都會遺失。"</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"您嘗試解除這支手機的鎖定已失敗 <xliff:g id="NUMBER_0">%d</xliff:g> 次，目前還剩 <xliff:g id="NUMBER_1">%d</xliff:g> 次機會。如果失敗次數超過限制，手機將恢復原廠設定，所有使用者資料都會遺失。"</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"您嘗試解除這個平板電腦的鎖定已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次，平板電腦現在將恢復原廠設定。"</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"您嘗試解除這支手機的鎖定已失敗 <xliff:g id="NUMBER">%d</xliff:g> 次，手機現在將恢復原廠設定。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除平板電腦的鎖定狀態。"\n\n"請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除手機的鎖定狀態。"\n\n"請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除平板電腦的鎖定狀態。\n\n請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"您的解鎖圖形已畫錯 <xliff:g id="NUMBER_0">%d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%d</xliff:g> 次仍未成功，系統就會要求您透過電子郵件帳戶解除手機的鎖定狀態。\n\n請在 <xliff:g id="NUMBER_2">%d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"移除"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"[上一首曲目] 按鈕"</string>

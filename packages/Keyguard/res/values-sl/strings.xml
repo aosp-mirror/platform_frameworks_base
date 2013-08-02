@@ -41,7 +41,7 @@
     <string name="keyguard_missing_sim_instructions" msgid="5210891509995942250">"Vstavite kartico SIM."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="5968985489463870358">"Kartice SIM ni ali je ni mogoče prebrati. Vstavite jo."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"Neuporabna kartica SIM."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Kartica SIM je trajno onemogočena."\n" Obrnite se na operaterja za drugo."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"Kartica SIM je trajno onemogočena.\n Obrnite se na operaterja za drugo."</string>
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"Kartica SIM je zaklenjena."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"Kartica SIM je zaklenjena s kodo PUK."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"Odklepanje kartice SIM …"</string>
@@ -116,17 +116,17 @@
     <string name="kg_login_password_hint" msgid="9057289103827298549">"Geslo"</string>
     <string name="kg_login_submit_button" msgid="5355904582674054702">"Prijava"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"Neveljavno uporabniško ime ali geslo."</string>
-    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Ali ste pozabili uporabniško ime ali geslo?"\n"Obiščite "<b>"google.com/accounts/recovery"</b>"."</string>
+    <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"Ali ste pozabili uporabniško ime ali geslo?\nObiščite "<b>"google.com/accounts/recovery"</b>"."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"Preverjanje računa ..."</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat vnesli napačno. "\n\n"Znova poskusite čez <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Geslo ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat vnesli napačno. "\n\n"Znova poskusite čez <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Vzorec za odklepanje ste nepravilno narisali <xliff:g id="NUMBER_0">%d</xliff:g>-krat. "\n\n"Poskusite znova čez <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="8276745642049502550">"PIN ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat vnesli napačno. \n\nZnova poskusite čez <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="7813713389422226531">"Geslo ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat vnesli napačno. \n\nZnova poskusite čez <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="74089475965050805">"Vzorec za odklepanje ste nepravilno narisali <xliff:g id="NUMBER_0">%d</xliff:g>-krat. \n\nPoskusite znova čez <xliff:g id="NUMBER_1">%d</xliff:g> s."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="1575557200627128949">"Tablični računalnik ste poskusili <xliff:g id="NUMBER_0">%d</xliff:g>-krat napačno odkleniti. Če poskusite še <xliff:g id="NUMBER_1">%d</xliff:g>-krat in ne uspete, bo ponastavljen na privzete tovarniške nastavitve in vsi uporabniški podatki bodo izgubljeni."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="4051015943038199910">"Telefon ste poskusili <xliff:g id="NUMBER_0">%d</xliff:g>-krat napačno odkleniti. Če poskusite še <xliff:g id="NUMBER_1">%d</xliff:g>-krat in ne uspete, bo ponastavljen na privzete tovarniške nastavitve in vsi uporabniški podatki bodo izgubljeni."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Tablični računalnik ste poskusili <xliff:g id="NUMBER">%d</xliff:g>-krat napačno odkleniti, zato bo ponastavljen na privzete tovarniške nastavitve."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Telefon ste poskusili <xliff:g id="NUMBER">%d</xliff:g>-krat napačno odkleniti, zato bo ponastavljen na privzete tovarniške nastavitve."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat napačno vnesli. Po nadaljnjih <xliff:g id="NUMBER_1">%d</xliff:g> neuspešnih poskusih boste pozvani, da tablični računalnik odklenete z e-poštnim računom."\n\n"Poskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat napačno vnesli. Po nadaljnjih <xliff:g id="NUMBER_1">%d</xliff:g> neuspešnih poskusih boste pozvani, da odklenete telefon z Googlovimi podatki za prijavo."\n\n"Poskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat napačno vnesli. Po nadaljnjih <xliff:g id="NUMBER_1">%d</xliff:g> neuspešnih poskusih boste pozvani, da tablični računalnik odklenete z e-poštnim računom.\n\nPoskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Vzorec za odklepanje ste <xliff:g id="NUMBER_0">%d</xliff:g>-krat napačno vnesli. Po nadaljnjih <xliff:g id="NUMBER_1">%d</xliff:g> neuspešnih poskusih boste pozvani, da odklenete telefon z Googlovimi podatki za prijavo.\n\nPoskusite znova čez <xliff:g id="NUMBER_2">%d</xliff:g> s."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Odstrani"</string>
     <string name="keyguard_transport_prev_description" msgid="8229108430245669854">"Gumb za prejšnjo skladbo"</string>
