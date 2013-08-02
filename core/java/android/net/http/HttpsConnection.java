@@ -44,6 +44,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.security.KeyManagementException;
 import java.security.cert.X509Certificate;
+import java.util.Locale;
 
 /**
  * A Connection connecting to a secure http server or tunneling through
@@ -209,7 +210,7 @@ public class HttpsConnection extends Connection {
                 // to add 'host' header unless we want proxy to answer us with a
                 // 400 Bad Request
                 for (Header h : req.mHttpRequest.getAllHeaders()) {
-                    String headerName = h.getName().toLowerCase();
+                    String headerName = h.getName().toLowerCase(Locale.ROOT);
                     if (headerName.startsWith("proxy") || headerName.equals("keep-alive")
                             || headerName.equals("host")) {
                         proxyReq.addHeader(h);

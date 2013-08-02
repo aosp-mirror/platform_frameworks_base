@@ -365,7 +365,7 @@ public class Linkify {
             String scheme, MatchFilter matchFilter,
             TransformFilter transformFilter) {
         boolean hasMatches = false;
-        String prefix = (scheme == null) ? "" : scheme.toLowerCase();
+        String prefix = (scheme == null) ? "" : scheme.toLowerCase(Locale.ROOT);
         Matcher m = p.matcher(s);
 
         while (m.find()) {

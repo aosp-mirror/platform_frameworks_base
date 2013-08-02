@@ -18,6 +18,7 @@ package android.util;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Locale;
 
 /**
  * <p>Various utilities for debugging and logging.</p>
@@ -78,7 +79,7 @@ public class DebugUtils {
                         Class<?> parent = klass;
                         do {
                             declaredMethod = parent.getDeclaredMethod("get" +
-                                    pair[0].substring(0, 1).toUpperCase() +
+                                    pair[0].substring(0, 1).toUpperCase(Locale.ROOT) +
                                     pair[0].substring(1),
                                     (Class[]) null);
                         } while ((parent = klass.getSuperclass()) != null &&
