@@ -20,6 +20,8 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Locale;
+
 /**
  * A class for creating a service discovery request for use with
  * {@link WifiP2pManager#addServiceRequest} and {@link WifiP2pManager#removeServiceRequest}
@@ -167,7 +169,7 @@ public class WifiP2pServiceRequest implements Parcelable {
         }
 
         // check whether query is hex string.
-        query = query.toLowerCase();
+        query = query.toLowerCase(Locale.ROOT);
         char[] chars = query.toCharArray();
         for (char c: chars) {
             if (!((c >= '0' && c <= '9') ||
