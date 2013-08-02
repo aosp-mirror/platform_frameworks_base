@@ -43,9 +43,10 @@ public final class DocumentsContract {
     private static final String TAG = "Documents";
 
     // content://com.example/roots/
-    // content://com.example/docs/0/
-    // content://com.example/docs/0/contents/
-    // content://com.example/docs/0/search/?query=pony
+    // content://com.example/roots/sdcard/
+    // content://com.example/roots/sdcard/docs/0/
+    // content://com.example/roots/sdcard/docs/0/contents/
+    // content://com.example/roots/sdcard/docs/0/search/?query=pony
 
     /**
      * MIME type of a document which is a directory that may contain additional
@@ -59,10 +60,10 @@ public final class DocumentsContract {
     public static final String META_DATA_DOCUMENT_PROVIDER = "android.content.DOCUMENT_PROVIDER";
 
     /**
-     * {@link DocumentColumns#GUID} value representing the root directory of a
-     * storage backend.
+     * {@link DocumentColumns#DOC_ID} value representing the root directory of a
+     * storage root.
      */
-    public static final String ROOT_GUID = "0";
+    public static final String ROOT_DOC_ID = "0";
 
     /**
      * Flag indicating that a document is a directory that supports creation of
@@ -139,20 +140,28 @@ public final class DocumentsContract {
     public static final String PARAM_QUERY = "query";
 
     /**
-     * Build URI representing the custom roots in a storage backend.
+     * Build URI representing the roots in a storage backend.
      */
     public static Uri buildRootsUri(String authority) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority).appendPath(PATH_ROOTS).build();
     }
 
-    /**
-     * Build URI representing the given {@link DocumentColumns#GUID} in a
-     * storage backend.
-     */
-    public static Uri buildDocumentUri(String authority, String guid) {
+    public static Uri buildRootUri(String authority, String rootId) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
-                .authority(authority).appendPath(PATH_DOCS).appendPath(guid).build();
+                .authority(authority).appendPath(PATH_ROOTS).appendPath(rootId).build();
+    }
+
+    public static Uri buildDocumentUri(String authority, String rootId, String docId) {
+        return buildDocumentUri(buildRootUri(authority, rootId), docId);
+    }
+
+    /**
+     * Build URI representing the given {@link DocumentColumns#DOC_ID} in a
+     * storage root.
+     */
+    public static Uri buildDocumentUri(Uri rootUri, String docId) {
+        return rootUri.buildUpon().appendPath(PATH_DOCS).appendPath(docId).build();
     }
 
     /**
@@ -184,15 +193,13 @@ public final class DocumentsContract {
      */
     public interface DocumentColumns extends OpenableColumns {
         /**
-         * The globally unique ID for a document within a storage backend.
-         * Values <em>must</em> never change once returned. This field is
-         * read-only to document clients.
+         * The ID for a document under a storage backend root. Values
+         * <em>must</em> never change once returned. This field is read-only to
+         * document clients.
          * <p>
          * Type: STRING
-         *
-         * @see DocumentsContract#ROOT_GUID
          */
-        public static final String GUID = "guid";
+        public static final String DOC_ID = "doc_id";
 
         /**
          * MIME type of a document, matching the value returned by
@@ -237,6 +244,8 @@ public final class DocumentsContract {
      * @see DocumentsContract#buildRootsUri(String)
      */
     public interface RootColumns {
+        public static final String ROOT_ID = "root_id";
+
         /**
          * Storage root type, use for clustering.
          * <p>
@@ -246,13 +255,6 @@ public final class DocumentsContract {
          * @see DocumentsContract#ROOT_TYPE_DEVICE
          */
         public static final String ROOT_TYPE = "root_type";
-
-        /**
-         * GUID of directory entry for this storage root.
-         * <p>
-         * Type: STRING
-         */
-        public static final String GUID = "guid";
 
         /**
          * Icon resource ID for this storage root, or {@code 0} to use the

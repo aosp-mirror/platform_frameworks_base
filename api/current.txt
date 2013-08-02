@@ -20267,7 +20267,9 @@ package android.provider {
   public final class DocumentsContract {
     ctor public DocumentsContract();
     method public static android.net.Uri buildContentsUri(android.net.Uri);
-    method public static android.net.Uri buildDocumentUri(java.lang.String, java.lang.String);
+    method public static android.net.Uri buildDocumentUri(java.lang.String, java.lang.String, java.lang.String);
+    method public static android.net.Uri buildDocumentUri(android.net.Uri, java.lang.String);
+    method public static android.net.Uri buildRootUri(java.lang.String, java.lang.String);
     method public static android.net.Uri buildRootsUri(java.lang.String);
     method public static android.net.Uri buildSearchUri(android.net.Uri, java.lang.String);
     method public static android.graphics.Bitmap getThumbnail(android.content.ContentResolver, android.net.Uri, android.graphics.Point);
@@ -20282,7 +20284,7 @@ package android.provider {
     field public static final int FLAG_SUPPORTS_THUMBNAIL = 8; // 0x8
     field public static final java.lang.String MIME_TYPE_DIRECTORY = "vnd.android.cursor.dir/doc";
     field public static final java.lang.String PARAM_QUERY = "query";
-    field public static final java.lang.String ROOT_GUID = "0";
+    field public static final java.lang.String ROOT_DOC_ID = "0";
     field public static final int ROOT_TYPE_DEVICE = 3; // 0x3
     field public static final int ROOT_TYPE_DEVICE_ADVANCED = 4; // 0x4
     field public static final int ROOT_TYPE_SERVICE = 1; // 0x1
@@ -20290,16 +20292,16 @@ package android.provider {
   }
 
   public static abstract interface DocumentsContract.DocumentColumns implements android.provider.OpenableColumns {
+    field public static final java.lang.String DOC_ID = "doc_id";
     field public static final java.lang.String FLAGS = "flags";
-    field public static final java.lang.String GUID = "guid";
     field public static final java.lang.String LAST_MODIFIED = "last_modified";
     field public static final java.lang.String MIME_TYPE = "mime_type";
   }
 
   public static abstract interface DocumentsContract.RootColumns {
     field public static final java.lang.String AVAILABLE_BYTES = "available_bytes";
-    field public static final java.lang.String GUID = "guid";
     field public static final java.lang.String ICON = "icon";
+    field public static final java.lang.String ROOT_ID = "root_id";
     field public static final java.lang.String ROOT_TYPE = "root_type";
     field public static final java.lang.String SUMMARY = "summary";
     field public static final java.lang.String TITLE = "title";

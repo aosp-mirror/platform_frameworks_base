@@ -59,6 +59,8 @@ import java.util.ArrayList;
 public class DirectoryFragment extends Fragment {
 
     // TODO: show storage backend in item views when requested
+    // TODO: apply sort order locally
+    // TODO: apply MIME filtering locally
 
     private ListView mListView;
     private GridView mGridView;
@@ -70,14 +72,16 @@ public class DirectoryFragment extends Fragment {
 
     private int mFlags;
 
-    private static final String EXTRA_URI = "uri";
+    private static final String EXTRA_ROOT_URI = "rootUri";
+    private static final String EXTRA_DOCS_URI = "docsUri";
 
     private static final int LOADER_DOCUMENTS = 2;
 
-    public static void show(
-            FragmentManager fm, Uri uri, String displayName, boolean addToBackStack) {
+    public static void show(FragmentManager fm, Uri rootUri, Uri docsUri, String displayName,
+            boolean addToBackStack) {
         final Bundle args = new Bundle();
-        args.putParcelable(EXTRA_URI, uri);
+        args.putParcelable(EXTRA_ROOT_URI, rootUri);
+        args.putParcelable(EXTRA_DOCS_URI, docsUri);
 
         final DirectoryFragment fragment = new DirectoryFragment();
         fragment.setArguments(args);
@@ -116,8 +120,8 @@ public class DirectoryFragment extends Fragment {
         updateMode();
 
         // TODO: migrate flags query to loader
-        final Uri uri = getArguments().getParcelable(EXTRA_URI);
-        mFlags = getDocumentFlags(context, uri);
+        final Uri docsUri = getArguments().getParcelable(EXTRA_DOCS_URI);
+        mFlags = getDocumentFlags(context, docsUri);
 
         mCallbacks = new LoaderCallbacks<Cursor>() {
             @Override
@@ -133,10 +137,10 @@ public class DirectoryFragment extends Fragment {
                 }
 
                 final Uri contentsUri;
-                if (uri.getQueryParameter(DocumentsContract.PARAM_QUERY) != null) {
-                    contentsUri = uri;
+                if (docsUri.getQueryParameter(DocumentsContract.PARAM_QUERY) != null) {
+                    contentsUri = docsUri;
                 } else {
-                    contentsUri = DocumentsContract.buildContentsUri(uri);
+                    contentsUri = DocumentsContract.buildContentsUri(docsUri);
                 }
 
                 return new CursorLoader(context, contentsUri, null, null, null, sortOrder);
@@ -162,8 +166,8 @@ public class DirectoryFragment extends Fragment {
         getLoaderManager().restartLoader(LOADER_DOCUMENTS, getArguments(), mCallbacks);
 
         // TODO: clean up tracking of current directory
-        final Uri uri = getArguments().getParcelable(EXTRA_URI);
-        ((DocumentsActivity) getActivity()).onDirectoryChanged(uri, mFlags);
+        final Uri docsUri = getArguments().getParcelable(EXTRA_DOCS_URI);
+        ((DocumentsActivity) getActivity()).onDirectoryChanged(docsUri, mFlags);
     }
 
     @Override
@@ -245,8 +249,8 @@ public class DirectoryFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             final Cursor cursor = (Cursor) mAdapter.getItem(position);
-            final Uri uri = getArguments().getParcelable(EXTRA_URI);
-            final Document doc = Document.fromCursor(uri.getAuthority(), cursor);
+            final Uri rootUri = getArguments().getParcelable(EXTRA_ROOT_URI);
+            final Document doc = Document.fromCursor(rootUri, cursor);
             ((DocumentsActivity) getActivity()).onDocumentPicked(doc);
         }
     };
@@ -266,7 +270,7 @@ public class DirectoryFragment extends Fragment {
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             if (item.getItemId() == R.id.menu_open) {
-                final Uri uri = getArguments().getParcelable(EXTRA_URI);
+                final Uri rootUri = getArguments().getParcelable(EXTRA_ROOT_URI);
                 final SparseBooleanArray checked = mCurrentView.getCheckedItemPositions();
                 final ArrayList<Document> docs = Lists.newArrayList();
 
@@ -274,7 +278,7 @@ public class DirectoryFragment extends Fragment {
                 for (int i = 0; i < size; i++) {
                     if (checked.valueAt(i)) {
                         final Cursor cursor = (Cursor) mAdapter.getItem(checked.keyAt(i));
-                        docs.add(Document.fromCursor(uri.getAuthority(), cursor));
+                        docs.add(Document.fromCursor(rootUri, cursor));
                     }
                 }
 
@@ -336,17 +340,17 @@ public class DirectoryFragment extends Fragment {
             final TextView summary = (TextView) view.findViewById(android.R.id.summary);
             final ImageView icon = (ImageView) view.findViewById(android.R.id.icon);
 
-            final String guid = getCursorString(cursor, DocumentColumns.GUID);
+            final String docId = getCursorString(cursor, DocumentColumns.DOC_ID);
             final String displayName = getCursorString(cursor, DocumentColumns.DISPLAY_NAME);
             final String mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
             final long lastModified = getCursorLong(cursor, DocumentColumns.LAST_MODIFIED);
             final int flags = getCursorInt(cursor, DocumentColumns.FLAGS);
 
-            final Uri uri = getArguments().getParcelable(EXTRA_URI);
-            final String authority = uri.getAuthority();
+            final Uri rootUri = getArguments().getParcelable(EXTRA_ROOT_URI);
+            final String authority = rootUri.getAuthority();
 
             if ((flags & DocumentsContract.FLAG_SUPPORTS_THUMBNAIL) != 0) {
-                final Uri childUri = DocumentsContract.buildDocumentUri(authority, guid);
+                final Uri childUri = DocumentsContract.buildDocumentUri(rootUri, docId);
                 icon.setImageURI(childUri);
             } else {
                 icon.setImageDrawable(

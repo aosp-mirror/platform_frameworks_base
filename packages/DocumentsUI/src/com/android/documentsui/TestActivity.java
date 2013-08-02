@@ -19,7 +19,9 @@ package com.android.documentsui;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -27,7 +29,15 @@ import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import libcore.io.IoUtils;
+import libcore.io.Streams;
+
+import java.io.IOException;
+import java.io.InputStream;
+
 public class TestActivity extends Activity {
+    private static final String TAG = "TestActivity";
+
     private TextView mResult;
 
     @Override
@@ -113,5 +123,19 @@ public class TestActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         mResult.setText("resultCode=" + resultCode + ", data=" + String.valueOf(data));
+
+        final Uri uri = data != null ? data.getData() : null;
+        if (uri != null) {
+            InputStream is = null;
+            try {
+                is = getContentResolver().openInputStream(uri);
+                final int length = Streams.readFullyNoClose(is).length;
+                Log.d(TAG, "read length=" + length);
+            } catch (IOException e) {
+                Log.w(TAG, "Failed to read " + uri, e);
+            } finally {
+                IoUtils.closeQuietly(is);
+            }
+        }
     }
 }
