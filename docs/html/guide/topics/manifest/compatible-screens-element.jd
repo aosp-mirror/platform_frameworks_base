@@ -33,14 +33,15 @@ with specific screen configurations and enable filtering for users. Any screen c
 compatible. Thus, external services (such as Google Play) should not provide the application to
 devices with such screens.</p>
 
-  <p class="caution"><strong>Caution:</strong> Normally, <strong>you should not use this manifest
+<p class="caution"><strong>Caution:</strong> Normally, <strong>you should not use this manifest
 element</strong>. Using this element can dramatically reduce the potential user base for your
 application, by not allowing users to install your application if they have a device with a screen
 configuration that you have not listed. You should use it only as a last resort, when the
-application absolutely does not work with all screen configurations. Instead of using this element,
-you should follow the guide to <a href="{@docRoot}guide/practices/screens_support.html">Supporting
-Multiple Screens</a>, in order to provide complete support for multiple screens, by adding
-alternative resources for different screen sizes and densities.</p>
+application absolutely does not work with specific screen configurations. Instead of using this
+element, you should follow the guide to <a href=
+"{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a> to
+provide scalable support for multiple screens using alternative layouts and bitmaps
+for different screen sizes and densities.</p>
 
   <p>If you want to set only a minimum screen <em>size</em> for your your application, then you
 should use the <a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
@@ -94,6 +95,10 @@ href="{@docRoot}guide/practices/screens_support.html#range">Supporting Multiple 
             <li>{@code hdpi}</li>
             <li>{@code xhdpi}</li>
           </ul>
+          <p class="note"><strong>Note:</strong> This attribute currently does not accept
+          {@code xxhdpi} as a valid value, but you can instead specify {@code 480}
+          as the value, which is the approximate threshold for xhdpi screens.</p>
+
           <p>For information about the different screen densities, see <a
 href="{@docRoot}guide/practices/screens_support.html#range">Supporting Multiple Screens</a>.</p>
         </dd>
