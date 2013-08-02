@@ -25,8 +25,8 @@
 
     <uses-sdk android:minSdkVersion="17" android:targetSdkVersion="17"/>
 
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL"/>
+    <uses-permission android:name="android.permission.ACCESS_ALL_PRINT_JOBS"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <permission android:name="android.permission.BIND_PRINT_SPOOLER_SERVICE"
         android:label="@string/permlab_bindPrintSpoolerService"
@@ -49,6 +49,11 @@
             android:exported="true"
             android:theme="@android:style/Theme.Holo.Light.Dialog.NoActionBar">
         </activity>
+
+        <receiver
+            android:name=".NotificationController$NotificationBroadcastReceiver"
+            android:exported="false" >
+        </receiver>
 
     </application>
 

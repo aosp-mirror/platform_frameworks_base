@@ -33,4 +33,5 @@ interface IPrintManager {
             in IPrintDocumentAdapter printAdapter, in PrintAttributes attributes,
             int appId, int userId);
     void cancelPrintJob(int printJobId, int appId, int userId);
+    void restartPrintJob(int printJobId, int appId, int userId);
 }

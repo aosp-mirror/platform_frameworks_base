@@ -18731,7 +18731,7 @@ package android.print {
 
   public final class PrinterId implements android.os.Parcelable {
     method public int describeContents();
-    method public java.lang.String getLocalId();
+    method public java.lang.String getPrinterName();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }
@@ -18744,7 +18744,6 @@ package android.print {
     method public int getFittingModes();
     method public android.print.PrinterId getId();
     method public java.util.List<android.print.PrintAttributes.Tray> getInputTrays();
-    method public java.lang.CharSequence getLabel();
     method public java.util.List<android.print.PrintAttributes.MediaSize> getMediaSizes();
     method public android.print.PrintAttributes.Margins getMinMargins();
     method public int getOrientations();
@@ -18758,7 +18757,7 @@ package android.print {
   }
 
   public static final class PrinterInfo.Builder {
-    ctor public PrinterInfo.Builder(android.print.PrinterId, java.lang.CharSequence);
+    ctor public PrinterInfo.Builder(android.print.PrinterId);
     method public android.print.PrinterInfo.Builder addInputTray(android.print.PrintAttributes.Tray, boolean);
     method public android.print.PrinterInfo.Builder addMediaSize(android.print.PrintAttributes.MediaSize, boolean);
     method public android.print.PrinterInfo.Builder addOutputTray(android.print.PrintAttributes.Tray, boolean);
