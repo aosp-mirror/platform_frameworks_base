@@ -341,8 +341,9 @@ public final class Settings {
     /**
      * Activity Action: Show settings to manage the user input dictionary.
      * <p>
-     * In some cases, a matching Activity may not exist, so ensure you
-     * safeguard against this.
+     * Starting with {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE},
+     * it is guaranteed there will always be an appropriate implementation for this Intent action.
+     * In prior releases of the platform this was optional, so ensure you safeguard against it.
      * <p>
      * Input: Nothing.
      * <p>
