@@ -935,15 +935,30 @@ Summary:
     
     <tr class=" api apilevel-" >
         <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/server/Constants.html#PARAM_PAYLOAD_PREFIX">PARAM_PAYLOAD_PREFIX</a></td>
-        <td class="jd-descrcol" width="100%">Prefix to HTTP parameter used to pass key-values in the message payload.</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/server/Constants.html#PARAM_DRY_RUN">PARAM_DRY_RUN</a></td>
+        <td class="jd-descrcol" width="100%">HTTP parameter for telling gcm to validate the message without actually sending it.</td>
     </tr>
     
     
     <tr class="alt-color api apilevel-" >
         <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/server/Constants.html#PARAM_PAYLOAD_PREFIX">PARAM_PAYLOAD_PREFIX</a></td>
+        <td class="jd-descrcol" width="100%">Prefix to HTTP parameter used to pass key-values in the message payload.</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol">String</td>
         <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/server/Constants.html#PARAM_REGISTRATION_ID">PARAM_REGISTRATION_ID</a></td>
         <td class="jd-descrcol" width="100%">HTTP parameter for registration id.</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol">String</td>
+        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/server/Constants.html#PARAM_RESTRICTED_PACKAGE_NAME">PARAM_RESTRICTED_PACKAGE_NAME</a></td>
+        <td class="jd-descrcol" width="100%">HTTP parameter for package name that can be used to restrict message delivery by matching
+ against the package name used to generate the registration id.</td>
     </tr>
     
     
@@ -2121,6 +2136,44 @@ From class
 
 
 
+<A NAME="PARAM_DRY_RUN"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        PARAM_DRY_RUN
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>HTTP parameter for telling gcm to validate the message without actually sending it.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "dry_run"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
 <A NAME="PARAM_PAYLOAD_PREFIX"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -2188,6 +2241,45 @@ From class
         <span>
             
                 "registration_id"
+            
+        </span>
+        </div>
+    
+    </div>
+</div>
+
+
+
+<A NAME="PARAM_RESTRICTED_PACKAGE_NAME"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+        static 
+        final 
+        String
+      </span>
+        PARAM_RESTRICTED_PACKAGE_NAME
+    </h4>
+      <div class="api-level">
+        
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>HTTP parameter for package name that can be used to restrict message delivery by matching
+ against the package name used to generate the registration id.
+</p></div>
+
+    
+        <div class="jd-tagdata">
+        <span class="jd-tagtitle">Constant Value: </span>
+        <span>
+            
+                "restricted_package_name"
             
         </span>
         </div>
