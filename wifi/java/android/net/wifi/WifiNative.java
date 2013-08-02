@@ -216,6 +216,40 @@ public class WifiNative {
         return doStringCommand("BSS RANGE=" + sid + "- MASK=0x21987");
     }
 
+    /**
+     * Format of command
+     * DRIVER WLS_BATCHING SET SCAN_FRQ=x BESTN=y CHANNEL=<z, w, t> RTT=s
+     * where x is an ascii representation of an integer number of seconds between scans
+     *       y is an ascii representation of an integer number of the max AP to remember per scan
+     *       z, w, t represent a 1..n size list of channel numbers and/or 'A', 'B' values
+     *           indicating entire ranges of channels
+     *       s is an ascii representation of an integer number of highest-strength AP
+     *           for which we'd like approximate distance reported
+     *
+     * The return value is an ascii integer representing a guess of the number of scans
+     * the firmware can remember before it runs out of buffer space or -1 on error
+     */
+    public String setBatchedScanSettings(BatchedScanSettings settings) {
+        if (settings == null) return doStringCommand("DRIVER WLS_BATCHING STOP");
+        String cmd = "DRIVER WLS_BATCHING SET SCAN_FRQ=" + settings.scanIntervalSec;
+        if (settings.maxApPerScan != BatchedScanSettings.UNSPECIFIED) {
+            cmd += " BESTN " + settings.maxApPerScan;
+        }
+        if (settings.channelSet != null && !settings.channelSet.isEmpty()) {
+            cmd += " CHANNEL=<";
+            for (String channel : settings.channelSet) cmd += " " + channel;
+            cmd += ">";
+        }
+        if (settings.maxApForDistance != BatchedScanSettings.UNSPECIFIED) {
+            cmd += " RTT=" + settings.maxApForDistance;
+        }
+        return doStringCommand(cmd);
+    }
+
+    public String getBatchedScanResults() {
+        return doStringCommand("DRIVER WLS_BATCHING GET");
+    }
+
     public boolean startDriver() {
         return doBooleanCommand("DRIVER START");
     }
