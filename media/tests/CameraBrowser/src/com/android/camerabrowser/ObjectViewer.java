@@ -37,6 +37,7 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * A view to display the properties of an object.
@@ -120,7 +121,7 @@ public class ObjectViewer extends Activity implements View.OnClickListener {
             mFileName = info.getName();
             view.setText(mFileName);
             view = (TextView)findViewById(R.id.format);
-            view.setText(Integer.toHexString(info.getFormat()).toUpperCase());
+            view.setText(Integer.toHexString(info.getFormat()).toUpperCase(Locale.ROOT));
             view = (TextView)findViewById(R.id.size);
             view.setText(Long.toString(info.getCompressedSize()));
             view = (TextView)findViewById(R.id.thumb_width);
