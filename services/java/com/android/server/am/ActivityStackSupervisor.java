@@ -1783,7 +1783,6 @@ public final class ActivityStackSupervisor {
         if (allResumedActivitiesIdle()) {
             if (r != null) {
                 mService.scheduleAppGcsLocked();
-                mService.requestPssLocked(r.app, SystemClock.uptimeMillis(), false);
             }
 
             if (mLaunchingActivity.isHeld()) {

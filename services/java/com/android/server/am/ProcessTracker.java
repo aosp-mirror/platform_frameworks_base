@@ -188,6 +188,8 @@ public final class ProcessTracker {
     State mState;
     boolean mCommitPending;
     boolean mShuttingDown;
+    int mLastMemOnlyState = -1;
+    boolean mMemFactorLowered;
 
     final ReentrantLock mWriteLock = new ReentrantLock();
 
@@ -1822,7 +1824,13 @@ public final class ProcessTracker {
         return ss;
     }
 
+    public boolean isMemFactorLowered() {
+        return mMemFactorLowered;
+    }
+
     public boolean setMemFactorLocked(int memFactor, boolean screenOn, long now) {
+        mMemFactorLowered = memFactor < mLastMemOnlyState;
+        mLastMemOnlyState = memFactor;
         if (screenOn) {
             memFactor += ADJ_SCREEN_ON;
         }
