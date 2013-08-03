@@ -955,6 +955,11 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         synchronized (mSyncRoot) {
             LogicalDisplay display = mLogicalDisplays.get(displayId);
             if (display != null && display.hasContentLocked() != hasContent) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Display " + displayId + " hasContent flag changed: "
+                            + "hasContent=" + hasContent + ", inTraversal=" + inTraversal);
+                }
+
                 display.setHasContentLocked(hasContent);
                 scheduleTraversalLocked(inTraversal);
             }
