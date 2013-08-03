@@ -1244,28 +1244,28 @@ public class PackageManagerService extends IPackageManager.Stub {
                     scanMode | SCAN_NO_DEX, 0);
 
             // Collected privileged system packages.
-            File mPrivilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
+            File privilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
             mPrivilegedInstallObserver = new AppDirObserver(
-                    mPrivilegedAppDir.getPath(), OBSERVER_EVENTS, true, true);
+                    privilegedAppDir.getPath(), OBSERVER_EVENTS, true, true);
             mPrivilegedInstallObserver.startWatching();
-                scanDirLI(mPrivilegedAppDir, PackageParser.PARSE_IS_SYSTEM
+                scanDirLI(privilegedAppDir, PackageParser.PARSE_IS_SYSTEM
                         | PackageParser.PARSE_IS_SYSTEM_DIR
                         | PackageParser.PARSE_IS_PRIVILEGED, scanMode, 0);
 
             // Collect ordinary system packages.
-            File mSystemAppDir = new File(Environment.getRootDirectory(), "app");
+            File systemAppDir = new File(Environment.getRootDirectory(), "app");
             mSystemInstallObserver = new AppDirObserver(
-                mSystemAppDir.getPath(), OBSERVER_EVENTS, true, false);
+                systemAppDir.getPath(), OBSERVER_EVENTS, true, false);
             mSystemInstallObserver.startWatching();
-            scanDirLI(mSystemAppDir, PackageParser.PARSE_IS_SYSTEM
+            scanDirLI(systemAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode, 0);
 
             // Collect all vendor packages.
-            File mVendorAppDir = new File("/vendor/app");
+            File vendorAppDir = new File("/vendor/app");
             mVendorInstallObserver = new AppDirObserver(
-                mVendorAppDir.getPath(), OBSERVER_EVENTS, true, false);
+                vendorAppDir.getPath(), OBSERVER_EVENTS, true, false);
             mVendorInstallObserver.startWatching();
-            scanDirLI(mVendorAppDir, PackageParser.PARSE_IS_SYSTEM
+            scanDirLI(vendorAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode, 0);
 
             if (DEBUG_UPGRADE) Log.v(TAG, "Running installd update commands");
