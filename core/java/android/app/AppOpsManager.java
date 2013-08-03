@@ -422,6 +422,14 @@ public class AppOpsManager {
         }
     }
 
+    /** @hide */
+    public void resetAllModes() {
+        try {
+            mService.resetAllModes();
+        } catch (RemoteException e) {
+        }
+    }
+
     public void startWatchingMode(int op, String packageName, final Callback callback) {
         synchronized (mModeWatchers) {
             IAppOpsCallback cb = mModeWatchers.get(callback);

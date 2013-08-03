@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -42,6 +43,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.AtomicFile;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -288,6 +290,24 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    private void pruneOp(Op op, int uid, String packageName) {
+        if (op.time == 0 && op.rejectTime == 0) {
+            Ops ops = getOpsLocked(uid, packageName, false);
+            if (ops != null) {
+                ops.remove(op.op);
+                if (ops.size() <= 0) {
+                    HashMap<String, Ops> pkgOps = mUidOps.get(uid);
+                    if (pkgOps != null) {
+                        pkgOps.remove(ops.packageName);
+                        if (pkgOps.size() <= 0) {
+                            mUidOps.remove(uid);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public void setMode(int code, int uid, String packageName, int mode) {
         verifyIncomingUid(uid);
@@ -316,21 +336,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (mode == AppOpsManager.MODE_ALLOWED) {
                         // If going into the default mode, prune this op
                         // if there is nothing else interesting in it.
-                        if (op.time == 0 && op.rejectTime == 0) {
-                            Ops ops = getOpsLocked(uid, packageName, false);
-                            if (ops != null) {
-                                ops.remove(op.op);
-                                if (ops.size() <= 0) {
-                                    HashMap<String, Ops> pkgOps = mUidOps.get(uid);
-                                    if (pkgOps != null) {
-                                        pkgOps.remove(ops.packageName);
-                                        if (pkgOps.size() <= 0) {
-                                            mUidOps.remove(uid);
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        pruneOp(op, uid, packageName);
                     }
                     scheduleWriteNowLocked();
                 }
@@ -341,6 +347,72 @@ public class AppOpsService extends IAppOpsService.Stub {
                 try {
                     repCbs.get(i).mCallback.opChanged(code, packageName);
                 } catch (RemoteException e) {
+                }
+            }
+        }
+    }
+
+    private static HashMap<Callback, ArrayList<Pair<String, Integer>>> addCallbacks(
+            HashMap<Callback, ArrayList<Pair<String, Integer>>> callbacks,
+            String packageName, int op, ArrayList<Callback> cbs) {
+        if (cbs == null) {
+            return callbacks;
+        }
+        if (callbacks == null) {
+            callbacks = new HashMap<Callback, ArrayList<Pair<String, Integer>>>();
+        }
+        for (int i=0; i<cbs.size(); i++) {
+            Callback cb = cbs.get(i);
+            ArrayList<Pair<String, Integer>> reports = callbacks.get(cb);
+            if (reports == null) {
+                reports = new ArrayList<Pair<String, Integer>>();
+                callbacks.put(cb, reports);
+            }
+            reports.add(new Pair<String, Integer>(packageName, op));
+        }
+        return callbacks;
+    }
+
+    @Override
+    public void resetAllModes() {
+        mContext.enforcePermission(android.Manifest.permission.UPDATE_APP_OPS_STATS,
+                Binder.getCallingPid(), Binder.getCallingUid(), null);
+        HashMap<Callback, ArrayList<Pair<String, Integer>>> callbacks = null;
+        synchronized (this) {
+            boolean changed = false;
+            for (int i=0; i<mUidOps.size(); i++) {
+                HashMap<String, Ops> packages = mUidOps.valueAt(i);
+                for (Map.Entry<String, Ops> ent : packages.entrySet()) {
+                    String packageName = ent.getKey();
+                    Ops pkgOps = ent.getValue();
+                    for (int j=0; j<pkgOps.size(); j++) {
+                        Op curOp = pkgOps.valueAt(j);
+                        if (curOp.mode != AppOpsManager.MODE_ALLOWED) {
+                            curOp.mode = AppOpsManager.MODE_ALLOWED;
+                            changed = true;
+                            callbacks = addCallbacks(callbacks, packageName, curOp.op,
+                                    mOpModeWatchers.get(curOp.op));
+                            callbacks = addCallbacks(callbacks, packageName, curOp.op,
+                                    mPackageModeWatchers.get(packageName));
+                            pruneOp(curOp, mUidOps.keyAt(i), packageName);
+                        }
+                    }
+                }
+            }
+            if (changed) {
+                scheduleWriteNowLocked();
+            }
+        }
+        if (callbacks != null) {
+            for (Map.Entry<Callback, ArrayList<Pair<String, Integer>>> ent : callbacks.entrySet()) {
+                Callback cb = ent.getKey();
+                ArrayList<Pair<String, Integer>> reports = ent.getValue();
+                for (int i=0; i<reports.size(); i++) {
+                    Pair<String, Integer> rep = reports.get(i);
+                    try {
+                        cb.mCallback.opChanged(rep.second, rep.first);
+                    } catch (RemoteException e) {
+                    }
                 }
             }
         }
