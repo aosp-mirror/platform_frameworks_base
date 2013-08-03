@@ -752,6 +752,8 @@ Summary:
     .collapseKey(collapseKey)
     .timeToLive(3)
     .delayWhileIdle(true)
+    .dryRun(true)
+    .restrictedPackageName(restrictedPackageName)
     .build();
  </pre></code>
 
@@ -761,6 +763,8 @@ Summary:
     .collapseKey(collapseKey)
     .timeToLive(3)
     .delayWhileIdle(true)
+    .dryRun(true)
+    .restrictedPackageName(restrictedPackageName)
     .addData("key1", "value1")
     .addData("key2", "value2")
     .build();
@@ -888,12 +892,48 @@ Summary:
             
             
             
+            String</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gcm/server/Message.html#getRestrictedPackageName()">getRestrictedPackageName</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Gets the restricted package name.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
             Integer</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gcm/server/Message.html#getTimeToLive()">getTimeToLive</a></span>()</nobr>
         
         <div class="jd-descrdiv">Gets the time to live (in seconds).</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            Boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gcm/server/Message.html#isDelayWhileIdle()">isDelayWhileIdle</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Gets the delayWhileIdle flag.</div>
   
   </td></tr>
 
@@ -909,9 +949,9 @@ Summary:
             Boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gcm/server/Message.html#isDelayWhileIdle()">isDelayWhileIdle</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gcm/server/Message.html#isDryRun()">isDryRun</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Gets the delayWhileIdle flag.</div>
+        <div class="jd-descrdiv">Gets the dryRun flag.</div>
   
   </td></tr>
 
@@ -1252,6 +1292,36 @@ From class
 </div>
 
 
+<A NAME="getRestrictedPackageName()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        String
+      </span>
+      <span class="sympad">getRestrictedPackageName</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the restricted package name.
+</p></div>
+
+    </div>
+</div>
+
+
 <A NAME="getTimeToLive()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1306,6 +1376,36 @@ From class
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Gets the delayWhileIdle flag.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="isDryRun()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        Boolean
+      </span>
+      <span class="sympad">isDryRun</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Gets the dryRun flag.
 </p></div>
 
     </div>
