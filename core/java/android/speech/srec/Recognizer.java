@@ -145,7 +145,7 @@ public final class Recognizer {
     public static String getConfigDir(Locale locale) {
         if (locale == null) locale = Locale.US;
         String dir = "/system/usr/srec/config/" +
-                locale.toString().replace('_', '.').toLowerCase();
+                locale.toString().replace('_', '.').toLowerCase(Locale.ROOT);
         if ((new File(dir)).isDirectory()) return dir;
         return null;
     }

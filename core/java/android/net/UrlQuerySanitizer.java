@@ -19,6 +19,7 @@ package android.net;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -305,7 +306,7 @@ public class UrlQuerySanitizer {
             int length = value.length();
             if ((mFlags & SCRIPT_URL_OK) != 0) {
                 if (length >= MIN_SCRIPT_PREFIX_LENGTH) {
-                    String asLower = value.toLowerCase();
+                    String asLower = value.toLowerCase(Locale.ROOT);
                     if (asLower.startsWith(JAVASCRIPT_PREFIX)  ||
                         asLower.startsWith(VBSCRIPT_PREFIX)) {
                         return "";
