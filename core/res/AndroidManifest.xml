@@ -1864,6 +1864,14 @@
         android:description="@string/permdesc_bindPrintService"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by an {@link android.nfc.cardemulation.HostApduService}
+         or {@link android.nfc.cardemulation.OffHostApduService} to ensure that only
+         the system can bind to it. -->
+    <permission android:name="android.permission.BIND_NFC_SERVICE"
+        android:label="@string/permlab_bindNfcService"
+        android:description="@string/permdesc_bindNfcService"
+        android:protectionLevel="signature" />
+
     <!-- Allows an application to call APIs that give it access to all print jobs
          on the device. Usually an app can access only the print jobts it created.
          This permission is not available to third party applications.

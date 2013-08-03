@@ -4196,6 +4196,18 @@ public final class Settings {
         public static final String SCREENSAVER_DEFAULT_COMPONENT = "screensaver_default_component";
 
         /**
+         * The default NFC payment component
+         * @hide
+         */
+        public static final String NFC_PAYMENT_DEFAULT_COMPONENT = "nfc_payment_default_component";
+
+        /**
+         * Whether to automatically invoke NFC payment app or manually select on tap.
+         * @hide
+         */
+        public static final String NFC_PAYMENT_MODE = "nfc_payment_mode";
+
+        /**
          * Name of a package that the current user has explicitly allowed to see all of that
          * user's notifications.
          *

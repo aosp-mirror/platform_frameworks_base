@@ -24,6 +24,7 @@ import android.nfc.TechListParcel;
 import android.nfc.INdefPushCallback;
 import android.nfc.INfcAdapterExtras;
 import android.nfc.INfcTag;
+import android.nfc.INfcCardEmulation;
 
 /**
  * @hide
@@ -31,6 +32,7 @@ import android.nfc.INfcTag;
 interface INfcAdapter
 {
     INfcTag getNfcTagInterface();
+    INfcCardEmulation getNfcCardEmulationInterface();
     INfcAdapterExtras getNfcAdapterExtrasInterface(in String pkg);
 
     int getState();

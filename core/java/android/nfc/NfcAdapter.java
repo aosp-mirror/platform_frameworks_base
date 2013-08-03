@@ -227,6 +227,7 @@ public final class NfcAdapter {
     // recovery
     static INfcAdapter sService;
     static INfcTag sTagService;
+    static INfcCardEmulation sCardEmulationService;
 
     /**
      * The NfcAdapter object for each application context.
@@ -348,6 +349,13 @@ public final class NfcAdapter {
                 throw new UnsupportedOperationException();
             }
 
+            try {
+                sCardEmulationService = sService.getNfcCardEmulationInterface();
+            } catch (RemoteException e) {
+                Log.e(TAG, "could not retrieve card emulation service");
+                throw new UnsupportedOperationException();
+            }
+
             sIsInitialized = true;
         }
         if (context == null) {
@@ -456,6 +464,15 @@ public final class NfcAdapter {
     }
 
     /**
+     * Returns the binder interface to the card emulation service.
+     * @hide
+     */
+    public INfcCardEmulation getCardEmulationService() {
+        isEnabled();
+        return sCardEmulationService;
+    }
+
+    /**
      * NFC service dead - attempt best effort recovery
      * @hide
      */
@@ -477,6 +494,13 @@ public final class NfcAdapter {
             Log.e(TAG, "could not retrieve NFC tag service during service recovery");
             // nothing more can be done now, sService is still stale, we'll hit
             // this recovery path again later
+            return;
+        }
+
+        try {
+            sCardEmulationService = service.getNfcCardEmulationInterface();
+        } catch (RemoteException ee) {
+            Log.e(TAG, "could not retrieve NFC card emulation service during service recovery");
         }
 
         return;
