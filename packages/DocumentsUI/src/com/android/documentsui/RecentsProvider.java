@@ -17,6 +17,7 @@
 package com.android.documentsui;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
@@ -29,6 +30,9 @@ import android.util.Log;
 
 public class RecentsProvider extends ContentProvider {
     private static final String TAG = "RecentsProvider";
+
+    // TODO: offer view of recents that handles backend root resolution before
+    // returning cursor, include extra columns
 
     public static final String AUTHORITY = "com.android.documentsui.recents";
 
@@ -53,13 +57,29 @@ public class RecentsProvider extends ContentProvider {
      * starting with root.
      */
     public static final String COL_PATH = "path";
+    public static final String COL_URI = "uri";
     public static final String COL_PACKAGE_NAME = "package_name";
     public static final String COL_TIMESTAMP = "timestamp";
+
+    public static Uri buildRecentOpen() {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(AUTHORITY).appendPath("recent_open").build();
+    }
+
+    public static Uri buildRecentCreate() {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(AUTHORITY).appendPath("recent_create").build();
+    }
+
+    public static Uri buildResume(String packageName) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(AUTHORITY).appendPath("resume").appendPath(packageName).build();
+    }
 
     private DatabaseHelper mHelper;
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        private static final String DB_NAME = "recents";
+        private static final String DB_NAME = "recents.db";
 
         private static final int VERSION_INIT = 1;
 
@@ -70,19 +90,19 @@ public class RecentsProvider extends ContentProvider {
         @Override
         public void onCreate(SQLiteDatabase db) {
             db.execSQL("CREATE TABLE " + TABLE_RECENT_OPEN + " (" +
-                    COL_PATH + " TEXT," +
-                    COL_TIMESTAMP + " INTEGER," +
+                    COL_URI + " TEXT PRIMARY KEY ON CONFLICT REPLACE," +
+                    COL_TIMESTAMP + " INTEGER" +
                     ")");
 
             db.execSQL("CREATE TABLE " + TABLE_RECENT_CREATE + " (" +
-                    COL_PATH + " TEXT," +
-                    COL_TIMESTAMP + " INTEGER," +
+                    COL_PATH + " TEXT PRIMARY KEY ON CONFLICT REPLACE," +
+                    COL_TIMESTAMP + " INTEGER" +
                     ")");
 
             db.execSQL("CREATE TABLE " + TABLE_RESUME + " (" +
                     COL_PACKAGE_NAME + " TEXT PRIMARY KEY ON CONFLICT REPLACE," +
                     COL_PATH + " TEXT," +
-                    COL_TIMESTAMP + " INTEGER," +
+                    COL_TIMESTAMP + " INTEGER" +
                     ")");
         }
 
@@ -136,11 +156,13 @@ public class RecentsProvider extends ContentProvider {
         final SQLiteDatabase db = mHelper.getWritableDatabase();
         switch (sMatcher.match(uri)) {
             case URI_RECENT_OPEN: {
+                values.put(COL_TIMESTAMP, System.currentTimeMillis());
                 db.insert(TABLE_RECENT_OPEN, null, values);
                 db.delete(TABLE_RECENT_OPEN, buildWhereOlder(DateUtils.WEEK_IN_MILLIS), null);
                 return uri;
             }
             case URI_RECENT_CREATE: {
+                values.put(COL_TIMESTAMP, System.currentTimeMillis());
                 db.insert(TABLE_RECENT_CREATE, null, values);
                 db.delete(TABLE_RECENT_CREATE, buildWhereOlder(DateUtils.WEEK_IN_MILLIS), null);
                 return uri;
@@ -148,6 +170,7 @@ public class RecentsProvider extends ContentProvider {
             case URI_RESUME: {
                 final String packageName = uri.getPathSegments().get(1);
                 values.put(COL_PACKAGE_NAME, packageName);
+                values.put(COL_TIMESTAMP, System.currentTimeMillis());
                 db.insert(TABLE_RESUME, null, values);
                 return uri;
             }

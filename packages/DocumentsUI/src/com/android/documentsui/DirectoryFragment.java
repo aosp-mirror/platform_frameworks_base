@@ -67,31 +67,29 @@ public class DirectoryFragment extends Fragment {
 
     private AbsListView mCurrentView;
 
+    private static final int TYPE_NORMAL = 1;
+    private static final int TYPE_SEARCH = 2;
+    private static final int TYPE_RECENT_OPEN = 3;
+    private static final int TYPE_RECENT_CREATE = 4;
+
+    private int mType = TYPE_NORMAL;
+
     private DocumentsAdapter mAdapter;
     private LoaderCallbacks<Cursor> mCallbacks;
 
-    private int mFlags;
-
-    private static final String EXTRA_ROOT_URI = "rootUri";
-    private static final String EXTRA_DOCS_URI = "docsUri";
+    private static final String EXTRA_URI = "uri";
 
     private static final int LOADER_DOCUMENTS = 2;
 
-    public static void show(FragmentManager fm, Uri rootUri, Uri docsUri, String displayName,
-            boolean addToBackStack) {
+    public static void show(FragmentManager fm, Uri uri) {
         final Bundle args = new Bundle();
-        args.putParcelable(EXTRA_ROOT_URI, rootUri);
-        args.putParcelable(EXTRA_DOCS_URI, docsUri);
+        args.putParcelable(EXTRA_URI, uri);
 
         final DirectoryFragment fragment = new DirectoryFragment();
         fragment.setArguments(args);
 
         final FragmentTransaction ft = fm.beginTransaction();
         ft.replace(R.id.directory, fragment);
-        if (addToBackStack) {
-            ft.addToBackStack(displayName);
-        }
-        ft.setBreadCrumbTitle(displayName);
         ft.commitAllowingStateLoss();
     }
 
@@ -119,9 +117,17 @@ public class DirectoryFragment extends Fragment {
         mAdapter = new DocumentsAdapter(context);
         updateMode();
 
-        // TODO: migrate flags query to loader
-        final Uri docsUri = getArguments().getParcelable(EXTRA_DOCS_URI);
-        mFlags = getDocumentFlags(context, docsUri);
+        final Uri uri = getArguments().getParcelable(EXTRA_URI);
+
+        if (uri.getQueryParameter(DocumentsContract.PARAM_QUERY) != null) {
+            mType = TYPE_SEARCH;
+        } else if (RecentsProvider.buildRecentOpen().equals(uri)) {
+            mType = TYPE_RECENT_OPEN;
+        } else if (RecentsProvider.buildRecentCreate().equals(uri)) {
+            mType = TYPE_RECENT_CREATE;
+        } else {
+            mType = TYPE_NORMAL;
+        }
 
         mCallbacks = new LoaderCallbacks<Cursor>() {
             @Override
@@ -137,10 +143,10 @@ public class DirectoryFragment extends Fragment {
                 }
 
                 final Uri contentsUri;
-                if (docsUri.getQueryParameter(DocumentsContract.PARAM_QUERY) != null) {
-                    contentsUri = docsUri;
+                if (mType == TYPE_NORMAL) {
+                    contentsUri = DocumentsContract.buildContentsUri(uri);
                 } else {
-                    contentsUri = DocumentsContract.buildContentsUri(docsUri);
+                    contentsUri = uri;
                 }
 
                 return new CursorLoader(context, contentsUri, null, null, null, sortOrder);
@@ -164,10 +170,6 @@ public class DirectoryFragment extends Fragment {
     public void onStart() {
         super.onStart();
         getLoaderManager().restartLoader(LOADER_DOCUMENTS, getArguments(), mCallbacks);
-
-        // TODO: clean up tracking of current directory
-        final Uri docsUri = getArguments().getParcelable(EXTRA_DOCS_URI);
-        ((DocumentsActivity) getActivity()).onDirectoryChanged(docsUri, mFlags);
     }
 
     @Override
@@ -249,8 +251,8 @@ public class DirectoryFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             final Cursor cursor = (Cursor) mAdapter.getItem(position);
-            final Uri rootUri = getArguments().getParcelable(EXTRA_ROOT_URI);
-            final Document doc = Document.fromCursor(rootUri, cursor);
+            final Uri uri = getArguments().getParcelable(EXTRA_URI);
+            final Document doc = Document.fromCursor(uri, cursor);
             ((DocumentsActivity) getActivity()).onDocumentPicked(doc);
         }
     };
@@ -270,7 +272,7 @@ public class DirectoryFragment extends Fragment {
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             if (item.getItemId() == R.id.menu_open) {
-                final Uri rootUri = getArguments().getParcelable(EXTRA_ROOT_URI);
+                final Uri uri = getArguments().getParcelable(EXTRA_URI);
                 final SparseBooleanArray checked = mCurrentView.getCheckedItemPositions();
                 final ArrayList<Document> docs = Lists.newArrayList();
 
@@ -278,7 +280,7 @@ public class DirectoryFragment extends Fragment {
                 for (int i = 0; i < size; i++) {
                     if (checked.valueAt(i)) {
                         final Cursor cursor = (Cursor) mAdapter.getItem(checked.keyAt(i));
-                        docs.add(Document.fromCursor(rootUri, cursor));
+                        docs.add(Document.fromCursor(uri, cursor));
                     }
                 }
 
@@ -346,35 +348,19 @@ public class DirectoryFragment extends Fragment {
             final long lastModified = getCursorLong(cursor, DocumentColumns.LAST_MODIFIED);
             final int flags = getCursorInt(cursor, DocumentColumns.FLAGS);
 
-            final Uri rootUri = getArguments().getParcelable(EXTRA_ROOT_URI);
-            final String authority = rootUri.getAuthority();
-
+            final Uri uri = getArguments().getParcelable(EXTRA_URI);
             if ((flags & DocumentsContract.FLAG_SUPPORTS_THUMBNAIL) != 0) {
-                final Uri childUri = DocumentsContract.buildDocumentUri(rootUri, docId);
+                final Uri childUri = DocumentsContract.buildDocumentUri(uri, docId);
                 icon.setImageURI(childUri);
             } else {
-                icon.setImageDrawable(
-                        DocumentsActivity.resolveDocumentIcon(context, authority, mimeType));
+                icon.setImageDrawable(DocumentsActivity.resolveDocumentIcon(
+                        context, uri.getAuthority(), mimeType));
             }
 
             title.setText(displayName);
             if (summary != null) {
                 summary.setText(DateUtils.getRelativeTimeSpanString(lastModified));
             }
-        }
-    }
-
-    private static int getDocumentFlags(Context context, Uri uri) {
-        final Cursor cursor = context.getContentResolver().query(uri, new String[] {
-                DocumentColumns.FLAGS }, null, null, null);
-        try {
-            if (cursor.moveToFirst()) {
-                return getCursorInt(cursor, DocumentColumns.FLAGS);
-            } else {
-                return 0;
-            }
-        } finally {
-            cursor.close();
         }
     }
 

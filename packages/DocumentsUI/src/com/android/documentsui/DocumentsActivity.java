@@ -16,6 +16,8 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.DirectoryFragment.getCursorInt;
+import static com.android.documentsui.DirectoryFragment.getCursorLong;
 import static com.android.documentsui.DirectoryFragment.getCursorString;
 
 import android.app.ActionBar;
@@ -25,7 +27,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
-import android.app.FragmentManager.OnBackStackChangedListener;
 import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -78,6 +79,8 @@ import com.google.android.collect.Maps;
 
 import libcore.io.IoUtils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -85,12 +88,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 public class DocumentsActivity extends Activity {
     private static final String TAG = "Documents";
 
-    // TODO: fragment to show recently opened documents
+    // TODO: share backend root cache with recents provider
 
     private static final String TAG_CREATE_DIRECTORY = "create_directory";
 
@@ -106,18 +110,17 @@ public class DocumentsActivity extends Activity {
     private ActionBarDrawerToggle mDrawerToggle;
 
     private static HashMap<String, DocumentsProviderInfo> sProviders = Maps.newHashMap();
-    private static ArrayList<Root> sRoots = Lists.newArrayList();
+    private static HashMap<String, Root> sRoots = Maps.newHashMap();
+
+    // TODO: remove once adapter split by type
+    private static ArrayList<Root> sRootsList = Lists.newArrayList();
 
     private RootsAdapter mRootsAdapter;
     private ListView mRootsList;
 
     private final DisplayState mDisplayState = new DisplayState();
 
-    private Root mCurrentRoot;
-
-    private Uri mCurrentDir;
-    private boolean mCurrentSupportsCreate;
-    private boolean mCurrentSupportsSearch;
+    private LinkedList<Document> mStack = new LinkedList<Document>();
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -148,8 +151,6 @@ public class DocumentsActivity extends Activity {
         setResult(Activity.RESULT_CANCELED);
         setContentView(R.layout.activity);
 
-        getFragmentManager().addOnBackStackChangedListener(mStackListener);
-
         if (mAction == ACTION_CREATE) {
             final String mimeType = getIntent().getType();
             final String title = getIntent().getStringExtra(Intent.EXTRA_TITLE);
@@ -157,7 +158,7 @@ public class DocumentsActivity extends Activity {
         }
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mRootsAdapter = new RootsAdapter(this, sRoots);
+        mRootsAdapter = new RootsAdapter(this, sRootsList);
         mRootsList = (ListView) findViewById(R.id.roots_list);
         mRootsList.setAdapter(mRootsAdapter);
         mRootsList.setOnItemClickListener(mRootsListener);
@@ -168,10 +169,24 @@ public class DocumentsActivity extends Activity {
         mDrawerLayout.setDrawerListener(mDrawerListener);
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
-        mDrawerLayout.openDrawer(mRootsList);
-
-        updateActionBar();
         updateRoots();
+
+        // Restore last stack for calling package
+        // TODO: move into async loader
+        final String packageName = getCallingPackage();
+        final Cursor cursor = getContentResolver()
+                .query(RecentsProvider.buildResume(packageName), null, null, null, null);
+        try {
+            if (cursor.moveToFirst()) {
+                final String rawStack = cursor.getString(
+                        cursor.getColumnIndex(RecentsProvider.COL_PATH));
+                restoreStack(rawStack);
+            }
+        } finally {
+            cursor.close();
+        }
+
+        updateDirectoryFragment();
     }
 
     private DrawerListener mDrawerListener = new DrawerListener() {
@@ -205,7 +220,6 @@ public class DocumentsActivity extends Activity {
     }
 
     public void updateActionBar() {
-        final FragmentManager fm = getFragmentManager();
         final ActionBar actionBar = getActionBar();
 
         actionBar.setDisplayShowHomeEnabled(true);
@@ -223,13 +237,12 @@ public class DocumentsActivity extends Activity {
 
         } else {
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-            if (mCurrentRoot != null) {
-                actionBar.setIcon(mCurrentRoot.icon);
-            }
+            final Root root = getCurrentRoot();
+            actionBar.setIcon(root != null ? root.icon : null);
             actionBar.setTitle(null);
             actionBar.setListNavigationCallbacks(mSortAdapter, mSortListener);
 
-            if (fm.getBackStackEntryCount() > 0) {
+            if (mStack.size() > 1) {
                 mDrawerToggle.setDrawerIndicatorEnabled(false);
             } else {
                 mDrawerToggle.setDrawerIndicatorEnabled(true);
@@ -247,10 +260,10 @@ public class DocumentsActivity extends Activity {
         mSearchView.setOnQueryTextListener(new OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                // TODO: clear existing directory stack?
-                final Uri searchUri = DocumentsContract.buildSearchUri(mCurrentDir, query);
-                DirectoryFragment.show(
-                        getFragmentManager(), mCurrentRoot.rootUri, searchUri, query, true);
+                // TODO: use second directory stack for searches?
+                final Document cwd = getCurrentDirectory();
+                final Document searchDoc = Document.fromSearch(cwd.uri, query);
+                onDocumentPicked(searchDoc);
                 mSearchView.setIconified(true);
                 return true;
             }
@@ -268,13 +281,20 @@ public class DocumentsActivity extends Activity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
 
+        final Document cwd = getCurrentDirectory();
+
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
         createDir.setVisible(mAction == ACTION_CREATE);
-        createDir.setEnabled(mCurrentSupportsCreate);
+        createDir.setEnabled(cwd != null && cwd.isCreateSupported());
 
         // TODO: close any search in-progress when hiding
         final MenuItem search = menu.findItem(R.id.menu_search);
-        search.setVisible(mCurrentSupportsSearch);
+        search.setVisible(cwd != null && cwd.isSearchSupported());
+
+        if (mAction == ACTION_CREATE) {
+            final FragmentManager fm = getFragmentManager();
+            SaveFragment.get(fm).setSaveEnabled(cwd != null && cwd.isCreateSupported());
+        }
 
         return true;
     }
@@ -287,8 +307,7 @@ public class DocumentsActivity extends Activity {
 
         final int id = item.getItemId();
         if (id == android.R.id.home) {
-            getFragmentManager().popBackStack();
-            updateActionBar();
+            onBackPressed();
             return true;
         } else if (id == R.id.menu_create_dir) {
             CreateDirectoryFragment.show(getFragmentManager());
@@ -299,12 +318,19 @@ public class DocumentsActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private OnBackStackChangedListener mStackListener = new OnBackStackChangedListener() {
-        @Override
-        public void onBackStackChanged() {
-            updateActionBar();
+    @Override
+    public void onBackPressed() {
+        final int size = mStack.size();
+        if (size > 1) {
+            mStack.pop();
+            updateDirectoryFragment();
+        } else if (size == 1 && !mDrawerLayout.isDrawerOpen(mRootsList)) {
+            // TODO: open root drawer once we can capture back key
+            super.onBackPressed();
+        } else {
+            super.onBackPressed();
         }
-    };
+    }
 
     // TODO: support additional sort orders
     private BaseAdapter mSortAdapter = new BaseAdapter() {
@@ -340,12 +366,9 @@ public class DocumentsActivity extends Activity {
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
             final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
 
-            final FragmentManager fm = getFragmentManager();
-            final int count = fm.getBackStackEntryCount();
-            if (count > 0) {
-                title.setText(fm.getBackStackEntryAt(count - 1).getBreadCrumbTitle());
-            } else if (mCurrentRoot != null) {
-                title.setText(mCurrentRoot.title);
+            final Document cwd = getCurrentDirectory();
+            if (cwd != null) {
+                title.setText(cwd.displayName);
             } else {
                 title.setText(null);
             }
@@ -377,28 +400,42 @@ public class DocumentsActivity extends Activity {
         }
     };
 
+    public Root getCurrentRoot() {
+        final Document cwd = getCurrentDirectory();
+        if (cwd != null) {
+            return sRoots.get(DocumentsContract.getRootId(cwd.uri));
+        } else {
+            return null;
+        }
+    }
+
+    public Document getCurrentDirectory() {
+        return mStack.peek();
+    }
+
     public DisplayState getDisplayState() {
         return mDisplayState;
     }
 
-    public void onDirectoryChanged(Uri uri, int flags) {
-        mCurrentDir = uri;
-        mCurrentSupportsCreate = (flags & DocumentsContract.FLAG_SUPPORTS_CREATE) != 0;
-        mCurrentSupportsSearch = (flags & DocumentsContract.FLAG_SUPPORTS_SEARCH) != 0;
-
-        if (mAction == ACTION_CREATE) {
-            final FragmentManager fm = getFragmentManager();
-            SaveFragment.get(fm).setSaveEnabled(mCurrentSupportsCreate);
+    private void updateDirectoryFragment() {
+        final FragmentManager fm = getFragmentManager();
+        final Document cwd = getCurrentDirectory();
+        if (cwd != null) {
+            DirectoryFragment.show(fm, cwd.uri);
+            mDrawerLayout.closeDrawer(mRootsList);
+        } else {
+            mDrawerLayout.openDrawer(mRootsList);
         }
-
+        updateActionBar();
         invalidateOptionsMenu();
+        dumpStack();
     }
 
     public void onDocumentPicked(Document doc) {
         final FragmentManager fm = getFragmentManager();
         if (DocumentsContract.MIME_TYPE_DIRECTORY.equals(doc.mimeType)) {
-            // Nested directory picked, recurse using new fragment
-            DirectoryFragment.show(fm, doc.rootUri, doc.uri, doc.displayName, true);
+            mStack.push(doc);
+            updateDirectoryFragment();
         } else if (mAction == ACTION_OPEN) {
             // Explicit file picked, return
             onFinished(doc.uri);
@@ -424,22 +461,70 @@ public class DocumentsActivity extends Activity {
         values.put(DocumentColumns.MIME_TYPE, mimeType);
         values.put(DocumentColumns.DISPLAY_NAME, displayName);
 
-        final Uri uri = getContentResolver().insert(mCurrentDir, values);
-        if (uri != null) {
-            onFinished(uri);
+        final Document cwd = getCurrentDirectory();
+        final Uri childUri = getContentResolver().insert(cwd.uri, values);
+        if (childUri != null) {
+            onFinished(childUri);
         } else {
             Toast.makeText(this, R.string.save_error, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private String saveStack() {
+        final JSONArray stack = new JSONArray();
+        for (int i = 0; i < mStack.size(); i++) {
+            stack.put(mStack.get(i).uri);
+        }
+        return stack.toString();
+    }
+
+    private void restoreStack(String rawStack) {
+        Log.d(TAG, "restoreStack: " + rawStack);
+        mStack.clear();
+        try {
+            final JSONArray stack = new JSONArray(rawStack);
+            for (int i = 0; i < stack.length(); i++) {
+                final Uri uri = Uri.parse(stack.getString(i));
+                final Document doc = Document.fromUri(getContentResolver(), uri);
+                mStack.add(doc);
+            }
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to decode stack", e);
         }
     }
 
     private void onFinished(Uri... uris) {
         Log.d(TAG, "onFinished() " + Arrays.toString(uris));
 
+        final ContentResolver resolver = getContentResolver();
+        final ContentValues values = new ContentValues();
+
+        final String stack = saveStack();
+        if (mAction == ACTION_CREATE) {
+            // Remember stack for last create
+            values.clear();
+            values.put(RecentsProvider.COL_PATH, stack);
+            resolver.insert(RecentsProvider.buildRecentCreate(), values);
+
+        } else if (mAction == ACTION_OPEN) {
+            // Remember opened items
+            for (Uri uri : uris) {
+                values.clear();
+                values.put(RecentsProvider.COL_URI, uri.toString());
+                resolver.insert(RecentsProvider.buildRecentOpen(), values);
+            }
+        }
+
+        // Remember location for next app launch
+        final String packageName = getCallingPackage();
+        values.clear();
+        values.put(RecentsProvider.COL_PATH, stack);
+        resolver.insert(RecentsProvider.buildResume(packageName), values);
+
         final Intent intent = new Intent();
         if (uris.length == 1) {
             intent.setData(uris[0]);
         } else if (uris.length > 1) {
-            final ContentResolver resolver = getContentResolver();
             final ClipData clipData = new ClipData(null, mAcceptMimes, new ClipData.Item(uris[0]));
             for (int i = 1; i < uris.length; i++) {
                 clipData.addItem(new ClipData.Item(uris[i]));
@@ -470,8 +555,8 @@ public class DocumentsActivity extends Activity {
 
     public static class Root {
         public DocumentsProviderInfo info;
+        public String rootId;
         public int rootType;
-        public Uri rootUri;
         public Uri uri;
         public Drawable icon;
         public String title;
@@ -479,20 +564,17 @@ public class DocumentsActivity extends Activity {
 
         public static Root fromCursor(
                 Context context, DocumentsProviderInfo info, Cursor cursor) {
-            final String rootId = cursor.getString(cursor.getColumnIndex(RootColumns.ROOT_ID));
-
-            final Root root = new Root();
             final PackageManager pm = context.getPackageManager();
 
+            final Root root = new Root();
             root.info = info;
+            root.rootId = cursor.getString(cursor.getColumnIndex(RootColumns.ROOT_ID));
             root.rootType = cursor.getInt(cursor.getColumnIndex(RootColumns.ROOT_TYPE));
-            root.rootUri = DocumentsContract.buildRootUri(info.providerInfo.authority, rootId);
             root.uri = DocumentsContract.buildDocumentUri(
-                    root.rootUri, DocumentsContract.ROOT_DOC_ID);
+                    info.providerInfo.authority, root.rootId, DocumentsContract.ROOT_DOC_ID);
             root.icon = info.providerInfo.loadIcon(pm);
             root.title = info.providerInfo.loadLabel(pm).toString();
             root.summary = null;
-
 
             final int icon = cursor.getInt(cursor.getColumnIndex(RootColumns.ICON));
             if (icon != 0) {
@@ -529,24 +611,28 @@ public class DocumentsActivity extends Activity {
     }
 
     public static class Document {
-        public Uri rootUri;
         public Uri uri;
         public String mimeType;
         public String displayName;
+        public long lastModified;
+        public int flags;
 
-        public static Document fromCursor(Uri rootUri, Cursor cursor) {
-            final Document doc = new Document();
+        public static Document fromCursor(Uri parent, Cursor cursor) {
+            final String authority = parent.getAuthority();
+            final String rootId = DocumentsContract.getRootId(parent);
             final String docId = getCursorString(cursor, DocumentColumns.DOC_ID);
-            doc.rootUri = rootUri;
-            doc.uri = DocumentsContract.buildDocumentUri(rootUri, docId);
+
+            final Document doc = new Document();
+            doc.uri = DocumentsContract.buildDocumentUri(authority, rootId, docId);
             doc.mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
             doc.displayName = getCursorString(cursor, DocumentColumns.DISPLAY_NAME);
+            doc.lastModified = getCursorLong(cursor, DocumentColumns.LAST_MODIFIED);
+            doc.flags = getCursorInt(cursor, DocumentColumns.FLAGS);
             return doc;
         }
 
-        public static Document fromUri(ContentResolver resolver, Uri rootUri, Uri uri) {
+        public static Document fromUri(ContentResolver resolver, Uri uri) {
             final Document doc = new Document();
-            doc.rootUri = rootUri;
             doc.uri = uri;
 
             final Cursor cursor = resolver.query(uri, null, null, null, null);
@@ -556,11 +642,40 @@ public class DocumentsActivity extends Activity {
                 }
                 doc.mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
                 doc.displayName = getCursorString(cursor, DocumentColumns.DISPLAY_NAME);
+                doc.lastModified = getCursorLong(cursor, DocumentColumns.LAST_MODIFIED);
+                doc.flags = getCursorInt(cursor, DocumentColumns.FLAGS);
             } finally {
                 cursor.close();
             }
 
             return doc;
+        }
+
+        public static Document fromSearch(Uri relatedUri, String query) {
+            final Document doc = new Document();
+            doc.uri = DocumentsContract.buildSearchUri(relatedUri, query);
+            doc.mimeType = DocumentsContract.MIME_TYPE_DIRECTORY;
+            doc.displayName = query;
+            doc.lastModified = System.currentTimeMillis();
+            doc.flags = 0;
+            return doc;
+        }
+
+        @Override
+        public String toString() {
+            return "'" + displayName + "' " + uri;
+        }
+
+        public boolean isCreateSupported() {
+            return (flags & DocumentsContract.FLAG_SUPPORTS_CREATE) != 0;
+        }
+
+        public boolean isSearchSupported() {
+            return (flags & DocumentsContract.FLAG_SUPPORTS_SEARCH) != 0;
+        }
+
+        public boolean isThumbnailSupported() {
+            return (flags & DocumentsContract.FLAG_SUPPORTS_THUMBNAIL) != 0;
         }
     }
 
@@ -622,6 +737,7 @@ public class DocumentsActivity extends Activity {
     private void updateRoots() {
         sProviders.clear();
         sRoots.clear();
+        sRootsList.clear();
 
         final PackageManager pm = getPackageManager();
         final List<ProviderInfo> providers = pm.queryContentProviders(
@@ -643,7 +759,9 @@ public class DocumentsActivity extends Activity {
                 final Cursor cursor = getContentResolver().query(uri, null, null, null, null);
                 try {
                     while (cursor.moveToNext()) {
-                        sRoots.add(Root.fromCursor(this, info, cursor));
+                        final Root root = Root.fromCursor(this, info, cursor);
+                        sRoots.put(root.rootId, root);
+                        sRootsList.add(root);
                     }
                 } finally {
                     cursor.close();
@@ -710,18 +828,24 @@ public class DocumentsActivity extends Activity {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             // Clear entire backstack and start in new root
-            final FragmentManager fm = getFragmentManager();
-            while (fm.getBackStackEntryCount() > 0) {
-                fm.popBackStackImmediate();
-            }
+            mStack.clear();
 
-            mCurrentRoot = mRootsAdapter.getItem(position);
-            DirectoryFragment.show(getFragmentManager(), mCurrentRoot.rootUri, mCurrentRoot.uri,
-                    mCurrentRoot.title, false);
+            final Root root = mRootsAdapter.getItem(position);
+
+            final ContentResolver resolver = getContentResolver();
+            final Document doc = Document.fromUri(resolver, root.uri);
+            onDocumentPicked(doc);
 
             mDrawerLayout.closeDrawers();
         }
     };
+
+    private void dumpStack() {
+        Log.d(TAG, "Current stack:");
+        for (Document doc : mStack) {
+            Log.d(TAG, "--> " + doc);
+        }
+    }
 
     public static class RootsAdapter extends ArrayAdapter<Root> {
         public RootsAdapter(Context context, List<Root> list) {
@@ -780,12 +904,13 @@ public class DocumentsActivity extends Activity {
                     values.put(DocumentColumns.DISPLAY_NAME, displayName);
 
                     final DocumentsActivity activity = (DocumentsActivity) getActivity();
-                    final Uri uri = resolver.insert(activity.mCurrentDir, values);
-                    if (uri != null) {
+                    final Document cwd = activity.getCurrentDirectory();
+
+                    final Uri childUri = resolver.insert(cwd.uri, values);
+                    if (childUri != null) {
                         // Navigate into newly created child
-                        final Document doc = Document.fromUri(
-                                resolver, activity.mCurrentRoot.rootUri, uri);
-                        activity.onDocumentPicked(doc);
+                        final Document childDoc = Document.fromUri(resolver, childUri);
+                        activity.onDocumentPicked(childDoc);
                     } else {
                         Toast.makeText(context, R.string.save_error, Toast.LENGTH_SHORT).show();
                     }
