@@ -527,6 +527,14 @@ public class AppOpsManager {
         }
     }
 
+    /** @hide */
+    public void resetAllModes() {
+        try {
+            mService.resetAllModes();
+        } catch (RemoteException e) {
+        }
+    }
+
     /**
      * Monitor for changes to the operating mode for the given op in the given app package.
      * @param op The operation to monitor, one of OP_*.
