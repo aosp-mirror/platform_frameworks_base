@@ -9903,11 +9903,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             // TODO(multidisplay): rotation on main screen only.
-            final Display display = displayContent.getDisplay();
-            final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-            screenRotationAnimation = new ScreenRotationAnimation(mContext,
-                    display, mFxSession, inTransaction, displayInfo.logicalWidth,
-                    displayInfo.logicalHeight, display.getRotation());
+            screenRotationAnimation = new ScreenRotationAnimation(mContext, displayContent,
+                    mFxSession, inTransaction, mPolicy.isDefaultOrientationForced());
             mAnimator.setScreenRotationAnimationLocked(displayId, screenRotationAnimation);
         }
     }

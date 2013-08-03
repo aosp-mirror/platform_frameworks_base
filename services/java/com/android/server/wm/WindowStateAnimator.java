@@ -494,22 +494,22 @@ class WindowStateAnimator {
 
         @Override
         public void setAlpha(float alpha) {
-            super.setAlpha(alpha);
-            if (alpha != mSurfaceTraceAlpha) {
-                mSurfaceTraceAlpha = alpha;
-                Slog.v(SURFACE_TAG, "setAlpha: " + this + ". Called by "
+            if (mSurfaceTraceAlpha != alpha) {
+                Slog.v(SURFACE_TAG, "setAlpha(" + alpha + "): OLD:" + this + ". Called by "
                         + Debug.getCallers(3));
+                mSurfaceTraceAlpha = alpha;
             }
+            super.setAlpha(alpha);
         }
 
         @Override
         public void setLayer(int zorder) {
-            super.setLayer(zorder);
             if (zorder != mLayer) {
-                mLayer = zorder;
-                Slog.v(SURFACE_TAG, "setLayer: " + this + ". Called by "
+                Slog.v(SURFACE_TAG, "setLayer(" + zorder + "): OLD:" + this + ". Called by "
                         + Debug.getCallers(3));
+                mLayer = zorder;
             }
+            super.setLayer(zorder);
 
             sSurfaces.remove(this);
             int i;
@@ -524,69 +524,68 @@ class WindowStateAnimator {
 
         @Override
         public void setPosition(float x, float y) {
-            super.setPosition(x, y);
             if (x != mPosition.x || y != mPosition.y) {
+                Slog.v(SURFACE_TAG, "setPosition(" + x + "," + y + "): OLD:" + this
+                        + ". Called by " + Debug.getCallers(3));
                 mPosition.set(x, y);
-                Slog.v(SURFACE_TAG, "setPosition: " + this + ". Called by "
-                        + Debug.getCallers(3));
             }
+            super.setPosition(x, y);
         }
 
         @Override
         public void setSize(int w, int h) {
-            super.setSize(w, h);
             if (w != mSize.x || h != mSize.y) {
-                mSize.set(w, h);
-                Slog.v(SURFACE_TAG, "setSize: " + this + ". Called by "
+                Slog.v(SURFACE_TAG, "setSize(" + w + "," + h + "): OLD:" + this + ". Called by "
                         + Debug.getCallers(3));
+                mSize.set(w, h);
             }
+            super.setSize(w, h);
         }
 
         @Override
         public void setWindowCrop(Rect crop) {
-            super.setWindowCrop(crop);
             if (crop != null) {
                 if (!crop.equals(mWindowCrop)) {
+                    Slog.v(SURFACE_TAG, "setWindowCrop(" + crop.toShortString() + "): OLD:" + this
+                            + ". Called by " + Debug.getCallers(3));
                     mWindowCrop.set(crop);
-                    Slog.v(SURFACE_TAG, "setWindowCrop: " + this + ". Called by "
-                            + Debug.getCallers(3));
                 }
             }
+            super.setWindowCrop(crop);
         }
 
         @Override
         public void setLayerStack(int layerStack) {
-            super.setLayerStack(layerStack);
             if (layerStack != mLayerStack) {
+                Slog.v(SURFACE_TAG, "setLayerStack(" + layerStack + "): OLD:" + this
+                        + ". Called by " + Debug.getCallers(3));
                 mLayerStack = layerStack;
-                Slog.v(SURFACE_TAG, "setLayerStack: " + this + ". Called by " + Debug.getCallers(3));
             }
+            super.setLayerStack(layerStack);
         }
 
         @Override
         public void hide() {
-            super.hide();
             if (mShown) {
+                Slog.v(SURFACE_TAG, "hide: OLD:" + this + ". Called by " + Debug.getCallers(3));
                 mShown = false;
-                Slog.v(SURFACE_TAG, "hide: " + this + ". Called by "
-                        + Debug.getCallers(3));
             }
+            super.hide();
         }
+
         @Override
         public void show() {
-            super.show();
             if (!mShown) {
+                Slog.v(SURFACE_TAG, "show: OLD:" + this + ". Called by " + Debug.getCallers(3));
                 mShown = true;
-                Slog.v(SURFACE_TAG, "show: " + this + ". Called by "
-                        + Debug.getCallers(3));
             }
+            super.show();
         }
 
         @Override
         public void destroy() {
             super.destroy();
-            Slog.v(SURFACE_TAG, "destroy: " + this + ". Called by "
-                    + Debug.getCallers(3));
+            Slog.v(SURFACE_TAG, "destroy: " + this + ". Called by " + Debug.getCallers(3));
             sSurfaces.remove(this);
         }
 

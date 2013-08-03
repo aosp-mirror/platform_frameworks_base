@@ -273,6 +273,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mDemoHdmiRotation;
     boolean mDemoHdmiRotationLock;
 
+    // Default display does not rotate, apps that require non-default orientation will have to
+    // have the orientation emulated.
+    private boolean mForceDefaultOrientation = false;
+
     int mUserRotationMode = WindowManagerPolicy.USER_ROTATION_FREE;
     int mUserRotation = Surface.ROTATION_0;
     boolean mAccelerometerDefault;
@@ -598,11 +602,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         return true;
     }
-    
+
     /*
      * Various use cases for invoking this function
      * screen turning off, should always disable listeners if already enabled
-     * screen turned on and current app has sensor based orientation, enable listeners 
+     * screen turned on and current app has sensor based orientation, enable listeners
      * if not already enabled
      * screen turned on and current app does not have sensor orientation, disable listeners if
      * already enabled
@@ -629,8 +633,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if(localLOGV) Slog.v(TAG, "Enabling listeners");
                     mOrientationSensorEnabled = true;
                 }
-            } 
-        } 
+            }
+        }
         //check if sensors need to be disabled
         if (disable && mOrientationSensorEnabled) {
             mOrientationListener.disable();
@@ -992,14 +996,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         mDisplay = display;
 
+        final Resources res = mContext.getResources();
         int shortSize, longSize;
         if (width > height) {
             shortSize = height;
             longSize = width;
             mLandscapeRotation = Surface.ROTATION_0;
             mSeascapeRotation = Surface.ROTATION_180;
-            if (mContext.getResources().getBoolean(
-                    com.android.internal.R.bool.config_reverseDefaultRotation)) {
+            if (res.getBoolean(com.android.internal.R.bool.config_reverseDefaultRotation)) {
                 mPortraitRotation = Surface.ROTATION_90;
                 mUpsideDownRotation = Surface.ROTATION_270;
             } else {
@@ -1011,8 +1015,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             longSize = height;
             mPortraitRotation = Surface.ROTATION_0;
             mUpsideDownRotation = Surface.ROTATION_180;
-            if (mContext.getResources().getBoolean(
-                    com.android.internal.R.bool.config_reverseDefaultRotation)) {
+            if (res.getBoolean(com.android.internal.R.bool.config_reverseDefaultRotation)) {
                 mLandscapeRotation = Surface.ROTATION_270;
                 mSeascapeRotation = Surface.ROTATION_90;
             } else {
@@ -1021,35 +1024,32 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        mStatusBarHeight = mContext.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.status_bar_height);
+        mStatusBarHeight =
+                res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
 
         // Height of the navigation bar when presented horizontally at bottom
         mNavigationBarHeightForRotation[mPortraitRotation] =
         mNavigationBarHeightForRotation[mUpsideDownRotation] =
-                mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.navigation_bar_height);
+                res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_height);
         mNavigationBarHeightForRotation[mLandscapeRotation] =
-        mNavigationBarHeightForRotation[mSeascapeRotation] =
-                mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.navigation_bar_height_landscape);
+        mNavigationBarHeightForRotation[mSeascapeRotation] = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.navigation_bar_height_landscape);
 
         // Width of the navigation bar when presented vertically along one side
         mNavigationBarWidthForRotation[mPortraitRotation] =
         mNavigationBarWidthForRotation[mUpsideDownRotation] =
         mNavigationBarWidthForRotation[mLandscapeRotation] =
         mNavigationBarWidthForRotation[mSeascapeRotation] =
-                mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.navigation_bar_width);
+                res.getDimensionPixelSize(com.android.internal.R.dimen.navigation_bar_width);
 
         // SystemUI (status bar) layout policy
         int shortSizeDp = shortSize * DisplayMetrics.DENSITY_DEFAULT / density;
+        int longSizeDp = longSize * DisplayMetrics.DENSITY_DEFAULT / density;
 
         // Allow the navigation bar to move on small devices (phones).
         mNavigationBarCanMove = shortSizeDp < 600;
 
-        mHasNavigationBar = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_showNavigationBar);
+        mHasNavigationBar = res.getBoolean(com.android.internal.R.bool.config_showNavigationBar);
         // Allow a system property to override this. Used by the emulator.
         // See also hasNavigationBar().
         String navBarOverride = SystemProperties.get("qemu.hw.mainkeys");
@@ -1075,6 +1075,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mDemoHdmiRotation = mLandscapeRotation;
         }
         mDemoHdmiRotationLock = SystemProperties.getBoolean("persist.demo.hdmirotationlock", false);
+
+        // Only force the default orientation if the screen is xlarge, at least 960dp x 720dp, per
+        // http://developer.android.com/guide/practices/screens_support.html#range
+        mForceDefaultOrientation = longSizeDp >= 960 && shortSizeDp >= 720 &&
+                res.getBoolean(com.android.internal.R.bool.config_forceDefaultOrientation) &&
+                // For debug purposes the next line turns this feature off with:
+                // $ adb shell setprop config.override_forced_orient true
+                // $ adb shell wm size reset
+                !"true".equals(SystemProperties.get("config.override_forced_orient"));
+    }
+
+    @Override
+    public boolean isDefaultOrientationForced() {
+        return mForceDefaultOrientation;
     }
 
     @Override
@@ -1453,6 +1467,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /** {@inheritDoc} */
+    @Override
     public int subWindowTypeToLayerLw(int type) {
         switch (type) {
         case TYPE_APPLICATION_PANEL:
@@ -1469,10 +1484,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return 0;
     }
 
+    @Override
     public int getMaxWallpaperLayer() {
         return windowTypeToLayerLw(TYPE_STATUS_BAR);
     }
 
+    @Override
     public int getAboveUniverseLayer() {
         return windowTypeToLayerLw(TYPE_SYSTEM_ERROR);
     }
@@ -4343,6 +4360,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         + ((mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED)
                             ? "USER_ROTATION_LOCKED" : "")
                         );
+        }
+
+        if (mForceDefaultOrientation) {
+            return Surface.ROTATION_0;
         }
 
         synchronized (mLock) {
