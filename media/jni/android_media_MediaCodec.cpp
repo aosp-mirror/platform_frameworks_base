@@ -49,9 +49,14 @@ enum {
     DEQUEUE_INFO_OUTPUT_BUFFERS_CHANGED     = -3,
 };
 
+struct CryptoErrorCodes {
+    jint cryptoErrorNoKey;
+    jint cryptoErrorKeyExpired;
+    jint cryptoErrorResourceBusy;
+} gCryptoErrorCodes;
+
 struct fields_t {
     jfieldID context;
-
     jfieldID cryptoInfoNumSubSamplesID;
     jfieldID cryptoInfoNumBytesOfClearDataID;
     jfieldID cryptoInfoNumBytesOfEncryptedDataID;
@@ -342,6 +347,21 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg) {
 
     jstring msgObj = env->NewStringUTF(msg != NULL ? msg : "Unknown Error");
 
+    /* translate OS errors to Java API CryptoException errorCodes */
+    switch (err) {
+        case ERROR_DRM_NO_LICENSE:
+            err = gCryptoErrorCodes.cryptoErrorNoKey;
+            break;
+        case ERROR_DRM_LICENSE_EXPIRED:
+            err = gCryptoErrorCodes.cryptoErrorKeyExpired;
+            break;
+        case ERROR_DRM_RESOURCE_BUSY:
+            err = gCryptoErrorCodes.cryptoErrorResourceBusy;
+            break;
+        default:
+            break;
+    }
+
     jthrowable exception =
         (jthrowable)env->NewObject(clazz, constructID, err, msgObj);
 
@@ -350,9 +370,8 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg) {
 
 static jint throwExceptionAsNecessary(
         JNIEnv *env, status_t err, const char *msg = NULL) {
-    if (err >= ERROR_DRM_WV_VENDOR_MIN && err <= ERROR_DRM_WV_VENDOR_MAX) {
+    if (err >= ERROR_DRM_VENDOR_MIN && err <= ERROR_DRM_VENDOR_MAX) {
         // We'll throw our custom MediaCodec.CryptoException
-
         throwCryptoException(env, err, msg);
         return 0;
     }
@@ -369,6 +388,12 @@ static jint throwExceptionAsNecessary(
 
         case INFO_OUTPUT_BUFFERS_CHANGED:
             return DEQUEUE_INFO_OUTPUT_BUFFERS_CHANGED;
+
+        case ERROR_DRM_NO_LICENSE:
+        case ERROR_DRM_LICENSE_EXPIRED:
+        case ERROR_DRM_RESOURCE_BUSY:
+            throwCryptoException(env, err, msg);
+            break;
 
         default:
         {
@@ -852,6 +877,22 @@ static void android_media_MediaCodec_native_init(JNIEnv *env) {
 
     gFields.cryptoInfoModeID = env->GetFieldID(clazz, "mode", "I");
     CHECK(gFields.cryptoInfoModeID != NULL);
+
+    clazz = env->FindClass("android/media/MediaCodec$CryptoException");
+    CHECK(clazz != NULL);
+
+    jfieldID field;
+    field = env->GetStaticFieldID(clazz, "ERROR_NO_KEY", "I");
+    CHECK(field != NULL);
+    gCryptoErrorCodes.cryptoErrorNoKey = env->GetStaticIntField(clazz, field);
+
+    field = env->GetStaticFieldID(clazz, "ERROR_KEY_EXPIRED", "I");
+    CHECK(field != NULL);
+    gCryptoErrorCodes.cryptoErrorKeyExpired = env->GetStaticIntField(clazz, field);
+
+    field = env->GetStaticFieldID(clazz, "ERROR_RESOURCE_BUSY", "I");
+    CHECK(field != NULL);
+    gCryptoErrorCodes.cryptoErrorResourceBusy = env->GetStaticIntField(clazz, field);
 }
 
 static void android_media_MediaCodec_native_setup(

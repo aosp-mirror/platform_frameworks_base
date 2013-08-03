@@ -300,6 +300,24 @@ final public class MediaCodec {
             mErrorCode = errorCode;
         }
 
+        /**
+         * This indicates that no key has been set to perform the requested
+         * decrypt operation.
+         */
+        public static final int ERROR_NO_KEY = 1;
+
+        /**
+         * This indicates that the key used for decryption is no longer
+         * valid due to license term expiration.
+         */
+        public static final int ERROR_KEY_EXPIRED = 2;
+
+        /**
+         * This indicates that a required crypto resource was not able to be
+         * allocated while attempting the requested operation.
+         */
+        public static final int ERROR_RESOURCE_BUSY = 3;
+
         public int getErrorCode() {
             return mErrorCode;
         }
