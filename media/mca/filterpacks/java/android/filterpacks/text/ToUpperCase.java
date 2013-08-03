@@ -23,6 +23,8 @@ import android.filterfw.core.Frame;
 import android.filterfw.core.FrameFormat;
 import android.filterfw.format.ObjectFormat;
 
+import java.util.Locale;
+
 /**
  * @hide
  */
@@ -47,7 +49,7 @@ public class ToUpperCase extends Filter {
         String inputString = (String)input.getObjectValue();
 
         Frame output = env.getFrameManager().newFrame(mOutputFormat);
-        output.setObjectValue(inputString.toUpperCase());
+        output.setObjectValue(inputString.toUpperCase(Locale.getDefault()));
 
         pushOutput("uppercase", output);
     }
