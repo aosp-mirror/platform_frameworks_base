@@ -142,13 +142,7 @@ private:
         while ((n = q->read(buffer, 16)) > 0) {
             for (int i=0 ; i<n ; i++) {
 
-                if (buffer[i].type == SENSOR_TYPE_STEP_COUNTER) {
-                    // step-counter returns a uint64, but the java API only deals with floats
-                    float value = float(buffer[i].u64.step_counter);
-                    env->SetFloatArrayRegion(mScratch, 0, 1, &value);
-                } else {
-                    env->SetFloatArrayRegion(mScratch, 0, 16, buffer[i].data);
-                }
+                env->SetFloatArrayRegion(mScratch, 0, 16, buffer[i].data);
 
                 env->CallVoidMethod(mReceiverObject,
                         gBaseEventQueueClassInfo.dispatchSensorEvent,
