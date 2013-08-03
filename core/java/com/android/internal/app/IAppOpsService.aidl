@@ -33,4 +33,5 @@ interface IAppOpsService {
     List<AppOpsManager.PackageOps> getPackagesForOps(in int[] ops);
     List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, in int[] ops);
     void setMode(int code, int uid, String packageName, int mode);
+    void resetAllModes();
 }
