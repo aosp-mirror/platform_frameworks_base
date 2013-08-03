@@ -47,7 +47,7 @@ to a shape with rotation.</p>
 
 <p>Rotating a drawing object with OpenGL ES 2.0 is relatively simple. You create another
 transformation matrix (a rotation matrix) and then combine it with your projection and
-camera view tranformation matrices:</p>
+camera view transformation matrices:</p>
 
 <pre>
 private float[] mRotationMatrix = new float[16];
@@ -56,7 +56,7 @@ public void onDrawFrame(GL10 gl) {
     // Create a rotation transformation for the triangle
     long time = SystemClock.uptimeMillis() % 4000L;
     float angle = 0.090f * ((int) time);
-    Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, -1.0f);
+    Matrix.setRotateM(mRotationMatrix, 0, angle, 0, 0, -1.0f);
 
     // Combine the rotation matrix with the projection and camera view
     Matrix.multiplyMM(mMVPMatrix, 0, mRotationMatrix, 0, mMVPMatrix, 0);
@@ -67,7 +67,7 @@ public void onDrawFrame(GL10 gl) {
 </pre>
 
 <p>If your triangle does not rotate after making these changes, make sure you have commented out the
-{@link android.opengl.GLSurfaceView#RENDERMODE_WHEN_DIRTY GLSurfaceView.RENDERMODE_WHEN_DIRTY} 
+{@link android.opengl.GLSurfaceView#RENDERMODE_WHEN_DIRTY GLSurfaceView.RENDERMODE_WHEN_DIRTY}
 setting, as described in the next section.</p>
 
 
