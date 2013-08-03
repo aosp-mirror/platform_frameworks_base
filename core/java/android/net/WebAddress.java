@@ -18,6 +18,7 @@ package android.net;
 
 import static android.util.Patterns.GOOD_IRI_CHAR;
 
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -77,7 +78,7 @@ public class WebAddress {
         String t;
         if (m.matches()) {
             t = m.group(MATCH_GROUP_SCHEME);
-            if (t != null) mScheme = t.toLowerCase();
+            if (t != null) mScheme = t.toLowerCase(Locale.ROOT);
             t = m.group(MATCH_GROUP_AUTHORITY);
             if (t != null) mAuthInfo = t;
             t = m.group(MATCH_GROUP_HOST);

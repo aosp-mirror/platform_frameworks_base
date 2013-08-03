@@ -25,6 +25,7 @@ import android.util.Log;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.Locale;
 
 /**
  * A container class for the http proxy info
@@ -87,7 +88,7 @@ public class ProxyProperties implements Parcelable {
         if (mExclusionList == null) {
             mParsedExclusionList = new String[0];
         } else {
-            String splitExclusionList[] = exclusionList.toLowerCase().split(",");
+            String splitExclusionList[] = exclusionList.toLowerCase(Locale.ROOT).split(",");
             mParsedExclusionList = new String[splitExclusionList.length * 2];
             for (int i = 0; i < splitExclusionList.length; i++) {
                 String s = splitExclusionList[i].trim();

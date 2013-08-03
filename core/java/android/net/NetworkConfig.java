@@ -17,6 +17,7 @@
 package android.net;
 
 import android.util.Log;
+import java.util.Locale;
 
 /**
  * Describes the buildtime configuration of a network.
@@ -63,7 +64,7 @@ public class NetworkConfig {
      */
     public NetworkConfig(String init) {
         String fragments[] = init.split(",");
-        name = fragments[0].trim().toLowerCase();
+        name = fragments[0].trim().toLowerCase(Locale.ROOT);
         type = Integer.parseInt(fragments[1]);
         radio = Integer.parseInt(fragments[2]);
         priority = Integer.parseInt(fragments[3]);
