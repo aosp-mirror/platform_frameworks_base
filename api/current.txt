@@ -40,6 +40,9 @@ package android {
     field public static final java.lang.String CALL_PHONE = "android.permission.CALL_PHONE";
     field public static final java.lang.String CALL_PRIVILEGED = "android.permission.CALL_PRIVILEGED";
     field public static final java.lang.String CAMERA = "android.permission.CAMERA";
+    field public static final java.lang.String CAPTURE_AUDIO_OUTPUT = "android.permission.CAPTURE_AUDIO_OUTPUT";
+    field public static final java.lang.String CAPTURE_SECURE_VIDEO_OUTPUT = "android.permission.CAPTURE_SECURE_VIDEO_OUTPUT";
+    field public static final java.lang.String CAPTURE_VIDEO_OUTPUT = "android.permission.CAPTURE_VIDEO_OUTPUT";
     field public static final java.lang.String CHANGE_COMPONENT_ENABLED_STATE = "android.permission.CHANGE_COMPONENT_ENABLED_STATE";
     field public static final java.lang.String CHANGE_CONFIGURATION = "android.permission.CHANGE_CONFIGURATION";
     field public static final java.lang.String CHANGE_NETWORK_STATE = "android.permission.CHANGE_NETWORK_STATE";
@@ -10798,13 +10801,16 @@ package android.hardware.camera2 {
 package android.hardware.display {
 
   public final class DisplayManager {
-    method public android.hardware.display.VirtualDisplay createPrivateVirtualDisplay(java.lang.String, int, int, int, android.view.Surface);
+    method public android.hardware.display.VirtualDisplay createVirtualDisplay(java.lang.String, int, int, int, android.view.Surface, int);
     method public android.view.Display getDisplay(int);
     method public android.view.Display[] getDisplays();
     method public android.view.Display[] getDisplays(java.lang.String);
     method public void registerDisplayListener(android.hardware.display.DisplayManager.DisplayListener, android.os.Handler);
     method public void unregisterDisplayListener(android.hardware.display.DisplayManager.DisplayListener);
     field public static final java.lang.String DISPLAY_CATEGORY_PRESENTATION = "android.hardware.display.category.PRESENTATION";
+    field public static final int VIRTUAL_DISPLAY_FLAG_PRESENTATION = 2; // 0x2
+    field public static final int VIRTUAL_DISPLAY_FLAG_PUBLIC = 1; // 0x1
+    field public static final int VIRTUAL_DISPLAY_FLAG_SECURE = 4; // 0x4
   }
 
   public static abstract interface DisplayManager.DisplayListener {
@@ -25610,6 +25616,7 @@ package android.view {
     method public deprecated int getWidth();
     method public boolean isValid();
     field public static final int DEFAULT_DISPLAY = 0; // 0x0
+    field public static final int FLAG_PRESENTATION = 8; // 0x8
     field public static final int FLAG_PRIVATE = 4; // 0x4
     field public static final int FLAG_SECURE = 2; // 0x2
     field public static final int FLAG_SUPPORTS_PROTECTED_BUFFERS = 1; // 0x1

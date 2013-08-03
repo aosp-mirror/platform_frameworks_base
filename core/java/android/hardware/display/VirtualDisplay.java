@@ -21,7 +21,7 @@ import android.view.Display;
 /**
  * Represents a virtual display.
  *
- * @see DisplayManager#createPrivateVirtualDisplay
+ * @see DisplayManager#createVirtualDisplay
  */
 public final class VirtualDisplay {
     private final DisplayManagerGlobal mGlobal;

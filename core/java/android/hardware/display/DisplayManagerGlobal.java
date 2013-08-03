@@ -329,8 +329,8 @@ public final class DisplayManagerGlobal {
         }
     }
 
-    public VirtualDisplay createPrivateVirtualDisplay(Context context, String name,
-            int width, int height, int densityDpi, Surface surface) {
+    public VirtualDisplay createVirtualDisplay(Context context, String name,
+            int width, int height, int densityDpi, Surface surface, int flags) {
         if (TextUtils.isEmpty(name)) {
             throw new IllegalArgumentException("name must be non-null and non-empty");
         }
@@ -345,20 +345,20 @@ public final class DisplayManagerGlobal {
         Binder token = new Binder();
         int displayId;
         try {
-            displayId = mDm.createPrivateVirtualDisplay(token, context.getPackageName(),
-                    name, width, height, densityDpi, surface);
+            displayId = mDm.createVirtualDisplay(token, context.getPackageName(),
+                    name, width, height, densityDpi, surface, flags);
         } catch (RemoteException ex) {
-            Log.e(TAG, "Could not create private virtual display: " + name, ex);
+            Log.e(TAG, "Could not create virtual display: " + name, ex);
             return null;
         }
         if (displayId < 0) {
-            Log.e(TAG, "Could not create private virtual display: " + name);
+            Log.e(TAG, "Could not create virtual display: " + name);
             return null;
         }
         Display display = getRealDisplay(displayId);
         if (display == null) {
             Log.wtf(TAG, "Could not obtain display info for newly created "
-                    + "private virtual display: " + name);
+                    + "virtual display: " + name);
             try {
                 mDm.releaseVirtualDisplay(token);
             } catch (RemoteException ex) {

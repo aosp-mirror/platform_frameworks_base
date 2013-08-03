@@ -1394,9 +1394,19 @@
     <string name="permdesc_configureWifiDisplay">Allows the app to configure and connect to Wifi displays.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_controlWifiDisplay">control Wifi displays</string>
+    <string name="permlab_captureAudioOutput">capture audio output</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_controlWifiDisplay">Allows the app to control low-level features of Wifi displays.</string>
+    <string name="permdesc_captureAudioOutput">Allows the app to capture and redirect audio output.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_captureVideoOutput">capture video output</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_captureVideoOutput">Allows the app to capture and redirect video output.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_captureSecureVideoOutput">capture secure video output</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_captureSecureVideoOutput">Allows the app to capture and redirect secure video output.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_modifyAudioSettings">change your audio settings</string>

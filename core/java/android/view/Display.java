@@ -149,14 +149,23 @@ public final class Display {
     /**
      * Display flag: Indicates that the display is private.  Only the application that
      * owns the display can create windows on it.
-     * <p>
-     * This flag is associated with displays that were created using
-     * {@link android.hardware.display.DisplayManager#createPrivateVirtualDisplay}.
-     * </p>
      *
      * @see #getFlags
      */
     public static final int FLAG_PRIVATE = 1 << 2;
+
+    /**
+     * Display flag: Indicates that the display is a presentation display.
+     * <p>
+     * This flag identifies secondary displays that are suitable for
+     * use as presentation displays such as HDMI or Wireless displays.  Applications
+     * may automatically project their content to presentation displays to provide
+     * richer second screen experiences.
+     * </p>
+     *
+     * @see #getFlags
+     */
+    public static final int FLAG_PRESENTATION = 1 << 3;
 
     /**
      * Display type: Unknown display type.

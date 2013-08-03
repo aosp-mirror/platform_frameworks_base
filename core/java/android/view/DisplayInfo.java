@@ -466,6 +466,9 @@ public final class DisplayInfo implements Parcelable {
         if ((flags & Display.FLAG_PRIVATE) != 0) {
             result.append(", FLAG_PRIVATE");
         }
+        if ((flags & Display.FLAG_PRESENTATION) != 0) {
+            result.append(", FLAG_PRESENTATION");
+        }
         return result.toString();
     }
 }

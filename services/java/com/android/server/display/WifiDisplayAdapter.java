@@ -352,7 +352,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
         }
 
         boolean secure = (flags & RemoteDisplay.DISPLAY_FLAG_SECURE) != 0;
-        int deviceFlags = 0;
+        int deviceFlags = DisplayDeviceInfo.FLAG_PRESENTATION;
         if (secure) {
             deviceFlags |= DisplayDeviceInfo.FLAG_SECURE;
             if (mSupportsProtectedBuffers) {

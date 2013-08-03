@@ -21,6 +21,7 @@ import com.android.internal.util.IndentingPrintWriter;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.IDisplayManager;
 import android.hardware.display.IDisplayManagerCallback;
@@ -589,8 +590,8 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     }
 
     @Override // Binder call
-    public int createPrivateVirtualDisplay(IBinder appToken, String packageName,
-            String name, int width, int height, int densityDpi, Surface surface) {
+    public int createVirtualDisplay(IBinder appToken, String packageName,
+            String name, int width, int height, int densityDpi, Surface surface, int flags) {
         final int callingUid = Binder.getCallingUid();
         if (!validatePackageName(callingUid, packageName)) {
             throw new SecurityException("packageName must match the calling uid");
@@ -608,6 +609,25 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         if (surface == null) {
             throw new IllegalArgumentException("surface must not be null");
         }
+        if ((flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) != 0) {
+            if (mContext.checkCallingPermission(android.Manifest.permission.CAPTURE_VIDEO_OUTPUT)
+                    != PackageManager.PERMISSION_GRANTED
+                    && mContext.checkCallingPermission(
+                            android.Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT)
+                            != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Requires CAPTURE_VIDEO_OUTPUT or "
+                        + "CAPTURE_SECURE_VIDEO_OUTPUT permission to create a "
+                        + "public virtual display.");
+            }
+        }
+        if ((flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE) != 0) {
+            if (mContext.checkCallingPermission(
+                    android.Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Requires CAPTURE_SECURE_VIDEO_OUTPUT "
+                        + "to create a secure virtual display.");
+            }
+        }
 
         final long token = Binder.clearCallingIdentity();
         try {
@@ -618,9 +638,9 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                     return -1;
                 }
 
-                DisplayDevice device = mVirtualDisplayAdapter.createPrivateVirtualDisplayLocked(
+                DisplayDevice device = mVirtualDisplayAdapter.createVirtualDisplayLocked(
                         appToken, callingUid, packageName, name, width, height, densityDpi,
-                        surface);
+                        surface, flags);
                 if (device == null) {
                     return -1;
                 }
@@ -632,7 +652,7 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
                 }
 
                 // Something weird happened and the logical display was not created.
-                Slog.w(TAG, "Rejecting request to create private virtual display "
+                Slog.w(TAG, "Rejecting request to create virtual display "
                         + "because the logical display was not created.");
                 mVirtualDisplayAdapter.releaseVirtualDisplayLocked(appToken);
                 handleDisplayDeviceRemovedLocked(device);

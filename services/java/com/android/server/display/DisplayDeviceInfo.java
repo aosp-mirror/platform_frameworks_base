@@ -73,6 +73,11 @@ final class DisplayDeviceInfo {
     public static final int FLAG_NEVER_BLANK = 1 << 5;
 
     /**
+     * Flag: Indicates that the display is suitable for presentations.
+     */
+    public static final int FLAG_PRESENTATION = 1 << 6;
+
+    /**
      * Touch attachment: Display does not receive touch.
      */
     public static final int TOUCH_NONE = 0;
@@ -288,6 +293,9 @@ final class DisplayDeviceInfo {
         }
         if ((flags & FLAG_NEVER_BLANK) != 0) {
             msg.append(", FLAG_NEVER_BLANK");
+        }
+        if ((flags & FLAG_PRESENTATION) != 0) {
+            msg.append(", FLAG_PRESENTATION");
         }
         return msg.toString();
     }

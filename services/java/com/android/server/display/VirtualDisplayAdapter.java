@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import android.content.Context;
+import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
@@ -46,12 +47,13 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         super(syncRoot, context, handler, listener, TAG);
     }
 
-    public DisplayDevice createPrivateVirtualDisplayLocked(IBinder appToken,
+    public DisplayDevice createVirtualDisplayLocked(IBinder appToken,
             int ownerUid, String ownerPackageName,
-            String name, int width, int height, int densityDpi, Surface surface) {
-        IBinder displayToken = SurfaceControl.createDisplay(name, false /*secure*/);
+            String name, int width, int height, int densityDpi, Surface surface, int flags) {
+        boolean secure = (flags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE) != 0;
+        IBinder displayToken = SurfaceControl.createDisplay(name, secure);
         VirtualDisplayDevice device = new VirtualDisplayDevice(displayToken, appToken,
-                ownerUid, ownerPackageName, name, width, height, densityDpi, surface);
+                ownerUid, ownerPackageName, name, width, height, densityDpi, surface, flags);
 
         try {
             appToken.linkToDeath(device, 0);
@@ -96,6 +98,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         private final int mWidth;
         private final int mHeight;
         private final int mDensityDpi;
+        private final int mFlags;
 
         private boolean mReleased;
         private Surface mSurface;
@@ -103,7 +106,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
 
         public VirtualDisplayDevice(IBinder displayToken,
                 IBinder appToken, int ownerUid, String ownerPackageName,
-                String name, int width, int height, int densityDpi, Surface surface) {
+                String name, int width, int height, int densityDpi, Surface surface, int flags) {
             super(VirtualDisplayAdapter.this, displayToken);
             mAppToken = appToken;
             mOwnerUid = ownerUid;
@@ -113,6 +116,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
             mHeight = height;
             mDensityDpi = densityDpi;
             mSurface = surface;
+            mFlags = flags;
         }
 
         @Override
@@ -149,7 +153,17 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
                 mInfo.densityDpi = mDensityDpi;
                 mInfo.xDpi = mDensityDpi;
                 mInfo.yDpi = mDensityDpi;
-                mInfo.flags = DisplayDeviceInfo.FLAG_PRIVATE | DisplayDeviceInfo.FLAG_NEVER_BLANK;
+                mInfo.flags = 0;
+                if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC) == 0) {
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_PRIVATE |
+                            DisplayDeviceInfo.FLAG_NEVER_BLANK;
+                }
+                if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE) != 0) {
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_SECURE;
+                }
+                if ((mFlags & DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION) != 0) {
+                    mInfo.flags |= DisplayDeviceInfo.FLAG_PRESENTATION;
+                }
                 mInfo.type = Display.TYPE_VIRTUAL;
                 mInfo.touch = DisplayDeviceInfo.TOUCH_NONE;
                 mInfo.ownerUid = mOwnerUid;

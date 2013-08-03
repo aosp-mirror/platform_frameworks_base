@@ -197,8 +197,8 @@ public class DisplaySourceService extends Service {
             Surface surface = codec.createInputSurface();
             codec.start();
 
-            VirtualDisplay virtualDisplay = mDisplayManager.createPrivateVirtualDisplay(
-                    DISPLAY_NAME, mWidth, mHeight, mDensityDpi, surface);
+            VirtualDisplay virtualDisplay = mDisplayManager.createVirtualDisplay(
+                    DISPLAY_NAME, mWidth, mHeight, mDensityDpi, surface, 0);
             if (virtualDisplay != null) {
                 mHandler.obtainMessage(MSG_DISPATCH_DISPLAY_ADDED,
                         virtualDisplay.getDisplay()).sendToTarget();
