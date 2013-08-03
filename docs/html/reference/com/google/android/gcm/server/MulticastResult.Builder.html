@@ -81,7 +81,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
-<title>GCMConstants | Android Developers</title>
+<title>MulticastResult.Builder | Android Developers</title>
 
 <!-- STYLESHEETS -->
 <link rel="stylesheet"
@@ -640,14 +640,17 @@ Summary:
 
 
 
-  <a href="#constants">Constants</a>
+
+
+
+
+  <a href="#pubctors">Ctors</a>
   
 
 
 
-
-
-
+  &#124; <a href="#pubmethods">Methods</a>
+  
 
 
 
@@ -669,11 +672,11 @@ Summary:
 
 <div id="jd-header">
     public
-     
+    static 
     final 
     
     class
-<h1 itemprop="name">GCMConstants</h1>
+<h1 itemprop="name">MulticastResult.Builder</h1>
 
 
 
@@ -706,7 +709,7 @@ Summary:
         
             <td class="jd-inheritance-space">&nbsp;&nbsp;&nbsp;&#x21b3;</td>
          	
-        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gcm.GCMConstants</td>
+        <td colspan="1" class="jd-inheritance-class-cell">com.google.android.gcm.server.MulticastResult.Builder</td>
     </tr>
     
 
@@ -719,17 +722,7 @@ Summary:
 
 
 <div class="jd-descr">
-<p>
-  <p class="caution"><strong>
-      This class is deprecated.</strong><br/>
-    Please use the <a href=
- "http://developer.android.com/reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">
- <code>GoogleCloudMessaging</code></a> API instead.
 
-  </p>
-
-<h2>Class Overview</h2>
-<p itemprop="articleBody">Constants used by the GCM library.</p>
 
 
 
@@ -769,182 +762,37 @@ Summary:
 
 
 
-<!-- =========== ENUM CONSTANT SUMMARY =========== -->
-<table id="constants" class="jd-sumtable"><tr><th colspan="12">Constants</th></tr>
 
 
-    
+
+
+
+
+
+
+
+
+<!-- ======== CONSTRUCTOR SUMMARY ======== -->
+<table id="pubctors" class="jd-sumtable"><tr><th colspan="12">Public Constructors</th></tr>
+
+
+
+	 
     <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#DEFAULT_INTENT_SERVICE_CLASS_NAME">DEFAULT_INTENT_SERVICE_CLASS_NAME</a></td>
-        <td class="jd-descrcol" width="100%"></td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#ERROR_ACCOUNT_MISSING">ERROR_ACCOUNT_MISSING</a></td>
-        <td class="jd-descrcol" width="100%">There is no Google account on the phone.</td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#ERROR_AUTHENTICATION_FAILED">ERROR_AUTHENTICATION_FAILED</a></td>
-        <td class="jd-descrcol" width="100%">Bad password.</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#ERROR_INVALID_PARAMETERS">ERROR_INVALID_PARAMETERS</a></td>
-        <td class="jd-descrcol" width="100%">The request sent by the phone does not contain the expected parameters.</td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#ERROR_INVALID_SENDER">ERROR_INVALID_SENDER</a></td>
-        <td class="jd-descrcol" width="100%">The sender account is not recognized.</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#ERROR_PHONE_REGISTRATION_ERROR">ERROR_PHONE_REGISTRATION_ERROR</a></td>
-        <td class="jd-descrcol" width="100%">Incorrect phone registration with Google.</td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#ERROR_SERVICE_NOT_AVAILABLE">ERROR_SERVICE_NOT_AVAILABLE</a></td>
-        <td class="jd-descrcol" width="100%">The device can't read the response, or there was a 500/503 from the
- server that can be retried later.</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#EXTRA_APPLICATION_PENDING_INTENT">EXTRA_APPLICATION_PENDING_INTENT</a></td>
-        <td class="jd-descrcol" width="100%">Extra used on
- <code><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_TO_GCM_REGISTRATION">com.google.android.gcm.GCMConstants.INTENT_TO_GCM_REGISTRATION</a></code>
- to get the application info.</td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#EXTRA_ERROR">EXTRA_ERROR</a></td>
-        <td class="jd-descrcol" width="100%">Extra used on
- <code><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_FROM_GCM_REGISTRATION_CALLBACK">com.google.android.gcm.GCMConstants.INTENT_FROM_GCM_REGISTRATION_CALLBACK</a></code>
- to indicate an error when the registration fails.</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#EXTRA_FROM">EXTRA_FROM</a></td>
-        <td class="jd-descrcol" width="100%">Extra used on
- <code><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_FROM_GCM_MESSAGE">com.google.android.gcm.GCMConstants.INTENT_FROM_GCM_MESSAGE</a></code>
- to indicate which sender (Google API project id) sent the message.</td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#EXTRA_REGISTRATION_ID">EXTRA_REGISTRATION_ID</a></td>
-        <td class="jd-descrcol" width="100%">Extra used on
- <code><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_FROM_GCM_REGISTRATION_CALLBACK">com.google.android.gcm.GCMConstants.INTENT_FROM_GCM_REGISTRATION_CALLBACK</a></code>
- to indicate the registration id when the registration succeeds.</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#EXTRA_SENDER">EXTRA_SENDER</a></td>
-        <td class="jd-descrcol" width="100%">Extra used on
- <code><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_TO_GCM_REGISTRATION">com.google.android.gcm.GCMConstants.INTENT_TO_GCM_REGISTRATION</a></code>
- to indicate which senders (Google API project ids) can send messages to
- the application.</td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#EXTRA_SPECIAL_MESSAGE">EXTRA_SPECIAL_MESSAGE</a></td>
-        <td class="jd-descrcol" width="100%">Type of message present in the
- <code><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_FROM_GCM_MESSAGE">com.google.android.gcm.GCMConstants.INTENT_FROM_GCM_MESSAGE</a></code>
- intent.</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#EXTRA_TOTAL_DELETED">EXTRA_TOTAL_DELETED</a></td>
-        <td class="jd-descrcol" width="100%">Number of messages deleted by the server because the device was idle.</td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#EXTRA_UNREGISTERED">EXTRA_UNREGISTERED</a></td>
-        <td class="jd-descrcol" width="100%">Extra used on
- <code><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_FROM_GCM_REGISTRATION_CALLBACK">com.google.android.gcm.GCMConstants.INTENT_FROM_GCM_REGISTRATION_CALLBACK</a></code>
- to indicate that the application has been unregistered.</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_FROM_GCM_LIBRARY_RETRY">INTENT_FROM_GCM_LIBRARY_RETRY</a></td>
-        <td class="jd-descrcol" width="100%">Intent used by the GCM library to indicate that the registration call
- should be retried.</td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_FROM_GCM_MESSAGE">INTENT_FROM_GCM_MESSAGE</a></td>
-        <td class="jd-descrcol" width="100%">Intent sent by GCM containing a message.</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_FROM_GCM_REGISTRATION_CALLBACK">INTENT_FROM_GCM_REGISTRATION_CALLBACK</a></td>
-        <td class="jd-descrcol" width="100%">Intent sent by GCM indicating with the result of a registration request.</td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_TO_GCM_REGISTRATION">INTENT_TO_GCM_REGISTRATION</a></td>
-        <td class="jd-descrcol" width="100%">Intent sent to GCM to register the application.</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_TO_GCM_UNREGISTRATION">INTENT_TO_GCM_UNREGISTRATION</a></td>
-        <td class="jd-descrcol" width="100%">Intent sent to GCM to unregister the application.</td>
-    </tr>
-    
-    
-    <tr class="alt-color api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#PERMISSION_GCM_INTENTS">PERMISSION_GCM_INTENTS</a></td>
-        <td class="jd-descrcol" width="100%">Permission necessary to receive GCM intents.</td>
-    </tr>
-    
-    
-    <tr class=" api apilevel-" >
-        <td class="jd-typecol">String</td>
-        <td class="jd-linkcol"><a href="/reference/com/google/android/gcm/GCMConstants.html#VALUE_DELETED_MESSAGES">VALUE_DELETED_MESSAGES</a></td>
-        <td class="jd-descrcol" width="100%">Special message indicating the server deleted the pending messages.</td>
-    </tr>
-    
-    
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            </nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gcm/server/MulticastResult.Builder.html#MulticastResult.Builder(int, int, int, long)">MulticastResult.Builder</a></span>(int success, int failure, int canonicalIds, long multicastId)</nobr>
+        
+  </td></tr>
+
+
 
 </table>
 
@@ -953,14 +801,61 @@ Summary:
 
 
 
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="pubmethods" class="jd-sumtable"><tr><th colspan="12">Public Methods</th></tr>
 
 
 
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gcm/server/MulticastResult.Builder.html">MulticastResult.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gcm/server/MulticastResult.Builder.html#addResult(com.google.android.gcm.server.Result)">addResult</a></span>(<a href="/reference/com/google/android/gcm/server/Result.html">Result</a> result)</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gcm/server/MulticastResult.html">MulticastResult</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gcm/server/MulticastResult.Builder.html#build()">build</a></span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            <a href="/reference/com/google/android/gcm/server/MulticastResult.Builder.html">MulticastResult.Builder</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gcm/server/MulticastResult.Builder.html#retryMulticastIds(java.util.List<java.lang.Long>)">retryMulticastIds</a></span>(List&lt;Long&gt; retryMulticastIds)</nobr>
+        
+  </td></tr>
 
 
 
-
-
+</table>
 
 
 
@@ -1198,26 +1093,34 @@ From class
 <!-- Constants -->
 
 
-<!-- ========= ENUM CONSTANTS DETAIL ======== -->
-<h2>Constants</h2>
+<!-- Fields -->
+
+
+<!-- Public ctors -->
+
+
+<!-- ========= CONSTRUCTOR DETAIL ======== -->
+<h2>Public Constructors</h2>
 
 
 
-
-<A NAME="DEFAULT_INTENT_SERVICE_CLASS_NAME"></A>
+<A NAME="MulticastResult.Builder(int, int, int, long)"></A>
 
 <div class="jd-details api apilevel-"> 
     <h4 class="jd-details-title">
       <span class="normal">
         public 
-        static 
-        final 
-        String
+         
+         
+         
+         
+        
       </span>
-        DEFAULT_INTENT_SERVICE_CLASS_NAME
+      <span class="sympad">MulticastResult.Builder</span>
+      <span class="normal">(int success, int failure, int canonicalIds, long multicastId)</span>
     </h4>
       <div class="api-level">
-        
+        <div></div>
         
   
 
@@ -1225,857 +1128,11 @@ From class
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p></p></div>
-  <div class="jd-tagdata">
-      <h5 class="jd-tagtitle">See Also</h5>
-      <ul class="nolist"><li><code><a href="/reference/com/google/android/gcm/GCMBroadcastReceiver.html">GCMBroadcastReceiver</a></code></li>
-      </ul>
-  </div>
 
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                ".GCMIntentService"
-            
-        </span>
-        </div>
-    
     </div>
 </div>
 
 
-
-<A NAME="ERROR_ACCOUNT_MISSING"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        ERROR_ACCOUNT_MISSING
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>There is no Google account on the phone. The application should ask the
- user to open the account manager and add a Google account.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "ACCOUNT_MISSING"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="ERROR_AUTHENTICATION_FAILED"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        ERROR_AUTHENTICATION_FAILED
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Bad password. The application should ask the user to enter his/her
- password, and let user retry manually later. Fix on the device side.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "AUTHENTICATION_FAILED"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="ERROR_INVALID_PARAMETERS"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        ERROR_INVALID_PARAMETERS
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>The request sent by the phone does not contain the expected parameters.
- This phone doesn't currently support GCM.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "INVALID_PARAMETERS"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="ERROR_INVALID_SENDER"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        ERROR_INVALID_SENDER
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>The sender account is not recognized. Fix on the device side.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "INVALID_SENDER"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="ERROR_PHONE_REGISTRATION_ERROR"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        ERROR_PHONE_REGISTRATION_ERROR
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Incorrect phone registration with Google. This phone doesn't currently
- support GCM.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "PHONE_REGISTRATION_ERROR"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="ERROR_SERVICE_NOT_AVAILABLE"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        ERROR_SERVICE_NOT_AVAILABLE
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>The device can't read the response, or there was a 500/503 from the
- server that can be retried later. The application should use exponential
- back off and retry.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "SERVICE_NOT_AVAILABLE"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="EXTRA_APPLICATION_PENDING_INTENT"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        EXTRA_APPLICATION_PENDING_INTENT
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Extra used on
- <code><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_TO_GCM_REGISTRATION">com.google.android.gcm.GCMConstants.INTENT_TO_GCM_REGISTRATION</a></code>
- to get the application info.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "app"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="EXTRA_ERROR"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        EXTRA_ERROR
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Extra used on
- <code><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_FROM_GCM_REGISTRATION_CALLBACK">com.google.android.gcm.GCMConstants.INTENT_FROM_GCM_REGISTRATION_CALLBACK</a></code>
- to indicate an error when the registration fails.
- See constants starting with ERROR_ for possible values.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "error"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="EXTRA_FROM"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        EXTRA_FROM
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Extra used on
- <code><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_FROM_GCM_MESSAGE">com.google.android.gcm.GCMConstants.INTENT_FROM_GCM_MESSAGE</a></code>
- to indicate which sender (Google API project id) sent the message.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "from"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="EXTRA_REGISTRATION_ID"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        EXTRA_REGISTRATION_ID
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Extra used on
- <code><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_FROM_GCM_REGISTRATION_CALLBACK">com.google.android.gcm.GCMConstants.INTENT_FROM_GCM_REGISTRATION_CALLBACK</a></code>
- to indicate the registration id when the registration succeeds.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "registration_id"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="EXTRA_SENDER"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        EXTRA_SENDER
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Extra used on
- <code><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_TO_GCM_REGISTRATION">com.google.android.gcm.GCMConstants.INTENT_TO_GCM_REGISTRATION</a></code>
- to indicate which senders (Google API project ids) can send messages to
- the application.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "sender"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="EXTRA_SPECIAL_MESSAGE"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        EXTRA_SPECIAL_MESSAGE
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Type of message present in the
- <code><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_FROM_GCM_MESSAGE">com.google.android.gcm.GCMConstants.INTENT_FROM_GCM_MESSAGE</a></code>
- intent.
- This extra is only set for special messages sent from GCM, not for
- messages originated from the application.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "message_type"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="EXTRA_TOTAL_DELETED"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        EXTRA_TOTAL_DELETED
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Number of messages deleted by the server because the device was idle.
- Present only on messages of special type
- <code><a href="/reference/com/google/android/gcm/GCMConstants.html#VALUE_DELETED_MESSAGES">com.google.android.gcm.GCMConstants.VALUE_DELETED_MESSAGES</a></code>
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "total_deleted"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="EXTRA_UNREGISTERED"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        EXTRA_UNREGISTERED
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Extra used on
- <code><a href="/reference/com/google/android/gcm/GCMConstants.html#INTENT_FROM_GCM_REGISTRATION_CALLBACK">com.google.android.gcm.GCMConstants.INTENT_FROM_GCM_REGISTRATION_CALLBACK</a></code>
- to indicate that the application has been unregistered.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "unregistered"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="INTENT_FROM_GCM_LIBRARY_RETRY"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        INTENT_FROM_GCM_LIBRARY_RETRY
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Intent used by the GCM library to indicate that the registration call
- should be retried.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "com.google.android.gcm.intent.RETRY"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="INTENT_FROM_GCM_MESSAGE"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        INTENT_FROM_GCM_MESSAGE
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Intent sent by GCM containing a message.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "com.google.android.c2dm.intent.RECEIVE"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="INTENT_FROM_GCM_REGISTRATION_CALLBACK"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        INTENT_FROM_GCM_REGISTRATION_CALLBACK
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Intent sent by GCM indicating with the result of a registration request.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "com.google.android.c2dm.intent.REGISTRATION"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="INTENT_TO_GCM_REGISTRATION"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        INTENT_TO_GCM_REGISTRATION
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Intent sent to GCM to register the application.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "com.google.android.c2dm.intent.REGISTER"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="INTENT_TO_GCM_UNREGISTRATION"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        INTENT_TO_GCM_UNREGISTRATION
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Intent sent to GCM to unregister the application.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "com.google.android.c2dm.intent.UNREGISTER"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="PERMISSION_GCM_INTENTS"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        PERMISSION_GCM_INTENTS
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Permission necessary to receive GCM intents.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "com.google.android.c2dm.permission.SEND"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-<A NAME="VALUE_DELETED_MESSAGES"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-        static 
-        final 
-        String
-      </span>
-        VALUE_DELETED_MESSAGES
-    </h4>
-      <div class="api-level">
-        
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Special message indicating the server deleted the pending messages.
-</p></div>
-
-    
-        <div class="jd-tagdata">
-        <span class="jd-tagtitle">Constant Value: </span>
-        <span>
-            
-                "deleted_messages"
-            
-        </span>
-        </div>
-    
-    </div>
-</div>
-
-
-
-
-<!-- Fields -->
-
-
-<!-- Public ctors -->
 
 
 
@@ -2086,6 +1143,98 @@ From class
 
 <!-- ========= METHOD DETAIL ======== -->
 <!-- Public methdos -->
+
+<h2>Public Methods</h2>
+
+
+
+<A NAME="addResult(com.google.android.gcm.server.Result)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gcm/server/MulticastResult.Builder.html">MulticastResult.Builder</a>
+      </span>
+      <span class="sympad">addResult</span>
+      <span class="normal">(<a href="/reference/com/google/android/gcm/server/Result.html">Result</a> result)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="build()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gcm/server/MulticastResult.html">MulticastResult</a>
+      </span>
+      <span class="sympad">build</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
+<A NAME="retryMulticastIds(java.util.List<java.lang.Long>)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        <a href="/reference/com/google/android/gcm/server/MulticastResult.Builder.html">MulticastResult.Builder</a>
+      </span>
+      <span class="sympad">retryMulticastIds</span>
+      <span class="normal">(List&lt;Long&gt; retryMulticastIds)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+
+    </div>
+</div>
+
+
 
 
 
