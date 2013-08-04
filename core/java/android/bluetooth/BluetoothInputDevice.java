@@ -206,9 +206,7 @@ public final class BluetoothInputDevice implements BluetoothProfile {
                             try {
                                 if (mService == null) {
                                     if (VDBG) Log.d(TAG,"Binding service...");
-                                    if (!mContext.bindService(new Intent(IBluetoothInputDevice.class.getName()), mConnection, 0)) {
-                                        Log.e(TAG, "Could not bind to Bluetooth HID Service");
-                                    }
+                                    doBind();
                                 }
                             } catch (Exception re) {
                                 Log.e(TAG,"",re);
@@ -237,10 +235,18 @@ public final class BluetoothInputDevice implements BluetoothProfile {
             }
         }
 
-        if (!context.bindService(new Intent(IBluetoothInputDevice.class.getName()),
-                                 mConnection, 0)) {
-            Log.e(TAG, "Could not bind to Bluetooth HID Service");
+        doBind();
+    }
+
+    boolean doBind() {
+        Intent intent = new Intent(IBluetoothInputDevice.class.getName());
+        ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
+        intent.setComponent(comp);
+        if (comp == null || !mContext.bindService(intent, mConnection, 0)) {
+            Log.e(TAG, "Could not bind to Bluetooth HID Service with " + intent);
+            return false;
         }
+        return true;
     }
 
     /*package*/ void close() {

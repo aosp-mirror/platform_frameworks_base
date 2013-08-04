@@ -137,12 +137,20 @@ public final class BluetoothPan implements BluetoothProfile {
         } catch (RemoteException re) {
             Log.w(TAG,"Unable to register BluetoothStateChangeCallback",re);
         }
-        Log.d(TAG, "BluetoothPan() call bindService");
-        if (!context.bindService(new Intent(IBluetoothPan.class.getName()),
-                                 mConnection, 0)) {
-            Log.e(TAG, "Could not bind to Bluetooth HID Service");
+        if (VDBG) Log.d(TAG, "BluetoothPan() call bindService");
+        doBind();
+        if (VDBG) Log.d(TAG, "BluetoothPan(), bindService called");
+    }
+
+    boolean doBind() {
+        Intent intent = new Intent(IBluetoothPan.class.getName());
+        ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
+        intent.setComponent(comp);
+        if (comp == null || !mContext.bindService(intent, mConnection, 0)) {
+            Log.e(TAG, "Could not bind to Bluetooth Pan Service with " + intent);
+            return false;
         }
-        Log.d(TAG, "BluetoothPan(), bindService called");
+        return true;
     }
 
     /*package*/ void close() {
@@ -170,11 +178,8 @@ public final class BluetoothPan implements BluetoothProfile {
             //Handle enable request to bind again.
             if (on) {
                 Log.d(TAG, "onBluetoothStateChange(on) call bindService");
-                if (!mContext.bindService(new Intent(IBluetoothPan.class.getName()),
-                                     mConnection, 0)) {
-                    Log.e(TAG, "Could not bind to Bluetooth HID Service");
-                }
-                Log.d(TAG, "BluetoothPan(), bindService called");
+                doBind();
+                if (VDBG) Log.d(TAG, "BluetoothPan(), bindService called");
             } else {
                 if (VDBG) Log.d(TAG,"Unbinding service...");
                 synchronized (mConnection) {

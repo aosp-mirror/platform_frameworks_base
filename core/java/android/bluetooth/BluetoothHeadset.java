@@ -241,9 +241,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
                             try {
                                 if (mService == null) {
                                     if (VDBG) Log.d(TAG,"Binding service...");
-                                    if (!mContext.bindService(new Intent(IBluetoothHeadset.class.getName()), mConnection, 0)) {
-                                        Log.e(TAG, "Could not bind to Bluetooth Headset Service");
-                                    }
+                                    doBind();
                                 }
                             } catch (Exception re) {
                                 Log.e(TAG,"",re);
@@ -270,9 +268,18 @@ public final class BluetoothHeadset implements BluetoothProfile {
             }
         }
 
-        if (!context.bindService(new Intent(IBluetoothHeadset.class.getName()), mConnection, 0)) {
-            Log.e(TAG, "Could not bind to Bluetooth Headset Service");
+        doBind();
+    }
+
+    boolean doBind() {
+        Intent intent = new Intent(IBluetoothHeadset.class.getName());
+        ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
+        intent.setComponent(comp);
+        if (comp == null || !mContext.bindService(intent, mConnection, 0)) {
+            Log.e(TAG, "Could not bind to Bluetooth Headset Service with " + intent);
+            return false;
         }
+        return true;
     }
 
     /**

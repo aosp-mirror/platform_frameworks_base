@@ -1444,6 +1444,14 @@ class ContextImpl extends Context {
     @Override
     public ComponentName startServiceAsUser(Intent service, UserHandle user) {
         try {
+            if (service.getComponent() == null && service.getPackage() == null) {
+                if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.KEY_LIME_PIE) {
+                    IllegalArgumentException ex = new IllegalArgumentException(
+                            "Service Intent must be explicit: " + service);
+                    Log.wtf(TAG, "This will become an error", ex);
+                    //throw ex;
+                }
+            }
             service.prepareToLeaveProcess();
             ComponentName cn = ActivityManagerNative.getDefault().startService(
                 mMainThread.getApplicationThread(), service,
@@ -1468,6 +1476,14 @@ class ContextImpl extends Context {
     @Override
     public boolean stopServiceAsUser(Intent service, UserHandle user) {
         try {
+            if (service.getComponent() == null && service.getPackage() == null) {
+                if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.KEY_LIME_PIE) {
+                    IllegalArgumentException ex = new IllegalArgumentException(
+                            "Service Intent must be explicit: " + service);
+                    Log.wtf(TAG, "This will become an error", ex);
+                    //throw ex;
+                }
+            }
             service.prepareToLeaveProcess();
             int res = ActivityManagerNative.getDefault().stopService(
                 mMainThread.getApplicationThread(), service,
@@ -1502,6 +1518,14 @@ class ContextImpl extends Context {
                     mMainThread.getHandler(), flags);
         } else {
             throw new RuntimeException("Not supported in system context");
+        }
+        if (service.getComponent() == null && service.getPackage() == null) {
+            if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.KEY_LIME_PIE) {
+                IllegalArgumentException ex = new IllegalArgumentException(
+                        "Service Intent must be explicit: " + service);
+                Log.wtf(TAG, "This will become an error", ex);
+                //throw ex;
+            }
         }
         try {
             IBinder token = getActivityToken();

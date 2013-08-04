@@ -16,6 +16,7 @@
 
 package android.content;
 
+import android.content.pm.ApplicationInfo;
 import android.util.ArraySet;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -44,6 +45,7 @@ import java.io.Serializable;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -5034,6 +5036,39 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /**
+     * Special function for use by the system to resolve service
+     * intents to system apps.  Throws an exception if there are
+     * multiple potential matches to the Intent.  Returns null if
+     * there are no matches.
+     * @hide
+     */
+    public ComponentName resolveSystemService(PackageManager pm, int flags) {
+        if (mComponent != null) {
+            return mComponent;
+        }
+
+        List<ResolveInfo> results = pm.queryIntentServices(this, flags);
+        if (results == null) {
+            return null;
+        }
+        ComponentName comp = null;
+        for (int i=0; i<results.size(); i++) {
+            ResolveInfo ri = results.get(i);
+            if ((ri.serviceInfo.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) == 0) {
+                continue;
+            }
+            ComponentName foundComp = new ComponentName(ri.serviceInfo.applicationInfo.packageName,
+                    ri.serviceInfo.name);
+            if (comp != null) {
+                throw new IllegalStateException("Multiple system services handle " + this
+                        + ": " + comp + ", " + foundComp);
+            }
+            comp = foundComp;
+        }
+        return comp;
+    }
+
+    /**
      * Set the general action to be performed.
      *
      * @param action An action name, such as ACTION_VIEW.  Application-specific
@@ -5068,7 +5103,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @see #getData
      * @see #setDataAndNormalize
-     * @see android.net.Intent#normalize
+     * @see android.net.Uri#normalizeScheme()
      */
     public Intent setData(Uri data) {
         mData = data;
