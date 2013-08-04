@@ -163,7 +163,7 @@ public class DemoContactNotificationScorer implements NotificationScorer {
         if (DBG) Slog.v(TAG, "Initializing  " + getClass().getSimpleName() + ".");
         mContext = context;
         mEnabled = ENABLE_CONTACT_SCORER && 1 == Settings.Global.getInt(
-                mContext.getContentResolver(), SETTING_ENABLE_SCORER, 1);
+                mContext.getContentResolver(), SETTING_ENABLE_SCORER, 0);
     }
 
     @Override
