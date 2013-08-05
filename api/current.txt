@@ -28373,16 +28373,16 @@ package android.view.accessibility {
     method public void setToIndex(int);
   }
 
-  public class CaptioningPreferences {
-    ctor public CaptioningPreferences();
+  public class CaptioningManager {
+    ctor public CaptioningManager();
     method public static final float getFontSize(android.content.ContentResolver);
     method public static final java.util.Locale getLocale(android.content.ContentResolver);
     method public static final boolean isEnabled(android.content.ContentResolver);
     field public static final java.lang.String ACTION_CAPTIONING_SETTINGS = "android.settings.CAPTIONING_SETTINGS";
   }
 
-  public static final class CaptioningPreferences.CaptionStyle {
-    method public static android.view.accessibility.CaptioningPreferences.CaptionStyle defaultUserStyle(android.content.ContentResolver);
+  public static final class CaptioningManager.CaptionStyle {
+    method public static android.view.accessibility.CaptioningManager.CaptionStyle defaultUserStyle(android.content.ContentResolver);
     method public android.graphics.Typeface getTypeface();
     field public static final int EDGE_TYPE_DROP_SHADOW = 2; // 0x2
     field public static final int EDGE_TYPE_NONE = 0; // 0x0
