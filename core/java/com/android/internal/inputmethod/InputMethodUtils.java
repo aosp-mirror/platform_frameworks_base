@@ -558,7 +558,7 @@ public class InputMethodUtils {
             return InputMethodSubtype.sort(context, 0, imi, enabledSubtypes);
         }
 
-        private List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(
+        public List<InputMethodSubtype> getEnabledInputMethodSubtypeListLocked(
                 InputMethodInfo imi) {
             List<Pair<String, ArrayList<String>>> imsList =
                     getEnabledInputMethodsAndSubtypeListLocked();
