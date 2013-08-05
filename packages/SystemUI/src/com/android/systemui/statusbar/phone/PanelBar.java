@@ -194,6 +194,7 @@ public class PanelBar extends FrameLayout {
             } else {
                 pv.setExpandedFraction(0); // just in case
                 pv.setVisibility(View.GONE);
+                pv.cancelPeek();
             }
         }
         if (DEBUG) LOG("collapseAllPanels: animate=%s waiting=%s", animate, waiting);

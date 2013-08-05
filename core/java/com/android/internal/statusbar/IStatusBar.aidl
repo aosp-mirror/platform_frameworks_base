@@ -38,5 +38,6 @@ oneway interface IStatusBar
     void toggleRecentApps();
     void preloadRecentApps();
     void cancelPreloadRecentApps();
+    void setWindowState(int window, int state);
 }
 
