@@ -157,4 +157,11 @@ public class MediaNames {
     public static final int STREAM_H264_480_360_1411k_DURATION = 46000;
     public static final int VIDEO_H263_AAC_DURATION = 501000;
     public static final int VIDEO_H263_AMR_DURATION = 502000;
+
+    // Video files for WiFi IOT video streaming test.
+    public static final String[] NETWORK_VIDEO_FILES = {
+            "H264_BP_720x480_25fps_256kbps_AMRNB_8khz_12.2kbps_m_0_26.mp4",
+            "MPEG4_SP_720x480_30fps_280kbps_AACLC_48kHz_161kbps_s_0_26.mp4",
+            "MPEG4_SP_720x480_30fps_280kbps_AACLC_48kHz_96kbps_s_0_21.mp4"
+    };
 }
