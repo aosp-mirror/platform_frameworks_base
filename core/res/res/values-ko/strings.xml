@@ -362,6 +362,10 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"권한을 가진 프로그램이 인쇄 서비스에 대한 최상위 인터페이스를 사용하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"모든 인쇄 작업에 액세스"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"권한을 가진 프로그램이 다른 앱에서 생성한 인쇄 작업에 액세스하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
+    <!-- no translation found for permlab_bindNfcService (2752731300419410724) -->
+    <skip />
+    <!-- no translation found for permdesc_bindNfcService (6120647629174066862) -->
+    <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"텍스트 서비스 연결"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"권한을 가진 프로그램이 텍스트 서비스(예: SpellCheckerService)에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"VPN 서비스와 연결"</string>
@@ -470,8 +474,18 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"앱이 InputFlinger의 하위 수준 기능을 사용하도록 합니다."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wi-Fi 디스플레이 설정"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"앱이 Wi-Fi 디스플레이를 설정하고 연결하도록 허용합니다."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wi-Fi 디스플레이 제어"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"앱이 Wi-Fi 디스플레이의 하위 수준 기능을 제어하도록 허용합니다."</string>
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"오디오 설정 변경"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"앱이 음량이나 출력을 위해 사용하는 스피커 등 전체 오디오 설정을 변경할 수 있도록 허용합니다."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"오디오 녹음"</string>
@@ -1465,6 +1479,8 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI 화면"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"<xliff:g id="ID">%1$d</xliff:g>번째 오버레이"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <!-- no translation found for display_manager_overlay_display_secure_suffix (6022119702628572080) -->
+    <skip />
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"무선 디스플레이가 연결되었습니다."</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"이 화면은 다른 기기에서 표시되고 있습니다."</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"연결 해제"</string>

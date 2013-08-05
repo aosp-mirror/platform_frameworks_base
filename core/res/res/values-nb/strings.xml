@@ -362,6 +362,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Gir innehaveren tillatelse til å binde til toppnivået av brukergrensesnittet for en utskriftstjeneste. Dette skal ikke være nødvendig for vanlige apper."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"tilgang til alle utskriftsjobber"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Gir innehaveren tillatelse til å åpne utskriftsjobber som er opprettet av andre apper. Dette skal ikke være nødvendig for vanlige apper."</string>
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"binding til NFC-tjenesten"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Tillater eieren å binde seg til apper som emulerer NFC-kort. Skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"binde til en teksttjeneste"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Lar innehaveren binde seg til øverste grensesnittnivå for en teksttjeneste (f.eks. SpellCheckerService). Skal aldri være nødvendig for vanlige apper."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"binde deg til en VPN-tjeneste"</string>
@@ -470,8 +472,18 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Lar appen bruke grunnleggende InputFlinger-funksjoner."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"konfigurere Wi-Fi-skjermer"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Tillater appen å konfigurere og koble til Wi-Fi-skjermer."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"kontrollere Wi-Fi-skjermer"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Tillater appen å kontrollere lavnivåfunksjoner i Wi-Fi-skjermer."</string>
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"endre lydinnstillinger"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Lar appen endre globale lydinnstillinger slik som volum og hvilken høyttaler som brukes for lydavspilling."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ta opp lyd"</string>
@@ -1465,6 +1477,7 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI-skjerm"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Overlegg #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", sikker"</string>
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"Trådløs skjermdeling er tilkoblet"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"Denne skjermen vises på en annen enhet"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Koble fra"</string>

@@ -362,6 +362,10 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Laat die houer toe om aan die top-koppelvlak van \'n drukdiens te verbind. Behoort nooit vir gewone programme nodig te wees nie."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"kry toegang tot alle druktake"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Gee die houer toegang tot druktake wat deur \'n ander program geskep is. Behoort nooit vir normale programme nodig te wees nie."</string>
+    <!-- no translation found for permlab_bindNfcService (2752731300419410724) -->
+    <skip />
+    <!-- no translation found for permdesc_bindNfcService (6120647629174066862) -->
+    <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"bind aan \'n teksdiens"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Dit laat die houer toe om aan die topvlak-koppelvlak van \'n teksdiens (bv SpellCheckerService) te bind. Dit moet nooit vir normale programme nodig wees nie."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"bind aan \'n VPN-diens"</string>
@@ -470,8 +474,18 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Laat die program toe om InputFlinger se laevlak-kenmerke te gebruik."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"stel Wi-Fi-skerms op"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Laat die program toe om Wi-Fi-skerms op te stel en daaraan te koppel."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"beheer Wi-Fi-skerms"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Laat die program toe om laevlak-kenmerke van Wi-Fi-skerms te beheer."</string>
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"verander jou klankinstellings"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Laat die program toe om globale klankinstellings soos volume en watter luidspreker vir uitvoer gebruik word, te verander."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"neem klank op"</string>
@@ -1465,6 +1479,7 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI-skerm"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Oorlegger #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", veilig"</string>
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"Draadlose skerm is gekoppel"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"Hierdie skerm word op \'n ander toestel gewys"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Ontkoppel"</string>

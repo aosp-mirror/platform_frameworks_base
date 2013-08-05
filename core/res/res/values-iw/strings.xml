@@ -362,6 +362,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"ההרשאה הזו מאפשרת לבעלים לבצע איגוד לממשק הרמה העליונה של שירות הדפסה. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"גישה אל כל עבודות ההדפסה"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"ההרשאה הזו מאפשרת לבעלים לגשת לעבודות הדפסה שנוצרו על ידי אפליקציה אחרת. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"איגוד לשירות NFC"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"מאפשרת לבעלים לאגד את האפליקציות המחקות כרטיסיות NFC. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"הכפפה לשירות טקסט"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"מאפשר למשתמש ליצור איגוד לממשק הרמה העליונה של שירות טקסט (למשל, SpellCheckerService). הרשאה זו לעולם אינה נחוצה ליישומים רגילים."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"אגד לשירות VPN"</string>
@@ -470,8 +472,18 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"מאפשרת לאפליקציה להשתמש בתכונות ברמה נמוכה של InputFlinger."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"הגדר תצוגות Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"מאפשר לאפליקציה להגדיר ולהתחבר לתצוגות Wi-Fi."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"שלוט בתצוגות Wi-Fi"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"מאפשר לאפליקציה לשלוט בתכונות ברמה נמוכה של תצוגות Wi-Fi."</string>
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"שנה את הגדרות האודיו שלך"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"מאפשר ליישום לשנות הגדרות אודיו גלובליות כמו עוצמת קול ובחירת הרמקול המשמש לפלט."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"הקלט אודיו"</string>
@@ -1465,6 +1477,7 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"מסך HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"שכבת על #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: ‎<xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>‎, ‏<xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", מאובטח"</string>
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"מסך אלחוטי מחובר"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"מסך זה מוצג במכשיר אחר"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"נתק"</string>

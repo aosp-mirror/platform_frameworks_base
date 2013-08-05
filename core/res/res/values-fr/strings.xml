@@ -362,6 +362,10 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Permet à l\'application autorisée de s\'associer à l\'interface de niveau supérieur d\'un service d\'impression. Cette fonctionnalité ne devrait pas être nécessaire pour les applications standards."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"accéder à l\'ensemble des tâches d\'impression"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Permet à l\'application autorisée d\'accéder aux tâches d\'impression créées via une autre application. Cette fonctionnalité ne devrait pas être nécessaire pour les applications standards."</string>
+    <!-- no translation found for permlab_bindNfcService (2752731300419410724) -->
+    <skip />
+    <!-- no translation found for permdesc_bindNfcService (6120647629174066862) -->
+    <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"associer à un service de texte"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Permet à l\'application de s\'associer à l\'interface de haut niveau d\'un service de texte (par exemple, SpellCheckerService). Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"associer à un service VPN"</string>
@@ -470,8 +474,18 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Permet à l\'application d\'utiliser les fonctionnalités de base d\'InputFlinger."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configurer les écrans Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Permet à l\'application de configurer des écrans Wi-Fi et de s\'y connecter."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"contrôler les écrans Wi-Fi"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permet à l\'application de contrôler les fonctionnalités de base des écrans Wi-Fi."</string>
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modifier vos paramètres audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permet à l\'application de modifier les paramètres audio généraux, tels que le volume et la sortie audio utilisée."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"Enregistrer des fichiers audio"</string>
@@ -1465,6 +1479,7 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Écran HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Superposition n° <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g> : <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", sécurisé"</string>
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"L\'affichage sans fil est connecté."</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"Cet écran s\'affiche sur un autre appareil."</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Déconnecter"</string>

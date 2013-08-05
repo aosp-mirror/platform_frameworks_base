@@ -362,6 +362,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"อนุญาตให้ผู้ใช้เชื่อมโยงกับอินเทอร์เฟซระดับสูงสุดของบริการการพิมพ์ ซึ่งแอปทั่วไปไม่จำเป็นต้องใช้"</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"เข้าถึงงานพิมพ์ทั้งหมด"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"อนุญาตให้ผู้ใช้สามารถเข้าถึงงานพิมพ์ที่สร้างโดยแอปอื่นได้ ซึ่งแอปทั่วไปไม่จำเป็นต้องใช้"</string>
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"เชื่อมโยงกับบริการ NFC"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"อนุญาตให้ผู้ถือเชื่อมโยงกับแอปพลิเคชันที่เลียนแบบการ์ด NFC ไม่จำเป็นสำหรับแอปทั่วไป"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"เชื่อมโยงกับบริการข้อความ"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"อนุญาตให้ผู้ใช้เชื่อมโยงกับส่วนติดต่อผู้ใช้ระดับสูงสุดของบริการข้อความ (เช่น บริการเครื่องตรวจตัวสะกด) ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"เชื่อมโยงกับบริการ VPN"</string>
@@ -470,8 +472,18 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"อนุญาตให้แอปใช้คุณลักษณะระดับต่ำของ InputFlinger"</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"กำหนดค่าการแสดงผลด้วย WiFi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"อนุญาตให้แอปกำหนดค่าและเชื่อมต่อกับจอแสดงผล WiFi ได้"</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"ควบคุมการแสดงผลด้วย WiFi"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"อนุญาตให้แอปควบคุมคุณลักษณะต่างๆ ในระดับล่างของการแสดงผลด้วย WiFi"</string>
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"เปลี่ยนการตั้งค่าเสียงของคุณ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"อนุญาตให้แอปพลิเคชันปรับเปลี่ยนการตั้งค่าเสียงทั้งหมดได้ เช่น ระดับเสียงและลำโพงที่จะใช้งาน"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"บันทึกเสียง"</string>
@@ -1465,6 +1477,7 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"หน้าจอ HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"การวางซ้อน #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", ปลอดภัย"</string>
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"เชื่อมต่อการแสดงผลแบบไร้สายอยู่"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"หน้าจอนี้กำลังแสดงบนอุปกรณ์อื่น"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"หยุดเชื่อมต่อ"</string>

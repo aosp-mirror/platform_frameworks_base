@@ -362,6 +362,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Permite que o titular vincule a interface de nível superior de um serviço de impressão. Nunca deverá ser necessário para aplicações normais."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"aceder a todas as tarefas de impressão"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Permite que o titular aceda a tarefas de impressão criadas por outra aplicação. Nunca deverá ser necessário para aplicações normais."</string>
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"vincular a serviço NFC"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Permite ao titular vincular a aplicações que recriam cartões NFC. Nunca deverá ser necessário para aplicações normais."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"vincular a um serviço de texto"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Permite ao titular ligar-se à interface de nível superior de um serviço de texto (por exemplo SpellCheckerService). Nunca deverá ser necessário para aplicações normais."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"vincular a um serviço VPN"</string>
@@ -470,8 +472,18 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Permite que a aplicação utilize funcionalidades de InputFlinger de nível inferior."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configurar visores Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Permite que a aplicação se configure e se ligue a visores Wi-Fi."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"controlar visores Wi-Fi"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permite que a aplicação controle funcionalidades de baixo nível em visores Wi-Fi."</string>
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"alterar as suas definições de áudio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite que a aplicação modifique definições de áudio globais, tais como o volume e qual o altifalante utilizado para a saída de som."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"gravar áudio"</string>
@@ -1465,6 +1477,7 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Ecrã HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Sobreposição #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> ppp"</string>
+    <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", protegido"</string>
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"O Display sem fios está ligado"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"Este ecrã está a ser apresentado noutro dispositivo"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Desligar"</string>
