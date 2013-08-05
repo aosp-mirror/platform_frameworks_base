@@ -2379,9 +2379,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * when hiding the status bar with {@link #SYSTEM_UI_FLAG_FULLSCREEN} and/or hiding the
      * navigation bar with {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION} instead of having the system
      * clear these flags upon interaction.  The system may compensate by temporarily overlaying
-     * transparent system ui while also delivering the event.
+     * transparent system bars while also delivering the event.
      */
-    public static final int SYSTEM_UI_FLAG_ALLOW_OVERLAY = 0x00000800;
+    public static final int SYSTEM_UI_FLAG_ALLOW_TRANSIENT = 0x00000800;
+
+    /**
+     * Flag for {@link #setSystemUiVisibility(int)}: View would like the status bar to have
+     * transparency.
+     *
+     * <p>The transparency request may be denied if the bar is in another mode with a specific
+     * style, like {@link #SYSTEM_UI_FLAG_ALLOW_TRANSIENT transient mode}.
+     */
+    public static final int SYSTEM_UI_FLAG_TRANSPARENT_STATUS = 0x00001000;
+
+    /**
+     * Flag for {@link #setSystemUiVisibility(int)}: View would like the navigation bar to have
+     * transparency.
+     *
+     * <p>The transparency request may be denied if the bar is in another mode with a specific
+     * style, like {@link #SYSTEM_UI_FLAG_ALLOW_TRANSIENT transient mode}.
+     */
+    public static final int SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION = 0x00002000;
 
     /**
      * @deprecated Use {@link #SYSTEM_UI_FLAG_LOW_PROFILE} instead.
@@ -2508,11 +2526,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
      * out of the public fields to keep the undefined bits out of the developer's way.
      *
-     * Flag to specify that the status bar should temporarily overlay underlying content
-     * that is otherwise assuming the status bar is hidden.  The status bar may
-     * have some degree of transparency while in this temporary overlay mode.
+     * Flag to specify that the status bar is displayed in transient mode.
      */
-    public static final int STATUS_BAR_OVERLAY = 0x04000000;
+    public static final int STATUS_BAR_TRANSIENT = 0x04000000;
 
     /**
      * @hide
@@ -2520,11 +2536,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * NOTE: This flag may only be used in subtreeSystemUiVisibility. It is masked
      * out of the public fields to keep the undefined bits out of the developer's way.
      *
-     * Flag to specify that the navigation bar should temporarily overlay underlying content
-     * that is otherwise assuming the navigation bar is hidden.  The navigation bar mayu
-     * have some degree of transparency while in this temporary overlay mode.
+     * Flag to specify that the navigation bar is displayed in transient mode.
      */
-    public static final int NAVIGATION_BAR_OVERLAY = 0x08000000;
+    public static final int NAVIGATION_BAR_TRANSIENT = 0x08000000;
 
     /**
      * @hide
