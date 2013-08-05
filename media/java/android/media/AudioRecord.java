@@ -17,8 +17,6 @@
 package android.media;
 
 import java.lang.ref.WeakReference;
-import java.lang.IllegalArgumentException;
-import java.lang.IllegalStateException;
 import java.nio.ByteBuffer;
 
 import android.os.Handler;
