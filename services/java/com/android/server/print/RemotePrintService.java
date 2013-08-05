@@ -228,19 +228,19 @@ final class RemotePrintService implements DeathRecipient {
                 printerIds).sendToTarget();
     }
 
-    private void handleReqeustUpdatePritners(final List<PrinterId> printerIds) {
+    private void handleReqeustUpdatePrinters(final List<PrinterId> printerIds) {
         throwIfDestroyed();
         if (!isBound()) {
             ensureBound();
             mPendingCommands.add(new Runnable() {
                 @Override
                 public void run() {
-                    handleReqeustUpdatePritners(printerIds);
+                    handleReqeustUpdatePrinters(printerIds);
                 }
             });
         } else {
             if (DEBUG) {
-                Slog.i(LOG_TAG, "[user: " + mUserId + "] handleReqeustUpdatePritners()");
+                Slog.i(LOG_TAG, "[user: " + mUserId + "] handleReqeustUpdatePrinters()");
             }
             try {
                 mPrintService.onRequestUpdatePrinters(printerIds);
@@ -367,7 +367,7 @@ final class RemotePrintService implements DeathRecipient {
 
                 case MSG_ON_REQUEST_UPDATE_PRINTERS: {
                     List<PrinterId> printerIds = (List<PrinterId>) message.obj;
-                    handleReqeustUpdatePritners(printerIds);
+                    handleReqeustUpdatePrinters(printerIds);
                 } break;
 
                 case MSG_ON_STOP_PRINTER_DISCOVERY: {

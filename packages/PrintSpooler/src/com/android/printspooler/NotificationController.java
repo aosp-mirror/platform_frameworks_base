@@ -22,7 +22,10 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -43,6 +46,8 @@ public class NotificationController {
     private static final String INTENT_ACTION_CANCEL_PRINTJOB = "INTENT_ACTION_CANCEL_PRINTJOB";
     private static final String INTENT_ACTION_RESTART_PRINTJOB = "INTENT_ACTION_RESTART_PRINTJOB";
     private static final String INTENT_EXTRA_PRINTJOB_ID = "INTENT_EXTRA_PRINTJOB_ID";
+    private static final String INTENT_EXTRA_PRINTJOB_LABEL = "INTENT_EXTRA_PRINTJOB_LABEL";
+    private static final String INTENT_EXTRA_PRINTER_NAME = "INTENT_EXTRA_PRINTER_NAME";
 
     private final Context mContext;
     private final NotificationManager mNotificationManager;
@@ -53,11 +58,10 @@ public class NotificationController {
                 mContext.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
-    public void onPrintJobStateChanged(PrintJobInfo printJob, int oldState) {
+    public void onPrintJobStateChanged(PrintJobInfo printJob) {
         if (DEBUG) {
             Log.i(LOG_TAG, "onPrintJobStateChanged() printJobId: " + printJob.getId()
-                    + " oldState: " + PrintJobInfo.stateToString(oldState)
-                    + " newState:" + PrintJobInfo.stateToString(printJob.getState()));
+                    + " state:" + PrintJobInfo.stateToString(printJob.getState()));
         }
         switch (printJob.getState()) {
             case PrintJobInfo.STATE_QUEUED: {
@@ -87,10 +91,10 @@ public class NotificationController {
                         printJob.getLabel()))
                 // TODO: Use appropriate icon when assets are ready
                 .addAction(android.R.drawable.ic_secure, mContext.getString(R.string.cancel),
-                        createCancelIntent(printJob.getId()))
+                        createCancelIntent(printJob))
                 .setContentText(printJob.getPrinterId().getPrinterName())
-                .setOngoing(true)
                 .setWhen(System.currentTimeMillis())
+                .setOngoing(true)
                 .setShowWhen(true);
         mNotificationManager.notify(printJob.getId(), builder.build());
     }
@@ -103,10 +107,10 @@ public class NotificationController {
                         printJob.getLabel()))
                 // TODO: Use appropriate icon when assets are ready
                 .addAction(android.R.drawable.ic_secure, mContext.getString(R.string.cancel),
-                        createCancelIntent(printJob.getId()))
+                        createCancelIntent(printJob))
                 .setContentText(printJob.getPrinterId().getPrinterName())
-                .setOngoing(true)
                 .setWhen(System.currentTimeMillis())
+                .setOngoing(true)
                 .setShowWhen(true);
         mNotificationManager.notify(printJob.getId(), builder.build());
     }
@@ -119,13 +123,13 @@ public class NotificationController {
                         printJob.getLabel()))
                 // TODO: Use appropriate icon when assets are ready
                 .addAction(android.R.drawable.ic_secure, mContext.getString(R.string.cancel),
-                        createCancelIntent(printJob.getId()))
+                        createCancelIntent(printJob))
                 // TODO: Use appropriate icon when assets are ready
                 .addAction(android.R.drawable.ic_secure, mContext.getString(R.string.restart),
                         createRestartIntent(printJob.getId()))
                 .setContentText(printJob.getFailureReason())
-                .setOngoing(true)
                 .setWhen(System.currentTimeMillis())
+                .setOngoing(true)
                 .setShowWhen(true);
         mNotificationManager.notify(printJob.getId(), builder.build());
     }
@@ -134,10 +138,12 @@ public class NotificationController {
         mNotificationManager.cancel(printJobId);
     }
 
-    private PendingIntent createCancelIntent(int printJobId) {
+    private PendingIntent createCancelIntent(PrintJobInfo printJob) {
         Intent intent = new Intent(mContext, NotificationBroadcastReceiver.class);
-        intent.setAction(INTENT_ACTION_CANCEL_PRINTJOB + "_" + String.valueOf(printJobId));
-        intent.putExtra(INTENT_EXTRA_PRINTJOB_ID, printJobId);
+        intent.setAction(INTENT_ACTION_CANCEL_PRINTJOB + "_" + String.valueOf(printJob.getId()));
+        intent.putExtra(INTENT_EXTRA_PRINTJOB_ID, printJob.getId());
+        intent.putExtra(INTENT_EXTRA_PRINTJOB_LABEL, printJob.getLabel());
+        intent.putExtra(INTENT_EXTRA_PRINTER_NAME, printJob.getPrinterId().getPrinterName());
         return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT);
     }
 
@@ -156,60 +162,68 @@ public class NotificationController {
             String action = intent.getAction();
             if (action != null && action.startsWith(INTENT_ACTION_CANCEL_PRINTJOB)) {
                 final int printJobId = intent.getExtras().getInt(INTENT_EXTRA_PRINTJOB_ID);
-                handleCancelPrintJob(context, printJobId);
+                String printJobLabel = intent.getExtras().getString(INTENT_EXTRA_PRINTJOB_LABEL);
+                String printerName = intent.getExtras().getString(INTENT_EXTRA_PRINTER_NAME);
+                handleCancelPrintJob(context, printJobId, printJobLabel, printerName);
             } else if (action != null && action.startsWith(INTENT_ACTION_RESTART_PRINTJOB)) {
                 final int printJobId = intent.getExtras().getInt(INTENT_EXTRA_PRINTJOB_ID);
                 handleRestartPrintJob(context, printJobId);
             }
         }
 
-        private void handleCancelPrintJob(final Context context, final int printJobId) {
+        private void handleCancelPrintJob(final Context context, final int printJobId,
+                final String printJobLabel, final String printerName) {
             if (DEBUG) {
                 Log.i(LOG_TAG, "handleCancelPrintJob() printJobId:" + printJobId);
-            }
-
-            PrintSpooler printSpooler = PrintSpooler.getInstance(context);
-
-            final PrintJobInfo printJob = printSpooler.getPrintJobInfo(printJobId,
-                    PrintManager.APP_ID_ANY);
-
-            if (printJob == null || printJob.getState() == PrintJobInfo.STATE_CANCELED) {
-                return;
             }
 
             // Put up a notification that we are trying to cancel.
             NotificationManager notificationManager = (NotificationManager)
                     context.getSystemService(Context.NOTIFICATION_SERVICE);
-
             Notification.Builder builder = new Notification.Builder(context)
                     // TODO: Use appropriate icon when assets are ready
                     .setSmallIcon(android.R.drawable.ic_secure)
                     .setContentTitle(context.getString(
                             R.string.cancelling_notification_title_template,
-                            printJob.getLabel()))
-                    .setContentText(printJob.getPrinterId().getPrinterName())
-                    .setOngoing(true)
+                            printJobLabel))
+                    .setContentText(printerName)
                     .setWhen(System.currentTimeMillis())
+                    .setOngoing(true)
                     .setShowWhen(true);
+            notificationManager.notify(printJobId, builder.build());
 
-            notificationManager.notify(printJob.getId(), builder.build());
+            // Call into the print manager service off the main thread since
+            // the print manager service may end up binding to the print spooler
+            // service which binding is handled on the main thread.
+            PowerManager powerManager = (PowerManager)
+                    context.getSystemService(Context.POWER_SERVICE);
+            final WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    LOG_TAG);
+            wakeLock.acquire();
 
-            // We need to request the cancellation to be done by the print
-            // manager service since it has to communicate with the managing
-            // print service to request the cancellation. Also we need the
-            // system service to be bound to the spooler since canceling a
-            // print job will trigger persistence of current jobs which is
-            // done on another thread and until it finishes the spooler has
-            // to be kept around.
-            IPrintManager printManager = IPrintManager.Stub.asInterface(
-                    ServiceManager.getService(Context.PRINT_SERVICE));
-
-            try {
-                printManager.cancelPrintJob(printJobId, PrintManager.APP_ID_ANY,
-                        UserHandle.myUserId());
-            } catch (RemoteException re) {
-                Log.i(LOG_TAG, "Error requestion print job cancellation", re);
-            }
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    // We need to request the cancellation to be done by the print
+                    // manager service since it has to communicate with the managing
+                    // print service to request the cancellation. Also we need the
+                    // system service to be bound to the spooler since canceling a
+                    // print job will trigger persistence of current jobs which is
+                    // done on another thread and until it finishes the spooler has
+                    // to be kept around.
+                    try {
+                    IPrintManager printManager = IPrintManager.Stub.asInterface(
+                            ServiceManager.getService(Context.PRINT_SERVICE));
+                        printManager.cancelPrintJob(printJobId, PrintManager.APP_ID_ANY,
+                                UserHandle.myUserId());
+                    } catch (RemoteException re) {
+                        Log.i(LOG_TAG, "Error requestion print job cancellation", re);
+                    } finally {
+                        wakeLock.release();
+                    }
+                    return null;
+                }
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
         }
 
         private void handleRestartPrintJob(final Context context, final int printJobId) {
@@ -217,29 +231,36 @@ public class NotificationController {
                 Log.i(LOG_TAG, "handleRestartPrintJob() printJobId:" + printJobId);
             }
 
-            PrintSpooler printSpooler = PrintSpooler.getInstance(context);
+            // Call into the print manager service off the main thread since
+            // the print manager service may end up binding to the print spooler
+            // service which binding is handled on the main thread.
+            PowerManager powerManager = (PowerManager)
+                    context.getSystemService(Context.POWER_SERVICE);
+            final WakeLock wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    LOG_TAG);
+            wakeLock.acquire();
 
-            PrintJobInfo printJob = printSpooler.getPrintJobInfo(printJobId,
-                    PrintManager.APP_ID_ANY);
-
-            if (printJob == null || printJob.getState() != PrintJobInfo.STATE_FAILED) {
-                return;
-            }
-
-            // We need to request the restart to be done by the print manager
-            // service since the latter must be bound to the spooler because
-            // restarting a print job will trigger persistence of current jobs
-            // which is done on another thread and until it finishes the spooler has
-            // to be kept around.
-            IPrintManager printManager = IPrintManager.Stub.asInterface(
-                    ServiceManager.getService(Context.PRINT_SERVICE));
-
-            try {
-                printManager.restartPrintJob(printJobId, PrintManager.APP_ID_ANY,
-                        UserHandle.myUserId());
-            } catch (RemoteException re) {
-                Log.i(LOG_TAG, "Error requestion print job restart", re);
-            }
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    // We need to request the restart to be done by the print manager
+                    // service since the latter must be bound to the spooler because
+                    // restarting a print job will trigger persistence of current jobs
+                    // which is done on another thread and until it finishes the spooler has
+                    // to be kept around.
+                    try {
+                        IPrintManager printManager = IPrintManager.Stub.asInterface(
+                                ServiceManager.getService(Context.PRINT_SERVICE));
+                        printManager.restartPrintJob(printJobId, PrintManager.APP_ID_ANY,
+                                UserHandle.myUserId());
+                    } catch (RemoteException re) {
+                        Log.i(LOG_TAG, "Error requestion print job restart", re);
+                    } finally {
+                        wakeLock.release();
+                    }
+                    return null;
+                }
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
         }
     }
 }

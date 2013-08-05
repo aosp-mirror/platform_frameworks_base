@@ -16,8 +16,6 @@
 
 package com.android.printspooler;
 
-import java.util.List;
-
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
@@ -29,16 +27,21 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.print.IPrintDocumentAdapter;
 import android.print.IPrintClient;
-import android.print.IPrintSpoolerClient;
+import android.print.IPrintDocumentAdapter;
 import android.print.IPrintSpooler;
 import android.print.IPrintSpoolerCallbacks;
+import android.print.IPrintSpoolerClient;
+import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintAttributes;
 import android.print.PrintJobInfo;
+import android.print.PrinterId;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.os.SomeArgs;
+
+import java.util.List;
 
 /**
  * Service for exposing some of the {@link PrintSpooler} functionality to
@@ -46,27 +49,26 @@ import com.android.internal.os.SomeArgs;
  */
 public final class PrintSpoolerService extends Service {
 
+    private static final long CHECK_ALL_PRINTJOBS_HANDLED_DELAY = 5000;
+
     private static final String LOG_TAG = "PrintSpoolerService";
 
     private Intent mStartPrintJobConfigActivityIntent;
 
-    private PrintSpooler mSpooler;
+    private IPrintSpoolerClient mClient;
 
-    private Handler mHanlder;
+    private Handler mHandler;
 
     @Override
     public void onCreate() {
         super.onCreate();
         mStartPrintJobConfigActivityIntent = new Intent(PrintSpoolerService.this,
                 PrintJobConfigActivity.class);
-        mSpooler = PrintSpooler.getInstance(this);
-        mHanlder = new MyHandler(getMainLooper());
+        mHandler = new MyHandler(getMainLooper());
     }
 
     @Override
     public IBinder onBind(Intent intent) {
-        mSpooler.restorePersistedState();
-
         return new IPrintSpooler.Stub() {
             @Override
             public void getPrintJobInfos(IPrintSpoolerCallbacks callback,
@@ -74,7 +76,8 @@ public final class PrintSpoolerService extends Service {
                             throws RemoteException {
                 List<PrintJobInfo> printJobs = null;
                 try {
-                    printJobs = mSpooler.getPrintJobInfos(componentName, state, appId);
+                    printJobs = PrintSpooler.peekInstance().getPrintJobInfos(
+                            componentName, state, appId);
                 } finally {
                     callback.onGetPrintJobInfosResult(printJobs, sequence);
                 }
@@ -85,7 +88,7 @@ public final class PrintSpoolerService extends Service {
                     int appId, int sequence) throws RemoteException {
                 PrintJobInfo printJob = null;
                 try {
-                    printJob = mSpooler.getPrintJobInfo(printJobId, appId);
+                    printJob = PrintSpooler.peekInstance().getPrintJobInfo(printJobId, appId);
                 } finally {
                     callback.onGetPrintJobInfoResult(printJob, sequence);
                 }
@@ -99,7 +102,7 @@ public final class PrintSpoolerService extends Service {
                             throws RemoteException {
                 PrintJobInfo printJob = null;
                 try {
-                    printJob = mSpooler.createPrintJob(printJobName, client,
+                    printJob = PrintSpooler.peekInstance().createPrintJob(printJobName, client,
                             attributes, appId);
                     if (printJob != null) {
                         Intent intent = mStartPrintJobConfigActivityIntent;
@@ -116,7 +119,8 @@ public final class PrintSpoolerService extends Service {
                         SomeArgs args = SomeArgs.obtain();
                         args.arg1 = client;
                         args.arg2 = sender;
-                        mHanlder.obtainMessage(0, args).sendToTarget();
+                        mHandler.obtainMessage(MyHandler.MSG_START_PRINT_JOB_CONFIG_ACTIVITY,
+                                args).sendToTarget();
                     }
                 } finally {
                     callback.onCreatePrintJobResult(printJob, sequence);
@@ -128,7 +132,8 @@ public final class PrintSpoolerService extends Service {
                     IPrintSpoolerCallbacks callback, int sequece) throws RemoteException {
                 boolean success = false;
                 try {
-                    success = mSpooler.setPrintJobState(printJobId, state, error);
+                    success = PrintSpooler.peekInstance().setPrintJobState(
+                            printJobId, state, error);
                 } finally {
                     callback.onSetPrintJobStateResult(success, sequece);
                 }
@@ -136,11 +141,10 @@ public final class PrintSpoolerService extends Service {
 
             @Override
             public void setPrintJobTag(int printJobId, String tag,
-                    IPrintSpoolerCallbacks callback, int sequece)
-                            throws RemoteException {
+                    IPrintSpoolerCallbacks callback, int sequece) throws RemoteException {
                 boolean success = false;
                 try {
-                    success = mSpooler.setPrintJobTag(printJobId, tag);
+                    success = PrintSpooler.peekInstance().setPrintJobTag(printJobId, tag);
                 } finally {
                     callback.onSetPrintJobTagResult(success, sequece);
                 }
@@ -148,37 +152,158 @@ public final class PrintSpoolerService extends Service {
 
             @Override
             public void writePrintJobData(ParcelFileDescriptor fd, int printJobId) {
-                mSpooler.writePrintJobData(fd, printJobId);
+                PrintSpooler.peekInstance().writePrintJobData(fd, printJobId);
             }
 
             @Override
-            public void setClient(IPrintSpoolerClient client)  {
-                mSpooler.setCleint(client);
-            }
-
-            @Override
-            public void notifyClientForActivteJobs() {
-                mSpooler.notifyClientForActivteJobs();
+            public void setClient(IPrintSpoolerClient client) {
+                mHandler.obtainMessage(MyHandler.MSG_SET_CLIENT, client).sendToTarget();
             }
         };
     }
 
-    private static final class MyHandler extends Handler {
+    public void onPrintJobQueued(PrintJobInfo printJob) {
+        mHandler.obtainMessage(MyHandler.MSG_ON_PRINT_JOB_QUEUED,
+                printJob).sendToTarget();
+    }
+
+    public void onReqeustUpdatePrinters(List<PrinterId> printers) {
+        mHandler.obtainMessage(MyHandler.MSG_ON_REQUEST_UPDATE_PRINTERS,
+                printers).sendToTarget();
+    }
+
+    public void startPrinterDiscovery(IPrinterDiscoveryObserver observer) {
+        mHandler.obtainMessage(MyHandler.MSG_ON_START_PRINTER_DISCOVERY,
+                observer).sendToTarget();
+    }
+
+    public void stopPrinterDiscovery() {
+        mHandler.sendEmptyMessage(MyHandler.MSG_ON_STOP_PRINTER_DISCOVERY);
+    }
+
+    public void onAllPrintJobsForServiceHandled(ComponentName service) {
+        mHandler.obtainMessage(MyHandler.MSG_ON_ALL_PRINT_JOBS_FOR_SERIVICE_HANDLED,
+                service).sendToTarget();
+    }
+
+    public void onAllPrintJobsHandled() {
+        mHandler.sendEmptyMessage(MyHandler.MSG_ON_ALL_PRINT_JOBS_HANDLED);
+    }
+
+    private final class MyHandler extends Handler {
+        public static final int MSG_SET_CLIENT = 1;
+        public static final int MSG_START_PRINT_JOB_CONFIG_ACTIVITY = 2;
+        public static final int MSG_ON_START_PRINTER_DISCOVERY = 3;
+        public static final int MSG_ON_STOP_PRINTER_DISCOVERY = 4;
+        public static final int MSG_ON_PRINT_JOB_QUEUED = 5;
+        public static final int MSG_ON_ALL_PRINT_JOBS_FOR_SERIVICE_HANDLED = 6;
+        public static final int MSG_ON_ALL_PRINT_JOBS_HANDLED = 7;
+        public static final int MSG_ON_REQUEST_UPDATE_PRINTERS = 8;
+        public static final int MSG_CHECK_ALL_PRINTJOBS_HANDLED = 9;
 
         public MyHandler(Looper looper) {
-            super(looper, null, true);
+            super(looper, null, false);
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public void handleMessage(Message message) {
-            SomeArgs args = (SomeArgs) message.obj;
-            IPrintClient client = (IPrintClient) args.arg1;
-            IntentSender sender = (IntentSender) args.arg2;
-            args.recycle();
-            try {
-                client.startPrintJobConfigActivity(sender);
-            } catch (RemoteException re) {
-                Slog.i(LOG_TAG, "Error starting print job config activity!", re);
+            switch (message.what) {
+                case MSG_SET_CLIENT: {
+                    mClient = (IPrintSpoolerClient) message.obj;
+                    if (mClient != null) {
+                        PrintSpooler.createInstance(PrintSpoolerService.this);
+                        mHandler.sendEmptyMessageDelayed(
+                                MyHandler.MSG_CHECK_ALL_PRINTJOBS_HANDLED,
+                                CHECK_ALL_PRINTJOBS_HANDLED_DELAY);
+                    } else {
+                        PrintSpooler.destroyInstance();
+                    }
+                } break;
+
+                case MSG_START_PRINT_JOB_CONFIG_ACTIVITY: {
+                    SomeArgs args = (SomeArgs) message.obj;
+                    IPrintClient client = (IPrintClient) args.arg1;
+                    IntentSender sender = (IntentSender) args.arg2;
+                    args.recycle();
+                    try {
+                        client.startPrintJobConfigActivity(sender);
+                    } catch (RemoteException re) {
+                        Slog.i(LOG_TAG, "Error starting print job config activity!", re);
+                    }
+                } break;
+
+                case MSG_ON_START_PRINTER_DISCOVERY: {
+                    IPrinterDiscoveryObserver observer = (IPrinterDiscoveryObserver) message.obj;
+                    if (mClient != null) {
+                        try {
+                            mClient.onStartPrinterDiscovery(observer);
+                        } catch (RemoteException re) {
+                            Log.e(LOG_TAG, "Error notifying start printer discovery.", re);
+                        }
+                    }
+                } break;
+
+                case MSG_ON_STOP_PRINTER_DISCOVERY: {
+                    if (mClient != null) {
+                        try {
+                            mClient.onStopPrinterDiscovery();
+                        } catch (RemoteException re) {
+                            Log.e(LOG_TAG, "Error notifying stop printer discovery.", re);
+                        }
+                    }
+                } break;
+
+                case MSG_ON_PRINT_JOB_QUEUED: {
+                    PrintJobInfo printJob = (PrintJobInfo) message.obj;
+                    if (mClient != null) {
+                        try {
+                            mClient.onPrintJobQueued(printJob);
+                        } catch (RemoteException re) {
+                            Slog.e(LOG_TAG, "Error notify for a queued print job.", re);
+                        }
+                    }
+                } break;
+
+                case MSG_ON_ALL_PRINT_JOBS_FOR_SERIVICE_HANDLED: {
+                    ComponentName service = (ComponentName) message.obj;
+                    if (mClient != null) {
+                        try {
+                            mClient.onAllPrintJobsForServiceHandled(service);
+                        } catch (RemoteException re) {
+                            Slog.e(LOG_TAG, "Error notify for all print jobs per service"
+                                    + " handled.", re);
+                        }
+                    }
+                } break;
+
+                case MSG_ON_ALL_PRINT_JOBS_HANDLED: {
+                    if (mClient != null) {
+                        try {
+                            mClient.onAllPrintJobsHandled();
+                        } catch (RemoteException re) {
+                            Slog.e(LOG_TAG, "Error notify for all print job handled.", re);
+                        }
+                    }
+                } break;
+
+                case MSG_ON_REQUEST_UPDATE_PRINTERS: {
+                    List<PrinterId> printerIds = (List<PrinterId>) message.obj;
+                    if (mClient != null) {
+                        try {
+                            mClient.onRequestUpdatePrinters(printerIds);
+                        } catch (RemoteException re) {
+                            Slog.e(LOG_TAG, "Error requesting to update pritners.", re);
+                        }
+                    }
+                } break;
+
+                case MSG_CHECK_ALL_PRINTJOBS_HANDLED: {
+                    PrintSpooler spooler = PrintSpooler.peekInstance();
+                    if (spooler != null) {
+                        spooler.checkAllPrintJobsHandled();
+                    }
+                } break;
             }
         }
     }

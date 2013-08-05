@@ -116,9 +116,6 @@ final class RemotePrintSpooler {
             throwIfDestroyedLocked();
             mCanUnbind = false;
         }
-        if (DEBUG) {
-            Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] getPrintJobInfos()");
-        }
         try {
             return mGetPrintJobInfosCaller.getPrintJobInfos(getRemoteInstanceLazy(),
                     componentName, state, appId);
@@ -127,6 +124,9 @@ final class RemotePrintSpooler {
         } catch (TimeoutException te) {
             Slog.e(LOG_TAG, "Error getting print jobs.", te);
         } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] getPrintJobInfos()");
+            }
             synchronized (mLock) {
                 mCanUnbind = true;
                 mLock.notifyAll();
@@ -142,9 +142,6 @@ final class RemotePrintSpooler {
             throwIfDestroyedLocked();
             mCanUnbind = false;
         }
-        if (DEBUG) {
-            Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] createPrintJob()");
-        }
         try {
             return mCreatePrintJobCaller.createPrintJob(getRemoteInstanceLazy(),
                     printJobName, client, documentAdapter, attributes, appId);
@@ -153,6 +150,9 @@ final class RemotePrintSpooler {
         } catch (TimeoutException te) {
             Slog.e(LOG_TAG, "Error creating print job.", te);
         } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] createPrintJob()");
+            }
             synchronized (mLock) {
                 mCanUnbind = true;
                 mLock.notifyAll();
@@ -167,9 +167,6 @@ final class RemotePrintSpooler {
             throwIfDestroyedLocked();
             mCanUnbind = false;
         }
-        if (DEBUG) {
-            Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] writePrintJobData()");
-        }
         try {
             getRemoteInstanceLazy().writePrintJobData(fd, printJobId);
         } catch (RemoteException re) {
@@ -177,6 +174,9 @@ final class RemotePrintSpooler {
         } catch (TimeoutException te) {
             Slog.e(LOG_TAG, "Error writing print job data.", te);
         } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] writePrintJobData()");
+            }
             // We passed the file descriptor across and now the other
             // side is responsible to close it, so close the local copy.
             IoUtils.closeQuietly(fd);
@@ -193,9 +193,6 @@ final class RemotePrintSpooler {
             throwIfDestroyedLocked();
             mCanUnbind = false;
         }
-        if (DEBUG) {
-            Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] getPrintJobInfo()");
-        }
         try {
             return mGetPrintJobInfoCaller.getPrintJobInfo(getRemoteInstanceLazy(),
                     printJobId, appId);
@@ -204,6 +201,9 @@ final class RemotePrintSpooler {
         } catch (TimeoutException te) {
             Slog.e(LOG_TAG, "Error getting print job info.", te);
         } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] getPrintJobInfo()");
+            }
             synchronized (mLock) {
                 mCanUnbind = true;
                 mLock.notifyAll();
@@ -218,9 +218,6 @@ final class RemotePrintSpooler {
             throwIfDestroyedLocked();
             mCanUnbind = false;
         }
-        if (DEBUG) {
-            Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] setPrintJobState()");
-        }
         try {
             return mSetPrintJobStatusCaller.setPrintJobState(getRemoteInstanceLazy(),
                     printJobId, state, error);
@@ -229,6 +226,9 @@ final class RemotePrintSpooler {
         } catch (TimeoutException te) {
             Slog.e(LOG_TAG, "Error setting print job state.", te);
         } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] setPrintJobState()");
+            }
             synchronized (mLock) {
                 mCanUnbind = true;
                 mLock.notifyAll();
@@ -243,9 +243,6 @@ final class RemotePrintSpooler {
             throwIfDestroyedLocked();
             mCanUnbind = false;
         }
-        if (DEBUG) {
-            Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] setPrintJobTag()");
-        }
         try {
             return mSetPrintJobTagCaller.setPrintJobTag(getRemoteInstanceLazy(),
                     printJobId, tag);
@@ -254,6 +251,9 @@ final class RemotePrintSpooler {
         } catch (TimeoutException te) {
             Slog.e(LOG_TAG, "Error setting print job tag.", te);
         } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] setPrintJobTag()");
+            }
             synchronized (mLock) {
                 mCanUnbind = true;
                 mLock.notifyAll();
@@ -262,23 +262,20 @@ final class RemotePrintSpooler {
         return false;
     }
 
-    public final void notifyClientForActivteJobs() {
+    public final void start() {
         throwIfCalledOnMainThread();
         synchronized (mLock) {
             throwIfDestroyedLocked();
             mCanUnbind = false;
         }
-        if (DEBUG) {
-            Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier()
-                    + "] notifyClientForActivteJobs()");
-        }
         try {
-            getRemoteInstanceLazy().notifyClientForActivteJobs();
-        } catch (RemoteException re) {
-            Slog.e(LOG_TAG, "Error asking for active print job notification.", re);
+            getRemoteInstanceLazy();
         } catch (TimeoutException te) {
-            Slog.e(LOG_TAG, "Error asking for active print job notification.", te);
+            Slog.e(LOG_TAG, "Error starting the spooler.", te);
         } finally {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier() + "] start()");
+            }
             synchronized (mLock) {
                 mCanUnbind = true;
                 mLock.notifyAll();

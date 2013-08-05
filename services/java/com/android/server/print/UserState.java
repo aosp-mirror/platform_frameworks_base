@@ -166,7 +166,7 @@ final class UserState implements PrintSpoolerCallbacks {
         return mSpooler;
     }
 
-    public Map<ComponentName, RemotePrintService> getActiveServices() {
+    public Map<ComponentName, RemotePrintService> getActiveServicesLocked() {
         synchronized(mLock) {
             throwIfDestroyedLocked();
             return mActiveServices;

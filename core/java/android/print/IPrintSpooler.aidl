@@ -46,5 +46,4 @@ oneway interface IPrintSpooler {
             int sequence);
     void writePrintJobData(in ParcelFileDescriptor fd, int printJobId);
     void setClient(IPrintSpoolerClient client);
-    void notifyClientForActivteJobs();
 }
