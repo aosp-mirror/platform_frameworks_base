@@ -182,7 +182,8 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"I-auto Rotate"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Naka-lock ang Pag-rotate"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Pamamaraan ng Pag-input"</string>
-    <string name="quick_settings_location_label" msgid="3292451598267467545">"Lokasyong ginagamit"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"Lokasyon"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Naka-off ang Lokasyon"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Device ng media"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Mga Pang-emergency na Tawag Lamang"</string>
