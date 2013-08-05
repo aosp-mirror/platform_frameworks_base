@@ -251,17 +251,22 @@ public class BitmapFactory {
         public boolean inPreferQualityOverSpeed;
 
         /**
-         * The resulting width of the bitmap, set independent of the state of
-         * inJustDecodeBounds. However, if there is an error trying to decode,
-         * outWidth will be set to -1.
+         * The resulting width of the bitmap. If {@link #inJustDecodeBounds} is
+         * set to false, this will be width of the output bitmap after any
+         * scaling is applied. If true, it will be the width of the input image
+         * without any accounting for scaling.
+         *
+         * <p>outWidth will be set to -1 if there is an error trying to decode.</p>
          */
-
         public int outWidth;
 
         /**
-         * The resulting height of the bitmap, set independent of the state of
-         * inJustDecodeBounds. However, if there is an error trying to decode,
-         * outHeight will be set to -1. 
+         * The resulting height of the bitmap. If {@link #inJustDecodeBounds} is
+         * set to false, this will be height of the output bitmap after any
+         * scaling is applied. If true, it will be the height of the input image
+         * without any accounting for scaling.
+         *
+         * <p>outHeight will be set to -1 if there is an error trying to decode.</p>
          */
         public int outHeight;
 
