@@ -2949,6 +2949,7 @@ final class ActivityStack {
 
         mWindowManager.moveTaskToTop(tr.taskId);
 
+        mLastPausedActivity = null;
         mStackSupervisor.resumeTopActivitiesLocked();
         EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, tr.userId, tr.taskId);
 
