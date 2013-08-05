@@ -16,16 +16,18 @@
 
 package android.app;
 
-import com.android.internal.R;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TimePicker;
 import android.widget.TimePicker.OnTimeChangedListener;
+
+import com.android.internal.R;
+
 
 /**
  * A dialog that prompts the user for the time of day using a {@link TimePicker}.
@@ -38,7 +40,7 @@ public class TimePickerDialog extends AlertDialog
 
     /**
      * The callback interface used to indicate the user is done filling in
-     * the time (they clicked on the 'Set' button).
+     * the time (they clicked on the 'Done' button).
      */
     public interface OnTimeSetListener {
 
@@ -55,7 +57,7 @@ public class TimePickerDialog extends AlertDialog
     private static final String IS_24_HOUR = "is24hour";
 
     private final TimePicker mTimePicker;
-    private final OnTimeSetListener mCallback;
+    private final OnTimeSetListener mTimeSetCallback;
 
     int mInitialHourOfDay;
     int mInitialMinute;
@@ -74,6 +76,16 @@ public class TimePickerDialog extends AlertDialog
         this(context, 0, callBack, hourOfDay, minute, is24HourView);
     }
 
+    static int resolveDialogTheme(Context context, int resid) {
+        if (resid == 0) {
+            TypedValue outValue = new TypedValue();
+            context.getTheme().resolveAttribute(R.attr.timePickerDialogTheme, outValue, true);
+            return outValue.resourceId;
+        } else {
+            return resid;
+        }
+    }
+
     /**
      * @param context Parent.
      * @param theme the theme to apply to this dialog
@@ -86,17 +98,13 @@ public class TimePickerDialog extends AlertDialog
             int theme,
             OnTimeSetListener callBack,
             int hourOfDay, int minute, boolean is24HourView) {
-        super(context, theme);
-        mCallback = callBack;
+        super(context, resolveDialogTheme(context, theme));
+        mTimeSetCallback = callBack;
         mInitialHourOfDay = hourOfDay;
         mInitialMinute = minute;
         mIs24HourView = is24HourView;
 
-        setIcon(0);
-        setTitle(R.string.time_picker_dialog_title);
-
         Context themeContext = getContext();
-        setButton(BUTTON_POSITIVE, themeContext.getText(R.string.date_time_done), this);
 
         LayoutInflater inflater =
                 (LayoutInflater) themeContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -104,7 +112,18 @@ public class TimePickerDialog extends AlertDialog
         setView(view);
         mTimePicker = (TimePicker) view.findViewById(R.id.timePicker);
 
-        // initialize state
+        // Initialize state
+        mTimePicker.setLegacyMode(false /* will show new UI */);
+        mTimePicker.setShowDoneButton(true);
+        mTimePicker.setDismissCallback(new TimePicker.TimePickerDismissCallback() {
+            @Override
+            public void dismiss(TimePicker view, boolean isCancel, int hourOfDay, int minute) {
+                if (!isCancel) {
+                    mTimeSetCallback.onTimeSet(view, hourOfDay, minute);
+                }
+                TimePickerDialog.this.dismiss();
+            }
+        });
         mTimePicker.setIs24HourView(mIs24HourView);
         mTimePicker.setCurrentHour(mInitialHourOfDay);
         mTimePicker.setCurrentMinute(mInitialMinute);
@@ -125,9 +144,9 @@ public class TimePickerDialog extends AlertDialog
     }
 
     private void tryNotifyTimeSet() {
-        if (mCallback != null) {
+        if (mTimeSetCallback != null) {
             mTimePicker.clearFocus();
-            mCallback.onTimeSet(mTimePicker, mTimePicker.getCurrentHour(),
+            mTimeSetCallback.onTimeSet(mTimePicker, mTimePicker.getCurrentHour(),
                     mTimePicker.getCurrentMinute());
         }
     }

@@ -611,6 +611,18 @@
         <!-- The TimePicker style. -->
         <attr name="timePickerStyle" format="reference" />
 
+        <!-- The TimePicker Header background color . -->
+        <attr name="timePickerHeaderBackgroundColor" format="reference" />
+
+        <!-- The TimePicker Header time label text appearance -->
+        <attr name="timePickerHeaderTimeLabelTextAppearance" format="reference" />
+
+        <!-- TimePicker Header am pm label text appearance -->
+        <attr name="timePickerHeaderAmPmLabelTextAppearance" format="reference" />
+
+        <!-- The TimePicker dialog theme. -->
+        <attr name="timePickerDialogTheme" format="reference" />
+
         <!-- The DatePicker style. -->
         <attr name="datePickerStyle" format="reference" />
 
@@ -3944,6 +3956,30 @@
     <declare-styleable name="TimePicker">
         <!-- @hide The layout of the time picker. -->
         <attr name="internalLayout" />
+        <!-- @hide The layout of the legacy time picker. -->
+        <attr name="legacyLayout" format="reference" />
+        <!-- @hide Enables or disable the use of the legacy layout for the TimePicker. -->
+        <attr name="legacyMode" format="boolean" />
+        <!-- @hide The color when the non legacy TimePicker is disabled. -->
+        <attr name="disabledColor" format="color|reference" />
+        <!-- @hide The color for selected text of the non legacy TimePicker. -->
+        <attr name="headerSelectedTextColor" format="color|reference" />
+        <!-- @hide The color for unselected text of the non legacy TimePicker. -->
+        <attr name="headerUnselectedTextColor" format="color|reference" />
+        <!-- @hide The background color for the header of the non legacy TimePicker. -->
+        <attr name="headerBackgroundColor" format="color|reference" />
+        <!-- @hide The color for the hours/minutes numbers of the non legacy TimePicker. -->
+        <attr name="numbersTextColor" format="color|reference" />
+        <!-- @hide The background color for the hours/minutes numbers of the non legacy TimePicker. -->
+        <attr name="numbersBackgroundColor" format="color|reference" />
+        <!-- @hide The color for the AM/PM selectors of the non legacy TimePicker. -->
+        <attr name="amPmTextColor" format="color|reference" />
+        <!-- @hide The background color for the AM/PM selectors of the non legacy TimePicker when unselected. -->
+        <attr name="amPmUnselectedBackgroundColor" format="color|reference" />
+        <!-- @hide The background color for the AM/PM selectors of the non legacy TimePicker when selected. -->
+        <attr name="amPmSelectedBackgroundColor" format="color|reference" />
+        <!-- @hide The color for the hours/minutes selector of the non legacy TimePicker. -->
+        <attr name="numbersSelectorColor" format="color|reference" />
     </declare-styleable>
 
     <!-- ========================= -->

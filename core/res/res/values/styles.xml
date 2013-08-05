@@ -555,7 +555,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.TimePicker">
-        <item name="android:internalLayout">@android:layout/time_picker</item>
+        <item name="android:legacyLayout">@android:layout/time_picker_legacy</item>
     </style>
 
     <style name="Widget.DatePicker">
@@ -1706,7 +1706,18 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.TimePicker" parent="Widget.TimePicker">
+        <item name="android:legacyLayout">@android:layout/time_picker_legacy_holo</item>
         <item name="android:internalLayout">@android:layout/time_picker_holo</item>
+        <item name="android:disabledColor">@android:color/timepicker_default_disabled_color_holo_dark</item>
+        <item name="android:headerSelectedTextColor">@android:color/holo_blue_light</item>
+        <item name="android:headerUnselectedTextColor">@android:color/timepicker_default_text_color_holo_dark</item>
+        <item name="android:headerBackgroundColor">@android:color/timepicker_default_background_holo_dark</item>
+        <item name="android:numbersTextColor">@android:color/timepicker_default_text_color_holo_dark</item>
+        <item name="android:numbersBackgroundColor">@android:color/timepicker_default_background_holo_dark</item>
+        <item name="android:amPmTextColor">@android:color/timepicker_default_text_color_holo_dark</item>
+        <item name="android:amPmUnselectedBackgroundColor">@android:color/timepicker_default_background_holo_dark</item>
+        <item name="android:amPmSelectedBackgroundColor">@android:color/holo_blue_light</item>
+        <item name="android:numbersSelectorColor">@android:color/holo_blue_light</item>
     </style>
 
     <style name="Widget.Holo.DatePicker" parent="Widget.DatePicker">
@@ -2127,7 +2138,19 @@ please see styles_device_defaults.xml.
     <style name="Widget.Holo.Light.NumberPicker" parent="Widget.Holo.NumberPicker">
     </style>
 
-    <style name="Widget.Holo.Light.TimePicker" parent="Widget.Holo.TimePicker">
+    <style name="Widget.Holo.Light.TimePicker" parent="Widget.TimePicker">
+        <item name="android:legacyLayout">@android:layout/time_picker_legacy_holo</item>
+        <item name="android:internalLayout">@android:layout/time_picker_holo</item>
+        <item name="android:disabledColor">@android:color/timepicker_default_disabled_color_holo_light</item>
+        <item name="android:headerSelectedTextColor">@android:color/holo_blue_light</item>
+        <item name="android:headerUnselectedTextColor">@android:color/timepicker_default_text_color_holo_light</item>
+        <item name="android:headerBackgroundColor">@android:color/timepicker_default_background_holo_light</item>
+        <item name="android:numbersTextColor">@android:color/timepicker_default_text_color_holo_light</item>
+        <item name="android:numbersBackgroundColor">@android:color/timepicker_default_background_holo_light</item>
+        <item name="android:amPmTextColor">@android:color/timepicker_default_text_color_holo_light</item>
+        <item name="android:amPmUnselectedBackgroundColor">@android:color/timepicker_default_background_holo_light</item>
+        <item name="android:amPmSelectedBackgroundColor">@android:color/holo_blue_light</item>
+        <item name="android:numbersSelectorColor">@android:color/holo_blue_light</item>
     </style>
 
     <style name="Widget.Holo.Light.DatePicker" parent="Widget.Holo.DatePicker">
@@ -2540,6 +2563,36 @@ please see styles_device_defaults.xml.
         <item name="android:fontFamily">sans-serif-condensed</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textColor">#80ffffff</item>
+    </style>
+
+    <style name="TextAppearance.TimePicker.TimeLabel" parent="TextAppearance">
+    </style>
+
+    <style name="TextAppearance.TimePicker.AmPmLabel" parent="TextAppearance">
+    </style>
+
+    <style name="TextAppearance.Holo.TimePicker.TimeLabel" parent="TextAppearance.Holo">
+        <item name="android:textSize">@dimen/timepicker_time_label_size</item>
+        <item name="android:textColor">@android:color/timepicker_default_text_color_holo_dark</item>
+    </style>
+
+    <style name="TextAppearance.Holo.TimePicker.AmPmLabel" parent="TextAppearance.Holo">
+        <item name="android:textSize">@dimen/timepicker_ampm_label_size</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@android:color/timepicker_default_text_color_holo_dark</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Light.TimePicker.TimeLabel" parent="TextAppearance.Holo.Light">
+        <item name="android:textSize">@dimen/timepicker_time_label_size</item>
+        <item name="android:textColor">@color/timepicker_default_text_color_holo_light</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Light.TimePicker.AmPmLabel" parent="TextAppearance.Holo.Light">
+        <item name="android:textSize">@dimen/timepicker_ampm_label_size</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/timepicker_default_text_color_holo_light</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
 </resources>

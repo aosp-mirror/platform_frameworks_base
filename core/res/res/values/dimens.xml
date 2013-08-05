@@ -356,4 +356,29 @@
     <!-- Outline width for video subtitles. -->
     <dimen name="subtitle_outline_width">2dp</dimen>
 
+    <!-- New TimePicker dimensions. -->
+    <item name="timepicker_circle_radius_multiplier" format="float" type="string">0.82</item>
+    <item name="timepicker_circle_radius_multiplier_24HourMode" format="float" type="string">0.85</item>
+    <item name="timepicker_selection_radius_multiplier" format="float" type="string">0.16</item>
+    <item name="timepicker_ampm_circle_radius_multiplier" format="float" type="string">0.19</item>
+    <item name="timepicker_numbers_radius_multiplier_normal" format="float" type="string">0.81</item>
+    <item name="timepicker_numbers_radius_multiplier_inner" format="float" type="string">0.60</item>
+    <item name="timepicker_numbers_radius_multiplier_outer" format="float" type="string">0.83</item>
+    <item name="timepicker_text_size_multiplier_normal" format="float" type="string">0.17</item>
+    <item name="timepicker_text_size_multiplier_inner" format="float" type="string">0.14</item>
+    <item name="timepicker_text_size_multiplier_outer" format="float" type="string">0.11</item>
+    <item name="timepicker_transition_mid_radius_multiplier" format="float" type="string">0.95</item>
+    <item name="timepicker_transition_end_radius_multiplier" format="float" type="string">1.3</item>
+
+    <dimen name="timepicker_time_label_size">60sp</dimen>
+    <dimen name="timepicker_extra_time_label_margin">-30dp</dimen>
+    <dimen name="timepicker_ampm_label_size">16sp</dimen>
+    <dimen name="timepicker_done_label_size">14sp</dimen>
+    <dimen name="timepicker_ampm_left_padding">6dip</dimen>
+    <dimen name="timepicker_separator_padding">4dip</dimen>
+    <dimen name="timepicker_header_height">96dip</dimen>
+    <dimen name="timepicker_minimum_margin_sides">48dip</dimen>
+    <dimen name="timepicker_minimum_margin_top_bottom">24dip</dimen>
+    <dimen name="timepicker_radial_picker_dimen">270dip</dimen>
+
 </resources>

@@ -1161,7 +1161,7 @@
   <java-symbol type="layout" name="tab_content" />
   <java-symbol type="layout" name="tab_indicator_holo" />
   <java-symbol type="layout" name="textview_hint" />
-  <java-symbol type="layout" name="time_picker" />
+  <java-symbol type="layout" name="time_picker_legacy" />
   <java-symbol type="layout" name="time_picker_dialog" />
   <java-symbol type="layout" name="toast_bar" />
   <java-symbol type="layout" name="transient_notification" />
@@ -1735,4 +1735,55 @@
   <java-symbol type="dimen" name="subtitle_shadow_radius" />
   <java-symbol type="dimen" name="subtitle_shadow_offset" />
   <java-symbol type="dimen" name="subtitle_outline_width" />
+
+  <!-- From the new TimePicker -->
+  <java-symbol type="attr" name="timePickerHeaderBackgroundColor" />
+  <java-symbol type="attr" name="timePickerDialogTheme" />
+  <java-symbol type="attr" name="headerSelectedTextColor" />
+  <java-symbol type="attr" name="headerUnselectedTextColor" />
+  <java-symbol type="attr" name="numbersTextColor" />
+  <java-symbol type="attr" name="numbersBackgroundColor" />
+  <java-symbol type="attr" name="amPmTextColor" />
+  <java-symbol type="attr" name="amPmUnselectedBackgroundColor" />
+  <java-symbol type="attr" name="amPmSelectedBackgroundColor" />
+  <java-symbol type="attr" name="numbersSelectorColor" />
+  <java-symbol type="attr" name="timePickerHeaderTimeLabelTextAppearance" />
+  <java-symbol type="style" name="TextAppearance.Holo.TimePicker.TimeLabel" />
+  <java-symbol type="layout" name="time_picker_holo" />
+  <java-symbol type="layout" name="time_header_label" />
+  <java-symbol type="id" name="time_header" />
+  <java-symbol type="id" name="hours" />
+  <java-symbol type="id" name="minutes" />
+  <java-symbol type="id" name="ampm_label" />
+  <java-symbol type="id" name="radial_picker" />
+  <java-symbol type="id" name="separator" />
+  <java-symbol type="id" name="layout_buttons" />
+  <java-symbol type="id" name="done_button" />
+  <java-symbol type="string" name="done_label" />
+  <java-symbol type="string" name="hour_picker_description" />
+  <java-symbol type="string" name="minute_picker_description" />
+  <java-symbol type="string" name="select_hours" />
+  <java-symbol type="string" name="select_minutes" />
+  <java-symbol type="string" name="time_placeholder" />
+  <java-symbol type="string" name="timepicker_circle_radius_multiplier" />
+  <java-symbol type="string" name="timepicker_circle_radius_multiplier_24HourMode" />
+  <java-symbol type="string" name="timepicker_ampm_circle_radius_multiplier" />
+  <java-symbol type="string" name="deleted_key" />
+  <java-symbol type="string" name="sans_serif" />
+  <java-symbol type="string" name="radial_numbers_typeface" />
+  <java-symbol type="string" name="timepicker_text_size_multiplier_inner" />
+  <java-symbol type="string" name="timepicker_text_size_multiplier_outer" />
+  <java-symbol type="string" name="timepicker_text_size_multiplier_normal" />
+  <java-symbol type="string" name="timepicker_numbers_radius_multiplier_outer" />
+  <java-symbol type="string" name="timepicker_selection_radius_multiplier" />
+  <java-symbol type="string" name="timepicker_numbers_radius_multiplier_inner" />
+  <java-symbol type="string" name="timepicker_numbers_radius_multiplier_normal" />
+  <java-symbol type="string" name="timepicker_transition_mid_radius_multiplier" />
+  <java-symbol type="string" name="timepicker_transition_end_radius_multiplier" />
+  <java-symbol type="color" name="timepicker_default_text_color_holo_light" />
+  <java-symbol type="color" name="timepicker_default_disabled_color_holo_light" />
+  <java-symbol type="color" name="timepicker_default_ampm_unselected_background_color_holo_light" />
+  <java-symbol type="color" name="timepicker_default_ampm_selected_background_color_holo_light" />
+  <java-symbol type="array" name="config_clockTickVibePattern" />
+
 </resources>
