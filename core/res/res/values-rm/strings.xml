@@ -565,6 +565,10 @@
     <skip />
     <!-- no translation found for permdesc_accessAllPrintJobs (2978185311041864762) -->
     <skip />
+    <!-- no translation found for permlab_bindNfcService (2752731300419410724) -->
+    <skip />
+    <!-- no translation found for permdesc_bindNfcService (6120647629174066862) -->
+    <skip />
     <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
     <skip />
     <!-- no translation found for permdesc_bindTextService (8151968910973998670) -->
@@ -769,9 +773,17 @@
     <skip />
     <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->
     <skip />
-    <!-- no translation found for permlab_controlWifiDisplay (393641276723695496) -->
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
     <skip />
-    <!-- no translation found for permdesc_controlWifiDisplay (4543912292681826986) -->
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
     <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modifitgar Voss parameters audio"</string>
     <!-- no translation found for permdesc_modifyAudioSettings (3522565366806248517) -->
@@ -2368,6 +2380,8 @@
     <!-- no translation found for display_manager_overlay_display_name (5142365982271620716) -->
     <skip />
     <!-- no translation found for display_manager_overlay_display_title (652124517672257172) -->
+    <skip />
+    <!-- no translation found for display_manager_overlay_display_secure_suffix (6022119702628572080) -->
     <skip />
     <!-- no translation found for wifi_display_notification_title (2223050649240326557) -->
     <skip />

@@ -362,6 +362,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Permet que el titular vinculi a la interfície de nivell superior d\'un servei d\'impressió. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"accedeix a totes les tasques d\'impressió"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Permet que el propietari accedeixi a les tasques d\'impressió creades per una altra aplicació. Les aplicacions normals no l\'haurien de necessitar mai."</string>
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"vincula al servei NFC"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Permet que el titular es vinculi a les aplicacions que emulen les targetes de NFC. No hauria de ser mai necessari per a les aplicacions normals."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"vincula a un servei de text"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Permet al titular vincular amb la interfície de nivell superior d\'un servei de text (per exemple, SpellCheckerService). Les aplicacions normals mai no ho haurien de necessitar."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"vincula a un servei de VPN"</string>
@@ -470,8 +472,18 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Permet que l\'aplicació utilitzi funcions InputFlinger de baix nivell."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configuració de les pantalles Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Permet a l\'aplicació configurar-se i connectar-se a les pantalles Wi-Fi."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"control de les pantalles Wi-Fi"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permet a l\'aplicació controlar les funcions de baix nivell de les pantalles Wi-Fi."</string>
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"canviar la configuració d\'àudio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permet que l\'aplicació modifiqui la configuració d\'àudio general, com ara el volum i l\'altaveu de sortida que es fa servir."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"enregistrar àudio"</string>
@@ -1465,6 +1477,7 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Pantalla HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Superposa #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", segur"</string>
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"La pantalla sense fil està connectada"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"Aquesta pantalla es mostra en un altre dispositiu"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Desconnecta"</string>

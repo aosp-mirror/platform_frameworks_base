@@ -362,6 +362,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"印刷サービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"すべての印刷ジョブへのアクセス"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"別のアプリが作成した印刷ジョブにアクセスすることを所有者に許可します。通常のアプリでは不要です。"</string>
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"NFCサービスへのバインド"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"NFCカードをエミュレートしているアプリにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"テキストサービスにバインド"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"テキストサービス（SpellCheckerServiceなど）のトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"VPNサービスにバインド"</string>
@@ -470,8 +472,18 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"InputFlingerの低レベルの機能を使用することをアプリに許可します。"</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wi-Fiディスプレイの設定"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Wi-Fiディスプレイを設定して接続することをアプリに許可します。"</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wi-Fiディスプレイの制御"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Wi-Fiディスプレイの低レベル機能を制御することをアプリに許可します。"</string>
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"音声設定の変更"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"音声全般の設定（音量、出力に使用するスピーカーなど）の変更をアプリに許可します。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"録音"</string>
@@ -1465,6 +1477,7 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI画面"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"オーバーレイ第<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>、<xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">"、セキュア"</string>
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"ワイヤレスディスプレイが接続されています"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"この画面は別の端末で表示されています"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"切断"</string>

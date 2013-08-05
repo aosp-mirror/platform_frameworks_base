@@ -362,6 +362,10 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"İzin sahibine, bir yazdırma hizmetinin en üst düzey arayüzüne bağlanma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"tüm yazdırma işlerine eriş"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"İzin sahibine, başka uygulama tarafından oluşturulan yazdırma işlerine erişim izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
+    <!-- no translation found for permlab_bindNfcService (2752731300419410724) -->
+    <skip />
+    <!-- no translation found for permdesc_bindNfcService (6120647629174066862) -->
+    <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"kısa mesaj hizmetine bağla"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Cihazın sahibine, bir metin hizmetinin (ör. SpellCheckerService) en üst düzey arayüzüne bağlanma izni verir. Normal uygulamalarda hiçbir zaman gerekmez."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"VPN hizmetine bağlan"</string>
@@ -470,8 +474,18 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Uygulamaya, alt düzey InputFlinger özelliklerini kullanma izni verir."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Kablosuz ekranları yapılandır"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Uygulamaya kablosuz ekranları yapılandırma ve bunlara bağlanma izni verir."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Kablosuz ekranları denetle"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Uygulamaya kablosuz ekranların alt düzey özelliklerini kontrol etme izni verir."</string>
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ses ayarlarınızı değiştirin"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Uygulamaya ses düzeyi ve ses çıkışı için kullanılan hoparlör gibi genel ses ayarlarını değiştirme izni verir."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ses kaydet"</string>
@@ -1465,6 +1479,8 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI Ekran"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Yer Paylaşımı No. <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <!-- no translation found for display_manager_overlay_display_secure_suffix (6022119702628572080) -->
+    <skip />
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"Kablosuz ekrana bağlandı"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"Bu ekran başka bir cihazda gösteriliyor"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Bağlantıyı kes"</string>

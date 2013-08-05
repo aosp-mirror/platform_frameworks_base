@@ -362,6 +362,10 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Ermöglicht dem Inhaber, sich an die Oberfläche eines Druckdienstes auf oberster Ebene zu binden. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"Auf alle Druckaufträge zugreifen"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Ermöglicht dem Inhaber den Zugriff auf von einer anderen App erstellte Druckaufträge. Sollte für normale Apps nie benötigt werden."</string>
+    <!-- no translation found for permlab_bindNfcService (2752731300419410724) -->
+    <skip />
+    <!-- no translation found for permdesc_bindNfcService (6120647629174066862) -->
+    <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"An einen Textdienst binden"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Ermöglicht dem Halter, sich an die Oberfläche eines Textdienstes auf oberster Ebene zu binden, z. B. eines Rechtschreibprüfungsdienstes. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"An einen VPN-Dienst binden"</string>
@@ -470,8 +474,18 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Ermöglicht der App, die systemnahen InputFlinger-Funktionen zu verwenden"</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"WLAN-Anzeigen konfigurieren"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Erlaubt der App, WLAN-Anzeigen zu konfigurieren und eine Verbindung zu diesen herzustellen"</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"WLAN-Anzeigen steuern"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Erlaubt der App, untergeordnete Funktionen von WLAN-Anzeigen zu steuern"</string>
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"Audio-Einstellungen ändern"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Ermöglicht der App, globale Audio-Einstellungen zu ändern, etwa die Lautstärke und den Lautsprecher für die Ausgabe."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"Audio aufnehmen"</string>
@@ -1465,6 +1479,7 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI-Bildschirm"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Overlay-Nr. <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", sicher"</string>
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"Kabellose Übertragung (WiDi) ist aktiviert."</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"Dieser Bildschirm wird auf einem anderen Gerät angezeigt."</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Verbindung trennen"</string>

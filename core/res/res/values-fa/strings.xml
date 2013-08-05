@@ -362,6 +362,10 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"به برنامه اجازه می‌دهد که به رابط سطح بالای سرویس چاپ متصل شود. هرگز برای برنامه‌های معمولی مورد نیاز نیست."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"دسترسی به تمام کارهای چاپ"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"به دارنده اجازه دسترسی به کارهای چاپی ایجاد شده توسط برنامه‌ای دیگر را می‌دهد.هرگز برای برنامه‌های معمولی مورد نیاز نیست."</string>
+    <!-- no translation found for permlab_bindNfcService (2752731300419410724) -->
+    <skip />
+    <!-- no translation found for permdesc_bindNfcService (6120647629174066862) -->
+    <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"اتصال به یک سرویس متنی"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"به دارنده اجازه می‌دهد خود را به یک رابط سطح بالای خدمات متنی مرتبط کند (برای مثال SpellCheckerService). هرگز برای برنامه‌های عادی لازم نیست."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"اتصال به یک سرویس VPN"</string>
@@ -470,8 +474,18 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"اجازه می‎دهد برنامه از قابلیت‌های سطح پایین InputFlinger استفاده کند."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"پیکربندی صفحه نمایش‌های Wi‑Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"به برنامه اجازه می‌دهد تا اتصال به صفحات نمایش Wi‑Fi را پیکربندی کند."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"کنترل صفحه نمایش‌های Wi‑Fi"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"به برنامه اجازه می‌دهد که ویژگی‌های سطح پایین صفحه‌های نمایش Wi‑Fi را کنترل کند."</string>
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"تغییر تنظیمات صوتی"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"به برنامه امکان می‌دهد تنظیمات صوتی کلی مانند میزان صدا و بلندگوی مورد استفاده برای پخش صدا را اصلاح کند."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ضبط صدا"</string>
@@ -1465,6 +1479,8 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"صفحه HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"همپوشانی #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <!-- no translation found for display_manager_overlay_display_secure_suffix (6022119702628572080) -->
+    <skip />
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"نمایشگر بی‌سیم متصل است"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"این صفحه در حال نمایش در دستگاه دیگری است"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"قطع اتصال"</string>

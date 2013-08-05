@@ -362,6 +362,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ in. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"truy cập tất cả các lệnh in"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Cho phép chủ sở hữu truy cập các lệnh in được tạo ra bởi ứng dụng khác. Không cần thiết cho các ứng dụng thông thường."</string>
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"liên kết với dịch vụ NFC"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Cho phép chủ sở hữu liên kết với ứng dụng đang mô phỏng thẻ NFC. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"liên kết với dịch vụ văn bản"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Cho phép chủ sở hữu liên kết với giao diện cấp cao nhất của dịch vụ văn bản (ví dụ: SpellCheckerService). Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"liên kết với dịch vụ VPN"</string>
@@ -470,8 +472,18 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Cho phép ứng dụng sử dụng các tính năng InputFlinger cấp độ thấp."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"định cấu hình màn hình Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Cho phép ứng dụng định cấu hình và kết nối với màn hình Wi-Fi."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"kiểm soát màn hình Wi-Fi"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Cho phép ứng dụng kiểm soát các tính năng cấp thấp của màn hình Wi-Fi."</string>
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"thay đổi cài đặt âm thanh của bạn"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Cho phép ứng dụng sửa đổi cài đặt âm thanh chung chẳng hạn như âm lượng và loa nào được sử dụng cho thiết bị ra."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ghi âm"</string>
@@ -1465,6 +1477,7 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Màn hình HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Lớp phủ #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", an toàn"</string>
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"Hiển thị không dây đã được kết nối"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"Màn hình này đang hiển thị trên thiết bị khác"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Ngắt kết nối"</string>

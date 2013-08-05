@@ -362,6 +362,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"允許應用程式繫結至列印服務的頂層介面 (一般應用程式並不需要)。"</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"存取所有列印工作"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"允許應用程式存取其他應用程式所建立的列印工作 (一般應用程式並不需要)。"</string>
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"繫結至 NFC 服務"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"允許應用程式繫結至模擬 NFC 卡的應用程式 (一般應用程式並不需要)。"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"繫結至文字服務"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"允許應用程式繫結至文字服務 (例如 SpellCheckerService) 的頂層介面 (一般應用程式不需使用)。"</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"繫結至 VPN 服務"</string>
@@ -470,8 +472,18 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"允許應用程式使用 InputFlinger 的低階功能。"</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"設定 Wi-Fi 顯示裝置"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"允許應用程式設定及連接 Wi-Fi 顯示裝置。"</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"控制 Wi-Fi 顯示裝置"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允許應用程式控制 Wi-Fi 顯示裝置的低階功能。"</string>
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"變更音訊設定"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"允許應用程式修改全域音訊設定，例如音量和用來輸出的喇叭。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"錄製音訊"</string>
@@ -1465,6 +1477,7 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI 螢幕"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"第 <xliff:g id="ID">%1$d</xliff:g> 個重疊效果"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>：<xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>，<xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">"(安全)"</string>
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"已連接無線顯示器"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"其他裝置正在顯示這個畫面"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"中斷連線"</string>

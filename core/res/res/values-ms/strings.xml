@@ -362,6 +362,10 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan cetakan. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"akses semua kerja cetakan"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Membenarkan pemegang mengakses kerja cetakan yang dibuat oleh apl lain. Tidak sekali-kali diperlukan untuk apl biasa."</string>
+    <!-- no translation found for permlab_bindNfcService (2752731300419410724) -->
+    <skip />
+    <!-- no translation found for permdesc_bindNfcService (6120647629174066862) -->
+    <skip />
     <string name="permlab_bindTextService" msgid="7358378401915287938">"terikat kepada perkhidmatan teks"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Membenarkan pemegang mengikat kepada antara muka peringkat atasan perkhidmatan teks(mis. PerkhidmatanPenyemakEjaan). Tidak seharusnya diperlukan untuk apl biasa."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"terikat kepada perkhidmatan VPN"</string>
@@ -470,8 +474,18 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Membenarkan apl menggunakan ciri peringkat rendah InputFlinger."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"konfigurasikan paparan Wifi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Membenarkan apl mengkonfigurasi dan menyambung ke paparan Wifi."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"kawal paparan Wifi"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Membenarkan apl mengawal ciri tahap rendah paparan Wifi."</string>
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"tukar tetapan audio anda"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Membenarkan apl untuk mengubah suai tetapan audio global seperti kelantangan dan pembesar suara mana digunakan untuk output."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"rakam audio"</string>
@@ -1465,6 +1479,8 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Skrin HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Tindih #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <!-- no translation found for display_manager_overlay_display_secure_suffix (6022119702628572080) -->
+    <skip />
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"Paparan wayarles disambungkan"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"Skrin ini ditunjukkan pada peranti lain"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Putus sambungan"</string>

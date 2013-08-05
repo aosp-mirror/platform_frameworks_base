@@ -362,6 +362,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Hiermee kan de houder verbinding maken met de hoofdinterface van een afdrukservice. Nooit vereist voor normale apps."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"toegang krijgen tot alle afdruktaken"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Hiermee kan de houder toegang krijgen tot afdruktaken die zijn gemaakt door een andere app. Nooit vereist voor normale apps."</string>
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"koppelen aan NFC-service"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Hiermee kan de houder apps koppelen die NFC-kaarten emuleren. Nooit vereist voor normale apps."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"koppelen aan een sms-service"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Hiermee kan de gebruiker koppelen met de hoofdinterface van een tekstservice (zoals SpellCheckerService). Dit is niet nodig voor normale apps."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"koppelen aan een VPN-service"</string>
@@ -470,8 +472,18 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Hiermee kan de app InputFlinger-functies op laag niveau gebruiken."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"wifi-displays configureren"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"De app toestaan wifi-displays te configureren en hiermee verbinding te maken."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"wifi-displays beheren"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"De app toestaan minder belangrijke functies van wifi-displays te beheren."</string>
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"uw audio-instellingen wijzigen"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Hiermee kan de app algemene audio-instellingen wijzigen zoals het volume en welke luidspreker wordt gebruikt voor de uitvoer."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"audio opnemen"</string>
@@ -1465,6 +1477,7 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI-scherm"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Overlay <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", beveiligd"</string>
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"Draadloze display is aangesloten"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"Dit scherm wordt op een ander apparaat weergegeven"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Verbinding verbreken"</string>

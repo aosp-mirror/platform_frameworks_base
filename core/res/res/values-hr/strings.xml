@@ -362,6 +362,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Dopušta nositelju vezanje uza sučelje usluge ispisa najviše razine. Ne bi smjelo biti potrebno za uobičajene aplikacije."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"pristupi svim zadacima ispisa"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Dopušta nositelju pristup zadacima ispisa koje je izradila neka druga aplikacija. Ne bi smjelo biti potrebno za uobičajene aplikacije."</string>
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"povezivanje s NFC uslugom"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Omogućuje nositelju povezivanje s aplikacijama koje emuliraju NFC kartice. Nikada ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"vezanje na tekstualnu uslugu"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Omogućuje korisniku povezivanje s najvišom razinom sučelja tekstualne usluge (npr. SpellCheckerService). Ne bi smjelo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"vezanje na VPN uslugu"</string>
@@ -470,8 +472,18 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Dopušta aplikaciji upotrebu značajki niske razine InputFlingera."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"konfiguriraj Wifi zaslone"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Omogućuje aplikaciji konfiguriranje i povezivanje s Wi-Fi zaslonima."</string>
-    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"upravljaj Wifi zaslonima"</string>
-    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Omogućuje aplikaciji upravljanje značajkama Wi-Fi zaslona niske razine."</string>
+    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
+    <skip />
+    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
+    <skip />
+    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
+    <skip />
+    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
+    <skip />
+    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
+    <skip />
+    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
+    <skip />
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"promjena postavki zvuka"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Aplikaciji omogućuje izmjenu globalnih postavki zvuka, primjerice glasnoće i zvučnika koji se upotrebljava za izlaz."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"snimanje zvuka"</string>
@@ -1465,6 +1477,7 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"HDMI zaslon"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Preklapanje br. <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", sigurno"</string>
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"Bežični je prikaz povezan"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"Ovaj se zaslon prikazuje na nekom drugom uređaju"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Isključi"</string>
