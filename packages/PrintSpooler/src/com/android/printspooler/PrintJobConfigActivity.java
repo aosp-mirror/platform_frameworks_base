@@ -994,7 +994,11 @@ public class PrintJobConfigActivity extends Activity {
                 printer.getDefaults(defaultAttributes);
 
                 // Destination
-                mDestinationSpinner.setEnabled(true);
+                if (mDestinationSpinnerAdapter.getCount() > 1) {
+                    mDestinationSpinner.setEnabled(true);
+                } else {
+                    mDestinationSpinner.setEnabled(false);
+                }
 
                 // Copies
                 mCopiesEditText.setEnabled(true);
@@ -1020,7 +1024,13 @@ public class PrintJobConfigActivity extends Activity {
                         mMediaSizeSpinnerAdapter.add(new SpinnerItem<MediaSize>(
                                 mediaSize, mediaSize.getLabel()));
                     }
-                    if (mediaSizeCount > 0) {
+                    if (mediaSizeCount <= 0) {
+                        mMediaSizeSpinner.setEnabled(false);
+                        mMediaSizeSpinner.setSelection(AdapterView.INVALID_POSITION);
+                    } else if (mediaSizeCount == 1) {
+                        mMediaSizeSpinner.setEnabled(false);
+                        mMediaSizeSpinner.setSelection(0);
+                    } else {
                         mMediaSizeSpinner.setEnabled(true);
                         final int selectedMediaSizeIndex = Math.max(mediaSizes.indexOf(
                                 defaultAttributes.getMediaSize()), 0);
@@ -1038,15 +1048,17 @@ public class PrintJobConfigActivity extends Activity {
                     colorModesChanged = true;
                 } else {
                     int remainingColorModes = colorModes;
+                    int adapterIndex = 0;
                     while (remainingColorModes != 0) {
                         final int colorBitOffset = Integer.numberOfTrailingZeros(
                                 remainingColorModes);
                         final int colorMode = 1 << colorBitOffset;
                         remainingColorModes &= ~colorMode;
-                        if (colorMode != mColorModeSpinnerAdapter.getItem(colorBitOffset).value) {
+                        if (colorMode != mColorModeSpinnerAdapter.getItem(adapterIndex).value) {
                             colorModesChanged = true;
                             break;
                         }
+                        adapterIndex++;
                     }
                 }
                 if (colorModesChanged) {
@@ -1062,7 +1074,14 @@ public class PrintJobConfigActivity extends Activity {
                         mColorModeSpinnerAdapter.add(new SpinnerItem<Integer>(colorMode,
                                 colorModeLabels[colorBitOffset]));
                     }
-                    if (colorModes > 0) {
+                    final int colorModeCount = Integer.bitCount(colorModes);
+                    if (colorModeCount <= 0) {
+                        mColorModeSpinner.setEnabled(false);
+                        mColorModeSpinner.setSelection(AdapterView.INVALID_POSITION);
+                    } else if (colorModeCount == 1) {
+                        mColorModeSpinner.setEnabled(false);
+                        mColorModeSpinner.setSelection(0);
+                    } else {
                         mColorModeSpinner.setEnabled(true);
                         final int selectedColorModeIndex = Integer.numberOfTrailingZeros(
                                 (colorModes & defaultAttributes.getColorMode()));
@@ -1080,16 +1099,18 @@ public class PrintJobConfigActivity extends Activity {
                     orientationsChanged = true;
                 } else {
                     int remainingOrientations = orientations;
+                    int adapterIndex = 0;
                     while (remainingOrientations != 0) {
                         final int orientationBitOffset = Integer.numberOfTrailingZeros(
                                 remainingOrientations);
                         final int orientation = 1 << orientationBitOffset;
                         remainingOrientations &= ~orientation;
                         if (orientation != mOrientationSpinnerAdapter.getItem(
-                                orientationBitOffset).value) {
+                                adapterIndex).value) {
                             orientationsChanged = true;
                             break;
                         }
+                        adapterIndex++;
                     }
                 }
                 if (orientationsChanged) {
@@ -1105,7 +1126,14 @@ public class PrintJobConfigActivity extends Activity {
                         mOrientationSpinnerAdapter.add(new SpinnerItem<Integer>(orientation,
                                 orientationLabels[orientationBitOffset]));
                     }
-                    if (orientations > 0) {
+                    final int orientationCount = Integer.bitCount(orientations);
+                    if (orientationCount <= 0) {
+                        mOrientationSpinner.setEnabled(false);
+                        mOrientationSpinner.setSelection(AdapterView.INVALID_POSITION);
+                    } else if (orientationCount == 1) {
+                        mOrientationSpinner.setEnabled(false);
+                        mOrientationSpinner.setSelection(0);
+                    } else {
                         mOrientationSpinner.setEnabled(true);
                         final int selectedOrientationIndex = Integer.numberOfTrailingZeros(
                                 (orientations & defaultAttributes.getOrientation()));
@@ -1201,6 +1229,8 @@ public class PrintJobConfigActivity extends Activity {
                     && mDestinationSpinnerAdapter.getCount() > 0) {
                 mDestinationSpinner.setSelection(0);
             }
+
+            mEditor.updateUi();
         }
 
         public void removePrinters(List<PrinterId> pritnerIds) {
