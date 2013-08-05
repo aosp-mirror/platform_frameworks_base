@@ -25,7 +25,6 @@ commonSources := \
     ObbFile.cpp \
     ResourceTypes.cpp \
     StreamingZipInflater.cpp \
-    ZipFileCRO.cpp \
     ZipFileRO.cpp \
     ZipUtils.cpp
 
