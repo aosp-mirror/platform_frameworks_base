@@ -217,7 +217,7 @@ public class Color {
             }
             return (int)color;
         } else {
-            Integer color = sColorNameMap.get(colorString.toLowerCase(Locale.US));
+            Integer color = sColorNameMap.get(colorString.toLowerCase(Locale.ROOT));
             if (color != null) {
                 return color;
             }
@@ -379,7 +379,7 @@ public class Color {
      * @hide
      */
     public static int getHtmlColor(String color) {
-        Integer i = sColorNameMap.get(color.toLowerCase());
+        Integer i = sColorNameMap.get(color.toLowerCase(Locale.ROOT));
         if (i != null) {
             return i;
         } else {
