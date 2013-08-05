@@ -48,6 +48,7 @@ import android.widget.AbsoluteLayout;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.OutputStream;
 import java.util.Map;
 
 /**
@@ -1031,6 +1032,34 @@ public class WebView extends AbsoluteLayout
     public Picture capturePicture() {
         checkThread();
         return mProvider.capturePicture();
+    }
+
+    /**
+     * Exports the contents of this Webview as PDF. Only supported for API levels
+     * {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE} and above.
+     *
+     * @param out            The stream to export the PDF contents to. Cannot be null.
+     * @param width          The page width. Should be larger than 0.
+     * @param height         The page height. Should be larger than 0.
+     * @param resultCallback A callback to be invoked when the PDF content is exported.
+     *                       A true indicates success, and a false failure.
+     *
+     * TODO: explain method parameters, margins, consider making the callback
+     * return more meaningful information, explain any threading concerns, HW
+     * draw limitations, and make it public.
+     * TODO: at the moment we are asking app to provide paper size information (width
+     * and height). This is likely not ideal (I think need margin info too).
+     * Another approach would be using PrintAttributes. This is to be clarified later.
+     *
+     * TODO: explain this webview will not draw during export (onDraw will clear to
+     * background color) so recommend taking it offscreen, or putting in a layer with an
+     * overlaid progress UI / spinner.
+     * @hide
+     */
+    public void exportToPdf(OutputStream out, int width, int height,
+            ValueCallback<Boolean> resultCallback) {
+        checkThread();
+        mProvider.exportToPdf(out, width, height, resultCallback);
     }
 
     /**
