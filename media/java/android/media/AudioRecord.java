@@ -256,19 +256,17 @@ public class AudioRecord
         // audio source
         if ( (audioSource < MediaRecorder.AudioSource.DEFAULT) ||
              (audioSource > MediaRecorder.getAudioSourceMax()) )  {
-            throw (new IllegalArgumentException("Invalid audio source."));
-        } else {
-            mRecordSource = audioSource;
+            throw new IllegalArgumentException("Invalid audio source.");
         }
+        mRecordSource = audioSource;
 
         //--------------
         // sample rate
         if ( (sampleRateInHz < 4000) || (sampleRateInHz > 48000) ) {
-            throw (new IllegalArgumentException(sampleRateInHz
-                    + "Hz is not a supported sample rate."));
-        } else {
-            mSampleRate = sampleRateInHz;
+            throw new IllegalArgumentException(sampleRateInHz
+                    + "Hz is not a supported sample rate.");
         }
+        mSampleRate = sampleRateInHz;
 
         //--------------
         // channel config
@@ -289,9 +287,7 @@ public class AudioRecord
             mChannelMask = channelConfig;
             break;
         default:
-            mChannelCount = 0;
-            mChannelMask = AudioFormat.CHANNEL_INVALID;
-            throw (new IllegalArgumentException("Unsupported channel configuration."));
+            throw new IllegalArgumentException("Unsupported channel configuration.");
         }
 
         //--------------
@@ -305,9 +301,8 @@ public class AudioRecord
             mAudioFormat = audioFormat;
             break;
         default:
-            mAudioFormat = AudioFormat.ENCODING_INVALID;
-        throw (new IllegalArgumentException("Unsupported sample encoding."
-                + " Should be ENCODING_PCM_8BIT or ENCODING_PCM_16BIT."));
+            throw new IllegalArgumentException("Unsupported sample encoding."
+                    + " Should be ENCODING_PCM_8BIT or ENCODING_PCM_16BIT.");
         }
     }
 
@@ -324,7 +319,7 @@ public class AudioRecord
         int frameSizeInBytes = mChannelCount
             * (mAudioFormat == AudioFormat.ENCODING_PCM_8BIT ? 1 : 2);
         if ((audioBufferSize % frameSizeInBytes != 0) || (audioBufferSize < 1)) {
-            throw (new IllegalArgumentException("Invalid audio buffer size."));
+            throw new IllegalArgumentException("Invalid audio buffer size.");
         }
 
         mNativeBufferSizeInBytes = audioBufferSize;
@@ -509,8 +504,8 @@ public class AudioRecord
     public void startRecording()
     throws IllegalStateException {
         if (mState != STATE_INITIALIZED) {
-            throw(new IllegalStateException("startRecording() called on an "
-                    +"uninitialized AudioRecord."));
+            throw new IllegalStateException("startRecording() called on an "
+                    + "uninitialized AudioRecord.");
         }
 
         // start recording
@@ -531,8 +526,8 @@ public class AudioRecord
     public void startRecording(MediaSyncEvent syncEvent)
     throws IllegalStateException {
         if (mState != STATE_INITIALIZED) {
-            throw(new IllegalStateException("startRecording() called on an "
-                    +"uninitialized AudioRecord."));
+            throw new IllegalStateException("startRecording() called on an "
+                    + "uninitialized AudioRecord.");
         }
 
         // start recording
@@ -550,7 +545,7 @@ public class AudioRecord
     public void stop()
     throws IllegalStateException {
         if (mState != STATE_INITIALIZED) {
-            throw(new IllegalStateException("stop() called on an uninitialized AudioRecord."));
+            throw new IllegalStateException("stop() called on an uninitialized AudioRecord.");
         }
 
         // stop recording

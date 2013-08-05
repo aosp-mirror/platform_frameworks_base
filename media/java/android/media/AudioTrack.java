@@ -371,18 +371,16 @@ public class AudioTrack
            && (streamType != AudioManager.STREAM_BLUETOOTH_SCO)
            && (streamType != AudioManager.STREAM_DTMF)) {
             throw new IllegalArgumentException("Invalid stream type.");
-        } else {
-            mStreamType = streamType;
         }
+        mStreamType = streamType;
 
         //--------------
         // sample rate, note these values are subject to change
         if ( (sampleRateInHz < 4000) || (sampleRateInHz > 48000) ) {
             throw new IllegalArgumentException(sampleRateInHz
                     + "Hz is not a supported sample rate.");
-        } else {
-            mSampleRate = sampleRateInHz;
         }
+        mSampleRate = sampleRateInHz;
 
         //--------------
         // channel config
@@ -403,14 +401,10 @@ public class AudioTrack
         default:
             if (!isMultichannelConfigSupported(channelConfig)) {
                 // input channel configuration features unsupported channels
-                mChannelCount = 0;
-                mChannels = AudioFormat.CHANNEL_INVALID;
-                mChannelConfiguration = AudioFormat.CHANNEL_INVALID;
                 throw new IllegalArgumentException("Unsupported channel configuration.");
-            } else {
-                mChannels = channelConfig;
-                mChannelCount = Integer.bitCount(channelConfig);
             }
+            mChannels = channelConfig;
+            mChannelCount = Integer.bitCount(channelConfig);
         }
 
         //--------------
@@ -424,7 +418,6 @@ public class AudioTrack
             mAudioFormat = audioFormat;
             break;
         default:
-            mAudioFormat = AudioFormat.ENCODING_INVALID;
             throw new IllegalArgumentException("Unsupported sample encoding."
                 + " Should be ENCODING_PCM_8BIT or ENCODING_PCM_16BIT.");
         }
@@ -433,9 +426,8 @@ public class AudioTrack
         // audio load mode
         if ( (mode != MODE_STREAM) && (mode != MODE_STATIC) ) {
             throw new IllegalArgumentException("Invalid mode.");
-        } else {
-            mDataLoadMode = mode;
         }
+        mDataLoadMode = mode;
     }
 
     /**
