@@ -134,7 +134,7 @@ static void audioCallback(int event, void* user, void *info) {
     switch (event) {
     case AudioTrack::EVENT_MARKER: {
         JNIEnv *env = AndroidRuntime::getJNIEnv();
-        if (user && env) {
+        if (user != NULL && env != NULL) {
             env->CallStaticVoidMethod(
                 callbackInfo->audioTrack_class,
                 javaAudioTrackFields.postNativeEventInJava,
@@ -148,7 +148,7 @@ static void audioCallback(int event, void* user, void *info) {
 
     case AudioTrack::EVENT_NEW_POS: {
         JNIEnv *env = AndroidRuntime::getJNIEnv();
-        if (user && env) {
+        if (user != NULL && env != NULL) {
             env->CallStaticVoidMethod(
                 callbackInfo->audioTrack_class,
                 javaAudioTrackFields.postNativeEventInJava,
