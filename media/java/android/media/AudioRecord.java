@@ -122,11 +122,11 @@ public class AudioRecord
     /**
      * The audio data sampling rate in Hz.
      */
-    private int mSampleRate = 22050;
+    private int mSampleRate;
     /**
      * The number of input audio channels (1 is mono, 2 is stereo)
      */
-    private int mChannelCount = 1;
+    private int mChannelCount;
     /**
      * The audio channel mask
      */
@@ -136,11 +136,11 @@ public class AudioRecord
      * @see AudioFormat#ENCODING_PCM_8BIT
      * @see AudioFormat#ENCODING_PCM_16BIT
      */
-    private int mAudioFormat = AudioFormat.ENCODING_PCM_16BIT;
+    private int mAudioFormat;
     /**
      * Where the audio data is recorded from.
      */
-    private int mRecordSource = MediaRecorder.AudioSource.DEFAULT;
+    private int mRecordSource;
     /**
      * Indicates the state of the AudioRecord instance.
      */
@@ -208,7 +208,6 @@ public class AudioRecord
     public AudioRecord(int audioSource, int sampleRateInHz, int channelConfig, int audioFormat,
             int bufferSizeInBytes)
     throws IllegalArgumentException {
-        mState = STATE_UNINITIALIZED;
         mRecordingState = RECORDSTATE_STOPPED;
 
         // remember which looper is associated with the AudioRecord instanciation
