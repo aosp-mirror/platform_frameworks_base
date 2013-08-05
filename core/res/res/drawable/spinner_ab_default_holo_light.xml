@@ -17,7 +17,7 @@
  */
 -->
 
-<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+<nine-patch xmlns:android="http://schemas.android.com/apk/res/android"
         android:src="@drawable/spinner_ab_default_holo_light_am"
         android:autoMirrored="true">
-</bitmap>
+</nine-patch>
