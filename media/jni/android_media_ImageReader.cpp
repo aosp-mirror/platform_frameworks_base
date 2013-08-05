@@ -305,6 +305,7 @@ static void Image_getLockedBufferInfo(JNIEnv* env, CpuConsumer::LockedBuffer* bu
     uint32_t dataSize, ySize, cSize, cStride;
     uint8_t *cb, *cr;
     uint8_t *pData = NULL;
+    int bytesPerPixel = 0;
 
     dataSize = ySize = cSize = cStride = 0;
     int32_t fmt = buffer->format;
@@ -385,6 +386,28 @@ static void Image_getLockedBufferInfo(JNIEnv* env, CpuConsumer::LockedBuffer* bu
             pData = buffer->data;
             dataSize = buffer->width * 2 * buffer->height;
             break;
+        case HAL_PIXEL_FORMAT_RGBA_8888:
+        case HAL_PIXEL_FORMAT_RGBX_8888:
+            // Single plane, 32bpp.
+            bytesPerPixel = 4;
+            ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
+            pData = buffer->data;
+            dataSize = buffer->stride * buffer->height * bytesPerPixel;
+            break;
+        case HAL_PIXEL_FORMAT_RGB_565:
+            // Single plane, 16bpp.
+            bytesPerPixel = 2;
+            ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
+            pData = buffer->data;
+            dataSize = buffer->stride * buffer->height * bytesPerPixel;
+            break;
+        case HAL_PIXEL_FORMAT_RGB_888:
+            // Single plane, 24bpp.
+            bytesPerPixel = 3;
+            ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
+            pData = buffer->data;
+            dataSize = buffer->stride * buffer->height * bytesPerPixel;
+            break;
         default:
             jniThrowExceptionFmt(env, "java/lang/UnsupportedOperationException",
                                  "Pixel format: 0x%x is unsupported", fmt);
@@ -426,9 +449,20 @@ static jint Image_imageGetPixelStride(JNIEnv* env, CpuConsumer::LockedBuffer* bu
             break;
         case HAL_PIXEL_FORMAT_Y16:
         case HAL_PIXEL_FORMAT_RAW_SENSOR:
+        case HAL_PIXEL_FORMAT_RGB_565:
             // Single plane 16bpp data.
             ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
             pixelStride = 2;
+            break;
+        case HAL_PIXEL_FORMAT_RGBA_8888:
+        case HAL_PIXEL_FORMAT_RGBX_8888:
+            ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
+            pixelStride = 4;
+            break;
+        case HAL_PIXEL_FORMAT_RGB_888:
+            // Single plane, 24bpp.
+            ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
+            pixelStride = 3;
             break;
         default:
             jniThrowExceptionFmt(env, "java/lang/UnsupportedOperationException",
@@ -481,6 +515,20 @@ static jint Image_imageGetRowStride(JNIEnv* env, CpuConsumer::LockedBuffer* buff
             LOG_ALWAYS_FATAL_IF(buffer->stride % 16,
                                 "Stride is not 16 pixel aligned %d", buffer->stride);
             rowStride = buffer->stride * 2;
+            break;
+        case HAL_PIXEL_FORMAT_RGB_565:
+            ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
+            rowStride = buffer->stride * 2;
+            break;
+        case HAL_PIXEL_FORMAT_RGBA_8888:
+        case HAL_PIXEL_FORMAT_RGBX_8888:
+            ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
+            rowStride = buffer->stride * 4;
+            break;
+        case HAL_PIXEL_FORMAT_RGB_888:
+            // Single plane, 24bpp.
+            ALOG_ASSERT(idx == 0, "Wrong index: %d", idx);
+            rowStride = buffer->stride * 3;
             break;
         default:
             ALOGE("%s Pixel format: 0x%x is unsupported", __FUNCTION__, fmt);

@@ -17,6 +17,7 @@
 package android.media;
 
 import android.graphics.ImageFormat;
+import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -64,7 +65,8 @@ public final class ImageReader implements AutoCloseable {
      * @param height the height in pixels of the Images that this reader will
      * produce.
      * @param format the format of the Image that this reader will produce. This
-     * must be one of the {@link android.graphics.ImageFormat} constants.
+     * must be one of the {@link android.graphics.ImageFormat} or
+     * {@link android.graphics.PixelFormat} constants.
      * @param maxImages the maximum number of images the user will want to
      * access simultaneously. This should be as small as possible to limit
      * memory use. Once maxImages Images are obtained by the user, one of them
@@ -223,6 +225,13 @@ public final class ImageReader implements AutoCloseable {
         }
     }
 
+    /**
+     * Only a subset of the formats defined in {@link android.graphics.ImageFormat} and
+     * {@link android.graphics.PixelFormat} are supported by ImageReader. When reading RGB
+     * data from a surface, the formats defined in {@link android.graphics.PixelFormat}
+     * can be used, when reading YUV, JPEG or raw sensor data ( for example, from camera
+     *  or video decoder), formats from {@link android.graphics.ImageFormat} are used.
+     */
     private int getNumPlanesFromFormat() {
         switch (mFormat) {
             case ImageFormat.YV12:
@@ -231,7 +240,10 @@ public final class ImageReader implements AutoCloseable {
                 return 3;
             case ImageFormat.NV16:
                 return 2;
-            case ImageFormat.RGB_565:
+            case PixelFormat.RGB_565:
+            case PixelFormat.RGBA_8888:
+            case PixelFormat.RGBX_8888:
+            case PixelFormat.RGB_888:
             case ImageFormat.JPEG:
             case ImageFormat.YUY2:
             case ImageFormat.Y8:
