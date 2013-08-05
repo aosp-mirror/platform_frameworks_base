@@ -1282,7 +1282,7 @@ public abstract class PreferenceActivity extends ListActivity implements
     }
 
     /**
-     * Start a new fragment containing a preference panel.  If the prefences
+     * Start a new fragment containing a preference panel.  If the preferences
      * are being displayed in multi-pane mode, the given fragment class will
      * be instantiated and placed in the appropriate pane.  If running in
      * single-pane mode, a new activity will be launched in which to show the
@@ -1305,10 +1305,6 @@ public abstract class PreferenceActivity extends ListActivity implements
         if (mSinglePane) {
             startWithFragment(fragmentClass, args, resultTo, resultRequestCode, titleRes, 0);
         } else {
-            if (!isValidFragment(fragmentClass)) {
-                throw new IllegalArgumentException("Invalid fragment for this activity: "
-                        + fragmentClass);
-            }
             Fragment f = Fragment.instantiate(this, fragmentClass, args);
             if (resultTo != null) {
                 f.setTargetFragment(resultTo, resultRequestCode);
