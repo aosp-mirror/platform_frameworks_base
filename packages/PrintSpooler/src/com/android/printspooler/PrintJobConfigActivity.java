@@ -161,7 +161,7 @@ public class PrintJobConfigActivity extends Activity {
             mCurrPrintAttributes.copyFrom(attributes);
         }
 
-        mSpooler = PrintSpooler.getInstance(this);
+        mSpooler = PrintSpooler.peekInstance();
         mEditor = new Editor();
         mDocument = new Document();
         mController = new PrintController(new RemotePrintDocumentAdapter(

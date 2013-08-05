@@ -68,7 +68,7 @@ public final class PrintManagerService extends IPrintManager.Stub {
                 synchronized (mLock) {
                     UserState userState = getCurrentUserStateLocked();
                     userState.updateIfNeededLocked();
-                    userState.getSpoolerLocked().notifyClientForActivteJobs();
+                    userState.getSpoolerLocked().start();
                 }
             }
         });
@@ -144,7 +144,7 @@ public final class PrintManagerService extends IPrintManager.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            PrintJobInfo printJobInfo = getPrintJobInfo(printJobId, resolvedAppId, resolvedUserId);
+            PrintJobInfo printJobInfo = spooler.getPrintJobInfo(printJobId, resolvedAppId);
             if (printJobInfo == null) {
                 return;
             }
@@ -152,7 +152,7 @@ public final class PrintManagerService extends IPrintManager.Stub {
                 ComponentName printServiceName = printJobInfo.getPrinterId().getServiceName();
                 RemotePrintService printService = null;
                 synchronized (mLock) {
-                    printService = userState.getActiveServices().get(printServiceName);
+                    printService = userState.getActiveServicesLocked().get(printServiceName);
                 }
                 if (printService == null) {
                     return;
@@ -328,7 +328,7 @@ public final class PrintManagerService extends IPrintManager.Stub {
             mCurrentUserId = newUserId;
             UserState userState = getCurrentUserStateLocked();
             userState.updateIfNeededLocked();
-            userState.getSpoolerLocked().notifyClientForActivteJobs();
+            userState.getSpoolerLocked().start();
         }
     }
 
