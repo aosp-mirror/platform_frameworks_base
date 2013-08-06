@@ -28,5 +28,6 @@ interface INfcCardEmulation
     boolean isDefaultServiceForCategory(int userHandle, in ComponentName service, String category);
     boolean isDefaultServiceForAid(int userHandle, in ComponentName service, String aid);
     boolean setDefaultServiceForCategory(int userHandle, in ComponentName service, String category);
+    boolean setDefaultForNextTap(int userHandle, in ComponentName service);
     List<ApduServiceInfo> getServices(int userHandle, in String category);
 }

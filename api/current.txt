@@ -14819,7 +14819,6 @@ package android.nfc.cardemulation {
     method public static synchronized android.nfc.cardemulation.CardEmulationManager getInstance(android.nfc.NfcAdapter);
     method public boolean isDefaultServiceForAid(android.content.ComponentName, java.lang.String);
     method public boolean isDefaultServiceForCategory(android.content.ComponentName, java.lang.String);
-    method public boolean setDefaultServiceForCategory(android.content.ComponentName, java.lang.String);
     field public static final java.lang.String ACTION_CHANGE_DEFAULT = "android.nfc.cardemulation.ACTION_CHANGE_DEFAULT";
     field public static final java.lang.String CATEGORY_OTHER = "other";
     field public static final java.lang.String CATEGORY_PAYMENT = "payment";
