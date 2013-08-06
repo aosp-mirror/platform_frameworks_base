@@ -100,6 +100,7 @@ struct DelegateTexture: public Texture {
             bool force = false, GLenum renderTarget = GL_TEXTURE_2D) {
         mDelegate->setFilterMinMag(min, mag, bindTexture, force, renderTarget);
     }
+
 private:
     Texture* const mDelegate;
 }; // struct DelegateTexture
@@ -125,12 +126,12 @@ void AssetAtlas::createEntries(Caches& caches, int* map, int count) {
                 y / height, (y + bitmap->height()) / height);
 
         Texture* texture = new DelegateTexture(caches, mTexture);
-        Entry* entry = new Entry(bitmap, x, y, rotated, texture, mapper, *this);
-
         texture->id = mTexture->id;
         texture->blend = !bitmap->isOpaque();
         texture->width = bitmap->width();
         texture->height = bitmap->height();
+
+        Entry* entry = new Entry(bitmap, x, y, rotated, texture, mapper, *this);
         texture->uvMapper = &entry->uvMapper;
 
         mEntries.add(entry->bitmap, entry);

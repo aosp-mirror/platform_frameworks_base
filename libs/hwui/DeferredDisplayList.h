@@ -40,7 +40,7 @@ class Batch;
 class DrawBatch;
 class MergingDrawBatch;
 
-typedef void* mergeid_t;
+typedef const void* mergeid_t;
 
 class DeferredDisplayList {
 public:
