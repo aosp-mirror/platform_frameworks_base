@@ -19,6 +19,7 @@
 #include <utils/Log.h>
 #include <utils/misc.h>
 #include <utils/List.h>
+#include <utils/String8.h>
 
 #include <cstdio>
 
@@ -47,22 +48,20 @@ enum {
     IMAGE_READER_MAX_NUM_PLANES = 3,
 };
 
-struct fields_t {
-    // For ImageReader class
-    jfieldID  imageReaderContext;
-    jmethodID postEvent;
-    // For SurfaceImage class
-    jfieldID  buffer;
-    jfieldID  timeStamp;
-};
+static struct {
+    jfieldID mNativeContext;
+    jmethodID postEventFromNative;
+} gImageReaderClassInfo;
 
-struct classInfo_t {
+static struct {
+    jfieldID mLockedBuffer;
+    jfieldID mTimestamp;
+} gSurfaceImageClassInfo;
+
+static struct {
     jclass clazz;
     jmethodID ctor;
-};
-
-static fields_t    fields;
-static classInfo_t surfPlaneClassInfo;
+} gSurfacePlaneClassInfo;
 
 // ----------------------------------------------------------------------------
 
@@ -183,7 +182,7 @@ void JNIImageReaderContext::onFrameAvailable()
     bool needsDetach = false;
     JNIEnv* env = getJNIEnv(&needsDetach);
     if (env != NULL) {
-        env->CallStaticVoidMethod(mClazz, fields.postEvent, mWeakThiz);
+        env->CallStaticVoidMethod(mClazz, gImageReaderClassInfo.postEventFromNative, mWeakThiz);
     } else {
         ALOGW("onFrameAvailable event will not posted");
     }
@@ -200,7 +199,7 @@ static JNIImageReaderContext* ImageReader_getContext(JNIEnv* env, jobject thiz)
 {
     JNIImageReaderContext *ctx;
     ctx = reinterpret_cast<JNIImageReaderContext *>
-              (env->GetLongField(thiz, fields.imageReaderContext));
+              (env->GetLongField(thiz, gImageReaderClassInfo.mNativeContext));
     return ctx;
 }
 
@@ -226,18 +225,20 @@ static void ImageReader_setNativeContext(JNIEnv* env,
     if (p) {
         p->decStrong((void*)ImageReader_setNativeContext);
     }
-    env->SetLongField(thiz, fields.imageReaderContext, reinterpret_cast<jlong>(ctx.get()));
+    env->SetLongField(thiz, gImageReaderClassInfo.mNativeContext,
+            reinterpret_cast<jlong>(ctx.get()));
 }
 
 static CpuConsumer::LockedBuffer* Image_getLockedBuffer(JNIEnv* env, jobject image)
 {
-    return reinterpret_cast<CpuConsumer::LockedBuffer*>(env->GetLongField(image, fields.buffer));
+    return reinterpret_cast<CpuConsumer::LockedBuffer*>(
+            env->GetLongField(image, gSurfaceImageClassInfo.mLockedBuffer));
 }
 
 static void Image_setBuffer(JNIEnv* env, jobject thiz,
         const CpuConsumer::LockedBuffer* buffer)
 {
-    env->SetLongField(thiz, fields.buffer, reinterpret_cast<jlong>(buffer));
+    env->SetLongField(thiz, gSurfaceImageClassInfo.mLockedBuffer, reinterpret_cast<jlong>(buffer));
 }
 
 // Some formats like JPEG defined with different values between android.graphics.ImageFormat and
@@ -549,33 +550,37 @@ static void ImageReader_classInit(JNIEnv* env, jclass clazz)
     jclass imageClazz = env->FindClass("android/media/ImageReader$SurfaceImage");
     LOG_ALWAYS_FATAL_IF(imageClazz == NULL,
                         "can't find android/graphics/ImageReader$SurfaceImage");
-    fields.buffer = env->GetFieldID(imageClazz, ANDROID_MEDIA_SURFACEIMAGE_BUFFER_JNI_ID, "J");
-    LOG_ALWAYS_FATAL_IF(fields.buffer == NULL,
+    gSurfaceImageClassInfo.mLockedBuffer = env->GetFieldID(
+            imageClazz, ANDROID_MEDIA_SURFACEIMAGE_BUFFER_JNI_ID, "J");
+    LOG_ALWAYS_FATAL_IF(gSurfaceImageClassInfo.mLockedBuffer == NULL,
                         "can't find android/graphics/ImageReader.%s",
                         ANDROID_MEDIA_SURFACEIMAGE_BUFFER_JNI_ID);
 
-    fields.timeStamp = env->GetFieldID(imageClazz, ANDROID_MEDIA_SURFACEIMAGE_TS_JNI_ID, "J");
-    LOG_ALWAYS_FATAL_IF(fields.timeStamp == NULL,
+    gSurfaceImageClassInfo.mTimestamp = env->GetFieldID(
+            imageClazz, ANDROID_MEDIA_SURFACEIMAGE_TS_JNI_ID, "J");
+    LOG_ALWAYS_FATAL_IF(gSurfaceImageClassInfo.mTimestamp == NULL,
                         "can't find android/graphics/ImageReader.%s",
                         ANDROID_MEDIA_SURFACEIMAGE_TS_JNI_ID);
 
-    fields.imageReaderContext = env->GetFieldID(clazz, ANDROID_MEDIA_IMAGEREADER_CTX_JNI_ID, "J");
-    LOG_ALWAYS_FATAL_IF(fields.imageReaderContext == NULL,
+    gImageReaderClassInfo.mNativeContext = env->GetFieldID(
+            clazz, ANDROID_MEDIA_IMAGEREADER_CTX_JNI_ID, "J");
+    LOG_ALWAYS_FATAL_IF(gImageReaderClassInfo.mNativeContext == NULL,
                         "can't find android/graphics/ImageReader.%s",
                           ANDROID_MEDIA_IMAGEREADER_CTX_JNI_ID);
 
-    fields.postEvent = env->GetStaticMethodID(clazz, "postEventFromNative",
-                                              "(Ljava/lang/Object;)V");
-    LOG_ALWAYS_FATAL_IF(fields.postEvent == NULL,
+    gImageReaderClassInfo.postEventFromNative = env->GetStaticMethodID(
+            clazz, "postEventFromNative", "(Ljava/lang/Object;)V");
+    LOG_ALWAYS_FATAL_IF(gImageReaderClassInfo.postEventFromNative == NULL,
                         "can't find android/graphics/ImageReader.postEventFromNative");
 
     jclass planeClazz = env->FindClass("android/media/ImageReader$SurfaceImage$SurfacePlane");
     LOG_ALWAYS_FATAL_IF(planeClazz == NULL, "Can not find SurfacePlane class");
     // FindClass only gives a local reference of jclass object.
-    surfPlaneClassInfo.clazz = (jclass) env->NewGlobalRef(planeClazz);
-    surfPlaneClassInfo.ctor = env->GetMethodID(surfPlaneClassInfo.clazz, "<init>",
-                                               "(Landroid/media/ImageReader$SurfaceImage;III)V");
-    LOG_ALWAYS_FATAL_IF(surfPlaneClassInfo.ctor == NULL, "Can not find SurfacePlane constructor");
+    gSurfacePlaneClassInfo.clazz = (jclass) env->NewGlobalRef(planeClazz);
+    gSurfacePlaneClassInfo.ctor = env->GetMethodID(gSurfacePlaneClassInfo.clazz, "<init>",
+            "(Landroid/media/ImageReader$SurfaceImage;III)V");
+    LOG_ALWAYS_FATAL_IF(gSurfacePlaneClassInfo.ctor == NULL,
+            "Can not find SurfacePlane constructor");
 }
 
 static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz,
@@ -710,8 +715,8 @@ static jboolean ImageReader_imageSetup(JNIEnv* env, jobject thiz,
 
     int imageReaderWidth = ctx->getBufferWidth();
     int imageReaderHeight = ctx->getBufferHeight();
-    if ((imageReaderWidth != outputWidth) ||
-        (imageReaderHeight != outputHeight)) {
+    if (imageReaderWidth != outputWidth
+            || imageReaderHeight != outputHeight) {
         // Spew warning for now, since MediaCodec decoder has a bug to setup the right crop
         // TODO: make it throw exception once the decoder bug is fixed.
         ALOGW("Producer buffer size: %dx%d, doesn't match ImageReader configured size: %dx%d",
@@ -726,14 +731,18 @@ static jboolean ImageReader_imageSetup(JNIEnv* env, jobject thiz,
         // Throw exception
         ALOGE("Producer output buffer format: 0x%x, ImageReader configured format: 0x%x",
               buffer->format, ctx->getBufferFormat());
+        String8 msg;
+        msg.appendFormat("The producer output buffer format 0x%x doesn't "
+                "match the ImageReader's configured buffer format 0x%x.",
+                buffer->format, ctx->getBufferFormat());
         jniThrowException(env, "java/lang/UnsupportedOperationException",
-                          "The producer output buffer configuration doesn't match the ImageReader"
-                          "configured");
+                msg.string());
         return false;
     }
     // Set SurfaceImage instance member variables
     Image_setBuffer(env, image, buffer);
-    env->SetLongField(image, fields.timeStamp, static_cast<jlong>(buffer->timestamp));
+    env->SetLongField(image, gSurfaceImageClassInfo.mTimestamp,
+            static_cast<jlong>(buffer->timestamp));
 
     return true;
 }
@@ -749,8 +758,8 @@ static jobject ImageReader_getSurface(JNIEnv* env, jobject thiz)
     }
 
     // Wrap the IGBP in a Java-language Surface.
-    return android_view_Surface_createFromIGraphicBufferProducer(env,
-                                                                 consumer->getProducerInterface());
+    return android_view_Surface_createFromIGraphicBufferProducer(
+            env, consumer->getProducerInterface());
 }
 
 static jobject Image_createSurfacePlane(JNIEnv* env, jobject thiz, int idx)
@@ -767,8 +776,8 @@ static jobject Image_createSurfacePlane(JNIEnv* env, jobject thiz, int idx)
     rowStride = Image_imageGetRowStride(env, buffer, idx);
     pixelStride = Image_imageGetPixelStride(env, buffer, idx);
 
-    jobject surfPlaneObj = env->NewObject(surfPlaneClassInfo.clazz, surfPlaneClassInfo.ctor,
-                                          thiz, idx, rowStride, pixelStride);
+    jobject surfPlaneObj = env->NewObject(gSurfacePlaneClassInfo.clazz,
+            gSurfacePlaneClassInfo.ctor, thiz, idx, rowStride, pixelStride);
 
     return surfPlaneObj;
 }
