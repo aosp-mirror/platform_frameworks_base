@@ -177,17 +177,15 @@ public class PrintSpooler {
             // Update the notification.
             mNotificationController.onPrintJobStateChanged(printJob);
 
-            //TODO: Figure out what the right policy for read print jobs is.
-
             switch (printJob.getState()) {
-                case PrintJobInfo.STATE_QUEUED: {
-                    // Notify that we have a queued job.
-                    mService.onPrintJobQueued(new PrintJobInfo(printJob));
-                } break;
-
+                case PrintJobInfo.STATE_QUEUED:
                 case PrintJobInfo.STATE_STARTED: {
-                    // We really want to restart this print job.
-                    setPrintJobState(printJob.getId(), PrintJobInfo.STATE_QUEUED, null);
+                    // We have a print job that was queued or started in the past
+                    // but the device battery died or a crash occurred. In this case
+                    // we assume the print job failed and let the user decide whether
+                    // to restart the job or just
+                    setPrintJobState(printJob.getId(), PrintJobInfo.STATE_FAILED,
+                            mService.getString(R.string.no_connection_to_printer));
                 } break;
             }
         }

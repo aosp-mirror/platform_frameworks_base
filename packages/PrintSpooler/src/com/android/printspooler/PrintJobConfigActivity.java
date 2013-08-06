@@ -17,7 +17,11 @@
 package com.android.printspooler;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -66,6 +70,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -137,6 +142,8 @@ public class PrintJobConfigActivity extends Activity {
 
     private IBinder mIPrintDocumentAdapter;
 
+    private Dialog mGeneratingPrintJobDialog;
+
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
@@ -167,17 +174,14 @@ public class PrintJobConfigActivity extends Activity {
         mController = new PrintController(new RemotePrintDocumentAdapter(
                 IPrintDocumentAdapter.Stub.asInterface(mIPrintDocumentAdapter),
                 mSpooler.generateFileForPrintJob(mPrintJobId)));
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
         try {
             mIPrintDocumentAdapter.linkToDeath(mDeathRecipient, 0);
         } catch (RemoteException re) {
             finish();
             return;
         }
+
         mController.initialize();
         mEditor.initialize();
         mPrinterDiscoveryObserver = new PrinterDiscoveryObserver(mEditor, getMainLooper());
@@ -185,27 +189,29 @@ public class PrintJobConfigActivity extends Activity {
     }
 
     @Override
-    protected void onPause() {
+    protected void onDestroy() {
+        // We can safely do the work in here since at this point
+        // the system is bound to our (spooler) process which
+        // guarantees that this process will not be killed.
         mSpooler.stopPrinterDiscovery();
         mPrinterDiscoveryObserver.destroy();
         mPrinterDiscoveryObserver = null;
-        if (mController.isCancelled() || mController.isFailed()) {
+        if (mController.hasStarted()) {
+            mController.finish();
+        }
+        if (mEditor.isPrintConfirmed() && mController.isFinished()) {
+            mSpooler.setPrintJobState(mPrintJobId,
+                    PrintJobInfo.STATE_QUEUED, null);
+        } else {
             mSpooler.setPrintJobState(mPrintJobId,
                     PrintJobInfo.STATE_CANCELED, null);
-        } else if (mController.hasStarted()) {
-            mController.finish();
-            if (mEditor.isPrintConfirmed()) {
-                if (mController.isFinished()) {
-                    mSpooler.setPrintJobState(mPrintJobId,
-                            PrintJobInfo.STATE_QUEUED, null);
-                } else {
-                    mSpooler.setPrintJobState(mPrintJobId,
-                            PrintJobInfo.STATE_CANCELED, null);
-                }
-            }
         }
         mIPrintDocumentAdapter.unlinkToDeath(mDeathRecipient, 0);
-        super.onPause();
+        if (mGeneratingPrintJobDialog != null) {
+            mGeneratingPrintJobDialog.dismiss();
+            mGeneratingPrintJobDialog = null;
+        }
+        super.onDestroy();
     }
 
     public boolean onTouchEvent(MotionEvent event) {
@@ -243,56 +249,54 @@ public class PrintJobConfigActivity extends Activity {
         return !mOldPrintAttributes.equals(mCurrPrintAttributes);
     }
 
+    private void showGeneratingPrintJobUi() {
+        getWindow().getDecorView().setVisibility(View.GONE);
+
+        DialogFragment fragment = new DialogFragment() {
+            @Override
+            public Dialog onCreateDialog(Bundle savedInstanceState) {
+                return new AlertDialog.Builder(PrintJobConfigActivity.this)
+                    .setTitle(getString(R.string.generating_print_job))
+                    .setView(PrintJobConfigActivity.this.getLayoutInflater().inflate(
+                            R.layout.generating_print_job_dialog, null))
+                    .setCancelable(false)
+                    .setPositiveButton(getString(R.string.cancel),
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    mEditor.cancel();
+                                    PrintJobConfigActivity.this.finish();
+                                }
+                            })
+                    .create();
+            }
+        };
+        fragment.show(getFragmentManager(), getString(R.string.generating_print_job));
+    }
+
     private class PrintController {
         private final AtomicInteger mRequestCounter = new AtomicInteger();
 
         private final RemotePrintDocumentAdapter mRemotePrintAdapter;
 
-        private final Handler mHandler;
+        private final Bundle mMetadata;
+
+        private final ControllerHandler mHandler;
+
+        private final LayoutResultCallback mLayoutResultCallback;
+
+        private final WriteResultCallback mWriteResultCallback;
 
         private int mControllerState = CONTROLLER_STATE_INITIALIZED;
 
         private PageRange[] mRequestedPages;
 
-        private Bundle mMetadata = new Bundle();
-
-        private final ILayoutResultCallback mILayoutResultCallback =
-                new ILayoutResultCallback.Stub() {
-            @Override
-            public void onLayoutFinished(PrintDocumentInfo info, boolean changed, int sequence) {
-                if (mRequestCounter.get() == sequence) {
-                    mHandler.obtainMessage(MyHandler.MSG_ON_LAYOUT_FINISHED, changed ? 1 : 0,
-                            0, info).sendToTarget();
-                }
-            }
-
-            @Override
-            public void onLayoutFailed(CharSequence error, int sequence) {
-                if (mRequestCounter.get() == sequence) {
-                    mHandler.obtainMessage(MyHandler.MSG_ON_LAYOUT_FAILED, error).sendToTarget();
-                }
-            }
-        };
-
-        private IWriteResultCallback mIWriteResultCallback = new IWriteResultCallback.Stub() {
-            @Override
-            public void onWriteFinished(PageRange[] pages, int sequence) {
-                if (mRequestCounter.get() == sequence) {
-                    mHandler.obtainMessage(MyHandler.MSG_ON_WRITE_FINISHED, pages).sendToTarget();
-                }
-            }
-
-            @Override
-            public void onWriteFailed(CharSequence error, int sequence) {
-                if (mRequestCounter.get() == sequence) {
-                    mHandler.obtainMessage(MyHandler.MSG_ON_WRITE_FAILED, error).sendToTarget();
-                }
-            }
-        };
-
         public PrintController(RemotePrintDocumentAdapter adapter) {
             mRemotePrintAdapter = adapter;
-            mHandler = new MyHandler(Looper.getMainLooper());
+            mMetadata = new Bundle();
+            mHandler = new ControllerHandler(getMainLooper());
+            mLayoutResultCallback = new LayoutResultCallback(mHandler);
+            mWriteResultCallback = new WriteResultCallback(mHandler);
         }
 
         public void initialize() {
@@ -309,10 +313,6 @@ public class PrintJobConfigActivity extends Activity {
 
         public boolean isFinished() {
             return (mControllerState == CONTROLLER_STATE_FINISHED);
-        }
-
-        public boolean isFailed() {
-            return (mControllerState == CONTROLLER_STATE_FAILED);
         }
 
         public boolean hasStarted() {
@@ -338,7 +338,7 @@ public class PrintJobConfigActivity extends Activity {
                 // If the attributes changes, then we do not do a layout but may
                 // have to ask the app to write some pages. Hence, pretend layout
                 // completed and nothing changed, so we handle writing as usual.
-                handleOnLayoutFinished(mDocument.info, false);
+                handleOnLayoutFinished(mDocument.info, false, mRequestCounter.get());
             } else {
                 mSpooler.setPrintJobAttributesNoPersistence(mPrintJobId, mCurrPrintAttributes);
 
@@ -348,7 +348,7 @@ public class PrintJobConfigActivity extends Activity {
                 mControllerState = CONTROLLER_STATE_LAYOUT_STARTED;
 
                 mRemotePrintAdapter.layout(mOldPrintAttributes, mCurrPrintAttributes,
-                        mILayoutResultCallback, mMetadata, mRequestCounter.incrementAndGet());
+                        mLayoutResultCallback, mMetadata, mRequestCounter.incrementAndGet());
 
                 mOldPrintAttributes.copyFrom(mCurrPrintAttributes);
             }
@@ -359,7 +359,12 @@ public class PrintJobConfigActivity extends Activity {
             mRemotePrintAdapter.finish();
         }
 
-        private void handleOnLayoutFinished(PrintDocumentInfo info, boolean layoutChanged) {
+        private void handleOnLayoutFinished(PrintDocumentInfo info,
+                boolean layoutChanged, int sequence) {
+            if (mRequestCounter.get() != sequence) {
+                return;
+            }
+
             if (isCancelled()) {
                 if (mEditor.isDone()) {
                     PrintJobConfigActivity.this.finish();
@@ -421,18 +426,25 @@ public class PrintJobConfigActivity extends Activity {
 
             // Request a write of the pages of interest.
             mControllerState = CONTROLLER_STATE_WRITE_STARTED;
-            mRemotePrintAdapter.write(mRequestedPages, mIWriteResultCallback,
+            mRemotePrintAdapter.write(mRequestedPages, mWriteResultCallback,
                     mRequestCounter.incrementAndGet());
         }
 
-        private void handleOnLayoutFailed(CharSequence error) {
+        private void handleOnLayoutFailed(CharSequence error, int sequence) {
+            if (mRequestCounter.get() != sequence) {
+                return;
+            }
             mControllerState = CONTROLLER_STATE_FAILED;
             // TODO: We need some UI for announcing an error.
             Log.e(LOG_TAG, "Error during layout: " + error);
             PrintJobConfigActivity.this.finish();
         }
 
-        private void handleOnWriteFinished(PageRange[] pages) {
+        private void handleOnWriteFinished(PageRange[] pages, int sequence) {
+            if (mRequestCounter.get() != sequence) {
+                return;
+            }
+
             if (isCancelled()) {
                 if (mEditor.isDone()) {
                     PrintJobConfigActivity.this.finish();
@@ -490,19 +502,22 @@ public class PrintJobConfigActivity extends Activity {
             }
         }
 
-        private void handleOnWriteFailed(CharSequence error) {
+        private void handleOnWriteFailed(CharSequence error, int sequence) {
+            if (mRequestCounter.get() != sequence) {
+                return;
+            }
             mControllerState = CONTROLLER_STATE_FAILED;
             Log.e(LOG_TAG, "Error during write: " + error);
             PrintJobConfigActivity.this.finish();
         }
 
-        private final class MyHandler extends Handler {
+        private final class ControllerHandler extends Handler {
             public static final int MSG_ON_LAYOUT_FINISHED = 1;
             public static final int MSG_ON_LAYOUT_FAILED = 2;
             public static final int MSG_ON_WRITE_FINISHED = 3;
             public static final int MSG_ON_WRITE_FAILED = 4;
 
-            public MyHandler(Looper looper) {
+            public ControllerHandler(Looper looper) {
                 super(looper, null, false);
             }
 
@@ -512,24 +527,80 @@ public class PrintJobConfigActivity extends Activity {
                     case MSG_ON_LAYOUT_FINISHED: {
                         PrintDocumentInfo info = (PrintDocumentInfo) message.obj;
                         final boolean changed = (message.arg1 == 1);
-                        mController.handleOnLayoutFinished(info, changed);
+                        final int sequence = message.arg2;
+                        handleOnLayoutFinished(info, changed, sequence);
                     } break;
 
                     case MSG_ON_LAYOUT_FAILED: {
                         CharSequence error = (CharSequence) message.obj;
-                        mController.handleOnLayoutFailed(error);
+                        final int sequence = message.arg1;
+                        handleOnLayoutFailed(error, sequence);
                     } break;
 
                     case MSG_ON_WRITE_FINISHED: {
                         PageRange[] pages = (PageRange[]) message.obj;
-                        mController.handleOnWriteFinished(pages);
+                        final int sequence = message.arg1;
+                        handleOnWriteFinished(pages, sequence);
                     } break;
 
                     case MSG_ON_WRITE_FAILED: {
                         CharSequence error = (CharSequence) message.obj;
-                        mController.handleOnWriteFailed(error);
+                        final int sequence = message.arg1;
+                        handleOnWriteFailed(error, sequence);
                     } break;
                 }
+            }
+        }
+    }
+
+    private static final class LayoutResultCallback extends ILayoutResultCallback.Stub {
+        private final WeakReference<PrintController.ControllerHandler> mWeakHandler;
+
+        public LayoutResultCallback(PrintController.ControllerHandler handler) {
+            mWeakHandler = new WeakReference<PrintController.ControllerHandler>(handler);
+        }
+
+        @Override
+        public void onLayoutFinished(PrintDocumentInfo info, boolean changed, int sequence) {
+            Handler handler = mWeakHandler.get();
+            if (handler != null) {
+                handler.obtainMessage(PrintController.ControllerHandler.MSG_ON_LAYOUT_FINISHED,
+                        changed ? 1 : 0, sequence, info).sendToTarget();
+            }
+        }
+
+        @Override
+        public void onLayoutFailed(CharSequence error, int sequence) {
+            Handler handler = mWeakHandler.get();
+            if (handler != null) {
+                handler.obtainMessage(PrintController.ControllerHandler.MSG_ON_LAYOUT_FAILED,
+                        sequence, 0, error).sendToTarget();
+            }
+        }
+    }
+
+    private static final class WriteResultCallback extends IWriteResultCallback.Stub {
+        private final WeakReference<PrintController.ControllerHandler> mWeakHandler;
+
+        public WriteResultCallback(PrintController.ControllerHandler handler) {
+            mWeakHandler = new WeakReference<PrintController.ControllerHandler>(handler);
+        }
+
+        @Override
+        public void onWriteFinished(PageRange[] pages, int sequence) {
+            Handler handler = mWeakHandler.get();
+            if (handler != null) {
+                handler.obtainMessage(PrintController.ControllerHandler.MSG_ON_WRITE_FINISHED,
+                        sequence, 0, pages).sendToTarget();
+            }
+        }
+
+        @Override
+        public void onWriteFailed(CharSequence error, int sequence) {
+            Handler handler = mWeakHandler.get();
+            if (handler != null) {
+                handler.obtainMessage(PrintController.ControllerHandler.MSG_ON_WRITE_FAILED,
+                    sequence, 0, error).sendToTarget();
             }
         }
     }
@@ -837,6 +908,7 @@ public class PrintJobConfigActivity extends Activity {
                     mEditor.confirmPrint();
                     updateUi();
                     mController.update();
+                    showGeneratingPrintJobUi();
                 }
             });
 

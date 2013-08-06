@@ -65,10 +65,6 @@ public class NotificationController {
         }
         switch (printJob.getState()) {
             case PrintJobInfo.STATE_QUEUED: {
-                createQueuingNotificaiton(printJob);
-            } break;
-
-            case PrintJobInfo.STATE_STARTED: {
                 createPrintingNotificaiton(printJob);
             } break;
 
@@ -81,22 +77,6 @@ public class NotificationController {
                 removeNotification(printJob.getId());
             } break;
         }
-    }
-
-    private void createQueuingNotificaiton(PrintJobInfo printJob) {
-        Notification.Builder builder = new Notification.Builder(mContext)
-                // TODO: Use appropriate icon when assets are ready
-                .setSmallIcon(android.R.drawable.ic_secure)
-                .setContentTitle(mContext.getString(R.string.queued_notification_title_template,
-                        printJob.getLabel()))
-                // TODO: Use appropriate icon when assets are ready
-                .addAction(android.R.drawable.ic_secure, mContext.getString(R.string.cancel),
-                        createCancelIntent(printJob))
-                .setContentText(printJob.getPrinterId().getPrinterName())
-                .setWhen(System.currentTimeMillis())
-                .setOngoing(true)
-                .setShowWhen(true);
-        mNotificationManager.notify(printJob.getId(), builder.build());
     }
 
     private void createPrintingNotificaiton(PrintJobInfo printJob) {

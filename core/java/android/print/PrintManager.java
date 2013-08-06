@@ -288,6 +288,7 @@ public final class PrintManager {
         private void doFinish() {
             mDocumentAdapter = null;
             mHandler = null;
+            mLayoutOrWriteCancellation = null;
         }
 
         private final class MyHandler extends Handler {
@@ -312,10 +313,10 @@ public final class PrintManager {
 
                     case MSG_LAYOUT: {
                         SomeArgs args = (SomeArgs) message.obj;
-                        final PrintAttributes oldAttributes = (PrintAttributes) args.arg1;
-                        final PrintAttributes newAttributes = (PrintAttributes) args.arg2;
-                        final ILayoutResultCallback callback = (ILayoutResultCallback) args.arg3;
-                        final Bundle metadata = (Bundle) args.arg4;
+                        PrintAttributes oldAttributes = (PrintAttributes) args.arg1;
+                        PrintAttributes newAttributes = (PrintAttributes) args.arg2;
+                        ILayoutResultCallback callback = (ILayoutResultCallback) args.arg3;
+                        Bundle metadata = (Bundle) args.arg4;
                         final int sequence = args.argi1;
                         args.recycle();
 
@@ -324,49 +325,15 @@ public final class PrintManager {
                             mLayoutOrWriteCancellation = cancellation;
                         }
 
-                        mDocumentAdapter.onLayout(oldAttributes, newAttributes,
-                                cancellation, new LayoutResultCallback() {
-                            @Override
-                            public void onLayoutFinished(PrintDocumentInfo info, boolean changed) {
-                                if (info == null) {
-                                    throw new IllegalArgumentException("info cannot be null");
-                                }
-                                synchronized (mLock) {
-                                    mLayoutOrWriteCancellation = null;
-                                }
-                                try {
-                                    callback.onLayoutFinished(info, changed, sequence);
-                                } catch (RemoteException re) {
-                                    Log.e(LOG_TAG, "Error calling onLayoutFinished", re);
-                                }
-                            }
-
-                            @Override
-                            public void onLayoutFailed(CharSequence error) {
-                                synchronized (mLock) {
-                                    mLayoutOrWriteCancellation = null;
-                                }
-                                try {
-                                    callback.onLayoutFailed(error, sequence);
-                                } catch (RemoteException re) {
-                                    Log.e(LOG_TAG, "Error calling onLayoutFailed", re);
-                                }
-                            }
-
-                            @Override
-                            public void onLayoutCancelled() {
-                                synchronized (mLock) {
-                                    mLayoutOrWriteCancellation = null;
-                                }
-                            }
-                        }, metadata);
+                        mDocumentAdapter.onLayout(oldAttributes, newAttributes, cancellation,
+                                new MyLayoutResultCallback(callback, sequence), metadata);
                     } break;
 
                     case MSG_WRITE: {
                         SomeArgs args = (SomeArgs) message.obj;
-                        final PageRange[] pages = (PageRange[]) args.arg1;
-                        final FileDescriptor fd = (FileDescriptor) args.arg2;
-                        final IWriteResultCallback callback = (IWriteResultCallback) args.arg3;
+                        PageRange[] pages = (PageRange[]) args.arg1;
+                        FileDescriptor fd = (FileDescriptor) args.arg2;
+                        IWriteResultCallback callback = (IWriteResultCallback) args.arg3;
                         final int sequence = args.argi1;
                         args.recycle();
 
@@ -376,52 +343,7 @@ public final class PrintManager {
                         }
 
                         mDocumentAdapter.onWrite(pages, fd, cancellation,
-                                new WriteResultCallback() {
-                            @Override
-                            public void onWriteFinished(PageRange[] pages) {
-                                if (pages == null) {
-                                    throw new IllegalArgumentException("pages cannot be null");
-                                }
-                                if (pages.length == 0) {
-                                    throw new IllegalArgumentException("pages cannot be empty");
-                                }
-                                synchronized (mLock) {
-                                    mLayoutOrWriteCancellation = null;
-                                }
-                                // Close before notifying the other end. We want
-                                // to be ready by the time we announce it.
-                                IoUtils.closeQuietly(fd);
-                                try {
-                                    callback.onWriteFinished(pages, sequence);
-                                } catch (RemoteException re) {
-                                    Log.e(LOG_TAG, "Error calling onWriteFinished", re);
-                                }
-                            }
-
-                            @Override
-                            public void onWriteFailed(CharSequence error) {
-                                synchronized (mLock) {
-                                    mLayoutOrWriteCancellation = null;
-                                }
-                                // Close before notifying the other end. We want
-                                // to be ready by the time we announce it.
-                                IoUtils.closeQuietly(fd);
-                                try {
-                                    callback.onWriteFailed(error, sequence);
-                                } catch (RemoteException re) {
-                                    Log.e(LOG_TAG, "Error calling onWriteFailed", re);
-                                }
-                            }
-
-                            @Override
-                            public void onWriteCancelled() {
-                                synchronized (mLock) {
-                                    mLayoutOrWriteCancellation = null;
-                                }
-                                // Just close the fd for now.
-                                IoUtils.closeQuietly(fd);
-                            }
-                        });
+                                new MyWriteResultCallback(callback, fd, sequence));
                     } break;
 
                     case MSG_FINISH: {
@@ -434,6 +356,129 @@ public final class PrintManager {
                                 + message.what);
                     }
                 }
+            }
+        }
+
+        private final class MyLayoutResultCallback extends LayoutResultCallback {
+            private ILayoutResultCallback mCallback;
+            private final int mSequence;
+
+            public MyLayoutResultCallback(ILayoutResultCallback callback,
+                    int sequence) {
+                mCallback = callback;
+                mSequence = sequence;
+            }
+
+            @Override
+            public void onLayoutFinished(PrintDocumentInfo info, boolean changed) {
+                final ILayoutResultCallback callback;
+                synchronized (mLock) {
+                    callback = mCallback;
+                    clearLocked();
+                }
+                if (info == null) {
+                    throw new IllegalArgumentException("info cannot be null");
+                }
+                if (callback != null) {
+                    try {
+                        callback.onLayoutFinished(info, changed, mSequence);
+                    } catch (RemoteException re) {
+                        Log.e(LOG_TAG, "Error calling onLayoutFinished", re);
+                    }
+                }
+            }
+
+            @Override
+            public void onLayoutFailed(CharSequence error) {
+                final ILayoutResultCallback callback;
+                synchronized (mLock) {
+                    callback = mCallback;
+                    clearLocked();
+                }
+                if (callback != null) {
+                    try {
+                        callback.onLayoutFailed(error, mSequence);
+                    } catch (RemoteException re) {
+                        Log.e(LOG_TAG, "Error calling onLayoutFailed", re);
+                    }
+                }
+            }
+
+            @Override
+            public void onLayoutCancelled() {
+                synchronized (mLock) {
+                    clearLocked();
+                }
+            }
+
+            private void clearLocked() {
+                mLayoutOrWriteCancellation = null;
+                mCallback = null;
+            }
+        }
+
+        private final class MyWriteResultCallback extends WriteResultCallback {
+            private FileDescriptor mFd;
+            private int mSequence;
+            private IWriteResultCallback mCallback;
+
+            public MyWriteResultCallback(IWriteResultCallback callback,
+                    FileDescriptor fd, int sequence) {
+                mFd = fd;
+                mSequence = sequence;
+                mCallback = callback;
+            }
+
+            @Override
+            public void onWriteFinished(PageRange[] pages) {
+                final IWriteResultCallback callback;
+                synchronized (mLock) {
+                    callback = mCallback;
+                    clearLocked();
+                }
+                if (pages == null) {
+                    throw new IllegalArgumentException("pages cannot be null");
+                }
+                if (pages.length == 0) {
+                    throw new IllegalArgumentException("pages cannot be empty");
+                }
+                if (callback != null) {
+                    try {
+                        callback.onWriteFinished(pages, mSequence);
+                    } catch (RemoteException re) {
+                        Log.e(LOG_TAG, "Error calling onWriteFinished", re);
+                    }
+                }
+            }
+
+            @Override
+            public void onWriteFailed(CharSequence error) {
+                final IWriteResultCallback callback;
+                synchronized (mLock) {
+                    callback = mCallback;
+                    clearLocked();
+                }
+                if (callback != null) {
+                    try {
+                        callback.onWriteFailed(error, mSequence);
+                    } catch (RemoteException re) {
+                        Log.e(LOG_TAG, "Error calling onWriteFailed", re);
+                    }
+                }
+            }
+
+            @Override
+            public void onWriteCancelled() {
+                synchronized (mLock) {
+                    clearLocked();
+                }
+            }
+
+            private void clearLocked() {
+                mLayoutOrWriteCancellation = null;
+                IoUtils.closeQuietly(mFd);
+                mCallback = null;
+                mFd = null;
             }
         }
     }
