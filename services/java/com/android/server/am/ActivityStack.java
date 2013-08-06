@@ -177,6 +177,13 @@ final class ActivityStack {
     ActivityRecord mLastPausedActivity = null;
 
     /**
+     * Activities that specify No History must be removed once the user navigates away from them.
+     * If the device goes to sleep with such an activity in the paused state then we save it here
+     * and finish it later if another activity replaces it on wakeup.
+     */
+    ActivityRecord mLastNoHistoryActivity = null;
+
+    /**
      * Current activity that is resumed, or null if there is none.
      */
     ActivityRecord mResumedActivity = null;
@@ -710,6 +717,8 @@ final class ActivityStack {
         mResumedActivity = null;
         mPausingActivity = prev;
         mLastPausedActivity = prev;
+        mLastNoHistoryActivity = (prev.intent.getFlags() & Intent.FLAG_ACTIVITY_NO_HISTORY) != 0
+                || (prev.info.flags & ActivityInfo.FLAG_NO_HISTORY) != 0 ? prev : null;
         prev.state = ActivityState.PAUSING;
         prev.task.touchActiveTime();
         clearLaunchTime(prev);
@@ -732,10 +741,12 @@ final class ActivityStack {
                 Slog.w(TAG, "Exception thrown during pause", e);
                 mPausingActivity = null;
                 mLastPausedActivity = null;
+                mLastNoHistoryActivity = null;
             }
         } else {
             mPausingActivity = null;
             mLastPausedActivity = null;
+            mLastNoHistoryActivity = null;
         }
 
         // If we are not going to sleep, we want to ensure the device is
@@ -1333,16 +1344,13 @@ final class ActivityStack {
         // If the most recent activity was noHistory but was only stopped rather
         // than stopped+finished because the device went to sleep, we need to make
         // sure to finish it as we're making a new activity topmost.
-        final ActivityRecord last = mLastPausedActivity;
-        if (mService.mSleeping && last != null && !last.finishing) {
-            if ((last.intent.getFlags()&Intent.FLAG_ACTIVITY_NO_HISTORY) != 0
-                    || (last.info.flags&ActivityInfo.FLAG_NO_HISTORY) != 0) {
-                if (DEBUG_STATES) {
-                    Slog.d(TAG, "no-history finish of " + last + " on new resume");
-                }
-                requestFinishActivityLocked(last.appToken, Activity.RESULT_CANCELED, null,
-                        "no-history", false);
-            }
+        if (mService.mSleeping && mLastNoHistoryActivity != null &&
+                !mLastNoHistoryActivity.finishing) {
+            if (DEBUG_STATES) Slog.d(TAG, "no-history finish of " + mLastNoHistoryActivity +
+                    " on new resume");
+            requestFinishActivityLocked(mLastNoHistoryActivity.appToken, Activity.RESULT_CANCELED,
+                    null, "no-history", false);
+            mLastNoHistoryActivity = null;
         }
 
         if (prev != null && prev != next) {
@@ -2949,7 +2957,6 @@ final class ActivityStack {
 
         mWindowManager.moveTaskToTop(tr.taskId);
 
-        mLastPausedActivity = null;
         mStackSupervisor.resumeTopActivitiesLocked();
         EventLog.writeEvent(EventLogTags.AM_TASK_TO_FRONT, tr.userId, tr.taskId);
 
@@ -3368,6 +3375,7 @@ final class ActivityStack {
         }
         if (mLastPausedActivity != null && mLastPausedActivity.app == app) {
             mLastPausedActivity = null;
+            mLastNoHistoryActivity = null;
         }
         final ActivityRecord top = topRunningActivityLocked(null);
         final boolean launchHomeTaskNext =

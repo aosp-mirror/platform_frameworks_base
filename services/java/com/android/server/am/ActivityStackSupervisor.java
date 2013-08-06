@@ -1398,6 +1398,7 @@ public final class ActivityStackSupervisor {
                         r.task = intentActivity.task;
                     }
                     targetStack = intentActivity.task.stack;
+                    targetStack.mLastPausedActivity = null;
                     moveHomeStack(targetStack.isHomeStack());
                     if (intentActivity.task.intent == null) {
                         // This task was started because of movement of
@@ -1575,6 +1576,7 @@ public final class ActivityStackSupervisor {
                                     top.task);
                             // For paranoia, make sure we have correctly
                             // resumed the top activity.
+                            topStack.mLastPausedActivity = null;
                             if (doResume) {
                                 setLaunchHomeTaskNextFlag(sourceRecord, null, topStack);
                                 resumeTopActivitiesLocked();
@@ -1653,6 +1655,7 @@ public final class ActivityStackSupervisor {
                     top.deliverNewIntentLocked(callingUid, r.intent);
                     // For paranoia, make sure we have correctly
                     // resumed the top activity.
+                    targetStack.mLastPausedActivity = null;
                     if (doResume) {
                         setLaunchHomeTaskNextFlag(sourceRecord, null, targetStack);
                         targetStack.resumeTopActivityLocked(null);
@@ -1675,6 +1678,7 @@ public final class ActivityStackSupervisor {
                     ActivityStack.logStartActivity(EventLogTags.AM_NEW_INTENT, r, task);
                     top.updateOptionsLocked(options);
                     top.deliverNewIntentLocked(callingUid, r.intent);
+                    targetStack.mLastPausedActivity = null;
                     if (doResume) {
                         setLaunchHomeTaskNextFlag(sourceRecord, null, targetStack);
                         targetStack.resumeTopActivityLocked(null);
@@ -1714,6 +1718,7 @@ public final class ActivityStackSupervisor {
         }
         ActivityStack.logStartActivity(EventLogTags.AM_CREATE_ACTIVITY, r, r.task);
         setLaunchHomeTaskNextFlag(sourceRecord, r, targetStack);
+        targetStack.mLastPausedActivity = null;
         targetStack.startActivityLocked(r, newTask, doResume, keepCurTransition, options);
         mService.setFocusedActivityLocked(r);
         return ActivityManager.START_SUCCESS;
@@ -2390,7 +2395,10 @@ public final class ActivityStackSupervisor {
                         "    mLastPausedActivity: ");
                 if (pr) {
                     printed = true;
+                    needSep = true;
                 }
+                printed |= printThisActivity(pw, stack.mLastNoHistoryActivity, dumpPackage,
+                        needSep, "    mLastNoHistoryActivity: ");
             }
             needSep = printed;
         }
