@@ -163,8 +163,7 @@ feature</em>, if necessary. </li>
   <dd>The OpenGL ES version required by the application. The higher 16 bits
 represent the major number and the lower 16 bits represent the minor number. For
 example, to specify OpenGL ES version 2.0, you would set the value as
-"0x00020000". To specify OpenGL ES 2.1, if/when such a version were made
-available, you would set the value as "0x00020001".
+"0x00020000", or to specify OpenGL ES 3.0, you would set the value as "0x00030000".
 
   <p>An application should specify at most one <code>android:glEsVersion</code>
 attribute in its manifest. If it specifies more than one, the
@@ -183,6 +182,10 @@ that it requires OpenGL ES 2.0.</p>
   <p>An application that can work with any of several OpenGL ES versions should
 only specify the numerically lowest version of OpenGL ES that it requires. (It
 can check at run-time whether a higher level of OpenGL ES is available.)</p>
+
+  <p>For more information about using OpenGL ES, including how to check the supported OpenGL ES
+version at runtime, see the <a href="{@docRoot}guide/topics/graphics/opengl.html">OpenGL ES</a>
+API guide.</p>
   </dd>
 
 </dl>
