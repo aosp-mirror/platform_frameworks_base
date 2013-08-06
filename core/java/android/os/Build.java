@@ -439,6 +439,14 @@ public class Build {
 
         /**
          * Android X.X: Key Lime Pie, another tasty treat.
+         *
+         * <p>Applications targeting this or a later release will get these
+         * new changes in behavior:</p>
+         * <ul>
+         * <li>It is no longer allowed to use implicit intents with
+         * {@link android.content.Context#startService} or
+         * {@link android.content.Context#bindService}.
+         * </ul>
          */
         public static final int KEY_LIME_PIE = CUR_DEVELOPMENT;
     }

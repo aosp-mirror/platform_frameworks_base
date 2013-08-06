@@ -976,7 +976,7 @@ public abstract class Context {
      * May be null if there are no options.  See {@link android.app.ActivityOptions}
      * for how to build the Bundle supplied here; there are no supported definitions
      * for building it manually.
-     * @param user The UserHandle of the user to start this activity for.
+     * @param userId The UserHandle of the user to start this activity for.
      * @throws ActivityNotFoundException &nbsp;
      * @hide
      */
@@ -1573,9 +1573,11 @@ public abstract class Context {
 
     /**
      * Request that a given application service be started.  The Intent
-     * can either contain the complete class name of a specific service
-     * implementation to start, or an abstract definition through the
-     * action and other fields of the kind of service to start.  If this service
+     * should contain either contain the complete class name of a specific service
+     * implementation to start or a specific package name to target.  If the
+     * Intent is less specified, it will either throw an {@link IllegalArgumentException}
+     * (if the caller targets {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE} or later),
+     * or which of multiple matching services it finds and uses will be undefined.  If this service
      * is not already running, it will be instantiated and started (creating a
      * process for it if needed); if it is running then it remains running.
      *
@@ -1601,10 +1603,9 @@ public abstract class Context {
      * <p>This function will throw {@link SecurityException} if you do not
      * have permission to start the given service.
      *
-     * @param service Identifies the service to be started.  The Intent may
-     *      specify either an explicit component name to start, or a logical
-     *      description (action, category, etc) to match an
-     *      {@link IntentFilter} published by a service.  Additional values
+     * @param service Identifies the service to be started.  The Intent must be either
+     *      fully explicit (supplying a component name) or specify a specific package
+     *      name it is targetted to.  Additional values
      *      may be included in the Intent extras to supply arguments along with
      *      this specific start call.
      *
@@ -1634,10 +1635,9 @@ public abstract class Context {
      * <p>This function will throw {@link SecurityException} if you do not
      * have permission to stop the given service.
      *
-     * @param service Description of the service to be stopped.  The Intent may
-     *      specify either an explicit component name to start, or a logical
-     *      description (action, category, etc) to match an
-     *      {@link IntentFilter} published by a service.
+     * @param service Description of the service to be stopped.  The Intent must be either
+     *      fully explicit (supplying a component name) or specify a specific package
+     *      name it is targetted to.
      *
      * @return If there is a service matching the given Intent that is already
      * running, then it is stopped and {@code true} is returned; else {@code false} is returned.
@@ -2296,7 +2296,7 @@ public abstract class Context {
      * camera devices.
      *
      * @see #getSystemService
-     * @see android.hardware.camera.CameraManager
+     * @see android.hardware.camera2.CameraManager
      */
     public static final String CAMERA_SERVICE = "camera";
 

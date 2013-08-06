@@ -128,9 +128,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
                             try {
                                 if (mService == null) {
                                     if (VDBG) Log.d(TAG,"Binding service...");
-                                    if (!mContext.bindService(new Intent(IBluetoothA2dp.class.getName()), mConnection, 0)) {
-                                        Log.e(TAG, "Could not bind to Bluetooth A2DP Service");
-                                    }
+                                    doBind();
                                 }
                             } catch (Exception re) {
                                 Log.e(TAG,"",re);
@@ -157,9 +155,18 @@ public final class BluetoothA2dp implements BluetoothProfile {
             }
         }
 
-        if (!context.bindService(new Intent(IBluetoothA2dp.class.getName()), mConnection, 0)) {
-            Log.e(TAG, "Could not bind to Bluetooth A2DP Service");
+        doBind();
+    }
+
+    boolean doBind() {
+        Intent intent = new Intent(IBluetoothA2dp.class.getName());
+        ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
+        intent.setComponent(comp);
+        if (comp == null || !mContext.bindService(intent, mConnection, 0)) {
+            Log.e(TAG, "Could not bind to Bluetooth A2DP Service with " + intent);
+            return false;
         }
+        return true;
     }
 
     /*package*/ void close() {
