@@ -21,13 +21,10 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Loader;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
-import android.provider.DocumentsContract.DocumentColumns;
 import android.text.format.DateUtils;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
@@ -41,17 +38,20 @@ import android.widget.AbsListView;
 import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.CursorAdapter;
+import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.documentsui.DocumentsActivity.DisplayState;
-import com.android.documentsui.DocumentsActivity.Document;
+import com.android.documentsui.model.Document;
+import com.android.internal.util.Predicate;
 import com.google.android.collect.Lists;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Display the documents inside a single directory.
@@ -59,23 +59,21 @@ import java.util.ArrayList;
 public class DirectoryFragment extends Fragment {
 
     // TODO: show storage backend in item views when requested
-    // TODO: apply sort order locally
-    // TODO: apply MIME filtering locally
 
     private ListView mListView;
     private GridView mGridView;
 
     private AbsListView mCurrentView;
 
-    private static final int TYPE_NORMAL = 1;
-    private static final int TYPE_SEARCH = 2;
-    private static final int TYPE_RECENT_OPEN = 3;
-    private static final int TYPE_RECENT_CREATE = 4;
+    public static final int TYPE_NORMAL = 1;
+    public static final int TYPE_SEARCH = 2;
+    public static final int TYPE_RECENT_OPEN = 3;
+    public static final int TYPE_RECENT_CREATE = 4;
 
     private int mType = TYPE_NORMAL;
 
     private DocumentsAdapter mAdapter;
-    private LoaderCallbacks<Cursor> mCallbacks;
+    private LoaderCallbacks<List<Document>> mCallbacks;
 
     private static final String EXTRA_URI = "uri";
 
@@ -91,6 +89,11 @@ public class DirectoryFragment extends Fragment {
         final FragmentTransaction ft = fm.beginTransaction();
         ft.replace(R.id.directory, fragment);
         ft.commitAllowingStateLoss();
+    }
+
+    public static DirectoryFragment get(FragmentManager fm) {
+        // TODO: deal with multiple directories shown at once
+        return (DirectoryFragment) fm.findFragmentById(R.id.directory);
     }
 
     @Override
@@ -114,7 +117,7 @@ public class DirectoryFragment extends Fragment {
         mGridView.setOnItemClickListener(mItemListener);
         mGridView.setMultiChoiceModeListener(mMultiListener);
 
-        mAdapter = new DocumentsAdapter(context);
+        mAdapter = new DocumentsAdapter();
         updateMode();
 
         final Uri uri = getArguments().getParcelable(EXTRA_URI);
@@ -129,18 +132,10 @@ public class DirectoryFragment extends Fragment {
             mType = TYPE_NORMAL;
         }
 
-        mCallbacks = new LoaderCallbacks<Cursor>() {
+        mCallbacks = new LoaderCallbacks<List<Document>>() {
             @Override
-            public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            public Loader<List<Document>> onCreateLoader(int id, Bundle args) {
                 final DisplayState state = getDisplayState(DirectoryFragment.this);
-                final String sortOrder;
-                if (state.sortBy == DisplayState.SORT_BY_NAME) {
-                    sortOrder = DocumentColumns.DISPLAY_NAME + " ASC";
-                } else if (state.sortBy == DisplayState.SORT_BY_DATE) {
-                    sortOrder = DocumentColumns.LAST_MODIFIED + " DESC";
-                } else {
-                    sortOrder = null;
-                }
 
                 final Uri contentsUri;
                 if (mType == TYPE_NORMAL) {
@@ -149,17 +144,29 @@ public class DirectoryFragment extends Fragment {
                     contentsUri = uri;
                 }
 
-                return new CursorLoader(context, contentsUri, null, null, null, sortOrder);
+                final Predicate<Document> filter = new MimePredicate(state.acceptMimes);
+
+                final Comparator<Document> sortOrder;
+                if (state.sortOrder == DisplayState.SORT_ORDER_DATE || mType == TYPE_RECENT_OPEN
+                        || mType == TYPE_RECENT_CREATE) {
+                    sortOrder = new Document.DateComparator();
+                } else if (state.sortOrder == DisplayState.SORT_ORDER_NAME) {
+                    sortOrder = new Document.NameComparator();
+                } else {
+                    throw new IllegalArgumentException("Unknown sort order " + state.sortOrder);
+                }
+
+                return new DirectoryLoader(context, contentsUri, mType, filter, sortOrder);
             }
 
             @Override
-            public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-                mAdapter.swapCursor(data);
+            public void onLoadFinished(Loader<List<Document>> loader, List<Document> data) {
+                mAdapter.swapDocuments(data);
             }
 
             @Override
-            public void onLoaderReset(Loader<Cursor> loader) {
-                mAdapter.swapCursor(null);
+            public void onLoaderReset(Loader<List<Document>> loader) {
+                mAdapter.swapDocuments(null);
             }
         };
 
@@ -243,16 +250,16 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    public void updateSortBy() {
+    public void updateSortOrder() {
         getLoaderManager().restartLoader(LOADER_DOCUMENTS, getArguments(), mCallbacks);
+        mListView.smoothScrollToPosition(0);
+        mGridView.smoothScrollToPosition(0);
     }
 
     private OnItemClickListener mItemListener = new OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            final Cursor cursor = (Cursor) mAdapter.getItem(position);
-            final Uri uri = getArguments().getParcelable(EXTRA_URI);
-            final Document doc = Document.fromCursor(uri, cursor);
+            final Document doc = mAdapter.getItem(position);
             ((DocumentsActivity) getActivity()).onDocumentPicked(doc);
         }
     };
@@ -279,8 +286,8 @@ public class DirectoryFragment extends Fragment {
                 final int size = checked.size();
                 for (int i = 0; i < size; i++) {
                     if (checked.valueAt(i)) {
-                        final Cursor cursor = (Cursor) mAdapter.getItem(checked.keyAt(i));
-                        docs.add(Document.fromCursor(uri, cursor));
+                        final Document doc = mAdapter.getItem(checked.keyAt(i));
+                        docs.add(doc);
                     }
                 }
 
@@ -300,11 +307,9 @@ public class DirectoryFragment extends Fragment {
         public void onItemCheckedStateChanged(
                 ActionMode mode, int position, long id, boolean checked) {
             if (checked) {
-                final Cursor cursor = (Cursor) mAdapter.getItem(position);
-                final String mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
-
                 // Directories cannot be checked
-                if (DocumentsContract.MIME_TYPE_DIRECTORY.equals(mimeType)) {
+                final Document doc = mAdapter.getItem(position);
+                if (DocumentsContract.MIME_TYPE_DIRECTORY.equals(doc.mimeType)) {
                     mCurrentView.setItemChecked(position, false);
                 }
             }
@@ -318,61 +323,68 @@ public class DirectoryFragment extends Fragment {
         return ((DocumentsActivity) fragment.getActivity()).getDisplayState();
     }
 
-    private class DocumentsAdapter extends CursorAdapter {
-        public DocumentsAdapter(Context context) {
-            super(context, null, false);
+    private class DocumentsAdapter extends BaseAdapter {
+        private List<Document> mDocuments;
+
+        public DocumentsAdapter() {
+        }
+
+        public void swapDocuments(List<Document> documents) {
+            mDocuments = documents;
+            notifyDataSetChanged();
         }
 
         @Override
-        public View newView(Context context, Cursor cursor, ViewGroup parent) {
-            final LayoutInflater inflater = LayoutInflater.from(context);
-            final DisplayState state = getDisplayState(DirectoryFragment.this);
-            if (state.mode == DisplayState.MODE_LIST) {
-                return inflater.inflate(R.layout.item_doc_list, parent, false);
-            } else if (state.mode == DisplayState.MODE_GRID) {
-                return inflater.inflate(R.layout.item_doc_grid, parent, false);
-            } else {
-                throw new IllegalStateException();
+        public View getView(int position, View convertView, ViewGroup parent) {
+            final Context context = parent.getContext();
+
+            if (convertView == null) {
+                final LayoutInflater inflater = LayoutInflater.from(context);
+                final DisplayState state = getDisplayState(DirectoryFragment.this);
+                if (state.mode == DisplayState.MODE_LIST) {
+                    convertView = inflater.inflate(R.layout.item_doc_list, parent, false);
+                } else if (state.mode == DisplayState.MODE_GRID) {
+                    convertView = inflater.inflate(R.layout.item_doc_grid, parent, false);
+                } else {
+                    throw new IllegalStateException();
+                }
             }
-        }
 
-        @Override
-        public void bindView(View view, Context context, Cursor cursor) {
-            final TextView title = (TextView) view.findViewById(android.R.id.title);
-            final TextView summary = (TextView) view.findViewById(android.R.id.summary);
-            final ImageView icon = (ImageView) view.findViewById(android.R.id.icon);
+            final Document doc = getItem(position);
 
-            final String docId = getCursorString(cursor, DocumentColumns.DOC_ID);
-            final String displayName = getCursorString(cursor, DocumentColumns.DISPLAY_NAME);
-            final String mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
-            final long lastModified = getCursorLong(cursor, DocumentColumns.LAST_MODIFIED);
-            final int flags = getCursorInt(cursor, DocumentColumns.FLAGS);
+            final TextView title = (TextView) convertView.findViewById(android.R.id.title);
+            final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
+            final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
 
-            final Uri uri = getArguments().getParcelable(EXTRA_URI);
-            if ((flags & DocumentsContract.FLAG_SUPPORTS_THUMBNAIL) != 0) {
-                final Uri childUri = DocumentsContract.buildDocumentUri(uri, docId);
-                icon.setImageURI(childUri);
+            if (doc.isThumbnailSupported()) {
+                // TODO: load thumbnails async
+                icon.setImageURI(doc.uri);
             } else {
                 icon.setImageDrawable(DocumentsActivity.resolveDocumentIcon(
-                        context, uri.getAuthority(), mimeType));
+                        context, doc.uri.getAuthority(), doc.mimeType));
             }
 
-            title.setText(displayName);
+            title.setText(doc.displayName);
             if (summary != null) {
-                summary.setText(DateUtils.getRelativeTimeSpanString(lastModified));
+                summary.setText(DateUtils.getRelativeTimeSpanString(doc.lastModified));
             }
+
+            return convertView;
         }
-    }
 
-    public static String getCursorString(Cursor cursor, String columnName) {
-        return cursor.getString(cursor.getColumnIndex(columnName));
-    }
+        @Override
+        public int getCount() {
+            return mDocuments != null ? mDocuments.size() : 0;
+        }
 
-    public static long getCursorLong(Cursor cursor, String columnName) {
-        return cursor.getLong(cursor.getColumnIndex(columnName));
-    }
+        @Override
+        public Document getItem(int position) {
+            return mDocuments.get(position);
+        }
 
-    public static int getCursorInt(Cursor cursor, String columnName) {
-        return cursor.getInt(cursor.getColumnIndex(columnName));
+        @Override
+        public long getItemId(int position) {
+            return getItem(position).uri.hashCode();
+        }
     }
 }
