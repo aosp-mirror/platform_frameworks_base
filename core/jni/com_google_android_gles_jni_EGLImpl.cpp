@@ -107,7 +107,7 @@ static bool validAttribList(JNIEnv *_env, jintArray attrib_list) {
 
 static jint* beginNativeAttribList(JNIEnv *_env, jintArray attrib_list) {
     if (attrib_list != NULL) {
-        return (jint *)_env->GetPrimitiveArrayCritical(attrib_list, (jboolean *)0);
+        return _env->GetIntArrayElements(attrib_list, (jboolean *)0);
     } else {
         return(jint*) gNull_attrib_base;
     }
@@ -115,7 +115,7 @@ static jint* beginNativeAttribList(JNIEnv *_env, jintArray attrib_list) {
 
 static void endNativeAttributeList(JNIEnv *_env, jintArray attrib_list, jint* attrib_base) {
     if (attrib_list != NULL) {
-        _env->ReleasePrimitiveArrayCritical(attrib_list, attrib_base, JNI_ABORT);
+        _env->ReleaseIntArrayElements(attrib_list, attrib_base, JNI_ABORT);
     }
 }
 
@@ -154,9 +154,9 @@ static jboolean jni_eglQueryContext(JNIEnv *_env, jobject _this, jobject display
     EGLBoolean success = EGL_FALSE;
     int len = _env->GetArrayLength(value);
     if (len) {
-        jint* base = (jint *)_env->GetPrimitiveArrayCritical(value, (jboolean *)0);
+        jint* base = _env->GetIntArrayElements(value, (jboolean *)0);
         success = eglQueryContext(dpy, ctx, attribute, base);
-        _env->ReleasePrimitiveArrayCritical(value, base, JNI_ABORT);
+        _env->ReleaseIntArrayElements(value, base, JNI_ABORT);
     }
     return EglBoolToJBool(success);
 }
@@ -174,9 +174,9 @@ static jboolean jni_eglQuerySurface(JNIEnv *_env, jobject _this, jobject display
     EGLBoolean success = EGL_FALSE;
     int len = _env->GetArrayLength(value);
     if (len) {
-        jint* base = (jint *)_env->GetPrimitiveArrayCritical(value, (jboolean *)0);
+        jint* base = _env->GetIntArrayElements(value, (jboolean *)0);
         success = eglQuerySurface(dpy, sur, attribute, base);
-        _env->ReleasePrimitiveArrayCritical(value, base, JNI_ABORT);
+        _env->ReleaseIntArrayElements(value, base, JNI_ABORT);
     }
     return EglBoolToJBool(success);
 }
