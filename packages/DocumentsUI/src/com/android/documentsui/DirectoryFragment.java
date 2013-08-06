@@ -87,13 +87,13 @@ public class DirectoryFragment extends Fragment {
         fragment.setArguments(args);
 
         final FragmentTransaction ft = fm.beginTransaction();
-        ft.replace(R.id.directory, fragment);
+        ft.replace(R.id.container_directory, fragment);
         ft.commitAllowingStateLoss();
     }
 
     public static DirectoryFragment get(FragmentManager fm) {
         // TODO: deal with multiple directories shown at once
-        return (DirectoryFragment) fm.findFragmentById(R.id.directory);
+        return (DirectoryFragment) fm.findFragmentById(R.id.container_directory);
     }
 
     @Override
@@ -360,7 +360,7 @@ public class DirectoryFragment extends Fragment {
                 // TODO: load thumbnails async
                 icon.setImageURI(doc.uri);
             } else {
-                icon.setImageDrawable(DocumentsActivity.resolveDocumentIcon(
+                icon.setImageDrawable(RootsCache.resolveDocumentIcon(
                         context, doc.uri.getAuthority(), doc.mimeType));
             }
 

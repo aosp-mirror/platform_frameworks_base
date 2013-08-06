@@ -29,6 +29,8 @@ import android.provider.DocumentsContract.RootColumns;
 import com.android.documentsui.R;
 import com.android.documentsui.RecentsProvider;
 
+import java.util.Comparator;
+
 /**
  * Representation of a root under a storage backend.
  */
@@ -88,5 +90,23 @@ public class Root {
         root.isRecents = false;
 
         return root;
+    }
+
+    public static class RootComparator implements Comparator<Root> {
+        @Override
+        public int compare(Root lhs, Root rhs) {
+            final int score = compareToIgnoreCaseNullable(lhs.title, rhs.title);
+            if (score != 0) {
+                return score;
+            } else {
+                return compareToIgnoreCaseNullable(lhs.summary, rhs.summary);
+            }
+        }
+    }
+
+    public static int compareToIgnoreCaseNullable(String lhs, String rhs) {
+        if (lhs == null) return -1;
+        if (rhs == null) return 1;
+        return lhs.compareToIgnoreCase(rhs);
     }
 }

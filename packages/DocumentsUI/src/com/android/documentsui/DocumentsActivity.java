@@ -19,25 +19,13 @@ package com.android.documentsui;
 import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.ClipData;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.ProviderInfo;
-import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
@@ -47,37 +35,24 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.documentsui.model.Document;
-import com.android.documentsui.model.DocumentsProviderInfo;
-import com.android.documentsui.model.DocumentsProviderInfo.Icon;
 import com.android.documentsui.model.Root;
-import com.google.android.collect.Lists;
-import com.google.android.collect.Maps;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -86,8 +61,6 @@ public class DocumentsActivity extends Activity {
 
     // TODO: share backend root cache with recents provider
 
-    private static final String TAG_CREATE_DIRECTORY = "create_directory";
-
     private static final int ACTION_OPEN = 1;
     private static final int ACTION_CREATE = 2;
 
@@ -95,23 +68,11 @@ public class DocumentsActivity extends Activity {
 
     private SearchView mSearchView;
 
+    private View mRootsContainer;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
 
     private Root mCurrentRoot;
-
-    /** Map from authority to cached info */
-    private static HashMap<String, DocumentsProviderInfo> sProviders = Maps.newHashMap();
-    /** Map from (authority+rootId) to cached info */
-    private static HashMap<Pair<String, String>, Root> sRoots = Maps.newHashMap();
-
-    // TODO: remove once adapter split by type
-    private static ArrayList<Root> sRootsList = Lists.newArrayList();
-
-    private static Root sRecentOpenRoot;
-
-    private RootsAdapter mRootsAdapter;
-    private ListView mRootsList;
 
     private final DisplayState mDisplayState = new DisplayState();
 
@@ -153,11 +114,11 @@ public class DocumentsActivity extends Activity {
             SaveFragment.show(getFragmentManager(), mimeType, title);
         }
 
+        RootsFragment.show(getFragmentManager());
+
+        mRootsContainer = findViewById(R.id.container_roots);
+
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mRootsAdapter = new RootsAdapter(this, sRootsList);
-        mRootsList = (ListView) findViewById(R.id.roots_list);
-        mRootsList.setAdapter(mRootsAdapter);
-        mRootsList.setOnItemClickListener(mRootsListener);
 
         mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
                 R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close);
@@ -165,9 +126,7 @@ public class DocumentsActivity extends Activity {
         mDrawerLayout.setDrawerListener(mDrawerListener);
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
-        mDrawerLayout.openDrawer(mRootsList);
-
-        updateRoots();
+        mDrawerLayout.openDrawer(mRootsContainer);
 
         // Restore last stack for calling package
         // TODO: move into async loader
@@ -186,7 +145,7 @@ public class DocumentsActivity extends Activity {
 
         // Start in recents if no restored stack
         if (mStack.isEmpty()) {
-            onRootPicked(sRecentOpenRoot);
+            onRootPicked(RootsCache.getRecentOpenRoot(this), false);
         }
 
         updateDirectoryFragment();
@@ -228,7 +187,7 @@ public class DocumentsActivity extends Activity {
         actionBar.setDisplayShowHomeEnabled(true);
         actionBar.setDisplayHomeAsUpEnabled(true);
 
-        if (mDrawerLayout.isDrawerOpen(mRootsList)) {
+        if (mDrawerLayout.isDrawerOpen(mRootsContainer)) {
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
             actionBar.setIcon(new ColorDrawable());
 
@@ -334,7 +293,7 @@ public class DocumentsActivity extends Activity {
         if (size > 1) {
             mStack.pop();
             updateDirectoryFragment();
-        } else if (size == 1 && !mDrawerLayout.isDrawerOpen(mRootsList)) {
+        } else if (size == 1 && !mDrawerLayout.isDrawerOpen(mRootsContainer)) {
             // TODO: open root drawer once we can capture back key
             super.onBackPressed();
         } else {
@@ -434,11 +393,15 @@ public class DocumentsActivity extends Activity {
         dumpStack();
     }
 
-    public void onRootPicked(Root root) {
+    public void onRootPicked(Root root, boolean closeDrawer) {
         // Clear entire backstack and start in new root
         mStack.clear();
         mCurrentRoot = root;
         onDocumentPicked(Document.fromRoot(getContentResolver(), root));
+
+        if (closeDrawer) {
+            mDrawerLayout.closeDrawers();
+        }
     }
 
     public void onDocumentPicked(Document doc) {
@@ -511,7 +474,7 @@ public class DocumentsActivity extends Activity {
         if (cwd != null) {
             final String authority = cwd.uri.getAuthority();
             final String rootId = DocumentsContract.getRootId(cwd.uri);
-            mCurrentRoot = sRoots.get(Pair.create(authority, rootId));
+            mCurrentRoot = RootsCache.findRoot(this, authority, rootId);
         }
     }
 
@@ -577,172 +540,10 @@ public class DocumentsActivity extends Activity {
         public static final int SORT_ORDER_DATE = 1;
     }
 
-    public static Drawable resolveDocumentIcon(Context context, String authority, String mimeType) {
-        // Custom icons take precedence
-        final DocumentsProviderInfo info = sProviders.get(authority);
-        if (info != null) {
-            for (Icon icon : info.customIcons) {
-                if (MimePredicate.mimeMatches(icon.mimeType, mimeType)) {
-                    return icon.icon;
-                }
-            }
-        }
-
-        if (DocumentsContract.MIME_TYPE_DIRECTORY.equals(mimeType)) {
-            return context.getResources().getDrawable(R.drawable.ic_dir);
-        } else {
-            final PackageManager pm = context.getPackageManager();
-            final Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setType(mimeType);
-
-            final ResolveInfo activityInfo = pm.resolveActivity(
-                    intent, PackageManager.MATCH_DEFAULT_ONLY);
-            if (activityInfo != null) {
-                return activityInfo.loadIcon(pm);
-            } else {
-                return null;
-            }
-        }
-    }
-
-    /**
-     * Gather roots from all known storage providers.
-     */
-    private void updateRoots() {
-        sProviders.clear();
-        sRoots.clear();
-        sRootsList.clear();
-
-        final Context context = this;
-        final PackageManager pm = getPackageManager();
-
-        // Create special roots, like recents
-        {
-            final Root root = Root.buildRecentOpen(context);
-            sRootsList.add(root);
-            sRecentOpenRoot = root;
-        }
-
-        // Query for other storage backends
-        final List<ProviderInfo> providers = pm.queryContentProviders(
-                null, -1, PackageManager.GET_META_DATA);
-        for (ProviderInfo providerInfo : providers) {
-            if (providerInfo.metaData != null && providerInfo.metaData.containsKey(
-                    DocumentsContract.META_DATA_DOCUMENT_PROVIDER)) {
-                final DocumentsProviderInfo info = DocumentsProviderInfo.parseInfo(
-                        this, providerInfo);
-                if (info == null) {
-                    Log.w(TAG, "Missing info for " + providerInfo);
-                    continue;
-                }
-
-                sProviders.put(info.providerInfo.authority, info);
-
-                // TODO: remove deprecated customRoots flag
-                // TODO: populate roots on background thread, and cache results
-                final Uri uri = DocumentsContract.buildRootsUri(providerInfo.authority);
-                final Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-                try {
-                    while (cursor.moveToNext()) {
-                        final Root root = Root.fromCursor(this, info, cursor);
-                        sRoots.put(Pair.create(info.providerInfo.authority, root.rootId), root);
-                        sRootsList.add(root);
-                    }
-                } finally {
-                    cursor.close();
-                }
-            }
-        }
-    }
-
-    private OnItemClickListener mRootsListener = new OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            final Root root = mRootsAdapter.getItem(position);
-            onRootPicked(root);
-            mDrawerLayout.closeDrawers();
-        }
-    };
-
     private void dumpStack() {
         Log.d(TAG, "Current stack:");
         for (Document doc : mStack) {
             Log.d(TAG, "--> " + doc);
-        }
-    }
-
-    public static class RootsAdapter extends ArrayAdapter<Root> {
-        public RootsAdapter(Context context, List<Root> list) {
-            super(context, android.R.layout.simple_list_item_1, list);
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.item_root, parent, false);
-            }
-
-            final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
-            final TextView title = (TextView) convertView.findViewById(android.R.id.title);
-            final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
-
-            final Root root = getItem(position);
-            icon.setImageDrawable(root.icon);
-            title.setText(root.title);
-
-            summary.setText(root.summary);
-            summary.setVisibility(root.summary != null ? View.VISIBLE : View.GONE);
-
-            return convertView;
-        }
-    }
-
-    public static class CreateDirectoryFragment extends DialogFragment {
-        public static void show(FragmentManager fm) {
-            final CreateDirectoryFragment dialog = new CreateDirectoryFragment();
-            dialog.show(fm, TAG_CREATE_DIRECTORY);
-        }
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            final Context context = getActivity();
-            final ContentResolver resolver = context.getContentResolver();
-
-            final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            final LayoutInflater dialogInflater = LayoutInflater.from(builder.getContext());
-
-            final View view = dialogInflater.inflate(R.layout.dialog_create_dir, null, false);
-            final EditText text1 = (EditText)view.findViewById(android.R.id.text1);
-
-            builder.setTitle(R.string.menu_create_dir);
-            builder.setView(view);
-
-            builder.setPositiveButton(android.R.string.ok, new OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    final String displayName = text1.getText().toString();
-
-                    final ContentValues values = new ContentValues();
-                    values.put(DocumentColumns.MIME_TYPE, DocumentsContract.MIME_TYPE_DIRECTORY);
-                    values.put(DocumentColumns.DISPLAY_NAME, displayName);
-
-                    final DocumentsActivity activity = (DocumentsActivity) getActivity();
-                    final Document cwd = activity.getCurrentDirectory();
-
-                    final Uri childUri = resolver.insert(cwd.uri, values);
-                    if (childUri != null) {
-                        // Navigate into newly created child
-                        final Document childDoc = Document.fromUri(resolver, childUri);
-                        activity.onDocumentPicked(childDoc);
-                    } else {
-                        Toast.makeText(context, R.string.save_error, Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-            builder.setNegativeButton(android.R.string.cancel, null);
-
-            return builder.create();
         }
     }
 }

@@ -155,7 +155,7 @@ public class Document {
             if (leftDir != rightDir) {
                 return leftDir ? -1 : 1;
             } else {
-                return lhs.displayName.compareToIgnoreCase(rhs.displayName);
+                return Root.compareToIgnoreCaseNullable(lhs.displayName, rhs.displayName);
             }
         }
     }
