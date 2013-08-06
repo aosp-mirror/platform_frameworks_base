@@ -1448,7 +1448,7 @@ class ContextImpl extends Context {
                 if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.KEY_LIME_PIE) {
                     IllegalArgumentException ex = new IllegalArgumentException(
                             "Service Intent must be explicit: " + service);
-                    Log.wtf(TAG, "This will become an error", ex);
+                    Log.e(TAG, "This will become an error", ex);
                     //throw ex;
                 }
             }
@@ -1480,7 +1480,7 @@ class ContextImpl extends Context {
                 if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.KEY_LIME_PIE) {
                     IllegalArgumentException ex = new IllegalArgumentException(
                             "Service Intent must be explicit: " + service);
-                    Log.wtf(TAG, "This will become an error", ex);
+                    Log.e(TAG, "This will become an error", ex);
                     //throw ex;
                 }
             }
@@ -1523,7 +1523,7 @@ class ContextImpl extends Context {
             if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.KEY_LIME_PIE) {
                 IllegalArgumentException ex = new IllegalArgumentException(
                         "Service Intent must be explicit: " + service);
-                Log.wtf(TAG, "This will become an error", ex);
+                Log.e(TAG, "This will become an error", ex);
                 //throw ex;
             }
         }
