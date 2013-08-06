@@ -594,7 +594,7 @@ final class Settings {
                         "Package " + p.name + " was user "
                         + p.sharedUser + " but is now " + sharedUser
                         + "; I am not changing its files so it will probably fail!");
-                p.sharedUser.packages.remove(p);
+                p.sharedUser.removePackage(p);
             } else if (p.appId != sharedUser.userId) {
                 PackageManagerService.reportSettingsProblem(Log.ERROR,
                     "Package " + p.name + " was user id " + p.appId
@@ -603,7 +603,7 @@ final class Settings {
                     + "; I am not changing its files so it will probably fail!");
             }
 
-            sharedUser.packages.add(p);
+            sharedUser.addPackage(p);
             p.sharedUser = sharedUser;
             p.appId = sharedUser.userId;
         }
@@ -663,7 +663,7 @@ final class Settings {
         if (p != null) {
             mPackages.remove(name);
             if (p.sharedUser != null) {
-                p.sharedUser.packages.remove(p);
+                p.sharedUser.removePackage(p);
                 if (p.sharedUser.packages.size() == 0) {
                     mSharedUsers.remove(p.sharedUser.name);
                     removeUserIdLPw(p.sharedUser.userId);
@@ -681,8 +681,8 @@ final class Settings {
         final PackageSetting p = mPackages.get(name);
         if (p != null) {
             if (p.sharedUser != null) {
-                p.sharedUser.packages.remove(p);
-                p.sharedUser.packages.add(newp);
+                p.sharedUser.removePackage(p);
+                p.sharedUser.addPackage(newp);
             } else {
                 replaceUserIdLPw(p.appId, newp);
             }

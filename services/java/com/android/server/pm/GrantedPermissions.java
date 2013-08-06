@@ -44,6 +44,7 @@ class GrantedPermissions {
     void setFlags(int pkgFlags) {
         this.pkgFlags = pkgFlags
                 & (ApplicationInfo.FLAG_SYSTEM
+                        | ApplicationInfo.FLAG_PRIVILEGED
                         | ApplicationInfo.FLAG_FORWARD_LOCK
                         | ApplicationInfo.FLAG_EXTERNAL_STORAGE);
     }
