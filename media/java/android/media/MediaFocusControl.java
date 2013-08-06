@@ -2141,7 +2141,7 @@ public class MediaFocusControl implements OnFinished {
                 new RccPlaybackState(state, timeMs, speed) /* obj */, 0 /* delay */);
     }
 
-    protected void onNewPlaybackStateForRcc(int rccId, int state, RccPlaybackState newState) {
+    private void onNewPlaybackStateForRcc(int rccId, int state, RccPlaybackState newState) {
         if(DEBUG_RC) Log.d(TAG, "onNewPlaybackStateForRcc(id=" + rccId + ", state=" + state
                 + ", time=" + newState.mPositionMs + ", speed=" + newState.mSpeed + ")");
         synchronized(mRCStack) {
