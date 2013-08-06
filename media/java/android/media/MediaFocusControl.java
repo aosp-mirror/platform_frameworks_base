@@ -117,6 +117,17 @@ public class MediaFocusControl implements OnFinished {
         postReevaluateRemote();
     }
 
+    protected void dump(PrintWriter pw) {
+        dumpFocusStack(pw);
+        dumpRCStack(pw);
+        dumpRCCStack(pw);
+        dumpRCDList(pw);
+    }
+
+    //==========================================================================================
+    // Internal event handling
+    //==========================================================================================
+
     // event handler messages
     private static final int MSG_PERSIST_MEDIABUTTONRECEIVER = 0;
     private static final int MSG_RCDISPLAY_CLEAR = 1;
@@ -197,35 +208,6 @@ public class MediaFocusControl implements OnFinished {
         }
     }
 
-    protected void dump(PrintWriter pw) {
-        dumpFocusStack(pw);
-        dumpRCStack(pw);
-        dumpRCCStack(pw);
-        dumpRCDList(pw);
-    }
-
-    private class PackageIntentsReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
-                    || action.equals(Intent.ACTION_PACKAGE_DATA_CLEARED)) {
-                if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                    // a package is being removed, not replaced
-                    String packageName = intent.getData().getSchemeSpecificPart();
-                    if (packageName != null) {
-                        cleanupMediaButtonReceiverForPackage(packageName, true);
-                    }
-                }
-            } else if (action.equals(Intent.ACTION_PACKAGE_ADDED)
-                    || action.equals(Intent.ACTION_PACKAGE_CHANGED)) {
-                String packageName = intent.getData().getSchemeSpecificPart();
-                if (packageName != null) {
-                    cleanupMediaButtonReceiverForPackage(packageName, false);
-                }
-            }
-        }
-    }
 
     //==========================================================================================
     // AudioFocus
@@ -705,6 +687,28 @@ public class MediaFocusControl implements OnFinished {
 
     }
 
+    private class PackageIntentsReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
+                    || action.equals(Intent.ACTION_PACKAGE_DATA_CLEARED)) {
+                if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                    // a package is being removed, not replaced
+                    String packageName = intent.getData().getSchemeSpecificPart();
+                    if (packageName != null) {
+                        cleanupMediaButtonReceiverForPackage(packageName, true);
+                    }
+                }
+            } else if (action.equals(Intent.ACTION_PACKAGE_ADDED)
+                    || action.equals(Intent.ACTION_PACKAGE_CHANGED)) {
+                String packageName = intent.getData().getSchemeSpecificPart();
+                if (packageName != null) {
+                    cleanupMediaButtonReceiverForPackage(packageName, false);
+                }
+            }
+        }
+    }
 
     private static boolean isValidMediaKeyEvent(KeyEvent keyEvent) {
         if (keyEvent == null) {
