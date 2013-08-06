@@ -185,7 +185,7 @@ public final class CardEmulationManager {
     }
 
     /**
-     * @return
+     * @hide
      */
     public boolean setDefaultServiceForCategory(ComponentName service, String category) {
         try {
@@ -207,6 +207,27 @@ public final class CardEmulationManager {
         }
     }
 
+    /**
+     * @hide
+     */
+    public boolean setDefaultForNextTap(ComponentName service) {
+        try {
+            return sService.setDefaultForNextTap(UserHandle.myUserId(), service);
+        } catch (RemoteException e) {
+            // Try one more time
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
+            try {
+                return sService.setDefaultForNextTap(UserHandle.myUserId(), service);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return false;
+            }
+        }
+    }
     /**
      * @hide
      */
