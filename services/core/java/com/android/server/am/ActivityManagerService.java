@@ -6402,6 +6402,18 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    public String getCallingPackageForBroadcast(boolean foreground) {
+        BroadcastQueue queue = foreground ? mFgBroadcastQueue : mBgBroadcastQueue;
+        BroadcastRecord r = queue.getProcessingBroadcast();
+        if (r != null) {
+            return r.callerPackage;
+        } else {
+            Log.e(TAG, "Broadcast sender is only retrievable in the onReceive");
+        }
+        return null;
+    }
+
+
     private ActivityRecord getCallingRecordLocked(IBinder token) {
         ActivityRecord r = ActivityRecord.isInStackLocked(token);
         if (r == null) {
