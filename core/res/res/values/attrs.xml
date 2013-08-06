@@ -737,6 +737,14 @@
         <attr name="preferenceLayoutChild" format="reference" />
         <!-- Preference panel style -->
         <attr name="preferencePanelStyle" format="reference" />
+        <!-- Preference headers panel style -->
+        <attr name="preferenceHeaderPanelStyle" format="reference" />
+        <!-- Preference list style -->
+        <attr name="preferenceListStyle" format="reference" />
+        <!-- Preference fragment list style -->
+        <attr name="preferenceFragmentListStyle" format="reference" />
+        <!-- Preference fragment padding side -->
+        <attr name="preferenceFragmentPaddingSide" format="dimension" />
         <!-- Default style for switch preferences. -->
         <attr name="switchPreferenceStyle" format="reference" />
 

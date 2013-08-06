@@ -30,24 +30,19 @@
         android:layout_weight="1">
 
         <LinearLayout
+            style="?attr/preferenceHeaderPanelStyle"
             android:id="@+id/headers"
             android:orientation="vertical"
             android:layout_width="0px"
             android:layout_height="match_parent"
-            android:layout_marginEnd="@dimen/preference_screen_side_margin_negative"
-            android:layout_marginStart="@dimen/preference_screen_side_margin"
             android:layout_weight="@integer/preferences_left_pane_weight">
 
             <ListView android:id="@android:id/list"
+                style="?attr/preferenceListStyle"
                 android:layout_width="match_parent"
                 android:layout_height="0px"
                 android:layout_weight="1"
-                android:paddingStart="@dimen/preference_screen_header_padding_side"
-                android:paddingEnd="@dimen/preference_screen_header_padding_side"
-                android:paddingTop="@dimen/preference_screen_header_vertical_padding"
-                android:paddingBottom="@dimen/preference_screen_header_vertical_padding"
                 android:clipToPadding="false"
-                android:scrollbarStyle="@integer/preference_screen_header_scrollbarStyle"
                 android:drawSelectorOnTop="false"
                 android:cacheColorHint="@android:color/transparent"
                 android:listPreferredItemHeight="48dp"

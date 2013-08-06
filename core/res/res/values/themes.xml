@@ -311,6 +311,10 @@ please see themes_device_defaults.xml.
         <item name="ringtonePreferenceStyle">@android:style/Preference.RingtonePreference</item>
         <item name="preferenceLayoutChild">@android:layout/preference_child</item>
         <item name="preferencePanelStyle">@style/PreferencePanel</item>
+        <item name="preferenceHeaderPanelStyle">@style/PreferenceHeaderPanel</item>
+        <item name="preferenceListStyle">@style/PreferenceHeaderList</item>
+        <item name="preferenceFragmentListStyle">@style/PreferenceFragmentList</item>
+        <item name="preferenceFragmentPaddingSide">@dimen/preference_fragment_padding_side</item>
         <item name="detailsElementBackground">@android:drawable/panel_bg_holo_dark</item>
 
         <!-- Search widget styles -->

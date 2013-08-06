@@ -1058,6 +1058,24 @@ please see styles_device_defaults.xml.
         <item name="android:background">@null</item>
     </style>
 
+    <style name="PreferenceHeaderPanel">
+        <item name="android:layout_marginStart">@dimen/preference_screen_side_margin</item>
+        <item name="android:layout_marginEnd">@dimen/preference_screen_side_margin_negative</item>
+        <item name="android:paddingTop">@dimen/preference_screen_header_vertical_padding</item>
+        <item name="android:paddingBottom">@dimen/preference_screen_header_vertical_padding</item>
+    </style>
+
+    <style name="PreferenceHeaderList">
+        <item name="android:paddingStart">@dimen/preference_screen_header_padding_side</item>
+        <item name="android:paddingEnd">@dimen/preference_screen_header_padding_side</item>
+        <item name="android:scrollbarStyle">@integer/preference_screen_header_scrollbarStyle</item>
+    </style>
+
+    <style name="PreferenceFragmentList">
+        <item name="android:paddingStart">@dimen/preference_fragment_padding_side</item>
+        <item name="android:paddingEnd">@dimen/preference_fragment_padding_side</item>
+    </style>
+
     <!-- Other Misc Styles -->
     <eat-comment />
 
@@ -2426,8 +2444,8 @@ please see styles_device_defaults.xml.
     <style name="Widget.Holo.PreferenceFrameLayout">
         <item name="android:borderTop">0dip</item>
         <item name="android:borderBottom">@dimen/preference_fragment_padding_bottom</item>
-        <item name="android:borderLeft">@dimen/preference_fragment_padding_side</item>
-        <item name="android:borderRight">@dimen/preference_fragment_padding_side</item>
+        <item name="android:borderLeft">?attr/preferenceFragmentPaddingSide</item>
+        <item name="android:borderRight">?attr/preferenceFragmentPaddingSide</item>
     </style>
 
     <!-- Pointer styles -->
