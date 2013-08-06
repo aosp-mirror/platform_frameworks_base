@@ -1979,7 +1979,7 @@ class ContextImpl extends Context {
                         " compatiblity info:" + container.getDisplayMetrics());
             }
             if (compatInfo == null) {
-                compatInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
+                compatInfo = packageInfo.getCompatibilityInfo();
             }
             mDisplayAdjustments.setCompatibilityInfo(compatInfo);
             mDisplayAdjustments.setActivityToken(activityToken);
