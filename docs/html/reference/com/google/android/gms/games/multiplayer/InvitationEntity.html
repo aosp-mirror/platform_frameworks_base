@@ -686,6 +686,9 @@ Summary:
   
 
 
+  &#124; <a href="#promethods">Protected Methods</a>
+  
+
 
   &#124; <a href="#inhmethods">Inherited Methods</a>
 
@@ -714,7 +717,7 @@ Summary:
 
 
   
-    extends Object<br/>
+    extends <a href="http://developer.android.com/reference/java/lang/Object.html">Object</a><br/>
   
   
   
@@ -722,6 +725,8 @@ Summary:
   
   
       implements 
+      
+        <a href="http://developer.android.com/reference/android/os/Parcelable.html">Parcelable</a> 
       
         <a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html">Invitation</a> 
       
@@ -739,7 +744,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
+        <td colspan="2" class="jd-inheritance-class-cell"><a href="http://developer.android.com/reference/java/lang/Object.html">java.lang.Object</a></td>
     </tr>
     
 
@@ -876,7 +881,7 @@ android.os.Parcelable
           public
           static
           final
-          Creator&lt;<a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html">InvitationEntity</a>&gt;</nobr></td>
+          <a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntityCreator.html">InvitationEntityCreator</a></nobr></td>
           <td class="jd-linkcol"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html#CREATOR">CREATOR</a></td>
           <td class="jd-descrcol" width="100%"></td>
       </tr>
@@ -927,7 +932,7 @@ android.os.Parcelable
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html#equals(java.lang.Object)">equals</a></span>(Object obj)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html#equals(java.lang.Object)">equals</a></span>(<a href="http://developer.android.com/reference/java/lang/Object.html">Object</a> obj)</nobr>
         
   </td></tr>
 
@@ -994,7 +999,7 @@ android.os.Parcelable
             
             
             
-            String</nobr>
+            <a href="http://developer.android.com/reference/java/lang/String.html">String</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html#getInvitationId()">getInvitationId</a></span>()</nobr>
@@ -1012,11 +1017,13 @@ android.os.Parcelable
             
             
             
-            int</nobr>
+            <a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html#getInvitationType()">getInvitationType</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html#getInviter()">getInviter</a></span>()</nobr>
         
+        <div class="jd-descrdiv">Retrieve the <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></code> who created this <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html">Invitation</a></code>.</div>
+  
   </td></tr>
 
 
@@ -1028,12 +1035,12 @@ android.os.Parcelable
             
             
             
-            <a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></nobr>
+            <a href="http://developer.android.com/reference/java/util/ArrayList.html">ArrayList</a>&lt;<a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html#getInviter()">getInviter</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html#getParticipants()">getParticipants</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Retrieve the <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></code> who created this <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html">Invitation</a></code>.</div>
+        <div class="jd-descrdiv">Retrieve the <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></code>s for this object.</div>
   
   </td></tr>
 
@@ -1046,12 +1053,12 @@ android.os.Parcelable
             
             
             
-            ArrayList&lt;<a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a>&gt;</nobr>
+            int</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html#getParticipants()">getParticipants</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html#getVariant()">getVariant</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Retrieve the <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></code>s for this object.</div>
+        <div class="jd-descrdiv">Retrieve the variant specified for this <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html">Invitation</a></code>, if any.</div>
   
   </td></tr>
 
@@ -1080,11 +1087,13 @@ android.os.Parcelable
             
             
             
-            String</nobr>
+            boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html#toString()">toString</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html#isDataValid()">isDataValid</a></span>()</nobr>
         
+        <div class="jd-descrdiv">Check to see if this object is valid for use.</div>
+  
   </td></tr>
 
 
@@ -1096,10 +1105,26 @@ android.os.Parcelable
             
             
             
+            <a href="http://developer.android.com/reference/java/lang/String.html">String</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html#toString()">toString</a></span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html#writeToParcel(android.os.Parcel, int)">writeToParcel</a></span>(Parcel dest, int flags)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html#writeToParcel(android.os.Parcel, int)">writeToParcel</a></span>(<a href="http://developer.android.com/reference/android/os/Parcel.html">Parcel</a> dest, int flags)</nobr>
         
   </td></tr>
 
@@ -1108,6 +1133,63 @@ android.os.Parcelable
 </table>
 
 
+
+
+<!-- ========== METHOD SUMMARY =========== -->
+<table id="promethods" class="jd-sumtable"><tr><th colspan="12">Protected Methods</th></tr>
+
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            static
+            
+            <a href="http://developer.android.com/reference/java/lang/ClassLoader.html">ClassLoader</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html#getUnparcelClassLoader()">getUnparcelClassLoader</a></span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            static
+            
+            <a href="http://developer.android.com/reference/java/lang/Integer.html">Integer</a></nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html#getUnparcelClientVersion()">getUnparcelClientVersion</a></span>()</nobr>
+        
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html#shouldDowngrade()">shouldDowngrade</a></span>()</nobr>
+        
+  </td></tr>
+
+
+
+</table>
 
 
 
@@ -1127,7 +1209,7 @@ android.os.Parcelable
           class="jd-expando-trigger-img" /></a>
 From class
 
-  java.lang.Object
+  <a href="http://developer.android.com/reference/java/lang/Object.html">java.lang.Object</a>
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -1146,7 +1228,7 @@ From class
             
             
             
-            Object</nobr>
+            <a href="http://developer.android.com/reference/java/lang/Object.html">Object</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -1165,7 +1247,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(Object arg0)</nobr>
+        <span class="sympad">equals</span>(<a href="http://developer.android.com/reference/java/lang/Object.html">Object</a> arg0)</nobr>
         
   </td></tr>
 
@@ -1194,7 +1276,7 @@ From class
             final
             
             
-            Class&lt;?&gt;</nobr>
+            <a href="http://developer.android.com/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -1258,7 +1340,7 @@ From class
             
             
             
-            String</nobr>
+            <a href="http://developer.android.com/reference/java/lang/String.html">String</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -1329,7 +1411,7 @@ From class
           class="jd-expando-trigger-img" /></a>
 From interface
 
-  android.os.Parcelable
+  <a href="http://developer.android.com/reference/android/os/Parcelable.html">android.os.Parcelable</a>
 
 <div id="inherited-methods-android.os.Parcelable">
   <div id="inherited-methods-android.os.Parcelable-list"
@@ -1367,7 +1449,7 @@ From interface
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">writeToParcel</span>(Parcel arg0, int arg1)</nobr>
+        <span class="sympad">writeToParcel</span>(<a href="http://developer.android.com/reference/android/os/Parcel.html">Parcel</a> arg0, int arg1)</nobr>
         
   </td></tr>
 
@@ -1412,6 +1494,24 @@ From interface
         <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#freeze()">freeze</a></span>()</nobr>
         
         <div class="jd-descrdiv">Freeze a volatile representation into an immutable representation.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#isDataValid()">isDataValid</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Check to see if this object is valid for use.</div>
   
   </td></tr>
 
@@ -1486,7 +1586,7 @@ From interface
             
             
             
-            String</nobr>
+            <a href="http://developer.android.com/reference/java/lang/String.html">String</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html#getInvitationId()">getInvitationId</a></span>()</nobr>
@@ -1510,6 +1610,24 @@ From interface
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html#getInviter()">getInviter</a></span>()</nobr>
         
         <div class="jd-descrdiv">Retrieve the <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></code> who created this <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html">Invitation</a></code>.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html#getVariant()">getVariant</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Retrieve the variant specified for this <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html">Invitation</a></code>, if any.</div>
   
   </td></tr>
 
@@ -1548,7 +1666,7 @@ From interface
             
             
             
-            ArrayList&lt;<a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a>&gt;</nobr>
+            <a href="http://developer.android.com/reference/java/util/ArrayList.html">ArrayList</a>&lt;<a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a>&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/Participatable.html#getParticipants()">getParticipants</a></span>()</nobr>
@@ -1604,7 +1722,7 @@ From interface
         public 
         static 
         final 
-        Creator&lt;<a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntity.html">InvitationEntity</a>&gt;
+        <a href="/reference/com/google/android/gms/games/multiplayer/InvitationEntityCreator.html">InvitationEntityCreator</a>
       </span>
         CREATOR
     </h4>
@@ -1683,7 +1801,7 @@ From interface
         boolean
       </span>
       <span class="sympad">equals</span>
-      <span class="normal">(Object obj)</span>
+      <span class="normal">(<a href="http://developer.android.com/reference/java/lang/Object.html">Object</a> obj)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -1824,7 +1942,7 @@ From interface
          
          
          
-        String
+        <a href="http://developer.android.com/reference/java/lang/String.html">String</a>
       </span>
       <span class="sympad">getInvitationId</span>
       <span class="normal">()</span>
@@ -1843,35 +1961,6 @@ From interface
       <ul class="nolist"><li>The ID of this <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html">Invitation</a></code>.
 </li></ul>
   </div>
-
-    </div>
-</div>
-
-
-<A NAME="getInvitationType()"></A>
-
-<div class="jd-details api apilevel-"> 
-    <h4 class="jd-details-title">
-      <span class="normal">
-        public 
-         
-         
-         
-         
-        int
-      </span>
-      <span class="sympad">getInvitationType</span>
-      <span class="normal">()</span>
-    </h4>
-      <div class="api-level">
-        <div></div>
-        
-  
-
-      </div>
-    <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -1921,7 +2010,7 @@ From interface
          
          
          
-        ArrayList&lt;<a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a>&gt;
+        <a href="http://developer.android.com/reference/java/util/ArrayList.html">ArrayList</a>&lt;<a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a>&gt;
       </span>
       <span class="sympad">getParticipants</span>
       <span class="normal">()</span>
@@ -1939,6 +2028,43 @@ From interface
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
       <ul class="nolist"><li>A list of <code><a href="/reference/com/google/android/gms/games/multiplayer/Participant.html">Participant</a></code>s for this object.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getVariant()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        int
+      </span>
+      <span class="sympad">getVariant</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Retrieve the variant specified for this <code><a href="/reference/com/google/android/gms/games/multiplayer/Invitation.html">Invitation</a></code>, if any. A variant is an optional
+ developer-controlled parameter describing the type of game to play. If specified, this value
+ will be a positive integer. If this invitation had no variant specified, returns
+ <code><a href="/reference/com/google/android/gms/games/multiplayer/realtime/Room.html#ROOM_VARIANT_ANY">ROOM_VARIANT_ANY</a></code>.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Variant specified for this invitation, if any.
 </li></ul>
   </div>
 
@@ -1975,6 +2101,42 @@ From interface
 </div>
 
 
+<A NAME="isDataValid()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">isDataValid</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Check to see if this object is valid for use. If the object is still volatile, this method
+ will indicate whether or not the object can be safely used. The output of a call to
+ <code><a href="/reference/com/google/android/gms/common/data/Freezable.html#freeze()">freeze()</a></code> will always be valid.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>whether or not the object is valid for use.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="toString()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1985,7 +2147,7 @@ From interface
          
          
          
-        String
+        <a href="http://developer.android.com/reference/java/lang/String.html">String</a>
       </span>
       <span class="sympad">toString</span>
       <span class="normal">()</span>
@@ -2017,7 +2179,7 @@ From interface
         void
       </span>
       <span class="sympad">writeToParcel</span>
-      <span class="normal">(Parcel dest, int flags)</span>
+      <span class="normal">(<a href="http://developer.android.com/reference/android/os/Parcel.html">Parcel</a> dest, int flags)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -2037,6 +2199,113 @@ From interface
 
 
 <!-- ========= METHOD DETAIL ======== -->
+
+<h2>Protected Methods</h2>
+
+
+
+<A NAME="getUnparcelClassLoader()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected 
+        static 
+         
+         
+         
+        <a href="http://developer.android.com/reference/java/lang/ClassLoader.html">ClassLoader</a>
+      </span>
+      <span class="sympad">getUnparcelClassLoader</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>The ClassLoader to use for unparceling, if any.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="getUnparcelClientVersion()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected 
+        static 
+         
+         
+         
+        <a href="http://developer.android.com/reference/java/lang/Integer.html">Integer</a>
+      </span>
+      <span class="sympad">getUnparcelClientVersion</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>The client version to use for unparceling, if known.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="shouldDowngrade()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        protected 
+         
+         
+         
+         
+        boolean
+      </span>
+      <span class="sympad">shouldDowngrade</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Returns</h5>
+      <ul class="nolist"><li>Whether or not this object has been downgraded to hand back to a client.
+</li></ul>
+  </div>
+
+    </div>
+</div>
+
+
 
 
 

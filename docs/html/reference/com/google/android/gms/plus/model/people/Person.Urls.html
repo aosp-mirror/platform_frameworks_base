@@ -800,12 +800,12 @@ Summary:
             
             
             
-            int</nobr>
+            <a href="http://developer.android.com/reference/java/lang/String.html">String</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Urls.html#getType()">getType</a></span>()</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Urls.html#getLabel()">getLabel</a></span>()</nobr>
         
-        <div class="jd-descrdiv">The type of URL.</div>
+        <div class="jd-descrdiv">The label of the URL.</div>
   
   </td></tr>
 
@@ -818,12 +818,48 @@ Summary:
             
             
             
-            String</nobr>
+            int</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Urls.html#getType()">getType</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">The type of URL.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            <a href="http://developer.android.com/reference/java/lang/String.html">String</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Urls.html#getValue()">getValue</a></span>()</nobr>
         
         <div class="jd-descrdiv">The URL value.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Urls.html#hasLabel()">hasLabel</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Indicates whether the "label" field is explicitly set to a value.</div>
   
   </td></tr>
 
@@ -841,7 +877,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Urls.html#hasPrimary()">hasPrimary</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Indicates whether the "primary" field is explicitly set to a value.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    Returns false (removed).
+</em></div>
   
   </td></tr>
 
@@ -895,7 +934,10 @@ Summary:
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/plus/model/people/Person.Urls.html#isPrimary()">isPrimary</a></span>()</nobr>
         
-        <div class="jd-descrdiv">If "true", this URL is the person's primary URL.</div>
+        <div class="jd-descrdiv"><em>
+      This method is deprecated.
+    Returns false (removed).
+</em></div>
   
   </td></tr>
 
@@ -952,6 +994,24 @@ From interface
   </td></tr>
 
 
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            abstract
+            
+            
+            
+            
+            boolean</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/common/data/Freezable.html#isDataValid()">isDataValid</a></span>()</nobr>
+        
+        <div class="jd-descrdiv">Check to see if this object is valid for use.</div>
+  
+  </td></tr>
+
+
 </table>
   </div>
 </div>
@@ -1000,6 +1060,36 @@ From interface
 
 
 
+<A NAME="getLabel()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        <a href="http://developer.android.com/reference/java/lang/String.html">String</a>
+      </span>
+      <span class="sympad">getLabel</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>The label of the URL.
+</p></div>
+
+    </div>
+</div>
+
+
 <A NAME="getType()"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -1024,10 +1114,9 @@ From interface
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>The type of URL. Possible values are:
- - "home" - URL for home.
- - "work" - URL for work.
- - "blog" - URL for blog.
- - "profile" - URL for profile.
+ - "otherProfile" - URL for another profile.
+ - "contributor" - URL for which this person is a contributor to.
+ - "website" - URL for this Google+ Page's primary website.
  - "other" - Other.
 </p></div>
 
@@ -1045,7 +1134,7 @@ From interface
          
         abstract 
          
-        String
+        <a href="http://developer.android.com/reference/java/lang/String.html">String</a>
       </span>
       <span class="sympad">getValue</span>
       <span class="normal">()</span>
@@ -1059,6 +1148,36 @@ From interface
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>The URL value.
+</p></div>
+
+    </div>
+</div>
+
+
+<A NAME="hasLabel()"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+         
+        abstract 
+         
+        boolean
+      </span>
+      <span class="sympad">hasLabel</span>
+      <span class="normal">()</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Indicates whether the "label" field is explicitly set to a value.
 </p></div>
 
     </div>
@@ -1087,9 +1206,13 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>Indicates whether the "primary" field is explicitly set to a value.
-</p></div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Returns false (removed).
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>
@@ -1177,9 +1300,13 @@ From interface
 
       </div>
     <div class="jd-details-descr">
-      
-  <div class="jd-tagdata jd-tagdescr"><p>If "true", this URL is the person's primary URL.
-</p></div>
+      <p>
+  <p class="caution"><strong>
+      This method is deprecated.</strong><br/>
+    Returns false (removed).
+
+  </p>
+  <div class="jd-tagdata jd-tagdescr"><p></p></div>
 
     </div>
 </div>

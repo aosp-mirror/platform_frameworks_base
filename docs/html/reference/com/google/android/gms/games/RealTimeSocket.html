@@ -685,14 +685,14 @@ onkeyup="return search_changed(event, false, '/')" />
  <p>
  Use <code><a href="/reference/com/google/android/gms/games/RealTimeSocket.html#getParcelFileDescriptor()">getParcelFileDescriptor()</a></code> to get a file descriptor for read/write, or
  use <code><a href="/reference/com/google/android/gms/games/RealTimeSocket.html#getInputStream()">getInputStream()</a></code> / <code><a href="/reference/com/google/android/gms/games/RealTimeSocket.html#getOutputStream()">getOutputStream()</a></code> to get
- access to an instance of <code><a href="/reference/java/io/InputStream.html">InputStream</a></code> or <code><a href="/reference/java/io/OutputStream.html">OutputStream</a></code>
+ access to an instance of <code><a href="/http://developer.android.com/reference/java/io/InputStream.html">InputStream</a></code> or <code><a href="/http://developer.android.com/reference/java/io/OutputStream.html">OutputStream</a></code>
  respectively.
  <p>
- Calling close() on any of (i) the returned <code><a href="/reference/android/os/ParcelFileDescriptor.html">ParcelFileDescriptor</a></code> or, (ii) the
- <code><a href="/reference/java/io/InputStream.html">InputStream</a></code> or <code><a href="/reference/java/io/OutputStream.html">OutputStream</a></code> instances will close the socket. Note: The maximum
+ Calling close() on any of (i) the returned <code><a href="/http://developer.android.com/reference/android/os/ParcelFileDescriptor.html">ParcelFileDescriptor</a></code> or, (ii) the
+ <code><a href="/http://developer.android.com/reference/java/io/InputStream.html">InputStream</a></code> or <code><a href="/http://developer.android.com/reference/java/io/OutputStream.html">OutputStream</a></code> instances will close the socket. Note: The maximum
  (unfragmented) packet size supported through this API is
  <code><a href="/reference/com/google/android/gms/games/GamesClient.html#MAX_UNRELIABLE_MESSAGE_LEN">MAX_UNRELIABLE_MESSAGE_LEN</a></code> bytes (excluding internal protocol headers). Thus,
- the byte[] data passed to <code><a href="/reference/java/io/OutputStream.html#write(byte[])">write(byte[])</a></code> should honor this limit or the packet will
+ the byte[] data passed to <code><a href="/http://developer.android.com/reference/java/io/OutputStream.html#write(byte[])">write(byte[])</a></code> should honor this limit or the packet will
  be dropped and an error message will be sent to the log.
 </p>
 
@@ -779,7 +779,7 @@ onkeyup="return search_changed(event, false, '/')" />
             
             
             
-            InputStream</nobr>
+            <a href="http://developer.android.com/reference/java/io/InputStream.html">InputStream</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/RealTimeSocket.html#getInputStream()">getInputStream</a></span>()</nobr>
@@ -797,12 +797,12 @@ onkeyup="return search_changed(event, false, '/')" />
             
             
             
-            OutputStream</nobr>
+            <a href="http://developer.android.com/reference/java/io/OutputStream.html">OutputStream</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/RealTimeSocket.html#getOutputStream()">getOutputStream</a></span>()</nobr>
         
-        <div class="jd-descrdiv">Instance of <code><a href="/reference/java/io/OutputStream.html">OutputStream</a></code> to write data to.</div>
+        <div class="jd-descrdiv">Instance of <code><a href="/http://developer.android.com/reference/java/io/OutputStream.html">OutputStream</a></code> to write data to.</div>
   
   </td></tr>
 
@@ -815,7 +815,7 @@ onkeyup="return search_changed(event, false, '/')" />
             
             
             
-            ParcelFileDescriptor</nobr>
+            <a href="http://developer.android.com/reference/android/os/ParcelFileDescriptor.html">ParcelFileDescriptor</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/games/RealTimeSocket.html#getParcelFileDescriptor()">getParcelFileDescriptor</a></span>()</nobr>
@@ -919,7 +919,7 @@ onkeyup="return search_changed(event, false, '/')" />
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th>IOException</td>
+            <th><a href="http://developer.android.com/reference/java/io/IOException.html">IOException</a></td>
             <td>on error.
 </td>
         </tr>
@@ -940,7 +940,7 @@ onkeyup="return search_changed(event, false, '/')" />
          
         abstract 
          
-        InputStream
+        <a href="http://developer.android.com/reference/java/io/InputStream.html">InputStream</a>
       </span>
       <span class="sympad">getInputStream</span>
       <span class="normal">()</span>
@@ -957,13 +957,13 @@ onkeyup="return search_changed(event, false, '/')" />
  Calling close() on the InputStream will close the socket.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>An instance of <code><a href="/reference/java/io/InputStream.html">InputStream</a></code>.</li></ul>
+      <ul class="nolist"><li>An instance of <code><a href="/http://developer.android.com/reference/java/io/InputStream.html">InputStream</a></code>.</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th>IOException</td>
+            <th><a href="http://developer.android.com/reference/java/io/IOException.html">IOException</a></td>
             <td>on error.
 </td>
         </tr>
@@ -984,7 +984,7 @@ onkeyup="return search_changed(event, false, '/')" />
          
         abstract 
          
-        OutputStream
+        <a href="http://developer.android.com/reference/java/io/OutputStream.html">OutputStream</a>
       </span>
       <span class="sympad">getOutputStream</span>
       <span class="normal">()</span>
@@ -997,22 +997,22 @@ onkeyup="return search_changed(event, false, '/')" />
       </div>
     <div class="jd-details-descr">
       
-  <div class="jd-tagdata jd-tagdescr"><p>Instance of <code><a href="/reference/java/io/OutputStream.html">OutputStream</a></code> to write data to.
+  <div class="jd-tagdata jd-tagdescr"><p>Instance of <code><a href="/http://developer.android.com/reference/java/io/OutputStream.html">OutputStream</a></code> to write data to.
  Calling close() on the OutputStream will close the socket.
 
  Note: The maximum (unfragmented) packet size supported through this API is
  <code><a href="/reference/com/google/android/gms/games/GamesClient.html#MAX_UNRELIABLE_MESSAGE_LEN">MAX_UNRELIABLE_MESSAGE_LEN</a></code> bytes (excluding internal protocol headers).
- Thus, the byte[] data passed to <code><a href="/reference/java/io/OutputStream.html#write(byte[])">write(byte[])</a></code> should honor this limit or the
+ Thus, the byte[] data passed to <code><a href="/http://developer.android.com/reference/java/io/OutputStream.html#write(byte[])">write(byte[])</a></code> should honor this limit or the
  packet will be dropped and an error message will be sent to the log.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>An instance of <code><a href="/reference/java/io/OutputStream.html">OutputStream</a></code>.</li></ul>
+      <ul class="nolist"><li>An instance of <code><a href="/http://developer.android.com/reference/java/io/OutputStream.html">OutputStream</a></code>.</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th>IOException</td>
+            <th><a href="http://developer.android.com/reference/java/io/IOException.html">IOException</a></td>
             <td>on error.
 </td>
         </tr>
@@ -1033,7 +1033,7 @@ onkeyup="return search_changed(event, false, '/')" />
          
         abstract 
          
-        ParcelFileDescriptor
+        <a href="http://developer.android.com/reference/android/os/ParcelFileDescriptor.html">ParcelFileDescriptor</a>
       </span>
       <span class="sympad">getParcelFileDescriptor</span>
       <span class="normal">()</span>
@@ -1050,14 +1050,14 @@ onkeyup="return search_changed(event, false, '/')" />
  Calling close() on the returned ParcelFileDescriptor will close the socket.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>An instance of <code><a href="/reference/android/os/ParcelFileDescriptor.html">ParcelFileDescriptor</a></code> or null if the underlying
+      <ul class="nolist"><li>An instance of <code><a href="/http://developer.android.com/reference/android/os/ParcelFileDescriptor.html">ParcelFileDescriptor</a></code> or null if the underlying
          socket is closed.</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th>IOException</td>
+            <th><a href="http://developer.android.com/reference/java/io/IOException.html">IOException</a></td>
             <td>in case of error.
 </td>
         </tr>
