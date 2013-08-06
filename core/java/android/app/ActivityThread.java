@@ -529,10 +529,11 @@ public final class ActivityThread {
         CompatibilityInfo info;
     }
 
-    static final class RequestActivityExtras {
+    static final class RequestAssistContextExtras {
         IBinder activityToken;
         IBinder requestToken;
         int requestType;
+        int index;
     }
 
     private native void dumpGraphicsInfo(FileDescriptor fd);
@@ -1197,13 +1198,14 @@ public final class ActivityThread {
         }
 
         @Override
-        public void requestActivityExtras(IBinder activityToken, IBinder requestToken,
-                int requestType) {
-            RequestActivityExtras cmd = new RequestActivityExtras();
+        public void requestAssistContextExtras(IBinder activityToken, IBinder requestToken,
+                int requestType, int index) {
+            RequestAssistContextExtras cmd = new RequestAssistContextExtras();
             cmd.activityToken = activityToken;
             cmd.requestToken = requestToken;
             cmd.requestType = requestType;
-            queueOrSendMessage(H.REQUEST_ACTIVITY_EXTRAS, cmd);
+            cmd.index = index;
+            queueOrSendMessage(H.REQUEST_ASSIST_CONTEXT_EXTRAS, cmd);
         }
 
         private void printRow(PrintWriter pw, String format, Object...objs) {
@@ -1292,7 +1294,7 @@ public final class ActivityThread {
         public static final int TRIM_MEMORY             = 140;
         public static final int DUMP_PROVIDER           = 141;
         public static final int UNSTABLE_PROVIDER_DIED  = 142;
-        public static final int REQUEST_ACTIVITY_EXTRAS = 143;
+        public static final int REQUEST_ASSIST_CONTEXT_EXTRAS = 143;
         public static final int TRANSLUCENT_CONVERSION_COMPLETE = 144;
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
@@ -1340,7 +1342,7 @@ public final class ActivityThread {
                     case TRIM_MEMORY: return "TRIM_MEMORY";
                     case DUMP_PROVIDER: return "DUMP_PROVIDER";
                     case UNSTABLE_PROVIDER_DIED: return "UNSTABLE_PROVIDER_DIED";
-                    case REQUEST_ACTIVITY_EXTRAS: return "REQUEST_ACTIVITY_EXTRAS";
+                    case REQUEST_ASSIST_CONTEXT_EXTRAS: return "REQUEST_ASSIST_CONTEXT_EXTRAS";
                     case TRANSLUCENT_CONVERSION_COMPLETE: return "TRANSLUCENT_CONVERSION_COMPLETE";
                 }
             }
@@ -1553,8 +1555,8 @@ public final class ActivityThread {
                 case UNSTABLE_PROVIDER_DIED:
                     handleUnstableProviderDied((IBinder)msg.obj, false);
                     break;
-                case REQUEST_ACTIVITY_EXTRAS:
-                    handleRequestActivityExtras((RequestActivityExtras)msg.obj);
+                case REQUEST_ASSIST_CONTEXT_EXTRAS:
+                    handleRequestAssistContextExtras((RequestAssistContextExtras)msg.obj);
                     break;
                 case TRANSLUCENT_CONVERSION_COMPLETE:
                     handleTranslucentConversionComplete((IBinder)msg.obj, msg.arg1 == 1);
@@ -2275,19 +2277,24 @@ public final class ActivityThread {
         performNewIntents(data.token, data.intents);
     }
 
-    public void handleRequestActivityExtras(RequestActivityExtras cmd) {
+    public void handleRequestAssistContextExtras(RequestAssistContextExtras cmd) {
         Bundle data = new Bundle();
         ActivityClientRecord r = mActivities.get(cmd.activityToken);
         if (r != null) {
             r.activity.getApplication().dispatchOnProvideAssistData(r.activity, data);
             r.activity.onProvideAssistData(data);
+        } else {
+            Service service = mServices.get(cmd.activityToken);
+            if (service != null) {
+                service.onProvideAssistData(data);
+            }
         }
         if (data.isEmpty()) {
             data = null;
         }
         IActivityManager mgr = ActivityManagerNative.getDefault();
         try {
-            mgr.reportTopActivityExtras(cmd.requestToken, data);
+            mgr.reportAssistContextExtras(cmd.requestToken, data, cmd.index);
         } catch (RemoteException e) {
         }
     }

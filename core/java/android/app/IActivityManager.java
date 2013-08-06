@@ -386,9 +386,10 @@ public interface IActivityManager extends IInterface {
 
     public long inputDispatchingTimedOut(int pid, boolean aboveSystem) throws RemoteException;
 
-    public Bundle getTopActivityExtras(int requestType) throws RemoteException;
+    public Bundle getAssistContextExtras(int requestType) throws RemoteException;
 
-    public void reportTopActivityExtras(IBinder token, Bundle extras) throws RemoteException;
+    public void reportAssistContextExtras(IBinder token, Bundle extras, int index)
+            throws RemoteException;
 
     public void killUid(int uid, String reason) throws RemoteException;
 
@@ -662,8 +663,8 @@ public interface IActivityManager extends IInterface {
     int INPUT_DISPATCHING_TIMED_OUT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+158;
     int CLEAR_PENDING_BACKUP_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+159;
     int GET_INTENT_FOR_INTENT_SENDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+160;
-    int GET_TOP_ACTIVITY_EXTRAS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+161;
-    int REPORT_TOP_ACTIVITY_EXTRAS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+162;
+    int GET_ASSIST_CONTEXT_EXTRAS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+161;
+    int REPORT_ASSIST_CONTEXT_EXTRAS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+162;
     int GET_LAUNCHED_FROM_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+163;
     int KILL_UID_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+164;
     int SET_USER_IS_MONKEY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+165;

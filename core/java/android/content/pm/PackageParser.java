@@ -3005,6 +3005,11 @@ public class PackageParser {
 
         s.info.flags = 0;
         if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestService_provideAssistData,
+                false)) {
+            s.info.flags |= ServiceInfo.FLAG_PROVIDE_ASSIST_DATA;
+        }
+        if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestService_stopWithTask,
                 false)) {
             s.info.flags |= ServiceInfo.FLAG_STOP_WITH_TASK;
