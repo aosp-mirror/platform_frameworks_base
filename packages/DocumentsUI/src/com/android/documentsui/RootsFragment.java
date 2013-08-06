@@ -69,7 +69,7 @@ public class RootsFragment extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_roots, container, false);
         mList = (ListView) view.findViewById(android.R.id.list);
 
-        mAdapter = new SectionedRootsAdapter(context, RootsCache.getRoots());
+        mAdapter = new SectionedRootsAdapter(context, RootsCache.getRoots(context));
         mList.setAdapter(mAdapter);
         mList.setOnItemClickListener(mItemListener);
 

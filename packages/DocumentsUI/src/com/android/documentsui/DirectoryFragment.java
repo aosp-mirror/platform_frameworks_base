@@ -26,11 +26,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.text.format.DateUtils;
+import android.text.format.Formatter;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,19 +47,20 @@ import android.widget.TextView;
 
 import com.android.documentsui.DocumentsActivity.DisplayState;
 import com.android.documentsui.model.Document;
+import com.android.documentsui.model.Root;
 import com.android.internal.util.Predicate;
 import com.google.android.collect.Lists;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Display the documents inside a single directory.
  */
 public class DirectoryFragment extends Fragment {
-
-    // TODO: show storage backend in item views when requested
 
     private ListView mListView;
     private GridView mGridView;
@@ -68,19 +70,35 @@ public class DirectoryFragment extends Fragment {
     public static final int TYPE_NORMAL = 1;
     public static final int TYPE_SEARCH = 2;
     public static final int TYPE_RECENT_OPEN = 3;
-    public static final int TYPE_RECENT_CREATE = 4;
 
     private int mType = TYPE_NORMAL;
 
     private DocumentsAdapter mAdapter;
     private LoaderCallbacks<List<Document>> mCallbacks;
 
+    private static final String EXTRA_TYPE = "type";
     private static final String EXTRA_URI = "uri";
 
-    private static final int LOADER_DOCUMENTS = 2;
+    private static AtomicInteger sLoaderId = new AtomicInteger(4000);
 
-    public static void show(FragmentManager fm, Uri uri) {
+    private final int mLoaderId = sLoaderId.incrementAndGet();
+
+    public static void showNormal(FragmentManager fm, Uri uri) {
+        show(fm, TYPE_NORMAL, uri);
+    }
+
+    public static void showSearch(FragmentManager fm, Uri uri, String query) {
+        final Uri searchUri = DocumentsContract.buildSearchUri(uri, query);
+        show(fm, TYPE_SEARCH, searchUri);
+    }
+
+    public static void showRecentsOpen(FragmentManager fm) {
+        show(fm, TYPE_RECENT_OPEN, null);
+    }
+
+    private static void show(FragmentManager fm, int type, Uri uri) {
         final Bundle args = new Bundle();
+        args.putInt(EXTRA_TYPE, type);
         args.putParcelable(EXTRA_URI, uri);
 
         final DirectoryFragment fragment = new DirectoryFragment();
@@ -94,12 +112,6 @@ public class DirectoryFragment extends Fragment {
     public static DirectoryFragment get(FragmentManager fm) {
         // TODO: deal with multiple directories shown at once
         return (DirectoryFragment) fm.findFragmentById(R.id.container_directory);
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
     }
 
     @Override
@@ -118,19 +130,9 @@ public class DirectoryFragment extends Fragment {
         mGridView.setMultiChoiceModeListener(mMultiListener);
 
         mAdapter = new DocumentsAdapter();
-        updateMode();
 
         final Uri uri = getArguments().getParcelable(EXTRA_URI);
-
-        if (uri.getQueryParameter(DocumentsContract.PARAM_QUERY) != null) {
-            mType = TYPE_SEARCH;
-        } else if (RecentsProvider.buildRecentOpen().equals(uri)) {
-            mType = TYPE_RECENT_OPEN;
-        } else if (RecentsProvider.buildRecentCreate().equals(uri)) {
-            mType = TYPE_RECENT_CREATE;
-        } else {
-            mType = TYPE_NORMAL;
-        }
+        mType = getArguments().getInt(EXTRA_TYPE);
 
         mCallbacks = new LoaderCallbacks<List<Document>>() {
             @Override
@@ -140,6 +142,8 @@ public class DirectoryFragment extends Fragment {
                 final Uri contentsUri;
                 if (mType == TYPE_NORMAL) {
                     contentsUri = DocumentsContract.buildContentsUri(uri);
+                } else if (mType == TYPE_RECENT_OPEN) {
+                    contentsUri = RecentsProvider.buildRecentOpen();
                 } else {
                     contentsUri = uri;
                 }
@@ -147,8 +151,7 @@ public class DirectoryFragment extends Fragment {
                 final Predicate<Document> filter = new MimePredicate(state.acceptMimes);
 
                 final Comparator<Document> sortOrder;
-                if (state.sortOrder == DisplayState.SORT_ORDER_DATE || mType == TYPE_RECENT_OPEN
-                        || mType == TYPE_RECENT_CREATE) {
+                if (state.sortOrder == DisplayState.SORT_ORDER_DATE || mType == TYPE_RECENT_OPEN) {
                     sortOrder = new Document.DateComparator();
                 } else if (state.sortOrder == DisplayState.SORT_ORDER_NAME) {
                     sortOrder = new Document.NameComparator();
@@ -170,56 +173,30 @@ public class DirectoryFragment extends Fragment {
             }
         };
 
+        updateDisplayState();
+
         return view;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        getLoaderManager().restartLoader(LOADER_DOCUMENTS, getArguments(), mCallbacks);
+        getLoaderManager().restartLoader(mLoaderId, getArguments(), mCallbacks);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        getLoaderManager().destroyLoader(LOADER_DOCUMENTS);
+        getLoaderManager().destroyLoader(mLoaderId);
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.directory, menu);
-    }
-
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
+    public void updateDisplayState() {
         final DisplayState state = getDisplayState(this);
-        menu.findItem(R.id.menu_grid).setVisible(state.mode != DisplayState.MODE_GRID);
-        menu.findItem(R.id.menu_list).setVisible(state.mode != DisplayState.MODE_LIST);
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        final DisplayState state = getDisplayState(this);
-        final int id = item.getItemId();
-        if (id == R.id.menu_grid) {
-            state.mode = DisplayState.MODE_GRID;
-            updateMode();
-            getFragmentManager().invalidateOptionsMenu();
-            return true;
-        } else if (id == R.id.menu_list) {
-            state.mode = DisplayState.MODE_LIST;
-            updateMode();
-            getFragmentManager().invalidateOptionsMenu();
-            return true;
-        } else {
-            return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void updateMode() {
-        final DisplayState state = getDisplayState(this);
+        // TODO: avoid kicking loader when sort didn't change
+        getLoaderManager().restartLoader(mLoaderId, getArguments(), mCallbacks);
+        mListView.smoothScrollToPosition(0);
+        mGridView.smoothScrollToPosition(0);
 
         mListView.setVisibility(state.mode == DisplayState.MODE_LIST ? View.VISIBLE : View.GONE);
         mGridView.setVisibility(state.mode == DisplayState.MODE_GRID ? View.VISIBLE : View.GONE);
@@ -248,12 +225,6 @@ public class DirectoryFragment extends Fragment {
         } else {
             throw new IllegalStateException();
         }
-    }
-
-    public void updateSortOrder() {
-        getLoaderManager().restartLoader(LOADER_DOCUMENTS, getArguments(), mCallbacks);
-        mListView.smoothScrollToPosition(0);
-        mGridView.smoothScrollToPosition(0);
     }
 
     private OnItemClickListener mItemListener = new OnItemClickListener() {
@@ -309,7 +280,7 @@ public class DirectoryFragment extends Fragment {
             if (checked) {
                 // Directories cannot be checked
                 final Document doc = mAdapter.getItem(position);
-                if (DocumentsContract.MIME_TYPE_DIRECTORY.equals(doc.mimeType)) {
+                if (doc.isDirectory()) {
                     mCurrentView.setItemChecked(position, false);
                 }
             }
@@ -337,10 +308,10 @@ public class DirectoryFragment extends Fragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             final Context context = parent.getContext();
+            final DisplayState state = getDisplayState(DirectoryFragment.this);
 
             if (convertView == null) {
                 final LayoutInflater inflater = LayoutInflater.from(context);
-                final DisplayState state = getDisplayState(DirectoryFragment.this);
                 if (state.mode == DisplayState.MODE_LIST) {
                     convertView = inflater.inflate(R.layout.item_doc_list, parent, false);
                 } else if (state.mode == DisplayState.MODE_GRID) {
@@ -352,9 +323,12 @@ public class DirectoryFragment extends Fragment {
 
             final Document doc = getItem(position);
 
-            final TextView title = (TextView) convertView.findViewById(android.R.id.title);
-            final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
             final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
+            final TextView title = (TextView) convertView.findViewById(android.R.id.title);
+            final ImageView icon1 = (ImageView) convertView.findViewById(android.R.id.icon1);
+            final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
+            final TextView date = (TextView) convertView.findViewById(R.id.date);
+            final TextView size = (TextView) convertView.findViewById(R.id.size);
 
             if (doc.isThumbnailSupported()) {
                 // TODO: load thumbnails async
@@ -365,8 +339,37 @@ public class DirectoryFragment extends Fragment {
             }
 
             title.setText(doc.displayName);
-            if (summary != null) {
-                summary.setText(DateUtils.getRelativeTimeSpanString(doc.lastModified));
+
+            if (mType == TYPE_NORMAL || mType == TYPE_SEARCH) {
+                icon1.setVisibility(View.GONE);
+                if (doc.summary != null) {
+                    summary.setText(doc.summary);
+                    summary.setVisibility(View.VISIBLE);
+                } else {
+                    summary.setVisibility(View.INVISIBLE);
+                }
+            } else if (mType == TYPE_RECENT_OPEN) {
+                final Root root = RootsCache.findRoot(context, doc);
+                icon1.setVisibility(View.VISIBLE);
+                icon1.setImageDrawable(root.icon);
+                summary.setText(root.getDirectoryString());
+                summary.setVisibility(View.VISIBLE);
+            }
+
+            // TODO: omit year from format
+            date.setText(DateUtils.formatSameDayTime(
+                    doc.lastModified, System.currentTimeMillis(), DateFormat.SHORT,
+                    DateFormat.SHORT));
+
+            if (state.showSize) {
+                size.setVisibility(View.VISIBLE);
+                if (doc.isDirectory()) {
+                    size.setText(null);
+                } else {
+                    size.setText(Formatter.formatFileSize(context, doc.size));
+                }
+            } else {
+                size.setVisibility(View.GONE);
             }
 
             return convertView;

@@ -27,4 +27,14 @@
         android:showAsAction="always|collapseActionView"
         android:actionViewClass="android.widget.SearchView"
         android:imeOptions="actionSearch" />
+    <item
+        android:id="@+id/menu_grid"
+        android:title="@string/menu_grid"
+        android:icon="@drawable/ic_menu_grid"
+        android:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_list"
+        android:title="@string/menu_list"
+        android:icon="@drawable/ic_menu_list"
+        android:showAsAction="ifRoom" />
 </menu>

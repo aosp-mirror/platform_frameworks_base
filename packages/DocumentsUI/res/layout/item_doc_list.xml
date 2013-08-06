@@ -14,7 +14,7 @@
      limitations under the License.
 -->
 
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/item_background"
@@ -23,40 +23,82 @@
     android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
     android:paddingTop="8dip"
     android:paddingBottom="8dip"
-    android:columnCount="3">
+    android:orientation="horizontal">
 
     <ImageView
         android:id="@android:id/icon"
         android:layout_width="@android:dimen/app_icon_size"
         android:layout_height="@android:dimen/app_icon_size"
-        android:layout_rowSpan="2"
         android:layout_marginEnd="8dip"
+        android:layout_gravity="center_vertical"
         android:scaleType="centerInside"
         android:contentDescription="@null" />
 
-    <TextView
-        android:id="@android:id/title"
+    <LinearLayout
         android:layout_width="0dip"
-        android:layout_gravity="fill_horizontal"
-        android:layout_marginTop="2dip"
-        android:layout_columnSpan="2"
-        android:singleLine="true"
-        android:ellipsize="marquee"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textAlignment="viewStart" />
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="center_vertical"
+        android:orientation="vertical">
 
-    <ImageView
-        android:id="@android:id/icon1"
-        android:layout_width="24dip"
-        android:layout_height="24dip"
-        android:layout_marginEnd="8dip"
-        android:visibility="gone"
-        android:scaleType="centerInside"
-        android:contentDescription="@null" />
+        <TextView
+            android:id="@android:id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textAlignment="viewStart" />
 
-    <TextView
-        android:id="@android:id/summary"
-        android:layout_marginTop="2dip"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        <LinearLayout
+            android:id="@+id/line2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-</GridLayout>
+            <ImageView
+                android:id="@android:id/icon1"
+                android:layout_width="24dip"
+                android:layout_height="24dip"
+                android:layout_marginEnd="6dip"
+                android:scaleType="centerInside"
+                android:contentDescription="@null" />
+
+            <TextView
+                android:id="@android:id/summary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:textAlignment="viewStart"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
+            <TextView
+                android:id="@+id/size"
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="8dp"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:textAlignment="viewEnd"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
+            <TextView
+                android:id="@+id/date"
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:textAlignment="viewEnd"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
