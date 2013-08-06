@@ -684,7 +684,7 @@ Summary:
 
 
   
-    extends Object<br/>
+    extends <a href="http://developer.android.com/reference/java/lang/Object.html">Object</a><br/>
   
   
   
@@ -704,7 +704,7 @@ Summary:
 
     <tr>
          	
-        <td colspan="2" class="jd-inheritance-class-cell">java.lang.Object</td>
+        <td colspan="2" class="jd-inheritance-class-cell"><a href="http://developer.android.com/reference/java/lang/Object.html">java.lang.Object</a></td>
     </tr>
     
 
@@ -733,7 +733,7 @@ Summary:
  rather, you must obtain one from the <code>getMap()</code> method on a <code><a href="/reference/com/google/android/gms/maps/MapFragment.html">MapFragment</a></code> or
  <code><a href="/reference/com/google/android/gms/maps/MapView.html">MapView</a></code> that you have added to your application.
  <p>
- Note: Similar to a <code><a href="/reference/android/view/View.html">View</a></code> object, a <code><a href="/reference/com/google/android/gms/maps/GoogleMap.html">GoogleMap</a></code> can only be read
+ Note: Similar to a <code><a href="/http://developer.android.com/reference/android/view/View.html">View</a></code> object, a <code><a href="/reference/com/google/android/gms/maps/GoogleMap.html">GoogleMap</a></code> can only be read
  and modified from the main thread. Calling <code><a href="/reference/com/google/android/gms/maps/GoogleMap.html">GoogleMap</a></code> methods from another thread will
  result in an exception.
  <p>
@@ -880,6 +880,18 @@ Summary:
          
         
         interface</nobr></td>
+      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMyLocationButtonClickListener.html">GoogleMap.OnMyLocationButtonClickListener</a></td>
+      <td class="jd-descrcol" width="100%">Callback interface for when the My Location button is clicked.&nbsp;</td>
+    </tr>
+    
+    
+    <tr class=" api apilevel-" >
+      <td class="jd-typecol"><nobr>
+        
+         
+         
+        
+        interface</nobr></td>
       <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.OnMyLocationChangeListener.html">GoogleMap.OnMyLocationChangeListener</a></td>
       <td class="jd-descrcol" width="100%"><em>
       This interface is deprecated.
@@ -890,6 +902,18 @@ Summary:
  <a href="https://developers.google.com/maps/documentation/android/map/location">
  Location Developer Guide</a>.
 </em>&nbsp;</td>
+    </tr>
+    
+    
+    <tr class="alt-color api apilevel-" >
+      <td class="jd-typecol"><nobr>
+        
+         
+         
+        
+        interface</nobr></td>
+      <td class="jd-linkcol"><a href="/reference/com/google/android/gms/maps/GoogleMap.SnapshotReadyCallback.html">GoogleMap.SnapshotReadyCallback</a></td>
+      <td class="jd-descrcol" width="100%">Callback interface to notify when the snapshot has been taken.&nbsp;</td>
     </tr>
     
     
@@ -1232,7 +1256,7 @@ Summary:
             final
             
             
-            Location</nobr>
+            <a href="http://developer.android.com/reference/android/location/Location.html">Location</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMap.html#getMyLocation()">getMyLocation</a></span>()</nobr>
@@ -1568,6 +1592,24 @@ Summary:
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMap.html#setOnMyLocationButtonClickListener(com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener)">setOnMyLocationButtonClickListener</a></span>(<a href="/reference/com/google/android/gms/maps/GoogleMap.OnMyLocationButtonClickListener.html">GoogleMap.OnMyLocationButtonClickListener</a> listener)</nobr>
+        
+        <div class="jd-descrdiv">Sets a callback that's invoked when the my location button is clicked.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMap.html#setOnMyLocationChangeListener(com.google.android.gms.maps.GoogleMap.OnMyLocationChangeListener)">setOnMyLocationChangeListener</a></span>(<a href="/reference/com/google/android/gms/maps/GoogleMap.OnMyLocationChangeListener.html">GoogleMap.OnMyLocationChangeListener</a> listener)</nobr>
         
         <div class="jd-descrdiv"><em>
@@ -1584,7 +1626,7 @@ Summary:
 
 
 	 
-    <tr class=" api apilevel-" >
+    <tr class="alt-color api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1602,7 +1644,43 @@ Summary:
 
 
 	 
+    <tr class=" api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMap.html#snapshot(com.google.android.gms.maps.GoogleMap.SnapshotReadyCallback, android.graphics.Bitmap)">snapshot</a></span>(<a href="/reference/com/google/android/gms/maps/GoogleMap.SnapshotReadyCallback.html">GoogleMap.SnapshotReadyCallback</a> callback, <a href="http://developer.android.com/reference/android/graphics/Bitmap.html">Bitmap</a> bitmap)</nobr>
+        
+        <div class="jd-descrdiv">Takes a snapshot of the map.</div>
+  
+  </td></tr>
+
+
+	 
     <tr class="alt-color api apilevel-" >
+        <td class="jd-typecol"><nobr>
+            
+            
+            final
+            
+            
+            void</nobr>
+        </td>
+        <td class="jd-linkcol" width="100%"><nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/maps/GoogleMap.html#snapshot(com.google.android.gms.maps.GoogleMap.SnapshotReadyCallback)">snapshot</a></span>(<a href="/reference/com/google/android/gms/maps/GoogleMap.SnapshotReadyCallback.html">GoogleMap.SnapshotReadyCallback</a> callback)</nobr>
+        
+        <div class="jd-descrdiv">Takes a snapshot of the map.</div>
+  
+  </td></tr>
+
+
+	 
+    <tr class=" api apilevel-" >
         <td class="jd-typecol"><nobr>
             
             
@@ -1642,7 +1720,7 @@ Summary:
           class="jd-expando-trigger-img" /></a>
 From class
 
-  java.lang.Object
+  <a href="http://developer.android.com/reference/java/lang/Object.html">java.lang.Object</a>
 
 <div id="inherited-methods-java.lang.Object">
   <div id="inherited-methods-java.lang.Object-list"
@@ -1661,7 +1739,7 @@ From class
             
             
             
-            Object</nobr>
+            <a href="http://developer.android.com/reference/java/lang/Object.html">Object</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">clone</span>()</nobr>
@@ -1680,7 +1758,7 @@ From class
             boolean</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad">equals</span>(Object arg0)</nobr>
+        <span class="sympad">equals</span>(<a href="http://developer.android.com/reference/java/lang/Object.html">Object</a> arg0)</nobr>
         
   </td></tr>
 
@@ -1709,7 +1787,7 @@ From class
             final
             
             
-            Class&lt;?&gt;</nobr>
+            <a href="http://developer.android.com/reference/java/lang/Class.html">Class</a>&lt;?&gt;</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">getClass</span>()</nobr>
@@ -1773,7 +1851,7 @@ From class
             
             
             
-            String</nobr>
+            <a href="http://developer.android.com/reference/java/lang/String.html">String</a></nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
         <span class="sympad">toString</span>()</nobr>
@@ -2159,7 +2237,7 @@ From class
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th>IllegalArgumentException</td>
+            <th><a href="http://developer.android.com/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></td>
             <td>if either the image or the position is unspecified in the
              options.
 </td>
@@ -2339,7 +2417,7 @@ From class
           <th>options</td>
           <td>A tile-overlay options object that defines how to render the overlay. Options
             must have a <code><a href="/reference/com/google/android/gms/maps/model/TileProvider.html">TileProvider</a></code>
-            specified, otherwise an <code><a href="/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></code> will be thrown.</td>
+            specified, otherwise an <code><a href="/http://developer.android.com/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></code> will be thrown.</td>
         </tr>
       </table>
   </div>
@@ -2351,7 +2429,7 @@ From class
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th>IllegalArgumentException</td>
+            <th><a href="http://developer.android.com/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></td>
             <td>if the <code><a href="/reference/com/google/android/gms/maps/model/TileProvider.html">TileProvider</a></code> is unspecified in the options.
 </td>
         </tr>
@@ -2396,7 +2474,7 @@ From class
         <tr>
           <th>durationMs</td>
           <td>The duration of the animation in milliseconds. This must be strictly
-            positive, otherwise an <code><a href="/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></code> will be thrown.
+            positive, otherwise an <code><a href="/http://developer.android.com/reference/java/lang/IllegalArgumentException.html">IllegalArgumentException</a></code> will be thrown.
 </td>
         </tr>
         <tr>
@@ -2691,7 +2769,7 @@ From class
         final 
          
          
-        Location
+        <a href="http://developer.android.com/reference/android/location/Location.html">Location</a>
       </span>
       <span class="sympad">getMyLocation</span>
       <span class="normal">()</span>
@@ -2718,13 +2796,13 @@ From class
  available.</p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Returns</h5>
-      <ul class="nolist"><li>The currently displayed <code><a href="/reference/android/location/Location.html">user location</a></code>.</li></ul>
+      <ul class="nolist"><li>The currently displayed <code><a href="/http://developer.android.com/reference/android/location/Location.html">user location</a></code>.</li></ul>
   </div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Throws</h5>
       <table class="jd-tagtable">  
         <tr>
-            <th>IllegalStateException</td>
+            <th><a href="http://developer.android.com/reference/java/lang/IllegalStateException.html">IllegalStateException</a></td>
             <td>if the my-location layer is not enabled.</td>
         </tr>
       </table>
@@ -3412,6 +3490,49 @@ From class
 </div>
 
 
+<A NAME="setOnMyLocationButtonClickListener(com.google.android.gms.maps.GoogleMap.OnMyLocationButtonClickListener)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+        final 
+         
+         
+        void
+      </span>
+      <span class="sympad">setOnMyLocationButtonClickListener</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/maps/GoogleMap.OnMyLocationButtonClickListener.html">GoogleMap.OnMyLocationButtonClickListener</a> listener)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Sets a callback that's invoked when the my location button is clicked.
+
+ <p>If the <code>listener</code> returns <code>true</code>, the event is consumed and the default
+ behavior will not occur. If it returns <code>false</code>, the default behavior will occur (i.e.
+ The camera moves such that it is centered on the user location).</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>listener</td>
+          <td>The callback that's invoked when the my location button is clicked.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
 <A NAME="setOnMyLocationChangeListener(com.google.android.gms.maps.GoogleMap.OnMyLocationChangeListener)"></A>
 
 <div class="jd-details api apilevel-"> 
@@ -3484,6 +3605,110 @@ From class
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Toggles the traffic layer on or off. </p></div>
+
+    </div>
+</div>
+
+
+<A NAME="snapshot(com.google.android.gms.maps.GoogleMap.SnapshotReadyCallback, android.graphics.Bitmap)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+        final 
+         
+         
+        void
+      </span>
+      <span class="sympad">snapshot</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/maps/GoogleMap.SnapshotReadyCallback.html">GoogleMap.SnapshotReadyCallback</a> callback, <a href="http://developer.android.com/reference/android/graphics/Bitmap.html">Bitmap</a> bitmap)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Takes a snapshot of the map.
+ <p>
+ <p>This method is equivalent to <code><a href="/reference/com/google/android/gms/maps/GoogleMap.html#snapshot(com.google.android.gms.maps.GoogleMap.SnapshotReadyCallback)">snapshot(SnapshotReadyCallback)</a></code> but lets you
+ provide a preallocated <code><a href="/http://developer.android.com/reference/android/graphics/Bitmap.html">Bitmap</a></code>. If the bitmap does not match the current dimensions of
+ the map, another bitmap will be allocated that fits the map's dimensions.
+ <p>
+ <p>Although in most cases the object passed by the callback method is the same as the one
+ given in parameter to this method, in some cases the returned object can be different (e.g.
+ if the view's dimensions have changed by the time the snapshot is actually taken). Thus, you
+ should only trust the content of the bitmap passed by the callback method.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>callback</td>
+          <td>Callback method invoked when the snapshot is taken.</td>
+        </tr>
+        <tr>
+          <th>bitmap</td>
+          <td>A preallocated bitmap. If <code>null</code>, behaves like
+     <code><a href="/reference/com/google/android/gms/maps/GoogleMap.html#snapshot(com.google.android.gms.maps.GoogleMap.SnapshotReadyCallback)">snapshot(SnapshotReadyCallback)</a></code>.
+</td>
+        </tr>
+      </table>
+  </div>
+
+    </div>
+</div>
+
+
+<A NAME="snapshot(com.google.android.gms.maps.GoogleMap.SnapshotReadyCallback)"></A>
+
+<div class="jd-details api apilevel-"> 
+    <h4 class="jd-details-title">
+      <span class="normal">
+        public 
+         
+        final 
+         
+         
+        void
+      </span>
+      <span class="sympad">snapshot</span>
+      <span class="normal">(<a href="/reference/com/google/android/gms/maps/GoogleMap.SnapshotReadyCallback.html">GoogleMap.SnapshotReadyCallback</a> callback)</span>
+    </h4>
+      <div class="api-level">
+        <div></div>
+        
+  
+
+      </div>
+    <div class="jd-details-descr">
+      
+  <div class="jd-tagdata jd-tagdescr"><p>Takes a snapshot of the map.
+
+ <p>You can use snapshots within your application when an interactive
+ map would be difficult, or impossible, to use. For example, images
+ produced with the <code>snapshot()</code> method can be used to display a
+ thumbnail of the map in your app, or a snapshot in the notification
+ center.
+
+ <p><strong>Note:</strong> Images of the map must not be
+ transmitted to your servers, or otherwise used outside of the
+ application. If you need to send a map to another application or user,
+ send data that allows them to reconstruct the map for the new user
+ instead of a snapshot.</p></div>
+  <div class="jd-tagdata">
+      <h5 class="jd-tagtitle">Parameters</h5>
+      <table class="jd-tagtable">
+        <tr>
+          <th>callback</td>
+          <td>Callback method invoked when the snapshot is taken.
+</td>
+        </tr>
+      </table>
+  </div>
 
     </div>
 </div>

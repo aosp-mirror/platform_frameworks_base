@@ -769,7 +769,7 @@ onkeyup="return search_changed(event, false, '/')" />
             void</nobr>
         </td>
         <td class="jd-linkcol" width="100%"><nobr>
-        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomUpdateListener.html#onLeftRoom(int, java.lang.String)">onLeftRoom</a></span>(int statusCode, String roomId)</nobr>
+        <span class="sympad"><a href="/reference/com/google/android/gms/games/multiplayer/realtime/RoomUpdateListener.html#onLeftRoom(int, java.lang.String)">onLeftRoom</a></span>(int statusCode, <a href="http://developer.android.com/reference/java/lang/String.html">String</a> roomId)</nobr>
         
         <div class="jd-descrdiv">Called when the client attempts to leaves the real-time room.</div>
   
@@ -904,7 +904,8 @@ onkeyup="return search_changed(event, false, '/')" />
         </tr>
         <tr>
           <th>room</td>
-          <td>The data of the real-time room that was joined.
+          <td>The data of the room that was joined. The room can be <code>null</code> if the
+              <code><a href="/reference/com/google/android/gms/games/GamesClient.html#joinRoom(com.google.android.gms.games.multiplayer.realtime.RoomConfig)">joinRoom(RoomConfig)</a></code> operation failed.
 </td>
         </tr>
       </table>
@@ -927,7 +928,7 @@ onkeyup="return search_changed(event, false, '/')" />
         void
       </span>
       <span class="sympad">onLeftRoom</span>
-      <span class="normal">(int statusCode, String roomId)</span>
+      <span class="normal">(int statusCode, <a href="http://developer.android.com/reference/java/lang/String.html">String</a> roomId)</span>
     </h4>
       <div class="api-level">
         <div></div>
@@ -987,13 +988,22 @@ onkeyup="return search_changed(event, false, '/')" />
     <div class="jd-details-descr">
       
   <div class="jd-tagdata jd-tagdescr"><p>Called when all the participants in a real-time room are fully connected. This gets called
- once all invitations are accepted and any necessary automatching has been completed</p></div>
+ once all invitations are accepted and any necessary automatching has been completed
+ Possible status codes include:
+ <ul>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_OK">STATUS_OK</a></code> if data was successfully loaded and is up-to-date.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_CLIENT_RECONNECT_REQUIRED">STATUS_CLIENT_RECONNECT_REQUIRED</a></code> if the <code><a href="/reference/com/google/android/gms/games/GamesClient.html">GamesClient</a></code> needs to
+ reconnect to the service to access this data.</li>
+ <li><code><a href="/reference/com/google/android/gms/games/GamesClient.html#STATUS_INTERNAL_ERROR">STATUS_INTERNAL_ERROR</a></code> if an unexpected error occurred in the
+ service.</li>
+ </ul></p></div>
   <div class="jd-tagdata">
       <h5 class="jd-tagtitle">Parameters</h5>
       <table class="jd-tagtable">
         <tr>
           <th>room</td>
-          <td>The fully connected room object.
+          <td>The fully connected room object. The room can be <code>null</code> if it could not be
+              loaded successfully.
 </td>
         </tr>
       </table>
@@ -1047,7 +1057,9 @@ onkeyup="return search_changed(event, false, '/')" />
         </tr>
         <tr>
           <th>room</td>
-          <td>The real-time room data that was created.
+          <td>The room data that was created if successful. The room can be <code>null</code> if the
+              <code><a href="/reference/com/google/android/gms/games/GamesClient.html#createRoom(com.google.android.gms.games.multiplayer.realtime.RoomConfig)">createRoom(RoomConfig)</a></code> operation failed.
+
 </td>
         </tr>
       </table>
