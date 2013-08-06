@@ -116,7 +116,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     private static final int MIN_USER_ID = 10;
 
-    private static final int USER_VERSION = 2;
+    private static final int USER_VERSION = 3;
 
     private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // ms
 
@@ -425,6 +425,7 @@ public class UserManagerService extends IUserManager.Stub {
                     && restrictions.getBoolean(UserManager.DISALLOW_APP_RESTRICTIONS, false)) {
                 restrictions.putBoolean(UserManager.DISALLOW_APP_RESTRICTIONS, false);
             }
+            mUserRestrictions.get(userId).clear();
             mUserRestrictions.get(userId).putAll(restrictions);
             writeUserLocked(mUsers.get(userId));
         }
@@ -555,7 +556,7 @@ public class UserManagerService extends IUserManager.Stub {
                 }
             }
             updateUserIdsLocked();
-            upgradeIfNecessary();
+            upgradeIfNecessaryLocked();
         } catch (IOException ioe) {
             fallbackToSingleUserLocked();
         } catch (XmlPullParserException pe) {
@@ -573,7 +574,7 @@ public class UserManagerService extends IUserManager.Stub {
     /**
      * Upgrade steps between versions, either for fixing bugs or changing the data format.
      */
-    private void upgradeIfNecessary() {
+    private void upgradeIfNecessaryLocked() {
         int userVersion = mUserVersion;
         if (userVersion < 1) {
             // Assign a proper name for the owner, if not initialized correctly before
@@ -593,6 +594,18 @@ public class UserManagerService extends IUserManager.Stub {
                 writeUserLocked(user);
             }
             userVersion = 2;
+        }
+
+        if (userVersion < 3) {
+            // Remove restrictions PIN for all users
+            for (int i = 0; i < mRestrictionsPinStates.size(); i++) {
+                int userId = mRestrictionsPinStates.keyAt(i);
+                RestrictionsPinState state = mRestrictionsPinStates.valueAt(i);
+                if (state.salt != 0 && state.pinHash != null) {
+                    removeRestrictionsForUser(userId);
+                }
+            }
+            userVersion = 3;
         }
 
         if (userVersion < USER_VERSION) {
@@ -1221,6 +1234,10 @@ public class UserManagerService extends IUserManager.Stub {
     public void removeRestrictions() {
         checkManageUsersPermission("Only system can remove restrictions");
         final int userHandle = UserHandle.getCallingUserId();
+        removeRestrictionsForUser(userHandle);
+    }
+
+    private void removeRestrictionsForUser(final int userHandle) {
         synchronized (mPackagesLock) {
             // Remove all user restrictions
             setUserRestrictions(new Bundle(), userHandle);
