@@ -362,10 +362,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Разрешава на притежателя да се обвърже с интерфейса от най-високото ниво на услуга за отпечатване. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"достъп до всички задания за отпечатване"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Разрешава на притежателя да осъществява достъп до създадените от друго приложение задания за отпечатване. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
-    <!-- no translation found for permlab_bindNfcService (2752731300419410724) -->
-    <skip />
-    <!-- no translation found for permdesc_bindNfcService (6120647629174066862) -->
-    <skip />
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"обвързване с услуга за КБП"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Разрешава на притежателя да се обвързва с приложения, които емулират карти за КБП. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"обвързване с текстова услуга"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Разрешава на притежателя да се обвърже с интерфейса от най-високото ниво на текстова услуга (напр. SpellCheckerService). Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"обвързване с услуга за VPN"</string>
@@ -474,6 +472,8 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Разрешава на приложението да използва функциите на InputFlinger от ниско ниво."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"конфигуриране на дисплеите през WiFi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Разрешава на приложението да конфигурира и да се свързва с дисплеите през WiFi."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"контролиране на дисплеите през WiFi"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Разрешава на приложението да контролира функциите от ниско ниво на дисплеите през WiFi."</string>
     <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
     <skip />
     <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->

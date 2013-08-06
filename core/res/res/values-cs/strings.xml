@@ -474,6 +474,8 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Umožňuje aplikaci používat nízkoúrovňové funkce InputFlinger."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"konfigurovat displeje přes Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Povoluje aplikaci připojit a konfigurovat displeje přes Wi-Fi."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"ovládat displeje přes Wi-Fi"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Povoluje aplikaci ovládat základní funkce displejů přes Wi-Fi."</string>
     <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
     <skip />
     <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
@@ -1479,8 +1481,7 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Obrazovka HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Překryvná vrstva č. <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
-    <!-- no translation found for display_manager_overlay_display_secure_suffix (6022119702628572080) -->
-    <skip />
+    <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", zabezpečené"</string>
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"Bezdrátový displej je připojen"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"Tato obrazovka se zobrazuje v jiném zařízení"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Odpojit"</string>

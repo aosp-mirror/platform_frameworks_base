@@ -472,6 +472,8 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"መተግበሪያው ባለአነስተኛ የInputFlinger ባህሪያት እንዲጠቀም ይፈቅድለታል።"</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"የWifi ማሳያዎችን አዋቅር"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"መተግበሪያው የWifi ማሳያዎችን እንዲያዋቅርና ከእነሱ ጋር እንዲገናኝ ይፈቅድለታል።"</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"የWifi ማሳያዎችን ተቆጣጠር"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"መተግበሪያው በዝቅተኛ ደረጃ ላይ ያሉ የWifi ማሳያዎችን እንዲቆጣጠር ይፈቅድለታል።"</string>
     <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
     <skip />
     <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->

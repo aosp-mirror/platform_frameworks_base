@@ -362,10 +362,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Inaruhusu kishikiliaji kujifungilia kiolesura cha kiwango cha juu cha huduma ya kuchapisha. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"fikia kazi zote za kuchapisha"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Huruhusu mmiliki kufikia kazi za kuchapisha zilizoundwa na programu nyingine. Haipaswi kuhitajika kwa programu za kawaida kamwe."</string>
-    <!-- no translation found for permlab_bindNfcService (2752731300419410724) -->
-    <skip />
-    <!-- no translation found for permdesc_bindNfcService (6120647629174066862) -->
-    <skip />
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"funga kwa huduma ya NFC"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Huruhusu mmiliki kufunga kwa programu zinazoiga kadi za NFC. Haipaswi kuhitaji kamwe kwa programu za kawaida."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"Imefungwa kwa huduma ya maandishi"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Inaruhusu kishikiliaji kushurutisha kusano ya kiwango cha juu ya huduma ya matini(k.m.SpellCheckerService). Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"funga kwa huduma ya VPN"</string>
@@ -474,6 +472,8 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Inaruhusu programu kutumia vipengele vya chini vya InputFlinger."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"sanidi maonyesho ya Wifi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Inaruhusu programu kusanidi na kuunganika kwenye maonyesho ya Wifi."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"dhibiti maonyesho ya Wifi"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Inaruhusu programu kudhibiti vipengele vya kiwango cha chini vya maonyesho ya Wifi."</string>
     <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
     <skip />
     <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
@@ -1479,8 +1479,7 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Skrini ya HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Uwekeleaji #<xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g>x<xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
-    <!-- no translation found for display_manager_overlay_display_secure_suffix (6022119702628572080) -->
-    <skip />
+    <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", salama"</string>
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"Onyesho pasiwaya limeunganishwa"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"Skrini hii inaonyesha kwenye kifaa kingine"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Tenganisha"</string>

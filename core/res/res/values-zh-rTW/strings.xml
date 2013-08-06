@@ -472,6 +472,8 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"允許應用程式使用 InputFlinger 的低階功能。"</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"設定 Wi-Fi 顯示裝置"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"允許應用程式設定及連接 Wi-Fi 顯示裝置。"</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"控制 Wi-Fi 顯示裝置"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"允許應用程式控制 Wi-Fi 顯示裝置的低階功能。"</string>
     <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
     <skip />
     <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->

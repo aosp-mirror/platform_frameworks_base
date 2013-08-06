@@ -472,6 +472,8 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"InputFlingerの低レベルの機能を使用することをアプリに許可します。"</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wi-Fiディスプレイの設定"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Wi-Fiディスプレイを設定して接続することをアプリに許可します。"</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wi-Fiディスプレイの制御"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Wi-Fiディスプレイの低レベル機能を制御することをアプリに許可します。"</string>
     <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
     <skip />
     <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->

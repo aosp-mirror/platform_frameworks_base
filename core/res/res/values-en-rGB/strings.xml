@@ -472,6 +472,8 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Allows the app to use InputFlinger low-level features."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configure Wi-Fi displays"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Allows the app to configure and connect to Wi-Fi displays."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"control Wi-Fi displays"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Allows the app to control low-level features of Wi-Fi displays."</string>
     <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
     <skip />
     <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->

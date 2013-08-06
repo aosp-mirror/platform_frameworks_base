@@ -362,10 +362,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Permite que o proprietário use a interface de nível superior de um serviço de impressão. Não deve ser necessário para aplicativos comuns."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"acessar todos os trabalhos de impressão"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Permite que o proprietário acesse trabalhos de impressão criados por outro aplicativo. Não deve ser necessário para aplicativos comuns."</string>
-    <!-- no translation found for permlab_bindNfcService (2752731300419410724) -->
-    <skip />
-    <!-- no translation found for permdesc_bindNfcService (6120647629174066862) -->
-    <skip />
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"associar ao serviço NFC"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Permite ao proprietário associar a aplicativos que emulam cartões NFC. Não deve ser necessário para aplicativos comuns."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"sujeitar-se a um serviço de texto"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Permite que o proprietário utilize interface de nível superior de um serviço de texto (por exemplo, SpellCheckerService). Nunca deve ser necessário para aplicativos normais."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"se ligam a um serviço de VPN"</string>
@@ -474,6 +472,8 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Permite que o aplicativo use recursos com baixos níveis de InputFinger."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configurar monitores Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Permite que o aplicativo configure e conecte a monitores Wi-Fi."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"controlar monitores Wi-Fi"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permite que o aplicativo controle recursos de baixo nível de monitores Wi-Fi."</string>
     <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
     <skip />
     <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
