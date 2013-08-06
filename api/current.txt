@@ -27257,13 +27257,15 @@ package android.view {
     field public static final int SOUND_EFFECTS_ENABLED = 134217728; // 0x8000000
     field public static final deprecated int STATUS_BAR_HIDDEN = 1; // 0x1
     field public static final deprecated int STATUS_BAR_VISIBLE = 0; // 0x0
-    field public static final int SYSTEM_UI_FLAG_ALLOW_OVERLAY = 2048; // 0x800
+    field public static final int SYSTEM_UI_FLAG_ALLOW_TRANSIENT = 2048; // 0x800
     field public static final int SYSTEM_UI_FLAG_FULLSCREEN = 4; // 0x4
     field public static final int SYSTEM_UI_FLAG_HIDE_NAVIGATION = 2; // 0x2
     field public static final int SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = 1024; // 0x400
     field public static final int SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION = 512; // 0x200
     field public static final int SYSTEM_UI_FLAG_LAYOUT_STABLE = 256; // 0x100
     field public static final int SYSTEM_UI_FLAG_LOW_PROFILE = 1; // 0x1
+    field public static final int SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION = 8192; // 0x2000
+    field public static final int SYSTEM_UI_FLAG_TRANSPARENT_STATUS = 4096; // 0x1000
     field public static final int SYSTEM_UI_FLAG_VISIBLE = 0; // 0x0
     field public static final int SYSTEM_UI_LAYOUT_FLAGS = 1536; // 0x600
     field public static final int TEXT_ALIGNMENT_CENTER = 4; // 0x4

@@ -127,10 +127,14 @@ public class PhoneStatusBar extends BaseStatusBar {
     private static final int NOTIFICATION_PRIORITY_MULTIPLIER = 10; // see NotificationManagerService
     private static final int HIDE_ICONS_BELOW_SCORE = Notification.PRIORITY_LOW * NOTIFICATION_PRIORITY_MULTIPLIER;
 
-    private static final int STATUS_OR_NAV_OVERLAY =
-            View.STATUS_BAR_OVERLAY | View.NAVIGATION_BAR_OVERLAY;
+    private static final int STATUS_OR_NAV_TRANSIENT =
+            View.STATUS_BAR_TRANSIENT | View.NAVIGATION_BAR_TRANSIENT;
     private static final long AUTOHIDE_TIMEOUT_MS = 3000;
     private static final float TRANSPARENT_ALPHA = 0.7f;
+
+    private static final int BAR_MODE_NORMAL = 0;
+    private static final int BAR_MODE_TRANSIENT = 1;
+    private static final int BAR_MODE_TRANSPARENT = 2;
 
     // fling gesture tuning parameters, scaled to display density
     private float mSelfExpandVelocityPx; // classic value: 2000px/s
@@ -306,33 +310,33 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     };
 
-    private Toast mHideybarConfirmation;
-    private boolean mHideybarConfirmationDismissed;
+    private Toast mHidingNavigationConfirmation;
+    private boolean mHidingNavigationConfirmationDismissed;
 
-    private final View.OnTouchListener mDismissHideybarConfirmationOnTouchOutside =
+    private final View.OnTouchListener mDismissHidingNavigationConfirmationOnTouchOutside =
             new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     if (event.getActionMasked() == MotionEvent.ACTION_OUTSIDE) {
-                        dismissHideybarConfirmation();
+                        dismissHidingNavigationConfirmation();
                     }
                     return false;
                 }
             };
 
-    private final Runnable mHideybarConfirmationAction = new Runnable() {
+    private final Runnable mHidingNavigationConfirmationAction = new Runnable() {
         @Override
         public void run() {
-            if (mHideybarConfirmation != null) {
+            if (mHidingNavigationConfirmation != null) {
                 final boolean isGloballyConfirmed = Prefs.read(mContext)
-                        .getBoolean(Prefs.HIDEYBAR_CONFIRMED, false);
+                        .getBoolean(Prefs.HIDING_NAVIGATION_CONFIRMED, false);
                 if (!isGloballyConfirmed) {
                     // user pressed button, consider this a confirmation
                     Prefs.edit(mContext)
-                            .putBoolean(Prefs.HIDEYBAR_CONFIRMED, true)
+                            .putBoolean(Prefs.HIDING_NAVIGATION_CONFIRMED, true)
                             .apply();
                 }
-                dismissHideybarConfirmation();
+                dismissHidingNavigationConfirmation();
             }
         }
     };
@@ -342,7 +346,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     private final Runnable mAutohide = new Runnable() {
         @Override
         public void run() {
-            int requested = mSystemUiVisibility & ~STATUS_OR_NAV_OVERLAY;
+            int requested = mSystemUiVisibility & ~STATUS_OR_NAV_TRANSIENT;
             if (mSystemUiVisibility != requested) {
                 notifyUiVisibilityChanged(requested);
             }
@@ -1892,8 +1896,9 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (diff != 0) {
             mSystemUiVisibility = newVal;
 
-            if (0 != (diff & View.SYSTEM_UI_FLAG_LOW_PROFILE)) {
-                final boolean lightsOut = (0 != (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE));
+            // update low profile
+            if ((diff & View.SYSTEM_UI_FLAG_LOW_PROFILE) != 0) {
+                final boolean lightsOut = (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE) != 0;
                 if (lightsOut) {
                     animateCollapsePanels();
                     if (mTicking) {
@@ -1908,70 +1913,93 @@ public class PhoneStatusBar extends BaseStatusBar {
                 setStatusBarLowProfile(lightsOut);
             }
 
-            boolean sbOverlayChanged = 0 != (diff & View.STATUS_BAR_OVERLAY);
-            boolean nbOverlayChanged = 0 != (diff & View.NAVIGATION_BAR_OVERLAY);
-            if (sbOverlayChanged || nbOverlayChanged) {
-                boolean sbOverlay = 0 != (vis & View.STATUS_BAR_OVERLAY);
-                boolean nbOverlay = 0 != (vis & View.NAVIGATION_BAR_OVERLAY);
-                if (sbOverlayChanged) {
-                    setTransparent(mStatusBarView, sbOverlay);
-                }
-                if (nbOverlayChanged) {
-                    setTransparent(mNavigationBarView, nbOverlay);
-                }
-                if (sbOverlayChanged && sbOverlay || nbOverlayChanged && nbOverlay) {
+            // update status bar mode
+            int sbMode = updateBarMode(oldVal, newVal, mStatusBarView,
+                    View.STATUS_BAR_TRANSIENT, View.SYSTEM_UI_FLAG_TRANSPARENT_STATUS);
+
+            // update navigation bar mode
+            int nbMode = updateBarMode(oldVal, newVal, mNavigationBarView,
+                    View.NAVIGATION_BAR_TRANSIENT, View.SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION);
+
+            if (sbMode != -1 || nbMode != -1) {
+                // update transient bar autohide
+                if (sbMode == BAR_MODE_TRANSIENT || nbMode == BAR_MODE_TRANSIENT) {
                     scheduleAutohide();
                 } else {
                     cancelAutohide();
                 }
             }
+
+            // update hiding navigation confirmation
             if (mNavigationBarView != null) {
-                int flags = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_ALLOW_OVERLAY;
-                boolean oldVisible =  (oldVal & flags) == flags;
-                boolean newVisible = (newVal & flags) == flags;
-                if (!oldVisible && newVisible) {
-                    mHideybarConfirmationDismissed = false;
+                final int hidingNav =
+                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_ALLOW_TRANSIENT;
+                boolean oldHidingNav = (oldVal & hidingNav) != 0;
+                boolean newHidingNav = (newVal & hidingNav) != 0;
+                if (!oldHidingNav && newHidingNav) {
+                    mHidingNavigationConfirmationDismissed = false;
                 }
-                setHideybarConfirmationVisible(newVisible);
+                setHidingNavigationConfirmationVisible(newHidingNav);
             }
+
+            // send updated sysui visibility to window manager
             notifyUiVisibilityChanged(mSystemUiVisibility);
         }
     }
 
-    private void dismissHideybarConfirmation() {
-        if (mHideybarConfirmation != null) {
-            mHideybarConfirmationDismissed = true;
-            mHideybarConfirmation.cancel();
-            mHideybarConfirmation = null;
+    private int updateBarMode(int oldVis, int newVis, View view,
+            int transientFlag, int transparentFlag) {
+        final int oldMode = barMode(oldVis, transientFlag, transparentFlag);
+        final int newMode = barMode(newVis, transientFlag, transparentFlag);
+        if (oldMode == newMode) {
+            return -1; // no mode change
+        }
+        setTransparent(view, newMode != BAR_MODE_NORMAL);
+        return newMode;
+    }
+
+    private int barMode(int vis, int transientFlag, int transparentFlag) {
+        return (vis & transientFlag) != 0 ? BAR_MODE_TRANSIENT
+                : (vis & transparentFlag) != 0 ? BAR_MODE_TRANSPARENT
+                : BAR_MODE_NORMAL;
+    }
+
+    private void dismissHidingNavigationConfirmation() {
+        if (mHidingNavigationConfirmation != null) {
+            mHidingNavigationConfirmationDismissed = true;
+            mHidingNavigationConfirmation.cancel();
+            mHidingNavigationConfirmation = null;
         }
     }
 
-    private void setHideybarConfirmationVisible(boolean visible) {
-        if (DEBUG) Log.d(TAG, "setHideybarConfirmationVisible " + visible);
-        if (visible && mHideybarConfirmation == null && !mHideybarConfirmationDismissed) {
+    private void setHidingNavigationConfirmationVisible(boolean visible) {
+        if (DEBUG) Log.d(TAG, "setHidingNavigationConfirmationVisible " + visible);
+        if (visible &&
+                mHidingNavigationConfirmation == null && !mHidingNavigationConfirmationDismissed) {
             // create the confirmation toast bar
-            int msg = R.string.hideybar_confirmation_message;
-            mHideybarConfirmation = Toast.makeBar(mContext, msg, Toast.LENGTH_INFINITE)
-                    .setAction(com.android.internal.R.string.ok, mHideybarConfirmationAction);
-            View v = mHideybarConfirmation.getView();
+            int msg = R.string.hiding_navigation_confirmation_message;
+            mHidingNavigationConfirmation = Toast.makeBar(mContext, msg, Toast.LENGTH_INFINITE)
+                    .setAction(com.android.internal.R.string.ok,
+                            mHidingNavigationConfirmationAction);
+            View v = mHidingNavigationConfirmation.getView();
             v.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
             boolean isGloballyConfirmed = Prefs.read(mContext)
-                    .getBoolean(Prefs.HIDEYBAR_CONFIRMED, false);
+                    .getBoolean(Prefs.HIDING_NAVIGATION_CONFIRMED, false);
             if (isGloballyConfirmed) {
                 // dismiss on outside touch if globally confirmed
-                v.setOnTouchListener(mDismissHideybarConfirmationOnTouchOutside);
+                v.setOnTouchListener(mDismissHidingNavigationConfirmationOnTouchOutside);
             }
             // position at the bottom like normal toasts, but use top gravity
             // to avoid jumping around when showing/hiding the nav bar
             v.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
             int offsetY = mContext.getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.toast_y_offset);
-            mHideybarConfirmation.setGravity(Gravity.TOP,
+            mHidingNavigationConfirmation.setGravity(Gravity.TOP,
                     0, mCurrentDisplaySize.y - v.getMeasuredHeight() / 2 - offsetY);
             // show the confirmation
-            mHideybarConfirmation.show();
+            mHidingNavigationConfirmation.show();
         } else if (!visible) {
-            dismissHideybarConfirmation();
+            dismissHidingNavigationConfirmation();
         }
     }
 
@@ -1985,7 +2013,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     public void suspendAutohide() {
         mHandler.removeCallbacks(mAutohide);
-        mAutohideSuspended = 0 != (mSystemUiVisibility & STATUS_OR_NAV_OVERLAY);
+        mAutohideSuspended = 0 != (mSystemUiVisibility & STATUS_OR_NAV_TRANSIENT);
     }
 
     private void cancelAutohide() {
@@ -1999,7 +2027,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     private void checkUserAutohide(View v, MotionEvent event) {
-        if ((mSystemUiVisibility & STATUS_OR_NAV_OVERLAY) != 0  // an overlay bar is revealed
+        if ((mSystemUiVisibility & STATUS_OR_NAV_TRANSIENT) != 0  // a transient bar is revealed
                 && event.getAction() == MotionEvent.ACTION_OUTSIDE // touch outside the source bar
                 && event.getX() == 0 && event.getY() == 0  // a touch outside both bars
                 ) {
