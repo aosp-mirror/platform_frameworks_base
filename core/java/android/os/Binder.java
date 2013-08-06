@@ -296,7 +296,21 @@ public class Binder implements IBinder {
                 disabled = sDumpDisabled;
             }
             if (disabled == null) {
-                dump(fd, pw, args);
+                try {
+                    dump(fd, pw, args);
+                } catch (SecurityException e) {
+                    pw.println();
+                    pw.println("Security exception: " + e.getMessage());
+                    throw e;
+                } catch (Throwable e) {
+                    // Unlike usual calls, in this case if an exception gets thrown
+                    // back to us we want to print it back in to the dump data, since
+                    // that is where the caller expects all interesting information to
+                    // go.
+                    pw.println();
+                    pw.println("Exception occurred while dumping:");
+                    e.printStackTrace(pw);
+                }
             } else {
                 pw.println(sDumpDisabled);
             }
@@ -443,7 +457,6 @@ final class BinderProxy implements IBinder {
         data.writeStringArray(args);
         try {
             transact(DUMP_TRANSACTION, data, reply, FLAG_ONEWAY);
-            reply.readException();
         } finally {
             data.recycle();
             reply.recycle();

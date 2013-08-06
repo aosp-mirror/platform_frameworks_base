@@ -29,18 +29,18 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 
-import com.android.internal.os.ProcessStats;
+import com.android.internal.os.ProcessCpuTracker;
 
 public class LoadAverageService extends Service {
     private View mView;
 
-    private static final class Stats extends ProcessStats {
+    private static final class CpuTracker extends ProcessCpuTracker {
         String mLoadText;
         int mLoadWidth;
 
         private final Paint mPaint;
 
-        Stats(Paint paint) {
+        CpuTracker(Paint paint) {
             super(false);
             mPaint = paint;
         }
@@ -70,7 +70,7 @@ public class LoadAverageService extends Service {
             }
         };
 
-        private final Stats mStats;
+        private final CpuTracker mStats;
 
         private Paint mLoadPaint;
         private Paint mAddedPaint;
@@ -150,7 +150,7 @@ public class LoadAverageService extends Service {
             float descent = mLoadPaint.descent();
             mFH = (int)(descent - mAscent + .5f);
 
-            mStats = new Stats(mLoadPaint);
+            mStats = new CpuTracker(mLoadPaint);
             mStats.init();
             updateDisplay();
         }
@@ -179,7 +179,7 @@ public class LoadAverageService extends Service {
             final int W = mNeededWidth;
             final int RIGHT = getWidth()-1;
 
-            final Stats stats = mStats;
+            final CpuTracker stats = mStats;
             final int userTime = stats.getLastUserTime();
             final int systemTime = stats.getLastSystemTime();
             final int iowaitTime = stats.getLastIoWaitTime();
@@ -226,7 +226,7 @@ public class LoadAverageService extends Service {
 
             int N = stats.countWorkingStats();
             for (int i=0; i<N; i++) {
-                Stats.Stats st = stats.getWorkingStats(i);
+                CpuTracker.Stats st = stats.getWorkingStats(i);
                 y += mFH;
                 top += mFH;
                 bottom += mFH;
@@ -259,12 +259,12 @@ public class LoadAverageService extends Service {
         }
 
         void updateDisplay() {
-            final Stats stats = mStats;
+            final CpuTracker stats = mStats;
             final int NW = stats.countWorkingStats();
 
             int maxWidth = stats.mLoadWidth;
             for (int i=0; i<NW; i++) {
-                Stats.Stats st = stats.getWorkingStats(i);
+                CpuTracker.Stats st = stats.getWorkingStats(i);
                 if (st.nameWidth > maxWidth) {
                     maxWidth = st.nameWidth;
                 }
