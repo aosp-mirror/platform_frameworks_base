@@ -30,10 +30,11 @@ import android.util.ArrayMap;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.app.ProcessStats;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsImpl;
-import com.android.internal.os.ProcessStats;
+import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
@@ -419,7 +420,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Tracking long-term execution of processes to look for abuse and other
      * bad app behavior.
      */
-    final ProcessTracker mProcessTracker;
+    final ProcessStatsService mProcessStats;
 
     /**
      * The currently running isolated processes.
@@ -891,19 +892,19 @@ public final class ActivityManagerService extends ActivityManagerNative
             = new ArrayList<ProcessChangeItem>();
 
     /**
-     * Runtime statistics collection thread.  This object's lock is used to
+     * Runtime CPU use collection thread.  This object's lock is used to
      * protect all related state.
      */
-    final Thread mProcessStatsThread;
+    final Thread mProcessCpuThread;
 
     /**
      * Used to collect process stats when showing not responding dialog.
-     * Protected by mProcessStatsThread.
+     * Protected by mProcessCpuThread.
      */
-    final ProcessStats mProcessStats = new ProcessStats(
+    final ProcessCpuTracker mProcessCpuTracker = new ProcessCpuTracker(
             MONITOR_THREAD_CPU_USAGE);
     final AtomicLong mLastCpuTime = new AtomicLong(0);
-    final AtomicBoolean mProcessStatsMutexFree = new AtomicBoolean(true);
+    final AtomicBoolean mProcessCpuMutexFree = new AtomicBoolean(true);
 
     long mLastWriteTime = 0;
 
@@ -1745,9 +1746,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return;
             }
 
-            synchronized (mActivityManagerService.mProcessStatsThread) {
-                pw.print(mActivityManagerService.mProcessStats.printCurrentLoad());
-                pw.print(mActivityManagerService.mProcessStats.printCurrentState(
+            synchronized (mActivityManagerService.mProcessCpuThread) {
+                pw.print(mActivityManagerService.mProcessCpuTracker.printCurrentLoad());
+                pw.print(mActivityManagerService.mProcessCpuTracker.printCurrentState(
                         SystemClock.uptimeMillis()));
             }
         }
@@ -1769,7 +1770,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 return;
             }
 
-            mActivityManagerService.mProcessTracker.dump(fd, pw, args);
+            mActivityManagerService.mProcessStats.dump(fd, pw, args);
         }
     }
 
@@ -1795,7 +1796,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 : mBatteryStatsService.getActiveStatistics().getIsOnBattery();
         mBatteryStatsService.getActiveStatistics().setCallback(this);
 
-        mProcessTracker = new ProcessTracker(this, new File(systemDir, "procstats"));
+        mProcessStats = new ProcessStatsService(this, new File(systemDir, "procstats"));
 
         mUsageStatsService = new UsageStatsService(new File(systemDir, "usagestats").toString());
         mAppOpsService = new AppOpsService(new File(systemDir, "appops.xml"));
@@ -1816,14 +1817,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         mConfiguration.setLocale(Locale.getDefault());
 
         mConfigurationSeq = mConfiguration.seq = 1;
-        mProcessStats.init();
+        mProcessCpuTracker.init();
 
         mCompatModePackages = new CompatModePackages(this, systemDir);
 
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
 
-        mProcessStatsThread = new Thread("ProcessStats") {
+        mProcessCpuThread = new Thread("CpuTracker") {
             @Override
             public void run() {
                 while (true) {
@@ -1839,7 +1840,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                     nextCpuDelay = nextWriteDelay;
                                 }
                                 if (nextCpuDelay > 0) {
-                                    mProcessStatsMutexFree.set(true);
+                                    mProcessCpuMutexFree.set(true);
                                     this.wait(nextCpuDelay);
                                 }
                             }
@@ -1852,7 +1853,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         };
-        mProcessStatsThread.start();
+        mProcessCpuThread.start();
     }
 
     @Override
@@ -1902,16 +1903,16 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (mLastCpuTime.get() >= now - MONITOR_CPU_MIN_TIME) {
             return;
         }
-        if (mProcessStatsMutexFree.compareAndSet(true, false)) {
-            synchronized (mProcessStatsThread) {
-                mProcessStatsThread.notify();
+        if (mProcessCpuMutexFree.compareAndSet(true, false)) {
+            synchronized (mProcessCpuThread) {
+                mProcessCpuThread.notify();
             }
         }
     }
 
     void updateCpuStatsNow() {
-        synchronized (mProcessStatsThread) {
-            mProcessStatsMutexFree.set(false);
+        synchronized (mProcessCpuThread) {
+            mProcessCpuMutexFree.set(false);
             final long now = SystemClock.uptimeMillis();
             boolean haveNewCpuStats = false;
 
@@ -1919,19 +1920,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                     mLastCpuTime.get() < (now-MONITOR_CPU_MIN_TIME)) {
                 mLastCpuTime.set(now);
                 haveNewCpuStats = true;
-                mProcessStats.update();
-                //Slog.i(TAG, mProcessStats.printCurrentState());
+                mProcessCpuTracker.update();
+                //Slog.i(TAG, mProcessCpu.printCurrentState());
                 //Slog.i(TAG, "Total CPU usage: "
-                //        + mProcessStats.getTotalCpuPercent() + "%");
+                //        + mProcessCpu.getTotalCpuPercent() + "%");
 
                 // Slog the cpu usage if the property is set.
                 if ("true".equals(SystemProperties.get("events.cpu"))) {
-                    int user = mProcessStats.getLastUserTime();
-                    int system = mProcessStats.getLastSystemTime();
-                    int iowait = mProcessStats.getLastIoWaitTime();
-                    int irq = mProcessStats.getLastIrqTime();
-                    int softIrq = mProcessStats.getLastSoftIrqTime();
-                    int idle = mProcessStats.getLastIdleTime();
+                    int user = mProcessCpuTracker.getLastUserTime();
+                    int system = mProcessCpuTracker.getLastSystemTime();
+                    int iowait = mProcessCpuTracker.getLastIoWaitTime();
+                    int irq = mProcessCpuTracker.getLastIrqTime();
+                    int softIrq = mProcessCpuTracker.getLastSoftIrqTime();
+                    int idle = mProcessCpuTracker.getLastIdleTime();
 
                     int total = user + system + iowait + irq + softIrq + idle;
                     if (total == 0) total = 1;
@@ -1946,7 +1947,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
 
-            long[] cpuSpeedTimes = mProcessStats.getLastCpuSpeedTimes();
+            long[] cpuSpeedTimes = mProcessCpuTracker.getLastCpuSpeedTimes();
             final BatteryStatsImpl bstats = mBatteryStatsService.getActiveStatistics();
             synchronized(bstats) {
                 synchronized(mPidsSelfLocked) {
@@ -1955,9 +1956,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                             int perc = bstats.startAddingCpuLocked();
                             int totalUTime = 0;
                             int totalSTime = 0;
-                            final int N = mProcessStats.countStats();
+                            final int N = mProcessCpuTracker.countStats();
                             for (int i=0; i<N; i++) {
-                                ProcessStats.Stats st = mProcessStats.getStats(i);
+                                ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
                                 if (!st.working) {
                                     continue;
                                 }
@@ -2233,7 +2234,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // come up (we have a pid but not yet its thread), so keep it.
                 if (DEBUG_PROCESSES) Slog.v(TAG, "App already running: " + app);
                 // If this is a new package in the process, add the package to the list
-                app.addPackage(info.packageName, mProcessTracker);
+                app.addPackage(info.packageName, mProcessStats);
                 return app;
             }
 
@@ -2288,7 +2289,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         } else {
             // If this is a new package in the process, add the package to the list
-            app.addPackage(info.packageName, mProcessTracker);
+            app.addPackage(info.packageName, mProcessStats);
         }
 
         // If the system is not ready yet, then hold off on starting this
@@ -3368,7 +3369,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * @return file containing stack traces, or null if no dump file is configured
      */
     public static File dumpStackTraces(boolean clearTraces, ArrayList<Integer> firstPids,
-            ProcessStats processStats, SparseArray<Boolean> lastPids, String[] nativeProcs) {
+            ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids, String[] nativeProcs) {
         String tracesPath = SystemProperties.get("dalvik.vm.stack-trace-file", null);
         if (tracesPath == null || tracesPath.length() == 0) {
             return null;
@@ -3393,12 +3394,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             return null;
         }
 
-        dumpStackTraces(tracesPath, firstPids, processStats, lastPids, nativeProcs);
+        dumpStackTraces(tracesPath, firstPids, processCpuTracker, lastPids, nativeProcs);
         return tracesFile;
     }
 
     private static void dumpStackTraces(String tracesPath, ArrayList<Integer> firstPids,
-            ProcessStats processStats, SparseArray<Boolean> lastPids, String[] nativeProcs) {
+            ProcessCpuTracker processCpuTracker, SparseArray<Boolean> lastPids, String[] nativeProcs) {
         // Use a FileObserver to detect when traces finish writing.
         // The order of traces is considered important to maintain for legibility.
         FileObserver observer = new FileObserver(tracesPath, FileObserver.CLOSE_WRITE) {
@@ -3425,23 +3426,23 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             // Next measure CPU usage.
-            if (processStats != null) {
-                processStats.init();
+            if (processCpuTracker != null) {
+                processCpuTracker.init();
                 System.gc();
-                processStats.update();
+                processCpuTracker.update();
                 try {
-                    synchronized (processStats) {
-                        processStats.wait(500); // measure over 1/2 second.
+                    synchronized (processCpuTracker) {
+                        processCpuTracker.wait(500); // measure over 1/2 second.
                     }
                 } catch (InterruptedException e) {
                 }
-                processStats.update();
+                processCpuTracker.update();
 
                 // We'll take the stack crawls of just the top apps using CPU.
-                final int N = processStats.countWorkingStats();
+                final int N = processCpuTracker.countWorkingStats();
                 int numProcs = 0;
                 for (int i=0; i<N && numProcs<5; i++) {
-                    ProcessStats.Stats stats = processStats.getWorkingStats(i);
+                    ProcessCpuTracker.Stats stats = processCpuTracker.getWorkingStats(i);
                     if (lastPids.indexOfKey(stats.pid) >= 0) {
                         numProcs++;
                         try {
@@ -3629,21 +3630,21 @@ public final class ActivityManagerService extends ActivityManagerNative
             info.append("Parent: ").append(parent.shortComponentName).append("\n");
         }
 
-        final ProcessStats processStats = new ProcessStats(true);
+        final ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(true);
 
-        File tracesFile = dumpStackTraces(true, firstPids, processStats, lastPids, null);
+        File tracesFile = dumpStackTraces(true, firstPids, processCpuTracker, lastPids, null);
 
         String cpuInfo = null;
         if (MONITOR_CPU_USAGE) {
             updateCpuStatsNow();
-            synchronized (mProcessStatsThread) {
-                cpuInfo = mProcessStats.printCurrentState(anrTime);
+            synchronized (mProcessCpuThread) {
+                cpuInfo = mProcessCpuTracker.printCurrentState(anrTime);
             }
-            info.append(processStats.printCurrentLoad());
+            info.append(processCpuTracker.printCurrentLoad());
             info.append(cpuInfo);
         }
 
-        info.append(processStats.printCurrentState(anrTime));
+        info.append(processCpuTracker.printCurrentState(anrTime));
 
         Slog.e(TAG, info.toString());
         if (tracesFile == null) {
@@ -4474,7 +4475,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             thread.asBinder().linkToDeath(adr, 0);
             app.deathRecipient = adr;
         } catch (RemoteException e) {
-            app.resetPackageList(mProcessTracker);
+            app.resetPackageList(mProcessStats);
             startProcessLocked(app, "link fail", processName);
             return false;
         }
@@ -4566,7 +4567,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // an infinite loop of restarting processes...
             Slog.w(TAG, "Exception thrown during bind!", e);
 
-            app.resetPackageList(mProcessTracker);
+            app.resetPackageList(mProcessStats);
             app.unlinkDeathRecipient();
             startProcessLocked(app, "bind fail", processName);
             return false;
@@ -6782,7 +6783,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (DEBUG_MU)
                     Slog.v(TAG_MU, "generateApplicationProvidersLocked, cpi.uid = " + cpr.uid);
                 app.pubProviders.put(cpi.name, cpr);
-                app.addPackage(cpi.applicationInfo.packageName, mProcessTracker);
+                app.addPackage(cpi.applicationInfo.packageName, mProcessStats);
                 ensurePackageDexOpt(cpi.applicationInfo.packageName);
             }
         }
@@ -7520,7 +7521,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             ps = stats.getProcessStatsLocked(info.uid, proc);
         }
         return new ProcessRecord(ps, thread, info, proc, uid,
-                mProcessTracker.getProcessStateLocked(info.packageName, info.uid, proc));
+                mProcessStats.getProcessStateLocked(info.packageName, info.uid, proc));
     }
 
     final ProcessRecord addAppLocked(ApplicationInfo info, boolean isolated) {
@@ -7660,7 +7661,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         mUsageStatsService.shutdown();
         mBatteryStatsService.shutdown();
         synchronized (this) {
-            mProcessTracker.shutdownLocked();
+            mProcessStats.shutdownLocked();
         }
 
         return timedout;
@@ -11665,7 +11666,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.crashing = false;
         app.notResponding = false;
         
-        app.resetPackageList(mProcessTracker);
+        app.resetPackageList(mProcessStats);
         app.unlinkDeathRecipient();
         app.thread = null;
         app.forcingToForeground = null;
@@ -14540,7 +14541,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     + " to " + app.curProcState);
             app.setProcState = app.curProcState;
             if (!doingAll) {
-                setProcessTrackerState(app, mProcessTracker.getMemFactorLocked(), now);
+                setProcessTrackerState(app, mProcessStats.getMemFactorLocked(), now);
             } else {
                 app.procStateChanged = true;
             }
@@ -14818,17 +14819,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             int memFactor;
             if (numCachedAndEmpty <= ProcessList.TRIM_CRITICAL_THRESHOLD) {
                 fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
-                memFactor = ProcessTracker.ADJ_MEM_FACTOR_CRITICAL;
+                memFactor = ProcessStats.ADJ_MEM_FACTOR_CRITICAL;
             } else if (numCachedAndEmpty <= ProcessList.TRIM_LOW_THRESHOLD) {
                 fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
-                memFactor = ProcessTracker.ADJ_MEM_FACTOR_LOW;
+                memFactor = ProcessStats.ADJ_MEM_FACTOR_LOW;
             } else {
                 fgTrimLevel = ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE;
-                memFactor = ProcessTracker.ADJ_MEM_FACTOR_MODERATE;
+                memFactor = ProcessStats.ADJ_MEM_FACTOR_MODERATE;
             }
             int curLevel = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
-            allChanged = mProcessTracker.setMemFactorLocked(memFactor, !mSleeping, now);
-            final int trackerMemFactor = mProcessTracker.getMemFactorLocked();
+            allChanged = mProcessStats.setMemFactorLocked(memFactor, !mSleeping, now);
+            final int trackerMemFactor = mProcessStats.getMemFactorLocked();
             for (int i=N-1; i>=0; i--) {
                 ProcessRecord app = mLruProcesses.get(i);
                 if (allChanged || app.procStateChanged) {
@@ -14916,9 +14917,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         } else {
-            allChanged = mProcessTracker.setMemFactorLocked(
-                    ProcessTracker.ADJ_MEM_FACTOR_NORMAL, !mSleeping, now);
-            final int trackerMemFactor = mProcessTracker.getMemFactorLocked();
+            allChanged = mProcessStats.setMemFactorLocked(
+                    ProcessStats.ADJ_MEM_FACTOR_NORMAL, !mSleeping, now);
+            final int trackerMemFactor = mProcessStats.getMemFactorLocked();
             for (int i=N-1; i>=0; i--) {
                 ProcessRecord app = mLruProcesses.get(i);
                 if (allChanged || app.procStateChanged) {
@@ -14951,14 +14952,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (allChanged) {
-            requestPssAllProcsLocked(now, false, mProcessTracker.isMemFactorLowered());
+            requestPssAllProcsLocked(now, false, mProcessStats.isMemFactorLowered());
         }
 
-        if (mProcessTracker.shouldWriteNowLocked(now)) {
+        if (mProcessStats.shouldWriteNowLocked(now)) {
             mHandler.post(new Runnable() {
                 @Override public void run() {
                     synchronized (ActivityManagerService.this) {
-                        mProcessTracker.writeStateAsyncLocked();
+                        mProcessStats.writeStateAsyncLocked();
                     }
                 }
             });

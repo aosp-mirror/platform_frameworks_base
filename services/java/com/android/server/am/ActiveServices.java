@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import com.android.internal.app.ProcessStats;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.TransferPipe;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
@@ -251,9 +252,9 @@ public final class ActiveServices {
         }
         r.lastActivity = SystemClock.uptimeMillis();
         r.startRequested = true;
-        ProcessTracker.ServiceState stracker = r.getTracker();
+        ProcessStats.ServiceState stracker = r.getTracker();
         if (stracker != null) {
-            stracker.setStarted(true, mAm.mProcessTracker.getMemFactorLocked(), r.lastActivity);
+            stracker.setStarted(true, mAm.mProcessStats.getMemFactorLocked(), r.lastActivity);
         }
         r.callStart = false;
         r.pendingStarts.add(new ServiceRecord.StartItem(r, false, r.makeNextStartId(),
@@ -274,7 +275,7 @@ public final class ActiveServices {
         }
         service.startRequested = false;
         if (service.tracker != null) {
-            service.tracker.setStarted(false, mAm.mProcessTracker.getMemFactorLocked(),
+            service.tracker.setStarted(false, mAm.mProcessStats.getMemFactorLocked(),
                     SystemClock.uptimeMillis());
         }
         service.callStart = false;
@@ -374,7 +375,7 @@ public final class ActiveServices {
             }
             r.startRequested = false;
             if (r.tracker != null) {
-                r.tracker.setStarted(false, mAm.mProcessTracker.getMemFactorLocked(),
+                r.tracker.setStarted(false, mAm.mProcessStats.getMemFactorLocked(),
                         SystemClock.uptimeMillis());
             }
             r.callStart = false;
@@ -516,9 +517,9 @@ public final class ActiveServices {
                 s.lastActivity = SystemClock.uptimeMillis();
                 if (!s.hasAutoCreateConnections()) {
                     // This is the first binding, let the tracker know.
-                    ProcessTracker.ServiceState stracker = s.getTracker();
+                    ProcessStats.ServiceState stracker = s.getTracker();
                     if (stracker != null) {
-                        stracker.setBound(true, mAm.mProcessTracker.getMemFactorLocked(),
+                        stracker.setBound(true, mAm.mProcessStats.getMemFactorLocked(),
                                 s.lastActivity);
                     }
                 }
@@ -844,9 +845,9 @@ public final class ActiveServices {
         long now = SystemClock.uptimeMillis();
         if (r.executeNesting == 0) {
             r.executeFg = fg;
-            ProcessTracker.ServiceState stracker = r.getTracker();
+            ProcessStats.ServiceState stracker = r.getTracker();
             if (stracker != null) {
-                stracker.setExecuting(true, mAm.mProcessTracker.getMemFactorLocked(), now);
+                stracker.setExecuting(true, mAm.mProcessStats.getMemFactorLocked(), now);
             }
             if (r.app != null) {
                 if (r.app.executingServices.size() == 0) {
@@ -1079,7 +1080,7 @@ public final class ActiveServices {
                 Slog.v(TAG_MU, "bringUpServiceLocked: appInfo.uid=" + r.appInfo.uid + " app=" + app);
             if (app != null && app.thread != null) {
                 try {
-                    app.addPackage(r.appInfo.packageName, mAm.mProcessTracker);
+                    app.addPackage(r.appInfo.packageName, mAm.mProcessStats);
                     realStartServiceLocked(r, app, execInFg);
                     return null;
                 } catch (RemoteException e) {
@@ -1364,7 +1365,7 @@ public final class ActiveServices {
            ((ServiceRestarter)r.restarter).setService(null);
         }
 
-        int memFactor = mAm.mProcessTracker.getMemFactorLocked();
+        int memFactor = mAm.mProcessStats.getMemFactorLocked();
         long now = SystemClock.uptimeMillis();
         if (r.tracker != null) {
             r.tracker.setStarted(false, memFactor, now);
@@ -1435,7 +1436,7 @@ public final class ActiveServices {
                 boolean hasAutoCreate = s.hasAutoCreateConnections();
                 if (!hasAutoCreate) {
                     if (s.tracker != null) {
-                        s.tracker.setBound(false, mAm.mProcessTracker.getMemFactorLocked(),
+                        s.tracker.setBound(false, mAm.mProcessStats.getMemFactorLocked(),
                                 SystemClock.uptimeMillis());
                     }
                 }
@@ -1541,7 +1542,7 @@ public final class ActiveServices {
             }
             r.executeFg = false;
             if (r.tracker != null) {
-                r.tracker.setExecuting(false, mAm.mProcessTracker.getMemFactorLocked(),
+                r.tracker.setExecuting(false, mAm.mProcessStats.getMemFactorLocked(),
                         SystemClock.uptimeMillis());
                 if (inStopping) {
                     r.tracker.makeInactive();
@@ -1566,7 +1567,7 @@ public final class ActiveServices {
 
                     mPendingServices.remove(i);
                     i--;
-                    proc.addPackage(sr.appInfo.packageName, mAm.mProcessTracker);
+                    proc.addPackage(sr.appInfo.packageName, mAm.mProcessStats);
                     realStartServiceLocked(sr, proc, sr.createdFromFg);
                     didSomething = true;
                 }
@@ -1737,7 +1738,7 @@ public final class ActiveServices {
             sr.isolatedProc = null;
             sr.executeNesting = 0;
             if (sr.tracker != null) {
-                sr.tracker.setExecuting(false, mAm.mProcessTracker.getMemFactorLocked(),
+                sr.tracker.setExecuting(false, mAm.mProcessStats.getMemFactorLocked(),
                         SystemClock.uptimeMillis());
             }
             if (mStoppingServices.remove(sr)) {
@@ -1772,7 +1773,7 @@ public final class ActiveServices {
                     if (sr.pendingStarts.size() == 0) {
                         sr.startRequested = false;
                         if (sr.tracker != null) {
-                            sr.tracker.setStarted(false, mAm.mProcessTracker.getMemFactorLocked(),
+                            sr.tracker.setStarted(false, mAm.mProcessStats.getMemFactorLocked(),
                                     SystemClock.uptimeMillis());
                         }
                         if (!sr.hasAutoCreateConnections()) {

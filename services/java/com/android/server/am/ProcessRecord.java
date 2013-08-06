@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import android.util.ArraySet;
+import com.android.internal.app.ProcessStats;
 import com.android.internal.os.BatteryStatsImpl;
 
 import android.app.ActivityManager;
@@ -51,10 +52,10 @@ final class ProcessRecord {
     final int uid;              // uid of process; may be different from 'info' if isolated
     final int userId;           // user of process.
     final String processName;   // name of the process
-    final ProcessTracker.ProcessState baseProcessTracker;
+    final ProcessStats.ProcessState baseProcessTracker;
     // List of packages running in the process
-    final ArrayMap<String, ProcessTracker.ProcessState> pkgList
-            = new ArrayMap<String, ProcessTracker.ProcessState>();
+    final ArrayMap<String, ProcessStats.ProcessState> pkgList
+            = new ArrayMap<String, ProcessStats.ProcessState>();
     IApplicationThread thread;  // the actual proc...  may be null only if
                                 // 'persistent' is true (in which case we
                                 // are in the process of launching the app)
@@ -350,7 +351,7 @@ final class ProcessRecord {
     
     ProcessRecord(BatteryStatsImpl.Uid.Proc _batteryStats, IApplicationThread _thread,
             ApplicationInfo _info, String _processName, int _uid,
-            ProcessTracker.ProcessState tracker) {
+            ProcessStats.ProcessState tracker) {
         batteryStats = _batteryStats;
         info = _info;
         isolated = _info.uid != _uid;
@@ -487,7 +488,7 @@ final class ProcessRecord {
     /*
      *  Return true if package has been added false if not
      */
-    public boolean addPackage(String pkg, ProcessTracker tracker) {
+    public boolean addPackage(String pkg, ProcessStatsService tracker) {
         if (!pkgList.containsKey(pkg)) {
             pkgList.put(pkg, tracker.getProcessStateLocked(pkg, info.uid, processName));
             return true;
@@ -513,9 +514,9 @@ final class ProcessRecord {
     /*
      *  Delete all packages from list except the package indicated in info
      */
-    public void resetPackageList(ProcessTracker tracker) {
+    public void resetPackageList(ProcessStatsService tracker) {
         long now = SystemClock.uptimeMillis();
-        baseProcessTracker.setState(ProcessTracker.STATE_NOTHING,
+        baseProcessTracker.setState(ProcessStats.STATE_NOTHING,
                 tracker.getMemFactorLocked(), now, pkgList);
         if (pkgList.size() != 1) {
             pkgList.clear();
