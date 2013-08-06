@@ -267,11 +267,43 @@ public final class DocumentsContract {
          * Type: INTEGER (int)
          */
         public static final String FLAGS = "flags";
+
+        /**
+         * Summary for this document, or {@code null} to omit.
+         * <p>
+         * Type: STRING
+         */
+        public static final String SUMMARY = "summary";
     }
 
+    /**
+     * Root that represents a cloud-based storage service.
+     *
+     * @see RootColumns#ROOT_TYPE
+     */
     public static final int ROOT_TYPE_SERVICE = 1;
+
+    /**
+     * Root that represents a shortcut to content that may be available
+     * elsewhere through another storage root.
+     *
+     * @see RootColumns#ROOT_TYPE
+     */
     public static final int ROOT_TYPE_SHORTCUT = 2;
+
+    /**
+     * Root that represents a physical storage device.
+     *
+     * @see RootColumns#ROOT_TYPE
+     */
     public static final int ROOT_TYPE_DEVICE = 3;
+
+    /**
+     * Root that represents a physical storage device that should only be
+     * displayed to advanced users.
+     *
+     * @see RootColumns#ROOT_TYPE
+     */
     public static final int ROOT_TYPE_DEVICE_ADVANCED = 4;
 
     /**

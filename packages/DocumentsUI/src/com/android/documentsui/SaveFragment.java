@@ -49,7 +49,7 @@ public class SaveFragment extends Fragment {
         fragment.setArguments(args);
 
         final FragmentTransaction ft = fm.beginTransaction();
-        ft.replace(R.id.save, fragment, TAG);
+        ft.replace(R.id.container_save, fragment, TAG);
         ft.commitAllowingStateLoss();
     }
 
@@ -65,7 +65,7 @@ public class SaveFragment extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_save, container, false);
 
         final ImageView icon = (ImageView) view.findViewById(android.R.id.icon);
-        icon.setImageDrawable(DocumentsActivity.resolveDocumentIcon(
+        icon.setImageDrawable(RootsCache.resolveDocumentIcon(
                 context, null, getArguments().getString(EXTRA_MIME_TYPE)));
 
         mDisplayName = (EditText) view.findViewById(android.R.id.title);

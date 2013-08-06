@@ -20301,6 +20301,7 @@ package android.provider {
     field public static final java.lang.String FLAGS = "flags";
     field public static final java.lang.String LAST_MODIFIED = "last_modified";
     field public static final java.lang.String MIME_TYPE = "mime_type";
+    field public static final java.lang.String SUMMARY = "summary";
   }
 
   public static abstract interface DocumentsContract.RootColumns {
