@@ -39,4 +39,6 @@
 
     <string name="save_error">Failed to save document</string>
 
+    <string name="root_recent">Recent</string>
+
 </resources>

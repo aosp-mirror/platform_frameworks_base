@@ -16,10 +16,6 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.DirectoryFragment.getCursorInt;
-import static com.android.documentsui.DirectoryFragment.getCursorLong;
-import static com.android.documentsui.DirectoryFragment.getCursorString;
-
 import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
 import android.app.Activity;
@@ -28,6 +24,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.ClipData;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -38,10 +35,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
-import android.content.res.Resources;
-import android.content.res.Resources.NotFoundException;
-import android.content.res.TypedArray;
-import android.content.res.XmlResourceParser;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -49,14 +42,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.DocumentColumns;
-import android.provider.DocumentsContract.RootColumns;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.DrawerListener;
-import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Xml;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -74,17 +65,16 @@ import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.documentsui.model.Document;
+import com.android.documentsui.model.DocumentsProviderInfo;
+import com.android.documentsui.model.DocumentsProviderInfo.Icon;
+import com.android.documentsui.model.Root;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
-import libcore.io.IoUtils;
-
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -92,7 +82,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class DocumentsActivity extends Activity {
-    private static final String TAG = "Documents";
+    public static final String TAG = "Documents";
 
     // TODO: share backend root cache with recents provider
 
@@ -102,18 +92,23 @@ public class DocumentsActivity extends Activity {
     private static final int ACTION_CREATE = 2;
 
     private int mAction;
-    private String[] mAcceptMimes;
 
     private SearchView mSearchView;
 
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
 
+    private Root mCurrentRoot;
+
+    /** Map from authority to cached info */
     private static HashMap<String, DocumentsProviderInfo> sProviders = Maps.newHashMap();
-    private static HashMap<String, Root> sRoots = Maps.newHashMap();
+    /** Map from (authority+rootId) to cached info */
+    private static HashMap<Pair<String, String>, Root> sRoots = Maps.newHashMap();
 
     // TODO: remove once adapter split by type
     private static ArrayList<Root> sRootsList = Lists.newArrayList();
+
+    private static Root sRecentOpenRoot;
 
     private RootsAdapter mRootsAdapter;
     private ListView mRootsList;
@@ -130,19 +125,20 @@ public class DocumentsActivity extends Activity {
         final String action = intent.getAction();
         if (Intent.ACTION_OPEN_DOCUMENT.equals(action)) {
             mAction = ACTION_OPEN;
-            mDisplayState.allowMultiple = intent.getBooleanExtra(Intent.EXTRA_ALLOW_MULTIPLE, false);
+            mDisplayState.allowMultiple = intent.getBooleanExtra(
+                    Intent.EXTRA_ALLOW_MULTIPLE, false);
         } else if (Intent.ACTION_CREATE_DOCUMENT.equals(action)) {
             mAction = ACTION_CREATE;
             mDisplayState.allowMultiple = false;
         }
 
         if (intent.hasExtra(Intent.EXTRA_MIME_TYPES)) {
-            mAcceptMimes = intent.getStringArrayExtra(Intent.EXTRA_MIME_TYPES);
+            mDisplayState.acceptMimes = intent.getStringArrayExtra(Intent.EXTRA_MIME_TYPES);
         } else {
-            mAcceptMimes = new String[] { intent.getType() };
+            mDisplayState.acceptMimes = new String[] { intent.getType() };
         }
 
-        if (mimeMatches("image/*", mAcceptMimes)) {
+        if (MimePredicate.mimeMatches("image/*", mDisplayState.acceptMimes)) {
             mDisplayState.mode = DisplayState.MODE_GRID;
         } else {
             mDisplayState.mode = DisplayState.MODE_LIST;
@@ -169,6 +165,8 @@ public class DocumentsActivity extends Activity {
         mDrawerLayout.setDrawerListener(mDrawerListener);
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
+        mDrawerLayout.openDrawer(mRootsList);
+
         updateRoots();
 
         // Restore last stack for calling package
@@ -184,6 +182,11 @@ public class DocumentsActivity extends Activity {
             }
         } finally {
             cursor.close();
+        }
+
+        // Start in recents if no restored stack
+        if (mStack.isEmpty()) {
+            onRootPicked(sRecentOpenRoot);
         }
 
         updateDirectoryFragment();
@@ -236,11 +239,18 @@ public class DocumentsActivity extends Activity {
             }
 
         } else {
-            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
             final Root root = getCurrentRoot();
             actionBar.setIcon(root != null ? root.icon : null);
-            actionBar.setTitle(null);
-            actionBar.setListNavigationCallbacks(mSortAdapter, mSortListener);
+
+            if (getCurrentRoot().isRecents) {
+                actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+                actionBar.setTitle(root.title);
+            } else {
+                actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+                actionBar.setTitle(null);
+                actionBar.setListNavigationCallbacks(mSortAdapter, mSortListener);
+                actionBar.setSelectedNavigationItem(mDisplayState.sortOrder);
+            }
 
             if (mStack.size() > 1) {
                 mDrawerToggle.setDrawerIndicatorEnabled(false);
@@ -395,18 +405,14 @@ public class DocumentsActivity extends Activity {
     private OnNavigationListener mSortListener = new OnNavigationListener() {
         @Override
         public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-            // TODO: request updated sort order
+            mDisplayState.sortOrder = itemPosition;
+            DirectoryFragment.get(getFragmentManager()).updateSortOrder();
             return true;
         }
     };
 
     public Root getCurrentRoot() {
-        final Document cwd = getCurrentDirectory();
-        if (cwd != null) {
-            return sRoots.get(DocumentsContract.getRootId(cwd.uri));
-        } else {
-            return null;
-        }
+        return mCurrentRoot;
     }
 
     public Document getCurrentDirectory() {
@@ -422,13 +428,17 @@ public class DocumentsActivity extends Activity {
         final Document cwd = getCurrentDirectory();
         if (cwd != null) {
             DirectoryFragment.show(fm, cwd.uri);
-            mDrawerLayout.closeDrawer(mRootsList);
-        } else {
-            mDrawerLayout.openDrawer(mRootsList);
         }
         updateActionBar();
         invalidateOptionsMenu();
         dumpStack();
+    }
+
+    public void onRootPicked(Root root) {
+        // Clear entire backstack and start in new root
+        mStack.clear();
+        mCurrentRoot = root;
+        onDocumentPicked(Document.fromRoot(getContentResolver(), root));
     }
 
     public void onDocumentPicked(Document doc) {
@@ -471,6 +481,8 @@ public class DocumentsActivity extends Activity {
     }
 
     private String saveStack() {
+        if (mCurrentRoot.isRecents) return null;
+
         final JSONArray stack = new JSONArray();
         for (int i = 0; i < mStack.size(); i++) {
             stack.put(mStack.get(i).uri);
@@ -481,6 +493,8 @@ public class DocumentsActivity extends Activity {
     private void restoreStack(String rawStack) {
         Log.d(TAG, "restoreStack: " + rawStack);
         mStack.clear();
+
+        if (rawStack == null) return;
         try {
             final JSONArray stack = new JSONArray(rawStack);
             for (int i = 0; i < stack.length(); i++) {
@@ -490,6 +504,14 @@ public class DocumentsActivity extends Activity {
             }
         } catch (JSONException e) {
             Log.w(TAG, "Failed to decode stack", e);
+        }
+
+        // TODO: handle roots that have gone missing
+        final Document cwd = getCurrentDirectory();
+        if (cwd != null) {
+            final String authority = cwd.uri.getAuthority();
+            final String rootId = DocumentsContract.getRootId(cwd.uri);
+            mCurrentRoot = sRoots.get(Pair.create(authority, rootId));
         }
     }
 
@@ -525,7 +547,8 @@ public class DocumentsActivity extends Activity {
         if (uris.length == 1) {
             intent.setData(uris[0]);
         } else if (uris.length > 1) {
-            final ClipData clipData = new ClipData(null, mAcceptMimes, new ClipData.Item(uris[0]));
+            final ClipData clipData = new ClipData(
+                    null, mDisplayState.acceptMimes, new ClipData.Item(uris[0]));
             for (int i = 1; i < uris.length; i++) {
                 clipData.addItem(new ClipData.Item(uris[i]));
             }
@@ -542,162 +565,16 @@ public class DocumentsActivity extends Activity {
     }
 
     public static class DisplayState {
-        public int mode;
-        public int sortBy;
-        public boolean allowMultiple;
+        public int mode = MODE_LIST;
+        public String[] acceptMimes;
+        public int sortOrder = SORT_ORDER_NAME;
+        public boolean allowMultiple = false;
 
         public static final int MODE_LIST = 0;
         public static final int MODE_GRID = 1;
 
-        public static final int SORT_BY_NAME = 0;
-        public static final int SORT_BY_DATE = 1;
-    }
-
-    public static class Root {
-        public DocumentsProviderInfo info;
-        public String rootId;
-        public int rootType;
-        public Uri uri;
-        public Drawable icon;
-        public String title;
-        public String summary;
-
-        public static Root fromCursor(
-                Context context, DocumentsProviderInfo info, Cursor cursor) {
-            final PackageManager pm = context.getPackageManager();
-
-            final Root root = new Root();
-            root.info = info;
-            root.rootId = cursor.getString(cursor.getColumnIndex(RootColumns.ROOT_ID));
-            root.rootType = cursor.getInt(cursor.getColumnIndex(RootColumns.ROOT_TYPE));
-            root.uri = DocumentsContract.buildDocumentUri(
-                    info.providerInfo.authority, root.rootId, DocumentsContract.ROOT_DOC_ID);
-            root.icon = info.providerInfo.loadIcon(pm);
-            root.title = info.providerInfo.loadLabel(pm).toString();
-            root.summary = null;
-
-            final int icon = cursor.getInt(cursor.getColumnIndex(RootColumns.ICON));
-            if (icon != 0) {
-                try {
-                    root.icon = pm.getResourcesForApplication(info.providerInfo.applicationInfo)
-                            .getDrawable(icon);
-                } catch (NotFoundException e) {
-                    throw new RuntimeException(e);
-                } catch (NameNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-
-            final String title = cursor.getString(cursor.getColumnIndex(RootColumns.TITLE));
-            if (title != null) {
-                root.title = title;
-            }
-
-            root.summary = cursor.getString(cursor.getColumnIndex(RootColumns.SUMMARY));
-
-            return root;
-        }
-    }
-
-    public static class DocumentsProviderInfo {
-        public ProviderInfo providerInfo;
-        public boolean customRoots;
-        public List<Icon> customIcons;
-    }
-
-    public static class Icon {
-        public String mimeType;
-        public Drawable icon;
-    }
-
-    public static class Document {
-        public Uri uri;
-        public String mimeType;
-        public String displayName;
-        public long lastModified;
-        public int flags;
-
-        public static Document fromCursor(Uri parent, Cursor cursor) {
-            final String authority = parent.getAuthority();
-            final String rootId = DocumentsContract.getRootId(parent);
-            final String docId = getCursorString(cursor, DocumentColumns.DOC_ID);
-
-            final Document doc = new Document();
-            doc.uri = DocumentsContract.buildDocumentUri(authority, rootId, docId);
-            doc.mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
-            doc.displayName = getCursorString(cursor, DocumentColumns.DISPLAY_NAME);
-            doc.lastModified = getCursorLong(cursor, DocumentColumns.LAST_MODIFIED);
-            doc.flags = getCursorInt(cursor, DocumentColumns.FLAGS);
-            return doc;
-        }
-
-        public static Document fromUri(ContentResolver resolver, Uri uri) {
-            final Document doc = new Document();
-            doc.uri = uri;
-
-            final Cursor cursor = resolver.query(uri, null, null, null, null);
-            try {
-                if (!cursor.moveToFirst()) {
-                    throw new IllegalArgumentException("Missing details for " + uri);
-                }
-                doc.mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
-                doc.displayName = getCursorString(cursor, DocumentColumns.DISPLAY_NAME);
-                doc.lastModified = getCursorLong(cursor, DocumentColumns.LAST_MODIFIED);
-                doc.flags = getCursorInt(cursor, DocumentColumns.FLAGS);
-            } finally {
-                cursor.close();
-            }
-
-            return doc;
-        }
-
-        public static Document fromSearch(Uri relatedUri, String query) {
-            final Document doc = new Document();
-            doc.uri = DocumentsContract.buildSearchUri(relatedUri, query);
-            doc.mimeType = DocumentsContract.MIME_TYPE_DIRECTORY;
-            doc.displayName = query;
-            doc.lastModified = System.currentTimeMillis();
-            doc.flags = 0;
-            return doc;
-        }
-
-        @Override
-        public String toString() {
-            return "'" + displayName + "' " + uri;
-        }
-
-        public boolean isCreateSupported() {
-            return (flags & DocumentsContract.FLAG_SUPPORTS_CREATE) != 0;
-        }
-
-        public boolean isSearchSupported() {
-            return (flags & DocumentsContract.FLAG_SUPPORTS_SEARCH) != 0;
-        }
-
-        public boolean isThumbnailSupported() {
-            return (flags & DocumentsContract.FLAG_SUPPORTS_THUMBNAIL) != 0;
-        }
-    }
-
-    public static boolean mimeMatches(String filter, String[] tests) {
-        for (String test : tests) {
-            if (mimeMatches(filter, test)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean mimeMatches(String filter, String test) {
-        if (filter.equals(test)) {
-            return true;
-        } else if ("*/*".equals(filter)) {
-            return true;
-        } else if (filter.endsWith("/*")) {
-            return filter.regionMatches(0, test, 0, filter.indexOf('/'));
-        } else {
-            return false;
-        }
+        public static final int SORT_ORDER_NAME = 0;
+        public static final int SORT_ORDER_DATE = 1;
     }
 
     public static Drawable resolveDocumentIcon(Context context, String authority, String mimeType) {
@@ -705,7 +582,7 @@ public class DocumentsActivity extends Activity {
         final DocumentsProviderInfo info = sProviders.get(authority);
         if (info != null) {
             for (Icon icon : info.customIcons) {
-                if (mimeMatches(icon.mimeType, mimeType)) {
+                if (MimePredicate.mimeMatches(icon.mimeType, mimeType)) {
                     return icon.icon;
                 }
             }
@@ -728,9 +605,6 @@ public class DocumentsActivity extends Activity {
         }
     }
 
-    private static final String TAG_DOCUMENTS_PROVIDER = "documents-provider";
-    private static final String TAG_ICON = "icon";
-
     /**
      * Gather roots from all known storage providers.
      */
@@ -739,13 +613,24 @@ public class DocumentsActivity extends Activity {
         sRoots.clear();
         sRootsList.clear();
 
+        final Context context = this;
         final PackageManager pm = getPackageManager();
+
+        // Create special roots, like recents
+        {
+            final Root root = Root.buildRecentOpen(context);
+            sRootsList.add(root);
+            sRecentOpenRoot = root;
+        }
+
+        // Query for other storage backends
         final List<ProviderInfo> providers = pm.queryContentProviders(
                 null, -1, PackageManager.GET_META_DATA);
         for (ProviderInfo providerInfo : providers) {
             if (providerInfo.metaData != null && providerInfo.metaData.containsKey(
                     DocumentsContract.META_DATA_DOCUMENT_PROVIDER)) {
-                final DocumentsProviderInfo info = parseInfo(this, providerInfo);
+                final DocumentsProviderInfo info = DocumentsProviderInfo.parseInfo(
+                        this, providerInfo);
                 if (info == null) {
                     Log.w(TAG, "Missing info for " + providerInfo);
                     continue;
@@ -760,7 +645,7 @@ public class DocumentsActivity extends Activity {
                 try {
                     while (cursor.moveToNext()) {
                         final Root root = Root.fromCursor(this, info, cursor);
-                        sRoots.put(root.rootId, root);
+                        sRoots.put(Pair.create(info.providerInfo.authority, root.rootId), root);
                         sRootsList.add(root);
                     }
                 } finally {
@@ -770,72 +655,11 @@ public class DocumentsActivity extends Activity {
         }
     }
 
-    private static DocumentsProviderInfo parseInfo(Context context, ProviderInfo providerInfo) {
-        final DocumentsProviderInfo info = new DocumentsProviderInfo();
-        info.providerInfo = providerInfo;
-        info.customIcons = Lists.newArrayList();
-
-        final PackageManager pm = context.getPackageManager();
-        final Resources res;
-        try {
-            res = pm.getResourcesForApplication(providerInfo.applicationInfo);
-        } catch (NameNotFoundException e) {
-            Log.w(TAG, "Failed to find resources for " + providerInfo, e);
-            return null;
-        }
-
-        XmlResourceParser parser = null;
-        try {
-            parser = providerInfo.loadXmlMetaData(
-                    pm, DocumentsContract.META_DATA_DOCUMENT_PROVIDER);
-            AttributeSet attrs = Xml.asAttributeSet(parser);
-
-            int type = 0;
-            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
-                final String tag = parser.getName();
-                if (type == XmlPullParser.START_TAG && TAG_DOCUMENTS_PROVIDER.equals(tag)) {
-                    final TypedArray a = res.obtainAttributes(
-                            attrs, com.android.internal.R.styleable.DocumentsProviderInfo);
-                    info.customRoots = a.getBoolean(
-                            com.android.internal.R.styleable.DocumentsProviderInfo_customRoots,
-                            false);
-                    a.recycle();
-
-                } else if (type == XmlPullParser.START_TAG && TAG_ICON.equals(tag)) {
-                    final TypedArray a = res.obtainAttributes(
-                            attrs, com.android.internal.R.styleable.Icon);
-                    final Icon icon = new Icon();
-                    icon.mimeType = a.getString(com.android.internal.R.styleable.Icon_mimeType);
-                    icon.icon = a.getDrawable(com.android.internal.R.styleable.Icon_icon);
-                    info.customIcons.add(icon);
-                    a.recycle();
-                }
-            }
-        } catch (IOException e){
-            Log.w(TAG, "Failed to parse metadata", e);
-            return null;
-        } catch (XmlPullParserException e) {
-            Log.w(TAG, "Failed to parse metadata", e);
-            return null;
-        } finally {
-            IoUtils.closeQuietly(parser);
-        }
-
-        return info;
-    }
-
     private OnItemClickListener mRootsListener = new OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            // Clear entire backstack and start in new root
-            mStack.clear();
-
             final Root root = mRootsAdapter.getItem(position);
-
-            final ContentResolver resolver = getContentResolver();
-            final Document doc = Document.fromUri(resolver, root.uri);
-            onDocumentPicked(doc);
-
+            onRootPicked(root);
             mDrawerLayout.closeDrawers();
         }
     };
