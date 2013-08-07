@@ -656,5 +656,17 @@ public class FrameLayout extends ViewGroup {
         public LayoutParams(ViewGroup.MarginLayoutParams source) {
             super(source);
         }
+
+        /**
+         * Copy constructor. Clones the width, height, margin values, and
+         * gravity of the source.
+         *
+         * @param source The layout params to copy from.
+         */
+        public LayoutParams(LayoutParams source) {
+            super(source);
+
+            this.gravity = source.gravity;
+        }
     }
 }

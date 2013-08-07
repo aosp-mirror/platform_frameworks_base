@@ -1961,12 +1961,16 @@ public class GridLayout extends ViewGroup {
         }
 
         /**
-         * {@inheritDoc}
+         * Copy constructor. Clones the width, height, margin values, row spec,
+         * and column spec of the source.
+         *
+         * @param source The layout params to copy from.
          */
-        public LayoutParams(LayoutParams that) {
-            super(that);
-            this.rowSpec = that.rowSpec;
-            this.columnSpec = that.columnSpec;
+        public LayoutParams(LayoutParams source) {
+            super(source);
+
+            this.rowSpec = source.rowSpec;
+            this.columnSpec = source.columnSpec;
         }
 
         // AttributeSet constructors

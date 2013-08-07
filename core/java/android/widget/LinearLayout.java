@@ -1871,8 +1871,21 @@ public class LinearLayout extends ViewGroup {
         /**
          * {@inheritDoc}
          */
-        public LayoutParams(MarginLayoutParams source) {
+        public LayoutParams(ViewGroup.MarginLayoutParams source) {
             super(source);
+        }
+
+        /**
+         * Copy constructor. Clones the width, height, margin values, weight,
+         * and gravity of the source.
+         *
+         * @param source The layout params to copy from.
+         */
+        public LayoutParams(LayoutParams source) {
+            super(source);
+
+            this.weight = source.weight;
+            this.gravity = source.gravity;
         }
 
         @Override
