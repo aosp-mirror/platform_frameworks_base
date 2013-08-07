@@ -733,6 +733,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mPointerEventDispatcher = new PointerEventDispatcher(mInputManager.monitorInput(TAG));
 
+        mFxSession = new SurfaceSession();
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
         mDisplayManager.registerDisplayListener(this, null);
         Display[] displays = mDisplayManager.getDisplays();
@@ -779,7 +780,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 | PowerManager.ON_AFTER_RELEASE, TAG);
         mHoldingScreenWakeLock.setReferenceCounted(false);
 
-        mFxSession = new SurfaceSession();
         mAnimator = new WindowAnimator(this);
 
         initPolicy(UiThread.getHandler());
