@@ -111,14 +111,25 @@ class DisplayContent {
     /** Save allocating when calculating rects */
     Rect mTmpRect = new Rect();
 
+    final WindowManagerService mService;
+
     /**
      * @param display May not be null.
+     * @param service TODO(cmautner):
      */
-    DisplayContent(Display display) {
+    DisplayContent(Display display, WindowManagerService service) {
         mDisplay = display;
         mDisplayId = display.getDisplayId();
         display.getDisplayInfo(mDisplayInfo);
         isDefaultDisplay = mDisplayId == Display.DEFAULT_DISPLAY;
+        mService = service;
+
+        StackBox newBox = new StackBox(service, this, null);
+        mStackBoxes.add(newBox);
+        TaskStack newStack = new TaskStack(service, HOME_STACK_ID, this);
+        newStack.mStackBox = newBox;
+        newBox.mStack = newStack;
+        mHomeStack = newStack;
     }
 
     int getDisplayId() {
@@ -201,22 +212,15 @@ class DisplayContent {
     }
 
     /** Refer to {@link WindowManagerService#createStack(int, int, int, float)} */
-    TaskStack createStack(WindowManagerService service, int stackId, int relativeStackBoxId,
-            int position, float weight) {
+    TaskStack createStack(int stackId, int relativeStackBoxId, int position, float weight) {
         TaskStack newStack = null;
         if (DEBUG_STACK) Slog.d(TAG, "createStack: stackId=" + stackId + " relativeStackBoxId="
                 + relativeStackBoxId + " position=" + position + " weight=" + weight);
-        if (mStackBoxes.isEmpty()) {
-            if (stackId != HOME_STACK_ID) {
-                throw new IllegalArgumentException("createStack: First stackId not "
-                        + HOME_STACK_ID);
+        if (stackId == HOME_STACK_ID) {
+            if (mStackBoxes.size() != 1) {
+                throw new IllegalArgumentException("createStack: HOME_STACK_ID (0) not first.");
             }
-            StackBox newBox = new StackBox(service, this, null);
-            mStackBoxes.add(newBox);
-            newStack = new TaskStack(service, stackId, this);
-            newStack.mStackBox = newBox;
-            newBox.mStack = newStack;
-            mHomeStack = newStack;
+            newStack = mHomeStack;
         } else {
             int stackBoxNdx;
             for (stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
@@ -225,8 +229,8 @@ class DisplayContent {
                         || position == StackBox.TASK_STACK_GOES_UNDER) {
                     // Position indicates a new box is added at top level only.
                     if (box.contains(relativeStackBoxId)) {
-                        StackBox newBox = new StackBox(service, this, null);
-                        newStack = new TaskStack(service, stackId, this);
+                        StackBox newBox = new StackBox(mService, this, null);
+                        newStack = new TaskStack(mService, stackId, this);
                         newStack.mStackBox = newBox;
                         newBox.mStack = newStack;
                         final int offset = position == StackBox.TASK_STACK_GOES_OVER ? 1 : 0;

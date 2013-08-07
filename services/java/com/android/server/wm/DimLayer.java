@@ -48,9 +48,10 @@ public class DimLayer {
     /** Time in milliseconds to take to transition from mStartAlpha to mTargetAlpha */
     long mDuration;
 
-    DimLayer(WindowManagerService service, int displayId) {
+    DimLayer(WindowManagerService service, DisplayContent displayContent) {
+        mDisplayContent = displayContent;
+        final int displayId = displayContent.getDisplayId();
         if (DEBUG) Slog.v(TAG, "Ctor: displayId=" + displayId);
-        mDisplayContent = service.getDisplayContentLocked(displayId);
         SurfaceControl.openTransaction();
         try {
             if (WindowManagerService.DEBUG_SURFACE_TRACE) {
