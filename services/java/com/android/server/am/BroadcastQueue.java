@@ -421,6 +421,10 @@ public final class BroadcastQueue {
                 skip = true;
             }
         }
+        if (!skip) {
+            skip = !mService.mIntentFirewall.checkBroadcast(r.intent, r.callingUid,
+                    r.callingPid, r.resolvedType, filter.receiverList.uid);
+        }
 
         if (!skip) {
             // If this is not being sent as an ordered broadcast, then we
@@ -728,6 +732,10 @@ public final class BroadcastQueue {
                             + info.activityInfo.packageName);
                     skip = true;
                 }
+            }
+            if (!skip) {
+                skip = !mService.mIntentFirewall.checkBroadcast(r.intent, r.callingUid,
+                        r.callingPid, r.resolvedType, info.activityInfo.applicationInfo.uid);
             }
             boolean isSingleton = false;
             try {

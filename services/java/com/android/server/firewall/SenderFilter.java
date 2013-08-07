@@ -79,15 +79,15 @@ class SenderFilter {
     private static final Filter SIGNATURE = new Filter() {
         @Override
         public boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
-                int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
-            return ifw.signaturesMatch(callerUid, resolvedApp.uid);
+                int callerUid, int callerPid, String resolvedType, int receivingUid) {
+            return ifw.signaturesMatch(callerUid, receivingUid);
         }
     };
 
     private static final Filter SYSTEM = new Filter() {
         @Override
         public boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
-                int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
+                int callerUid, int callerPid, String resolvedType, int receivingUid) {
             return isPrivilegedApp(callerUid, callerPid);
         }
     };
@@ -95,21 +95,21 @@ class SenderFilter {
     private static final Filter SYSTEM_OR_SIGNATURE = new Filter() {
         @Override
         public boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
-                int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
+                int callerUid, int callerPid, String resolvedType, int receivingUid) {
             return isPrivilegedApp(callerUid, callerPid) ||
-                    ifw.signaturesMatch(callerUid, resolvedApp.uid);
+                    ifw.signaturesMatch(callerUid, receivingUid);
         }
     };
 
     private static final Filter USER_ID = new Filter() {
         @Override
         public boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
-                int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
+                int callerUid, int callerPid, String resolvedType, int receivingUid) {
             // This checks whether the caller is either the system process, or has the same user id
             // I.e. the same app, or an app that uses the same shared user id.
             // This is the same set of applications that would be able to access the component if
             // it wasn't exported.
-            return ifw.checkComponentPermission(null, callerPid, callerUid, resolvedApp.uid, false);
+            return ifw.checkComponentPermission(null, callerPid, callerUid, receivingUid, false);
         }
     };
 }

@@ -47,6 +47,7 @@ final class BroadcastRecord extends Binder {
     final boolean sticky;   // originated from existing sticky data?
     final boolean initialSticky; // initial broadcast from register to sticky?
     final int userId;       // user id this broadcast was for
+    final String resolvedType; // the resolved data type
     final String requiredPermission; // a permission the caller has required
     final int appOp;        // an app op that is associated with this broadcast
     final List receivers;   // contains BroadcastFilter and ResolveInfo
@@ -171,8 +172,8 @@ final class BroadcastRecord extends Binder {
 
     BroadcastRecord(BroadcastQueue _queue,
             Intent _intent, ProcessRecord _callerApp, String _callerPackage,
-            int _callingPid, int _callingUid, String _requiredPermission, int _appOp,
-            List _receivers, IIntentReceiver _resultTo, int _resultCode,
+            int _callingPid, int _callingUid, String _resolvedType, String _requiredPermission,
+            int _appOp, List _receivers, IIntentReceiver _resultTo, int _resultCode,
             String _resultData, Bundle _resultExtras, boolean _serialized,
             boolean _sticky, boolean _initialSticky,
             int _userId) {
@@ -183,6 +184,7 @@ final class BroadcastRecord extends Binder {
         callerPackage = _callerPackage;
         callingPid = _callingPid;
         callingUid = _callingUid;
+        resolvedType = _resolvedType;
         requiredPermission = _requiredPermission;
         appOp = _appOp;
         receivers = _receivers;

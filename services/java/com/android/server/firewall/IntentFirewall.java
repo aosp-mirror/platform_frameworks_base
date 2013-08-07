@@ -124,18 +124,24 @@ public class IntentFirewall {
     public boolean checkStartActivity(Intent intent, int callerUid, int callerPid,
             String resolvedType, ApplicationInfo resolvedApp) {
         return checkIntent(mActivityResolver, intent.getComponent(), TYPE_ACTIVITY, intent,
-                callerUid, callerPid, resolvedType, resolvedApp);
+                callerUid, callerPid, resolvedType, resolvedApp.uid);
     }
 
     public boolean checkService(ComponentName resolvedService, Intent intent, int callerUid,
             int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
         return checkIntent(mServiceResolver, resolvedService, TYPE_SERVICE, intent, callerUid,
-                callerPid, resolvedType, resolvedApp);
+                callerPid, resolvedType, resolvedApp.uid);
+    }
+
+    public boolean checkBroadcast(Intent intent, int callerUid, int callerPid,
+            String resolvedType, int receivingUid) {
+        return checkIntent(mBroadcastResolver, intent.getComponent(), TYPE_BROADCAST, intent,
+                callerUid, callerPid, resolvedType, receivingUid);
     }
 
     public boolean checkIntent(FirewallIntentResolver resolver, ComponentName resolvedComponent,
             int intentType, Intent intent, int callerUid, int callerPid, String resolvedType,
-            ApplicationInfo resolvedApp) {
+            int receivingUid) {
         boolean log = false;
         boolean block = false;
 
@@ -153,7 +159,7 @@ public class IntentFirewall {
         for (int i=0; i<candidateRules.size(); i++) {
             Rule rule = candidateRules.get(i);
             if (rule.matches(this, resolvedComponent, intent, callerUid, callerPid, resolvedType,
-                    resolvedApp)) {
+                    receivingUid)) {
                 block |= rule.getBlock();
                 log |= rule.getLog();
 

@@ -18,7 +18,6 @@ package com.android.server.firewall;
 
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -36,7 +35,7 @@ class CategoryFilter implements Filter {
 
     @Override
     public boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
-            int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
+            int callerUid, int callerPid, String resolvedType, int receivingUid) {
         Set<String> categories = intent.getCategories();
         if (categories == null) {
             return false;

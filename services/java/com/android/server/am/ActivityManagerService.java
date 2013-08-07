@@ -12371,7 +12371,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     Intent intent = (Intent)allSticky.get(i);
                     BroadcastQueue queue = broadcastQueueForIntent(intent);
                     BroadcastRecord r = new BroadcastRecord(queue, intent, null,
-                            null, -1, -1, null, AppOpsManager.OP_NONE, receivers, null, 0,
+                            null, -1, -1, null, null, AppOpsManager.OP_NONE, receivers, null, 0,
                             null, null, false, true, true, -1);
                     queue.enqueueParallelBroadcastLocked(r);
                     queue.scheduleBroadcastsLocked();
@@ -12804,8 +12804,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             // components to be launched.
             final BroadcastQueue queue = broadcastQueueForIntent(intent);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp,
-                    callerPackage, callingPid, callingUid, requiredPermission, appOp,
-                    registeredReceivers, resultTo, resultCode, resultData, map,
+                    callerPackage, callingPid, callingUid, resolvedType, requiredPermission,
+                    appOp, registeredReceivers, resultTo, resultCode, resultData, map,
                     ordered, sticky, false, userId);
             if (DEBUG_BROADCAST) Slog.v(
                     TAG, "Enqueueing parallel broadcast " + r);
@@ -12894,9 +12894,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 || resultTo != null) {
             BroadcastQueue queue = broadcastQueueForIntent(intent);
             BroadcastRecord r = new BroadcastRecord(queue, intent, callerApp,
-                    callerPackage, callingPid, callingUid, requiredPermission, appOp,
-                    receivers, resultTo, resultCode, resultData, map, ordered,
-                    sticky, false, userId);
+                    callerPackage, callingPid, callingUid, resolvedType,
+                    requiredPermission, appOp, receivers, resultTo, resultCode,
+                    resultData, map, ordered, sticky, false, userId);
             if (DEBUG_BROADCAST) Slog.v(
                     TAG, "Enqueueing ordered broadcast " + r
                     + ": prev had " + queue.mOrderedBroadcasts.size());
