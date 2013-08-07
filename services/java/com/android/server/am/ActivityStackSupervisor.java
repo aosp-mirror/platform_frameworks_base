@@ -1418,7 +1418,8 @@ public final class ActivityStackSupervisor {
                             null : lastStack.topRunningNonDelayedActivityLocked(notTop);
                     if (curTop != null && curTop.task != intentActivity.task) {
                         r.intent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-                        if (sourceRecord == null || sourceStack.topActivity() == sourceRecord) {
+                        if (sourceRecord == null || (sourceStack.topActivity() != null &&
+                                sourceStack.topActivity().task == sourceRecord.task)) {
                             // We really do want to push this one into the
                             // user's face, right now.
                             movedHome = true;
