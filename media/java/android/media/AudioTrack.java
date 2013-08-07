@@ -166,7 +166,7 @@ public class AudioTrack
     private int mNativeBufferSizeInBytes = 0;
     private int mNativeBufferSizeInFrames = 0;
     /**
-     * Handler for marker events coming from the native code.
+     * Handler for events coming from the native code.
      */
     private NativeEventHandlerDelegate mEventHandlerDelegate;
     /**
