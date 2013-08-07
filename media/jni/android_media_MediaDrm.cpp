@@ -242,6 +242,9 @@ static bool throwExceptionAsNecessary(
     } else if (err == ERROR_DRM_NOT_PROVISIONED) {
         jniThrowException(env, "android/media/NotProvisionedException", msg);
         return true;
+    } else if (err == ERROR_DRM_RESOURCE_BUSY) {
+        jniThrowException(env, "android/media/ResourceBusyException", msg);
+        return true;
     } else if (err == ERROR_DRM_DEVICE_REVOKED) {
         jniThrowException(env, "android/media/DeniedByServerException", msg);
         return true;

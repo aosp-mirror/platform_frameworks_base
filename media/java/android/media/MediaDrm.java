@@ -273,6 +273,7 @@ public final class MediaDrm {
      * Open a new session with the MediaDrm object.  A session ID is returned.
      *
      * @throws NotProvisionedException if provisioning is needed
+     * @throws ResourceBusyException if required resources are in use
      */
     public native byte[] openSession() throws NotProvisionedException;
 
@@ -379,6 +380,7 @@ public final class MediaDrm {
      * reprovisioning is required
      * @throws DeniedByServerException if the response indicates that the
      * server rejected the request
+     * @throws ResourceBusyException if required resources are in use
      */
     public native byte[] provideKeyResponse(byte[] scope, byte[] response)
         throws NotProvisionedException, DeniedByServerException;
