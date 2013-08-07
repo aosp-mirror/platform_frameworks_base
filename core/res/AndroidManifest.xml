@@ -201,6 +201,7 @@
     <protected-broadcast android:name="android.net.wifi.p2p.PERSISTENT_GROUPS_CHANGED" />
     <protected-broadcast android:name="android.net.conn.TETHER_STATE_CHANGED" />
     <protected-broadcast android:name="android.net.conn.INET_CONDITION_ACTION" />
+    <protected-broadcast android:name="android.net.conn.NETWORK_CONDITIONS_MEASURED" />
     <protected-broadcast android:name="android.intent.action.EXTERNAL_APPLICATIONS_AVAILABLE" />
     <protected-broadcast android:name="android.intent.action.EXTERNAL_APPLICATIONS_UNAVAILABLE" />
     <protected-broadcast android:name="android.intent.action.AIRPLANE_MODE" />
@@ -2397,6 +2398,13 @@
     <permission android:name="android.permission.INVOKE_CARRIER_SETUP"
         android:label="@string/permlab_invokeCarrierSetup"
         android:description="@string/permdesc_invokeCarrierSetup"
+        android:protectionLevel="signature|system" />
+
+    <!-- Allows an application to listen for network condition observations.
+         @hide This is not a third-party API (intended for system apps). -->
+    <permission android:name="android.permission.ACCESS_NETWORK_CONDITIONS"
+        android:label="@string/permlab_accessNetworkConditions"
+        android:description="@string/permdesc_accessNetworkConditions"
         android:protectionLevel="signature|system" />
 
     <!-- The system process is explicitly the only one allowed to launch the
