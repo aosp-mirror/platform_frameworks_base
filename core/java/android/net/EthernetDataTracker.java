@@ -279,6 +279,11 @@ public class EthernetDataTracker implements NetworkStateTracker {
         // not implemented
     }
 
+    @Override
+    public void captivePortalCheckCompleted(boolean isCaptivePortal) {
+        // not implemented
+    }
+
     /**
      * Turn the wireless radio off for a network.
      * @param turnOn {@code true} to turn the radio on, {@code false}
