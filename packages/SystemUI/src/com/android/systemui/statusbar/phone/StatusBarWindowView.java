@@ -42,6 +42,7 @@ public class StatusBarWindowView extends FrameLayout
     private NotificationRowLayout latestItems;
     private NotificationPanelView mNotificationPanel;
     private ScrollView mScrollView;
+    private boolean mPointerDown;
 
     PhoneStatusBar mService;
 
@@ -86,6 +87,7 @@ public class StatusBarWindowView extends FrameLayout
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        registerPointer(ev);
         boolean intercept = false;
         if (mNotificationPanel.isFullyExpanded() && mScrollView.getVisibility() == View.VISIBLE) {
             intercept = mExpandHelper.onInterceptTouchEvent(ev);
@@ -130,6 +132,22 @@ public class StatusBarWindowView extends FrameLayout
         if (mExpandHelper != null) {
             mExpandHelper.cancel();
         }
+    }
+
+    private void registerPointer(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                mPointerDown = true;
+                break;
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                mPointerDown = false;
+                break;
+        }
+    }
+
+    public boolean isPointerDown() {
+        return mPointerDown;
     }
 }
 
