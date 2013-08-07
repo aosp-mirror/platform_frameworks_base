@@ -17,6 +17,7 @@
 package com.android.internal.app;
 
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -38,7 +39,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Objects;
 
-final public class ProcessStats {
+final public class ProcessStats implements Parcelable {
     static final String TAG = "ProcessStats";
     static final boolean DEBUG = false;
     
@@ -197,6 +198,22 @@ final public class ProcessStats {
         mRunning = running;
         reset();
     }
+
+    public ProcessStats(Parcel in) {
+        reset();
+        readFromParcel(in);
+    }
+
+    public static final Parcelable.Creator<ProcessStats> CREATOR
+            = new Parcelable.Creator<ProcessStats>() {
+        public ProcessStats createFromParcel(Parcel in) {
+            return new ProcessStats(in);
+        }
+
+        public ProcessStats[] newArray(int size) {
+            return new ProcessStats[size];
+        }
+    };
 
     static private void printScreenLabel(PrintWriter pw, int offset) {
         switch (offset) {
@@ -947,7 +964,13 @@ final public class ProcessStats {
         return table;
     }
 
-    public void writeToParcel(Parcel out) {
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
         long now = SystemClock.uptimeMillis();
         out.writeInt(MAGIC);
         out.writeInt(PARCEL_VERSION);
@@ -2272,6 +2295,7 @@ final public class ProcessStats {
             if (mDurationsTable == BAD_TABLE) {
                 return false;
             }
+            mDurationsTableSize = mDurationsTable != null ? mDurationsTable.length : 0;
             mStartedCount = in.readInt();
             mBoundCount = in.readInt();
             mExecCount = in.readInt();
