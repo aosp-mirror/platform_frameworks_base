@@ -4832,8 +4832,8 @@ public class WindowManagerService extends IWindowManager.Stub
             final int numDisplays = mDisplayContents.size();
             for (int displayNdx = 0; displayNdx < numDisplays; ++displayNdx) {
                 final DisplayContent displayContent = mDisplayContents.valueAt(displayNdx);
-                TaskStack stack = displayContent.createStack(this, stackId, relativeStackBoxId,
-                        position, weight);
+                TaskStack stack = displayContent.createStack(stackId, relativeStackBoxId, position,
+                        weight);
                 if (stack != null) {
                     mStackIdToStack.put(stackId, stack);
                     displayContent.moveStack(stack, true);
@@ -10716,7 +10716,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private DisplayContent newDisplayContentLocked(final Display display) {
-        DisplayContent displayContent = new DisplayContent(display);
+        DisplayContent displayContent = new DisplayContent(display, this);
         final int displayId = display.getDisplayId();
         mDisplayContents.put(displayId, displayContent);
         final Rect rect = new Rect();
