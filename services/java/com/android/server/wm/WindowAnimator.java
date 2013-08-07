@@ -526,6 +526,10 @@ public class WindowAnimator {
                 }
             }
 
+            if (mAnimating) {
+                mService.scheduleAnimationLocked();
+            }
+
             mService.setFocusedStackLayer();
 
             if (mService.mWatermark != null) {
@@ -561,9 +565,7 @@ public class WindowAnimator {
             mService.requestTraversalLocked();
         }
 
-        if (mAnimating) {
-            mService.scheduleAnimationLocked();
-        } else if (wasAnimating) {
+        if (!mAnimating && wasAnimating) {
             mService.requestTraversalLocked();
         }
         if (WindowManagerService.DEBUG_WINDOW_TRACE) {
