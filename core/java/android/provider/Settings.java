@@ -33,6 +33,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
@@ -736,6 +737,10 @@ public final class Settings {
 
     private static final String TAG = "Settings";
     private static final boolean LOCAL_LOGV = false;
+
+    // Lock ensures that when enabling/disabling the master location switch, we don't end up
+    // with a partial enable/disable state in multi-threaded situations.
+    private static final Object mLocationSettingsLock = new Object();
 
     public static class SettingNotFoundException extends AndroidException {
         public SettingNotFoundException(String msg) {
@@ -4303,6 +4308,20 @@ public final class Settings {
         }
 
         /**
+         * Helper method for determining if the location master switch is enabled.
+         * @param cr the content resolver to use
+         * @return true if the master switch is enabled
+         * @hide
+         */
+        public static final boolean isLocationMasterSwitchEnabled(ContentResolver cr) {
+            int uid = UserHandle.myUserId();
+            synchronized (mLocationSettingsLock) {
+                return isLocationProviderEnabledForUser(cr, LocationManager.NETWORK_PROVIDER, uid)
+                        || isLocationProviderEnabledForUser(cr, LocationManager.GPS_PROVIDER, uid);
+            }
+        }
+
+        /**
          * Helper method for determining if a location provider is enabled.
          * @param cr the content resolver to use
          * @param provider the location provider to query
@@ -4328,6 +4347,23 @@ public final class Settings {
         }
 
         /**
+         * Thread-safe method for enabling or disabling the location master switch.
+         *
+         * @param cr the content resolver to use
+         * @param enabled true if master switch should be enabled
+         * @hide
+         */
+        public static final void setLocationMasterSwitchEnabled(ContentResolver cr,
+                boolean enabled) {
+            int uid = UserHandle.myUserId();
+            synchronized (mLocationSettingsLock) {
+                setLocationProviderEnabledForUser(cr, LocationManager.GPS_PROVIDER, enabled, uid);
+                setLocationProviderEnabledForUser(cr, LocationManager.NETWORK_PROVIDER, enabled,
+                        uid);
+            }
+        }
+
+        /**
          * Thread-safe method for enabling or disabling a single location provider.
          * @param cr the content resolver to use
          * @param provider the location provider to enable or disable
@@ -4337,16 +4373,18 @@ public final class Settings {
          */
         public static final void setLocationProviderEnabledForUser(ContentResolver cr,
                 String provider, boolean enabled, int userId) {
-            // to ensure thread safety, we write the provider name with a '+' or '-'
-            // and let the SettingsProvider handle it rather than reading and modifying
-            // the list of enabled providers.
-            if (enabled) {
-                provider = "+" + provider;
-            } else {
-                provider = "-" + provider;
+            synchronized (mLocationSettingsLock) {
+                // to ensure thread safety, we write the provider name with a '+' or '-'
+                // and let the SettingsProvider handle it rather than reading and modifying
+                // the list of enabled providers.
+                if (enabled) {
+                    provider = "+" + provider;
+                } else {
+                    provider = "-" + provider;
+                }
+                putStringForUser(cr, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, provider,
+                        userId);
             }
-            putStringForUser(cr, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, provider,
-                    userId);
         }
     }
 
