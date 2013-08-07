@@ -42,7 +42,7 @@ import com.android.internal.util.MemInfoReader;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.IntentResolver;
-import com.android.server.ProcessMap;
+import com.android.internal.app.ProcessMap;
 import com.android.server.SystemServer;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
@@ -1554,11 +1554,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         try {
             ActivityManagerService m = mSelf;
 
-            ServiceManager.addService("activity", m, true);
+            ServiceManager.addService(Context.ACTIVITY_SERVICE, m, true);
+            ServiceManager.addService(ProcessStats.SERVICE_NAME, m.mProcessStats);
             ServiceManager.addService("meminfo", new MemBinder(m));
             ServiceManager.addService("gfxinfo", new GraphicsBinder(m));
             ServiceManager.addService("dbinfo", new DbBinder(m));
-            ServiceManager.addService("procstats", new ProcBinder(m));
             if (MONITOR_CPU_USAGE) {
                 ServiceManager.addService("cpuinfo", new CpuBinder(m));
             }
@@ -1772,26 +1772,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.print(mActivityManagerService.mProcessCpuTracker.printCurrentState(
                         SystemClock.uptimeMillis()));
             }
-        }
-    }
-
-    static class ProcBinder extends Binder {
-        ActivityManagerService mActivityManagerService;
-        ProcBinder(ActivityManagerService activityManagerService) {
-            mActivityManagerService = activityManagerService;
-        }
-
-        @Override
-        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (mActivityManagerService.checkCallingPermission(android.Manifest.permission.DUMP)
-                    != PackageManager.PERMISSION_GRANTED) {
-                pw.println("Permission Denial: can't dump procstats from from pid="
-                        + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                        + " without permission " + android.Manifest.permission.DUMP);
-                return;
-            }
-
-            mActivityManagerService.mProcessStats.dump(fd, pw, args);
         }
     }
 

@@ -29,7 +29,6 @@ import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.webkit.WebViewFactory;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.ProcessMap;
 import dalvik.system.VMRuntime;
 
 import java.io.PrintWriter;
@@ -39,10 +38,12 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Objects;
 
-final public class ProcessStats implements Parcelable {
+public final class ProcessStats implements Parcelable {
     static final String TAG = "ProcessStats";
     static final boolean DEBUG = false;
-    
+
+    public static final String SERVICE_NAME = "procstats";
+
     public static final int STATE_NOTHING = -1;
     public static final int STATE_PERSISTENT = 0;
     public static final int STATE_TOP = 1;
@@ -84,13 +85,20 @@ final public class ProcessStats implements Parcelable {
     public static final int FLAG_SHUTDOWN = 1<<1;
     public static final int FLAG_SYSPROPS = 1<<2;
 
-    static final int[] ALL_MEM_ADJ = new int[] { ADJ_MEM_FACTOR_NORMAL, ADJ_MEM_FACTOR_MODERATE,
-            ADJ_MEM_FACTOR_LOW, ADJ_MEM_FACTOR_CRITICAL };
-    static final int[] ALL_SCREEN_ADJ = new int[] { ADJ_SCREEN_OFF, ADJ_SCREEN_ON };
-    static final int[] NON_CACHED_PROC_STATES = new int[] { STATE_PERSISTENT,
-            STATE_TOP, STATE_IMPORTANT_FOREGROUND,
+    public static final int[] ALL_MEM_ADJ = new int[] { ADJ_MEM_FACTOR_NORMAL,
+            ADJ_MEM_FACTOR_MODERATE, ADJ_MEM_FACTOR_LOW, ADJ_MEM_FACTOR_CRITICAL };
+
+    public static final int[] ALL_SCREEN_ADJ = new int[] { ADJ_SCREEN_OFF, ADJ_SCREEN_ON };
+
+    public static final int[] NON_CACHED_PROC_STATES = new int[] {
+            STATE_PERSISTENT, STATE_TOP, STATE_IMPORTANT_FOREGROUND,
             STATE_IMPORTANT_BACKGROUND, STATE_BACKUP, STATE_HEAVY_WEIGHT,
-            STATE_SERVICE, STATE_SERVICE_RESTARTING, STATE_RECEIVER, STATE_HOME
+            STATE_SERVICE, STATE_SERVICE_RESTARTING, STATE_RECEIVER
+    };
+
+    public static final int[] BACKGROUND_PROC_STATES = new int[] {
+            STATE_IMPORTANT_FOREGROUND, STATE_IMPORTANT_BACKGROUND, STATE_BACKUP,
+            STATE_HEAVY_WEIGHT, STATE_SERVICE, STATE_SERVICE_RESTARTING, STATE_RECEIVER
     };
 
     // Map from process states to the states we track.
@@ -215,7 +223,7 @@ final public class ProcessStats implements Parcelable {
         }
     };
 
-    static private void printScreenLabel(PrintWriter pw, int offset) {
+    private static void printScreenLabel(PrintWriter pw, int offset) {
         switch (offset) {
             case ADJ_NOTHING:
                 pw.print("             ");
@@ -232,7 +240,7 @@ final public class ProcessStats implements Parcelable {
         }
     }
 
-    static public void printScreenLabelCsv(PrintWriter pw, int offset) {
+    public static void printScreenLabelCsv(PrintWriter pw, int offset) {
         switch (offset) {
             case ADJ_NOTHING:
                 break;
@@ -248,7 +256,7 @@ final public class ProcessStats implements Parcelable {
         }
     }
 
-    static private void printMemLabel(PrintWriter pw, int offset) {
+    private static void printMemLabel(PrintWriter pw, int offset) {
         switch (offset) {
             case ADJ_NOTHING:
                 pw.print("       ");
@@ -271,7 +279,7 @@ final public class ProcessStats implements Parcelable {
         }
     }
 
-    static public void printMemLabelCsv(PrintWriter pw, int offset) {
+    public static void printMemLabelCsv(PrintWriter pw, int offset) {
         if (offset >= ADJ_MEM_FACTOR_NORMAL) {
             if (offset <= ADJ_MEM_FACTOR_CRITICAL) {
                 pw.print(ADJ_MEM_NAMES_CSV[offset]);
@@ -281,7 +289,7 @@ final public class ProcessStats implements Parcelable {
         }
     }
 
-    static long dumpSingleTime(PrintWriter pw, String prefix, long[] durations,
+    public static long dumpSingleTime(PrintWriter pw, String prefix, long[] durations,
             int curState, long curStartTime, long now) {
         long totalTime = 0;
         int printedScreen = -1;
@@ -361,7 +369,7 @@ final public class ProcessStats implements Parcelable {
             if (type != serviceType) {
                 continue;
             }
-            long time = svc.mProcessStats.getLong(off, 0);
+            long time = svc.mStats.getLong(off, 0);
             if (curState == memFactor) {
                 didCurState = true;
                 time += now - curStartTime;
@@ -374,7 +382,7 @@ final public class ProcessStats implements Parcelable {
         pw.println();
     }
 
-    static void computeProcessData(ProcessState proc, ProcessDataCollection data, long now) {
+    public static void computeProcessData(ProcessState proc, ProcessDataCollection data, long now) {
         data.totalTime = 0;
         data.numPss = data.minPss = data.avgPss = data.maxPss =
                 data.minUss = data.avgUss = data.maxUss = 0;
@@ -815,7 +823,7 @@ final public class ProcessStats implements Parcelable {
         for (int i=0; i<proc.mDurationsTableSize; i++) {
             int off = proc.mDurationsTable[i];
             int type = (off>>OFFSET_TYPE_SHIFT)&OFFSET_TYPE_MASK;
-            long time = proc.mProcessStats.getLong(off, 0);
+            long time = proc.mStats.getLong(off, 0);
             if (proc.mCurState == type) {
                 didCurState = true;
                 time += now - proc.mStartTime;
@@ -831,13 +839,13 @@ final public class ProcessStats implements Parcelable {
         for (int i=0; i<proc.mPssTableSize; i++) {
             int off = proc.mPssTable[i];
             int type = (off>>OFFSET_TYPE_SHIFT)&OFFSET_TYPE_MASK;
-            long count = proc.mProcessStats.getLong(off, PSS_SAMPLE_COUNT);
-            long min = proc.mProcessStats.getLong(off, PSS_MINIMUM);
-            long avg = proc.mProcessStats.getLong(off, PSS_AVERAGE);
-            long max = proc.mProcessStats.getLong(off, PSS_MAXIMUM);
-            long umin = proc.mProcessStats.getLong(off, PSS_USS_MINIMUM);
-            long uavg = proc.mProcessStats.getLong(off, PSS_USS_AVERAGE);
-            long umax = proc.mProcessStats.getLong(off, PSS_USS_MAXIMUM);
+            long count = proc.mStats.getLong(off, PSS_SAMPLE_COUNT);
+            long min = proc.mStats.getLong(off, PSS_MINIMUM);
+            long avg = proc.mStats.getLong(off, PSS_AVERAGE);
+            long max = proc.mStats.getLong(off, PSS_MAXIMUM);
+            long umin = proc.mStats.getLong(off, PSS_USS_MINIMUM);
+            long uavg = proc.mStats.getLong(off, PSS_USS_AVERAGE);
+            long umax = proc.mStats.getLong(off, PSS_USS_MAXIMUM);
             pw.print(',');
             printProcStateTag(pw, type);
             pw.print(':');
@@ -979,6 +987,37 @@ final public class ProcessStats implements Parcelable {
         out.writeInt(PSS_COUNT);
         out.writeInt(LONGS_SIZE);
 
+        // First commit all running times.
+        ArrayMap<String, SparseArray<ProcessState>> procMap = mProcesses.getMap();
+        final int NPROC = procMap.size();
+        for (int ip=0; ip<NPROC; ip++) {
+            SparseArray<ProcessState> uids = procMap.valueAt(ip);
+            final int NUID = uids.size();
+            for (int iu=0; iu<NUID; iu++) {
+                uids.valueAt(iu).commitStateTime(now);
+            }
+        }
+        ArrayMap<String, SparseArray<PackageState>> pkgMap = mPackages.getMap();
+        final int NPKG = pkgMap.size();
+        for (int ip=0; ip<NPKG; ip++) {
+            SparseArray<PackageState> uids = pkgMap.valueAt(ip);
+            final int NUID = uids.size();
+            for (int iu=0; iu<NUID; iu++) {
+                PackageState pkgState = uids.valueAt(iu);
+                final int NPROCS = pkgState.mProcesses.size();
+                for (int iproc=0; iproc<NPROCS; iproc++) {
+                    ProcessState proc = pkgState.mProcesses.valueAt(iproc);
+                    if (proc.mCommonProcess != proc) {
+                        proc.commitStateTime(now);
+                    }
+                }
+                final int NSRVS = pkgState.mServices.size();
+                for (int isvc=0; isvc<NSRVS; isvc++) {
+                    pkgState.mServices.valueAt(isvc).commitStateTime(now);
+                }
+            }
+        }
+
         out.writeLong(mTimePeriodStartClock);
         out.writeLong(mTimePeriodStartRealtime);
         out.writeLong(mTimePeriodEndRealtime);
@@ -991,7 +1030,7 @@ final public class ProcessStats implements Parcelable {
         for (int i=0; i<(mLongs.size()-1); i++) {
             out.writeLongArray(mLongs.get(i));
         }
-        long[] lastLongs = mLongs.get(mLongs.size()-1);
+        long[] lastLongs = mLongs.get(mLongs.size() - 1);
         for (int i=0; i<mNextLong; i++) {
             out.writeLong(lastLongs[i]);
             if (DEBUG) Slog.d(TAG, "Writing last long #" + i + ": " + lastLongs[i]);
@@ -1003,8 +1042,6 @@ final public class ProcessStats implements Parcelable {
         }
         out.writeLongArray(mMemFactorDurations);
 
-        ArrayMap<String, SparseArray<ProcessState>> procMap = mProcesses.getMap();
-        final int NPROC = procMap.size();
         out.writeInt(NPROC);
         for (int ip=0; ip<NPROC; ip++) {
             out.writeString(procMap.keyAt(ip));
@@ -1018,8 +1055,6 @@ final public class ProcessStats implements Parcelable {
                 proc.writeToParcel(out, now);
             }
         }
-        ArrayMap<String, SparseArray<PackageState>> pkgMap = mPackages.getMap();
-        final int NPKG = pkgMap.size();
         out.writeInt(NPKG);
         for (int ip=0; ip<NPKG; ip++) {
             out.writeString(pkgMap.keyAt(ip));
@@ -1530,11 +1565,8 @@ final public class ProcessStats implements Parcelable {
                 long time = service.getDuration(serviceType, curState, curStartTime,
                         state, now);
                 String running = "";
-                if (curState == state) {
-                    time += now - curStartTime;
-                    if (pw != null) {
-                        running = " (running)";
-                    }
+                if (curState == state && pw != null) {
+                    running = " (running)";
                 }
                 if (time != 0) {
                     if (pw != null) {
@@ -1824,11 +1856,11 @@ final public class ProcessStats implements Parcelable {
     }
 
     public static final class ProcessState {
-        final ProcessStats mProcessStats;
-        final ProcessState mCommonProcess;
-        final String mPackage;
-        final int mUid;
-        final String mName;
+        public final ProcessStats mStats;
+        public final ProcessState mCommonProcess;
+        public final String mPackage;
+        public final int mUid;
+        public final String mName;
 
         int[] mDurationsTable;
         int mDurationsTableSize;
@@ -1849,14 +1881,14 @@ final public class ProcessStats implements Parcelable {
 
         boolean mMultiPackage;
 
-        long mTmpTotalTime;
+        public long mTmpTotalTime;
 
         /**
          * Create a new top-level process state, for the initial case where there is only
          * a single package running in a process.  The initial state is not running.
          */
         public ProcessState(ProcessStats processStats, String pkg, int uid, String name) {
-            mProcessStats = processStats;
+            mStats = processStats;
             mCommonProcess = this;
             mPackage = pkg;
             mUid = uid;
@@ -1870,7 +1902,7 @@ final public class ProcessStats implements Parcelable {
          */
         public ProcessState(ProcessState commonProcess, String pkg, int uid, String name,
                 long now) {
-            mProcessStats = commonProcess.mProcessStats;
+            mStats = commonProcess.mStats;
             mCommonProcess = commonProcess;
             mPackage = pkg;
             mUid = uid;
@@ -1882,32 +1914,32 @@ final public class ProcessStats implements Parcelable {
         ProcessState clone(String pkg, long now) {
             ProcessState pnew = new ProcessState(this, pkg, mUid, mName, now);
             if (mDurationsTable != null) {
-                mProcessStats.mAddLongTable = new int[mDurationsTable.length];
-                mProcessStats.mAddLongTableSize = 0;
+                mStats.mAddLongTable = new int[mDurationsTable.length];
+                mStats.mAddLongTableSize = 0;
                 for (int i=0; i<mDurationsTableSize; i++) {
                     int origEnt = mDurationsTable[i];
                     int type = (origEnt>>OFFSET_TYPE_SHIFT)&OFFSET_TYPE_MASK;
-                    int newOff = mProcessStats.addLongData(i, type, 1);
-                    mProcessStats.mAddLongTable[i] = newOff | type;
-                    mProcessStats.setLong(newOff, 0, mProcessStats.getLong(origEnt, 0));
+                    int newOff = mStats.addLongData(i, type, 1);
+                    mStats.mAddLongTable[i] = newOff | type;
+                    mStats.setLong(newOff, 0, mStats.getLong(origEnt, 0));
                 }
-                pnew.mDurationsTable = mProcessStats.mAddLongTable;
-                pnew.mDurationsTableSize = mProcessStats.mAddLongTableSize;
+                pnew.mDurationsTable = mStats.mAddLongTable;
+                pnew.mDurationsTableSize = mStats.mAddLongTableSize;
             }
             if (mPssTable != null) {
-                mProcessStats.mAddLongTable = new int[mPssTable.length];
-                mProcessStats.mAddLongTableSize = 0;
+                mStats.mAddLongTable = new int[mPssTable.length];
+                mStats.mAddLongTableSize = 0;
                 for (int i=0; i<mPssTableSize; i++) {
                     int origEnt = mPssTable[i];
                     int type = (origEnt>>OFFSET_TYPE_SHIFT)&OFFSET_TYPE_MASK;
-                    int newOff = mProcessStats.addLongData(i, type, PSS_COUNT);
-                    mProcessStats.mAddLongTable[i] = newOff | type;
+                    int newOff = mStats.addLongData(i, type, PSS_COUNT);
+                    mStats.mAddLongTable[i] = newOff | type;
                     for (int j=0; j<PSS_COUNT; j++) {
-                        mProcessStats.setLong(newOff, j, mProcessStats.getLong(origEnt, j));
+                        mStats.setLong(newOff, j, mStats.getLong(origEnt, j));
                     }
                 }
-                pnew.mPssTable = mProcessStats.mAddLongTable;
-                pnew.mPssTableSize = mProcessStats.mAddLongTableSize;
+                pnew.mPssTable = mStats.mAddLongTable;
+                pnew.mPssTableSize = mStats.mAddLongTableSize;
             }
             pnew.mNumExcessiveWake = mNumExcessiveWake;
             pnew.mNumExcessiveCpu = mNumExcessiveCpu;
@@ -1928,7 +1960,6 @@ final public class ProcessStats implements Parcelable {
         }
 
         void writeToParcel(Parcel out, long now) {
-            commitStateTime(now);
             out.writeInt(mMultiPackage ? 1 : 0);
             out.writeInt(mDurationsTableSize);
             for (int i=0; i<mDurationsTableSize; i++) {
@@ -1952,13 +1983,13 @@ final public class ProcessStats implements Parcelable {
                 mMultiPackage = multiPackage;
             }
             if (DEBUG) Slog.d(TAG, "Reading durations table...");
-            mDurationsTable = mProcessStats.readTableFromParcel(in, mName, "durations");
+            mDurationsTable = mStats.readTableFromParcel(in, mName, "durations");
             if (mDurationsTable == BAD_TABLE) {
                 return false;
             }
             mDurationsTableSize = mDurationsTable != null ? mDurationsTable.length : 0;
             if (DEBUG) Slog.d(TAG, "Reading pss table...");
-            mPssTable = mProcessStats.readTableFromParcel(in, mName, "pss");
+            mPssTable = mStats.readTableFromParcel(in, mName, "pss");
             if (mPssTable == BAD_TABLE) {
                 return false;
             }
@@ -2017,13 +2048,13 @@ final public class ProcessStats implements Parcelable {
                     if (idx >= 0) {
                         off = mDurationsTable[idx];
                     } else {
-                        mProcessStats.mAddLongTable = mDurationsTable;
-                        mProcessStats.mAddLongTableSize = mDurationsTableSize;
-                        off = mProcessStats.addLongData(~idx, mCurState, 1);
-                        mDurationsTable = mProcessStats.mAddLongTable;
-                        mDurationsTableSize = mProcessStats.mAddLongTableSize;
+                        mStats.mAddLongTable = mDurationsTable;
+                        mStats.mAddLongTableSize = mDurationsTableSize;
+                        off = mStats.addLongData(~idx, mCurState, 1);
+                        mDurationsTable = mStats.mAddLongTable;
+                        mDurationsTableSize = mStats.mAddLongTableSize;
                     }
-                    long[] longs = mProcessStats.mLongs.get((off>>OFFSET_ARRAY_SHIFT)&OFFSET_ARRAY_MASK);
+                    long[] longs = mStats.mLongs.get((off>>OFFSET_ARRAY_SHIFT)&OFFSET_ARRAY_MASK);
                     longs[(off>>OFFSET_INDEX_SHIFT)&OFFSET_INDEX_MASK] += dur;
                 }
             }
@@ -2068,13 +2099,13 @@ final public class ProcessStats implements Parcelable {
                 if (idx >= 0) {
                     off = mPssTable[idx];
                 } else {
-                    mProcessStats.mAddLongTable = mPssTable;
-                    mProcessStats.mAddLongTableSize = mPssTableSize;
-                    off = mProcessStats.addLongData(~idx, mCurState, PSS_COUNT);
-                    mPssTable = mProcessStats.mAddLongTable;
-                    mPssTableSize = mProcessStats.mAddLongTableSize;
+                    mStats.mAddLongTable = mPssTable;
+                    mStats.mAddLongTableSize = mPssTableSize;
+                    off = mStats.addLongData(~idx, mCurState, PSS_COUNT);
+                    mPssTable = mStats.mAddLongTable;
+                    mPssTableSize = mStats.mAddLongTableSize;
                 }
-                long[] longs = mProcessStats.mLongs.get((off>>OFFSET_ARRAY_SHIFT)&OFFSET_ARRAY_MASK);
+                long[] longs = mStats.mLongs.get((off>>OFFSET_ARRAY_SHIFT)&OFFSET_ARRAY_MASK);
                 idx = (off>>OFFSET_INDEX_SHIFT)&OFFSET_INDEX_MASK;
                 long count = longs[idx+PSS_SAMPLE_COUNT];
                 if (count == 0) {
@@ -2134,7 +2165,7 @@ final public class ProcessStats implements Parcelable {
                 // The array map is still pointing to a common process state
                 // that is now shared across packages.  Update it to point to
                 // the new per-package state.
-                ProcessState proc = mProcessStats.mPackages.get(pkgName,
+                ProcessState proc = mStats.mPackages.get(pkgName,
                         mUid).mProcesses.get(mName);
                 if (proc == null) {
                     throw new IllegalStateException("Didn't create per-package process");
@@ -2151,7 +2182,7 @@ final public class ProcessStats implements Parcelable {
                 // The array map is still pointing to a common process state
                 // that is now shared across packages.  Update it to point to
                 // the new per-package state.
-                proc = mProcessStats.mPackages.get(pkgList.keyAt(index),
+                proc = mStats.mPackages.get(pkgList.keyAt(index),
                         proc.mUid).mProcesses.get(proc.mName);
                 if (proc == null) {
                     throw new IllegalStateException("Didn't create per-package process");
@@ -2163,7 +2194,7 @@ final public class ProcessStats implements Parcelable {
 
         long getDuration(int state, long now) {
             int idx = binarySearch(mDurationsTable, mDurationsTableSize, state);
-            long time = idx >= 0 ? mProcessStats.getLong(mDurationsTable[idx], 0) : 0;
+            long time = idx >= 0 ? mStats.getLong(mDurationsTable[idx], 0) : 0;
             if (mCurState == state) {
                 time += now - mStartTime;
             }
@@ -2172,42 +2203,42 @@ final public class ProcessStats implements Parcelable {
 
         long getPssSampleCount(int state) {
             int idx = binarySearch(mPssTable, mPssTableSize, state);
-            return idx >= 0 ? mProcessStats.getLong(mPssTable[idx], PSS_SAMPLE_COUNT) : 0;
+            return idx >= 0 ? mStats.getLong(mPssTable[idx], PSS_SAMPLE_COUNT) : 0;
         }
 
         long getPssMinimum(int state) {
             int idx = binarySearch(mPssTable, mPssTableSize, state);
-            return idx >= 0 ? mProcessStats.getLong(mPssTable[idx], PSS_MINIMUM) : 0;
+            return idx >= 0 ? mStats.getLong(mPssTable[idx], PSS_MINIMUM) : 0;
         }
 
         long getPssAverage(int state) {
             int idx = binarySearch(mPssTable, mPssTableSize, state);
-            return idx >= 0 ? mProcessStats.getLong(mPssTable[idx], PSS_AVERAGE) : 0;
+            return idx >= 0 ? mStats.getLong(mPssTable[idx], PSS_AVERAGE) : 0;
         }
 
         long getPssMaximum(int state) {
             int idx = binarySearch(mPssTable, mPssTableSize, state);
-            return idx >= 0 ? mProcessStats.getLong(mPssTable[idx], PSS_MAXIMUM) : 0;
+            return idx >= 0 ? mStats.getLong(mPssTable[idx], PSS_MAXIMUM) : 0;
         }
 
         long getPssUssMinimum(int state) {
             int idx = binarySearch(mPssTable, mPssTableSize, state);
-            return idx >= 0 ? mProcessStats.getLong(mPssTable[idx], PSS_USS_MINIMUM) : 0;
+            return idx >= 0 ? mStats.getLong(mPssTable[idx], PSS_USS_MINIMUM) : 0;
         }
 
         long getPssUssAverage(int state) {
             int idx = binarySearch(mPssTable, mPssTableSize, state);
-            return idx >= 0 ? mProcessStats.getLong(mPssTable[idx], PSS_USS_AVERAGE) : 0;
+            return idx >= 0 ? mStats.getLong(mPssTable[idx], PSS_USS_AVERAGE) : 0;
         }
 
         long getPssUssMaximum(int state) {
             int idx = binarySearch(mPssTable, mPssTableSize, state);
-            return idx >= 0 ? mProcessStats.getLong(mPssTable[idx], PSS_USS_MAXIMUM) : 0;
+            return idx >= 0 ? mStats.getLong(mPssTable[idx], PSS_USS_MAXIMUM) : 0;
         }
     }
 
     public static final class ServiceState {
-        final ProcessStats mProcessStats;
+        final ProcessStats mStats;
         final String mPackage;
         ProcessState mProc;
 
@@ -2234,7 +2265,7 @@ final public class ProcessStats implements Parcelable {
         long mExecStartTime;
 
         public ServiceState(ProcessStats processStats, String pkg, ProcessState proc) {
-            mProcessStats = processStats;
+            mStats = processStats;
             mPackage = pkg;
             mProc = proc;
         }
@@ -2266,18 +2297,6 @@ final public class ProcessStats implements Parcelable {
         }
 
         void writeToParcel(Parcel out, long now) {
-            if (mStartedState != STATE_NOTHING) {
-                addStateTime(SERVICE_STARTED, mStartedState, now - mStartedStartTime);
-                mStartedStartTime = now;
-            }
-            if (mBoundState != STATE_NOTHING) {
-                addStateTime(SERVICE_BOUND, mBoundState, now - mBoundStartTime);
-                mBoundStartTime = now;
-            }
-            if (mExecState != STATE_NOTHING) {
-                addStateTime(SERVICE_EXEC, mExecState, now - mExecStartTime);
-                mExecStartTime = now;
-            }
             out.writeInt(mDurationsTableSize);
             for (int i=0; i<mDurationsTableSize; i++) {
                 if (DEBUG) Slog.i(TAG, "Writing service in " + mPackage + " dur #" + i + ": "
@@ -2291,7 +2310,7 @@ final public class ProcessStats implements Parcelable {
 
         boolean readFromParcel(Parcel in) {
             if (DEBUG) Slog.d(TAG, "Reading durations table...");
-            mDurationsTable = mProcessStats.readTableFromParcel(in, mPackage, "service");
+            mDurationsTable = mStats.readTableFromParcel(in, mPackage, "service");
             if (mDurationsTable == BAD_TABLE) {
                 return false;
             }
@@ -2310,14 +2329,29 @@ final public class ProcessStats implements Parcelable {
                 if (idx >= 0) {
                     off = mDurationsTable[idx];
                 } else {
-                    mProcessStats.mAddLongTable = mDurationsTable;
-                    mProcessStats.mAddLongTableSize = mDurationsTableSize;
-                    off = mProcessStats.addLongData(~idx, state, 1);
-                    mDurationsTable = mProcessStats.mAddLongTable;
-                    mDurationsTableSize = mProcessStats.mAddLongTableSize;
+                    mStats.mAddLongTable = mDurationsTable;
+                    mStats.mAddLongTableSize = mDurationsTableSize;
+                    off = mStats.addLongData(~idx, state, 1);
+                    mDurationsTable = mStats.mAddLongTable;
+                    mDurationsTableSize = mStats.mAddLongTableSize;
                 }
-                long[] longs = mProcessStats.mLongs.get((off>>OFFSET_ARRAY_SHIFT)&OFFSET_ARRAY_MASK);
+                long[] longs = mStats.mLongs.get((off>>OFFSET_ARRAY_SHIFT)&OFFSET_ARRAY_MASK);
                 longs[(off>>OFFSET_INDEX_SHIFT)&OFFSET_INDEX_MASK] += time;
+            }
+        }
+
+        void commitStateTime(long now) {
+            if (mStartedState != STATE_NOTHING) {
+                addStateTime(SERVICE_STARTED, mStartedState, now - mStartedStartTime);
+                mStartedStartTime = now;
+            }
+            if (mBoundState != STATE_NOTHING) {
+                addStateTime(SERVICE_BOUND, mBoundState, now - mBoundStartTime);
+                mBoundStartTime = now;
+            }
+            if (mExecState != STATE_NOTHING) {
+                addStateTime(SERVICE_EXEC, mExecState, now - mExecStartTime);
+                mExecStartTime = now;
             }
         }
 
@@ -2377,25 +2411,11 @@ final public class ProcessStats implements Parcelable {
             }
         }
 
-        long getStartDuration(int opType, int memFactor, long now) {
-            switch (opType) {
-                case SERVICE_STARTED:
-                    return getDuration(opType, mStartedState, mStartedStartTime, memFactor, now);
-                case SERVICE_BOUND:
-                    return getDuration(opType, mBoundState, mBoundStartTime, memFactor, now);
-                case SERVICE_EXEC:
-                    return getDuration(opType, mExecState, mExecStartTime, memFactor, now);
-                default:
-                    throw new IllegalArgumentException("Bad opType: " + opType);
-            }
-        }
-
-
         private long getDuration(int opType, int curState, long startTime, int memFactor,
                 long now) {
             int state = opType + (memFactor*SERVICE_COUNT);
             int idx = binarySearch(mDurationsTable, mDurationsTableSize, state);
-            long time = idx >= 0 ? mProcessStats.getLong(mDurationsTable[idx], 0) : 0;
+            long time = idx >= 0 ? mStats.getLong(mDurationsTable[idx], 0) : 0;
             if (curState == memFactor) {
                 time += now - startTime;
             }
@@ -2415,21 +2435,21 @@ final public class ProcessStats implements Parcelable {
         }
     }
 
-    static final class ProcessDataCollection {
+    public static final class ProcessDataCollection {
         final int[] screenStates;
         final int[] memStates;
         final int[] procStates;
 
-        long totalTime;
-        long numPss;
-        long minPss;
-        long avgPss;
-        long maxPss;
-        long minUss;
-        long avgUss;
-        long maxUss;
+        public long totalTime;
+        public long numPss;
+        public long minPss;
+        public long avgPss;
+        public long maxPss;
+        public long minUss;
+        public long avgUss;
+        public long maxUss;
 
-        ProcessDataCollection(int[] _screenStates, int[] _memStates, int[] _procStates) {
+        public ProcessDataCollection(int[] _screenStates, int[] _memStates, int[] _procStates) {
             screenStates = _screenStates;
             memStates = _memStates;
             procStates = _procStates;
