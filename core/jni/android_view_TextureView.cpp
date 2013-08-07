@@ -100,7 +100,7 @@ static void android_view_TextureView_createNativeWindow(JNIEnv* env, jobject tex
         jobject surface) {
 
     sp<IGraphicBufferProducer> producer(SurfaceTexture_getProducer(env, surface));
-    sp<ANativeWindow> window = new Surface(producer);
+    sp<ANativeWindow> window = new Surface(producer, true);
 
     window->incStrong((void*)android_view_TextureView_createNativeWindow);
     SET_INT(textureView, gTextureViewClassInfo.nativeWindow, jint(window.get()));
