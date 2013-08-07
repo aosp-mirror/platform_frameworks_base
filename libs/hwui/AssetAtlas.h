@@ -84,11 +84,20 @@ public:
          */
         const AssetAtlas& atlas;
 
+        /**
+         * Unique identifier used to merge bitmaps and 9-patches stored
+         * in the atlas.
+         */
+        const void* getMergeId() const {
+            return texture->blend ? &atlas.mBlendKey : &atlas.mOpaqueKey;
+        }
+
     private:
         Entry(SkBitmap* bitmap, int x, int y, bool rotated,
                 Texture* texture, const UvMapper& mapper, const AssetAtlas& atlas):
                 bitmap(bitmap), x(x), y(y), rotated(rotated),
-                texture(texture), uvMapper(mapper), atlas(atlas) { }
+                texture(texture), uvMapper(mapper), atlas(atlas) {
+        }
 
         ~Entry() {
             delete texture;
@@ -97,7 +106,8 @@ public:
         friend class AssetAtlas;
     };
 
-    AssetAtlas(): mTexture(NULL), mImage(NULL), mGenerationId(0) { }
+    AssetAtlas(): mTexture(NULL), mImage(NULL), mGenerationId(0),
+            mBlendKey(true), mOpaqueKey(false) { }
     ~AssetAtlas() { terminate(); }
 
     /**
@@ -172,6 +182,9 @@ private:
     Image* mImage;
 
     uint32_t mGenerationId;
+
+    const bool mBlendKey;
+    const bool mOpaqueKey;
 
     KeyedVector<SkBitmap*, Entry*> mEntries;
 }; // class AssetAtlas

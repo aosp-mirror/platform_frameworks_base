@@ -818,7 +818,7 @@ public:
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {
         deferInfo.batchId = DeferredDisplayList::kOpBatch_Bitmap;
-        deferInfo.mergeId = getAtlasEntry() ? (mergeid_t) &mEntry->atlas : (mergeid_t) mBitmap;
+        deferInfo.mergeId = getAtlasEntry() ? (mergeid_t) mEntry->getMergeId() : (mergeid_t) mBitmap;
 
         // Don't merge A8 bitmaps - the paint's color isn't compared by mergeId, or in
         // MergingDrawBatch::canMergeWith()
@@ -1071,7 +1071,7 @@ public:
 
     virtual void onDefer(OpenGLRenderer& renderer, DeferInfo& deferInfo) {
         deferInfo.batchId = DeferredDisplayList::kOpBatch_Patch;
-        deferInfo.mergeId = getAtlasEntry() ? (mergeid_t) &mEntry->atlas : (mergeid_t) mBitmap;
+        deferInfo.mergeId = getAtlasEntry() ? (mergeid_t) mEntry->getMergeId() : (mergeid_t) mBitmap;
         deferInfo.mergeable = state.mMatrix.isPureTranslate() &&
                 OpenGLRenderer::getXfermodeDirect(mPaint) == SkXfermode::kSrcOver_Mode;
         deferInfo.opaqueOverBounds = isOpaqueOverBounds() && mBitmap->isOpaque();
