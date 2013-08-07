@@ -30,6 +30,7 @@ import android.provider.DocumentsContract;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.documentsui.model.Document;
 import com.android.documentsui.model.DocumentsProviderInfo;
 import com.android.documentsui.model.DocumentsProviderInfo.Icon;
 import com.android.documentsui.model.Root;
@@ -58,7 +59,7 @@ public class RootsCache {
 
     public static ArrayList<Root> sRootsList = Lists.newArrayList();
 
-    private static Root sRecentOpenRoot;
+    private static Root sRecentsRoot;
 
     /**
      * Gather roots from all known storage providers.
@@ -73,9 +74,9 @@ public class RootsCache {
 
         {
             // Create special root for recents
-            final Root root = Root.buildRecentOpen(context);
+            final Root root = Root.buildRecents(context);
             sRootsList.add(root);
-            sRecentOpenRoot = root;
+            sRecentsRoot = root;
         }
 
         // Query for other storage backends
@@ -125,13 +126,21 @@ public class RootsCache {
     }
 
     @GuardedBy("ActivityThread")
-    public static Root getRecentOpenRoot(Context context) {
-        ensureCache(context);
-        return sRecentOpenRoot;
+    public static Root findRoot(Context context, Document doc) {
+        final String authority = doc.uri.getAuthority();
+        final String rootId = DocumentsContract.getRootId(doc.uri);
+        return findRoot(context, authority, rootId);
     }
 
     @GuardedBy("ActivityThread")
-    public static Collection<Root> getRoots() {
+    public static Root getRecentsRoot(Context context) {
+        ensureCache(context);
+        return sRecentsRoot;
+    }
+
+    @GuardedBy("ActivityThread")
+    public static Collection<Root> getRoots(Context context) {
+        ensureCache(context);
         return sRootsList;
     }
 

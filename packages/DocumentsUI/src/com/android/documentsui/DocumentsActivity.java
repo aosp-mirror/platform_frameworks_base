@@ -28,7 +28,6 @@ import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.DocumentColumns;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
@@ -42,27 +41,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.SearchView;
+import android.widget.SearchView.OnCloseListener;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.documentsui.model.Document;
+import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.Root;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 public class DocumentsActivity extends Activity {
     public static final String TAG = "Documents";
 
-    // TODO: share backend root cache with recents provider
-
-    private static final int ACTION_OPEN = 1;
-    private static final int ACTION_CREATE = 2;
+    public static final int ACTION_OPEN = 1;
+    public static final int ACTION_CREATE = 2;
 
     private int mAction;
 
@@ -72,11 +67,12 @@ public class DocumentsActivity extends Activity {
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
 
-    private Root mCurrentRoot;
-
     private final DisplayState mDisplayState = new DisplayState();
 
-    private LinkedList<Document> mStack = new LinkedList<Document>();
+    /** Current user navigation stack; empty implies recents. */
+    private DocumentStack mStack;
+    /** Currently active search, overriding any stack. */
+    private String mCurrentSearch;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -135,17 +131,12 @@ public class DocumentsActivity extends Activity {
                 .query(RecentsProvider.buildResume(packageName), null, null, null, null);
         try {
             if (cursor.moveToFirst()) {
-                final String rawStack = cursor.getString(
+                final String raw = cursor.getString(
                         cursor.getColumnIndex(RecentsProvider.COL_PATH));
-                restoreStack(rawStack);
+                mStack = DocumentStack.deserialize(getContentResolver(), raw);
             }
         } finally {
             cursor.close();
-        }
-
-        // Start in recents if no restored stack
-        if (mStack.isEmpty()) {
-            onRootPicked(RootsCache.getRecentOpenRoot(this), false);
         }
 
         updateDirectoryFragment();
@@ -201,7 +192,7 @@ public class DocumentsActivity extends Activity {
             final Root root = getCurrentRoot();
             actionBar.setIcon(root != null ? root.icon : null);
 
-            if (getCurrentRoot().isRecents) {
+            if (root.isRecents) {
                 actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
                 actionBar.setTitle(root.title);
             } else {
@@ -229,16 +220,23 @@ public class DocumentsActivity extends Activity {
         mSearchView.setOnQueryTextListener(new OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                // TODO: use second directory stack for searches?
-                final Document cwd = getCurrentDirectory();
-                final Document searchDoc = Document.fromSearch(cwd.uri, query);
-                onDocumentPicked(searchDoc);
+                mCurrentSearch = query;
+                updateDirectoryFragment();
                 mSearchView.setIconified(true);
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
+        mSearchView.setOnCloseListener(new OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                mCurrentSearch = null;
+                updateDirectoryFragment();
                 return false;
             }
         });
@@ -265,6 +263,9 @@ public class DocumentsActivity extends Activity {
             SaveFragment.get(fm).setSaveEnabled(cwd != null && cwd.isCreateSupported());
         }
 
+        menu.findItem(R.id.menu_grid).setVisible(mDisplayState.mode != DisplayState.MODE_GRID);
+        menu.findItem(R.id.menu_list).setVisible(mDisplayState.mode != DisplayState.MODE_LIST);
+
         return true;
     }
 
@@ -283,8 +284,19 @@ public class DocumentsActivity extends Activity {
             return true;
         } else if (id == R.id.menu_search) {
             return false;
+        } else if (id == R.id.menu_grid) {
+            mDisplayState.mode = DisplayState.MODE_GRID;
+            updateDisplayState();
+            invalidateOptionsMenu();
+            return true;
+        } else if (id == R.id.menu_list) {
+            mDisplayState.mode = DisplayState.MODE_LIST;
+            updateDisplayState();
+            invalidateOptionsMenu();
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -339,7 +351,8 @@ public class DocumentsActivity extends Activity {
             if (cwd != null) {
                 title.setText(cwd.displayName);
             } else {
-                title.setText(null);
+                // No directory means recents
+                title.setText(R.string.root_recent);
             }
 
             summary.setText((String) getItem(position));
@@ -365,13 +378,18 @@ public class DocumentsActivity extends Activity {
         @Override
         public boolean onNavigationItemSelected(int itemPosition, long itemId) {
             mDisplayState.sortOrder = itemPosition;
-            DirectoryFragment.get(getFragmentManager()).updateSortOrder();
+            updateDisplayState();
             return true;
         }
     };
 
     public Root getCurrentRoot() {
-        return mCurrentRoot;
+        final Document cwd = getCurrentDirectory();
+        if (cwd != null) {
+            return RootsCache.findRoot(this, cwd);
+        } else {
+            return RootsCache.getRecentsRoot(this);
+        }
     }
 
     public Document getCurrentDirectory() {
@@ -385,19 +403,47 @@ public class DocumentsActivity extends Activity {
     private void updateDirectoryFragment() {
         final FragmentManager fm = getFragmentManager();
         final Document cwd = getCurrentDirectory();
-        if (cwd != null) {
-            DirectoryFragment.show(fm, cwd.uri);
+        if (cwd == null) {
+            // No directory means recents
+            if (mAction == ACTION_CREATE) {
+                RecentsCreateFragment.show(fm);
+            } else {
+                DirectoryFragment.showRecentsOpen(fm);
+            }
+        } else {
+            if (mCurrentSearch != null) {
+                // Ongoing search
+                DirectoryFragment.showSearch(fm, cwd.uri, mCurrentSearch);
+            } else {
+                // Normal boring directory
+                DirectoryFragment.showNormal(fm, cwd.uri);
+            }
         }
+
         updateActionBar();
         invalidateOptionsMenu();
         dumpStack();
     }
 
+    private void updateDisplayState() {
+        // TODO: handle multiple directory stacks on tablets
+        DirectoryFragment.get(getFragmentManager()).updateDisplayState();
+    }
+
+    public void onStackPicked(DocumentStack stack) {
+        mStack = stack;
+        updateDirectoryFragment();
+    }
+
     public void onRootPicked(Root root, boolean closeDrawer) {
         // Clear entire backstack and start in new root
         mStack.clear();
-        mCurrentRoot = root;
-        onDocumentPicked(Document.fromRoot(getContentResolver(), root));
+
+        if (!root.isRecents) {
+            onDocumentPicked(Document.fromRoot(getContentResolver(), root));
+        } else {
+            updateDirectoryFragment();
+        }
 
         if (closeDrawer) {
             mDrawerLayout.closeDrawers();
@@ -406,7 +452,7 @@ public class DocumentsActivity extends Activity {
 
     public void onDocumentPicked(Document doc) {
         final FragmentManager fm = getFragmentManager();
-        if (DocumentsContract.MIME_TYPE_DIRECTORY.equals(doc.mimeType)) {
+        if (doc.isDirectory()) {
             mStack.push(doc);
             updateDirectoryFragment();
         } else if (mAction == ACTION_OPEN) {
@@ -443,52 +489,17 @@ public class DocumentsActivity extends Activity {
         }
     }
 
-    private String saveStack() {
-        if (mCurrentRoot.isRecents) return null;
-
-        final JSONArray stack = new JSONArray();
-        for (int i = 0; i < mStack.size(); i++) {
-            stack.put(mStack.get(i).uri);
-        }
-        return stack.toString();
-    }
-
-    private void restoreStack(String rawStack) {
-        Log.d(TAG, "restoreStack: " + rawStack);
-        mStack.clear();
-
-        if (rawStack == null) return;
-        try {
-            final JSONArray stack = new JSONArray(rawStack);
-            for (int i = 0; i < stack.length(); i++) {
-                final Uri uri = Uri.parse(stack.getString(i));
-                final Document doc = Document.fromUri(getContentResolver(), uri);
-                mStack.add(doc);
-            }
-        } catch (JSONException e) {
-            Log.w(TAG, "Failed to decode stack", e);
-        }
-
-        // TODO: handle roots that have gone missing
-        final Document cwd = getCurrentDirectory();
-        if (cwd != null) {
-            final String authority = cwd.uri.getAuthority();
-            final String rootId = DocumentsContract.getRootId(cwd.uri);
-            mCurrentRoot = RootsCache.findRoot(this, authority, rootId);
-        }
-    }
-
     private void onFinished(Uri... uris) {
         Log.d(TAG, "onFinished() " + Arrays.toString(uris));
 
         final ContentResolver resolver = getContentResolver();
         final ContentValues values = new ContentValues();
 
-        final String stack = saveStack();
+        final String rawStack = DocumentStack.serialize(mStack);
         if (mAction == ACTION_CREATE) {
             // Remember stack for last create
             values.clear();
-            values.put(RecentsProvider.COL_PATH, stack);
+            values.put(RecentsProvider.COL_PATH, rawStack);
             resolver.insert(RecentsProvider.buildRecentCreate(), values);
 
         } else if (mAction == ACTION_OPEN) {
@@ -503,7 +514,7 @@ public class DocumentsActivity extends Activity {
         // Remember location for next app launch
         final String packageName = getCallingPackage();
         values.clear();
-        values.put(RecentsProvider.COL_PATH, stack);
+        values.put(RecentsProvider.COL_PATH, rawStack);
         resolver.insert(RecentsProvider.buildResume(packageName), values);
 
         final Intent intent = new Intent();
@@ -532,6 +543,7 @@ public class DocumentsActivity extends Activity {
         public String[] acceptMimes;
         public int sortOrder = SORT_ORDER_NAME;
         public boolean allowMultiple = false;
+        public boolean showSize = false;
 
         public static final int MODE_LIST = 0;
         public static final int MODE_GRID = 1;

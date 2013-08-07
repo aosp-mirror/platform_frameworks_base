@@ -3,7 +3,10 @@
 
     <uses-permission android:name="android.permission.MANAGE_DOCUMENTS" />
 
-    <application android:label="@string/app_label">
+    <application
+        android:label="@string/app_label"
+        android:supportsRtl="true">
+
         <activity
             android:name=".DocumentsActivity"
             android:finishOnCloseSystemDialogs="true"

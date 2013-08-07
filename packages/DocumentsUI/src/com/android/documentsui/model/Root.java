@@ -43,12 +43,12 @@ public class Root {
     public String summary;
     public boolean isRecents;
 
-    public static Root buildRecentOpen(Context context) {
+    public static Root buildRecents(Context context) {
         final PackageManager pm = context.getPackageManager();
         final Root root = new Root();
         root.rootId = null;
         root.rootType = DocumentsContract.ROOT_TYPE_SHORTCUT;
-        root.uri = RecentsProvider.buildRecentOpen();
+        root.uri = null;
         root.icon = context.getResources().getDrawable(R.drawable.ic_dir);
         root.title = context.getString(R.string.root_recent);
         root.summary = null;
@@ -90,6 +90,13 @@ public class Root {
         root.isRecents = false;
 
         return root;
+    }
+
+    /**
+     * Return string most suited to showing in a directory listing.
+     */
+    public String getDirectoryString() {
+        return (summary != null) ? summary : title;
     }
 
     public static class RootComparator implements Comparator<Root> {

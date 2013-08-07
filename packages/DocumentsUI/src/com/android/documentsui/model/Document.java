@@ -35,26 +35,22 @@ public class Document {
     public final String displayName;
     public final long lastModified;
     public final int flags;
+    public final String summary;
+    public final long size;
 
-    private Document(Uri uri, String mimeType, String displayName, long lastModified, int flags) {
+    private Document(Uri uri, String mimeType, String displayName, long lastModified, int flags,
+            String summary, long size) {
         this.uri = uri;
         this.mimeType = mimeType;
         this.displayName = displayName;
         this.lastModified = lastModified;
         this.flags = flags;
+        this.summary = summary;
+        this.size = size;
     }
 
     public static Document fromRoot(ContentResolver resolver, Root root) {
-        if (root.isRecents) {
-            final Uri uri = root.uri;
-            final String mimeType = DocumentsContract.MIME_TYPE_DIRECTORY;
-            final String displayName = root.title;
-            final long lastModified = -1;
-            final int flags = 0;
-            return new Document(uri, mimeType, displayName, lastModified, flags);
-        } else {
-            return fromUri(resolver, root.uri);
-        }
+        return fromUri(resolver, root.uri);
     }
 
     public static Document fromDirectoryCursor(Uri parent, Cursor cursor) {
@@ -67,8 +63,10 @@ public class Document {
         final String displayName = getCursorString(cursor, DocumentColumns.DISPLAY_NAME);
         final long lastModified = getCursorLong(cursor, DocumentColumns.LAST_MODIFIED);
         final int flags = getCursorInt(cursor, DocumentColumns.FLAGS);
+        final String summary = getCursorString(cursor, DocumentColumns.SUMMARY);
+        final long size = getCursorLong(cursor, DocumentColumns.SIZE);
 
-        return new Document(uri, mimeType, displayName, lastModified, flags);
+        return new Document(uri, mimeType, displayName, lastModified, flags, summary, size);
     }
 
     public static Document fromRecentOpenCursor(ContentResolver resolver, Cursor cursor) {
@@ -84,8 +82,10 @@ public class Document {
             final String displayName = getCursorString(itemCursor, DocumentColumns.DISPLAY_NAME);
             final int flags = getCursorInt(itemCursor, DocumentColumns.FLAGS)
                     & DocumentsContract.FLAG_SUPPORTS_THUMBNAIL;
+            final String summary = getCursorString(cursor, DocumentColumns.SUMMARY);
+            final long size = getCursorLong(cursor, DocumentColumns.SIZE);
 
-            return new Document(uri, mimeType, displayName, lastModified, flags);
+            return new Document(uri, mimeType, displayName, lastModified, flags, summary, size);
         } finally {
             itemCursor.close();
         }
@@ -101,20 +101,13 @@ public class Document {
             final String displayName = getCursorString(cursor, DocumentColumns.DISPLAY_NAME);
             final long lastModified = getCursorLong(cursor, DocumentColumns.LAST_MODIFIED);
             final int flags = getCursorInt(cursor, DocumentColumns.FLAGS);
+            final String summary = getCursorString(cursor, DocumentColumns.SUMMARY);
+            final long size = getCursorLong(cursor, DocumentColumns.SIZE);
 
-            return new Document(uri, mimeType, displayName, lastModified, flags);
+            return new Document(uri, mimeType, displayName, lastModified, flags, summary, size);
         } finally {
             cursor.close();
         }
-    }
-
-    public static Document fromSearch(Uri relatedUri, String query) {
-        final Uri uri = DocumentsContract.buildSearchUri(relatedUri, query);
-        final String mimeType = DocumentsContract.MIME_TYPE_DIRECTORY;
-        final String displayName = query;
-        final long lastModified = System.currentTimeMillis();
-        final int flags = 0;
-        return new Document(uri, mimeType, displayName, lastModified, flags);
     }
 
     @Override
@@ -134,23 +127,30 @@ public class Document {
         return (flags & DocumentsContract.FLAG_SUPPORTS_THUMBNAIL) != 0;
     }
 
+    public boolean isDirectory() {
+        return DocumentsContract.MIME_TYPE_DIRECTORY.equals(mimeType);
+    }
+
     private static String getCursorString(Cursor cursor, String columnName) {
-        return cursor.getString(cursor.getColumnIndexOrThrow(columnName));
+        final int index = cursor.getColumnIndex(columnName);
+        return (index != -1) ? cursor.getString(index) : null;
     }
 
     private static long getCursorLong(Cursor cursor, String columnName) {
-        return cursor.getLong(cursor.getColumnIndexOrThrow(columnName));
+        final int index = cursor.getColumnIndex(columnName);
+        return (index != -1) ? cursor.getLong(index) : 0;
     }
 
     private static int getCursorInt(Cursor cursor, String columnName) {
-        return cursor.getInt(cursor.getColumnIndexOrThrow(columnName));
+        final int index = cursor.getColumnIndex(columnName);
+        return (index != -1) ? cursor.getInt(index) : 0;
     }
 
     public static class NameComparator implements Comparator<Document> {
         @Override
         public int compare(Document lhs, Document rhs) {
-            final boolean leftDir = DocumentsContract.MIME_TYPE_DIRECTORY.equals(lhs.mimeType);
-            final boolean rightDir = DocumentsContract.MIME_TYPE_DIRECTORY.equals(rhs.mimeType);
+            final boolean leftDir = lhs.isDirectory();
+            final boolean rightDir = rhs.isDirectory();
 
             if (leftDir != rightDir) {
                 return leftDir ? -1 : 1;

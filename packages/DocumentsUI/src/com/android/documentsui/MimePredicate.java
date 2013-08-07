@@ -16,8 +16,6 @@
 
 package com.android.documentsui;
 
-import android.provider.DocumentsContract;
-
 import com.android.documentsui.model.Document;
 import com.android.internal.util.Predicate;
 
@@ -30,7 +28,7 @@ public class MimePredicate implements Predicate<Document> {
 
     @Override
     public boolean apply(Document doc) {
-        if (DocumentsContract.MIME_TYPE_DIRECTORY.equals(doc.mimeType)) {
+        if (doc.isDirectory()) {
             return true;
         }
         for (String filter : mFilters) {
