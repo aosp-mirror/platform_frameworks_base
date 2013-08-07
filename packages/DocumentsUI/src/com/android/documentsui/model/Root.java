@@ -27,7 +27,6 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.RootColumns;
 
 import com.android.documentsui.R;
-import com.android.documentsui.RecentsProvider;
 
 import java.util.Comparator;
 
@@ -41,6 +40,7 @@ public class Root {
     public Drawable icon;
     public String title;
     public String summary;
+    public long availableBytes = -1;
     public boolean isRecents;
 
     public static Root buildRecents(Context context) {
@@ -52,6 +52,7 @@ public class Root {
         root.icon = context.getResources().getDrawable(R.drawable.ic_dir);
         root.title = context.getString(R.string.root_recent);
         root.summary = null;
+        root.availableBytes = -1;
         root.isRecents = true;
         return root;
     }
@@ -67,6 +68,7 @@ public class Root {
                 info.providerInfo.authority, root.rootId, DocumentsContract.ROOT_DOC_ID);
         root.icon = info.providerInfo.loadIcon(pm);
         root.title = info.providerInfo.loadLabel(pm).toString();
+        root.availableBytes = cursor.getLong(cursor.getColumnIndex(RootColumns.AVAILABLE_BYTES));
         root.summary = null;
 
         final int icon = cursor.getInt(cursor.getColumnIndex(RootColumns.ICON));
