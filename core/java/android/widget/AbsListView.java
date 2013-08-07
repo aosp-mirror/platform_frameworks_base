@@ -223,6 +223,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public static final int CHOICE_MODE_MULTIPLE_MODAL = 3;
 
     /**
+     * The thread that created this view.
+     */
+    private final Thread mOwnerThread;
+
+    /**
      * Controls if/how the user may choose/check items in the list
      */
     int mChoiceMode = CHOICE_MODE_NONE;
@@ -436,6 +441,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Whether or not to enable the fast scroll feature on this list
      */
     boolean mFastScrollEnabled;
+
+    /**
+     * Whether or not to always show the fast scroll feature on this list
+     */
+    boolean mFastScrollAlwaysVisible;
 
     /**
      * Optional callback to notify client when scroll position has changed
@@ -756,6 +766,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         super(context);
         initAbsListView();
 
+        mOwnerThread = Thread.currentThread();
+
         setVerticalScrollBarEnabled(true);
         TypedArray a = context.obtainStyledAttributes(R.styleable.View);
         initializeScrollbars(a);
@@ -769,6 +781,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public AbsListView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         initAbsListView();
+
+        mOwnerThread = Thread.currentThread();
 
         TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.AbsListView, defStyle, 0);
@@ -1205,15 +1219,28 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @see #isFastScrollEnabled()
      * @param enabled whether or not to enable fast scrolling
      */
-    public void setFastScrollEnabled(boolean enabled) {
-        mFastScrollEnabled = enabled;
+    public void setFastScrollEnabled(final boolean enabled) {
+        if (mFastScrollEnabled != enabled) {
+            mFastScrollEnabled = enabled;
 
-        if (enabled && mFastScroller == null) {
-            mFastScroller = new FastScroller(getContext(), this);
+            if (isOwnerThread()) {
+                setFastScrollerEnabledUiThread(enabled);
+            } else {
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        setFastScrollerEnabledUiThread(enabled);
+                    }
+                });
+            }
         }
+    }
 
+    private void setFastScrollerEnabledUiThread(boolean enabled) {
         if (mFastScroller != null) {
             mFastScroller.setEnabled(enabled);
+        } else if (enabled) {
+            mFastScroller = new FastScroller(this);
         }
     }
 
@@ -1228,17 +1255,38 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @see #setScrollBarStyle(int)
      * @see #setFastScrollEnabled(boolean)
      */
-    public void setFastScrollAlwaysVisible(boolean alwaysShow) {
-        if (alwaysShow && !mFastScrollEnabled) {
-            setFastScrollEnabled(true);
-        }
+    public void setFastScrollAlwaysVisible(final boolean alwaysShow) {
+        if (mFastScrollAlwaysVisible != alwaysShow) {
+            if (alwaysShow && !mFastScrollEnabled) {
+                setFastScrollEnabled(true);
+            }
 
+            mFastScrollAlwaysVisible = alwaysShow;
+
+            if (isOwnerThread()) {
+                setFastScrollerAlwaysVisibleUiThread(alwaysShow);
+            } else {
+                post(new Runnable() {
+                    @Override
+                    public void run() {
+                        setFastScrollerAlwaysVisibleUiThread(alwaysShow);
+                    }
+                });
+            }
+        }
+    }
+
+    private void setFastScrollerAlwaysVisibleUiThread(boolean alwaysShow) {
         if (mFastScroller != null) {
             mFastScroller.setAlwaysShow(alwaysShow);
         }
+    }
 
-        computeOpaqueFlags();
-        recomputePadding();
+    /**
+     * @return whether the current thread is the one that created the view
+     */
+    private boolean isOwnerThread() {
+        return mOwnerThread == Thread.currentThread();
     }
 
     /**
@@ -1249,12 +1297,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @see #setFastScrollAlwaysVisible(boolean)
      */
     public boolean isFastScrollAlwaysVisible() {
-        return mFastScrollEnabled && mFastScroller.isAlwaysShowEnabled();
+        return mFastScrollEnabled && mFastScrollAlwaysVisible;
     }
 
     @Override
     public int getVerticalScrollbarWidth() {
-        if (isFastScrollAlwaysVisible()) {
+        if (isFastScrollAlwaysVisible() && mFastScroller != null) {
             return Math.max(super.getVerticalScrollbarWidth(), mFastScroller.getWidth());
         }
         return super.getVerticalScrollbarWidth();
