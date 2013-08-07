@@ -15,12 +15,15 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
+    android:id="@+id/content_editing"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:divider="?android:attr/dividerHorizontal"
+    android:showDividers="middle">
 
     <ScrollView
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:scrollbars="vertical">
@@ -256,17 +259,6 @@
                 android:layout_marginRight="32dip"
                 android:layout_marginBottom="32dip"
                 android:layout_row="9"
-                android:layout_column="0"
-                android:layout_columnSpan="2"
-                android:background="?android:attr/listDivider"
-                android:contentDescription="@null">
-            </ImageView>
-
-            <ImageView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="fill_horizontal"
-                android:layout_row="10"
                 android:layout_column="0"
                 android:layout_columnSpan="2"
                 android:background="?android:attr/listDivider"

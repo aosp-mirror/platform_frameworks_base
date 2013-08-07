@@ -22,6 +22,9 @@
     <!-- Label of the print dialog's print button. [CHAR LIMIT=16] -->
     <string name="print_button">PRINT</string>
 
+    <!-- Label of the print dialog's cancel button. [CHAR LIMIT=16] -->
+    <string name="cancel_button">CANCEL</string>
+
     <!-- Label of the destination widget. [CHAR LIMIT=20] -->
     <string name="label_destination">DESTIINATION</string>
 

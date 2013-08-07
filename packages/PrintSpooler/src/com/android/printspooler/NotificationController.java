@@ -81,12 +81,10 @@ public class NotificationController {
 
     private void createPrintingNotificaiton(PrintJobInfo printJob) {
         Notification.Builder builder = new Notification.Builder(mContext)
-                // TODO: Use appropriate icon when assets are ready
-                .setSmallIcon(android.R.drawable.ic_secure)
+                .setSmallIcon(R.drawable.stat_notify_print)
                 .setContentTitle(mContext.getString(R.string.printing_notification_title_template,
                         printJob.getLabel()))
-                // TODO: Use appropriate icon when assets are ready
-                .addAction(android.R.drawable.ic_secure, mContext.getString(R.string.cancel),
+                .addAction(R.drawable.stat_notify_cancelling, mContext.getString(R.string.cancel),
                         createCancelIntent(printJob))
                 .setContentText(printJob.getPrinterId().getPrinterName())
                 .setWhen(System.currentTimeMillis())
@@ -97,12 +95,10 @@ public class NotificationController {
 
     private void createFailedNotificaiton(PrintJobInfo printJob) {
         Notification.Builder builder = new Notification.Builder(mContext)
-                // TODO: Use appropriate icon when assets are ready
-                .setSmallIcon(android.R.drawable.ic_secure)
+                .setSmallIcon(R.drawable.stat_notify_error)
                 .setContentTitle(mContext.getString(R.string.failed_notification_title_template,
                         printJob.getLabel()))
-                // TODO: Use appropriate icon when assets are ready
-                .addAction(android.R.drawable.ic_secure, mContext.getString(R.string.cancel),
+                .addAction(R.drawable.stat_notify_cancelling, mContext.getString(R.string.cancel),
                         createCancelIntent(printJob))
                 // TODO: Use appropriate icon when assets are ready
                 .addAction(android.R.drawable.ic_secure, mContext.getString(R.string.restart),
@@ -161,8 +157,7 @@ public class NotificationController {
             NotificationManager notificationManager = (NotificationManager)
                     context.getSystemService(Context.NOTIFICATION_SERVICE);
             Notification.Builder builder = new Notification.Builder(context)
-                    // TODO: Use appropriate icon when assets are ready
-                    .setSmallIcon(android.R.drawable.ic_secure)
+                    .setSmallIcon(R.drawable.stat_notify_cancelling)
                     .setContentTitle(context.getString(
                             R.string.cancelling_notification_title_template,
                             printJobLabel))

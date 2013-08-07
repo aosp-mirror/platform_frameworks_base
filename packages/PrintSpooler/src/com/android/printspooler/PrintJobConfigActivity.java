@@ -17,11 +17,8 @@
 package com.android.printspooler;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -57,6 +54,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -147,7 +145,7 @@ public class PrintJobConfigActivity extends Activity {
     @Override
     protected void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        setContentView(R.layout.print_job_config_activity);
+        setContentView(R.layout.print_job_config_activity_container);
 
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
@@ -234,10 +232,14 @@ public class PrintJobConfigActivity extends Activity {
     }
 
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.isTracking()
-                && !event.isCanceled()) {
-            if (!mController.isWorking()) {
-                PrintJobConfigActivity.this.finish();
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (mEditor.isShwoingGeneratingPrintJobUi()) {
+                return true;
+            }
+            if (event.isTracking() && !event.isCanceled()) {
+                if (!mController.isWorking()) {
+                    PrintJobConfigActivity.this.finish();
+                }
             }
             mEditor.cancel();
             return true;
@@ -247,31 +249,6 @@ public class PrintJobConfigActivity extends Activity {
 
     private boolean printAttributesChanged() {
         return !mOldPrintAttributes.equals(mCurrPrintAttributes);
-    }
-
-    private void showGeneratingPrintJobUi() {
-        getWindow().getDecorView().setVisibility(View.GONE);
-
-        DialogFragment fragment = new DialogFragment() {
-            @Override
-            public Dialog onCreateDialog(Bundle savedInstanceState) {
-                return new AlertDialog.Builder(PrintJobConfigActivity.this)
-                    .setTitle(getString(R.string.generating_print_job))
-                    .setView(PrintJobConfigActivity.this.getLayoutInflater().inflate(
-                            R.layout.generating_print_job_dialog, null))
-                    .setCancelable(false)
-                    .setPositiveButton(getString(R.string.cancel),
-                            new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    mEditor.cancel();
-                                    PrintJobConfigActivity.this.finish();
-                                }
-                            })
-                    .create();
-            }
-        };
-        fragment.show(getFragmentManager(), getString(R.string.generating_print_job));
     }
 
     private class PrintController {
@@ -913,6 +890,67 @@ public class PrintJobConfigActivity extends Activity {
             });
 
             updateUi();
+        }
+
+        public boolean isShwoingGeneratingPrintJobUi() {
+            return (findViewById(R.id.content_generating) != null);
+        }
+
+        private void showGeneratingPrintJobUi() {
+            // Find everything we will shuffle around.
+            final ViewGroup contentContainer = (ViewGroup) findViewById(R.id.content_container);
+            final View contentEditing = contentContainer.findViewById(R.id.content_editing);
+            final View contentGenerating = getLayoutInflater().inflate(
+                    R.layout.print_job_config_activity_content_generating,
+                    contentContainer, false);
+
+            // Wire the cancel action.
+            Button cancelButton = (Button) contentGenerating.findViewById(R.id.cancel_button);
+            cancelButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!mController.isWorking()) {
+                        PrintJobConfigActivity.this.finish();
+                    }
+                    mEditor.cancel();
+                }
+            });
+
+            // First animation - fade out the old content.
+            contentEditing.animate().alpha(0.0f).withEndAction(new Runnable() {
+                @Override
+                public void run() {
+                    contentEditing.setVisibility(View.INVISIBLE);
+
+                    // Prepare the new content with correct size and alpha.
+                    contentGenerating.setMinimumWidth(contentContainer.getWidth());
+                    contentGenerating.setAlpha(0.0f);
+
+                    // Compute how to much shrink the container to fit around the new content.
+                    final int widthSpec = MeasureSpec.makeMeasureSpec(
+                            contentContainer.getWidth(), MeasureSpec.AT_MOST);
+                    final int heightSpec = MeasureSpec.makeMeasureSpec(
+                            contentContainer.getHeight(), MeasureSpec.AT_MOST);
+                    contentGenerating.measure(widthSpec, heightSpec);
+                    final float scaleY = (float) contentGenerating.getMeasuredHeight()
+                            / (float) contentContainer.getHeight();
+
+                    // Second animation - resize the container.
+                    contentContainer.animate().scaleY(scaleY).withEndAction(
+                            new Runnable() {
+                        @Override
+                        public void run() {
+                            // Swap the old and the new content.
+                            contentContainer.removeAllViews();
+                            contentContainer.setScaleY(1.0f);
+                            contentContainer.addView(contentGenerating);
+
+                            // Third animation - show the new content.
+                            contentGenerating.animate().alpha(1.0f);
+                        }
+                    });
+                }
+            });
         }
 
         public void initialize() {
