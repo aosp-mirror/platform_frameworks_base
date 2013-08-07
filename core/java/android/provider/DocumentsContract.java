@@ -105,6 +105,8 @@ public final class DocumentsContract {
      */
     public static final int FLAG_SUPPORTS_SEARCH = 1 << 4;
 
+    // TODO: flag indicating that document is writable?
+
     /**
      * Optimal dimensions for a document thumbnail request, stored as a
      * {@link Point} object. This is only a hint, and the returned thumbnail may

@@ -37,4 +37,8 @@
         android:title="@string/menu_list"
         android:icon="@drawable/ic_menu_list"
         android:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/menu_settings"
+        android:title="@string/menu_settings"
+        android:showAsAction="never" />
 </menu>

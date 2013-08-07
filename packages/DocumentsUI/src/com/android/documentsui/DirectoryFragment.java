@@ -27,7 +27,6 @@ import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.text.format.DateUtils;
 import android.text.format.Formatter;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -62,10 +61,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class DirectoryFragment extends Fragment {
 
+    private View mEmptyView;
     private ListView mListView;
     private GridView mGridView;
 
     private AbsListView mCurrentView;
+
+    private Predicate<Document> mFilter;
 
     public static final int TYPE_NORMAL = 1;
     public static final int TYPE_SEARCH = 2;
@@ -121,6 +123,8 @@ public class DirectoryFragment extends Fragment {
 
         final View view = inflater.inflate(R.layout.fragment_directory, container, false);
 
+        mEmptyView = view.findViewById(android.R.id.empty);
+
         mListView = (ListView) view.findViewById(R.id.list);
         mListView.setOnItemClickListener(mItemListener);
         mListView.setMultiChoiceModeListener(mMultiListener);
@@ -138,6 +142,7 @@ public class DirectoryFragment extends Fragment {
             @Override
             public Loader<List<Document>> onCreateLoader(int id, Bundle args) {
                 final DisplayState state = getDisplayState(DirectoryFragment.this);
+                mFilter = new MimePredicate(state.acceptMimes);
 
                 final Uri contentsUri;
                 if (mType == TYPE_NORMAL) {
@@ -148,18 +153,18 @@ public class DirectoryFragment extends Fragment {
                     contentsUri = uri;
                 }
 
-                final Predicate<Document> filter = new MimePredicate(state.acceptMimes);
-
                 final Comparator<Document> sortOrder;
                 if (state.sortOrder == DisplayState.SORT_ORDER_DATE || mType == TYPE_RECENT_OPEN) {
                     sortOrder = new Document.DateComparator();
                 } else if (state.sortOrder == DisplayState.SORT_ORDER_NAME) {
                     sortOrder = new Document.NameComparator();
+                } else if (state.sortOrder == DisplayState.SORT_ORDER_SIZE) {
+                    sortOrder = new Document.SizeComparator();
                 } else {
                     throw new IllegalArgumentException("Unknown sort order " + state.sortOrder);
                 }
 
-                return new DirectoryLoader(context, contentsUri, mType, filter, sortOrder);
+                return new DirectoryLoader(context, contentsUri, mType, null, sortOrder);
             }
 
             @Override
@@ -181,6 +186,10 @@ public class DirectoryFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+
+        final Context context = getActivity();
+        getDisplayState(this).showSize = SettingsActivity.getDisplayFileSize(context);
+
         getLoaderManager().restartLoader(mLoaderId, getArguments(), mCallbacks);
     }
 
@@ -193,7 +202,7 @@ public class DirectoryFragment extends Fragment {
     public void updateDisplayState() {
         final DisplayState state = getDisplayState(this);
 
-        // TODO: avoid kicking loader when sort didn't change
+        // TODO: avoid kicking loader when nothing changed
         getLoaderManager().restartLoader(mLoaderId, getArguments(), mCallbacks);
         mListView.smoothScrollToPosition(0);
         mGridView.smoothScrollToPosition(0);
@@ -302,6 +311,13 @@ public class DirectoryFragment extends Fragment {
 
         public void swapDocuments(List<Document> documents) {
             mDocuments = documents;
+
+            if (documents != null && documents.isEmpty()) {
+                mEmptyView.setVisibility(View.VISIBLE);
+            } else {
+                mEmptyView.setVisibility(View.GONE);
+            }
+
             notifyDataSetChanged();
         }
 
@@ -325,6 +341,7 @@ public class DirectoryFragment extends Fragment {
 
             final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
+            final View summaryGrid = convertView.findViewById(R.id.summary_grid);
             final ImageView icon1 = (ImageView) convertView.findViewById(android.R.id.icon1);
             final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
             final TextView date = (TextView) convertView.findViewById(R.id.date);
@@ -354,6 +371,11 @@ public class DirectoryFragment extends Fragment {
                 icon1.setImageDrawable(root.icon);
                 summary.setText(root.getDirectoryString());
                 summary.setVisibility(View.VISIBLE);
+            }
+
+            if (summaryGrid != null) {
+                summaryGrid.setVisibility(
+                        (summary.getVisibility() == View.VISIBLE) ? View.VISIBLE : View.GONE);
             }
 
             // TODO: omit year from format
@@ -388,6 +410,17 @@ public class DirectoryFragment extends Fragment {
         @Override
         public long getItemId(int position) {
             return getItem(position).uri.hashCode();
+        }
+
+        @Override
+        public boolean areAllItemsEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isEnabled(int position) {
+            final Document doc = getItem(position);
+            return mFilter.apply(doc);
         }
     }
 }
