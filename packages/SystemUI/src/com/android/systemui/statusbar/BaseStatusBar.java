@@ -818,10 +818,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         return entry.notification;
     }
 
-    protected StatusBarIconView addNotificationViews(IBinder key,
+    protected NotificationData.Entry createNotificationViews(IBinder key,
             StatusBarNotification notification) {
         if (DEBUG) {
-            Log.d(TAG, "addNotificationViews(key=" + key + ", notification=" + notification);
+            Log.d(TAG, "createNotificationViews(key=" + key + ", notification=" + notification);
         }
         // Construct the icon.
         final StatusBarIconView iconView = new StatusBarIconView(mContext,
@@ -846,7 +846,10 @@ public abstract class BaseStatusBar extends SystemUI implements
                     + notification);
             return null;
         }
+        return entry;
+    }
 
+    protected void addNotificationViews(NotificationData.Entry entry) {
         // Add the expanded view and icon.
         int pos = mNotificationData.add(entry);
         if (DEBUG) {
@@ -854,8 +857,10 @@ public abstract class BaseStatusBar extends SystemUI implements
         }
         updateExpansionStates();
         updateNotificationIcons();
+    }
 
-        return iconView;
+    private void addNotificationViews(IBinder key, StatusBarNotification notification) {
+        addNotificationViews(createNotificationViews(key, notification));
     }
 
     protected void updateExpansionStates() {

@@ -897,15 +897,17 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     public void addNotification(IBinder key, StatusBarNotification notification) {
         if (DEBUG) Log.d(TAG, "addNotification score=" + notification.getScore());
-        StatusBarIconView iconView = addNotificationViews(key, notification);
-        if (iconView == null) return;
-
+        Entry shadeEntry = createNotificationViews(key, notification);
+        if (shadeEntry == null) {
+            return;
+        }
         if (mUseHeadsUp && shouldInterrupt(notification)) {
             if (DEBUG) Log.d(TAG, "launching notification in heads up mode");
             Entry interruptionCandidate = new Entry(key, notification, null);
             if (inflateViews(interruptionCandidate, mHeadsUpNotificationView.getHolder())) {
                 mInterruptingNotificationTime = System.currentTimeMillis();
                 mInterruptingNotificationEntry = interruptionCandidate;
+                shadeEntry.setInterruption();
 
                 // 1. Populate mHeadsUpNotificationView
                 mHeadsUpNotificationView.setNotification(mInterruptingNotificationEntry);
@@ -935,7 +937,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 tick(null, notification, true);
             }
         }
-
+        addNotificationViews(shadeEntry);
         // Recalculate the position of the sliding windows and the titles.
         setAreThereNotifications();
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
