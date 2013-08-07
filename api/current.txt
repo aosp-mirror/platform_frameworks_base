@@ -30547,6 +30547,7 @@ package android.widget {
     ctor public FrameLayout.LayoutParams(int, int, int);
     ctor public FrameLayout.LayoutParams(android.view.ViewGroup.LayoutParams);
     ctor public FrameLayout.LayoutParams(android.view.ViewGroup.MarginLayoutParams);
+    ctor public FrameLayout.LayoutParams(android.widget.FrameLayout.LayoutParams);
     field public int gravity;
   }
 
@@ -30811,6 +30812,7 @@ package android.widget {
     ctor public LinearLayout.LayoutParams(int, int, float);
     ctor public LinearLayout.LayoutParams(android.view.ViewGroup.LayoutParams);
     ctor public LinearLayout.LayoutParams(android.view.ViewGroup.MarginLayoutParams);
+    ctor public LinearLayout.LayoutParams(android.widget.LinearLayout.LayoutParams);
     method public java.lang.String debug(java.lang.String);
     field public int gravity;
     field public float weight;
@@ -31243,6 +31245,7 @@ package android.widget {
     ctor public RelativeLayout.LayoutParams(int, int);
     ctor public RelativeLayout.LayoutParams(android.view.ViewGroup.LayoutParams);
     ctor public RelativeLayout.LayoutParams(android.view.ViewGroup.MarginLayoutParams);
+    ctor public RelativeLayout.LayoutParams(android.widget.RelativeLayout.LayoutParams);
     method public void addRule(int);
     method public void addRule(int, int);
     method public java.lang.String debug(java.lang.String);
