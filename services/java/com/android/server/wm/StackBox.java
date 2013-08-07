@@ -380,6 +380,16 @@ public class StackBox {
         mSecond.switchUserStacks(userId);
     }
 
+    void close() {
+        if (mStack != null) {
+            mStack.mDimLayer.mDimSurface.destroy();
+            mStack.mAnimationBackgroundSurface.mDimSurface.destroy();
+            return;
+        }
+        mFirst.close();
+        mSecond.close();
+    }
+
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("mParent="); pw.println(mParent);
         pw.print(prefix); pw.print("mBounds="); pw.print(mBounds.toShortString());
