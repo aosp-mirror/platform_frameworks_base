@@ -19,6 +19,7 @@ package com.android.server.am;
 import android.app.AppGlobals;
 import android.content.pm.IPackageManager;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -27,6 +28,7 @@ import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
+import com.android.internal.app.IProcessStats;
 import com.android.internal.app.ProcessStats;
 import com.android.internal.os.BackgroundThread;
 
@@ -38,9 +40,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-public final class ProcessStatsService {
+public final class ProcessStatsService extends IProcessStats.Stub {
     static final String TAG = "ProcessStatsService";
     static final boolean DEBUG = false;
 
@@ -204,7 +207,7 @@ public final class ProcessStatsService {
                 if (commit) {
                     mProcessStats.mFlags |= ProcessStats.FLAG_COMPLETE;
                 }
-                mProcessStats.writeToParcel(mPendingWrite);
+                mProcessStats.writeToParcel(mPendingWrite, 0);
                 mPendingWriteFile = new AtomicFile(mFile.getBaseFile());
                 mPendingWriteCommitted = commit;
             }
@@ -440,6 +443,33 @@ public final class ProcessStatsService {
             finalRes[i] = res.get(i) * mult;
         }
         return finalRes;
+    }
+
+    public byte[] getCurrentStats(List<ParcelFileDescriptor> historic) {
+        Parcel current = Parcel.obtain();
+        mWriteLock.lock();
+        try {
+            synchronized (mLock) {
+                mProcessStats.writeToParcel(current, 0);
+            }
+            if (historic != null) {
+                ArrayList<String> files = getCommittedFiles(0, true);
+                if (files != null) {
+                    for (int i=files.size()-1; i>=0; i--) {
+                        try {
+                            ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
+                                    new File(files.get(i)), ParcelFileDescriptor.MODE_READ_ONLY);
+                            historic.add(pfd);
+                        } catch (IOException e) {
+                            Slog.w(TAG, "Failure opening procstat file " + files.get(i), e);
+                        }
+                    }
+                }
+            }
+        } finally {
+            mWriteLock.unlock();
+        }
+        return current.marshall();
     }
 
     static private void dumpHelp(PrintWriter pw) {
