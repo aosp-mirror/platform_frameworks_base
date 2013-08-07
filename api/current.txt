@@ -5783,6 +5783,7 @@ package android.content {
     field public static final java.lang.String ACCOUNT_SERVICE = "account";
     field public static final java.lang.String ACTIVITY_SERVICE = "activity";
     field public static final java.lang.String ALARM_SERVICE = "alarm";
+    field public static final java.lang.String APP_OPS_SERVICE = "appops";
     field public static final java.lang.String AUDIO_SERVICE = "audio";
     field public static final int BIND_ABOVE_CLIENT = 8; // 0x8
     field public static final int BIND_ADJUST_WITH_ACTIVITY = 128; // 0x80

@@ -2285,8 +2285,6 @@ public abstract class Context {
      *
      * @see #getSystemService
      * @see android.app.AppOpsManager
-     *
-     * @hide
      */
     public static final String APP_OPS_SERVICE = "appops";
 
