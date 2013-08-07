@@ -29819,6 +29819,7 @@ package android.widget {
     method public int pointToPosition(int, int);
     method public long pointToRowId(int, int);
     method public void reclaimViews(java.util.List<android.view.View>);
+    method public boolean scrollListBy(int);
     method public void setAdapter(android.widget.ListAdapter);
     method public void setCacheColorHint(int);
     method public void setChoiceMode(int);

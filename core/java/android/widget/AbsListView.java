@@ -4836,6 +4836,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
+     * Scrolls the list items within the view by a specified number of pixels.
+     *
+     * @param y the amount of pixels to scroll by vertically
+     * @return true if the list is able to scroll, or false if the list is
+     *         already at the beginning/end and unable to scroll any more.
+     */
+    public boolean scrollListBy(int y) {
+        return !trackMotionScroll(-y, -y);
+    }
+
+    /**
      * Track a motion scroll
      *
      * @param deltaY Amount to offset mMotionView. This is the accumulated delta since the motion
