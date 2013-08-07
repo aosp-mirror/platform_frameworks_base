@@ -12813,6 +12813,10 @@ package android.media {
     method public abstract void onPlaybackPositionUpdate(long);
   }
 
+  public final class ResourceBusyException extends android.media.MediaDrmException {
+    ctor public ResourceBusyException(java.lang.String);
+  }
+
   public class Ringtone {
     method public int getStreamType();
     method public java.lang.String getTitle(android.content.Context);
