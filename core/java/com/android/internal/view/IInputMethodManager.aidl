@@ -32,7 +32,7 @@ import com.android.internal.view.IInputMethodClient;
 interface IInputMethodManager {
     List<InputMethodInfo> getInputMethodList();
     List<InputMethodInfo> getEnabledInputMethodList();
-    List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in String imiId,
+    List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in InputMethodInfo imi,
             boolean allowsImplicitlySelectedSubtypes);
     InputMethodSubtype getLastInputMethodSubtype();
     // TODO: We should change the return type from List to List<Parcelable>

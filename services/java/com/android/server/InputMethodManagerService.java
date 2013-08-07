@@ -969,25 +969,19 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     /**
-     * @param imiId if null, returns enabled subtypes for the current imi
+     * @param imi if null, returns enabled subtypes for the current imi
      * @return enabled subtypes of the specified imi
      */
     @Override
-    public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(String imiId,
+    public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(InputMethodInfo imi,
             boolean allowsImplicitlySelectedSubtypes) {
         // TODO: Make this work even for non-current users?
         if (!calledFromValidUser()) {
-            return Collections.<InputMethodSubtype>emptyList();
+            return Collections.emptyList();
         }
         synchronized (mMethodMap) {
-            final InputMethodInfo imi;
-            if (imiId == null && mCurMethodId != null) {
+            if (imi == null && mCurMethodId != null) {
                 imi = mMethodMap.get(mCurMethodId);
-            } else {
-                imi = mMethodMap.get(imiId);
-            }
-            if (imi == null) {
-                return Collections.<InputMethodSubtype>emptyList();
             }
             return mSettings.getEnabledInputMethodSubtypeListLocked(
                     mContext, imi, allowsImplicitlySelectedSubtypes);
