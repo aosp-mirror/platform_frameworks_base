@@ -84,6 +84,8 @@ const nsecs_t STREAM_AHEAD_EVENT_TIMEOUT = 500 * 1000000LL; // 0.5sec
 // Log a warning when an event takes longer than this to process, even if an ANR does not occur.
 const nsecs_t SLOW_EVENT_PROCESSING_WARNING_TIMEOUT = 2000 * 1000000LL; // 2sec
 
+// Number of recent events to keep for debugging purposes.
+const size_t RECENT_QUEUE_MAX_SIZE = 10;
 
 static inline nsecs_t now() {
     return systemTime(SYSTEM_TIME_MONOTONIC);
@@ -455,6 +457,14 @@ bool InputDispatcher::enqueueInboundEventLocked(EventEntry* entry) {
     return needWake;
 }
 
+void InputDispatcher::addRecentEventLocked(EventEntry* entry) {
+    entry->refCount += 1;
+    mRecentQueue.enqueueAtTail(entry);
+    if (mRecentQueue.count() > RECENT_QUEUE_MAX_SIZE) {
+        mRecentQueue.dequeueAtHead()->release();
+    }
+}
+
 sp<InputWindowHandle> InputDispatcher::findTouchedWindowAtLocked(int32_t displayId,
         int32_t x, int32_t y) {
     // Traverse windows from front to back to find touched window.
@@ -624,6 +634,7 @@ void InputDispatcher::releaseInboundEventLocked(EventEntry* entry) {
     if (entry == mNextUnblockedEvent) {
         mNextUnblockedEvent = NULL;
     }
+    addRecentEventLocked(entry);
     entry->release();
 }
 
@@ -3161,6 +3172,31 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
 
     nsecs_t currentTime = now();
 
+    // Dump recently dispatched or dropped events from oldest to newest.
+    if (!mRecentQueue.isEmpty()) {
+        dump.appendFormat(INDENT "RecentQueue: length=%u\n", mRecentQueue.count());
+        for (EventEntry* entry = mRecentQueue.head; entry; entry = entry->next) {
+            dump.append(INDENT2);
+            entry->appendDescription(dump);
+            dump.appendFormat(", age=%0.1fms\n",
+                    (currentTime - entry->eventTime) * 0.000001f);
+        }
+    } else {
+        dump.append(INDENT "RecentQueue: <empty>\n");
+    }
+
+    // Dump event currently being dispatched.
+    if (mPendingEvent) {
+        dump.append(INDENT "PendingEvent:\n");
+        dump.append(INDENT2);
+        mPendingEvent->appendDescription(dump);
+        dump.appendFormat(", age=%0.1fms\n",
+                (currentTime - mPendingEvent->eventTime) * 0.000001f);
+    } else {
+        dump.append(INDENT "PendingEvent: <none>\n");
+    }
+
+    // Dump inbound events from oldest to newest.
     if (!mInboundQueue.isEmpty()) {
         dump.appendFormat(INDENT "InboundQueue: length=%u\n", mInboundQueue.count());
         for (EventEntry* entry = mInboundQueue.head; entry; entry = entry->next) {
@@ -3809,7 +3845,8 @@ InputDispatcher::ConfigurationChangedEntry::~ConfigurationChangedEntry() {
 }
 
 void InputDispatcher::ConfigurationChangedEntry::appendDescription(String8& msg) const {
-    msg.append("ConfigurationChangedEvent()");
+    msg.append("ConfigurationChangedEvent(), policyFlags=0x%08x",
+            policyFlags);
 }
 
 
@@ -3824,7 +3861,8 @@ InputDispatcher::DeviceResetEntry::~DeviceResetEntry() {
 }
 
 void InputDispatcher::DeviceResetEntry::appendDescription(String8& msg) const {
-    msg.appendFormat("DeviceResetEvent(deviceId=%d)", deviceId);
+    msg.appendFormat("DeviceResetEvent(deviceId=%d), policyFlags=0x%08x",
+            deviceId, policyFlags);
 }
 
 
@@ -3846,8 +3884,11 @@ InputDispatcher::KeyEntry::~KeyEntry() {
 }
 
 void InputDispatcher::KeyEntry::appendDescription(String8& msg) const {
-    msg.appendFormat("KeyEvent(action=%d, deviceId=%d, source=0x%08x)",
-            action, deviceId, source);
+    msg.appendFormat("KeyEvent(deviceId=%d, source=0x%08x, action=%d, "
+            "flags=0x%08x, keyCode=%d, scanCode=%d, metaState=0x%08x, "
+            "repeatCount=%d), policyFlags=0x%08x",
+            deviceId, source, action, flags, keyCode, scanCode, metaState,
+            repeatCount, policyFlags);
 }
 
 void InputDispatcher::KeyEntry::recycle() {
@@ -3884,8 +3925,19 @@ InputDispatcher::MotionEntry::~MotionEntry() {
 }
 
 void InputDispatcher::MotionEntry::appendDescription(String8& msg) const {
-    msg.appendFormat("MotionEvent(action=%d, deviceId=%d, source=0x%08x, displayId=%d)",
-            action, deviceId, source, displayId);
+    msg.appendFormat("MotionEvent(deviceId=%d, source=0x%08x, action=%d, "
+            "flags=0x%08x, metaState=0x%08x, buttonState=0x%08x, edgeFlags=0x%08x, "
+            "xPrecision=%.1f, yPrecision=%.1f, displayId=%d, pointers=[",
+            deviceId, source, action, flags, metaState, buttonState, edgeFlags,
+            xPrecision, yPrecision, displayId);
+    for (uint32_t i = 0; i < pointerCount; i++) {
+        if (i) {
+            msg.append(", ");
+        }
+        msg.appendFormat("%d: (%.1f, %.1f)", pointerProperties[i].id,
+                pointerCoords[i].getX(), pointerCoords[i].getY());
+    }
+    msg.appendFormat("]), policyFlags=0x%08x", policyFlags);
 }
 
 
