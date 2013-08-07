@@ -6961,12 +6961,7 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_TOUCHSCREEN);
-
-            final DisplayContent displayContent = getDefaultDisplayContentLocked();
-            mPolicy.setInitialDisplaySize(displayContent.getDisplay(),
-                    displayContent.mInitialDisplayWidth,
-                    displayContent.mInitialDisplayHeight,
-                    displayContent.mInitialDisplayDensity);
+            configureDisplayPolicyLocked(getDefaultDisplayContentLocked());
         }
 
         try {
@@ -7793,11 +7788,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // displayContent must not be null
     private void reconfigureDisplayLocked(DisplayContent displayContent) {
         // TODO: Multidisplay: for now only use with default display.
-        mPolicy.setInitialDisplaySize(displayContent.getDisplay(),
-                displayContent.mBaseDisplayWidth,
-                displayContent.mBaseDisplayHeight,
-                displayContent.mBaseDisplayDensity);
-
+        configureDisplayPolicyLocked(displayContent);
         displayContent.layoutNeeded = true;
 
         boolean configChanged = updateOrientationFromAppTokensLocked(false);
@@ -7818,6 +7809,18 @@ public class WindowManagerService extends IWindowManager.Stub
         performLayoutAndPlaceSurfacesLocked();
     }
 
+    private void configureDisplayPolicyLocked(DisplayContent displayContent) {
+        mPolicy.setInitialDisplaySize(displayContent.getDisplay(),
+                displayContent.mBaseDisplayWidth,
+                displayContent.mBaseDisplayHeight,
+                displayContent.mBaseDisplayDensity);
+
+        DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        mPolicy.setDisplayOverscan(displayContent.getDisplay(),
+                displayInfo.overscanLeft, displayInfo.overscanTop,
+                displayInfo.overscanRight, displayInfo.overscanBottom);
+    }
+
     @Override
     public void setOverscan(int displayId, int left, int top, int right, int bottom) {
         if (mContext.checkCallingOrSelfPermission(
@@ -7829,21 +7832,25 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             DisplayContent displayContent = getDisplayContentLocked(displayId);
             if (displayContent != null) {
-                mDisplayManagerService.setOverscan(displayId, left, top, right, bottom);
-                final DisplayInfo displayInfo = displayContent.getDisplayInfo();
-                synchronized(displayContent.mDisplaySizeLock) {
-                    displayInfo.overscanLeft = left;
-                    displayInfo.overscanTop = top;
-                    displayInfo.overscanRight = right;
-                    displayInfo.overscanBottom = bottom;
-                }
-                mPolicy.setDisplayOverscan(displayContent.getDisplay(), left, top, right, bottom);
-                displayContent.layoutNeeded = true;
-                mDisplaySettings.setOverscanLocked(displayInfo.name, left, top, right, bottom);
-                mDisplaySettings.writeSettingsLocked();
-                performLayoutAndPlaceSurfacesLocked();
+                setOverscanLocked(displayContent, left, top, right, bottom);
             }
         }
+    }
+
+    private void setOverscanLocked(DisplayContent displayContent,
+            int left, int top, int right, int bottom) {
+        final DisplayInfo displayInfo = displayContent.getDisplayInfo();
+        synchronized (displayContent.mDisplaySizeLock) {
+            displayInfo.overscanLeft = left;
+            displayInfo.overscanTop = top;
+            displayInfo.overscanRight = right;
+            displayInfo.overscanBottom = bottom;
+        }
+
+        mDisplaySettings.setOverscanLocked(displayInfo.name, left, top, right, bottom);
+        mDisplaySettings.writeSettingsLocked();
+
+        reconfigureDisplayLocked(displayContent);
     }
 
     // -------------------------------------------------------------
@@ -10719,17 +10726,19 @@ public class WindowManagerService extends IWindowManager.Stub
         DisplayContent displayContent = new DisplayContent(display, this);
         final int displayId = display.getDisplayId();
         mDisplayContents.put(displayId, displayContent);
+
+        DisplayInfo displayInfo = displayContent.getDisplayInfo();
         final Rect rect = new Rect();
-        DisplayInfo info = displayContent.getDisplayInfo();
-        mDisplaySettings.getOverscanLocked(info.name, rect);
-        info.overscanLeft = rect.left;
-        info.overscanTop = rect.top;
-        info.overscanRight = rect.right;
-        info.overscanBottom = rect.bottom;
-        mDisplayManagerService.setOverscan(display.getDisplayId(), rect.left, rect.top,
-                rect.right, rect.bottom);
-        mPolicy.setDisplayOverscan(displayContent.getDisplay(), rect.left, rect.top,
-                rect.right, rect.bottom);
+        mDisplaySettings.getOverscanLocked(displayInfo.name, rect);
+        synchronized (displayContent.mDisplaySizeLock) {
+            displayInfo.overscanLeft = rect.left;
+            displayInfo.overscanTop = rect.top;
+            displayInfo.overscanRight = rect.right;
+            displayInfo.overscanBottom = rect.bottom;
+            mDisplayManagerService.setDisplayInfoOverrideFromWindowManager(
+                    displayId, displayInfo);
+        }
+        configureDisplayPolicyLocked(displayContent);
 
         // TODO: Create an input channel for each display with touch capability.
         if (displayId == Display.DEFAULT_DISPLAY) {

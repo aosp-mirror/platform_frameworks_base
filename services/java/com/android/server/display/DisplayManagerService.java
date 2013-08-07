@@ -314,6 +314,9 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
      * to the display information synchronously so that applications will immediately
      * observe the new state.
      *
+     * NOTE: This method must be the only entry point by which the window manager
+     * influences the logical configuration of displays.
+     *
      * @param displayId The logical display id.
      * @param info The new data to be stored.
      */
@@ -322,24 +325,10 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         synchronized (mSyncRoot) {
             LogicalDisplay display = mLogicalDisplays.get(displayId);
             if (display != null) {
-                mTempDisplayInfo.copyFrom(display.getDisplayInfoLocked());
-                display.setDisplayInfoOverrideFromWindowManagerLocked(info);
-                if (!mTempDisplayInfo.equals(display.getDisplayInfoLocked())) {
+                if (display.setDisplayInfoOverrideFromWindowManagerLocked(info)) {
                     sendDisplayEventLocked(displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
                     scheduleTraversalLocked(false);
                 }
-            }
-        }
-    }
-
-    /**
-     * Sets the overscan insets for a particular display.
-     */
-    public void setOverscan(int displayId, int left, int top, int right, int bottom) {
-        synchronized (mSyncRoot) {
-            LogicalDisplay display = mLogicalDisplays.get(displayId);
-            if (display != null) {
-                display.setOverscan(left, top, right, bottom);
             }
         }
     }
