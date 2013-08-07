@@ -1983,7 +1983,12 @@ public abstract class HardwareRenderer {
                         if (map != null) {
                             GLES20Canvas.initAtlas(buffer, map);
                         }
-                        buffer.destroy();
+                        // If IAssetAtlas is not the same class as the IBinder
+                        // we are using a remote service and we can safely
+                        // destroy the graphic buffer
+                        if (atlas.getClass() != binder.getClass()) {
+                            buffer.destroy();
+                        }
                     }
                 }
             } catch (RemoteException e) {
@@ -1994,7 +1999,7 @@ public abstract class HardwareRenderer {
         @Override
         boolean canDraw() {
             return super.canDraw() && mGlCanvas != null;
-        }                
+        }
 
         @Override
         int onPreDraw(Rect dirty) {
