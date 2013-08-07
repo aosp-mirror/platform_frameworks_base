@@ -472,6 +472,8 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Antaa sovelluksen käyttää InputFlingerin matalan tason ominaisuuksia."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"määritä wifi-näyttöjen asetukset"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Antaa sovelluksen määrittää wifi-näyttöjä ja muodostaa yhteyden niihin."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"hallitse wifi-näyttöjä"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Antaa sovelluksen hallita wifi-näyttöjen matalan tason ominaisuuksia."</string>
     <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
     <skip />
     <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->

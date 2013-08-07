@@ -472,6 +472,8 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Hiermee kan de app InputFlinger-functies op laag niveau gebruiken."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"wifi-displays configureren"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"De app toestaan wifi-displays te configureren en hiermee verbinding te maken."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"wifi-displays beheren"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"De app toestaan minder belangrijke functies van wifi-displays te beheren."</string>
     <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
     <skip />
     <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->

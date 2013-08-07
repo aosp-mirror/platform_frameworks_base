@@ -362,10 +362,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Ermöglicht dem Inhaber, sich an die Oberfläche eines Druckdienstes auf oberster Ebene zu binden. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"Auf alle Druckaufträge zugreifen"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Ermöglicht dem Inhaber den Zugriff auf von einer anderen App erstellte Druckaufträge. Sollte für normale Apps nie benötigt werden."</string>
-    <!-- no translation found for permlab_bindNfcService (2752731300419410724) -->
-    <skip />
-    <!-- no translation found for permdesc_bindNfcService (6120647629174066862) -->
-    <skip />
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"An NFC-Dienst binden"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Ermöglicht dem Inhaber die Bindung an Apps, die NFC-Karten emulieren. Dies sollte für normale Apps niemals notwendig sein."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"An einen Textdienst binden"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Ermöglicht dem Halter, sich an die Oberfläche eines Textdienstes auf oberster Ebene zu binden, z. B. eines Rechtschreibprüfungsdienstes. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"An einen VPN-Dienst binden"</string>
@@ -474,6 +472,8 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Ermöglicht der App, die systemnahen InputFlinger-Funktionen zu verwenden"</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"WLAN-Anzeigen konfigurieren"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Erlaubt der App, WLAN-Anzeigen zu konfigurieren und eine Verbindung zu diesen herzustellen"</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"WLAN-Anzeigen steuern"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Erlaubt der App, untergeordnete Funktionen von WLAN-Anzeigen zu steuern"</string>
     <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
     <skip />
     <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->

@@ -474,6 +474,8 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Permite aplicației să utilizeze funcțiile de nivel redus InputFlinger."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configurează afişaje Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Permite aplicaţiei să configureze şi să se conecteze la afişaje Wi-Fi."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"controlează afişaje Wi-Fi"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permite aplicaţiei să controleze funcţiile de nivel redus ale afişajelor Wi-Fi."</string>
     <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
     <skip />
     <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->

@@ -363,7 +363,7 @@
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"juurdepääs kõikidele printimistöödele"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Lubab omanikule juurdepääsu teise rakenduse loodud printimistöödele. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"NFC-teenusega sidumine"</string>
-    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Lubab kasutajal luua seosed rakendustega, mis jäljendavad NFC-kaarte. Pole kunagi vajalik tavaliste rakenduste korral."</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Lubab õiguste omajal luua seosed rakendustega, mis emuleerivad NFC-kaarte. Pole kunagi vajalik tavaliste rakenduste korral."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"tekstiteenusega sidumine"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Võimaldab omanikul siduda tekstiteenuse (nt SpellCheckerService) ülataseme liidesega. Tavarakenduste puhul ei peaks seda kunagi vaja minema."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"seo VPN-teenusega"</string>
@@ -472,6 +472,8 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Lubab rakendusel kasutada InputFlingeri madalatasemelisi funktsioone."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"WiFi-ekraanide seadistamine"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Lubab rakendusel seadistada WiFi-ekraane ja nendega ühendus luua."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"WiFi-ekraanide juhtimine"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Lubab rakendusel juhtida WiFi-ekraanide madala taseme funktsioone."</string>
     <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
     <skip />
     <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->

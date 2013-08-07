@@ -472,6 +472,8 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"एप्‍लिकेशन को InputFlinger निम्‍न-स्‍तर सुविधाओं का उपयोग करने देता है."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wifi डिस्प्ले को कॉन्फ़िगर करें"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"एप्लिकेशन को कॉन्फ़िगर करने देता है और Wifi डिस्प्ले से कनेक्ट करता है."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wifi डिस्प्ले को नियंत्रित करें"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"एप्लिकेशन को Wifi डिस्प्ले की निम्न-स्तर की सुविधाएं नियंत्रित करने देता है."</string>
     <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
     <skip />
     <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->

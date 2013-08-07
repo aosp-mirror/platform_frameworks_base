@@ -472,6 +472,8 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Lehetővé teszi az alkalmazás számára az InputFlinger alacsony szintű funkciók használatát."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wi-Fi kijelzők konfigurálása"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Lehetővé teszi, hogy az alkalmazás Wi-Fi kijelzőket konfiguráljon, és csatlakozzon hozzájuk."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wi-Fi kijelzők irányítása"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Lehetővé teszi, hogy az alkalmazás irányítsa a Wi-Fi kijelzők alacsonyabb szintű funkcióit."</string>
     <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
     <skip />
     <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->

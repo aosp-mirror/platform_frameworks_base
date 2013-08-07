@@ -472,6 +472,8 @@
     <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Дозвољава апликацији да користи InputFlinger функције ниског нивоа."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"конфигурисање Wi-Fi екрана"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Дозвољава апликацији да конфигурише Wi-Fi екране и повезује се са њима."</string>
+    <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"контрола Wi-Fi екрана"</string>
+    <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Дозвољава апликацији да контролише функције Wi-Fi екрана ниског нивоа."</string>
     <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
     <skip />
     <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
