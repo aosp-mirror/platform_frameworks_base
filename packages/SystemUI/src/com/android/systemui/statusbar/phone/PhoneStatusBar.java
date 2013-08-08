@@ -902,20 +902,19 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         if (mUseHeadsUp && shouldInterrupt(notification)) {
             if (DEBUG) Log.d(TAG, "launching notification in heads up mode");
-            // 1. Populate mHeadsUpNotificationView
-            mInterruptingNotificationTime = System.currentTimeMillis();
-            mInterruptingNotificationEntry = new Entry(key, notification, null);
+            Entry interruptionCandidate = new Entry(key, notification, null);
+            if (inflateViews(interruptionCandidate, mHeadsUpNotificationView.getHolder())) {
+                mInterruptingNotificationTime = System.currentTimeMillis();
+                mInterruptingNotificationEntry = interruptionCandidate;
 
-            if (inflateViews(mInterruptingNotificationEntry,
-                    mHeadsUpNotificationView.getHolder())) {
+                // 1. Populate mHeadsUpNotificationView
                 mHeadsUpNotificationView.setNotification(mInterruptingNotificationEntry);
+
                 // 2. Animate mHeadsUpNotificationView in
                 mHandler.sendEmptyMessage(MSG_SHOW_HEADS_UP);
 
                 // 3. Set alarm to age the notification off
                 resetHeadsUpDecayTimer();
-            } else {
-                mInterruptingNotificationEntry = null;
             }
         } else if (notification.getNotification().fullScreenIntent != null) {
             // Stop screensaver if the notification has a full-screen intent.
