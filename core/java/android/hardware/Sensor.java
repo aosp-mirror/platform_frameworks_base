@@ -129,7 +129,7 @@ public final class Sensor {
      * due to distortions that arise from magnetized iron, steel or permanent magnets on the
      * device) is not considered in the given sensor values. However, such hard iron bias values
      * are returned to you separately in the result {@link android.hardware.SensorEvent#values}
-     * so you may use them for custom calibrations. 
+     * so you may use them for custom calibrations.
      * <p>Also, no periodic calibration is performed
      * (i.e. there are no discontinuities in the data stream while using this sensor) and
      * assumptions that the magnetic field is due to the Earth's poles is avoided, but
@@ -174,7 +174,7 @@ public final class Sensor {
     public static final int TYPE_GYROSCOPE_UNCALIBRATED = 16;
 
     /**
-     * A constant describing the significant motion trigger sensor.
+     * A constant describing a significant motion trigger sensor.
      * <p>
      * It triggers when an event occurs and then automatically disables
      * itself. The sensor continues to operate while the device is asleep
@@ -184,6 +184,42 @@ public final class Sensor {
      * <p>See {@link TriggerEvent} for more details.
      */
     public static final int TYPE_SIGNIFICANT_MOTION = 17;
+
+    /**
+     * A constant describing a step detector sensor.
+     * <p>
+     * A sensor of this type triggers an event each time a step is taken by the user. The only
+     * allowed value to return is 1.0 and an event is generated for each step. Like with any other
+     * event, the timestamp indicates when the event (here the step) occurred, this corresponds to
+     * when the foot hit the ground, generating a high variation in acceleration.
+     * <p>
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     */
+    public static final int TYPE_STEP_DETECTOR = 18;
+
+    /**
+     * A constant describing a step counter sensor.
+     * <p>
+     * A sensor of this type returns the number of steps taken by the user since the last reboot
+     * while activated. The value is returned as a float (with the fractional part set to zero) and
+     * is reset to zero only on a system reboot. The timestamp of the event is set to the time when
+     * the first step for that event was taken. This sensor is implemented in hardware and is
+     * expected to be low power.
+     * <p>
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     */
+    public static final int TYPE_STEP_COUNTER = 19;
+
+    /**
+     * A constant describing the geo-magnetic rotation vector.
+     * <p>
+     * Similar to {@link #SENSOR_TYPE_ROTATION_VECTOR}, but using a magnetometer instead of using a
+     * gyroscope. This sensor uses lower power than the other rotation vectors, because it doesn't
+     * use the gyroscope. However, it is more noisy and will work best outdoors.
+     * <p>
+     * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
+     */
+    public static final int TYPE_GEOMAGNETIC_ROTATION_VECTOR = 20;
 
     /**
      * A constant describing all sensor types.
