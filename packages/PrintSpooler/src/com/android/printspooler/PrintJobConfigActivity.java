@@ -19,7 +19,6 @@ package com.android.printspooler;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -56,6 +55,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -66,7 +66,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -104,7 +103,7 @@ public class PrintJobConfigActivity extends Activity {
 
     private static final int EDITOR_STATE_INITIALIZED = 1;
     private static final int EDITOR_STATE_CONFIRMED_PRINT = 2;
-    private static final int EDITOR_STATE_CONFIRMED_PREVIEW = 3;
+//    private static final int EDITOR_STATE_CONFIRMED_PREVIEW = 3;
     private static final int EDITOR_STATE_CANCELLED = 4;
 
     private static final int MIN_COPIES = 1;
@@ -214,7 +213,7 @@ public class PrintJobConfigActivity extends Activity {
 
     public boolean onTouchEvent(MotionEvent event) {
         if (!mEditor.isPrintConfirmed() && !mEditor.isPreviewConfirmed()
-                && getWindow().shouldCloseOnTouch(this, event)) {
+                && mEditor.shouldCloseOnTouch(event)) {
             if (!mController.isWorking()) {
                 PrintJobConfigActivity.this.finish();
             }
@@ -606,7 +605,7 @@ public class PrintJobConfigActivity extends Activity {
         private final SimpleStringSplitter mStringCommaSplitter =
                 new SimpleStringSplitter(',');
 
-        private final Button mPrintPreviewButton;
+        private final View mContentContainer;
 
         private final Button mPrintButton;
 
@@ -802,6 +801,9 @@ public class PrintJobConfigActivity extends Activity {
         private boolean mIgnoreNextRangeChange;
 
         public Editor() {
+            // Content container
+            mContentContainer = findViewById(R.id.content_container);
+
             // Copies
             mCopiesEditText = (EditText) findViewById(R.id.copies_edittext);
             mCopiesEditText.setText(String.valueOf(MIN_COPIES));
@@ -864,19 +866,6 @@ public class PrintJobConfigActivity extends Activity {
                 mRangeOptionsSpinner.setSelection(0);
             }
 
-            // Preview button
-            mPrintPreviewButton = (Button) findViewById(R.id.print_preview_button);
-            mPrintPreviewButton.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mEditor.confirmPreview();
-                    // TODO: Implement me
-                    Toast.makeText(PrintJobConfigActivity.this,
-                            "Stop poking me! Not implemented yet :)",
-                            Toast.LENGTH_LONG).show();
-                }
-            });
-
             // Print button
             mPrintButton = (Button) findViewById(R.id.print_button);
             mPrintButton.setOnClickListener(new OnClickListener() {
@@ -890,6 +879,32 @@ public class PrintJobConfigActivity extends Activity {
             });
 
             updateUi();
+        }
+
+        public boolean shouldCloseOnTouch(MotionEvent event) {
+            if (event.getAction() != MotionEvent.ACTION_DOWN) {
+                return false;
+            }
+
+            final int[] locationInWindow = new int[2];
+            mContentContainer.getLocationInWindow(locationInWindow);
+
+            final int windowTouchSlop = ViewConfiguration.get(PrintJobConfigActivity.this)
+                    .getScaledWindowTouchSlop();
+            final int eventX = (int) event.getX();
+            final int eventY = (int) event.getY();
+            final int lenientWindowLeft = locationInWindow[0] - windowTouchSlop;
+            final int lenientWindowRight = lenientWindowLeft + mContentContainer.getWidth()
+                    + windowTouchSlop;
+            final int lenientWindowTop = locationInWindow[1] - windowTouchSlop;
+            final int lenientWindowBottom = lenientWindowTop + mContentContainer.getHeight()
+                    + windowTouchSlop;
+
+            if (eventX < lenientWindowLeft || eventX > lenientWindowRight
+                    || eventY < lenientWindowTop || eventY > lenientWindowBottom) {
+                return true;
+            }
+            return false;
         }
 
         public boolean isShwoingGeneratingPrintJobUi() {
@@ -917,7 +932,7 @@ public class PrintJobConfigActivity extends Activity {
             });
 
             // First animation - fade out the old content.
-            contentEditing.animate().alpha(0.0f).withEndAction(new Runnable() {
+            contentEditing.animate().alpha(0.0f).withLayer().withEndAction(new Runnable() {
                 @Override
                 public void run() {
                     contentEditing.setVisibility(View.INVISIBLE);
@@ -936,7 +951,7 @@ public class PrintJobConfigActivity extends Activity {
                             / (float) contentContainer.getHeight();
 
                     // Second animation - resize the container.
-                    contentContainer.animate().scaleY(scaleY).withEndAction(
+                    contentContainer.animate().scaleY(scaleY).withLayer().withEndAction(
                             new Runnable() {
                         @Override
                         public void run() {
@@ -946,7 +961,7 @@ public class PrintJobConfigActivity extends Activity {
                             contentContainer.addView(contentGenerating);
 
                             // Third animation - show the new content.
-                            contentGenerating.animate().alpha(1.0f);
+                            contentGenerating.animate().withLayer().alpha(1.0f);
                         }
                     });
                 }
@@ -987,9 +1002,9 @@ public class PrintJobConfigActivity extends Activity {
             return mEditorState == EDITOR_STATE_CONFIRMED_PRINT;
         }
 
-        public void confirmPreview() {
-            mEditorState = EDITOR_STATE_CONFIRMED_PREVIEW;
-        }
+//        public void confirmPreview() {
+//            mEditorState = EDITOR_STATE_CONFIRMED_PREVIEW;
+//        }
 
         public PageRange[] getRequestedPages() {
             if (hasErrors()) {
@@ -1035,7 +1050,8 @@ public class PrintJobConfigActivity extends Activity {
                 mOrientationSpinner.setEnabled(false);
                 mRangeOptionsSpinner.setEnabled(false);
                 mRangeEditText.setEnabled(false);
-                mPrintPreviewButton.setEnabled(false);
+                // TODO: Remove entirely or implement print preview.
+//                mPrintPreviewButton.setEnabled(false);
                 mPrintButton.setEnabled(false);
                 return;
             }
@@ -1092,9 +1108,9 @@ public class PrintJobConfigActivity extends Activity {
                 mRangeEditText.setEnabled(false);
                 mRangeEditText.setVisibility(View.INVISIBLE);
 
-                // Print preview
-                mPrintPreviewButton.setEnabled(false);
-                mPrintPreviewButton.setText(getString(R.string.print_preview));
+//                // Print preview
+//                mPrintPreviewButton.setEnabled(false);
+//                mPrintPreviewButton.setText(getString(R.string.print_preview));
 
                 // Print
                 mPrintButton.setEnabled(false);
@@ -1291,15 +1307,15 @@ public class PrintJobConfigActivity extends Activity {
                             && (TextUtils.isEmpty(mRangeEditText.getText()) || hasErrors()))
                         || (mRangeOptionsSpinner.getSelectedItemPosition() == 0
                             && (!mController.hasPerformedLayout() || hasErrors()))) {
-                    mPrintPreviewButton.setEnabled(false);
+//                    mPrintPreviewButton.setEnabled(false);
                     mPrintButton.setEnabled(false);
                 } else {
-                    mPrintPreviewButton.setEnabled(true);
-                    if (hasPdfViewer()) {
-                        mPrintPreviewButton.setText(getString(R.string.print_preview));
-                    } else {
-                        mPrintPreviewButton.setText(getString(R.string.install_for_print_preview));
-                    }
+//                    mPrintPreviewButton.setEnabled(true);
+//                    if (hasPdfViewer()) {
+//                        mPrintPreviewButton.setText(getString(R.string.print_preview));
+//                    } else {
+//                        mPrintPreviewButton.setText(getString(R.string.install_for_print_preview));
+//                    }
                     mPrintButton.setEnabled(true);
                 }
 
@@ -1412,12 +1428,12 @@ public class PrintJobConfigActivity extends Activity {
                     || mCopiesEditText.getError() != null;
         }
 
-        private boolean hasPdfViewer() {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setType("application/pdf");
-            return !getPackageManager().queryIntentActivities(intent,
-                    PackageManager.MATCH_DEFAULT_ONLY).isEmpty();
-        }
+//        private boolean hasPdfViewer() {
+//            Intent intent = new Intent(Intent.ACTION_VIEW);
+//            intent.setType("application/pdf");
+//            return !getPackageManager().queryIntentActivities(intent,
+//                    PackageManager.MATCH_DEFAULT_ONLY).isEmpty();
+//        }
 
         private final class SpinnerItem<T> {
             final T value;
