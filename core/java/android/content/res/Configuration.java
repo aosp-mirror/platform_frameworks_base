@@ -786,10 +786,14 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             // 2 most significant bits in screenLayout).
             setLayoutDirection(locale);
         }
+        if (delta.screenLayout != 0 && screenLayout != delta.screenLayout) {
+            changed |= ActivityInfo.CONFIG_LAYOUT_DIRECTION;
+            setLayoutDirection(locale);
+        }
         if (delta.userSetLocale && (!userSetLocale || ((changed & ActivityInfo.CONFIG_LOCALE) != 0)))
         {
-            userSetLocale = true;
             changed |= ActivityInfo.CONFIG_LOCALE;
+            userSetLocale = true;
         }
         if (delta.touchscreen != TOUCHSCREEN_UNDEFINED
                 && touchscreen != delta.touchscreen) {
@@ -933,6 +937,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_LOCALE;
             changed |= ActivityInfo.CONFIG_LAYOUT_DIRECTION;
         }
+        if (delta.screenLayout != 0 && screenLayout != delta.screenLayout) {
+            changed |= ActivityInfo.CONFIG_LAYOUT_DIRECTION;
+        }
         if (delta.touchscreen != TOUCHSCREEN_UNDEFINED
                 && touchscreen != delta.touchscreen) {
             changed |= ActivityInfo.CONFIG_TOUCHSCREEN;
@@ -1005,7 +1012,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static boolean needNewResources(int configChanges, int interestingChanges) {
         return (configChanges & (interestingChanges|ActivityInfo.CONFIG_FONT_SCALE)) != 0;
     }
-    
+
     /**
      * @hide Return true if the sequence of 'other' is better than this.  Assumes
      * that 'this' is your current sequence and 'other' is a new one you have
