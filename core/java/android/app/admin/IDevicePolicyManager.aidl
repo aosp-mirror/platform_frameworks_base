@@ -98,7 +98,8 @@ interface IDevicePolicyManager {
     void reportFailedPasswordAttempt(int userHandle);
     void reportSuccessfulPasswordAttempt(int userHandle);
 
-    boolean setDeviceOwner(String packageName);
+    boolean setDeviceOwner(String packageName, String ownerName);
     boolean isDeviceOwner(String packageName);
     String getDeviceOwner();
+    String getDeviceOwnerName();
 }
