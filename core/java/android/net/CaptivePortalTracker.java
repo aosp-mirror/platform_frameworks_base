@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.Inet4Address;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -65,7 +66,7 @@ import com.android.internal.R;
  * @hide
  */
 public class CaptivePortalTracker extends StateMachine {
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
     private static final String TAG = "CaptivePortalTracker";
 
     private static final String DEFAULT_SERVER = "clients3.google.com";
@@ -382,6 +383,12 @@ public class CaptivePortalTracker extends StateMachine {
             sendNetworkConditionsBroadcast(true /* response received */, isCaptivePortal,
                     requestTimestamp, responseTimestamp);
             return isCaptivePortal;
+        } catch (SocketTimeoutException e) {
+            if (DBG) log("Probably a portal: exception " + e);
+            if (requestTimestamp != -1) {
+                sendFailedCaptivePortalCheckBroadcast(requestTimestamp);
+            } // else something went wrong with setting up the urlConnection
+            return true;
         } catch (IOException e) {
             if (DBG) log("Probably not a portal: exception " + e);
             if (requestTimestamp != -1) {
