@@ -16,6 +16,8 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.DocumentsActivity.TAG;
+
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -28,6 +30,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.text.TextUtils.TruncateAt;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +47,7 @@ import com.google.android.collect.Lists;
 
 import libcore.io.IoUtils;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,8 +140,12 @@ public class RecentsCreateFragment extends Fragment {
                 while (cursor != null && cursor.moveToNext()) {
                     final String rawStack = cursor.getString(
                             cursor.getColumnIndex(RecentsProvider.COL_PATH));
-                    final DocumentStack stack = DocumentStack.deserialize(resolver, rawStack);
-                    result.add(stack);
+                    try {
+                        final DocumentStack stack = DocumentStack.deserialize(resolver, rawStack);
+                        result.add(stack);
+                    } catch (FileNotFoundException e) {
+                        Log.w(TAG, "Failed to resolve stack: " + e);
+                    }
                 }
             } finally {
                 IoUtils.closeQuietly(cursor);

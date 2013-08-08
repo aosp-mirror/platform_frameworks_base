@@ -25,12 +25,10 @@ import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.DocumentsContract.DocumentColumns;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
@@ -53,6 +51,7 @@ import com.android.documentsui.model.Document;
 import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.Root;
 
+import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -138,6 +137,8 @@ public class DocumentsActivity extends Activity {
                         cursor.getColumnIndex(RecentsProvider.COL_PATH));
                 mStack = DocumentStack.deserialize(getContentResolver(), raw);
             }
+        } catch (FileNotFoundException e) {
+            Log.w(TAG, "Failed to resume", e);
         } finally {
             cursor.close();
         }
@@ -470,7 +471,10 @@ public class DocumentsActivity extends Activity {
         mStack.clear();
 
         if (!root.isRecents) {
-            onDocumentPicked(Document.fromRoot(getContentResolver(), root));
+            try {
+                onDocumentPicked(Document.fromRoot(getContentResolver(), root));
+            } catch (FileNotFoundException e) {
+            }
         } else {
             onCurrentDirectoryChanged();
         }

@@ -21,10 +21,12 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.DocumentColumns;
-import android.util.Log;
 
 import com.android.documentsui.RecentsProvider;
 
+import libcore.io.IoUtils;
+
+import java.io.FileNotFoundException;
 import java.util.Comparator;
 
 /**
@@ -50,7 +52,8 @@ public class Document {
         this.size = size;
     }
 
-    public static Document fromRoot(ContentResolver resolver, Root root) {
+    public static Document fromRoot(ContentResolver resolver, Root root)
+            throws FileNotFoundException {
         return fromUri(resolver, root.uri);
     }
 
@@ -70,14 +73,16 @@ public class Document {
         return new Document(uri, mimeType, displayName, lastModified, flags, summary, size);
     }
 
-    public static Document fromRecentOpenCursor(ContentResolver resolver, Cursor recentCursor) {
+    public static Document fromRecentOpenCursor(ContentResolver resolver, Cursor recentCursor)
+            throws FileNotFoundException {
         final Uri uri = Uri.parse(getCursorString(recentCursor, RecentsProvider.COL_URI));
         final long lastModified = getCursorLong(recentCursor, RecentsProvider.COL_TIMESTAMP);
 
-        final Cursor cursor = resolver.query(uri, null, null, null, null);
+        Cursor cursor = null;
         try {
+            cursor = resolver.query(uri, null, null, null, null);
             if (!cursor.moveToFirst()) {
-                throw new IllegalArgumentException("Missing details for " + uri);
+                throw new FileNotFoundException("Missing details for " + uri);
             }
             final String mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
             final String displayName = getCursorString(cursor, DocumentColumns.DISPLAY_NAME);
@@ -87,16 +92,19 @@ public class Document {
             final long size = getCursorLong(cursor, DocumentColumns.SIZE);
 
             return new Document(uri, mimeType, displayName, lastModified, flags, summary, size);
+        } catch (Throwable t) {
+            throw asFileNotFoundException(t);
         } finally {
-            cursor.close();
+            IoUtils.closeQuietly(cursor);
         }
     }
 
-    public static Document fromUri(ContentResolver resolver, Uri uri) {
-        final Cursor cursor = resolver.query(uri, null, null, null, null);
+    public static Document fromUri(ContentResolver resolver, Uri uri) throws FileNotFoundException {
+        Cursor cursor = null;
         try {
+            cursor = resolver.query(uri, null, null, null, null);
             if (!cursor.moveToFirst()) {
-                throw new IllegalArgumentException("Missing details for " + uri);
+                throw new FileNotFoundException("Missing details for " + uri);
             }
             final String mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
             final String displayName = getCursorString(cursor, DocumentColumns.DISPLAY_NAME);
@@ -106,8 +114,10 @@ public class Document {
             final long size = getCursorLong(cursor, DocumentColumns.SIZE);
 
             return new Document(uri, mimeType, displayName, lastModified, flags, summary, size);
+        } catch (Throwable t) {
+            throw asFileNotFoundException(t);
         } finally {
-            cursor.close();
+            IoUtils.closeQuietly(cursor);
         }
     }
 
@@ -173,5 +183,15 @@ public class Document {
         public int compare(Document lhs, Document rhs) {
             return Long.compare(rhs.size, lhs.size);
         }
+    }
+
+    public static FileNotFoundException asFileNotFoundException(Throwable t)
+            throws FileNotFoundException {
+        if (t instanceof FileNotFoundException) {
+            throw (FileNotFoundException) t;
+        }
+        final FileNotFoundException fnfe = new FileNotFoundException(t.getMessage());
+        fnfe.initCause(t);
+        throw fnfe;
     }
 }
