@@ -1378,6 +1378,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 dr.mDrawableSizeEnd = dr.mDrawableHeightEnd = 0;
             }
+            resetResolvedDrawables();
+            resolveDrawables();
         }
     }
 
