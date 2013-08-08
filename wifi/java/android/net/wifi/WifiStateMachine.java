@@ -68,6 +68,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.util.Log;
 import android.util.LruCache;
 import android.text.TextUtils;
 
@@ -543,7 +544,6 @@ public class WifiStateMachine extends StateMachine {
 
     public WifiStateMachine(Context context, String wlanInterface) {
         super("WifiStateMachine");
-
         mContext = context;
         mInterfaceName = wlanInterface;
 
@@ -888,6 +888,7 @@ public class WifiStateMachine extends StateMachine {
      * TODO: doc
      */
     public void setOperationalMode(int mode) {
+        if (DBG) log("setting operational mode to " + String.valueOf(mode));
         sendMessage(CMD_SET_OPERATIONAL_MODE, mode, 0);
     }
 
@@ -1756,8 +1757,7 @@ public class WifiStateMachine extends StateMachine {
         /* Socket connection can be lost when we do a graceful shutdown
         * or when the driver is hung. Ensure supplicant is stopped here.
         */
-        mWifiNative.killSupplicant(mP2pSupported);
-        mWifiNative.closeSupplicantConnection();
+        mWifiMonitor.killSupplicant(mP2pSupported);
         sendSupplicantConnectionChangedBroadcast(false);
         setWifiState(WIFI_STATE_DISABLED);
     }
@@ -2139,7 +2139,7 @@ public class WifiStateMachine extends StateMachine {
                         * Avoids issues with drivers that do not handle interface down
                         * on a running supplicant properly.
                         */
-                        mWifiNative.killSupplicant(mP2pSupported);
+                        mWifiMonitor.killSupplicant(mP2pSupported);
                         if(mWifiNative.startSupplicant(mP2pSupported)) {
                             setWifiState(WIFI_STATE_ENABLING);
                             if (DBG) log("Supplicant start successful");
@@ -2222,7 +2222,7 @@ public class WifiStateMachine extends StateMachine {
                 case WifiMonitor.SUP_DISCONNECTION_EVENT:
                     if (++mSupplicantRestartCount <= SUPPLICANT_RESTART_TRIES) {
                         loge("Failed to setup control channel, restart supplicant");
-                        mWifiNative.killSupplicant(mP2pSupported);
+                        mWifiMonitor.killSupplicant(mP2pSupported);
                         transitionTo(mInitialState);
                         sendMessageDelayed(CMD_START_SUPPLICANT, SUPPLICANT_RESTART_INTERVAL_MSECS);
                     } else {
@@ -2329,9 +2329,7 @@ public class WifiStateMachine extends StateMachine {
             }
 
             if (DBG) log("stopping supplicant");
-            if (!mWifiNative.stopSupplicant()) {
-                loge("Failed to stop supplicant");
-            }
+            mWifiMonitor.stopSupplicant();
 
             /* Send ourselves a delayed message to indicate failure after a wait time */
             sendMessageDelayed(obtainMessage(CMD_STOP_SUPPLICANT_FAILED,
