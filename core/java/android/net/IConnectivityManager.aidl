@@ -136,4 +136,6 @@ interface IConnectivityManager
     int checkMobileProvisioning(boolean sendNotification, int suggestedTimeOutMs, in ResultReceiver resultReceiver);
 
     String getMobileProvisioningUrl();
+
+    String getMobileRedirectedProvisioningUrl();
 }
