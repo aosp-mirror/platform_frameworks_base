@@ -1155,7 +1155,7 @@ public final class ActivityStackSupervisor {
         }
 
         boolean abort = !mService.mIntentFirewall.checkStartActivity(intent, callingUid,
-                callingPid, resolvedType, aInfo);
+                callingPid, resolvedType, aInfo.applicationInfo);
 
         if (mService.mController != null) {
             try {

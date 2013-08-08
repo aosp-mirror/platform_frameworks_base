@@ -20,7 +20,7 @@ import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.os.Environment;
@@ -119,15 +119,26 @@ public class IntentFirewall {
      * It is assumed the caller is already holding the global ActivityManagerService lock.
      */
     public boolean checkStartActivity(Intent intent, int callerUid, int callerPid,
-            String resolvedType, ActivityInfo resolvedActivity) {
-        List<Rule> matchingRules = mActivityResolver.queryIntent(intent, resolvedType, false, 0);
+            String resolvedType, ApplicationInfo resolvedApp) {
+        return checkIntent(mActivityResolver, TYPE_ACTIVITY, intent, callerUid, callerPid,
+                resolvedType, resolvedApp);
+    }
+
+    public boolean checkService(Intent intent, int callerUid, int callerPid, String resolvedType,
+            ApplicationInfo resolvedApp) {
+        return checkIntent(mServiceResolver, TYPE_SERVICE, intent, callerUid, callerPid,
+                resolvedType, resolvedApp);
+    }
+
+    public boolean checkIntent(FirewallIntentResolver resolver, int intentType, Intent intent,
+            int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
+        List<Rule> matchingRules = resolver.queryIntent(intent, resolvedType, false, 0);
         boolean log = false;
         boolean block = false;
 
         for (int i=0; i< matchingRules.size(); i++) {
             Rule rule = matchingRules.get(i);
-            if (rule.matches(this, intent, callerUid, callerPid, resolvedType,
-                    resolvedActivity.applicationInfo)) {
+            if (rule.matches(this, intent, callerUid, callerPid, resolvedType, resolvedApp)) {
                 block |= rule.getBlock();
                 log |= rule.getLog();
 
@@ -140,7 +151,7 @@ public class IntentFirewall {
         }
 
         if (log) {
-            logIntent(TYPE_ACTIVITY, intent, callerUid, resolvedType);
+            logIntent(intentType, intent, callerUid, resolvedType);
         }
 
         return !block;
