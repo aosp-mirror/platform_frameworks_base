@@ -3916,11 +3916,26 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 // hipri connection so the default connection stays active.
                 log("isMobileOk: start hipri url=" + params.mUrl);
                 mCs.setEnableFailFastMobileData(DctConstants.ENABLED);
-                mCs.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
-                        Phone.FEATURE_ENABLE_HIPRI, new Binder());
 
                 // Continue trying to connect until time has run out
                 long endTime = SystemClock.elapsedRealtime() + params.mTimeOutMs;
+
+                // First wait until we can start using hipri
+                Binder binder = new Binder();
+                while(SystemClock.elapsedRealtime() < endTime) {
+                    int ret = mCs.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
+                            Phone.FEATURE_ENABLE_HIPRI, binder);
+                    if ((ret == PhoneConstants.APN_ALREADY_ACTIVE)
+                        || (ret == PhoneConstants.APN_REQUEST_STARTED)) {
+                            log("isMobileOk: hipri started");
+                            break;
+                    }
+                    if (VDBG) log("isMobileOk: hipri not started yet");
+                    result = ConnectivityManager.CMP_RESULT_CODE_NO_CONNECTION;
+                    sleep(1);
+                }
+
+                // Continue trying to connect until time has run out
                 while(SystemClock.elapsedRealtime() < endTime) {
                     try {
                         // Wait for hipri to connect.
