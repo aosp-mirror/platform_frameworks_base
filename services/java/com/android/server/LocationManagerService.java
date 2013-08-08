@@ -63,6 +63,8 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 import com.android.internal.os.BackgroundThread;
+import com.android.server.location.FlpHardwareProvider;
+import com.android.server.location.FusedProxy;
 import com.android.server.location.GeocoderProxy;
 import com.android.server.location.GeofenceProxy;
 import com.android.server.location.GeofenceManager;
@@ -429,6 +431,17 @@ public class LocationManagerService extends ILocationManager.Stub {
             Slog.e(TAG,  "no geofence provider found");
         }
 
+        // bind to fused provider
+        // TODO: [GeofenceIntegration] bind #getGeofenceHardware() with the GeofenceProxy
+        FlpHardwareProvider flpHardwareProvider = FlpHardwareProvider.getInstance(mContext);
+        FusedProxy fusedProxy = FusedProxy.createAndBind(
+                mContext,
+                mLocationHandler,
+                flpHardwareProvider.getLocationHardware());
+
+        if(fusedProxy == null) {
+            Slog.e(TAG, "No FusedProvider found.");
+        }
     }
 
     /**
