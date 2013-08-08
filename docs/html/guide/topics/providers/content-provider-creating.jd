@@ -680,7 +680,7 @@ public class ExampleProvider extends ContentProvider
          * Notice that the database itself isn't created or opened
          * until SQLiteOpenHelper.getWritableDatabase is called
          */
-        mOpenHelper = new SQLiteOpenHelper(
+        mOpenHelper = new MainDatabaseHelper(
             getContext(),        // the application context
             DBNAME,              // the name of the database)
             null,                // uses the default SQLite cursor
