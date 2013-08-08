@@ -26,6 +26,7 @@ import android.app.IStopUserCallback;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.RestrictionEntry;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -116,7 +117,7 @@ public class UserManagerService extends IUserManager.Stub {
 
     private static final int MIN_USER_ID = 10;
 
-    private static final int USER_VERSION = 3;
+    private static final int USER_VERSION = 4;
 
     private static final long EPOCH_PLUS_30_YEARS = 30L * 365 * 24 * 60 * 60 * 1000L; // ms
 
@@ -162,6 +163,8 @@ public class UserManagerService extends IUserManager.Stub {
     private boolean mGuestEnabled;
     private int mNextSerialNumber;
     private int mUserVersion = 0;
+    // Temporary cleanup variable, this and associated code should be removed later.
+    private boolean mUnblockAppsTemp;
 
     private static UserManagerService sInstance;
 
@@ -232,12 +235,14 @@ public class UserManagerService extends IUserManager.Stub {
                 sInstance = this;
             }
         }
-
     }
 
     void systemReady() {
-        mUserPackageMonitor.register(ActivityThread.systemMain().getSystemContext(),
+        final Context context = ActivityThread.systemMain().getSystemContext();
+        mUserPackageMonitor.register(context,
                 null, UserHandle.ALL, false);
+        context.registerReceiver(mBootCompletedReceiver,
+                new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
         userForeground(UserHandle.USER_OWNER);
     }
 
@@ -602,10 +607,15 @@ public class UserManagerService extends IUserManager.Stub {
                 int userId = mRestrictionsPinStates.keyAt(i);
                 RestrictionsPinState state = mRestrictionsPinStates.valueAt(i);
                 if (state.salt != 0 && state.pinHash != null) {
-                    removeRestrictionsForUser(userId);
+                    removeRestrictionsForUser(userId, false);
                 }
             }
             userVersion = 3;
+        }
+
+        if (userVersion < 4) {
+            mUnblockAppsTemp = true;
+            userVersion = 4;
         }
 
         if (userVersion < USER_VERSION) {
@@ -1234,10 +1244,10 @@ public class UserManagerService extends IUserManager.Stub {
     public void removeRestrictions() {
         checkManageUsersPermission("Only system can remove restrictions");
         final int userHandle = UserHandle.getCallingUserId();
-        removeRestrictionsForUser(userHandle);
+        removeRestrictionsForUser(userHandle, true);
     }
 
-    private void removeRestrictionsForUser(final int userHandle) {
+    private void removeRestrictionsForUser(final int userHandle, boolean unblockApps) {
         synchronized (mPackagesLock) {
             // Remove all user restrictions
             setUserRestrictions(new Bundle(), userHandle);
@@ -1246,6 +1256,12 @@ public class UserManagerService extends IUserManager.Stub {
             // Remove any app restrictions
             cleanAppRestrictions(userHandle, true);
         }
+        if (unblockApps) {
+            unblockAllAppsForUser(userHandle);
+        }
+    }
+
+    private void unblockAllAppsForUser(final int userHandle) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -1569,6 +1585,21 @@ public class UserManagerService extends IUserManager.Stub {
             final boolean uninstalled = isPackageDisappearing(pkg) == PACKAGE_PERMANENT_CHANGE;
             if (uninstalled && userId >= 0 && !isPackageInstalled(pkg, userId)) {
                 cleanAppRestrictionsForPackage(pkg, userId);
+            }
+        }
+    };
+
+    private BroadcastReceiver mBootCompletedReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            // This code block can be removed after cleanup
+            if (mUnblockAppsTemp) {
+                synchronized (mPackagesLock) {
+                    // Unblock apps due to removal of restrictions feature
+                    for (int i = 0; i < mUsers.size(); i++) {
+                        int userId = mUsers.keyAt(i);
+                        unblockAllAppsForUser(userId);
+                    }
+                }
             }
         }
     };
