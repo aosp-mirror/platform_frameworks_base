@@ -16,14 +16,13 @@
 
 package android.app;
 
-import android.R;
 import android.os.BatteryStats;
 import android.os.IBinder;
 import com.android.internal.app.IUsageStats;
+import com.android.internal.app.ProcessStats;
 import com.android.internal.os.PkgUsageStats;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.FastPrintWriter;
-import com.android.internal.util.MemInfoReader;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -35,9 +34,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Point;
 import android.graphics.Rect;
-import android.hardware.display.DisplayManagerGlobal;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -52,7 +49,6 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
-import android.view.Display;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -2253,7 +2249,7 @@ public class ActivityManager {
         PrintWriter pw = new FastPrintWriter(fout);
         dumpService(pw, fd, Context.ACTIVITY_SERVICE, new String[] { "package", packageName });
         pw.println();
-        dumpService(pw, fd, "procstats", new String[] { packageName });
+        dumpService(pw, fd, ProcessStats.SERVICE_NAME, new String[] { packageName });
         pw.println();
         dumpService(pw, fd, "usagestats", new String[] { "--packages", packageName });
         pw.println();

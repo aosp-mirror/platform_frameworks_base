@@ -155,6 +155,7 @@ public abstract class BatteryStats implements Parcelable {
     private static final String BATTERY_LEVEL_DATA = "lv";
     private static final String WIFI_DATA = "wfl";
     private static final String MISC_DATA = "m";
+    private static final String HISTORY_DATA = "h";
     private static final String SCREEN_BRIGHTNESS_DATA = "br";
     private static final String SIGNAL_STRENGTH_TIME_DATA = "sgt";
     private static final String SIGNAL_SCANNING_TIME_DATA = "sst";
@@ -2390,7 +2391,7 @@ public abstract class BatteryStats implements Parcelable {
             while (getNextHistoryLocked(rec)) {
                 pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
                 pw.print(0); pw.print(',');
-                pw.print("h"); pw.print(',');
+                pw.print(HISTORY_DATA); pw.print(',');
                 hprinter.printNextItemCheckin(pw, rec, now);
                 pw.println();
             }
