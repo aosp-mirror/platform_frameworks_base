@@ -17,6 +17,7 @@
 package com.android.documentsui.model;
 
 import static com.android.documentsui.DocumentsActivity.TAG;
+import static com.android.documentsui.model.Document.asFileNotFoundException;
 
 import android.content.ContentResolver;
 import android.net.Uri;
@@ -25,6 +26,7 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.io.FileNotFoundException;
 import java.util.LinkedList;
 
 /**
@@ -41,7 +43,8 @@ public class DocumentStack extends LinkedList<Document> {
         return json.toString();
     }
 
-    public static DocumentStack deserialize(ContentResolver resolver, String raw) {
+    public static DocumentStack deserialize(ContentResolver resolver, String raw)
+            throws FileNotFoundException {
         Log.d(TAG, "deserialize: " + raw);
 
         final DocumentStack stack = new DocumentStack();
@@ -53,7 +56,7 @@ public class DocumentStack extends LinkedList<Document> {
                 stack.add(doc);
             }
         } catch (JSONException e) {
-            Log.w(TAG, "Failed to decode stack", e);
+            throw asFileNotFoundException(e);
         }
 
         // TODO: handle roots that have gone missing

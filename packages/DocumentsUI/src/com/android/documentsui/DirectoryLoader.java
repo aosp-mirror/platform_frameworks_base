@@ -19,12 +19,14 @@ package com.android.documentsui;
 import static com.android.documentsui.DirectoryFragment.TYPE_NORMAL;
 import static com.android.documentsui.DirectoryFragment.TYPE_RECENT_OPEN;
 import static com.android.documentsui.DirectoryFragment.TYPE_SEARCH;
+import static com.android.documentsui.DocumentsActivity.TAG;
 
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
+import android.util.Log;
 
 import com.android.documentsui.model.Document;
 import com.android.internal.util.Predicate;
@@ -32,6 +34,7 @@ import com.google.android.collect.Lists;
 
 import libcore.io.IoUtils;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -60,20 +63,24 @@ public class DirectoryLoader extends UriDerivativeLoader<List<Document>> {
         final Cursor cursor = resolver.query(uri, null, null, null, null, signal);
         try {
             while (cursor != null && cursor.moveToNext()) {
-                final Document doc;
+                Document doc = null;
                 switch (mType) {
                     case TYPE_NORMAL:
                     case TYPE_SEARCH:
                         doc = Document.fromDirectoryCursor(uri, cursor);
                         break;
                     case TYPE_RECENT_OPEN:
-                        doc = Document.fromRecentOpenCursor(resolver, cursor);
+                        try {
+                            doc = Document.fromRecentOpenCursor(resolver, cursor);
+                        } catch (FileNotFoundException e) {
+                            Log.w(TAG, "Failed to find recent: " + e);
+                        }
                         break;
                     default:
                         throw new IllegalArgumentException("Unknown type");
                 }
 
-                if (mFilter == null || mFilter.apply(doc)) {
+                if (doc != null && (mFilter == null || mFilter.apply(doc))) {
                     result.add(doc);
                 }
             }

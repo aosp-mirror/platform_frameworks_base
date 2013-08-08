@@ -36,6 +36,8 @@ import android.widget.Toast;
 
 import com.android.documentsui.model.Document;
 
+import java.io.FileNotFoundException;
+
 /**
  * Dialog to create a new directory.
  */
@@ -73,12 +75,16 @@ public class CreateDirectoryFragment extends DialogFragment {
                 final DocumentsActivity activity = (DocumentsActivity) getActivity();
                 final Document cwd = activity.getCurrentDirectory();
 
-                final Uri childUri = resolver.insert(cwd.uri, values);
-                if (childUri != null) {
+                Uri childUri = resolver.insert(cwd.uri, values);
+                try {
                     // Navigate into newly created child
                     final Document childDoc = Document.fromUri(resolver, childUri);
                     activity.onDocumentPicked(childDoc);
-                } else {
+                } catch (FileNotFoundException e) {
+                    childUri = null;
+                }
+
+                if (childUri == null) {
                     Toast.makeText(context, R.string.save_error, Toast.LENGTH_SHORT).show();
                 }
             }
