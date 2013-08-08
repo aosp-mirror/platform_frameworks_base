@@ -106,6 +106,7 @@ class FastScroller {
 
     private final Rect mTempBounds = new Rect();
     private final Rect mTempMargins = new Rect();
+    private final Rect mContainerRect = new Rect();
 
     private final AbsListView mList;
     private final ViewGroupOverlay mOverlay;
@@ -158,6 +159,9 @@ class FastScroller {
     private boolean mLongList;
 
     private Object[] mSections;
+
+    /** Whether this view is currently performing layout. */
+    private boolean mUpdatingLayout;
 
     /**
      * Current decoration state, one of:
@@ -434,6 +438,16 @@ class FastScroller {
      * Measures and layouts the scrollbar and decorations.
      */
     private void updateLayout() {
+        // Prevent re-entry when RTL properties change as a side-effect of
+        // resolving padding.
+        if (mUpdatingLayout) {
+            return;
+        }
+
+        mUpdatingLayout = true;
+
+        updateContainerRect();
+
         layoutThumb();
         layoutTrack();
 
@@ -451,6 +465,8 @@ class FastScroller {
             bounds.bottom += mPreviewImage.getPaddingBottom();
             applyLayout(mPreviewImage, bounds);
         }
+
+        mUpdatingLayout = false;
     }
 
     /**
@@ -513,14 +529,15 @@ class FastScroller {
             marginRight = margins.right;
         }
 
-        final int listWidth = mList.getWidth();
+        final Rect container = mContainerRect;
+        final int containerWidth = container.width();
         final int maxWidth;
         if (adjacent == null) {
-            maxWidth = listWidth;
+            maxWidth = containerWidth;
         } else if (mLayoutFromRight) {
             maxWidth = adjacent.getLeft();
         } else {
-            maxWidth = listWidth - adjacent.getRight();
+            maxWidth = containerWidth - adjacent.getRight();
         }
 
         final int adjMaxWidth = maxWidth - marginLeft - marginRight;
@@ -533,10 +550,10 @@ class FastScroller {
         final int left;
         final int right;
         if (mLayoutFromRight) {
-            right = (adjacent == null ? listWidth : adjacent.getLeft()) - marginRight;
+            right = (adjacent == null ? container.right : adjacent.getLeft()) - marginRight;
             left = right - width;
         } else {
-            left = (adjacent == null ? 0 : adjacent.getRight()) + marginLeft;
+            left = (adjacent == null ? container.left : adjacent.getRight()) + marginLeft;
             right = left + width;
         }
 
@@ -560,20 +577,39 @@ class FastScroller {
             marginRight = margins.right;
         }
 
-        final View list = mList;
-        final int listWidth = list.getWidth();
-        final int adjMaxWidth = listWidth - marginLeft - marginRight;
+        final Rect container = mContainerRect;
+        final int containerWidth = container.width();
+        final int adjMaxWidth = containerWidth - marginLeft - marginRight;
         final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(adjMaxWidth, MeasureSpec.AT_MOST);
         final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
         preview.measure(widthMeasureSpec, heightMeasureSpec);
 
         // Align at the vertical center, 10% from the top.
+        final int containerHeight = container.height();
         final int width = preview.getMeasuredWidth();
-        final int top = list.getHeight() / 10 + marginTop;
+        final int top = containerHeight / 10 + marginTop + container.top;
         final int bottom = top + preview.getMeasuredHeight();
-        final int left = (listWidth - width) / 2;
+        final int left = (containerWidth - width) / 2 + container.left;
         final int right = left + width;
         out.set(left, top, right, bottom);
+    }
+
+    private void updateContainerRect() {
+        final AbsListView list = mList;
+        final Rect container = mContainerRect;
+        container.left = 0;
+        container.top = 0;
+        container.right = list.getWidth();
+        container.bottom = list.getHeight();
+
+        final int scrollbarStyle = list.getScrollBarStyle();
+        if (scrollbarStyle == View.SCROLLBARS_INSIDE_INSET
+                || scrollbarStyle == View.SCROLLBARS_INSIDE_OVERLAY) {
+            container.left += list.getPaddingLeft();
+            container.top += list.getPaddingTop();
+            container.right -= list.getPaddingRight();
+            container.bottom -= list.getPaddingBottom();
+        }
     }
 
     /**
@@ -586,25 +622,24 @@ class FastScroller {
     }
 
     /**
-     * Lays out the track centered on the thumb, if available, or against the
-     * edge if no thumb is available. Must be called after {@link #layoutThumb}.
+     * Lays out the track centered on the thumb. Must be called after
+     * {@link #layoutThumb}.
      */
     private void layoutTrack() {
         final View track = mTrackImage;
         final View thumb = mThumbImage;
-        final View list = mList;
-        final int listWidth = list.getWidth();
-        final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(listWidth, MeasureSpec.AT_MOST);
+        final Rect container = mContainerRect;
+        final int containerWidth = container.width();
+        final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(containerWidth, MeasureSpec.AT_MOST);
         final int heightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
         track.measure(widthMeasureSpec, heightMeasureSpec);
 
         final int trackWidth = track.getMeasuredWidth();
         final int thumbHalfHeight = thumb == null ? 0 : thumb.getHeight() / 2;
-        final int left = thumb == null ? listWidth - trackWidth :
-            thumb.getLeft() + (thumb.getWidth() - trackWidth) / 2;
+        final int left = thumb.getLeft() + (thumb.getWidth() - trackWidth) / 2;
         final int right = left + trackWidth;
-        final int top = thumbHalfHeight;
-        final int bottom = list.getHeight() - thumbHalfHeight;
+        final int top = container.top + thumbHalfHeight;
+        final int bottom = container.bottom - thumbHalfHeight;
         track.layout(left, top, right, bottom);
     }
 
@@ -990,36 +1025,40 @@ class FastScroller {
      *            to place the thumb.
      */
     private void setThumbPos(float position) {
-        final int top = 0;
-        final int bottom = mList.getHeight();
+        final Rect container = mContainerRect;
+        final int top = container.top;
+        final int bottom = container.bottom;
 
-        final float thumbHalfHeight = mThumbImage.getHeight() / 2f;
-        final float min = top + thumbHalfHeight;
-        final float max = bottom - thumbHalfHeight;
+        final ImageView trackImage = mTrackImage;
+        final ImageView thumbImage = mThumbImage;
+        final float min = trackImage.getTop();
+        final float max = trackImage.getBottom();
         final float offset = min;
         final float range = max - min;
         final float thumbMiddle = position * range + offset;
-        mThumbImage.setTranslationY(thumbMiddle - thumbHalfHeight);
+        thumbImage.setTranslationY(thumbMiddle - thumbImage.getHeight() / 2);
 
         // Center the preview on the thumb, constrained to the list bounds.
-        final float previewHalfHeight = mPreviewImage.getHeight() / 2f;
+        final ImageView previewImage = mPreviewImage;
+        final float previewHalfHeight = previewImage.getHeight() / 2f;
         final float minP = top + previewHalfHeight;
         final float maxP = bottom - previewHalfHeight;
         final float previewMiddle = MathUtils.constrain(thumbMiddle, minP, maxP);
         final float previewTop = previewMiddle - previewHalfHeight;
+        previewImage.setTranslationY(previewTop);
 
-        mPreviewImage.setTranslationY(previewTop);
         mPrimaryText.setTranslationY(previewTop);
         mSecondaryText.setTranslationY(previewTop);
     }
 
     private float getPosFromMotionEvent(float y) {
-        final int top = 0;
-        final int bottom = mList.getHeight();
+        final Rect container = mContainerRect;
+        final int top = container.top;
+        final int bottom = container.bottom;
 
-        final float thumbHalfHeight = mThumbImage.getHeight() / 2f;
-        final float min = top + thumbHalfHeight;
-        final float max = bottom - thumbHalfHeight;
+        final ImageView trackImage = mTrackImage;
+        final float min = trackImage.getTop();
+        final float max = trackImage.getBottom();
         final float offset = min;
         final float range = max - min;
 
