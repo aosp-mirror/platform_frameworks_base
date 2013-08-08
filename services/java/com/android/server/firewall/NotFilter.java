@@ -18,7 +18,6 @@ package com.android.server.firewall;
 
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -34,9 +33,9 @@ class NotFilter implements Filter {
 
     @Override
     public boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
-            int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
+            int callerUid, int callerPid, String resolvedType, int receivingUid) {
         return !mChild.matches(ifw, resolvedComponent, intent, callerUid, callerPid, resolvedType,
-                resolvedApp);
+                receivingUid);
     }
 
     public static final FilterFactory FACTORY = new FilterFactory("not") {

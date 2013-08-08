@@ -18,7 +18,6 @@ package com.android.server.firewall;
 
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 
 interface Filter {
     /**
@@ -30,8 +29,8 @@ interface Filter {
      * @param callerUid The uid of the caller
      * @param callerPid The pid of the caller
      * @param resolvedType The resolved mime type of the intent
-     * @param resolvedApp The application that contains the resolved component that the intent is
+     * @param receivingUid The uid of the component receiving the intent
      */
     boolean matches(IntentFirewall ifw, ComponentName resolvedComponent, Intent intent,
-            int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp);
+            int callerUid, int callerPid, String resolvedType, int receivingUid);
 }
