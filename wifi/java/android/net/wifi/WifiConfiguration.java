@@ -312,7 +312,10 @@ public class WifiConfiguration implements Parcelable {
         STATIC,
         /* no proxy details are assigned, this is used to indicate
          * that any existing proxy settings should be retained */
-        UNASSIGNED
+        UNASSIGNED,
+        /* Use a Pac based proxy.
+         */
+        PAC
     }
     /**
      * @hide

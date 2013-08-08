@@ -56,13 +56,11 @@ import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
-import android.net.Uri;
 import android.net.LinkProperties.CompareResult;
 import android.net.MobileDataStateTracker;
 import android.net.NetworkConfig;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
-import android.net.NetworkInfo.State;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkState;
 import android.net.NetworkStateTracker;
@@ -70,6 +68,7 @@ import android.net.NetworkUtils;
 import android.net.Proxy;
 import android.net.ProxyProperties;
 import android.net.RouteInfo;
+import android.net.Uri;
 import android.net.wifi.WifiStateTracker;
 import android.net.wimax.WimaxManagerConstants;
 import android.os.AsyncTask;
@@ -102,6 +101,7 @@ import android.util.SparseIntArray;
 import android.util.Xml;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
@@ -110,17 +110,17 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
+import com.android.net.IProxyService;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.connectivity.Nat464Xlat;
+import com.android.server.connectivity.PacManager;
 import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
 import com.android.server.net.BaseNetworkObserver;
 import com.android.server.net.LockdownVpnTracker;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Sets;
-
-import com.android.internal.annotations.GuardedBy;
 
 import dalvik.system.DexClassLoader;
 
@@ -369,6 +369,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     // track the global proxy.
     private ProxyProperties mGlobalProxy = null;
+
+    private PacManager mPacManager = null;
 
     private SettingsObserver mSettingsObserver;
 
@@ -631,6 +633,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         mDataConnectionStats = new DataConnectionStats(mContext);
         mDataConnectionStats.startMonitoring();
+
+        mPacManager = new PacManager(mContext);
     }
 
     /**
@@ -3168,13 +3172,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // of proxy info to all the JVMs.
         // enforceAccessPermission();
         synchronized (mProxyLock) {
-            if (mGlobalProxy != null) return mGlobalProxy;
-            return (mDefaultProxyDisabled ? null : mDefaultProxy);
+            ProxyProperties ret = mGlobalProxy;
+            if ((ret == null) && !mDefaultProxyDisabled) ret = mDefaultProxy;
+            return ret;
         }
     }
 
     public void setGlobalProxy(ProxyProperties proxyProperties) {
         enforceConnectivityInternalPermission();
+
         synchronized (mProxyLock) {
             if (proxyProperties == mGlobalProxy) return;
             if (proxyProperties != null && proxyProperties.equals(mGlobalProxy)) return;
@@ -3183,11 +3189,16 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             String host = "";
             int port = 0;
             String exclList = "";
-            if (proxyProperties != null && !TextUtils.isEmpty(proxyProperties.getHost())) {
+            String pacFileUrl = "";
+            if (proxyProperties != null && (!TextUtils.isEmpty(proxyProperties.getHost()) ||
+                    !TextUtils.isEmpty(proxyProperties.getPacFileUrl()))) {
                 mGlobalProxy = new ProxyProperties(proxyProperties);
                 host = mGlobalProxy.getHost();
                 port = mGlobalProxy.getPort();
                 exclList = mGlobalProxy.getExclusionList();
+                if (proxyProperties.getPacFileUrl() != null) {
+                    pacFileUrl = proxyProperties.getPacFileUrl();
+                }
             } else {
                 mGlobalProxy = null;
             }
@@ -3198,6 +3209,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 Settings.Global.putInt(res, Settings.Global.GLOBAL_HTTP_PROXY_PORT, port);
                 Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST,
                         exclList);
+                Settings.Global.putString(res, Settings.Global.GLOBAL_HTTP_PROXY_PAC, pacFileUrl);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -3215,8 +3227,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         int port = Settings.Global.getInt(res, Settings.Global.GLOBAL_HTTP_PROXY_PORT, 0);
         String exclList = Settings.Global.getString(res,
                 Settings.Global.GLOBAL_HTTP_PROXY_EXCLUSION_LIST);
-        if (!TextUtils.isEmpty(host)) {
-            ProxyProperties proxyProperties = new ProxyProperties(host, port, exclList);
+        String pacFileUrl = Settings.Global.getString(res, Settings.Global.GLOBAL_HTTP_PROXY_PAC);
+        if (!TextUtils.isEmpty(host) || !TextUtils.isEmpty(pacFileUrl)) {
+            ProxyProperties proxyProperties;
+            if (!TextUtils.isEmpty(pacFileUrl)) {
+                proxyProperties = new ProxyProperties(pacFileUrl);
+            } else {
+                proxyProperties = new ProxyProperties(host, port, exclList);
+            }
             synchronized (mProxyLock) {
                 mGlobalProxy = proxyProperties;
             }
@@ -3234,7 +3252,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private void handleApplyDefaultProxy(ProxyProperties proxy) {
-        if (proxy != null && TextUtils.isEmpty(proxy.getHost())) {
+        if (proxy != null && TextUtils.isEmpty(proxy.getHost())
+                && TextUtils.isEmpty(proxy.getPacFileUrl())) {
             proxy = null;
         }
         synchronized (mProxyLock) {
@@ -3276,6 +3295,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void sendProxyBroadcast(ProxyProperties proxy) {
         if (proxy == null) proxy = new ProxyProperties("", 0, "");
+        mPacManager.setCurrentProxyScriptUrl(proxy);
         if (DBG) log("sending Proxy Broadcast for " + proxy);
         Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |

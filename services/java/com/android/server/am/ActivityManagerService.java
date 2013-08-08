@@ -1184,17 +1184,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                 String host = "";
                 String port = "";
                 String exclList = "";
+                String pacFileUrl = null;
                 if (proxy != null) {
                     host = proxy.getHost();
                     port = Integer.toString(proxy.getPort());
                     exclList = proxy.getExclusionList();
+                    pacFileUrl = proxy.getPacFileUrl();
                 }
                 synchronized (ActivityManagerService.this) {
                     for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
                         ProcessRecord r = mLruProcesses.get(i);
                         if (r.thread != null) {
                             try {
-                                r.thread.setHttpProxy(host, port, exclList);
+                                r.thread.setHttpProxy(host, port, exclList, pacFileUrl);
                             } catch (RemoteException ex) {
                                 Slog.w(TAG, "Failed to update http proxy for: " +
                                         r.info.processName);

@@ -5292,6 +5292,14 @@ public final class Settings {
         public static final String CONNECTIVITY_CHANGE_DELAY = "connectivity_change_delay";
 
         /**
+         * The series of successively longer delays used in retrying to download PAC file.
+         * Last delay is used between successful PAC downloads.
+         *
+         * @hide
+         */
+        public static final String PAC_CHANGE_DELAY = "pac_change_delay";
+
+        /**
          * Setting to turn off captive portal detection. Feature is enabled by
          * default and the setting needs to be set to 0 to disable it.
          *
@@ -5384,6 +5392,13 @@ public final class Settings {
          */
         public static final String
                 GLOBAL_HTTP_PROXY_EXCLUSION_LIST = "global_http_proxy_exclusion_list";
+
+        /**
+         * The location PAC File for the proxy.
+         * @hide
+         */
+        public static final String
+                GLOBAL_HTTP_PROXY_PAC = "global_proxy_pac_url";
 
         /**
          * Enables the UI setting to allow the user to specify the global HTTP

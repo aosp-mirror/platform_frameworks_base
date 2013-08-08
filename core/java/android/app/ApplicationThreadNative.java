@@ -338,7 +338,8 @@ public abstract class ApplicationThreadNative extends Binder
             final String proxy = data.readString();
             final String port = data.readString();
             final String exclList = data.readString();
-            setHttpProxy(proxy, port, exclList);
+            final String pacFileUrl = data.readString();
+            setHttpProxy(proxy, port, exclList, pacFileUrl);
             return true;
         }
 
@@ -1001,12 +1002,14 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
 
-    public void setHttpProxy(String proxy, String port, String exclList) throws RemoteException {
+    public void setHttpProxy(String proxy, String port, String exclList,
+            String pacFileUrl) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeString(proxy);
         data.writeString(port);
         data.writeString(exclList);
+        data.writeString(pacFileUrl);
         mRemote.transact(SET_HTTP_PROXY_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
         data.recycle();
     }

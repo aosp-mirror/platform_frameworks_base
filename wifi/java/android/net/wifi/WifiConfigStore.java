@@ -141,6 +141,7 @@ class WifiConfigStore {
     private static final String PROXY_SETTINGS_KEY = "proxySettings";
     private static final String PROXY_HOST_KEY = "proxyHost";
     private static final String PROXY_PORT_KEY = "proxyPort";
+    private static final String PROXY_PAC_FILE = "proxyPac";
     private static final String EXCLUSION_LIST_KEY = "exclusionList";
     private static final String EOS = "eos";
 
@@ -771,6 +772,14 @@ class WifiConfigStore {
                                 out.writeUTF(exclusionList);
                                 writeToFile = true;
                                 break;
+                            case PAC:
+                                ProxyProperties proxyPacProperties = linkProperties.getHttpProxy();
+                                out.writeUTF(PROXY_SETTINGS_KEY);
+                                out.writeUTF(config.proxySettings.toString());
+                                out.writeUTF(PROXY_PAC_FILE);
+                                out.writeUTF(proxyPacProperties.getPacFileUrl());
+                                writeToFile = true;
+                                break;
                             case NONE:
                                 out.writeUTF(PROXY_SETTINGS_KEY);
                                 out.writeUTF(config.proxySettings.toString());
@@ -838,6 +847,7 @@ class WifiConfigStore {
                 ProxySettings proxySettings = ProxySettings.NONE;
                 LinkProperties linkProperties = new LinkProperties();
                 String proxyHost = null;
+                String pacFileUrl = null;
                 int proxyPort = -1;
                 String exclusionList = null;
                 String key;
@@ -879,6 +889,8 @@ class WifiConfigStore {
                             proxyHost = in.readUTF();
                         } else if (key.equals(PROXY_PORT_KEY)) {
                             proxyPort = in.readInt();
+                        } else if (key.equals(PROXY_PAC_FILE)) {
+                            pacFileUrl = in.readUTF();
                         } else if (key.equals(EXCLUSION_LIST_KEY)) {
                             exclusionList = in.readUTF();
                         } else if (key.equals(EOS)) {
@@ -919,6 +931,12 @@ class WifiConfigStore {
                                 ProxyProperties proxyProperties =
                                     new ProxyProperties(proxyHost, proxyPort, exclusionList);
                                 linkProperties.setHttpProxy(proxyProperties);
+                                break;
+                            case PAC:
+                                config.proxySettings = proxySettings;
+                                ProxyProperties proxyPacProperties = 
+                                        new ProxyProperties(pacFileUrl);
+                                linkProperties.setHttpProxy(proxyPacProperties);
                                 break;
                             case NONE:
                                 config.proxySettings = proxySettings;
@@ -1247,6 +1265,7 @@ class WifiConfigStore {
 
         switch (newConfig.proxySettings) {
             case STATIC:
+            case PAC:
                 ProxyProperties newHttpProxy = newConfig.linkProperties.getHttpProxy();
                 ProxyProperties currentHttpProxy = currentConfig.linkProperties.getHttpProxy();
 

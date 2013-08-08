@@ -101,7 +101,8 @@ public interface IApplicationThread extends IInterface {
     void scheduleConfigurationChanged(Configuration config) throws RemoteException;
     void updateTimeZone() throws RemoteException;
     void clearDnsCache() throws RemoteException;
-    void setHttpProxy(String proxy, String port, String exclList) throws RemoteException;
+    void setHttpProxy(String proxy, String port, String exclList,
+            String pacFileUrl) throws RemoteException;
     void processInBackground() throws RemoteException;
     void dumpService(FileDescriptor fd, IBinder servicetoken, String[] args)
             throws RemoteException;
