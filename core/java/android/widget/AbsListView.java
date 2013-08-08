@@ -1241,6 +1241,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mFastScroller.setEnabled(enabled);
         } else if (enabled) {
             mFastScroller = new FastScroller(this);
+            mFastScroller.setEnabled(true);
         }
     }
 
