@@ -49,6 +49,14 @@ public class ServiceInfo extends ComponentInfo
     public static final int FLAG_ISOLATED_PROCESS = 0x0002;
 
     /**
+     * Bit in {@link #flags}: If set,
+     * {@link Service#onProvideAssistData(android.os.Bundle)} will be
+     * called on the service when it is running in the foreground. Set from
+     * the {@link android.R.attr#provideAssistData} attribute.
+     */
+    public static final int FLAG_PROVIDE_ASSIST_DATA = 0x0004;
+
+    /**
      * Bit in {@link #flags}: If set, a single instance of the service will
      * run for all users on the device.  Set from the
      * {@link android.R.attr#singleUser} attribute.

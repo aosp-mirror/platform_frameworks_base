@@ -133,8 +133,8 @@ public interface IApplicationThread extends IInterface {
     void dumpGfxInfo(FileDescriptor fd, String[] args) throws RemoteException;
     void dumpDbInfo(FileDescriptor fd, String[] args) throws RemoteException;
     void unstableProviderDied(IBinder provider) throws RemoteException;
-    void requestActivityExtras(IBinder activityToken, IBinder requestToken, int requestType)
-            throws RemoteException;
+    void requestAssistContextExtras(IBinder activityToken, IBinder requestToken, int requestType,
+            int index) throws RemoteException;
     void scheduleTranslucentConversionComplete(IBinder token, boolean timeout)
             throws RemoteException;
     void setProcessState(int state) throws RemoteException;
@@ -187,7 +187,7 @@ public interface IApplicationThread extends IInterface {
     int DUMP_PROVIDER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+44;
     int DUMP_DB_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+45;
     int UNSTABLE_PROVIDER_DIED_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+46;
-    int REQUEST_ACTIVITY_EXTRAS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+47;
+    int REQUEST_ASSIST_CONTEXT_EXTRAS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+47;
     int SCHEDULE_TRANSLUCENT_CONVERSION_COMPLETE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+48;
     int SET_PROCESS_STATE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+49;
 }

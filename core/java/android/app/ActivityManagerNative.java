@@ -1921,20 +1921,21 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
-        case GET_TOP_ACTIVITY_EXTRAS_TRANSACTION: {
+        case GET_ASSIST_CONTEXT_EXTRAS_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int requestType = data.readInt();
-            Bundle res = getTopActivityExtras(requestType);
+            Bundle res = getAssistContextExtras(requestType);
             reply.writeNoException();
             reply.writeBundle(res);
             return true;
         }
 
-        case REPORT_TOP_ACTIVITY_EXTRAS_TRANSACTION: {
+        case REPORT_ASSIST_CONTEXT_EXTRAS_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
             Bundle extras = data.readBundle();
-            reportTopActivityExtras(token, extras);
+            int index = data.readInt();
+            reportAssistContextExtras(token, extras, index);
             reply.writeNoException();
             return true;
         }
@@ -4456,12 +4457,12 @@ class ActivityManagerProxy implements IActivityManager
         return res;
     }
 
-    public Bundle getTopActivityExtras(int requestType) throws RemoteException {
+    public Bundle getAssistContextExtras(int requestType) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(requestType);
-        mRemote.transact(GET_TOP_ACTIVITY_EXTRAS_TRANSACTION, data, reply, 0);
+        mRemote.transact(GET_ASSIST_CONTEXT_EXTRAS_TRANSACTION, data, reply, 0);
         reply.readException();
         Bundle res = reply.readBundle();
         data.recycle();
@@ -4469,13 +4470,15 @@ class ActivityManagerProxy implements IActivityManager
         return res;
     }
 
-    public void reportTopActivityExtras(IBinder token, Bundle extras) throws RemoteException {
+    public void reportAssistContextExtras(IBinder token, Bundle extras, int index)
+            throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeStrongBinder(token);
         data.writeBundle(extras);
-        mRemote.transact(REPORT_TOP_ACTIVITY_EXTRAS_TRANSACTION, data, reply, 0);
+        data.writeInt(index);
+        mRemote.transact(REPORT_ASSIST_CONTEXT_EXTRAS_TRANSACTION, data, reply, 0);
         reply.readException();
         data.recycle();
         reply.recycle();

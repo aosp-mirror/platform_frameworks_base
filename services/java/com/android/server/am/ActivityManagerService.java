@@ -184,6 +184,7 @@ import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -306,8 +307,13 @@ public final class ActivityManagerService extends ActivityManagerNative
     // Maximum number of users we allow to be running at a time.
     static final int MAX_RUNNING_USERS = 3;
 
-    // How long to wait in getTopActivityExtras for the activity to respond with the result.
-    static final int PENDING_ACTIVITY_RESULT_TIMEOUT = 2*2000;
+    // How long to wait in getAssistContextExtras for the activity and foreground services
+    // to respond with the result.
+    static final int PENDING_ASSIST_EXTRAS_TIMEOUT = 500;
+
+    // Index for assist context bundle pertaining to the top activity. Non-negative indices
+    // correspond to assist context bundles from foreground services.
+    static final int TOP_ACTIVITY_ASSIST_EXTRAS_INDEX = -1;
 
     static final int MY_PID = Process.myPid();
 
@@ -383,25 +389,38 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     private final ArrayList<TaskRecord> mRecentTasks = new ArrayList<TaskRecord>();
 
-    public class PendingActivityExtras extends Binder implements Runnable {
+    public class PendingAssistExtras extends Binder implements Runnable {
         public final ActivityRecord activity;
-        public boolean haveResult = false;
-        public Bundle result = null;
-        public PendingActivityExtras(ActivityRecord _activity) {
+        public final List<ServiceRecord> services;
+        public int numPending;
+        public int numRespondedServices = 0;
+        public Bundle activityExtras = null;
+        public Bundle[] servicesExtras;
+        public PendingAssistExtras(ActivityRecord _activity, List<ServiceRecord> _services) {
             activity = _activity;
+            services = _services;
+            numPending = services.size() + 1;
         }
         @Override
         public void run() {
-            Slog.w(TAG, "getTopActivityExtras failed: timeout retrieving from " + activity);
+            if (activityExtras == null) {
+                Slog.w(TAG, "getAssistContextExtras failed: timeout retrieving from " + activity);
+            }
+            for (int i = 0; i < services.size(); i++) {
+                if (servicesExtras[i] == null) {
+                    Slog.w(TAG, "getAssistContextExtras failed: timeout retrieving from "
+                            + services.get(i));
+                }
+            }
             synchronized (this) {
-                haveResult = true;
+                numPending = 0;
                 notifyAll();
             }
         }
     }
 
-    final ArrayList<PendingActivityExtras> mPendingActivityExtras
-            = new ArrayList<PendingActivityExtras>();
+    final ArrayList<PendingAssistExtras> mPendingAssistExtras
+            = new ArrayList<PendingAssistExtras>();
 
     /**
      * Process management.
@@ -7986,60 +8005,110 @@ public final class ActivityManagerService extends ActivityManagerNative
         return true;
     }
 
-    public Bundle getTopActivityExtras(int requestType) {
+    public Bundle getAssistContextExtras(int requestType) {
         enforceCallingPermission(android.Manifest.permission.GET_TOP_ACTIVITY_INFO,
-                "getTopActivityExtras()");
-        PendingActivityExtras pae;
+                "getAssistContextExtras()");
+        PendingAssistExtras pae;
         Bundle extras = new Bundle();
+        List<ServiceRecord> foregroundServices;
         synchronized (this) {
-            ActivityRecord activity = getFocusedStack().mResumedActivity;
-            if (activity == null) {
-                Slog.w(TAG, "getTopActivityExtras failed: no resumed activity");
-                return null;
+            Collection<ServiceRecord> allServices = mServices.mServiceMap.getAllServices(
+                    Binder.getCallingUid());
+            foregroundServices = new ArrayList<ServiceRecord>();
+            for (ServiceRecord record : allServices) {
+                if ((record.serviceInfo.flags & ServiceInfo.FLAG_PROVIDE_ASSIST_DATA) > 0 &&
+                        record.isForeground) {
+                    if (record.app == null || record.app.thread == null) {
+                        Slog.w(TAG, "getAssistContextExtras error: no process for " + record);
+                        continue;
+                    }
+                    if (record.app.pid == Binder.getCallingPid()) {
+                        Slog.w(TAG, "getAssistContextExtras error: request process same as " +
+                                record);
+                        continue;
+                    }
+                    foregroundServices.add(record);
+                }
             }
-            extras.putString(Intent.EXTRA_ASSIST_PACKAGE, activity.packageName);
+
+            ActivityRecord activity = getFocusedStack().mResumedActivity;
+            boolean validActivity = true;
+            if (activity == null) {
+                Slog.w(TAG, "getAssistContextExtras error: no resumed activity");
+                validActivity = false;
+            }
             if (activity.app == null || activity.app.thread == null) {
-                Slog.w(TAG, "getTopActivityExtras failed: no process for " + activity);
-                return extras;
+                Slog.w(TAG, "getAssistContextExtras error: no process for " + activity);
+                validActivity = false;
             }
             if (activity.app.pid == Binder.getCallingPid()) {
-                Slog.w(TAG, "getTopActivityExtras failed: request process same as " + activity);
-                return extras;
+                Slog.w(TAG, "getAssistContextExtras error: request process same as " + activity);
+                validActivity = false;
             }
-            pae = new PendingActivityExtras(activity);
+
+            pae = new PendingAssistExtras(activity, foregroundServices);
             try {
-                activity.app.thread.requestActivityExtras(activity.appToken, pae, requestType);
-                mPendingActivityExtras.add(pae);
-                mHandler.postDelayed(pae, PENDING_ACTIVITY_RESULT_TIMEOUT);
+                if (validActivity) {
+                    activity.app.thread.requestAssistContextExtras(activity.appToken, pae,
+                            requestType, -1);
+                }
+                for (int i = 0; i < foregroundServices.size(); i++) {
+                    ServiceRecord record = foregroundServices.get(i);
+                    record.app.thread.requestAssistContextExtras(record, pae, requestType, i);
+                }
+                mPendingAssistExtras.add(pae);
+                mHandler.postDelayed(pae, PENDING_ASSIST_EXTRAS_TIMEOUT);
             } catch (RemoteException e) {
-                Slog.w(TAG, "getTopActivityExtras failed: crash calling " + activity);
-                return extras;
+                Slog.w(TAG, "getAssistContextExtras failed: crash fetching extras.", e);
             }
         }
         synchronized (pae) {
-            while (!pae.haveResult) {
+            while (pae.numPending > 0) {
                 try {
                     pae.wait();
                 } catch (InterruptedException e) {
                 }
             }
-            if (pae.result != null) {
-                extras.putBundle(Intent.EXTRA_ASSIST_CONTEXT, pae.result);
+            if (pae.activityExtras != null) {
+                extras.putBundle(Intent.EXTRA_ASSIST_CONTEXT, pae.activityExtras);
+                extras.putString(Intent.EXTRA_ASSIST_PACKAGE, pae.activity.packageName);
+            }
+            if (pae.numRespondedServices > 0) {
+                Bundle[] servicesExtras = new Bundle[pae.numRespondedServices];
+                String[] servicesPackages = new String[pae.numRespondedServices];
+                int extrasIndex = 0;
+                for (int i = 0; i < foregroundServices.size(); i++) {
+                    if (pae.servicesExtras[i] != null) {
+                        servicesExtras[extrasIndex] = pae.servicesExtras[i];
+                        ServiceRecord record = foregroundServices.get(i);
+                        servicesPackages[extrasIndex] = record.packageName;
+                        extrasIndex++;
+                    }
+                }
+                extras.putParcelableArray(Intent.EXTRA_ASSIST_SERVICES_CONTEXTS, servicesExtras);
+                extras.putStringArray(Intent.EXTRA_ASSIST_SERVICES_PACKAGES, servicesPackages);
             }
         }
         synchronized (this) {
-            mPendingActivityExtras.remove(pae);
+            mPendingAssistExtras.remove(pae);
             mHandler.removeCallbacks(pae);
         }
         return extras;
     }
 
-    public void reportTopActivityExtras(IBinder token, Bundle extras) {
-        PendingActivityExtras pae = (PendingActivityExtras)token;
+    public void reportAssistContextExtras(IBinder token, Bundle extras, int index) {
+        PendingAssistExtras pae = (PendingAssistExtras)token;
         synchronized (pae) {
-            pae.result = extras;
-            pae.haveResult = true;
-            pae.notifyAll();
+            if (index == TOP_ACTIVITY_ASSIST_EXTRAS_INDEX) {
+                pae.activityExtras = extras;
+            } else {
+                pae.servicesExtras[index] = extras;
+                pae.numRespondedServices++;
+            }
+            pae.numPending--;
+            if (pae.numPending == 0) {
+                pae.notifyAll();
+            }
         }
     }
 
