@@ -8453,9 +8453,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             resolver, Settings.Global.WAIT_FOR_DEBUGGER, 0) != 0;
         boolean alwaysFinishActivities = Settings.Global.getInt(
             resolver, Settings.Global.ALWAYS_FINISH_ACTIVITIES, 0) != 0;
+        boolean forceRtl = Settings.Global.getInt(
+                resolver, Settings.Global.DEVELOPMENT_FORCE_RTL, 0) != 0;
+        // Transfer any global setting for forcing RTL layout, into a System Property
+        SystemProperties.set(Settings.Global.DEVELOPMENT_FORCE_RTL, forceRtl ? "1":"0");
 
         Configuration configuration = new Configuration();
         Settings.System.getConfiguration(resolver, configuration);
+        if (forceRtl) {
+            // This will take care of setting the correct layout direction flags
+            configuration.setLayoutDirection(configuration.locale);
+        }
 
         synchronized (this) {
             mDebugApp = mOrigDebugApp = debugApp;
