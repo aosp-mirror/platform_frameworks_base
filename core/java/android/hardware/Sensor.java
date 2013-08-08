@@ -213,7 +213,7 @@ public final class Sensor {
     /**
      * A constant describing the geo-magnetic rotation vector.
      * <p>
-     * Similar to {@link #SENSOR_TYPE_ROTATION_VECTOR}, but using a magnetometer instead of using a
+     * Similar to {@link #TYPE_ROTATION_VECTOR}, but using a magnetometer instead of using a
      * gyroscope. This sensor uses lower power than the other rotation vectors, because it doesn't
      * use the gyroscope. However, it is more noisy and will work best outdoors.
      * <p>
