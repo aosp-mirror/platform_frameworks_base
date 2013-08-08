@@ -60,7 +60,7 @@ public final class ApduServiceInfo implements Parcelable {
     final ArrayList<String> mAids;
 
     /**
-     * Whether this is an {@link HostApduService} or {@link OffHostApduService}
+     * Whether this service represents AIDs running on the host CPU
      */
     final boolean mOnHost;
 
@@ -77,30 +77,37 @@ public final class ApduServiceInfo implements Parcelable {
     /**
      * @hide
      */
-    public ApduServiceInfo(ResolveInfo info, String description,
+    public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
             ArrayList<AidGroup> aidGroups) {
         this.mService = info;
         this.mDescription = description;
         this.mAidGroups = aidGroups;
         this.mAids = new ArrayList<String>();
         this.mCategoryToGroup = new HashMap<String, AidGroup>();
-        this.mOnHost = false;
+        this.mOnHost = onHost;
         for (AidGroup aidGroup : aidGroups) {
             this.mCategoryToGroup.put(aidGroup.category, aidGroup);
             this.mAids.addAll(aidGroup.aids);
         }
     }
 
-    public ApduServiceInfo(PackageManager pm, ResolveInfo info) throws XmlPullParserException,
-            IOException {
+    public ApduServiceInfo(PackageManager pm, ResolveInfo info, boolean onHost)
+            throws XmlPullParserException, IOException {
         ServiceInfo si = info.serviceInfo;
-
         XmlResourceParser parser = null;
         try {
-            parser = si.loadXmlMetaData(pm, HostApduService.SERVICE_META_DATA);
-            if (parser == null) {
-                throw new XmlPullParserException("No " + HostApduService.SERVICE_META_DATA +
-                        " meta-data");
+            if (onHost) {
+                parser = si.loadXmlMetaData(pm, HostApduService.SERVICE_META_DATA);
+                if (parser == null) {
+                    throw new XmlPullParserException("No " + HostApduService.SERVICE_META_DATA +
+                            " meta-data");
+                }
+            } else {
+                parser = si.loadXmlMetaData(pm, OffHostApduService.SERVICE_META_DATA);
+                if (parser == null) {
+                    throw new XmlPullParserException("No " + OffHostApduService.SERVICE_META_DATA +
+                            " meta-data");
+                }
             }
 
             int eventType = parser.getEventType();
@@ -109,22 +116,34 @@ public final class ApduServiceInfo implements Parcelable {
             }
 
             String tagName = parser.getName();
-            if (!"host-apdu-service".equals(tagName)) {
+            if (onHost && !"host-apdu-service".equals(tagName)) {
                 throw new XmlPullParserException(
                         "Meta-data does not start with <host-apdu-service> tag");
+            } else if (!onHost && !"offhost-apdu-service".equals(tagName)) {
+                throw new XmlPullParserException(
+                        "Meta-data does not start with <offhost-apdu-service> tag");
             }
 
             Resources res = pm.getResourcesForApplication(si.applicationInfo);
             AttributeSet attrs = Xml.asAttributeSet(parser);
-            TypedArray sa = res.obtainAttributes(attrs,
-                    com.android.internal.R.styleable.HostApduService);
-            mService = info;
-            mDescription = sa.getString(
-                    com.android.internal.R.styleable.HostApduService_description);
+            if (onHost) {
+                TypedArray sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.HostApduService);
+                mService = info;
+                mDescription = sa.getString(
+                        com.android.internal.R.styleable.HostApduService_description);
+            } else {
+                TypedArray sa = res.obtainAttributes(attrs,
+                        com.android.internal.R.styleable.OffHostApduService);
+                mService = info;
+                mDescription = sa.getString(
+                        com.android.internal.R.styleable.OffHostApduService_description);
+            }
+
             mAidGroups = new ArrayList<AidGroup>();
             mCategoryToGroup = new HashMap<String, AidGroup>();
             mAids = new ArrayList<String>();
-            mOnHost = true; // TODO
+            mOnHost = onHost;
             final int depth = parser.getDepth();
             AidGroup currentGroup = null;
 
@@ -202,6 +221,10 @@ public final class ApduServiceInfo implements Parcelable {
         return mCategoryToGroup.containsKey(category);
     }
 
+    public boolean isOnHost() {
+        return mOnHost;
+    }
+
     public CharSequence loadLabel(PackageManager pm) {
         return mService.loadLabel(pm);
     }
@@ -258,6 +281,7 @@ public final class ApduServiceInfo implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         mService.writeToParcel(dest, flags);
         dest.writeString(mDescription);
+        dest.writeInt(mOnHost ? 1 : 0);
         dest.writeInt(mAidGroups.size());
         if (mAidGroups.size() > 0) {
             dest.writeTypedList(mAidGroups);
@@ -270,12 +294,13 @@ public final class ApduServiceInfo implements Parcelable {
         public ApduServiceInfo createFromParcel(Parcel source) {
             ResolveInfo info = ResolveInfo.CREATOR.createFromParcel(source);
             String description = source.readString();
+            boolean onHost = (source.readInt() != 0) ? true : false;
             ArrayList<AidGroup> aidGroups = new ArrayList<AidGroup>();
             int numGroups = source.readInt();
             if (numGroups > 0) {
                 source.readTypedList(aidGroups, AidGroup.CREATOR);
             }
-            return new ApduServiceInfo(info, description, aidGroups);
+            return new ApduServiceInfo(info, onHost, description, aidGroups);
         }
 
         @Override
