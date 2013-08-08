@@ -165,6 +165,8 @@ public class PhoneStatusBar extends BaseStatusBar {
     int mIconHPadding = -1;
     Display mDisplay;
     Point mCurrentDisplaySize = new Point();
+    private float mHeadsUpVerticalOffset;
+    private int[] mPilePosition = new int[2];
 
     StatusBarWindowView mStatusBarWindow;
     PhoneStatusBarView mStatusBarView;
@@ -839,7 +841,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     private void addHeadsUpView() {
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL, // below the status bar!
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL, // above the status bar!
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                     | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
@@ -2365,6 +2367,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         if (ENABLE_HEADS_UP && mHeadsUpNotificationView != null) {
             mHeadsUpNotificationView.setMargin(mNotificationPanelMarginPx);
+            mPile.getLocationOnScreen(mPilePosition);
+            mHeadsUpVerticalOffset = mPilePosition[1] - mNaturalBarHeight;
         }
 
         updateCarrierLabelVisibility(false);
@@ -2552,6 +2556,17 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (!ENABLE_HEADS_UP) return;
         if (DEBUG) Log.v(TAG, (vis ? "showing" : "hiding") + " heads up window");
         mHeadsUpNotificationView.setVisibility(vis ? View.VISIBLE : View.GONE);
+    }
+
+    public void animateHeadsUp(boolean animateInto, float frac) {
+        if (!ENABLE_HEADS_UP || mHeadsUpNotificationView == null) return;
+        frac = frac / 0.4f;
+        frac = frac < 1.0f ? frac : 1.0f;
+        float alpha = 1.0f - frac;
+        float offset = mHeadsUpVerticalOffset * frac;
+        offset = animateInto ? offset : 0f;
+        mHeadsUpNotificationView.setAlpha(alpha);
+        mHeadsUpNotificationView.setY(offset);
     }
 
     public void onHeadsUpDismissed() {
