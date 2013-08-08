@@ -63,7 +63,7 @@ public class BridgeIInputMethodManager implements IInputMethodManager {
     }
 
     @Override
-    public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(InputMethodInfo arg0,
+    public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(String arg0,
             boolean arg1) throws RemoteException {
         // TODO Auto-generated method stub
         return null;

@@ -28,11 +28,13 @@ import com.android.internal.view.IInputMethodClient;
 /**
  * Public interface to the global input method manager, used by all client
  * applications.
+ * You need to update BridgeIInputMethodManager.java as well when changing
+ * this file.
  */
 interface IInputMethodManager {
     List<InputMethodInfo> getInputMethodList();
     List<InputMethodInfo> getEnabledInputMethodList();
-    List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in InputMethodInfo imi,
+    List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in String imiId,
             boolean allowsImplicitlySelectedSubtypes);
     InputMethodSubtype getLastInputMethodSubtype();
     // TODO: We should change the return type from List to List<Parcelable>
