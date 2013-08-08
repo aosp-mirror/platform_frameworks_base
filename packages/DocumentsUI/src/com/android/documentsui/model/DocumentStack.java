@@ -42,7 +42,7 @@ public class DocumentStack extends LinkedList<Document> {
     }
 
     public static DocumentStack deserialize(ContentResolver resolver, String raw) {
-        Log.d(TAG, "restoreStack: " + raw);
+        Log.d(TAG, "deserialize: " + raw);
 
         final DocumentStack stack = new DocumentStack();
         try {

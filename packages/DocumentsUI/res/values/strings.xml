@@ -25,6 +25,7 @@
     <string name="menu_list">List view</string>
     <string name="menu_sort">Sort by</string>
     <string name="menu_search">Search</string>
+    <string name="menu_settings">Settings</string>
 
     <string name="menu_open">Open</string>
     <string name="menu_save">Save</string>
@@ -33,6 +34,7 @@
 
     <string name="sort_name">By name</string>
     <string name="sort_date">By date modified</string>
+    <string name="sort_size">By size</string>
 
     <string name="drawer_open">Show roots</string>
     <string name="drawer_close">Hide roots</string>
@@ -40,9 +42,16 @@
     <string name="save_error">Failed to save document</string>
 
     <string name="root_recent">Recent</string>
+    <string name="root_available_bytes"><xliff:g id="size" example="3GB">%1$s</xliff:g> free</string>
 
     <string name="root_type_service">Services</string>
     <string name="root_type_shortcut">Shortcuts</string>
     <string name="root_type_device">Devices</string>
+
+    <string name="pref_advanced_devices">Display advanced devices</string>
+    <string name="pref_file_size">Display file size</string>
+    <string name="pref_device_size">Display device size</string>
+
+    <string name="empty">No items</string>
 
 </resources>

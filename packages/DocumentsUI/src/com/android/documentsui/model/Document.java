@@ -21,6 +21,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.DocumentColumns;
+import android.util.Log;
 
 import com.android.documentsui.RecentsProvider;
 
@@ -69,25 +70,25 @@ public class Document {
         return new Document(uri, mimeType, displayName, lastModified, flags, summary, size);
     }
 
-    public static Document fromRecentOpenCursor(ContentResolver resolver, Cursor cursor) {
-        final Uri uri = Uri.parse(getCursorString(cursor, RecentsProvider.COL_URI));
-        final long lastModified = getCursorLong(cursor, RecentsProvider.COL_TIMESTAMP);
+    public static Document fromRecentOpenCursor(ContentResolver resolver, Cursor recentCursor) {
+        final Uri uri = Uri.parse(getCursorString(recentCursor, RecentsProvider.COL_URI));
+        final long lastModified = getCursorLong(recentCursor, RecentsProvider.COL_TIMESTAMP);
 
-        final Cursor itemCursor = resolver.query(uri, null, null, null, null);
+        final Cursor cursor = resolver.query(uri, null, null, null, null);
         try {
-            if (!itemCursor.moveToFirst()) {
+            if (!cursor.moveToFirst()) {
                 throw new IllegalArgumentException("Missing details for " + uri);
             }
-            final String mimeType = getCursorString(itemCursor, DocumentColumns.MIME_TYPE);
-            final String displayName = getCursorString(itemCursor, DocumentColumns.DISPLAY_NAME);
-            final int flags = getCursorInt(itemCursor, DocumentColumns.FLAGS)
+            final String mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
+            final String displayName = getCursorString(cursor, DocumentColumns.DISPLAY_NAME);
+            final int flags = getCursorInt(cursor, DocumentColumns.FLAGS)
                     & DocumentsContract.FLAG_SUPPORTS_THUMBNAIL;
             final String summary = getCursorString(cursor, DocumentColumns.SUMMARY);
             final long size = getCursorLong(cursor, DocumentColumns.SIZE);
 
             return new Document(uri, mimeType, displayName, lastModified, flags, summary, size);
         } finally {
-            itemCursor.close();
+            cursor.close();
         }
     }
 
@@ -164,6 +165,13 @@ public class Document {
         @Override
         public int compare(Document lhs, Document rhs) {
             return Long.compare(rhs.lastModified, lhs.lastModified);
+        }
+    }
+
+    public static class SizeComparator implements Comparator<Document> {
+        @Override
+        public int compare(Document lhs, Document rhs) {
+            return Long.compare(rhs.size, lhs.size);
         }
     }
 }

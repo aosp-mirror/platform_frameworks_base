@@ -24,6 +24,7 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -76,6 +77,14 @@ public class RootsFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        final Context context = getActivity();
+        mAdapter.setShowAdvanced(SettingsActivity.getDisplayAdvancedDevices(context));
+    }
+
     private OnItemClickListener mItemListener = new OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -94,8 +103,9 @@ public class RootsFragment extends Fragment {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+            final Context context = parent.getContext();
             if (convertView == null) {
-                convertView = LayoutInflater.from(parent.getContext())
+                convertView = LayoutInflater.from(context)
                         .inflate(R.layout.item_root, parent, false);
             }
 
@@ -107,8 +117,19 @@ public class RootsFragment extends Fragment {
             icon.setImageDrawable(root.icon);
             title.setText(root.title);
 
-            summary.setText(root.summary);
-            summary.setVisibility(root.summary != null ? View.VISIBLE : View.GONE);
+            // Device summary is always available space
+            final String summaryText;
+            if ((root.rootType == DocumentsContract.ROOT_TYPE_DEVICE
+                    || root.rootType == DocumentsContract.ROOT_TYPE_DEVICE_ADVANCED)
+                    && root.availableBytes >= 0) {
+                summaryText = context.getString(R.string.root_available_bytes,
+                        Formatter.formatFileSize(context, root.availableBytes));
+            } else {
+                summaryText = root.summary;
+            }
+
+            summary.setText(summaryText);
+            summary.setVisibility(summaryText != null ? View.VISIBLE : View.GONE);
 
             return convertView;
         }
@@ -163,9 +184,6 @@ public class RootsFragment extends Fragment {
             mShortcuts.sort(comp);
             mDevices.sort(comp);
             mDevicesAdvanced.sort(comp);
-
-            // TODO: switch to hide advanced items by default
-            setShowAdvanced(true);
         }
 
         public void setShowAdvanced(boolean showAdvanced) {

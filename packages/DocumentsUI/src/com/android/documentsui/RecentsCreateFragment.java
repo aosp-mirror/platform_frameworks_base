@@ -169,24 +169,23 @@ public class RecentsCreateFragment extends Fragment {
 
             final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
-            final View line2 = convertView.findViewById(R.id.line2);
+            final View summaryList = convertView.findViewById(R.id.summary_list);
 
             final DocumentStack stack = getItem(position);
             final Root root = RootsCache.findRoot(context, stack.peek());
             icon.setImageDrawable(root != null ? root.icon : null);
 
             final StringBuilder builder = new StringBuilder();
-            final int size = stack.size();
-            for (int i = 0; i < size; i++) {
+            for (int i = stack.size() - 1; i >= 0; i--) {
                 builder.append(stack.get(i).displayName);
-                if (i <  size - 1) {
+                if (i > 0) {
                     builder.append(" \u232a ");
                 }
             }
             title.setText(builder.toString());
             title.setEllipsize(TruncateAt.MIDDLE);
 
-            line2.setVisibility(View.GONE);
+            summaryList.setVisibility(View.GONE);
 
             return convertView;
         }

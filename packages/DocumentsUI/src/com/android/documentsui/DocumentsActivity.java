@@ -19,15 +19,18 @@ package com.android.documentsui;
 import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.DocumentsContract.DocumentColumns;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
@@ -139,7 +142,7 @@ public class DocumentsActivity extends Activity {
             cursor.close();
         }
 
-        updateDirectoryFragment();
+        onCurrentDirectoryChanged();
     }
 
     private DrawerListener mDrawerListener = new DrawerListener() {
@@ -221,7 +224,7 @@ public class DocumentsActivity extends Activity {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 mCurrentSearch = query;
-                updateDirectoryFragment();
+                onCurrentDirectoryChanged();
                 mSearchView.setIconified(true);
                 return true;
             }
@@ -236,7 +239,7 @@ public class DocumentsActivity extends Activity {
             @Override
             public boolean onClose() {
                 mCurrentSearch = null;
-                updateDirectoryFragment();
+                onCurrentDirectoryChanged();
                 return false;
             }
         });
@@ -248,23 +251,36 @@ public class DocumentsActivity extends Activity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
 
+        final FragmentManager fm = getFragmentManager();
         final Document cwd = getCurrentDirectory();
 
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
-        createDir.setVisible(mAction == ACTION_CREATE);
-        createDir.setEnabled(cwd != null && cwd.isCreateSupported());
-
-        // TODO: close any search in-progress when hiding
         final MenuItem search = menu.findItem(R.id.menu_search);
-        search.setVisible(cwd != null && cwd.isSearchSupported());
+        final MenuItem grid =  menu.findItem(R.id.menu_grid);
+        final MenuItem list = menu.findItem(R.id.menu_list);
 
+        grid.setVisible(mDisplayState.mode != DisplayState.MODE_GRID);
+        list.setVisible(mDisplayState.mode != DisplayState.MODE_LIST);
+
+        final boolean searchVisible;
         if (mAction == ACTION_CREATE) {
-            final FragmentManager fm = getFragmentManager();
+            createDir.setVisible(cwd != null && cwd.isCreateSupported());
+            searchVisible = false;
+
+            // No display options in recent directories
+            if (cwd == null) {
+                grid.setVisible(false);
+                list.setVisible(false);
+            }
+
             SaveFragment.get(fm).setSaveEnabled(cwd != null && cwd.isCreateSupported());
+        } else {
+            createDir.setVisible(false);
+            searchVisible = cwd != null && cwd.isSearchSupported();
         }
 
-        menu.findItem(R.id.menu_grid).setVisible(mDisplayState.mode != DisplayState.MODE_GRID);
-        menu.findItem(R.id.menu_list).setVisible(mDisplayState.mode != DisplayState.MODE_LIST);
+        // TODO: close any search in-progress when hiding
+        search.setVisible(searchVisible);
 
         return true;
     }
@@ -294,6 +310,9 @@ public class DocumentsActivity extends Activity {
             updateDisplayState();
             invalidateOptionsMenu();
             return true;
+        } else if (id == R.id.menu_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
         } else {
             return super.onOptionsItemSelected(item);
         }
@@ -304,7 +323,7 @@ public class DocumentsActivity extends Activity {
         final int size = mStack.size();
         if (size > 1) {
             mStack.pop();
-            updateDirectoryFragment();
+            onCurrentDirectoryChanged();
         } else if (size == 1 && !mDrawerLayout.isDrawerOpen(mRootsContainer)) {
             // TODO: open root drawer once we can capture back key
             super.onBackPressed();
@@ -317,7 +336,7 @@ public class DocumentsActivity extends Activity {
     private BaseAdapter mSortAdapter = new BaseAdapter() {
         @Override
         public int getCount() {
-            return 2;
+            return mDisplayState.showSize ? 3 : 2;
         }
 
         @Override
@@ -327,6 +346,8 @@ public class DocumentsActivity extends Activity {
                     return getText(R.string.sort_name);
                 case 1:
                     return getText(R.string.sort_date);
+                case 2:
+                    return getText(R.string.sort_size);
                 default:
                     return null;
             }
@@ -400,9 +421,10 @@ public class DocumentsActivity extends Activity {
         return mDisplayState;
     }
 
-    private void updateDirectoryFragment() {
+    private void onCurrentDirectoryChanged() {
         final FragmentManager fm = getFragmentManager();
         final Document cwd = getCurrentDirectory();
+
         if (cwd == null) {
             // No directory means recents
             if (mAction == ACTION_CREATE) {
@@ -420,6 +442,14 @@ public class DocumentsActivity extends Activity {
             }
         }
 
+        // Forget any replacement target
+        if (mAction == ACTION_CREATE) {
+            final SaveFragment save = SaveFragment.get(fm);
+            if (save != null) {
+                save.setReplaceTarget(null);
+            }
+        }
+
         updateActionBar();
         invalidateOptionsMenu();
         dumpStack();
@@ -432,7 +462,7 @@ public class DocumentsActivity extends Activity {
 
     public void onStackPicked(DocumentStack stack) {
         mStack = stack;
-        updateDirectoryFragment();
+        onCurrentDirectoryChanged();
     }
 
     public void onRootPicked(Root root, boolean closeDrawer) {
@@ -442,7 +472,7 @@ public class DocumentsActivity extends Activity {
         if (!root.isRecents) {
             onDocumentPicked(Document.fromRoot(getContentResolver(), root));
         } else {
-            updateDirectoryFragment();
+            onCurrentDirectoryChanged();
         }
 
         if (closeDrawer) {
@@ -454,13 +484,13 @@ public class DocumentsActivity extends Activity {
         final FragmentManager fm = getFragmentManager();
         if (doc.isDirectory()) {
             mStack.push(doc);
-            updateDirectoryFragment();
+            onCurrentDirectoryChanged();
         } else if (mAction == ACTION_OPEN) {
             // Explicit file picked, return
             onFinished(doc.uri);
         } else if (mAction == ACTION_CREATE) {
-            // Overwrite current filename
-            SaveFragment.get(fm).setDisplayName(doc.displayName);
+            // Replace selected file
+            SaveFragment.get(fm).setReplaceTarget(doc);
         }
     }
 
@@ -473,9 +503,11 @@ public class DocumentsActivity extends Activity {
         onFinished(uris);
     }
 
-    public void onSaveRequested(String mimeType, String displayName) {
-        // TODO: handle overwrite by using last-selected GUID
+    public void onSaveRequested(Document replaceTarget) {
+        onFinished(replaceTarget.uri);
+    }
 
+    public void onSaveRequested(String mimeType, String displayName) {
         final ContentValues values = new ContentValues();
         values.put(DocumentColumns.MIME_TYPE, mimeType);
         values.put(DocumentColumns.DISPLAY_NAME, displayName);
@@ -550,6 +582,7 @@ public class DocumentsActivity extends Activity {
 
         public static final int SORT_ORDER_NAME = 0;
         public static final int SORT_ORDER_DATE = 1;
+        public static final int SORT_ORDER_SIZE = 2;
     }
 
     private void dumpStack() {
@@ -557,5 +590,9 @@ public class DocumentsActivity extends Activity {
         for (Document doc : mStack) {
             Log.d(TAG, "--> " + doc);
         }
+    }
+
+    public static DocumentsActivity get(Fragment fragment) {
+        return (DocumentsActivity) fragment.getActivity();
     }
 }
