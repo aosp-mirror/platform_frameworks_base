@@ -21,7 +21,6 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.os.Environment;
@@ -46,7 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class IntentFirewall {
-    private static final String TAG = "IntentFirewall";
+    static final String TAG = "IntentFirewall";
 
     // e.g. /data/system/ifw or /data/secure/system/ifw
     private static final File RULES_DIR = new File(Environment.getSystemSecureDirectory(), "ifw");
@@ -119,15 +118,15 @@ public class IntentFirewall {
      * This is called from ActivityManager to check if a start activity intent should be allowed.
      * It is assumed the caller is already holding the global ActivityManagerService lock.
      */
-    public boolean checkStartActivity(Intent intent, ApplicationInfo callerApp, int callerUid,
-            int callerPid, String resolvedType, ActivityInfo resolvedActivity) {
+    public boolean checkStartActivity(Intent intent, int callerUid, int callerPid,
+            String resolvedType, ActivityInfo resolvedActivity) {
         List<Rule> matchingRules = mActivityResolver.queryIntent(intent, resolvedType, false, 0);
         boolean log = false;
         boolean block = false;
 
         for (int i=0; i< matchingRules.size(); i++) {
             Rule rule = matchingRules.get(i);
-            if (rule.matches(this, intent, callerApp, callerUid, callerPid, resolvedType,
+            if (rule.matches(this, intent, callerUid, callerPid, resolvedType,
                     resolvedActivity.applicationInfo)) {
                 block |= rule.getBlock();
                 log |= rule.getLog();
@@ -504,4 +503,5 @@ public class IntentFirewall {
             return false;
         }
     }
+
 }

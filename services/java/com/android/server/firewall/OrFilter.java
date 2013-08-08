@@ -25,10 +25,10 @@ import java.io.IOException;
 
 class OrFilter extends FilterList {
     @Override
-    public boolean matches(IntentFirewall ifw, Intent intent, ApplicationInfo callerApp,
-            int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
+    public boolean matches(IntentFirewall ifw, Intent intent, int callerUid, int callerPid,
+            String resolvedType, ApplicationInfo resolvedApp) {
         for (int i=0; i<children.size(); i++) {
-            if (children.get(i).matches(ifw, intent, callerApp, callerUid, callerPid, resolvedType,
+            if (children.get(i).matches(ifw, intent, callerUid, callerPid, resolvedType,
                     resolvedApp)) {
                 return true;
             }
