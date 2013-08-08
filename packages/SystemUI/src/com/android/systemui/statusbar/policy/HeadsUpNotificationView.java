@@ -83,6 +83,7 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         mContentHolder.setAlpha(1f);
         mContentHolder.removeAllViews();
         mContentHolder.addView(mHeadsUp.row);
+        mSwipeHelper.snapChild(mContentSlider, 1f);
         mStartTouchTime = System.currentTimeMillis() + mTouchSensitivityDelay;
         return true;
     }
@@ -231,6 +232,6 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
 
     @Override
     public View getChildContentView(View v) {
-        return v;
+        return mContentSlider;
     }
 }
