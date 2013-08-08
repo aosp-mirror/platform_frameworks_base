@@ -101,7 +101,9 @@ interface IPackageManager {
     String getNameForUid(int uid);
     
     int getUidForSharedUser(String sharedUserName);
-    
+
+    int getFlagsForUid(int uid);
+
     ResolveInfo resolveIntent(in Intent intent, String resolvedType, int flags, int userId);
 
     List<ResolveInfo> queryIntentActivities(in Intent intent, 

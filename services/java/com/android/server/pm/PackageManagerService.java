@@ -2574,6 +2574,20 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    public int getFlagsForUid(int uid) {
+        synchronized (mPackages) {
+            Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
+            if (obj instanceof SharedUserSetting) {
+                final SharedUserSetting sus = (SharedUserSetting) obj;
+                return sus.pkgFlags;
+            } else if (obj instanceof PackageSetting) {
+                final PackageSetting ps = (PackageSetting) obj;
+                return ps.pkgFlags;
+            }
+        }
+        return 0;
+    }
+
     @Override
     public ResolveInfo resolveIntent(Intent intent, String resolvedType,
             int flags, int userId) {
@@ -4058,8 +4072,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
 
             if (pkg.mSharedUserId != null) {
-                suid = mSettings.getSharedUserLPw(pkg.mSharedUserId,
-                        pkg.applicationInfo.flags, true);
+                suid = mSettings.getSharedUserLPw(pkg.mSharedUserId, 0, true);
                 if (suid == null) {
                     Slog.w(TAG, "Creating application package " + pkg.packageName
                             + " for shared user failed");

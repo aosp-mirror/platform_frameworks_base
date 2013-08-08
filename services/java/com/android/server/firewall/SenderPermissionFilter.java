@@ -33,8 +33,8 @@ class SenderPermissionFilter implements Filter {
     }
 
     @Override
-    public boolean matches(IntentFirewall ifw, Intent intent, ApplicationInfo callerApp,
-            int callerUid, int callerPid, String resolvedType, ApplicationInfo resolvedApp) {
+    public boolean matches(IntentFirewall ifw, Intent intent, int callerUid, int callerPid,
+            String resolvedType, ApplicationInfo resolvedApp) {
         // We assume the component is exported here. If the component is not exported, then
         // ActivityManager would only resolve to this component for callers from the same uid.
         // In this case, it doesn't matter whether the component is exported or not.
