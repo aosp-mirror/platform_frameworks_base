@@ -177,6 +177,17 @@ public class LocationManager {
      */
     public static final String EXTRA_GPS_ENABLED = "enabled";
 
+    /**
+     * Broadcast intent action indicating that a high power location requests
+     * has either started or stopped being active.  The current state of
+     * active location requests should be read from AppOpsManager using
+     * {@code OP_MONITOR_HIGH_POWER_LOCATION}.
+     *
+     * @hide
+     */
+    public static final String HIGH_POWER_REQUEST_CHANGE_ACTION =
+        "android.location.HIGH_POWER_REQUEST_CHANGE";
+
     // Map from LocationListeners to their associated ListenerTransport objects
     private HashMap<LocationListener,ListenerTransport> mListeners =
         new HashMap<LocationListener,ListenerTransport>();

@@ -16,10 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.app.INotificationManager;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.app.AppOpsManager;
+import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -28,34 +26,37 @@ import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.location.LocationManager;
 import android.os.Handler;
-import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 
 import com.android.systemui.R;
 
 import java.util.ArrayList;
+import java.util.List;
 
+/**
+ * A controller to manage changes of location related states and update the views accordingly.
+ */
 public class LocationController extends BroadcastReceiver {
-    private static final String TAG = "StatusBar.LocationController";
+    // The name of the placeholder corresponding to the location request status icon.
+    // This string corresponds to config_statusBarIcons in core/res/res/values/config.xml.
+    private static final String LOCATION_STATUS_ICON_PLACEHOLDER = "location";
+    private static final int LOCATION_STATUS_ICON_ID
+        = R.drawable.stat_sys_device_access_location_found;
 
-    private static final int GPS_NOTIFICATION_ID = 374203-122084;
+    private static final int[] mHighPowerRequestAppOpArray
+        = new int[] {AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION};
 
     private Context mContext;
 
-    private INotificationManager mNotificationService;
+    private AppOpsManager mAppOpsManager;
+    private StatusBarManager mStatusBarManager;
 
-    private ArrayList<LocationGpsStateChangeCallback> mChangeCallbacks =
-            new ArrayList<LocationGpsStateChangeCallback>();
+    private boolean mAreActiveLocationRequests;
+    private boolean mIsAirplaneMode;
+
     private ArrayList<LocationSettingsChangeCallback> mSettingsChangeCallbacks =
             new ArrayList<LocationSettingsChangeCallback>();
-
-    /**
-     * A callback for change in gps status (enabled/disabled, have lock, etc).
-     */
-    public interface LocationGpsStateChangeCallback {
-        public void onLocationGpsStateChanged(boolean inUse, String description);
-    }
 
     /**
      * A callback for change in location settings (the user has enabled/disabled location).
@@ -74,13 +75,15 @@ public class LocationController extends BroadcastReceiver {
         mContext = context;
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction(LocationManager.GPS_ENABLED_CHANGE_ACTION);
-        filter.addAction(LocationManager.GPS_FIX_CHANGE_ACTION);
+        filter.addAction(LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION);
+        // Listen for a change in the airplane mode setting so we can defensively turn off the
+        // high power location icon when radios are disabled.
+        filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         context.registerReceiver(this, filter);
 
-        NotificationManager nm = (NotificationManager)context.getSystemService(
-                Context.NOTIFICATION_SERVICE);
-        mNotificationService = nm.getService();
+        mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        mStatusBarManager
+                = (StatusBarManager) context.getSystemService(Context.STATUS_BAR_SERVICE);
 
         // Register to listen for changes to the location settings
         context.getContentResolver().registerContentObserver(
@@ -94,13 +97,11 @@ public class LocationController extends BroadcastReceiver {
                         }
                     }
                 });
-    }
 
-    /**
-     * Add a callback to listen for changes in gps status.
-     */
-    public void addStateChangedCallback(LocationGpsStateChangeCallback cb) {
-        mChangeCallbacks.add(cb);
+        // Examine the current location state and initialize the status view.
+        updateActiveLocationRequests();
+        updateAirplaneMode();
+        refreshViews();
     }
 
     /**
@@ -145,76 +146,77 @@ public class LocationController extends BroadcastReceiver {
        return isGpsEnabled || isNetworkEnabled;
     }
 
+    /**
+     * Returns true if there currently exist active high power location requests.
+     */
+    private boolean areActiveHighPowerLocationRequests() {
+        List<AppOpsManager.PackageOps> packages
+            = mAppOpsManager.getPackagesForOps(mHighPowerRequestAppOpArray);
+        // AppOpsManager can return null when there is no requested data.
+        if (packages != null) {
+            final int numPackages = packages.size();
+            for (int packageInd = 0; packageInd < numPackages; packageInd++) {
+                AppOpsManager.PackageOps packageOp = packages.get(packageInd);
+                List<AppOpsManager.OpEntry> opEntries = packageOp.getOps();
+                if (opEntries != null) {
+                    final int numOps = opEntries.size();
+                    for (int opInd = 0; opInd < numOps; opInd++) {
+                        AppOpsManager.OpEntry opEntry = opEntries.get(opInd);
+                        // AppOpsManager should only return OP_MONITOR_HIGH_POWER_LOCATION because
+                        // of the mHighPowerRequestAppOpArray filter, but checking defensively.
+                        if (opEntry.getOp() == AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION) {
+                            if (opEntry.isRunning()) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    // Updates the status view based on the current state of location requests and airplane mode.
+    private void refreshViews() {
+        // The airplane mode check is defensive - there shouldn't be any active high power
+        // location requests when airplane mode is on.
+        if (!mIsAirplaneMode && mAreActiveLocationRequests) {
+            mStatusBarManager.setIcon(LOCATION_STATUS_ICON_PLACEHOLDER, LOCATION_STATUS_ICON_ID, 0,
+                    mContext.getString(R.string.accessibility_location_active));
+        } else {
+            mStatusBarManager.removeIcon(LOCATION_STATUS_ICON_PLACEHOLDER);
+        }
+    }
+
+    // Reads the active location requests and updates the status view if necessary.
+    private void updateActiveLocationRequests() {
+        boolean hadActiveLocationRequests = mAreActiveLocationRequests;
+        mAreActiveLocationRequests = areActiveHighPowerLocationRequests();
+        if (mAreActiveLocationRequests != hadActiveLocationRequests) {
+            refreshViews();
+        }
+    }
+
+    // Reads the airplane mode setting and updates the status view if necessary.
+    private void updateAirplaneMode() {
+        boolean wasAirplaneMode = mIsAirplaneMode;
+        // TODO This probably warrants a utility method in Settings.java.
+        mIsAirplaneMode = (Settings.Global.getInt(
+                mContext.getContentResolver(),
+                Settings.Global.AIRPLANE_MODE_ON, 0) == 1);
+        if (mIsAirplaneMode != wasAirplaneMode) {
+            refreshViews();
+        }
+    }
+
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
-        final boolean enabled = intent.getBooleanExtra(LocationManager.EXTRA_GPS_ENABLED, false);
-
-        boolean visible;
-        int iconId, textResId;
-
-        if (action.equals(LocationManager.GPS_FIX_CHANGE_ACTION) && enabled) {
-            // GPS is getting fixes
-            iconId = com.android.internal.R.drawable.stat_sys_gps_on;
-            textResId = R.string.gps_notification_found_text;
-            visible = true;
-        } else if (action.equals(LocationManager.GPS_ENABLED_CHANGE_ACTION) && !enabled) {
-            // GPS is off
-            visible = false;
-            iconId = textResId = 0;
-        } else {
-            // GPS is on, but not receiving fixes
-            iconId = R.drawable.stat_sys_gps_acquiring_anim;
-            textResId = R.string.gps_notification_searching_text;
-            visible = true;
-        }
-
-        try {
-            if (visible) {
-                Intent gpsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                gpsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-                PendingIntent pendingIntent = PendingIntent.getActivityAsUser(context, 0,
-                        gpsIntent, 0, null, UserHandle.CURRENT);
-                String text = mContext.getText(textResId).toString();
-
-                Notification n = new Notification.Builder(mContext)
-                    .setSmallIcon(iconId)
-                    .setContentTitle(text)
-                    .setOngoing(true)
-                    .setContentIntent(pendingIntent)
-                    .getNotification();
-
-                // Notification.Builder will helpfully fill these out for you no matter what you do
-                n.tickerView = null;
-                n.tickerText = null;
-
-                n.priority = Notification.PRIORITY_HIGH;
-
-                int[] idOut = new int[1];
-                mNotificationService.enqueueNotificationWithTag(
-                        mContext.getPackageName(), mContext.getBasePackageName(),
-                        null,
-                        GPS_NOTIFICATION_ID,
-                        n,
-                        idOut,
-                        UserHandle.USER_ALL);
-
-                for (LocationGpsStateChangeCallback cb : mChangeCallbacks) {
-                    cb.onLocationGpsStateChanged(true, text);
-                }
-            } else {
-                mNotificationService.cancelNotificationWithTag(
-                        mContext.getPackageName(), null,
-                        GPS_NOTIFICATION_ID, UserHandle.USER_ALL);
-
-                for (LocationGpsStateChangeCallback cb : mChangeCallbacks) {
-                    cb.onLocationGpsStateChanged(false, null);
-                }
-            }
-        } catch (android.os.RemoteException ex) {
-            // well, it was worth a shot
+        if (LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION.equals(action)) {
+            updateActiveLocationRequests();
+        } else if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(action)) {
+            updateAirplaneMode();
         }
     }
 }
-
