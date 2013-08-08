@@ -312,7 +312,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * full {@link Intent#ACTION_ASSIST} Intent with all of the context of the current
      * running foreground services.  You can override this method to place into the bundle
      * anything you would like to appear as an item in the
-     * {@link Intent#EXTRA_SERVICES_ASSIST_CONTEXT} part of the assist Intent.
+     * {@link Intent#EXTRA_ASSIST_SERVICES_CONTEXTS} part of the assist Intent.
      * This method will not be called if this service is not in the foreground.
      * The default implementation does nothing.
      */
