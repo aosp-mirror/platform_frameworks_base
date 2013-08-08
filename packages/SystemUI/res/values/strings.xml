@@ -418,6 +418,9 @@
     <!-- Notification text: when GPS has found a fix [CHAR LIMIT=50] -->
     <string name="gps_notification_found_text">Location set by GPS</string>
 
+    <!-- Accessibility text describing the presence of active location requests by one or more apps -->
+    <string name="accessibility_location_active">Location requests active</string>
+
     <!-- Content description of the clear button in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_clear_all">Clear all notifications.</string>
 
