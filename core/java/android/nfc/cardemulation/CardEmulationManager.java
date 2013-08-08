@@ -56,7 +56,8 @@ public final class CardEmulationManager {
     public static final String EXTRA_CATEGORY = "category";
 
     /**
-     * The ComponentName of the card emulation service component.
+     * The ComponentName object passed in as a parcelable
+     * extra for {@link #ACTION_CHANGE_DEFAULT}
      *
      * @see #ACTION_CHANGE_DEFAULT
      */
