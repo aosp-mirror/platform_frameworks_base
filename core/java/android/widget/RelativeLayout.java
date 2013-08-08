@@ -1321,6 +1321,24 @@ public class RelativeLayout extends ViewGroup {
             super(source);
         }
 
+        /**
+         * Copy constructor. Clones the width, height, margin values, and rules
+         * of the source.
+         *
+         * @param source The layout params to copy from.
+         */
+        public LayoutParams(LayoutParams source) {
+            super(source);
+
+            this.mIsRtlCompatibilityMode = source.mIsRtlCompatibilityMode;
+            this.mRulesChanged = source.mRulesChanged;
+            this.alignWithParent = source.alignWithParent;
+
+            System.arraycopy(source.mRules, LEFT_OF, this.mRules, LEFT_OF, VERB_COUNT);
+            System.arraycopy(
+                    source.mInitialRules, LEFT_OF, this.mInitialRules, LEFT_OF, VERB_COUNT);
+        }
+
         @Override
         public String debug(String output) {
             return output + "ViewGroup.LayoutParams={ width=" + sizeToString(width) +
