@@ -129,6 +129,8 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     private static final int STATUS_OR_NAV_TRANSIENT =
             View.STATUS_BAR_TRANSIENT | View.NAVIGATION_BAR_TRANSIENT;
+    private static final int TRANSIENT_NAV_HIDING =
+            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_ALLOW_TRANSIENT;
     private static final long AUTOHIDE_TIMEOUT_MS = 3000;
     private static final float TRANSPARENT_ALPHA = 0.7f;
 
@@ -1955,14 +1957,12 @@ public class PhoneStatusBar extends BaseStatusBar {
 
             // update hiding navigation confirmation
             if (mNavigationBarView != null) {
-                final int hidingNav =
-                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_ALLOW_TRANSIENT;
-                boolean oldHidingNav = (oldVal & hidingNav) != 0;
-                boolean newHidingNav = (newVal & hidingNav) != 0;
-                if (!oldHidingNav && newHidingNav) {
+                boolean oldShowConfirm = (oldVal & TRANSIENT_NAV_HIDING) == TRANSIENT_NAV_HIDING;
+                boolean newShowConfirm = (newVal & TRANSIENT_NAV_HIDING) == TRANSIENT_NAV_HIDING;
+                if (!oldShowConfirm && newShowConfirm) {
                     mHidingNavigationConfirmationDismissed = false;
                 }
-                setHidingNavigationConfirmationVisible(newHidingNav);
+                setHidingNavigationConfirmationVisible(newShowConfirm);
             }
 
             // send updated sysui visibility to window manager
