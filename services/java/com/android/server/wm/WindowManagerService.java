@@ -10818,7 +10818,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final DisplayContent displayContent = getDisplayContentLocked(displayId);
         if (displayContent != null) {
             mDisplayContents.delete(displayId);
-
+            displayContent.close();
             if (displayId == Display.DEFAULT_DISPLAY) {
                 unregisterPointerEventListener(displayContent.mTapDetector);
             }

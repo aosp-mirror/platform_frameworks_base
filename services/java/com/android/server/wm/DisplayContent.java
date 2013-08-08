@@ -427,6 +427,12 @@ class DisplayContent {
         }
     }
 
+    void close() {
+        for (int stackBoxNdx = mStackBoxes.size() - 1; stackBoxNdx >= 0; --stackBoxNdx) {
+            mStackBoxes.get(stackBoxNdx).close();
+        }
+    }
+
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("Display: mDisplayId="); pw.println(mDisplayId);
         final String subPrefix = "  " + prefix;
