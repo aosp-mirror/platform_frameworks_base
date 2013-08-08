@@ -701,10 +701,11 @@ static jboolean ImageReader_imageSetup(JNIEnv* env, jobject thiz,
     }
     status_t res = consumer->lockNextBuffer(buffer);
     if (res != NO_ERROR) {
-        ALOGE("%s Fail to lockNextBuffer with error: %d ", __FUNCTION__, res);
+        if (res != BAD_VALUE /*no buffers*/) {
+            ALOGE("%s Fail to lockNextBuffer with error: %d ", __FUNCTION__, res);
+        }
         return false;
     }
-
 
     // Check if the left-top corner of the crop rect is origin, we currently assume this point is
     // zero, will revist this once this assumption turns out problematic.
