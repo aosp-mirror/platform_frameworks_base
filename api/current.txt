@@ -10757,7 +10757,119 @@ package android.hardware.camera2 {
     method public void readFromParcel(android.os.Parcel);
     method public void set(android.hardware.camera2.CameraMetadata.Key<T>, T);
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int COLOR_CORRECTION_MODE_FAST = 1; // 0x1
+    field public static final int COLOR_CORRECTION_MODE_HIGH_QUALITY = 2; // 0x2
+    field public static final int COLOR_CORRECTION_MODE_TRANSFORM_MATRIX = 0; // 0x0
+    field public static final int CONTROL_AE_ANTIBANDING_MODE_50HZ = 1; // 0x1
+    field public static final int CONTROL_AE_ANTIBANDING_MODE_60HZ = 2; // 0x2
+    field public static final int CONTROL_AE_ANTIBANDING_MODE_AUTO = 3; // 0x3
+    field public static final int CONTROL_AE_ANTIBANDING_MODE_OFF = 0; // 0x0
+    field public static final int CONTROL_AE_MODE_OFF = 0; // 0x0
+    field public static final int CONTROL_AE_MODE_ON = 1; // 0x1
+    field public static final int CONTROL_AE_MODE_ON_ALWAYS_FLASH = 3; // 0x3
+    field public static final int CONTROL_AE_MODE_ON_AUTO_FLASH = 2; // 0x2
+    field public static final int CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE = 4; // 0x4
+    field public static final int CONTROL_AE_PRECAPTURE_TRIGGER_IDLE = 0; // 0x0
+    field public static final int CONTROL_AE_PRECAPTURE_TRIGGER_START = 1; // 0x1
+    field public static final int CONTROL_AE_STATE_CONVERGED = 2; // 0x2
+    field public static final int CONTROL_AE_STATE_FLASH_REQUIRED = 4; // 0x4
+    field public static final int CONTROL_AE_STATE_INACTIVE = 0; // 0x0
+    field public static final int CONTROL_AE_STATE_LOCKED = 3; // 0x3
+    field public static final int CONTROL_AE_STATE_PRECAPTURE = 5; // 0x5
+    field public static final int CONTROL_AE_STATE_SEARCHING = 1; // 0x1
+    field public static final int CONTROL_AF_MODE_AUTO = 1; // 0x1
+    field public static final int CONTROL_AF_MODE_CONTINUOUS_PICTURE = 4; // 0x4
+    field public static final int CONTROL_AF_MODE_CONTINUOUS_VIDEO = 3; // 0x3
+    field public static final int CONTROL_AF_MODE_EDOF = 5; // 0x5
+    field public static final int CONTROL_AF_MODE_MACRO = 2; // 0x2
+    field public static final int CONTROL_AF_MODE_OFF = 0; // 0x0
+    field public static final int CONTROL_AF_STATE_ACTIVE_SCAN = 3; // 0x3
+    field public static final int CONTROL_AF_STATE_FOCUSED_LOCKED = 4; // 0x4
+    field public static final int CONTROL_AF_STATE_INACTIVE = 0; // 0x0
+    field public static final int CONTROL_AF_STATE_NOT_FOCUSED_LOCKED = 5; // 0x5
+    field public static final int CONTROL_AF_STATE_PASSIVE_FOCUSED = 2; // 0x2
+    field public static final int CONTROL_AF_STATE_PASSIVE_SCAN = 1; // 0x1
+    field public static final int CONTROL_AF_TRIGGER_CANCEL = 2; // 0x2
+    field public static final int CONTROL_AF_TRIGGER_IDLE = 0; // 0x0
+    field public static final int CONTROL_AF_TRIGGER_START = 1; // 0x1
+    field public static final int CONTROL_AWB_MODE_AUTO = 1; // 0x1
+    field public static final int CONTROL_AWB_MODE_CLOUDY_DAYLIGHT = 6; // 0x6
+    field public static final int CONTROL_AWB_MODE_DAYLIGHT = 5; // 0x5
+    field public static final int CONTROL_AWB_MODE_FLUORESCENT = 3; // 0x3
+    field public static final int CONTROL_AWB_MODE_INCANDESCENT = 2; // 0x2
+    field public static final int CONTROL_AWB_MODE_OFF = 0; // 0x0
+    field public static final int CONTROL_AWB_MODE_SHADE = 8; // 0x8
+    field public static final int CONTROL_AWB_MODE_TWILIGHT = 7; // 0x7
+    field public static final int CONTROL_AWB_MODE_WARM_FLUORESCENT = 4; // 0x4
+    field public static final int CONTROL_AWB_STATE_CONVERGED = 2; // 0x2
+    field public static final int CONTROL_AWB_STATE_INACTIVE = 0; // 0x0
+    field public static final int CONTROL_AWB_STATE_LOCKED = 3; // 0x3
+    field public static final int CONTROL_AWB_STATE_SEARCHING = 1; // 0x1
+    field public static final int CONTROL_CAPTURE_INTENT_CUSTOM = 0; // 0x0
+    field public static final int CONTROL_CAPTURE_INTENT_PREVIEW = 1; // 0x1
+    field public static final int CONTROL_CAPTURE_INTENT_STILL_CAPTURE = 2; // 0x2
+    field public static final int CONTROL_CAPTURE_INTENT_VIDEO_RECORD = 3; // 0x3
+    field public static final int CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT = 4; // 0x4
+    field public static final int CONTROL_CAPTURE_INTENT_ZERO_SHUTTER_LAG = 5; // 0x5
+    field public static final int CONTROL_EFFECT_MODE_AQUA = 8; // 0x8
+    field public static final int CONTROL_EFFECT_MODE_BLACKBOARD = 7; // 0x7
+    field public static final int CONTROL_EFFECT_MODE_MONO = 1; // 0x1
+    field public static final int CONTROL_EFFECT_MODE_NEGATIVE = 2; // 0x2
+    field public static final int CONTROL_EFFECT_MODE_OFF = 0; // 0x0
+    field public static final int CONTROL_EFFECT_MODE_POSTERIZE = 5; // 0x5
+    field public static final int CONTROL_EFFECT_MODE_SEPIA = 4; // 0x4
+    field public static final int CONTROL_EFFECT_MODE_SOLARIZE = 3; // 0x3
+    field public static final int CONTROL_EFFECT_MODE_WHITEBOARD = 6; // 0x6
+    field public static final int CONTROL_MODE_AUTO = 1; // 0x1
+    field public static final int CONTROL_MODE_OFF = 0; // 0x0
+    field public static final int CONTROL_MODE_USE_SCENE_MODE = 2; // 0x2
+    field public static final int CONTROL_SCENE_MODE_ACTION = 2; // 0x2
+    field public static final int CONTROL_SCENE_MODE_BARCODE = 16; // 0x10
+    field public static final int CONTROL_SCENE_MODE_BEACH = 8; // 0x8
+    field public static final int CONTROL_SCENE_MODE_CANDLELIGHT = 15; // 0xf
+    field public static final int CONTROL_SCENE_MODE_FACE_PRIORITY = 1; // 0x1
+    field public static final int CONTROL_SCENE_MODE_FIREWORKS = 12; // 0xc
+    field public static final int CONTROL_SCENE_MODE_LANDSCAPE = 4; // 0x4
+    field public static final int CONTROL_SCENE_MODE_NIGHT = 5; // 0x5
+    field public static final int CONTROL_SCENE_MODE_NIGHT_PORTRAIT = 6; // 0x6
+    field public static final int CONTROL_SCENE_MODE_PARTY = 14; // 0xe
+    field public static final int CONTROL_SCENE_MODE_PORTRAIT = 3; // 0x3
+    field public static final int CONTROL_SCENE_MODE_SNOW = 9; // 0x9
+    field public static final int CONTROL_SCENE_MODE_SPORTS = 13; // 0xd
+    field public static final int CONTROL_SCENE_MODE_STEADYPHOTO = 11; // 0xb
+    field public static final int CONTROL_SCENE_MODE_SUNSET = 10; // 0xa
+    field public static final int CONTROL_SCENE_MODE_THEATRE = 7; // 0x7
+    field public static final int CONTROL_SCENE_MODE_UNSUPPORTED = 0; // 0x0
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int EDGE_MODE_FAST = 1; // 0x1
+    field public static final int EDGE_MODE_HIGH_QUALITY = 2; // 0x2
+    field public static final int EDGE_MODE_OFF = 0; // 0x0
+    field public static final int FLASH_MODE_OFF = 0; // 0x0
+    field public static final int FLASH_MODE_SINGLE = 1; // 0x1
+    field public static final int FLASH_MODE_TORCH = 2; // 0x2
+    field public static final int FLASH_STATE_CHARGING = 1; // 0x1
+    field public static final int FLASH_STATE_FIRED = 3; // 0x3
+    field public static final int FLASH_STATE_READY = 2; // 0x2
+    field public static final int FLASH_STATE_UNAVAILABLE = 0; // 0x0
+    field public static final int INFO_SUPPORTED_HARDWARE_LEVEL_FULL = 1; // 0x1
+    field public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED = 0; // 0x0
+    field public static final int LENS_FACING_BACK = 1; // 0x1
+    field public static final int LENS_FACING_FRONT = 0; // 0x0
+    field public static final int LENS_OPTICAL_STABILIZATION_MODE_OFF = 0; // 0x0
+    field public static final int LENS_OPTICAL_STABILIZATION_MODE_ON = 1; // 0x1
+    field public static final int LENS_STATE_STATIONARY = 0; // 0x0
+    field public static final int NOISE_REDUCTION_MODE_FAST = 1; // 0x1
+    field public static final int NOISE_REDUCTION_MODE_HIGH_QUALITY = 2; // 0x2
+    field public static final int NOISE_REDUCTION_MODE_OFF = 0; // 0x0
+    field public static final int STATISTICS_FACE_DETECT_MODE_FULL = 2; // 0x2
+    field public static final int STATISTICS_FACE_DETECT_MODE_OFF = 0; // 0x0
+    field public static final int STATISTICS_FACE_DETECT_MODE_SIMPLE = 1; // 0x1
+    field public static final int STATISTICS_SCENE_FLICKER_50HZ = 1; // 0x1
+    field public static final int STATISTICS_SCENE_FLICKER_60HZ = 2; // 0x2
+    field public static final int STATISTICS_SCENE_FLICKER_NONE = 0; // 0x0
+    field public static final int TONEMAP_MODE_CONTRAST_CURVE = 0; // 0x0
+    field public static final int TONEMAP_MODE_FAST = 1; // 0x1
+    field public static final int TONEMAP_MODE_HIGH_QUALITY = 2; // 0x2
   }
 
   public static class CameraMetadata.Key {
@@ -10769,38 +10881,149 @@ package android.hardware.camera2 {
 
   public final class CameraProperties extends android.hardware.camera2.CameraMetadata {
     ctor public CameraProperties();
-    field public static final android.hardware.camera2.CameraMetadata.Key INFO_IDENTIFIER;
-    field public static final android.hardware.camera2.CameraMetadata.Key INFO_MODEL;
-    field public static final android.hardware.camera2.CameraMetadata.Key INFO_REMOVABLE;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_AVAILABLE_ANTIBANDING_MODES;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_COMPENSATION_RANGE;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_COMPENSATION_STEP;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AF_AVAILABLE_MODES;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AVAILABLE_EFFECTS;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AVAILABLE_SCENE_MODES;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AWB_AVAILABLE_MODES;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_MAX_REGIONS;
+    field public static final android.hardware.camera2.CameraMetadata.Key FLASH_INFO_AVAILABLE;
     field public static final android.hardware.camera2.CameraMetadata.Key INFO_SUPPORTED_HARDWARE_LEVEL;
-    field public static final int INFO_SUPPORTED_HARDWARE_LEVEL_FULL = 1; // 0x1
-    field public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED = 0; // 0x0
+    field public static final android.hardware.camera2.CameraMetadata.Key JPEG_AVAILABLE_THUMBNAIL_SIZES;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_FACING;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_AVAILABLE_APERTURES;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_AVAILABLE_FILTER_DENSITIES;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_AVAILABLE_FOCAL_LENGTHS;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_HYPERFOCAL_DISTANCE;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_MINIMUM_FOCUS_DISTANCE;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_INFO_SHADING_MAP_SIZE;
+    field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_MAX_NUM_OUTPUT_STREAMS;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_FORMATS;
+    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_JPEG_MIN_DURATIONS;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_JPEG_SIZES;
+    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_MAX_DIGITAL_ZOOM;
+    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS;
     field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_PROCESSED_SIZES;
-    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_AVAILABLE_RAW_SIZES;
-    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_ACTIVE_ARRAY_SIZE;
-    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_PIXEL_ARRAY_SIZE;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_BASE_GAIN_FACTOR;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_ACTIVE_ARRAY_SIZE;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_EXPOSURE_TIME_RANGE;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_MAX_FRAME_DURATION;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_PHYSICAL_SIZE;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_INFO_SENSITIVITY_RANGE;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_MAX_ANALOG_SENSITIVITY;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_ORIENTATION;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_INFO_MAX_FACE_COUNT;
+    field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_MAX_CURVE_POINTS;
   }
 
   public final class CaptureRequest extends android.hardware.camera2.CameraMetadata implements android.os.Parcelable {
     method public void addTarget(android.view.Surface);
     method public void removeTarget(android.view.Surface);
+    field public static final android.hardware.camera2.CameraMetadata.Key BLACK_LEVEL_LOCK;
+    field public static final android.hardware.camera2.CameraMetadata.Key COLOR_CORRECTION_GAINS;
+    field public static final android.hardware.camera2.CameraMetadata.Key COLOR_CORRECTION_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key COLOR_CORRECTION_TRANSFORM;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_ANTIBANDING_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_EXPOSURE_COMPENSATION;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_LOCK;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_PRECAPTURE_TRIGGER;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_REGIONS;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_TARGET_FPS_RANGE;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AF_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AF_REGIONS;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AF_TRIGGER;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AWB_LOCK;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AWB_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AWB_REGIONS;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_CAPTURE_INTENT;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_EFFECT_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_SCENE_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_VIDEO_STABILIZATION_MODE;
     field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final android.hardware.camera2.CameraMetadata.Key EDGE_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key FLASH_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key JPEG_GPS_COORDINATES;
+    field public static final android.hardware.camera2.CameraMetadata.Key JPEG_GPS_PROCESSING_METHOD;
+    field public static final android.hardware.camera2.CameraMetadata.Key JPEG_GPS_TIMESTAMP;
+    field public static final android.hardware.camera2.CameraMetadata.Key JPEG_ORIENTATION;
+    field public static final android.hardware.camera2.CameraMetadata.Key JPEG_QUALITY;
+    field public static final android.hardware.camera2.CameraMetadata.Key JPEG_THUMBNAIL_QUALITY;
+    field public static final android.hardware.camera2.CameraMetadata.Key JPEG_THUMBNAIL_SIZE;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_APERTURE;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_FILTER_DENSITY;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_FOCAL_LENGTH;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_FOCUS_DISTANCE;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_OPTICAL_STABILIZATION_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key NOISE_REDUCTION_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_CROP_REGION;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_EXPOSURE_TIME;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_FRAME_DURATION;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_SENSITIVITY;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_DETECT_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_CURVE_BLUE;
+    field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_CURVE_GREEN;
+    field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_CURVE_RED;
+    field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_MODE;
   }
 
   public final class CaptureResult extends android.hardware.camera2.CameraMetadata {
+    field public static final android.hardware.camera2.CameraMetadata.Key BLACK_LEVEL_LOCK;
+    field public static final android.hardware.camera2.CameraMetadata.Key COLOR_CORRECTION_GAINS;
+    field public static final android.hardware.camera2.CameraMetadata.Key COLOR_CORRECTION_TRANSFORM;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_REGIONS;
     field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AE_STATE;
-    field public static final int CONTROL_AE_STATE_CONVERGED = 2; // 0x2
-    field public static final int CONTROL_AE_STATE_FLASH_REQUIRED = 4; // 0x4
-    field public static final int CONTROL_AE_STATE_INACTIVE = 0; // 0x0
-    field public static final int CONTROL_AE_STATE_LOCKED = 3; // 0x3
-    field public static final int CONTROL_AE_STATE_PRECAPTURE = 5; // 0x5
-    field public static final int CONTROL_AE_STATE_SEARCHING = 1; // 0x1
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AF_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AF_REGIONS;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AF_STATE;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AWB_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AWB_REGIONS;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_AWB_STATE;
+    field public static final android.hardware.camera2.CameraMetadata.Key CONTROL_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key EDGE_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key FLASH_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key FLASH_STATE;
+    field public static final android.hardware.camera2.CameraMetadata.Key JPEG_GPS_COORDINATES;
+    field public static final android.hardware.camera2.CameraMetadata.Key JPEG_GPS_PROCESSING_METHOD;
+    field public static final android.hardware.camera2.CameraMetadata.Key JPEG_GPS_TIMESTAMP;
+    field public static final android.hardware.camera2.CameraMetadata.Key JPEG_ORIENTATION;
+    field public static final android.hardware.camera2.CameraMetadata.Key JPEG_QUALITY;
+    field public static final android.hardware.camera2.CameraMetadata.Key JPEG_THUMBNAIL_QUALITY;
+    field public static final android.hardware.camera2.CameraMetadata.Key JPEG_THUMBNAIL_SIZE;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_APERTURE;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_FILTER_DENSITY;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_FOCAL_LENGTH;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_FOCUS_DISTANCE;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_FOCUS_RANGE;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_OPTICAL_STABILIZATION_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key LENS_STATE;
+    field public static final android.hardware.camera2.CameraMetadata.Key NOISE_REDUCTION_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key REQUEST_FRAME_COUNT;
+    field public static final android.hardware.camera2.CameraMetadata.Key SCALER_CROP_REGION;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_EXPOSURE_TIME;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_FRAME_DURATION;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_SENSITIVITY;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TIMESTAMP;
-    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_DETECTED_FACES;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_DETECT_MODE;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_IDS;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_LANDMARKS;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_RECTANGLES;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_SCORES;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_LENS_SHADING_MAP;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_PREDICTED_COLOR_GAINS;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_PREDICTED_COLOR_TRANSFORM;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_SCENE_FLICKER;
+    field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_CURVE_BLUE;
+    field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_CURVE_GREEN;
+    field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_CURVE_RED;
+    field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_MODE;
   }
 
   public static class CaptureResult.Face {
