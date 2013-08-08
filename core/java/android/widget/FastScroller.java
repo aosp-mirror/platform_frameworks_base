@@ -231,10 +231,11 @@ class FastScroller {
         }
     };
 
-    public FastScroller(Context context, AbsListView listView) {
+    public FastScroller(AbsListView listView) {
         mList = listView;
         mOverlay = listView.getOverlay();
 
+        final Context context = listView.getContext();
         mScaledTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 
         final Resources res = context.getResources();
