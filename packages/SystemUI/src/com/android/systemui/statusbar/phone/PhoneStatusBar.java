@@ -1319,12 +1319,10 @@ public class PhoneStatusBar extends BaseStatusBar {
                     break;
                 case MSG_HIDE_HEADS_UP:
                     setHeadsUpVisibility(false);
-                    mInterruptingNotificationEntry = null;
                     break;
                 case MSG_ESCALATE_HEADS_UP:
                     escalateHeadsUp();
                     setHeadsUpVisibility(false);
-                    mInterruptingNotificationEntry = null;
                     break;
             }
         }
@@ -2507,6 +2505,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (!ENABLE_HEADS_UP) return;
         if (DEBUG) Log.v(TAG, (vis ? "showing" : "hiding") + " heads up window");
         mHeadsUpNotificationView.setVisibility(vis ? View.VISIBLE : View.GONE);
+        if (!vis) {
+            if (DEBUG) Log.d(TAG, "setting heads up entry to null");
+            mInterruptingNotificationEntry = null;
+        }
     }
 
     public void animateHeadsUp(boolean animateInto, float frac) {
