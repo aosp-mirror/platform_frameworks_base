@@ -600,13 +600,14 @@ public abstract class ApplicationThreadNative extends Binder
             return true;
         }
 
-        case REQUEST_ACTIVITY_EXTRAS_TRANSACTION:
+        case REQUEST_ASSIST_CONTEXT_EXTRAS_TRANSACTION:
         {
             data.enforceInterface(IApplicationThread.descriptor);
             IBinder activityToken = data.readStrongBinder();
             IBinder requestToken = data.readStrongBinder();
             int requestType = data.readInt();
-            requestActivityExtras(activityToken, requestToken, requestType);
+            int index = data.readInt();
+            requestAssistContextExtras(activityToken, requestToken, requestType, index);
             reply.writeNoException();
             return true;
         }
@@ -1241,14 +1242,16 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
 
     @Override
-    public void requestActivityExtras(IBinder activityToken, IBinder requestToken, int requestType)
-            throws RemoteException {
+    public void requestAssistContextExtras(IBinder activityToken, IBinder requestToken,
+            int requestType, int index) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(activityToken);
         data.writeStrongBinder(requestToken);
         data.writeInt(requestType);
-        mRemote.transact(REQUEST_ACTIVITY_EXTRAS_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
+        data.writeInt(index);
+        mRemote.transact(REQUEST_ASSIST_CONTEXT_EXTRAS_TRANSACTION, data, null,
+                IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 

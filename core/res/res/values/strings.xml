@@ -831,8 +831,8 @@
     <string name="permlab_getTopActivityInfo">get current app info</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_getTopActivityInfo">Allows the holder to retrieve private information
-        about the current application in the foreground of the screen.</string>
-    
+        about the current application and services in the foreground of the screen.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_runSetActivityWatcher">monitor and control all app launching</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

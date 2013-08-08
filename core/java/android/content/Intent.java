@@ -1152,9 +1152,10 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Activity Action: Perform assist action.
      * <p>
-     * Input: {@link #EXTRA_ASSIST_PACKAGE} and {@link #EXTRA_ASSIST_CONTEXT} can provide
-     * additional optional contextual information about where the user was when they requested
-     * the assist.
+     * Input: {@link #EXTRA_ASSIST_PACKAGE}, {@link #EXTRA_ASSIST_CONTEXT},
+     * {@link #EXTRA_ASSIST_SERVICES_PACKAGES}, and {@link #EXTRA_ASSIST_SERVICES_CONTEXTS} can
+     * provide additional optional contextual information about where the user was when they
+     * requested the assist.
      * Output: nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -1163,9 +1164,10 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Activity Action: Perform voice assist action.
      * <p>
-     * Input: {@link #EXTRA_ASSIST_PACKAGE} and {@link #EXTRA_ASSIST_CONTEXT} can provide
-     * additional optional contextual information about where the user was when they requested
-     * the voice assist.
+     * Input: {@link #EXTRA_ASSIST_PACKAGE}, {@link #EXTRA_ASSIST_CONTEXT},
+     * {@link #EXTRA_ASSIST_SERVICES_PACKAGES}, and {@link #EXTRA_ASSIST_SERVICES_CONTEXTS} can
+     * provide additional optional contextual information about where the user was when they
+     * requested the voice assist.
      * Output: nothing.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -1187,6 +1189,25 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_ASSIST_CONTEXT
             = "android.intent.extra.ASSIST_CONTEXT";
+
+    /**
+     * An optional field on {@link #ACTION_ASSIST} and {@link #ACTION_VOICE_ASSIST}
+     * containing an the names of the application package of foreground services at the time
+     * of the assist request.  This is an array of {@link String}s, with one entry
+     * per service.
+     */
+    public static final String EXTRA_ASSIST_SERVICES_PACKAGES
+            = "android.intent.extra.ASSIST_SERVICES_PACKAGES";
+
+    /**
+     * An optional field on {@link #ACTION_ASSIST} and {@link #ACTION_VOICE_ASSIST}
+     * containing additional contextual information supplied by the current
+     * foreground services at the time of the assist request.  This is an array
+     * of {@link Bundle}s of additional data, with one {@link Bundle} per service.
+     */
+    public static final String EXTRA_ASSIST_SERVICES_CONTEXTS
+            = "android.intent.extra.ASSIST_SERVICES_CONTEXTS";
+
 
     /**
      * Activity Action: List all available applications
