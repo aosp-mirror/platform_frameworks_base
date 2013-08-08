@@ -125,12 +125,9 @@ public class LocationController extends BroadcastReceiver {
             return;
         }
         final ContentResolver cr = mContext.getContentResolver();
-        Settings.Secure.setLocationProviderEnabled(
-                cr, LocationManager.GPS_PROVIDER, enabled);
-        // When enabling the NETWORK_PROVIDER, a user consent dialog will pop up, and the
-        // setting won't actually be enabled until the user accepts the agreement.
-        Settings.Secure.setLocationProviderEnabled(
-                cr, LocationManager.NETWORK_PROVIDER, enabled);
+        // When enabling location, a user consent dialog will pop up, and the
+        // setting won't be fully enabled until the user accepts the agreement.
+        Settings.Secure.setLocationMasterSwitchEnabled(cr, enabled);
     }
 
     /**
@@ -138,11 +135,7 @@ public class LocationController extends BroadcastReceiver {
      */
     public boolean isLocationEnabled() {
         ContentResolver contentResolver = mContext.getContentResolver();
-        boolean isGpsEnabled = Settings.Secure.isLocationProviderEnabled(
-                contentResolver, LocationManager.GPS_PROVIDER);
-        boolean isNetworkEnabled = Settings.Secure.isLocationProviderEnabled(
-                contentResolver, LocationManager.NETWORK_PROVIDER);
-       return isGpsEnabled || isNetworkEnabled;
+        return Settings.Secure.isLocationMasterSwitchEnabled(contentResolver);
     }
 
     @Override
