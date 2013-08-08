@@ -333,6 +333,12 @@ static jobject nativeCreateDisplay(JNIEnv* env, jclass clazz, jstring nameObj,
     return javaObjectForIBinder(env, token);
 }
 
+static void nativeDestroyDisplay(JNIEnv* env, jclass clazz, jobject tokenObj) {
+    sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
+    if (token == NULL) return;
+    SurfaceComposerClient::destroyDisplay(token);
+}
+
 static void nativeSetDisplaySurface(JNIEnv* env, jclass clazz,
         jobject tokenObj, jint nativeSurfaceObject) {
     sp<IBinder> token(ibinderForJavaObject(env, tokenObj));
@@ -441,6 +447,8 @@ static JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetBuiltInDisplay },
     {"nativeCreateDisplay", "(Ljava/lang/String;Z)Landroid/os/IBinder;",
             (void*)nativeCreateDisplay },
+    {"nativeDestroyDisplay", "(Landroid/os/IBinder;)V",
+            (void*)nativeDestroyDisplay },
     {"nativeSetDisplaySurface", "(Landroid/os/IBinder;I)V",
             (void*)nativeSetDisplaySurface },
     {"nativeSetDisplayLayerStack", "(Landroid/os/IBinder;I)V",

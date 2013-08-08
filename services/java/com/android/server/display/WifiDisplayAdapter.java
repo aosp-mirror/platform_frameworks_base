@@ -374,7 +374,7 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
     private void removeDisplayDeviceLocked() {
         if (mDisplayDevice != null) {
-            mDisplayDevice.clearSurfaceLocked();
+            mDisplayDevice.destroyLocked();
             sendDisplayDeviceEventLocked(mDisplayDevice, DISPLAY_DEVICE_EVENT_REMOVED);
             mDisplayDevice = null;
 
@@ -633,9 +633,12 @@ final class WifiDisplayAdapter extends DisplayAdapter {
             mSurface = surface;
         }
 
-        public void clearSurfaceLocked() {
-            mSurface = null;
-            sendTraversalRequestLocked();
+        public void destroyLocked() {
+            if (mSurface != null) {
+                mSurface.release();
+                mSurface = null;
+            }
+            SurfaceControl.destroyDisplay(getDisplayTokenLocked());
         }
 
         public void setNameLocked(String name) {
@@ -645,7 +648,9 @@ final class WifiDisplayAdapter extends DisplayAdapter {
 
         @Override
         public void performTraversalInTransactionLocked() {
-            setSurfaceInTransactionLocked(mSurface);
+            if (mSurface != null) {
+                setSurfaceInTransactionLocked(mSurface);
+            }
         }
 
         @Override

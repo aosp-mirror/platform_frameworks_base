@@ -154,9 +154,6 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     // List of all currently connected display devices.
     private final ArrayList<DisplayDevice> mDisplayDevices = new ArrayList<DisplayDevice>();
 
-    // List of all removed display devices.
-    private final ArrayList<DisplayDevice> mRemovedDisplayDevices = new ArrayList<DisplayDevice>();
-
     // List of all logical displays indexed by logical display id.
     private final SparseArray<LogicalDisplay> mLogicalDisplays =
             new SparseArray<LogicalDisplay>();
@@ -798,7 +795,6 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
 
         Slog.i(TAG, "Display device removed: " + device.getDisplayDeviceInfoLocked());
 
-        mRemovedDisplayDevices.add(device);
         updateLogicalDisplaysLocked();
         scheduleTraversalLocked(false);
     }
@@ -900,14 +896,6 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
     }
 
     private void performTraversalInTransactionLocked() {
-        // Perform one last traversal for each removed display device.
-        final int removedCount = mRemovedDisplayDevices.size();
-        for (int i = 0; i < removedCount; i++) {
-            DisplayDevice device = mRemovedDisplayDevices.get(i);
-            device.performTraversalInTransactionLocked();
-        }
-        mRemovedDisplayDevices.clear();
-
         // Clear all viewports before configuring displays so that we can keep
         // track of which ones we have configured.
         clearViewportsLocked();

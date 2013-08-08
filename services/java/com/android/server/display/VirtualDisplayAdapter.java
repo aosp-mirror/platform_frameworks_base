@@ -58,7 +58,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         try {
             appToken.linkToDeath(device, 0);
         } catch (RemoteException ex) {
-            device.releaseLocked();
+            device.destroyLocked();
             return null;
         }
 
@@ -72,6 +72,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
     public DisplayDevice releaseVirtualDisplayLocked(IBinder appToken) {
         VirtualDisplayDevice device = mVirtualDisplayDevices.remove(appToken);
         if (device != null) {
+            device.destroyLocked();
             appToken.unlinkToDeath(device, 0);
         }
 
@@ -85,6 +86,7 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         if (device != null) {
             Slog.i(TAG, "Virtual display device released because application token died: "
                     + device.mOwnerPackageName);
+            device.destroyLocked();
             sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_REMOVED);
         }
     }
@@ -100,7 +102,6 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         private final int mDensityDpi;
         private final int mFlags;
 
-        private boolean mReleased;
         private Surface mSurface;
         private DisplayDeviceInfo mInfo;
 
@@ -122,24 +123,25 @@ final class VirtualDisplayAdapter extends DisplayAdapter {
         @Override
         public void binderDied() {
             synchronized (getSyncRoot()) {
-                if (!mReleased) {
+                if (mSurface != null) {
                     handleBinderDiedLocked(mAppToken);
                 }
             }
         }
 
-        public void releaseLocked() {
-            mReleased = true;
-            sendTraversalRequestLocked();
+        public void destroyLocked() {
+            if (mSurface != null) {
+                mSurface.release();
+                mSurface = null;
+            }
+            SurfaceControl.destroyDisplay(getDisplayTokenLocked());
         }
 
         @Override
         public void performTraversalInTransactionLocked() {
-            if (mReleased && mSurface != null) {
-                mSurface.destroy();
-                mSurface = null;
+            if (mSurface != null) {
+                setSurfaceInTransactionLocked(mSurface);
             }
-            setSurfaceInTransactionLocked(mSurface);
         }
 
         @Override
