@@ -28,8 +28,10 @@ import android.os.FileObserver;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.util.ArrayMap;
 import android.util.Slog;
 import android.util.Xml;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
 import com.android.server.EventLogTags;
 import com.android.server.IntentResolver;
@@ -41,6 +43,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -133,12 +136,22 @@ public class IntentFirewall {
     public boolean checkIntent(FirewallIntentResolver resolver, ComponentName resolvedComponent,
             int intentType, Intent intent, int callerUid, int callerPid, String resolvedType,
             ApplicationInfo resolvedApp) {
-        List<Rule> matchingRules = resolver.queryIntent(intent, resolvedType, false, 0);
         boolean log = false;
         boolean block = false;
 
-        for (int i=0; i< matchingRules.size(); i++) {
-            Rule rule = matchingRules.get(i);
+        // For the first pass, find all the rules that have at least one intent-filter or
+        // component-filter that matches this intent
+        List<Rule> candidateRules;
+        candidateRules = resolver.queryIntent(intent, resolvedType, false, 0);
+        if (candidateRules == null) {
+            candidateRules = new ArrayList<Rule>();
+        }
+        resolver.queryByComponent(resolvedComponent, candidateRules);
+
+        // For the second pass, try to match the potentially more specific conditions in each
+        // rule against the intent
+        for (int i=0; i<candidateRules.size(); i++) {
+            Rule rule = candidateRules.get(i);
             if (rule.matches(this, resolvedComponent, intent, callerUid, callerPid, resolvedType,
                     resolvedApp)) {
                 block |= rule.getBlock();
@@ -347,8 +360,11 @@ public class IntentFirewall {
 
             for (int ruleIndex=0; ruleIndex<rules.size(); ruleIndex++) {
                 Rule rule = rules.get(ruleIndex);
-                for (int filterIndex=0; filterIndex<rule.getIntentFilterCount(); filterIndex++) {
-                    resolver.addFilter(rule.getIntentFilter(filterIndex));
+                for (int i=0; i<rule.getIntentFilterCount(); i++) {
+                    resolver.addFilter(rule.getIntentFilter(i));
+                }
+                for (int i=0; i<rule.getComponentFilterCount(); i++) {
+                    resolver.addComponentFilter(rule.getComponentFilter(i), rule);
                 }
             }
         }
@@ -365,14 +381,35 @@ public class IntentFirewall {
         return factory.newFilter(parser);
     }
 
+    /**
+     * Represents a single activity/service/broadcast rule within one of the xml files.
+     *
+     * Rules are matched against an incoming intent in two phases. The goal of the first phase
+     * is to select a subset of rules that might match a given intent.
+     *
+     * For the first phase, we use a combination of intent filters (via an IntentResolver)
+     * and component filters to select which rules to check. If a rule has multiple intent or
+     * component filters, only a single filter must match for the rule to be passed on to the
+     * second phase.
+     *
+     * In the second phase, we check the specific conditions in each rule against the values in the
+     * intent. All top level conditions (but not filters) in the rule must match for the rule as a
+     * whole to match.
+     *
+     * If the rule matches, then we block or log the intent, as specified by the rule. If multiple
+     * rules match, we combine the block/log flags from any matching rule.
+     */
     private static class Rule extends AndFilter {
         private static final String TAG_INTENT_FILTER = "intent-filter";
+        private static final String TAG_COMPONENT_FILTER = "component-filter";
+        private static final String ATTR_NAME = "name";
 
         private static final String ATTR_BLOCK = "block";
         private static final String ATTR_LOG = "log";
 
         private final ArrayList<FirewallIntentFilter> mIntentFilters =
                 new ArrayList<FirewallIntentFilter>(1);
+        private final ArrayList<ComponentName> mComponentFilters = new ArrayList<ComponentName>(0);
         private boolean block;
         private boolean log;
 
@@ -387,10 +424,25 @@ public class IntentFirewall {
 
         @Override
         protected void readChild(XmlPullParser parser) throws IOException, XmlPullParserException {
-            if (parser.getName().equals(TAG_INTENT_FILTER)) {
+            String currentTag = parser.getName();
+
+            if (currentTag.equals(TAG_INTENT_FILTER)) {
                 FirewallIntentFilter intentFilter = new FirewallIntentFilter(this);
                 intentFilter.readFromXml(parser);
                 mIntentFilters.add(intentFilter);
+            } else if (currentTag.equals(TAG_COMPONENT_FILTER)) {
+                String componentStr = parser.getAttributeValue(null, ATTR_NAME);
+                if (componentStr == null) {
+                    throw new XmlPullParserException("Component name must be specified.",
+                            parser, null);
+                }
+
+                ComponentName componentName = ComponentName.unflattenFromString(componentStr);
+                if (componentName == null) {
+                    throw new XmlPullParserException("Invalid component name: " + componentStr);
+                }
+
+                mComponentFilters.add(componentName);
             } else {
                 super.readChild(parser);
             }
@@ -404,6 +456,13 @@ public class IntentFirewall {
             return mIntentFilters.get(index);
         }
 
+        public int getComponentFilterCount() {
+            return mComponentFilters.size();
+        }
+
+        public ComponentName getComponentFilter(int index) {
+            return mComponentFilters.get(index);
+        }
         public boolean getBlock() {
             return block;
         }
@@ -448,6 +507,22 @@ public class IntentFirewall {
             // there's no need to sort the results
             return;
         }
+
+        public void queryByComponent(ComponentName componentName, List<Rule> candidateRules) {
+            Rule[] rules = mRulesByComponent.get(componentName);
+            if (rules != null) {
+                candidateRules.addAll(Arrays.asList(rules));
+            }
+        }
+
+        public void addComponentFilter(ComponentName componentName, Rule rule) {
+            Rule[] rules = mRulesByComponent.get(componentName);
+            rules = ArrayUtils.appendElement(Rule.class, rules, rule);
+            mRulesByComponent.put(componentName, rules);
+        }
+
+        private final ArrayMap<ComponentName, Rule[]> mRulesByComponent =
+                new ArrayMap<ComponentName, Rule[]>(0);
     }
 
     final Handler mHandler = new Handler() {
