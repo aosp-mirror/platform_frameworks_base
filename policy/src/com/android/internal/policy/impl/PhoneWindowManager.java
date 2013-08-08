@@ -995,8 +995,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public void setInitialDisplaySize(Display display, int width, int height, int density) {
-        if (display.getDisplayId() != Display.DEFAULT_DISPLAY) {
-            throw new IllegalArgumentException("Can only set the default display");
+        // This method might be called before the policy has been fully initialized
+        // or for other displays we don't care about.
+        if (mContext == null || display.getDisplayId() != Display.DEFAULT_DISPLAY) {
+            return;
         }
         mDisplay = display;
 
