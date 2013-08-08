@@ -22,6 +22,7 @@ import android.hardware.camera2.CameraPropertiesKeys;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
+import android.hardware.camera2.utils.BinderHolder;
 import android.os.RemoteException;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -39,8 +40,8 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
     private static String TAG = "CameraDeviceBinderTest";
     // Number of streaming callbacks need to check.
     private static int NUM_CALLBACKS_CHECKED = 10;
-    // Wait for capture result timeout value: 1000ms
-    private final static int WAIT_FOR_COMPLETE_TIMEOUT_MS = 1000;
+    // Wait for capture result timeout value: 1500ms
+    private final static int WAIT_FOR_COMPLETE_TIMEOUT_MS = 1500;
 
     private int mCameraId;
     private ICameraDeviceUser mCameraUser;
@@ -129,8 +130,10 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
 
         mMockCb = spy(dummyCallbacks);
 
-        mCameraUser = mUtils.getCameraService().connectDevice(mMockCb, mCameraId,
-                clientPackageName, CameraBinderTestUtils.USE_CALLING_UID);
+        BinderHolder holder = new BinderHolder();
+        mUtils.getCameraService().connectDevice(mMockCb, mCameraId,
+                clientPackageName, CameraBinderTestUtils.USE_CALLING_UID, holder);
+        mCameraUser = ICameraDeviceUser.Stub.asInterface(holder.getBinder());
         assertNotNull(String.format("Camera %s was null", mCameraId), mCameraUser);
         createDefaultSurface();
 
