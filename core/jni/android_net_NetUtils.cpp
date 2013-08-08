@@ -141,7 +141,7 @@ static jboolean android_net_utils_runDhcpCommon(JNIEnv* env, jobject clazz, jstr
                 dns, server, &lease, vendorInfo, domains, mtu);
     }
     if (result != 0) {
-        ALOGD("dhcp_do_request failed");
+        ALOGD("dhcp_do_request failed : %s (%s)", nameStr, renew ? "renew" : "new");
     }
 
     env->ReleaseStringUTFChars(ifname, nameStr);

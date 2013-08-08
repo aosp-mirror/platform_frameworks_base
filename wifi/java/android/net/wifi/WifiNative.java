@@ -47,7 +47,9 @@ public class WifiNative {
     static final int SCAN_WITHOUT_CONNECTION_SETUP          = 1;
     static final int SCAN_WITH_CONNECTION_SETUP             = 2;
 
-    String mInterface = "";
+    public final String mInterfaceName;
+    public final String mInterfacePrefix;
+
     private boolean mSuspendOptEnabled = false;
 
     public native static boolean loadDriver();
@@ -62,52 +64,53 @@ public class WifiNative {
        or when the supplicant is hung */
     public native static boolean killSupplicant(boolean p2pSupported);
 
-    private native boolean connectToSupplicant(String iface);
+    private native boolean connectToSupplicantNative();
 
-    private native void closeSupplicantConnection(String iface);
+    private native void closeSupplicantConnectionNative();
 
     /**
      * Wait for the supplicant to send an event, returning the event string.
      * @return the event string sent by the supplicant.
      */
-    private native String waitForEvent(String iface);
+    private native String waitForEventNative();
 
-    private native boolean doBooleanCommand(String iface, String command);
+    private native boolean doBooleanCommandNative(String command);
 
-    private native int doIntCommand(String iface, String command);
+    private native int doIntCommandNative(String command);
 
-    private native String doStringCommand(String iface, String command);
+    private native String doStringCommandNative(String command);
 
-    public WifiNative(String iface) {
-        mInterface = iface;
-        mTAG = "WifiNative-" + iface;
+    public WifiNative(String interfaceName) {
+        mInterfaceName = interfaceName;
+        mInterfacePrefix = "IFNAME=" + interfaceName + " ";
+        mTAG = "WifiNative-" + interfaceName;
     }
 
     public boolean connectToSupplicant() {
-        return connectToSupplicant(mInterface);
+        return connectToSupplicantNative();
     }
 
     public void closeSupplicantConnection() {
-        closeSupplicantConnection(mInterface);
+        closeSupplicantConnectionNative();
     }
 
     public String waitForEvent() {
-        return waitForEvent(mInterface);
+        return waitForEventNative();
     }
 
     private boolean doBooleanCommand(String command) {
         if (DBG) Log.d(mTAG, "doBoolean: " + command);
-        return doBooleanCommand(mInterface, command);
+        return doBooleanCommandNative(mInterfacePrefix + command);
     }
 
     private int doIntCommand(String command) {
         if (DBG) Log.d(mTAG, "doInt: " + command);
-        return doIntCommand(mInterface, command);
+        return doIntCommandNative(mInterfacePrefix + command);
     }
 
     private String doStringCommand(String command) {
         if (DBG) Log.d(mTAG, "doString: " + command);
-        return doStringCommand(mInterface, command);
+        return doStringCommandNative(mInterfacePrefix + command);
     }
 
     public boolean ping() {
@@ -411,9 +414,9 @@ public class WifiNative {
 
     public boolean startWpsPbc(String iface, String bssid) {
         if (TextUtils.isEmpty(bssid)) {
-            return doBooleanCommand("IFNAME=" + iface + " WPS_PBC");
+            return doBooleanCommandNative("IFNAME=" + iface + " WPS_PBC");
         } else {
-            return doBooleanCommand("IFNAME=" + iface + " WPS_PBC " + bssid);
+            return doBooleanCommandNative("IFNAME=" + iface + " WPS_PBC " + bssid);
         }
     }
 
@@ -424,7 +427,7 @@ public class WifiNative {
 
     public boolean startWpsPinKeypad(String iface, String pin) {
         if (TextUtils.isEmpty(pin)) return false;
-        return doBooleanCommand("IFNAME=" + iface + " WPS_PIN any " + pin);
+        return doBooleanCommandNative("IFNAME=" + iface + " WPS_PIN any " + pin);
     }
 
 
@@ -438,9 +441,9 @@ public class WifiNative {
 
     public String startWpsPinDisplay(String iface, String bssid) {
         if (TextUtils.isEmpty(bssid)) {
-            return doStringCommand("IFNAME=" + iface + " WPS_PIN any");
+            return doStringCommandNative("IFNAME=" + iface + " WPS_PIN any");
         } else {
-            return doStringCommand("IFNAME=" + iface + " WPS_PIN " + bssid);
+            return doStringCommandNative("IFNAME=" + iface + " WPS_PIN " + bssid);
         }
     }
 
@@ -492,7 +495,7 @@ public class WifiNative {
     }
 
     public boolean setP2pGroupIdle(String iface, int time) {
-        return doBooleanCommand("IFNAME=" + iface + " SET p2p_group_idle " + time);
+        return doBooleanCommandNative("IFNAME=" + iface + " SET p2p_group_idle " + time);
     }
 
     public void setPowerSave(boolean enabled) {
@@ -505,9 +508,9 @@ public class WifiNative {
 
     public boolean setP2pPowerSave(String iface, boolean enabled) {
         if (enabled) {
-            return doBooleanCommand("IFNAME=" + iface + " P2P_SET ps 1");
+            return doBooleanCommandNative("IFNAME=" + iface + " P2P_SET ps 1");
         } else {
-            return doBooleanCommand("IFNAME=" + iface + " P2P_SET ps 0");
+            return doBooleanCommandNative("IFNAME=" + iface + " P2P_SET ps 0");
         }
     }
 
@@ -645,7 +648,7 @@ public class WifiNative {
 
     public boolean p2pGroupRemove(String iface) {
         if (TextUtils.isEmpty(iface)) return false;
-        return doBooleanCommand("P2P_GROUP_REMOVE " + iface);
+        return doBooleanCommandNative("IFNAME=" + iface + " P2P_GROUP_REMOVE " + iface);
     }
 
     public boolean p2pReject(String deviceAddress) {
