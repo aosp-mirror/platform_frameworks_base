@@ -846,6 +846,7 @@ private:
 
     EventEntry* mPendingEvent;
     Queue<EventEntry> mInboundQueue;
+    Queue<EventEntry> mRecentQueue;
     Queue<CommandEntry> mCommandQueue;
 
     void dispatchOnceInnerLocked(nsecs_t* nextWakeupTime);
@@ -855,6 +856,9 @@ private:
 
     // Cleans up input state when dropping an inbound event.
     void dropInboundEventLocked(EventEntry* entry, DropReason dropReason);
+
+    // Adds an event to a queue of recent events for debugging purposes.
+    void addRecentEventLocked(EventEntry* entry);
 
     // App switch latency optimization.
     bool mAppSwitchSawKeyDown;
