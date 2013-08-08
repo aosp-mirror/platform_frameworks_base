@@ -144,6 +144,11 @@ public interface NetworkStateTracker {
     public void captivePortalCheckComplete();
 
     /**
+     * Captive portal check has completed
+     */
+    public void captivePortalCheckCompleted(boolean isCaptive);
+
+    /**
      * Turn the wireless radio off for a network.
      * @param turnOn {@code true} to turn the radio on, {@code false}
      */
