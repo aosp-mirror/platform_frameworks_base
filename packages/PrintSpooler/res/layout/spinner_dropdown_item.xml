@@ -17,11 +17,11 @@
 <LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="8dip"
-    android:paddingRight="8dip"
+    android:paddingStart="8dip"
+    android:paddingEnd="8dip"
     android:minHeight="?android:attr/listPreferredItemHeightSmall"
     android:orientation="vertical"
-    android:gravity="center_vertical">
+    android:gravity="left|center_vertical">
 
     <TextView
         android:id="@+id/title"
@@ -30,7 +30,9 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:singleLine="true"
         android:ellipsize="end"
-        android:textIsSelectable="false">
+        android:textIsSelectable="false"
+        android:gravity="top|left"
+        android:textColor="@color/important_text">
     </TextView>
 
     <TextView
@@ -41,7 +43,8 @@
         android:singleLine="true"
         android:ellipsize="end"
         android:textIsSelectable="false"
-        android:visibility="gone">
+        android:visibility="gone"
+        android:textColor="@color/important_text">
 
     </TextView>
 

@@ -18,35 +18,56 @@
     android:id="@+id/content_generating"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:divider="?android:attr/dividerHorizontal"
-    android:showDividers="middle">
+    android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        style="?android:attr/buttonBarButtonStyle"
-        android:singleLine="true"
-        android:ellipsize="end"
-        android:textAlignment="viewStart"
-        android:text="@string/generating_print_job" >
-    </TextView>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:background="@color/editable_background"
+        android:orientation="vertical">
 
-    <ProgressBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="32dip"
-        android:layout_gravity="center_horizontal"
-        style="?android:attr/progressBarStyleLarge">
-    </ProgressBar>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dip"
+            android:layout_marginEnd="16dip"
+            android:layout_gravity="center"
+            style="?android:attr/buttonBarButtonStyle"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:text="@string/generating_print_job"
+            android:textColor="@color/important_text"
+            android:textSize="16sp">
+        </TextView>
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dip"
+            android:layout_marginEnd="32dip"
+            android:layout_marginTop="16dip"
+            android:layout_marginBottom="32dip"
+            android:layout_gravity="center_horizontal"
+            style="?android:attr/progressBarStyleLarge">
+        </ProgressBar>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:background="@color/separator">
+        </View>
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/cancel_button"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="fill_horizontal"
-        android:text="@string/cancel_button"
-        style="?android:attr/buttonBarButtonStyle">
+        style="?android:attr/buttonBarButtonStyle"
+        android:text="@string/cancel"
+        android:textSize="16sp"
+        android:textColor="@color/important_text">
     </Button>
 
 </LinearLayout>

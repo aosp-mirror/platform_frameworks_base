@@ -19,7 +19,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:background="@color/print_job_config_activity_content_background">
+    android:background="@color/container_background">
 
     <include
         layout="@layout/print_job_config_activity_content_editing">
