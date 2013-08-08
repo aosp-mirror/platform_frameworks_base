@@ -793,8 +793,8 @@ public final class ActivityThread {
             InetAddress.clearDnsCache();
         }
 
-        public void setHttpProxy(String host, String port, String exclList) {
-            Proxy.setHttpProxySystemProperty(host, port, exclList);
+        public void setHttpProxy(String host, String port, String exclList, String pacFileUrl) {
+            Proxy.setHttpProxySystemProperty(host, port, exclList, pacFileUrl);
         }
 
         public void processInBackground() {
