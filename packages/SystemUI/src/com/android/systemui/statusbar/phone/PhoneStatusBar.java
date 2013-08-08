@@ -1354,6 +1354,27 @@ public class PhoneStatusBar extends BaseStatusBar {
                     setHeadsUpVisibility(false);
                     mInterruptingNotificationEntry = null;
                     break;
+                case MSG_ESCALATE_HEADS_UP:
+                    escalateHeadsUp();
+                    setHeadsUpVisibility(false);
+                    mInterruptingNotificationEntry = null;
+                    break;
+            }
+        }
+    }
+
+    /**  if the interrupting notification had a fullscreen intent, fire it now.  */
+    private void escalateHeadsUp() {
+        if (mInterruptingNotificationEntry != null) {
+            final StatusBarNotification sbn = mInterruptingNotificationEntry.notification;
+            final Notification notification = sbn.getNotification();
+            if (notification.fullScreenIntent != null) {
+                if (DEBUG)
+                    Log.d(TAG, "converting a heads up to fullScreen");
+                try {
+                    notification.fullScreenIntent.send();
+                } catch (PendingIntent.CanceledException e) {
+                }
             }
         }
     }
@@ -2516,6 +2537,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 // no waiting!
                 makeExpandedInvisible();
                 notifyNavigationBarScreenOn(false);
+                notifyHeadsUpScreenOn(false);
             }
             else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
                 if (DEBUG) {

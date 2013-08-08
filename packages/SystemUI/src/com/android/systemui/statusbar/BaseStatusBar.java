@@ -89,6 +89,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     protected static final int MSG_CLOSE_SEARCH_PANEL = 1025;
     protected static final int MSG_SHOW_HEADS_UP = 1026;
     protected static final int MSG_HIDE_HEADS_UP = 1027;
+    protected static final int MSG_ESCALATE_HEADS_UP = 1028;
 
     protected static final boolean ENABLE_HEADS_UP = true;
     // scores above this threshold should be displayed in heads up mode.
@@ -1032,6 +1033,12 @@ public abstract class BaseStatusBar extends SystemUI implements
                 if (DEBUG) Log.d(TAG, "no longer interrupts!");
                 mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
             }
+        }
+    }
+
+    protected void notifyHeadsUpScreenOn(boolean screenOn) {
+        if (!screenOn && mInterruptingNotificationEntry != null) {
+            mHandler.sendEmptyMessage(MSG_ESCALATE_HEADS_UP);
         }
     }
 
