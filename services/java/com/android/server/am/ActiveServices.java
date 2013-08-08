@@ -832,8 +832,8 @@ public final class ActiveServices {
                         + " requires " + r.permission);
                 return new ServiceLookupResult(null, r.permission);
             }
-            if (!mAm.mIntentFirewall.checkService(service, callingUid, callingPid, resolvedType,
-                    r.appInfo)) {
+            if (!mAm.mIntentFirewall.checkService(r.name, service, callingUid, callingPid,
+                    resolvedType, r.appInfo)) {
                 return null;
             }
             return new ServiceLookupResult(r, null);
