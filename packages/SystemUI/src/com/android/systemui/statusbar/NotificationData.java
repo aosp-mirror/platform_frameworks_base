@@ -39,6 +39,7 @@ public class NotificationData {
         public View expanded; // the inflated RemoteViews
         public ImageView largeIcon;
         private View expandedBig;
+        private boolean interruption;
         public Entry() {}
         public Entry(IBinder key, StatusBarNotification n, StatusBarIconView ic) {
             this.key = key;
@@ -58,6 +59,10 @@ public class NotificationData {
         public void setUserLocked(boolean userLocked) {
             row.setUserLocked(userLocked);
         }
+
+        public void setInterruption() {
+            interruption = true;
+        }
     }
     private final ArrayList<Entry> mEntries = new ArrayList<Entry>();
     private final Comparator<Entry> mEntryCmp = new Comparator<Entry>() {
@@ -66,9 +71,13 @@ public class NotificationData {
             final StatusBarNotification na = a.notification;
             final StatusBarNotification nb = b.notification;
             int d = na.getScore() - nb.getScore();
-            return (d != 0)
-                ? d
-                : (int)(na.getNotification().when - nb.getNotification().when);
+	    if (a.interruption != b.interruption) {
+	      return a.interruption ? 1 : -1;
+	    } else if (d != 0) {
+                return d;
+            } else {
+                return (int) (na.getNotification().when - nb.getNotification().when);
+            }
         }
     };
 
