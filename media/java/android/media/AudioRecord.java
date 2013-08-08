@@ -87,7 +87,7 @@ public class AudioRecord
     private static final int AUDIORECORD_ERROR_SETUP_NATIVEINITFAILED    = -20;
 
     // Events:
-    // to keep in sync with frameworks/base/include/media/AudioRecord.h
+    // to keep in sync with frameworks/av/include/media/AudioRecord.h
     /**
      * Event id denotes when record head has reached a previously set marker.
      */
@@ -427,10 +427,12 @@ public class AudioRecord
 
     /**
      * Returns the minimum buffer size required for the successful creation of an AudioRecord
-     * object.
+     * object, in byte units.
      * Note that this size doesn't guarantee a smooth recording under load, and higher values
      * should be chosen according to the expected frequency at which the AudioRecord instance
      * will be polled for new data.
+     * See {@link #AudioRecord(int, int, int, int, int)} for more information on valid
+     * configuration values.
      * @param sampleRateInHz the sample rate expressed in Hertz.
      * @param channelConfig describes the configuration of the audio channels.
      *   See {@link AudioFormat#CHANNEL_IN_MONO} and
@@ -440,10 +442,9 @@ public class AudioRecord
      * @return {@link #ERROR_BAD_VALUE} if the recording parameters are not supported by the
      *  hardware, or an invalid parameter was passed,
      *  or {@link #ERROR} if the implementation was unable to query the hardware for its
-     *  output properties,
+     *  input properties,
      *   or the minimum buffer size expressed in bytes.
-     * @see #AudioRecord(int, int, int, int, int) for more information on valid
-     *   configuration values.
+     * @see #AudioRecord(int, int, int, int, int)
      */
     static public int getMinBufferSize(int sampleRateInHz, int channelConfig, int audioFormat) {
         int channelCount = 0;
@@ -692,6 +693,7 @@ public class AudioRecord
      * Sets the period at which the listener is called, if set with
      * {@link #setRecordPositionUpdateListener(OnRecordPositionUpdateListener)} or
      * {@link #setRecordPositionUpdateListener(OnRecordPositionUpdateListener, Handler)}.
+     * It is possible for notifications to be lost if the period is too small.
      * @param periodInFrames update period expressed in frames
      * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_INVALID_OPERATION}
      */
