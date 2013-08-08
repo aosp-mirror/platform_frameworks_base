@@ -221,7 +221,7 @@ public class MtpDatabase {
                 if (c != null) c.close();
                 if (db != null) db.close();
             }
-            databaseFile.delete();
+            context.deleteDatabase(devicePropertiesName);
         }
     }
 
