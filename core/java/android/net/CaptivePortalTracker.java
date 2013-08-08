@@ -272,6 +272,7 @@ public class CaptivePortalTracker extends StateMachine {
                         } else {
                             if (DBG) log("Not captive network " + mNetworkInfo);
                         }
+                        notifyPortalCheckCompleted(mNetworkInfo, captive);
                         if (mDeviceProvisioned) {
                             if (captive) {
                                 // Setup Wizard will assist the user in connecting to a captive
@@ -302,7 +303,21 @@ public class CaptivePortalTracker extends StateMachine {
             return;
         }
         try {
+            if (DBG) log("notifyPortalCheckComplete: ni=" + info);
             mConnService.captivePortalCheckComplete(info);
+        } catch(RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void notifyPortalCheckCompleted(NetworkInfo info, boolean isCaptivePortal) {
+        if (info == null) {
+            loge("notifyPortalCheckComplete on null");
+            return;
+        }
+        try {
+            if (DBG) log("notifyPortalCheckCompleted: captive=" + isCaptivePortal + " ni=" + info);
+            mConnService.captivePortalCheckCompleted(info, isCaptivePortal);
         } catch(RemoteException e) {
             e.printStackTrace();
         }
