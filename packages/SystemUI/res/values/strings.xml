@@ -506,4 +506,20 @@
 
     <!-- Glyph to be overlaid atop the battery when the level is extremely low. Do not translate. -->
     <string name="battery_meter_very_low_overlay_symbol">!</string>
+
+    <!-- Shows up when there is a user SSL CA Cert installed on the
+         device.  Indicates to the user that SSL traffic can be intercepted.  [CHAR LIMIT=NONE] -->
+    <string name="ssl_ca_cert_warning">Network may be monitored</string>
+    <!-- Button to close the SSL CA cert warning dialog box.  [CHAR LIMIT=NONE] -->
+    <string name="done_button">Done</string>
+    <!-- Title of Dialog warning users of SSL monitoring. [CHAR LIMIT=NONE] -->
+    <string name="ssl_ca_cert_dialog_title">Network Monitoring</string>
+    <!-- Text of message to show to users whose administrator has installed a SSL CA Cert.
+         [CHAR LIMIT=NONE] -->
+    <string name="ssl_ca_cert_info_message">This device is managed by: <xliff:g id="managing_domain">%s</xliff:g>.\n\nYour administrator is capable of monitoring your network activity, including emails, apps, and secure websites.\n\nFor more information,contact your administrator.</string>
+    <!-- Text of warning to show to users that have a SSL CA Cert installed.  [CHAR LIMIT=NONE] -->
+    <string name="ssl_ca_cert_warning_message">A third party is capable of monitoring your network\nactivity, including emails, apps, and secure websites.\n\nA trusted credential installed on your device is making this possible.</string>
+    <!-- Label on button that will take the user to the Trusted Credentials settings page.
+         [CHAR LIMIT=NONE]-->
+    <string name="ssl_ca_cert_settings_button">Check trusted credentials</string>
 </resources>

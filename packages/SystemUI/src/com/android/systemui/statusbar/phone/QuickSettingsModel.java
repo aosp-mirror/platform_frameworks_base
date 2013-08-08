@@ -263,6 +263,10 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     private RefreshCallback mSettingsCallback;
     private State mSettingsState = new State();
 
+    private QuickSettingsTileView mSslCaCertWarningTile;
+    private RefreshCallback mSslCaCertWarningCallback;
+    private State mSslCaCertWarningState = new State();
+
     private RotationLockController mRotationLockController;
 
     public QuickSettingsModel(Context context) {
@@ -746,5 +750,24 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     }
     void refreshBrightnessTile() {
         onBrightnessLevelChanged();
+    }
+
+    // SSL CA Cert warning.
+    public void addSslCaCertWarningTile(QuickSettingsTileView view, RefreshCallback cb) {
+        mSslCaCertWarningTile = view;
+        mSslCaCertWarningCallback = cb;
+        // Set a sane default while we wait for the AsyncTask to finish (no cert).
+        setSslCaCertWarningTileInfo(false, true);
+    }
+    public void setSslCaCertWarningTileInfo(boolean hasCert, boolean isManaged) {
+        Resources r = mContext.getResources();
+        mSslCaCertWarningState.enabled = hasCert;
+        if (isManaged) {
+            mSslCaCertWarningState.iconId = R.drawable.ic_qs_certificate_info;
+        } else {
+            mSslCaCertWarningState.iconId = android.R.drawable.stat_notify_error;
+        }
+        mSslCaCertWarningState.label = r.getString(R.string.ssl_ca_cert_warning);
+        mSslCaCertWarningCallback.refreshView(mSslCaCertWarningTile, mSslCaCertWarningState);
     }
 }
