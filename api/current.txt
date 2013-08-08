@@ -10925,7 +10925,9 @@ package android.hardware.camera2 {
 
   public final class CaptureRequest extends android.hardware.camera2.CameraMetadata implements android.os.Parcelable {
     method public void addTarget(android.view.Surface);
+    method public java.lang.Object getTag();
     method public void removeTarget(android.view.Surface);
+    method public void setTag(java.lang.Object);
     field public static final android.hardware.camera2.CameraMetadata.Key BLACK_LEVEL_LOCK;
     field public static final android.hardware.camera2.CameraMetadata.Key COLOR_CORRECTION_GAINS;
     field public static final android.hardware.camera2.CameraMetadata.Key COLOR_CORRECTION_MODE;
