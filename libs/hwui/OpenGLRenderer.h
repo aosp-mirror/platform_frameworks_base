@@ -1003,7 +1003,6 @@ private:
     void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLvoid* colors);
     void setupDrawMeshIndices(GLvoid* vertices, GLvoid* texCoords, GLuint vbo = 0);
     void setupDrawIndexedVertices(GLvoid* vertices);
-    void finishDrawTexture();
     void accountForClear(SkXfermode::Mode mode);
 
     bool updateLayer(Layer* layer, bool inFrame);
