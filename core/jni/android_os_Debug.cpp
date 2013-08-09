@@ -220,6 +220,8 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
                 } else {
                     whichHeap = HEAP_ASHMEM;
                 }
+            } else if (strncmp(name, "[anon:libc_malloc]", 18) == 0) {
+                whichHeap = HEAP_NATIVE;
             } else if (strncmp(name, "[stack", 6) == 0) {
                 whichHeap = HEAP_STACK;
             } else if (strncmp(name, "/dev/", 5) == 0) {
@@ -246,6 +248,8 @@ static void read_mapinfo(FILE *fp, stats_t* stats)
             } else if (nameLen > 4 && strcmp(name+nameLen-4, ".art") == 0) {
                 whichHeap = HEAP_ART;
                 is_swappable = true;
+            } else if (strncmp(name, "[anon:", 6) == 0) {
+                whichHeap = HEAP_UNKNOWN;
             } else if (nameLen > 0) {
                 whichHeap = HEAP_UNKNOWN_MAP;
             } else if (start == prevEnd && prevHeap == HEAP_SO) {
