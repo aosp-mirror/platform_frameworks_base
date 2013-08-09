@@ -22,4 +22,5 @@ import com.android.internal.app.ProcessStats;
 
 interface IProcessStats {
     byte[] getCurrentStats(out List<ParcelFileDescriptor> historic);
+    int getCurrentMemoryState();
 }
