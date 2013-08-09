@@ -120,7 +120,13 @@ public class DummyDataStateTracker implements NetworkStateTracker {
         return true;
     }
 
+    @Override
     public void captivePortalCheckComplete() {
+        // not implemented
+    }
+
+    @Override
+    public void captivePortalCheckCompleted(boolean isCaptivePortal) {
         // not implemented
     }
 
