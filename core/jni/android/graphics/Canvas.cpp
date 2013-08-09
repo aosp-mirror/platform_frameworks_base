@@ -35,8 +35,6 @@
 
 #include <utils/Log.h>
 
-#define TIME_DRAWx
-
 static uint32_t get_thread_msec() {
 #if defined(HAVE_POSIX_CLOCKS)
     struct timespec tm;
@@ -463,20 +461,6 @@ public:
         canvas->drawPath(*path, *paint);
     }
  
-    static void drawPicture(JNIEnv* env, jobject, SkCanvas* canvas,
-                            SkPicture* picture) {
-        SkASSERT(canvas);
-        SkASSERT(picture);
-        
-#ifdef TIME_DRAW
-        SkMSec now = get_thread_msec(); //SkTime::GetMSecs();
-#endif
-        canvas->drawPicture(*picture);
-#ifdef TIME_DRAW
-        ALOGD("---- picture playback %d ms\n", get_thread_msec() - now);
-#endif
-    }
-
     static void drawBitmap__BitmapFFPaint(JNIEnv* env, jobject jcanvas,
                                           SkCanvas* canvas, SkBitmap* bitmap,
                                           jfloat left, jfloat top,
@@ -1103,7 +1087,6 @@ static JNINativeMethod gCanvasMethods[] = {
         (void*) SkCanvasGlue::drawTextOnPath___CIIPathFFPaint},
     {"native_drawTextOnPath","(ILjava/lang/String;IFFII)V",
         (void*) SkCanvasGlue::drawTextOnPath__StringPathFFPaint},
-    {"native_drawPicture", "(II)V", (void*) SkCanvasGlue::drawPicture},
 
     {"freeCaches", "()V", (void*) SkCanvasGlue::freeCaches},
 
