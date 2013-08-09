@@ -188,7 +188,8 @@ public final class ApduServiceInfo implements Parcelable {
                         currentGroup != null) {
                     final TypedArray a = res.obtainAttributes(attrs,
                             com.android.internal.R.styleable.AidFilter);
-                    String aid = a.getString(com.android.internal.R.styleable.AidFilter_name);
+                    String aid = a.getString(com.android.internal.R.styleable.AidFilter_name).
+                            toUpperCase();
                     if (isValidAid(aid) && !currentGroup.aids.contains(aid)) {
                         currentGroup.aids.add(aid);
                         mAids.add(aid);
