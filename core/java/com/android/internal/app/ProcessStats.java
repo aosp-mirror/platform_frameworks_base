@@ -1682,7 +1682,7 @@ public final class ProcessStats implements Parcelable {
         }
     }
 
-    static long dumpSingleServiceTime(PrintWriter pw, String prefix, ServiceState service,
+    public static long dumpSingleServiceTime(PrintWriter pw, String prefix, ServiceState service,
             int serviceType, int curState, long curStartTime, long now) {
         long totalTime = 0;
         int printedScreen = -1;
@@ -2403,15 +2403,15 @@ public final class ProcessStats implements Parcelable {
 
     public static final class ServiceState {
         final ProcessStats mStats;
-        final String mPackage;
-        final String mName;
+        public final String mPackage;
+        public final String mName;
         ProcessState mProc;
 
         int mActive = 1;
 
-        static final int SERVICE_STARTED = 0;
-        static final int SERVICE_BOUND = 1;
-        static final int SERVICE_EXEC = 2;
+        public static final int SERVICE_STARTED = 0;
+        public static final int SERVICE_BOUND = 1;
+        public static final int SERVICE_EXEC = 2;
         static final int SERVICE_COUNT = 3;
 
         int[] mDurationsTable;
