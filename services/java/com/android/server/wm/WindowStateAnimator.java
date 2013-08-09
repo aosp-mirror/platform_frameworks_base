@@ -1272,6 +1272,11 @@ class WindowStateAnimator {
                             if (mIsWallpaper) {
                                 mService.dispatchWallpaperVisibility(w, true);
                             }
+                            // This draw means the difference between unique content and mirroring.
+                            // Run another pass through performLayout to set mHasContent in the
+                            // LogicalDisplay.
+                            mAnimator.setPendingLayoutChanges(w.getDisplayId(),
+                                    WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM);
                         } else {
                             w.mOrientationChanging = false;
                         }
