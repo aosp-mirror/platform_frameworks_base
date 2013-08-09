@@ -435,6 +435,12 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         return current.marshall();
     }
 
+    public int getCurrentMemoryState() {
+        synchronized (mAm) {
+            return mLastMemOnlyState;
+        }
+    }
+
     static private void dumpHelp(PrintWriter pw) {
         pw.println("Process stats (procstats) dump options:");
         pw.println("    [--checkin|-c|--csv] [--csv-screen] [--csv-proc] [--csv-mem]");
