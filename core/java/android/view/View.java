@@ -12062,7 +12062,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Resolve padding depending on layout direction.
+     * Resolves padding depending on layout direction, if applicable, and
+     * recomputes internal padding values to adjust for scroll bars.
      *
      * @hide
      */
@@ -12102,10 +12103,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             mUserPaddingBottom = (mUserPaddingBottom >= 0) ? mUserPaddingBottom : mPaddingBottom;
 
-            internalSetPadding(mUserPaddingLeft, mPaddingTop, mUserPaddingRight,
-                    mUserPaddingBottom);
             onRtlPropertiesChanged(resolvedLayoutDirection);
         }
+
+        internalSetPadding(mUserPaddingLeft, mPaddingTop, mUserPaddingRight, mUserPaddingBottom);
 
         mPrivateFlags2 |= PFLAG2_PADDING_RESOLVED;
     }
