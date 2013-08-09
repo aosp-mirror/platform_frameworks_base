@@ -866,6 +866,15 @@ public interface WindowManager extends ViewManager {
          */
         public static final int FLAG_NEEDS_MENU_KEY = 0x08000000;
 
+        /**
+         * Flag for a window in local focus mode.
+         * Window in local focus mode can control focus independent of window manager using
+         * {@link Window#setLocalFocus(boolean, boolean)}.
+         * Usually window in this mode will not get touch/key events from window manager, but will
+         * get events only via local injection using {@link Window#injectInputEvent(InputEvent)}.
+         */
+        public static final int FLAG_LOCAL_FOCUS_MODE = 0x10000000;
+
         /** Window flag: special flag to limit the size of the window to be
          * original size ([320x480] x density). Used to create window for applications
          * running under compatibility mode.
@@ -905,6 +914,7 @@ public interface WindowManager extends ViewManager {
          * @see #FLAG_DISMISS_KEYGUARD
          * @see #FLAG_SPLIT_TOUCH
          * @see #FLAG_HARDWARE_ACCELERATED
+         * @see #FLAG_LOCAL_FOCUS_MODE
          */
         @ViewDebug.ExportedProperty(flagMapping = {
             @ViewDebug.FlagToString(mask = FLAG_ALLOW_LOCK_WHILE_SCREEN_ON, equals = FLAG_ALLOW_LOCK_WHILE_SCREEN_ON,
@@ -956,7 +966,9 @@ public interface WindowManager extends ViewManager {
             @ViewDebug.FlagToString(mask = FLAG_SPLIT_TOUCH, equals = FLAG_SPLIT_TOUCH,
                     name = "FLAG_SPLIT_TOUCH"),
             @ViewDebug.FlagToString(mask = FLAG_HARDWARE_ACCELERATED, equals = FLAG_HARDWARE_ACCELERATED,
-                    name = "FLAG_HARDWARE_ACCELERATED")
+                    name = "FLAG_HARDWARE_ACCELERATED"),
+            @ViewDebug.FlagToString(mask = FLAG_LOCAL_FOCUS_MODE, equals = FLAG_LOCAL_FOCUS_MODE,
+                    name = "FLAG_LOCAL_FOCUS_MODE")
         })
         public int flags;
 
