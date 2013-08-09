@@ -22,6 +22,8 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+import static android.os.Process.SYSTEM_UID;
+import static android.os.Process.PACKAGE_INFO_GID;
 
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
@@ -117,6 +119,7 @@ final class Settings {
     private final File mPackageListFilename;
     private final File mStoppedPackagesFilename;
     private final File mBackupStoppedPackagesFilename;
+
     final HashMap<String, PackageSetting> mPackages =
             new HashMap<String, PackageSetting>();
     // List of replaced system applications
@@ -201,6 +204,8 @@ final class Settings {
         mSettingsFilename = new File(mSystemDir, "packages.xml");
         mBackupSettingsFilename = new File(mSystemDir, "packages-backup.xml");
         mPackageListFilename = new File(mSystemDir, "packages.list");
+        FileUtils.setPermissions(mPackageListFilename, 0660, SYSTEM_UID, PACKAGE_INFO_GID);
+
         // Deprecated: Needed for migration
         mStoppedPackagesFilename = new File(mSystemDir, "packages-stopped.xml");
         mBackupStoppedPackagesFilename = new File(mSystemDir, "packages-stopped-backup.xml");
@@ -1369,13 +1374,15 @@ final class Settings {
                     -1, -1);
 
             // Write package list file now, use a JournaledFile.
-            //
-            File tempFile = new File(mPackageListFilename.toString() + ".tmp");
+            File tempFile = new File(mPackageListFilename.getAbsolutePath() + ".tmp");
             JournaledFile journal = new JournaledFile(mPackageListFilename, tempFile);
 
-            fstr = new FileOutputStream(journal.chooseForWrite());
+            final File writeTarget = journal.chooseForWrite();
+            fstr = new FileOutputStream(writeTarget);
             str = new BufferedOutputStream(fstr);
             try {
+                FileUtils.setPermissions(fstr.getFD(), 0660, SYSTEM_UID, PACKAGE_INFO_GID);
+
                 StringBuilder sb = new StringBuilder();
                 for (final PackageSetting pkg : mPackages.values()) {
                     ApplicationInfo ai = pkg.pkg.applicationInfo;
@@ -1400,6 +1407,7 @@ final class Settings {
                     // DO NOT MODIFY THIS FORMAT UNLESS YOU CAN ALSO MODIFY ITS USERS
                     // FROM NATIVE CODE. AT THE MOMENT, LOOK AT THE FOLLOWING SOURCES:
                     //   system/core/run-as/run-as.c
+                    //   system/core/sdcard/sdcard.c
                     //
                     sb.setLength(0);
                     sb.append(ai.packageName);
@@ -1420,11 +1428,6 @@ final class Settings {
                 IoUtils.closeQuietly(str);
                 journal.rollback();
             }
-
-            FileUtils.setPermissions(mPackageListFilename.toString(),
-                    FileUtils.S_IRUSR|FileUtils.S_IWUSR
-                    |FileUtils.S_IRGRP|FileUtils.S_IWGRP,
-                    -1, -1);
 
             writeAllUsersPackageRestrictionsLPr();
             return;
