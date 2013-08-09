@@ -131,6 +131,9 @@ class FastScroller {
     /** Whether there is a track image to display. */
     private final boolean mHasTrackImage;
 
+    /** Total width of decorations. */
+    private final int mWidth;
+
     /** Set containing decoration transition animations. */
     private AnimatorSet mDecorAnimation;
 
@@ -154,6 +157,9 @@ class FastScroller {
 
     /** The index of the current section. */
     private int mCurrentSection = -1;
+
+    /** The current scrollbar position. */
+    private int mScrollbarPosition = -1;
 
     /** Whether the list is long enough to need a fast scroller. */
     private boolean mLongList;
@@ -193,6 +199,9 @@ class FastScroller {
      * </ul>
      */
     private int mOverlayPosition;
+
+    /** Current scrollbar style, including inset and overlay properties. */
+    private int mScrollBarStyle;
 
     /** Whether to precisely match the thumb position to the list. */
     private boolean mMatchDragPosition;
@@ -245,33 +254,43 @@ class FastScroller {
         final Resources res = context.getResources();
         final TypedArray ta = context.getTheme().obtainStyledAttributes(ATTRS);
 
-        mTrackImage = new ImageView(context);
+        final ImageView trackImage = new ImageView(context);
+        mTrackImage = trackImage;
+
+        int width = 0;
 
         // Add track to overlay if it has an image.
-        final int trackResId = ta.getResourceId(TRACK_DRAWABLE, 0);
-        if (trackResId != 0) {
+        final Drawable trackDrawable = ta.getDrawable(TRACK_DRAWABLE);
+        if (trackDrawable != null) {
             mHasTrackImage = true;
-            mTrackImage.setBackgroundResource(trackResId);
-            mOverlay.add(mTrackImage);
+            trackImage.setBackground(trackDrawable);
+            mOverlay.add(trackImage);
+            width = Math.max(width, trackDrawable.getIntrinsicWidth());
         } else {
             mHasTrackImage = false;
         }
 
-        mThumbImage = new ImageView(context);
+        final ImageView thumbImage = new ImageView(context);
+        mThumbImage = thumbImage;
 
         // Add thumb to overlay if it has an image.
         final Drawable thumbDrawable = ta.getDrawable(THUMB_DRAWABLE);
         if (thumbDrawable != null) {
-            mThumbImage.setImageDrawable(thumbDrawable);
-            mOverlay.add(mThumbImage);
+            thumbImage.setImageDrawable(thumbDrawable);
+            mOverlay.add(thumbImage);
+            width = Math.max(width, thumbDrawable.getIntrinsicWidth());
         }
 
         // If necessary, apply minimum thumb width and height.
         if (thumbDrawable.getIntrinsicWidth() <= 0 || thumbDrawable.getIntrinsicHeight() <= 0) {
-            mThumbImage.setMinimumWidth(res.getDimensionPixelSize(R.dimen.fastscroll_thumb_width));
-            mThumbImage.setMinimumHeight(
+            final int minWidth = res.getDimensionPixelSize(R.dimen.fastscroll_thumb_width);
+            thumbImage.setMinimumWidth(minWidth);
+            thumbImage.setMinimumHeight(
                     res.getDimensionPixelSize(R.dimen.fastscroll_thumb_height));
+            width = Math.max(width, minWidth);
         }
+
+        mWidth = width;
 
         final int previewSize = res.getDimensionPixelSize(R.dimen.fastscroll_overlay_size);
         mPreviewImage = new ImageView(context);
@@ -297,10 +316,11 @@ class FastScroller {
         mOverlayPosition = ta.getInt(OVERLAY_POSITION, OVERLAY_FLOATING);
         ta.recycle();
 
+        mScrollBarStyle = listView.getScrollBarStyle();
         mScrollCompleted = true;
         mState = STATE_VISIBLE;
-        mMatchDragPosition =
-                context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.HONEYCOMB;
+        mMatchDragPosition = context.getApplicationInfo().targetSdkVersion
+                >= Build.VERSION_CODES.HONEYCOMB;
 
         getSectionsFromIndexer();
         refreshDrawablePressedState();
@@ -362,6 +382,14 @@ class FastScroller {
         return mAlwaysShow;
     }
 
+    public void setScrollBarStyle(int style) {
+        if (mScrollBarStyle != style) {
+            mScrollBarStyle = style;
+
+            updateLayout();
+        }
+    }
+
     /**
      * Immediately transitions the fast scroller decorations to a hidden state.
      */
@@ -375,25 +403,29 @@ class FastScroller {
                     View.SCROLLBAR_POSITION_LEFT : View.SCROLLBAR_POSITION_RIGHT;
         }
 
-        mLayoutFromRight = position != View.SCROLLBAR_POSITION_LEFT;
+        if (mScrollbarPosition != position) {
+            mScrollbarPosition = position;
+            mLayoutFromRight = position != View.SCROLLBAR_POSITION_LEFT;
 
-        final int previewResId = mPreviewResId[mLayoutFromRight ? PREVIEW_RIGHT : PREVIEW_LEFT];
-        mPreviewImage.setBackgroundResource(previewResId);
+            final int previewResId = mPreviewResId[mLayoutFromRight ? PREVIEW_RIGHT : PREVIEW_LEFT];
+            mPreviewImage.setBackgroundResource(previewResId);
 
-        // Add extra padding for text.
-        final Drawable background = mPreviewImage.getBackground();
-        if (background != null) {
-            final Rect padding = mTempBounds;
-            background.getPadding(padding);
-            padding.offset(mPreviewPadding, mPreviewPadding);
-            mPreviewImage.setPadding(padding.left, padding.top, padding.right, padding.bottom);
+            // Add extra padding for text.
+            final Drawable background = mPreviewImage.getBackground();
+            if (background != null) {
+                final Rect padding = mTempBounds;
+                background.getPadding(padding);
+                padding.offset(mPreviewPadding, mPreviewPadding);
+                mPreviewImage.setPadding(padding.left, padding.top, padding.right, padding.bottom);
+            }
+
+            // Requires re-layout.
+            updateLayout();
         }
-
-        updateLayout();
     }
 
     public int getWidth() {
-        return mThumbImage.getWidth();
+        return mWidth;
     }
 
     public void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -437,7 +469,7 @@ class FastScroller {
     /**
      * Measures and layouts the scrollbar and decorations.
      */
-    private void updateLayout() {
+    public void updateLayout() {
         // Prevent re-entry when RTL properties change as a side-effect of
         // resolving padding.
         if (mUpdatingLayout) {
@@ -594,21 +626,36 @@ class FastScroller {
         out.set(left, top, right, bottom);
     }
 
+    /**
+     * Updates the container rectangle used for layout.
+     */
     private void updateContainerRect() {
         final AbsListView list = mList;
+        list.resolvePadding();
+
         final Rect container = mContainerRect;
         container.left = 0;
         container.top = 0;
         container.right = list.getWidth();
         container.bottom = list.getHeight();
 
-        final int scrollbarStyle = list.getScrollBarStyle();
+        final int scrollbarStyle = mScrollBarStyle;
         if (scrollbarStyle == View.SCROLLBARS_INSIDE_INSET
                 || scrollbarStyle == View.SCROLLBARS_INSIDE_OVERLAY) {
             container.left += list.getPaddingLeft();
             container.top += list.getPaddingTop();
             container.right -= list.getPaddingRight();
             container.bottom -= list.getPaddingBottom();
+
+            // In inset mode, we need to adjust for padded scrollbar width.
+            if (scrollbarStyle == View.SCROLLBARS_INSIDE_INSET) {
+                final int width = getWidth();
+                if (mScrollbarPosition == View.SCROLLBAR_POSITION_RIGHT) {
+                    container.right += width;
+                } else {
+                    container.left -= width;
+                }
+            }
         }
     }
 
