@@ -431,6 +431,8 @@ public class Paint {
         mRasterizer = paint.mRasterizer;
         if (paint.mShader != null) {
             mShader = paint.mShader.copy();
+        } else {
+            mShader = null;
         }
         mTypeface = paint.mTypeface;
         mXfermode = paint.mXfermode;
