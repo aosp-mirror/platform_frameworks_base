@@ -858,7 +858,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     }
                     if (mGroups.clear()) sendP2pPersistentGroupsChangedBroadcast();
 
-                    mWifiNative.closeSupplicantConnection();
+                    mWifiMonitor.stopMonitoring();
                     transitionTo(mP2pDisablingState);
                     break;
                 case WifiP2pManager.SET_DEVICE_NAME:
