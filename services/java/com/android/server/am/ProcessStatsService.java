@@ -103,17 +103,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
 
     public ProcessStats.ServiceState getServiceStateLocked(String packageName, int uid,
             String processName, String className) {
-        final ProcessStats.PackageState as = mProcessStats.getPackageStateLocked(packageName, uid);
-        ProcessStats.ServiceState ss = as.mServices.get(className);
-        if (ss != null) {
-            ss.makeActive();
-            return ss;
-        }
-        final ProcessStats.ProcessState ps = mProcessStats.getProcessStateLocked(packageName,
-                uid, processName);
-        ss = new ProcessStats.ServiceState(mProcessStats, packageName, ps);
-        as.mServices.put(className, ss);
-        return ss;
+        return mProcessStats.getServiceStateLocked(packageName, uid, processName, className);
     }
 
     public boolean isMemFactorLowered() {
@@ -271,40 +261,11 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         }
     }
 
-    static byte[] readFully(FileInputStream stream) throws java.io.IOException {
-        int pos = 0;
-        int avail = stream.available();
-        byte[] data = new byte[avail];
-        while (true) {
-            int amt = stream.read(data, pos, data.length-pos);
-            //Log.i("foo", "Read " + amt + " bytes at " + pos
-            //        + " of avail " + data.length);
-            if (amt <= 0) {
-                //Log.i("foo", "**** FINISHED READING: pos=" + pos
-                //        + " len=" + data.length);
-                return data;
-            }
-            pos += amt;
-            avail = stream.available();
-            if (avail > data.length-pos) {
-                byte[] newData = new byte[pos+avail];
-                System.arraycopy(data, 0, newData, 0, pos);
-                data = newData;
-            }
-        }
-    }
-
     boolean readLocked(ProcessStats stats, AtomicFile file) {
         try {
             FileInputStream stream = file.openRead();
-
-            byte[] raw = readFully(stream);
-            Parcel in = Parcel.obtain();
-            in.unmarshall(raw, 0, raw.length);
-            in.setDataPosition(0);
+            stats.read(stream);
             stream.close();
-
-            stats.readFromParcel(in);
             if (stats.mReadError != null) {
                 Slog.w(TAG, "Ignoring existing stats; " + stats.mReadError);
                 if (DEBUG) {
