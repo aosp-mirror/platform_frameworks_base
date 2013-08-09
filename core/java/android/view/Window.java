@@ -1290,4 +1290,18 @@ public abstract class Window {
      * @hide
      */
     public void setDefaultLogo(int resId) { }
+
+    /**
+     * Set focus locally. The window should have the
+     * {@link WindowManager.LayoutParams#FLAG_LOCAL_FOCUS_MODE} flag set already.
+     * @param hasFocus Whether this window has focus or not.
+     * @param inTouchMode Whether this window is in touch mode or not.
+     */
+    public void setLocalFocus(boolean hasFocus, boolean inTouchMode) { }
+
+    /**
+     * Inject an event to window locally.
+     * @param event A key or touch event to inject to this window.
+     */
+    public void injectInputEvent(InputEvent event) { }
 }
