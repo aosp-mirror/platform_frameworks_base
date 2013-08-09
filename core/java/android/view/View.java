@@ -14013,10 +14013,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if (more && hardwareAccelerated) {
-            // invalidation is the trigger to recreate display lists, so if we're using
-            // display lists to render, force an invalidate to allow the animation to
-            // continue drawing another frame
-            parent.invalidate(true);
             if (a.hasAlpha() && (mPrivateFlags & PFLAG_ALPHA_SET) == PFLAG_ALPHA_SET) {
                 // alpha animations should cause the child to recreate its display list
                 invalidate(true);
