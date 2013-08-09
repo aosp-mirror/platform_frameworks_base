@@ -552,8 +552,14 @@ public class LocationManagerService extends ILocationManager.Stub {
                     allowHighPower = false;
                 }
             }
+            boolean wasHighPowerMonitoring = mOpHighPowerMonitoring;
             mOpHighPowerMonitoring = updateMonitoring(allowHighPower, mOpHighPowerMonitoring,
                     AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION);
+            if (mOpHighPowerMonitoring != wasHighPowerMonitoring) {
+                // send an intent to notify that a high power request has been added/removed.
+                Intent intent = new Intent(LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION);
+                mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+            }
         }
 
         /**
