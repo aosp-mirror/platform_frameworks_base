@@ -72,7 +72,7 @@ public class DocumentsActivity extends Activity {
     private final DisplayState mDisplayState = new DisplayState();
 
     /** Current user navigation stack; empty implies recents. */
-    private DocumentStack mStack;
+    private DocumentStack mStack = new DocumentStack();
     /** Currently active search, overriding any stack. */
     private String mCurrentSearch;
 
