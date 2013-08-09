@@ -166,6 +166,8 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi συνδεδεμένο"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Αναζήτηση για GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Ρύθμιση τοποθεσίας με GPS"</string>
+    <!-- no translation found for accessibility_location_active (2427290146138169014) -->
+    <skip />
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Εκκαθάριση όλων των ειδοποιήσεων."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Πληροφορίες εφαρμογής"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Θα γίνεται αυτόματη περιστροφή της οθόνης."</string>
@@ -202,6 +204,6 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ΑΥΤΟΜΑΤΗ"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Οι ειδοποιήσεις εμφανίζονται εδώ"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Μεταβείτε σε αυτές ανά πάσα στιγμή σύροντας προς τα κάτω.\nΣύρετε ξανά προς τα κάτω για τα στοιχεία ελέγχου συστήματος."</string>
-    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Σύρετε από την άκρη της οθόνης για να εμφανίσετε τη γραμμή"</string>
-    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Σύρετε από την άκρη της οθόνης για να εμφανίσετε τη γραμμή συστήματος"</string>
+    <string name="hiding_navigation_confirmation_message" msgid="3227814171674734332">"Σύρετε από την άκρη της οθόνης για να εμφανίσετε τη γραμμή"</string>
+    <string name="hiding_navigation_confirmation_message_long" msgid="7854368870786524950">"Σύρετε από την άκρη της οθόνης για να εμφανίσετε τη γραμμή συστήματος"</string>
 </resources>
