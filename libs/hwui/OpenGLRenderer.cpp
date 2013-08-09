@@ -1112,8 +1112,6 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
     setupDrawMesh(&mMeshVertices[0].position[0], &mMeshVertices[0].texture[0]);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
-
-    finishDrawTexture();
 }
 
 void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap) {
@@ -1255,8 +1253,6 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
             DRAW_DOUBLE_STENCIL(glDrawElements(GL_TRIANGLES, numQuads * 6,
                             GL_UNSIGNED_SHORT, NULL));
         }
-
-        finishDrawTexture();
 
 #if DEBUG_LAYERS_AS_REGIONS
         drawRegionRects(layer->region);
@@ -2021,9 +2017,6 @@ void OpenGLRenderer::setupDrawIndexedVertices(GLvoid* vertices) {
     mCaches.bindPositionVertexPointer(force, vertices, gVertexStride);
 }
 
-void OpenGLRenderer::finishDrawTexture() {
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Drawing
 ///////////////////////////////////////////////////////////////////////////////
@@ -2307,8 +2300,6 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
     setupDrawMesh(&mesh[0].position[0], &mesh[0].texture[0], &mesh[0].color[0]);
 
     glDrawArrays(GL_TRIANGLES, 0, count);
-
-    finishDrawTexture();
 
     int slot = mCaches.currentProgram->getAttrib("colors");
     if (slot >= 0) {
@@ -3134,8 +3125,6 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
                 mesh += (drawCount / 6) * 4;
             }
 
-            finishDrawTexture();
-
 #if DEBUG_LAYERS_AS_REGIONS
             drawRegionRects(layer->region);
 #endif
@@ -3270,8 +3259,6 @@ void OpenGLRenderer::drawPathTexture(const PathTexture* texture,
     setupDrawMesh(NULL, (GLvoid*) gMeshTextureOffset);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
-
-    finishDrawTexture();
 }
 
 // Same values used by Skia
@@ -3488,8 +3475,6 @@ void OpenGLRenderer::drawTextureMesh(float left, float top, float right, float b
     setupDrawMesh(vertices, texCoords, vbo);
 
     glDrawArrays(drawMode, 0, elementsCount);
-
-    finishDrawTexture();
 }
 
 void OpenGLRenderer::drawIndexedTextureMesh(float left, float top, float right, float bottom,
@@ -3515,8 +3500,6 @@ void OpenGLRenderer::drawIndexedTextureMesh(float left, float top, float right, 
     setupDrawMeshIndices(vertices, texCoords, vbo);
 
     glDrawElements(drawMode, elementsCount, GL_UNSIGNED_SHORT, NULL);
-
-    finishDrawTexture();
 }
 
 void OpenGLRenderer::drawAlpha8TextureMesh(float left, float top, float right, float bottom,
@@ -3546,8 +3529,6 @@ void OpenGLRenderer::drawAlpha8TextureMesh(float left, float top, float right, f
     setupDrawMesh(vertices, texCoords);
 
     glDrawArrays(drawMode, 0, elementsCount);
-
-    finishDrawTexture();
 }
 
 void OpenGLRenderer::chooseBlending(bool blend, SkXfermode::Mode mode,
