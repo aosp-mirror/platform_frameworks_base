@@ -314,7 +314,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"zabránění přepínání aplikací"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Zabrání uživateli přepnout na jinou aplikaci."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"získat informace o aktuální aplikaci"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Umožňuje držiteli získat soukromé informace o aktuální aplikaci na popředí obrazovky."</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"sledování a řízení spouštění všech aplikací"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Umožňuje aplikaci sledovat a řídit spouštění činností systémem. Škodlivé aplikace mohou systém zcela ovládnout. Toto oprávnění je požadováno pouze pro účely vývoje, nikdy pro běžné použití."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"odeslání vysílání o odstranění balíčku"</string>
@@ -362,10 +363,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Umožňuje navázání na nejvyšší úroveň tiskové služby. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"přístup ke všem tiskovým úlohám"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Umožňuje přístup k tiskovým úlohám vytvořeným jinou aplikací. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
-    <!-- no translation found for permlab_bindNfcService (2752731300419410724) -->
-    <skip />
-    <!-- no translation found for permdesc_bindNfcService (6120647629174066862) -->
-    <skip />
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"navázat se na službu NFC"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Umožňuje držiteli navázat se na aplikace, které emulují karty NFC. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"navázat se na textovou službu"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Umožňuje držiteli připojit se k nejvyšší úrovni rozhraní textové služby (např. SpellCheckerService). Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"navázat se na službu VPN"</string>
@@ -476,18 +475,12 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Povoluje aplikaci připojit a konfigurovat displeje přes Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"ovládat displeje přes Wi-Fi"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Povoluje aplikaci ovládat základní funkce displejů přes Wi-Fi."</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"zachytit výstup zvuku"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Umožní aplikaci zachytit a přesměrovat výstup zvuku."</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"zachytit výstup videa"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Umožní aplikaci zachytit a přesměrovat výstup videa."</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"zachytit zabezpečený výstup videa"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Umožní aplikaci zachytit a přesměrovat zabezpečený výstup videa."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"změna nastavení zvuku"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Umožňuje aplikaci změnit globální nastavení zvuku, například hlasitost či reproduktor pro výstup zvuku."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"nahrávání zvuku"</string>
@@ -661,6 +654,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Umožňuje držiteli navázat se na nejvyšší úroveň služby pro poslouchání oznámení. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"vyvolat konfigurační aplikaci poskytnutou operátorem"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Umožňuje vyvolání konfigurační aplikace poskytnuté operátorem. Běžné aplikace by toto oprávnění neměly nikdy požadovat."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"naslouchat informacím o stavu sítě"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Umožňuje aplikaci naslouchat informacím o stavu sítě. Běžné aplikace by toto oprávnění neměly nikdy potřebovat."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastavit pravidla pro heslo"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Řídit délku hesel pro odemčení obrazovky a povolené znaky."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovat pokusy o odemčení obrazovky"</string>

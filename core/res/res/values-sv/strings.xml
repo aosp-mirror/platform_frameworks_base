@@ -314,7 +314,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"förhindrar programbyten"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Hindrar användaren från att byta till en annan app."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"hämta information om aktuell app"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Innehavaren tillåts att hämta privat information om den app som för tillfället är i förgrunden på skärmen."</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"övervaka och styra alla appar som öppnas"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Tillåter att appen övervakar och styr hur systemet startar aktiviteter. Skadliga appar kan kompromettera systemet helt. Den här behörigheten behövs bara för programmering, aldrig för vanlig användning."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"skicka meddelande om borttaget paket"</string>
@@ -474,18 +475,12 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Tillåter att appen konfigurerar och ansluter till Wi-Fi-skärmar."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"kontrollerar Wi-Fi-skärmar"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Tillåter att appen kontrollerar grundläggande funktioner för Wi-Fi-skärmar."</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"fånga upp ljudutgång"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Tillåt att appen fångar upp och omdirigerar ljudutgången."</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"fånga upp videoutgång"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Tillåt att appen fångar upp och omdirigerar videoutgången."</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"fånga upp säker videoutgång"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Tillåt att appen fångar upp och omdirigerar säker videoutgång."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ändra dina ljudinställningar"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Tillåter att appen ändrar globala ljudinställningar som volym och vilken högtalarutgång som används."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"spela in ljud"</string>
@@ -659,6 +654,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en meddelandelyssnare. Ska inte behövas för vanliga appar."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"anropa konfigurationsappen från operatören"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Innehavaren tillåts att anropa konfigurationsappen från operatören. Ska inte behövas för vanliga appar."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"lyssna efter information om nätverksförhållanden"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Tillåter att appen lyssnar efter information om nätverksförhållanden. Vanliga appar bör aldrig behöva den här behörigheten."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ange lösenordsregler"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Bestäm hur många och vilka tecken som är tillåtna i skärmlåsets lösenord."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Övervaka försök att låsa upp skärmen"</string>

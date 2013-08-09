@@ -314,7 +314,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"Защита от переключения приложений"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Запрещает пользователям переключаться между приложениями."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"Показ информации о текущем приложении"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"На экране будут отображаться сведения о текущем приложении."</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"Отслеживание и управление запуском всех приложений"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Приложение сможет отслеживать запуск системных процессов и управлять им. Вредоносные программы смогут получить полный контроль над системой. Это разрешение необходимо только для разработки и не нужно в обычном режиме."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"Отправка оповещений об удалении пакетов"</string>
@@ -362,10 +363,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Приложение сможет подключаться к базовому интерфейсу службы печати. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"Доступ к заданиям печати"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Владелец сможет просматривать задания печати, созданные другими приложениями. Это разрешение не используется обычными приложениями."</string>
-    <!-- no translation found for permlab_bindNfcService (2752731300419410724) -->
-    <skip />
-    <!-- no translation found for permdesc_bindNfcService (6120647629174066862) -->
-    <skip />
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"подключаться к службе NFC"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Приложение сможет подключаться к программам с имитацией карт NFC. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"Подключение к службе текстовых сообщений"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Позволяет подключаться к базовому интерфейсу службы текстовых сообщений (например, SpellCheckerService). Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"Подключение к VPN-службе"</string>
@@ -476,18 +475,12 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Приложение сможет подключаться к экранам с помощью Wi-Fi и настраивать их."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Управление мониторами, подключенными через Wi-Fi"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Приложение сможет управлять низкоуровневыми функциями экранов, подключенных через Wi-Fi."</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"захват аудиосигнала"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Приложение сможет захватывать и перенаправлять аудиосигнал."</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"захват видеосигнала"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Приложение сможет захватывать и перенаправлять видеосигнал."</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"захват защищенного видеосигнала"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Приложение сможет захватывать и перенаправлять защищенный видеосигнал."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"Изменение настроек аудио"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Приложение сможет изменять системные настройки звука, например уровень громкости и активный динамик."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"Запись аудио"</string>
@@ -661,6 +654,10 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Приложение сможет подключаться к базовому интерфейсу службы просмотра уведомлений. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"Запуск приложения настроек, предоставленного оператором"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Владелец сможет запускать приложение настроек, предоставленное оператором. Это разрешение не используется обычными приложениями."</string>
+    <!-- no translation found for permlab_accessNetworkConditions (8206077447838909516) -->
+    <skip />
+    <!-- no translation found for permdesc_accessNetworkConditions (6899102075825272211) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Правила выбора паролей"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Контролировать длину и символы при вводе паролей для снятия блокировки экрана."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Отслеживать попытки снятия блокировки экрана"</string>
@@ -1481,8 +1478,7 @@
     <string name="display_manager_hdmi_display_name" msgid="1555264559227470109">"Экран HDMI"</string>
     <string name="display_manager_overlay_display_name" msgid="5142365982271620716">"Наложение № <xliff:g id="ID">%1$d</xliff:g>"</string>
     <string name="display_manager_overlay_display_title" msgid="652124517672257172">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> х <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> тчк/дюйм"</string>
-    <!-- no translation found for display_manager_overlay_display_secure_suffix (6022119702628572080) -->
-    <skip />
+    <string name="display_manager_overlay_display_secure_suffix" msgid="6022119702628572080">", безопасный"</string>
     <string name="wifi_display_notification_title" msgid="2223050649240326557">"Беспроводной проектор подключен"</string>
     <string name="wifi_display_notification_message" msgid="4498802012464170685">"Изображение передается на другое устройство"</string>
     <string name="wifi_display_notification_disconnect" msgid="6183754463561153372">"Отключить"</string>
