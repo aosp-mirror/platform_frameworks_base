@@ -52,6 +52,14 @@ namespace android {
 namespace uirenderer {
 
 struct DrawModifiers {
+    DrawModifiers() {
+        reset();
+    }
+
+    void reset() {
+        memset(this, 0, sizeof(DrawModifiers));
+    }
+
     SkiaShader* mShader;
     SkiaColorFilter* mColorFilter;
     float mOverrideLayerAlpha;

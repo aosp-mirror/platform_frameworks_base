@@ -249,11 +249,16 @@ public:
     }
 
     // default empty constructor for bounds, to be overridden in child constructor body
-    DrawBoundedOp(SkPaint* paint)
-            : DrawOp(paint) {}
+    DrawBoundedOp(SkPaint* paint): DrawOp(paint) { }
 
     bool getLocalBounds(Rect& localBounds) {
         localBounds.set(mLocalBounds);
+        if (state.mDrawModifiers.mHasShadow) {
+            Rect shadow(mLocalBounds);
+            shadow.translate(state.mDrawModifiers.mShadowDx, state.mDrawModifiers.mShadowDy);
+            shadow.outset(state.mDrawModifiers.mShadowRadius);
+            localBounds.unionWith(shadow);
+        }
         return true;
     }
 
@@ -1442,8 +1447,10 @@ public:
     }
 
     virtual status_t applyDraw(OpenGLRenderer& renderer, Rect& dirty) {
+        Rect bounds;
+        getLocalBounds(bounds);
         return renderer.drawText(mText, mBytesCount, mCount, mX, mY,
-                mPositions, getPaint(renderer), mTotalAdvance, mLocalBounds);
+                mPositions, getPaint(renderer), mTotalAdvance, bounds);
     }
 
     virtual status_t multiDraw(OpenGLRenderer& renderer, Rect& dirty,
@@ -1454,6 +1461,8 @@ public:
             renderer.restoreDisplayState(ops[i]->state, true); // restore all but the clip
 
             DrawTextOp& op = *((DrawTextOp*)ops[i]);
+            // quickReject() will not occure in drawText() so we can use mLocalBounds
+            // directly, we do not need to account for shadow by calling getLocalBounds()
             status |= renderer.drawText(op.mText, op.mBytesCount, op.mCount, op.mX, op.mY,
                     op.mPositions, op.getPaint(renderer), op.mTotalAdvance, op.mLocalBounds,
                     drawOpMode);

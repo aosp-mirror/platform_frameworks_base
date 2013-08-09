@@ -464,10 +464,12 @@ void DisplayListRenderer::setupColorFilter(SkiaColorFilter* filter) {
 
 void DisplayListRenderer::resetShadow() {
     addStateOp(new (alloc()) ResetShadowOp());
+    OpenGLRenderer::resetShadow();
 }
 
 void DisplayListRenderer::setupShadow(float radius, float dx, float dy, int color) {
     addStateOp(new (alloc()) SetupShadowOp(radius, dx, dy, color));
+    OpenGLRenderer::setupShadow(radius, dx, dy, color);
 }
 
 void DisplayListRenderer::resetPaintFilter() {
@@ -503,10 +505,16 @@ void DisplayListRenderer::addStateOp(StateOp* op) {
 
 void DisplayListRenderer::addDrawOp(DrawOp* op) {
     Rect localBounds;
+    if (mDrawModifiers.mHasShadow) {
+        op->state.mDrawModifiers = mDrawModifiers;
+    }
     if (op->getLocalBounds(localBounds)) {
         bool rejected = quickRejectNoScissor(localBounds.left, localBounds.top,
                 localBounds.right, localBounds.bottom);
         op->setQuickRejected(rejected);
+    }
+    if (mDrawModifiers.mHasShadow) {
+        op->state.mDrawModifiers.reset();
     }
     mHasDrawOps = true;
     addOpInternal(op);
