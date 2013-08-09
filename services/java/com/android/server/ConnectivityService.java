@@ -4287,7 +4287,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return null;
     }
 
-    private String getMobileRedirectedProvisioningUrl() {
+    @Override
+    public String getMobileRedirectedProvisioningUrl() {
+        enforceConnectivityInternalPermission();
         String url = getProvisioningUrlBaseFromFile(REDIRECTED_PROVISIONING);
         if (TextUtils.isEmpty(url)) {
             url = mContext.getResources().getString(R.string.mobile_redirected_provisioning_url);
@@ -4295,14 +4297,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return url;
     }
 
+    @Override
     public String getMobileProvisioningUrl() {
         enforceConnectivityInternalPermission();
         String url = getProvisioningUrlBaseFromFile(PROVISIONING);
         if (TextUtils.isEmpty(url)) {
             url = mContext.getResources().getString(R.string.mobile_provisioning_url);
-            log("getProvisioningUrl: mobile_provisioining_url from resource =" + url);
+            log("getMobileProvisioningUrl: mobile_provisioining_url from resource =" + url);
         } else {
-            log("getProvisioningUrl: mobile_provisioning_url from File =" + url);
+            log("getMobileProvisioningUrl: mobile_provisioning_url from File =" + url);
         }
         // populate the iccid, imei and phone number in the provisioning url.
         if (!TextUtils.isEmpty(url)) {
