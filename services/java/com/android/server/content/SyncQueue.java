@@ -16,12 +16,11 @@
 
 package com.android.server.content;
 
-import android.accounts.Account;
 import android.content.pm.PackageManager;
-import android.content.pm.RegisteredServicesCache;
 import android.content.SyncAdapterType;
 import android.content.SyncAdaptersCache;
 import android.content.pm.RegisteredServicesCache.ServiceInfo;
+import android.os.Bundle;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -60,25 +59,51 @@ public class SyncQueue {
 
     public void addPendingOperations(int userId) {
         for (SyncStorageEngine.PendingOperation op : mSyncStorageEngine.getPendingOperations()) {
-            if (op.userId != userId) continue;
+            final SyncStorageEngine.EndPoint info = op.authority;
+            if (info.userId != userId) continue;
 
-            final Pair<Long, Long> backoff = mSyncStorageEngine.getBackoff(
-                    op.account, op.userId, op.authority);
-            final ServiceInfo<SyncAdapterType> syncAdapterInfo = mSyncAdapters.getServiceInfo(
-                    SyncAdapterType.newKey(op.authority, op.account.type), op.userId);
-            if (syncAdapterInfo == null) {
-                Log.w(TAG, "Missing sync adapter info for authority " + op.authority + ", userId "
-                        + op.userId);
-                continue;
+            final Pair<Long, Long> backoff = mSyncStorageEngine.getBackoff(info);
+            SyncOperation operationToAdd;
+            if (info.target_provider) {
+                final ServiceInfo<SyncAdapterType> syncAdapterInfo = mSyncAdapters.getServiceInfo(
+                        SyncAdapterType.newKey(info.provider, info.account.type), info.userId);
+                if (syncAdapterInfo == null) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.w(TAG, "Missing sync adapter info for authority " + op.authority);
+                    }
+                    continue;
+                }
+                operationToAdd = new SyncOperation(
+                        info.account, info.userId, op.reason, op.syncSource, info.provider,
+                        op.extras,
+                        0 /* delay */,
+                        0 /* flex */,
+                        backoff != null ? backoff.first : 0,
+                        mSyncStorageEngine.getDelayUntilTime(info),
+                        syncAdapterInfo.type.allowParallelSyncs());
+                operationToAdd.expedited = op.expedited;
+                operationToAdd.pendingOperation = op;
+                add(operationToAdd, op);
+            } else if (info.target_service) {
+                try {
+                    mPackageManager.getServiceInfo(info.service, 0);
+                } catch (PackageManager.NameNotFoundException e) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.w(TAG, "Missing sync servce for authority " + op.authority);
+                    }
+                    continue;
+                }
+                operationToAdd = new SyncOperation(
+                        info.service, info.userId, op.reason, op.syncSource,
+                        op.extras,
+                        0 /* delay */,
+                        0 /* flex */,
+                        backoff != null ? backoff.first : 0,
+                        mSyncStorageEngine.getDelayUntilTime(info));
+                operationToAdd.expedited = op.expedited;
+                operationToAdd.pendingOperation = op;
+                add(operationToAdd, op);
             }
-            SyncOperation syncOperation = new SyncOperation(
-                    op.account, op.userId, op.reason, op.syncSource, op.authority, op.extras,
-                    0 /* delay */, 0 /* flex */, backoff != null ? backoff.first : 0,
-                    mSyncStorageEngine.getDelayUntilTime(op.account, op.userId, op.authority),
-                    syncAdapterInfo.type.allowParallelSyncs());
-            syncOperation.expedited = op.expedited;
-            syncOperation.pendingOperation = op;
-            add(syncOperation, op);
         }
     }
 
@@ -119,12 +144,8 @@ public class SyncQueue {
         operation.pendingOperation = pop;
         // Don't update the PendingOp if one already exists. This really is just a placeholder,
         // no actual scheduling info is placed here.
-        // TODO: Change this to support service components.
         if (operation.pendingOperation == null) {
-            pop = new SyncStorageEngine.PendingOperation(
-                    operation.account, operation.userId, operation.reason, operation.syncSource,
-                    operation.authority, operation.extras, operation.expedited);
-            pop = mSyncStorageEngine.insertIntoPending(pop);
+            pop = mSyncStorageEngine.insertIntoPending(operation);
             if (pop == null) {
                 throw new IllegalStateException("error adding pending sync operation "
                         + operation);
@@ -136,17 +157,16 @@ public class SyncQueue {
         return true;
     }
 
-    public void removeUser(int userId) {
+    public void removeUserLocked(int userId) {
         ArrayList<SyncOperation> opsToRemove = new ArrayList<SyncOperation>();
         for (SyncOperation op : mOperationsMap.values()) {
-            if (op.userId == userId) {
+            if (op.target.userId == userId) {
                 opsToRemove.add(op);
             }
         }
-
-        for (SyncOperation op : opsToRemove) {
-            remove(op);
-        }
+            for (SyncOperation op : opsToRemove) {
+                remove(op);
+            }
     }
 
     /**
@@ -154,8 +174,15 @@ public class SyncQueue {
      * @param operation the operation to remove
      */
     public void remove(SyncOperation operation) {
+        boolean isLoggable = Log.isLoggable(TAG, Log.DEBUG);
         SyncOperation operationToRemove = mOperationsMap.remove(operation.key);
+        if (isLoggable) {
+            Log.d(TAG, "Attempting to remove: " + operation.key);
+        }
         if (operationToRemove == null) {
+            if (isLoggable) {
+                Log.d(TAG, "Could not find: " + operation.key);
+            }
             return;
         }
         if (!mSyncStorageEngine.deleteFromPending(operationToRemove.pendingOperation)) {
@@ -164,41 +191,58 @@ public class SyncQueue {
         }
     }
 
-    public void onBackoffChanged(Account account, int userId, String providerName, long backoff) {
-        // for each op that matches the account and provider update its
+    /** Reset backoffs for all operations in the queue. */
+    public void clearBackoffs() {
+        for (SyncOperation op : mOperationsMap.values()) {
+            op.backoff = 0L;
+            op.updateEffectiveRunTime();
+        }
+    }
+
+    public void onBackoffChanged(SyncStorageEngine.EndPoint target, long backoff) {
+        // For each op that matches the authority of the changed op, update its
         // backoff and effectiveStartTime
         for (SyncOperation op : mOperationsMap.values()) {
-            if (op.account.equals(account) && op.authority.equals(providerName)
-                    && op.userId == userId) {
+            if (op.target.matches(target)) {
                 op.backoff = backoff;
                 op.updateEffectiveRunTime();
             }
         }
     }
 
-    public void onDelayUntilTimeChanged(Account account, String providerName, long delayUntil) {
-        // for each op that matches the account and provider update its
-        // delayUntilTime and effectiveStartTime
+    public void onDelayUntilTimeChanged(SyncStorageEngine.EndPoint target, long delayUntil) {
+        // for each op that matches the authority info of the provided op, change the delay time.
         for (SyncOperation op : mOperationsMap.values()) {
-            if (op.account.equals(account) && op.authority.equals(providerName)) {
+            if (op.target.matches(target)) {
                 op.delayUntil = delayUntil;
                 op.updateEffectiveRunTime();
             }
         }
     }
 
-    public void remove(Account account, int userId, String authority) {
+    /**
+     * Remove all of the SyncOperations associated with a given target.
+     *
+     * @param info target object provided here can have null Account/provider. This is the case
+     * where you want to remove all ops associated with a provider (null Account) or all ops
+     * associated with an account (null provider).
+     * @param extras option bundle to include to further specify which operation to remove. If this
+     * bundle contains sync settings flags, they are ignored.
+     */
+    public void remove(final SyncStorageEngine.EndPoint info, Bundle extras) {
         Iterator<Map.Entry<String, SyncOperation>> entries = mOperationsMap.entrySet().iterator();
         while (entries.hasNext()) {
             Map.Entry<String, SyncOperation> entry = entries.next();
             SyncOperation syncOperation = entry.getValue();
-            if (account != null && !syncOperation.account.equals(account)) {
+            final SyncStorageEngine.EndPoint opInfo = syncOperation.target;
+            if (!opInfo.matches(info)) {
                 continue;
             }
-            if (authority != null && !syncOperation.authority.equals(authority)) {
-                continue;
-            }
-            if (userId != syncOperation.userId) {
+            if (extras != null
+                    && !SyncManager.syncExtrasEquals(
+                        syncOperation.extras,
+                        extras,
+                        false /* no config flags*/)) {
                 continue;
             }
             entries.remove();
