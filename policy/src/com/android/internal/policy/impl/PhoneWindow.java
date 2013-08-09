@@ -67,6 +67,7 @@ import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.IRotationWatcher;
 import android.view.IWindowManager;
+import android.view.InputEvent;
 import android.view.InputQueue;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -79,6 +80,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewManager;
 import android.view.ViewParent;
+import android.view.ViewRootImpl;
 import android.view.ViewStub;
 import android.view.Window;
 import android.view.WindowManager;
@@ -1457,6 +1459,27 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mActionBar != null && !mActionBar.hasLogo()) {
             mActionBar.setLogo(resId);
         }
+    }
+
+    @Override
+    public void setLocalFocus(boolean hasFocus, boolean inTouchMode) {
+        getViewRootImpl().windowFocusChanged(hasFocus, inTouchMode);
+
+    }
+
+    @Override
+    public void injectInputEvent(InputEvent event) {
+        getViewRootImpl().dispatchInputEvent(event);
+    }
+
+    private ViewRootImpl getViewRootImpl() {
+        if (mDecor != null) {
+            ViewRootImpl viewRootImpl = mDecor.getViewRootImpl();
+            if (viewRootImpl != null) {
+                return viewRootImpl;
+            }
+        }
+        throw new IllegalStateException("view not added");
     }
 
     /**

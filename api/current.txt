@@ -27828,6 +27828,7 @@ package android.view {
     method public final boolean hasChildren();
     method public boolean hasFeature(int);
     method protected final boolean hasSoftInputMode();
+    method public void injectInputEvent(android.view.InputEvent);
     method public abstract void invalidatePanelMenu(int);
     method public final boolean isActive();
     method public abstract boolean isFloating();
@@ -27865,6 +27866,7 @@ package android.view {
     method public void setGravity(int);
     method public void setIcon(int);
     method public void setLayout(int, int);
+    method public void setLocalFocus(boolean, boolean);
     method public void setLogo(int);
     method public void setSoftInputMode(int);
     method public abstract void setTitle(java.lang.CharSequence);
@@ -28003,6 +28005,7 @@ package android.view {
     field public static final int FLAG_LAYOUT_IN_OVERSCAN = 33554432; // 0x2000000
     field public static final int FLAG_LAYOUT_IN_SCREEN = 256; // 0x100
     field public static final int FLAG_LAYOUT_NO_LIMITS = 512; // 0x200
+    field public static final int FLAG_LOCAL_FOCUS_MODE = 268435456; // 0x10000000
     field public static final int FLAG_NOT_FOCUSABLE = 8; // 0x8
     field public static final int FLAG_NOT_TOUCHABLE = 16; // 0x10
     field public static final int FLAG_NOT_TOUCH_MODAL = 32; // 0x20
