@@ -188,37 +188,6 @@
             android:taskAffinity="com.android.systemui.net"
             android:excludeFromRecents="true" />
 
-        <!-- started from ... somewhere -->
-        <activity
-            android:name=".BeanBag"
-            android:exported="true"
-            android:label="BeanBag"
-            android:icon="@drawable/redbean2"
-            android:theme="@android:style/Theme.Wallpaper.NoTitleBar.Fullscreen"
-            android:hardwareAccelerated="true"
-            android:launchMode="singleInstance"
-            android:excludeFromRecents="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="com.android.internal.category.PLATLOGO" />
-<!--            <category android:name="android.intent.category.LAUNCHER" />-->
-            </intent-filter>
-        </activity>
-
-        <!-- Beans in space -->
-        <service
-            android:name=".BeanBagDream"
-            android:exported="true"
-            android:label="@string/jelly_bean_dream_name"
-            android:enabled="false"
-            >
-            <intent-filter>
-                <action android:name="android.service.dreams.DreamService" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </service>
-
         <activity android:name=".Somnambulator"
             android:label="@string/start_dreams"
             android:icon="@mipmap/ic_launcher_dreams"
