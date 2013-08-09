@@ -114,9 +114,13 @@ public class Canvas {
      * canvas.
      */
     public Canvas() {
-        // 0 means no native bitmap
-        mNativeCanvas = initRaster(0);
-        mFinalizer = new CanvasFinalizer(mNativeCanvas);
+        if (!isHardwareAccelerated()) {
+            // 0 means no native bitmap
+            mNativeCanvas = initRaster(0);
+            mFinalizer = new CanvasFinalizer(mNativeCanvas);
+        } else {
+            mFinalizer = null;
+        }
     }
 
     /**
