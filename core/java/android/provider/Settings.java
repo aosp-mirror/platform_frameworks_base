@@ -5662,6 +5662,12 @@ public final class Settings {
         public static final String SELINUX_STATUS = "selinux_status";
 
         /**
+         * Developer setting to force RTL layout.
+         * @hide
+         */
+        public static final String DEVELOPMENT_FORCE_RTL = "debug.force_rtl";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
