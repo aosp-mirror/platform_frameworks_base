@@ -1243,6 +1243,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mFastScroller = new FastScroller(this);
             mFastScroller.setEnabled(true);
         }
+
+        recomputePadding();
+
+        if (mFastScroller != null) {
+            mFastScroller.updateLayout();
+        }
     }
 
     /**
@@ -1303,7 +1309,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
 
     @Override
     public int getVerticalScrollbarWidth() {
-        if (isFastScrollAlwaysVisible() && mFastScroller != null) {
+        if (mFastScroller != null && mFastScroller.isEnabled()) {
             return Math.max(super.getVerticalScrollbarWidth(), mFastScroller.getWidth());
         }
         return super.getVerticalScrollbarWidth();
@@ -1324,6 +1330,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         super.setVerticalScrollbarPosition(position);
         if (mFastScroller != null) {
             mFastScroller.setScrollbarPosition(position);
+        }
+    }
+
+    @Override
+    public void setScrollBarStyle(int style) {
+        super.setScrollBarStyle(style);
+        if (mFastScroller != null) {
+            mFastScroller.setScrollBarStyle(style);
         }
     }
 
@@ -2787,7 +2801,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     @Override
     public void onRtlPropertiesChanged(int layoutDirection) {
         super.onRtlPropertiesChanged(layoutDirection);
-
         if (mFastScroller != null) {
            mFastScroller.setScrollbarPosition(getVerticalScrollbarPosition());
         }
