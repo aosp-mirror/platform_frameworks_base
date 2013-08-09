@@ -31,6 +31,9 @@
 #include <gui/Surface.h>
 
 namespace android {
+
+class GLConsumer;
+
 namespace filterfw {
 
 class ShaderProgram;

@@ -26,6 +26,8 @@
 #include <string>
 #include <EGL/eglext.h>
 
+#include <gui/GLConsumer.h>
+
 namespace android {
 namespace filterfw {
 
