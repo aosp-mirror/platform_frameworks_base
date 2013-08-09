@@ -1852,6 +1852,11 @@ public class WebView extends AbsoluteLayout
             return WebView.this.getHorizontalScrollbarHeight();
         }
 
+        public void super_onDrawVerticalScrollBar(Canvas canvas, Drawable scrollBar,
+                int l, int t, int r, int b) {
+            WebView.super.onDrawVerticalScrollBar(canvas, scrollBar, l, t, r, b);
+        }
+
         // ---- Access to (non-public) fields ----
         /** Raw setter for the scroll X value, without invoking onScrollChanged handlers etc. */
         public void setScrollXRaw(int scrollX) {
