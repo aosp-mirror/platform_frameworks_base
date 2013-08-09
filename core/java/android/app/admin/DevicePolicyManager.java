@@ -1527,9 +1527,26 @@ public class DevicePolicyManager {
      */
     public boolean setDeviceOwner(String packageName) throws IllegalArgumentException,
             IllegalStateException {
+        return setDeviceOwner(packageName, null);
+    }
+
+    /**
+     * @hide
+     * Sets the given package as the device owner. The package must already be installed and there
+     * shouldn't be an existing device owner registered, for this call to succeed. Also, this
+     * method must be called before the device is provisioned.
+     * @param packageName the package name of the application to be registered as the device owner.
+     * @param ownerName the human readable name of the institution that owns this device.
+     * @return whether the package was successfully registered as the device owner.
+     * @throws IllegalArgumentException if the package name is null or invalid
+     * @throws IllegalStateException if a device owner is already registered or the device has
+     *         already been provisioned.
+     */
+    public boolean setDeviceOwner(String packageName, String ownerName)
+            throws IllegalArgumentException, IllegalStateException {
         if (mService != null) {
             try {
-                return mService.setDeviceOwner(packageName);
+                return mService.setDeviceOwner(packageName, ownerName);
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to set device owner");
             }
@@ -1575,6 +1592,18 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 return mService.getDeviceOwner();
+            } catch (RemoteException re) {
+                Log.w(TAG, "Failed to get device owner");
+            }
+        }
+        return null;
+    }
+
+    /** @hide */
+    public String getDeviceOwnerName() {
+        if (mService != null) {
+            try {
+                return mService.getDeviceOwnerName();
             } catch (RemoteException re) {
                 Log.w(TAG, "Failed to get device owner");
             }
