@@ -643,6 +643,23 @@ public final class Settings {
         "android.settings.NFCSHARING_SETTINGS";
 
     /**
+     * Activity Action: Show NFC Tap & Pay settings
+     * <p>
+     * This shows UI that allows the user to configure Tap&Pay
+     * settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NFC_PAYMENT_SETTINGS =
+        "android.settings.NFC_PAYMENT_SETTINGS";
+
+    /**
      * Activity Action: Show Daydream settings.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
