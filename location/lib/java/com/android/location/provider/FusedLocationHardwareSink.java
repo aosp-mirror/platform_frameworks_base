@@ -20,7 +20,6 @@ import android.location.Location;
 
 /**
  * Base class for sinks to interact with FusedLocationHardware.
- * This is mainly used by GmsCore Fused Provider.
  */
 public abstract class FusedLocationHardwareSink {
     /*

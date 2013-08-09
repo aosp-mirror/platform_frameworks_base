@@ -9,7 +9,7 @@
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIOS OF ANY KIND, either express or implied.
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
@@ -21,20 +21,26 @@ import android.hardware.location.IFusedLocationHardwareSink;
 
 import android.location.Location;
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Class that exposes IFusedLocationHardware functionality to unbundled services.
- * Namely this is used by GmsCore Fused Location Provider.
  */
 public final class FusedLocationHardware {
     private final String TAG = "FusedLocationHardware";
 
     private IFusedLocationHardware mLocationHardware;
-    ArrayList<FusedLocationHardwareSink> mSinkList = new ArrayList<FusedLocationHardwareSink>();
+
+    // the list uses a copy-on-write pattern to update its contents
+    HashMap<FusedLocationHardwareSink, DispatcherHandler> mSinkList =
+            new HashMap<FusedLocationHardwareSink, DispatcherHandler>();
 
     private IFusedLocationHardwareSink mInternalSink = new IFusedLocationHardwareSink.Stub() {
         @Override
@@ -48,6 +54,9 @@ public final class FusedLocationHardware {
         }
     };
 
+    /**
+     * @hide
+     */
     public FusedLocationHardware(IFusedLocationHardware locationHardware) {
         mLocationHardware = locationHardware;
     }
@@ -55,19 +64,24 @@ public final class FusedLocationHardware {
     /*
      * Methods to provide a Facade for IFusedLocationHardware
      */
-    public void registerSink(FusedLocationHardwareSink sink) {
-        if(sink == null) {
-            return;
+    public void registerSink(FusedLocationHardwareSink sink, Looper looper) {
+        if(sink == null || looper == null) {
+            throw new IllegalArgumentException("Parameter sink and looper cannot be null.");
         }
 
-        boolean registerSink = false;
+        boolean registerSink;
         synchronized (mSinkList) {
             // register only on first insertion
             registerSink = mSinkList.size() == 0;
             // guarantee uniqueness
-            if(!mSinkList.contains(sink)) {
-                mSinkList.add(sink);
+            if(mSinkList.containsKey(sink)) {
+                return;
             }
+
+            HashMap<FusedLocationHardwareSink, DispatcherHandler> newSinkList =
+                    new HashMap<FusedLocationHardwareSink, DispatcherHandler>(mSinkList);
+            newSinkList.put(sink, new DispatcherHandler(looper));
+            mSinkList = newSinkList;
         }
 
         if(registerSink) {
@@ -81,14 +95,23 @@ public final class FusedLocationHardware {
 
     public void unregisterSink(FusedLocationHardwareSink sink) {
         if(sink == null) {
-            return;
+            throw new IllegalArgumentException("Parameter sink cannot be null.");
         }
 
-        boolean unregisterSink = false;
+        boolean unregisterSink;
         synchronized(mSinkList) {
-            mSinkList.remove(sink);
-            // unregister after the last sink
-            unregisterSink = mSinkList.size() == 0;
+            if(!mSinkList.containsKey(sink)) {
+                //done
+                return;
+            }
+
+            HashMap<FusedLocationHardwareSink, DispatcherHandler> newSinkList =
+                    new HashMap<FusedLocationHardwareSink, DispatcherHandler>(mSinkList);
+            newSinkList.remove(sink);
+            //unregister after the last sink
+            unregisterSink = newSinkList.size() == 0;
+
+            mSinkList = newSinkList;
         }
 
         if(unregisterSink) {
@@ -176,27 +199,82 @@ public final class FusedLocationHardware {
     }
 
     /*
-     * Helper methods
+     * Helper methods and classes
      */
-    private void dispatchLocations(Location[] locations) {
-        ArrayList<FusedLocationHardwareSink> sinks = null;
-        synchronized (mSinkList) {
-            sinks = new ArrayList<FusedLocationHardwareSink>(mSinkList);
+    private class DispatcherHandler extends Handler {
+        public static final int DISPATCH_LOCATION = 1;
+        public static final int DISPATCH_DIAGNOSTIC_DATA = 2;
+
+        public DispatcherHandler(Looper looper) {
+            super(looper, null /*callback*/ , true /*async*/);
         }
 
-        for(FusedLocationHardwareSink sink : sinks) {
-            sink.onLocationAvailable(locations);
+        @Override
+        public void handleMessage(Message message) {
+            MessageCommand command = (MessageCommand) message.obj;
+            switch(message.what) {
+                case DISPATCH_LOCATION:
+                    command.dispatchLocation();
+                    break;
+                case DISPATCH_DIAGNOSTIC_DATA:
+                    command.dispatchDiagnosticData();
+                default:
+                    Log.e(TAG, "Invalid dispatch message");
+                    break;
+            }
+        }
+    }
+
+    private class MessageCommand {
+        private final FusedLocationHardwareSink mSink;
+        private final Location[] mLocations;
+        private final String mData;
+
+        public MessageCommand(
+                FusedLocationHardwareSink sink,
+                Location[] locations,
+                String data) {
+            mSink = sink;
+            mLocations = locations;
+            mData = data;
+        }
+
+        public void dispatchLocation() {
+            mSink.onLocationAvailable(mLocations);
+        }
+
+        public void dispatchDiagnosticData() {
+            mSink.onDiagnosticDataAvailable(mData);
+        }
+    }
+
+    private void dispatchLocations(Location[] locations) {
+        HashMap<FusedLocationHardwareSink, DispatcherHandler> sinks;
+        synchronized (mSinkList) {
+            sinks = mSinkList;
+        }
+
+        for(Map.Entry<FusedLocationHardwareSink, DispatcherHandler> entry : sinks.entrySet()) {
+            Message message = Message.obtain(
+                    entry.getValue(),
+                    DispatcherHandler.DISPATCH_LOCATION,
+                    new MessageCommand(entry.getKey(), locations, null /*data*/));
+            message.sendToTarget();
         }
     }
 
     private void dispatchDiagnosticData(String data) {
-        ArrayList<FusedLocationHardwareSink> sinks = null;
+        HashMap<FusedLocationHardwareSink, DispatcherHandler> sinks;
         synchronized(mSinkList) {
-            sinks = new ArrayList<FusedLocationHardwareSink>(mSinkList);
+            sinks = mSinkList;
         }
 
-        for(FusedLocationHardwareSink sink : sinks) {
-            sink.onDiagnosticDataAvailable(data);
+        for(Map.Entry<FusedLocationHardwareSink, DispatcherHandler> entry : sinks.entrySet()) {
+            Message message = Message.obtain(
+                    entry.getValue(),
+                    DispatcherHandler.DISPATCH_DIAGNOSTIC_DATA,
+                    new MessageCommand(entry.getKey(), null /*locations*/, data));
+            message.sendToTarget();
         }
     }
 }
