@@ -314,7 +314,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"pigilan ang mga paglipat ng app"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Pinipigilan ang mga user sa paglipat sa isa pang app."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"kunin ang impormasyon ng kasalukuyang app"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Pinapayagan ang may-ari na bawiin ang pribadong impormasyon tungkol sa kasalukuyang application sa foreground ng screen."</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"subaybayan at kontrolin ang lahat ng paglunsad ng app"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Pinapayagan ang app na subaybayan at kontrolin kung paano naglulunsad ng mga aktibidad ang system. Maaaring ganap na ikompromiso ng nakakahamak na apps ang system. Kinakailangan lamang ang pahintulot na ito para sa pagpapabuti, hindi kailanman para sa normal na paggamit."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"magpadala ng package inalis ang broadcast"</string>
@@ -474,18 +475,12 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Pinapayagan ang app na mag-configure at kumonekta sa mga Wifi display."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"magkontrol ng mga Wifi display"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Pinapayagan ang app na magkontrol ng mga tampok sa mababang antas ng mga dispay ng Wifi."</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"kumuha ng audio output"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Pinapayagan ang app na kumuha at mag-redirect ng audio output."</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"kumuha ng video output"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Pinapayagan ang app na kumuha at mag-redirect ng video output."</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"kumuha ng secure na video output"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Pinapayagan ang app na kumuha at mag-redirect ng secure na video output."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"baguhin ang mga setting ng iyong audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Pinapayagan ang app na baguhin ang mga pandaigdigang setting ng audio gaya ng volume at kung aling speaker ang ginagamit para sa output."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"mag-record ng audio"</string>
@@ -659,6 +654,10 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Nagbibigay-daan sa may-ari na mapailalim sa interface sa tuktok na antas ng isang serbisyo ng notification listener. Hindi dapat kailanganin para sa karaniwang apps kahit kailan."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"paganahin ang app ng configuration na ibinigay ng carrier"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Nagbibigay-daan sa may-ari na paganahin ang app ng configuration na ibinigay ng carrier. Hindi dapat kailanganin para sa normal na apps kahit kailan."</string>
+    <!-- no translation found for permlab_accessNetworkConditions (8206077447838909516) -->
+    <skip />
+    <!-- no translation found for permdesc_accessNetworkConditions (6899102075825272211) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Magtakda ng mga panuntunan sa password"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrolin ang haba at mga character na pinapayagan sa mga password sa pag-unlock ng screen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>

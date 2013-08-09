@@ -314,7 +314,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"アプリケーションの切り替えを禁止する"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"ユーザーが別のアプリに切り替えられないようにします。"</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"現在のアプリ情報の取得"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"画面のフォアグラウンドで現在のアプリに関する非公開情報を取得することを所有者に許可します。"</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"すべてのアプリ起動の監視と制御"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"システムによるアクティビティ起動方法を監視し制御することをアプリに許可します。この許可を悪意のあるアプリに利用されると、システム全体のセキュリティが侵害される恐れがあります。この許可は開発時にのみ必要で、通常の使用では不要です。"</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"パッケージ削除ブロードキャストの送信"</string>
@@ -474,18 +475,12 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Wi-Fiディスプレイを設定して接続することをアプリに許可します。"</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wi-Fiディスプレイの制御"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Wi-Fiディスプレイの低レベル機能を制御することをアプリに許可します。"</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"音声出力のキャプチャ"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"音声出力のキャプチャとリダイレクトをアプリに許可します。"</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"動画出力のキャプチャ"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"動画出力のキャプチャとリダイレクトをアプリに許可します。"</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"セキュリティ保護された動画出力のキャプチャ"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"セキュリティ保護された動画出力のキャプチャとリダイレクトをアプリに許可します。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"音声設定の変更"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"音声全般の設定（音量、出力に使用するスピーカーなど）の変更をアプリに許可します。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"録音"</string>
@@ -659,6 +654,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"通知リスナーサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"携帯通信会社が提供する設定アプリの呼び出し"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"携帯通信会社が提供する設定アプリを呼び出すことを所有者に許可します。通常のアプリでは不要です。"</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ネットワーク状況監視のためのリッスン"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"ネットワーク状況を監視するためリッスンすることをアプリに許可します。通常のアプリで必要になることはありません。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"画面ロック解除パスワードの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"画面ロック解除試行の監視"</string>

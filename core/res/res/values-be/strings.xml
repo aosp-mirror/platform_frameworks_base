@@ -316,7 +316,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"прадухіляць пераключэнне прыкладанняў"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Не дазваляе карыстальніку пераходзіць да іншага прыкладання."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"атрымаць бягучую інфармацыю прыкладання"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Дазваляе ўладальніку атрымлiваць асабістую інфармацыю аб бягучым прыкладаннi на пярэднім плане экрана."</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"адсочваць і кантраляваць запуск усіх прыкладанняў"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Дазваляе прыкладанню сачыць і кантраляваць, як сістэма запускае працэсы. Шкоднасныя прыкладанні могуць цалкам парушыць працу сістэмы. Гэты дазвол патрэбны толькі для распрацоўкі, ніколі для звычайнага выкарыстання."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"трансляваць паведамленні аб выдаленні пакетаў"</string>
@@ -674,6 +675,10 @@
     <!-- no translation found for permlab_invokeCarrierSetup (3699600833975117478) -->
     <skip />
     <!-- no translation found for permdesc_invokeCarrierSetup (4159549152529111920) -->
+    <skip />
+    <!-- no translation found for permlab_accessNetworkConditions (8206077447838909516) -->
+    <skip />
+    <!-- no translation found for permdesc_accessNetworkConditions (6899102075825272211) -->
     <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Устанавіць правілы паролю"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Кіраванне даўжынёй і колькасцю знакаў у паролі разблакоўкі экрана."</string>
