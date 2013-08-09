@@ -2378,7 +2378,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean setDeviceOwner(String packageName) {
+    public boolean setDeviceOwner(String packageName, String ownerName) {
         if (packageName == null
                 || !DeviceOwner.isInstalled(packageName, mContext.getPackageManager())) {
             throw new IllegalArgumentException("Invalid package name " + packageName
@@ -2386,7 +2386,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         synchronized (this) {
             if (mDeviceOwner == null && !isDeviceProvisioned()) {
-                mDeviceOwner = new DeviceOwner(packageName);
+                mDeviceOwner = new DeviceOwner(packageName, ownerName);
                 mDeviceOwner.writeOwnerFile();
                 return true;
             } else {
@@ -2410,6 +2410,17 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (this) {
             if (mDeviceOwner != null) {
                 return mDeviceOwner.getPackageName();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public String getDeviceOwnerName() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USERS, null);
+        synchronized (this) {
+            if (mDeviceOwner != null) {
+                return mDeviceOwner.getName();
             }
         }
         return null;
@@ -2488,15 +2499,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     static class DeviceOwner {
         private static final String DEVICE_OWNER_XML = "device_owner.xml";
         private static final String TAG_DEVICE_OWNER = "device-owner";
+        private static final String ATTR_NAME = "name";
         private static final String ATTR_PACKAGE = "package";
         private String mPackageName;
+        private String mOwnerName;
 
         DeviceOwner() {
             readOwnerFile();
         }
 
-        DeviceOwner(String packageName) {
+        DeviceOwner(String packageName, String ownerName) {
             this.mPackageName = packageName;
+            this.mOwnerName = ownerName;
         }
 
         static boolean isRegistered() {
@@ -2506,6 +2520,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         String getPackageName() {
             return mPackageName;
+        }
+
+        String getName() {
+            return mOwnerName;
         }
 
         static boolean isInstalled(String packageName, PackageManager pm) {
@@ -2539,6 +2557,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             "Device Owner file does not start with device-owner tag: found " + tag);
                 }
                 mPackageName = parser.getAttributeValue(null, ATTR_PACKAGE);
+                mOwnerName = parser.getAttributeValue(null, ATTR_NAME);
                 input.close();
             } catch (XmlPullParserException xppe) {
                 Slog.e(TAG, "Error parsing device-owner file\n" + xppe);
@@ -2563,6 +2582,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.startDocument(null, true);
                 out.startTag(null, TAG_DEVICE_OWNER);
                 out.attribute(null, ATTR_PACKAGE, mPackageName);
+                if (mOwnerName != null) {
+                    out.attribute(null, ATTR_NAME, mOwnerName);
+                }
                 out.endTag(null, TAG_DEVICE_OWNER);
                 out.endDocument();
                 out.flush();
