@@ -2221,13 +2221,24 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
 
+        if (DBG) log("handleCaptivePortalTrackerCheck: call captivePortalCheckComplete ni=" + info);
         thisNet.captivePortalCheckComplete();
     }
 
     /** @hide */
+    @Override
     public void captivePortalCheckComplete(NetworkInfo info) {
         enforceConnectivityInternalPermission();
+        if (DBG) log("captivePortalCheckComplete: ni=" + info);
         mNetTrackers[info.getType()].captivePortalCheckComplete();
+    }
+
+    /** @hide */
+    @Override
+    public void captivePortalCheckCompleted(NetworkInfo info, boolean isCaptivePortal) {
+        enforceConnectivityInternalPermission();
+        if (DBG) log("captivePortalCheckCompleted: ni=" + info + " captive=" + isCaptivePortal);
+        mNetTrackers[info.getType()].captivePortalCheckCompleted(isCaptivePortal);
     }
 
     /**

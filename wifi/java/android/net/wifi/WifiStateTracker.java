@@ -120,6 +120,11 @@ public class WifiStateTracker implements NetworkStateTracker {
         mWifiManager.captivePortalCheckComplete();
     }
 
+    @Override
+    public void captivePortalCheckCompleted(boolean isCaptivePortal) {
+        // not implemented
+    }
+
     /**
      * Turn the wireless radio off for a network.
      * @param turnOn {@code true} to turn the radio on, {@code false}
