@@ -10746,7 +10746,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (display == null) {
             throw new IllegalArgumentException("getDisplayContent: display must not be null");
         }
-        newDisplayContentLocked(display);
+        getDisplayContentLocked(display.getDisplayId());
     }
 
     /**
