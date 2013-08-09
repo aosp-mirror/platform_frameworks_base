@@ -1148,14 +1148,6 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawPicture(int nativeCanvas,
-                                                  int nativePicture) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Canvas.drawPicture is not supported.", null, null /*data*/);
-    }
-
-    @LayoutlibDelegate
     /*package*/ static void finalizer(int nativeCanvas) {
         // get the delegate from the native int so that it can be disposed.
         Canvas_Delegate canvasDelegate = sManager.getDelegate(nativeCanvas);
