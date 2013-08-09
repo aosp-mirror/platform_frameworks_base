@@ -14659,13 +14659,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     protected void resolveDrawables() {
-        if (canResolveLayoutDirection()) {
-            if (mBackground != null) {
-                mBackground.setLayoutDirection(getLayoutDirection());
-            }
-            mPrivateFlags2 |= PFLAG2_DRAWABLE_RESOLVED;
-            onResolveDrawables(getLayoutDirection());
+        // Drawables resolution may need to happen before resolving the layout direction (which is
+        // done only during the measure() call).
+        // If the layout direction is not resolved yet, we cannot resolve the Drawables except in
+        // one case: when the raw layout direction has not been defined as LAYOUT_DIRECTION_INHERIT.
+        // So, if the raw layout direction is LAYOUT_DIRECTION_LTR or LAYOUT_DIRECTION_RTL or
+        // LAYOUT_DIRECTION_LOCALE, we can "cheat" and we don't need to wait for the layout
+        // direction to be resolved as its resolved value will be the same as its raw value.
+        if (!isLayoutDirectionResolved() &&
+                getRawLayoutDirection() == View.LAYOUT_DIRECTION_INHERIT) {
+            return;
         }
+
+        final int layoutDirection = isLayoutDirectionResolved() ?
+                getLayoutDirection() : getRawLayoutDirection();
+
+        if (mBackground != null) {
+            mBackground.setLayoutDirection(layoutDirection);
+        }
+        mPrivateFlags2 |= PFLAG2_DRAWABLE_RESOLVED;
+        onResolveDrawables(layoutDirection);
     }
 
     /**
