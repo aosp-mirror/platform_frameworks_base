@@ -40,6 +40,7 @@ import com.android.internal.util.AsyncChannel;
 
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Track the state of mobile data connectivity. This is done by
@@ -74,6 +75,8 @@ public class MobileDataStateTracker implements NetworkStateTracker {
 
     private Handler mHandler;
     private AsyncChannel mDataConnectionTrackerAc;
+
+    private AtomicBoolean mIsCaptivePortal = new AtomicBoolean(false);
 
     /**
      * Create a new MobileDataStateTracker
@@ -375,6 +378,15 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     @Override
     public void captivePortalCheckComplete() {
         // not implemented
+    }
+
+    @Override
+    public void captivePortalCheckCompleted(boolean isCaptivePortal) {
+        if (mIsCaptivePortal.getAndSet(isCaptivePortal) != isCaptivePortal) {
+            // Captive portal change enable/disable failing fast
+            setEnableFailFastMobileData(
+                    isCaptivePortal ? DctConstants.ENABLED : DctConstants.DISABLED);
+        }
     }
 
     /**
