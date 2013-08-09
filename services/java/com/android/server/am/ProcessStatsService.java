@@ -18,6 +18,8 @@ package com.android.server.am;
 
 import android.app.AppGlobals;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -59,7 +61,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     static long WRITE_PERIOD = 30*60*1000;      // Write file every 30 minutes or so.
     static long COMMIT_PERIOD = 24*60*60*1000;  // Commit current stats every day.
 
-    final Object mLock;
+    final ActivityManagerService mAm;
     final File mBaseDir;
     ProcessStats mProcessStats;
     AtomicFile mFile;
@@ -75,15 +77,15 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     boolean mPendingWriteCommitted;
     long mLastWriteTime;
 
-    public ProcessStatsService(Object lock, File file) {
-        mLock = lock;
+    public ProcessStatsService(ActivityManagerService am, File file) {
+        mAm = am;
         mBaseDir = file;
         mBaseDir.mkdirs();
         mProcessStats = new ProcessStats(true);
         updateFile();
         SystemProperties.addChangeCallback(new Runnable() {
             @Override public void run() {
-                synchronized (mLock) {
+                synchronized (mAm) {
                     if (mProcessStats.evaluateSystemProperties(false)) {
                         mProcessStats.mFlags |= ProcessStats.FLAG_SYSPROPS;
                         writeStateLocked(true, true);
@@ -449,7 +451,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         Parcel current = Parcel.obtain();
         mWriteLock.lock();
         try {
-            synchronized (mLock) {
+            synchronized (mAm) {
                 mProcessStats.writeToParcel(current, 0);
             }
             if (historic != null) {
@@ -493,7 +495,16 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         pw.println("  <package.name>: optional name of package to filter output by.");
     }
 
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mAm.checkCallingPermission(android.Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump procstats from from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
+                    + " without permission " + android.Manifest.permission.DUMP);
+            return;
+        }
+
         final long now = SystemClock.uptimeMillis();
 
         boolean isCheckin = false;
@@ -638,7 +649,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 }
             }
             pw.println();
-            synchronized (mLock) {
+            synchronized (mAm) {
                 dumpFilteredProcessesCsvLocked(pw, null,
                         csvSepScreenStats, csvScreenStats, csvSepMemStats, csvMemStats,
                         csvSepProcStats, csvProcStats, now, reqPackage);
@@ -721,7 +732,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             }
         }
         if (!isCheckin) {
-            synchronized (mLock) {
+            synchronized (mAm) {
                 if (isCompact) {
                     mProcessStats.dumpCheckinLocked(pw, reqPackage);
                 } else {
