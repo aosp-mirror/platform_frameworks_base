@@ -1646,7 +1646,9 @@ public class Canvas {
      */
     public void drawPicture(Picture picture) {
         picture.endRecording();
-        native_drawPicture(mNativeCanvas, picture.ni());
+        int restoreCount = save();
+        picture.draw(this);
+        restoreToCount(restoreCount);
     }
     
     /**
@@ -1831,7 +1833,5 @@ public class Canvas {
                                                      float hOffset, 
                                                      float vOffset, 
                                                      int flags, int paint);
-    private static native void native_drawPicture(int nativeCanvas,
-                                                  int nativePicture);
     private static native void finalizer(int nativeCanvas);
 }
