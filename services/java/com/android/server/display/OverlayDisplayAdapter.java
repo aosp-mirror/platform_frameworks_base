@@ -211,11 +211,13 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
             mSurfaceTexture = surfaceTexture;
         }
 
-        public void clearSurfaceTextureLocked() {
-            if (mSurfaceTexture != null) {
-                mSurfaceTexture = null;
+        public void destroyLocked() {
+            mSurfaceTexture = null;
+            if (mSurface != null) {
+                mSurface.release();
+                mSurface = null;
             }
-            sendTraversalRequestLocked();
+            SurfaceControl.destroyDisplay(getDisplayTokenLocked());
         }
 
         @Override
@@ -225,12 +227,6 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                     mSurface = new Surface(mSurfaceTexture);
                 }
                 setSurfaceInTransactionLocked(mSurface);
-            } else {
-                setSurfaceInTransactionLocked(null);
-                if (mSurface != null) {
-                    mSurface.destroy();
-                    mSurface = null;
-                }
             }
         }
 
@@ -307,7 +303,7 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
         public void onWindowDestroyed() {
             synchronized (getSyncRoot()) {
                 if (mDevice != null) {
-                    mDevice.clearSurfaceTextureLocked();
+                    mDevice.destroyLocked();
                     sendDisplayDeviceEventLocked(mDevice, DISPLAY_DEVICE_EVENT_REMOVED);
                 }
             }
