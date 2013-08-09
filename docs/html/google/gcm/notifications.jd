@@ -14,14 +14,15 @@ page.title=User Notifications
 <h2>In this document</h2>
 
 <ol class="toc">
-  <li><a href="#what">What are User Notifications?</a> </li>
-  <li><a href="#examples">Examples</a>
-    <ol>
-      <li><a href="#create">Generate a notification key</a></li>
-      <li><a href="#add">Add registration IDs</a></li>
-      <li><a href="#remove">Remove registration IDs</a></li>
-      <li><a href="#upstream">Send upstream messages</a></li>
-      <li><a href="#response">Response formats</a></li>
+  <li><a href="#request">Request Format</a></li>
+  <li><a href="#create">Generate a Notification Key</a></li>
+  <li><a href="#add">Add Registration IDs</a></li>
+  <li><a href="#remove">Remove Registration IDs</a></li>
+  <li><a href="#upstream">Send Upstream Messages</a></li>
+  <li><a href="#response">Response Formats</a>
+    <ol class="toc">
+      <li><a href="#response-create">Create/add/remove operations</a>
+      <li><a href="#response-send">Send operations</a>
     </ol>
   </li>
 </ol>
@@ -38,32 +39,51 @@ page.title=User Notifications
 
 <p class="note"><strong>Note:</strong> To try out this feature, sign up using <a href="https://services.google.com/fb/forms/gcm/">this form</a>.</p>
 
-<p>The upstream messaging (device-to-cloud) feature described in this document is part of the Google Play services platform. Upstream messaging is available through the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">GoogleCloudMessaging</a> APIs. To use upstream messaging and the new streamlined registration process, you must <a href="{@docRoot}google/play-services/setup.html">set up</a> the Google Play services SDK.</p>
 
-<h2 id="what">What are User Notifications?</h2>
-
-<p>Third party servers can send a single message to multiple instance of an app running on devices owned by a single user. This feature is called <em>user notifications</em>. User notifications make it possible for every app instance that a user owns to reflect the latest messaging state. For example:</p>
+<p>With user notifications, 3rd-party app servers can send a single message to
+multiple instance of an app running on devices owned by a single user. This feature
+is called <em>user notifications</em>. User notifications make it possible for every
+app instance that a user owns to reflect the latest messaging state. For example:</p>
 
   <ul>
-  <li>If a message has been handled on one device, the GCM message on the other devices are dismissed. For example, if a user has handled a calendar notification on one device, the notification will go away on the user's other devices.</li>
-  <li>If a message has not been delivered yet to a device and but it has been handled, the GCM server removes it from the unsent queue for the other devices.</li>
-  <li>Likewise, a device can send messages to the {@code notification_key}, which is the token that GCM uses to fan out notifications to all devices whose registration IDs are associated with the key.</li>
+  <li>If a message has been handled on one device, the GCM message on the other
+devices are dismissed. For example, if a user has handled a calendar notification
+on one device, the notification will go away on the user's other devices.</li>
+
+  <li>If a message has not been delivered yet to a device and but it has been handled,
+the GCM server removes it from the unsent queue for the other devices.</li>
+
+  <li>Likewise, a device can send messages to the {@code notification_key}, which
+is the token that GCM uses to fan out notifications to all devices whose
+registration IDs are associated with the key.</li>
 </ul>
 
-<p>The way this works is that during registration, the 3rd-party server requests a {@code notification_key}. The {@code notification_key} maps a particular user to all of the user's associated registration IDs (a regID represents a particular Android application running on a particular device). Then instead of sending one message to one regID at a time, the 3rd-party server can send a message to to the {@code notification_key}, which then sends the message to all of the user's regIDs.</p>
+<p>The way this works is that during registration, the 3rd-party server requests
+a {@code notification_key}. The {@code notification_key} maps a particular user
+to all of the user's associated registration IDs (a regID represents a particular
+Android application running on a particular device). Then instead of sending one
+message to one regID at a time, the 3rd-party server can send a message to to the
+{@code notification_key}, which then sends the message to all of the user's regIDs.</p>
 
-<p class="note"><strong>Note:</strong> A notification dismissal message is like any other upstream message, meaning that it will be delivered to the other devices that belong to the specified {@code notification_key}. You should design your app to handle cases where the app receives a dismissal message, but has not yet displayed the notification that is being dismissed. You can solve this by caching the dismissal and then reconciling it with the corresponding notification.
+<p class="note"><strong>Note:</strong> A notification dismissal message is like any
+other upstream message, meaning that it will be delivered to the other devices that
+belong to the specified {@code notification_key}. You should design your app to
+handle cases where the app receives a dismissal message, but has not yet displayed
+the notification that is being dismissed. You can solve this by caching the dismissal
+and then reconciling it with the corresponding notification.
 </p>
 
-<p>You can use this feature with either the new <a href="ccs.html">GCM Cloud Connection Server</a> (CCS), or the older <a href="gcm.html">GCM HTTP server</a>.</p>
+<p>You can use this feature with either the <a href="ccs.html">XMPP</a> (CCS) or
+<a href="http.html">HTTP</a> connection server.</p>
 
 
-<h3 id="examples">Examples</h3>
+<p>The examples below show you how to perform generate/add/remove operations,
+and how to send upstream messages. For generate/add/remove operations, the
+message body is JSON.</p>
 
-<p>The examples in this section show you how to perform generate/add/remove operations, and how to send upstream messages. For generate/add/remove operations, the message body is JSON.</p>
-
-<h4 id="request">Request format</h4>
-<p>To send a  message, the application server issues a POST request to <code>https://android.googleapis.com/gcm/notification</code>.</p>
+<h2 id="request">Request Format</h2>
+<p>To send a  message, the application server issues a POST request to
+<code>https://android.googleapis.com/gcm/notification</code>.</p>
 
 <p>Here is the HTTP request header you should use for all create/add/remove operations:</p>
 
@@ -72,12 +92,22 @@ Header : "project_id": &lt;projectID&gt;
 Header: "Authorization", "key=API_KEY"
 </pre>
 
-<h4 id="create">Generate a notification key</h4>
+<h2 id="create">Generate a Notification Key</h2>
 
-<p>This example shows how to create a new <code>notification_key</code> for a <code>notification_key_name</code> called <code>appUser-Chris</code>. The {@code notification_key_name} is a name or identifier (can be a username for a 3rd-party app) that is unique to a given user. It is used by third parties to group together registration IDs for a single user. Note that <code>notification_key_name</code> and <code>notification_key</code> are unique to a group of registration IDs. It is also important that <code>notification_key_name</code> be uniquely named per app in case you have multiple apps for the same project ID. This ensures that notifications only go to the intended target app.</p>
+<p>This example shows how to create a new <code>notification_key</code> for a
+<code>notification_key_name</code> called <code>appUser-Chris</code>.
+The {@code notification_key_name} is a name or identifier (can be a username for
+a 3rd-party app) that is unique to a given user. It is used by third parties to
+group together registration IDs for a single user. Note that <code>notification_key_name</code>
+and <code>notification_key</code> are unique to a group of registration IDs. It is also
+important that <code>notification_key_name</code> be uniquely named per app in case
+you have multiple apps for the same project ID. This ensures that notifications
+only go to the intended target app.</p>
 
 
-<p>A create operation returns a token (<code>notification_key</code>). Third parties must save this token (as well as its mapping to the <code>notification_key_name</code>) to use in subsequent operations:</p>
+<p>A create operation returns a token (<code>notification_key</code>). Third parties
+must save this token (as well as its mapping to the <code>notification_key_name</code>)
+to use in subsequent operations:</p>
 
 <pre>request:
 { 
@@ -86,11 +116,14 @@ Header: "Authorization", "key=API_KEY"
    &quot;registration_ids&quot;: [&quot;4&quot;, &quot;8&quot;, &quot;15&quot;, &quot;16&quot;, &quot;23&quot;, &quot;42&quot;]
 }</pre>
 
-<h4 id="add">Add registration IDs</h4>
+<h2 id="add">Add Registration IDs</h2>
 
-<p>This example shows how to add registration IDs for a given notification key. The maximum number of members allowed for a {@code notification_key} is 10.</p>
+<p>This example shows how to add registration IDs for a given notification key.
+The maximum number of members allowed for a {@code notification_key} is 10.</p>
 
-<p>Note that the <code>notification_key_name</code> is not strictly required for adding/removing regIDs. But including it protects you against accidentally using the incorrect <code>notification_key</code>.</p>
+<p>Note that the <code>notification_key_name</code> is not strictly required for
+adding/removing regIDs. But including it protects you against accidentally using
+the incorrect <code>notification_key</code>.</p>
 
 <pre>request:
 { 
@@ -100,7 +133,7 @@ Header: "Authorization", "key=API_KEY"
    &quot;registration_ids&quot;: [&quot;4&quot;, &quot;8&quot;, &quot;15&quot;, &quot;16&quot;, &quot;23&quot;, &quot;42&quot;]
 }</pre>
 
-<h4 id="remove">Remove registration IDs</h4>
+<h2 id="remove">Remove Registration IDs</h2>
 
 <p>This example shows how to remove registration IDs for a given notification key:</p>
 <pre>request:
@@ -111,9 +144,14 @@ Header: "Authorization", "key=API_KEY"
    &quot;registration_ids&quot;: [&quot;4&quot;, &quot;8&quot;, &quot;15&quot;, &quot;16&quot;, &quot;23&quot;, &quot;42&quot;]
 }</pre>
 
-<h4 id="upstream">Send upstream messages</h4>
+<h2 id="upstream">Send Upstream Messages</h2>
 
-<p>To send an upstream (device-to-cloud) message, you must use the <a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">GoogleCloudMessaging</a> API. Specifying a {@code notification_key} as the target for an upstream message allows a user on one device to send a message to other devices in the notification group&mdash;for example, to dismiss a notification. Here is an example that shows targeting a {@code notification_key}:</p>
+<p>To send an upstream (device-to-cloud) message, you must use the
+<a href="{@docRoot}reference/com/google/android/gms/gcm/GoogleCloudMessaging.html">
+{@code GoogleCloudMessaging}</a> API. Specifying a {@code notification_key} as the target
+for an upstream message allows a user on one device to send a message to other
+devices in the notification group&mdash;for example, to dismiss a notification.
+Here is an example that shows targeting a {@code notification_key}:</p>
 
 <pre>GoogleCloudMessaging gcm = GoogleCloudMessaging.get(context);
 String to = NOTIFICATION_KEY;
@@ -125,17 +163,21 @@ data.putString("hello", "world");
 gcm.send(to, id, data);
 </pre>
 
-<p>This call generates the necessary XMPP stanza for sending the message. The Bundle data consists of a key-value pair.</p>
+<p>This call generates the necessary XMPP stanza for sending the message. The
+Bundle data consists of a key-value pair.</p>
 
-<p>For a complete example, see <a href="gs.html#gs_example">Getting Started</a>. 
+<p>For a complete example, see <a href="client.html">Implementing GCM Client</a>.
 
-<h4 id="response">Response formats</h4>
+<h2 id="response">Response Formats</h2>
 
-<p>This section shows examples of the responses that can be returned for notification key operations.</p>
+<p>This section shows examples of the responses that can be returned for
+notification key operations.</p>
 
-<h5>Response for create/add/remove operations</h5>
+<h3 id="response-create">Create/add/remove operations</h3>
 
-<p>When you make a request to create a {@code notification_key} or to add/remove its the wayregIDs, a successful response always returns the <code>notification_key</code>. This is the {@code notification_key} you will use for sending messages:</p>
+<p>When you make a request to create a {@code notification_key} or to add/remove its
+regIDs, a successful response always returns the <code>notification_key</code>.
+his is the {@code notification_key} you will use for sending messages:</p>
 
 <pre>HTTP status: 200
 { 
@@ -143,18 +185,23 @@ gcm.send(to, id, data);
 }</pre>
 
 
-<h5>Response for send operations</h5>
+<h3 id="response-send">Send operations</h3>
 
-<p>For a send operation that has a {@code notification_key} as its target, the possible responses are success, partial success, and failure.</p>
+<p>For a send operation that has a {@code notification_key} as its target, the
+possible responses are success, partial success, and failure.</p>
 
-<p>Here is an example of "success"&mdash;the {@code notification_key} has 2 regIDs associated with it, and the message was successfully sent to both of them:</p>
+<p>Here is an example of "success"&mdash;the {@code notification_key} has 2 regIDs
+associated with it, and the message was successfully sent to both of them:</p>
 
 <pre>{
   "success": 2,
   "failure": 0
 }</pre>
 
-<p>Here is an example of "partial success"&mdash;the {@code notification_key} has 3 regIDs associated with it. The message was successfully send to 1 of the regIDs, but not to the other 2. The response message lists the regIDs that failed to receive the message:</p>
+<p>Here is an example of "partial success"&mdash;the {@code notification_key} has
+3 regIDs associated with it. The message was successfully send to 1 of the regIDs,
+but not to the other 2. The response message lists the regIDs that failed to
+receive the message:</p>
 
 <pre>{
   "success":1,
@@ -165,7 +212,9 @@ gcm.send(to, id, data);
   ]
 }</pre>
 
-<p>In the case of failure, the response has HTTP code 503 and no JSON. When a message fails to be delivered to one or more of the regIDs associated with a {@code notification_key}, the 3rd-party server should retry.</p>
+<p>In the case of failure, the response has HTTP code 503 and no JSON. When a message
+fails to be delivered to one or more of the regIDs associated with a {@code notification_key},
+the 3rd-party server should retry.</p>
 
 
 
