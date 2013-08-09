@@ -103,6 +103,8 @@ public final class BluetoothSocket implements Closeable {
     /*package*/ static final int SEC_FLAG_ENCRYPT = 1;
     /*package*/ static final int SEC_FLAG_AUTH = 1 << 1;
 
+    /*package*/ static final int PORT_MASK_FIXED_CHAN = 1 << 16;
+
     private final int mType;  /* one of TYPE_RFCOMM etc */
     private BluetoothDevice mDevice;    /* remote device */
     private String mAddress;    /* remote address */
@@ -115,7 +117,7 @@ public final class BluetoothSocket implements Closeable {
     private LocalSocket mSocket;
     private InputStream mSocketIS;
     private OutputStream mSocketOS;
-    private int mPort;  /* RFCOMM channel or L2CAP psm */
+    private int mPort;  /* RFCOMM channel or L2CAP psm/channel */
     private int mFd;
     private String mServiceName;
     private static int PROXY_CONNECTION_TIMEOUT = 5000;
