@@ -1401,12 +1401,24 @@ public class ConnectivityManager {
     }
 
     /**
-     * Get the carrier provisioning url.
+     * Get the mobile provisioning url.
      * {@hide}
      */
     public String getMobileProvisioningUrl() {
         try {
             return mService.getMobileProvisioningUrl();
+        } catch (RemoteException e) {
+        }
+        return null;
+    }
+
+    /**
+     * Get the mobile redirected provisioning url.
+     * {@hide}
+     */
+    public String getMobileRedirectedProvisioningUrl() {
+        try {
+            return mService.getMobileRedirectedProvisioningUrl();
         } catch (RemoteException e) {
         }
         return null;
