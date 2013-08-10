@@ -1316,19 +1316,6 @@ public class AudioManager {
     }
 
     /**
-     * @hide
-     * Signals whether remote submix audio rerouting is enabled.
-     */
-    public void setRemoteSubmixOn(boolean on, int address) {
-        IAudioService service = getService();
-        try {
-            service.setRemoteSubmixOn(on, address);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in setRemoteSubmixOn", e);
-        }
-    }
-
-    /**
      * Sets audio routing to the wired headset on or off.
      *
      * @param on set <var>true</var> to route audio to/from wired
