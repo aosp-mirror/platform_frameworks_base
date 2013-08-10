@@ -33,10 +33,8 @@ import android.util.Log;
  */
 public final class FusedProxy {
     private final String TAG = "FusedProxy";
-
-    private ServiceWatcher mServiceWatcher;
-
-    private FusedLocationHardwareSecure mLocationHardware;
+    private final ServiceWatcher mServiceWatcher;
+    private final FusedLocationHardwareSecure mLocationHardware;
 
     /**
      * Constructor of the class.
@@ -46,7 +44,13 @@ public final class FusedProxy {
      * @param handler           The handler needed for construction.
      * @param locationHardware  The instance of the Fused location hardware assigned to the proxy.
      */
-    private FusedProxy(Context context, Handler handler, IFusedLocationHardware locationHardware) {
+    private FusedProxy(
+            Context context,
+            Handler handler,
+            IFusedLocationHardware locationHardware,
+            int overlaySwitchResId,
+            int defaultServicePackageNameResId,
+            int initialPackageNameResId) {
         mLocationHardware = new FusedLocationHardwareSecure(
                 locationHardware,
                 context,
@@ -63,9 +67,9 @@ public final class FusedProxy {
                 context,
                 TAG,
                 "com.android.location.service.FusedProvider",
-                com.android.internal.R.bool.config_enableFusedLocationOverlay,
-                com.android.internal.R.string.config_fusedLocationProviderPackageName,
-                com.android.internal.R.array.config_locationProviderPackageNames,
+                overlaySwitchResId,
+                defaultServicePackageNameResId,
+                initialPackageNameResId,
                 newServiceWork,
                 handler);
     }
@@ -82,9 +86,17 @@ public final class FusedProxy {
     public static FusedProxy createAndBind(
             Context context,
             Handler handler,
-            IFusedLocationHardware locationHardware
-            ) {
-        FusedProxy fusedProxy = new FusedProxy(context, handler, locationHardware);
+            IFusedLocationHardware locationHardware,
+            int overlaySwitchResId,
+            int defaultServicePackageNameResId,
+            int initialPackageNameResId) {
+        FusedProxy fusedProxy = new FusedProxy(
+                context,
+                handler,
+                locationHardware,
+                overlaySwitchResId,
+                defaultServicePackageNameResId,
+                initialPackageNameResId);
 
         // try to bind the Fused provider
         if (!fusedProxy.mServiceWatcher.start()) {

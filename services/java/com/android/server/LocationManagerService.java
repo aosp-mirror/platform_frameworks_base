@@ -437,7 +437,10 @@ public class LocationManagerService extends ILocationManager.Stub {
         FusedProxy fusedProxy = FusedProxy.createAndBind(
                 mContext,
                 mLocationHandler,
-                flpHardwareProvider.getLocationHardware());
+                flpHardwareProvider.getLocationHardware(),
+                com.android.internal.R.bool.config_enableFusedLocationOverlay,
+                com.android.internal.R.string.config_fusedLocationProviderPackageName,
+                com.android.internal.R.array.config_locationProviderPackageNames);
 
         if(fusedProxy == null) {
             Slog.e(TAG, "No FusedProvider found.");

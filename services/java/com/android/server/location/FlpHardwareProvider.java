@@ -28,11 +28,10 @@ import android.location.LocationManager;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
-import android.util.Slog;
 
 /**
  * This class is an interop layer for JVM types and the JNI code that interacts
@@ -48,6 +47,7 @@ public class FlpHardwareProvider {
 
     private final static String TAG = "FlpHardwareProvider";
     private final Context mContext;
+    private final Object mLocationSinkLock = new Object();
 
     public static FlpHardwareProvider getInstance(Context context) {
         if (sSingletonInstance == null) {
@@ -61,7 +61,6 @@ public class FlpHardwareProvider {
         mContext = context;
 
         // register for listening for passive provider data
-        Handler handler = new Handler();
         LocationManager manager = (LocationManager) mContext.getSystemService(
                 Context.LOCATION_SERVICE);
         manager.requestLocationUpdates(
@@ -69,7 +68,7 @@ public class FlpHardwareProvider {
                 0 /* minTime */,
                 0 /* minDistance */,
                 new NetworkLocationListener(),
-                handler.getLooper());
+                Looper.myLooper());
     }
 
     public static boolean isSupported() {
@@ -87,9 +86,13 @@ public class FlpHardwareProvider {
             location.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
         }
 
+        IFusedLocationHardwareSink sink;
+        synchronized (mLocationSinkLock) {
+            sink = mLocationSink;
+        }
         try {
-            if (mLocationSink != null) {
-                mLocationSink.onLocationAvailable(locations);
+            if (sink != null) {
+                sink.onLocationAvailable(locations);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling onLocationAvailable");
@@ -98,9 +101,13 @@ public class FlpHardwareProvider {
 
     // FlpDiagnosticCallbacks members
     private void onDataReport(String data) {
+        IFusedLocationHardwareSink sink;
+        synchronized (mLocationSinkLock) {
+            sink = mLocationSink;
+        }
         try {
             if (mLocationSink != null) {
-                mLocationSink.onDiagnosticDataAvailable(data);
+                sink.onDiagnosticDataAvailable(data);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException calling onDiagnosticDataAvailable");
@@ -199,19 +206,24 @@ public class FlpHardwareProvider {
     private final IFusedLocationHardware mLocationHardware = new IFusedLocationHardware.Stub() {
         @Override
         public void registerSink(IFusedLocationHardwareSink eventSink) {
-            // only one sink is allowed at the moment
-            if (mLocationSink != null) {
-                throw new RuntimeException("IFusedLocationHardware does not support multiple sinks");
-            }
+            synchronized (mLocationSinkLock) {
+                // only one sink is allowed at the moment
+                if (mLocationSink != null) {
+                    throw new RuntimeException(
+                            "IFusedLocationHardware does not support multiple sinks");
+                }
 
-            mLocationSink = eventSink;
+                mLocationSink = eventSink;
+            }
         }
 
         @Override
         public void unregisterSink(IFusedLocationHardwareSink eventSink) {
-            // don't throw if the sink is not registered, simply make it a no-op
-            if (mLocationSink == eventSink) {
-                mLocationSink = null;
+            synchronized (mLocationSinkLock) {
+                // don't throw if the sink is not registered, simply make it a no-op
+                if (mLocationSink == eventSink) {
+                    mLocationSink = null;
+                }
             }
         }
 
