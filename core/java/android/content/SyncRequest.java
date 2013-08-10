@@ -539,7 +539,7 @@ public class SyncRequest implements Parcelable {
          * Not valid for periodic sync and will throw an <code>IllegalArgumentException</code> in
          * {@link #build()}.
          * <p>Throws <code>IllegalArgumentException</code> if called and
-         * {@link #setAllowMetered(true)} has been set.
+         * {@link #setDisallowMetered(false)} has been set.
          * 
          *
          * @param ignoreSettings true to ignore the sync automatically settings. Default false.
