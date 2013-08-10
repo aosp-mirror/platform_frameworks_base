@@ -202,6 +202,6 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMÀTICA"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Les notificacions apareixen aquí"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Accedeix-hi en qualsevol moment: només has de fer lliscar el dit cap avall.\nTorna a fer lliscar el dit cap avall per fer que es mostrin els controls del sistema."</string>
-    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Fes lliscar el dit per la vora de la pantalla perquè es mostri la barra"</string>
-    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Fes lliscar el dit des de la vora de la pantalla perquè es mostri la barra del sistema"</string>
+    <string name="hiding_navigation_confirmation_message" msgid="3227814171674734332">"Fes lliscar el dit per la vora de la pantalla perquè es mostri la barra"</string>
+    <string name="hiding_navigation_confirmation_message_long" msgid="7854368870786524950">"Fes lliscar el dit des de la vora de la pantalla perquè es mostri la barra del sistema"</string>
 </resources>

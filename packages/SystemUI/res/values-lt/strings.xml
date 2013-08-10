@@ -200,6 +200,6 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATINIS"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Pranešimai rodomi čia"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Perbraukę žemyn bet kuriuo metu pasieksite pranešimus.\nJei norite naudoti sistemos valdiklius, perbraukite žemyn dar kartą."</string>
-    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Jei norite, kad būtų rodoma juosta, perbraukite ekrano krašte"</string>
-    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Jei norite, kad būtų rodoma sistemos juosta, perbraukite iš ekrano krašto"</string>
+    <string name="hiding_navigation_confirmation_message" msgid="3227814171674734332">"Jei norite, kad būtų rodoma juosta, perbraukite ekrano krašte"</string>
+    <string name="hiding_navigation_confirmation_message_long" msgid="7854368870786524950">"Jei norite, kad būtų rodoma sistemos juosta, perbraukite iš ekrano krašto"</string>
 </resources>

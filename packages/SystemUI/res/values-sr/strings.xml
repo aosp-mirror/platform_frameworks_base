@@ -200,6 +200,6 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АУТОМАТСКА"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Обавештења се појављују овде"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Приступите им у било ком тренутку листањем надоле.\nПоново листајте надоле да би се приказале системске контроле."</string>
-    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Превуците по ивици екрана да би се приказала трака"</string>
-    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Превуците од ивице екрана да би се приказала системска трака"</string>
+    <string name="hiding_navigation_confirmation_message" msgid="3227814171674734332">"Превуците по ивици екрана да би се приказала трака"</string>
+    <string name="hiding_navigation_confirmation_message_long" msgid="7854368870786524950">"Превуците од ивице екрана да би се приказала системска трака"</string>
 </resources>

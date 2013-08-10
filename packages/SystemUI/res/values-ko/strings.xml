@@ -182,10 +182,8 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"자동 회전"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"회전 잠금"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"입력 방법"</string>
-    <!-- no translation found for quick_settings_location_label (5011327048748762257) -->
-    <skip />
-    <!-- no translation found for quick_settings_location_off_label (7464544086507331459) -->
-    <skip />
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"위치"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"위치 사용 중지"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"미디어 기기"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"긴급 통화만 허용"</string>
@@ -202,6 +200,6 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"자동"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"알림이 여기에 표시됨"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"아래로 스와이프하여 언제든 액세스하세요.\n한 번 더 아래로 스와이프하면 시스템 관리로 이동합니다."</string>
-    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"화면 가장자리에서 스와이프하여 표시줄 표시"</string>
-    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"화면 가장자리에서 스와이프하여 시스템 표시줄 표시"</string>
+    <string name="hiding_navigation_confirmation_message" msgid="3227814171674734332">"화면 가장자리에서 스와이프하여 표시줄 표시"</string>
+    <string name="hiding_navigation_confirmation_message_long" msgid="7854368870786524950">"화면 가장자리에서 스와이프하여 시스템 표시줄 표시"</string>
 </resources>
