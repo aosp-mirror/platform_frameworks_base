@@ -464,6 +464,8 @@ public final class HeaderSet {
                 return mHttpHeader;
             case WHO:
                 return mWho;
+            case CONNECTION_ID:
+                return mConnectionID;
             case OBJECT_CLASS:
                 return mObjectClass;
             case APPLICATION_PARAMETER:
