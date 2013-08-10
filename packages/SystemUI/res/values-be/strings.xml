@@ -166,6 +166,8 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi падключаны"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Пошук GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Месца задана праз GPS"</string>
+    <!-- no translation found for accessibility_location_active (2427290146138169014) -->
+    <skip />
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Выдалiць усе апавяшчэннi."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Інфармацыя пра прыкладанне"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Экран паварочваецца аўтаматычна."</string>
@@ -204,8 +206,8 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АЎТА"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Апавяшчэнні з\'яўляюцца тут"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Атрымлівайце доступ да іх у любы час, праводзячы пальцам уніз.\nПравядзіце пальцам уніз яшчэ раз, каб атрымаць доступ да сродкаў кіравання сістэмай."</string>
-    <!-- no translation found for hideybar_confirmation_message (9050869548951044371) -->
+    <!-- no translation found for hiding_navigation_confirmation_message (3227814171674734332) -->
     <skip />
-    <!-- no translation found for hideybar_confirmation_message_long (7117692795163620626) -->
+    <!-- no translation found for hiding_navigation_confirmation_message_long (7854368870786524950) -->
     <skip />
 </resources>

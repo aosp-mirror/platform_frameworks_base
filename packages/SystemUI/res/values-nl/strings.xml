@@ -164,6 +164,8 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Verbonden via wifi"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Zoeken naar GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Locatie bepaald met GPS"</string>
+    <!-- no translation found for accessibility_location_active (2427290146138169014) -->
+    <skip />
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Alle meldingen wissen."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"App-info"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Scherm wordt automatisch geroteerd."</string>
@@ -200,6 +202,6 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATISCH"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Meldingen worden hier weergegeven"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"U kunt de meldingen op elk gewenst moment openen door met uw vinger omlaag te vegen.\nVeeg nogmaals met uw vinger omlaag om de systeembesturingselementen weer te geven."</string>
-    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Veeg vanaf de rand om balk weer te geven"</string>
-    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Veeg vanaf de rand van het scherm om de systeembalk weer te geven"</string>
+    <string name="hiding_navigation_confirmation_message" msgid="3227814171674734332">"Veeg vanaf de rand om balk weer te geven"</string>
+    <string name="hiding_navigation_confirmation_message_long" msgid="7854368870786524950">"Veeg vanaf de rand van het scherm om de systeembalk weer te geven"</string>
 </resources>

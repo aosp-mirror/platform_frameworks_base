@@ -166,6 +166,8 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Connecté au Wi-Fi"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Recherche de GPS..."</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Position définie par GPS"</string>
+    <!-- no translation found for accessibility_location_active (2427290146138169014) -->
+    <skip />
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Supprimer toutes les notifications"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Informations sur l\'application"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"L\'écran pivote automatiquement."</string>
@@ -184,10 +186,8 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Rotation auto"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Rotation bloquée"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Mode de saisie"</string>
-    <!-- no translation found for quick_settings_location_label (5011327048748762257) -->
-    <skip />
-    <!-- no translation found for quick_settings_location_off_label (7464544086507331459) -->
-    <skip />
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"Localisation"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Localisation désactivée"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Appareil multimédia"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Appels d\'urgence uniquement"</string>
@@ -204,6 +204,6 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATIQUE"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Les notifications s’affichent ici"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Accédez-y à tout moment en faisant glisser le doigt vers le bas.\nRépétez l\'opération pour accéder aux commandes du système."</string>
-    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Faites glisser votre doigt sur le côté de l\'écran pour afficher la barre."</string>
-    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Faites glisser votre doigt à partir d\'un côté de l\'écran pour afficher la barre système."</string>
+    <string name="hiding_navigation_confirmation_message" msgid="3227814171674734332">"Faites glisser le doigt sur le côté de l\'écran pour afficher la barre."</string>
+    <string name="hiding_navigation_confirmation_message_long" msgid="7854368870786524950">"Faites glisser le doigt à partir d\'un côté de l\'écran pour afficher la barre système."</string>
 </resources>

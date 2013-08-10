@@ -166,6 +166,8 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi conectado"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Buscando GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"La ubicación se estableció por GPS"</string>
+    <!-- no translation found for accessibility_location_active (2427290146138169014) -->
+    <skip />
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Eliminar todas las notificaciones"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Información de la aplicación"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"La pantalla girará automáticamente."</string>
@@ -202,6 +204,6 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMÁTICO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Las notificaciones aparecen aquí."</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Desliza el dedo hacia abajo para acceder al contenido.\nVuelve a deslizar el dedo hacia abajo para acceder a los controles del sistema."</string>
-    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Desliza el dedo desde el borde de la pantalla para mostrar la barra."</string>
-    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Desliza el dedo desde el borde de la pantalla para mostrar la barra del sistema."</string>
+    <string name="hiding_navigation_confirmation_message" msgid="3227814171674734332">"Desliza el dedo desde el borde de la pantalla para mostrar la barra."</string>
+    <string name="hiding_navigation_confirmation_message_long" msgid="7854368870786524950">"Desliza el dedo desde el borde de la pantalla para mostrar la barra del sistema."</string>
 </resources>

@@ -166,6 +166,8 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"WLAN verbunden"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS wird gesucht"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Standort durch GPS festgelegt"</string>
+    <!-- no translation found for accessibility_location_active (2427290146138169014) -->
+    <skip />
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Alle Benachrichtigungen löschen"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"App-Details"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Bildschirm wird automatisch gedreht."</string>
@@ -202,6 +204,6 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Benachrichtigungen erscheinen hier"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Greifen Sie jederzeit auf sie zu, indem Sie nach unten wischen.\nWischen Sie für Systemeinstellungen erneut nach unten."</string>
-    <string name="hideybar_confirmation_message" msgid="9050869548951044371">"Zum Einblenden der Leiste vom Rand wischen"</string>
-    <string name="hideybar_confirmation_message_long" msgid="7117692795163620626">"Zum Einblenden der Systemleiste vom Display-Rand weg wischen"</string>
+    <string name="hiding_navigation_confirmation_message" msgid="3227814171674734332">"Zum Einblenden der Leiste vom Rand weg wischen"</string>
+    <string name="hiding_navigation_confirmation_message_long" msgid="7854368870786524950">"Zum Einblenden der Systemleiste vom Display-Rand weg wischen"</string>
 </resources>
