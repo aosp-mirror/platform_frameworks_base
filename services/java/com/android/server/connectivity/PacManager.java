@@ -83,6 +83,12 @@ public class PacManager implements Runnable {
         mContext = context;
         mProxyService = IProxyService.Stub.asInterface(
                 ServiceManager.getService(PROXY_SERVICE));
+        if (mProxyService == null) {
+            // Added because of b10267814 where mako is restarting.
+            Log.e(TAG, "PacManager: no proxy service");
+        } else {
+            Log.d(TAG, "PacManager: mProxyService available");
+        }
 
         mPacRefreshIntent = PendingIntent.getBroadcast(
                 context, 0, new Intent(ACTION_PAC_REFRESH), 0);
@@ -98,6 +104,10 @@ public class PacManager implements Runnable {
     }
 
     public void setCurrentProxyScriptUrl(ProxyProperties proxy) {
+        if (mProxyService == null) {
+            Log.e(TAG, "setCurrentProxyScriptUrl: no proxy service");
+            return;
+        }
         if (!TextUtils.isEmpty(proxy.getPacFileUrl())) {
             try {
                 mProxyService.startPacSystem();
@@ -212,6 +222,10 @@ public class PacManager implements Runnable {
     }
 
     private boolean setCurrentProxyScript(String script) {
+        if (mProxyService == null) {
+            Log.e(TAG, "setCurrentProxyScript: no proxy service");
+            return false;
+        }
         try {
             if (mProxyService.setPacFile(script) != NO_ERROR) {
                 Log.e(TAG, "Unable to parse proxy script.");

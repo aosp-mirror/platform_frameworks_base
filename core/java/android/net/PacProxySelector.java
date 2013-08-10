@@ -3,6 +3,7 @@ package android.net;
 
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.Log;
 
 import com.android.net.IProxyService;
 import com.google.android.collect.Lists;
@@ -21,16 +22,25 @@ import java.util.List;
  * @hide
  */
 public class PacProxySelector extends ProxySelector {
+    private static final String TAG = "PacProxySelector";
     public static final String PROXY_SERVICE = "com.android.net.IProxyService";
     private IProxyService mProxyService;
 
     public PacProxySelector() {
         mProxyService = IProxyService.Stub.asInterface(
                 ServiceManager.getService(PROXY_SERVICE));
+        if (mProxyService == null) {
+            // Added because of b10267814 where mako is restarting.
+            Log.e(TAG, "PackManager: no proxy service");
+        }
     }
 
     @Override
     public List<Proxy> select(URI uri) {
+        if (mProxyService == null) {
+            Log.e(TAG, "select: no proxy service return NO_PROXY");
+            return Lists.newArrayList(java.net.Proxy.NO_PROXY);
+        }
         String response = null;
         String urlString;
         try {
