@@ -210,7 +210,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_BACKGROUND_BROADCAST = DEBUG_BROADCAST || false;
     static final boolean DEBUG_CLEANUP = localLOGV || false;
     static final boolean DEBUG_CONFIGURATION = localLOGV || false;
-    static final boolean DEBUG_FOCUS = true;
+    static final boolean DEBUG_FOCUS = false;
     static final boolean DEBUG_IMMERSIVE = localLOGV || false;
     static final boolean DEBUG_MU = localLOGV || false;
     static final boolean DEBUG_OOM_ADJ = localLOGV || false;

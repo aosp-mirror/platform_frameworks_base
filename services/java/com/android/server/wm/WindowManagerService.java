@@ -194,9 +194,6 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean PROFILE_ORIENTATION = false;
     static final boolean localLOGV = DEBUG;
 
-    final static boolean REVERSE_ITERATOR = true;
-    final static boolean FORWARD_ITERATOR = false;
-
     /** How much to multiply the policy's type layer, to reserve room
      * for multiple windows of the same type and Z-ordering adjustment
      * with TYPE_LAYER_OFFSET. */
@@ -9574,19 +9571,15 @@ public class WindowManagerService extends IWindowManager.Stub
         return doRequest;
     }
 
-    /** If a window that has an animation specifying a colored background is the current wallpaper
-     * target, then the color goes *below* the wallpaper so we don't cause the wallpaper to
+    /** If a window that has an animation specifying a colored background and the current wallpaper
+     * is visible, then the color goes *below* the wallpaper so we don't cause the wallpaper to
      * suddenly disappear. */
     int adjustAnimationBackground(WindowStateAnimator winAnimator) {
-        final WindowState win = winAnimator.mWin;
-        if (mWallpaperTarget == win || mLowerWallpaperTarget == win
-                || mUpperWallpaperTarget == win) {
-            WindowList windows = win.getWindowList();
-            for (int i = windows.size() - 1; i >= 0; --i) {
-                WindowState testWin = windows.get(i);
-                if (testWin.mIsWallpaper) {
-                    return testWin.mWinAnimator.mAnimLayer;
-                }
+        WindowList windows = winAnimator.mWin.getWindowList();
+        for (int i = windows.size() - 1; i >= 0; --i) {
+            WindowState testWin = windows.get(i);
+            if (testWin.mIsWallpaper && testWin.isVisibleNow()) {
+                return testWin.mWinAnimator.mAnimLayer;
             }
         }
         return winAnimator.mAnimLayer;
