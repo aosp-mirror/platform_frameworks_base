@@ -359,9 +359,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             mDrawableRight = mDrawableStart;
                             mDrawableSizeRight = mDrawableSizeStart;
                             mDrawableHeightRight = mDrawableHeightStart;
-                        }
 
-                        if (mOverride) {
                             mDrawableLeft = mDrawableEnd;
                             mDrawableSizeLeft = mDrawableSizeEnd;
                             mDrawableHeightLeft = mDrawableHeightEnd;
@@ -374,9 +372,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             mDrawableLeft = mDrawableStart;
                             mDrawableSizeLeft = mDrawableSizeStart;
                             mDrawableHeightLeft = mDrawableHeightStart;
-                        }
 
-                        if (mOverride) {
                             mDrawableRight = mDrawableEnd;
                             mDrawableSizeRight = mDrawableSizeEnd;
                             mDrawableHeightRight = mDrawableHeightEnd;
