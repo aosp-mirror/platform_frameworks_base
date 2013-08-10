@@ -4313,4 +4313,9 @@
         <item quantity="other">Incorrect PIN. Try again in <xliff:g id="count">%d</xliff:g> seconds.</item>
     </plurals>
 
+    <!-- Toast bar message when hiding the transient navigation bar [CHAR LIMIT=35] -->
+    <string name="transient_navigation_confirmation">Swipe edge of screen to reveal bar</string>
+
+    <!-- Longer version of toast bar message when hiding the transient navigation bar (if room) -->
+    <string name="transient_navigation_confirmation_long">Swipe from edge of screen to reveal system bar</string>
 </resources>
