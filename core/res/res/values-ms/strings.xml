@@ -314,7 +314,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"halang pertukaran apl"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Menghalang pengguna daripada bertukar kepada apl lain."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"dapatkan maklumat apl semasa"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Membenarkan pemegang mendapatkan maklumat peribadi tentang permohonan semasa di latar hadapan skrin"</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"pantau dan kawal semua pelancaran apl"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Membenarkan apl untuk memantau dan mengawal cara sistem melancarkan aktiviti. Apl hasad boleh menjejaskan sistem sepenuhnya. Kebenaran ini hanya diperlukan untuk pembangunan, tidak sekali-kali untuk penggunaan biasa."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"hantar siaran bahawa pakej telah dialih keluar"</string>
@@ -363,7 +364,7 @@
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"akses semua kerja cetakan"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Membenarkan pemegang mengakses kerja cetakan yang dibuat oleh apl lain. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"terikat kepada perkhidmatan NFC"</string>
-    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Membenarkan pemegang untuk terikat kepada aplikasi yang mengikuti kad NFC. Tidak sekali-kali harus diperlukan untuk apl normal."</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Membenarkan pemegang untuk terikat kepada aplikasi yang mengikut kad NFC. Tidak sekali-kali diperlukan untuk apl normal."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"terikat kepada perkhidmatan teks"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Membenarkan pemegang mengikat kepada antara muka peringkat atasan perkhidmatan teks(mis. PerkhidmatanPenyemakEjaan). Tidak seharusnya diperlukan untuk apl biasa."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"terikat kepada perkhidmatan VPN"</string>
@@ -474,18 +475,12 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Membenarkan apl mengkonfigurasi dan menyambung ke paparan Wifi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"kawal paparan Wifi"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Membenarkan apl mengawal ciri tahap rendah paparan Wifi."</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"tangkap output audio"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Membenarkan apl menangkap dan mengubah hala output audio."</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"tangkap output video"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Membenarkan apl menangkap dan mengubah hala output video."</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"tangkap output video selamat"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Membenarkan apl menangkap dan mengubah hala output video selamat."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"tukar tetapan audio anda"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Membenarkan apl untuk mengubah suai tetapan audio global seperti kelantangan dan pembesar suara mana digunakan untuk output."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"rakam audio"</string>
@@ -659,6 +654,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan pendengar pemberitahuan. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"gunakan apl konfigurasi yang disediakan oleh pembawa"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Membenarkan pemegang menggunakan apl konfigurasi yang diberikan oleh pembawa. Tidak sekali-kali diperlukan untuk apl biasa."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"dengar pemerhatian mengenai keadaan rangkaian"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Membenarkan aplikasi mendengar pemerhantian tentang keadaan rangkaian. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Tetapkan peraturan kata laluan"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Mengawal panjang dan aksara yang dibenarkan dalam kata laluan buka kunci skrin."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Memantau percubaan buka kunci skrin"</string>

@@ -479,7 +479,7 @@
     <skip />
     <!-- no translation found for permlab_getTopActivityInfo (2537922311411546016) -->
     <skip />
-    <!-- no translation found for permdesc_getTopActivityInfo (2512448855496067131) -->
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
     <skip />
     <!-- no translation found for permlab_runSetActivityWatcher (892239094867182656) -->
     <skip />
@@ -1103,6 +1103,10 @@
     <!-- no translation found for permlab_invokeCarrierSetup (3699600833975117478) -->
     <skip />
     <!-- no translation found for permdesc_invokeCarrierSetup (4159549152529111920) -->
+    <skip />
+    <!-- no translation found for permlab_accessNetworkConditions (8206077447838909516) -->
+    <skip />
+    <!-- no translation found for permdesc_accessNetworkConditions (6899102075825272211) -->
     <skip />
     <!-- no translation found for policylab_limitPassword (4497420728857585791) -->
     <skip />

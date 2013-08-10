@@ -314,7 +314,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"zapobieganie przełączaniu aplikacji"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Uniemożliwia użytkownikowi przełączenie na inną aplikację."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"pobierz informacje o bieżącej aplikacji"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Zezwala posiadaczowi na pobieranie prywatnych informacji o bieżącej aplikacji i wyświetlanie ich na pierwszym planie ekranu."</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"monitorowanie i kontrolowanie wszystkich uruchamianych aplikacji"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Pozwala aplikacji na monitorowanie i kontrolowanie sposobu uruchamiania działań przez system. Złośliwe aplikacje mogą całkowicie naruszyć zabezpieczenia systemu. To uprawnienie nigdy nie jest potrzebne podczas normalnego użytkowania, a jedynie podczas programowania."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"wysyłanie transmisji informującej o usuniętym pakiecie"</string>
@@ -474,18 +475,12 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Zezwala aplikacji na konfigurację wyświetlaczy Wi-Fi i łączenie z nimi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"zarządzanie wyświetlaczami Wi-Fi"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Zezwala aplikacji na zarządzanie niskopoziomowymi funkcjami wyświetlaczy Wi-Fi."</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"przechwyć wyjście audio"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Zezwala aplikacji na przechwytywanie i przekierowywanie wyjścia audio."</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"przechwyć wyjście wideo"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Zezwala aplikacji na przechwytywanie i przekierowywanie wyjścia wideo."</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"przechwyć bezpieczne wyjście wideo"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Zezwala aplikacji na przechwytywanie i przekierowywanie bezpiecznego wyjścia wideo."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"zmienianie ustawień audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Pozwala aplikacji na modyfikowanie globalnych ustawień dźwięku, takich jak głośność oraz urządzenie wyjściowe."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"nagrywanie dźwięku"</string>
@@ -659,6 +654,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Zezwala na tworzenie powiązania z interfejsem najwyższego poziomu usługi odbiornika powiadomień. Nie powinno być nigdy potrzebne dla zwykłych aplikacji."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"wywoływanie aplikacji konfiguracyjnej udostępnionej przez operatora"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Zezwala na wywoływanie aplikacji konfiguracyjnej udostępnionej przez operatora. Nieprzeznaczone dla zwykłych aplikacji."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"śledź stan sieci"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Pozwala aplikacji śledzić stan sieci. Nieprzeznaczone dla zwykłych aplikacji."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Określ reguły hasła"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrolowanie długości haseł odblokowania ekranu i dozwolonych w nich znaków"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitoruj próby odblokowania ekranu"</string>

@@ -314,7 +314,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"מנע החלפת יישומים"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"מניעת מעבר ליישום אחר על ידי המשתמש."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"קבל פרטים על היישום הנוכחי"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"מאפשר לבעלים לאחזר מידע פרטי לגבי היישום הנוכחי שבקדמת המסך."</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"ניהול מעקב ושליטה על כל הפעלות היישומים"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"מאפשר ליישום לנהל מעקב אחר האופן שבו המערכת מפעילה פעילויות, ולשלוט בו. יישומים זדוניים עלולים לסכן את המערכת כולה. הרשאה זו אינה נחוצה לשימוש רגיל, אלא לפיתוח בלבד."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"שלח שידור שהוסר מחבילה"</string>
@@ -474,18 +475,12 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"מאפשר לאפליקציה להגדיר ולהתחבר לתצוגות Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"שלוט בתצוגות Wi-Fi"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"מאפשר לאפליקציה לשלוט בתכונות ברמה נמוכה של תצוגות Wi-Fi."</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"קליטת פלט אודיו"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"מאפשרת לאפליקציה לקלוט ולהפנות מחדש פלט אודיו."</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"קליטת פלט וידאו"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"מאפשרת לאפליקציה לקלוט ולהפנות מחדש פלט וידאו."</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"קליטת פלט וידאו מאובטח"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"מאפשרת לאפליקציה לקלוט ולהפנות מחדש פלט וידאו מאובטח."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"שנה את הגדרות האודיו שלך"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"מאפשר ליישום לשנות הגדרות אודיו גלובליות כמו עוצמת קול ובחירת הרמקול המשמש לפלט."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"הקלט אודיו"</string>
@@ -659,6 +654,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"הרשאה זו מאפשרת למשתמש לבצע איגוד לממשק הרמה העליונה של שירות מאזין להתראות. הרשאה זו אף פעם אינה נחוצה ליישומים רגילים."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"הפעלה של אפליקציית תצורה שסופקה על ידי ספק"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"ההרשאה הזו מאפשרת לבעלים להפעיל את אפליקציית התצורה שסופקה על ידי ספק. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"קליטת מעקב אחר תנאי רשת"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"מאפשרת לאפליקציה לקלוט מעקב אחר תנאי רשת. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"הגדר כללי סיסמה"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"שלוט באורך ובתווים המותרים בסיסמאות לביטול נעילת מסך."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"עקוב אחר ניסיונות לביטול נעילת מסך"</string>
@@ -1125,7 +1122,7 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"אפשר תכונה זו מחדש ב\'הגדרות מערכת\' &lt;‏ Google Apps‏ &lt; \'הורדות\'."</string>
     <string name="smv_application" msgid="3307209192155442829">"היישום <xliff:g id="APPLICATION">%1$s</xliff:g> (תהליך <xliff:g id="PROCESS">%2$s</xliff:g>) הפר את מדיניות StrictMode באכיפה עצמית שלו."</string>
     <string name="smv_process" msgid="5120397012047462446">"התהליך <xliff:g id="PROCESS">%1$s</xliff:g> הפר את מדיניות StrictMode באכיפה עצמית."</string>
-    <string name="android_upgrading_title" msgid="1584192285441405746">"Android מבצע שדרוג..."</string>
+    <string name="android_upgrading_title" msgid="1584192285441405746">"‏Android מבצע שדרוג…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"מבצע אופטימיזציה של יישום <xliff:g id="NUMBER_0">%1$d</xliff:g> מתוך <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"מפעיל יישומים."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"מסיים אתחול."</string>

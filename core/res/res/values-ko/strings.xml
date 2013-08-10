@@ -314,7 +314,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"애플리케이션 전환 방지"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"사용자가 다른 앱으로 전환하지 못하게 합니다."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"현재 앱 정보 얻기"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"권한을 가진 프로그램이 화면의 포그라운드에서 현재 애플리케이션에 대한 비공개 정보를 검색하도록 허용합니다."</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"실행 중인 모든 앱 모니터링 및 제어"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"앱이 시스템에서 활동이 시작되는 방식을 모니터링하고 관리할 수 있도록 허용합니다. 이 경우 악성 앱이 이 기능을 이용하여 시스템을 완전히 손상시킬 수 있습니다. 이 권한은 개발 과정에만 필요하며 일반 사용 시에는 필요하지 않습니다."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"패키지 제거 브로드캐스트 보내기"</string>
@@ -362,10 +363,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"권한을 가진 프로그램이 인쇄 서비스에 대한 최상위 인터페이스를 사용하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"모든 인쇄 작업에 액세스"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"권한을 가진 프로그램이 다른 앱에서 생성한 인쇄 작업에 액세스하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
-    <!-- no translation found for permlab_bindNfcService (2752731300419410724) -->
-    <skip />
-    <!-- no translation found for permdesc_bindNfcService (6120647629174066862) -->
-    <skip />
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"NFC 서비스 사용"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"권한을 가진 프로그램이 NFC 카드를 에뮬레이션하는 애플리케이션을 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"텍스트 서비스 연결"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"권한을 가진 프로그램이 텍스트 서비스(예: SpellCheckerService)에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"VPN 서비스와 연결"</string>
@@ -476,18 +475,12 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"앱이 Wi-Fi 디스플레이를 설정하고 연결하도록 허용합니다."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wi-Fi 디스플레이 제어"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"앱이 Wi-Fi 디스플레이의 하위 수준 기능을 제어하도록 허용합니다."</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"오디오 출력 캡처"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"앱이 오디오 출력을 캡처하고 리디렉션하도록 허용합니다."</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"비디오 출력 캡처"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"앱이 비디오 출력을 캡처하고 리디렉션하도록 허용합니다."</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"안전한 비디오 출력 캡처"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"앱이 안전한 비디오 출력을 캡처하고 리디렉션하도록 허용합니다."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"오디오 설정 변경"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"앱이 음량이나 출력을 위해 사용하는 스피커 등 전체 오디오 설정을 변경할 수 있도록 허용합니다."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"오디오 녹음"</string>
@@ -661,6 +654,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"권한을 가진 프로그램이 알림 수신기 서비스에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"이동통신사에서 제공한 구성 앱 호출"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"권한을 가진 프로그램이 이동통신사에서 제공한 구성 앱을 호출하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"네트워크 상태에 대한 관측 보고 수신"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"애플리케이션이 네트워크 상태에 대한 관측 보고를 수신하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"화면 잠금해제 비밀번호에 허용되는 길이 및 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"화면 잠금해제 시도 모니터링"</string>
