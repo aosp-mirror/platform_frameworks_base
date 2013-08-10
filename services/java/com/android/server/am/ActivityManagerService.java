@@ -13830,7 +13830,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         for (int is = app.services.size()-1;
                 is >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
                         || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE
-                        || procState > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
+                        || procState > ActivityManager.PROCESS_STATE_TOP);
                 is--) {
             ServiceRecord s = app.services.valueAt(is);
             if (s.startRequested) {
@@ -13871,13 +13871,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int conni = s.connections.size()-1;
                     conni >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
                             || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE
-                            || procState > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
+                            || procState > ActivityManager.PROCESS_STATE_TOP);
                     conni--) {
                 ArrayList<ConnectionRecord> clist = s.connections.valueAt(conni);
                 for (int i = 0;
                         i < clist.size() && (adj > ProcessList.FOREGROUND_APP_ADJ
                                 || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE
-                                || procState > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
+                                || procState > ActivityManager.PROCESS_STATE_TOP);
                         i++) {
                     // XXX should compute this based on the max of
                     // all connected clients.
@@ -13987,8 +13987,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                             if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
                                 schedGroup = Process.THREAD_GROUP_DEFAULT;
                             }
-                            if (clientProcState <
-                                    ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
+                            if (clientProcState <=
+                                    ActivityManager.PROCESS_STATE_PERSISTENT_UI &&
+                                    clientProcState >=
+                                            ActivityManager.PROCESS_STATE_PERSISTENT) {
+                                // Persistent processes don't allow us to become top.
+                                // However the top process DOES allow us to become top,
+                                // because in that case we are running because the current
+                                // top process wants us, so we should be counted as part
+                                // of the top set and not just running for some random
+                                // unknown reason in the background.
                                 clientProcState =
                                         ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
                             }
@@ -14040,13 +14048,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         for (int provi = app.pubProviders.size()-1;
                 provi >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
                         || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE
-                        || procState > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
+                        || procState > ActivityManager.PROCESS_STATE_TOP);
                 provi--) {
             ContentProviderRecord cpr = app.pubProviders.valueAt(provi);
             for (int i = cpr.connections.size()-1;
                     i >= 0 && (adj > ProcessList.FOREGROUND_APP_ADJ
                             || schedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE
-                            || procState > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND);
+                            || procState > ActivityManager.PROCESS_STATE_TOP);
                     i--) {
                 ContentProviderConnection conn = cpr.connections.get(i);
                 ProcessRecord client = conn.client;
@@ -14078,9 +14086,21 @@ public final class ActivityManagerService extends ActivityManagerNative
                     app.adjSourceOom = clientAdj;
                     app.adjTarget = cpr.name;
                 }
+                if (clientProcState <=
+                        ActivityManager.PROCESS_STATE_PERSISTENT_UI &&
+                        clientProcState >=
+                                ActivityManager.PROCESS_STATE_PERSISTENT) {
+                    // Persistent processes don't allow us to become top.
+                    // However the top process DOES allow us to become top,
+                    // because in that case we are running because the current
+                    // top process wants us, so we should be counted as part
+                    // of the top set and not just running for some random
+                    // unknown reason in the background.
+                    clientProcState =
+                            ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+                }
                 if (procState > clientProcState) {
-                    procState = clientProcState > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
-                            ? clientProcState : ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+                    procState = clientProcState;
                 }
                 if (client.curSchedGroup == Process.THREAD_GROUP_DEFAULT) {
                     schedGroup = Process.THREAD_GROUP_DEFAULT;
