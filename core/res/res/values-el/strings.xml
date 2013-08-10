@@ -314,7 +314,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"αποτροπή εναλλαγών εφαρμογών"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Δεν επιτρέπει στο χρήστη να μεταβεί σε άλλη εφαρμογή."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"λήψη πληροφοριών σχετικά με την τρέχουσα εφαρμογή"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Δίνει στον κάτοχο τη δυνατότητα ανάκτησης απόρρητων πληροφοριών σχετικά με την τρέχουσα εφαρμογή στο προσκήνιο της οθόνης."</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"παρακολούθηση και έλεγχος όλων των εκκινήσεων εφαρμογών"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Επιτρέπει στην εφαρμογή να παρακολουθεί και να ελέγχει τον τρόπο με τον οποίο το σύστημα εκκινεί δραστηριότητες. Τυχόν κακόβουλες εφαρμογές ενδέχεται να θέσουν σε κίνδυνο το σύστημα. Αυτή η άδεια είναι απαραίτητη μόνο για σκοπούς ανάπτυξης και ποτέ για συνήθη χρήση."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"αποστολή εκπομπής χωρίς πακέτο"</string>
@@ -474,18 +475,12 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Επιτρέπει τη διαμόρφωση της εφαρμογής και τη σύνδεσης σε οθόνες Wifi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"έλεγχος οθονών Wifi"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Επιτρέπει στην εφαρμογή τον έλεγχο των λειτουργιών χαμηλού επιπέδου των οθονών Wifi."</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"έγγραφή εξόδου ήχου"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Δίνει στην εφαρμογή τη δυνατότητα εγγραφής και ανακατεύθυνσης εξόδου ήχου."</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"έγγραφή εξόδου βίντεο"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Δίνει στην εφαρμογή τη δυνατότητα εγγραφής και ανακατεύθυνσης εξόδου βίντεο."</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"έγγραφή ασφαλούς εξόδου βίντεο"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Δίνει στην εφαρμογή τη δυνατότητα εγγραφής και ανακατεύθυνσης ασφαλούς εξόδου βίντεο."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"αλλαγή των ρυθμίσεων ήχου"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Επιτρέπει στην εφαρμογή την τροποποίηση καθολικών ρυθμίσεων ήχου, όπως η ένταση και ποιο ηχείο χρησιμοποιείται για έξοδο."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"εγγραφή ήχου"</string>
@@ -659,6 +654,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας υπηρεσίας ακρόασης ειδοποιήσεων. Δεν απαιτείται σε κανονικές εφαρμογές."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"κλήση της εφαρμογής διαμόρφωσης που παρέχεται από την εταιρεία κινητής τηλεφωνίας"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Επιτρέπει στον κάτοχο την κλήση της εφαρμογής διαμόρφωσης που παρέχεται από την εταιρεία κινητής τηλεφωνίας. Δεν απαιτείται για κανονικές εφαρμογές."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"λήψη παρατηρήσεων σχετικά με την κατάσταση δικτύου"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Επιτρέπει σε μια εφαρμογή να λαμβάνει παρατηρήσεις σχετικά με την κατάσταση δικτύου. Δεν θα πρέπει να απαιτείται ποτέ για κανονικές εφαρμογές."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ορισμός κανόνων κωδικού πρόσβασης"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Έλεγχος του μεγέθους και των χαρακτήρων που επιτρέπονται στους κωδικούς πρόσβασης ξεκλειδώματος οθόνης."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Παρακολούθηση προσπαθειών ξεκλειδώματος οθόνης"</string>

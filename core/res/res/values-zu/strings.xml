@@ -314,7 +314,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"gwema ukushintsha kohlelo lokusebenza"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Igwema umsebenzisi ukuthi ashintshele kolunye uhlelo lokusebenza."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"thola ulwazi lohlelo lokusebenza lwamanje"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Ivumela umphathi ukuthi athole ulwazi oluyimfihlo mayelana nohlelo lokusebenza lwamanje ngaphambili kwesikrini."</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"qapha futhi ulawule ukuqaliswa kwazo zonke izinsiza"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Ivumela uhlelo lokusebebenza ukuthi luhlole futhi lulawule ukuthi isistimu iziqalisa kanjani imisebenzi. Izinhlelo zokusebenza ezinobungozi zingensa isistimu ibe sebungozini. Le mvume idingakalela intuthuku kuphela hhayi ukusetshenziswa okwejwayelekile."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"thumela iphakheji yomsakazo okhishiwe"</string>
@@ -474,18 +475,12 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Ivumela uhlelo lokusebenza ukulungisa nokuxhuma ekubukisweni kwe-Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"lawula ukubukwa kwe-Wi-Fi"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Uvumela uhlelo lokusebenza ukulawula izici zeleveli ephansi zokuboniswa kwe-Wi-Fi."</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"shutha okukhipha umsindo"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Kuvumela uhlelo lokusebenza ukuba lushuthe futhi luqondise kabusha okukhipha umsindo."</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"shutha okokukhipha ividiyo"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Kuvumela uhlelo lokusebenza ukuba lushuthe futhi luqondise kabusha okukhipha ividiyo."</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"shutha okukhipha ividiyo ephephile"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Kuvumela uhlelo lokusebenza ukuba lushuthe futhi luqondise kabusha okukhipa ividiyo ephephile."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"shintsha izilungiselelo zakho zomsindo"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Ivumela uhlelo lokusebenza ukushintsha izilungiselelo zomsindo we-global njengevolomu nokuthi isiphi isipika esisetshenziselwa okukhiphayo."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"qopha umsindo"</string>
@@ -659,6 +654,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ivumela umbambi ukubophezela kwisixhumi esibonakalayo sezinga eliphezulu lesevisi yomlaleli wesaziso. Akusoze kwadingeka kwizinhlelo zokusebenza ezivamile."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"buyisela uhlelo lokusebenza lokulungiselelwa okunikezwe yinkampani yenethiwekhi"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ivumela umnikazi ukuthi abuyisele uhlelo lokusebenza lokulungiselelwa. Akumele idingelwe izinhlelo zokusebenza ezijwayelekile."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"Lalela okubonwayo kuzimo zenethiwekhi"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Ivumela uhlelo lokusebenza ukuthi lulalele okubonwa kuzimo zenethiwekhi. Akumele idingelwe izinhlelo zokusebenza ezijwayelekile."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Misa imithetho yephasiwedi"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Lawula ubude nezinhlamvu ezivunyelwe kumaphasiwedi okuvula isikrini"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Gaka imizamo yokuvula isikrini"</string>

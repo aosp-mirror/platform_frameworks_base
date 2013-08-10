@@ -236,7 +236,7 @@
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Verbesserte Web-Bedienung aktivieren"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Skripts können installiert werden, um den Zugriff auf App-Inhalte zu erleichtern."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Text bei der Eingabe beobachten"</string>
-    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Einschließlich persönlicher Daten wie Kreditkartennummern und Passwörter."</string>
+    <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Einschließlich personenbezogener Daten wie Kreditkartennummern und Passwörter."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"Statusleiste deaktivieren oder ändern"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Ermöglicht der App, die Statusleiste zu deaktivieren oder Systemsymbole hinzuzufügen oder zu entfernen"</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"Statusleiste"</string>
@@ -314,7 +314,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"App-Wechsel verhindern"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Hindert den Nutzer daran, zu einer anderen App zu wechseln"</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"Informationen zur aktuellen App abrufen"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Ermöglicht es dem Inhaber, private Informationen zur aktuellen App im Vordergrund des Bildschirms abzurufen"</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"Start von Apps überwachen und steuern"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Ermöglicht der App, den Start von Systemaktivitäten zu überwachen und zu steuern. Schädliche Apps können so das gesamte System beeinträchtigen. Diese Berechtigung wird nur zu Entwicklungszwecken und nie für die normale Nutzung benötigt."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"Broadcast ohne Paket senden"</string>
@@ -474,18 +475,12 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Erlaubt der App, WLAN-Anzeigen zu konfigurieren und eine Verbindung zu diesen herzustellen"</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"WLAN-Anzeigen steuern"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Erlaubt der App, untergeordnete Funktionen von WLAN-Anzeigen zu steuern"</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"Audioausgabe erfassen"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Ermöglicht der App das Erfassen und Weiterleiten von Audioausgaben"</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"Videoausgabe erfassen"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Ermöglicht der App das Erfassen und Weiterleiten von Videoausgaben"</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"Sichere Videoausgabe erfassen"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Ermöglicht der App das Erfassen und Weiterleiten von sicheren Videoausgaben"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"Audio-Einstellungen ändern"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Ermöglicht der App, globale Audio-Einstellungen zu ändern, etwa die Lautstärke und den Lautsprecher für die Ausgabe."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"Audio aufnehmen"</string>
@@ -659,6 +654,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ermöglicht dem Inhaber, sich an die Oberfläche der obersten Ebene eines Benachrichtigungs-Listener-Dienstes zu binden. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"Vom Mobilfunkanbieter bereitgestellte Konfigurations-App aufrufen"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ermöglicht dem Inhaber, die vom Mobilfunkanbieter bereitgestellte Konfigurations-App aufzurufen. Sollte für normale Apps nie benötigt werden."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"Informationen zu den Netzwerkbedingungen erfassen"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Ermöglicht der App, Informationen zu den Netzwerkbedingungen zu erfassen. Sollte für normale Apps nie benötigt werden."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Passwortregeln festlegen"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Zulässige Länge und Zeichen für Passwörter zum Entsperren des Bildschirms festlegen"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Versuche zum Entsperren des Displays überwachen"</string>

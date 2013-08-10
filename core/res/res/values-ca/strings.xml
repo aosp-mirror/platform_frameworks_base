@@ -314,7 +314,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"impedir els canvis d\'aplicació"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Impedeix que l\'usuari canviï a una altra aplicació."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"obtenció d\'informació de l\'aplicació actual"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Permet que el titular recuperi informació privada sobre l\'aplicació actual al primer pla de la pantalla."</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"supervisa i controla tots els inicis d\'aplicacions"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Permet que l\'aplicació supervisi i controli com el sistema inicia activitats. Les aplicacions malicioses poden comprometre totalment el sistema. Aquest permís només és necessari per al desenvolupament, mai per a l\'ús normal."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"enviar difusió d\'eliminació de paquet"</string>
@@ -474,18 +475,12 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Permet a l\'aplicació configurar-se i connectar-se a les pantalles Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"control de les pantalles Wi-Fi"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permet a l\'aplicació controlar les funcions de baix nivell de les pantalles Wi-Fi."</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"captura la sortida d\'àudio"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Permet que l\'aplicació capturi i redirigeixi la sortida d\'àudio."</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"captura la sortida de vídeo"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Permet que l\'aplicació capturi i redirigeixi la sortida de vídeo."</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"captura la sortida de vídeo segur"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Permet que l\'aplicació capturi i redirigeixi la sortida de vídeo segur."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"canviar la configuració d\'àudio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permet que l\'aplicació modifiqui la configuració d\'àudio general, com ara el volum i l\'altaveu de sortida que es fa servir."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"enregistrar àudio"</string>
@@ -659,6 +654,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permet que el titular vinculi la interfície de nivell superior d\'un servei de processament de notificacions. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invoca l\'aplicació de configuració proporcionada per l\'operador"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permet que el titular invoqui l\'aplicació de configuració proporcionada per l\'operador. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"conèixer les observacions sobre les condicions de la xarxa"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permet que una aplicació conegui les observacions sobre les condicions de la xarxa. No s\'ha de necessitar mai per a aplicacions normals."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Defineix les normes de contrasenya"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Controla la longitud i els caràcters permesos a les contrasenyes de desbloqueig de pantalla."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Control d\'intents de desbloqueig de pantalla"</string>

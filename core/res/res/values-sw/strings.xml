@@ -314,7 +314,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"zuia swichi za app"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Huzuia mtumiaji dhidi ya kubadilisha na kwenda kwa programu nyingine."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"pata maelezo ya sasa kuhusu programu"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Huruhusu mmiliki kurejesha maelezo ya faragha kuhusu programu ya sasa katika mandharimbele ya skrini."</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"Fuatilia na kudhibiti uzinduzi wote wa programu"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Inaruhusu programu kufuatilia na kudhibiti jinsi mfumo unazindua shughuli. Programu hasidi zinaweza kutia mfumo hatarini. Ruhusa inahitajika tu kwa usanidi, kamwe sio kwa matumizi ya kawaida."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"furushi lililotumwa limeondoa tangazo"</string>
@@ -362,8 +363,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Inaruhusu kishikiliaji kujifungilia kiolesura cha kiwango cha juu cha huduma ya kuchapisha. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"fikia kazi zote za kuchapisha"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Huruhusu mmiliki kufikia kazi za kuchapisha zilizoundwa na programu nyingine. Haipaswi kuhitajika kwa programu za kawaida kamwe."</string>
-    <string name="permlab_bindNfcService" msgid="2752731300419410724">"funga kwa huduma ya NFC"</string>
-    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Huruhusu mmiliki kufunga kwa programu zinazoiga kadi za NFC. Haipaswi kuhitaji kamwe kwa programu za kawaida."</string>
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"funga kwenye huduma za NFC"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Huruhusu mmiliki kufunga kwa programu zinazoiga kadi za NFC. Haipaswi kuhitajika kamwe kwa programu za kawaida."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"Imefungwa kwa huduma ya maandishi"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Inaruhusu kishikiliaji kushurutisha kusano ya kiwango cha juu ya huduma ya matini(k.m.SpellCheckerService). Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"funga kwa huduma ya VPN"</string>
@@ -474,18 +475,12 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Inaruhusu programu kusanidi na kuunganika kwenye maonyesho ya Wifi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"dhibiti maonyesho ya Wifi"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Inaruhusu programu kudhibiti vipengele vya kiwango cha chini vya maonyesho ya Wifi."</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"nasa sauti"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Inaruhusu programu kunasa na kuelekeza sauti kwingine."</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"nasa sauti ya video"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Inaruhusu programu kunasa na kuelekeza video kwingine."</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"nasa sauti ya video kwa usalama"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Inaruhusu programu kunasa na kuelekeza video kwingine kwa usalama."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"badilisha mipangilio yako ya sauti"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Inaruhusu programu kurekebisha mipangilio ya sauti kila mahali kama vile sauti na ni kipaza sauti kipi ambacho kinatumika kwa kutoa."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"rekodi sauti"</string>
@@ -659,6 +654,10 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Inaruhusu kishikilizi kuunganishwa kwenye kusano cha kiwango cha juu cha huduma ya kisikilizi cha arifa. Haipaswi kuhitajika tena kwa programu za kawaida."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"omba programu ya usakinishaji inayotolewa na mtoa huduma."</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Inaruhusu kishikiliaji kuomba programu ya usakinishaji inayotolewa na mto huduma. Haipaswi kuhitajika kwa programu za kawaida."</string>
+    <!-- no translation found for permlab_accessNetworkConditions (8206077447838909516) -->
+    <skip />
+    <!-- no translation found for permdesc_accessNetworkConditions (6899102075825272211) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Weka kanuni za nenosiri"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Dhibiti urefu na vibambo vinavyoruhusiwa katika manenosiri ya kufungua skrini."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Chunguza majaribio ya kutofun gua skrini"</string>

@@ -314,7 +314,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"prevent app switches"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Prevents the user from switching to another app."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"get current app info"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Allows the holder to retrieve private information about the current application in the foreground of the screen."</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"monitor and control all app launching"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Allows the app to monitor and control how the system launches activities. Malicious apps may completely compromise the system. This permission is only needed for development, never for normal use."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"send package removed broadcast"</string>
@@ -474,18 +475,12 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Allows the app to configure and connect to Wi-Fi displays."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"control Wi-Fi displays"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Allows the app to control low-level features of Wi-Fi displays."</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"capture audio output"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Allows the app to capture and redirect audio output."</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"capture video output"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Allows the app to capture and redirect video output."</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"capture secure video output"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Allows the app to capture and redirect secure video output."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"change your audio settings"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Allows the app to modify global audio settings such as volume and which speaker is used for output."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"record audio"</string>
@@ -659,6 +654,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Allows the holder to bind to the top-level interface of a notification listener service. Should never be needed for normal apps."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"invoke the carrier-provided configuration app"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Allows the holder to invoke the carrier-provided configuration app. Should never be needed for normal apps."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"listen for observations on network conditions"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Allows an application to listen for observations on network conditions. Should never be needed for normal apps."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Set password rules"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Control the length and the characters allowed in screen-unlock passwords."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitor screen-unlock attempts"</string>

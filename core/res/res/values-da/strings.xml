@@ -314,7 +314,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"undgå programskift"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Forhindrer brugeren i at skifte til en anden app."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"få aktuelle app-oplysninger"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Tillader, at brugeren henter private oplysninger om den aktuelle applikation i forgrunden på ​​skærmen."</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"overvåge og kontrollere åbning af alle apps"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Tillader, at appen kan overvåge og kontrollere, hvordan systemet starter aktiviteter. Ondsindede apps kan fuldstændig kompromittere systemet. Denne tilladelse er kun nødvendig til udvikling, aldrig til normal brug."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"send udsendelse om fjernet pakke"</string>
@@ -474,18 +475,12 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Tillader, at appen konfigurerer og opretter forbindelse til Wi-Fi-skærme."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"kontrollér Wi-Fi-skærme"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Tillader, at appen kontrollerer Wi-Fi-skærmfunktioner på lavt niveau."</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"opfang et lydoutput"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Tillader, at appen opfanger og omdirigerer et lydoutput."</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"opfang et videooutput"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Tillader, at appen opfanger og omdirigerer et videooutput."</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"opfang et sikkert videooutput"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Tillader, at appen opfanger og omdirigerer et sikkert videooutput."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"skift dine lydindstillinger"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Tillader, at appen kan ændre globale lydindstillinger, som f.eks. lydstyrke og hvilken højttaler der bruges til output."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"optage lyd"</string>
@@ -659,6 +654,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Tillader brugeren at forpligte sig til en underretningslyttertjenestes grænseflade på øverste niveau. Bør aldrig være nødvendigt til almindelige apps."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"aktivere konfigurationsappen, der leveres af mobilselskabet"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Tillader, at brugeren aktiverer konfigurationsappen, der er forsynet af mobilselskabet. Dette bør aldrig være nødvendigt for almindelige apps."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"observer netværksforhold"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Tillader, at en applikation observerer netværksforhold. Bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Indstil regler for adgangskode"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontroller længden samt tilladte tegn i adgangskoder til oplåsning af skærmen."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåg forsøg på oplåsning af skærm"</string>

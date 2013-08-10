@@ -314,7 +314,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"uygulama değişimlerini engelle"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Kullanıcının başka bir uygulamaya geçiş yapmasını engeller."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"geçerli uygulama bilgilerini al"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"İzin sahibine, ekranın ön planındaki geçerli uygulama hakkında gizli bilgileri alma olanağı verir."</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"tüm uygulama başlatma işlemlerini izle ve denetle"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Uygulamaya, sistemin etkinlikleri nasıl başlattığını izleme ve denetleme izni verir. Kötü amaçlı uygulamalar sistemi tamamen tehlikeye atabilir. Bu izin normal kullanım için değildir, sadece geliştirme süreçlerinde kullanılır."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"paket ile kaldırılan yayını gönder"</string>
@@ -474,18 +475,12 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Uygulamaya kablosuz ekranları yapılandırma ve bunlara bağlanma izni verir."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Kablosuz ekranları denetle"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Uygulamaya kablosuz ekranların alt düzey özelliklerini kontrol etme izni verir."</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"ses çıkışını yakala"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Uygulamaya, ses çıkışını yakalayıp yönlendirme izni verir."</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"video çıkışını yakala"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Uygulamaya, video çıkışını yakalayıp yönlendirme izni verir."</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"güvenli video çıkışını yakala"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Uygulamaya, güvenli video çıkışını yakalayıp yönlendirme izni verir."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ses ayarlarınızı değiştirin"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Uygulamaya ses düzeyi ve ses çıkışı için kullanılan hoparlör gibi genel ses ayarlarını değiştirme izni verir."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ses kaydet"</string>
@@ -659,6 +654,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"İzin sahibine bir bildirim dinleyici hizmetinin en üst düzey arayüzüne bağlanma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"operatör tarafından sağlanan yapılandırma uygulamasını çalıştır"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"İzin sahibine, operatör tarafından sağlanan yapılandırma uygulamasını çalıştırma izni verir. Normal uygulamalarda hiçbir zaman gerek duyulmaz."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ağ koşullarındaki gözlemleri dinle"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Bir uygulamaya, ağ koşullarındaki gözlemleri dinleme izni verir. Normal uygulamalar için hiçbir zaman gerekmez."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Şifre kuralları ayarla"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ekran kilidini açma şifrelerinde izin verilen uzunluğu ve karakterleri denetleme."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekran kilidini açma denemelerini izle"</string>

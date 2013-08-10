@@ -314,7 +314,8 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"împiedicare comutare între aplicaţii"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Împiedică trecerea utilizatorului la o altă aplicaţie."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"obținere informații despre aplicația curentă"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="2512448855496067131">"Permite proprietarului să preia informațiile private despre aplicația curentă în prim-planul ecranului."</string>
+    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
+    <skip />
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"monitorizare şi control asupra lansării tuturor aplicaţiilor"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Permite aplicaţiei să monitorizeze şi să controleze modul în care sistemul lansează activităţi. Aplicaţiile rău intenţionate pot să compromită sistemul în întregime. Această permisiune este necesară doar pentru dezvoltare şi niciodată pentru utilizarea normală."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"trimitere mesaj difuzat privind extragerea din pachet"</string>
@@ -362,10 +363,8 @@
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu de printare. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"acces la toate procesele de printare"</string>
     <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Permite proprietarului să acceseze procesele de printare create de o altă aplicație. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
-    <!-- no translation found for permlab_bindNfcService (2752731300419410724) -->
-    <skip />
-    <!-- no translation found for permdesc_bindNfcService (6120647629174066862) -->
-    <skip />
+    <string name="permlab_bindNfcService" msgid="2752731300419410724">"conectare la serviciul NFC"</string>
+    <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Permite aplicației autorizate să se asocieze cu aplicații care emulează carduri NFC. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"conectare la un serviciu text"</string>
     <string name="permdesc_bindTextService" msgid="8151968910973998670">"Permite proprietarului să se conecteze la o interfaţă de nivel superior a unui serviciu text (de ex., SpellCheckerService). Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_bindVpnService" msgid="4708596021161473255">"conectare la un serviciu VPN"</string>
@@ -476,18 +475,12 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Permite aplicaţiei să configureze şi să se conecteze la afişaje Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"controlează afişaje Wi-Fi"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Permite aplicaţiei să controleze funcţiile de nivel redus ale afişajelor Wi-Fi."</string>
-    <!-- no translation found for permlab_captureAudioOutput (6857134498402346708) -->
-    <skip />
-    <!-- no translation found for permdesc_captureAudioOutput (6210597754212208853) -->
-    <skip />
-    <!-- no translation found for permlab_captureVideoOutput (2246828773589094023) -->
-    <skip />
-    <!-- no translation found for permdesc_captureVideoOutput (359481658034149860) -->
-    <skip />
-    <!-- no translation found for permlab_captureSecureVideoOutput (7815398969303382016) -->
-    <skip />
-    <!-- no translation found for permdesc_captureSecureVideoOutput (2779793064709350289) -->
-    <skip />
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"capturați ieșirea audio"</string>
+    <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Permite aplicației să captureze și să redirecționeze ieșirea audio."</string>
+    <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"capturați ieșirea video"</string>
+    <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Permite aplicației să captureze și să redirecționeze ieșirea video."</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"capturați ieșirea video securizată"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Permite aplicației să captureze și să redirecționeze ieșirea video securizată."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modificare setări audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite aplicaţiei să modifice setările audio globale, cum ar fi volumul şi difuzorul care este utilizat pentru ieşire."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"înregistrare audio"</string>
@@ -661,6 +654,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Permite proprietarului să se conecteze la interfața de nivel superior a unui serviciu de citire a notificărilor. În mod normal aplicațiile nu ar trebui să aibă nevoie de această permisiune."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"apelarea aplicației de configurare furnizată de operator"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permite proprietarului să apeleze aplicația de configurare furnizată de operator. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"ascultați observații despre starea rețelei"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permite unei aplicații să asculte observații despre starea rețelei. Nu ar trebui să fie necesară pentru aplicațiile obișnuite."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setaţi reguli pentru parolă"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Stabiliţi lungimea şi tipul de caractere permise în parolele pentru deblocarea ecranului."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitorizaţi încercările de deblocare a ecranului"</string>
