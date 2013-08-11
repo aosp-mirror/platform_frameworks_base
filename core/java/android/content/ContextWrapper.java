@@ -203,12 +203,22 @@ public class ContextWrapper extends Context {
     public File getExternalFilesDir(String type) {
         return mBase.getExternalFilesDir(type);
     }
-    
+
+    @Override
+    public File[] getExternalFilesDirs(String type) {
+        return mBase.getExternalFilesDirs(type);
+    }
+
     @Override
     public File getObbDir() {
         return mBase.getObbDir();
     }
-    
+
+    @Override
+    public File[] getObbDirs() {
+        return mBase.getObbDirs();
+    }
+
     @Override
     public File getCacheDir() {
         return mBase.getCacheDir();
@@ -217,6 +227,11 @@ public class ContextWrapper extends Context {
     @Override
     public File getExternalCacheDir() {
         return mBase.getExternalCacheDir();
+    }
+
+    @Override
+    public File[] getExternalCacheDirs() {
+        return mBase.getExternalCacheDirs();
     }
 
     @Override

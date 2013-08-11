@@ -190,6 +190,8 @@ class MountService extends IMountService.Stub
     /** When defined, base template for user-specific {@link StorageVolume}. */
     private StorageVolume mEmulatedTemplate;
 
+    // TODO: separate storage volumes on per-user basis
+
     @GuardedBy("mVolumesLock")
     private final ArrayList<StorageVolume> mVolumes = Lists.newArrayList();
     /** Map from path to {@link StorageVolume} */
@@ -2605,6 +2607,7 @@ class MountService extends IMountService.Stub
     @VisibleForTesting
     public static String buildObbPath(final String canonicalPath, int userId, boolean forVold) {
         // TODO: allow caller to provide Environment for full testing
+        // TODO: extend to support OBB mounts on secondary external storage
 
         // Only adjust paths when storage is emulated
         if (!Environment.isExternalStorageEmulated()) {
@@ -2617,10 +2620,10 @@ class MountService extends IMountService.Stub
         final UserEnvironment userEnv = new UserEnvironment(userId);
 
         // /storage/emulated/0
-        final String externalPath = userEnv.getExternalStorageDirectory().toString();
+        final String externalPath = userEnv.getExternalStorageDirectory().getAbsolutePath();
         // /storage/emulated_legacy
         final String legacyExternalPath = Environment.getLegacyExternalStorageDirectory()
-                .toString();
+                .getAbsolutePath();
 
         if (path.startsWith(externalPath)) {
             path = path.substring(externalPath.length() + 1);
@@ -2636,18 +2639,19 @@ class MountService extends IMountService.Stub
             path = path.substring(obbPath.length() + 1);
 
             if (forVold) {
-                return new File(Environment.getEmulatedStorageObbSource(), path).toString();
+                return new File(Environment.getEmulatedStorageObbSource(), path).getAbsolutePath();
             } else {
                 final UserEnvironment ownerEnv = new UserEnvironment(UserHandle.USER_OWNER);
-                return new File(ownerEnv.getExternalStorageObbDirectory(), path).toString();
+                return new File(ownerEnv.buildExternalStorageAndroidObbDirs()[0], path)
+                        .getAbsolutePath();
             }
         }
 
         // Handle normal external storage paths
         if (forVold) {
-            return new File(Environment.getEmulatedStorageSource(userId), path).toString();
+            return new File(Environment.getEmulatedStorageSource(userId), path).getAbsolutePath();
         } else {
-            return new File(userEnv.getExternalStorageDirectory(), path).toString();
+            return new File(userEnv.getExternalDirs()[0], path).getAbsolutePath();
         }
     }
 
