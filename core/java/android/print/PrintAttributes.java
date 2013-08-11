@@ -931,7 +931,7 @@ public final class PrintAttributes implements Parcelable {
         }
 
         private final String mId;
-        private final CharSequence mLabel;
+        private final String mLabel;
         private final int mWidthMils;
         private final int mHeightMils;
 
@@ -948,7 +948,7 @@ public final class PrintAttributes implements Parcelable {
          * @throws IllegalArgumentException If the widthMils is less than or equal to zero.
          * @throws IllegalArgumentException If the heightMils is less than or equal to zero.
          */
-        public MediaSize(String id, CharSequence label, int widthMils, int heightMils) {
+        public MediaSize(String id, String label, int widthMils, int heightMils) {
             if (TextUtils.isEmpty(id)) {
                 throw new IllegalArgumentException("id cannot be empty.");
             }
@@ -983,7 +983,7 @@ public final class PrintAttributes implements Parcelable {
          *
          * @return The human readable label.
          */
-        public CharSequence getLabel() {
+        public String getLabel() {
             return mLabel;
         }
 
@@ -1007,7 +1007,7 @@ public final class PrintAttributes implements Parcelable {
 
         void writeToParcel(Parcel parcel) {
             parcel.writeString(mId);
-            parcel.writeCharSequence(mLabel);
+            parcel.writeString(mLabel);
             parcel.writeInt(mWidthMils);
             parcel.writeInt(mHeightMils);
         }
@@ -1015,7 +1015,7 @@ public final class PrintAttributes implements Parcelable {
         static MediaSize createFromParcel(Parcel parcel) {
             return new MediaSize(
                     parcel.readString(),
-                    parcel.readCharSequence(),
+                    parcel.readString(),
                     parcel.readInt(),
                     parcel.readInt());
         }
@@ -1076,7 +1076,7 @@ public final class PrintAttributes implements Parcelable {
      */
     public static final class Resolution {
         private final String mId;
-        private final CharSequence mLabel;
+        private final String mLabel;
         private final int mHorizontalDpi;
         private final int mVerticalDpi;
 
@@ -1093,7 +1093,7 @@ public final class PrintAttributes implements Parcelable {
          * @throws IllegalArgumentException If the horizontalDpi is less than or equal to zero.
          * @throws IllegalArgumentException If the verticalDpi is less than or equal to zero.
          */
-        public Resolution(String id, CharSequence label, int horizontalDpi, int verticalDpi) {
+        public Resolution(String id, String label, int horizontalDpi, int verticalDpi) {
             if (TextUtils.isEmpty(id)) {
                 throw new IllegalArgumentException("id cannot be empty.");
             }
@@ -1128,7 +1128,7 @@ public final class PrintAttributes implements Parcelable {
          *
          * @return The human readable label.
          */
-        public CharSequence getLabel() {
+        public String getLabel() {
             return mLabel;
         }
 
@@ -1152,7 +1152,7 @@ public final class PrintAttributes implements Parcelable {
 
         void writeToParcel(Parcel parcel) {
             parcel.writeString(mId);
-            parcel.writeCharSequence(mLabel);
+            parcel.writeString(mLabel);
             parcel.writeInt(mHorizontalDpi);
             parcel.writeInt(mVerticalDpi);
         }
@@ -1160,7 +1160,7 @@ public final class PrintAttributes implements Parcelable {
         static Resolution createFromParcel(Parcel parcel) {
             return new Resolution(
                     parcel.readString(),
-                    parcel.readCharSequence(),
+                    parcel.readString(),
                     parcel.readInt(),
                     parcel.readInt());
         }
@@ -1364,7 +1364,7 @@ public final class PrintAttributes implements Parcelable {
      */
     public static final class Tray {
         private final String mId;
-        private final CharSequence mLabel;
+        private final String mLabel;
 
         /**
          * Creates a new instance.
@@ -1375,7 +1375,7 @@ public final class PrintAttributes implements Parcelable {
          * @throws IllegalArgumentException If the id is empty.
          * @throws IllegalArgumentException If the label is empty.
          */
-        public Tray(String id, CharSequence label) {
+        public Tray(String id, String label) {
             if (TextUtils.isEmpty(id)) {
                 throw new IllegalArgumentException("id cannot be empty.");
             }
@@ -1400,19 +1400,19 @@ public final class PrintAttributes implements Parcelable {
          *
          * @return The human readable label.
          */
-        public CharSequence getLabel() {
+        public String getLabel() {
             return mLabel;
         }
 
         void writeToParcel(Parcel parcel) {
             parcel.writeString(mId);
-            parcel.writeCharSequence(mLabel);
+            parcel.writeString(mLabel);
         }
 
         static Tray createFromParcel(Parcel parcel) {
             return new Tray(
                     parcel.readString(),
-                    parcel.readCharSequence());
+                    parcel.readString());
         }
 
         @Override
@@ -1457,7 +1457,7 @@ public final class PrintAttributes implements Parcelable {
         }
     }
 
-    private static String duplexModeToString(int duplexMode) {
+    static String duplexModeToString(int duplexMode) {
         switch (duplexMode) {
             case DUPLEX_MODE_NONE: {
                 return "DUPLEX_MODE_NONE";
@@ -1473,7 +1473,7 @@ public final class PrintAttributes implements Parcelable {
         }
     }
 
-    private static String colorModeToString(int colorMode) {
+    static String colorModeToString(int colorMode) {
         switch (colorMode) {
             case COLOR_MODE_MONOCHROME: {
                 return "COLOR_MODE_MONOCHROME";
@@ -1486,7 +1486,7 @@ public final class PrintAttributes implements Parcelable {
         }
     }
 
-    private static String orientationToString(int orientation) {
+    static String orientationToString(int orientation) {
         switch (orientation) {
             case ORIENTATION_PORTRAIT: {
                 return "ORIENTATION_PORTRAIT";
@@ -1499,7 +1499,7 @@ public final class PrintAttributes implements Parcelable {
         }
     }
 
-    private static String fittingModeToString(int fittingMode) {
+    static String fittingModeToString(int fittingMode) {
         switch (fittingMode) {
             case FITTING_MODE_NONE: {
                 return "FITTING_MODE_NONE";

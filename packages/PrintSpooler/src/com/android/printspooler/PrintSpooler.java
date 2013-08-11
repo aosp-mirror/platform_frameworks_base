@@ -21,7 +21,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.ParcelFileDescriptor;
 import android.print.IPrintClient;
-import android.print.IPrinterDiscoveryObserver;
+import android.print.IPrinterDiscoverySessionObserver;
 import android.print.PageRange;
 import android.print.PrintAttributes;
 import android.print.PrintAttributes.Margins;
@@ -32,6 +32,7 @@ import android.print.PrintDocumentInfo;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
 import android.print.PrinterId;
+import android.print.PrinterInfo;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
@@ -199,16 +200,8 @@ public class PrintSpooler {
         }
     }
 
-    public void startPrinterDiscovery(IPrinterDiscoveryObserver observer) {
-        mService.startPrinterDiscovery(observer);
-    }
-
-    public void stopPrinterDiscovery() {
-        mService.stopPrinterDiscovery();
-    }
-
-    public void onReqeustUpdatePrinters(List<PrinterId> printerIds) {
-        mService.onReqeustUpdatePrinters(printerIds);
+    public void createPrinterDiscoverySession(IPrinterDiscoverySessionObserver observer) {
+        mService.createPrinterDiscoverySession(observer);
     }
 
     private int generatePrintJobIdLocked() {
@@ -417,11 +410,12 @@ public class PrintSpooler {
         }
     }
 
-    public void setPrintJobPrinterIdNoPersistence(int printJobId, PrinterId printerId) {
+    public void setPrintJobPrinterNoPersistence(int printJobId, PrinterInfo printer) {
         synchronized (mLock) {
             PrintJobInfo printJob = getPrintJobInfo(printJobId, PrintManager.APP_ID_ANY);
             if (printJob != null) {
-                printJob.setPrinterId(printerId);
+                printJob.setPrinterId(printer.getId());
+                printJob.setPrinterName(printer.getName());
             }
         }
     }
@@ -500,6 +494,7 @@ public class PrintSpooler {
         private static final String ATTR_START = "start";
         private static final String ATTR_END = "end";
 
+        private static final String ATTR_NAME = "name";
         private static final String ATTR_PAGE_COUNT = "pageCount";
         private static final String ATTR_CONTENT_TYPE = "contentType";
 
@@ -573,7 +568,7 @@ public class PrintSpooler {
                     PrinterId printerId = printJob.getPrinterId();
                     if (printerId != null) {
                         serializer.startTag(null, TAG_PRINTER_ID);
-                        serializer.attribute(null, ATTR_PRINTER_NAME, printerId.getPrinterName());
+                        serializer.attribute(null, ATTR_PRINTER_NAME, printerId.getLocalId());
                         serializer.attribute(null, ATTR_SERVICE_NAME, printerId.getServiceName()
                                 .flattenToString());
                         serializer.endTag(null, TAG_PRINTER_ID);
@@ -675,6 +670,7 @@ public class PrintSpooler {
                     PrintDocumentInfo documentInfo = printJob.getDocumentInfo();
                     if (documentInfo != null) {
                         serializer.startTag(null, TAG_DOCUMENT_INFO);
+                        serializer.attribute(null, ATTR_NAME, documentInfo.getName());
                         serializer.attribute(null, ATTR_CONTENT_TYPE, String.valueOf(
                                 documentInfo.getContentType()));
                         serializer.attribute(null, ATTR_PAGE_COUNT, String.valueOf(
@@ -921,11 +917,13 @@ public class PrintSpooler {
 
             skipEmptyTextTags(parser);
             if (accept(parser, XmlPullParser.START_TAG, TAG_DOCUMENT_INFO)) {
+                String name = parser.getAttributeValue(null, ATTR_NAME);
                 final int pageCount = Integer.parseInt(parser.getAttributeValue(null,
                         ATTR_PAGE_COUNT));
                 final int contentType = Integer.parseInt(parser.getAttributeValue(null,
                         ATTR_CONTENT_TYPE));
-                PrintDocumentInfo info = new PrintDocumentInfo.Builder().setPageCount(pageCount)
+                PrintDocumentInfo info = new PrintDocumentInfo.Builder(name)
+                        .setPageCount(pageCount)
                         .setContentType(contentType).create();
                 printJob.setDocumentInfo(info);
                 parser.next();

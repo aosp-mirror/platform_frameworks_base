@@ -34,7 +34,8 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.print.ILayoutResultCallback;
 import android.print.IPrintDocumentAdapter;
-import android.print.IPrinterDiscoveryObserver;
+import android.print.IPrinterDiscoverySessionController;
+import android.print.IPrinterDiscoverySessionObserver;
 import android.print.IWriteResultCallback;
 import android.print.PageRange;
 import android.print.PrintAttributes;
@@ -42,6 +43,7 @@ import android.print.PrintAttributes.MediaSize;
 import android.print.PrintDocumentAdapter;
 import android.print.PrintDocumentInfo;
 import android.print.PrintJobInfo;
+import android.print.PrinterCapabilitiesInfo;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
 import android.text.Editable;
@@ -70,6 +72,7 @@ import android.widget.TextView;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -133,7 +136,7 @@ public class PrintJobConfigActivity extends Activity {
     private Editor mEditor;
     private Document mDocument;
     private PrintController mController;
-    private PrinterDiscoveryObserver mPrinterDiscoveryObserver;
+    private PrinterDiscoverySessionObserver mPrinterDiscoverySessionObserver;
 
     private int mPrintJobId;
 
@@ -181,8 +184,9 @@ public class PrintJobConfigActivity extends Activity {
 
         mController.initialize();
         mEditor.initialize();
-        mPrinterDiscoveryObserver = new PrinterDiscoveryObserver(mEditor, getMainLooper());
-        mSpooler.startPrinterDiscovery(mPrinterDiscoveryObserver);
+        mPrinterDiscoverySessionObserver = new PrinterDiscoverySessionObserver(mEditor,
+                getMainLooper());
+        mSpooler.createPrinterDiscoverySession(mPrinterDiscoverySessionObserver);
     }
 
     @Override
@@ -190,9 +194,9 @@ public class PrintJobConfigActivity extends Activity {
         // We can safely do the work in here since at this point
         // the system is bound to our (spooler) process which
         // guarantees that this process will not be killed.
-        mSpooler.stopPrinterDiscovery();
-        mPrinterDiscoveryObserver.destroy();
-        mPrinterDiscoveryObserver = null;
+        mPrinterDiscoverySessionObserver.close();
+        mPrinterDiscoverySessionObserver.destroy();
+        mPrinterDiscoverySessionObserver = null;
         if (mController.hasStarted()) {
             mController.finish();
         }
@@ -622,14 +626,15 @@ public class PrintJobConfigActivity extends Activity {
                     SpinnerItem<PrinterInfo> dstItem = mDestinationSpinnerAdapter.getItem(position);
                     if (dstItem != null) {
                         PrinterInfo printer = dstItem.value;
-                        mSpooler.setPrintJobPrinterIdNoPersistence(mPrintJobId, printer.getId());
-                        printer.getDefaults(mCurrPrintAttributes);
-                        if (!printer.hasAllRequiredAttributes()) {
+                        mSpooler.setPrintJobPrinterNoPersistence(mPrintJobId, printer.getId());
+                        PrinterCapabilitiesInfo capabilities = printer.getCapabilities();
+                        if (capabilities == null) {
                             List<PrinterId> printerIds = new ArrayList<PrinterId>();
                             printerIds.add(printer.getId());
-                            mSpooler.onReqeustUpdatePrinters(printerIds);
+                            mPrinterDiscoverySessionObserver.requestPrinterUpdate(printer.getId());
                             //TODO: We need a timeout for the update.
                         } else {
+                            capabilities.getDefaults(mCurrPrintAttributes);
                             if (!mController.hasStarted()) {
                                 mController.start();
                             }
@@ -1058,8 +1063,8 @@ public class PrintJobConfigActivity extends Activity {
 
             final int selectedIndex = mDestinationSpinner.getSelectedItemPosition();
 
-            if (selectedIndex < 0 || !mDestinationSpinnerAdapter.getItem(
-                    selectedIndex).value.hasAllRequiredAttributes()) {
+            if (selectedIndex < 0 || mDestinationSpinnerAdapter.getItem(
+                    selectedIndex).value.getCapabilities() == null) {
 
                 // Destination
                 mDestinationSpinner.setEnabled(false);
@@ -1117,7 +1122,8 @@ public class PrintJobConfigActivity extends Activity {
             } else {
                 PrintAttributes defaultAttributes = mTempPrintAttributes;
                 PrinterInfo printer = mDestinationSpinnerAdapter.getItem(selectedIndex).value;
-                printer.getDefaults(defaultAttributes);
+                PrinterCapabilitiesInfo capabilities = printer.getCapabilities();
+                printer.getCapabilities().getDefaults(defaultAttributes);
 
                 // Destination
                 if (mDestinationSpinnerAdapter.getCount() > 1) {
@@ -1130,7 +1136,7 @@ public class PrintJobConfigActivity extends Activity {
                 mCopiesEditText.setEnabled(true);
 
                 // Media size.
-                List<MediaSize> mediaSizes = printer.getMediaSizes();
+                List<MediaSize> mediaSizes = capabilities.getMediaSizes();
                 boolean mediaSizesChanged = false;
                 final int mediaSizeCount = mediaSizes.size();
                 if (mediaSizeCount != mMediaSizeSpinnerAdapter.getCount()) {
@@ -1168,7 +1174,7 @@ public class PrintJobConfigActivity extends Activity {
                 }
 
                 // Color mode.
-                final int colorModes = printer.getColorModes();
+                final int colorModes = capabilities.getColorModes();
                 boolean colorModesChanged = false;
                 if (Integer.bitCount(colorModes) != mColorModeSpinnerAdapter.getCount()) {
                     colorModesChanged = true;
@@ -1219,7 +1225,7 @@ public class PrintJobConfigActivity extends Activity {
                 }
 
                 // Orientation.
-                final int orientations = printer.getOrientations();
+                final int orientations = capabilities.getOrientations();
                 boolean orientationsChanged = false;
                 if (Integer.bitCount(orientations) != mOrientationSpinnerAdapter.getCount()) {
                     orientationsChanged = true;
@@ -1345,7 +1351,7 @@ public class PrintJobConfigActivity extends Activity {
                 }
                 if (!duplicate) {
                     mDestinationSpinnerAdapter.add(new SpinnerItem<PrinterInfo>(
-                            addedPrinter, addedPrinter.getId().getPrinterName()));
+                            addedPrinter, addedPrinter.getName()));
                 } else {
                     Log.w(LOG_TAG, "Skipping a duplicate printer: " + addedPrinter);
                 }
@@ -1470,7 +1476,7 @@ public class PrintJobConfigActivity extends Activity {
 
                 PrinterInfo printerInfo = getItem(position).value;
                 TextView title = (TextView) convertView.findViewById(R.id.title);
-                title.setText(printerInfo.getId().getPrinterName());
+                title.setText(printerInfo.getName());
 
                 try {
                     TextView subtitle = (TextView)
@@ -1489,21 +1495,35 @@ public class PrintJobConfigActivity extends Activity {
         }
     }
 
-    private static final class PrinterDiscoveryObserver extends IPrinterDiscoveryObserver.Stub {
-        private static final int MSG_ON_PRINTERS_ADDED = 1;
-        private static final int MSG_ON_PRINTERS_REMOVED = 2;
-        private static final int MSG_ON_PRINTERS_UPDATED = 3;
+    private static final class PrinterDiscoverySessionObserver
+            extends IPrinterDiscoverySessionObserver.Stub {
+        private static final int MSG_SET_CONTROLLER = 1;
+        private static final int MSG_ON_PRINTERS_ADDED = 2;
+        private static final int MSG_ON_PRINTERS_REMOVED = 3;
+        private static final int MSG_ON_PRINTERS_UPDATED = 4;
 
         private Handler mHandler;
         private Editor mEditor;
+        private IPrinterDiscoverySessionController mController;
 
         @SuppressWarnings("unchecked")
-        public PrinterDiscoveryObserver(Editor editor, Looper looper) {
+        public PrinterDiscoverySessionObserver(Editor editor, Looper looper) {
             mEditor = editor;
             mHandler = new Handler(looper, null, true) {
                 @Override
                 public void handleMessage(Message message) {
                     switch (message.what) {
+                        case MSG_SET_CONTROLLER: {
+                            mController = (IPrinterDiscoverySessionController) message.obj;
+                            // TODO: This should be cleaned up
+                            List<PrinterId> printerIds = Collections.emptyList();
+                            try {
+                                mController.open(printerIds);
+                            } catch (RemoteException e) {
+                                Log.e(LOG_TAG, "Error starting printer discovery");
+                            }
+                        } break;
+
                         case MSG_ON_PRINTERS_ADDED: {
                             List<PrinterInfo> printers = (List<PrinterInfo>) message.obj;
                             mEditor.addPrinters(printers);
@@ -1521,6 +1541,46 @@ public class PrintJobConfigActivity extends Activity {
                     }
                 }
             };
+        }
+
+        public void open(List<PrinterId> priorityList) {
+            if (mController != null) {
+                try {
+                    mController.open(priorityList);
+                } catch (RemoteException re) {
+                    Log.e(LOG_TAG, "Error closing printer discovery session", re);
+                }
+            }
+        }
+
+        public void close() {
+            if (mController != null) {
+                try {
+                    mController.close();
+                } catch (RemoteException re) {
+                    Log.e(LOG_TAG, "Error closing printer discovery session", re);
+                }
+            }
+        }
+
+        public void requestPrinterUpdate(PrinterId printerId) {
+            if (mController != null) {
+                try {
+                    mController.requestPrinterUpdate(printerId);
+                } catch (RemoteException re) {
+                    Log.e(LOG_TAG, "Error requestin printer update", re);
+                }
+            }
+        }
+
+        @Override
+        public void setController(IPrinterDiscoverySessionController controller) {
+            synchronized (this) {
+                if (mHandler != null) {
+                    mHandler.obtainMessage(MSG_SET_CONTROLLER, controller)
+                        .sendToTarget();
+                }
+            }
         }
 
         @Override

@@ -36,34 +36,48 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Adapter for printing files.
+ * Adapter for printing files. This class could be useful if you
+ * want to print a file and intercept when the system is ready
+ * spooling the data, so you can deleted the file if it is a
+ * temporary one.
  */
-final class FileDocumentAdapter extends PrintDocumentAdapter {
+public final class PrintFileDocumentAdapter extends PrintDocumentAdapter {
 
-    private static final String LOG_TAG = "FileDocumentAdapter";
+    private static final String LOG_TAG = "PrintedFileDocumentAdapter";
 
     private final Context mContext;
 
     private final File mFile;
 
+    private final PrintDocumentInfo mDocumentInfo;
+
     private WriteFileAsyncTask mWriteFileAsyncTask;
 
-    public FileDocumentAdapter(Context context, File file) {
+    /**
+     * Constructor.
+     *
+     * @param context Context for accessing resources.
+     * @param file The file to print.
+     * @param documentInfo The information about the printed file.
+     */
+    public PrintFileDocumentAdapter(Context context, File file,
+            PrintDocumentInfo documentInfo) {
         if (file == null) {
             throw new IllegalArgumentException("File cannot be null!");
         }
+        if (documentInfo == null) {
+            throw new IllegalArgumentException("documentInfo cannot be null!");
+        }
         mContext = context;
         mFile = file;
+        mDocumentInfo = documentInfo;
     }
 
     @Override
     public void onLayout(PrintAttributes oldAttributes, PrintAttributes newAttributes,
             CancellationSignal cancellationSignal, LayoutResultCallback callback,
             Bundle metadata) {
-        // TODO: When we have a PDF rendering library we should query the page count.
-        PrintDocumentInfo info =  new PrintDocumentInfo.Builder()
-        .setPageCount(PrintDocumentInfo.PAGE_COUNT_UNKNOWN).create();
-        callback.onLayoutFinished(info, false);
+        callback.onLayoutFinished(mDocumentInfo, false);
     }
 
     @Override

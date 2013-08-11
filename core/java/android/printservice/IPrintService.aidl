@@ -10,16 +10,14 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+ * See the License for the specific languagÿe governing permissions and
  * limitations under the License.
  */
 
 package android.printservice;
 
-import android.os.ICancellationSignal;
-import android.print.IPrinterDiscoveryObserver;
+import android.print.IPrinterDiscoverySessionObserver;
 import android.print.PrintJobInfo;
-import android.print.PrinterId;
 import android.printservice.IPrintServiceClient;
 
 /**
@@ -29,9 +27,7 @@ import android.printservice.IPrintServiceClient;
  */
 oneway interface IPrintService {
     void setClient(IPrintServiceClient client);
-    void onRequestUpdatePrinters(in List<PrinterId> printerIds);
-    void onRequestCancelPrintJob(in PrintJobInfo printJobInfo);
+    void requestCancelPrintJob(in PrintJobInfo printJobInfo);
     void onPrintJobQueued(in PrintJobInfo printJobInfo);
-    void onStartPrinterDiscovery(IPrinterDiscoveryObserver observer);
-    void onStopPrinterDiscovery();
+    void createPrinterDiscoverySession(IPrinterDiscoverySessionObserver observer);
 }
