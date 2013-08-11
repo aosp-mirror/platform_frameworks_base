@@ -626,7 +626,7 @@ public class PrintJobConfigActivity extends Activity {
                     SpinnerItem<PrinterInfo> dstItem = mDestinationSpinnerAdapter.getItem(position);
                     if (dstItem != null) {
                         PrinterInfo printer = dstItem.value;
-                        mSpooler.setPrintJobPrinterNoPersistence(mPrintJobId, printer.getId());
+                        mSpooler.setPrintJobPrinterNoPersistence(mPrintJobId, printer);
                         PrinterCapabilitiesInfo capabilities = printer.getCapabilities();
                         if (capabilities == null) {
                             List<PrinterId> printerIds = new ArrayList<PrinterId>();
