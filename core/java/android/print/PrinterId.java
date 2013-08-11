@@ -28,24 +28,24 @@ public final class PrinterId implements Parcelable {
 
     private final ComponentName mServiceName;
 
-    private final String mPrinterName;
+    private final String mLocalId;
 
     /**
      * Creates a new instance.
      *
      * @param serviceName The managing print service.
-     * @param printerName The unique name within the managing service.
+     * @param localId The locally unique id within the managing service.
      *
      * @hide
      */
-    public PrinterId(ComponentName serviceName, String printerName) {
+    public PrinterId(ComponentName serviceName, String localId) {
         mServiceName = serviceName;
-        mPrinterName = printerName;
+        mLocalId = localId;
     }
 
     private PrinterId(Parcel parcel) {
         mServiceName = parcel.readParcelable(null);
-        mPrinterName = parcel.readString();
+        mLocalId = parcel.readString();
     }
 
     /**
@@ -60,13 +60,13 @@ public final class PrinterId implements Parcelable {
     }
 
     /**
-     * Gets the name of this printer which is unique in the context
+     * Gets the id of this printer which is unique in the context
      * of the print service that manages it.
      *
      * @return The printer name.
      */
-    public String getPrinterName() {
-        return mPrinterName;
+    public String getLocalId() {
+        return mLocalId;
     }
 
     @Override
@@ -77,7 +77,7 @@ public final class PrinterId implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeParcelable(mServiceName, flags);
-        parcel.writeString(mPrinterName);
+        parcel.writeString(mLocalId);
     }
 
     @Override
@@ -99,7 +99,7 @@ public final class PrinterId implements Parcelable {
         } else if (!mServiceName.equals(other.mServiceName)) {
             return false;
         }
-        if (!TextUtils.equals(mPrinterName, other.mPrinterName)) {
+        if (!TextUtils.equals(mLocalId, other.mLocalId)) {
             return false;
         }
         return true;
@@ -111,7 +111,7 @@ public final class PrinterId implements Parcelable {
         int hashCode = 1;
         hashCode = prime * hashCode + ((mServiceName != null)
                 ? mServiceName.hashCode() : 1);
-        hashCode = prime * hashCode + mPrinterName.hashCode();
+        hashCode = prime * hashCode + mLocalId.hashCode();
         return hashCode;
     }
 
@@ -119,9 +119,8 @@ public final class PrinterId implements Parcelable {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("PrinterId{");
-        builder.append(mServiceName.flattenToString());
-        builder.append(":");
-        builder.append(mPrinterName);
+        builder.append("serviceName=").append(mServiceName.flattenToString());
+        builder.append(", localId=").append(mLocalId);
         builder.append('}');
         return builder.toString();
     }

@@ -24,13 +24,14 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IBinder.DeathRecipient;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.os.IBinder.DeathRecipient;
-import android.print.IPrinterDiscoveryObserver;
+import android.print.IPrinterDiscoverySessionController;
+import android.print.IPrinterDiscoverySessionObserver;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
 import android.print.PrinterId;
@@ -128,18 +129,18 @@ final class RemotePrintService implements DeathRecipient {
                 printJob).sendToTarget();
     }
 
-    private void handleOnRequestCancelPrintJob(final PrintJobInfo printJob) {
+    private void handleRequestCancelPrintJob(final PrintJobInfo printJob) {
         throwIfDestroyed();
         // If we are not bound, then we have no print jobs to handle
         // which means that there are no print jobs to be cancelled.
         if (isBound()) {
             if (DEBUG) {
-                Slog.i(LOG_TAG, "[user: " + mUserId + "] handleOnRequestCancelPrintJob()");
+                Slog.i(LOG_TAG, "[user: " + mUserId + "] handleRequestCancelPrintJob()");
             }
             try {
-                mPrintService.onRequestCancelPrintJob(printJob);
+                mPrintService.requestCancelPrintJob(printJob);
             } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error canceling pring job.", re);
+                Slog.e(LOG_TAG, "Error canceling a pring job.", re);
             }
         }
     }
@@ -171,81 +172,30 @@ final class RemotePrintService implements DeathRecipient {
         }
     }
 
-    public void onStartPrinterDiscovery(IPrinterDiscoveryObserver observer) {
-        mHandler.obtainMessage(MyHandler.MSG_ON_START_PRINTER_DISCOVERY, observer).sendToTarget();
+    public void createPrinterDiscoverySession(IPrinterDiscoverySessionObserver observer) {
+        mHandler.obtainMessage(MyHandler.MSG_CREATE_PRINTER_DISCOVERY_SESSION,
+                observer).sendToTarget();
     }
 
-    private void handleOnStartPrinterDiscovery(final IPrinterDiscoveryObserver observer) {
+    private void handleCreatePrinterDiscoverySession(
+            final IPrinterDiscoverySessionObserver observer) {
         throwIfDestroyed();
         if (!isBound()) {
             ensureBound();
             mPendingCommands.add(new Runnable() {
                 @Override
                 public void run() {
-                    handleOnStartPrinterDiscovery(observer);
+                    handleCreatePrinterDiscoverySession(observer);
                 }
             });
         } else {
             if (DEBUG) {
-                Slog.i(LOG_TAG, "[user: " + mUserId + "] onStartPrinterDiscovery()");
+                Slog.i(LOG_TAG, "[user: " + mUserId + "] createPrinterDiscoverySession()");
             }
             try {
-                mPrintService.onStartPrinterDiscovery(observer);
+                mPrintService.createPrinterDiscoverySession(observer);
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Error announcing start printer dicovery.", re);
-            }
-        }
-    }
-
-    public void onStopPrinterDiscovery() {
-        mHandler.sendEmptyMessage(MyHandler.MSG_ON_STOP_PRINTER_DISCOVERY);
-    }
-
-    private void handleStopPrinterDiscovery() {
-        throwIfDestroyed();
-        if (!isBound()) {
-            ensureBound();
-            mPendingCommands.add(new Runnable() {
-                @Override
-                public void run() {
-                    handleStopPrinterDiscovery();
-                }
-            });
-        } else {
-            if (DEBUG) {
-                Slog.i(LOG_TAG, "[user: " + mUserId + "] onStopPrinterDiscovery()");
-            }
-            try {
-                mPrintService.onStopPrinterDiscovery();
-            } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error announcing stop printer dicovery.", re);
-            }
-        }
-    }
-
-    public void onRequestUpdatePrinters(List<PrinterId> printerIds) {
-        mHandler.obtainMessage(MyHandler.MSG_ON_REQUEST_UPDATE_PRINTERS,
-                printerIds).sendToTarget();
-    }
-
-    private void handleReqeustUpdatePrinters(final List<PrinterId> printerIds) {
-        throwIfDestroyed();
-        if (!isBound()) {
-            ensureBound();
-            mPendingCommands.add(new Runnable() {
-                @Override
-                public void run() {
-                    handleReqeustUpdatePrinters(printerIds);
-                }
-            });
-        } else {
-            if (DEBUG) {
-                Slog.i(LOG_TAG, "[user: " + mUserId + "] handleReqeustUpdatePrinters()");
-            }
-            try {
-                mPrintService.onRequestUpdatePrinters(printerIds);
-            } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error requesting to update printers.", re);
             }
         }
     }
@@ -331,18 +281,15 @@ final class RemotePrintService implements DeathRecipient {
         public static final int MSG_ON_ALL_PRINT_JOBS_HANDLED = 1;
         public static final int MSG_ON_REQUEST_CANCEL_PRINT_JOB = 2;
         public static final int MSG_ON_PRINT_JOB_QUEUED = 3;
-        public static final int MSG_ON_START_PRINTER_DISCOVERY = 4;
-        public static final int MSG_ON_STOP_PRINTER_DISCOVERY = 5;
-        public static final int MSG_ON_REQUEST_UPDATE_PRINTERS = 6;
-        public static final int MSG_DESTROY = 7;
-        public static final int MSG_BINDER_DIED = 8;
+        public static final int MSG_CREATE_PRINTER_DISCOVERY_SESSION = 4;
+        public static final int MSG_DESTROY = 6;
+        public static final int MSG_BINDER_DIED = 7;
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public void handleMessage(Message message) {
             switch (message.what) {
                 case MSG_ON_ALL_PRINT_JOBS_HANDLED: {
@@ -351,7 +298,7 @@ final class RemotePrintService implements DeathRecipient {
 
                 case MSG_ON_REQUEST_CANCEL_PRINT_JOB: {
                     PrintJobInfo printJob = (PrintJobInfo) message.obj;
-                    handleOnRequestCancelPrintJob(printJob);
+                    handleRequestCancelPrintJob(printJob);
                 } break;
 
                 case MSG_ON_PRINT_JOB_QUEUED: {
@@ -359,19 +306,11 @@ final class RemotePrintService implements DeathRecipient {
                     handleOnPrintJobQueued(printJob);
                 } break;
 
-                case MSG_ON_START_PRINTER_DISCOVERY: {
-                    IPrinterDiscoveryObserver observer = (IPrinterDiscoveryObserver) message.obj;
-                    handleOnStartPrinterDiscovery(new SecurePrinterDiscoveryObserver(
+                case MSG_CREATE_PRINTER_DISCOVERY_SESSION: {
+                    IPrinterDiscoverySessionObserver observer =
+                            (IPrinterDiscoverySessionObserver) message.obj;
+                    handleCreatePrinterDiscoverySession(new SecurePrinterDiscoverySessionObserver(
                             mComponentName, observer));
-                } break;
-
-                case MSG_ON_REQUEST_UPDATE_PRINTERS: {
-                    List<PrinterId> printerIds = (List<PrinterId>) message.obj;
-                    handleReqeustUpdatePrinters(printerIds);
-                } break;
-
-                case MSG_ON_STOP_PRINTER_DISCOVERY: {
-                    handleStopPrinterDiscovery();
                 } break;
 
                 case MSG_DESTROY: {
@@ -464,14 +403,14 @@ final class RemotePrintService implements DeathRecipient {
         }
     }
 
-    private static final class SecurePrinterDiscoveryObserver
-            extends IPrinterDiscoveryObserver.Stub {
+    private static final class SecurePrinterDiscoverySessionObserver
+            extends IPrinterDiscoverySessionObserver.Stub {
         private final ComponentName mComponentName;
 
-        private final IPrinterDiscoveryObserver mDecoratedObsever;
+        private final IPrinterDiscoverySessionObserver mDecoratedObsever;
 
-        public SecurePrinterDiscoveryObserver(ComponentName componentName,
-                IPrinterDiscoveryObserver observer) {
+        public SecurePrinterDiscoverySessionObserver(ComponentName componentName,
+                IPrinterDiscoverySessionObserver observer) {
             mComponentName = componentName;
             mDecoratedObsever = observer;
         }
@@ -503,6 +442,15 @@ final class RemotePrintService implements DeathRecipient {
                 mDecoratedObsever.onPrintersRemoved(printerIds);
             } catch (RemoteException re) {
                 Slog.e(LOG_TAG, "Error delegating to onPrintersRemoved", re);
+            }
+        }
+
+        @Override
+        public void setController(IPrinterDiscoverySessionController controller) {
+            try {
+                mDecoratedObsever.setController(controller);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Error setting controller", re);
             }
         }
 

@@ -18,6 +18,7 @@ package android.print;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 /**
  * This class encapsulates information about a printed document.
@@ -44,6 +45,7 @@ public final class PrintDocumentInfo implements Parcelable {
      */
     public static final int CONTENT_TYPE_PHOTO = 1;
 
+    private String mName;
     private int mPageCount;
     private int mContentType;
 
@@ -61,6 +63,7 @@ public final class PrintDocumentInfo implements Parcelable {
      * @param Prototype from which to clone.
      */
     private PrintDocumentInfo(PrintDocumentInfo prototype) {
+        mName = prototype.mName;
         mPageCount = prototype.mPageCount;
         mContentType = prototype.mContentType;
     }
@@ -71,8 +74,18 @@ public final class PrintDocumentInfo implements Parcelable {
      * @param parcel Data from which to initialize.
      */
     private PrintDocumentInfo(Parcel parcel) {
+        mName = parcel.readString();
         mPageCount = parcel.readInt();
         mContentType = parcel.readInt();
+    }
+
+    /**
+     * Gets the document name.
+     *
+     * @return The document name.
+     */
+    public String getName() {
+        return mName;
     }
 
     /**
@@ -106,6 +119,7 @@ public final class PrintDocumentInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeString(mName);
         parcel.writeInt(mPageCount);
         parcel.writeInt(mContentType);
     }
@@ -114,6 +128,7 @@ public final class PrintDocumentInfo implements Parcelable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((mName != null) ? mName.hashCode() : 0);
         result = prime * result + mContentType;
         result = prime * result + mPageCount;
         return result;
@@ -131,6 +146,9 @@ public final class PrintDocumentInfo implements Parcelable {
             return false;
         }
         PrintDocumentInfo other = (PrintDocumentInfo) obj;
+        if (!TextUtils.equals(mName, other.mName)) {
+            return false;
+        }
         if (mContentType != other.mContentType) {
             return false;
         }
@@ -144,17 +162,47 @@ public final class PrintDocumentInfo implements Parcelable {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("PrintDocumentInfo{");
-        builder.append("pageCount: ").append(mPageCount);
-        builder.append(", contentType: ").append(mContentType);
+        builder.append("name=").append(mName);
+        builder.append(", pageCount=").append(mPageCount);
+        builder.append(", contentType=").append(contentTyepToString(mContentType));
         builder.append("}");
         return builder.toString();
+    }
+
+    private String contentTyepToString(int contentType) {
+        switch (contentType) {
+            case CONTENT_TYPE_DOCUMENT: {
+                return "CONTENT_TYPE_DOCUMENT";
+            }
+            case CONTENT_TYPE_PHOTO: {
+                return "CONTENT_TYPE_PHOTO";
+            }
+            default: {
+                return "CONTENT_TYPE_UNKNOWN";
+            }
+        }
     }
 
     /**
      * Builder for creating an {@link PrintDocumentInfo}.
      */
     public static final class Builder {
-        private final PrintDocumentInfo mPrototype = new PrintDocumentInfo();
+        private final PrintDocumentInfo mPrototype;
+
+        /**
+         * Constructor.
+         *
+         * @param name The document name. Cannot be empty.
+         *
+         * @throws IllegalArgumentException If the name is empty.
+         */
+        public Builder(String name) {
+            if (TextUtils.isEmpty(name)) {
+                throw new IllegalArgumentException("name cannot be empty");
+            }
+            mPrototype = new PrintDocumentInfo();
+            mPrototype.mName = name;
+        }
 
         /**
          * Sets the total number of pages.

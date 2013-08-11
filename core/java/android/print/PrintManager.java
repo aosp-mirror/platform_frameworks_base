@@ -161,13 +161,16 @@ public final class PrintManager {
      *
      * @param printJobName A name for the new print job.
      * @param pdfFile The PDF file to print.
+     * @param documentInfo Information about the printed document.
      * @param attributes The default print job attributes.
      * @return The created print job.
      *
      * @see PrintJob
      */
-    public PrintJob print(String printJobName, File pdfFile, PrintAttributes attributes) {
-        FileDocumentAdapter documentAdapter = new FileDocumentAdapter(mContext, pdfFile);
+    public PrintJob print(String printJobName, File pdfFile, PrintDocumentInfo documentInfo,
+            PrintAttributes attributes) {
+        PrintFileDocumentAdapter documentAdapter = new PrintFileDocumentAdapter(
+                mContext, pdfFile, documentInfo);
         return print(printJobName, documentAdapter, attributes);
     }
 
