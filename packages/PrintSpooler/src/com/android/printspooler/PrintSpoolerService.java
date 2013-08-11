@@ -32,10 +32,9 @@ import android.print.IPrintDocumentAdapter;
 import android.print.IPrintSpooler;
 import android.print.IPrintSpoolerCallbacks;
 import android.print.IPrintSpoolerClient;
-import android.print.IPrinterDiscoveryObserver;
+import android.print.IPrinterDiscoverySessionObserver;
 import android.print.PrintAttributes;
 import android.print.PrintJobInfo;
-import android.print.PrinterId;
 import android.util.Log;
 import android.util.Slog;
 
@@ -167,18 +166,9 @@ public final class PrintSpoolerService extends Service {
                 printJob).sendToTarget();
     }
 
-    public void onReqeustUpdatePrinters(List<PrinterId> printers) {
-        mHandler.obtainMessage(MyHandler.MSG_ON_REQUEST_UPDATE_PRINTERS,
-                printers).sendToTarget();
-    }
-
-    public void startPrinterDiscovery(IPrinterDiscoveryObserver observer) {
-        mHandler.obtainMessage(MyHandler.MSG_ON_START_PRINTER_DISCOVERY,
+    public void createPrinterDiscoverySession(IPrinterDiscoverySessionObserver observer) {
+        mHandler.obtainMessage(MyHandler.MSG_CREATE_PRINTER_DISCOVERY_SESSION,
                 observer).sendToTarget();
-    }
-
-    public void stopPrinterDiscovery() {
-        mHandler.sendEmptyMessage(MyHandler.MSG_ON_STOP_PRINTER_DISCOVERY);
     }
 
     public void onAllPrintJobsForServiceHandled(ComponentName service) {
@@ -193,12 +183,10 @@ public final class PrintSpoolerService extends Service {
     private final class MyHandler extends Handler {
         public static final int MSG_SET_CLIENT = 1;
         public static final int MSG_START_PRINT_JOB_CONFIG_ACTIVITY = 2;
-        public static final int MSG_ON_START_PRINTER_DISCOVERY = 3;
-        public static final int MSG_ON_STOP_PRINTER_DISCOVERY = 4;
+        public static final int MSG_CREATE_PRINTER_DISCOVERY_SESSION = 3;
         public static final int MSG_ON_PRINT_JOB_QUEUED = 5;
         public static final int MSG_ON_ALL_PRINT_JOBS_FOR_SERIVICE_HANDLED = 6;
         public static final int MSG_ON_ALL_PRINT_JOBS_HANDLED = 7;
-        public static final int MSG_ON_REQUEST_UPDATE_PRINTERS = 8;
         public static final int MSG_CHECK_ALL_PRINTJOBS_HANDLED = 9;
 
         public MyHandler(Looper looper) {
@@ -206,7 +194,6 @@ public final class PrintSpoolerService extends Service {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public void handleMessage(Message message) {
             switch (message.what) {
                 case MSG_SET_CLIENT: {
@@ -233,23 +220,14 @@ public final class PrintSpoolerService extends Service {
                     }
                 } break;
 
-                case MSG_ON_START_PRINTER_DISCOVERY: {
-                    IPrinterDiscoveryObserver observer = (IPrinterDiscoveryObserver) message.obj;
+                case MSG_CREATE_PRINTER_DISCOVERY_SESSION: {
+                    IPrinterDiscoverySessionObserver observer =
+                            (IPrinterDiscoverySessionObserver) message.obj;
                     if (mClient != null) {
                         try {
-                            mClient.onStartPrinterDiscovery(observer);
+                            mClient.createPrinterDiscoverySession(observer);
                         } catch (RemoteException re) {
-                            Log.e(LOG_TAG, "Error notifying start printer discovery.", re);
-                        }
-                    }
-                } break;
-
-                case MSG_ON_STOP_PRINTER_DISCOVERY: {
-                    if (mClient != null) {
-                        try {
-                            mClient.onStopPrinterDiscovery();
-                        } catch (RemoteException re) {
-                            Log.e(LOG_TAG, "Error notifying stop printer discovery.", re);
+                            Log.e(LOG_TAG, "Error creating printer discovery session.", re);
                         }
                     }
                 } break;
@@ -283,17 +261,6 @@ public final class PrintSpoolerService extends Service {
                             mClient.onAllPrintJobsHandled();
                         } catch (RemoteException re) {
                             Slog.e(LOG_TAG, "Error notify for all print job handled.", re);
-                        }
-                    }
-                } break;
-
-                case MSG_ON_REQUEST_UPDATE_PRINTERS: {
-                    List<PrinterId> printerIds = (List<PrinterId>) message.obj;
-                    if (mClient != null) {
-                        try {
-                            mClient.onRequestUpdatePrinters(printerIds);
-                        } catch (RemoteException re) {
-                            Slog.e(LOG_TAG, "Error requesting to update pritners.", re);
                         }
                     }
                 } break;

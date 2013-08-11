@@ -21,9 +21,9 @@ import android.print.PrintJobInfo;
 import android.util.Log;
 
 /**
- * This class represents a print job from the perspective of a
- * print service. It provides APIs for observing the print job
- * state and performing operations on the print job.
+ * This class represents a print job from the perspective of a print
+ * service. It provides APIs for observing the print job state and
+ * performing operations on the print job.
  */
 public final class PrintJob {
 
@@ -38,7 +38,8 @@ public final class PrintJob {
     PrintJob(PrintJobInfo jobInfo, IPrintServiceClient client) {
         mCachedInfo = jobInfo;
         mPrintServiceClient = client;
-        mDocument = new PrintDocument(mCachedInfo.getId(), client, jobInfo.getDocumentInfo());
+        mDocument = new PrintDocument(mCachedInfo.getId(), client,
+                jobInfo.getDocumentInfo());
     }
 
     /**
@@ -77,7 +78,7 @@ public final class PrintJob {
     }
 
     /**
-     * Gets the document of this print job.
+     * Gets the printed document.
      *
      * @return The document.
      */
@@ -87,11 +88,12 @@ public final class PrintJob {
 
     /**
      * Gets whether this print job is queued. Such a print job is
-     * ready to be printed and can be started.
+     * ready to be printed and can be started or cancelled.
      *
      * @return Whether the print job is queued.
      *
      * @see #start()
+     * @see #cancel()
      */
     public boolean isQueued() {
         return getInfo().getState() == PrintJobInfo.STATE_QUEUED;
@@ -109,6 +111,42 @@ public final class PrintJob {
      */
     public boolean isStarted() {
         return getInfo().getState() == PrintJobInfo.STATE_STARTED;
+    }
+
+    /**
+     * Gets whether this print job is completed. Such a print job
+     * is successfully printed. This is a final state.
+     *
+     * @return Whether the print job is completed.
+     *
+     * @see #complete()
+     */
+    public boolean isCompleted() {
+        return getInfo().getState() == PrintJobInfo.STATE_COMPLETED;
+    }
+
+    /**
+     * Gets whether this print job is failed. Such a print job is
+     * not successfully printed due to an error. This is a final state.
+     *
+     * @return Whether the print job is failed.
+     *
+     * @see #fail(CharSequence)
+     */
+    public boolean isFailed() {
+        return getInfo().getState() == PrintJobInfo.STATE_FAILED;
+    }
+
+    /**
+     * Gets whether this print job is cancelled. Such a print job was
+     * cancelled as a result of a user request. This is a final state.
+     *
+     * @return Whether the print job is cancelled.
+     *
+     * @see #cancel()
+     */
+    public boolean isCancelled() {
+        return getInfo().getState() == PrintJobInfo.STATE_FAILED;
     }
 
     /**
@@ -163,12 +201,13 @@ public final class PrintJob {
     /**
      * Cancels the print job. You should call this method if {@link
      * #isQueued()} or {@link #isStarted()} returns true and you canceled
-     * the print job as a response to a call to {@link PrintService
-     * #onRequestCancelPrintJob(PrintJob)}.
+     * the print job as a response to a call to {@link
+     * PrintService#onRequestCancelPrintJob(PrintJob)}.
      *
-     * @return Whether the job as canceled.
+     * @return Whether the job is canceled.
      *
      * @see #isStarted()
+     * @see #isQueued()
      */
     public boolean cancel() {
         if (isQueued() || isStarted()) {

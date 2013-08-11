@@ -21,9 +21,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.print.IPrinterDiscoveryObserver;
+import android.print.IPrinterDiscoverySessionObserver;
 import android.print.PrintJobInfo;
-import android.print.PrinterId;
 import android.printservice.PrintServiceInfo;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -106,7 +105,7 @@ final class UserState implements PrintSpoolerCallbacks {
     }
 
     @Override
-    public void onStartPrinterDiscovery(IPrinterDiscoveryObserver observer) {
+    public void createPrinterDiscoverySession(IPrinterDiscoverySessionObserver observer) {
         final List<RemotePrintService> services;
         synchronized (mLock) {
             throwIfDestroyedLocked();
@@ -118,39 +117,7 @@ final class UserState implements PrintSpoolerCallbacks {
         final int serviceCount = services.size();
         for (int i = 0; i < serviceCount; i++) {
             RemotePrintService service = services.get(i);
-            service.onStartPrinterDiscovery(observer);
-        }
-    }
-
-    @Override
-    public void onStopPrinterDiscovery() {
-        final List<RemotePrintService> services;
-        synchronized (mLock) {
-            throwIfDestroyedLocked();
-            if (mActiveServices.isEmpty()) {
-                return;
-            }
-            services = new ArrayList<RemotePrintService>(mActiveServices.values());
-        }
-        final int serviceCount = services.size();
-        for (int i = 0; i < serviceCount; i++) {
-            RemotePrintService service = services.get(i);
-            service.onStopPrinterDiscovery();
-        }
-    }
-
-    @Override
-    public void onRequestUpdatePrinters(List<PrinterId> printerIds) {
-        final RemotePrintService service;
-        synchronized (mLock) {
-            throwIfDestroyedLocked();
-            if (mActiveServices.isEmpty()) {
-                return;
-            }
-            service = mActiveServices.get(printerIds.get(0).getServiceName());
-        }
-        if (service != null) {
-            service.onRequestUpdatePrinters(printerIds);
+            service.createPrinterDiscoverySession(observer);
         }
     }
 

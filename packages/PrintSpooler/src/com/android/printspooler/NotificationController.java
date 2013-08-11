@@ -86,7 +86,7 @@ public class NotificationController {
                         printJob.getLabel()))
                 .addAction(R.drawable.stat_notify_cancelling, mContext.getString(R.string.cancel),
                         createCancelIntent(printJob))
-                .setContentText(printJob.getPrinterId().getPrinterName())
+                .setContentText(printJob.getPrinterName())
                 .setWhen(System.currentTimeMillis())
                 .setOngoing(true)
                 .setShowWhen(true);
@@ -119,7 +119,7 @@ public class NotificationController {
         intent.setAction(INTENT_ACTION_CANCEL_PRINTJOB + "_" + String.valueOf(printJob.getId()));
         intent.putExtra(INTENT_EXTRA_PRINTJOB_ID, printJob.getId());
         intent.putExtra(INTENT_EXTRA_PRINTJOB_LABEL, printJob.getLabel());
-        intent.putExtra(INTENT_EXTRA_PRINTER_NAME, printJob.getPrinterId().getPrinterName());
+        intent.putExtra(INTENT_EXTRA_PRINTER_NAME, printJob.getPrinterName());
         return PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_ONE_SHOT);
     }
 

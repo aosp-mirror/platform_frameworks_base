@@ -55,14 +55,14 @@ public final class PrintDocument {
     }
 
     /**
-     * Gets the data associated with this document. It is a responsibility of the
-     * client to open a stream to the returned file descriptor and fully read the
-     * data.
+     * Gets the data associated with this document.
      * <p>
-     * <strong>Note:</strong> It is your responsibility to close the file descriptor.
+     * <strong>Note: </strong> It is a responsibility of the client to open a
+     * stream to the returned file descriptor, fully read the data, and close
+     * the file descriptor.
      * </p>
      *
-     * @return A file descriptor for reading the data or <code>null</code>.
+     * @return A file descriptor for reading the data.
      */
     public FileDescriptor getData() {
         ParcelFileDescriptor source = null;

@@ -109,6 +109,9 @@ public final class PrintJobInfo implements Parcelable {
     /** The unique id of the printer. */
     private PrinterId mPrinterId;
 
+    /** The name of the printer - internally used */
+    private String mPrinterName;
+
     /** The status of the print job. */
     private int mState;
 
@@ -146,6 +149,7 @@ public final class PrintJobInfo implements Parcelable {
         mId = other.mId;
         mLabel = other.mLabel;
         mPrinterId = other.mPrinterId;
+        mPrinterName = other.mPrinterName;
         mState = other.mState;
         mAppId = other.mAppId;
         mUserId = other.mUserId;
@@ -161,6 +165,7 @@ public final class PrintJobInfo implements Parcelable {
         mId = parcel.readInt();
         mLabel = parcel.readCharSequence();
         mPrinterId = parcel.readParcelable(null);
+        mPrinterName = parcel.readString();
         mState = parcel.readInt();
         mAppId = parcel.readInt();
         mUserId = parcel.readInt();
@@ -242,6 +247,28 @@ public final class PrintJobInfo implements Parcelable {
      */
     public void setPrinterId(PrinterId printerId) {
         mPrinterId = printerId;
+    }
+
+    /**
+     * Gets the name of the target printer.
+     *
+     * @return The printer name.
+     *
+     * @hide
+     */
+    public String getPrinterName() {
+        return mPrinterName;
+    }
+
+    /**
+     * Sets the name of the target printer.
+     *
+     * @param printerName The printer name.
+     *
+     * @hide
+     */
+    public void setPrinterName(String printerName) {
+        mPrinterName = printerName;
     }
 
     /**
@@ -445,6 +472,7 @@ public final class PrintJobInfo implements Parcelable {
         parcel.writeInt(mId);
         parcel.writeCharSequence(mLabel);
         parcel.writeParcelable(mPrinterId, flags);
+        parcel.writeString(mPrinterName);
         parcel.writeInt(mState);
         parcel.writeInt(mAppId);
         parcel.writeInt(mUserId);
