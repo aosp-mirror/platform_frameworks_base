@@ -1684,9 +1684,6 @@ public final class ActivityStackSupervisor {
                         setLaunchHomeTaskNextFlag(sourceRecord, null, targetStack);
                         targetStack.resumeTopActivityLocked(null);
                     }
-                    if (r.task == null)  Slog.v(TAG,
-                        "startActivityUncheckedLocked: task left null",
-                        new RuntimeException("here").fillInStackTrace());
                     return ActivityManager.START_DELIVERED_TO_TOP;
                 }
             }
