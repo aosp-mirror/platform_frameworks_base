@@ -234,6 +234,7 @@ void FontRenderer::cacheBitmap(const SkGlyph& glyph, CachedGlyphInfo* cachedGlyp
     Vector<CacheTexture*>* cacheTextures = NULL;
     switch (format) {
         case SkMask::kA8_Format:
+        case SkMask::kBW_Format:
             cacheTextures = &mACacheTextures;
             break;
         case SkMask::kARGB32_Format:

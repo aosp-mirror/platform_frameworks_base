@@ -233,9 +233,11 @@ void CacheTexture::setDirty(bool dirty) {
 bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_t* retOriginY) {
     switch (glyph.fMaskFormat) {
         case SkMask::kA8_Format:
+        case SkMask::kBW_Format:
             if (mFormat != GL_ALPHA) {
 #if DEBUG_FONT_RENDERER
-                ALOGD("fitBitmap: kA8_Format glyph cannot fit into texture format %x", mFormat);
+                ALOGD("fitBitmap: texture format %x is inappropriate for monochromatic glyphs",
+                        mFormat);
 #endif
                 return false;
             }
@@ -243,7 +245,7 @@ bool CacheTexture::fitBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_
         case SkMask::kARGB32_Format:
             if (mFormat != GL_RGBA) {
 #if DEBUG_FONT_RENDERER
-                ALOGD("fitBitmap: kARGB32_Format glyph cannot fit into texture format %x", mFormat);
+                ALOGD("fitBitmap: texture format %x is inappropriate for colour glyphs", mFormat);
 #endif
                 return false;
             }
