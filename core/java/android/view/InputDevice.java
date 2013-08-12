@@ -46,6 +46,8 @@ public final class InputDevice implements Parcelable {
     private final int mGeneration;
     private final int mControllerNumber;
     private final String mName;
+    private final int mVendorId;
+    private final int mProductId;
     private final String mDescriptor;
     private final boolean mIsExternal;
     private final int mSources;
@@ -343,13 +345,15 @@ public final class InputDevice implements Parcelable {
     };
 
     // Called by native code.
-    private InputDevice(int id, int generation, int controllerNumber, String name,
-            String descriptor, boolean isExternal, int sources, int keyboardType,
+    private InputDevice(int id, int generation, int controllerNumber, String name, int vendorId,
+            int productId, String descriptor, boolean isExternal, int sources, int keyboardType,
             KeyCharacterMap keyCharacterMap, boolean hasVibrator, boolean hasButtonUnderPad) {
         mId = id;
         mGeneration = generation;
         mControllerNumber = controllerNumber;
         mName = name;
+        mVendorId = vendorId;
+        mProductId = productId;
         mDescriptor = descriptor;
         mIsExternal = isExternal;
         mSources = sources;
@@ -364,6 +368,8 @@ public final class InputDevice implements Parcelable {
         mGeneration = in.readInt();
         mControllerNumber = in.readInt();
         mName = in.readString();
+        mVendorId = in.readInt();
+        mProductId = in.readInt();
         mDescriptor = in.readString();
         mIsExternal = in.readInt() != 0;
         mSources = in.readInt();
@@ -440,6 +446,33 @@ public final class InputDevice implements Parcelable {
      */
     public int getGeneration() {
         return mGeneration;
+    }
+
+    /**
+     * Gets the vendor id for the given device, if available.
+     * <p>
+     * A vendor id uniquely identifies the company who manufactured the device. A value of 0 will
+     * be assigned where a vendor id is not available.
+     * </p>
+     *
+     * @return The vendor id of a given device
+     */
+    public int getVendorId() {
+        return mVendorId;
+    }
+
+    /**
+     * Gets the product id for the given device, if available.
+     * <p>
+     * A product id uniquely identifies which product within the address space of a given vendor,
+     * identified by the device's vendor id. A value of 0 will be assigned where a product id is
+     * not available.
+     * </p>
+     *
+     * @return The product id of a given device
+     */
+    public int getProductId() {
+        return mProductId;
     }
 
     /**
@@ -757,6 +790,8 @@ public final class InputDevice implements Parcelable {
         out.writeInt(mGeneration);
         out.writeInt(mControllerNumber);
         out.writeString(mName);
+        out.writeInt(mVendorId);
+        out.writeInt(mProductId);
         out.writeString(mDescriptor);
         out.writeInt(mIsExternal ? 1 : 0);
         out.writeInt(mSources);
