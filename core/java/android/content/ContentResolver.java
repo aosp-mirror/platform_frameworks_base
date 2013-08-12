@@ -16,8 +16,6 @@
 
 package android.content;
 
-import dalvik.system.CloseGuard;
-
 import android.accounts.Account;
 import android.app.ActivityManagerNative;
 import android.app.ActivityThread;
@@ -44,7 +42,8 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
-import android.util.Pair;
+
+import dalvik.system.CloseGuard;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -1385,6 +1384,58 @@ public abstract class ContentResolver {
                     observer != null && observer.deliverSelfNotifications(), syncToNetwork,
                     userHandle);
         } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Return list of all Uri permissions that have been granted <em>to</em> the
+     * calling package, and which exactly match the requested flags. For
+     * example, to return all Uris that the calling application has
+     * <em>non-persistent</em> read access to:
+     *
+     * <pre class="prettyprint">
+     * getIncomingUriPermissionGrants(Intent.FLAG_GRANT_READ_URI_PERMISSION,
+     *         Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_PERSIST_GRANT_URI_PERMISSION);
+     * </pre>
+     *
+     * @param modeFlags any combination of
+     *            {@link Intent#FLAG_GRANT_READ_URI_PERMISSION},
+     *            {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION}, or
+     *            {@link Intent#FLAG_PERSIST_GRANT_URI_PERMISSION}.
+     * @param modeMask mask indicating which flags must match.
+     */
+    public Uri[] getIncomingUriPermissionGrants(int modeFlags, int modeMask) {
+        try {
+            return ActivityManagerNative.getDefault()
+                    .getGrantedUriPermissions(null, getPackageName(), modeFlags, modeMask);
+        } catch (RemoteException e) {
+            return new Uri[0];
+        }
+    }
+
+    /**
+     * Return list of all Uri permissions that have been granted <em>from</em> the
+     * calling package, and which exactly match the requested flags. For
+     * example, to return all Uris that the calling application has granted
+     * <em>non-persistent</em> read access to:
+     *
+     * <pre class="prettyprint">
+     * getOutgoingUriPermissionGrants(Intent.FLAG_GRANT_READ_URI_PERMISSION,
+     *         Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_PERSIST_GRANT_URI_PERMISSION);
+     * </pre>
+     *
+     * @param modeFlags any combination of
+     *            {@link Intent#FLAG_GRANT_READ_URI_PERMISSION},
+     *            {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION}, or
+     *            {@link Intent#FLAG_PERSIST_GRANT_URI_PERMISSION}.
+     * @param modeMask mask indicating which flags must match.
+     */
+    public Uri[] getOutgoingUriPermissionGrants(int modeFlags, int modeMask) {
+        try {
+            return ActivityManagerNative.getDefault()
+                    .getGrantedUriPermissions(getPackageName(), null, modeFlags, modeMask);
+        } catch (RemoteException e) {
+            return new Uri[0];
         }
     }
 
