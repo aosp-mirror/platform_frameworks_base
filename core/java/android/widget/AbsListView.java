@@ -3485,7 +3485,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mLastY = Integer.MIN_VALUE;
         }
 
-        if (performButtonActionOnTouchDown(ev) && (mTouchMode == TOUCH_MODE_DOWN)) {
+        if (mTouchMode == TOUCH_MODE_DOWN && mMotionPosition != INVALID_POSITION
+                && performButtonActionOnTouchDown(ev)) {
             removeCallbacks(mPendingCheckForTap);
         }
     }
