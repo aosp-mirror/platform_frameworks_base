@@ -41,7 +41,7 @@ import java.io.OutputStream;
  * spooling the data, so you can deleted the file if it is a
  * temporary one.
  */
-public final class PrintFileDocumentAdapter extends PrintDocumentAdapter {
+public class PrintFileDocumentAdapter extends PrintDocumentAdapter {
 
     private static final String LOG_TAG = "PrintedFileDocumentAdapter";
 
