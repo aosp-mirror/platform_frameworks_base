@@ -559,6 +559,7 @@ public final class Bitmap implements Parcelable {
      * @param dstHeight The new bitmap's desired height.
      * @param filter    true if the source should be filtered.
      * @return The new scaled bitmap or the source bitmap if no scaling is required.
+     * @throws IllegalArgumentException if width is <= 0, or height is <= 0
      */
     public static Bitmap createScaledBitmap(Bitmap src, int dstWidth, int dstHeight,
             boolean filter) {
@@ -611,6 +612,9 @@ public final class Bitmap implements Parcelable {
      * @param width    The number of pixels in each row
      * @param height   The number of rows
      * @return A copy of a subset of the source bitmap or the source bitmap itself.
+     * @throws IllegalArgumentException if the x, y, width, height values are
+     *         outside of the dimensions of the source bitmap, or width is <= 0,
+     *         or height is <= 0
      */
     public static Bitmap createBitmap(Bitmap source, int x, int y, int width, int height) {
         return createBitmap(source, x, y, width, height, null, false);
@@ -637,7 +641,8 @@ public final class Bitmap implements Parcelable {
      *                   translation.
      * @return A bitmap that represents the specified subset of source
      * @throws IllegalArgumentException if the x, y, width, height values are
-     *         outside of the dimensions of the source bitmap.
+     *         outside of the dimensions of the source bitmap, or width is <= 0,
+     *         or height is <= 0
      */
     public static Bitmap createBitmap(Bitmap source, int x, int y, int width, int height,
             Matrix m, boolean filter) {
