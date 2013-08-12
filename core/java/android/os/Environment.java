@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.content.Context;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
@@ -41,7 +42,16 @@ public class Environment {
     private static final String ENV_ANDROID_ROOT = "ANDROID_ROOT";
 
     /** {@hide} */
-    public static String DIRECTORY_ANDROID = "Android";
+    public static final String DIR_ANDROID = "Android";
+    private static final String DIR_DATA = "data";
+    private static final String DIR_MEDIA = "media";
+    private static final String DIR_OBB = "obb";
+    private static final String DIR_FILES = "files";
+    private static final String DIR_CACHE = "cache";
+
+    /** {@hide} */
+    @Deprecated
+    public static final String DIRECTORY_ANDROID = DIR_ANDROID;
 
     private static final File DIR_ANDROID_ROOT = getDirectory(ENV_ANDROID_ROOT, "/system");
     private static final File DIR_MEDIA_STORAGE = getDirectory(ENV_MEDIA_STORAGE, "/data/media");
@@ -98,12 +108,10 @@ public class Environment {
     /** {@hide} */
     public static class UserEnvironment {
         // TODO: generalize further to create package-specific environment
+        // TODO: add support for secondary external storage
 
-        private final File mExternalStorage;
-        private final File mExternalStorageAndroidData;
-        private final File mExternalStorageAndroidMedia;
-        private final File mExternalStorageAndroidObb;
-        private final File mMediaStorage;
+        private final File[] mExternalDirs;
+        private final File mMediaDir;
 
         public UserEnvironment(int userId) {
             // See storage config details at http://source.android.com/tech/storage/
@@ -122,9 +130,9 @@ public class Environment {
                 final File mediaBase = new File(rawMediaStorage);
 
                 // /storage/emulated/0
-                mExternalStorage = buildPath(emulatedBase, rawUserId);
+                mExternalDirs = new File[] { buildPath(emulatedBase, rawUserId) };
                 // /data/media/0
-                mMediaStorage = buildPath(mediaBase, rawUserId);
+                mMediaDir = buildPath(mediaBase, rawUserId);
 
             } else {
                 // Device has physical external storage; use plain paths.
@@ -134,54 +142,60 @@ public class Environment {
                 }
 
                 // /storage/sdcard0
-                mExternalStorage = new File(rawExternalStorage);
+                mExternalDirs = new File[] { new File(rawExternalStorage) };
                 // /data/media
-                mMediaStorage = new File(rawMediaStorage);
+                mMediaDir = new File(rawMediaStorage);
             }
-
-            mExternalStorageAndroidObb = buildPath(mExternalStorage, DIRECTORY_ANDROID, "obb");
-            mExternalStorageAndroidData = buildPath(mExternalStorage, DIRECTORY_ANDROID, "data");
-            mExternalStorageAndroidMedia = buildPath(mExternalStorage, DIRECTORY_ANDROID, "media");
         }
 
+        @Deprecated
         public File getExternalStorageDirectory() {
-            return mExternalStorage;
+            return mExternalDirs[0];
         }
 
-        public File getExternalStorageObbDirectory() {
-            return mExternalStorageAndroidObb;
-        }
-
+        @Deprecated
         public File getExternalStoragePublicDirectory(String type) {
-            return new File(mExternalStorage, type);
+            return buildExternalStoragePublicDirs(type)[0];
         }
 
-        public File getExternalStorageAndroidDataDir() {
-            return mExternalStorageAndroidData;
+        public File[] getExternalDirs() {
+            return mExternalDirs;
         }
 
-        public File getExternalStorageAppDataDirectory(String packageName) {
-            return new File(mExternalStorageAndroidData, packageName);
+        public File getMediaDir() {
+            return mMediaDir;
         }
 
-        public File getExternalStorageAppMediaDirectory(String packageName) {
-            return new File(mExternalStorageAndroidMedia, packageName);
+        public File[] buildExternalStoragePublicDirs(String type) {
+            return buildPaths(mExternalDirs, type);
         }
 
-        public File getExternalStorageAppObbDirectory(String packageName) {
-            return new File(mExternalStorageAndroidObb, packageName);
+        public File[] buildExternalStorageAndroidDataDirs() {
+            return buildPaths(mExternalDirs, DIR_ANDROID, DIR_DATA);
         }
 
-        public File getExternalStorageAppFilesDirectory(String packageName) {
-            return new File(new File(mExternalStorageAndroidData, packageName), "files");
+        public File[] buildExternalStorageAndroidObbDirs() {
+            return buildPaths(mExternalDirs, DIR_ANDROID, DIR_OBB);
         }
 
-        public File getExternalStorageAppCacheDirectory(String packageName) {
-            return new File(new File(mExternalStorageAndroidData, packageName), "cache");
+        public File[] buildExternalStorageAppDataDirs(String packageName) {
+            return buildPaths(mExternalDirs, DIR_ANDROID, DIR_DATA, packageName);
         }
 
-        public File getMediaStorageDirectory() {
-            return mMediaStorage;
+        public File[] buildExternalStorageAppMediaDirs(String packageName) {
+            return buildPaths(mExternalDirs, DIR_ANDROID, DIR_MEDIA, packageName);
+        }
+
+        public File[] buildExternalStorageAppObbDirs(String packageName) {
+            return buildPaths(mExternalDirs, DIR_ANDROID, DIR_OBB, packageName);
+        }
+
+        public File[] buildExternalStorageAppFilesDirs(String packageName) {
+            return buildPaths(mExternalDirs, DIR_ANDROID, DIR_DATA, packageName, DIR_FILES);
+        }
+
+        public File[] buildExternalStorageAppCacheDirs(String packageName) {
+            return buildPaths(mExternalDirs, DIR_ANDROID, DIR_DATA, packageName, DIR_CACHE);
         }
     }
 
@@ -230,7 +244,7 @@ public class Environment {
      */
     public static File getMediaStorageDirectory() {
         throwIfUserRequired();
-        return sCurrentUser.getMediaStorageDirectory();
+        return sCurrentUser.getMediaDir();
     }
 
     /**
@@ -266,58 +280,64 @@ public class Environment {
     private static final File DOWNLOAD_CACHE_DIRECTORY = getDirectory("DOWNLOAD_CACHE", "/cache");
 
     /**
-     * Gets the Android data directory.
+     * Return the user data directory.
      */
     public static File getDataDirectory() {
         return DATA_DIRECTORY;
     }
 
     /**
-     * Gets the Android external storage directory.  This directory may not
+     * Return the primary external storage directory. This directory may not
      * currently be accessible if it has been mounted by the user on their
      * computer, has been removed from the device, or some other problem has
-     * happened.  You can determine its current state with
+     * happened. You can determine its current state with
      * {@link #getExternalStorageState()}.
-     * 
-     * <p><em>Note: don't be confused by the word "external" here.  This
-     * directory can better be thought as media/shared storage.  It is a
-     * filesystem that can hold a relatively large amount of data and that
-     * is shared across all applications (does not enforce permissions).
-     * Traditionally this is an SD card, but it may also be implemented as
-     * built-in storage in a device that is distinct from the protected
-     * internal storage and can be mounted as a filesystem on a computer.</em></p>
-     *
-     * <p>On devices with multiple users (as described by {@link UserManager}),
-     * each user has their own isolated external storage. Applications only
-     * have access to the external storage for the user they're running as.</p>
-     *
-     * <p>In devices with multiple "external" storage directories (such as
-     * both secure app storage and mountable shared storage), this directory
+     * <p>
+     * <em>Note: don't be confused by the word "external" here. This directory
+     * can better be thought as media/shared storage. It is a filesystem that
+     * can hold a relatively large amount of data and that is shared across all
+     * applications (does not enforce permissions). Traditionally this is an SD
+     * card, but it may also be implemented as built-in storage in a device that
+     * is distinct from the protected internal storage and can be mounted as a
+     * filesystem on a computer.</em>
+     * <p>
+     * On devices with multiple users (as described by {@link UserManager}),
+     * each user has their own isolated external storage. Applications only have
+     * access to the external storage for the user they're running as.
+     * <p>
+     * In devices with multiple "external" storage directories, this directory
      * represents the "primary" external storage that the user will interact
-     * with.</p>
-     *
-     * <p>Applications should not directly use this top-level directory, in
-     * order to avoid polluting the user's root namespace.  Any files that are
-     * private to the application should be placed in a directory returned
-     * by {@link android.content.Context#getExternalFilesDir
+     * with. Access to secondary storage is available through
+     * <p>
+     * Applications should not directly use this top-level directory, in order
+     * to avoid polluting the user's root namespace. Any files that are private
+     * to the application should be placed in a directory returned by
+     * {@link android.content.Context#getExternalFilesDir
      * Context.getExternalFilesDir}, which the system will take care of deleting
-     * if the application is uninstalled.  Other shared files should be placed
-     * in one of the directories returned by
-     * {@link #getExternalStoragePublicDirectory}.</p>
-     *
-     * <p>Writing to this path requires the
-     * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission. In
-     * a future platform release, access to this path will require the
+     * if the application is uninstalled. Other shared files should be placed in
+     * one of the directories returned by
+     * {@link #getExternalStoragePublicDirectory}.
+     * <p>
+     * Writing to this path requires the
+     * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission,
+     * and starting in read access requires the
      * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission,
-     * which is automatically granted if you hold the write permission.</p>
-     *
-     * <p>This path may change between platform versions, so applications
-     * should only persist relative paths.</p>
-     * 
-     * <p>Here is an example of typical code to monitor the state of
-     * external storage:</p>
-     * 
-     * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
+     * which is automatically granted if you hold the write permission.
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, if your
+     * application only needs to store internal data, consider using
+     * {@link Context#getExternalFilesDir(String)} or
+     * {@link Context#getExternalCacheDir()}, which require no permissions to
+     * read or write.
+     * <p>
+     * This path may change between platform versions, so applications should
+     * only persist relative paths.
+     * <p>
+     * Here is an example of typical code to monitor the state of external
+     * storage:
+     * <p>
+     * {@sample
+     * development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
      * monitor_storage}
      *
      * @see #getExternalStorageState()
@@ -325,7 +345,7 @@ public class Environment {
      */
     public static File getExternalStorageDirectory() {
         throwIfUserRequired();
-        return sCurrentUser.getExternalStorageDirectory();
+        return sCurrentUser.getExternalDirs()[0];
     }
 
     /** {@hide} */
@@ -335,7 +355,7 @@ public class Environment {
 
     /** {@hide} */
     public static File getLegacyExternalStorageObbDirectory() {
-        return buildPath(getLegacyExternalStorageDirectory(), DIRECTORY_ANDROID, "obb");
+        return buildPath(getLegacyExternalStorageDirectory(), DIR_ANDROID, DIR_OBB);
     }
 
     /** {@hide} */
@@ -347,7 +367,7 @@ public class Environment {
     /** {@hide} */
     public static File getEmulatedStorageObbSource() {
         // /mnt/shell/emulated/obb
-        return new File(System.getenv(ENV_EMULATED_STORAGE_SOURCE), "obb");
+        return new File(System.getenv(ENV_EMULATED_STORAGE_SOURCE), DIR_OBB);
     }
 
     /**
@@ -472,139 +492,192 @@ public class Environment {
      */
     public static File getExternalStoragePublicDirectory(String type) {
         throwIfUserRequired();
-        return sCurrentUser.getExternalStoragePublicDirectory(type);
+        return sCurrentUser.buildExternalStoragePublicDirs(type)[0];
     }
 
     /**
      * Returns the path for android-specific data on the SD card.
      * @hide
      */
-    public static File getExternalStorageAndroidDataDir() {
+    public static File[] buildExternalStorageAndroidDataDirs() {
         throwIfUserRequired();
-        return sCurrentUser.getExternalStorageAndroidDataDir();
+        return sCurrentUser.buildExternalStorageAndroidDataDirs();
     }
-    
+
     /**
      * Generates the raw path to an application's data
      * @hide
      */
-    public static File getExternalStorageAppDataDirectory(String packageName) {
+    public static File[] buildExternalStorageAppDataDirs(String packageName) {
         throwIfUserRequired();
-        return sCurrentUser.getExternalStorageAppDataDirectory(packageName);
+        return sCurrentUser.buildExternalStorageAppDataDirs(packageName);
     }
     
     /**
      * Generates the raw path to an application's media
      * @hide
      */
-    public static File getExternalStorageAppMediaDirectory(String packageName) {
+    public static File[] buildExternalStorageAppMediaDirs(String packageName) {
         throwIfUserRequired();
-        return sCurrentUser.getExternalStorageAppMediaDirectory(packageName);
+        return sCurrentUser.buildExternalStorageAppMediaDirs(packageName);
     }
     
     /**
      * Generates the raw path to an application's OBB files
      * @hide
      */
-    public static File getExternalStorageAppObbDirectory(String packageName) {
+    public static File[] buildExternalStorageAppObbDirs(String packageName) {
         throwIfUserRequired();
-        return sCurrentUser.getExternalStorageAppObbDirectory(packageName);
+        return sCurrentUser.buildExternalStorageAppObbDirs(packageName);
     }
     
     /**
      * Generates the path to an application's files.
      * @hide
      */
-    public static File getExternalStorageAppFilesDirectory(String packageName) {
+    public static File[] buildExternalStorageAppFilesDirs(String packageName) {
         throwIfUserRequired();
-        return sCurrentUser.getExternalStorageAppFilesDirectory(packageName);
+        return sCurrentUser.buildExternalStorageAppFilesDirs(packageName);
     }
 
     /**
      * Generates the path to an application's cache.
      * @hide
      */
-    public static File getExternalStorageAppCacheDirectory(String packageName) {
+    public static File[] buildExternalStorageAppCacheDirs(String packageName) {
         throwIfUserRequired();
-        return sCurrentUser.getExternalStorageAppCacheDirectory(packageName);
+        return sCurrentUser.buildExternalStorageAppCacheDirs(packageName);
     }
     
     /**
-     * Gets the Android download/cache content directory.
+     * Return the download/cache content directory.
      */
     public static File getDownloadCacheDirectory() {
         return DOWNLOAD_CACHE_DIRECTORY;
     }
 
     /**
-     * {@link #getExternalStorageState()} returns MEDIA_REMOVED if the media is not present.
+     * Unknown storage state, such as when a path isn't backed by known storage
+     * media.
+     *
+     * @see #getStorageState(File)
+     */
+    public static final String MEDIA_UNKNOWN = "unknown";
+
+    /**
+     * Storage state if the media is not present.
+     *
+     * @see #getStorageState(File)
      */
     public static final String MEDIA_REMOVED = "removed";
-     
+
     /**
-     * {@link #getExternalStorageState()} returns MEDIA_UNMOUNTED if the media is present
-     * but not mounted. 
+     * Storage state if the media is present but not mounted.
+     *
+     * @see #getStorageState(File)
      */
     public static final String MEDIA_UNMOUNTED = "unmounted";
 
     /**
-     * {@link #getExternalStorageState()} returns MEDIA_CHECKING if the media is present
-     * and being disk-checked
+     * Storage state if the media is present and being disk-checked.
+     *
+     * @see #getStorageState(File)
      */
     public static final String MEDIA_CHECKING = "checking";
 
     /**
-     * {@link #getExternalStorageState()} returns MEDIA_NOFS if the media is present
-     * but is blank or is using an unsupported filesystem
+     * Storage state if the media is present but is blank or is using an
+     * unsupported filesystem.
+     *
+     * @see #getStorageState(File)
      */
     public static final String MEDIA_NOFS = "nofs";
 
     /**
-     * {@link #getExternalStorageState()} returns MEDIA_MOUNTED if the media is present
-     * and mounted at its mount point with read/write access. 
+     * Storage state if the media is present and mounted at its mount point with
+     * read/write access.
+     *
+     * @see #getStorageState(File)
      */
     public static final String MEDIA_MOUNTED = "mounted";
 
     /**
-     * {@link #getExternalStorageState()} returns MEDIA_MOUNTED_READ_ONLY if the media is present
-     * and mounted at its mount point with read only access. 
+     * Storage state if the media is present and mounted at its mount point with
+     * read-only access.
+     *
+     * @see #getStorageState(File)
      */
     public static final String MEDIA_MOUNTED_READ_ONLY = "mounted_ro";
 
     /**
-     * {@link #getExternalStorageState()} returns MEDIA_SHARED if the media is present
-     * not mounted, and shared via USB mass storage. 
+     * Storage state if the media is present not mounted, and shared via USB
+     * mass storage.
+     *
+     * @see #getStorageState(File)
      */
     public static final String MEDIA_SHARED = "shared";
 
     /**
-     * {@link #getExternalStorageState()} returns MEDIA_BAD_REMOVAL if the media was
-     * removed before it was unmounted. 
+     * Storage state if the media was removed before it was unmounted.
+     *
+     * @see #getStorageState(File)
      */
     public static final String MEDIA_BAD_REMOVAL = "bad_removal";
 
     /**
-     * {@link #getExternalStorageState()} returns MEDIA_UNMOUNTABLE if the media is present
-     * but cannot be mounted.  Typically this happens if the file system on the
-     * media is corrupted. 
+     * Storage state if the media is present but cannot be mounted. Typically
+     * this happens if the file system on the media is corrupted.
+     *
+     * @see #getStorageState(File)
      */
     public static final String MEDIA_UNMOUNTABLE = "unmountable";
 
     /**
-     * Gets the current state of the primary "external" storage device.
+     * Returns the current state of the primary "external" storage device.
      * 
      * @see #getExternalStorageDirectory()
+     * @return one of {@link #MEDIA_UNKNOWN}, {@link #MEDIA_REMOVED},
+     *         {@link #MEDIA_UNMOUNTED}, {@link #MEDIA_CHECKING},
+     *         {@link #MEDIA_NOFS}, {@link #MEDIA_MOUNTED},
+     *         {@link #MEDIA_MOUNTED_READ_ONLY}, {@link #MEDIA_SHARED},
+     *         {@link #MEDIA_BAD_REMOVAL}, or {@link #MEDIA_UNMOUNTABLE}.
      */
     public static String getExternalStorageState() {
+        return getStorageState(getExternalStorageDirectory());
+    }
+
+    /**
+     * Returns the current state of the storage device that provides the given
+     * path.
+     *
+     * @return one of {@link #MEDIA_UNKNOWN}, {@link #MEDIA_REMOVED},
+     *         {@link #MEDIA_UNMOUNTED}, {@link #MEDIA_CHECKING},
+     *         {@link #MEDIA_NOFS}, {@link #MEDIA_MOUNTED},
+     *         {@link #MEDIA_MOUNTED_READ_ONLY}, {@link #MEDIA_SHARED},
+     *         {@link #MEDIA_BAD_REMOVAL}, or {@link #MEDIA_UNMOUNTABLE}.
+     */
+    public static String getStorageState(File path) {
+        final String rawPath;
         try {
-            IMountService mountService = IMountService.Stub.asInterface(ServiceManager
-                    .getService("mount"));
-            final StorageVolume primary = getPrimaryVolume();
-            return mountService.getVolumeState(primary.getPath());
-        } catch (RemoteException rex) {
-            Log.w(TAG, "Failed to read external storage state; assuming REMOVED: " + rex);
-            return Environment.MEDIA_REMOVED;
+            rawPath = path.getCanonicalPath();
+        } catch (IOException e) {
+            Log.w(TAG, "Failed to resolve target path: " + e);
+            return Environment.MEDIA_UNKNOWN;
         }
+
+        try {
+            final IMountService mountService = IMountService.Stub.asInterface(
+                    ServiceManager.getService("mount"));
+            final StorageVolume[] volumes = mountService.getVolumeList();
+            for (StorageVolume volume : volumes) {
+                if (rawPath.startsWith(volume.getPath())) {
+                    return mountService.getVolumeState(volume.getPath());
+                }
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to find external storage state: " + e);
+        }
+        return Environment.MEDIA_UNKNOWN;
     }
 
     /**
@@ -668,7 +741,25 @@ public class Environment {
         }
     }
 
-    private static File buildPath(File base, String... segments) {
+    /**
+     * Append path segments to each given base path, returning result.
+     *
+     * @hide
+     */
+    public static File[] buildPaths(File[] base, String... segments) {
+        File[] result = new File[base.length];
+        for (int i = 0; i < base.length; i++) {
+            result[i] = buildPath(base[i], segments);
+        }
+        return result;
+    }
+
+    /**
+     * Append path segments to given base path, returning result.
+     *
+     * @hide
+     */
+    public static File buildPath(File base, String... segments) {
         File cur = base;
         for (String segment : segments) {
             if (cur == null) {
