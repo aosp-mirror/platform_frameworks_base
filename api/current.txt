@@ -5587,8 +5587,10 @@ package android.content {
     method public final int delete(android.net.Uri, java.lang.String, java.lang.String[]);
     method public static deprecated android.content.SyncInfo getCurrentSync();
     method public static java.util.List<android.content.SyncInfo> getCurrentSyncs();
+    method public android.net.Uri[] getIncomingUriPermissionGrants(int, int);
     method public static int getIsSyncable(android.accounts.Account, java.lang.String);
     method public static boolean getMasterSyncAutomatically();
+    method public android.net.Uri[] getOutgoingUriPermissionGrants(int, int);
     method public static java.util.List<android.content.PeriodicSync> getPeriodicSyncs(android.accounts.Account, java.lang.String);
     method public java.lang.String[] getStreamTypes(android.net.Uri, java.lang.String);
     method public static android.content.SyncAdapterType[] getSyncAdapterTypes();
@@ -20320,6 +20322,7 @@ package android.provider {
     method public static android.net.Uri buildSearchUri(java.lang.String, java.lang.String, java.lang.String, java.lang.String);
     method public static android.net.Uri buildSearchUri(android.net.Uri, java.lang.String);
     method public static java.lang.String getDocId(android.net.Uri);
+    method public static android.net.Uri[] getOpenDocuments(android.content.Context);
     method public static java.lang.String getRootId(android.net.Uri);
     method public static java.lang.String getSearchQuery(android.net.Uri);
     method public static android.graphics.Bitmap getThumbnail(android.content.ContentResolver, android.net.Uri, android.graphics.Point);
@@ -23335,11 +23338,14 @@ package android.test.mock {
     method public java.io.File getDatabasePath(java.lang.String);
     method public java.io.File getDir(java.lang.String, int);
     method public java.io.File getExternalCacheDir();
+    method public java.io.File[] getExternalCacheDirs();
     method public java.io.File getExternalFilesDir(java.lang.String);
+    method public java.io.File[] getExternalFilesDirs(java.lang.String);
     method public java.io.File getFileStreamPath(java.lang.String);
     method public java.io.File getFilesDir();
     method public android.os.Looper getMainLooper();
     method public java.io.File getObbDir();
+    method public java.io.File[] getObbDirs();
     method public java.lang.String getPackageCodePath();
     method public android.content.pm.PackageManager getPackageManager();
     method public java.lang.String getPackageName();

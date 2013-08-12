@@ -399,6 +399,10 @@ public interface IActivityManager extends IInterface {
 
     public void restart() throws RemoteException;
 
+    public Uri[] getGrantedUriPermissions(
+            String sourcePackage, String targetPackage, int modeFlags, int modeMask)
+            throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -680,4 +684,5 @@ public interface IActivityManager extends IInterface {
     int NOTIFY_ACTIVITY_DRAWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+175;
     int REPORT_ACTIVITY_FULLY_DRAWN_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+176;
     int RESTART_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+177;
+    int GET_GRANTED_URI_PERMISSIONS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+178;
 }

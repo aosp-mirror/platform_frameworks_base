@@ -36,6 +36,7 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.MemInfoReader;
@@ -705,8 +706,8 @@ public final class ActivityManagerService extends ActivityManagerNative
      * to {@link UriPermission#uri} to {@link UriPermission}.
      */
     @GuardedBy("this")
-    private final SparseArray<HashMap<Uri, UriPermission>>
-            mGrantedUriPermissions = new SparseArray<HashMap<Uri, UriPermission>>();
+    private final SparseArray<ArrayMap<Uri, UriPermission>>
+            mGrantedUriPermissions = new SparseArray<ArrayMap<Uri, UriPermission>>();
 
     CoreSettingsObserver mCoreSettingsObserver;
 
@@ -5446,9 +5447,9 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private UriPermission findOrCreateUriPermissionLocked(
             String sourcePkg, String targetPkg, int targetUid, Uri uri) {
-        HashMap<Uri, UriPermission> targetUris = mGrantedUriPermissions.get(targetUid);
+        ArrayMap<Uri, UriPermission> targetUris = mGrantedUriPermissions.get(targetUid);
         if (targetUris == null) {
-            targetUris = Maps.newHashMap();
+            targetUris = Maps.newArrayMap();
             mGrantedUriPermissions.put(targetUid, targetUris);
         }
 
@@ -5467,7 +5468,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (uid == 0) {
             return true;
         }
-        HashMap<Uri, UriPermission> perms = mGrantedUriPermissions.get(uid);
+        ArrayMap<Uri, UriPermission> perms = mGrantedUriPermissions.get(uid);
         if (perms == null) return false;
         UriPermission perm = perms.get(uri);
         if (perm == null) return false;
@@ -5794,7 +5795,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     void removeUriPermissionIfNeededLocked(UriPermission perm) {
         if ((perm.modeFlags&(Intent.FLAG_GRANT_READ_URI_PERMISSION
                 |Intent.FLAG_GRANT_WRITE_URI_PERMISSION)) == 0) {
-            HashMap<Uri, UriPermission> perms
+            ArrayMap<Uri, UriPermission> perms
                     = mGrantedUriPermissions.get(perm.targetUid);
             if (perms != null) {
                 if (DEBUG_URI_PERMISSION) Slog.v(TAG, 
@@ -5837,7 +5838,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             final int NS = SEGMENTS.size();
             int N = mGrantedUriPermissions.size();
             for (int i=0; i<N; i++) {
-                HashMap<Uri, UriPermission> perms
+                ArrayMap<Uri, UriPermission> perms
                         = mGrantedUriPermissions.valueAt(i);
                 Iterator<UriPermission> it = perms.values().iterator();
             toploop:
@@ -6111,6 +6112,51 @@ public final class ActivityManagerService extends ActivityManagerNative
             Log.wtf(TAG, "Failed reading Uri grants", e);
         } finally {
             IoUtils.closeQuietly(fis);
+        }
+    }
+
+    @Override
+    public Uri[] getGrantedUriPermissions(
+            String sourcePackage, String targetPackage, int modeFlags, int modeMask) {
+        enforceNotIsolatedCaller("getGrantedUriPermissions");
+        synchronized (this) {
+            // Verify that caller owns at least one of the requested packages
+            final int uid = Binder.getCallingUid();
+            final IPackageManager pm = AppGlobals.getPackageManager();
+            final String[] callerPackages;
+            try {
+                callerPackages = pm.getPackagesForUid(uid);
+            } catch (RemoteException e) {
+                throw new SecurityException("Failed to find packages for UID " + uid);
+            }
+            final boolean callerOwnsSource = sourcePackage != null
+                    && ArrayUtils.contains(callerPackages, sourcePackage);
+            final boolean callerOwnsTarget = targetPackage != null
+                    && ArrayUtils.contains(callerPackages, targetPackage);
+            if (!(callerOwnsSource || callerOwnsTarget)) {
+                throw new SecurityException("Caller " + Arrays.toString(callerPackages)
+                        + " doesn't own " + sourcePackage + " or " + targetPackage);
+            }
+
+            final ArrayList<Uri> result = Lists.newArrayList();
+            final int size = mGrantedUriPermissions.size();
+            for (int i = 0; i < size; i++) {
+                final ArrayMap<Uri, UriPermission> map = mGrantedUriPermissions.valueAt(i);
+                final int mapSize = map.size();
+                for (int j = 0; j < mapSize; j++) {
+                    final UriPermission perm = map.valueAt(j);
+                    final boolean sourceMatch = sourcePackage == null
+                            || sourcePackage.equals(perm.sourcePkg);
+                    final boolean targetMatch = targetPackage == null
+                            || targetPackage.equals(perm.targetPkg);
+                    final boolean modeMatch = (perm.modeFlags & modeMask) == modeFlags;
+                    if (sourceMatch && targetMatch && modeMatch) {
+                        result.add(perm.uri);
+                    }
+                }
+            }
+
+            return result.toArray(new Uri[result.size()]);
         }
     }
 
@@ -6830,7 +6876,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         
-        HashMap<Uri, UriPermission> perms = mGrantedUriPermissions.get(callingUid);
+        ArrayMap<Uri, UriPermission> perms = mGrantedUriPermissions.get(callingUid);
         if (perms != null) {
             for (Map.Entry<Uri, UriPermission> uri : perms.entrySet()) {
                 if (uri.getKey().getAuthority().equals(cpi.authority)) {
@@ -10731,7 +10777,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (dumpUid >= -1 && UserHandle.getAppId(uid) != dumpUid) {
                     continue;
                 }
-                HashMap<Uri, UriPermission> perms
+                ArrayMap<Uri, UriPermission> perms
                         = mGrantedUriPermissions.valueAt(i);
                 if (!printed) {
                     if (needSep) pw.println();
