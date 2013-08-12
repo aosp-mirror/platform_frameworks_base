@@ -610,6 +610,7 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
     const jchar* glyphs = value->getGlyphs();
     size_t glyphsCount = value->getGlyphsCount();
     jfloat totalAdvance = value->getTotalAdvance();
+    x += xOffsetForTextAlign(paint, totalAdvance);
     const float* positions = value->getPos();
     int bytesCount = glyphsCount * sizeof(jchar);
     const SkRect& r = value->getBounds();
@@ -617,8 +618,7 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
     bounds.translate(x, y);
 
     renderer->drawText((const char*) glyphs, bytesCount, glyphsCount,
-            x + xOffsetForTextAlign(paint, totalAdvance), y, positions,
-            paint, totalAdvance, bounds);
+            x, y, positions, paint, totalAdvance, bounds);
 }
 
 static void renderTextOnPath(OpenGLRenderer* renderer, const jchar* text, int count,
@@ -646,6 +646,7 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
     const jchar* glyphs = value->getGlyphs();
     size_t glyphsCount = value->getGlyphsCount();
     jfloat totalAdvance = value->getTotalAdvance();
+    x += xOffsetForTextAlign(paint, totalAdvance);
     const float* positions = value->getPos();
     int bytesCount = glyphsCount * sizeof(jchar);
     const SkRect& r = value->getBounds();
@@ -653,8 +654,7 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
     bounds.translate(x, y);
 
     renderer->drawText((const char*) glyphs, bytesCount, glyphsCount,
-            x + xOffsetForTextAlign(paint, totalAdvance), y, positions,
-            paint, totalAdvance, bounds);
+            x, y, positions, paint, totalAdvance, bounds);
 }
 
 static void android_view_GLES20Canvas_drawTextArray(JNIEnv* env, jobject clazz,
