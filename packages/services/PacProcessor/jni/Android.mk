@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2010 The Android Open Source Project
+# Copyright (C) 2013 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,15 +18,24 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
+LOCAL_SRC_FILES := \
+    jni_init.cpp \
+    com_android_pacprocessor_PacNative.cpp
+
+LOCAL_C_INCLUDES += \
+    external/chromium-libpac/src
+
+LOCAL_SHARED_LIBRARIES := \
+    libandroidfw \
+    libandroid_runtime \
+    liblog \
+    libutils \
+    libnativehelper \
+    libpac
+
+LOCAL_MODULE := libjni_pacprocessor
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
+include external/stlport/libstlport.mk
 
-LOCAL_PACKAGE_NAME := PacProcessor
-LOCAL_CERTIFICATE := platform
-
-LOCAL_REQUIRED_MODULES := libjni_pacprocessor
-
-include $(BUILD_PACKAGE)
-
-include $(call all-makefiles-under,$(LOCAL_PATH))
+include $(BUILD_SHARED_LIBRARY)

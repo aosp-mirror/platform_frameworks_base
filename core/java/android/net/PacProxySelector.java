@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2013 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package android.net;
 
@@ -25,18 +40,24 @@ public class PacProxySelector extends ProxySelector {
     private static final String TAG = "PacProxySelector";
     public static final String PROXY_SERVICE = "com.android.net.IProxyService";
     private IProxyService mProxyService;
+    private final List<Proxy> mDefaultList;
 
     public PacProxySelector() {
         mProxyService = IProxyService.Stub.asInterface(
                 ServiceManager.getService(PROXY_SERVICE));
         if (mProxyService == null) {
             // Added because of b10267814 where mako is restarting.
-            Log.e(TAG, "PackManager: no proxy service");
+            Log.e(TAG, "PacManager: no proxy service");
         }
+        mDefaultList = Lists.newArrayList(java.net.Proxy.NO_PROXY);
     }
 
     @Override
     public List<Proxy> select(URI uri) {
+        if (mProxyService == null) {
+            mProxyService = IProxyService.Stub.asInterface(
+                    ServiceManager.getService(PROXY_SERVICE));
+        }
         if (mProxyService == null) {
             Log.e(TAG, "select: no proxy service return NO_PROXY");
             return Lists.newArrayList(java.net.Proxy.NO_PROXY);
@@ -52,6 +73,9 @@ public class PacProxySelector extends ProxySelector {
             response = mProxyService.resolvePacFile(uri.getHost(), urlString);
         } catch (RemoteException e) {
             e.printStackTrace();
+        }
+        if (response == null) {
+            return mDefaultList;
         }
 
         return parseResponse(response);
