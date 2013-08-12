@@ -5718,11 +5718,14 @@ package android.content {
     method public abstract java.io.File getDatabasePath(java.lang.String);
     method public abstract java.io.File getDir(java.lang.String, int);
     method public abstract java.io.File getExternalCacheDir();
+    method public abstract java.io.File[] getExternalCacheDirs();
     method public abstract java.io.File getExternalFilesDir(java.lang.String);
+    method public abstract java.io.File[] getExternalFilesDirs(java.lang.String);
     method public abstract java.io.File getFileStreamPath(java.lang.String);
     method public abstract java.io.File getFilesDir();
     method public abstract android.os.Looper getMainLooper();
     method public abstract java.io.File getObbDir();
+    method public abstract java.io.File[] getObbDirs();
     method public abstract java.lang.String getPackageCodePath();
     method public abstract android.content.pm.PackageManager getPackageManager();
     method public abstract java.lang.String getPackageName();
@@ -5873,11 +5876,14 @@ package android.content {
     method public java.io.File getDatabasePath(java.lang.String);
     method public java.io.File getDir(java.lang.String, int);
     method public java.io.File getExternalCacheDir();
+    method public java.io.File[] getExternalCacheDirs();
     method public java.io.File getExternalFilesDir(java.lang.String);
+    method public java.io.File[] getExternalFilesDirs(java.lang.String);
     method public java.io.File getFileStreamPath(java.lang.String);
     method public java.io.File getFilesDir();
     method public android.os.Looper getMainLooper();
     method public java.io.File getObbDir();
+    method public java.io.File[] getObbDirs();
     method public java.lang.String getPackageCodePath();
     method public android.content.pm.PackageManager getPackageManager();
     method public java.lang.String getPackageName();
@@ -17530,6 +17536,7 @@ package android.os {
     method public static java.io.File getExternalStoragePublicDirectory(java.lang.String);
     method public static java.lang.String getExternalStorageState();
     method public static java.io.File getRootDirectory();
+    method public static java.lang.String getStorageState(java.io.File);
     method public static boolean isExternalStorageEmulated();
     method public static boolean isExternalStorageRemovable();
     field public static java.lang.String DIRECTORY_ALARMS;
@@ -17548,6 +17555,7 @@ package android.os {
     field public static final java.lang.String MEDIA_NOFS = "nofs";
     field public static final java.lang.String MEDIA_REMOVED = "removed";
     field public static final java.lang.String MEDIA_SHARED = "shared";
+    field public static final java.lang.String MEDIA_UNKNOWN = "unknown";
     field public static final java.lang.String MEDIA_UNMOUNTABLE = "unmountable";
     field public static final java.lang.String MEDIA_UNMOUNTED = "unmounted";
   }

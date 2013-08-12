@@ -2877,7 +2877,7 @@ class BackupManagerService extends IBackupManager.Stub {
             // Save associated .obb content if it exists and we did save the apk
             // check for .obb and save those too
             final UserEnvironment userEnv = new UserEnvironment(UserHandle.USER_OWNER);
-            final File obbDir = userEnv.getExternalStorageAppObbDirectory(pkg.packageName);
+            final File obbDir = userEnv.buildExternalStorageAppObbDirs(pkg.packageName)[0];
             if (obbDir != null) {
                 if (MORE_DEBUG) Log.i(TAG, "obb dir: " + obbDir.getAbsolutePath());
                 File[] obbFiles = obbDir.listFiles();

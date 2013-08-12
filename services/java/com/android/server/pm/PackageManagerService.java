@@ -6794,31 +6794,20 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (mounted) {
                 final UserEnvironment userEnv = new UserEnvironment(mStats.userHandle);
 
-                final File externalCacheDir = userEnv
-                        .getExternalStorageAppCacheDirectory(mStats.packageName);
-                final long externalCacheSize = mContainerService
-                        .calculateDirectorySize(externalCacheDir.getPath());
-                mStats.externalCacheSize = externalCacheSize;
+                mStats.externalCacheSize = calculateDirectorySize(mContainerService,
+                        userEnv.buildExternalStorageAppCacheDirs(mStats.packageName));
 
-                final File externalDataDir = userEnv
-                        .getExternalStorageAppDataDirectory(mStats.packageName);
-                long externalDataSize = mContainerService.calculateDirectorySize(externalDataDir
-                        .getPath());
+                mStats.externalDataSize = calculateDirectorySize(mContainerService,
+                        userEnv.buildExternalStorageAppDataDirs(mStats.packageName));
 
-                if (externalCacheDir.getParentFile().equals(externalDataDir)) {
-                    externalDataSize -= externalCacheSize;
-                }
-                mStats.externalDataSize = externalDataSize;
+                // Always subtract cache size, since it's a subdirectory
+                mStats.externalDataSize -= mStats.externalCacheSize;
 
-                final File externalMediaDir = userEnv
-                        .getExternalStorageAppMediaDirectory(mStats.packageName);
-                mStats.externalMediaSize = mContainerService
-                        .calculateDirectorySize(externalMediaDir.getPath());
+                mStats.externalMediaSize = calculateDirectorySize(mContainerService,
+                        userEnv.buildExternalStorageAppMediaDirs(mStats.packageName));
 
-                final File externalObbDir = userEnv
-                        .getExternalStorageAppObbDirectory(mStats.packageName);
-                mStats.externalObbSize = mContainerService.calculateDirectorySize(externalObbDir
-                        .getPath());
+                mStats.externalObbSize = calculateDirectorySize(mContainerService,
+                        userEnv.buildExternalStorageAppObbDirs(mStats.packageName));
             }
         }
 
@@ -6837,6 +6826,24 @@ public class PackageManagerService extends IPackageManager.Stub {
         void handleServiceError() {
             Slog.e(TAG, "Could not measure application " + mStats.packageName
                             + " external storage");
+        }
+    }
+
+    private static long calculateDirectorySize(IMediaContainerService mcs, File[] paths)
+            throws RemoteException {
+        long result = 0;
+        for (File path : paths) {
+            result += mcs.calculateDirectorySize(path.getAbsolutePath());
+        }
+        return result;
+    }
+
+    private static void clearDirectory(IMediaContainerService mcs, File[] paths) {
+        for (File path : paths) {
+            try {
+                mcs.clearDirectory(path.getAbsolutePath());
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -9291,25 +9298,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
 
                     final UserEnvironment userEnv = new UserEnvironment(curUser);
-                    final File externalCacheDir = userEnv
-                            .getExternalStorageAppCacheDirectory(packageName);
-                    try {
-                        conn.mContainerService.clearDirectory(externalCacheDir.toString());
-                    } catch (RemoteException e) {
-                    }
+                    clearDirectory(conn.mContainerService,
+                            userEnv.buildExternalStorageAppCacheDirs(packageName));
                     if (allData) {
-                        final File externalDataDir = userEnv
-                                .getExternalStorageAppDataDirectory(packageName);
-                        try {
-                            conn.mContainerService.clearDirectory(externalDataDir.toString());
-                        } catch (RemoteException e) {
-                        }
-                        final File externalMediaDir = userEnv
-                                .getExternalStorageAppMediaDirectory(packageName);
-                        try {
-                            conn.mContainerService.clearDirectory(externalMediaDir.toString());
-                        } catch (RemoteException e) {
-                        }
+                        clearDirectory(conn.mContainerService,
+                                userEnv.buildExternalStorageAppDataDirs(packageName));
+                        clearDirectory(conn.mContainerService,
+                                userEnv.buildExternalStorageAppMediaDirs(packageName));
                     }
                 }
             } finally {
