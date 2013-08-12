@@ -2892,6 +2892,17 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     }
 
     /**
+     * See {@link WebView#exportToPdf()}
+     */
+    @Override
+    public void exportToPdf(java.io.OutputStream out, int width, int height,
+            ValueCallback<Boolean> resultCallback) {
+        // K-only API not implemented in WebViewClassic.
+        throw new IllegalStateException("This API not supported in Classic WebView.");
+
+    }
+
+    /**
      * See {@link WebView#getScale()}
      */
     @Override
