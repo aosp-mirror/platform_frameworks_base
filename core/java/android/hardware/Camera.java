@@ -1013,7 +1013,7 @@ public class Camera {
 
             case CAMERA_MSG_META_DATA:
                 if (mCameraMetaDataCallback != null) {
-                    mCameraMetaDataCallback.onCameraMetaData((int[])msg.obj, mCamera);
+                    mCameraMetaDataCallback.onCameraMetaData((byte[])msg.obj, mCamera);
                 }
                 return;
             /* ### QC ADD-ONS: END */
@@ -1775,25 +1775,24 @@ public class Camera {
         /**
          * Callback for when camera meta data is available.
          *
-         * @param data   a int array of the camera meta data
+         * @param data   a byte array of the camera meta data
          * @param camera the Camera service object
          */
-        void onCameraMetaData(int[] data, Camera camera);
+        void onCameraMetaData(byte[] data, Camera camera);
     };
 
     /** @hide
-     * Set camera face detection mode and registers a callback function to run.
+     * Set camera meta data and registers a callback function to run.
      *  Only valid after startPreview() has been called.
      *
      * @param cb the callback to run
      */
-    //TBD
-    public final void setFaceDetectionCb(CameraMetaDataCallback cb)
+    public final void setMetadataCb(CameraMetaDataCallback cb)
     {
         mCameraMetaDataCallback = cb;
-        native_setFaceDetectionCb(cb!=null);
+        native_setMetadataCb(cb!=null);
     }
-    private native final void native_setFaceDetectionCb(boolean mode);
+    private native final void native_setMetadataCb(boolean mode);
 
     /** @hide
      * Set camera face detection command to send meta data.
