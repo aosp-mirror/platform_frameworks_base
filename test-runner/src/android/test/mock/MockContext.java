@@ -577,4 +577,19 @@ public class MockContext extends Context {
     public DisplayAdjustments getDisplayAdjustments(int displayId) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public File[] getExternalFilesDirs(String type) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public File[] getObbDirs() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public File[] getExternalCacheDirs() {
+        throw new UnsupportedOperationException();
+    }
 }

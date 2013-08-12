@@ -295,14 +295,20 @@ public class DefaultContainerService extends IntentService {
             try {
                 while ((item = pm.nextPackageToClean(item)) != null) {
                     final UserEnvironment userEnv = new UserEnvironment(item.userId);
-                    eraseFiles(userEnv.getExternalStorageAppDataDirectory(item.packageName));
-                    eraseFiles(userEnv.getExternalStorageAppMediaDirectory(item.packageName));
+                    eraseFiles(userEnv.buildExternalStorageAppDataDirs(item.packageName));
+                    eraseFiles(userEnv.buildExternalStorageAppMediaDirs(item.packageName));
                     if (item.andCode) {
-                        eraseFiles(userEnv.getExternalStorageAppObbDirectory(item.packageName));
+                        eraseFiles(userEnv.buildExternalStorageAppObbDirs(item.packageName));
                     }
                 }
             } catch (RemoteException e) {
             }
+        }
+    }
+
+    void eraseFiles(File[] paths) {
+        for (File path : paths) {
+            eraseFiles(path);
         }
     }
 
