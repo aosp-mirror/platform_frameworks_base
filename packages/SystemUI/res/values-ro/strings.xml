@@ -164,6 +164,8 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi conectat"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Se caută GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Locaţie setată prin GPS"</string>
+    <!-- no translation found for accessibility_location_active (2427290146138169014) -->
+    <skip />
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Ștergeţi toate notificările."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Informaţii despre aplicaţie"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Ecranul se va roti în mod automat."</string>
