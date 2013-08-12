@@ -16,6 +16,10 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_NORMAL;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSIENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -129,11 +133,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     private static final int STATUS_OR_NAV_TRANSIENT =
             View.STATUS_BAR_TRANSIENT | View.NAVIGATION_BAR_TRANSIENT;
     private static final long AUTOHIDE_TIMEOUT_MS = 3000;
-    private static final float TRANSPARENT_ALPHA = 0.7f;
-
-    private static final int BAR_MODE_NORMAL = 0;
-    private static final int BAR_MODE_TRANSIENT = 1;
-    private static final int BAR_MODE_TRANSPARENT = 2;
 
     // fling gesture tuning parameters, scaled to display density
     private float mSelfExpandVelocityPx; // classic value: 2000px/s
@@ -1905,16 +1904,16 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
 
             // update status bar mode
-            int sbMode = updateBarMode(oldVal, newVal, mStatusBarView,
+            int sbMode = updateBarMode(oldVal, newVal, mStatusBarView.getBarTransitions(),
                     View.STATUS_BAR_TRANSIENT, View.SYSTEM_UI_FLAG_TRANSPARENT_STATUS);
 
             // update navigation bar mode
-            int nbMode = updateBarMode(oldVal, newVal, mNavigationBarView,
+            int nbMode = updateBarMode(oldVal, newVal, mNavigationBarView.getBarTransitions(),
                     View.NAVIGATION_BAR_TRANSIENT, View.SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION);
 
             if (sbMode != -1 || nbMode != -1) {
                 // update transient bar autohide
-                if (sbMode == BAR_MODE_TRANSIENT || nbMode == BAR_MODE_TRANSIENT) {
+                if (sbMode == MODE_TRANSIENT || nbMode == MODE_TRANSIENT) {
                     scheduleAutohide();
                 } else {
                     cancelAutohide();
@@ -1926,21 +1925,21 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
-    private int updateBarMode(int oldVis, int newVis, View view,
+    private int updateBarMode(int oldVis, int newVis, BarTransitions transitions,
             int transientFlag, int transparentFlag) {
         final int oldMode = barMode(oldVis, transientFlag, transparentFlag);
         final int newMode = barMode(newVis, transientFlag, transparentFlag);
         if (oldMode == newMode) {
             return -1; // no mode change
         }
-        setTransparent(view, newMode != BAR_MODE_NORMAL);
+        transitions.transitionTo(newMode);
         return newMode;
     }
 
     private int barMode(int vis, int transientFlag, int transparentFlag) {
-        return (vis & transientFlag) != 0 ? BAR_MODE_TRANSIENT
-                : (vis & transparentFlag) != 0 ? BAR_MODE_TRANSPARENT
-                : BAR_MODE_NORMAL;
+        return (vis & transientFlag) != 0 ? MODE_TRANSIENT
+                : (vis & transparentFlag) != 0 ? MODE_TRANSPARENT
+                : MODE_NORMAL;
     }
 
     @Override
@@ -1978,13 +1977,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     private void userAutohide() {
         cancelAutohide();
         mHandler.postDelayed(mAutohide, 25);
-    }
-
-    private void setTransparent(View view, boolean transparent) {
-        float alpha = transparent ? TRANSPARENT_ALPHA : 1;
-        if (DEBUG) Log.d(TAG, "Setting " + (view == mStatusBarView ? "status bar" :
-                view == mNavigationBarView ? "navigation bar" : "view") +  " alpha to " + alpha);
-        view.setAlpha(alpha);
     }
 
     private void setStatusBarLowProfile(boolean lightsOut) {
