@@ -590,7 +590,7 @@ public abstract class Context {
      * Returns the absolute path to the directory on the external filesystem
      * (that is somewhere on {@link android.os.Environment#getExternalStorageDirectory()
      * Environment.getExternalStorageDirectory()}) where the application can
-     * place persistent files it owns.  These files are private to the
+     * place persistent files it owns.  These files are internal to the
      * applications, and not typically visible to the user as media.
      *
      * <p>This is like {@link #getFilesDir()} in that these
@@ -637,9 +637,11 @@ public abstract class Context {
      *
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
      * private_picture}
-     *
-     * <p>Writing to this path requires the
-     * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission.</p>
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, no
+     * permissions are required for the owning application to read or write to
+     * this path. Otherwise, {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE}
+     * or {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} are required.
      *
      * @param type The type of files directory to return.  May be null for
      * the root of the files directory or one of
@@ -663,16 +665,64 @@ public abstract class Context {
     public abstract File getExternalFilesDir(String type);
 
     /**
-     * Return the directory where this application's OBB files (if there
-     * are any) can be found.  Note if the application does not have any OBB
-     * files, this directory may not exist.
+     * Returns absolute paths to application-specific directories on all
+     * external storage devices where the application can place persistent files
+     * it owns. These files are internal to the application, and not typically
+     * visible to the user as media.
+     * <p>
+     * External storage devices returned here are considered a permanent part of
+     * the device, including both emulated external storage and physical media
+     * slots. This does not include transient devices, such as USB flash drives.
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, no
+     * permissions are required for the owning application to read or write to
+     * these paths.
+     * <p>
+     * The returned paths include any path that would be returned by
+     * {@link #getExternalFilesDir(String)}.
      *
-     * <p>On devices with multiple users (as described by {@link UserManager}),
+     * @see #getExternalFilesDir(String)
+     */
+    public abstract File[] getExternalFilesDirs(String type);
+
+    /**
+     * Return the directory where this application's OBB files (if there are
+     * any) can be found. Note if the application does not have any OBB files,
+     * this directory may not exist.
+     * <p>
+     * On devices with multiple users (as described by {@link UserManager}),
      * multiple users may share the same OBB storage location. Applications
-     * should ensure that multiple instances running under different users
-     * don't interfere with each other.</p>
+     * should ensure that multiple instances running under different users don't
+     * interfere with each other.
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, no
+     * permissions are required for the owning application to read or write to
+     * this path. Otherwise,
+     * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} or
+     * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} are required.
      */
     public abstract File getObbDir();
+
+    /**
+     * Returns absolute paths to application-specific directories on all
+     * external storage devices where the application's OBB files (if there are
+     * any) can be found. Note if the application does not have any OBB files,
+     * these directories may not exist.
+     * <p>
+     * External storage devices returned here are considered a permanent part of
+     * the device, including both emulated external storage and physical media
+     * slots. This does not include transient devices, such as USB flash drives.
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, no
+     * permissions are required for the owning application to read or write to
+     * this path.
+     * <p>
+     * The returned paths include any path that would be returned by
+     * {@link #getObbDir()}
+     *
+     * @see #getObbDir()
+     */
+    public abstract File[] getObbDirs();
 
     /**
      * Returns the absolute path to the application specific cache directory
@@ -697,7 +747,8 @@ public abstract class Context {
      * Returns the absolute path to the directory on the external filesystem
      * (that is somewhere on {@link android.os.Environment#getExternalStorageDirectory()
      * Environment.getExternalStorageDirectory()} where the application can
-     * place cache files it owns.
+     * place cache files it owns. These files are internal to the application, and
+     * not typically visible to the user as media.
      *
      * <p>This is like {@link #getCacheDir()} in that these
      * files will be deleted when the application is uninstalled, however there
@@ -722,9 +773,12 @@ public abstract class Context {
      * <p>On devices with multiple users (as described by {@link UserManager}),
      * each user has their own isolated external storage. Applications only
      * have access to the external storage for the user they're running as.</p>
-     *
-     * <p>Writing to this path requires the
-     * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} permission.</p>
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, no
+     * permissions are required for the owning application to read or write to
+     * this path. Otherwise,
+     * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} or
+     * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} are required.
      *
      * @return The path of the directory holding application cache files
      * on external storage.  Returns null if external storage is not currently
@@ -734,6 +788,27 @@ public abstract class Context {
      * @see #getCacheDir
      */
     public abstract File getExternalCacheDir();
+
+    /**
+     * Returns absolute paths to application-specific directories on all
+     * external storage devices where the application can place cache files it
+     * owns. These files are internal to the application, and not typically
+     * visible to the user as media.
+     * <p>
+     * External storage devices returned here are considered a permanent part of
+     * the device, including both emulated external storage and physical media
+     * slots. This does not include transient devices, such as USB flash drives.
+     * <p>
+     * Starting in {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, no
+     * permissions are required for the owning application to read or write to
+     * these paths.
+     * <p>
+     * The returned paths include any path that would be returned by
+     * {@link #getExternalCacheDir()}.
+     *
+     * @see #getExternalCacheDir()
+     */
+    public abstract File[] getExternalCacheDirs();
 
     /**
      * Returns an array of strings naming the private files associated with

@@ -111,6 +111,7 @@ import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
 import android.app.admin.DevicePolicyManager;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.os.IDropBoxManagerService;
 
@@ -197,13 +198,21 @@ class ContextImpl extends Context {
 
     private final Object mSync = new Object();
 
+    @GuardedBy("mSync")
     private File mDatabasesDir;
+    @GuardedBy("mSync")
     private File mPreferencesDir;
+    @GuardedBy("mSync")
     private File mFilesDir;
+    @GuardedBy("mSync")
     private File mCacheDir;
-    private File mObbDir;
-    private File mExternalFilesDir;
-    private File mExternalCacheDir;
+
+    @GuardedBy("mSync")
+    private File[] mExternalObbDirs;
+    @GuardedBy("mSync")
+    private File[] mExternalFilesDirs;
+    @GuardedBy("mSync")
+    private File[] mExternalCacheDirs;
 
     private static final String[] EMPTY_FILE_LIST = {};
 
@@ -802,44 +811,41 @@ class ContextImpl extends Context {
 
     @Override
     public File getExternalFilesDir(String type) {
+        // Operates on primary external storage
+        return getExternalFilesDirs(type)[0];
+    }
+
+    @Override
+    public File[] getExternalFilesDirs(String type) {
         synchronized (mSync) {
-            if (mExternalFilesDir == null) {
-                mExternalFilesDir = Environment.getExternalStorageAppFilesDirectory(
-                        getPackageName());
+            if (mExternalFilesDirs == null) {
+                mExternalFilesDirs = Environment.buildExternalStorageAppFilesDirs(getPackageName());
             }
-            if (!mExternalFilesDir.exists()) {
-                try {
-                    (new File(Environment.getExternalStorageAndroidDataDir(),
-                            ".nomedia")).createNewFile();
-                } catch (IOException e) {
-                }
-                if (!mExternalFilesDir.mkdirs()) {
-                    Log.w(TAG, "Unable to create external files directory");
-                    return null;
-                }
+
+            // Splice in requested type, if any
+            File[] dirs = mExternalFilesDirs;
+            if (type != null) {
+                dirs = Environment.buildPaths(dirs, type);
             }
-            if (type == null) {
-                return mExternalFilesDir;
-            }
-            File dir = new File(mExternalFilesDir, type);
-            if (!dir.exists()) {
-                if (!dir.mkdirs()) {
-                    Log.w(TAG, "Unable to create external media directory " + dir);
-                    return null;
-                }
-            }
-            return dir;
+
+            // Create dirs if needed
+            return ensureDirsExistOrFilter(dirs);
         }
     }
 
     @Override
     public File getObbDir() {
+        // Operates on primary external storage
+        return getObbDirs()[0];
+    }
+
+    @Override
+    public File[] getObbDirs() {
         synchronized (mSync) {
-            if (mObbDir == null) {
-                mObbDir = Environment.getExternalStorageAppObbDirectory(
-                        getPackageName());
+            if (mExternalObbDirs == null) {
+                mExternalObbDirs = Environment.buildExternalStorageAppObbDirs(getPackageName());
             }
-            return mObbDir;
+            return mExternalObbDirs;
         }
     }
 
@@ -865,23 +871,19 @@ class ContextImpl extends Context {
 
     @Override
     public File getExternalCacheDir() {
+        // Operates on primary external storage
+        return getExternalCacheDirs()[0];
+    }
+
+    @Override
+    public File[] getExternalCacheDirs() {
         synchronized (mSync) {
-            if (mExternalCacheDir == null) {
-                mExternalCacheDir = Environment.getExternalStorageAppCacheDirectory(
-                        getPackageName());
+            if (mExternalCacheDirs == null) {
+                mExternalCacheDirs = Environment.buildExternalStorageAppCacheDirs(getPackageName());
             }
-            if (!mExternalCacheDir.exists()) {
-                try {
-                    (new File(Environment.getExternalStorageAndroidDataDir(),
-                            ".nomedia")).createNewFile();
-                } catch (IOException e) {
-                }
-                if (!mExternalCacheDir.mkdirs()) {
-                    Log.w(TAG, "Unable to create external cache directory");
-                    return null;
-                }
-            }
-            return mExternalCacheDir;
+
+            // Create dirs if needed
+            return ensureDirsExistOrFilter(mExternalCacheDirs);
         }
     }
 
@@ -2079,6 +2081,25 @@ class ContextImpl extends Context {
         }
         throw new IllegalArgumentException(
                 "File " + name + " contains a path separator");
+    }
+
+    /**
+     * Ensure that given directories exist, trying to create them if missing. If
+     * unable to create, they are filtered by replacing with {@code null}.
+     */
+    private static File[] ensureDirsExistOrFilter(File[] dirs) {
+        File[] result = new File[dirs.length];
+        for (int i = 0; i < dirs.length; i++) {
+            File dir = dirs[i];
+            if (!dir.exists()) {
+                if (!dir.mkdirs()) {
+                    Log.w(TAG, "Failed to ensure directory: " + dir);
+                    dir = null;
+                }
+            }
+            result[i] = dir;
+        }
+        return result;
     }
 
     // ----------------------------------------------------------------------
