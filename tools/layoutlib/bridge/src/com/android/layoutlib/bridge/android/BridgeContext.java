@@ -1406,4 +1406,22 @@ public final class BridgeContext extends Context {
     public int getUserId() {
         return 0; // not used
     }
+
+    @Override
+    public File[] getExternalFilesDirs(String type) {
+        // pass
+        return new File[0];
+    }
+
+    @Override
+    public File[] getObbDirs() {
+        // pass
+        return new File[0];
+    }
+
+    @Override
+    public File[] getExternalCacheDirs() {
+        // pass
+        return new File[0];
+    }
 }
