@@ -1980,6 +1980,19 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             reply.writeNoException();
             return true;
         }
+
+        case GET_GRANTED_URI_PERMISSIONS_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            final String sourcePackage = data.readString();
+            final String targetPackage = data.readString();
+            final int modeFlags = data.readInt();
+            final int modeMask = data.readInt();
+            final Uri[] uris = getGrantedUriPermissions(
+                    sourcePackage, targetPackage, modeFlags, modeMask);
+            reply.writeNoException();
+            reply.writeParcelableArray(uris, 0);
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -4538,6 +4551,24 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+
+    public Uri[] getGrantedUriPermissions(
+            String sourcePackage, String targetPackage, int modeFlags, int modeMask)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(sourcePackage);
+        data.writeString(targetPackage);
+        data.writeInt(modeFlags);
+        data.writeInt(modeMask);
+        mRemote.transact(GET_GRANTED_URI_PERMISSIONS_TRANSACTION, data, reply, 0);
+        reply.readException();
+        final Uri[] uris = (Uri[]) reply.readParcelableArray(null);
+        data.recycle();
+        reply.recycle();
+        return uris;
     }
 
     private IBinder mRemote;
