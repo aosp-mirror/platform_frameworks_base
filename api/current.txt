@@ -6690,7 +6690,7 @@ package android.content {
   public static class SyncRequest.Builder {
     ctor public SyncRequest.Builder();
     method public android.content.SyncRequest build();
-    method public android.content.SyncRequest.Builder setDisallowMetered(boolean);
+    method public android.content.SyncRequest.Builder setAllowMetered(boolean);
     method public android.content.SyncRequest.Builder setExpedited(boolean);
     method public android.content.SyncRequest.Builder setExtras(android.os.Bundle);
     method public android.content.SyncRequest.Builder setIgnoreBackoff(boolean);
