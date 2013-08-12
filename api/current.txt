@@ -2338,17 +2338,23 @@ package android.animation {
   public abstract class Animator implements java.lang.Cloneable {
     ctor public Animator();
     method public void addListener(android.animation.Animator.AnimatorListener);
+    method public void addPauseListener(android.animation.Animator.AnimatorPauseListener);
     method public void cancel();
     method public android.animation.Animator clone();
     method public void end();
     method public abstract long getDuration();
     method public android.animation.TimeInterpolator getInterpolator();
     method public java.util.ArrayList<android.animation.Animator.AnimatorListener> getListeners();
+    method public java.util.ArrayList<android.animation.Animator.AnimatorPauseListener> getPauseListeners();
     method public abstract long getStartDelay();
+    method public boolean isPaused();
     method public abstract boolean isRunning();
     method public boolean isStarted();
+    method public void pause();
     method public void removeAllListeners();
     method public void removeListener(android.animation.Animator.AnimatorListener);
+    method public void removePauseListener(android.animation.Animator.AnimatorPauseListener);
+    method public void resume();
     method public abstract android.animation.Animator setDuration(long);
     method public abstract void setInterpolator(android.animation.TimeInterpolator);
     method public abstract void setStartDelay(long);
@@ -2365,16 +2371,23 @@ package android.animation {
     method public abstract void onAnimationStart(android.animation.Animator);
   }
 
+  public static abstract interface Animator.AnimatorPauseListener {
+    method public abstract void onAnimationPause(android.animation.Animator);
+    method public abstract void onAnimationResume(android.animation.Animator);
+  }
+
   public class AnimatorInflater {
     ctor public AnimatorInflater();
     method public static android.animation.Animator loadAnimator(android.content.Context, int) throws android.content.res.Resources.NotFoundException;
   }
 
-  public abstract class AnimatorListenerAdapter implements android.animation.Animator.AnimatorListener {
+  public abstract class AnimatorListenerAdapter implements android.animation.Animator.AnimatorListener android.animation.Animator.AnimatorPauseListener {
     ctor public AnimatorListenerAdapter();
     method public void onAnimationCancel(android.animation.Animator);
     method public void onAnimationEnd(android.animation.Animator);
+    method public void onAnimationPause(android.animation.Animator);
     method public void onAnimationRepeat(android.animation.Animator);
+    method public void onAnimationResume(android.animation.Animator);
     method public void onAnimationStart(android.animation.Animator);
   }
 
