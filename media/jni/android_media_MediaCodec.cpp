@@ -38,6 +38,8 @@
 #include <media/stagefright/foundation/AString.h>
 #include <media/stagefright/MediaErrors.h>
 
+#include <nativehelper/ScopedLocalRef.h>
+
 #include <system/window.h>
 
 namespace android {
@@ -86,7 +88,7 @@ JMediaCodec::JMediaCodec(
     mLooper->start(
             false,      // runOnCallingThread
             false,       // canCallJava
-            PRIORITY_DEFAULT);
+            PRIORITY_FOREGROUND);
 
     if (nameIsType) {
         mCodec = MediaCodec::CreateByType(mLooper, name, encoder);
@@ -186,9 +188,10 @@ status_t JMediaCodec::dequeueOutputBuffer(
         return err;
     }
 
-    jclass clazz = env->FindClass("android/media/MediaCodec$BufferInfo");
+    ScopedLocalRef<jclass> clazz(
+            env, env->FindClass("android/media/MediaCodec$BufferInfo"));
 
-    jmethodID method = env->GetMethodID(clazz, "set", "(IIJI)V");
+    jmethodID method = env->GetMethodID(clazz.get(), "set", "(IIJI)V");
     env->CallVoidMethod(bufferInfo, method, offset, size, timeUs, flags);
 
     return OK;
@@ -227,29 +230,33 @@ status_t JMediaCodec::getBuffers(
         return err;
     }
 
-    jclass byteBufferClass = env->FindClass("java/nio/ByteBuffer");
-    CHECK(byteBufferClass != NULL);
+    ScopedLocalRef<jclass> byteBufferClass(
+            env, env->FindClass("java/nio/ByteBuffer"));
+
+    CHECK(byteBufferClass.get() != NULL);
 
     jmethodID orderID = env->GetMethodID(
-            byteBufferClass,
+            byteBufferClass.get(),
             "order",
             "(Ljava/nio/ByteOrder;)Ljava/nio/ByteBuffer;");
 
     CHECK(orderID != NULL);
 
-    jclass byteOrderClass = env->FindClass("java/nio/ByteOrder");
-    CHECK(byteOrderClass != NULL);
+    ScopedLocalRef<jclass> byteOrderClass(
+            env, env->FindClass("java/nio/ByteOrder"));
+
+    CHECK(byteOrderClass.get() != NULL);
 
     jmethodID nativeOrderID = env->GetStaticMethodID(
-            byteOrderClass, "nativeOrder", "()Ljava/nio/ByteOrder;");
+            byteOrderClass.get(), "nativeOrder", "()Ljava/nio/ByteOrder;");
     CHECK(nativeOrderID != NULL);
 
     jobject nativeByteOrderObj =
-        env->CallStaticObjectMethod(byteOrderClass, nativeOrderID);
+        env->CallStaticObjectMethod(byteOrderClass.get(), nativeOrderID);
     CHECK(nativeByteOrderObj != NULL);
 
     *bufArray = (jobjectArray)env->NewObjectArray(
-            buffers.size(), byteBufferClass, NULL);
+            buffers.size(), byteBufferClass.get(), NULL);
     if (*bufArray == NULL) {
         env->DeleteLocalRef(nativeByteOrderObj);
         return NO_MEMORY;
@@ -338,11 +345,12 @@ static void android_media_MediaCodec_release(JNIEnv *env, jobject thiz) {
 }
 
 static void throwCryptoException(JNIEnv *env, status_t err, const char *msg) {
-    jclass clazz = env->FindClass("android/media/MediaCodec$CryptoException");
-    CHECK(clazz != NULL);
+    ScopedLocalRef<jclass> clazz(
+            env, env->FindClass("android/media/MediaCodec$CryptoException"));
+    CHECK(clazz.get() != NULL);
 
     jmethodID constructID =
-        env->GetMethodID(clazz, "<init>", "(ILjava/lang/String;)V");
+        env->GetMethodID(clazz.get(), "<init>", "(ILjava/lang/String;)V");
     CHECK(constructID != NULL);
 
     jstring msgObj = env->NewStringUTF(msg != NULL ? msg : "Unknown Error");
@@ -363,7 +371,7 @@ static void throwCryptoException(JNIEnv *env, status_t err, const char *msg) {
     }
 
     jthrowable exception =
-        (jthrowable)env->NewObject(clazz, constructID, err, msgObj);
+        (jthrowable)env->NewObject(clazz.get(), constructID, err, msgObj);
 
     env->Throw(exception);
 }
@@ -848,51 +856,55 @@ static void android_media_MediaCodec_setVideoScalingMode(
 }
 
 static void android_media_MediaCodec_native_init(JNIEnv *env) {
-    jclass clazz = env->FindClass("android/media/MediaCodec");
-    CHECK(clazz != NULL);
+    ScopedLocalRef<jclass> clazz(
+            env, env->FindClass("android/media/MediaCodec"));
+    CHECK(clazz.get() != NULL);
 
-    gFields.context = env->GetFieldID(clazz, "mNativeContext", "I");
+    gFields.context = env->GetFieldID(clazz.get(), "mNativeContext", "I");
     CHECK(gFields.context != NULL);
 
-    clazz = env->FindClass("android/media/MediaCodec$CryptoInfo");
-    CHECK(clazz != NULL);
+    clazz.reset(env->FindClass("android/media/MediaCodec$CryptoInfo"));
+    CHECK(clazz.get() != NULL);
 
     gFields.cryptoInfoNumSubSamplesID =
-        env->GetFieldID(clazz, "numSubSamples", "I");
+        env->GetFieldID(clazz.get(), "numSubSamples", "I");
     CHECK(gFields.cryptoInfoNumSubSamplesID != NULL);
 
     gFields.cryptoInfoNumBytesOfClearDataID =
-        env->GetFieldID(clazz, "numBytesOfClearData", "[I");
+        env->GetFieldID(clazz.get(), "numBytesOfClearData", "[I");
     CHECK(gFields.cryptoInfoNumBytesOfClearDataID != NULL);
 
     gFields.cryptoInfoNumBytesOfEncryptedDataID =
-        env->GetFieldID(clazz, "numBytesOfEncryptedData", "[I");
+        env->GetFieldID(clazz.get(), "numBytesOfEncryptedData", "[I");
     CHECK(gFields.cryptoInfoNumBytesOfEncryptedDataID != NULL);
 
-    gFields.cryptoInfoKeyID = env->GetFieldID(clazz, "key", "[B");
+    gFields.cryptoInfoKeyID = env->GetFieldID(clazz.get(), "key", "[B");
     CHECK(gFields.cryptoInfoKeyID != NULL);
 
-    gFields.cryptoInfoIVID = env->GetFieldID(clazz, "iv", "[B");
+    gFields.cryptoInfoIVID = env->GetFieldID(clazz.get(), "iv", "[B");
     CHECK(gFields.cryptoInfoIVID != NULL);
 
-    gFields.cryptoInfoModeID = env->GetFieldID(clazz, "mode", "I");
+    gFields.cryptoInfoModeID = env->GetFieldID(clazz.get(), "mode", "I");
     CHECK(gFields.cryptoInfoModeID != NULL);
 
-    clazz = env->FindClass("android/media/MediaCodec$CryptoException");
-    CHECK(clazz != NULL);
+    clazz.reset(env->FindClass("android/media/MediaCodec$CryptoException"));
+    CHECK(clazz.get() != NULL);
 
     jfieldID field;
-    field = env->GetStaticFieldID(clazz, "ERROR_NO_KEY", "I");
+    field = env->GetStaticFieldID(clazz.get(), "ERROR_NO_KEY", "I");
     CHECK(field != NULL);
-    gCryptoErrorCodes.cryptoErrorNoKey = env->GetStaticIntField(clazz, field);
+    gCryptoErrorCodes.cryptoErrorNoKey =
+        env->GetStaticIntField(clazz.get(), field);
 
-    field = env->GetStaticFieldID(clazz, "ERROR_KEY_EXPIRED", "I");
+    field = env->GetStaticFieldID(clazz.get(), "ERROR_KEY_EXPIRED", "I");
     CHECK(field != NULL);
-    gCryptoErrorCodes.cryptoErrorKeyExpired = env->GetStaticIntField(clazz, field);
+    gCryptoErrorCodes.cryptoErrorKeyExpired =
+        env->GetStaticIntField(clazz.get(), field);
 
-    field = env->GetStaticFieldID(clazz, "ERROR_RESOURCE_BUSY", "I");
+    field = env->GetStaticFieldID(clazz.get(), "ERROR_RESOURCE_BUSY", "I");
     CHECK(field != NULL);
-    gCryptoErrorCodes.cryptoErrorResourceBusy = env->GetStaticIntField(clazz, field);
+    gCryptoErrorCodes.cryptoErrorResourceBusy =
+        env->GetStaticIntField(clazz.get(), field);
 }
 
 static void android_media_MediaCodec_native_setup(
