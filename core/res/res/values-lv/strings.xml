@@ -314,8 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"novērst lietojumprogrammu pārslēgšanu"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Novērš lietotāja pārslēgšanos uz citu lietotni."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"pašreizējās lietotnes informācijas iegūšana"</string>
-    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
-    <skip />
+    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Ļauj īpašniekam izgūt privātu informāciju par pašreizējo lietojumprogrammu un pakalpojumiem ekrāna priekšplānā."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"pārraudzīt un kontrolēt visu lietotņu atvēršanu"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Ļauj lietotnei pārraudzīt un kontrolēt, kā sistēmā tiek palaistas darbības. Ļaunprātīgas lietotnes var pilnībā uzlauzt sistēmu. Šī atļauja ir nepieciešama tikai izstrādei, taču ne parastai lietošanai."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"sūtīt apraidi par pakotnes noņemšanu"</string>
@@ -654,10 +653,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Ļauj īpašniekam izveidot saiti ar paziņojumu uztvērēja pakalpojuma augšējā līmeņa saskarni. Parastajām lietotnēm tas nekad nav nepieciešams."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"Operatora nodrošinātas konfigurācijas lietotnes izsaukšana"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Ļauj īpašniekam izsaukt operatora nodrošināto konfigurācijas lietotni. Parastām lietotnēm tas nekad nav nepieciešams."</string>
-    <!-- no translation found for permlab_accessNetworkConditions (8206077447838909516) -->
-    <skip />
-    <!-- no translation found for permdesc_accessNetworkConditions (6899102075825272211) -->
-    <skip />
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"iegūt informāciju par tīkla stāvokļa novērojumiem"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Ļauj lietojumprogrammai iegūt informāciju par tīkla stāvokļa novērojumiem. Parastām lietotnēm šī atļauja nekad nav nepieciešama."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Paroles kārtulu iestatīšana"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Kontrolē ekrāna atbloķēšanas parolē atļautās rakstzīmes un garumu."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Ekrāna atbloķēšanas mēģinājumu pārraudzīšana"</string>

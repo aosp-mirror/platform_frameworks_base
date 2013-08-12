@@ -314,8 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"evitar trocas de aplicativo"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Impede que o usuário alterne para outro aplicativo."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"obter informações do aplicativo atual"</string>
-    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
-    <skip />
+    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Permite que o proprietário armazene informações particulares sobre o aplicativo e os serviços em primeiro plano na tela."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"monitorar e controlar todos os aplicativos que estão sendo iniciados"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Permite que o aplicativo monitore e controle a forma como o sistema inicia atividades. Aplicativos maliciosos podem comprometer completamente o sistema. Esta permissão só é necessária para o desenvolvimento, nunca para o uso normal."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"enviar transmissão removida do pacote"</string>

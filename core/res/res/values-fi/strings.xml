@@ -314,8 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"estä sovellusten vaihto"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Estää käyttäjää siirtymästä toiseen sovellukseen."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"hae nykyisen sovelluksen tiedot"</string>
-    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
-    <skip />
+    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Antaa sovellukselle luvan noutaa nykyistä sovellusta ja nykyisiä palveluita koskevia yksityisiä tietoja ruudun etualalla."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"kaikkien sovellusten käynnistämisen valvonta ja hallinta"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Antaa sovelluksen valvoa ja hallita sitä, miten laite käynnistää toimintoja. Haitalliset sovellukset voivat vaarantaa laitteen käytön. Tätä oikeutta tarvitaan vain kehityskäyttöön eikä koskaan tavalliseen käyttöön."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"lähetä paketeista poistettuja lähetyksiä"</string>
