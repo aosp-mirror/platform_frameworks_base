@@ -18754,7 +18754,7 @@ package android.print {
     method public android.print.PrintDocumentInfo.Builder setPageCount(int);
   }
 
-  public final class PrintFileDocumentAdapter extends android.print.PrintDocumentAdapter {
+  public class PrintFileDocumentAdapter extends android.print.PrintDocumentAdapter {
     ctor public PrintFileDocumentAdapter(android.content.Context, java.io.File, android.print.PrintDocumentInfo);
     method public void onLayout(android.print.PrintAttributes, android.print.PrintAttributes, android.os.CancellationSignal, android.print.PrintDocumentAdapter.LayoutResultCallback, android.os.Bundle);
     method public void onWrite(android.print.PageRange[], java.io.FileDescriptor, android.os.CancellationSignal, android.print.PrintDocumentAdapter.WriteResultCallback);
