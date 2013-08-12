@@ -21,31 +21,24 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.Trace;
-import android.util.ArrayMap;
-import android.util.SparseArray;
-import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
+
+import java.util.HashMap;
 
 /**
  * Simplified @link android.content.AbstractThreadedSyncAdapter. Folds that
  * behaviour into a service to which the system can bind when requesting an
  * anonymous (providerless/accountless) sync.
  * <p>
- * In order to perform an anonymous sync operation you must extend this service, implementing the
- * abstract methods. This service must be declared in the application's manifest as usual. You
- * can use this service for other work, however you <b> must not </b> override the onBind() method
- * unless you know what you're doing, which limits the usefulness of this service for other work.
- * <p>A {@link SyncService} can either be enabled, disabled, or have unknown state. This is similar
- * to an {@link AbstractThreadedSyncAdapter} isSyncable state, where the service is considered in
- * an unknown state until run for the first time. Implementers of this class can override
- * {@link #onPerformInitialisation(Bundle)} to change this behaviour. Different to an
- * {@link AbstractThreadedSyncAdapter} however, there is no
- * {@link ContentResolver#setSyncAutomatically(android.accounts.Account account, String provider, boolean sync)}.
- * This functionality is collapsed into the enabled/disabled state of the SyncService.
+ * In order to perform an anonymous sync operation you must extend this service,
+ * implementing the abstract methods. This service must then be declared in the
+ * application's manifest as usual. You can use this service for other work, however you
+ * <b> must not </b> override the onBind() method unless you know what you're doing,
+ * which limits the usefulness of this service for other work.
  *
  * <pre>
- * &lt;service android:name=".MySyncService"/&gt;
+ * &lt;service ndroid:name=".MyAnonymousSyncService" android:permission="android.permission.SYNC" /&gt;
  * </pre>
  * Like @link android.content.AbstractThreadedSyncAdapter this service supports
  * multiple syncs at the same time. Each incoming startSync() with a unique tag
@@ -55,50 +48,41 @@ import com.android.internal.annotations.GuardedBy;
  * at once, so if you mutate local objects you must ensure synchronization.
  */
 public abstract class SyncService extends Service {
-    private static final String TAG = "SyncService";
 
-    private final SyncAdapterImpl mSyncAdapter = new SyncAdapterImpl();
+    /** SyncAdapter Instantiation that any anonymous syncs call. */
+    private final AnonymousSyncAdapterImpl mSyncAdapter = new AnonymousSyncAdapterImpl();
 
-    /** Keep track of on-going syncs, keyed by bundle. */
-    @GuardedBy("mSyncThreadLock")
-    private final SparseArray<SyncThread>
-            mSyncThreads = new SparseArray<SyncThread>();
+    /** Keep track of on-going syncs, keyed by tag. */
+    @GuardedBy("mLock")
+    private final HashMap<Bundle, AnonymousSyncThread>
+            mSyncThreads = new HashMap<Bundle, AnonymousSyncThread>();
     /** Lock object for accessing the SyncThreads HashMap. */
     private final Object mSyncThreadLock = new Object();
-    /**
-     * Default key for if this sync service does not support parallel operations. Currently not
-     * sure if null keys will make it into the ArrayMap for KLP, so keeping our default for now.
-     */
-    private static final int KEY_DEFAULT = 0;
-    /** Identifier for this sync service. */
-    private ComponentName mServiceComponent;
 
-    /** {@hide} */
+    @Override
     public IBinder onBind(Intent intent) {
-        mServiceComponent = new ComponentName(this, getClass());
         return mSyncAdapter.asBinder();
     }
 
     /** {@hide} */
-    private class SyncAdapterImpl extends ISyncServiceAdapter.Stub {
+    private class AnonymousSyncAdapterImpl extends IAnonymousSyncAdapter.Stub {
+
         @Override
         public void startSync(ISyncContext syncContext, Bundle extras) {
             // Wrap the provided Sync Context because it may go away by the time
             // we call it.
             final SyncContext syncContextClient = new SyncContext(syncContext);
             boolean alreadyInProgress = false;
-            final int extrasAsKey = extrasToKey(extras);
             synchronized (mSyncThreadLock) {
-                if (mSyncThreads.get(extrasAsKey) != null) {
-                    Log.e(TAG, "starting sync for : " + mServiceComponent);
-                    // Start sync.
-                    SyncThread syncThread = new SyncThread(syncContextClient, extras);
-                    mSyncThreads.put(extrasAsKey, syncThread);
-                    syncThread.start();
-                } else {
+                if (mSyncThreads.containsKey(extras)) {
                     // Don't want to call back to SyncManager while still
                     // holding lock.
                     alreadyInProgress = true;
+                } else {
+                    AnonymousSyncThread syncThread = new AnonymousSyncThread(
+                            syncContextClient, extras);
+                    mSyncThreads.put(extras, syncThread);
+                    syncThread.start();
                 }
             }
             if (alreadyInProgress) {
@@ -107,15 +91,14 @@ public abstract class SyncService extends Service {
         }
 
         /**
-         * Used by the SM to cancel a specific sync using the
-         * com.android.server.content.SyncManager.ActiveSyncContext as a handle.
+         * Used by the SM to cancel a specific sync using the {@link
+         * com.android.server.content.SyncManager.ActiveSyncContext} as a handle.
          */
         @Override
         public void cancelSync(ISyncContext syncContext) {
-            SyncThread runningSync = null;
+            AnonymousSyncThread runningSync = null;
             synchronized (mSyncThreadLock) {
-                for (int i = 0; i < mSyncThreads.size(); i++) {
-                    SyncThread thread = mSyncThreads.valueAt(i);
+                for (AnonymousSyncThread thread : mSyncThreads.values()) {
                     if (thread.mSyncContext.getSyncContextBinder() == syncContext.asBinder()) {
                         runningSync = thread;
                         break;
@@ -129,39 +112,19 @@ public abstract class SyncService extends Service {
     }
 
     /**
-     * 
-     * @param extras Bundle for which to compute hash
-     * @return an integer hash that is equal to that of another bundle if they both contain the
-     * same key -> value mappings, however, not necessarily in order.
-     * Based on the toString() representation of the value mapped.
-     */
-    private int extrasToKey(Bundle extras) {
-        int hash = KEY_DEFAULT; // Empty bundle, or no parallel operations enabled.
-        if (parallelSyncsEnabled()) {
-            for (String key : extras.keySet()) {
-                String mapping = key + " " + extras.get(key).toString();
-                hash += mapping.hashCode();
-            }
-        }
-        return hash;
-    }
-
-    /**
      * {@hide}
      * Similar to {@link android.content.AbstractThreadedSyncAdapter.SyncThread}. However while
      * the ATSA considers an already in-progress sync to be if the account provided is currently
-     * syncing, this anonymous sync has no notion of account and considers a sync unique if the
-     * provided bundle is different.
+     * syncing, this anonymous sync has no notion of account and therefore considers a sync unique
+     * if the provided bundle is different.
      */
-    private class SyncThread extends Thread {
+    private class AnonymousSyncThread extends Thread {
         private final SyncContext mSyncContext;
         private final Bundle mExtras;
-        private final int mThreadsKey;
 
-        public SyncThread(SyncContext syncContext, Bundle extras) {
+        public AnonymousSyncThread(SyncContext syncContext, Bundle extras) {
             mSyncContext = syncContext;
             mExtras = extras;
-            mThreadsKey = extrasToKey(extras);
         }
 
         @Override
@@ -172,8 +135,10 @@ public abstract class SyncService extends Service {
 
             SyncResult syncResult = new SyncResult();
             try {
-                if (isCancelled()) return;
-                // Run the sync.
+                if (isCancelled()) {
+                    return;
+                }
+                // Run the sync based off of the provided code.
                 SyncService.this.onPerformSync(mExtras, syncResult);
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_SYNC_MANAGER);
@@ -181,9 +146,10 @@ public abstract class SyncService extends Service {
                     mSyncContext.onFinished(syncResult);
                 }
                 // Synchronize so that the assignment will be seen by other
-                // threads that also synchronize accesses to mSyncThreads.
+                // threads
+                // that also synchronize accesses to mSyncThreads.
                 synchronized (mSyncThreadLock) {
-                    mSyncThreads.remove(mThreadsKey);
+                    mSyncThreads.remove(mExtras);
                 }
             }
         }
@@ -200,14 +166,4 @@ public abstract class SyncService extends Service {
      */
     public abstract void onPerformSync(Bundle extras, SyncResult syncResult);
 
-    /**
-     * Override this function to indicated whether you want to support parallel syncs.
-     * <p>If you override and return true multiple threads will be spawned within your Service to
-     * handle each concurrent sync request.
-     *
-     * @return false to indicate that this service does not support parallel operations by default.
-     */
-    protected boolean parallelSyncsEnabled() {
-        return false;
-    }
 }

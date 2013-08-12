@@ -32,8 +32,8 @@ public class SyncRequest implements Parcelable {
     private final ComponentName mComponentInfo;
     /** Bundle containing user info as well as sync settings. */
     private final Bundle mExtras;
-    /** Don't allow this sync request on metered networks. */
-    private final boolean mDisallowMetered;
+    /** Allow this sync request on metered networks. */
+    private final boolean mAllowMetered;
     /**
      * Anticipated upload size in bytes.
      * TODO: Not yet used - we put this information into the bundle for simplicity.
@@ -85,32 +85,16 @@ public class SyncRequest implements Parcelable {
 
     /**
      * {@hide}
+     * Throws a runtime IllegalArgumentException if this function is called for an
+     * anonymous sync.
      *
-     * @return account object for this sync.
-     * @throws IllegalArgumentException if this function is called for a request that targets a
-     * sync service.
+     * @return (Account, Provider) for this SyncRequest.
      */
-    public Account getAccount() {
+    public Pair<Account, String> getProviderInfo() {
         if (!hasAuthority()) {
-            throw new IllegalArgumentException("Cannot getAccount() for a sync that targets a sync"
-                    + "service.");
+            throw new IllegalArgumentException("Cannot getProviderInfo() for an anonymous sync.");
         }
-        return mAccountToSync;
-    }
-
-    /**
-     * {@hide}
-     *
-     * @return provider for this sync.
-     * @throws IllegalArgumentException if this function is called for a request that targets a
-     * sync service.
-     */
-    public String getProvider() {
-        if (!hasAuthority()) {
-            throw new IllegalArgumentException("Cannot getProvider() for a sync that targets a"
-                    + "sync service.");
-        }
-        return mAuthority;
+        return Pair.create(mAccountToSync, mAuthority);
     }
 
     /**
@@ -175,7 +159,7 @@ public class SyncRequest implements Parcelable {
         parcel.writeLong(mSyncFlexTimeSecs);
         parcel.writeLong(mSyncRunTimeSecs);
         parcel.writeInt((mIsPeriodic ? 1 : 0));
-        parcel.writeInt((mDisallowMetered ? 1 : 0));
+        parcel.writeInt((mAllowMetered ? 1 : 0));
         parcel.writeLong(mTxBytes);
         parcel.writeLong(mRxBytes);
         parcel.writeInt((mIsAuthority ? 1 : 0));
@@ -193,7 +177,7 @@ public class SyncRequest implements Parcelable {
         mSyncFlexTimeSecs = in.readLong();
         mSyncRunTimeSecs = in.readLong();
         mIsPeriodic = (in.readInt() != 0);
-        mDisallowMetered = (in.readInt() != 0);
+        mAllowMetered = (in.readInt() != 0);
         mTxBytes = in.readLong();
         mRxBytes = in.readLong();
         mIsAuthority = (in.readInt() != 0);
@@ -223,7 +207,7 @@ public class SyncRequest implements Parcelable {
         // For now we merge the sync config extras & the custom extras into one bundle.
         // TODO: pass the configuration extras through separately.
         mExtras.putAll(b.mSyncConfigExtras);
-        mDisallowMetered = b.mDisallowMetered;
+        mAllowMetered = b.mAllowMetered;
         mTxBytes = b.mTxBytes;
         mRxBytes = b.mRxBytes;
     }
@@ -269,7 +253,7 @@ public class SyncRequest implements Parcelable {
         /** Expected download transfer in bytes. */
         private long mRxBytes = -1L;
         /** Whether or not this sync can occur on metered networks. Default false. */
-        private boolean mDisallowMetered;
+        private boolean mAllowMetered;
         /** Priority of this sync relative to others from calling app [-2, 2]. Default 0. */
         private int mPriority = 0;
         /**
@@ -360,10 +344,6 @@ public class SyncRequest implements Parcelable {
          * You cannot reuse the same builder for one-time syncs after having specified a periodic
          * sync (by calling this function). If you do, an <code>IllegalArgumentException</code>
          * will be thrown.
-         * <p>The bundle for a periodic sync can be queried by applications with the correct
-         * permissions using
-         * {@link ContentResolver#getPeriodicSyncs(Account account, String provider)}, so no
-         * sensitive data should be transferred here.
          *
          * Example usage.
          *
@@ -427,17 +407,10 @@ public class SyncRequest implements Parcelable {
         }
 
         /**
-         * Will throw an <code>IllegalArgumentException</code> if called and
-         * {@link #setIgnoreSettings(boolean ignoreSettings)} has already been called.
-         * @param disallow true to allow this transfer on metered networks. Default false.
-         * 
+         * @param allow false to allow this transfer on metered networks. Default true.
          */
-        public Builder setDisallowMetered(boolean disallow) {
-            if (mIgnoreSettings && disallow) {
-                throw new IllegalArgumentException("setDisallowMetered(true) after having"
-                        + "specified that settings are ignored.");
-            }
-            mDisallowMetered = disallow;
+        public Builder setAllowMetered(boolean allow) {
+            mAllowMetered = true;
             return this;
         }
 
@@ -538,17 +511,10 @@ public class SyncRequest implements Parcelable {
          *
          * Not valid for periodic sync and will throw an <code>IllegalArgumentException</code> in
          * {@link #build()}.
-         * <p>Throws <code>IllegalArgumentException</code> if called and
-         * {@link #setDisallowMetered(false)} has been set.
-         * 
          *
          * @param ignoreSettings true to ignore the sync automatically settings. Default false.
          */
         public Builder setIgnoreSettings(boolean ignoreSettings) {
-            if (mDisallowMetered && ignoreSettings) {
-                throw new IllegalArgumentException("setIgnoreSettings(true) after having specified"
-                        + " sync settings with this builder.");
-            }
             mIgnoreSettings = ignoreSettings;
             return this;
         }
@@ -625,8 +591,8 @@ public class SyncRequest implements Parcelable {
             if (mIgnoreBackoff) {
                 mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, true);
             }
-            if (mDisallowMetered) {
-                mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_DISALLOW_METERED, true);
+            if (mAllowMetered) {
+                mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_ALLOW_METERED, true);
             }
             if (mIgnoreSettings) {
                 mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, true);
@@ -638,26 +604,17 @@ public class SyncRequest implements Parcelable {
                 mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
             }
             if (mIsManual) {
-                mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, true);
-                mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, true);
+                mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
             }
             mSyncConfigExtras.putLong(ContentResolver.SYNC_EXTRAS_EXPECTED_UPLOAD, mTxBytes);
             mSyncConfigExtras.putLong(ContentResolver.SYNC_EXTRAS_EXPECTED_DOWNLOAD, mRxBytes);
             mSyncConfigExtras.putInt(ContentResolver.SYNC_EXTRAS_PRIORITY, mPriority);
             if (mSyncType == SYNC_TYPE_PERIODIC) {
                 // If this is a periodic sync ensure than invalid extras were not set.
-                if (ContentResolver.invalidPeriodicExtras(mCustomExtras) || 
-                        ContentResolver.invalidPeriodicExtras(mSyncConfigExtras)) {
-                    throw new IllegalArgumentException("Illegal extras were set");
-                }
+                validatePeriodicExtras(mCustomExtras);
+                validatePeriodicExtras(mSyncConfigExtras);
             } else if (mSyncType == SYNC_TYPE_UNKNOWN) {
                 throw new IllegalArgumentException("Must call either syncOnce() or syncPeriodic()");
-            }
-            if (mSyncTarget == SYNC_TARGET_SERVICE) {
-                if (mSyncConfigExtras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false)) {
-                    throw new IllegalArgumentException("Cannot specify an initialisation sync"
-                            + " that targets a service.");
-                }
             }
             // Ensure that a target for the sync has been set.
             if (mSyncTarget == SYNC_TARGET_UNKNOWN) {
@@ -666,5 +623,23 @@ public class SyncRequest implements Parcelable {
             }
             return new SyncRequest(this);
         }
-    }   
+
+        /**
+         * Helper function to throw an <code>IllegalArgumentException</code> if any illegal
+         * extras were set for a periodic sync.
+         *
+         * @param extras bundle to validate.
+         */
+        private void validatePeriodicExtras(Bundle extras) {
+            if (extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false)
+                    || extras.getBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, false)
+                    || extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, false)
+                    || extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, false)
+                    || extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false)
+                    || extras.getBoolean(ContentResolver.SYNC_EXTRAS_FORCE, false)
+                    || extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false)) {
+                throw new IllegalArgumentException("Illegal extras were set");
+            }
+        }
+    }
 }

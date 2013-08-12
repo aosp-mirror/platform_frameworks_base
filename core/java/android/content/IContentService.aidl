@@ -17,7 +17,6 @@
 package android.content;
 
 import android.accounts.Account;
-import android.content.ComponentName;
 import android.content.SyncInfo;
 import android.content.ISyncStatusObserver;
 import android.content.SyncAdapterType;
@@ -56,14 +55,8 @@ interface IContentService {
             int userHandle);
 
     void requestSync(in Account account, String authority, in Bundle extras);
-    /**
-     * Start a sync given a request.
-     */
     void sync(in SyncRequest request);
-    void cancelSync(in Account account, String authority, in ComponentName cname);
-
-    /** Cancel a sync, providing information about the sync to be cancelled. */
-     void cancelRequest(in SyncRequest request);
+    void cancelSync(in Account account, String authority);
 
     /**
      * Check if the provider should be synced when a network tickle is received
@@ -81,14 +74,12 @@ interface IContentService {
     void setSyncAutomatically(in Account account, String providerName, boolean sync);
 
     /**
-     * Get a list of periodic operations for a specified authority, or service.
-     * @param account account for authority, must be null if cname is non-null.
-     * @param providerName name of provider, must be null if cname is non-null.
-     * @param cname component to identify sync service, must be null if account/providerName are
-     * non-null.
+     * Get the frequency of the periodic poll, if any.
+     * @param providerName the provider whose setting we are querying
+     * @return the frequency of the periodic sync in seconds. If 0 then no periodic syncs
+     * will take place.
      */
-    List<PeriodicSync> getPeriodicSyncs(in Account account, String providerName,
-        in ComponentName cname);
+    List<PeriodicSync> getPeriodicSyncs(in Account account, String providerName);
 
     /**
      * Set whether or not the provider is to be synced on a periodic basis.
@@ -121,22 +112,15 @@ interface IContentService {
      */
     void setIsSyncable(in Account account, String providerName, int syncable);
 
-    /**
-     * Corresponds roughly to setIsSyncable(String account, String provider) for syncs that bind
-     * to a SyncService.
-     */
-    void setServiceActive(in ComponentName cname, boolean active);
-
-    /**
-     * Corresponds roughly to getIsSyncable(String account, String provider) for syncs that bind
-     * to a SyncService.
-     * @return 0 if this SyncService is not enabled, 1 if enabled, <0 if unknown.
-     */
-    boolean isServiceActive(in ComponentName cname);
-
     void setMasterSyncAutomatically(boolean flag);
 
     boolean getMasterSyncAutomatically();
+
+    /**
+     * Returns true if there is currently a sync operation for the given
+     * account or authority in the pending list, or actively being processed.
+     */
+    boolean isSyncActive(in Account account, String authority);
 
     List<SyncInfo> getCurrentSyncs();
 
@@ -147,33 +131,17 @@ interface IContentService {
     SyncAdapterType[] getSyncAdapterTypes();
 
     /**
-     * Returns true if there is currently a operation for the given account/authority or service
-     * actively being processed.
-     * @param account account for authority, must be null if cname is non-null.
-     * @param providerName name of provider, must be null if cname is non-null.
-     * @param cname component to identify sync service, must be null if account/providerName are
-     * non-null.
-     */
-    boolean isSyncActive(in Account account, String authority, in ComponentName cname);
-
-    /**
      * Returns the status that matches the authority. If there are multiples accounts for
      * the authority, the one with the latest "lastSuccessTime" status is returned.
-     * @param account account for authority, must be null if cname is non-null.
-     * @param providerName name of provider, must be null if cname is non-null.
-     * @param cname component to identify sync service, must be null if account/providerName are
-     * non-null.
+     * @param authority the authority whose row should be selected
+     * @return the SyncStatusInfo for the authority, or null if none exists
      */
-    SyncStatusInfo getSyncStatus(in Account account, String authority, in ComponentName cname);
+    SyncStatusInfo getSyncStatus(in Account account, String authority);
 
     /**
      * Return true if the pending status is true of any matching authorities.
-     * @param account account for authority, must be null if cname is non-null.
-     * @param providerName name of provider, must be null if cname is non-null.
-     * @param cname component to identify sync service, must be null if account/providerName are
-     * non-null.
      */
-    boolean isSyncPending(in Account account, String authority, in ComponentName cname);
+    boolean isSyncPending(in Account account, String authority);
 
     void addStatusChangeListener(int mask, ISyncStatusObserver callback);
 

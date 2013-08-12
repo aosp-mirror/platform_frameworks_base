@@ -17,7 +17,6 @@
 package android.content;
 
 import android.accounts.Account;
-import android.content.pm.RegisteredServicesCache;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Parcelable.Creator;
@@ -30,22 +29,14 @@ public class SyncInfo implements Parcelable {
     public final int authorityId;
 
     /**
-     * The {@link Account} that is currently being synced. Will be null if this sync is running via
-     * a {@link SyncService}.
+     * The {@link Account} that is currently being synced.
      */
     public final Account account;
 
     /**
-     * The authority of the provider that is currently being synced. Will be null if this sync
-     * is running via a {@link SyncService}.
+     * The authority of the provider that is currently being synced.
      */
     public final String authority;
-
-    /**
-     * The {@link SyncService} that is targeted by this operation. Null if this sync is running via
-     * a {@link AbstractThreadedSyncAdapter}. 
-     */
-    public final ComponentName service;
 
     /**
      * The start time of the current sync operation in milliseconds since boot.
@@ -55,13 +46,12 @@ public class SyncInfo implements Parcelable {
     public final long startTime;
 
     /** @hide */
-    public SyncInfo(int authorityId, Account account, String authority, ComponentName service,
+    public SyncInfo(int authorityId, Account account, String authority,
             long startTime) {
         this.authorityId = authorityId;
         this.account = account;
         this.authority = authority;
         this.startTime = startTime;
-        this.service = service;
     }
 
     /** @hide */
@@ -72,20 +62,17 @@ public class SyncInfo implements Parcelable {
     /** @hide */
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(authorityId);
-        parcel.writeParcelable(account, flags);
+        account.writeToParcel(parcel, 0);
         parcel.writeString(authority);
         parcel.writeLong(startTime);
-        parcel.writeParcelable(service, flags);
-        
     }
 
     /** @hide */
     SyncInfo(Parcel parcel) {
         authorityId = parcel.readInt();
-        account = parcel.readParcelable(Account.class.getClassLoader());
+        account = new Account(parcel);
         authority = parcel.readString();
         startTime = parcel.readLong();
-        service = parcel.readParcelable(ComponentName.class.getClassLoader());
     }
 
     /** @hide */
