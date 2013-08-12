@@ -314,8 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"alkalmazásváltás megakadályozása"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Megakadályozza, hogy a felhasználó átváltson egy másik alkalmazásra."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"az alkalmazás aktuális információinak lekérése"</string>
-    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
-    <skip />
+    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Lehetővé teszi, hogy a felhasználó privát adatokat kérjen le az aktuális alkalmazásról és szolgáltatásról a képernyő előterében."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"alkalmazásindítások nyomon követése és vezérlése"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Lehetővé teszi az alkalmazás számára, hogy figyelje és vezérelje, hogy a rendszer hogyan indít el tevékenységeket. A rosszindulatú alkalmazások teljesen tönkretehetik a rendszert. Ez az engedély csak fejlesztéshez szükséges, normál használathoz sosem."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"eltávolított csomagú üzenetek küldése"</string>

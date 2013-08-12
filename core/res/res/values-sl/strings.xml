@@ -314,8 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"preprečevanje preklopa programov"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Uporabniku preprečuje preklop v drug program."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"pridobivanje podatkov o trenutni aplikaciji"</string>
-    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
-    <skip />
+    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Imetniku dovoli prenos zasebnih podatkov o trenutni aplikaciji in storitvah v ospredju zaslona."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"spremljanje in nadzor vseh zagonov programov"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Programu omogoča spremljanje in nadziranje načina, kako sistem zažene dejavnosti. Zlonamerni programi lahko v celoti ogrozijo varnost sistema. To dovoljenje je potrebno samo za razvoj, vendar nikoli za običajno uporabo."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"pošiljanje oddaje brez paketa"</string>
