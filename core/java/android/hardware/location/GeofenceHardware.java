@@ -15,16 +15,11 @@
  */
 package android.hardware.location;
 
-import android.content.Context;
 import android.location.Location;
 import android.os.RemoteException;
-import android.util.Log;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 
 /**
  * This class handles geofences managed by various hardware subsystems. It contains
@@ -52,12 +47,19 @@ public final class GeofenceHardware {
     private IGeofenceHardware mService;
 
     // Hardware systems that do geofence monitoring.
-    static final int NUM_MONITORS = 1;
+    static final int NUM_MONITORS = 2;
 
     /**
      * Constant for geofence monitoring done by the GPS hardware.
      */
     public static final int MONITORING_TYPE_GPS_HARDWARE = 0;
+
+    /**
+     * Constant for geofence monitoring done by the Fused hardware.
+     *
+     * @hide
+     */
+    public static final int MONITORING_TYPE_FUSED_HARDWARE = 1;
 
     /**
      * Constant to indiciate that the monitoring system is currently
@@ -124,8 +126,12 @@ public final class GeofenceHardware {
      */
     public static final int GEOFENCE_FAILURE = 5;
 
-    static final int GPS_GEOFENCE_UNAVAILABLE = 1<<0L;
-    static final int GPS_GEOFENCE_AVAILABLE = 1<<1L;
+    /**
+     * The constant used to indicate that the operation failed due to insufficient memory.
+     *
+     * @hide
+     */
+    public static final int GEOFENCE_ERROR_INSUFFICIENT_MEMORY = 6;
 
     private HashMap<GeofenceHardwareCallback, GeofenceHardwareCallbackWrapper>
             mCallbacks = new HashMap<GeofenceHardwareCallback, GeofenceHardwareCallbackWrapper>();
