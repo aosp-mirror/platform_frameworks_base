@@ -514,6 +514,12 @@ public class WifiMonitor {
                     if (space != -1) {
                         String iface = eventStr.substring(7,space);
                         m = mWifiMonitorSingleton.getMonitor(iface);
+                        if (m == null && iface.startsWith("p2p-")) {
+                            // p2p interfaces are created dynamically, but we have
+                            // only one P2p state machine monitoring all of them; look
+                            // for it explicitly, and send messages there ..
+                            m = mWifiMonitorSingleton.getMonitor("p2p0");
+                        }
                         if (m != null) {
                             if (m.mMonitoring) {
                                 mStateMachine = m.mWifiStateMachine;
