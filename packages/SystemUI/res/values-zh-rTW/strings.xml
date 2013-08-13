@@ -166,6 +166,7 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi 已連線"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"正在搜尋 GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS 已定位"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"有位置資訊要求"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"清除所有通知。"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"應用程式資訊"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"螢幕會自動旋轉。"</string>

@@ -166,6 +166,7 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi connesso"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Ricerca del GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Posizione stabilita dal GPS"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"Richieste di accesso alla posizione attive"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Cancella tutte le notifiche."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Informazioni applicazione"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Lo schermo ruoterà automaticamente."</string>

@@ -164,6 +164,7 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi متصل شد"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"جستجو برای GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"مکان تنظیم شده توسط GPS"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"درخواست‌های موقعیت مکانی فعال است"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"پاک کردن تمام اعلان‌ها"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"اطلاعات برنامه"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"صفحه به صورت خودکار می‌چرخد."</string>
