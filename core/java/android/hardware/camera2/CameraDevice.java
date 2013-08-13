@@ -173,6 +173,11 @@ public interface CameraDevice extends AutoCloseable {
      * <p>This function can take several hundred milliseconds to execute, since
      * camera hardware may need to be powered on or reconfigured.</p>
      *
+     * <p>The camera device will query each Surface's size and formats upon this
+     * call, so they must be set to a valid setting at this time (in particular:
+     * if the format is user-visible, it must be one of android.scaler.availableFormats;
+     * and the size must be one of android.scaler.available[Processed|Jpeg]Sizes).</p>
+     *
      * <p>To change the configuration after requests have been submitted to the
      * device, the camera device must be idle. To idle the device, stop any
      * repeating requests with {@link #stopRepeating stopRepeating}, and then
