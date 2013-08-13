@@ -314,8 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"αποτροπή εναλλαγών εφαρμογών"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Δεν επιτρέπει στο χρήστη να μεταβεί σε άλλη εφαρμογή."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"λήψη πληροφοριών σχετικά με την τρέχουσα εφαρμογή"</string>
-    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
-    <skip />
+    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Επιτρέπει στον κάτοχό του να ανακτήσει ιδιωτικές πληροφορίες σχετικά με την τρέχουσα εφαρμογή και τις υπηρεσίες στο προσκήνιο της οθόνης."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"παρακολούθηση και έλεγχος όλων των εκκινήσεων εφαρμογών"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Επιτρέπει στην εφαρμογή να παρακολουθεί και να ελέγχει τον τρόπο με τον οποίο το σύστημα εκκινεί δραστηριότητες. Τυχόν κακόβουλες εφαρμογές ενδέχεται να θέσουν σε κίνδυνο το σύστημα. Αυτή η άδεια είναι απαραίτητη μόνο για σκοπούς ανάπτυξης και ποτέ για συνήθη χρήση."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"αποστολή εκπομπής χωρίς πακέτο"</string>

@@ -314,8 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"neleisti perjungti programų"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Neleidžiama naudotojui perjungti į kitą programą."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"gauti esamos programos informaciją"</string>
-    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
-    <skip />
+    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Savininkui leidžiama gauti privačią informaciją apie dabartinę programą ir paslaugas, naudojamas ekrano priekiniame plane."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"stebėti ir valdyti visų programų paleidimą"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Leidžiama programai stebėti ir valdyti, kaip sistema paleidžia veiklą. Kenkėjiškos programos gali visiškai pažeisti sistemą. Šis leidimas reikalingas tik kuriant ir jo niekada nereikia naudojant įprastai."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"siųsti pašalinto paketo perdavimą"</string>
@@ -475,7 +474,7 @@
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Leidžiama programai konfigūruoti ir prisijungti prie „Wi-Fi“ pateikčių."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"valdyti „Wi-Fi“ pateiktis"</string>
     <string name="permdesc_controlWifiDisplay" msgid="4543912292681826986">"Leidžiama programai valdyti „Wi-Fi“ pateikčių žemo lygio funkcijas."</string>
-    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"fiksuoti garso įvestį"</string>
+    <string name="permlab_captureAudioOutput" msgid="6857134498402346708">"fiksuoti garso išvestį"</string>
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Programai leidžiama fiksuoti ir peradresuoti garso išvestį."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"fiksuoti vaizdo išvestį"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Programai leidžiama fiksuoti ir peradresuoti vaizdo išvestį."</string>
@@ -654,10 +653,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"Leidžiama turėtojui susisaistyti su pranešimų skaitymo priemonės paslaugos aukščiausio lygio sąsaja. Įprastoms programoms to neturėtų prireikti."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"iškviesti operatoriaus pateiktą konfigūravimo programą"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Turėtojui leidžiama iškviesti operatoriaus pateiktą konfigūravimo programą. Įprastoms programoms to neturėtų prireikti."</string>
-    <!-- no translation found for permlab_accessNetworkConditions (8206077447838909516) -->
-    <skip />
-    <!-- no translation found for permdesc_accessNetworkConditions (6899102075825272211) -->
-    <skip />
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"vykdyti tinklo sąlygų stebėjimą"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Leidžiama programai vykdyti tinklo sąlygų stebėjimą. To niekada neturėtų prireikti naudojant įprastas programas."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nustatyti slaptažodžio taisykles"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Valdyti leidžiamą ekrano atrakinimo slaptažodžių ilgį ir leidžiamus naudoti simbolius."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Stebėti bandymus atrakinti ekraną"</string>

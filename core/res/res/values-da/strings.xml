@@ -314,8 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"undgå programskift"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Forhindrer brugeren i at skifte til en anden app."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"få aktuelle app-oplysninger"</string>
-    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
-    <skip />
+    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Tillader, at brugeren henter private oplysninger om den aktuelle applikation og de aktuelle tjenester i forgrunden af skærmen."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"overvåge og kontrollere åbning af alle apps"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Tillader, at appen kan overvåge og kontrollere, hvordan systemet starter aktiviteter. Ondsindede apps kan fuldstændig kompromittere systemet. Denne tilladelse er kun nødvendig til udvikling, aldrig til normal brug."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"send udsendelse om fjernet pakke"</string>

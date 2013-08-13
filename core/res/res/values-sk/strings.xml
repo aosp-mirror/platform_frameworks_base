@@ -314,8 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"zabrániť prepínaniu aplikácií"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Zabráni používateľovi prepnúť na inú aplikáciu."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"získať informácie o aktuálnej aplikácii"</string>
-    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
-    <skip />
+    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Umožňuje držiteľovi povolenia načítať súkromné informácie o aktuálnej aplikácii a službách v popredí obrazovky."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"sledovať a ovládať všetky spustenia aplikácií"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Umožňuje aplikácii sledovať a ovládať spúšťanie aktivít systémom. Škodlivé aplikácie môžu systém úplne ovládnuť. Toto povolenie je potrebné len na účely vývoja, nikdy nie na bežné používanie."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"odoslanie vysielania o odstránení balíčka"</string>
