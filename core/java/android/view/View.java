@@ -4572,10 +4572,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             System.out.println(this + " clearFocus()");
         }
 
+        clearFocusInternal(true, true);
+    }
+
+    /**
+     * Clears focus from the view, optionally propagating the change up through
+     * the parent hierarchy and requesting that the root view place new focus.
+     *
+     * @param propagate whether to propagate the change up through the parent
+     *            hierarchy
+     * @param refocus when propagate is true, specifies whether to request the
+     *            root view place new focus
+     */
+    void clearFocusInternal(boolean propagate, boolean refocus) {
         if ((mPrivateFlags & PFLAG_FOCUSED) != 0) {
             mPrivateFlags &= ~PFLAG_FOCUSED;
 
-            if (mParent != null) {
+            if (propagate && mParent != null) {
                 mParent.clearChildFocus(this);
             }
 
@@ -4583,7 +4596,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             refreshDrawableState();
 
-            if (!rootViewRequestFocus()) {
+            if (propagate && (!refocus || !rootViewRequestFocus())) {
                 notifyGlobalFocusCleared(this);
             }
         }
@@ -4613,12 +4626,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             System.out.println(this + " unFocus()");
         }
 
-        if ((mPrivateFlags & PFLAG_FOCUSED) != 0) {
-            mPrivateFlags &= ~PFLAG_FOCUSED;
-
-            onFocusChanged(false, 0, null);
-            refreshDrawableState();
-        }
+        clearFocusInternal(false, false);
     }
 
     /**
