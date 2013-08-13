@@ -2889,11 +2889,12 @@ public class SyncManager {
             // determine if we need to set or cancel the alarm
             boolean shouldSet = false;
             boolean shouldCancel = false;
-            final boolean alarmIsActive = mAlarmScheduleTime != null;
+            final boolean alarmIsActive = (mAlarmScheduleTime != null) && (now < mAlarmScheduleTime);
             final boolean needAlarm = alarmTime != Long.MAX_VALUE;
             if (needAlarm) {
-                // Need the alarm if it's currently not set, or if our time is before the currently
-                // set time.
+                // Need the alarm if
+                //  - it's currently not set
+                //  - if the alarm is set in the past.
                 if (!alarmIsActive || alarmTime < mAlarmScheduleTime) {
                     shouldSet = true;
                 }
@@ -2910,7 +2911,7 @@ public class SyncManager {
                             + " secs from now");
                 }
                 mAlarmScheduleTime = alarmTime;
-                mAlarmService.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, alarmTime,
+                mAlarmService.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, alarmTime,
                         mSyncAlarmIntent);
             } else if (shouldCancel) {
                 mAlarmScheduleTime = null;
