@@ -25,6 +25,8 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.GradientDrawable.Orientation;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ServiceManager;
@@ -79,6 +81,9 @@ public class NavigationBarView extends LinearLayout {
 
     private DelegateViewHelper mDelegateHelper;
     private DeadZone mDeadZone;
+    private final BarTransitions mBarTransitions;
+    private final Drawable mTransparent;
+    private final Drawable mTransparentVertical;
 
     // workaround for LayoutTransitions leaving the nav buttons in a weird state (bug 5549288)
     final static boolean WORKAROUND_INVALID_LAYOUT = true;
@@ -105,6 +110,37 @@ public class NavigationBarView extends LinearLayout {
                     break;
             }
         }
+    }
+
+    public NavigationBarView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+
+        mHidden = false;
+
+        mDisplay = ((WindowManager)context.getSystemService(
+                Context.WINDOW_SERVICE)).getDefaultDisplay();
+        mBarService = IStatusBarService.Stub.asInterface(
+                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+
+        final Resources res = mContext.getResources();
+        mBarSize = res.getDimensionPixelSize(R.dimen.navigation_bar_size);
+        mVertical = false;
+        mShowMenu = false;
+        mDelegateHelper = new DelegateViewHelper(this);
+
+        getIcons(res);
+
+        final int[] gradientColors = new int[] {
+                res.getColor(R.color.navigation_bar_background_transparent_start),
+                res.getColor(R.color.navigation_bar_background_transparent_end)
+        };
+        mTransparent = new GradientDrawable(Orientation.BOTTOM_TOP, gradientColors);
+        mTransparentVertical = new GradientDrawable(Orientation.RIGHT_LEFT, gradientColors);
+        mBarTransitions = new BarTransitions(context, this, mTransparent);
+    }
+
+    public BarTransitions getBarTransitions() {
+        return mBarTransitions;
     }
 
     public void setDelegateView(View view) {
@@ -153,25 +189,6 @@ public class NavigationBarView extends LinearLayout {
     // for when home is disabled, but search isn't
     public View getSearchLight() {
         return mCurrentView.findViewById(R.id.search_light);
-    }
-
-    public NavigationBarView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-
-        mHidden = false;
-
-        mDisplay = ((WindowManager)context.getSystemService(
-                Context.WINDOW_SERVICE)).getDefaultDisplay();
-        mBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
-
-        final Resources res = mContext.getResources();
-        mBarSize = res.getDimensionPixelSize(R.dimen.navigation_bar_size);
-        mVertical = false;
-        mShowMenu = false;
-        mDelegateHelper = new DelegateViewHelper(this);
-
-        getIcons(res);
     }
 
     private void getIcons(Resources res) {
@@ -406,6 +423,7 @@ public class NavigationBarView extends LinearLayout {
         }
 
         setNavigationIconHints(mNavigationIconHints, true);
+        mBarTransitions.setTransparent(mVertical ? mTransparentVertical : mTransparent);
     }
 
     @Override
