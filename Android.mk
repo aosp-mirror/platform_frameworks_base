@@ -391,6 +391,8 @@ aidl_files := \
 	frameworks/base/telephony/java/android/telephony/ServiceState.aidl \
 	frameworks/base/telephony/java/com/android/internal/telephony/IPhoneSubInfo.aidl \
 	frameworks/base/telephony/java/com/android/internal/telephony/ITelephony.aidl \
+	frameworks/base/wifi/java/android/net/wifi/BatchedScanSettings.aidl \
+	frameworks/base/wifi/java/android/net/wifi/BatchedScanResult.aidl \
 
 gen := $(TARGET_OUT_COMMON_INTERMEDIATES)/framework.aidl
 $(gen): PRIVATE_SRC_FILES := $(aidl_files)

@@ -35,6 +35,7 @@ import android.util.SparseArray;
 import java.net.InetAddress;
 import java.util.concurrent.CountDownLatch;
 
+import com.android.internal.R;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
@@ -364,6 +365,14 @@ public class WifiManager {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String SCAN_RESULTS_AVAILABLE_ACTION = "android.net.wifi.SCAN_RESULTS";
+    /**
+     * A batch of access point scans has been completed and the results areavailable.
+     * Call {@link #getBatchedScanResults()} to obtain the results.
+     * @hide pending review
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String BATCHED_SCAN_RESULTS_AVAILABLE_ACTION =
+            "android.net.wifi.BATCHED_RESULTS";
     /**
      * The RSSI (signal strength) has changed.
      * @see #EXTRA_NEW_RSSI
@@ -774,6 +783,59 @@ public class WifiManager {
             return true;
         } catch (RemoteException e) {
             return false;
+        }
+    }
+
+    /**
+     * Request a batched scan for access points.  To end your requested batched scan,
+     * call stopBatchedScan with the same Settings.
+     *
+     * If there are mulitple requests for batched scans, the more demanding settings will
+     * take precidence.
+     *
+     * @param requested {@link BatchedScanSettings} the scan settings requested.
+     * @return false on known error
+     * @hide
+     */
+    public boolean requestBatchedScan(BatchedScanSettings requested) {
+        try {
+            return mService.requestBatchedScan(requested, new Binder());
+        } catch (RemoteException e) { return false; }
+    }
+
+    /**
+     * Check if the Batched Scan feature is supported.
+     *
+     * @return false if not supported.
+     * @hide
+     */
+    public boolean isBatchedScanSupported() {
+        try {
+            return mService.isBatchedScanSupported();
+        } catch (RemoteException e) { return false; }
+    }
+
+    /**
+     * End a requested batch scan for this applicaiton.  Note that batched scan may
+     * still occur if other apps are using them.
+     * @hide
+     */
+    public void stopBatchedScan(BatchedScanSettings requested) {
+        try {
+            mService.stopBatchedScan(requested, new Binder());
+        } catch (RemoteException e) {}
+    }
+
+    /**
+     * Retrieve the latest batched scan result.  This should be called immediately after
+     * {@link BATCHED_SCAN_RESULTS_AVAILABLE_ACTION} is received.
+     * @hide
+     */
+    public List<BatchedScanResult> getBatchedScanResults() {
+        try {
+            return mService.getBatchedScanResults(mContext.getBasePackageName());
+        } catch (RemoteException e) {
+            return null;
         }
     }
 
