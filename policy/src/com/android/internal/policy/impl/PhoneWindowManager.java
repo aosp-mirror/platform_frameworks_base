@@ -558,6 +558,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int TRANSIENT_BAR_HIDING = 2;
     private int mStatusTransientBar;
     private int mNavigationTransientBar;
+    private TransientNavigationConfirmation mTransientNavigationConfirmation;
 
     private SystemGesturesPointerEventListener mSystemGestures;
 
@@ -942,6 +943,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         }
                     }
                 });
+        mTransientNavigationConfirmation = new TransientNavigationConfirmation(mContext, mHandler);
         mWindowManagerFuncs.registerPointerEventListener(mSystemGestures);
 
         mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
@@ -3173,11 +3175,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             = mOverscanScreenTop + mOverscanScreenHeight;
                 } else if (mCanHideNavigationBar
                         && (sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION) != 0
-                        && attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
-                        && attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
+                        && (attrs.type == TYPE_TOAST
+                            || (attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
+                            && attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW))) {
                     // Asking for layout as if the nav bar is hidden, lets the
                     // application extend into the unrestricted screen area.  We
-                    // only do this for application windows to ensure no window that
+                    // only do this for application windows (or toasts) to ensure no window that
                     // can be above the nav bar can do this.
                     // XXX This assumes that an app asking for this will also
                     // ask for layout in only content.  We can't currently figure out
@@ -3879,6 +3882,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_POWER: {
                 result &= ~ACTION_PASS_TO_USER;
                 if (down) {
+                    if (isScreenOn && isNavigationBarTransient(mLastSystemUiFlags)) {
+                        mTransientNavigationConfirmation.unconfirmLastPackage();
+                    }
                     if (isScreenOn && !mPowerKeyTriggered
                             && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
                         mPowerKeyTriggered = true;
@@ -5019,7 +5025,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mForcingShowNavBar && mFocusedWindow.getSurfaceLayer() < mForcingShowNavBarLayer) {
             tmpVisibility &= ~View.SYSTEM_UI_CLEARABLE_FLAGS;
         }
-        final int visibility = updateTransientBarsLw(tmpVisibility);
+        final int visibility = updateTransientBarsLw(mLastSystemUiFlags, tmpVisibility);
         final int diff = visibility ^ mLastSystemUiFlags;
         final boolean needsMenu = mFocusedWindow.getNeedsMenuLw(mTopFullscreenOpaqueWindowState);
         if (diff == 0 && mLastFocusNeedsMenu == needsMenu
@@ -5047,7 +5053,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return diff;
     }
 
-    private int updateTransientBarsLw(int vis) {
+    private int updateTransientBarsLw(int oldVis, int vis) {
         if (ImmersiveModeTesting.enabled) {
             vis = ImmersiveModeTesting.applyForced(mFocusedWindow, vis);
         }
@@ -5059,9 +5065,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     | View.SYSTEM_UI_FLAG_ALLOW_TRANSIENT;
             vis = (vis & ~flags) | (mLastSystemUiFlags & flags);
         }
-        boolean transientAllowed = (vis & View.SYSTEM_UI_FLAG_ALLOW_TRANSIENT) != 0;
         if (mStatusTransientBar == TRANSIENT_BAR_SHOWING) {
             // status transient bar requested
+            boolean transientAllowed =
+                    (vis & View.SYSTEM_UI_FLAG_ALLOW_TRANSIENT) != 0;
             boolean hideStatusBarWM =
                     (mFocusedWindow.getAttrs().flags
                             & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
@@ -5092,13 +5099,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
             }
         }
+        boolean oldTransientNav = isNavigationBarTransient(oldVis);
+        boolean isTransientNav = isNavigationBarTransient(vis);
+        if (mFocusedWindow != null && oldTransientNav != isTransientNav) {
+            final int uid = getCurrentUserId();
+            final String pkg = mFocusedWindow.getOwningPackage();
+            mTransientNavigationConfirmation.transientNavigationChanged(uid, pkg, isTransientNav);
+        }
         if (mNavigationTransientBar == TRANSIENT_BAR_SHOWING) {
             // navigation transient bar requested
-            boolean hideNavigationBarSysui =
-                    (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0;
-            boolean transientNavigationBarAllowed =
-                    mNavigationBar != null && hideNavigationBarSysui && transientAllowed;
-            if (!transientNavigationBarAllowed) {
+            if (!isTransientNav) {
                 mNavigationTransientBar = TRANSIENT_BAR_NONE;
             } else {
                 // show navigation transient bar
@@ -5110,6 +5120,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         return vis;
+    }
+
+    private boolean isNavigationBarTransient(int vis) {
+        return mNavigationBar != null
+                && (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
+                && (vis & View.SYSTEM_UI_FLAG_ALLOW_TRANSIENT) != 0;
     }
 
     private boolean setBarShowingLw(WindowState win, final boolean show) {

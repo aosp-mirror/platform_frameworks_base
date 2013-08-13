@@ -503,10 +503,4 @@
     <string name="status_bar_help_title">Notifications appear here</string>
     <!-- Body of help text shown when the notification panel is pulled down for the very first time. [CHAR LIMIT=NONE] -->
     <string name="status_bar_help_text">Access them anytime by swiping down.\nSwipe down again for system controls.</string>
-
-    <!-- Toast bar message when hiding the navigation bar -->
-    <string name="hiding_navigation_confirmation_message">Swipe edge of screen to reveal bar</string>
-
-    <!-- Longer version of toast bar message when hiding the navigation bar (if room) -->
-    <string name="hiding_navigation_confirmation_message_long">Swipe from edge of screen to reveal system bar</string>
 </resources>
