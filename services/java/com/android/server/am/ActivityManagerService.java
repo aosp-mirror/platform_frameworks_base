@@ -8062,12 +8062,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (activity == null) {
                 Slog.w(TAG, "getAssistContextExtras error: no resumed activity");
                 validActivity = false;
-            }
-            if (activity.app == null || activity.app.thread == null) {
+            } else if (activity.app == null || activity.app.thread == null) {
                 Slog.w(TAG, "getAssistContextExtras error: no process for " + activity);
                 validActivity = false;
-            }
-            if (activity.app.pid == Binder.getCallingPid()) {
+            } else if (activity.app.pid == Binder.getCallingPid()) {
                 Slog.w(TAG, "getAssistContextExtras error: request process same as " + activity);
                 validActivity = false;
             }
