@@ -25832,7 +25832,9 @@ package android.view {
     method public android.view.InputDevice.MotionRange getMotionRange(int, int);
     method public java.util.List<android.view.InputDevice.MotionRange> getMotionRanges();
     method public java.lang.String getName();
+    method public int getProductId();
     method public int getSources();
+    method public int getVendorId();
     method public android.os.Vibrator getVibrator();
     method public boolean isVirtual();
     method public void writeToParcel(android.os.Parcel, int);
