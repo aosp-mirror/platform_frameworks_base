@@ -95,6 +95,8 @@ public class Toast {
         mTN = new TN();
         mTN.mY = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.toast_y_offset);
+        mTN.mGravity = context.getResources().getInteger(
+                com.android.internal.R.integer.config_toastDefaultGravity);
     }
     
     /**
@@ -382,12 +384,12 @@ public class Toast {
         private final WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
         final Handler mHandler = new Handler();    
 
-        int mGravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+        int mGravity;
         int mX, mY;
         float mHorizontalMargin;
         float mVerticalMargin;
 
-       
+
         View mView;
         View mNextView;
 
