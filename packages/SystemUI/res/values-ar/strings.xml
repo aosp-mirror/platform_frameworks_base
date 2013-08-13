@@ -164,8 +164,7 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi متصل"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"جارٍ البحث عن GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"تم تعيين الموقع بواسطة GPS"</string>
-    <!-- no translation found for accessibility_location_active (2427290146138169014) -->
-    <skip />
+    <string name="accessibility_location_active" msgid="2427290146138169014">"طلبات الموقع نشطة"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"محو جميع الإشعارات."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"معلومات التطبيق"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"سيتم تدوير الشاشة تلقائيًا."</string>
