@@ -1200,4 +1200,7 @@
          from an emulated display within the physical display. -->
     <bool name="config_forceDefaultOrientation">false</bool>
 
+    <!-- Default Gravity setting for the system Toast view. Equivalent to: Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM -->
+    <integer name="config_toastDefaultGravity">0x00000051</integer>
+
 </resources>
