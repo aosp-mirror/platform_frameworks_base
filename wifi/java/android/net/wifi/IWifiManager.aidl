@@ -16,8 +16,10 @@
 
 package android.net.wifi;
 
-import android.net.wifi.WifiInfo;
+import android.net.wifi.BatchedScanResult;
+import android.net.wifi.BatchedScanSettings;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.ScanResult;
 import android.net.DhcpInfo;
 
@@ -114,5 +116,13 @@ interface IWifiManager
     void enableTdls(String remoteIPAddress, boolean enable);
 
     void enableTdlsWithMacAddress(String remoteMacAddress, boolean enable);
+
+    boolean requestBatchedScan(in BatchedScanSettings requested, IBinder binder);
+
+    void stopBatchedScan(in BatchedScanSettings requested, IBinder binder);
+
+    List<BatchedScanResult> getBatchedScanResults(String callingPackage);
+
+    boolean isBatchedScanSupported();
 }
 

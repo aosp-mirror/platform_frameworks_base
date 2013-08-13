@@ -25,18 +25,20 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
-import android.net.wifi.IWifiManager;
-import android.net.wifi.ScanResult;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
-import android.net.wifi.WifiStateMachine;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiWatchdogStateMachine;
 import android.net.DhcpInfo;
 import android.net.DhcpResults;
 import android.net.LinkAddress;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
+import android.net.wifi.IWifiManager;
+import android.net.wifi.ScanResult;
+import android.net.wifi.BatchedScanResult;
+import android.net.wifi.BatchedScanSettings;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.net.wifi.WifiStateMachine;
+import android.net.wifi.WifiWatchdogStateMachine;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Messenger;
@@ -63,6 +65,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -120,6 +123,8 @@ public final class WifiService extends IWifiManager.Stub {
     private WifiTrafficPoller mTrafficPoller;
     /* Tracks the persisted states for wi-fi & airplane mode */
     final WifiSettingsStore mSettingsStore;
+
+    final boolean mBatchedScanSupported;
 
     /**
      * Asynchronous channel to WifiStateMachine
@@ -246,6 +251,9 @@ public final class WifiService extends IWifiManager.Stub {
         mWifiController = new WifiController(mContext, this, wifiThread.getLooper());
         mWifiController.start();
 
+        mBatchedScanSupported = mContext.getResources().getBoolean(
+                R.bool.config_wifi_batched_scan_supported);
+
         registerForScanModeChange();
         mContext.registerReceiver(
                 new BroadcastReceiver() {
@@ -312,6 +320,142 @@ public final class WifiService extends IWifiManager.Stub {
             enforceWorkSourcePermission();
         }
         mWifiStateMachine.startScan(Binder.getCallingUid(), workSource);
+    }
+
+    private class BatchedScanRequest extends DeathRecipient {
+        BatchedScanSettings settings;
+        int uid;
+
+        BatchedScanRequest(BatchedScanSettings settings, IBinder binder, int uid) {
+            super(0, null, binder, null);
+            this.settings = settings;
+            this.uid = uid;
+        }
+        public void binderDied() {
+            stopBatchedScan(settings, mBinder);
+        }
+        public String toString() {
+            return "BatchedScanRequest{settings=" + settings + ", binder=" + mBinder + "}";
+        }
+    }
+
+    private final List<BatchedScanRequest> mBatchedScanners = new ArrayList<BatchedScanRequest>();
+
+    public boolean isBatchedScanSupported() {
+        return mBatchedScanSupported;
+    }
+
+    /**
+     * see {@link android.net.wifi.WifiManager#requestBatchedScan()}
+     */
+    public boolean requestBatchedScan(BatchedScanSettings requested, IBinder binder) {
+        enforceChangePermission();
+        if (mBatchedScanSupported == false) return false;
+        requested = new BatchedScanSettings(requested);
+        if (requested.isInvalid()) return false;
+        BatchedScanRequest r = new BatchedScanRequest(requested, binder, Binder.getCallingUid());
+        synchronized(mBatchedScanners) {
+            mBatchedScanners.add(r);
+            resolveBatchedScannersLocked();
+        }
+        return true;
+    }
+
+    public List<BatchedScanResult> getBatchedScanResults(String callingPackage) {
+        enforceAccessPermission();
+        if (mBatchedScanSupported == false) return new ArrayList<BatchedScanResult>();
+        int userId = UserHandle.getCallingUserId();
+        int uid = Binder.getCallingUid();
+        long ident = Binder.clearCallingIdentity();
+        try {
+            if (mAppOps.noteOp(AppOpsManager.OP_WIFI_SCAN, uid, callingPackage)
+                    != AppOpsManager.MODE_ALLOWED) {
+                return new ArrayList<BatchedScanResult>();
+            }
+            int currentUser = ActivityManager.getCurrentUser();
+            if (userId != currentUser) {
+                return new ArrayList<BatchedScanResult>();
+            } else {
+                return mWifiStateMachine.syncGetBatchedScanResultsList();
+            }
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+
+    public void stopBatchedScan(BatchedScanSettings settings, IBinder binder) {
+        enforceChangePermission();
+        if (mBatchedScanSupported == false) return;
+        synchronized(mBatchedScanners) {
+            BatchedScanRequest found = null;
+            for (BatchedScanRequest r : mBatchedScanners) {
+                if (r.mBinder.equals(binder) && r.settings.equals(settings)) {
+                    found = r;
+                    break;
+                }
+            }
+            if (found != null) {
+                mBatchedScanners.remove(found);
+                resolveBatchedScannersLocked();
+            }
+        }
+    }
+
+    private void resolveBatchedScannersLocked() {
+        BatchedScanSettings setting = new BatchedScanSettings();
+        setting.scanIntervalSec = BatchedScanSettings.DEFAULT_INTERVAL_SEC;
+        int responsibleUid = 0;
+        setting.channelSet = new ArrayList<String>();
+
+        if (mBatchedScanners.size() == 0) {
+            mWifiStateMachine.setBatchedScanSettings(null, 0);
+            return;
+        }
+
+        for (BatchedScanRequest r : mBatchedScanners) {
+            BatchedScanSettings s = r.settings;
+            if (s.maxScansPerBatch != BatchedScanSettings.UNSPECIFIED &&
+                    s.maxScansPerBatch < setting.maxScansPerBatch) {
+                setting.maxScansPerBatch = s.maxScansPerBatch;
+                responsibleUid = r.uid;
+            }
+            if (s.maxApPerScan != BatchedScanSettings.UNSPECIFIED &&
+                    s.maxApPerScan > setting.maxApPerScan) {
+                setting.maxApPerScan = s.maxApPerScan;
+            }
+            if (s.scanIntervalSec != BatchedScanSettings.UNSPECIFIED &&
+                    s.scanIntervalSec < setting.scanIntervalSec) {
+                setting.scanIntervalSec = s.scanIntervalSec;
+                responsibleUid = r.uid;
+            }
+            if (s.maxApForDistance != BatchedScanSettings.UNSPECIFIED &&
+                    s.maxApForDistance > setting.maxApForDistance) {
+                setting.maxApForDistance = s.maxApForDistance;
+            }
+            if (s.channelSet != null) {
+                for (String i : s.channelSet) {
+                    if (setting.channelSet.contains(i) == false) setting.channelSet.add(i);
+                }
+            }
+        }
+        if (setting.channelSet.size() == 0) setting.channelSet = null;
+        if (setting.scanIntervalSec < BatchedScanSettings.MIN_INTERVAL_SEC) {
+            setting.scanIntervalSec = BatchedScanSettings.MIN_INTERVAL_SEC;
+        }
+        if (setting.maxScansPerBatch == BatchedScanSettings.UNSPECIFIED) {
+            setting.maxScansPerBatch = BatchedScanSettings.DEFAULT_SCANS_PER_BATCH;
+        }
+        if (setting.maxApPerScan == BatchedScanSettings.UNSPECIFIED) {
+            setting.maxApPerScan = BatchedScanSettings.DEFAULT_AP_PER_SCAN;
+        }
+        if (setting.scanIntervalSec == BatchedScanSettings.UNSPECIFIED) {
+            setting.scanIntervalSec = BatchedScanSettings.DEFAULT_INTERVAL_SEC;
+        }
+        if (setting.maxApForDistance == BatchedScanSettings.UNSPECIFIED) {
+            setting.maxApForDistance = BatchedScanSettings.DEFAULT_AP_FOR_DISTANCE;
+        }
+        mWifiStateMachine.setBatchedScanSettings(setting, responsibleUid);
     }
 
     private void enforceAccessPermission() {
@@ -569,11 +713,11 @@ public final class WifiService extends IWifiManager.Stub {
         int userId = UserHandle.getCallingUserId();
         int uid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
-        if (mAppOps.noteOp(AppOpsManager.OP_WIFI_SCAN, uid, callingPackage)
-                != AppOpsManager.MODE_ALLOWED) {
-            return new ArrayList<ScanResult>();
-        }
         try {
+            if (mAppOps.noteOp(AppOpsManager.OP_WIFI_SCAN, uid, callingPackage)
+                    != AppOpsManager.MODE_ALLOWED) {
+                return new ArrayList<ScanResult>();
+            }
             int currentUser = ActivityManager.getCurrentUser();
             if (userId != currentUser) {
                 return new ArrayList<ScanResult>();
