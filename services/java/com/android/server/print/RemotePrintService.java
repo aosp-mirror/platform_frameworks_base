@@ -110,6 +110,7 @@ final class RemotePrintService implements DeathRecipient {
     }
 
     private void handleBinderDied() {
+        mPendingCommands.clear();
         ensureUnbound();
     }
 
