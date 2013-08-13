@@ -53,7 +53,6 @@ public class LocationController extends BroadcastReceiver {
     private StatusBarManager mStatusBarManager;
 
     private boolean mAreActiveLocationRequests;
-    private boolean mIsAirplaneMode;
 
     private ArrayList<LocationSettingsChangeCallback> mSettingsChangeCallbacks =
             new ArrayList<LocationSettingsChangeCallback>();
@@ -76,9 +75,6 @@ public class LocationController extends BroadcastReceiver {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION);
-        // Listen for a change in the airplane mode setting so we can defensively turn off the
-        // high power location icon when radios are disabled.
-        filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         context.registerReceiver(this, filter);
 
         mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
@@ -100,7 +96,6 @@ public class LocationController extends BroadcastReceiver {
 
         // Examine the current location state and initialize the status view.
         updateActiveLocationRequests();
-        updateAirplaneMode();
         refreshViews();
     }
 
@@ -170,11 +165,9 @@ public class LocationController extends BroadcastReceiver {
         return false;
     }
 
-    // Updates the status view based on the current state of location requests and airplane mode.
+    // Updates the status view based on the current state of location requests.
     private void refreshViews() {
-        // The airplane mode check is defensive - there shouldn't be any active high power
-        // location requests when airplane mode is on.
-        if (!mIsAirplaneMode && mAreActiveLocationRequests) {
+        if (mAreActiveLocationRequests) {
             mStatusBarManager.setIcon(LOCATION_STATUS_ICON_PLACEHOLDER, LOCATION_STATUS_ICON_ID, 0,
                     mContext.getString(R.string.accessibility_location_active));
         } else {
@@ -191,25 +184,11 @@ public class LocationController extends BroadcastReceiver {
         }
     }
 
-    // Reads the airplane mode setting and updates the status view if necessary.
-    private void updateAirplaneMode() {
-        boolean wasAirplaneMode = mIsAirplaneMode;
-        // TODO This probably warrants a utility method in Settings.java.
-        mIsAirplaneMode = (Settings.Global.getInt(
-                mContext.getContentResolver(),
-                Settings.Global.AIRPLANE_MODE_ON, 0) == 1);
-        if (mIsAirplaneMode != wasAirplaneMode) {
-            refreshViews();
-        }
-    }
-
     @Override
     public void onReceive(Context context, Intent intent) {
         final String action = intent.getAction();
         if (LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION.equals(action)) {
             updateActiveLocationRequests();
-        } else if (Intent.ACTION_AIRPLANE_MODE_CHANGED.equals(action)) {
-            updateAirplaneMode();
         }
     }
 }
