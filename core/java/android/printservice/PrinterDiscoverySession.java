@@ -109,21 +109,19 @@ public abstract class PrinterDiscoverySession {
      * Removed printers can be added again. You can call this method multiple
      * times during printer discovery.
      * <p>
-     * <strong>Note: </strong> Calling this method when the session is closed,
-     * which is if {@link #isClosed()} returns true, will throw an {@link
-     * IllegalStateException}.
+     * <strong>Note: </strong> Calls to this method before the session is opened,
+     * i.e. before the {@link #onOpen(List)} call, and after the session is closed,
+     * i.e. after the call to {@link #onClose()}, will be ignored.
      * </p>
      *
      * @param printers The printers to add.
      *
      * @see #removePrinters(List)
      * @see #updatePrinters(List)
-     * @see #isClosed()
      */
     public final void addPrinters(List<PrinterInfo> printers) {
         final IPrinterDiscoverySessionObserver observer;
         synchronized (mLock) {
-            throwIfClosedLocked();
             observer = mObserver;
         }
         if (observer != null) {
@@ -132,6 +130,8 @@ public abstract class PrinterDiscoverySession {
             } catch (RemoteException re) {
                 Log.e(LOG_TAG, "Error adding printers", re);
             }
+        } else {
+            Log.w(LOG_TAG, "Printer discovery session not open not adding printers.");
         }
     }
 
@@ -140,21 +140,19 @@ public abstract class PrinterDiscoverySession {
      * printer has no effect. Removed printers can be added again. You
      * can call this method multiple times during printer discovery.
      * <p>
-     * <strong>Note: </strong> Calling this method when the session is closed,
-     * which is if {@link #isClosed()} returns true, will throw an {@link
-     * IllegalStateException}.
+     * <strong>Note: </strong> Calls to this method before the session is opened,
+     * i.e. before the {@link #onOpen(List)} call, and after the session is closed,
+     * i.e. after the call to {@link #onClose()}, will be ignored.
      * </p>
      *
      * @param printerIds The ids of the removed printers.
      *
      * @see #addPrinters(List)
      * @see #updatePrinters(List)
-     * @see #isClosed()
      */
     public final void removePrinters(List<PrinterId> printerIds) {
         final IPrinterDiscoverySessionObserver observer;
         synchronized (mLock) {
-            throwIfClosedLocked();
             observer = mObserver;
         }
         if (observer != null) {
@@ -163,6 +161,8 @@ public abstract class PrinterDiscoverySession {
             } catch (RemoteException re) {
                 Log.e(LOG_TAG, "Error removing printers", re);
             }
+        } else {
+            Log.w(LOG_TAG, "Printer discovery session not open not removing printers.");
         }
     }
 
@@ -171,21 +171,19 @@ public abstract class PrinterDiscoverySession {
      * was removed has no effect. You can call this method multiple times
      * during printer discovery.
      * <p>
-     * <strong>Note: </strong> Calling this method when the session is closed,
-     * which is if {@link #isClosed()} returns true, will throw an {@link
-     * IllegalStateException}.
+     * <strong>Note: </strong> Calls to this method before the session is opened,
+     * i.e. before the {@link #onOpen(List)} call, and after the session is closed,
+     * i.e. after the call to {@link #onClose()}, will be ignored.
      * </p>
      *
      * @param printers The printers to update.
      *
      * @see #addPrinters(List)
      * @see #removePrinters(List)
-     * @see #isClosed()
      */
     public final void updatePrinters(List<PrinterInfo> printers) {
         final IPrinterDiscoverySessionObserver observer;
         synchronized (mLock) {
-            throwIfClosedLocked();
             observer = mObserver;
         }
         if (observer != null) {
@@ -194,6 +192,8 @@ public abstract class PrinterDiscoverySession {
             } catch (RemoteException re) {
                 Log.e(LOG_TAG, "Error updating printers", re);
             }
+        } else {
+            Log.w(LOG_TAG, "Printer discovery session not open not updating printers.");
         }
     }
 
@@ -217,7 +217,6 @@ public abstract class PrinterDiscoverySession {
      * </p>
      *
      * @see #onClose()
-     * @see #isClosed()
      * @see #addPrinters(List)
      * @see #removePrinters(List)
      * @see #updatePrinters(List)
@@ -226,16 +225,9 @@ public abstract class PrinterDiscoverySession {
 
     /**
      * Callback notifying you that the session is closed and you should stop
-     * printer discovery. After the session is closed and any attempt to call
-     * any of its methods will throw an exception. Whether a session is closed
-     * can be checked by calling {@link #isClosed()}. Once the session is closed
+     * printer discovery. After the session is closed any call to the methods
+     * of this instance will be ignored. Once the session is closed
      * it will never be opened again.
-     *
-     * @see #onOpen(List)
-     * @see #isClosed()
-     * @see #addPrinters(List)
-     * @see #removePrinters(List)
-     * @see #updatePrinters(List)
      */
     public abstract void onClose();
 
@@ -263,28 +255,10 @@ public abstract class PrinterDiscoverySession {
      */
     public abstract void onRequestPrinterUpdate(PrinterId printerId);
 
-    /**
-     * Gets whether this session is closed.
-     *
-     * @return Whether the session is closed.
-     */
-    public final boolean isClosed() {
-        synchronized (mLock) {
-            return (mController == null && mObserver == null);
-        }
-    }
-
     void close() {
         synchronized (mLock) {
-            throwIfClosedLocked();
             mController = null;
             mObserver = null;
-        }
-    }
-
-    private void throwIfClosedLocked() {
-        if (isClosed()) {
-            throw new IllegalStateException("Session is closed");
         }
     }
 

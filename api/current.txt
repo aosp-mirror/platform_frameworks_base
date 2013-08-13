@@ -18903,7 +18903,6 @@ package android.printservice {
   public abstract class PrinterDiscoverySession {
     ctor public PrinterDiscoverySession(android.content.Context);
     method public final void addPrinters(java.util.List<android.print.PrinterInfo>);
-    method public final boolean isClosed();
     method public abstract void onClose();
     method public abstract void onOpen(java.util.List<android.print.PrinterId>);
     method public abstract void onRequestPrinterUpdate(android.print.PrinterId);
