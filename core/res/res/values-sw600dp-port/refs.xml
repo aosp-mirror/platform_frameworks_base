@@ -16,5 +16,5 @@
 */
 -->
 <resources>
-    <item type="string" name="hiding_navigation_confirmation_message">@string/hiding_navigation_confirmation_message_long</item>
+    <item type="string" name="transient_navigation_confirmation">@string/transient_navigation_confirmation_long</item>
 </resources>
