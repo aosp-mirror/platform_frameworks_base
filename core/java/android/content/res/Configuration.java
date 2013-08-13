@@ -786,9 +786,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             // 2 most significant bits in screenLayout).
             setLayoutDirection(locale);
         }
-        if (delta.screenLayout != 0 && screenLayout != delta.screenLayout) {
+        final int deltaScreenLayoutDir = delta.screenLayout & SCREENLAYOUT_LAYOUTDIR_MASK;
+        if (deltaScreenLayoutDir != SCREENLAYOUT_LAYOUTDIR_UNDEFINED &&
+                deltaScreenLayoutDir != (screenLayout & SCREENLAYOUT_LAYOUTDIR_MASK)) {
+            screenLayout = (screenLayout & ~SCREENLAYOUT_LAYOUTDIR_MASK) | deltaScreenLayoutDir;
             changed |= ActivityInfo.CONFIG_LAYOUT_DIRECTION;
-            setLayoutDirection(locale);
         }
         if (delta.userSetLocale && (!userSetLocale || ((changed & ActivityInfo.CONFIG_LOCALE) != 0)))
         {
@@ -937,7 +939,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_LOCALE;
             changed |= ActivityInfo.CONFIG_LAYOUT_DIRECTION;
         }
-        if (delta.screenLayout != 0 && screenLayout != delta.screenLayout) {
+        final int deltaScreenLayoutDir = delta.screenLayout & SCREENLAYOUT_LAYOUTDIR_MASK;
+        if (deltaScreenLayoutDir != SCREENLAYOUT_LAYOUTDIR_UNDEFINED &&
+                deltaScreenLayoutDir != (screenLayout & SCREENLAYOUT_LAYOUTDIR_MASK)) {
             changed |= ActivityInfo.CONFIG_LAYOUT_DIRECTION;
         }
         if (delta.touchscreen != TOUCHSCREEN_UNDEFINED
