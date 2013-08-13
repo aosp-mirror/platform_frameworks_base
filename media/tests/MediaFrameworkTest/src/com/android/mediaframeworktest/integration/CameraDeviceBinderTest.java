@@ -309,4 +309,34 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
                         argThat(matcher));
         request.close();
     }
+
+    @SmallTest
+    public void testFlush() throws Exception {
+        int status;
+
+        // Initial flush should work
+        status = mCameraUser.flush();
+        assertEquals(CameraBinderTestUtils.NO_ERROR, status);
+
+        // Then set up a stream
+        CaptureRequest request = createDefaultRequest(/* needStream */true);
+
+        // Flush should still be a no-op, really
+        status = mCameraUser.flush();
+        assertEquals(CameraBinderTestUtils.NO_ERROR, status);
+
+        // Submit a few capture requests
+        int requestId1 = submitCameraRequest(request, /* streaming */false);
+        int requestId2 = submitCameraRequest(request, /* streaming */false);
+        int requestId3 = submitCameraRequest(request, /* streaming */false);
+        int requestId4 = submitCameraRequest(request, /* streaming */false);
+        int requestId5 = submitCameraRequest(request, /* streaming */false);
+
+        // Then flush
+        status = mCameraUser.flush();
+        assertEquals(CameraBinderTestUtils.NO_ERROR, status);
+
+        // TODO: When errors are hooked up, count that errors + successful
+        // requests equal to 5.
+    }
 }
