@@ -2379,7 +2379,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * when hiding the status bar with {@link #SYSTEM_UI_FLAG_FULLSCREEN} and/or hiding the
      * navigation bar with {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION} instead of having the system
      * clear these flags upon interaction.  The system may compensate by temporarily overlaying
-     * transparent system bars while also delivering the event.
+     * semi-transparent system bars while also delivering the event.
      */
     public static final int SYSTEM_UI_FLAG_ALLOW_TRANSIENT = 0x00000800;
 
@@ -16540,7 +16540,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param visibility  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE},
      * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, {@link #SYSTEM_UI_FLAG_FULLSCREEN},
      * {@link #SYSTEM_UI_FLAG_LAYOUT_STABLE}, {@link #SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION},
-     * and {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}.
+     * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}, {@link #SYSTEM_UI_FLAG_ALLOW_TRANSIENT},
+     * {@link #SYSTEM_UI_FLAG_TRANSPARENT_STATUS},
+     * and {@link #SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION}.
      */
     public void setSystemUiVisibility(int visibility) {
         if (visibility != mSystemUiVisibility) {
@@ -16552,11 +16554,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Returns the last {@link #setSystemUiVisibility(int) that this view has requested.
+     * Returns the last {@link #setSystemUiVisibility(int)} that this view has requested.
      * @return  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE},
      * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, {@link #SYSTEM_UI_FLAG_FULLSCREEN},
      * {@link #SYSTEM_UI_FLAG_LAYOUT_STABLE}, {@link #SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION},
-     * and {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}.
+     * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}, {@link #SYSTEM_UI_FLAG_ALLOW_TRANSIENT},
+     * {@link #SYSTEM_UI_FLAG_TRANSPARENT_STATUS},
+     * and {@link #SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION}.
      */
     public int getSystemUiVisibility() {
         return mSystemUiVisibility;
