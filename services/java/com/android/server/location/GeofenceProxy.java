@@ -22,6 +22,7 @@ import android.hardware.location.GeofenceHardwareService;
 import android.hardware.location.IGeofenceHardware;
 import android.location.IGeofenceProvider;
 import android.location.IGpsGeofenceHardware;
+import android.location.IFusedGeofenceHardware;
 import android.content.Context;
 import android.os.Handler;
 import android.os.IBinder;
@@ -44,6 +45,7 @@ public final class GeofenceProxy {
     private Context mContext;
     private IGeofenceHardware mGeofenceHardware;
     private IGpsGeofenceHardware mGpsGeofenceHardware;
+    private IFusedGeofenceHardware mFusedGeofenceHardware;
 
     private static final int GEOFENCE_PROVIDER_CONNECTED = 1;
     private static final int GEOFENCE_HARDWARE_CONNECTED = 2;
@@ -60,9 +62,11 @@ public final class GeofenceProxy {
 
     public static GeofenceProxy createAndBind(Context context,
             int overlaySwitchResId, int defaultServicePackageNameResId,
-            int initialPackageNamesResId, Handler handler, IGpsGeofenceHardware gpsGeofence) {
+            int initialPackageNamesResId, Handler handler, IGpsGeofenceHardware gpsGeofence,
+            IFusedGeofenceHardware fusedGeofenceHardware) {
         GeofenceProxy proxy = new GeofenceProxy(context, overlaySwitchResId,
-            defaultServicePackageNameResId, initialPackageNamesResId, handler, gpsGeofence);
+            defaultServicePackageNameResId, initialPackageNamesResId, handler, gpsGeofence,
+            fusedGeofenceHardware);
         if (proxy.bindGeofenceProvider()) {
             return proxy;
         } else {
@@ -72,11 +76,13 @@ public final class GeofenceProxy {
 
     private GeofenceProxy(Context context,
             int overlaySwitchResId, int defaultServicePackageNameResId,
-            int initialPackageNamesResId, Handler handler, IGpsGeofenceHardware gpsGeofence) {
+            int initialPackageNamesResId, Handler handler, IGpsGeofenceHardware gpsGeofence,
+            IFusedGeofenceHardware fusedGeofenceHardware) {
         mContext = context;
         mServiceWatcher = new ServiceWatcher(context, TAG, SERVICE_ACTION, overlaySwitchResId,
             defaultServicePackageNameResId, initialPackageNamesResId, mRunnable, handler);
         mGpsGeofenceHardware = gpsGeofence;
+        mFusedGeofenceHardware = fusedGeofenceHardware;
         bindHardwareGeofence();
     }
 
@@ -123,6 +129,13 @@ public final class GeofenceProxy {
         }
     }
 
+    private void setFusedGeofence() {
+        try {
+            mGeofenceHardware.setFusedGeofenceHardware(mFusedGeofenceHardware);
+        } catch(RemoteException e) {
+            Log.e(TAG, "Error while connecting to GeofenceHardwareService");
+        }
+    }
 
     // This needs to be reworked, when more services get added,
     // Might need a state machine or add a framework utility class,
@@ -142,6 +155,7 @@ public final class GeofenceProxy {
                     break;
                 case GEOFENCE_HARDWARE_CONNECTED:
                     setGpsGeofence();
+                    setFusedGeofence();
                     mGeofenceHardwareConnected = true;
                     if (mGeofenceProviderConnected) {
                         setGeofenceHardwareInProvider();

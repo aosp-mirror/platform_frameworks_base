@@ -16,6 +16,7 @@
 
 package android.hardware.location;
 
+import android.location.IFusedGeofenceHardware;
 import android.location.IGpsGeofenceHardware;
 import android.hardware.location.IGeofenceHardwareCallback;
 import android.hardware.location.IGeofenceHardwareMonitorCallback;
@@ -23,6 +24,7 @@ import android.hardware.location.IGeofenceHardwareMonitorCallback;
 /** @hide */
 interface IGeofenceHardware {
     void setGpsGeofenceHardware(in IGpsGeofenceHardware service);
+    void setFusedGeofenceHardware(in IFusedGeofenceHardware service);
     int[] getMonitoringTypes();
     int getStatusOfMonitoringType(int monitoringType);
     boolean addCircularFence(int id,  int monitoringType, double lat, double longitude,

@@ -24,9 +24,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.hardware.location.GeofenceHardware;
 import android.hardware.location.GeofenceHardwareImpl;
-import android.hardware.location.IGeofenceHardware;
 import android.location.Criteria;
+import android.location.FusedBatchOptions;
 import android.location.IGpsGeofenceHardware;
 import android.location.IGpsStatusListener;
 import android.location.IGpsStatusProvider;
@@ -194,6 +195,17 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int AGPS_SETID_TYPE_MSISDN = 2;
 
     private static final String PROPERTIES_FILE = "/etc/gps.conf";
+
+    private static final int GPS_GEOFENCE_UNAVAILABLE = 1<<0L;
+    private static final int GPS_GEOFENCE_AVAILABLE = 1<<1L;
+
+    // GPS Geofence errors. Should match gps.h constants.
+    private static final int GPS_GEOFENCE_OPERATION_SUCCESS = 0;
+    private static final int GPS_GEOFENCE_ERROR_TOO_MANY_GEOFENCES = 100;
+    private static final int GPS_GEOFENCE_ERROR_ID_EXISTS  = -101;
+    private static final int GPS_GEOFENCE_ERROR_ID_UNKNOWN = -102;
+    private static final int GPS_GEOFENCE_ERROR_INVALID_TRANSITION = -103;
+    private static final int GPS_GEOFENCE_ERROR_GENERIC = -149;
 
     /** simpler wrapper for ProviderRequest + Worksource */
     private static class GpsRequest {
@@ -501,7 +513,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                 LocationManager locManager =
                         (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
                 locManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
-                        0, 0, new NetworkLocationListener(), mHandler.getLooper());                
+                        0, 0, new NetworkLocationListener(), mHandler.getLooper());
             }
         });
     }
@@ -1405,6 +1417,62 @@ public class GpsLocationProvider implements LocationProviderInterface {
     }
 
     /**
+     * Helper method to construct a location object.
+     */
+    private Location buildLocation(
+            int flags,
+            double latitude,
+            double longitude,
+            double altitude,
+            float speed,
+            float bearing,
+            float accuracy,
+            long timestamp) {
+        Location location = new Location(LocationManager.GPS_PROVIDER);
+        if((flags & LOCATION_HAS_LAT_LONG) == LOCATION_HAS_LAT_LONG) {
+            location.setLatitude(latitude);
+            location.setLongitude(longitude);
+            location.setTime(timestamp);
+            location.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
+        }
+        if((flags & LOCATION_HAS_ALTITUDE) == LOCATION_HAS_ALTITUDE) {
+            location.setAltitude(altitude);
+        }
+        if((flags & LOCATION_HAS_SPEED) == LOCATION_HAS_SPEED) {
+            location.setSpeed(speed);
+        }
+        if((flags & LOCATION_HAS_BEARING) == LOCATION_HAS_BEARING) {
+            location.setBearing(bearing);
+        }
+        if((flags & LOCATION_HAS_ACCURACY) == LOCATION_HAS_ACCURACY) {
+            location.setAccuracy(accuracy);
+        }
+        return location;
+    }
+
+    /**
+     * Converts the GPS HAL status to the internal Geofence Hardware status.
+     */
+    private int getGeofenceStatus(int status) {
+        switch(status) {
+            case GPS_GEOFENCE_OPERATION_SUCCESS:
+                return GeofenceHardware.GEOFENCE_SUCCESS;
+            case GPS_GEOFENCE_ERROR_GENERIC:
+                return GeofenceHardware.GEOFENCE_FAILURE;
+            case GPS_GEOFENCE_ERROR_ID_EXISTS:
+                return GeofenceHardware.GEOFENCE_ERROR_ID_EXISTS;
+            case GPS_GEOFENCE_ERROR_INVALID_TRANSITION:
+                return GeofenceHardware.GEOFENCE_ERROR_INVALID_TRANSITION;
+            case GPS_GEOFENCE_ERROR_TOO_MANY_GEOFENCES:
+                return GeofenceHardware.GEOFENCE_ERROR_TOO_MANY_GEOFENCES;
+            case GPS_GEOFENCE_ERROR_ID_UNKNOWN:
+                return GeofenceHardware.GEOFENCE_ERROR_ID_UNKNOWN;
+            default:
+                return -1;
+        }
+    }
+
+    /**
      * Called from native to report GPS Geofence transition
      * All geofence callbacks are called on the same thread
      */
@@ -1414,8 +1482,22 @@ public class GpsLocationProvider implements LocationProviderInterface {
         if (mGeofenceHardwareImpl == null) {
             mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
         }
-        mGeofenceHardwareImpl.reportGpsGeofenceTransition(geofenceId, flags, latitude, longitude,
-           altitude, speed, bearing, accuracy, timestamp, transition, transitionTimestamp);
+        Location location = buildLocation(
+                flags,
+                latitude,
+                longitude,
+                altitude,
+                speed,
+                bearing,
+                accuracy,
+                timestamp);
+        mGeofenceHardwareImpl.reportGeofenceTransition(
+                geofenceId,
+                location,
+                transition,
+                transitionTimestamp,
+                GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE,
+                FusedBatchOptions.SourceTechnologies.GNSS);
     }
 
     /**
@@ -1427,8 +1509,24 @@ public class GpsLocationProvider implements LocationProviderInterface {
         if (mGeofenceHardwareImpl == null) {
             mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
         }
-        mGeofenceHardwareImpl.reportGpsGeofenceStatus(status, flags, latitude, longitude, altitude,
-            speed, bearing, accuracy, timestamp);
+        Location location = buildLocation(
+                flags,
+                latitude,
+                longitude,
+                altitude,
+                speed,
+                bearing,
+                accuracy,
+                timestamp);
+        int monitorStatus = GeofenceHardware.MONITOR_CURRENTLY_UNAVAILABLE;
+        if(status == GPS_GEOFENCE_AVAILABLE) {
+            monitorStatus = GeofenceHardware.MONITOR_CURRENTLY_AVAILABLE;
+        }
+        mGeofenceHardwareImpl.reportGeofenceMonitorStatus(
+                GeofenceHardware.MONITORING_TYPE_GPS_HARDWARE,
+                monitorStatus,
+                location,
+                FusedBatchOptions.SourceTechnologies.GNSS);
     }
 
     /**
@@ -1438,7 +1536,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         if (mGeofenceHardwareImpl == null) {
             mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
         }
-        mGeofenceHardwareImpl.reportGpsGeofenceAddStatus(geofenceId, status);
+        mGeofenceHardwareImpl.reportGeofenceAddStatus(geofenceId, getGeofenceStatus(status));
     }
 
     /**
@@ -1448,7 +1546,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         if (mGeofenceHardwareImpl == null) {
             mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
         }
-        mGeofenceHardwareImpl.reportGpsGeofenceRemoveStatus(geofenceId, status);
+        mGeofenceHardwareImpl.reportGeofenceRemoveStatus(geofenceId, getGeofenceStatus(status));
     }
 
     /**
@@ -1458,7 +1556,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         if (mGeofenceHardwareImpl == null) {
             mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
         }
-        mGeofenceHardwareImpl.reportGpsGeofencePauseStatus(geofenceId, status);
+        mGeofenceHardwareImpl.reportGeofencePauseStatus(geofenceId, getGeofenceStatus(status));
     }
 
     /**
@@ -1468,7 +1566,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         if (mGeofenceHardwareImpl == null) {
             mGeofenceHardwareImpl = GeofenceHardwareImpl.getInstance(mContext);
         }
-        mGeofenceHardwareImpl.reportGpsGeofenceResumeStatus(geofenceId, status);
+        mGeofenceHardwareImpl.reportGeofenceResumeStatus(geofenceId, getGeofenceStatus(status));
     }
 
     //=============================================================

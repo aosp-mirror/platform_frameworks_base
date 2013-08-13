@@ -355,6 +355,7 @@ aidl_files := \
 	frameworks/base/core/java/android/content/SyncStats.aidl \
 	frameworks/base/core/java/android/content/res/Configuration.aidl \
 	frameworks/base/core/java/android/database/CursorWindow.aidl \
+	frameworks/base/core/java/android/hardware/location/GeofenceHardwareRequestParcelable.aidl \
 	frameworks/base/core/java/android/net/Uri.aidl \
 	frameworks/base/core/java/android/nfc/NdefMessage.aidl \
 	frameworks/base/core/java/android/nfc/NdefRecord.aidl \

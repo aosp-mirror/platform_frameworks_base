@@ -420,19 +420,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             Slog.e(TAG,  "no geocoder provider found");
         }
 
-        // bind to geofence provider
-        GeofenceProxy provider = GeofenceProxy.createAndBind(mContext,
-                com.android.internal.R.bool.config_enableGeofenceOverlay,
-                com.android.internal.R.string.config_geofenceProviderPackageName,
-                com.android.internal.R.array.config_locationProviderPackageNames,
-                mLocationHandler,
-                gpsProvider.getGpsGeofenceProxy());
-        if (provider == null) {
-            Slog.e(TAG,  "no geofence provider found");
-        }
-
         // bind to fused provider
-        // TODO: [GeofenceIntegration] bind #getGeofenceHardware() with the GeofenceProxy
         FlpHardwareProvider flpHardwareProvider = FlpHardwareProvider.getInstance(mContext);
         FusedProxy fusedProxy = FusedProxy.createAndBind(
                 mContext,
@@ -441,9 +429,20 @@ public class LocationManagerService extends ILocationManager.Stub {
                 com.android.internal.R.bool.config_enableFusedLocationOverlay,
                 com.android.internal.R.string.config_fusedLocationProviderPackageName,
                 com.android.internal.R.array.config_locationProviderPackageNames);
-
         if(fusedProxy == null) {
             Slog.e(TAG, "No FusedProvider found.");
+        }
+
+        // bind to geofence provider
+        GeofenceProxy provider = GeofenceProxy.createAndBind(mContext,
+                com.android.internal.R.bool.config_enableGeofenceOverlay,
+                com.android.internal.R.string.config_geofenceProviderPackageName,
+                com.android.internal.R.array.config_locationProviderPackageNames,
+                mLocationHandler,
+                gpsProvider.getGpsGeofenceProxy(),
+                flpHardwareProvider.getGeofenceHardware());
+        if (provider == null) {
+            Slog.e(TAG,  "no geofence provider found");
         }
     }
 

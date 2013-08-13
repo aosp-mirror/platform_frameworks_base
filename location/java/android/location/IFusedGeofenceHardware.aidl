@@ -16,8 +16,8 @@
  
 package android.location;
 
-import android.location.Geofence;
- 
+import android.hardware.location.GeofenceHardwareRequestParcelable;
+
 /**
  * Fused Geofence Hardware interface.
  *
@@ -39,11 +39,9 @@ interface IFusedGeofenceHardware {
     /**
      * Adds a given list of geofences to the system.
      *
-     * @param geofenceIdsArray    The list of geofence Ids to add.
-     * @param geofencesArray      the list of geofences to add.
+     * @param geofenceRequestsArray    The list of geofences to add.
      */
-    // TODO: [GeofenceIntegration] GeofenceHardwareRequest is not a parcelable class exposed in aidl
-    void addGeofences(in int[] geofenceIdsArray, in Geofence[] geofencesArray);
+    void addGeofences(in GeofenceHardwareRequestParcelable[] geofenceRequestsArray);
 
     /**
      * Removes a give list of geofences from the system.
@@ -79,7 +77,8 @@ interface IFusedGeofenceHardware {
      *                                      the geofence.
      * @param monitorTransitions            The set of transitions to monitor.
      * @param notificationResponsiveness    The notification responsivness needed.
-     * @param unknownTimer                  The time span associated with the
+     * @param unknownTimer                  The time span associated with the.
+     * @param sourcesToUse                  The source technologies to use.
      *
      * Remarks: keep the options as separate fields to be able to leverage the class
      * GeofenceHardwareRequest without any changes
@@ -89,5 +88,6 @@ interface IFusedGeofenceHardware {
             in int lastTransition,
             in int monitorTransitions,
             in int notificationResponsiveness,
-            in int unknownTimer);
+            in int unknownTimer,
+            in int sourcesToUse);
 }
