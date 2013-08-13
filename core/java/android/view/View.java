@@ -9184,9 +9184,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public interface OnLayoutChangeListener {
         /**
-         * Called when the focus state of a view has changed.
+         * Called when the layout bounds of a view changes due to layout processing.
          *
-         * @param v The view whose state has changed.
+         * @param v The view whose bounds have changed.
          * @param left The new value of the view's left property.
          * @param top The new value of the view's top property.
          * @param right The new value of the view's right property.
@@ -10427,7 +10427,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * The horizontal location of this view relative to its {@link #getTop() top} position.
+     * The vertical location of this view relative to its {@link #getTop() top} position.
      * This position is post-layout, in addition to wherever the object's
      * layout placed it.
      *
