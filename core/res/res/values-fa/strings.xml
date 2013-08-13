@@ -314,8 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"ممانعت از جابجایی برنامه"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"اجازه نمی‎دهد کاربر به برنامه دیگری برود."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"دریافت اطلاعات برنامه فعلی"</string>
-    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
-    <skip />
+    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"به دارنده اجازه می‌دهد اطلاعات خصوصی مربوط به خدمات و برنامه فعلی را در پیش‌زمینه صفحه بازیابی کند."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"نظارت و کنترل راه‌اندازی همه برنامه"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"به برنامه اجازه می‎دهد تا نحوه راه‌اندازی فعالیت‌های سیستم را کنترل کند. برنامه‎های مخرب می‎توانند کاملا با سیستم سازگار شوند. این مجوز فقط برای توسعه نیاز است و برای استفاده عادی نیست."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"ارسال پخش بسته حذف شده"</string>
@@ -654,10 +653,8 @@
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"به دارنده اجازه می‌دهد به یک رابط سطح بالای سرویس شنونده اعلان متصل شود. هرگز نباید برای برنامه‌های عادی لازم شود."</string>
     <string name="permlab_invokeCarrierSetup" msgid="3699600833975117478">"لغو برنامه پیکربندی ارائه شده توسط شرکت مخابراتی"</string>
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"به دارنده اجازه می‌دهد که تنظیمات برنامه شرکت مخابراتی را لغو کند. هرگز برای برنامه‌های معمولی مورد نیاز نیست."</string>
-    <!-- no translation found for permlab_accessNetworkConditions (8206077447838909516) -->
-    <skip />
-    <!-- no translation found for permdesc_accessNetworkConditions (6899102075825272211) -->
-    <skip />
+    <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"گوش دادن برای بررسی شرایط شبکه"</string>
+    <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"به برنامه امکان می‌دهد برای بررسی شرایط شبکه گوش دهد. این امکان هرگز نباید برای برنامه‌های معمولی مورد نیاز باشد."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"تنظیم قوانین رمز ورود"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"طول و نویسه‎های مجاز در گذرواژه‌های بازکردن قفل صفحه را کنترل کنید."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"نمایش تلاش‌های قفل گشایی صفحه"</string>

@@ -314,8 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"एप्‍लिकेशन स्‍विच करने से रोकता है"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"उपयोगकर्ता को दूसरे एप्‍लिकेशन पर स्‍विच करने से रोकता है."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"वर्तमान एप्लिकेशन की जानकारी प्राप्त करें"</string>
-    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
-    <skip />
+    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"धारक को स्क्रीन की अग्रभूमि में वर्तमान एप्लिकेशन और सेवाओं की निजी जानकारी प्राप्त करने देती है."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"सभी एप्‍लिकेशन की लॉन्‍चिंग की निगरानी करें और उसे नियंत्रित करें"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"एप्लिकेशन को यह निगरानी और नियंत्रित करने देता है कि सिस्टम कैसे गतिविधियां लॉन्च करता है. दुर्भावनापूर्ण एप्लिकेशन सिस्टम को पूरी तरह से जोखिम में डाल सकते हैं. इस अनुमति की आवश्यकता केवल विकास के लिए है, सामान्य उपयोग के लिए कभी नहीं."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"पैकेज निकाले गए प्रसारण भेजें"</string>

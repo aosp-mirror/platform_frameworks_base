@@ -314,8 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"verhoed program-oorskakelings"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Verhoed dat die gebruiker na \'n ander program oorskakel."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"kry huidige program-inligting"</string>
-    <!-- no translation found for permdesc_getTopActivityInfo (8153651434145132505) -->
-    <skip />
+    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Laat die houer toe om private inligting oor die huidige program en dienste op die voorgrond van die skerm te herwin."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"monitor en beheer alle programlaaiery"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Laat die program toe om te monitor en te beheer hoe die stelsel aktiwiteite laai. Kwaadwillige programme kan dalk die stelsel heeltemal in gevaar stel. Hierdie toestemming is net nodig vir ontwikkeling, en nooit vir normale gebruik nie."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"stuur uitsending met pakket verwyder"</string>
@@ -479,8 +478,8 @@
     <string name="permdesc_captureAudioOutput" msgid="6210597754212208853">"Laat die program oudio-uitset vasvang en herlei."</string>
     <string name="permlab_captureVideoOutput" msgid="2246828773589094023">"vang video-uitset vas"</string>
     <string name="permdesc_captureVideoOutput" msgid="359481658034149860">"Laat die program video-uitset vasvang en herlei."</string>
-    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"vang sekure video-uitset vas"</string>
-    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Laat die program sekure video-uitset vasvang en herlei."</string>
+    <string name="permlab_captureSecureVideoOutput" msgid="7815398969303382016">"vang veilige video-uitset vas"</string>
+    <string name="permdesc_captureSecureVideoOutput" msgid="2779793064709350289">"Laat die program veilige video-uitset vasvang en herlei."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"verander jou klankinstellings"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Laat die program toe om globale klankinstellings soos volume en watter luidspreker vir uitvoer gebruik word, te verander."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"neem klank op"</string>
