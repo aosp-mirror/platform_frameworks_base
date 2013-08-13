@@ -2659,7 +2659,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     @Override
     public void evaluateJavaScript(String script, ValueCallback<String> resultCallback) {
         // K-only API not implemented in WebViewClassic.
-        throw new IllegalStateException("This API not supported in Classic WebView.");
+        throw new IllegalStateException("This API not supported on Android 4.3 and earlier");
     }
 
     /**
@@ -2898,7 +2898,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
     public void exportToPdf(java.io.OutputStream out, int width, int height,
             ValueCallback<Boolean> resultCallback) {
         // K-only API not implemented in WebViewClassic.
-        throw new IllegalStateException("This API not supported in Classic WebView.");
+        throw new IllegalStateException("This API not supported on Android 4.3 and earlier");
 
     }
 
