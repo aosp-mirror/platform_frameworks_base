@@ -3916,13 +3916,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             Random rand = new Random();
             mParams = params;
 
-            try {
-                if (mCs.isNetworkSupported(ConnectivityManager.TYPE_MOBILE) == false) {
-                    log("isMobileOk: not mobile capable");
-                    result = ConnectivityManager.CMP_RESULT_CODE_NO_CONNECTION;
-                    return result;
-                }
+            if (mCs.isNetworkSupported(ConnectivityManager.TYPE_MOBILE) == false) {
+                log("isMobileOk: not mobile capable");
+                result = ConnectivityManager.CMP_RESULT_CODE_NO_CONNECTION;
+                return result;
+            }
 
+            try {
                 // Enable fail fast as we'll do retries here and use a
                 // hipri connection so the default connection stays active.
                 log("isMobileOk: start hipri url=" + params.mUrl);
