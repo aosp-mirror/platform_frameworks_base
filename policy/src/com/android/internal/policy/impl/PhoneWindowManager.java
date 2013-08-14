@@ -943,7 +943,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         }
                     }
                 });
-        mTransientNavigationConfirmation = new TransientNavigationConfirmation(mContext, mHandler);
+        mTransientNavigationConfirmation = new TransientNavigationConfirmation(mContext);
         mWindowManagerFuncs.registerPointerEventListener(mSystemGestures);
 
         mVibrator = (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
