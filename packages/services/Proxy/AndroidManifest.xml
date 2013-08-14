@@ -6,7 +6,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:persistent="true"
         android:label="@string/app_label"
         android:process="com.android.proxyhandler">
 
