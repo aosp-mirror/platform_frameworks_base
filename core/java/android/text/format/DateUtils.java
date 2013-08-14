@@ -815,7 +815,13 @@ public class DateUtils
      * @return the formatter with the formatted date/time range appended to the string buffer.
      */
     public static Formatter formatDateRange(Context context, Formatter formatter, long startMillis,
-            long endMillis, int flags, String timeZone) {
+                                            long endMillis, int flags, String timeZone) {
+        // icu4c will fall back to the locale's preferred 12/24 format,
+        // but we want to fall back to the user's preference.
+        if ((flags & (FORMAT_12HOUR | FORMAT_24HOUR)) == 0) {
+            flags |= DateFormat.is24HourFormat(context) ? FORMAT_24HOUR : FORMAT_12HOUR;
+        }
+
         String range = DateIntervalFormat.formatDateRange(startMillis, endMillis, flags, timeZone);
         try {
             formatter.out().append(range);
