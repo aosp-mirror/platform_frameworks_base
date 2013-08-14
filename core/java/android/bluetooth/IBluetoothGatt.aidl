@@ -37,6 +37,10 @@ interface IBluetoothGatt {
     void unregisterClient(in int clientIf);
     void clientConnect(in int clientIf, in String address, in boolean isDirect);
     void clientDisconnect(in int clientIf, in String address);
+    void clientListen(in int clientIf, in boolean start);
+    void setAdvData(in int clientIf, in boolean setScanRsp, in boolean inclName,
+                            in boolean inclTxPower, in int minInterval, in int maxInterval,
+                            in int appearance, in byte[] manufacturerData);
     void refreshDevice(in int clientIf, in String address);
     void discoverServices(in int clientIf, in String address);
     void readCharacteristic(in int clientIf, in String address, in int srvcType,
