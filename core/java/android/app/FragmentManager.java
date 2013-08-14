@@ -1328,12 +1328,19 @@ final class FragmentManagerImpl extends FragmentManager {
         }
     }
 
+    /**
+     * Adds an action to the queue of pending actions.
+     *
+     * @param action the action to add
+     * @param allowStateLoss whether to allow loss of state information
+     * @throws IllegalStateException if the activity has been destroyed
+     */
     public void enqueueAction(Runnable action, boolean allowStateLoss) {
         if (!allowStateLoss) {
             checkStateLoss();
         }
         synchronized (this) {
-            if (mActivity == null) {
+            if (mDestroyed || mActivity == null) {
                 throw new IllegalStateException("Activity has been destroyed");
             }
             if (mPendingActions == null) {
