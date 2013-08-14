@@ -110,10 +110,11 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
 
     Vector<MediaCodecList::ProfileLevel> profileLevels;
     Vector<uint32_t> colorFormats;
+    uint32_t flags;
 
     status_t err =
         MediaCodecList::getInstance()->getCodecCapabilities(
-                index, typeStr, &profileLevels, &colorFormats);
+                index, typeStr, &profileLevels, &colorFormats, &flags);
 
     env->ReleaseStringUTFChars(type, typeStr);
     typeStr = NULL;
@@ -126,6 +127,9 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
     jclass capsClazz =
         env->FindClass("android/media/MediaCodecInfo$CodecCapabilities");
     CHECK(capsClazz != NULL);
+
+    jfieldID flagsField =
+        env->GetFieldID(capsClazz, "flags", "I");
 
     jobject caps = env->AllocObject(capsClazz);
 
@@ -162,6 +166,8 @@ static jobject android_media_MediaCodecList_getCodecCapabilities(
             "[Landroid/media/MediaCodecInfo$CodecProfileLevel;");
 
     env->SetObjectField(caps, profileLevelsField, profileLevelArray);
+
+    env->SetIntField(caps, flagsField, flags);
 
     env->DeleteLocalRef(profileLevelArray);
     profileLevelArray = NULL;
