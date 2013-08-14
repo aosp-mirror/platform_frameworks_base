@@ -261,7 +261,7 @@ public final class BluetoothGatt implements BluetoothProfile {
             public void onGetDescriptor(String address, int srvcType,
                              int srvcInstId, ParcelUuid srvcUuid,
                              int charInstId, ParcelUuid charUuid,
-                             ParcelUuid descUuid) {
+                             int descrInstId, ParcelUuid descUuid) {
                 if (DBG) Log.d(TAG, "onGetDescriptor() - Device=" + address + " UUID=" + descUuid);
 
                 if (!address.equals(mDevice.getAddress())) {
@@ -276,7 +276,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 if (characteristic == null) return;
 
                 characteristic.addDescriptor(new BluetoothGattDescriptor(
-                    characteristic, descUuid.getUuid(), 0));
+                    characteristic, descUuid.getUuid(), descrInstId, 0));
             }
 
             /**
@@ -429,7 +429,8 @@ public final class BluetoothGatt implements BluetoothProfile {
             public void onDescriptorRead(String address, int status, int srvcType,
                              int srvcInstId, ParcelUuid srvcUuid,
                              int charInstId, ParcelUuid charUuid,
-                             ParcelUuid descrUuid, byte[] value) {
+                             int descrInstId, ParcelUuid descrUuid,
+                             byte[] value) {
                 if (DBG) Log.d(TAG, "onDescriptorRead() - Device=" + address + " UUID=" + charUuid);
 
                 if (!address.equals(mDevice.getAddress())) {
@@ -444,7 +445,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 if (characteristic == null) return;
 
                 BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
-                        descrUuid.getUuid());
+                        descrUuid.getUuid(), descrInstId);
                 if (descriptor == null) return;
 
                 if (status == 0) descriptor.setValue(value);
@@ -456,7 +457,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                         mAuthRetry = true;
                         mService.readDescriptor(mClientIf, address,
                             srvcType, srvcInstId, srvcUuid, charInstId, charUuid,
-                            descrUuid, AUTHENTICATION_MITM);
+                            descrInstId, descrUuid, AUTHENTICATION_MITM);
                     } catch (RemoteException e) {
                         Log.e(TAG,"",e);
                     }
@@ -478,7 +479,7 @@ public final class BluetoothGatt implements BluetoothProfile {
             public void onDescriptorWrite(String address, int status, int srvcType,
                              int srvcInstId, ParcelUuid srvcUuid,
                              int charInstId, ParcelUuid charUuid,
-                             ParcelUuid descrUuid) {
+                             int descrInstId, ParcelUuid descrUuid) {
                 if (DBG) Log.d(TAG, "onDescriptorWrite() - Device=" + address + " UUID=" + charUuid);
 
                 if (!address.equals(mDevice.getAddress())) {
@@ -493,7 +494,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                 if (characteristic == null) return;
 
                 BluetoothGattDescriptor descriptor = characteristic.getDescriptor(
-                        descrUuid.getUuid());
+                        descrUuid.getUuid(), descrInstId);
                 if (descriptor == null) return;
 
                 if ((status == GATT_INSUFFICIENT_AUTHENTICATION
@@ -503,7 +504,7 @@ public final class BluetoothGatt implements BluetoothProfile {
                         mAuthRetry = true;
                         mService.writeDescriptor(mClientIf, address,
                             srvcType, srvcInstId, srvcUuid, charInstId, charUuid,
-                            descrUuid, characteristic.getWriteType(),
+                            descrInstId, descrUuid, characteristic.getWriteType(),
                             AUTHENTICATION_MITM, descriptor.getValue());
                     } catch (RemoteException e) {
                         Log.e(TAG,"",e);
@@ -915,11 +916,11 @@ public final class BluetoothGatt implements BluetoothProfile {
         if (device == null) return false;
 
         try {
-            mService.readDescriptor(mClientIf, device.getAddress(),
-                service.getType(), service.getInstanceId(),
-                new ParcelUuid(service.getUuid()), characteristic.getInstanceId(),
-                new ParcelUuid(characteristic.getUuid()),
-                new ParcelUuid(descriptor.getUuid()), AUTHENTICATION_NONE);
+            mService.readDescriptor(mClientIf, device.getAddress(), service.getType(),
+                service.getInstanceId(), new ParcelUuid(service.getUuid()),
+                characteristic.getInstanceId(), new ParcelUuid(characteristic.getUuid()),
+                descriptor.getInstanceId(), new ParcelUuid(descriptor.getUuid()),
+                AUTHENTICATION_NONE);
         } catch (RemoteException e) {
             Log.e(TAG,"",e);
             return false;
@@ -953,11 +954,10 @@ public final class BluetoothGatt implements BluetoothProfile {
         if (device == null) return false;
 
         try {
-            mService.writeDescriptor(mClientIf, device.getAddress(),
-                service.getType(), service.getInstanceId(),
-                new ParcelUuid(service.getUuid()), characteristic.getInstanceId(),
-                new ParcelUuid(characteristic.getUuid()),
-                new ParcelUuid(descriptor.getUuid()),
+            mService.writeDescriptor(mClientIf, device.getAddress(), service.getType(),
+                service.getInstanceId(), new ParcelUuid(service.getUuid()),
+                characteristic.getInstanceId(), new ParcelUuid(characteristic.getUuid()),
+                descriptor.getInstanceId(), new ParcelUuid(descriptor.getUuid()),
                 characteristic.getWriteType(), AUTHENTICATION_NONE,
                 descriptor.getValue());
         } catch (RemoteException e) {

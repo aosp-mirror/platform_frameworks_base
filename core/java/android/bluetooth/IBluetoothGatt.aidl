@@ -50,12 +50,13 @@ interface IBluetoothGatt {
     void readDescriptor(in int clientIf, in String address, in int srvcType,
                             in int srvcInstanceId, in ParcelUuid srvcId,
                             in int charInstanceId, in ParcelUuid charId,
-                            in ParcelUuid descrUuid, in int authReq);
+                            in int descrInstanceId, in ParcelUuid descrUuid,
+                            in int authReq);
     void writeDescriptor(in int clientIf, in String address, in int srvcType,
                             in int srvcInstanceId, in ParcelUuid srvcId,
                             in int charInstanceId, in ParcelUuid charId,
-                            in ParcelUuid descrId, in int writeType,
-                            in int authReq, in byte[] value);
+                            in int descrInstanceId, in ParcelUuid descrId,
+                            in int writeType, in int authReq, in byte[] value);
     void registerForNotification(in int clientIf, in String address, in int srvcType,
                             in int srvcInstanceId, in ParcelUuid srvcId,
                             in int charInstanceId, in ParcelUuid charId,
