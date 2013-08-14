@@ -1579,4 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"PIN incorrecto. Inténtalo de nuevo dentro de 1 segundo."</item>
     <item quantity="other" msgid="8030607343223287654">"PIN incorrecto. Inténtalo de nuevo dentro de <xliff:g id="COUNT">%d</xliff:g> segundos."</item>
   </plurals>
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Deslizar borde para mostrar barra"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Desliza el borde de la pantalla para mostrar la barra del sistema"</string>
 </resources>

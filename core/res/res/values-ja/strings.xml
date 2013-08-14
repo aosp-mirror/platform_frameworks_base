@@ -1579,4 +1579,8 @@
     <item quantity="one" msgid="4835639969503729874">"PINが正しくありません。1秒後にもう一度お試しください。"</item>
     <item quantity="other" msgid="8030607343223287654">"PINが正しくありません。<xliff:g id="COUNT">%d</xliff:g>秒後にもう一度お試しください。"</item>
   </plurals>
+    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
+    <skip />
+    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
+    <skip />
 </resources>

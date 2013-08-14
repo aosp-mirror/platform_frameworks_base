@@ -1579,4 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"गलत PIN. 1 सेकंड में पुनः प्रयास करें."</item>
     <item quantity="other" msgid="8030607343223287654">"गलत PIN. <xliff:g id="COUNT">%d</xliff:g> सेकंड में पुनः प्रयास करें."</item>
   </plurals>
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"बार को प्रदर्शित करने के लिए स्क्रीन के किनारे को स्वाइप करें"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"सिस्टम बार को प्रदर्शित करने के लिए स्क्रीन के किनारे से स्वाइप करें"</string>
 </resources>

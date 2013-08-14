@@ -1579,4 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"PIN errato. Riprova tra 1 s."</item>
     <item quantity="other" msgid="8030607343223287654">"PIN errato. Riprova tra <xliff:g id="COUNT">%d</xliff:g> s."</item>
   </plurals>
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Scorri bordo schermo per visual. barra"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Fai scorrere il dito dal bordo dello schermo per visualizzare la barra di sistema"</string>
 </resources>

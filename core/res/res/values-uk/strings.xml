@@ -1579,4 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"Неправильний PIN. Повторіть через 1 с."</item>
     <item quantity="other" msgid="8030607343223287654">"Неправильний PIN. Повторіть через <xliff:g id="COUNT">%d</xliff:g> с."</item>
   </plurals>
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Гортайте від краю, щоб відкрити панель"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Проведіть пальцем від краю екрана, щоб з’явилась навігаційна панель"</string>
 </resources>

@@ -625,7 +625,7 @@
     <string name="permlab_sdcardRead" product="default" msgid="8235341515605559677">"akses uji coba ke penyimpanan yang dilindungi"</string>
     <string name="permdesc_sdcardRead" product="nosdcard" msgid="3642473292348132072">"Memungkinkan aplikasi menguji izin penyimpanan USB yang akan tersedia di perangkat mendatang."</string>
     <string name="permdesc_sdcardRead" product="default" msgid="5914402684685848828">"Memungkinkan aplikasi menguji izin untuk kartu SD yang akan tersedia pada perangkat yang akan datang."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"ubah/hapus konten pympanan USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="8485979062254666748">"ubah/hapus isi penyimpanan USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8805693630050458763">"mengubah atau menghapus konten kartu SD Anda"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6175406299445710888">"Mengizinkan apl menulis ke penyimpanan USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="4337417790936632090">"Memungkinkan apl menulis ke kartu SD."</string>
@@ -1579,4 +1579,8 @@
     <item quantity="one" msgid="4835639969503729874">"PIN salah. Coba lagi dalam 1 detik."</item>
     <item quantity="other" msgid="8030607343223287654">"PIN salah. Coba lagi dalam <xliff:g id="COUNT">%d</xliff:g> detik."</item>
   </plurals>
+    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
+    <skip />
+    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
+    <skip />
 </resources>

@@ -245,9 +245,9 @@
     <string name="permdesc_expandStatusBar" msgid="6917549437129401132">"Tillader, at appen kan udvide og skjule statusbjælken."</string>
     <string name="permlab_processOutgoingCalls" msgid="3906007831192990946">"omdirigere udgående opkald"</string>
     <string name="permdesc_processOutgoingCalls" msgid="5331318931937402040">"Tillader, at appen kan behandle udgående opkald og ændre det nummer, der skal ringes til. Med denne tilladelse kan appen overvåge, omdirigere eller forhindre udgående opkald."</string>
-    <string name="permlab_receiveSms" msgid="8673471768947895082">"modtage tekstbeskeder (SMS)"</string>
+    <string name="permlab_receiveSms" msgid="8673471768947895082">"modtage tekstbeskeder (sms)"</string>
     <string name="permdesc_receiveSms" msgid="6424387754228766939">"Tillader, at appen kan modtage og behandle sms-beskeder. Det betyder, at appen kan overvåge eller slette de beskeder, der sendes til din enhed, uden at vise dem til dig."</string>
-    <string name="permlab_receiveMms" msgid="1821317344668257098">"modtage tekstbeskeder (MMS)"</string>
+    <string name="permlab_receiveMms" msgid="1821317344668257098">"modtage tekstbeskeder (mms)"</string>
     <string name="permdesc_receiveMms" msgid="533019437263212260">"Tillader, at appen kan modtage og behandle mms-beskeder. Det betyder, at appen kan overvåge eller slette de beskeder, der sendes til din enhed, uden at vise dem til dig."</string>
     <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"modtage nødudsendelser"</string>
     <string name="permdesc_receiveEmergencyBroadcast" msgid="848524070262431974">"Tillader, at appen kan modtage og behandle nødtransmissioner. Denne tilladelse er kun tilgængelig for systemapps."</string>
@@ -257,10 +257,10 @@
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Tillader, at appen kan sende sms-beskeder. Dette kan resultere i uventede opkrævninger. Skadelige apps kan koste dig penge ved at sende beskeder uden din bekræftelse."</string>
     <string name="permlab_sendRespondViaMessageRequest" msgid="8713889105305943200">"send hændelser, hvor der skal svares pr. besked"</string>
     <string name="permdesc_sendRespondViaMessageRequest" msgid="7107648548468778734">"Tillader, at appen kan sende anmodninger til andre apps til beskeder for at håndtere hændelser, hvor der skal svares pr. besked."</string>
-    <string name="permlab_readSms" msgid="8745086572213270480">"læse dine tekstbeskeder (SMS eller MMS)"</string>
+    <string name="permlab_readSms" msgid="8745086572213270480">"læse dine tekstbeskeder (sms eller mms)"</string>
     <string name="permdesc_readSms" product="tablet" msgid="2467981548684735522">"Tillader, at appen kan læse de sms-beskeder, der er gemt på din tablet eller dit SIM-kort. Med denne tilladelse kan appen læse alle sms-beskeder, uanset indhold eller fortrolighed."</string>
     <string name="permdesc_readSms" product="default" msgid="3695967533457240550">"Tillader, at appen kan læse de sms-beskeder, der er gemt på din telefon eller dit SIM-kort. Med denne tilladelse kan appen læse alle sms-beskeder, uanset indhold eller fortrolighed."</string>
-    <string name="permlab_writeSms" msgid="3216950472636214774">"redigere dine tekstbeskeder (SMS eller MMS)"</string>
+    <string name="permlab_writeSms" msgid="3216950472636214774">"redigere dine tekstbeskeder (sms eller mms)"</string>
     <string name="permdesc_writeSms" product="tablet" msgid="5160413947794501538">"Tillader, at appen kan skrive til sms-beskeder, der er gemt på din tablet eller på SIM-kortet. Ondsindede apps kan slette dine beskeder."</string>
     <string name="permdesc_writeSms" product="default" msgid="7268668709052328567">"Tillader, at appen kan skrive til sms-beskeder, der er gemt på din telefon eller dit SIM-kort. Ondsindede apps kan slette dine beskeder."</string>
     <string name="permlab_receiveWapPush" msgid="5991398711936590410">"modtage tekstbeskeder (WAP)"</string>
@@ -1579,4 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"Forkert pinkode. Prøv igen om 1 sekund."</item>
     <item quantity="other" msgid="8030607343223287654">"Forkert pinkode. Prøv igen om <xliff:g id="COUNT">%d</xliff:g> sekunder."</item>
   </plurals>
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Stryg fra skærmkanten for at se bjælken"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Stryg med fingeren fra skærmens kant for at se systembjælken"</string>
 </resources>
