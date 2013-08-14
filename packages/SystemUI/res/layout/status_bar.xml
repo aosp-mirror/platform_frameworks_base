@@ -95,11 +95,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     />
-                <ImageView
+                <!-- battery must be padded below by 1px to match assets -->
+                <com.android.systemui.BatteryMeterView
                     android:id="@+id/battery"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:paddingStart="4dip"
+                    android:layout_height="16dp"
+                    android:layout_width="10dp"
+                    android:paddingBottom="1px"
+                    android:layout_marginStart="4dip"
                     />
             </LinearLayout>
     
