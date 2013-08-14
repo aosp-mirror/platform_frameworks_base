@@ -12125,6 +12125,7 @@ package android.media {
 
   public static final class MediaCodecInfo.CodecCapabilities {
     ctor public MediaCodecInfo.CodecCapabilities();
+    method public final boolean isFeatureSupported(java.lang.String);
     field public static final int COLOR_Format12bitRGB444 = 3; // 0x3
     field public static final int COLOR_Format16bitARGB1555 = 5; // 0x5
     field public static final int COLOR_Format16bitARGB4444 = 4; // 0x4
@@ -12171,6 +12172,7 @@ package android.media {
     field public static final int COLOR_FormatYUV444Interleaved = 29; // 0x1d
     field public static final int COLOR_QCOM_FormatYUV420SemiPlanar = 2141391872; // 0x7fa30c00
     field public static final int COLOR_TI_FormatYUV420PackedSemiPlanar = 2130706688; // 0x7f000100
+    field public static final java.lang.String FEATURE_AdaptivePlayback = "adaptive-playback";
     field public int[] colorFormats;
     field public android.media.MediaCodecInfo.CodecProfileLevel[] profileLevels;
   }
