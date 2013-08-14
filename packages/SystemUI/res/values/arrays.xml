@@ -40,4 +40,16 @@
         <item>@null</item>
     </array>
 
+    <!-- BatteryMeterView parameters -->
+    <array name="batterymeter_color_levels">
+        <item>4</item>
+        <item>15</item>
+        <item>100</item>
+    </array>
+    <array name="batterymeter_color_values">
+        <item>#FFFF0000</item>
+        <item>#FFFE6600</item>
+        <item>#FF3792B4</item>
+    </array>
+
 </resources>

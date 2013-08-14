@@ -503,4 +503,7 @@
     <string name="status_bar_help_title">Notifications appear here</string>
     <!-- Body of help text shown when the notification panel is pulled down for the very first time. [CHAR LIMIT=NONE] -->
     <string name="status_bar_help_text">Access them anytime by swiping down.\nSwipe down again for system controls.</string>
+
+    <!-- Glyph to be overlaid atop the battery when the level is extremely low. Do not translate. -->
+    <string name="battery_meter_very_low_overlay_symbol">!</string>
 </resources>
