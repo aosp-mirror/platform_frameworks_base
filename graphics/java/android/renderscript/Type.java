@@ -37,10 +37,11 @@ import android.util.Log;
  * faces. LOD and cube map faces are booleans to indicate present or not
  * present. </p>
  *
- * <p>A Type also supports YUV format information to support an {@link
- * android.renderscript.Allocation} in a YUV format. The YUV formats supported
- * are {@link android.graphics.ImageFormat#YV12} and {@link
- * android.graphics.ImageFormat#NV21}.</p>
+ * <p>A Type also supports YUV format information to support an
+ * {@link android.renderscript.Allocation} in a YUV format. The YUV formats
+ * supported are {@link android.graphics.ImageFormat#YV12},
+ * {@link android.graphics.ImageFormat#NV21}, and
+ * {@link android.graphics.ImageFormat#YUV_420_888}</p>
  *
  * <div class="special reference">
  * <h3>Developer Guides</h3>
@@ -284,16 +285,19 @@ public class Type extends BaseObj {
         /**
          * Set the YUV layout for a Type.
          *
-         * @param yuvFormat {@link android.graphics.ImageFormat#YV12} or {@link android.graphics.ImageFormat#NV21}
+         * @param yuvFormat {@link android.graphics.ImageFormat#YV12}, {@link android.graphics.ImageFormat#NV21}, or
+         * {@link android.graphics.ImageFormat#YUV_420_888}.
          */
         public Builder setYuvFormat(int yuvFormat) {
             switch (yuvFormat) {
             case android.graphics.ImageFormat.NV21:
             case android.graphics.ImageFormat.YV12:
+            case android.graphics.ImageFormat.YUV_420_888:
                 break;
 
             default:
-                throw new RSIllegalArgumentException("Only NV21 and YV12 are supported..");
+                throw new RSIllegalArgumentException(
+                    "Only ImageFormat.NV21, .YV12, and .YUV_420_888 are supported..");
             }
 
             mYuv = yuvFormat;
