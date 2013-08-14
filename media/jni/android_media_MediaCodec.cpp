@@ -310,6 +310,10 @@ status_t JMediaCodec::getName(JNIEnv *env, jstring *nameStr) const {
     return OK;
 }
 
+status_t JMediaCodec::setParameters(const sp<AMessage> &msg) {
+    return mCodec->setParameters(msg);
+}
+
 void JMediaCodec::setVideoScalingMode(int mode) {
     if (mSurfaceTextureClient != NULL) {
         native_window_set_scaling_mode(mSurfaceTextureClient.get(), mode);
@@ -837,6 +841,27 @@ static jobject android_media_MediaCodec_getName(
     return NULL;
 }
 
+static void android_media_MediaCodec_setParameters(
+        JNIEnv *env, jobject thiz, jobjectArray keys, jobjectArray vals) {
+    ALOGV("android_media_MediaCodec_setParameters");
+
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+
+    if (codec == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return;
+    }
+
+    sp<AMessage> params;
+    status_t err = ConvertKeyValueArraysToMessage(env, keys, vals, &params);
+
+    if (err == OK) {
+        err = codec->setParameters(params);
+    }
+
+    throwExceptionAsNecessary(env, err);
+}
+
 static void android_media_MediaCodec_setVideoScalingMode(
         JNIEnv *env, jobject thiz, jint mode) {
     sp<JMediaCodec> codec = getMediaCodec(env, thiz);
@@ -985,6 +1010,9 @@ static JNINativeMethod gMethods[] = {
 
     { "getName", "()Ljava/lang/String;",
       (void *)android_media_MediaCodec_getName },
+
+    { "setParameters", "([Ljava/lang/String;[Ljava/lang/Object;)V",
+      (void *)android_media_MediaCodec_setParameters },
 
     { "setVideoScalingMode", "(I)V",
       (void *)android_media_MediaCodec_setVideoScalingMode },
