@@ -553,11 +553,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     MyOrientationListener mOrientationListener;
 
-    private static final int TRANSIENT_BAR_NONE = 0;
-    private static final int TRANSIENT_BAR_SHOWING = 1;
-    private static final int TRANSIENT_BAR_HIDING = 2;
-    private int mStatusTransientBar;
-    private int mNavigationTransientBar;
+    private final BarController mStatusBarController = new BarController("StatusBar",
+            View.STATUS_BAR_TRANSIENT, StatusBarManager.WINDOW_STATUS_BAR);
+    private final BarController mNavigationBarController = new BarController("NavigationBar",
+            View.NAVIGATION_BAR_TRANSIENT, StatusBarManager.WINDOW_NAVIGATION_BAR);
     private TransientNavigationConfirmation mTransientNavigationConfirmation;
 
     private SystemGesturesPointerEventListener mSystemGestures;
@@ -1716,6 +1715,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
                 mStatusBar = win;
+                mStatusBarController.setWindow(win);
                 break;
             case TYPE_NAVIGATION_BAR:
                 mContext.enforceCallingOrSelfPermission(
@@ -1727,6 +1727,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
                 mNavigationBar = win;
+                mNavigationBarController.setWindow(win);
                 if (DEBUG_LAYOUT) Slog.i(TAG, "NAVIGATION BAR: " + mNavigationBar);
                 break;
             case TYPE_NAVIGATION_BAR_PANEL:
@@ -1765,6 +1766,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void removeWindowLw(WindowState win) {
         if (mStatusBar == win) {
             mStatusBar = null;
+            mStatusBarController.setWindow(null);
         } else if (mKeyguard == win) {
             Log.v(TAG, "Removing keyguard window (Did it crash?)");
             mKeyguard = null;
@@ -1774,6 +1776,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mKeyguardScrim = null;
         } if (mNavigationBar == win) {
             mNavigationBar = null;
+            mNavigationBarController.setWindow(null);
         }
     }
 
@@ -2548,16 +2551,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public int adjustSystemUiVisibilityLw(int visibility) {
-        if (mStatusBar != null && mStatusTransientBar == TRANSIENT_BAR_SHOWING &&
-                0 == (visibility & View.STATUS_BAR_TRANSIENT)) {
-            mStatusTransientBar = TRANSIENT_BAR_HIDING;
-            setBarShowingLw(mStatusBar, false);
-        }
-        if (mNavigationBar != null && mNavigationTransientBar == TRANSIENT_BAR_SHOWING &&
-                0 == (visibility & View.NAVIGATION_BAR_TRANSIENT)) {
-            mNavigationTransientBar = TRANSIENT_BAR_HIDING;
-            setBarShowingLw(mNavigationBar, false);
-        }
+        mStatusBarController.adjustSystemUiVisibilityLw(visibility);
+        mNavigationBarController.adjustSystemUiVisibilityLw(visibility);
+
         // Reset any bits in mForceClearingStatusBarVisibility that
         // are now clear.
         mResettingSystemUiFlags &= visibility;
@@ -2714,7 +2710,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             boolean updateSysUiVisibility = false;
             if (mNavigationBar != null) {
-                boolean transientNavBarShowing = mNavigationTransientBar == TRANSIENT_BAR_SHOWING;
+                boolean transientNavBarShowing = mNavigationBarController.isTransientShowing();
                 // Force the navigation bar to its appropriate place and
                 // size.  We need to do this directly, instead of relying on
                 // it to bubble up from the nav bar, because this needs to
@@ -2727,15 +2723,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mTmpNavigationFrame.set(0, top, displayWidth, displayHeight - overscanBottom);
                     mStableBottom = mStableFullscreenBottom = mTmpNavigationFrame.top;
                     if (transientNavBarShowing || navTransparent) {
-                        setBarShowingLw(mNavigationBar, true);
+                        mNavigationBarController.setBarShowingLw(true);
                     } else if (navVisible) {
-                        setBarShowingLw(mNavigationBar, true);
+                        mNavigationBarController.setBarShowingLw(true);
                         mDockBottom = mTmpNavigationFrame.top;
                         mRestrictedScreenHeight = mDockBottom - mRestrictedScreenTop;
                         mRestrictedOverscanScreenHeight = mDockBottom - mRestrictedOverscanScreenTop;
                     } else {
                         // We currently want to hide the navigation UI.
-                        setBarShowingLw(mNavigationBar, false);
+                        mNavigationBarController.setBarShowingLw(false);
                     }
                     if (navVisible && !navTransparent && !mNavigationBar.isAnimatingLw()) {
                         // If the opaque nav bar is currently requested to be visible,
@@ -2750,15 +2746,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mTmpNavigationFrame.set(left, 0, displayWidth - overscanRight, displayHeight);
                     mStableRight = mStableFullscreenRight = mTmpNavigationFrame.left;
                     if (transientNavBarShowing || navTransparent) {
-                        setBarShowingLw(mNavigationBar, true);
+                        mNavigationBarController.setBarShowingLw(true);
                     } else if (navVisible) {
-                        setBarShowingLw(mNavigationBar, true);
+                        mNavigationBarController.setBarShowingLw(true);
                         mDockRight = mTmpNavigationFrame.left;
                         mRestrictedScreenWidth = mDockRight - mRestrictedScreenLeft;
                         mRestrictedOverscanScreenWidth = mDockRight - mRestrictedOverscanScreenLeft;
                     } else {
                         // We currently want to hide the navigation UI.
-                        setBarShowingLw(mNavigationBar, false);
+                        mNavigationBarController.setBarShowingLw(false);
                     }
                     if (navVisible && !navTransparent && !mNavigationBar.isAnimatingLw()) {
                         // If the nav bar is currently requested to be visible,
@@ -2778,9 +2774,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mNavigationBar.computeFrameLw(mTmpNavigationFrame, mTmpNavigationFrame,
                         mTmpNavigationFrame, mTmpNavigationFrame, mTmpNavigationFrame);
                 if (DEBUG_LAYOUT) Slog.i(TAG, "mNavigationBar frame: " + mTmpNavigationFrame);
-                if (mNavigationTransientBar == TRANSIENT_BAR_HIDING && !mNavigationBar.isVisibleLw()) {
-                    // Finished animating out, clean up and reset alpha
-                    mNavigationTransientBar = TRANSIENT_BAR_NONE;
+                if (mNavigationBarController.checkHiddenLw()) {
                     updateSysUiVisibility = true;
                 }
             }
@@ -2838,10 +2832,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // we can tell the app that it is covered by it.
                     mSystemTop = mUnrestrictedScreenTop + mStatusBarHeight;
                 }
-
-                if (mStatusTransientBar == TRANSIENT_BAR_HIDING && !mStatusBar.isVisibleLw()) {
-                    // Finished animating out, clean up and reset alpha
-                    mStatusTransientBar = TRANSIENT_BAR_NONE;
+                if (mStatusBarController.checkHiddenLw()) {
                     updateSysUiVisibility = true;
                 }
             }
@@ -3410,7 +3401,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     + " top=" + mTopFullscreenOpaqueWindowState);
             if (mForceStatusBar || mForceStatusBarFromKeyguard) {
                 if (DEBUG_LAYOUT) Slog.v(TAG, "Showing status bar: forced");
-                if (setBarShowingLw(mStatusBar, true)) changes |= FINISH_LAYOUT_REDO_LAYOUT;
+                if (mStatusBarController.setBarShowingLw(true)) {
+                    changes |= FINISH_LAYOUT_REDO_LAYOUT;
+                }
             } else if (mTopFullscreenOpaqueWindowState != null) {
                 if (localLOGV) {
                     Slog.d(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw()
@@ -3424,20 +3417,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // and mTopIsFullscreen is that that mTopIsFullscreen is set only if the window
                 // has the FLAG_FULLSCREEN set.  Not sure if there is another way that to be the
                 // case though.
-                if (mStatusTransientBar == TRANSIENT_BAR_SHOWING) {
-                    if (setBarShowingLw(mStatusBar, true)) {
+                if (mStatusBarController.isTransientShowing()) {
+                    if (mStatusBarController.setBarShowingLw(true)) {
                         changes |= FINISH_LAYOUT_REDO_LAYOUT;
                     }
                 } else if (topIsFullscreen) {
                     if (DEBUG_LAYOUT) Slog.v(TAG, "** HIDING status bar");
-                    if (setBarShowingLw(mStatusBar, false)) {
+                    if (mStatusBarController.setBarShowingLw(false)) {
                         changes |= FINISH_LAYOUT_REDO_LAYOUT;
                     } else {
                         if (DEBUG_LAYOUT) Slog.v(TAG, "Status bar already hiding");
                     }
                 } else {
                     if (DEBUG_LAYOUT) Slog.v(TAG, "** SHOWING status bar: top is not fullscreen");
-                    if (setBarShowingLw(mStatusBar, true)) changes |= FINISH_LAYOUT_REDO_LAYOUT;
+                    if (mStatusBarController.setBarShowingLw(true)) {
+                        changes |= FINISH_LAYOUT_REDO_LAYOUT;
+                    }
                 }
             }
         }
@@ -3882,7 +3877,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_POWER: {
                 result &= ~ACTION_PASS_TO_USER;
                 if (down) {
-                    if (isScreenOn && isNavigationBarTransient(mLastSystemUiFlags)) {
+                    if (isScreenOn && isTransientNavigationAllowed(mLastSystemUiFlags)) {
                         mTransientNavigationConfirmation.unconfirmLastPackage();
                     }
                     if (isScreenOn && !mPowerKeyTriggered
@@ -4153,33 +4148,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void requestTransientBars(WindowState swipeTarget) {
         synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
-            boolean sb = checkShowTransientBar("status", mStatusTransientBar, mStatusBar);
-            boolean nb = checkShowTransientBar("nav", mNavigationTransientBar, mNavigationBar);
+            boolean sb = mStatusBarController.checkShowTransientBarLw();
+            boolean nb = mNavigationBarController.checkShowTransientBarLw();
             if (sb || nb) {
                 WindowState barTarget = sb ? mStatusBar : mNavigationBar;
                 if (sb ^ nb && barTarget != swipeTarget) {
                     if (DEBUG) Slog.d(TAG, "Not showing transient bar, wrong swipe target");
                     return;
                 }
-                mStatusTransientBar = sb ? TRANSIENT_BAR_SHOWING : mStatusTransientBar;
-                mNavigationTransientBar = nb ? TRANSIENT_BAR_SHOWING : mNavigationTransientBar;
+                if (sb) mStatusBarController.showTransient();
+                if (nb) mNavigationBarController.showTransient();
                 updateSystemUiVisibilityLw();
             }
-        }
-    }
-
-    private boolean checkShowTransientBar(String tag, int transientBar, WindowState win) {
-        if (transientBar == TRANSIENT_BAR_SHOWING) {
-            if (DEBUG) Slog.d(TAG, "Not showing " + tag + " transient bar, already shown");
-            return false;
-        } else if (win == null) {
-            if (DEBUG) Slog.d(TAG, "Not showing " + tag + " transient bar, bar doesn't exist");
-            return false;
-        } else if (win.isDisplayedLw()) {
-            if (DEBUG) Slog.d(TAG, "Not showing " + tag + " transient bar, bar already visible");
-            return false;
-        } else {
-            return true;
         }
     }
 
@@ -5057,104 +5037,60 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (ImmersiveModeTesting.enabled) {
             vis = ImmersiveModeTesting.applyForced(mFocusedWindow, vis);
         }
+
+        // prevent status bar interaction from clearing certain flags
         boolean statusBarHasFocus = mFocusedWindow.getAttrs().type == TYPE_STATUS_BAR;
         if (statusBarHasFocus) {
-            // prevent status bar interaction from clearing certain flags
             int flags = View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_ALLOW_TRANSIENT;
             vis = (vis & ~flags) | (mLastSystemUiFlags & flags);
         }
-        if (mStatusTransientBar == TRANSIENT_BAR_SHOWING) {
-            // status transient bar requested
-            boolean transientAllowed =
-                    (vis & View.SYSTEM_UI_FLAG_ALLOW_TRANSIENT) != 0;
-            boolean hideStatusBarWM =
-                    (mFocusedWindow.getAttrs().flags
-                            & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
-            boolean hideStatusBarSysui =
-                    (vis & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0;
 
-            boolean transientStatusBarAllowed =
-                    hideStatusBarWM
-                    || (hideStatusBarSysui && transientAllowed)
-                    || statusBarHasFocus;
+        // update status bar
+        boolean transientAllowed =
+                (vis & View.SYSTEM_UI_FLAG_ALLOW_TRANSIENT) != 0;
+        boolean hideStatusBarWM =
+                (mFocusedWindow.getAttrs().flags
+                        & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
+        boolean hideStatusBarSysui =
+                (vis & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0;
 
-            if (mStatusBar == null || !transientStatusBarAllowed) {
-                mStatusTransientBar = TRANSIENT_BAR_NONE;
-                if (mStatusBar != null && hideStatusBarSysui) {
-                    // clear the clearable flags instead
-                    int newVal = mResettingSystemUiFlags | View.SYSTEM_UI_CLEARABLE_FLAGS;
-                    if (newVal != mResettingSystemUiFlags) {
-                        mResettingSystemUiFlags = newVal;
-                        mWindowManagerFuncs.reevaluateStatusBarVisibility();
-                    }
-                }
-            } else {
-                // show status transient bar
-                vis |= View.STATUS_BAR_TRANSIENT;
-                if ((mLastSystemUiFlags & View.STATUS_BAR_TRANSIENT) == 0) {
-                    vis &= ~View.SYSTEM_UI_FLAG_LOW_PROFILE;
-                    setBarShowingLw(mStatusBar, true);
-                }
+        boolean transientStatusBarAllowed =
+                mStatusBar != null && (
+                hideStatusBarWM
+                || (hideStatusBarSysui && transientAllowed)
+                || statusBarHasFocus);
+
+        if (mStatusBarController.isTransientShowing()
+                && !transientStatusBarAllowed && hideStatusBarSysui) {
+            // clear the clearable flags instead
+            int newVal = mResettingSystemUiFlags | View.SYSTEM_UI_CLEARABLE_FLAGS;
+            if (newVal != mResettingSystemUiFlags) {
+                mResettingSystemUiFlags = newVal;
+                mWindowManagerFuncs.reevaluateStatusBarVisibility();
             }
         }
-        boolean oldTransientNav = isNavigationBarTransient(oldVis);
-        boolean isTransientNav = isNavigationBarTransient(vis);
+
+        vis = mStatusBarController.updateVisibilityLw(transientStatusBarAllowed, oldVis, vis);
+
+        // update navigation bar
+        boolean oldTransientNav = isTransientNavigationAllowed(oldVis);
+        boolean isTransientNav = isTransientNavigationAllowed(vis);
         if (mFocusedWindow != null && oldTransientNav != isTransientNav) {
             final int uid = getCurrentUserId();
             final String pkg = mFocusedWindow.getOwningPackage();
             mTransientNavigationConfirmation.transientNavigationChanged(uid, pkg, isTransientNav);
         }
-        if (mNavigationTransientBar == TRANSIENT_BAR_SHOWING) {
-            // navigation transient bar requested
-            if (!isTransientNav) {
-                mNavigationTransientBar = TRANSIENT_BAR_NONE;
-            } else {
-                // show navigation transient bar
-                vis |= View.NAVIGATION_BAR_TRANSIENT;
-                if ((mLastSystemUiFlags & View.NAVIGATION_BAR_TRANSIENT) == 0) {
-                    setBarShowingLw(mNavigationBar, true);
-                }
-            }
-        }
-        if (mStatusTransientBar != TRANSIENT_BAR_NONE
-                || mNavigationTransientBar != TRANSIENT_BAR_NONE) {
-            vis &= ~View.SYSTEM_UI_FLAG_LOW_PROFILE;
-        }
+        vis = mNavigationBarController.updateVisibilityLw(isTransientNav, oldVis, vis);
+
         return vis;
     }
 
-    private boolean isNavigationBarTransient(int vis) {
+    private boolean isTransientNavigationAllowed(int vis) {
         return mNavigationBar != null
                 && (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
                 && (vis & View.SYSTEM_UI_FLAG_ALLOW_TRANSIENT) != 0;
-    }
-
-    private boolean setBarShowingLw(WindowState win, final boolean show) {
-        final int window =
-                  win == mStatusBar ? StatusBarManager.WINDOW_STATUS_BAR
-                : win == mNavigationBar ? StatusBarManager.WINDOW_NAVIGATION_BAR
-                : 0;
-        if (window != 0) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        IStatusBarService statusbar = getStatusBarService();
-                        if (statusbar != null) {
-                            statusbar.setWindowState(window, show
-                                    ? StatusBarManager.WINDOW_STATE_SHOWING
-                                    : StatusBarManager.WINDOW_STATE_HIDING);
-                        }
-                    } catch (RemoteException e) {
-                        // re-acquire status bar service next time it is needed.
-                        mStatusBarService = null;
-                    }
-                }
-            });
-        }
-        return show ? win.showLw(true) : win.hideLw(true);
     }
 
     // Temporary helper that allows testing immersive mode on existing apps
@@ -5417,18 +5353,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pw.print(prefix); pw.print("mDemoHdmiRotation="); pw.print(mDemoHdmiRotation);
                 pw.print(" mDemoHdmiRotationLock="); pw.println(mDemoHdmiRotationLock);
         pw.print(prefix); pw.print("mUndockedHdmiRotation="); pw.println(mUndockedHdmiRotation);
-        dumpTransient(pw, prefix,
-                mStatusBar, "mStatusTransientBar", mStatusTransientBar);
-        dumpTransient(pw, prefix,
-                mNavigationBar, "mNavigationTransientBar", mNavigationTransientBar);
-    }
-
-    private void dumpTransient(PrintWriter pw, String pre, WindowState win, String var, int val) {
-        if (win != null) {
-            pw.print(pre); pw.print(var); pw.print('=');
-            pw.println(val == TRANSIENT_BAR_HIDING ? "HIDING"
-                     : val == TRANSIENT_BAR_SHOWING ? "SHOWING"
-                     : "NONE");
-        }
+        mStatusBarController.dump(pw, prefix);
+        mNavigationBarController.dump(pw, prefix);
     }
 }
