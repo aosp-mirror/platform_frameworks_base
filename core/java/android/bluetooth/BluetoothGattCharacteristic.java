@@ -283,6 +283,20 @@ public class BluetoothGattCharacteristic {
     }
 
     /**
+     * Get a descriptor by UUID and isntance id.
+     * @hide
+     */
+    /*package*/  BluetoothGattDescriptor getDescriptor(UUID uuid, int instanceId) {
+        for(BluetoothGattDescriptor descriptor : mDescriptors) {
+            if (descriptor.getUuid().equals(uuid)
+             && descriptor.getInstanceId() == instanceId) {
+                return descriptor;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Returns the service this characteristic belongs to.
      * @return The asscociated service
      */
