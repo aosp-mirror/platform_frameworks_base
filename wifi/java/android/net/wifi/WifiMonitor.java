@@ -506,13 +506,14 @@ public class WifiMonitor {
                     Log.d(TAG, "Event [" + eventStr + "]");
                 }
 
+                String iface = "p2p0";
                 WifiMonitor m = null;
                 mStateMachine = null;
 
                 if (eventStr.startsWith("IFNAME=")) {
                     int space = eventStr.indexOf(' ');
                     if (space != -1) {
-                        String iface = eventStr.substring(7,space);
+                        iface = eventStr.substring(7,space);
                         m = mWifiMonitorSingleton.getMonitor(iface);
                         if (m == null && iface.startsWith("p2p-")) {
                             // p2p interfaces are created dynamically, but we have
@@ -520,20 +521,20 @@ public class WifiMonitor {
                             // for it explicitly, and send messages there ..
                             m = mWifiMonitorSingleton.getMonitor("p2p0");
                         }
-                        if (m != null) {
-                            if (m.mMonitoring) {
-                                mStateMachine = m.mWifiStateMachine;
-                                eventStr = eventStr.substring(space + 1);
-                            }
-                            else {
-                                if (DBG) Log.d(TAG, "Dropping event because monitor (" + iface +
-                                        ") is stopped");
-                                continue;
-                            }
-                        }
-                        else {
-                            eventStr = eventStr.substring(space + 1);
-                        }
+                        eventStr = eventStr.substring(space + 1);
+                    }
+                } else {
+                    // events without prefix belong to p2p0 monitor
+                    m = mWifiMonitorSingleton.getMonitor("p2p0");
+                }
+
+                if (m != null) {
+                    if (m.mMonitoring) {
+                        mStateMachine = m.mWifiStateMachine;
+                    } else {
+                        if (DBG) Log.d(TAG, "Dropping event because monitor (" + iface +
+                                            ") is stopped");
+                        continue;
                     }
                 }
 
