@@ -118,7 +118,7 @@ public class PanelView extends FrameLayout {
             int i = 0;
             float totalweight = 0f;
             float weight = 10f;
-            for (final Iterator<MotionEventCopy> iter = mEventBuf.descendingIterator();
+            for (final Iterator<MotionEventCopy> iter = mEventBuf.iterator();
                     iter.hasNext();) {
                 final MotionEventCopy event = iter.next();
                 if (last != null) {
@@ -126,12 +126,21 @@ public class PanelView extends FrameLayout {
                     final float dx = (event.x - last.x);
                     final float dy = (event.y - last.y);
                     if (FlingTracker.DEBUG) {
-                        Log.v("FlingTracker", String.format("   [%d] dx=%.1f dy=%.1f dt=%.0f vx=%.1f vy=%.1f",
-                                i,
+                        Log.v("FlingTracker", String.format(
+                                "   [%d] (t=%d %.1f,%.1f) dx=%.1f dy=%.1f dt=%f vx=%.1f vy=%.1f",
+                                i, event.t, event.x, event.y,
                                 dx, dy, dt,
                                 (dx/dt),
                                 (dy/dt)
                                 ));
+                    }
+                    if (event.t == last.t) {
+                        // Really not sure what to do with events that happened at the same time,
+                        // so we'll skip subsequent events.
+                        if (DEBUG_NAN) {
+                            Log.v("FlingTracker", "skipping simultaneous event at t=" + event.t);
+                        }
+                        continue;
                     }
                     mVX += weight * dx / dt;
                     mVY += weight * dy / dt;
@@ -158,18 +167,18 @@ public class PanelView extends FrameLayout {
             }
         }
         public float getXVelocity() {
-            if (Float.isNaN(mVX)) {
+            if (Float.isNaN(mVX) || Float.isInfinite(mVX)) {
                 if (DEBUG_NAN) {
-                    Log.v("FlingTracker", "warning: vx=NaN");
+                    Log.v("FlingTracker", "warning: vx=" + mVX);
                 }
                 mVX = 0;
             }
             return mVX;
         }
         public float getYVelocity() {
-            if (Float.isNaN(mVY)) {
+            if (Float.isNaN(mVY) || Float.isInfinite(mVX)) {
                 if (DEBUG_NAN) {
-                    Log.v("FlingTracker", "warning: vx=NaN");
+                    Log.v("FlingTracker", "warning: vx=" + mVY);
                 }
                 mVY = 0;
             }
