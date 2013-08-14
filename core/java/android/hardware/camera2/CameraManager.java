@@ -24,13 +24,14 @@ import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;
 import android.hardware.camera2.utils.BinderHolder;
 import android.os.IBinder;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+import android.util.ArrayMap;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 
 /**
  * <p>An interface for iterating, listing, and connecting to
@@ -55,7 +56,10 @@ public final class CameraManager {
 
     private final ICameraService mCameraService;
     private ArrayList<String> mDeviceIdList;
-    private final HashSet<CameraListener> mListenerSet = new HashSet<CameraListener>();
+
+    private ArrayMap<AvailabilityListener, Handler> mListenerMap =
+            new ArrayMap<AvailabilityListener, Handler>();
+
     private final Context mContext;
     private final Object mLock = new Object();
 
@@ -85,14 +89,16 @@ public final class CameraManager {
     }
 
     /**
-     * <p>Return the list of currently connected camera devices by
-     * identifier. Non-removable cameras use integers starting at 0 for their
+     * Return the list of currently connected camera devices by
+     * identifier.
+     *
+     * <p>Non-removable cameras use integers starting at 0 for their
      * identifiers, while removable cameras have a unique identifier for each
      * individual device, even if they are the same model.</p>
      *
      * @return The list of currently connected camera devices.
      */
-    public String[] getDeviceIdList() throws CameraAccessException {
+    public String[] getCameraIdList() throws CameraAccessException {
         synchronized (mLock) {
             try {
                 return getOrCreateDeviceIdListLocked().toArray(new String[0]);
@@ -107,13 +113,25 @@ public final class CameraManager {
     /**
      * Register a listener to be notified about camera device availability.
      *
-     * Registering a listener more than once has no effect.
+     * <p>Registering the same listener again will replace the handler with the
+     * new one provided.</p>
      *
      * @param listener The new listener to send camera availability notices to
+     * @param handler The handler on which the listener should be invoked, or
+     * {@code null} to use the current thread's {@link android.os.Looper looper}.
      */
-    public void registerCameraListener(CameraListener listener) {
+    public void addAvailabilityListener(AvailabilityListener listener, Handler handler) {
+        if (handler == null) {
+            Looper looper = Looper.myLooper();
+            if (looper == null) {
+                throw new IllegalArgumentException(
+                        "No handler given, and current thread has no looper!");
+            }
+            handler = new Handler(looper);
+        }
+
         synchronized (mLock) {
-            mListenerSet.add(listener);
+            mListenerMap.put(listener, handler);
         }
     }
 
@@ -121,13 +139,13 @@ public final class CameraManager {
      * Remove a previously-added listener; the listener will no longer receive
      * connection and disconnection callbacks.
      *
-     * Removing a listener that isn't registered has no effect.
+     * <p>Removing a listener that isn't registered has no effect.</p>
      *
      * @param listener The listener to remove from the notification list
      */
-    public void unregisterCameraListener(CameraListener listener) {
+    public void removeAvailabilityListener(AvailabilityListener listener) {
         synchronized (mLock) {
-            mListenerSet.remove(listener);
+            mListenerMap.remove(listener);
         }
     }
 
@@ -144,7 +162,7 @@ public final class CameraManager {
      * @throws SecurityException if the application does not have permission to
      * access the camera
      *
-     * @see #getDeviceIdList
+     * @see #getCameraIdList
      * @see android.app.admin.DevicePolicyManager#setCameraDisabled
      */
     public CameraProperties getCameraProperties(String cameraId)
@@ -165,9 +183,9 @@ public final class CameraManager {
 
     /**
      * Open a connection to a camera with the given ID. Use
-     * {@link #getDeviceIdList} to get the list of available camera
+     * {@link #getCameraIdList} to get the list of available camera
      * devices. Note that even if an id is listed, open may fail if the device
-     * is disconnected between the calls to {@link #getDeviceIdList} and
+     * is disconnected between the calls to {@link #getCameraIdList} and
      * {@link #openCamera}.
      *
      * @param cameraId The unique identifier of the camera device to open
@@ -179,7 +197,7 @@ public final class CameraManager {
      * @throws SecurityException if the application does not have permission to
      * access the camera
      *
-     * @see #getDeviceIdList
+     * @see #getCameraIdList
      * @see android.app.admin.DevicePolicyManager#setCameraDisabled
      */
     public CameraDevice openCamera(String cameraId) throws CameraAccessException {
@@ -218,29 +236,43 @@ public final class CameraManager {
     }
 
     /**
-     * Interface for listening to cameras becoming available or unavailable.
-     * Cameras become available when they are no longer in use, or when a new
+     * Interface for listening to camera devices becoming available or
+     * unavailable.
+     *
+     * <p>Cameras become available when they are no longer in use, or when a new
      * removable camera is connected. They become unavailable when some
      * application or service starts using a camera, or when a removable camera
-     * is disconnected.
+     * is disconnected.</p>
+     *
+     * @see addAvailabilityListener
      */
-    public interface CameraListener {
+    public static abstract class AvailabilityListener {
+
         /**
          * A new camera has become available to use.
          *
+         * <p>The default implementation of this method does nothing.</p>
+         *
          * @param cameraId The unique identifier of the new camera.
          */
-        public void onCameraAvailable(String cameraId);
+        public void onCameraAvailable(String cameraId) {
+            // default empty implementation
+        }
 
         /**
-         * A previously-available camera has become unavailable for use. If an
-         * application had an active CameraDevice instance for the
-         * now-disconnected camera, that application will receive a {@link
-         * CameraDevice.ErrorListener#DEVICE_DISCONNECTED disconnection error}.
+         * A previously-available camera has become unavailable for use.
+         *
+         * <p>If an application had an active CameraDevice instance for the
+         * now-disconnected camera, that application will receive a
+         * {@link CameraDevice.CameraDeviceListener#onCameraDisconnected disconnection error}.</p>
+         *
+         * <p>The default implementation of this method does nothing.</p>
          *
          * @param cameraId The unique identifier of the disconnected camera.
          */
-        public void onCameraUnavailable(String cameraId);
+        public void onCameraUnavailable(String cameraId) {
+            // default empty implementation
+        }
     }
 
     private ArrayList<String> getOrCreateDeviceIdListLocked() throws CameraAccessException {
@@ -285,7 +317,7 @@ public final class CameraManager {
         public static final int STATUS_NOT_AVAILABLE = 0x80000000;
 
         // Camera ID -> Status map
-        private final HashMap<String, Integer> mDeviceStatus = new HashMap<String, Integer>();
+        private final ArrayMap<String, Integer> mDeviceStatus = new ArrayMap<String, Integer>();
 
         private static final String TAG = "CameraServiceListener";
 
@@ -322,7 +354,7 @@ public final class CameraManager {
                 Log.v(TAG,
                         String.format("Camera id %d has status changed to 0x%x", cameraId, status));
 
-                String id = String.valueOf(cameraId);
+                final String id = String.valueOf(cameraId);
 
                 if (!validStatus(status)) {
                     Log.e(TAG, String.format("Ignoring invalid device %d status 0x%x", cameraId,
@@ -363,11 +395,24 @@ public final class CameraManager {
                     return;
                 }
 
-                for (CameraListener listener : mListenerSet) {
+                final int listenerCount = mListenerMap.size();
+                for (int i = 0; i < listenerCount; i++) {
+                    Handler handler = mListenerMap.valueAt(i);
+                    final AvailabilityListener listener = mListenerMap.keyAt(i);
                     if (isAvailable(status)) {
-                        listener.onCameraAvailable(id);
+                        handler.post(
+                            new Runnable() {
+                                public void run() {
+                                    listener.onCameraAvailable(id);
+                                }
+                            });
                     } else {
-                        listener.onCameraUnavailable(id);
+                        handler.post(
+                            new Runnable() {
+                                public void run() {
+                                    listener.onCameraUnavailable(id);
+                                }
+                            });
                     }
                 } // for
             } // synchronized
