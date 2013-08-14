@@ -15426,6 +15426,90 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Transforms a motion event from view-local coordinates to on-screen
+     * coordinates.
+     *
+     * @param ev the view-local motion event
+     * @return false if the transformation could not be applied
+     * @hide
+     */
+    public boolean toGlobalMotionEvent(MotionEvent ev) {
+        final AttachInfo info = mAttachInfo;
+        if (info == null) {
+            return false;
+        }
+
+        transformMotionEventToGlobal(ev);
+        ev.offsetLocation(info.mWindowLeft, info.mWindowTop);
+        return true;
+    }
+
+    /**
+     * Transforms a motion event from on-screen coordinates to view-local
+     * coordinates.
+     *
+     * @param ev the on-screen motion event
+     * @return false if the transformation could not be applied
+     * @hide
+     */
+    public boolean toLocalMotionEvent(MotionEvent ev) {
+        final AttachInfo info = mAttachInfo;
+        if (info == null) {
+            return false;
+        }
+
+        ev.offsetLocation(-info.mWindowLeft, -info.mWindowTop);
+        transformMotionEventToLocal(ev);
+        return true;
+    }
+
+    /**
+     * Recursive helper method that applies transformations in post-order.
+     *
+     * @param ev the on-screen motion event
+     */
+    private void transformMotionEventToLocal(MotionEvent ev) {
+        final ViewParent parent = mParent;
+        if (parent instanceof View) {
+            final View vp = (View) parent;
+            vp.transformMotionEventToLocal(ev);
+            ev.offsetLocation(vp.mScrollX, vp.mScrollY);
+        } else if (parent instanceof ViewRootImpl) {
+            final ViewRootImpl vr = (ViewRootImpl) parent;
+            ev.offsetLocation(0, vr.mCurScrollY);
+        }
+
+        ev.offsetLocation(-mLeft, -mTop);
+
+        if (!hasIdentityMatrix()) {
+            ev.transform(getInverseMatrix());
+        }
+    }
+
+    /**
+     * Recursive helper method that applies transformations in pre-order.
+     *
+     * @param ev the on-screen motion event
+     */
+    private void transformMotionEventToGlobal(MotionEvent ev) {
+        if (!hasIdentityMatrix()) {
+            ev.transform(getMatrix());
+        }
+
+        ev.offsetLocation(mLeft, mTop);
+
+        final ViewParent parent = mParent;
+        if (parent instanceof View) {
+            final View vp = (View) parent;
+            ev.offsetLocation(-vp.mScrollX, -vp.mScrollY);
+            vp.transformMotionEventToGlobal(ev);
+        } else if (parent instanceof ViewRootImpl) {
+            final ViewRootImpl vr = (ViewRootImpl) parent;
+            ev.offsetLocation(0, -vr.mCurScrollY);
+        }
+    }
+
+    /**
      * <p>Computes the coordinates of this view on the screen. The argument
      * must be an array of two integers. After the method returns, the array
      * contains the x and y location in that order.</p>
