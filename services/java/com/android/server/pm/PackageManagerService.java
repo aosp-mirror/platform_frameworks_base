@@ -1792,8 +1792,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    @Override
     public int[] getPackageGids(String packageName) {
-        final boolean enforcedDefault = isPermissionEnforcedDefault(READ_EXTERNAL_STORAGE);
         // reader
         synchronized (mPackages) {
             PackageParser.Package p = mPackages.get(packageName);
@@ -1801,17 +1801,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Log.v(TAG, "getPackageGids" + packageName + ": " + p);
             if (p != null) {
                 final PackageSetting ps = (PackageSetting)p.mExtras;
-                final SharedUserSetting suid = ps.sharedUser;
-                int[] gids = suid != null ? suid.gids : ps.gids;
-
-                // include GIDs for any unenforced permissions
-                if (!isPermissionEnforcedLocked(READ_EXTERNAL_STORAGE, enforcedDefault)) {
-                    final BasePermission basePerm = mSettings.mPermissions.get(
-                            READ_EXTERNAL_STORAGE);
-                    gids = appendInts(gids, basePerm.gids);
-                }
-
-                return gids;
+                return ps.getGids();
             }
         }
         // stupid thing to indicate an error.
@@ -2132,7 +2122,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     public int checkPermission(String permName, String pkgName) {
-        final boolean enforcedDefault = isPermissionEnforcedDefault(permName);
         synchronized (mPackages) {
             PackageParser.Package p = mPackages.get(pkgName);
             if (p != null && p.mExtras != null) {
@@ -2145,15 +2134,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                     return PackageManager.PERMISSION_GRANTED;
                 }
             }
-            if (!isPermissionEnforcedLocked(permName, enforcedDefault)) {
-                return PackageManager.PERMISSION_GRANTED;
-            }
         }
         return PackageManager.PERMISSION_DENIED;
     }
 
     public int checkUidPermission(String permName, int uid) {
-        final boolean enforcedDefault = isPermissionEnforcedDefault(permName);
         synchronized (mPackages) {
             Object obj = mSettings.getUserIdLPr(UserHandle.getAppId(uid));
             if (obj != null) {
@@ -2166,9 +2151,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (perms != null && perms.contains(permName)) {
                     return PackageManager.PERMISSION_GRANTED;
                 }
-            }
-            if (!isPermissionEnforcedLocked(permName, enforcedDefault)) {
-                return PackageManager.PERMISSION_GRANTED;
             }
         }
         return PackageManager.PERMISSION_DENIED;
@@ -11112,42 +11094,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     @Override
+    @Deprecated
     public boolean isPermissionEnforced(String permission) {
-        final boolean enforcedDefault = isPermissionEnforcedDefault(permission);
-        synchronized (mPackages) {
-            return isPermissionEnforcedLocked(permission, enforcedDefault);
-        }
-    }
-
-    /**
-     * Check if given permission should be enforced by default. Should always be
-     * called outside of {@link #mPackages} lock.
-     */
-    private boolean isPermissionEnforcedDefault(String permission) {
-        if (READ_EXTERNAL_STORAGE.equals(permission)) {
-            return android.provider.Settings.Global.getInt(mContext.getContentResolver(),
-                    android.provider.Settings.Global.READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT, 0)
-                    != 0;
-        } else {
-            return true;
-        }
-    }
-
-    /**
-     * Check if user has requested that given permission be enforced, using
-     * given default if undefined.
-     */
-    private boolean isPermissionEnforcedLocked(String permission, boolean enforcedDefault) {
-        if (READ_EXTERNAL_STORAGE.equals(permission)) {
-            if (mSettings.mReadExternalStorageEnforced != null) {
-                return mSettings.mReadExternalStorageEnforced;
-            } else {
-                // User hasn't defined; fall back to secure default
-                return enforcedDefault;
-            }
-        } else {
-            return true;
-        }
+        return true;
     }
 
     public boolean isStorageLow() {
