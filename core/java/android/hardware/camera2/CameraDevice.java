@@ -157,14 +157,13 @@ public interface CameraDevice extends AutoCloseable {
      *   obtain the Surface with
      *   {@link android.renderscript.Allocation#getSurface}.</li>
      *
-     * <li>For access to uncompressed, JPEG, or raw sensor data in the
-     *   application: Create a {@link android.media.ImageReader} object with the
-     *   desired {@link CameraProperties#SCALER_AVAILABLE_FORMATS image format},
-     *   and a size from the matching
+     * <li>For access to uncompressed or JPEG data in the application: Create a
+     *   {@link android.media.ImageReader} object with the desired
+     *   {@link CameraProperties#SCALER_AVAILABLE_FORMATS image format}, and a
+     *   size from the matching
      *   {@link CameraProperties#SCALER_AVAILABLE_PROCESSED_SIZES processed},
-     *   {@link CameraProperties#SCALER_AVAILABLE_JPEG_SIZES jpeg}, or
-     *   {@link CameraProperties#SCALER_AVAILABLE_RAW_SIZES raw} sizes. Then
-     *   obtain a Surface from it.</li>
+     *   {@link CameraProperties#SCALER_AVAILABLE_JPEG_SIZES jpeg}. Then obtain
+     *   a Surface from it.</li>
      *
      * </ul>
      *
