@@ -164,8 +164,7 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi tilkoblet"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Søker etter GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Posisjon angitt av GPS"</string>
-    <!-- no translation found for accessibility_location_active (2427290146138169014) -->
-    <skip />
+    <string name="accessibility_location_active" msgid="2427290146138169014">"Aktive stedsforespørsler"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Fjern alle varslinger."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Info om app"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Skjermen roterer automatisk."</string>
@@ -202,6 +201,4 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Varslene vises her"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Bruk dem når som helst ved å sveipe nedover.\nSveip nedover igjen for å gå til systemkontrollene."</string>
-    <string name="hiding_navigation_confirmation_message" msgid="3227814171674734332">"Sveip på kanten av skjermen for å få frem feltet"</string>
-    <string name="hiding_navigation_confirmation_message_long" msgid="7854368870786524950">"Sveip fra kanten på skjermen for å få frem systemfeltet"</string>
 </resources>
