@@ -564,6 +564,52 @@ final public class MediaCodec {
     public native final String getName();
 
     /**
+     * Change a video encoder's target bitrate on the fly. The value is an
+     * Integer object containing the new bitrate in bps.
+     */
+    public static final String PARAMETER_KEY_VIDEO_BITRATE = "videoBitrate";
+
+    /**
+     * Temporarily suspend/resume encoding of input data. While suspended
+     * input data is effectively discarded instead of being fed into the
+     * encoder. This parameter really only makes sense to use with an encoder
+     * in "surface-input" mode, as the client code has no control over the
+     * input-side of the encoder in that case.
+     * The value is an Integer object containing the value 1 to suspend
+     * or the value 0 to resume.
+     */
+    public static final String PARAMETER_KEY_SUSPEND = "drop-input-frames";
+
+    /**
+     * Request that the encoder produce a sync frame "soon".
+     * Provide an Integer with the value 0.
+     */
+    public static final String PARAMETER_KEY_REQUEST_SYNC_FRAME = "request-sync";
+
+    /**
+     * Communicate additional parameter changes to the component instance.
+     */
+    public final void setParameters(Map<String, Object> params) {
+        if (params == null) {
+            return;
+        }
+
+        String[] keys = new String[params.size()];
+        Object[] values = new Object[params.size()];
+
+        int i = 0;
+        for (Map.Entry<String, Object> entry: params.entrySet()) {
+            keys[i] = entry.getKey();
+            values[i] = entry.getValue();
+            ++i;
+        }
+
+        setParameters(keys, values);
+    }
+
+    private native final void setParameters(String[] keys, Object[] values);
+
+    /**
      * Get the codec info. If the codec was created by createDecoderByType
      * or createEncoderByType, what component is chosen is not known beforehand,
      * and thus the caller does not have the MediaCodecInfo.
