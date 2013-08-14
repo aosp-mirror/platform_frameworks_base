@@ -58,6 +58,11 @@
     <!-- Title for the temporary dialog show while an app is generating a print job. [CHAR LIMIT=30] -->
     <string name="generating_print_job">Generating print job</string>
 
+    <!-- Choose printer activity -->
+
+    <!-- Title for the share action bar menu item. [CHAR LIMIT=20] -->
+    <string name="search">Search</string>
+
     <!-- Notifications -->
 
     <!-- Template for the notificaiton label for a printing print job. [CHAR LIMIT=25] -->
