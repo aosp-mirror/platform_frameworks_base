@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"împiedicare comutare între aplicaţii"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Împiedică trecerea utilizatorului la o altă aplicaţie."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"obținere informații despre aplicația curentă"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Permite titularului să recupereze informații private despre aplicația și serviciile curente în prim-planul ecranului."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Permite titularului să afișeze informații private despre aplicația și serviciile curente în prim-planul ecranului."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"monitorizare şi control asupra lansării tuturor aplicaţiilor"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Permite aplicaţiei să monitorizeze şi să controleze modul în care sistemul lansează activităţi. Aplicaţiile rău intenţionate pot să compromită sistemul în întregime. Această permisiune este necesară doar pentru dezvoltare şi niciodată pentru utilizarea normală."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"trimitere mesaj difuzat privind extragerea din pachet"</string>
@@ -1579,4 +1579,8 @@
     <item quantity="one" msgid="4835639969503729874">"PIN incorect. Reîncercați în 1 sec."</item>
     <item quantity="other" msgid="8030607343223287654">"PIN incorect. Reîncercați în <xliff:g id="COUNT">%d</xliff:g> sec."</item>
   </plurals>
+    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
+    <skip />
+    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
+    <skip />
 </resources>

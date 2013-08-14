@@ -1579,4 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"Feil PIN-kode. Prøv på nytt om 1 sekund."</item>
     <item quantity="other" msgid="8030607343223287654">"Feil PIN-kode. Prøv på nytt om <xliff:g id="COUNT">%d</xliff:g> sekunder."</item>
   </plurals>
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Sveip på kanten av skjermen for å få frem feltet"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Sveip fra kanten på skjermen for å få frem systemfeltet"</string>
 </resources>

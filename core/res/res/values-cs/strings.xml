@@ -1579,4 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"Nesprávný kód PIN. Zkuste to znovu za jednu sekundu."</item>
     <item quantity="other" msgid="8030607343223287654">"Nesprávný kód PIN. Zkuste to znovu za <xliff:g id="COUNT">%d</xliff:g> s."</item>
   </plurals>
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Panel zobrazíte přejetím kraje obr."</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Systémový panel zobrazíte přejetím přes okraj obrazovky"</string>
 </resources>

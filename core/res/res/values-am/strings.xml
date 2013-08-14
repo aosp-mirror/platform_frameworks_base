@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"የትግበራ መቀያየርን ተከላከል"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"ተጠቃሚው ከሌላ መተግበሪያ ከመቀየር ይከላከላል።"</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"የአሁኑ የመተግበሪያ መረጃ ያግኙ"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"ያዢው በማያ ገጹ ፊት ላይ ስላለው የአሁኑ መተግበሪያ የግል መረጃ እንዲያመጣ ያስችለዋል።"</string>
+    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"ያዢው በአሁኑ መተግበሪያ እና በማያ ገጹ ፊት ላይ ስላሉ መተግበሪያዎች የግል መረጃ እንዲያመጣ ያስችለዋል።"</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"ሁሉንም መተግበሪያ ማስነሻ አሳይ እና ተቆጣጠር"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"እንቅስቃሴዎችን ስርዓቱ እንዴት እንደሚያስጀምር ለመከታተል እና ለመቆጣጠር ለመተግበሪያው ይፈቅዳሉ፡፡ ተንኮል አዘል መተግበሪያዎች የስርዓቱን ክብረ ገመና ሙሉለሙሉ ሊያጋልጡ ይችላሉ፡፡ ይህ ፍቃድ የሚያስፈልገው ለግንባታ ብቻ ነው፤ ለመደበኛ አጠቃቀም ፈጽሞ አይደለም፡፡"</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"አካታች የተወገደለት ስርጭት ላክ"</string>
@@ -1579,4 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"ትክክል ያልሆነ ፒን። በ1 ሰከንድ ውስጥ እንደገና ይሞክሩ።"</item>
     <item quantity="other" msgid="8030607343223287654">"ትክክል ያልሆነ ፒን። በ<xliff:g id="COUNT">%d</xliff:g> ሰከንዶች ውስጥ እንደገና ይሞክሩ።"</item>
   </plurals>
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"አሞሌውን ለማሳየት የማያ ገጹን ጠርዝ ላይ ያንሸራትቱ"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"አሞሌውን ለማሳየት ከማያ ገጹ ጠርዝ ጀምረው ያንሸራትቱ"</string>
 </resources>

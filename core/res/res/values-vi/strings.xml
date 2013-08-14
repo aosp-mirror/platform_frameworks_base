@@ -1579,4 +1579,8 @@
     <item quantity="one" msgid="4835639969503729874">"Mã PIN không đúng. Hãy thử lại sau 1 giây nữa."</item>
     <item quantity="other" msgid="8030607343223287654">"Mã PIN không đúng. Hãy thử lại sau <xliff:g id="COUNT">%d</xliff:g> giây nữa."</item>
   </plurals>
+    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
+    <skip />
+    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
+    <skip />
 </resources>

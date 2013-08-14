@@ -1579,4 +1579,8 @@
     <item quantity="one" msgid="4835639969503729874">"PIN erroné. Réessayez dans 1 seconde."</item>
     <item quantity="other" msgid="8030607343223287654">"PIN erroné. Réessayez dans <xliff:g id="COUNT">%d</xliff:g> secondes."</item>
   </plurals>
+    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
+    <skip />
+    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
+    <skip />
 </resources>

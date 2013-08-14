@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"防止切換應用程式"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"防止使用者切換到其他應用程式。"</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"取得目前的應用程式資訊"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"允許應用程式針對目前在螢幕前景運作的應用程式與服務擷取相關私人資訊。"</string>
+    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"允許應用程式擷取目前在螢幕前景運作的應用程式和服務的不公開資訊。"</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"監視及控制所有應用程式的啟動程序"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"允許應用程式監視和控制系統啟動活動的方式。請注意，惡意應用程式可能利用此功能破壞整個系統。這個權限只有開發人員才需要，一般使用者不需使用這個權限。"</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"傳送程式已移除廣播"</string>
@@ -1579,4 +1579,8 @@
     <item quantity="one" msgid="4835639969503729874">"PIN 不正確，請於 1 秒後再試一次。"</item>
     <item quantity="other" msgid="8030607343223287654">"PIN 不正確，請於 <xliff:g id="COUNT">%d</xliff:g> 秒後再試一次。"</item>
   </plurals>
+    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
+    <skip />
+    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
+    <skip />
 </resources>

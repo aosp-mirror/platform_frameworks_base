@@ -1579,4 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"Verkeerde PIN. Probeer weer oor 1 sekonde."</item>
     <item quantity="other" msgid="8030607343223287654">"Verkeerde PIN. Probeer weer oor <xliff:g id="COUNT">%d</xliff:g> sekondes."</item>
   </plurals>
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Sleep rand van skerm om balk te wys"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Sleep van rand van skerm af om stelselbalk te wys"</string>
 </resources>
