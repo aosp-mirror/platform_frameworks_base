@@ -11582,6 +11582,18 @@ package android.location {
     field public static final int TEMPORARILY_UNAVAILABLE = 1; // 0x1
   }
 
+  public abstract class SettingInjectorService extends android.app.IntentService {
+    ctor public SettingInjectorService(java.lang.String);
+    method protected abstract android.location.SettingInjectorService.Status getStatus();
+    method protected final void onHandleIntent(android.content.Intent);
+  }
+
+  public static final class SettingInjectorService.Status {
+    ctor public SettingInjectorService.Status(java.lang.String, boolean);
+    field public final boolean enabled;
+    field public final java.lang.String summary;
+  }
+
 }
 
 package android.media {
