@@ -25,11 +25,6 @@ import android.os.Parcel;
 import android.util.Log;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -275,110 +270,11 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
             boolean sizeOnly) {
 
         MetadataMarshalClass<T> marshaler = getMarshaler(type, nativeType);
-        if (marshaler != null) {
-            return marshaler.marshal(value, buffer, nativeType, sizeOnly);
+        if (marshaler == null) {
+            throw new IllegalArgumentException(String.format("Unknown Key type: %s", type));
         }
 
-        /**
-         * FIXME: This doesn't actually work because getFields() returns fields in an unordered
-         * manner. Although we could sort and get the data to come out correctly on the *java* side,
-         * it would not be data-compatible with our strict XML definitions.
-         *
-         * Rewrite this code to use Parcelables instead, they are most likely compatible with
-         * what we are trying to do in general.
-         */
-        List<Field> instanceFields = findInstanceFields(type);
-        if (instanceFields.size() == 0) {
-            throw new UnsupportedOperationException("Class has no instance fields: " + type);
-        }
-
-        int fieldCount = instanceFields.size();
-        int bufferSize = 0;
-
-        HashSet<Class<?>> fieldTypes = new HashSet<Class<?>>();
-        for (Field f : instanceFields) {
-            fieldTypes.add(f.getType());
-        }
-
-        /**
-         * Pack arguments one field at a time. If we can't access field, look for its accessor
-         * method instead.
-         */
-        for (int i = 0; i < fieldCount; ++i) {
-            Object arg;
-
-            Field f = instanceFields.get(i);
-
-            if ((f.getModifiers() & Modifier.PUBLIC) != 0) {
-                try {
-                    arg = f.get(value);
-                } catch (IllegalAccessException e) {
-                    throw new UnsupportedOperationException(
-                            "Failed to access field " + f + " of type " + type, e);
-                } catch (IllegalArgumentException e) {
-                    throw new UnsupportedOperationException(
-                            "Illegal arguments when accessing field " + f + " of type " + type, e);
-                }
-            } else {
-                Method accessor = null;
-                // try to find a public accessor method
-                for(Method m : type.getMethods()) {
-                    Log.v(TAG, String.format("Looking for getter in method %s for field %s", m, f));
-
-                    // Must have 0 arguments
-                    if (m.getParameterTypes().length != 0) {
-                        continue;
-                    }
-
-                    // Return type must be same as field type
-                    if (m.getReturnType() != f.getType()) {
-                        continue;
-                    }
-
-                    // Strip 'm' from variable prefix if the next letter is capitalized
-                    String fieldName = f.getName();
-                    char[] nameChars = f.getName().toCharArray();
-                    if (nameChars.length >= 2 && nameChars[0] == 'm'
-                            && Character.isUpperCase(nameChars[1])) {
-                        fieldName = String.valueOf(nameChars, /*start*/1, nameChars.length - 1);
-                    }
-
-                    Log.v(TAG, String.format("Normalized field name: %s", fieldName));
-
-                    // #getFoo() , getfoo(), foo(), all match.
-                    if (m.getName().toLowerCase().equals(fieldName.toLowerCase()) ||
-                            m.getName().toLowerCase().equals("get" + fieldName.toLowerCase())) {
-                        accessor = m;
-                        break;
-                    }
-                }
-
-                if (accessor == null) {
-                    throw new UnsupportedOperationException(
-                            "Failed to find getter method for field " + f + " in type " + type);
-                }
-
-                try {
-                    arg = accessor.invoke(value);
-                } catch (IllegalAccessException e) {
-                    // Impossible
-                    throw new UnsupportedOperationException("Failed to access method + " + accessor
-                            + " in type " + type, e);
-                } catch (IllegalArgumentException e) {
-                    // Impossible
-                    throw new UnsupportedOperationException("Bad arguments for method + " + accessor
-                            + " in type " + type, e);
-                } catch (InvocationTargetException e) {
-                    // Possibly but extremely unlikely
-                    throw new UnsupportedOperationException("Failed to invoke method + " + accessor
-                            + " in type " + type, e);
-                }
-            }
-
-            bufferSize += packSingle(arg, buffer, (Class<Object>)f.getType(), nativeType, sizeOnly);
-        }
-
-        return bufferSize;
+        return marshaler.marshal(value, buffer, nativeType, sizeOnly);
     }
 
     private static <T> int packArray(T value, ByteBuffer buffer, Class<T> type, int nativeType,
@@ -442,30 +338,6 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
         return val;
     }
 
-    private static <T> List<Field> findInstanceFields(Class<T> type) {
-        List<Field> fields = new ArrayList<Field>();
-
-        for (Field f : type.getDeclaredFields()) {
-            if (f.isSynthetic()) {
-                throw new UnsupportedOperationException(
-                        "Marshalling synthetic fields not supported in type " + type);
-            }
-
-            // Skip static fields
-            int modifiers = f.getModifiers();
-            if ((modifiers & Modifier.STATIC) == 0) {
-                fields.add(f);
-            }
-
-            Log.v(TAG, String.format("Field %s has modifiers %d", f, modifiers));
-        }
-
-        if (type.getDeclaredFields().length == 0) {
-            Log.w(TAG, String.format("Type %s had 0 fields of any kind", type));
-        }
-        return fields;
-    }
-
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static <T> T unpackSingle(ByteBuffer buffer, Class<T> type, int nativeType) {
 
@@ -486,84 +358,6 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
         return instance;
     }
 
-    private static <T> Constructor<T> findApplicableConstructor(Class<T> type) {
-
-        List<Field> instanceFields = findInstanceFields(type);
-        if (instanceFields.size() == 0) {
-            throw new UnsupportedOperationException("Class has no instance fields: " + type);
-        }
-
-        Constructor<T> constructor = null;
-        int fieldCount = instanceFields.size();
-
-        HashSet<Class<?>> fieldTypes = new HashSet<Class<?>>();
-        for (Field f : instanceFields) {
-            fieldTypes.add(f.getType());
-        }
-
-        /**
-         * Find which constructor to use:
-         * - must be public
-         * - same amount of arguments as there are instance fields
-         * - each argument is same type as each field (in any order)
-         */
-        @SuppressWarnings("unchecked")
-        Constructor<T>[] constructors = (Constructor<T>[]) type.getConstructors();
-        for (Constructor<T> ctor : constructors) {
-            Log.v(TAG, String.format("Inspecting constructor '%s'", ctor));
-
-            Class<?>[] parameterTypes = ctor.getParameterTypes();
-            if (parameterTypes.length == fieldCount) {
-                boolean match = true;
-
-                HashSet<Class<?>> argTypes = new HashSet<Class<?>>();
-                for (Class<?> t : parameterTypes) {
-                    argTypes.add(t);
-                }
-
-                // Order does not matter
-                match = argTypes.equals(fieldTypes);
-
-                /*
-                // check if the types are the same
-                for (int i = 0; i < fieldCount; ++i) {
-                    if (parameterTypes[i] != instanceFields.get(i).getType()) {
-
-                        Log.v(TAG, String.format(
-                                "Constructor arg (%d) type %s did not match field type %s", i,
-                                parameterTypes[i], instanceFields.get(i).getType()));
-
-                        match = false;
-                        break;
-                    }
-                }
-                */
-
-                if (match) {
-                    constructor = ctor;
-                    break;
-                } else {
-                    Log.w(TAG, String.format("Constructor args did not have matching types"));
-                }
-            } else {
-                Log.v(TAG, String.format(
-                        "Constructor did not have expected amount of fields (had %d, expected %d)",
-                        parameterTypes.length, fieldCount));
-            }
-        }
-
-        if (constructors.length == 0) {
-            Log.w(TAG, String.format("Type %s had no public constructors", type));
-        }
-
-        if (constructor == null) {
-            throw new UnsupportedOperationException(
-                    "Failed to find any applicable constructors for type " + type);
-        }
-
-        return constructor;
-    }
-
     private static <T extends Enum<T>> T unpackEnum(ByteBuffer buffer, Class<T> type,
             int nativeType) {
         int ordinal = unpackSingleNative(buffer, Integer.TYPE, nativeType);
@@ -573,55 +367,11 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
     private static <T> T unpackClass(ByteBuffer buffer, Class<T> type, int nativeType) {
 
         MetadataMarshalClass<T> marshaler = getMarshaler(type, nativeType);
-        if (marshaler != null) {
-            return marshaler.unmarshal(buffer, nativeType);
+        if (marshaler == null) {
+            throw new IllegalArgumentException("Unknown class type: " + type);
         }
 
-        /**
-         * FIXME: This doesn't actually work because getFields() returns fields in an unordered
-         * manner. Although we could sort and get the data to come out correctly on the *java* side,
-         * it would not be data-compatible with our strict XML definitions.
-         *
-         * Rewrite this code to use Parcelables instead, they are most likely compatible with
-         * what we are trying to do in general.
-         */
-
-        List<Field> instanceFields = findInstanceFields(type);
-        if (instanceFields.size() == 0) {
-            throw new UnsupportedOperationException("Class has no instance fields: " + type);
-        }
-        int fieldCount = instanceFields.size();
-
-        Constructor<T> constructor = findApplicableConstructor(type);
-
-        /**
-         * Build the arguments by unpacking one field at a time
-         * (note that while the field type might be different, the native type is the same)
-         */
-        Object[] arguments = new Object[fieldCount];
-        for (int i = 0; i < fieldCount; ++i) {
-            Object o = unpackSingle(buffer, instanceFields.get(i).getType(), nativeType);
-            arguments[i] = o;
-        }
-
-        T instance;
-        try {
-            instance = constructor.newInstance(arguments);
-        } catch (InstantiationException e) {
-            // type is abstract class, interface, etc...
-            throw new UnsupportedOperationException("Failed to instantiate type " + type, e);
-        } catch (IllegalAccessException e) {
-            // This could happen if we have to access a private.
-            throw new UnsupportedOperationException("Failed to access type " + type, e);
-        } catch (IllegalArgumentException e) {
-            throw new UnsupportedOperationException("Illegal arguments for constructor of type "
-                    + type, e);
-        } catch (InvocationTargetException e) {
-            throw new UnsupportedOperationException(
-                    "Underlying constructor threw exception for type " + type, e);
-        }
-
-        return instance;
+        return marshaler.unmarshal(buffer, nativeType);
     }
 
     @SuppressWarnings("unchecked")
@@ -1011,4 +761,1025 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
 
         Log.v(TAG, "Registered metadata marshalers");
     }
+
+    /*@O~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
+     * The enum values below this point are generated from metadata
+     * definitions in /system/media/camera/docs. Do not modify by hand or
+     * modify the comment blocks at the start or end.
+     *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~*/
+
+    //
+    // Enumeration values for CameraProperties#LENS_FACING
+    //
+
+    /**
+     * @see CameraProperties#LENS_FACING
+     */
+    public static final int LENS_FACING_FRONT = 0;
+
+    /**
+     * @see CameraProperties#LENS_FACING
+     */
+    public static final int LENS_FACING_BACK = 1;
+
+    //
+    // Enumeration values for CameraProperties#LED_AVAILABLE_LEDS
+    //
+
+    /**
+     * <p>
+     * android.led.transmit control is used
+     * </p>
+     * @see CameraProperties#LED_AVAILABLE_LEDS
+     * @hide
+     */
+    public static final int LED_AVAILABLE_LEDS_TRANSMIT = 0;
+
+    //
+    // Enumeration values for CameraProperties#INFO_SUPPORTED_HARDWARE_LEVEL
+    //
+
+    /**
+     * @see CameraProperties#INFO_SUPPORTED_HARDWARE_LEVEL
+     */
+    public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED = 0;
+
+    /**
+     * @see CameraProperties#INFO_SUPPORTED_HARDWARE_LEVEL
+     */
+    public static final int INFO_SUPPORTED_HARDWARE_LEVEL_FULL = 1;
+
+    //
+    // Enumeration values for CaptureRequest#COLOR_CORRECTION_MODE
+    //
+
+    /**
+     * <p>
+     * Use the android.colorCorrection.transform matrix
+     * and android.colorCorrection.gains to do color conversion
+     * </p>
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     */
+    public static final int COLOR_CORRECTION_MODE_TRANSFORM_MATRIX = 0;
+
+    /**
+     * <p>
+     * Must not slow down frame rate relative to raw
+     * bayer output
+     * </p>
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     */
+    public static final int COLOR_CORRECTION_MODE_FAST = 1;
+
+    /**
+     * <p>
+     * Frame rate may be reduced by high
+     * quality
+     * </p>
+     * @see CaptureRequest#COLOR_CORRECTION_MODE
+     */
+    public static final int COLOR_CORRECTION_MODE_HIGH_QUALITY = 2;
+
+    //
+    // Enumeration values for CaptureRequest#CONTROL_AE_ANTIBANDING_MODE
+    //
+
+    /**
+     * @see CaptureRequest#CONTROL_AE_ANTIBANDING_MODE
+     */
+    public static final int CONTROL_AE_ANTIBANDING_MODE_OFF = 0;
+
+    /**
+     * @see CaptureRequest#CONTROL_AE_ANTIBANDING_MODE
+     */
+    public static final int CONTROL_AE_ANTIBANDING_MODE_50HZ = 1;
+
+    /**
+     * @see CaptureRequest#CONTROL_AE_ANTIBANDING_MODE
+     */
+    public static final int CONTROL_AE_ANTIBANDING_MODE_60HZ = 2;
+
+    /**
+     * @see CaptureRequest#CONTROL_AE_ANTIBANDING_MODE
+     */
+    public static final int CONTROL_AE_ANTIBANDING_MODE_AUTO = 3;
+
+    //
+    // Enumeration values for CaptureRequest#CONTROL_AE_MODE
+    //
+
+    /**
+     * <p>
+     * Autoexposure is disabled; sensor.exposureTime,
+     * sensor.sensitivity and sensor.frameDuration are used
+     * </p>
+     * @see CaptureRequest#CONTROL_AE_MODE
+     */
+    public static final int CONTROL_AE_MODE_OFF = 0;
+
+    /**
+     * <p>
+     * Autoexposure is active, no flash
+     * control
+     * </p>
+     * @see CaptureRequest#CONTROL_AE_MODE
+     */
+    public static final int CONTROL_AE_MODE_ON = 1;
+
+    /**
+     * <p>
+     * if flash exists Autoexposure is active, auto
+     * flash control; flash may be fired when precapture
+     * trigger is activated, and for captures for which
+     * captureIntent = STILL_CAPTURE
+     * </p>
+     * @see CaptureRequest#CONTROL_AE_MODE
+     */
+    public static final int CONTROL_AE_MODE_ON_AUTO_FLASH = 2;
+
+    /**
+     * <p>
+     * if flash exists Autoexposure is active, auto
+     * flash control for precapture trigger and always flash
+     * when captureIntent = STILL_CAPTURE
+     * </p>
+     * @see CaptureRequest#CONTROL_AE_MODE
+     */
+    public static final int CONTROL_AE_MODE_ON_ALWAYS_FLASH = 3;
+
+    /**
+     * <p>
+     * optional Automatic red eye reduction with flash.
+     * If deemed necessary, red eye reduction sequence should
+     * fire when precapture trigger is activated, and final
+     * flash should fire when captureIntent =
+     * STILL_CAPTURE
+     * </p>
+     * @see CaptureRequest#CONTROL_AE_MODE
+     */
+    public static final int CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE = 4;
+
+    //
+    // Enumeration values for CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+    //
+
+    /**
+     * <p>
+     * The trigger is idle.
+     * </p>
+     * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     */
+    public static final int CONTROL_AE_PRECAPTURE_TRIGGER_IDLE = 0;
+
+    /**
+     * <p>
+     * The precapture metering sequence
+     * must be started. The exact effect of the precapture
+     * trigger depends on the current AE mode and
+     * state.
+     * </p>
+     * @see CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
+     */
+    public static final int CONTROL_AE_PRECAPTURE_TRIGGER_START = 1;
+
+    //
+    // Enumeration values for CaptureRequest#CONTROL_AF_MODE
+    //
+
+    /**
+     * <p>
+     * The 3A routines do not control the lens;
+     * android.lens.focusDistance is controlled by the
+     * application
+     * </p>
+     * @see CaptureRequest#CONTROL_AF_MODE
+     */
+    public static final int CONTROL_AF_MODE_OFF = 0;
+
+    /**
+     * <p>
+     * if lens is not fixed focus.
+     * </p><p>
+     * Use android.lens.minimumFocusDistance to determine if lens
+     * is fixed focus In this mode, the lens does not move unless
+     * the autofocus trigger action is called. When that trigger
+     * is activated, AF must transition to ACTIVE_SCAN, then to
+     * the outcome of the scan (FOCUSED or
+     * NOT_FOCUSED).
+     * </p><p>
+     * Triggering cancel AF resets the lens position to default,
+     * and sets the AF state to INACTIVE.
+     * </p>
+     * @see CaptureRequest#CONTROL_AF_MODE
+     */
+    public static final int CONTROL_AF_MODE_AUTO = 1;
+
+    /**
+     * <p>
+     * In this mode, the lens does not move unless the
+     * autofocus trigger action is called.
+     * </p><p>
+     * When that trigger is activated, AF must transition to
+     * ACTIVE_SCAN, then to the outcome of the scan (FOCUSED or
+     * NOT_FOCUSED).  Triggering cancel AF resets the lens
+     * position to default, and sets the AF state to
+     * INACTIVE.
+     * </p>
+     * @see CaptureRequest#CONTROL_AF_MODE
+     */
+    public static final int CONTROL_AF_MODE_MACRO = 2;
+
+    /**
+     * <p>
+     * In this mode, the AF algorithm modifies the lens
+     * position continually to attempt to provide a
+     * constantly-in-focus image stream.
+     * </p><p>
+     * The focusing behavior should be suitable for good quality
+     * video recording; typically this means slower focus
+     * movement and no overshoots. When the AF trigger is not
+     * involved, the AF algorithm should start in INACTIVE state,
+     * and then transition into PASSIVE_SCAN and PASSIVE_FOCUSED
+     * states as appropriate. When the AF trigger is activated,
+     * the algorithm should immediately transition into
+     * AF_FOCUSED or AF_NOT_FOCUSED as appropriate, and lock the
+     * lens position until a cancel AF trigger is received.
+     * </p><p>
+     * Once cancel is received, the algorithm should transition
+     * back to INACTIVE and resume passive scan. Note that this
+     * behavior is not identical to CONTINUOUS_PICTURE, since an
+     * ongoing PASSIVE_SCAN must immediately be
+     * canceled.
+     * </p>
+     * @see CaptureRequest#CONTROL_AF_MODE
+     */
+    public static final int CONTROL_AF_MODE_CONTINUOUS_VIDEO = 3;
+
+    /**
+     * <p>
+     * In this mode, the AF algorithm modifies the lens
+     * position continually to attempt to provide a
+     * constantly-in-focus image stream.
+     * </p><p>
+     * The focusing behavior should be suitable for still image
+     * capture; typically this means focusing as fast as
+     * possible. When the AF trigger is not involved, the AF
+     * algorithm should start in INACTIVE state, and then
+     * transition into PASSIVE_SCAN and PASSIVE_FOCUSED states as
+     * appropriate as it attempts to maintain focus. When the AF
+     * trigger is activated, the algorithm should finish its
+     * PASSIVE_SCAN if active, and then transition into
+     * AF_FOCUSED or AF_NOT_FOCUSED as appropriate, and lock the
+     * lens position until a cancel AF trigger is received.
+     * </p><p>
+     * When the AF cancel trigger is activated, the algorithm
+     * should transition back to INACTIVE and then act as if it
+     * has just been started.
+     * </p>
+     * @see CaptureRequest#CONTROL_AF_MODE
+     */
+    public static final int CONTROL_AF_MODE_CONTINUOUS_PICTURE = 4;
+
+    /**
+     * <p>
+     * Extended depth of field (digital focus). AF
+     * trigger is ignored, AF state should always be
+     * INACTIVE.
+     * </p>
+     * @see CaptureRequest#CONTROL_AF_MODE
+     */
+    public static final int CONTROL_AF_MODE_EDOF = 5;
+
+    //
+    // Enumeration values for CaptureRequest#CONTROL_AF_TRIGGER
+    //
+
+    /**
+     * <p>
+     * The trigger is idle.
+     * </p>
+     * @see CaptureRequest#CONTROL_AF_TRIGGER
+     */
+    public static final int CONTROL_AF_TRIGGER_IDLE = 0;
+
+    /**
+     * <p>
+     * Autofocus must trigger now.
+     * </p>
+     * @see CaptureRequest#CONTROL_AF_TRIGGER
+     */
+    public static final int CONTROL_AF_TRIGGER_START = 1;
+
+    /**
+     * <p>
+     * Autofocus must return to initial
+     * state, and cancel any active trigger.
+     * </p>
+     * @see CaptureRequest#CONTROL_AF_TRIGGER
+     */
+    public static final int CONTROL_AF_TRIGGER_CANCEL = 2;
+
+    //
+    // Enumeration values for CaptureRequest#CONTROL_AWB_MODE
+    //
+
+    /**
+     * @see CaptureRequest#CONTROL_AWB_MODE
+     */
+    public static final int CONTROL_AWB_MODE_OFF = 0;
+
+    /**
+     * @see CaptureRequest#CONTROL_AWB_MODE
+     */
+    public static final int CONTROL_AWB_MODE_AUTO = 1;
+
+    /**
+     * @see CaptureRequest#CONTROL_AWB_MODE
+     */
+    public static final int CONTROL_AWB_MODE_INCANDESCENT = 2;
+
+    /**
+     * @see CaptureRequest#CONTROL_AWB_MODE
+     */
+    public static final int CONTROL_AWB_MODE_FLUORESCENT = 3;
+
+    /**
+     * @see CaptureRequest#CONTROL_AWB_MODE
+     */
+    public static final int CONTROL_AWB_MODE_WARM_FLUORESCENT = 4;
+
+    /**
+     * @see CaptureRequest#CONTROL_AWB_MODE
+     */
+    public static final int CONTROL_AWB_MODE_DAYLIGHT = 5;
+
+    /**
+     * @see CaptureRequest#CONTROL_AWB_MODE
+     */
+    public static final int CONTROL_AWB_MODE_CLOUDY_DAYLIGHT = 6;
+
+    /**
+     * @see CaptureRequest#CONTROL_AWB_MODE
+     */
+    public static final int CONTROL_AWB_MODE_TWILIGHT = 7;
+
+    /**
+     * @see CaptureRequest#CONTROL_AWB_MODE
+     */
+    public static final int CONTROL_AWB_MODE_SHADE = 8;
+
+    //
+    // Enumeration values for CaptureRequest#CONTROL_CAPTURE_INTENT
+    //
+
+    /**
+     * <p>
+     * This request doesn't fall into the other
+     * categories. Default to preview-like
+     * behavior.
+     * </p>
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
+     */
+    public static final int CONTROL_CAPTURE_INTENT_CUSTOM = 0;
+
+    /**
+     * <p>
+     * This request is for a preview-like usecase. The
+     * precapture trigger may be used to start off a metering
+     * w/flash sequence
+     * </p>
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
+     */
+    public static final int CONTROL_CAPTURE_INTENT_PREVIEW = 1;
+
+    /**
+     * <p>
+     * This request is for a still capture-type
+     * usecase.
+     * </p>
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
+     */
+    public static final int CONTROL_CAPTURE_INTENT_STILL_CAPTURE = 2;
+
+    /**
+     * <p>
+     * This request is for a video recording
+     * usecase.
+     * </p>
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
+     */
+    public static final int CONTROL_CAPTURE_INTENT_VIDEO_RECORD = 3;
+
+    /**
+     * <p>
+     * This request is for a video snapshot (still
+     * image while recording video) usecase
+     * </p>
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
+     */
+    public static final int CONTROL_CAPTURE_INTENT_VIDEO_SNAPSHOT = 4;
+
+    /**
+     * <p>
+     * This request is for a ZSL usecase; the
+     * application will stream full-resolution images and
+     * reprocess one or several later for a final
+     * capture
+     * </p>
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
+     */
+    public static final int CONTROL_CAPTURE_INTENT_ZERO_SHUTTER_LAG = 5;
+
+    //
+    // Enumeration values for CaptureRequest#CONTROL_EFFECT_MODE
+    //
+
+    /**
+     * @see CaptureRequest#CONTROL_EFFECT_MODE
+     */
+    public static final int CONTROL_EFFECT_MODE_OFF = 0;
+
+    /**
+     * @see CaptureRequest#CONTROL_EFFECT_MODE
+     */
+    public static final int CONTROL_EFFECT_MODE_MONO = 1;
+
+    /**
+     * @see CaptureRequest#CONTROL_EFFECT_MODE
+     */
+    public static final int CONTROL_EFFECT_MODE_NEGATIVE = 2;
+
+    /**
+     * @see CaptureRequest#CONTROL_EFFECT_MODE
+     */
+    public static final int CONTROL_EFFECT_MODE_SOLARIZE = 3;
+
+    /**
+     * @see CaptureRequest#CONTROL_EFFECT_MODE
+     */
+    public static final int CONTROL_EFFECT_MODE_SEPIA = 4;
+
+    /**
+     * @see CaptureRequest#CONTROL_EFFECT_MODE
+     */
+    public static final int CONTROL_EFFECT_MODE_POSTERIZE = 5;
+
+    /**
+     * @see CaptureRequest#CONTROL_EFFECT_MODE
+     */
+    public static final int CONTROL_EFFECT_MODE_WHITEBOARD = 6;
+
+    /**
+     * @see CaptureRequest#CONTROL_EFFECT_MODE
+     */
+    public static final int CONTROL_EFFECT_MODE_BLACKBOARD = 7;
+
+    /**
+     * @see CaptureRequest#CONTROL_EFFECT_MODE
+     */
+    public static final int CONTROL_EFFECT_MODE_AQUA = 8;
+
+    //
+    // Enumeration values for CaptureRequest#CONTROL_MODE
+    //
+
+    /**
+     * <p>
+     * Full application control of pipeline. All 3A
+     * routines are disabled, no other settings in
+     * android.control.* have any effect
+     * </p>
+     * @see CaptureRequest#CONTROL_MODE
+     */
+    public static final int CONTROL_MODE_OFF = 0;
+
+    /**
+     * <p>
+     * Use settings for each individual 3A routine.
+     * Manual control of capture parameters is disabled. All
+     * controls in android.control.* besides sceneMode take
+     * effect
+     * </p>
+     * @see CaptureRequest#CONTROL_MODE
+     */
+    public static final int CONTROL_MODE_AUTO = 1;
+
+    /**
+     * <p>
+     * Use specific scene mode. Enabling this disables
+     * control.aeMode, control.awbMode and control.afMode
+     * controls; the HAL must ignore those settings while
+     * USE_SCENE_MODE is active (except for FACE_PRIORITY
+     * scene mode). Other control entries are still active.
+     * This setting can only be used if availableSceneModes !=
+     * UNSUPPORTED
+     * </p>
+     * @see CaptureRequest#CONTROL_MODE
+     */
+    public static final int CONTROL_MODE_USE_SCENE_MODE = 2;
+
+    //
+    // Enumeration values for CaptureRequest#CONTROL_SCENE_MODE
+    //
+
+    /**
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     */
+    public static final int CONTROL_SCENE_MODE_UNSUPPORTED = 0;
+
+    /**
+     * <p>
+     * if face detection support exists Use face
+     * detection data to drive 3A routines. If face detection
+     * statistics are disabled, should still operate correctly
+     * (but not return face detection statistics to the
+     * framework).
+     * </p><p>
+     * Unlike the other scene modes, aeMode, awbMode, and afMode
+     * remain active when FACE_PRIORITY is set. This is due to
+     * compatibility concerns with the old camera
+     * API
+     * </p>
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     */
+    public static final int CONTROL_SCENE_MODE_FACE_PRIORITY = 1;
+
+    /**
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     */
+    public static final int CONTROL_SCENE_MODE_ACTION = 2;
+
+    /**
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     */
+    public static final int CONTROL_SCENE_MODE_PORTRAIT = 3;
+
+    /**
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     */
+    public static final int CONTROL_SCENE_MODE_LANDSCAPE = 4;
+
+    /**
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     */
+    public static final int CONTROL_SCENE_MODE_NIGHT = 5;
+
+    /**
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     */
+    public static final int CONTROL_SCENE_MODE_NIGHT_PORTRAIT = 6;
+
+    /**
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     */
+    public static final int CONTROL_SCENE_MODE_THEATRE = 7;
+
+    /**
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     */
+    public static final int CONTROL_SCENE_MODE_BEACH = 8;
+
+    /**
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     */
+    public static final int CONTROL_SCENE_MODE_SNOW = 9;
+
+    /**
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     */
+    public static final int CONTROL_SCENE_MODE_SUNSET = 10;
+
+    /**
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     */
+    public static final int CONTROL_SCENE_MODE_STEADYPHOTO = 11;
+
+    /**
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     */
+    public static final int CONTROL_SCENE_MODE_FIREWORKS = 12;
+
+    /**
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     */
+    public static final int CONTROL_SCENE_MODE_SPORTS = 13;
+
+    /**
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     */
+    public static final int CONTROL_SCENE_MODE_PARTY = 14;
+
+    /**
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     */
+    public static final int CONTROL_SCENE_MODE_CANDLELIGHT = 15;
+
+    /**
+     * @see CaptureRequest#CONTROL_SCENE_MODE
+     */
+    public static final int CONTROL_SCENE_MODE_BARCODE = 16;
+
+    //
+    // Enumeration values for CaptureRequest#EDGE_MODE
+    //
+
+    /**
+     * <p>
+     * No edge enhancement is applied
+     * </p>
+     * @see CaptureRequest#EDGE_MODE
+     */
+    public static final int EDGE_MODE_OFF = 0;
+
+    /**
+     * <p>
+     * Must not slow down frame rate relative to raw
+     * bayer output
+     * </p>
+     * @see CaptureRequest#EDGE_MODE
+     */
+    public static final int EDGE_MODE_FAST = 1;
+
+    /**
+     * <p>
+     * Frame rate may be reduced by high
+     * quality
+     * </p>
+     * @see CaptureRequest#EDGE_MODE
+     */
+    public static final int EDGE_MODE_HIGH_QUALITY = 2;
+
+    //
+    // Enumeration values for CaptureRequest#FLASH_MODE
+    //
+
+    /**
+     * <p>
+     * Do not fire the flash for this
+     * capture
+     * </p>
+     * @see CaptureRequest#FLASH_MODE
+     */
+    public static final int FLASH_MODE_OFF = 0;
+
+    /**
+     * <p>
+     * if android.flash.available is true Fire flash
+     * for this capture based on firingPower,
+     * firingTime.
+     * </p>
+     * @see CaptureRequest#FLASH_MODE
+     */
+    public static final int FLASH_MODE_SINGLE = 1;
+
+    /**
+     * <p>
+     * if android.flash.available is true Flash
+     * continuously on, power set by
+     * firingPower
+     * </p>
+     * @see CaptureRequest#FLASH_MODE
+     */
+    public static final int FLASH_MODE_TORCH = 2;
+
+    //
+    // Enumeration values for CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
+    //
+
+    /**
+     * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
+     */
+    public static final int LENS_OPTICAL_STABILIZATION_MODE_OFF = 0;
+
+    /**
+     * @see CaptureRequest#LENS_OPTICAL_STABILIZATION_MODE
+     */
+    public static final int LENS_OPTICAL_STABILIZATION_MODE_ON = 1;
+
+    //
+    // Enumeration values for CaptureRequest#NOISE_REDUCTION_MODE
+    //
+
+    /**
+     * <p>
+     * No noise reduction is applied
+     * </p>
+     * @see CaptureRequest#NOISE_REDUCTION_MODE
+     */
+    public static final int NOISE_REDUCTION_MODE_OFF = 0;
+
+    /**
+     * <p>
+     * Must not slow down frame rate relative to raw
+     * bayer output
+     * </p>
+     * @see CaptureRequest#NOISE_REDUCTION_MODE
+     */
+    public static final int NOISE_REDUCTION_MODE_FAST = 1;
+
+    /**
+     * <p>
+     * May slow down frame rate to provide highest
+     * quality
+     * </p>
+     * @see CaptureRequest#NOISE_REDUCTION_MODE
+     */
+    public static final int NOISE_REDUCTION_MODE_HIGH_QUALITY = 2;
+
+    //
+    // Enumeration values for CaptureRequest#STATISTICS_FACE_DETECT_MODE
+    //
+
+    /**
+     * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
+     */
+    public static final int STATISTICS_FACE_DETECT_MODE_OFF = 0;
+
+    /**
+     * <p>
+     * Optional Return rectangle and confidence
+     * only
+     * </p>
+     * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
+     */
+    public static final int STATISTICS_FACE_DETECT_MODE_SIMPLE = 1;
+
+    /**
+     * <p>
+     * Optional Return all face
+     * metadata
+     * </p>
+     * @see CaptureRequest#STATISTICS_FACE_DETECT_MODE
+     */
+    public static final int STATISTICS_FACE_DETECT_MODE_FULL = 2;
+
+    //
+    // Enumeration values for CaptureRequest#TONEMAP_MODE
+    //
+
+    /**
+     * <p>
+     * Use the tone mapping curve specified in
+     * android.tonemap.curve
+     * </p>
+     * @see CaptureRequest#TONEMAP_MODE
+     */
+    public static final int TONEMAP_MODE_CONTRAST_CURVE = 0;
+
+    /**
+     * <p>
+     * Must not slow down frame rate relative to raw
+     * bayer output
+     * </p>
+     * @see CaptureRequest#TONEMAP_MODE
+     */
+    public static final int TONEMAP_MODE_FAST = 1;
+
+    /**
+     * <p>
+     * Frame rate may be reduced by high
+     * quality
+     * </p>
+     * @see CaptureRequest#TONEMAP_MODE
+     */
+    public static final int TONEMAP_MODE_HIGH_QUALITY = 2;
+
+    //
+    // Enumeration values for CaptureResult#CONTROL_AE_STATE
+    //
+
+    /**
+     * <p>
+     * AE is off.  When a camera device is opened, it starts in
+     * this state.
+     * </p>
+     * @see CaptureResult#CONTROL_AE_STATE
+     */
+    public static final int CONTROL_AE_STATE_INACTIVE = 0;
+
+    /**
+     * <p>
+     * AE doesn't yet have a good set of control values
+     * for the current scene
+     * </p>
+     * @see CaptureResult#CONTROL_AE_STATE
+     */
+    public static final int CONTROL_AE_STATE_SEARCHING = 1;
+
+    /**
+     * <p>
+     * AE has a good set of control values for the
+     * current scene
+     * </p>
+     * @see CaptureResult#CONTROL_AE_STATE
+     */
+    public static final int CONTROL_AE_STATE_CONVERGED = 2;
+
+    /**
+     * <p>
+     * AE has been locked (aeMode =
+     * LOCKED)
+     * </p>
+     * @see CaptureResult#CONTROL_AE_STATE
+     */
+    public static final int CONTROL_AE_STATE_LOCKED = 3;
+
+    /**
+     * <p>
+     * AE has a good set of control values, but flash
+     * needs to be fired for good quality still
+     * capture
+     * </p>
+     * @see CaptureResult#CONTROL_AE_STATE
+     */
+    public static final int CONTROL_AE_STATE_FLASH_REQUIRED = 4;
+
+    /**
+     * <p>
+     * AE has been asked to do a precapture sequence
+     * (through the
+     * trigger_action(CAMERA2_TRIGGER_PRECAPTURE_METERING)
+     * call), and is currently executing it. Once PRECAPTURE
+     * completes, AE will transition to CONVERGED or
+     * FLASH_REQUIRED as appropriate
+     * </p>
+     * @see CaptureResult#CONTROL_AE_STATE
+     */
+    public static final int CONTROL_AE_STATE_PRECAPTURE = 5;
+
+    //
+    // Enumeration values for CaptureResult#CONTROL_AF_STATE
+    //
+
+    /**
+     * <p>
+     * AF off or has not yet tried to scan/been asked
+     * to scan.  When a camera device is opened, it starts in
+     * this state.
+     * </p>
+     * @see CaptureResult#CONTROL_AF_STATE
+     */
+    public static final int CONTROL_AF_STATE_INACTIVE = 0;
+
+    /**
+     * <p>
+     * if CONTINUOUS_* modes are supported AF is
+     * currently doing an AF scan initiated by a continuous
+     * autofocus mode
+     * </p>
+     * @see CaptureResult#CONTROL_AF_STATE
+     */
+    public static final int CONTROL_AF_STATE_PASSIVE_SCAN = 1;
+
+    /**
+     * <p>
+     * if CONTINUOUS_* modes are supported AF currently
+     * believes it is in focus, but may restart scanning at
+     * any time.
+     * </p>
+     * @see CaptureResult#CONTROL_AF_STATE
+     */
+    public static final int CONTROL_AF_STATE_PASSIVE_FOCUSED = 2;
+
+    /**
+     * <p>
+     * if AUTO or MACRO modes are supported AF is doing
+     * an AF scan because it was triggered by AF
+     * trigger
+     * </p>
+     * @see CaptureResult#CONTROL_AF_STATE
+     */
+    public static final int CONTROL_AF_STATE_ACTIVE_SCAN = 3;
+
+    /**
+     * <p>
+     * if any AF mode besides OFF is supported AF
+     * believes it is focused correctly and is
+     * locked
+     * </p>
+     * @see CaptureResult#CONTROL_AF_STATE
+     */
+    public static final int CONTROL_AF_STATE_FOCUSED_LOCKED = 4;
+
+    /**
+     * <p>
+     * if any AF mode besides OFF is supported AF has
+     * failed to focus successfully and is
+     * locked
+     * </p>
+     * @see CaptureResult#CONTROL_AF_STATE
+     */
+    public static final int CONTROL_AF_STATE_NOT_FOCUSED_LOCKED = 5;
+
+    //
+    // Enumeration values for CaptureResult#CONTROL_AWB_STATE
+    //
+
+    /**
+     * <p>
+     * AWB is not in auto mode.  When a camera device is opened, it
+     * starts in this state.
+     * </p>
+     * @see CaptureResult#CONTROL_AWB_STATE
+     */
+    public static final int CONTROL_AWB_STATE_INACTIVE = 0;
+
+    /**
+     * <p>
+     * AWB doesn't yet have a good set of control
+     * values for the current scene
+     * </p>
+     * @see CaptureResult#CONTROL_AWB_STATE
+     */
+    public static final int CONTROL_AWB_STATE_SEARCHING = 1;
+
+    /**
+     * <p>
+     * AWB has a good set of control values for the
+     * current scene
+     * </p>
+     * @see CaptureResult#CONTROL_AWB_STATE
+     */
+    public static final int CONTROL_AWB_STATE_CONVERGED = 2;
+
+    /**
+     * <p>
+     * AE has been locked (aeMode =
+     * LOCKED)
+     * </p>
+     * @see CaptureResult#CONTROL_AWB_STATE
+     */
+    public static final int CONTROL_AWB_STATE_LOCKED = 3;
+
+    //
+    // Enumeration values for CaptureResult#FLASH_STATE
+    //
+
+    /**
+     * <p>
+     * No flash on camera
+     * </p>
+     * @see CaptureResult#FLASH_STATE
+     */
+    public static final int FLASH_STATE_UNAVAILABLE = 0;
+
+    /**
+     * <p>
+     * if android.flash.available is true Flash is
+     * charging and cannot be fired
+     * </p>
+     * @see CaptureResult#FLASH_STATE
+     */
+    public static final int FLASH_STATE_CHARGING = 1;
+
+    /**
+     * <p>
+     * if android.flash.available is true Flash is
+     * ready to fire
+     * </p>
+     * @see CaptureResult#FLASH_STATE
+     */
+    public static final int FLASH_STATE_READY = 2;
+
+    /**
+     * <p>
+     * if android.flash.available is true Flash fired
+     * for this capture
+     * </p>
+     * @see CaptureResult#FLASH_STATE
+     */
+    public static final int FLASH_STATE_FIRED = 3;
+
+    //
+    // Enumeration values for CaptureResult#LENS_STATE
+    //
+
+    /**
+     * @see CaptureResult#LENS_STATE
+     */
+    public static final int LENS_STATE_STATIONARY = 0;
+
+    //
+    // Enumeration values for CaptureResult#STATISTICS_SCENE_FLICKER
+    //
+
+    /**
+     * @see CaptureResult#STATISTICS_SCENE_FLICKER
+     */
+    public static final int STATISTICS_SCENE_FLICKER_NONE = 0;
+
+    /**
+     * @see CaptureResult#STATISTICS_SCENE_FLICKER
+     */
+    public static final int STATISTICS_SCENE_FLICKER_50HZ = 1;
+
+    /**
+     * @see CaptureResult#STATISTICS_SCENE_FLICKER
+     */
+    public static final int STATISTICS_SCENE_FLICKER_60HZ = 2;
+
+    /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
+     * End generated code
+     *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
+
 }

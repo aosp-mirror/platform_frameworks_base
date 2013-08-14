@@ -32,216 +32,466 @@ import java.util.List;
  * @see CameraManager
  */
 public final class CameraProperties extends CameraMetadata {
-    /**
-     * The model name of the camera. For fixed (non-removable) cameras, this is
-     * the manufacturer's name. For removable cameras, this is a string that
-     * uniquely identifies the camera model and manufacturer. The
-     * {@link #INFO_IDENTIFIER} can be used to distinguish between multiple
-     * removable cameras of the same model.
-     */
-    public static final Key<String> INFO_MODEL =
-            new Key<String>("android.info.model", String.class);
+
+    /*@O~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
+     * The key entries below this point are generated from metadata
+     * definitions in /system/media/camera/docs. Do not modify by hand or
+     * modify the comment blocks at the start or end.
+     *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~*/
 
     /**
-     * A unique identifier for this camera. For removable cameras, every
-     * camera will have a unique identifier, including two cameras of the
-     * same model and manufacturer. For non-removable cameras, the
-     * identifier is equal to the the device's id.
+     * <p>
+     * Which set of antibanding modes are
+     * supported
+     * </p>
      */
-    public static final Key<String> INFO_IDENTIFIER =
-            new Key<String>("android.info.identifier", String.class);
+    public static final Key<byte[]> CONTROL_AE_AVAILABLE_ANTIBANDING_MODES =
+            new Key<byte[]>("android.control.aeAvailableAntibandingModes", byte[].class);
 
     /**
-     * <p>Whether this camera is removable or not.</p>
-     *
-     * <p>Applications using a removable camera must be prepared for the camera
-     * to be disconnected during use. Use the {@link #INFO_IDENTIFIER} field to
-     * determine if this camera is a match for a camera device seen earlier.</p>
+     * <p>
+     * List of frame rate ranges supported by the
+     * AE algorithm/hardware
+     * </p>
      */
-    public static final Key<Boolean> INFO_REMOVABLE =
-            new Key<Boolean>("android.info.isRemovable", Boolean.TYPE);
+    public static final Key<int[]> CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES =
+            new Key<int[]>("android.control.aeAvailableTargetFpsRanges", int[].class);
 
     /**
-     * <p>The hardware operational model of this device. One of the
-     * INFO_SUPPORTED_HARDWARE_LEVEL_* constants.</p>
-     *
-     * <p>Limited-capability devices have a number of limitations relative to
-     * full-capability cameras. Roughly, they have capabilities comparable to
-     * those provided by the deprecated {@link android.hardware.Camera}
-     * class.</p>
-     *
-     * <p>Specifically, limited-mode devices:</p>
-     *
-     * <ol>
-     *
-     *  <li>Do not provide per-frame result metadata for repeating
-     *  captures. This means that a CaptureListener will not be called for
-     *  captures done through {@link CameraDevice#setRepeatingRequest
-     *  setRepeatingRequest} or {@link CameraDevice#setRepeatingBurst
-     *  setRepeatingBurst}.</li>
-     *
-     *  <li>Do not support complete result metadata. Only a few fields are
-     *  provided, such as the timestamp (TODO).</li>
-     *
-     *  <li>Do not support manual capture controls. Only the (TODO)
-     *  ANDROID_CONTROL_* fields and TODO controls are used, and the various
-     *  AE/AF/AWB_OFF control values cannot be used.</li>
-     *
-     *  <li>Do not support high frame rate captures. To obtain high frame rate,
-     *  the {@link CameraDevice#setRepeatingRequest setRepeatingRequest} method
-     *  must be used. The {@link CameraDevice#capture capture},
-     *  {@link CameraDevice#captureBurst captureBurst}, and
-     *  {@link CameraDevice#setRepeatingBurst setRepeatingBurst} methods will
-     *  result in slow frame captures.</li>
-     *
-     * </ol>
-     *
-     * @see #INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED
-     * @see #INFO_SUPPORTED_HARDWARE_LEVEL_FULL
+     * <p>
+     * Maximum and minimum exposure compensation
+     * setting, in counts of
+     * android.control.aeCompensationStepSize
+     * </p>
      */
-    public static final Key<Integer> INFO_SUPPORTED_HARDWARE_LEVEL =
-            new Key<Integer>("android.info.supportedHardwareLevel", Integer.TYPE);
+    public static final Key<int[]> CONTROL_AE_COMPENSATION_RANGE =
+            new Key<int[]>("android.control.aeCompensationRange", int[].class);
 
     /**
-     * <p>The type reported by limited-capability camera devices.</p>
-     *
-     * <p>Limited-capability devices have a number of limitations relative to
-     * full-capability cameras. Roughly, they have capabilities comparable to
-     * those provided by the deprecated {@link android.hardware.Camera}
-     * class.</p>
-     *
-     * <p>Specifically, limited-mode devices:</p>
-     *
-     * <ol>
-     *
-     *  <li>Do not provide per-frame result metadata for repeating
-     *  captures. This means that a CaptureListener will not be called for
-     *  captures done through {@link CameraDevice#setRepeatingRequest
-     *  setRepeatingRequest} or {@link CameraDevice#setRepeatingBurst
-     *  setRepeatingBurst}.</li>
-     *
-     *  <li>Do not support complete result metadata. Only a few fields are
-     *  provided, such as the timestamp (TODO).</li>
-     *
-     *  <li>Do not support manual capture controls. Only the (TODO)
-     *  ANDROID_CONTROL_* fields and TODO controls are used, and the various
-     *  AE/AF/AWB_OFF control values cannot be used.</li>
-     *
-     *  <li>Do not support high frame rate captures. To obtain high frame rate,
-     *  the {@link CameraDevice#setRepeatingRequest setRepeatingRequest} method
-     *  must be used. The {@link CameraDevice#capture capture},
-     *  {@link CameraDevice#captureBurst captureBurst}, and
-     *  {@link CameraDevice#setRepeatingBurst setRepeatingBurst} methods will
-     *  result in slow frame captures.</li>
-     *
-     * </ol>
-     *
-     * @see #INFO_SUPPORTED_HARDWARE_LEVEL
+     * <p>
+     * Smallest step by which exposure compensation
+     * can be changed
+     * </p>
      */
-    public static final int INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED = 0;
+    public static final Key<Rational> CONTROL_AE_COMPENSATION_STEP =
+            new Key<Rational>("android.control.aeCompensationStep", Rational.class);
 
     /**
-     * <p>The type reported by full-capability camera devices</p>
-     *
-     * <p>Full-capability devices allow for per-frame control of capture
-     * hardware and post-processing parameters at high frame rates. They also
-     * provide output data at high resolution in uncompressed formats, in
-     * addition to compressed JPEG output.</p>
-     *
-     * @see #INFO_SUPPORTED_HARDWARE_LEVEL
+     * <p>
+     * List of AF modes that can be
+     * selected
+     * </p>
      */
-    public static final int INFO_SUPPORTED_HARDWARE_LEVEL_FULL = 1;
+    public static final Key<byte[]> CONTROL_AF_AVAILABLE_MODES =
+            new Key<byte[]>("android.control.afAvailableModes", byte[].class);
 
     /**
-     * <p>The available output formats from this camera device. When using a
-     * {@link android.media.ImageReader} as an output target, the
-     * ImageReader must be configured to use one of these formats.</p>
-     *
-     * <p>The list is a subset of the formats defined in
-     * {@link android.graphics.ImageFormat}.</p>
-     *
-     * <p>The image formats {@link android.graphics.ImageFormat#JPEG},
-     * {@link android.graphics.ImageFormat#YUV_420_888} are guaranteed to be
-     * supported.</p>
+     * <p>
+     * what subset of the full color effect enum
+     * list is supported
+     * </p>
+     */
+    public static final Key<byte[]> CONTROL_AVAILABLE_EFFECTS =
+            new Key<byte[]>("android.control.availableEffects", byte[].class);
+
+    /**
+     * <p>
+     * what subset of the scene mode enum list is
+     * supported.
+     * </p>
+     */
+    public static final Key<byte[]> CONTROL_AVAILABLE_SCENE_MODES =
+            new Key<byte[]>("android.control.availableSceneModes", byte[].class);
+
+    /**
+     * <p>
+     * List of video stabilization modes that can
+     * be supported
+     * </p>
+     */
+    public static final Key<byte[]> CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES =
+            new Key<byte[]>("android.control.availableVideoStabilizationModes", byte[].class);
+
+    /**
+     */
+    public static final Key<byte[]> CONTROL_AWB_AVAILABLE_MODES =
+            new Key<byte[]>("android.control.awbAvailableModes", byte[].class);
+
+    /**
+     * <p>
+     * For AE, AWB, and AF, how many individual
+     * regions can be listed for metering?
+     * </p>
+     */
+    public static final Key<Integer> CONTROL_MAX_REGIONS =
+            new Key<Integer>("android.control.maxRegions", int.class);
+
+    /**
+     * <p>
+     * Whether this camera has a
+     * flash
+     * </p>
+     * <p>
+     * If no flash, none of the flash controls do
+     * anything. All other metadata should return 0
+     * </p>
+     */
+    public static final Key<Byte> FLASH_INFO_AVAILABLE =
+            new Key<Byte>("android.flash.info.available", byte.class);
+
+    /**
+     * <p>
+     * Supported resolutions for the JPEG
+     * thumbnail
+     * </p>
+     */
+    public static final Key<android.hardware.camera2.Size[]> JPEG_AVAILABLE_THUMBNAIL_SIZES =
+            new Key<android.hardware.camera2.Size[]>("android.jpeg.availableThumbnailSizes", android.hardware.camera2.Size[].class);
+
+    /**
+     * <p>
+     * List of supported aperture
+     * values
+     * </p>
+     * <p>
+     * If variable aperture not available, only setting
+     * should be for the fixed aperture
+     * </p>
+     */
+    public static final Key<float[]> LENS_INFO_AVAILABLE_APERTURES =
+            new Key<float[]>("android.lens.info.availableApertures", float[].class);
+
+    /**
+     * <p>
+     * List of supported ND filter
+     * values
+     * </p>
+     * <p>
+     * If not available, only setting is 0. Otherwise,
+     * lists the available exposure index values for dimming
+     * (2 would mean the filter is set to reduce incoming
+     * light by two stops)
+     * </p>
+     */
+    public static final Key<float[]> LENS_INFO_AVAILABLE_FILTER_DENSITIES =
+            new Key<float[]>("android.lens.info.availableFilterDensities", float[].class);
+
+    /**
+     * <p>
+     * If fitted with optical zoom, what focal
+     * lengths are available. If not, the static focal
+     * length
+     * </p>
+     * <p>
+     * If optical zoom not supported, only one value
+     * should be reported
+     * </p>
+     */
+    public static final Key<float[]> LENS_INFO_AVAILABLE_FOCAL_LENGTHS =
+            new Key<float[]>("android.lens.info.availableFocalLengths", float[].class);
+
+    /**
+     * <p>
+     * List of supported optical image
+     * stabilization modes
+     * </p>
+     */
+    public static final Key<byte[]> LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION =
+            new Key<byte[]>("android.lens.info.availableOpticalStabilization", byte[].class);
+
+    /**
+     * <p>
+     * Hyperfocal distance for this lens; set to
+     * 0 if fixed focus
+     * </p>
+     * <p>
+     * The hyperfocal distance is used for the old
+     * API's 'fixed' setting
+     * </p>
+     */
+    public static final Key<Float> LENS_INFO_HYPERFOCAL_DISTANCE =
+            new Key<Float>("android.lens.info.hyperfocalDistance", float.class);
+
+    /**
+     * <p>
+     * Shortest distance from frontmost surface
+     * of the lens that can be focused correctly
+     * </p>
+     * <p>
+     * If the lens is fixed-focus, this should be
+     * 0
+     * </p>
+     */
+    public static final Key<Float> LENS_INFO_MINIMUM_FOCUS_DISTANCE =
+            new Key<Float>("android.lens.info.minimumFocusDistance", float.class);
+
+    /**
+     * <p>
+     * Dimensions of lens shading
+     * map
+     * </p>
+     */
+    public static final Key<android.hardware.camera2.Size> LENS_INFO_SHADING_MAP_SIZE =
+            new Key<android.hardware.camera2.Size>("android.lens.info.shadingMapSize", android.hardware.camera2.Size.class);
+
+    /**
+     * <p>
+     * Direction the camera faces relative to
+     * device screen
+     * </p>
+     * @see #LENS_FACING_FRONT
+     * @see #LENS_FACING_BACK
+     */
+    public static final Key<Integer> LENS_FACING =
+            new Key<Integer>("android.lens.facing", int.class);
+
+    /**
+     * <p>
+     * How many output streams can be allocated at
+     * the same time for each type of stream
+     * </p>
+     * <p>
+     * Video snapshot with preview callbacks requires 3
+     * processed streams (preview, record, app callbacks) and
+     * one JPEG stream (snapshot)
+     * </p>
+     */
+    public static final Key<int[]> REQUEST_MAX_NUM_OUTPUT_STREAMS =
+            new Key<int[]>("android.request.maxNumOutputStreams", int[].class);
+
+    /**
+     * <p>
+     * List of app-visible formats
+     * </p>
      */
     public static final Key<int[]> SCALER_AVAILABLE_FORMATS =
             new Key<int[]>("android.scaler.availableFormats", int[].class);
 
     /**
-     * <p>The available output sizes for JPEG buffers from this camera
-     * device. When using a {@link android.media.ImageReader} as an output
-     * target, the ImageReader must be configured to use one of these sizes
-     * when using format {@link android.graphics.ImageFormat#JPEG}.</p>
+     * <p>
+     * The minimum frame duration that is supported
+     * for each resolution in availableJpegSizes. Should
+     * correspond to the frame duration when only that JPEG
+     * stream is active and captured in a burst, with all
+     * processing set to FAST
+     * </p>
+     * <p>
+     * When multiple streams are configured, the minimum
+     * frame duration will be >= max(individual stream min
+     * durations)
+     * </p>
      */
-    public static final Key<Size[]> SCALER_AVAILABLE_JPEG_SIZES =
-            new Key<Size[]>("android.scaler.availableJpegSizes", Size[].class);
+    public static final Key<long[]> SCALER_AVAILABLE_JPEG_MIN_DURATIONS =
+            new Key<long[]>("android.scaler.availableJpegMinDurations", long[].class);
 
     /**
-     * <p>The available sizes for output buffers from this camera device, when
-     * the buffers are neither of the {@link android.graphics.ImageFormat#JPEG}
-     * or of the {@link android.graphics.ImageFormat#RAW_SENSOR} type.</p>
-     *
-     * <p>When using a {@link android.view.SurfaceView},
-     * {@link android.graphics.SurfaceTexture},
-     * {@link android.media.MediaRecorder}, {@link android.media.MediaCodec}, or
-     * {@link android.renderscript.Allocation} as an output target, that target
-     * must be configured to one of these sizes. See
-     * {@link CameraDevice#configureOutputs} for details.
-     *
-     * <p>When using a {@link android.media.ImageReader} as an output
-     * target, the ImageReader must be configured to use one of these sizes
-     * when using format {@link android.graphics.ImageFormat#YUV_420_888}.</p>
-     *
+     * <p>
+     * The resolutions available for output from
+     * the JPEG block. Listed as width x height
+     * </p>
      */
-    public static final Key<Size[]> SCALER_AVAILABLE_PROCESSED_SIZES =
-            new Key<Size[]>("android.scaler.availableProcessedSizes", Size[].class);
+    public static final Key<android.hardware.camera2.Size[]> SCALER_AVAILABLE_JPEG_SIZES =
+            new Key<android.hardware.camera2.Size[]>("android.scaler.availableJpegSizes", android.hardware.camera2.Size[].class);
 
     /**
-     * <p>The available sizes for output buffers from this camera device, when
-     * the buffers are of the {@link android.graphics.ImageFormat#RAW_SENSOR} type. This type of output may not be
-     * supported by the device; check {@link #SCALER_AVAILABLE_FORMATS} to
-     * check. In that case, this list will not exist.</p>
-     *
-     * <p>When using a {@link android.media.ImageReader} as an output
-     * target, the ImageReader must be configured to use one of these sizes
-     * when using image format {@link android.graphics.ImageFormat#RAW_SENSOR}.</p>
+     * <p>
+     * The maximum ratio between active area width
+     * and crop region width, or between active area height and
+     * crop region height, if the crop region height is larger
+     * than width
+     * </p>
      */
-    public static final Key<Size[]> SCALER_AVAILABLE_RAW_SIZES =
-            new Key<Size[]>("android.scaler.availableRawSizes", Size[].class);
+    public static final Key<Float> SCALER_AVAILABLE_MAX_DIGITAL_ZOOM =
+            new Key<Float>("android.scaler.availableMaxDigitalZoom", float.class);
 
     /**
-     * <p>The coordinates of the sensor's active pixel array, relative to its
-     * total pixel array. These are the pixels that are actually used for image
-     * capture. The active pixel region may be smaller than the total number of
-     * pixels, if some pixels are used for other tasks such as calibrating the
-     * sensor's black level. If all pixels available for readout are used for
-     * imaging, then this rectangle will be
-     * {@code (0,0) - (SENSOR_PIXEL_ARRAY_SIZE.width,
-     * SENSOR_PIXEL_ARRAY_SIZE.height)}.</p>
-     *
-     * <p>If raw sensor capture is supported by this device, the width and
-     * height of the active pixel array match up to one of the supported raw
-     * capture sizes, and using that size will capture just the active pixel
-     * array region.</p>
-     *
-     * <p>Most other coordinates used by the camera device (for example, for
-     * metering and crop region selection, or for reporting detected faces) use
-     * a coordinate system based on the active array dimensions, with (0,0)
-     * being the top-left corner of the active array.</p>
+     * <p>
+     * The minimum frame duration that is supported
+     * for each resolution in availableProcessedSizes. Should
+     * correspond to the frame duration when only that processed
+     * stream is active, with all processing set to
+     * FAST
+     * </p>
+     * <p>
+     * When multiple streams are configured, the minimum
+     * frame duration will be >= max(individual stream min
+     * durations)
+     * </p>
      */
-    public static final Key<Rect> SENSOR_ACTIVE_ARRAY_SIZE =
-            new Key<Rect>("android.sensor.activeArraySize", Rect.class);
+    public static final Key<long[]> SCALER_AVAILABLE_PROCESSED_MIN_DURATIONS =
+            new Key<long[]>("android.scaler.availableProcessedMinDurations", long[].class);
 
     /**
-     * <p>The size of the sensor's total pixel array available for readout. Some
-     * of these pixels may not be used for image capture, in which case
-     * {@link #SENSOR_ACTIVE_ARRAY_SIZE} will describe a rectangle smaller than
-     * this. If raw sensor capture is supported by this device, this is one of
-     * the supported capture sizes.</p>
+     * <p>
+     * The resolutions available for use with
+     * processed output streams, such as YV12, NV12, and
+     * platform opaque YUV/RGB streams to the GPU or video
+     * encoders. Listed as width, height
+     * </p>
      */
-    public static final Key<Size> SENSOR_PIXEL_ARRAY_SIZE =
-            new Key<Size>("android.sensor.activeArraySize", Size.class);
+    public static final Key<android.hardware.camera2.Size[]> SCALER_AVAILABLE_PROCESSED_SIZES =
+            new Key<android.hardware.camera2.Size[]>("android.scaler.availableProcessedSizes", android.hardware.camera2.Size[].class);
 
-    // TODO: Many more of these.
+    /**
+     * <p>
+     * Area of raw data which corresponds to only
+     * active pixels; smaller or equal to
+     * pixelArraySize.
+     * </p>
+     */
+    public static final Key<android.graphics.Rect> SENSOR_INFO_ACTIVE_ARRAY_SIZE =
+            new Key<android.graphics.Rect>("android.sensor.info.activeArraySize", android.graphics.Rect.class);
 
+    /**
+     * <p>
+     * Range of valid sensitivities
+     * </p>
+     */
+    public static final Key<int[]> SENSOR_INFO_SENSITIVITY_RANGE =
+            new Key<int[]>("android.sensor.info.sensitivityRange", int[].class);
+
+    /**
+     * <p>
+     * Range of valid exposure
+     * times
+     * </p>
+     */
+    public static final Key<long[]> SENSOR_INFO_EXPOSURE_TIME_RANGE =
+            new Key<long[]>("android.sensor.info.exposureTimeRange", long[].class);
+
+    /**
+     * <p>
+     * Maximum possible frame duration (minimum frame
+     * rate)
+     * </p>
+     * <p>
+     * Minimum duration is a function of resolution,
+     * processing settings. See
+     * android.scaler.availableProcessedMinDurations
+     * android.scaler.availableJpegMinDurations
+     * android.scaler.availableRawMinDurations
+     * </p>
+     */
+    public static final Key<Long> SENSOR_INFO_MAX_FRAME_DURATION =
+            new Key<Long>("android.sensor.info.maxFrameDuration", long.class);
+
+    /**
+     * <p>
+     * The physical dimensions of the full pixel
+     * array
+     * </p>
+     * <p>
+     * Needed for FOV calculation for old API
+     * </p>
+     */
+    public static final Key<android.hardware.camera2.Size> SENSOR_INFO_PHYSICAL_SIZE =
+            new Key<android.hardware.camera2.Size>("android.sensor.info.physicalSize", android.hardware.camera2.Size.class);
+
+    /**
+     * <p>
+     * Gain factor from electrons to raw units when
+     * ISO=100
+     * </p>
+     */
+    public static final Key<Rational> SENSOR_BASE_GAIN_FACTOR =
+            new Key<Rational>("android.sensor.baseGainFactor", Rational.class);
+
+    /**
+     * <p>
+     * Maximum sensitivity that is implemented
+     * purely through analog gain
+     * </p>
+     * <p>
+     * For android.sensor.sensitivity values less than or
+     * equal to this, all applied gain must be analog. For
+     * values above this, it can be a mix of analog and
+     * digital
+     * </p>
+     */
+    public static final Key<Integer> SENSOR_MAX_ANALOG_SENSITIVITY =
+            new Key<Integer>("android.sensor.maxAnalogSensitivity", int.class);
+
+    /**
+     * <p>
+     * Clockwise angle through which the output
+     * image needs to be rotated to be upright on the device
+     * screen in its native orientation. Also defines the
+     * direction of rolling shutter readout, which is from top
+     * to bottom in the sensor's coordinate system
+     * </p>
+     */
+    public static final Key<Integer> SENSOR_ORIENTATION =
+            new Key<Integer>("android.sensor.orientation", int.class);
+
+    /**
+     * <p>
+     * Which face detection modes are available,
+     * if any
+     * </p>
+     * <p>
+     * OFF means face detection is disabled, it must
+     * be included in the list.
+     * </p><p>
+     * SIMPLE means the device supports the
+     * android.statistics.faceRectangles and
+     * android.statistics.faceScores outputs.
+     * </p><p>
+     * FULL means the device additionally supports the
+     * android.statistics.faceIds and
+     * android.statistics.faceLandmarks outputs.
+     * </p>
+     */
+    public static final Key<byte[]> STATISTICS_INFO_AVAILABLE_FACE_DETECT_MODES =
+            new Key<byte[]>("android.statistics.info.availableFaceDetectModes", byte[].class);
+
+    /**
+     * <p>
+     * Maximum number of simultaneously detectable
+     * faces
+     * </p>
+     */
+    public static final Key<Integer> STATISTICS_INFO_MAX_FACE_COUNT =
+            new Key<Integer>("android.statistics.info.maxFaceCount", int.class);
+
+    /**
+     * <p>
+     * Maximum number of supported points in the
+     * tonemap curve
+     * </p>
+     */
+    public static final Key<Integer> TONEMAP_MAX_CURVE_POINTS =
+            new Key<Integer>("android.tonemap.maxCurvePoints", int.class);
+
+    /**
+     * <p>
+     * A list of camera LEDs that are available on this system.
+     * </p>
+     * @see #LED_AVAILABLE_LEDS_TRANSMIT
+     *
+     * @hide
+     */
+    public static final Key<int[]> LED_AVAILABLE_LEDS =
+            new Key<int[]>("android.led.availableLeds", int[].class);
+
+    /**
+     * <p>
+     * The camera 3 HAL device can implement one of two possible
+     * operational modes; limited and full. Full support is
+     * expected from new higher-end devices. Limited mode has
+     * hardware requirements roughly in line with those for a
+     * camera HAL device v1 implementation, and is expected from
+     * older or inexpensive devices. Full is a strict superset of
+     * limited, and they share the same essential operational flow.
+     * </p><p>
+     * For full details refer to "S3. Operational Modes" in camera3.h
+     * </p>
+     * @see #INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED
+     * @see #INFO_SUPPORTED_HARDWARE_LEVEL_FULL
+     */
+    public static final Key<Integer> INFO_SUPPORTED_HARDWARE_LEVEL =
+            new Key<Integer>("android.info.supportedHardwareLevel", int.class);
+
+    /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
+     * End generated code
+     *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~O@*/
 }
