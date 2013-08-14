@@ -1752,6 +1752,10 @@ public final class BluetoothAdapter {
         public void onReadRemoteRssi(String address, int rssi, int status) {
             // no op
         }
+
+        public void onListen(int status) {
+            // no op
+        }
     }
 
 }
