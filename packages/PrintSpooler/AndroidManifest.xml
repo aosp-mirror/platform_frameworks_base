@@ -50,6 +50,12 @@
             android:theme="@style/PrintJobConfigActivityTheme">
         </activity>
 
+        <activity
+            android:name=".ChoosePrinterActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Holo.Light">
+        </activity>
+
         <receiver
             android:name=".NotificationController$NotificationBroadcastReceiver"
             android:exported="false" >

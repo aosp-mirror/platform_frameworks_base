@@ -477,7 +477,7 @@ public class PrintSpooler {
         private static final String ATTR_FITTING_MODE = "fittingMode";
         private static final String ATTR_ORIENTATION = "orientation";
 
-        private static final String ATTR_PRINTER_NAME = "printerName";
+        private static final String ATTR_LOCAL_ID = "printerName";
         private static final String ATTR_SERVICE_NAME = "serviceName";
 
         private static final String ATTR_WIDTH_MILS = "widthMils";
@@ -568,7 +568,7 @@ public class PrintSpooler {
                     PrinterId printerId = printJob.getPrinterId();
                     if (printerId != null) {
                         serializer.startTag(null, TAG_PRINTER_ID);
-                        serializer.attribute(null, ATTR_PRINTER_NAME, printerId.getLocalId());
+                        serializer.attribute(null, ATTR_LOCAL_ID, printerId.getLocalId());
                         serializer.attribute(null, ATTR_SERVICE_NAME, printerId.getServiceName()
                                 .flattenToString());
                         serializer.endTag(null, TAG_PRINTER_ID);
@@ -695,13 +695,7 @@ public class PrintSpooler {
                 Slog.w(LOG_TAG, "Failed to write state, restoring backup.", e);
                 mStatePersistFile.failWrite(out);
             } finally {
-                if (out != null) {
-                    try {
-                        out.close();
-                    } catch (IOException ioe) {
-                        /* ignore */
-                    }
-                }
+                IoUtils.closeQuietly(out);
             }
         }
 
@@ -733,11 +727,7 @@ public class PrintSpooler {
             } catch (IndexOutOfBoundsException iobe) {
                 Slog.w(LOG_TAG, "Failed parsing ", iobe);
             } finally {
-                try {
-                    in.close();
-                } catch (IOException ioe) {
-                    /* ignore */
-                }
+                IoUtils.closeQuietly(in);
             }
         }
 
@@ -784,7 +774,7 @@ public class PrintSpooler {
 
             skipEmptyTextTags(parser);
             if (accept(parser, XmlPullParser.START_TAG, TAG_PRINTER_ID)) {
-                String localId = parser.getAttributeValue(null, ATTR_PRINTER_NAME);
+                String localId = parser.getAttributeValue(null, ATTR_LOCAL_ID);
                 ComponentName service = ComponentName.unflattenFromString(parser.getAttributeValue(
                         null, ATTR_SERVICE_NAME));
                 printJob.setPrinterId(new PrinterId(service, localId));
