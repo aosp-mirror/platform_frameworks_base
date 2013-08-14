@@ -1385,9 +1385,10 @@ final class Settings {
 
                 StringBuilder sb = new StringBuilder();
                 for (final PackageSetting pkg : mPackages.values()) {
-                    ApplicationInfo ai = pkg.pkg.applicationInfo;
-                    String dataPath = ai.dataDir;
-                    boolean isDebug  = (ai.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+                    final ApplicationInfo ai = pkg.pkg.applicationInfo;
+                    final String dataPath = ai.dataDir;
+                    final boolean isDebug = (ai.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+                    final int[] gids = pkg.getGids();
 
                     // Avoid any application that has a space in its path
                     // or that is handled by the system.
@@ -1401,6 +1402,7 @@ final class Settings {
                     // debugFlag  - 0 or 1 if the package is debuggable.
                     // dataPath   - path to package's data path
                     // seinfo     - seinfo label for the app (assigned at install time)
+                    // gids       - supplementary gids this app launches with
                     //
                     // NOTE: We prefer not to expose all ApplicationInfo flags for now.
                     //
@@ -1417,6 +1419,16 @@ final class Settings {
                     sb.append(dataPath);
                     sb.append(" ");
                     sb.append(ai.seinfo);
+                    sb.append(" ");
+                    if (gids != null && gids.length > 0) {
+                        sb.append(gids[0]);
+                        for (int i = 1; i < gids.length; i++) {
+                            sb.append(",");
+                            sb.append(gids[i]);
+                        }
+                    } else {
+                        sb.append("none");
+                    }
                     sb.append("\n");
                     str.write(sb.toString().getBytes());
                 }
@@ -1425,6 +1437,7 @@ final class Settings {
                 str.close();
                 journal.commit();
             } catch (Exception e) {
+                Log.wtf(TAG, "Failed to write packages.list", e);
                 IoUtils.closeQuietly(str);
                 journal.rollback();
             }
