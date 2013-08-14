@@ -91,6 +91,12 @@ public class BluetoothGattDescriptor {
     protected UUID mUuid;
 
     /**
+     * Instance ID for this descriptor.
+     * @hide
+     */
+    protected int mInstance;
+
+    /**
      * Permissions for this descriptor
      * @hide
      */
@@ -116,7 +122,7 @@ public class BluetoothGattDescriptor {
      * @param permissions Permissions for this descriptor
      */
     public BluetoothGattDescriptor(UUID uuid, int permissions) {
-        initDescriptor(null, uuid, permissions);
+        initDescriptor(null, uuid, 0, permissions);
     }
 
     /**
@@ -128,14 +134,15 @@ public class BluetoothGattDescriptor {
      * @param permissions Permissions for this descriptor
      */
     /*package*/ BluetoothGattDescriptor(BluetoothGattCharacteristic characteristic, UUID uuid,
-                                    int permissions) {
-        initDescriptor(characteristic, uuid, permissions);
+                                    int instance, int permissions) {
+        initDescriptor(characteristic, uuid, instance, permissions);
     }
 
     private void initDescriptor(BluetoothGattCharacteristic characteristic, UUID uuid,
-                                int permissions) {
+                                int instance, int permissions) {
         mCharacteristic = characteristic;
         mUuid = uuid;
+        mInstance = instance;
         mPermissions = permissions;
     }
 
@@ -162,6 +169,21 @@ public class BluetoothGattDescriptor {
      */
     public UUID getUuid() {
         return mUuid;
+    }
+
+    /**
+     * Returns the instance ID for this descriptor.
+     *
+     * <p>If a remote device offers multiple descriptors with the same UUID,
+     * the instance ID is used to distuinguish between descriptors.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @return Instance ID of this descriptor
+     * @hide
+     */
+    public int getInstanceId() {
+        return mInstance;
     }
 
     /**
