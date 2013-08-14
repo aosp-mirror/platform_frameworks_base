@@ -21,9 +21,6 @@ import java.io.PrintWriter;
 
 /**
  * The Matrix class holds a 3x3 matrix for transforming coordinates.
- * Matrix does not have a constructor, so it must be explicitly initialized
- * using either reset() - to construct an identity matrix, or one of the set..()
- * functions (e.g. setTranslate, setRotate, etc.).
  */
 public class Matrix {
 
