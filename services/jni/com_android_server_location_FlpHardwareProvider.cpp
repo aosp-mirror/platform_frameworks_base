@@ -261,6 +261,75 @@ static void TranslateFromObject(
 }
 
 /*
+ * Helper function to unwrap Geofence structures from the Java Runtime calls.
+ */
+static void TranslateGeofenceFromGeofenceHardwareRequestParcelable(
+    JNIEnv* env,
+    jobject geofenceRequestObject,
+    Geofence& geofence) {
+  jclass geofenceRequestClass = env->GetObjectClass(geofenceRequestObject);
+
+  jmethodID getId = env->GetMethodID(geofenceRequestClass, "getId", "()I");
+  geofence.geofence_id = env->CallIntMethod(geofenceRequestObject, getId);
+
+  jmethodID getType = env->GetMethodID(geofenceRequestClass, "getType", "()I");
+  // this works because GeofenceHardwareRequest.java and fused_location.h have
+  // the same notion of geofence types
+  GeofenceType type = (GeofenceType)env->CallIntMethod(geofenceRequestObject, getType);
+  if(type != TYPE_CIRCLE) {
+    ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
+  }
+  geofence.data->type = type;
+  GeofenceCircle& circle = geofence.data->geofence.circle;
+
+  jmethodID getLatitude = env->GetMethodID(
+      geofenceRequestClass,
+      "getLatitude",
+      "()D");
+  circle.latitude = env->CallDoubleMethod(geofenceRequestObject, getLatitude);
+
+  jmethodID getLongitude = env->GetMethodID(
+      geofenceRequestClass,
+      "getLongitude",
+      "()D");
+  circle.longitude = env->CallDoubleMethod(geofenceRequestObject, getLongitude);
+
+  jmethodID getRadius = env->GetMethodID(geofenceRequestClass, "getRadius", "()D");
+  circle.radius_m = env->CallDoubleMethod(geofenceRequestObject, getRadius);
+
+  GeofenceOptions* options = geofence.options;
+  jmethodID getMonitorTransitions = env->GetMethodID(
+      geofenceRequestClass,
+      "getMonitorTransitions",
+      "()I");
+  options->monitor_transitions = env->CallIntMethod(
+      geofenceRequestObject,
+      getMonitorTransitions);
+
+  jmethodID getUnknownTimer = env->GetMethodID(
+      geofenceRequestClass,
+      "getUnknownTimer",
+      "()I");
+  options->unknown_timer_ms = env->CallIntMethod(geofenceRequestObject, getUnknownTimer);
+
+  jmethodID getNotificationResponsiveness = env->GetMethodID(
+      geofenceRequestClass,
+      "getNotificationResponsiveness",
+      "()D");
+  options->notification_responsivenes_ms = env->CallIntMethod(
+      geofenceRequestObject,
+      getNotificationResponsiveness);
+
+  jmethodID getLastTransition = env->GetMethodID(
+      geofenceRequestClass,
+      "getLastTransition",
+      "()I");
+  options->last_transition = env->CallIntMethod(geofenceRequestObject, getLastTransition);
+
+  // TODO: set data.sources_to_use when available
+}
+
+/*
  * Helper function to transform FlpLocation into a java object.
  */
 static void TranslateToObject(const FlpLocation* location, jobject& locationObject) {
@@ -559,7 +628,7 @@ static void Init(JNIEnv* env, jobject obj) {
   }
 
   err = module->methods->open(
-        module, 
+        module,
         FUSED_LOCATION_HARDWARE_MODULE_ID, &sHardwareDevice);
   if(err != 0) {
     ALOGE("Error opening device '%s': %d", FUSED_LOCATION_HARDWARE_MODULE_ID, err);
@@ -749,10 +818,9 @@ static jboolean IsGeofencingSupported() {
 static void AddGeofences(
     JNIEnv* env,
     jobject object,
-    jintArray geofenceIdsArray,
-    jobjectArray geofencesArray) {
-  if(geofencesArray == NULL) {
-    ALOGE("Invalid Geofences to add: %p", geofencesArray);
+    jobjectArray geofenceRequestsArray) {
+  if(geofenceRequestsArray == NULL) {
+    ALOGE("Invalid Geofences to add: %p", geofenceRequestsArray);
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
   }
 
@@ -760,23 +828,32 @@ static void AddGeofences(
     ThrowOnError(env, FLP_RESULT_ERROR, __FUNCTION__);
   }
 
-  jint geofencesCount = env->GetArrayLength(geofenceIdsArray);
-  Geofence* geofences = new Geofence[geofencesCount];
+  jint geofenceRequestsCount = env->GetArrayLength(geofenceRequestsArray);
+  if(geofenceRequestsCount == 0) {
+    return;
+  }
+
+  Geofence* geofences = new Geofence[geofenceRequestsCount];
   if (geofences == NULL) {
     ThrowOnError(env, FLP_RESULT_INSUFFICIENT_MEMORY, __FUNCTION__);
   }
 
-  jint* ids = env->GetIntArrayElements(geofenceIdsArray, /* isCopy */ NULL);
-  for (int i = 0; i < geofencesCount; ++i) {
-    geofences[i].geofence_id = ids[i];
+  for (int i = 0; i < geofenceRequestsCount; ++i) {
+    geofences[i].data = new GeofenceData();
+    geofences[i].options = new GeofenceOptions();
+    jobject geofenceObject = env->GetObjectArrayElement(geofenceRequestsArray, i);
 
-    // TODO: fill in the GeofenceData
-
-    // TODO: fill in the GeofenceOptions
+    TranslateGeofenceFromGeofenceHardwareRequestParcelable(env, geofenceObject, geofences[i]);
   }
 
-  sFlpGeofencingInterface->add_geofences(geofencesCount, &geofences);
-  if (geofences != NULL) delete[] geofences;
+  sFlpGeofencingInterface->add_geofences(geofenceRequestsCount, &geofences);
+  if (geofences != NULL) {
+    for(int i = 0; i < geofenceRequestsCount; ++i) {
+      delete geofences[i].data;
+      delete geofences[i].options;
+    }
+    delete[] geofences;
+  }
 }
 
 static void PauseGeofence(JNIEnv* env, jobject object, jint geofenceId) {
@@ -847,41 +924,41 @@ static JNINativeMethod sMethods[] = {
   {"nativeCleanup", "()V", reinterpret_cast<void*>(Cleanup)},
   {"nativeIsSupported", "()Z", reinterpret_cast<void*>(IsSupported)},
   {"nativeGetBatchSize", "()I", reinterpret_cast<void*>(GetBatchSize)},
-  {"nativeStartBatching", 
-        "(ILandroid/location/FusedBatchOptions;)V", 
+  {"nativeStartBatching",
+        "(ILandroid/location/FusedBatchOptions;)V",
         reinterpret_cast<void*>(StartBatching)},
-  {"nativeUpdateBatchingOptions", 
-        "(ILandroid/location/FusedBatchOptions;)V", 
+  {"nativeUpdateBatchingOptions",
+        "(ILandroid/location/FusedBatchOptions;)V",
         reinterpret_cast<void*>(UpdateBatchingOptions)},
   {"nativeStopBatching", "(I)V", reinterpret_cast<void*>(StopBatching)},
-  {"nativeRequestBatchedLocation", 
-        "(I)V", 
+  {"nativeRequestBatchedLocation",
+        "(I)V",
         reinterpret_cast<void*>(GetBatchedLocation)},
-  {"nativeInjectLocation", 
-        "(Landroid/location/Location;)V", 
+  {"nativeInjectLocation",
+        "(Landroid/location/Location;)V",
         reinterpret_cast<void*>(InjectLocation)},
-  {"nativeIsDiagnosticSupported", 
-        "()Z", 
+  {"nativeIsDiagnosticSupported",
+        "()Z",
         reinterpret_cast<void*>(IsDiagnosticSupported)},
-  {"nativeInjectDiagnosticData", 
-        "(Ljava/lang/String;)V", 
+  {"nativeInjectDiagnosticData",
+        "(Ljava/lang/String;)V",
         reinterpret_cast<void*>(InjectDiagnosticData)},
-  {"nativeIsDeviceContextSupported", 
-        "()Z", 
+  {"nativeIsDeviceContextSupported",
+        "()Z",
         reinterpret_cast<void*>(IsDeviceContextSupported)},
-  {"nativeInjectDeviceContext", 
-        "(I)V", 
+  {"nativeInjectDeviceContext",
+        "(I)V",
         reinterpret_cast<void*>(InjectDeviceContext)},
-  {"nativeIsGeofencingSupported", 
-        "()Z", 
+  {"nativeIsGeofencingSupported",
+        "()Z",
         reinterpret_cast<void*>(IsGeofencingSupported)},
-  {"nativeAddGeofences", 
-        "([I[Landroid/location/Geofence;)V", 
+  {"nativeAddGeofences",
+        "([Landroid/hardware/location/GeofenceHardwareRequestParcelable;)V",
         reinterpret_cast<void*>(AddGeofences)},
   {"nativePauseGeofence", "(I)V", reinterpret_cast<void*>(PauseGeofence)},
   {"nativeResumeGeofence", "(II)V", reinterpret_cast<void*>(ResumeGeofence)},
-  {"nativeModifyGeofenceOption", 
-        "(IIIIII)V", 
+  {"nativeModifyGeofenceOption",
+        "(IIIIII)V",
         reinterpret_cast<void*>(ModifyGeofenceOption)},
   {"nativeRemoveGeofences", "([I)V", reinterpret_cast<void*>(RemoveGeofences)}
 };

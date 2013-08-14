@@ -16,12 +16,13 @@
 
 package com.android.server.location;
 
+import android.hardware.location.GeofenceHardware;
 import android.hardware.location.GeofenceHardwareImpl;
+import android.hardware.location.GeofenceHardwareRequestParcelable;
 import android.hardware.location.IFusedLocationHardware;
 import android.hardware.location.IFusedLocationHardwareSink;
 import android.location.IFusedGeofenceHardware;
 import android.location.FusedBatchOptions;
-import android.location.Geofence;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -48,6 +49,15 @@ public class FlpHardwareProvider {
     private final static String TAG = "FlpHardwareProvider";
     private final Context mContext;
     private final Object mLocationSinkLock = new Object();
+
+    // FlpHal result codes, they must be equal to the ones in fused_location.h
+    private static final int FLP_RESULT_SUCCESS = 0;
+    private static final int FLP_RESULT_ERROR = -1;
+    private static final int FLP_RESULT_INSUFFICIENT_MEMORY = -2;
+    private static final int FLP_RESULT_TOO_MANY_GEOFENCES = -3;
+    private static final int FLP_RESULT_ID_EXISTS = -4;
+    private static final int FLP_RESULT_ID_UNKNOWN = -5;
+    private static final int FLP_RESULT_INVALID_GEOFENCE_TRANSITION = -6;
 
     public static FlpHardwareProvider getInstance(Context context) {
         if (sSingletonInstance == null) {
@@ -120,29 +130,46 @@ public class FlpHardwareProvider {
             Location location,
             int transition,
             long timestamp,
-            int sourcesUsed
-            ) {
-        // TODO: [GeofenceIntegration] change GeofenceHardwareImpl to accept a location object
+            int sourcesUsed) {
+        getGeofenceHardwareSink().reportGeofenceTransition(
+                geofenceId,
+                updateLocationInformation(location),
+                transition,
+                timestamp,
+                GeofenceHardware.MONITORING_TYPE_FUSED_HARDWARE,
+                sourcesUsed);
     }
 
     private void onGeofenceMonitorStatus(int status, int source, Location location) {
-        // TODO: [GeofenceIntegration]
+        getGeofenceHardwareSink().reportGeofenceMonitorStatus(
+                GeofenceHardware.MONITORING_TYPE_FUSED_HARDWARE,
+                status,
+                updateLocationInformation(location),
+                source);
     }
 
     private void onGeofenceAdd(int geofenceId, int result) {
-        // TODO: [GeofenceIntegration] map between GPS and FLP results to pass a consistent status
+        getGeofenceHardwareSink().reportGeofenceAddStatus(
+                geofenceId,
+                translateToGeofenceHardwareStatus(result));
     }
 
     private void onGeofenceRemove(int geofenceId, int result) {
-        // TODO: [GeofenceIntegration] map between GPS and FLP results to pass a consistent status
+        getGeofenceHardwareSink().reportGeofenceRemoveStatus(
+                geofenceId,
+                translateToGeofenceHardwareStatus(result));
     }
 
     private void onGeofencePause(int geofenceId, int result) {
-        // TODO; [GeofenceIntegration] map between GPS and FLP results
+        getGeofenceHardwareSink().reportGeofencePauseStatus(
+                geofenceId,
+                translateToGeofenceHardwareStatus(result));
     }
 
     private void onGeofenceResume(int geofenceId, int result) {
-        // TODO: [GeofenceIntegration] map between GPS and FLP results
+        getGeofenceHardwareSink().reportGeofenceResumeStatus(
+                geofenceId,
+                translateToGeofenceHardwareStatus(result));
     }
 
     /**
@@ -175,7 +202,8 @@ public class FlpHardwareProvider {
 
     // FlpGeofencingInterface members
     private native boolean nativeIsGeofencingSupported();
-    private native void nativeAddGeofences(int[] geofenceIdsArray, Geofence[] geofencesArray);
+    private native void nativeAddGeofences(
+            GeofenceHardwareRequestParcelable[] geofenceRequestsArray);
     private native void nativePauseGeofence(int geofenceId);
     private native void  nativeResumeGeofence(int geofenceId, int monitorTransitions);
     private native void nativeModifyGeofenceOption(
@@ -281,8 +309,8 @@ public class FlpHardwareProvider {
         }
 
         @Override
-        public void addGeofences(int[] geofenceIdsArray, Geofence[] geofencesArray) {
-            nativeAddGeofences(geofenceIdsArray, geofencesArray);
+        public void addGeofences(GeofenceHardwareRequestParcelable[] geofenceRequestsArray) {
+            nativeAddGeofences(geofenceRequestsArray);
         }
 
         @Override
@@ -305,17 +333,15 @@ public class FlpHardwareProvider {
                 int lastTransition,
                 int monitorTransitions,
                 int notificationResponsiveness,
-                int unknownTimer
-                ) {
-            // TODO: [GeofenceIntegration] set sourcesToUse to the right value
-            // TODO: expose sourcesToUse externally when needed
+                int unknownTimer,
+                int sourcesToUse) {
             nativeModifyGeofenceOption(
                     geofenceId,
                     lastTransition,
                     monitorTransitions,
                     notificationResponsiveness,
                     unknownTimer,
-                    /* sourcesToUse */ 0xFFFF);
+                    sourcesToUse);
         }
     };
 
@@ -347,10 +373,39 @@ public class FlpHardwareProvider {
 
     private GeofenceHardwareImpl getGeofenceHardwareSink() {
         if (mGeofenceHardwareSink == null) {
-            // TODO: [GeofenceIntegration] we need to register ourselves with GeofenceHardwareImpl
             mGeofenceHardwareSink = GeofenceHardwareImpl.getInstance(mContext);
         }
 
         return mGeofenceHardwareSink;
+    }
+
+    private static int translateToGeofenceHardwareStatus(int flpHalResult) {
+        switch(flpHalResult) {
+            case FLP_RESULT_SUCCESS:
+                return GeofenceHardware.GEOFENCE_SUCCESS;
+            case FLP_RESULT_ERROR:
+                return GeofenceHardware.GEOFENCE_FAILURE;
+            // TODO: uncomment this once the ERROR definition is marked public
+            //case FLP_RESULT_INSUFFICIENT_MEMORY:
+            //    return GeofenceHardware.GEOFENCE_ERROR_INSUFFICIENT_MEMORY;
+            case FLP_RESULT_TOO_MANY_GEOFENCES:
+                return GeofenceHardware.GEOFENCE_ERROR_TOO_MANY_GEOFENCES;
+            case FLP_RESULT_ID_EXISTS:
+                return GeofenceHardware.GEOFENCE_ERROR_ID_EXISTS;
+            case FLP_RESULT_ID_UNKNOWN:
+                return GeofenceHardware.GEOFENCE_ERROR_ID_UNKNOWN;
+            case FLP_RESULT_INVALID_GEOFENCE_TRANSITION:
+                return GeofenceHardware.GEOFENCE_ERROR_INVALID_TRANSITION;
+            default:
+                Log.e(TAG, String.format("Invalid FlpHal result code: %d", flpHalResult));
+                return GeofenceHardware.GEOFENCE_FAILURE;
+        }
+    }
+
+    private Location updateLocationInformation(Location location) {
+        location.setProvider(LocationManager.FUSED_PROVIDER);
+        // set the elapsed time-stamp just as GPS provider does
+        location.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
+        return location;
     }
 }
