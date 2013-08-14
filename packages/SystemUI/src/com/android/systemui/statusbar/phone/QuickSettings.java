@@ -494,7 +494,9 @@ class QuickSettings {
         }
 
         // Battery
-        final QuickSettingsBasicTile batteryTile = new QuickSettingsBasicTile(mContext);
+        final QuickSettingsTileView batteryTile = (QuickSettingsTileView)
+                inflater.inflate(R.layout.quick_settings_tile, parent, false);
+        batteryTile.setContent(R.layout.quick_settings_tile_battery, inflater);
         batteryTile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -506,9 +508,6 @@ class QuickSettings {
             public void refreshView(QuickSettingsTileView unused, State state) {
                 QuickSettingsModel.BatteryState batteryState =
                         (QuickSettingsModel.BatteryState) state;
-                Drawable d = batteryState.pluggedIn
-                        ? mChargingBatteryLevels
-                        : mBatteryLevels;
                 String t;
                 if (batteryState.batteryLevel == 100) {
                     t = mContext.getString(R.string.quick_settings_battery_charged_label);
@@ -519,9 +518,7 @@ class QuickSettings {
                         : mContext.getString(R.string.status_bar_settings_battery_meter_format,
                                 batteryState.batteryLevel);
                 }
-                batteryTile.setImageDrawable(d);
-                batteryTile.getImageView().setImageLevel(batteryState.batteryLevel);
-                batteryTile.setText(t);
+                ((TextView)batteryTile.findViewById(R.id.text)).setText(t);
                 batteryTile.setContentDescription(
                         mContext.getString(R.string.accessibility_quick_settings_battery, t));
             }
