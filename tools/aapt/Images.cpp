@@ -1075,18 +1075,19 @@ static void write_png(const char* imageName,
             unknowns[b_index].size = chunk_size;
         }
 
+        for (int i = 0; i < chunk_count; i++) {
+            unknowns[i].location = PNG_HAVE_PLTE;
+        }
         png_set_keep_unknown_chunks(write_ptr, PNG_HANDLE_CHUNK_ALWAYS,
                                     chunk_names, chunk_count);
         png_set_unknown_chunks(write_ptr, write_info, unknowns, chunk_count);
-        // XXX I can't get this to work without forcibly changing
-        // the location to what I want...  which apparently is supposed
-        // to be a private API, but everything else I have tried results
-        // in the location being set to what I -last- wrote so I never
-        // get written. :p
+#if PNG_LIBPNG_VER < 10600
+        /* Deal with unknown chunk location bug in 1.5.x and earlier */
         png_set_unknown_chunk_location(write_ptr, write_info, 0, PNG_HAVE_PLTE);
         if (imageInfo.haveLayoutBounds) {
             png_set_unknown_chunk_location(write_ptr, write_info, 1, PNG_HAVE_PLTE);
         }
+#endif
     }
 
 
@@ -1094,7 +1095,9 @@ static void write_png(const char* imageName,
 
     png_bytepp rows;
     if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_RGB_ALPHA) {
-        png_set_filler(write_ptr, 0, PNG_FILLER_AFTER);
+        if (color_type == PNG_COLOR_TYPE_RGB) {
+            png_set_filler(write_ptr, 0, PNG_FILLER_AFTER);
+        }
         rows = imageInfo.rows;
     } else {
         rows = outRows;
