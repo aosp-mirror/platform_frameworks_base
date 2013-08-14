@@ -5114,10 +5114,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // show navigation transient bar
                 vis |= View.NAVIGATION_BAR_TRANSIENT;
                 if ((mLastSystemUiFlags & View.NAVIGATION_BAR_TRANSIENT) == 0) {
-                    vis &= ~View.SYSTEM_UI_FLAG_LOW_PROFILE;
                     setBarShowingLw(mNavigationBar, true);
                 }
             }
+        }
+        if (mStatusTransientBar != TRANSIENT_BAR_NONE
+                || mNavigationTransientBar != TRANSIENT_BAR_NONE) {
+            vis &= ~View.SYSTEM_UI_FLAG_LOW_PROFILE;
         }
         return vis;
     }
@@ -5414,5 +5417,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         pw.print(prefix); pw.print("mDemoHdmiRotation="); pw.print(mDemoHdmiRotation);
                 pw.print(" mDemoHdmiRotationLock="); pw.println(mDemoHdmiRotationLock);
         pw.print(prefix); pw.print("mUndockedHdmiRotation="); pw.println(mUndockedHdmiRotation);
+        dumpTransient(pw, prefix,
+                mStatusBar, "mStatusTransientBar", mStatusTransientBar);
+        dumpTransient(pw, prefix,
+                mNavigationBar, "mNavigationTransientBar", mNavigationTransientBar);
+    }
+
+    private void dumpTransient(PrintWriter pw, String pre, WindowState win, String var, int val) {
+        if (win != null) {
+            pw.print(pre); pw.print(var); pw.print('=');
+            pw.println(val == TRANSIENT_BAR_HIDING ? "HIDING"
+                     : val == TRANSIENT_BAR_SHOWING ? "SHOWING"
+                     : "NONE");
+        }
     }
 }
