@@ -24,24 +24,28 @@ public class ProxyService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null) {
-            handleCommand(intent);
+            if (handleCommand(intent)) {
+                return START_REDELIVER_INTENT;
+            }
         }
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
-    private void handleCommand(Intent intent) {
+    private boolean handleCommand(Intent intent) {
         Bundle bundle = intent.getExtras();
         ProxyProperties proxy = null;
         if ((bundle != null) && bundle.containsKey(Proxy.EXTRA_PROXY_INFO)) {
             proxy = bundle.getParcelable(Proxy.EXTRA_PROXY_INFO);
             if ((proxy != null) && !TextUtils.isEmpty(proxy.getPacFileUrl())) {
                 startProxy(proxy);
+                return true;
             } else {
                 stopSelf();
             }
         } else {
             stopSelf();
         }
+        return false;
     }
 
 
