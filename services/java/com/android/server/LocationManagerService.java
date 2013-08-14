@@ -548,30 +548,52 @@ public class LocationManagerService extends ILocationManager.Stub {
             return s.toString();
         }
 
+        /**
+         * Update AppOp monitoring for this receiver.
+         *
+         * @param allow If true receiver is currently active, if false it's been removed.
+         */
         public void updateMonitoring(boolean allow) {
             if (mHideFromAppOps) {
                 return;
             }
 
+            boolean requestingLocation = false;
+            boolean requestingHighPowerLocation = false;
+            if (allow) {
+                // See if receiver has any enabled update records.  Also note if any update records
+                // are high power (has a high power provider with an interval under a threshold).
+                for (UpdateRecord updateRecord : mUpdateRecords.values()) {
+                    if (isAllowedByCurrentUserSettingsLocked(updateRecord.mProvider)) {
+                        requestingLocation = true;
+                        LocationProviderInterface locationProvider
+                            = mProvidersByName.get(updateRecord.mProvider);
+                        ProviderProperties properties = locationProvider != null
+                                ? locationProvider.getProperties() : null;
+                        if (properties != null
+                                && properties.mPowerRequirement == Criteria.POWER_HIGH
+                                && updateRecord.mRequest.getInterval() < HIGH_POWER_INTERVAL_MS) {
+                            requestingHighPowerLocation = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
             // First update monitoring of any location request (including high power).
-            mOpMonitoring = updateMonitoring(allow, mOpMonitoring,
+            mOpMonitoring = updateMonitoring(
+                    requestingLocation,
+                    mOpMonitoring,
                     AppOpsManager.OP_MONITOR_LOCATION);
 
             // Now update monitoring of high power requests only.
-            // A high power request is any gps request with interval under a threshold.
-            boolean allowHighPower = allow;
-            if (allowHighPower) {
-                UpdateRecord gpsRecord = mUpdateRecords.get(LocationManager.GPS_PROVIDER);
-                if (gpsRecord == null
-                        || gpsRecord.mRequest.getInterval() > HIGH_POWER_INTERVAL_MS) {
-                    allowHighPower = false;
-                }
-            }
             boolean wasHighPowerMonitoring = mOpHighPowerMonitoring;
-            mOpHighPowerMonitoring = updateMonitoring(allowHighPower, mOpHighPowerMonitoring,
+            mOpHighPowerMonitoring = updateMonitoring(
+                    requestingHighPowerLocation,
+                    mOpHighPowerMonitoring,
                     AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION);
             if (mOpHighPowerMonitoring != wasHighPowerMonitoring) {
-                // send an intent to notify that a high power request has been added/removed.
+                // Send an intent to notify that a high power request has been added/removed.
                 Intent intent = new Intent(LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION);
                 mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
             }
@@ -688,6 +710,10 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         public boolean callProviderEnabledLocked(String provider, boolean enabled) {
+            // First update AppOp monitoring.
+            // An app may get/lose location access as providers are enabled/disabled.
+            updateMonitoring(true);
+
             if (mListener != null) {
                 try {
                     synchronized (this) {
