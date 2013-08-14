@@ -86,7 +86,13 @@ public final class DreamManagerService extends IDreamManager.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.DUMP, TAG);
+        if (mContext.checkCallingOrSelfPermission("android.permission.DUMP")
+                != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump DreamManager from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid());
+            return;
+        }
 
         pw.println("DREAM MANAGER (dumpsys dreams)");
         pw.println();
