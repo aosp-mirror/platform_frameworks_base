@@ -81,9 +81,6 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         }
     };
 
-    private static final HostnameVerifier HOSTNAME_VERIFIER =
-        HttpsURLConnection.getDefaultHostnameVerifier();
-
     private SSLSocketFactory mInsecureFactory = null;
     private SSLSocketFactory mSecureFactory = null;
     private TrustManager[] mTrustManagers = null;
@@ -195,7 +192,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
             if (session == null) {
                 throw new SSLException("Cannot verify SSL socket without session");
             }
-            if (!HOSTNAME_VERIFIER.verify(hostname, session)) {
+            if (!HttpsURLConnection.getDefaultHostnameVerifier().verify(hostname, session)) {
                 throw new SSLPeerUnverifiedException("Cannot verify hostname: " + hostname);
             }
         }
