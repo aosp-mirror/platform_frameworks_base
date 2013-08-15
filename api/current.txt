@@ -1015,6 +1015,7 @@ package android {
     field public static final int summaryOff = 16843248; // 0x10101f0
     field public static final int summaryOn = 16843247; // 0x10101ef
     field public static final int supportsRtl = 16843695; // 0x10103af
+    field public static final int supportsSwitchingToNextInputMethod = 16843753; // 0x10103e9
     field public static final int supportsUploading = 16843419; // 0x101029b
     field public static final int switchMinWidth = 16843632; // 0x1010370
     field public static final int switchPadding = 16843633; // 0x1010371
