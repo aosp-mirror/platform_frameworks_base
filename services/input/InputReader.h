@@ -1285,6 +1285,9 @@ protected:
             if (haveSizeBias) {
                 *outSize += sizeBias;
             }
+            if (*outSize < 0) {
+                *outSize = 0;
+            }
         }
     } mCalibration;
 
