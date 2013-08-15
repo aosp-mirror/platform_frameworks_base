@@ -76,6 +76,7 @@ public class PanelView extends FrameLayout {
     private boolean mClosing;
     private boolean mRubberbanding;
     private boolean mTracking;
+    private int mTrackingPointer;
 
     private TimeAnimator mTimeAnimator;
     private ObjectAnimator mPeekAnimator;
@@ -380,14 +381,21 @@ public class PanelView extends FrameLayout {
             mHandleView.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    final float y = event.getY();
-                    final float rawY = event.getRawY();
-                    if (DEBUG) logf("handle.onTouch: a=%s y=%.1f rawY=%.1f off=%.1f",
+                    int pointerIndex = event.findPointerIndex(mTrackingPointer);
+                    if (pointerIndex < 0) {
+                        pointerIndex = 0;
+                        mTrackingPointer = event.getPointerId(pointerIndex);
+                    }
+                    final float y = event.getY(pointerIndex);
+                    final float rawDelta = event.getRawY() - event.getY();
+                    final float rawY = y + rawDelta;
+                    if (DEBUG) logf("handle.onTouch: a=%s p=[%d,%d] y=%.1f rawY=%.1f off=%.1f",
                             MotionEvent.actionToString(event.getAction()),
+                            mTrackingPointer, pointerIndex,
                             y, rawY, mTouchOffset);
                     PanelView.this.getLocationOnScreen(mAbsPos);
 
-                    switch (event.getAction()) {
+                    switch (event.getActionMasked()) {
                         case MotionEvent.ACTION_DOWN:
                             mTracking = true;
                             mHandleView.setPressed(true);
@@ -397,10 +405,23 @@ public class PanelView extends FrameLayout {
                             trackMovement(event);
                             mTimeAnimator.cancel(); // end any outstanding animations
                             mBar.onTrackingStarted(PanelView.this);
-                            mTouchOffset = (rawY - mAbsPos[1]) - PanelView.this.getExpandedHeight();
+                            mTouchOffset = (rawY - mAbsPos[1]) - mExpandedHeight;
                             if (mExpandedHeight == 0) {
                                 mJustPeeked = true;
                                 runPeekAnimation();
+                            }
+                            break;
+
+                        case MotionEvent.ACTION_POINTER_UP:
+                            final int upPointer = event.getPointerId(event.getActionIndex());
+                            if (mTrackingPointer == upPointer) {
+                                // gesture is ongoing, find a new pointer to track
+                                final int newIndex = event.getPointerId(0) != upPointer ? 0 : 1;
+                                final float newY = event.getY(newIndex);
+                                final float newRawY = newY + rawDelta;
+                                mTrackingPointer = event.getPointerId(newIndex);
+                                mTouchOffset = (newRawY - mAbsPos[1]) - mExpandedHeight;
+                                mInitialTouchY = newY;
                             }
                             break;
 
@@ -424,6 +445,7 @@ public class PanelView extends FrameLayout {
                         case MotionEvent.ACTION_CANCEL:
                             mFinalTouchY = y;
                             mTracking = false;
+                            mTrackingPointer = -1;
                             mHandleView.setPressed(false);
                             postInvalidate(); // catch the press state change
                             mBar.onTrackingStopped(PanelView.this);
