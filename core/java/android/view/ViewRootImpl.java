@@ -3271,9 +3271,9 @@ public final class ViewRootImpl implements ViewParent,
                     // focus
                     return ancestorToTakeFocus.requestFocus();
                 } else {
-                    // nothing appropriate to have focus in touch mode, clear it
-                    // out
-                    focused.clearFocus();
+                    // There's nothing to focus. Clear and propagate through the
+                    // hierarchy, but don't attempt to place new focus.
+                    focused.clearFocusInternal(true, false);
                     return true;
                 }
             }
