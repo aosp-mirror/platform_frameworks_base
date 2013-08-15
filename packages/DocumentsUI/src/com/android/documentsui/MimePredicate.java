@@ -49,7 +49,9 @@ public class MimePredicate implements Predicate<Document> {
     }
 
     public static boolean mimeMatches(String filter, String test) {
-        if (filter.equals(test)) {
+        if (test == null) {
+            return false;
+        } else if (filter.equals(test)) {
             return true;
         } else if ("*/*".equals(filter)) {
             return true;

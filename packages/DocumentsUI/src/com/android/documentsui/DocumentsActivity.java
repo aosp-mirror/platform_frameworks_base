@@ -31,6 +31,7 @@ import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.DocumentColumns;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
@@ -63,6 +64,7 @@ public class DocumentsActivity extends Activity {
     public static final int ACTION_OPEN = 1;
     public static final int ACTION_CREATE = 2;
     public static final int ACTION_GET_CONTENT = 3;
+    public static final int ACTION_MANAGE = 4;
 
     private int mAction;
 
@@ -91,6 +93,8 @@ public class DocumentsActivity extends Activity {
             mAction = ACTION_CREATE;
         } else if (Intent.ACTION_GET_CONTENT.equals(action)) {
             mAction = ACTION_GET_CONTENT;
+        } else if (Intent.ACTION_MANAGE_DOCUMENT.equals(action)) {
+            mAction = ACTION_MANAGE;
         }
 
         if (mAction == ACTION_OPEN || mAction == ACTION_GET_CONTENT) {
@@ -98,7 +102,9 @@ public class DocumentsActivity extends Activity {
                     Intent.EXTRA_ALLOW_MULTIPLE, false);
         }
 
-        if (intent.hasExtra(Intent.EXTRA_MIME_TYPES)) {
+        if (mAction == ACTION_MANAGE) {
+            mDisplayState.acceptMimes = new String[] { "*/*" };
+        } else if (intent.hasExtra(Intent.EXTRA_MIME_TYPES)) {
             mDisplayState.acceptMimes = intent.getStringArrayExtra(Intent.EXTRA_MIME_TYPES);
         } else {
             mDisplayState.acceptMimes = new String[] { intent.getType() };
@@ -120,8 +126,12 @@ public class DocumentsActivity extends Activity {
             moreApps.setComponent(null);
             moreApps.setPackage(null);
             RootsFragment.show(getFragmentManager(), moreApps);
-        } else {
+        } else if (mAction == ACTION_OPEN || mAction == ACTION_CREATE) {
             RootsFragment.show(getFragmentManager(), null);
+        }
+
+        if (mAction == ACTION_MANAGE) {
+            mDisplayState.sortOrder = DisplayState.SORT_ORDER_DATE;
         }
 
         mRootsContainer = findViewById(R.id.container_roots);
@@ -134,26 +144,54 @@ public class DocumentsActivity extends Activity {
         mDrawerLayout.setDrawerListener(mDrawerListener);
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
 
-        mDrawerLayout.openDrawer(mRootsContainer);
+        if (mAction == ACTION_MANAGE) {
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
-        // Restore last stack for calling package
-        // TODO: move into async loader
-        final String packageName = getCallingPackage();
-        final Cursor cursor = getContentResolver()
-                .query(RecentsProvider.buildResume(packageName), null, null, null, null);
-        try {
-            if (cursor.moveToFirst()) {
-                final String raw = cursor.getString(
-                        cursor.getColumnIndex(RecentsProvider.COL_PATH));
-                mStack = DocumentStack.deserialize(getContentResolver(), raw);
+            final Uri rootUri = intent.getData();
+            final String authority = rootUri.getAuthority();
+            final String rootId = DocumentsContract.getRootId(rootUri);
+
+            final Root root = RootsCache.findRoot(this, authority, rootId);
+            if (root != null) {
+                onRootPicked(root, true);
+            } else {
+                Log.w(TAG, "Failed to find root: " + rootUri);
+                finish();
             }
-        } catch (FileNotFoundException e) {
-            Log.w(TAG, "Failed to resume", e);
-        } finally {
-            cursor.close();
-        }
 
-        onCurrentDirectoryChanged();
+        } else {
+            mDrawerLayout.openDrawer(mRootsContainer);
+
+            // Restore last stack for calling package
+            // TODO: move into async loader
+            final String packageName = getCallingPackage();
+            final Cursor cursor = getContentResolver()
+                    .query(RecentsProvider.buildResume(packageName), null, null, null, null);
+            try {
+                if (cursor.moveToFirst()) {
+                    final String raw = cursor.getString(
+                            cursor.getColumnIndex(RecentsProvider.COL_PATH));
+                    mStack = DocumentStack.deserialize(getContentResolver(), raw);
+                }
+            } catch (FileNotFoundException e) {
+                Log.w(TAG, "Failed to resume", e);
+            } finally {
+                cursor.close();
+            }
+
+            onCurrentDirectoryChanged();
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if (mAction == ACTION_MANAGE) {
+            mDisplayState.showSize = true;
+        } else {
+            mDisplayState.showSize = SettingsActivity.getDisplayFileSize(this);
+        }
     }
 
     private DrawerListener mDrawerListener = new DrawerListener() {
@@ -190,7 +228,6 @@ public class DocumentsActivity extends Activity {
         final ActionBar actionBar = getActionBar();
 
         actionBar.setDisplayShowHomeEnabled(true);
-        actionBar.setDisplayHomeAsUpEnabled(true);
 
         if (mDrawerLayout.isDrawerOpen(mRootsContainer)) {
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
@@ -201,6 +238,9 @@ public class DocumentsActivity extends Activity {
             } else if (mAction == ACTION_CREATE) {
                 actionBar.setTitle(R.string.title_save);
             }
+
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            mDrawerToggle.setDrawerIndicatorEnabled(true);
 
         } else {
             final Root root = getCurrentRoot();
@@ -217,8 +257,13 @@ public class DocumentsActivity extends Activity {
             }
 
             if (mStack.size() > 1) {
+                actionBar.setDisplayHomeAsUpEnabled(true);
+                mDrawerToggle.setDrawerIndicatorEnabled(false);
+            } else if (mAction == ACTION_MANAGE) {
+                actionBar.setDisplayHomeAsUpEnabled(false);
                 mDrawerToggle.setDrawerIndicatorEnabled(false);
             } else {
+                actionBar.setDisplayHomeAsUpEnabled(true);
                 mDrawerToggle.setDrawerIndicatorEnabled(true);
             }
         }
@@ -269,6 +314,7 @@ public class DocumentsActivity extends Activity {
         final MenuItem search = menu.findItem(R.id.menu_search);
         final MenuItem grid =  menu.findItem(R.id.menu_grid);
         final MenuItem list = menu.findItem(R.id.menu_list);
+        final MenuItem settings = menu.findItem(R.id.menu_settings);
 
         grid.setVisible(mDisplayState.mode != DisplayState.MODE_GRID);
         list.setVisible(mDisplayState.mode != DisplayState.MODE_LIST);
@@ -292,6 +338,8 @@ public class DocumentsActivity extends Activity {
 
         // TODO: close any search in-progress when hiding
         search.setVisible(searchVisible);
+
+        settings.setVisible(mAction != ACTION_MANAGE);
 
         return true;
     }

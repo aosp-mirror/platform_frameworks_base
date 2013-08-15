@@ -27,8 +27,8 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.DocumentColumns;
+import android.provider.DocumentsContract.Documents;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -69,7 +69,7 @@ public class CreateDirectoryFragment extends DialogFragment {
                 final String displayName = text1.getText().toString();
 
                 final ContentValues values = new ContentValues();
-                values.put(DocumentColumns.MIME_TYPE, DocumentsContract.MIME_TYPE_DIRECTORY);
+                values.put(DocumentColumns.MIME_TYPE, Documents.MIME_TYPE_DIR);
                 values.put(DocumentColumns.DISPLAY_NAME, displayName);
 
                 final DocumentsActivity activity = (DocumentsActivity) getActivity();

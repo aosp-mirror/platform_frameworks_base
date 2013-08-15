@@ -190,10 +190,6 @@ public class DirectoryFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-
-        final Context context = getActivity();
-        getDisplayState(this).showSize = SettingsActivity.getDisplayFileSize(context);
-
         getLoaderManager().restartLoader(mLoaderId, getArguments(), mCallbacks);
     }
 
@@ -244,7 +240,9 @@ public class DirectoryFragment extends Fragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             final Document doc = mAdapter.getItem(position);
-            ((DocumentsActivity) getActivity()).onDocumentPicked(doc);
+            if (mFilter.apply(doc)) {
+                ((DocumentsActivity) getActivity()).onDocumentPicked(doc);
+            }
         }
     };
 
@@ -389,7 +387,7 @@ public class DirectoryFragment extends Fragment {
 
             if (state.showSize) {
                 size.setVisibility(View.VISIBLE);
-                if (doc.isDirectory()) {
+                if (doc.isDirectory() || doc.size == -1) {
                     size.setText(null);
                 } else {
                     size.setText(Formatter.formatFileSize(context, doc.size));
@@ -414,17 +412,6 @@ public class DirectoryFragment extends Fragment {
         @Override
         public long getItemId(int position) {
             return getItem(position).uri.hashCode();
-        }
-
-        @Override
-        public boolean areAllItemsEnabled() {
-            return false;
-        }
-
-        @Override
-        public boolean isEnabled(int position) {
-            final Document doc = getItem(position);
-            return mFilter.apply(doc);
         }
     }
 }

@@ -21,6 +21,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.DocumentColumns;
+import android.provider.DocumentsContract.Documents;
 
 import com.android.documentsui.RecentsProvider;
 
@@ -87,7 +88,7 @@ public class Document {
             final String mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
             final String displayName = getCursorString(cursor, DocumentColumns.DISPLAY_NAME);
             final int flags = getCursorInt(cursor, DocumentColumns.FLAGS)
-                    & DocumentsContract.FLAG_SUPPORTS_THUMBNAIL;
+                    & Documents.FLAG_SUPPORTS_THUMBNAIL;
             final String summary = getCursorString(cursor, DocumentColumns.SUMMARY);
             final long size = getCursorLong(cursor, DocumentColumns.SIZE);
 
@@ -127,19 +128,19 @@ public class Document {
     }
 
     public boolean isCreateSupported() {
-        return (flags & DocumentsContract.FLAG_SUPPORTS_CREATE) != 0;
+        return (flags & Documents.FLAG_SUPPORTS_CREATE) != 0;
     }
 
     public boolean isSearchSupported() {
-        return (flags & DocumentsContract.FLAG_SUPPORTS_SEARCH) != 0;
+        return (flags & Documents.FLAG_SUPPORTS_SEARCH) != 0;
     }
 
     public boolean isThumbnailSupported() {
-        return (flags & DocumentsContract.FLAG_SUPPORTS_THUMBNAIL) != 0;
+        return (flags & Documents.FLAG_SUPPORTS_THUMBNAIL) != 0;
     }
 
     public boolean isDirectory() {
-        return DocumentsContract.MIME_TYPE_DIRECTORY.equals(mimeType);
+        return Documents.MIME_TYPE_DIR.equals(mimeType);
     }
 
     private static String getCursorString(Cursor cursor, String columnName) {
@@ -147,9 +148,19 @@ public class Document {
         return (index != -1) ? cursor.getString(index) : null;
     }
 
+    /**
+     * Missing or null values are returned as -1.
+     */
     private static long getCursorLong(Cursor cursor, String columnName) {
         final int index = cursor.getColumnIndex(columnName);
-        return (index != -1) ? cursor.getLong(index) : 0;
+        if (index == -1) return -1;
+        final String value = cursor.getString(index);
+        if (value == null) return -1;
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 
     private static int getCursorInt(Cursor cursor, String columnName) {
