@@ -175,14 +175,18 @@ public class NativeActivity extends Activity implements SurfaceHolder.Callback2,
                 ? savedInstanceState.getByteArray(KEY_NATIVE_SAVED_STATE) : null;
 
         mNativeHandle = loadNativeCode(path, funcname, Looper.myQueue(),
-                 getFilesDir().getAbsolutePath(), getObbDir().getAbsolutePath(),
-                 getExternalFilesDir(null).getAbsolutePath(),
-                 Build.VERSION.SDK_INT, getAssets(), nativeSavedState);
-        
+                getAbsolutePath(getFilesDir()), getAbsolutePath(getObbDir()),
+                getAbsolutePath(getExternalFilesDir(null)),
+                Build.VERSION.SDK_INT, getAssets(), nativeSavedState);
+
         if (mNativeHandle == 0) {
             throw new IllegalArgumentException("Unable to load native library: " + path);
         }
         super.onCreate(savedInstanceState);
+    }
+
+    private static String getAbsolutePath(File file) {
+        return (file != null) ? file.getAbsolutePath() : null;
     }
 
     @Override
