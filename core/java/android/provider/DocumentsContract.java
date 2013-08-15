@@ -57,12 +57,15 @@ public final class DocumentsContract {
      * MIME type of a document which is a directory that may contain additional
      * documents.
      *
-     * @see #buildContentsUri(Uri)
+     * @see #buildContentsUri(String, String, String)
      */
     public static final String MIME_TYPE_DIRECTORY = "vnd.android.cursor.dir/doc";
 
     /** {@hide} */
     public static final String META_DATA_DOCUMENT_PROVIDER = "android.content.DOCUMENT_PROVIDER";
+
+    /** {@hide} */
+    public static final String ACTION_ROOTS_CHANGED = "android.provider.action.ROOTS_CHANGED";
 
     /**
      * {@link DocumentColumns#DOC_ID} value representing the root directory of a
@@ -75,7 +78,7 @@ public final class DocumentsContract {
      * new files within it.
      *
      * @see DocumentColumns#FLAGS
-     * @see #buildContentsUri(Uri)
+     * @see #createDocument(ContentResolver, Uri, String, String)
      */
     public static final int FLAG_SUPPORTS_CREATE = 1;
 
@@ -109,7 +112,21 @@ public final class DocumentsContract {
      */
     public static final int FLAG_SUPPORTS_SEARCH = 1 << 4;
 
-    // TODO: flag indicating that document is writable?
+    /**
+     * Flag indicating that a document is writable.
+     *
+     * @see DocumentColumns#FLAGS
+     */
+    public static final int FLAG_SUPPORTS_WRITE = 1 << 5;
+
+    /**
+     * Flag indicating that a document is a directory that prefers its contents
+     * be shown in a larger format grid. Usually suitable when a directory
+     * contains mostly pictures.
+     *
+     * @see DocumentColumns#FLAGS
+     */
+    public static final int FLAG_PREFERS_GRID = 1 << 6;
 
     /**
      * Optimal dimensions for a document thumbnail request, stored as a
@@ -144,7 +161,8 @@ public final class DocumentsContract {
     private static final String PATH_CONTENTS = "contents";
     private static final String PATH_SEARCH = "search";
 
-    public static final String PARAM_QUERY = "query";
+    private static final String PARAM_QUERY = "query";
+    private static final String PARAM_LOCAL_ONLY = "localOnly";
 
     /**
      * Build URI representing the roots in a storage backend.
@@ -228,8 +246,29 @@ public final class DocumentsContract {
         return paths.get(3);
     }
 
+    /**
+     * Return requested search query from the given Uri.
+     */
     public static String getSearchQuery(Uri documentUri) {
         return documentUri.getQueryParameter(PARAM_QUERY);
+    }
+
+    /**
+     * Mark the given Uri to indicate that only locally-available contents
+     * should be returned.
+     */
+    public static Uri setLocalOnly(Uri documentUri) {
+        return documentUri.buildUpon()
+                .appendQueryParameter(PARAM_LOCAL_ONLY, String.valueOf(true)).build();
+    }
+
+    /**
+     * Return if the given Uri is requesting that only locally-available content
+     * be returned. That is, no network connections should be initiated to
+     * provide the metadata or content.
+     */
+    public static boolean isLocalOnly(Uri documentUri) {
+        return documentUri.getBooleanQueryParameter(PARAM_LOCAL_ONLY, false);
     }
 
     /**
@@ -423,6 +462,23 @@ public final class DocumentsContract {
     }
 
     /**
+     * Create a new document under a specific parent document with the given
+     * display name and MIME type.
+     *
+     * @param parentDocumentUri document with {@link #FLAG_SUPPORTS_CREATE}
+     * @param displayName name for new document
+     * @param mimeType MIME type for new document, which cannot be changed
+     * @return newly created document Uri, or {@code null} if failed
+     */
+    public static Uri createDocument(
+            ContentResolver resolver, Uri parentDocumentUri, String displayName, String mimeType) {
+        final ContentValues values = new ContentValues();
+        values.put(DocumentColumns.MIME_TYPE, mimeType);
+        values.put(DocumentColumns.DISPLAY_NAME, displayName);
+        return resolver.insert(parentDocumentUri, values);
+    }
+
+    /**
      * Rename the document at the given URI. Given document must have
      * {@link #FLAG_SUPPORTS_RENAME} set.
      *
@@ -433,5 +489,15 @@ public final class DocumentsContract {
         final ContentValues values = new ContentValues();
         values.put(DocumentColumns.DISPLAY_NAME, displayName);
         return (resolver.update(documentUri, values, null, null) == 1);
+    }
+
+    /**
+     * Notify the system that roots have changed for the given storage provider.
+     * This signal is used to invalidate internal caches.
+     */
+    public static void notifyRootsChanged(Context context, String authority) {
+        final Intent intent = new Intent(ACTION_ROOTS_CHANGED);
+        intent.setData(buildRootsUri(authority));
+        context.sendBroadcast(intent);
     }
 }
