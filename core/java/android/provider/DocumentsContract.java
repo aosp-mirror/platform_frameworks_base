@@ -65,7 +65,7 @@ public final class DocumentsContract {
     public static final String META_DATA_DOCUMENT_PROVIDER = "android.content.DOCUMENT_PROVIDER";
 
     /** {@hide} */
-    public static final String ACTION_ROOTS_CHANGED = "android.provider.action.ROOTS_CHANGED";
+    public static final String ACTION_DOCUMENT_CHANGED = "android.provider.action.DOCUMENT_CHANGED";
 
     /**
      * {@link DocumentColumns#DOC_ID} value representing the root directory of a
@@ -496,7 +496,7 @@ public final class DocumentsContract {
      * This signal is used to invalidate internal caches.
      */
     public static void notifyRootsChanged(Context context, String authority) {
-        final Intent intent = new Intent(ACTION_ROOTS_CHANGED);
+        final Intent intent = new Intent(ACTION_DOCUMENT_CHANGED);
         intent.setData(buildRootsUri(authority));
         context.sendBroadcast(intent);
     }

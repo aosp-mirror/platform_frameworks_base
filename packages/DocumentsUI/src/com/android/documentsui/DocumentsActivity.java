@@ -22,9 +22,11 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.ClipData;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -60,6 +62,7 @@ public class DocumentsActivity extends Activity {
 
     public static final int ACTION_OPEN = 1;
     public static final int ACTION_CREATE = 2;
+    public static final int ACTION_GET_CONTENT = 3;
 
     private int mAction;
 
@@ -84,11 +87,15 @@ public class DocumentsActivity extends Activity {
         final String action = intent.getAction();
         if (Intent.ACTION_OPEN_DOCUMENT.equals(action)) {
             mAction = ACTION_OPEN;
-            mDisplayState.allowMultiple = intent.getBooleanExtra(
-                    Intent.EXTRA_ALLOW_MULTIPLE, false);
         } else if (Intent.ACTION_CREATE_DOCUMENT.equals(action)) {
             mAction = ACTION_CREATE;
-            mDisplayState.allowMultiple = false;
+        } else if (Intent.ACTION_GET_CONTENT.equals(action)) {
+            mAction = ACTION_GET_CONTENT;
+        }
+
+        if (mAction == ACTION_OPEN || mAction == ACTION_GET_CONTENT) {
+            mDisplayState.allowMultiple = intent.getBooleanExtra(
+                    Intent.EXTRA_ALLOW_MULTIPLE, false);
         }
 
         if (intent.hasExtra(Intent.EXTRA_MIME_TYPES)) {
@@ -97,11 +104,7 @@ public class DocumentsActivity extends Activity {
             mDisplayState.acceptMimes = new String[] { intent.getType() };
         }
 
-        if (MimePredicate.mimeMatches("image/*", mDisplayState.acceptMimes)) {
-            mDisplayState.mode = DisplayState.MODE_GRID;
-        } else {
-            mDisplayState.mode = DisplayState.MODE_LIST;
-        }
+        mDisplayState.localOnly = intent.getBooleanExtra(Intent.EXTRA_LOCAL_ONLY, false);
 
         setResult(Activity.RESULT_CANCELED);
         setContentView(R.layout.activity);
@@ -112,7 +115,14 @@ public class DocumentsActivity extends Activity {
             SaveFragment.show(getFragmentManager(), mimeType, title);
         }
 
-        RootsFragment.show(getFragmentManager());
+        if (mAction == ACTION_GET_CONTENT) {
+            final Intent moreApps = new Intent(getIntent());
+            moreApps.setComponent(null);
+            moreApps.setPackage(null);
+            RootsFragment.show(getFragmentManager(), moreApps);
+        } else {
+            RootsFragment.show(getFragmentManager(), null);
+        }
 
         mRootsContainer = findViewById(R.id.container_roots);
 
@@ -186,7 +196,7 @@ public class DocumentsActivity extends Activity {
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
             actionBar.setIcon(new ColorDrawable());
 
-            if (mAction == ACTION_OPEN) {
+            if (mAction == ACTION_OPEN || mAction == ACTION_GET_CONTENT) {
                 actionBar.setTitle(R.string.title_open);
             } else if (mAction == ACTION_CREATE) {
                 actionBar.setTitle(R.string.title_save);
@@ -484,12 +494,21 @@ public class DocumentsActivity extends Activity {
         }
     }
 
+    public void onAppPicked(ResolveInfo info) {
+        final Intent intent = new Intent(getIntent());
+        intent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+        intent.setComponent(new ComponentName(
+                info.activityInfo.applicationInfo.packageName, info.activityInfo.name));
+        startActivity(intent);
+        finish();
+    }
+
     public void onDocumentPicked(Document doc) {
         final FragmentManager fm = getFragmentManager();
         if (doc.isDirectory()) {
             mStack.push(doc);
             onCurrentDirectoryChanged();
-        } else if (mAction == ACTION_OPEN) {
+        } else if (mAction == ACTION_OPEN || mAction == ACTION_GET_CONTENT) {
             // Explicit file picked, return
             onFinished(doc.uri);
         } else if (mAction == ACTION_CREATE) {
@@ -538,7 +557,7 @@ public class DocumentsActivity extends Activity {
             values.put(RecentsProvider.COL_PATH, rawStack);
             resolver.insert(RecentsProvider.buildRecentCreate(), values);
 
-        } else if (mAction == ACTION_OPEN) {
+        } else if (mAction == ACTION_OPEN || mAction == ACTION_GET_CONTENT) {
             // Remember opened items
             for (Uri uri : uris) {
                 values.clear();
@@ -565,10 +584,13 @@ public class DocumentsActivity extends Activity {
             intent.setClipData(clipData);
         }
 
-        // TODO: omit WRITE and PERSIST for GET_CONTENT
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
-                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                | Intent.FLAG_PERSIST_GRANT_URI_PERMISSION);
+        if (mAction == ACTION_GET_CONTENT) {
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        } else {
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                    | Intent.FLAG_PERSIST_GRANT_URI_PERMISSION);
+        }
 
         setResult(Activity.RESULT_OK, intent);
         finish();
@@ -580,6 +602,7 @@ public class DocumentsActivity extends Activity {
         public int sortOrder = SORT_ORDER_NAME;
         public boolean allowMultiple = false;
         public boolean showSize = false;
+        public boolean localOnly = false;
 
         public static final int MODE_LIST = 0;
         public static final int MODE_GRID = 1;

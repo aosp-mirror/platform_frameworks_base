@@ -47,6 +47,7 @@
     <string name="root_type_service">Services</string>
     <string name="root_type_shortcut">Shortcuts</string>
     <string name="root_type_device">Devices</string>
+    <string name="root_type_apps">More apps</string>
 
     <string name="pref_advanced_devices">Display advanced devices</string>
     <string name="pref_file_size">Display file size</string>

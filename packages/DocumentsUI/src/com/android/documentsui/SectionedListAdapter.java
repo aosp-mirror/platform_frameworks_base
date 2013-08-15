@@ -18,6 +18,7 @@ package com.android.documentsui;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 
@@ -41,6 +42,11 @@ public class SectionedListAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    /**
+     * After mutating sections, you <em>must</em>
+     * {@link AdapterView#setAdapter(android.widget.Adapter)} to correctly
+     * recount view types.
+     */
     public void addSection(SectionAdapter adapter) {
         mSections.add(adapter);
         notifyDataSetChanged();
@@ -117,7 +123,7 @@ public class SectionedListAdapter extends BaseAdapter {
             if (position == 0) {
                 return false;
             } else if (position < sectionSize) {
-                return section.isEnabled(position);
+                return section.isEnabled(position - 1);
             }
 
             // Otherwise jump into next section
