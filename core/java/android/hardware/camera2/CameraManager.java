@@ -108,7 +108,7 @@ public final class CameraManager {
      *
      * Registering a listener more than once has no effect.
      *
-     * @param listener the new listener to send camera availability notices to.
+     * @param listener The new listener to send camera availability notices to
      */
     public void registerCameraListener(CameraListener listener) {
         synchronized (mLock) {
@@ -122,7 +122,7 @@ public final class CameraManager {
      *
      * Removing a listener that isn't registered has no effect.
      *
-     * @param listener the listener to remove from the notification list
+     * @param listener The listener to remove from the notification list
      */
     public void unregisterCameraListener(CameraListener listener) {
         synchronized (mLock) {
