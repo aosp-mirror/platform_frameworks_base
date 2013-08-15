@@ -29,9 +29,12 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnInfoListener;
 import android.media.Metadata;
+import android.media.SubtitleController;
+import android.media.WebVttRenderer;
 import android.net.Uri;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -54,7 +57,8 @@ import java.util.Vector;
  * it can be used in any layout manager, and provides various display options
  * such as scaling and tinting.
  */
-public class VideoView extends SurfaceView implements MediaPlayerControl {
+public class VideoView extends SurfaceView
+        implements MediaPlayerControl, SubtitleController.Anchor {
     private String TAG = "VideoView";
     // settable by the client
     private Uri         mUri;
@@ -208,7 +212,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         setFocusable(true);
         setFocusableInTouchMode(true);
         requestFocus();
-        mPendingSubtitleTracks = 0;
+        mPendingSubtitleTracks = new Vector<Pair<InputStream, MediaFormat>>();
         mCurrentState = STATE_IDLE;
         mTargetState  = STATE_IDLE;
     }
@@ -256,23 +260,19 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
      *               specify "und" for the language.
      */
     public void addSubtitleSource(InputStream is, MediaFormat format) {
-        // always signal unsupported message for now
-        try {
-            if (is != null) {
-                is.close();
-            }
-        } catch (IOException e) {
-        }
-
         if (mMediaPlayer == null) {
-            ++mPendingSubtitleTracks;
+            mPendingSubtitleTracks.add(Pair.create(is, format));
         } else {
-            mInfoListener.onInfo(
-                    mMediaPlayer, MediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE, 0);
+            try {
+                mMediaPlayer.addSubtitleSource(is, format);
+            } catch (IllegalStateException e) {
+                mInfoListener.onInfo(
+                        mMediaPlayer, MediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE, 0);
+            }
         }
     }
 
-    private int mPendingSubtitleTracks;
+    private Vector<Pair<InputStream, MediaFormat>> mPendingSubtitleTracks;
 
     public void stopPlayback() {
         if (mMediaPlayer != null) {
@@ -300,6 +300,15 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         release(false);
         try {
             mMediaPlayer = new MediaPlayer();
+            // TODO: create SubtitleController in MediaPlayer, but we need
+            // a context for the subtitle renderers
+            SubtitleController controller = new SubtitleController(
+                    getContext(),
+                    mMediaPlayer.getMediaTimeProvider(),
+                    mMediaPlayer);
+            controller.registerRenderer(new WebVttRenderer(getContext(), null));
+            mMediaPlayer.setSubtitleAnchor(controller, this);
+
             if (mAudioSession != 0) {
                 mMediaPlayer.setAudioSessionId(mAudioSession);
             } else {
@@ -318,9 +327,13 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             mMediaPlayer.setScreenOnWhilePlaying(true);
             mMediaPlayer.prepareAsync();
 
-            for (int ix = 0; ix < mPendingSubtitleTracks; ix++) {
-                mInfoListener.onInfo(
-                        mMediaPlayer, MediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE, 0);
+            for (Pair<InputStream, MediaFormat> pending: mPendingSubtitleTracks) {
+                try {
+                    mMediaPlayer.addSubtitleSource(pending.first, pending.second);
+                } catch (IllegalStateException e) {
+                    mInfoListener.onInfo(
+                            mMediaPlayer, MediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE, 0);
+                }
             }
 
             // we don't set the target state here either, but preserve the
@@ -340,7 +353,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             mErrorListener.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
             return;
         } finally {
-            mPendingSubtitleTracks = 0;
+            mPendingSubtitleTracks.clear();
         }
     }
 
@@ -604,7 +617,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             mMediaPlayer.reset();
             mMediaPlayer.release();
             mMediaPlayer = null;
-            mPendingSubtitleTracks = 0;
+            mPendingSubtitleTracks.clear();
             mCurrentState = STATE_IDLE;
             if (cleartargetstate) {
                 mTargetState  = STATE_IDLE;
@@ -874,4 +887,22 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             overlay.layout(left, top, right, bottom);
         }
     }
+
+    /** @hide */
+    @Override
+    public void setSubtitleView(View view) {
+        if (mSubtitleView == view) {
+            return;
+        }
+
+        if (mSubtitleView != null) {
+            removeOverlay(mSubtitleView);
+        }
+        mSubtitleView = view;
+        if (mSubtitleView != null) {
+            addOverlay(mSubtitleView);
+        }
+    }
+
+    private View mSubtitleView;
 }
