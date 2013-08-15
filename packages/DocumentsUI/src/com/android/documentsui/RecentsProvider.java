@@ -129,11 +129,11 @@ public class RecentsProvider extends ContentProvider {
         switch (sMatcher.match(uri)) {
             case URI_RECENT_OPEN: {
                 return db.query(TABLE_RECENT_OPEN, projection,
-                        buildWhereYounger(DateUtils.WEEK_IN_MILLIS), null, null, null, sortOrder);
+                        buildWhereYounger(DateUtils.WEEK_IN_MILLIS), null, null, null, null);
             }
             case URI_RECENT_CREATE: {
                 return db.query(TABLE_RECENT_CREATE, projection,
-                        buildWhereYounger(DateUtils.WEEK_IN_MILLIS), null, null, null, sortOrder);
+                        buildWhereYounger(DateUtils.WEEK_IN_MILLIS), null, null, null, null);
             }
             case URI_RESUME: {
                 final String packageName = uri.getPathSegments().get(1);

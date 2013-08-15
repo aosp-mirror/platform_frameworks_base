@@ -95,19 +95,24 @@ public class RootsCache {
 
                 sProviders.put(info.providerInfo.authority, info);
 
-                // TODO: remove deprecated customRoots flag
-                // TODO: populate roots on background thread, and cache results
-                final Uri uri = DocumentsContract.buildRootsUri(providerInfo.authority);
-                final Cursor cursor = context.getContentResolver()
-                        .query(uri, null, null, null, null);
                 try {
-                    while (cursor.moveToNext()) {
-                        final Root root = Root.fromCursor(context, info, cursor);
-                        sRoots.put(Pair.create(info.providerInfo.authority, root.rootId), root);
-                        sRootsList.add(root);
+                    // TODO: remove deprecated customRoots flag
+                    // TODO: populate roots on background thread, and cache results
+                    final Uri uri = DocumentsContract.buildRootsUri(providerInfo.authority);
+                    final Cursor cursor = context.getContentResolver()
+                            .query(uri, null, null, null, null);
+                    try {
+                        while (cursor.moveToNext()) {
+                            final Root root = Root.fromCursor(context, info, cursor);
+                            sRoots.put(Pair.create(info.providerInfo.authority, root.rootId), root);
+                            sRootsList.add(root);
+                        }
+                    } finally {
+                        cursor.close();
                     }
-                } finally {
-                    cursor.close();
+                } catch (Exception e) {
+                    Log.w(TAG, "Failed to load some roots from " + info.providerInfo.authority
+                            + ": " + e);
                 }
             }
         }

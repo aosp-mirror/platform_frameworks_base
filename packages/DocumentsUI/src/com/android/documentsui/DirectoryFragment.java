@@ -144,13 +144,17 @@ public class DirectoryFragment extends Fragment {
                 final DisplayState state = getDisplayState(DirectoryFragment.this);
                 mFilter = new MimePredicate(state.acceptMimes);
 
-                final Uri contentsUri;
+                Uri contentsUri;
                 if (mType == TYPE_NORMAL) {
                     contentsUri = DocumentsContract.buildContentsUri(uri);
                 } else if (mType == TYPE_RECENT_OPEN) {
                     contentsUri = RecentsProvider.buildRecentOpen();
                 } else {
                     contentsUri = uri;
+                }
+
+                if (state.localOnly) {
+                    contentsUri = DocumentsContract.setLocalOnly(contentsUri);
                 }
 
                 final Comparator<Document> sortOrder;
