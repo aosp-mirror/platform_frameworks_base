@@ -23,7 +23,15 @@
         android:actionViewClass="android.widget.SearchView"
         android:showAsAction="ifRoom"
         android:alphabeticShortcut="f"
-         android:imeOptions="actionSearch">
+        android:imeOptions="actionSearch">
+    </item>
+
+    <item
+        android:id="@+id/action_add_printer"
+        android:title="@null"
+        android:icon="@drawable/ic_menu_add"
+        android:showAsAction="ifRoom"
+        android:alphabeticShortcut="a">
     </item>
 
 </menu>

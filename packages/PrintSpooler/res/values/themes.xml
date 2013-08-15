@@ -24,4 +24,12 @@
         <item name="android:colorBackgroundCacheHint">@android:color/transparent</item>
     </style>
 
+    <style name="SelectPrinterActivityTheme" parent="@android:style/Theme.Holo.Light">
+        <item name="android:actionBarStyle">@style/SelectPrinterActivityActionBarStyle</item>
+    </style>
+
+    <style name="SelectPrinterActivityActionBarStyle" parent="@android:style/Widget.Holo.ActionBar">
+        <item name="android:displayOptions">showTitle</item>
+    </style>
+
 </resources>

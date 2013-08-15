@@ -24,6 +24,10 @@ import android.util.Log;
  * This class represents a print job from the perspective of a print
  * service. It provides APIs for observing the print job state and
  * performing operations on the print job.
+ * <p>
+ * <strong>Note: </strong> All methods of this class must be executed on the main
+ * application thread.
+ * </p>
  */
 public final class PrintJob {
 
@@ -48,6 +52,7 @@ public final class PrintJob {
      * @return The id.
      */
     public int getId() {
+        PrintService.throwIfNotCalledOnMainThread();
         return mCachedInfo.getId();
     }
 
@@ -62,6 +67,7 @@ public final class PrintJob {
      * @return The print job info.
      */
     public PrintJobInfo getInfo() {
+        PrintService.throwIfNotCalledOnMainThread();
         if (isInImmutableState()) {
             return mCachedInfo;
         }
@@ -83,6 +89,7 @@ public final class PrintJob {
      * @return The document.
      */
     public PrintDocument getDocument() {
+        PrintService.throwIfNotCalledOnMainThread();
         return mDocument;
     }
 
@@ -96,6 +103,7 @@ public final class PrintJob {
      * @see #cancel()
      */
     public boolean isQueued() {
+        PrintService.throwIfNotCalledOnMainThread();
         return getInfo().getState() == PrintJobInfo.STATE_QUEUED;
     }
 
@@ -110,6 +118,7 @@ public final class PrintJob {
      * @see #fail(CharSequence)
      */
     public boolean isStarted() {
+        PrintService.throwIfNotCalledOnMainThread();
         return getInfo().getState() == PrintJobInfo.STATE_STARTED;
     }
 
@@ -122,6 +131,7 @@ public final class PrintJob {
      * @see #complete()
      */
     public boolean isCompleted() {
+        PrintService.throwIfNotCalledOnMainThread();
         return getInfo().getState() == PrintJobInfo.STATE_COMPLETED;
     }
 
@@ -134,6 +144,7 @@ public final class PrintJob {
      * @see #fail(CharSequence)
      */
     public boolean isFailed() {
+        PrintService.throwIfNotCalledOnMainThread();
         return getInfo().getState() == PrintJobInfo.STATE_FAILED;
     }
 
@@ -146,6 +157,7 @@ public final class PrintJob {
      * @see #cancel()
      */
     public boolean isCancelled() {
+        PrintService.throwIfNotCalledOnMainThread();
         return getInfo().getState() == PrintJobInfo.STATE_FAILED;
     }
 
@@ -158,6 +170,7 @@ public final class PrintJob {
      * @see #isQueued()
      */
     public boolean start() {
+        PrintService.throwIfNotCalledOnMainThread();
         if (isQueued()) {
             return setState(PrintJobInfo.STATE_STARTED, null);
         }
@@ -173,6 +186,7 @@ public final class PrintJob {
      * @see #isStarted()
      */
     public boolean complete() {
+        PrintService.throwIfNotCalledOnMainThread();
         if (isStarted()) {
             return setState(PrintJobInfo.STATE_COMPLETED, null);
         }
@@ -191,7 +205,8 @@ public final class PrintJob {
      * @see #isQueued()
      * @see #isStarted()
      */
-    public boolean fail(CharSequence error) {
+    public boolean fail(String error) {
+        PrintService.throwIfNotCalledOnMainThread();
         if (isQueued() || isStarted()) {
             return setState(PrintJobInfo.STATE_FAILED, error);
         }
@@ -210,6 +225,7 @@ public final class PrintJob {
      * @see #isQueued()
      */
     public boolean cancel() {
+        PrintService.throwIfNotCalledOnMainThread();
         if (isQueued() || isStarted()) {
             return setState(PrintJobInfo.STATE_CANCELED, null);
         }
@@ -226,6 +242,7 @@ public final class PrintJob {
      * @return True if the tag was set, false otherwise.
      */
     public boolean setTag(String tag) {
+        PrintService.throwIfNotCalledOnMainThread();
         if (isInImmutableState()) {
             return false;
         }
@@ -263,7 +280,7 @@ public final class PrintJob {
                 || state == PrintJobInfo.STATE_CANCELED;
     }
 
-    private boolean setState(int state, CharSequence error) {
+    private boolean setState(int state, String error) {
         try {
             if (mPrintServiceClient.setPrintJobState(mCachedInfo.getId(), state, error)) {
                 // Best effort - update the state of the cached info since

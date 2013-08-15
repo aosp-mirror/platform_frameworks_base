@@ -374,13 +374,13 @@ public final class PrintManager {
 
             @Override
             public void onLayoutFinished(PrintDocumentInfo info, boolean changed) {
+                if (info == null) {
+                    throw new NullPointerException("document info cannot be null");
+                }
                 final ILayoutResultCallback callback;
                 synchronized (mLock) {
                     callback = mCallback;
                     clearLocked();
-                }
-                if (info == null) {
-                    throw new IllegalArgumentException("info cannot be null");
                 }
                 if (callback != null) {
                     try {

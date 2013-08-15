@@ -229,10 +229,11 @@ public final class PrinterInfo implements Parcelable {
         /**
          * Constructor.
          *
-         * @param prototype Prototype from which to start building.
+         * @param other Other info from which to start building.
          */
-        public Builder(PrinterInfo prototype) {
-            mPrototype = prototype;
+        public Builder(PrinterInfo other) {
+            mPrototype = new PrinterInfo();
+            mPrototype.copyFrom(other);
         }
 
         /**
