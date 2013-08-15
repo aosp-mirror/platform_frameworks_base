@@ -130,6 +130,18 @@ android_mtp_MtpServer_send_device_property_changed(JNIEnv *env, jobject thiz, ji
 }
 
 static void
+android_mtp_MtpServer_send_object_updated(JNIEnv *env, jobject thiz, jint handle)
+{
+    Mutex::Autolock autoLock(sMutex);
+
+    MtpServer* server = getMtpServer(env, thiz);
+    if (server)
+        server->sendObjectUpdated(handle);
+    else
+        ALOGE("server is null in send_object_updated");
+}
+
+static void
 android_mtp_MtpServer_add_storage(JNIEnv *env, jobject thiz, jobject jstorage)
 {
     Mutex::Autolock autoLock(sMutex);
@@ -188,6 +200,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_send_object_removed",  "(I)V", (void *)android_mtp_MtpServer_send_object_removed},
     {"native_send_device_property_changed",  "(I)V",
                                     (void *)android_mtp_MtpServer_send_device_property_changed},
+    {"native_send_object_updated",  "(I)V", (void *)android_mtp_MtpServer_send_object_updated},
     {"native_add_storage",          "(Landroid/mtp/MtpStorage;)V",
                                             (void *)android_mtp_MtpServer_add_storage},
     {"native_remove_storage",       "(I)V", (void *)android_mtp_MtpServer_remove_storage},

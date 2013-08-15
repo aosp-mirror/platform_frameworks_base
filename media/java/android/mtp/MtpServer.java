@@ -59,6 +59,10 @@ public class MtpServer implements Runnable {
         native_send_device_property_changed(property);
     }
 
+    public void sendObjectUpdated(int handle) {
+        native_send_object_updated(handle);
+    }
+
     public void addStorage(MtpStorage storage) {
         native_add_storage(storage);
     }
@@ -73,6 +77,7 @@ public class MtpServer implements Runnable {
     private native final void native_send_object_added(int handle);
     private native final void native_send_object_removed(int handle);
     private native final void native_send_device_property_changed(int property);
+    private native final void native_send_object_updated(int handle);
     private native final void native_add_storage(MtpStorage storage);
     private native final void native_remove_storage(int storageId);
 }
