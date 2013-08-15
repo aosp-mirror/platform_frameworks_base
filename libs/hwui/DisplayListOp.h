@@ -1029,8 +1029,8 @@ public:
             TextureVertex* opVertices = opMesh->vertices;
             for (uint32_t j = 0; j < vertexCount; j++, opVertices++) {
                 TextureVertex::set(vertex++,
-                        opVertices->position[0] + tx, opVertices->position[1] + ty,
-                        opVertices->texture[0], opVertices->texture[1]);
+                        opVertices->x + tx, opVertices->y + ty,
+                        opVertices->u, opVertices->v);
             }
 
             // Dirty the current layer if possible. When the 9-patch does not
