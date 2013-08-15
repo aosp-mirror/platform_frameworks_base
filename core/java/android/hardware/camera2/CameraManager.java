@@ -54,7 +54,7 @@ public final class CameraManager {
 
     private final ICameraService mCameraService;
     private ArrayList<String> mDeviceIdList;
-    private HashSet<CameraListener> mListenerSet;
+    private HashSet<CameraListener> mListenerSet = new HashSet<CameraListener>();
     private final Context mContext;
     private final Object mLock = new Object();
 
