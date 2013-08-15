@@ -16,15 +16,4 @@
 
 package android.os;
 
-import android.os.IBatteryPropertiesListener;
-import android.os.BatteryProperty;
-
-/**
- * {@hide}
- */
-
-interface IBatteryPropertiesRegistrar {
-    void registerListener(IBatteryPropertiesListener listener);
-    void unregisterListener(IBatteryPropertiesListener listener);
-    int getProperty(in int id, out BatteryProperty prop);
-}
+parcelable BatteryProperty;
