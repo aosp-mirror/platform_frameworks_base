@@ -564,7 +564,7 @@ public final class LocationRequest implements Parcelable {
             request.setHideFromAppOps(in.readInt() != 0);
             String provider = in.readString();
             if (provider != null) request.setProvider(provider);
-            WorkSource workSource = in.readParcelable(WorkSource.class.getClassLoader());
+            WorkSource workSource = in.readParcelable(null);
             if (workSource != null) request.setWorkSource(workSource);
             return request;
         }
