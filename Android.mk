@@ -279,7 +279,7 @@ LOCAL_JAVA_LIBRARIES := bouncycastle conscrypt core core-junit ext okhttp
 
 LOCAL_MODULE := framework-base
 
-LOCAL_JAR_EXCLUDE_FILES := none
+LOCAL_RMTYPEDEFS := true
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
