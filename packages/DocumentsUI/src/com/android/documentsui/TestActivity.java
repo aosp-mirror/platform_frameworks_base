@@ -60,6 +60,7 @@ public class TestActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
                 intent.setType("*/*");
                 if (multiple.isChecked()) {
                     intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
@@ -75,6 +76,7 @@ public class TestActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
                 intent.setType("image/*");
                 if (multiple.isChecked()) {
                     intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
@@ -90,6 +92,7 @@ public class TestActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
                 intent.setType("*/*");
                 intent.putExtra(Intent.EXTRA_MIME_TYPES, new String[] {
                         "text/plain", "application/msword" });
@@ -107,9 +110,26 @@ public class TestActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
                 intent.setType("text/plain");
                 intent.putExtra(Intent.EXTRA_TITLE, "foobar.txt");
                 startActivityForResult(intent, 42);
+            }
+        });
+        view.addView(button);
+
+        button = new Button(context);
+        button.setText("GET_CONTENT */*");
+        button.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("*/*");
+                if (multiple.isChecked()) {
+                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                }
+                startActivityForResult(Intent.createChooser(intent, "Kittens!"), 42);
             }
         });
         view.addView(button);
@@ -131,7 +151,7 @@ public class TestActivity extends Activity {
                 is = getContentResolver().openInputStream(uri);
                 final int length = Streams.readFullyNoClose(is).length;
                 Log.d(TAG, "read length=" + length);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.w(TAG, "Failed to read " + uri, e);
             } finally {
                 IoUtils.closeQuietly(is);

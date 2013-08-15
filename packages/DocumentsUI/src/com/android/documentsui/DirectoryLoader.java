@@ -26,6 +26,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
+import android.provider.DocumentsContract.DocumentColumns;
 import android.util.Log;
 
 import com.android.documentsui.model.Document;
@@ -38,6 +39,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 
 public class DirectoryLoader extends UriDerivativeLoader<List<Document>> {
@@ -45,6 +47,17 @@ public class DirectoryLoader extends UriDerivativeLoader<List<Document>> {
     private final int mType;
     private Predicate<Document> mFilter;
     private Comparator<Document> mSortOrder;
+
+    /**
+     * Stub result that represents an internal error.
+     */
+    public static class ExceptionResult extends LinkedList<Document> {
+        public final Exception e;
+
+        public ExceptionResult(Exception e) {
+            this.e = e;
+        }
+    }
 
     public DirectoryLoader(Context context, Uri uri, int type, Predicate<Document> filter,
             Comparator<Document> sortOrder) {
@@ -56,11 +69,18 @@ public class DirectoryLoader extends UriDerivativeLoader<List<Document>> {
 
     @Override
     public List<Document> loadInBackground(Uri uri, CancellationSignal signal) {
+        try {
+            return loadInBackgroundInternal(uri, signal);
+        } catch (Exception e) {
+            return new ExceptionResult(e);
+        }
+    }
+
+    private List<Document> loadInBackgroundInternal(Uri uri, CancellationSignal signal) {
         final ArrayList<Document> result = Lists.newArrayList();
 
-        // TODO: send selection and sorting hints to backend
         final ContentResolver resolver = getContext().getContentResolver();
-        final Cursor cursor = resolver.query(uri, null, null, null, null, signal);
+        final Cursor cursor = resolver.query(uri, null, null, null, getQuerySortOrder(), signal);
         try {
             while (cursor != null && cursor.moveToNext()) {
                 Document doc = null;
@@ -93,5 +113,17 @@ public class DirectoryLoader extends UriDerivativeLoader<List<Document>> {
         }
 
         return result;
+    }
+
+    private String getQuerySortOrder() {
+        if (mSortOrder instanceof Document.DateComparator) {
+            return DocumentColumns.LAST_MODIFIED + " DESC";
+        } else if (mSortOrder instanceof Document.NameComparator) {
+            return DocumentColumns.DISPLAY_NAME + " ASC";
+        } else if (mSortOrder instanceof Document.SizeComparator) {
+            return DocumentColumns.SIZE + " DESC";
+        } else {
+            return null;
+        }
     }
 }
