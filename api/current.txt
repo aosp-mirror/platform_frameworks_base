@@ -12375,6 +12375,7 @@ package android.media {
     ctor public MediaFormat();
     method public final boolean containsKey(java.lang.String);
     method public static final android.media.MediaFormat createAudioFormat(java.lang.String, int, int);
+    method public static final android.media.MediaFormat createSubtitleFormat(java.lang.String, java.lang.String);
     method public static final android.media.MediaFormat createVideoFormat(java.lang.String, int, int);
     method public final java.nio.ByteBuffer getByteBuffer(java.lang.String);
     method public final float getFloat(java.lang.String);
@@ -12397,6 +12398,7 @@ package android.media {
     field public static final java.lang.String KEY_HEIGHT = "height";
     field public static final java.lang.String KEY_IS_ADTS = "is-adts";
     field public static final java.lang.String KEY_I_FRAME_INTERVAL = "i-frame-interval";
+    field public static final java.lang.String KEY_LANGUAGE = "language";
     field public static final java.lang.String KEY_MAX_INPUT_SIZE = "max-input-size";
     field public static final java.lang.String KEY_MIME = "mime";
     field public static final java.lang.String KEY_SAMPLE_RATE = "sample-rate";

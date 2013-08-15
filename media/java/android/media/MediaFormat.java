@@ -26,7 +26,7 @@ import java.util.Map;
  *
  * The format of the media data is specified as string/value pairs.
  *
- * Keys common to all formats, <b>all keys not marked optional are mandatory</b>:
+ * Keys common to all audio/video formats, <b>all keys not marked optional are mandatory</b>:
  *
  * <table>
  * <tr><th>Name</th><th>Value Type</th><th>Description</th></tr>
@@ -57,6 +57,11 @@ import java.util.Map;
  * <tr><td>{@link #KEY_FLAC_COMPRESSION_LEVEL}</td><td>Integer</td><td><b>encoder-only</b>, optional, if content is FLAC audio, specifies the desired compression level.</td></tr>
  * </table>
  *
+ * Subtitle formats have the following keys:
+ * <table>
+ * <tr><td>{@link #KEY_MIME}</td><td>String</td><td>The type of the format.</td></tr>
+ * <tr><td>{@link #KEY_LANGUAGE}</td><td>String</td><td>The language of the content.</td></tr>
+ * </table>
  */
 public final class MediaFormat {
     private Map<String, Object> mMap;
@@ -66,6 +71,12 @@ public final class MediaFormat {
      * The associated value is a string.
      */
     public static final String KEY_MIME = "mime";
+
+    /**
+     * A key describing the language of the content.
+     * The associated value is a string.
+     */
+    public static final String KEY_LANGUAGE = "language";
 
     /**
      * A key describing the sample rate of an audio format.
@@ -272,6 +283,23 @@ public final class MediaFormat {
         format.setString(KEY_MIME, mime);
         format.setInteger(KEY_SAMPLE_RATE, sampleRate);
         format.setInteger(KEY_CHANNEL_COUNT, channelCount);
+
+        return format;
+    }
+
+    /**
+     * Creates a minimal subtitle format.
+     * @param mime The mime type of the content.
+     * @param language The language of the content.  Specify "und" if language
+     *        information is only included in the content (similarly, if there
+     *        are multiple language tracks in the content.)
+     */
+    public static final MediaFormat createSubtitleFormat(
+            String mime,
+            String language) {
+        MediaFormat format = new MediaFormat();
+        format.setString(KEY_MIME, mime);
+        format.setString(KEY_LANGUAGE, language);
 
         return format;
     }
