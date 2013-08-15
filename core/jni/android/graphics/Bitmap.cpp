@@ -222,8 +222,12 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
         }
     }
 
-    SkBitmap bitmap;
+    // ARGB_4444 is a deprecated format, convert automatically to 8888
+    if (config == SkBitmap::kARGB_4444_Config) {
+        config = SkBitmap::kARGB_8888_Config;
+    }
 
+    SkBitmap bitmap;
     bitmap.setConfig(config, width, height);
 
     jbyteArray buff = GraphicsJNI::allocateJavaPixelRef(env, &bitmap, NULL);
@@ -232,8 +236,7 @@ static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,
     }
 
     if (jColors != NULL) {
-        GraphicsJNI::SetPixels(env, jColors, offset, stride,
-                               0, 0, width, height, bitmap);
+        GraphicsJNI::SetPixels(env, jColors, offset, stride, 0, 0, width, height, bitmap);
     }
 
     return GraphicsJNI::createBitmap(env, new SkBitmap(bitmap), buff, isMutable, NULL, NULL);
