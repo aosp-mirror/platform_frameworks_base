@@ -547,18 +547,17 @@ public:
                                 jboolean hasAlpha, SkPaint* paint)
     {
         SkBitmap    bitmap;
-        
         bitmap.setConfig(hasAlpha ? SkBitmap::kARGB_8888_Config :
                          SkBitmap::kRGB_565_Config, width, height);
         if (!bitmap.allocPixels()) {
             return;
         }
-        
+
         if (!GraphicsJNI::SetPixels(env, jcolors, offset, stride,
-                                    0, 0, width, height, bitmap)) {
+                0, 0, width, height, bitmap, true)) {
             return;
         }
-        
+
         canvas->drawBitmap(bitmap, SkFloatToScalar(x), SkFloatToScalar(y),
                            paint);
     }

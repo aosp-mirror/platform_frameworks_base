@@ -17,6 +17,12 @@ class SkPicture;
 
 class GraphicsJNI {
 public:
+    enum BitmapCreateFlags {
+        kBitmapCreateFlag_None = 0x0,
+        kBitmapCreateFlag_Mutable = 0x1,
+        kBitmapCreateFlag_Premultiplied = 0x2,
+    };
+
     // returns true if an exception is set (and dumps it out to the Log)
     static bool hasException(JNIEnv*);
 
@@ -53,13 +59,13 @@ public:
         storage array (may be null).
     */
     static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buffer,
-                                bool isMutable, jbyteArray ninepatch, jintArray layoutbounds,
-                                int density = -1);
+            int bitmapCreateFlags, jbyteArray ninepatch, jintArray layoutbounds, int density = -1);
 
-    static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, bool isMutable,
-                                jbyteArray ninepatch, int density = -1);
+    static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, int bitmapCreateFlags,
+            jbyteArray ninepatch, int density = -1);
 
-    static void reinitBitmap(JNIEnv* env, jobject javaBitmap);
+    static void reinitBitmap(JNIEnv* env, jobject javaBitmap, SkBitmap* bitmap,
+            bool isPremultiplied);
 
     static int getBitmapAllocationByteCount(JNIEnv* env, jobject javaBitmap);
 
@@ -68,14 +74,14 @@ public:
     static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);
 
     static jbyteArray allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
-                                     SkColorTable* ctable);
+            SkColorTable* ctable);
 
     /** Copy the colors in colors[] to the bitmap, convert to the correct
         format along the way.
     */
     static bool SetPixels(JNIEnv* env, jintArray colors, int srcOffset,
-                          int srcStride, int x, int y, int width, int height,
-                          const SkBitmap& dstBitmap);
+            int srcStride, int x, int y, int width, int height,
+            const SkBitmap& dstBitmap, bool isPremultiplied);
 
     static jbyteArray getBitmapStorageObj(SkPixelRef *pixref);
 };

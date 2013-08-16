@@ -136,7 +136,7 @@ public class Canvas {
         if (!bitmap.isMutable()) {
             throw new IllegalStateException("Immutable bitmap passed to Canvas constructor");
         }
-        throwIfRecycled(bitmap);
+        throwIfCannotDraw(bitmap);
         mNativeCanvas = initRaster(bitmap.ni());
         mFinalizer = new CanvasFinalizer(mNativeCanvas);
         mBitmap = bitmap;
@@ -225,7 +225,7 @@ public class Canvas {
             if (!bitmap.isMutable()) {
                 throw new IllegalStateException();
             }
-            throwIfRecycled(bitmap);
+            throwIfCannotDraw(bitmap);
 
             safeCanvasSwap(initRaster(bitmap.ni()), true);
             mDensity = bitmap.mDensity;
@@ -1075,10 +1075,18 @@ public class Canvas {
     public void drawPath(Path path, Paint paint) {
         native_drawPath(mNativeCanvas, path.ni(), paint.mNativePaint);
     }
-    
-    private static void throwIfRecycled(Bitmap bitmap) {
+
+    /**
+     * @hide
+     */
+    protected static void throwIfCannotDraw(Bitmap bitmap) {
         if (bitmap.isRecycled()) {
             throw new RuntimeException("Canvas: trying to use a recycled bitmap " + bitmap);
+        }
+        if (!bitmap.isPremultiplied() && bitmap.getConfig() == Bitmap.Config.ARGB_8888 &&
+                bitmap.hasAlpha()) {
+            throw new RuntimeException("Canvas: trying to use a non-premultiplied bitmap "
+                    + bitmap);
         }
     }
 
@@ -1128,7 +1136,7 @@ public class Canvas {
      * @param paint  The paint used to draw the bitmap (may be null)
      */
     public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
-        throwIfRecycled(bitmap);
+        throwIfCannotDraw(bitmap);
         native_drawBitmap(mNativeCanvas, bitmap.ni(), left, top,
                 paint != null ? paint.mNativePaint : 0, mDensity, mScreenDensity, bitmap.mDensity);
     }
@@ -1159,7 +1167,7 @@ public class Canvas {
         if (dst == null) {
             throw new NullPointerException();
         }
-        throwIfRecycled(bitmap);
+        throwIfCannotDraw(bitmap);
         native_drawBitmap(mNativeCanvas, bitmap.ni(), src, dst,
                           paint != null ? paint.mNativePaint : 0, mScreenDensity, bitmap.mDensity);
     }
@@ -1190,7 +1198,7 @@ public class Canvas {
         if (dst == null) {
             throw new NullPointerException();
         }
-        throwIfRecycled(bitmap);
+        throwIfCannotDraw(bitmap);
         native_drawBitmap(mNativeCanvas, bitmap.ni(), src, dst,
                 paint != null ? paint.mNativePaint : 0, mScreenDensity, bitmap.mDensity);
     }
