@@ -1579,4 +1579,8 @@
     <item quantity="one" msgid="4835639969503729874">"Mali ang PIN. Subukang muli pagkalipas ng 1 segundo."</item>
     <item quantity="other" msgid="8030607343223287654">"Mali ang PIN. Subukang muli pagkalipas ng <xliff:g id="COUNT">%d</xliff:g> (na) segundo."</item>
   </plurals>
+    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
+    <skip />
+    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
+    <skip />
 </resources>

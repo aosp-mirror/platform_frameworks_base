@@ -1579,4 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"PIN nav pareizs. Mēģiniet pēc 1 s."</item>
     <item quantity="other" msgid="8030607343223287654">"PIN nav pareizs. Mēģiniet pēc <xliff:g id="COUNT">%d</xliff:g> s."</item>
   </plurals>
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Velciet no malas, lai atvērtu joslu"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Velciet no ekrāna malas, lai atvērtu sistēmas joslu."</string>
 </resources>

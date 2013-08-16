@@ -560,8 +560,8 @@
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Inaruhusu programu kubadilisha wakati wa saa ya kompyuta kibao."</string>
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Inaruhusu programu kubadilisha wakati wa saa ya simu."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"weka saa za eneo"</string>
-    <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Inaruhusu programu kubadilisha  majira ya saa ya kompyuta kibao."</string>
-    <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Inaruhusu programu kubadilisha  majira ya saa ya simu."</string>
+    <string name="permdesc_setTimeZone" product="tablet" msgid="1676983712315827645">"Huruhusu programu kubadilisha saa za eneo katika kompyuta kibao."</string>
+    <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Huruhusu programu kubadilisha saa za eneo katika simu."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"tenda kama Huduma ya Meneja wa Akaunti"</string>
     <string name="permdesc_accountManagerService" msgid="1948455552333615954">"Huruhusu programu kupiga simu kwa Wathibitishaji Akaunti."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"pata akaunti kwenye kifaa"</string>
@@ -1579,4 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"PIN sio sahihi. Jaribu tena baada ya sekunde 1."</item>
     <item quantity="other" msgid="8030607343223287654">"PIN sio sahihi. Jaribu tena baada ya sekunde <xliff:g id="COUNT">%d</xliff:g>."</item>
   </plurals>
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Telezesha kidole kutoka ukingo wa skrini ili kuonyesha upau"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Telezesha kidole kutoka ukingo wa skrini ili kuonyesha upau wa mfumo"</string>
 </resources>

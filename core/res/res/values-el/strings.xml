@@ -1579,4 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"Λάθος PIN. Προσπαθήστε ξανά σε 1 δευτερόλεπτο."</item>
     <item quantity="other" msgid="8030607343223287654">"Λάθος PIN. Προσπαθήστε ξανά σε <xliff:g id="COUNT">%d</xliff:g> δευτερόλεπτα."</item>
   </plurals>
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Σύρετε την άκρη για εμφάν.γραμμής"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Σύρετε από την άκρη της οθόνης για να εμφανίσετε τη γραμμή συστήματος"</string>
 </resources>
