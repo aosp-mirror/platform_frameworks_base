@@ -2378,6 +2378,9 @@
         <!-- Set to true in all of the configurations for which this input
              method should be considered an option as the default. -->
         <attr name="isDefault" format="boolean" />
+        <!-- Set to true if this input method supports ways to switch to
+             a next input method (e.g. a globe key.). -->
+        <attr name="supportsSwitchingToNextInputMethod" format="boolean" />
     </declare-styleable>
 
     <!-- This is the subtype of InputMethod. Subtype can describe locales (e.g. en_US, fr_FR...)
