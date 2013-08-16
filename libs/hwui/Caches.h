@@ -62,7 +62,7 @@ namespace uirenderer {
 static const uint32_t gMaxNumberOfQuads = 2048;
 
 // Generates simple and textured vertices
-#define FV(x, y, u, v) { { x, y }, { u, v } }
+#define FV(x, y, u, v) { x, y, u, v }
 
 // This array is never used directly but used as a memcpy source in the
 // OpenGLRenderer constructor

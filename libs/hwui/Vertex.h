@@ -26,11 +26,11 @@ namespace uirenderer {
  * Simple structure to describe a vertex with a position and a texture.
  */
 struct Vertex {
-    float position[2];
+    float x, y;
 
     static inline void set(Vertex* vertex, float x, float y) {
-        vertex[0].position[0] = x;
-        vertex[0].position[1] = y;
+        vertex[0].x = x;
+        vertex[0].y = y;
     }
 
     static inline void set(Vertex* vertex, vec2 val) {
@@ -38,7 +38,7 @@ struct Vertex {
     }
 
     static inline void copyWithOffset(Vertex* vertex, const Vertex& src, float x, float y) {
-        set(vertex, src.position[0] + x, src.position[1] + y);
+        set(vertex, src.x + x, src.y + y);
     }
 
 }; // struct Vertex
@@ -47,19 +47,19 @@ struct Vertex {
  * Simple structure to describe a vertex with a position and texture UV.
  */
 struct TextureVertex {
-    float position[2];
-    float texture[2];
+    float x, y;
+    float u, v;
 
     static inline void set(TextureVertex* vertex, float x, float y, float u, float v) {
-        vertex[0].position[0] = x;
-        vertex[0].position[1] = y;
-        vertex[0].texture[0] = u;
-        vertex[0].texture[1] = v;
+        vertex[0].x = x;
+        vertex[0].y = y;
+        vertex[0].u = u;
+        vertex[0].v = v;
     }
 
     static inline void setUV(TextureVertex* vertex, float u, float v) {
-        vertex[0].texture[0] = u;
-        vertex[0].texture[1] = v;
+        vertex[0].u = u;
+        vertex[0].v = v;
     }
 }; // struct TextureVertex
 
@@ -67,17 +67,17 @@ struct TextureVertex {
  * Simple structure to describe a vertex with a position, texture UV and ARGB color.
  */
 struct ColorTextureVertex : TextureVertex {
-    float color[4];
+    float r, g, b, a;
 
     static inline void set(ColorTextureVertex* vertex, float x, float y,
             float u, float v, int color) {
         TextureVertex::set(vertex, x, y, u, v);
 
         const float a = ((color >> 24) & 0xff) / 255.0f;
-        vertex[0].color[0] = a * ((color >> 16) & 0xff) / 255.0f;
-        vertex[0].color[1] = a * ((color >>  8) & 0xff) / 255.0f;
-        vertex[0].color[2] = a * ((color      ) & 0xff) / 255.0f;
-        vertex[0].color[3] = a;
+        vertex[0].r = a * ((color >> 16) & 0xff) / 255.0f;
+        vertex[0].g = a * ((color >>  8) & 0xff) / 255.0f;
+        vertex[0].b = a * ((color      ) & 0xff) / 255.0f;
+        vertex[0].a = a;
     }
 }; // struct ColorTextureVertex
 
@@ -94,7 +94,7 @@ struct AlphaVertex : Vertex {
 
     static inline void copyWithOffset(AlphaVertex* vertex, const AlphaVertex& src,
             float x, float y) {
-        Vertex::set(vertex, src.position[0] + x, src.position[1] + y);
+        Vertex::set(vertex, src.x + x, src.y + y);
         vertex[0].alpha = src.alpha;
     }
 

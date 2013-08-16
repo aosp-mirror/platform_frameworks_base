@@ -24,11 +24,11 @@
 #define DEBUG_DUMP_ALPHA_BUFFER() \
     for (unsigned int i = 0; i < vertexBuffer.getSize(); i++) { \
         ALOGD("point %d at %f %f, alpha %f", \
-        i, buffer[i].position[0], buffer[i].position[1], buffer[i].alpha); \
+        i, buffer[i].x, buffer[i].y, buffer[i].alpha); \
     }
 #define DEBUG_DUMP_BUFFER() \
     for (unsigned int i = 0; i < vertexBuffer.getSize(); i++) { \
-        ALOGD("point %d at %f %f", i, buffer[i].position[0], buffer[i].position[1]); \
+        ALOGD("point %d at %f %f", i, buffer[i].x, buffer[i].y); \
     }
 #else
 #define DEBUG_DUMP_ALPHA_BUFFER()
@@ -67,11 +67,11 @@ void PathTessellator::expandBoundsForStroke(SkRect& bounds, const SkPaint* paint
 }
 
 inline static void copyVertex(Vertex* destPtr, const Vertex* srcPtr) {
-    Vertex::set(destPtr, srcPtr->position[0], srcPtr->position[1]);
+    Vertex::set(destPtr, srcPtr->x, srcPtr->y);
 }
 
 inline static void copyAlphaVertex(AlphaVertex* destPtr, const AlphaVertex* srcPtr) {
-    AlphaVertex::set(destPtr, srcPtr->position[0], srcPtr->position[1], srcPtr->alpha);
+    AlphaVertex::set(destPtr, srcPtr->x, srcPtr->y, srcPtr->alpha);
 }
 
 /**
@@ -192,25 +192,25 @@ void getStrokeVerticesFromPerimeter(const PaintInfo& paintInfo, const Vector<Ver
     int currentIndex = 0;
     const Vertex* last = &(perimeter[perimeter.size() - 1]);
     const Vertex* current = &(perimeter[0]);
-    vec2 lastNormal(current->position[1] - last->position[1],
-            last->position[0] - current->position[0]);
+    vec2 lastNormal(current->y - last->y,
+            last->x - current->x);
     lastNormal.normalize();
     for (unsigned int i = 0; i < perimeter.size(); i++) {
         const Vertex* next = &(perimeter[i + 1 >= perimeter.size() ? 0 : i + 1]);
-        vec2 nextNormal(next->position[1] - current->position[1],
-                current->position[0] - next->position[0]);
+        vec2 nextNormal(next->y - current->y,
+                current->x - next->x);
         nextNormal.normalize();
 
         vec2 totalOffset = totalOffsetFromNormals(lastNormal, nextNormal);
         paintInfo.scaleOffsetForStrokeWidth(totalOffset);
 
         Vertex::set(&buffer[currentIndex++],
-                current->position[0] + totalOffset.x,
-                current->position[1] + totalOffset.y);
+                current->x + totalOffset.x,
+                current->y + totalOffset.y);
 
         Vertex::set(&buffer[currentIndex++],
-                current->position[0] - totalOffset.x,
-                current->position[1] - totalOffset.y);
+                current->x - totalOffset.x,
+                current->y - totalOffset.y);
 
         last = current;
         current = next;
@@ -229,7 +229,7 @@ static inline void storeBeginEnd(const PaintInfo& paintInfo, const Vertex& cente
     vec2 strokeOffset = normal;
     paintInfo.scaleOffsetForStrokeWidth(strokeOffset);
 
-    vec2 referencePoint(center.position[0], center.position[1]);
+    vec2 referencePoint(center.x, center.y);
     if (paintInfo.cap == SkPaint::kSquare_Cap) {
         referencePoint += vec2(-strokeOffset.y, strokeOffset.x) * (begin ? -1 : 1);
     }
@@ -255,11 +255,11 @@ void getStrokeVerticesFromUnclosedVertices(const PaintInfo& paintInfo,
     if (extra > 0) {
         // tessellate both round caps
         float beginTheta = atan2(
-                    - (vertices[0].position[0] - vertices[1].position[0]),
-                    vertices[0].position[1] - vertices[1].position[1]);
+                    - (vertices[0].x - vertices[1].x),
+                    vertices[0].y - vertices[1].y);
         float endTheta = atan2(
-                    - (vertices[lastIndex].position[0] - vertices[lastIndex - 1].position[0]),
-                    vertices[lastIndex].position[1] - vertices[lastIndex - 1].position[1]);
+                    - (vertices[lastIndex].x - vertices[lastIndex - 1].x),
+                    vertices[lastIndex].y - vertices[lastIndex - 1].y);
         const float dTheta = PI / (extra + 1);
         const float radialScale = 2.0f / (1 + cos(dTheta));
 
@@ -275,37 +275,37 @@ void getStrokeVerticesFromUnclosedVertices(const PaintInfo& paintInfo,
             vec2 beginRadialOffset(cos(beginTheta), sin(beginTheta));
             paintInfo.scaleOffsetForStrokeWidth(beginRadialOffset);
             Vertex::set(&buffer[capOffset],
-                    vertices[0].position[0] + beginRadialOffset.x,
-                    vertices[0].position[1] + beginRadialOffset.y);
+                    vertices[0].x + beginRadialOffset.x,
+                    vertices[0].y + beginRadialOffset.y);
 
             endTheta += dTheta;
             vec2 endRadialOffset(cos(endTheta), sin(endTheta));
             paintInfo.scaleOffsetForStrokeWidth(endRadialOffset);
             Vertex::set(&buffer[allocSize - 1 - capOffset],
-                    vertices[lastIndex].position[0] + endRadialOffset.x,
-                    vertices[lastIndex].position[1] + endRadialOffset.y);
+                    vertices[lastIndex].x + endRadialOffset.x,
+                    vertices[lastIndex].y + endRadialOffset.y);
         }
     }
 
     int currentIndex = extra;
     const Vertex* last = &(vertices[0]);
     const Vertex* current = &(vertices[1]);
-    vec2 lastNormal(current->position[1] - last->position[1],
-                last->position[0] - current->position[0]);
+    vec2 lastNormal(current->y - last->y,
+                last->x - current->x);
     lastNormal.normalize();
 
     storeBeginEnd(paintInfo, vertices[0], lastNormal, buffer, currentIndex, true);
 
     for (unsigned int i = 1; i < vertices.size() - 1; i++) {
         const Vertex* next = &(vertices[i + 1]);
-        vec2 nextNormal(next->position[1] - current->position[1],
-                current->position[0] - next->position[0]);
+        vec2 nextNormal(next->y - current->y,
+                current->x - next->x);
         nextNormal.normalize();
 
         vec2 strokeOffset  = totalOffsetFromNormals(lastNormal, nextNormal);
         paintInfo.scaleOffsetForStrokeWidth(strokeOffset);
 
-        vec2 center(current->position[0], current->position[1]);
+        vec2 center(current->x, current->y);
         Vertex::set(&buffer[currentIndex++], center + strokeOffset);
         Vertex::set(&buffer[currentIndex++], center - strokeOffset);
 
@@ -337,13 +337,13 @@ void getFillVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<Ver
     int currentIndex = 0;
     const Vertex* last = &(perimeter[perimeter.size() - 1]);
     const Vertex* current = &(perimeter[0]);
-    vec2 lastNormal(current->position[1] - last->position[1],
-            last->position[0] - current->position[0]);
+    vec2 lastNormal(current->y - last->y,
+            last->x - current->x);
     lastNormal.normalize();
     for (unsigned int i = 0; i < perimeter.size(); i++) {
         const Vertex* next = &(perimeter[i + 1 >= perimeter.size() ? 0 : i + 1]);
-        vec2 nextNormal(next->position[1] - current->position[1],
-                current->position[0] - next->position[0]);
+        vec2 nextNormal(next->y - current->y,
+                current->x - next->x);
         nextNormal.normalize();
 
         // AA point offset from original point is that point's normal, such that each side is offset
@@ -351,12 +351,12 @@ void getFillVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<Ver
         vec2 totalOffset = paintInfo.deriveAAOffset(totalOffsetFromNormals(lastNormal, nextNormal));
 
         AlphaVertex::set(&buffer[currentIndex++],
-                current->position[0] + totalOffset.x,
-                current->position[1] + totalOffset.y,
+                current->x + totalOffset.x,
+                current->y + totalOffset.y,
                 0.0f);
         AlphaVertex::set(&buffer[currentIndex++],
-                current->position[0] - totalOffset.x,
-                current->position[1] - totalOffset.y,
+                current->x - totalOffset.x,
+                current->y - totalOffset.y,
                 1.0f);
 
         last = current;
@@ -416,7 +416,7 @@ inline static void storeCapAA(const PaintInfo& paintInfo, const Vector<Vertex>& 
 
     // determine referencePoint, the center point for the 4 primary cap vertices
     const Vertex* point = isFirst ? vertices.begin() : (vertices.end() - 1);
-    vec2 referencePoint(point->position[0], point->position[1]);
+    vec2 referencePoint(point->x, point->y);
     if (paintInfo.cap == SkPaint::kSquare_Cap) {
         // To account for square cap, move the primary cap vertices (that create the AA edge) by the
         // stroke offset vector (rotated to be parallel to the stroke)
@@ -576,8 +576,8 @@ void getStrokeVerticesFromUnclosedVerticesAA(const PaintInfo& paintInfo,
 
     const Vertex* last = &(vertices[0]);
     const Vertex* current = &(vertices[1]);
-    vec2 lastNormal(current->position[1] - last->position[1],
-            last->position[0] - current->position[0]);
+    vec2 lastNormal(current->y - last->y,
+            last->x - current->x);
     lastNormal.normalize();
 
     // TODO: use normal from bezier traversal for cap, instead of from vertices
@@ -585,8 +585,8 @@ void getStrokeVerticesFromUnclosedVerticesAA(const PaintInfo& paintInfo,
 
     for (unsigned int i = 1; i < vertices.size() - 1; i++) {
         const Vertex* next = &(vertices[i + 1]);
-        vec2 nextNormal(next->position[1] - current->position[1],
-                current->position[0] - next->position[0]);
+        vec2 nextNormal(next->y - current->y,
+                current->x - next->x);
         nextNormal.normalize();
 
         vec2 totalOffset = totalOffsetFromNormals(lastNormal, nextNormal);
@@ -598,30 +598,30 @@ void getStrokeVerticesFromUnclosedVerticesAA(const PaintInfo& paintInfo,
         innerOffset -= AAOffset;
 
         AlphaVertex::set(&buffer[currentAAOuterIndex++],
-                current->position[0] + outerOffset.x,
-                current->position[1] + outerOffset.y,
+                current->x + outerOffset.x,
+                current->y + outerOffset.y,
                 0.0f);
         AlphaVertex::set(&buffer[currentAAOuterIndex++],
-                current->position[0] + innerOffset.x,
-                current->position[1] + innerOffset.y,
+                current->x + innerOffset.x,
+                current->y + innerOffset.y,
                 paintInfo.maxAlpha);
 
         AlphaVertex::set(&buffer[currentStrokeIndex++],
-                current->position[0] + innerOffset.x,
-                current->position[1] + innerOffset.y,
+                current->x + innerOffset.x,
+                current->y + innerOffset.y,
                 paintInfo.maxAlpha);
         AlphaVertex::set(&buffer[currentStrokeIndex++],
-                current->position[0] - innerOffset.x,
-                current->position[1] - innerOffset.y,
+                current->x - innerOffset.x,
+                current->y - innerOffset.y,
                 paintInfo.maxAlpha);
 
         AlphaVertex::set(&buffer[currentAAInnerIndex--],
-                current->position[0] - innerOffset.x,
-                current->position[1] - innerOffset.y,
+                current->x - innerOffset.x,
+                current->y - innerOffset.y,
                 paintInfo.maxAlpha);
         AlphaVertex::set(&buffer[currentAAInnerIndex--],
-                current->position[0] - outerOffset.x,
-                current->position[1] - outerOffset.y,
+                current->x - outerOffset.x,
+                current->y - outerOffset.y,
                 0.0f);
 
         current = next;
@@ -646,13 +646,13 @@ void getStrokeVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<V
 
     const Vertex* last = &(perimeter[perimeter.size() - 1]);
     const Vertex* current = &(perimeter[0]);
-    vec2 lastNormal(current->position[1] - last->position[1],
-            last->position[0] - current->position[0]);
+    vec2 lastNormal(current->y - last->y,
+            last->x - current->x);
     lastNormal.normalize();
     for (unsigned int i = 0; i < perimeter.size(); i++) {
         const Vertex* next = &(perimeter[i + 1 >= perimeter.size() ? 0 : i + 1]);
-        vec2 nextNormal(next->position[1] - current->position[1],
-                current->position[0] - next->position[0]);
+        vec2 nextNormal(next->y - current->y,
+                current->x - next->x);
         nextNormal.normalize();
 
         vec2 totalOffset = totalOffsetFromNormals(lastNormal, nextNormal);
@@ -664,30 +664,30 @@ void getStrokeVerticesFromPerimeterAA(const PaintInfo& paintInfo, const Vector<V
         innerOffset -= AAOffset;
 
         AlphaVertex::set(&buffer[currentAAOuterIndex++],
-                current->position[0] + outerOffset.x,
-                current->position[1] + outerOffset.y,
+                current->x + outerOffset.x,
+                current->y + outerOffset.y,
                 0.0f);
         AlphaVertex::set(&buffer[currentAAOuterIndex++],
-                current->position[0] + innerOffset.x,
-                current->position[1] + innerOffset.y,
+                current->x + innerOffset.x,
+                current->y + innerOffset.y,
                 paintInfo.maxAlpha);
 
         AlphaVertex::set(&buffer[currentStrokeIndex++],
-                current->position[0] + innerOffset.x,
-                current->position[1] + innerOffset.y,
+                current->x + innerOffset.x,
+                current->y + innerOffset.y,
                 paintInfo.maxAlpha);
         AlphaVertex::set(&buffer[currentStrokeIndex++],
-                current->position[0] - innerOffset.x,
-                current->position[1] - innerOffset.y,
+                current->x - innerOffset.x,
+                current->y - innerOffset.y,
                 paintInfo.maxAlpha);
 
         AlphaVertex::set(&buffer[currentAAInnerIndex++],
-                current->position[0] - innerOffset.x,
-                current->position[1] - innerOffset.y,
+                current->x - innerOffset.x,
+                current->y - innerOffset.y,
                 paintInfo.maxAlpha);
         AlphaVertex::set(&buffer[currentAAInnerIndex++],
-                current->position[0] - outerOffset.x,
-                current->position[1] - outerOffset.y,
+                current->x - outerOffset.x,
+                current->y - outerOffset.y,
                 0.0f);
 
         last = current;
@@ -743,7 +743,7 @@ void PathTessellator::tessellatePath(const SkPath &path, const SkPaint* paint,
 #if VERTEX_DEBUG
     for (unsigned int i = 0; i < tempVertices.size(); i++) {
         ALOGD("orig path: point at %f %f",
-                tempVertices[i].position[0], tempVertices[i].position[1]);
+                tempVertices[i].x, tempVertices[i].y);
     }
 #endif
 
@@ -780,7 +780,7 @@ static void expandRectToCoverVertex(SkRect& rect, float x, float y) {
     rect.fBottom = fmaxf(rect.fBottom, y);
 }
 static void expandRectToCoverVertex(SkRect& rect, const Vertex& vertex) {
-    expandRectToCoverVertex(rect, vertex.position[0], vertex.position[1]);
+    expandRectToCoverVertex(rect, vertex.x, vertex.y);
 }
 
 template <class TYPE>
@@ -939,8 +939,8 @@ bool PathTessellator::approximatePathOutlineVertices(const SkPath& path, bool fo
     }
 
     int size = outputVertices.size();
-    if (size >= 2 && outputVertices[0].position[0] == outputVertices[size - 1].position[0] &&
-            outputVertices[0].position[1] == outputVertices[size - 1].position[1]) {
+    if (size >= 2 && outputVertices[0].x == outputVertices[size - 1].x &&
+            outputVertices[0].y == outputVertices[size - 1].y) {
         outputVertices.pop();
         return true;
     }

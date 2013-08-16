@@ -1109,7 +1109,7 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
         setupDrawModelView(rect.left, rect.top, rect.right, rect.bottom);
     }
     setupDrawTextureTransformUniforms(layer->getTexTransform());
-    setupDrawMesh(&mMeshVertices[0].position[0], &mMeshVertices[0].texture[0]);
+    setupDrawMesh(&mMeshVertices[0].x, &mMeshVertices[0].u);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
 }
@@ -1142,7 +1142,7 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
         bool blend = layer->isBlend() || alpha < 1.0f;
         drawTextureMesh(x, y, x + rect.getWidth(), y + rect.getHeight(),
                 layer->getTexture(), alpha, layer->getMode(), blend,
-                &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
+                &mMeshVertices[0].x, &mMeshVertices[0].u,
                 GL_TRIANGLE_STRIP, gMeshCount, swap, swap || simpleTransform);
 
         resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
@@ -1223,7 +1223,7 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
             layer->setFilter(GL_LINEAR);
             setupDrawModelViewTranslate(rect.left, rect.top, rect.right, rect.bottom);
         }
-        setupDrawMeshIndices(&mesh[0].position[0], &mesh[0].texture[0]);
+        setupDrawMeshIndices(&mesh[0].x, &mesh[0].u);
 
         for (size_t i = 0; i < count; i++) {
             const android::Rect* r = &rects[i];
@@ -1337,7 +1337,7 @@ void OpenGLRenderer::drawIndexedQuads(Vertex* mesh, GLsizei quadsCount) {
     while (elementsCount > 0) {
         GLsizei drawCount = min(elementsCount, (GLsizei) gMaxNumberOfQuads * 6);
 
-        setupDrawIndexedVertices(&mesh[0].position[0]);
+        setupDrawIndexedVertices(&mesh[0].x);
         glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_SHORT, NULL);
 
         elementsCount -= drawCount;
@@ -2110,12 +2110,12 @@ status_t OpenGLRenderer::drawBitmaps(SkBitmap* bitmap, AssetAtlas::Entry* entry,
         int color = paint != NULL ? paint->getColor() : 0;
         drawAlpha8TextureMesh(x, y, x + bounds.getWidth(), y + bounds.getHeight(),
                 texture->id, paint != NULL, color, alpha, mode,
-                &vertices[0].position[0], &vertices[0].texture[0],
+                &vertices[0].x, &vertices[0].u,
                 GL_TRIANGLES, bitmapCount * 6, true, true, false);
     } else {
         drawTextureMesh(x, y, x + bounds.getWidth(), y + bounds.getHeight(),
                 texture->id, alpha / 255.0f, mode, texture->blend,
-                &vertices[0].position[0], &vertices[0].texture[0],
+                &vertices[0].x, &vertices[0].u,
                 GL_TRIANGLES, bitmapCount * 6, false, true, 0, true, false);
     }
 
@@ -2297,7 +2297,7 @@ status_t OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int mes
     setupDrawTexture(texture->id);
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
-    setupDrawMesh(&mesh[0].position[0], &mesh[0].texture[0], &mesh[0].color[0]);
+    setupDrawMesh(&mesh[0].x, &mesh[0].u, &mesh[0].r);
 
     glDrawArrays(GL_TRIANGLES, 0, count);
 
@@ -2385,12 +2385,12 @@ status_t OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
         int color = paint ? paint->getColor() : 0;
         drawAlpha8TextureMesh(dstLeft, dstTop, dstRight, dstBottom,
                 texture->id, paint != NULL, color, alpha, mode,
-                &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
+                &mMeshVertices[0].x, &mMeshVertices[0].u,
                 GL_TRIANGLE_STRIP, gMeshCount, ignoreTransform);
     } else {
         drawTextureMesh(dstLeft, dstTop, dstRight, dstBottom,
                 texture->id, alpha / 255.0f, mode, texture->blend,
-                &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
+                &mMeshVertices[0].x, &mMeshVertices[0].u,
                 GL_TRIANGLE_STRIP, gMeshCount, false, ignoreTransform);
     }
 
@@ -2495,7 +2495,7 @@ status_t OpenGLRenderer::drawPatches(SkBitmap* bitmap, AssetAtlas::Entry* entry,
     getAlphaAndMode(paint, &alpha, &mode);
 
     drawIndexedTextureMesh(0.0f, 0.0f, 1.0f, 1.0f, texture->id, alpha / 255.0f,
-            mode, texture->blend, &vertices[0].position[0], &vertices[0].texture[0],
+            mode, texture->blend, &vertices[0].x, &vertices[0].u,
             GL_TRIANGLES, indexCount, false, true, 0, true, false);
 
     return DrawGlInfo::kStatusDrew;
@@ -3115,7 +3115,7 @@ status_t OpenGLRenderer::drawLayer(Layer* layer, float x, float y) {
             while (elementsCount > 0) {
                 GLsizei drawCount = min(elementsCount, (GLsizei) gMaxNumberOfQuads * 6);
 
-                setupDrawMeshIndices(&mesh[0].position[0], &mesh[0].texture[0]);
+                setupDrawMeshIndices(&mesh[0].x, &mesh[0].u);
                 DRAW_DOUBLE_STENCIL_IF(!layer->hasDrawnSinceUpdate,
                         glDrawElements(GL_TRIANGLES, drawCount, GL_UNSIGNED_SHORT, NULL));
 
@@ -3418,8 +3418,8 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
     GLvoid* texCoords = (GLvoid*) gMeshTextureOffset;
 
     if (texture->uvMapper) {
-        vertices = &mMeshVertices[0].position[0];
-        texCoords = &mMeshVertices[0].texture[0];
+        vertices = &mMeshVertices[0].x;
+        texCoords = &mMeshVertices[0].u;
 
         Rect uvs(0.0f, 0.0f, 1.0f, 1.0f);
         texture->uvMapper->map(uvs);
