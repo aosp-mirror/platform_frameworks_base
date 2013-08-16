@@ -40,12 +40,16 @@ public class KeyPairGeneratorSpecTest extends AndroidTestCase {
 
     public void testConstructor_Success() throws Exception {
         KeyPairGeneratorSpec spec =
-                new KeyPairGeneratorSpec(getContext(), TEST_ALIAS_1, TEST_DN_1, SERIAL_1,
-                        NOW, NOW_PLUS_10_YEARS, 0);
+                new KeyPairGeneratorSpec(getContext(), TEST_ALIAS_1, "RSA", 1024, null, TEST_DN_1,
+                        SERIAL_1, NOW, NOW_PLUS_10_YEARS, 0);
 
         assertEquals("Context should be the one specified", getContext(), spec.getContext());
 
         assertEquals("Alias should be the one specified", TEST_ALIAS_1, spec.getKeystoreAlias());
+
+        assertEquals("Key algorithm should be the one specified", "RSA", spec.getKeyType());
+
+        assertEquals("Key size should be the one specified", 1024, spec.getKeySize());
 
         assertEquals("subjectDN should be the one specified", TEST_DN_1, spec.getSubjectDN());
 
@@ -57,6 +61,8 @@ public class KeyPairGeneratorSpecTest extends AndroidTestCase {
     public void testBuilder_Success() throws Exception {
         KeyPairGeneratorSpec spec = new KeyPairGeneratorSpec.Builder(getContext())
                 .setAlias(TEST_ALIAS_1)
+                .setKeyType("RSA")
+                .setKeySize(1024)
                 .setSubject(TEST_DN_1)
                 .setSerialNumber(SERIAL_1)
                 .setStartDate(NOW)
@@ -67,6 +73,10 @@ public class KeyPairGeneratorSpecTest extends AndroidTestCase {
         assertEquals("Context should be the one specified", getContext(), spec.getContext());
 
         assertEquals("Alias should be the one specified", TEST_ALIAS_1, spec.getKeystoreAlias());
+
+        assertEquals("Key algorithm should be the one specified", "RSA", spec.getKeyType());
+
+        assertEquals("Key size should be the one specified", 1024, spec.getKeySize());
 
         assertEquals("subjectDN should be the one specified", TEST_DN_1, spec.getSubjectDN());
 
@@ -79,7 +89,7 @@ public class KeyPairGeneratorSpecTest extends AndroidTestCase {
 
     public void testConstructor_NullContext_Failure() throws Exception {
         try {
-            new KeyPairGeneratorSpec(null, TEST_ALIAS_1, TEST_DN_1, SERIAL_1, NOW,
+            new KeyPairGeneratorSpec(null, TEST_ALIAS_1, "RSA", 1024, null, TEST_DN_1, SERIAL_1, NOW,
                     NOW_PLUS_10_YEARS, 0);
             fail("Should throw IllegalArgumentException when context is null");
         } catch (IllegalArgumentException success) {
@@ -88,7 +98,7 @@ public class KeyPairGeneratorSpecTest extends AndroidTestCase {
 
     public void testConstructor_NullKeystoreAlias_Failure() throws Exception {
         try {
-            new KeyPairGeneratorSpec(getContext(), null, TEST_DN_1, SERIAL_1, NOW,
+            new KeyPairGeneratorSpec(getContext(), null, "RSA", 1024, null, TEST_DN_1, SERIAL_1, NOW,
                     NOW_PLUS_10_YEARS, 0);
             fail("Should throw IllegalArgumentException when keystoreAlias is null");
         } catch (IllegalArgumentException success) {
@@ -97,7 +107,7 @@ public class KeyPairGeneratorSpecTest extends AndroidTestCase {
 
     public void testConstructor_NullSubjectDN_Failure() throws Exception {
         try {
-            new KeyPairGeneratorSpec(getContext(), TEST_ALIAS_1, null, SERIAL_1, NOW,
+            new KeyPairGeneratorSpec(getContext(), TEST_ALIAS_1, "RSA", 1024, null, null, SERIAL_1, NOW,
                     NOW_PLUS_10_YEARS, 0);
             fail("Should throw IllegalArgumentException when subjectDN is null");
         } catch (IllegalArgumentException success) {
@@ -106,7 +116,7 @@ public class KeyPairGeneratorSpecTest extends AndroidTestCase {
 
     public void testConstructor_NullSerial_Failure() throws Exception {
         try {
-            new KeyPairGeneratorSpec(getContext(), TEST_ALIAS_1, TEST_DN_1, null, NOW,
+            new KeyPairGeneratorSpec(getContext(), TEST_ALIAS_1, "RSA", 1024, null, TEST_DN_1, null, NOW,
                     NOW_PLUS_10_YEARS, 0);
             fail("Should throw IllegalArgumentException when startDate is null");
         } catch (IllegalArgumentException success) {
@@ -115,8 +125,8 @@ public class KeyPairGeneratorSpecTest extends AndroidTestCase {
 
     public void testConstructor_NullStartDate_Failure() throws Exception {
         try {
-            new KeyPairGeneratorSpec(getContext(), TEST_ALIAS_1, TEST_DN_1, SERIAL_1, null,
-                    NOW_PLUS_10_YEARS, 0);
+            new KeyPairGeneratorSpec(getContext(), TEST_ALIAS_1, "RSA", 1024, null, TEST_DN_1, SERIAL_1,
+                    null, NOW_PLUS_10_YEARS, 0);
             fail("Should throw IllegalArgumentException when startDate is null");
         } catch (IllegalArgumentException success) {
         }
@@ -124,8 +134,8 @@ public class KeyPairGeneratorSpecTest extends AndroidTestCase {
 
     public void testConstructor_NullEndDate_Failure() throws Exception {
         try {
-            new KeyPairGeneratorSpec(getContext(), TEST_ALIAS_1, TEST_DN_1, SERIAL_1, NOW,
-                    null, 0);
+            new KeyPairGeneratorSpec(getContext(), TEST_ALIAS_1, "RSA", 1024, null, TEST_DN_1, SERIAL_1,
+                    NOW, null, 0);
             fail("Should throw IllegalArgumentException when keystoreAlias is null");
         } catch (IllegalArgumentException success) {
         }
@@ -133,7 +143,7 @@ public class KeyPairGeneratorSpecTest extends AndroidTestCase {
 
     public void testConstructor_EndBeforeStart_Failure() throws Exception {
         try {
-            new KeyPairGeneratorSpec(getContext(), TEST_ALIAS_1, TEST_DN_1, SERIAL_1,
+            new KeyPairGeneratorSpec(getContext(), TEST_ALIAS_1, "RSA", 1024, null, TEST_DN_1, SERIAL_1,
                     NOW_PLUS_10_YEARS, NOW, 0);
             fail("Should throw IllegalArgumentException when end is before start");
         } catch (IllegalArgumentException success) {
