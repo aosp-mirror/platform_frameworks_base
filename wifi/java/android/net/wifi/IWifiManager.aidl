@@ -124,5 +124,7 @@ interface IWifiManager
     List<BatchedScanResult> getBatchedScanResults(String callingPackage);
 
     boolean isBatchedScanSupported();
+
+    void pollBatchedScan();
 }
 

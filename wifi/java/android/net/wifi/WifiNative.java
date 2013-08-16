@@ -221,8 +221,9 @@ public class WifiNative {
 
     /**
      * Format of command
-     * DRIVER WLS_BATCHING SET SCAN_FRQ=x BESTN=y CHANNEL=<z, w, t> RTT=s
+     * DRIVER WLS_BATCHING SET SCAN_FRQ=x MSCAN=r BESTN=y CHANNEL=<z, w, t> RTT=s
      * where x is an ascii representation of an integer number of seconds between scans
+     *       r is an ascii representation of an integer number of scans per batch
      *       y is an ascii representation of an integer number of the max AP to remember per scan
      *       z, w, t represent a 1..n size list of channel numbers and/or 'A', 'B' values
      *           indicating entire ranges of channels
@@ -235,8 +236,9 @@ public class WifiNative {
     public String setBatchedScanSettings(BatchedScanSettings settings) {
         if (settings == null) return doStringCommand("DRIVER WLS_BATCHING STOP");
         String cmd = "DRIVER WLS_BATCHING SET SCAN_FRQ=" + settings.scanIntervalSec;
+        cmd += " MSCAN=" + settings.maxScansPerBatch;
         if (settings.maxApPerScan != BatchedScanSettings.UNSPECIFIED) {
-            cmd += " BESTN " + settings.maxApPerScan;
+            cmd += " BESTN=" + settings.maxApPerScan;
         }
         if (settings.channelSet != null && !settings.channelSet.isEmpty()) {
             cmd += " CHANNEL=<";

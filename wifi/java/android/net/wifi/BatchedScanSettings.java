@@ -51,6 +51,7 @@ public class BatchedScanSettings implements Parcelable {
     public final static int MAX_AP_FOR_DISTANCE = MAX_AP_PER_SCAN;
     public final static int DEFAULT_AP_FOR_DISTANCE = 0;
 
+    public final static int MAX_WIFI_CHANNEL = 196;
 
     /** The expected number of scans per batch.  Note that the firmware may drop scans
      *  leading to fewer scans during the normal batch scan duration.  This value need not
@@ -113,7 +114,7 @@ public class BatchedScanSettings implements Parcelable {
         for (String channel : channelSet) {
             try {
                 int i = Integer.parseInt(channel);
-                if (i > 0 && i < 197) continue;
+                if (i > 0 && i <= MAX_WIFI_CHANNEL) continue;
             } catch (NumberFormatException e) {}
             if (channel.equals("A") || channel.equals("B")) continue;
             return false;
