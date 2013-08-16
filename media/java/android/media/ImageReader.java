@@ -20,7 +20,6 @@ import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.view.Surface;
 
 import java.lang.ref.WeakReference;
@@ -130,11 +129,26 @@ public final class ImageReader implements AutoCloseable {
     }
 
     /**
-     * <p>Get the next Image from the ImageReader's queue. Returns {@code null}
-     * if no new image is available.</p>
+     * <p>
+     * Get the next Image from the ImageReader's queue. Returns {@code null} if
+     * no new image is available.
+     * </p>
+     * <p>
+     * This operation will fail by throwing an
+     * {@link Surface.OutOfResourcesException OutOfResourcesException} if too
+     * many images have been acquired with {@link #getNextImage}. In particular
+     * a sequence of {@link #getNextImage} calls greater than {@link #getMaxImages}
+     * without calling {@link Image#close} or {@link #releaseImage} in-between
+     * will exhaust the underlying queue. At such a time,
+     * {@link Surface.OutOfResourcesException OutOfResourcesException} will be
+     * thrown until more images are released with {@link Image#close} or
+     * {@link #releaseImage}.
+     * </p>
      *
      * @return a new frame of image data, or {@code null} if no image data is
-     * available.
+     *         available.
+     * @throws Surface.OutOfResourcesException if too many images are currently
+     *         acquired
      */
     public Image getNextImage() {
         SurfaceImage si = new SurfaceImage();
@@ -172,6 +186,8 @@ public final class ImageReader implements AutoCloseable {
      * @param listener the listener that will be run
      * @param handler The handler on which the listener should be invoked, or null
      * if the listener should be invoked on the calling thread's looper.
+     *
+     * @throws IllegalArgumentException if no handler specified and the calling thread has no looper
      */
    public void setImageAvailableListener(OnImageAvailableListener listener, Handler handler) {
         mImageListener = listener;
@@ -260,8 +276,9 @@ public final class ImageReader implements AutoCloseable {
      * Called from Native code when an Event happens.
      */
     private static void postEventFromNative(Object selfRef) {
-        WeakReference weakSelf = (WeakReference)selfRef;
-        final ImageReader ir = (ImageReader)weakSelf.get();
+        @SuppressWarnings("unchecked")
+        WeakReference<ImageReader> weakSelf = (WeakReference<ImageReader>)selfRef;
+        final ImageReader ir = weakSelf.get();
         if (ir == null) {
             return;
         }
