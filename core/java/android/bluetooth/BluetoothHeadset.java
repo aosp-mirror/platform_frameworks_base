@@ -193,6 +193,11 @@ public final class BluetoothHeadset implements BluetoothProfile {
             "android.bluetooth.headset.intent.category.companyid";
 
     /**
+     * A vendor-specific command for unsolicited result code.
+     */
+    public static final String VENDOR_RESULT_CODE_COMMAND_ANDROID = "+ANDROID";
+
+    /**
      * Headset state when SCO audio is not connected.
      * This state can be one of
      * {@link #EXTRA_STATE} or {@link #EXTRA_PREVIOUS_STATE} of
@@ -838,6 +843,46 @@ public final class BluetoothHeadset implements BluetoothProfile {
             Log.w(TAG, "Proxy not attached to service");
             if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
         }
+    }
+
+    /**
+     * Sends a vendor-specific unsolicited result code to the headset.
+     *
+     * <p>The actual string to be sent is <code>command + ": " + arg</code>.
+     * For example, if {@code command} is {@link VENDOR_RESULT_CODE_COMMAND_ANDROID} and {@code arg}
+     * is {@code "0"}, the string <code>"+ANDROID: 0"</code> will be sent.
+     *
+     * <p>Currently only {@link VENDOR_RESULT_CODE_COMMAND_ANDROID} is allowed as {@code command}.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @param device Bluetooth headset.
+     * @param command A vendor-specific command.
+     * @param arg The argument that will be attached to the command.
+     * @return {@code false} if there is no headset connected, or if the command is not an allowed
+     *         vendor-specific unsolicited result code, or on error. {@code true} otherwise.
+     * @throws IllegalArgumentException if {@code command} is {@code null}.
+     */
+    public boolean sendVendorSpecificResultCode(BluetoothDevice device, String command,
+            String arg) {
+        if (DBG) {
+            log("sendVendorSpecificResultCode()");
+        }
+        if (command == null) {
+            throw new IllegalArgumentException("command is null");
+        }
+        if (mService != null && isEnabled() &&
+                isValidDevice(device)) {
+            try {
+                return mService.sendVendorSpecificResultCode(device, command, arg);
+            } catch (RemoteException e) {
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+            }
+        }
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service");
+        }
+        return false;
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {
