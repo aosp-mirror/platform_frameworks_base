@@ -30,24 +30,24 @@ public class BarTransitions {
     private static final boolean DEBUG = false;
 
     public static final int MODE_NORMAL = 0;
-    public static final int MODE_TRANSIENT = 1;
+    public static final int MODE_SEMI_TRANSPARENT = 1;
     public static final int MODE_TRANSPARENT = 2;
 
     private final String mTag;
     private final View mTarget;
     private final Drawable mOpaque;
-    private final Drawable mTransient;
+    private final Drawable mSemiTransparent;
 
-    private Drawable mTransparent;
+    protected Drawable mTransparent;
     private int mMode;
 
-    public BarTransitions(Context context, View target, Drawable transparent) {
+    public BarTransitions(Context context, View target) {
         mTag = "BarTransitions." + target.getClass().getSimpleName();
         mTarget = target;
         final Resources res = context.getResources();
         mOpaque = new ColorDrawable(res.getColor(R.drawable.status_bar_background));
-        mTransient = new ColorDrawable(res.getColor(R.color.status_bar_background_transient));
-        mTransparent = transparent;
+        mSemiTransparent =
+                new ColorDrawable(res.getColor(R.color.status_bar_background_semi_transparent));
     }
 
     public void setTransparent(Drawable transparent) {
@@ -58,18 +58,25 @@ public class BarTransitions {
     }
 
     public void transitionTo(int mode) {
+        if (mMode == mode) return;
+        int oldMode = mMode;
         mMode = mode;
         if (!ActivityManager.isHighEndGfx()) return;
-        if (DEBUG) Log.d(mTag, "transitionTo " + modeToString(mode));
-        Drawable background = mode == MODE_TRANSIENT ? mTransient
-                : mode == MODE_TRANSPARENT ? mTransparent
+        if (DEBUG) Log.d(mTag, String.format("transition from %s to %s",
+                modeToString(oldMode), modeToString(mode)));
+        onTransition(oldMode, mMode);
+    }
+
+    protected void onTransition(int oldMode, int newMode) {
+        Drawable background = newMode == MODE_SEMI_TRANSPARENT ? mSemiTransparent
+                : newMode == MODE_TRANSPARENT ? mTransparent
                 : mOpaque;
         mTarget.setBackground(background);
     }
 
     public static String modeToString(int mode) {
         if (mode == MODE_NORMAL) return "MODE_NORMAL";
-        if (mode == MODE_TRANSIENT) return "MODE_TRANSIENT";
+        if (mode == MODE_SEMI_TRANSPARENT) return "MODE_SEMI_TRANSPARENT";
         if (mode == MODE_TRANSPARENT) return "MODE_TRANSPARENT";
         throw new IllegalArgumentException("Unknown mode " + mode);
     }

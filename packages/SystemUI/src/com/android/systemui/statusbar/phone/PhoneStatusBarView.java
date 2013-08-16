@@ -46,7 +46,15 @@ public class PhoneStatusBarView extends PanelBar {
     PanelView mLastFullyOpenedPanel = null;
     PanelView mNotificationPanel, mSettingsPanel;
     private boolean mShouldFade;
-    private final BarTransitions mBarTransitions;
+    private final StatusBarTransitions mBarTransitions;
+
+    private final class StatusBarTransitions extends BarTransitions {
+        public StatusBarTransitions(Context context) {
+            super(context, PhoneStatusBarView.this);
+            final Resources res = context.getResources();
+            mTransparent = res.getDrawable(R.color.status_bar_background_transparent);
+        }
+    }
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -60,8 +68,7 @@ public class PhoneStatusBarView extends PanelBar {
             mSettingsPanelDragzoneFrac = 0f;
         }
         mFullWidthNotifications = mSettingsPanelDragzoneFrac <= 0f;
-        final Drawable transparent = res.getDrawable(R.color.status_bar_background_transparent);
-        mBarTransitions = new BarTransitions(context, this, transparent);
+        mBarTransitions = new StatusBarTransitions(context);
     }
 
     public BarTransitions getBarTransitions() {
