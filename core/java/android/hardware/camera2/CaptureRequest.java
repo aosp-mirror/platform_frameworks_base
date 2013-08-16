@@ -53,6 +53,7 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
 
     private final Object mLock = new Object();
     private final HashSet<Surface> mSurfaceSet = new HashSet<Surface>();
+    private Object mUserTag;
 
     /**
      * @hide
@@ -86,6 +87,42 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
     public void removeTarget(Surface outputTarget) {
         synchronized (mLock) {
             mSurfaceSet.remove(outputTarget);
+        }
+    }
+
+    /**
+     * Set a tag for this request.
+     *
+     * <p>This tag is not used for anything by the camera device, but can be
+     * used by an application to easily identify a CaptureRequest when it is
+     * returned by
+     * {@link CameraDevice.CaptureListener#onCaptureComplete CaptureListener.onCaptureComplete}
+     *
+     * @param tag an arbitrary Object to store with this request
+     * @see #getTag
+     */
+    public void setTag(Object tag) {
+        synchronized (mLock) {
+            mUserTag = tag;
+        }
+    }
+
+    /**
+     * Retrieve the tag for this request, if any.
+     *
+     * <p>This tag is not used for anything by the camera device, but can be
+     * used by an application to easily identify a CaptureRequest when it is
+     * returned by
+     * {@link CameraDevice.CaptureListener#onCaptureComplete CaptureListener.onCaptureComplete}
+     * </p>
+     *
+     * @return the last tag Object set on this request, or {@code null} if
+     *     no tag has been set.
+     * @see #setTag
+     */
+    public Object getTag() {
+        synchronized (mLock) {
+            return mUserTag;
         }
     }
 
