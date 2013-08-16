@@ -753,7 +753,9 @@ static jbyteArray android_media_MediaDrm_provideKeyResponse(
 
     status_t err = drm->provideKeyResponse(sessionId, response, keySetId);
 
-    throwExceptionAsNecessary(env, err, "Failed to handle key response");
+    if (throwExceptionAsNecessary(env, err, "Failed to handle key response")) {
+        return NULL;
+    }
     return VectorToJByteArray(env, keySetId);
 }
 
@@ -1104,7 +1106,9 @@ static jbyteArray android_media_MediaDrm_encryptNative(
 
     status_t err = drm->encrypt(sessionId, keyId, input, iv, output);
 
-    throwExceptionAsNecessary(env, err, "Failed to encrypt");
+    if (throwExceptionAsNecessary(env, err, "Failed to encrypt")) {
+        return NULL;
+    }
 
     return VectorToJByteArray(env, output);
 }
@@ -1132,7 +1136,9 @@ static jbyteArray android_media_MediaDrm_decryptNative(
     Vector<uint8_t> output;
 
     status_t err = drm->decrypt(sessionId, keyId, input, iv, output);
-    throwExceptionAsNecessary(env, err, "Failed to decrypt");
+    if (throwExceptionAsNecessary(env, err, "Failed to decrypt")) {
+        return NULL;
+    }
 
     return VectorToJByteArray(env, output);
 }
@@ -1160,7 +1166,9 @@ static jbyteArray android_media_MediaDrm_signNative(
 
     status_t err = drm->sign(sessionId, keyId, message, signature);
 
-    throwExceptionAsNecessary(env, err, "Failed to sign");
+    if (throwExceptionAsNecessary(env, err, "Failed to sign")) {
+        return NULL;
+    }
 
     return VectorToJByteArray(env, signature);
 }
