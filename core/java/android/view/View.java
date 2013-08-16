@@ -12076,12 +12076,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void resolvePadding() {
+        final int resolvedLayoutDirection = getLayoutDirection();
+
         if (!isRtlCompatibilityMode()) {
             // Post Jelly Bean MR1 case: we need to take the resolved layout direction into account.
             // If start / end padding are defined, they will be resolved (hence overriding) to
             // left / right or right / left depending on the resolved layout direction.
             // If start / end padding are not defined, use the left / right ones.
-            int resolvedLayoutDirection = getLayoutDirection();
             switch (resolvedLayoutDirection) {
                 case LAYOUT_DIRECTION_RTL:
                     if (mUserPaddingStart != UNDEFINED_PADDING) {
@@ -12110,11 +12111,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             mUserPaddingBottom = (mUserPaddingBottom >= 0) ? mUserPaddingBottom : mPaddingBottom;
-
-            onRtlPropertiesChanged(resolvedLayoutDirection);
         }
 
         internalSetPadding(mUserPaddingLeft, mPaddingTop, mUserPaddingRight, mUserPaddingBottom);
+        onRtlPropertiesChanged(resolvedLayoutDirection);
 
         mPrivateFlags2 |= PFLAG2_PADDING_RESOLVED;
     }
