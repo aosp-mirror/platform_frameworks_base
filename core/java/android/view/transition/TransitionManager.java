@@ -18,6 +18,7 @@ package android.view.transition;
 
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
@@ -45,8 +46,8 @@ public class TransitionManager {
     ArrayMap<Scene, Transition> mSceneTransitions = new ArrayMap<Scene, Transition>();
     ArrayMap<Scene, ArrayMap<Scene, Transition>> mScenePairTransitions =
             new ArrayMap<Scene, ArrayMap<Scene, Transition>>();
-    static ArrayMap<ViewGroup, Transition> sRunningTransitions =
-            new ArrayMap<ViewGroup, Transition>();
+    private static ThreadLocal<ArrayMap<ViewGroup, ArrayList<Transition>>> sRunningTransitions =
+            new ThreadLocal<ArrayMap<ViewGroup, ArrayList<Transition>>>();
     private static ArrayList<ViewGroup> sPendingTransitions = new ArrayList<ViewGroup>();
 
 
@@ -160,6 +161,16 @@ public class TransitionManager {
         sceneChangeRunTransition(sceneRoot, transitionClone);
     }
 
+    private static ArrayMap<ViewGroup, ArrayList<Transition>> getRunningTransitions() {
+        ArrayMap<ViewGroup, ArrayList<Transition>> runningTransitions =
+                sRunningTransitions.get();
+        if (runningTransitions == null) {
+            runningTransitions = new ArrayMap<ViewGroup, ArrayList<Transition>>();
+            sRunningTransitions.set(runningTransitions);
+        }
+        return runningTransitions;
+    }
+
     private static void sceneChangeRunTransition(final ViewGroup sceneRoot,
             final Transition transition) {
         if (transition != null) {
@@ -169,16 +180,31 @@ public class TransitionManager {
                     sceneRoot.getViewTreeObserver().removeOnPreDrawListener(this);
                     sPendingTransitions.remove(sceneRoot);
                     // Add to running list, handle end to remove it
-                    sRunningTransitions.put(sceneRoot, transition);
+                    final ArrayMap<ViewGroup, ArrayList<Transition>> runningTransitions =
+                            getRunningTransitions();
+                    ArrayList<Transition> currentTransitions = runningTransitions.get(sceneRoot);
+                    if (currentTransitions == null) {
+                        currentTransitions = new ArrayList<Transition>();
+                        runningTransitions.put(sceneRoot, currentTransitions);
+                    }
+                    currentTransitions.add(transition);
                     transition.addListener(new Transition.TransitionListenerAdapter() {
                         @Override
                         public void onTransitionEnd(Transition transition) {
-                            sRunningTransitions.remove(sceneRoot);
+                            ArrayList<Transition> currentTransitions =
+                                    runningTransitions.get(sceneRoot);
+                            currentTransitions.remove(transition);
                         }
                     });
                     transition.captureValues(sceneRoot, false);
                     transition.playTransition(sceneRoot);
-                    return true;
+
+                    // Returning false from onPreDraw() skips the current frame. This is
+                    // necessary to avoid artifacts caused by resetting target views
+                    // to their proper end states for capturing. Waiting until the next
+                    // frame to draw allows these views to have their mid-transition
+                    // values set on them again and avoid artifacts.
+                    return false;
                 }
             });
         }
@@ -187,14 +213,16 @@ public class TransitionManager {
     private static void sceneChangeSetup(ViewGroup sceneRoot, Transition transition) {
 
         // Capture current values
-        Transition runningTransition = sRunningTransitions.get(sceneRoot);
+        ArrayList<Transition> runningTransitions = getRunningTransitions().get(sceneRoot);
+
+        if (runningTransitions != null && runningTransitions.size() > 0) {
+            for (Transition runningTransition : runningTransitions) {
+                runningTransition.pause();
+            }
+        }
 
         if (transition != null) {
             transition.captureValues(sceneRoot, true);
-        }
-
-        if (runningTransition != null) {
-            runningTransition.cancelTransition();
         }
 
         // Notify previous scene that it is being exited

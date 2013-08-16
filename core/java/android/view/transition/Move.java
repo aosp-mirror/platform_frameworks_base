@@ -25,8 +25,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
-import android.util.ArrayMap;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -42,12 +40,24 @@ public class Move extends Transition {
     private static final String PROPNAME_PARENT = "android:move:parent";
     private static final String PROPNAME_WINDOW_X = "android:move:windowX";
     private static final String PROPNAME_WINDOW_Y = "android:move:windowY";
+    private static String[] sTransitionProperties = {
+            PROPNAME_BOUNDS,
+            PROPNAME_PARENT,
+            PROPNAME_WINDOW_X,
+            PROPNAME_WINDOW_Y
+    };
+
     int[] tempLocation = new int[2];
     boolean mResizeClip = false;
     boolean mReparent = false;
     private static final String LOG_TAG = "Move";
 
     private static RectEvaluator sRectEvaluator = new RectEvaluator();
+
+    @Override
+    public String[] getTransitionProperties() {
+        return sTransitionProperties;
+    }
 
     public void setResizeClip(boolean resizeClip) {
         mResizeClip = resizeClip;
@@ -146,12 +156,33 @@ public class Move extends Transition {
                     if (view.getParent() instanceof ViewGroup) {
                         final ViewGroup parent = (ViewGroup) view.getParent();
                         parent.suppressLayout(true);
-                        anim.addListener(new AnimatorListenerAdapter() {
+                        TransitionListener transitionListener = new TransitionListenerAdapter() {
+                            boolean mCanceled = false;
+
                             @Override
-                            public void onAnimationEnd(Animator animation) {
+                            public void onTransitionCancel(Transition transition) {
+                                parent.suppressLayout(false);
+                                mCanceled = true;
+                            }
+
+                            @Override
+                            public void onTransitionEnd(Transition transition) {
+                                if (!mCanceled) {
+                                    parent.suppressLayout(false);
+                                }
+                            }
+
+                            @Override
+                            public void onTransitionPause(Transition transition) {
                                 parent.suppressLayout(false);
                             }
-                        });
+
+                            @Override
+                            public void onTransitionResume(Transition transition) {
+                                parent.suppressLayout(true);
+                            }
+                        };
+                        addListener(transitionListener);
                     }
                     return anim;
                 } else {
@@ -191,12 +222,33 @@ public class Move extends Transition {
                     if (view.getParent() instanceof ViewGroup) {
                         final ViewGroup parent = (ViewGroup) view.getParent();
                         parent.suppressLayout(true);
-                        anim.addListener(new AnimatorListenerAdapter() {
+                        TransitionListener transitionListener = new TransitionListenerAdapter() {
+                            boolean mCanceled = false;
+
                             @Override
-                            public void onAnimationEnd(Animator animation) {
+                            public void onTransitionCancel(Transition transition) {
+                                parent.suppressLayout(false);
+                                mCanceled = true;
+                            }
+
+                            @Override
+                            public void onTransitionEnd(Transition transition) {
+                                if (!mCanceled) {
+                                    parent.suppressLayout(false);
+                                }
+                            }
+
+                            @Override
+                            public void onTransitionPause(Transition transition) {
                                 parent.suppressLayout(false);
                             }
-                        });
+
+                            @Override
+                            public void onTransitionResume(Transition transition) {
+                                parent.suppressLayout(true);
+                            }
+                        };
+                        addListener(transitionListener);
                     }
                     anim.addListener(new AnimatorListenerAdapter() {
                         @Override
