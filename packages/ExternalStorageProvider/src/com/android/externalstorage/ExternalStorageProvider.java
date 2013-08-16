@@ -28,7 +28,9 @@ import android.os.ParcelFileDescriptor;
 import android.provider.BaseColumns;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.DocumentColumns;
+import android.provider.DocumentsContract.Documents;
 import android.provider.DocumentsContract.RootColumns;
+import android.provider.DocumentsContract.Roots;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
@@ -79,7 +81,7 @@ public class ExternalStorageProvider extends ContentProvider {
         mRoots.clear();
 
         final Root root = new Root();
-        root.rootType = DocumentsContract.ROOT_TYPE_DEVICE_ADVANCED;
+        root.rootType = Roots.ROOT_TYPE_DEVICE_ADVANCED;
         root.name = "primary";
         root.title = getContext().getString(R.string.root_internal_storage);
         root.path = Environment.getExternalStorageDirectory();
@@ -173,7 +175,7 @@ public class ExternalStorageProvider extends ContentProvider {
         String rootPath = root.path.getAbsolutePath();
         final String path = file.getAbsolutePath();
         if (path.equals(rootPath)) {
-            return DocumentsContract.ROOT_DOC_ID;
+            return Documents.DOC_ID_ROOT;
         }
 
         if (!rootPath.endsWith("/")) {
@@ -187,7 +189,7 @@ public class ExternalStorageProvider extends ContentProvider {
     }
 
     private File docIdToFile(Root root, String docId) {
-        if (DocumentsContract.ROOT_DOC_ID.equals(docId)) {
+        if (Documents.DOC_ID_ROOT.equals(docId)) {
             return root.path;
         } else {
             return new File(root.path, docId);
@@ -204,26 +206,27 @@ public class ExternalStorageProvider extends ContentProvider {
         int flags = 0;
 
         if (file.isDirectory()) {
-            flags |= DocumentsContract.FLAG_SUPPORTS_SEARCH;
+            flags |= Documents.FLAG_SUPPORTS_SEARCH;
         }
         if (file.isDirectory() && file.canWrite()) {
-            flags |= DocumentsContract.FLAG_SUPPORTS_CREATE;
+            flags |= Documents.FLAG_SUPPORTS_CREATE;
         }
         if (file.canWrite()) {
-            flags |= DocumentsContract.FLAG_SUPPORTS_RENAME;
-            flags |= DocumentsContract.FLAG_SUPPORTS_DELETE;
+            flags |= Documents.FLAG_SUPPORTS_WRITE;
+            flags |= Documents.FLAG_SUPPORTS_RENAME;
+            flags |= Documents.FLAG_SUPPORTS_DELETE;
         }
 
         final String mimeType = getTypeForFile(file);
         if (mimeType.startsWith("image/")) {
-            flags |= DocumentsContract.FLAG_SUPPORTS_THUMBNAIL;
+            flags |= Documents.FLAG_SUPPORTS_THUMBNAIL;
         }
 
         final String docId = fileToDocId(root, file);
         final long id = docId.hashCode();
 
         final String displayName;
-        if (DocumentsContract.ROOT_DOC_ID.equals(docId)) {
+        if (Documents.DOC_ID_ROOT.equals(docId)) {
             displayName = root.title;
         } else {
             displayName = file.getName();
@@ -236,6 +239,12 @@ public class ExternalStorageProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         switch (sMatcher.match(uri)) {
+            case URI_ROOTS: {
+                return Roots.MIME_TYPE_DIR;
+            }
+            case URI_ROOTS_ID: {
+                return Roots.MIME_TYPE_ITEM;
+            }
             case URI_DOCS_ID: {
                 final Root root = mRoots.get(DocumentsContract.getRootId(uri));
                 final String docId = DocumentsContract.getDocId(uri);
@@ -249,7 +258,7 @@ public class ExternalStorageProvider extends ContentProvider {
 
     private String getTypeForFile(File file) {
         if (file.isDirectory()) {
-            return DocumentsContract.MIME_TYPE_DIRECTORY;
+            return Documents.MIME_TYPE_DIR;
         } else {
             return getTypeForName(file.getName());
         }
@@ -299,7 +308,7 @@ public class ExternalStorageProvider extends ContentProvider {
                         values.getAsString(DocumentColumns.DISPLAY_NAME), mimeType);
 
                 final File file = new File(parent, name);
-                if (DocumentsContract.MIME_TYPE_DIRECTORY.equals(mimeType)) {
+                if (Documents.MIME_TYPE_DIR.equals(mimeType)) {
                     if (!file.mkdir()) {
                         return null;
                     }
@@ -359,7 +368,7 @@ public class ExternalStorageProvider extends ContentProvider {
     }
 
     private String validateDisplayName(String displayName, String mimeType) {
-        if (DocumentsContract.MIME_TYPE_DIRECTORY.equals(mimeType)) {
+        if (Documents.MIME_TYPE_DIR.equals(mimeType)) {
             return displayName;
         } else {
             // Try appending meaningful extension if needed

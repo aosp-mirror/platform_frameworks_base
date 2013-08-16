@@ -20620,19 +20620,6 @@ package android.provider {
     field public static final java.lang.String EXTRA_HAS_MORE = "has_more";
     field public static final java.lang.String EXTRA_REQUEST_MORE = "request_more";
     field public static final java.lang.String EXTRA_THUMBNAIL_SIZE = "thumbnail_size";
-    field public static final int FLAG_PREFERS_GRID = 64; // 0x40
-    field public static final int FLAG_SUPPORTS_CREATE = 1; // 0x1
-    field public static final int FLAG_SUPPORTS_DELETE = 4; // 0x4
-    field public static final int FLAG_SUPPORTS_RENAME = 2; // 0x2
-    field public static final int FLAG_SUPPORTS_SEARCH = 16; // 0x10
-    field public static final int FLAG_SUPPORTS_THUMBNAIL = 8; // 0x8
-    field public static final int FLAG_SUPPORTS_WRITE = 32; // 0x20
-    field public static final java.lang.String MIME_TYPE_DIRECTORY = "vnd.android.cursor.dir/doc";
-    field public static final java.lang.String ROOT_DOC_ID = "0";
-    field public static final int ROOT_TYPE_DEVICE = 3; // 0x3
-    field public static final int ROOT_TYPE_DEVICE_ADVANCED = 4; // 0x4
-    field public static final int ROOT_TYPE_SERVICE = 1; // 0x1
-    field public static final int ROOT_TYPE_SHORTCUT = 2; // 0x2
   }
 
   public static abstract interface DocumentsContract.DocumentColumns implements android.provider.OpenableColumns {
@@ -20643,6 +20630,18 @@ package android.provider {
     field public static final java.lang.String SUMMARY = "summary";
   }
 
+  public static class DocumentsContract.Documents {
+    field public static final java.lang.String DOC_ID_ROOT = "0";
+    field public static final int FLAG_PREFERS_GRID = 64; // 0x40
+    field public static final int FLAG_SUPPORTS_CREATE = 1; // 0x1
+    field public static final int FLAG_SUPPORTS_DELETE = 4; // 0x4
+    field public static final int FLAG_SUPPORTS_RENAME = 2; // 0x2
+    field public static final int FLAG_SUPPORTS_SEARCH = 16; // 0x10
+    field public static final int FLAG_SUPPORTS_THUMBNAIL = 8; // 0x8
+    field public static final int FLAG_SUPPORTS_WRITE = 32; // 0x20
+    field public static final java.lang.String MIME_TYPE_DIR = "vnd.android.cursor.dir/doc";
+  }
+
   public static abstract interface DocumentsContract.RootColumns {
     field public static final java.lang.String AVAILABLE_BYTES = "available_bytes";
     field public static final java.lang.String ICON = "icon";
@@ -20650,6 +20649,15 @@ package android.provider {
     field public static final java.lang.String ROOT_TYPE = "root_type";
     field public static final java.lang.String SUMMARY = "summary";
     field public static final java.lang.String TITLE = "title";
+  }
+
+  public static class DocumentsContract.Roots {
+    field public static final java.lang.String MIME_TYPE_DIR = "vnd.android.cursor.dir/root";
+    field public static final java.lang.String MIME_TYPE_ITEM = "vnd.android.cursor.item/root";
+    field public static final int ROOT_TYPE_DEVICE = 3; // 0x3
+    field public static final int ROOT_TYPE_DEVICE_ADVANCED = 4; // 0x4
+    field public static final int ROOT_TYPE_SERVICE = 1; // 0x1
+    field public static final int ROOT_TYPE_SHORTCUT = 2; // 0x2
   }
 
   public final deprecated class LiveFolders implements android.provider.BaseColumns {
