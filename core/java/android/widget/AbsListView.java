@@ -1211,13 +1211,19 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
-     * Enables fast scrolling by letting the user quickly scroll through lists by
-     * dragging the fast scroll thumb. The adapter attached to the list may want
-     * to implement {@link SectionIndexer} if it wishes to display alphabet preview and
-     * jump between sections of the list.
+     * Specifies whether fast scrolling is enabled or disabled.
+     * <p>
+     * When fast scrolling is enabled, the user can quickly scroll through lists
+     * by dragging the fast scroll thumb.
+     * <p>
+     * If the adapter backing this list implements {@link SectionIndexer}, the
+     * fast scroller will display section header previews as the user scrolls.
+     * Additionally, the user will be able to quickly jump between sections by
+     * tapping along the length of the scroll bar.
+     *
      * @see SectionIndexer
      * @see #isFastScrollEnabled()
-     * @param enabled whether or not to enable fast scrolling
+     * @param enabled true to enable fast scrolling, false otherwise
      */
     public void setFastScrollEnabled(final boolean enabled) {
         if (mFastScrollEnabled != enabled) {
@@ -1252,13 +1258,16 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
-     * Set whether or not the fast scroller should always be shown in place of the
-     * standard scrollbars. Fast scrollers shown in this way will not fade out and will
-     * be a permanent fixture within the list. Best combined with an inset scroll bar style
-     * that will ensure enough padding. This will enable fast scrolling if it is not
+     * Set whether or not the fast scroller should always be shown in place of
+     * the standard scroll bars. This will enable fast scrolling if it is not
      * already enabled.
+     * <p>
+     * Fast scrollers shown in this way will not fade out and will be a
+     * permanent fixture within the list. This is best combined with an inset
+     * scroll bar style to ensure the scroll bar does not overlap content.
      *
-     * @param alwaysShow true if the fast scroller should always be displayed.
+     * @param alwaysShow true if the fast scroller should always be displayed,
+     *            false otherwise
      * @see #setScrollBarStyle(int)
      * @see #setFastScrollEnabled(boolean)
      */
@@ -1297,10 +1306,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
-     * Returns true if the fast scroller is set to always show on this view rather than
-     * fade out when not in use.
+     * Returns true if the fast scroller is set to always show on this view.
      *
-     * @return true if the fast scroller will always show.
+     * @return true if the fast scroller will always show
      * @see #setFastScrollAlwaysVisible(boolean)
      */
     public boolean isFastScrollAlwaysVisible() {
@@ -1316,7 +1324,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     /**
-     * Returns the current state of the fast scroll feature.
+     * Returns true if the fast scroller is enabled.
+     *
      * @see #setFastScrollEnabled(boolean)
      * @return true if fast scroll is enabled, false otherwise
      */
