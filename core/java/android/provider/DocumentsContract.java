@@ -53,80 +53,85 @@ public final class DocumentsContract {
     // content://com.example/roots/sdcard/docs/0/contents/
     // content://com.example/roots/sdcard/docs/0/search/?query=pony
 
-    /**
-     * MIME type of a document which is a directory that may contain additional
-     * documents.
-     *
-     * @see #buildContentsUri(String, String, String)
-     */
-    public static final String MIME_TYPE_DIRECTORY = "vnd.android.cursor.dir/doc";
-
     /** {@hide} */
     public static final String META_DATA_DOCUMENT_PROVIDER = "android.content.DOCUMENT_PROVIDER";
 
     /** {@hide} */
     public static final String ACTION_DOCUMENT_CHANGED = "android.provider.action.DOCUMENT_CHANGED";
 
-    /**
-     * {@link DocumentColumns#DOC_ID} value representing the root directory of a
-     * storage root.
-     */
-    public static final String ROOT_DOC_ID = "0";
+    public static class Documents {
+        private Documents() {
+        }
 
-    /**
-     * Flag indicating that a document is a directory that supports creation of
-     * new files within it.
-     *
-     * @see DocumentColumns#FLAGS
-     * @see #createDocument(ContentResolver, Uri, String, String)
-     */
-    public static final int FLAG_SUPPORTS_CREATE = 1;
+        /**
+         * MIME type of a document which is a directory that may contain additional
+         * documents.
+         *
+         * @see #buildContentsUri(String, String, String)
+         */
+        public static final String MIME_TYPE_DIR = "vnd.android.cursor.dir/doc";
 
-    /**
-     * Flag indicating that a document is renamable.
-     *
-     * @see DocumentColumns#FLAGS
-     * @see #renameDocument(ContentResolver, Uri, String)
-     */
-    public static final int FLAG_SUPPORTS_RENAME = 1 << 1;
+        /**
+         * {@link DocumentColumns#DOC_ID} value representing the root directory of a
+         * storage root.
+         */
+        public static final String DOC_ID_ROOT = "0";
 
-    /**
-     * Flag indicating that a document is deletable.
-     *
-     * @see DocumentColumns#FLAGS
-     */
-    public static final int FLAG_SUPPORTS_DELETE = 1 << 2;
+        /**
+         * Flag indicating that a document is a directory that supports creation of
+         * new files within it.
+         *
+         * @see DocumentColumns#FLAGS
+         * @see #createDocument(ContentResolver, Uri, String, String)
+         */
+        public static final int FLAG_SUPPORTS_CREATE = 1;
 
-    /**
-     * Flag indicating that a document can be represented as a thumbnail.
-     *
-     * @see DocumentColumns#FLAGS
-     * @see #getThumbnail(ContentResolver, Uri, Point)
-     */
-    public static final int FLAG_SUPPORTS_THUMBNAIL = 1 << 3;
+        /**
+         * Flag indicating that a document is renamable.
+         *
+         * @see DocumentColumns#FLAGS
+         * @see #renameDocument(ContentResolver, Uri, String)
+         */
+        public static final int FLAG_SUPPORTS_RENAME = 1 << 1;
 
-    /**
-     * Flag indicating that a document is a directory that supports search.
-     *
-     * @see DocumentColumns#FLAGS
-     */
-    public static final int FLAG_SUPPORTS_SEARCH = 1 << 4;
+        /**
+         * Flag indicating that a document is deletable.
+         *
+         * @see DocumentColumns#FLAGS
+         */
+        public static final int FLAG_SUPPORTS_DELETE = 1 << 2;
 
-    /**
-     * Flag indicating that a document is writable.
-     *
-     * @see DocumentColumns#FLAGS
-     */
-    public static final int FLAG_SUPPORTS_WRITE = 1 << 5;
+        /**
+         * Flag indicating that a document can be represented as a thumbnail.
+         *
+         * @see DocumentColumns#FLAGS
+         * @see #getThumbnail(ContentResolver, Uri, Point)
+         */
+        public static final int FLAG_SUPPORTS_THUMBNAIL = 1 << 3;
 
-    /**
-     * Flag indicating that a document is a directory that prefers its contents
-     * be shown in a larger format grid. Usually suitable when a directory
-     * contains mostly pictures.
-     *
-     * @see DocumentColumns#FLAGS
-     */
-    public static final int FLAG_PREFERS_GRID = 1 << 6;
+        /**
+         * Flag indicating that a document is a directory that supports search.
+         *
+         * @see DocumentColumns#FLAGS
+         */
+        public static final int FLAG_SUPPORTS_SEARCH = 1 << 4;
+
+        /**
+         * Flag indicating that a document is writable.
+         *
+         * @see DocumentColumns#FLAGS
+         */
+        public static final int FLAG_SUPPORTS_WRITE = 1 << 5;
+
+        /**
+         * Flag indicating that a document is a directory that prefers its contents
+         * be shown in a larger format grid. Usually suitable when a directory
+         * contains mostly pictures.
+         *
+         * @see DocumentColumns#FLAGS
+         */
+        public static final int FLAG_PREFERS_GRID = 1 << 6;
+    }
 
     /**
      * Optimal dimensions for a document thumbnail request, stored as a
@@ -189,7 +194,7 @@ public final class DocumentsContract {
 
     /**
      * Build URI representing the contents of the given directory in a storage
-     * backend. The given document must be {@link #MIME_TYPE_DIRECTORY}.
+     * backend. The given document must be {@link Documents#MIME_TYPE_DIR}.
      */
     public static Uri buildContentsUri(String authority, String rootId, String docId) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(authority)
@@ -296,7 +301,7 @@ public final class DocumentsContract {
          * <p>
          * Type: STRING
          *
-         * @see DocumentsContract#MIME_TYPE_DIRECTORY
+         * @see Documents#MIME_TYPE_DIR
          */
         public static final String MIME_TYPE = "mime_type";
 
@@ -327,35 +332,43 @@ public final class DocumentsContract {
         public static final String SUMMARY = "summary";
     }
 
-    /**
-     * Root that represents a cloud-based storage service.
-     *
-     * @see RootColumns#ROOT_TYPE
-     */
-    public static final int ROOT_TYPE_SERVICE = 1;
+    public static class Roots {
+        private Roots() {
+        }
 
-    /**
-     * Root that represents a shortcut to content that may be available
-     * elsewhere through another storage root.
-     *
-     * @see RootColumns#ROOT_TYPE
-     */
-    public static final int ROOT_TYPE_SHORTCUT = 2;
+        public static final String MIME_TYPE_DIR = "vnd.android.cursor.dir/root";
+        public static final String MIME_TYPE_ITEM = "vnd.android.cursor.item/root";
 
-    /**
-     * Root that represents a physical storage device.
-     *
-     * @see RootColumns#ROOT_TYPE
-     */
-    public static final int ROOT_TYPE_DEVICE = 3;
+        /**
+         * Root that represents a cloud-based storage service.
+         *
+         * @see RootColumns#ROOT_TYPE
+         */
+        public static final int ROOT_TYPE_SERVICE = 1;
 
-    /**
-     * Root that represents a physical storage device that should only be
-     * displayed to advanced users.
-     *
-     * @see RootColumns#ROOT_TYPE
-     */
-    public static final int ROOT_TYPE_DEVICE_ADVANCED = 4;
+        /**
+         * Root that represents a shortcut to content that may be available
+         * elsewhere through another storage root.
+         *
+         * @see RootColumns#ROOT_TYPE
+         */
+        public static final int ROOT_TYPE_SHORTCUT = 2;
+
+        /**
+         * Root that represents a physical storage device.
+         *
+         * @see RootColumns#ROOT_TYPE
+         */
+        public static final int ROOT_TYPE_DEVICE = 3;
+
+        /**
+         * Root that represents a physical storage device that should only be
+         * displayed to advanced users.
+         *
+         * @see RootColumns#ROOT_TYPE
+         */
+        public static final int ROOT_TYPE_DEVICE_ADVANCED = 4;
+    }
 
     /**
      * These are standard columns for the roots URI.
@@ -370,8 +383,8 @@ public final class DocumentsContract {
          * <p>
          * Type: INTEGER (int)
          *
-         * @see DocumentsContract#ROOT_TYPE_SERVICE
-         * @see DocumentsContract#ROOT_TYPE_DEVICE
+         * @see Roots#ROOT_TYPE_SERVICE
+         * @see Roots#ROOT_TYPE_DEVICE
          */
         public static final String ROOT_TYPE = "root_type";
 
@@ -440,7 +453,7 @@ public final class DocumentsContract {
     /**
      * Return thumbnail representing the document at the given URI. Callers are
      * responsible for their own caching. Given document must have
-     * {@link #FLAG_SUPPORTS_THUMBNAIL} set.
+     * {@link Documents#FLAG_SUPPORTS_THUMBNAIL} set.
      *
      * @return decoded thumbnail, or {@code null} if problem was encountered.
      */
@@ -465,7 +478,8 @@ public final class DocumentsContract {
      * Create a new document under a specific parent document with the given
      * display name and MIME type.
      *
-     * @param parentDocumentUri document with {@link #FLAG_SUPPORTS_CREATE}
+     * @param parentDocumentUri document with
+     *            {@link Documents#FLAG_SUPPORTS_CREATE}
      * @param displayName name for new document
      * @param mimeType MIME type for new document, which cannot be changed
      * @return newly created document Uri, or {@code null} if failed
@@ -480,7 +494,7 @@ public final class DocumentsContract {
 
     /**
      * Rename the document at the given URI. Given document must have
-     * {@link #FLAG_SUPPORTS_RENAME} set.
+     * {@link Documents#FLAG_SUPPORTS_RENAME} set.
      *
      * @return if rename was successful.
      */

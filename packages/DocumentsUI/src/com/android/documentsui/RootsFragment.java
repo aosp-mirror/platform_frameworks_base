@@ -26,7 +26,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
-import android.provider.DocumentsContract;
+import android.provider.DocumentsContract.Roots;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -44,7 +44,6 @@ import com.android.documentsui.model.Root;
 import com.android.documentsui.model.Root.RootComparator;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -138,8 +137,8 @@ public class RootsFragment extends Fragment {
 
             // Device summary is always available space
             final String summaryText;
-            if ((root.rootType == DocumentsContract.ROOT_TYPE_DEVICE
-                    || root.rootType == DocumentsContract.ROOT_TYPE_DEVICE_ADVANCED)
+            if ((root.rootType == Roots.ROOT_TYPE_DEVICE
+                    || root.rootType == Roots.ROOT_TYPE_DEVICE_ADVANCED)
                     && root.availableBytes >= 0) {
                 summaryText = context.getString(R.string.root_available_bytes,
                         Formatter.formatFileSize(context, root.availableBytes));
@@ -226,17 +225,17 @@ public class RootsFragment extends Fragment {
             for (Root root : roots) {
                 Log.d(TAG, "Found rootType=" + root.rootType);
                 switch (root.rootType) {
-                    case DocumentsContract.ROOT_TYPE_SERVICE:
+                    case Roots.ROOT_TYPE_SERVICE:
                         mServices.add(root);
                         break;
-                    case DocumentsContract.ROOT_TYPE_SHORTCUT:
+                    case Roots.ROOT_TYPE_SHORTCUT:
                         mShortcuts.add(root);
                         break;
-                    case DocumentsContract.ROOT_TYPE_DEVICE:
+                    case Roots.ROOT_TYPE_DEVICE:
                         mDevices.add(root);
                         mDevicesAdvanced.add(root);
                         break;
-                    case DocumentsContract.ROOT_TYPE_DEVICE_ADVANCED:
+                    case Roots.ROOT_TYPE_DEVICE_ADVANCED:
                         mDevicesAdvanced.add(root);
                         break;
                 }

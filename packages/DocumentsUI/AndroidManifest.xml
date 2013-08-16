@@ -32,6 +32,12 @@
                 <category android:name="android.intent.category.OPENABLE" />
                 <data android:mimeType="*/*" />
             </intent-filter>
+            <!-- data expected to point at existing root to manage -->
+            <intent-filter>
+                <action android:name="android.intent.action.MANAGE_DOCUMENT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.item/root" />
+            </intent-filter>
         </activity>
 
         <activity
