@@ -338,6 +338,7 @@ void Caches::flush(FlushMode mode) {
             dropShadowCache.clear();
             gradientCache.clear();
             fontRenderer->clear();
+            fboCache.clear();
             dither.clear();
             // fall through
         case kFlushMode_Moderate:
