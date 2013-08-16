@@ -12854,6 +12854,7 @@ package android.media {
     field public static final int CAMCORDER = 5; // 0x5
     field public static final int DEFAULT = 0; // 0x0
     field public static final int MIC = 1; // 0x1
+    field public static final int REMOTE_SUBMIX = 8; // 0x8
     field public static final int VOICE_CALL = 4; // 0x4
     field public static final int VOICE_COMMUNICATION = 7; // 0x7
     field public static final int VOICE_DOWNLINK = 3; // 0x3
