@@ -816,9 +816,10 @@ public class DateUtils
      */
     public static Formatter formatDateRange(Context context, Formatter formatter, long startMillis,
                                             long endMillis, int flags, String timeZone) {
-        // icu4c will fall back to the locale's preferred 12/24 format,
+        // If we're being asked to format a time without being explicitly told whether to use
+        // the 12- or 24-hour clock, icu4c will fall back to the locale's preferred 12/24 format,
         // but we want to fall back to the user's preference.
-        if ((flags & (FORMAT_12HOUR | FORMAT_24HOUR)) == 0) {
+        if ((flags & (FORMAT_SHOW_TIME | FORMAT_12HOUR | FORMAT_24HOUR)) == FORMAT_SHOW_TIME) {
             flags |= DateFormat.is24HourFormat(context) ? FORMAT_24HOUR : FORMAT_12HOUR;
         }
 
