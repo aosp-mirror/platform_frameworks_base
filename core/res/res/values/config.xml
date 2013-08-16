@@ -1171,6 +1171,11 @@
     <string name="config_chooseTypeAndAccountActivity"
             >android/android.accounts.ChooseTypeAndAccountActivity</string>
 
+    <!-- Component name of a custom ResolverActivity (Intent resolver) to be used instead of
+         the default framework version. If left empty, then the framework version will be used.
+         Example: com.google.android.myapp/.resolver.MyResolverActivity  -->
+    <string name="config_customResolverActivity"></string>
+
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
     <string name="config_appsAuthorizedForSharedAccounts">;com.android.settings;</string>
 
