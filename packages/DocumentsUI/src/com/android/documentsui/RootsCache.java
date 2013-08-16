@@ -27,6 +27,7 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.DocumentsContract;
+import android.provider.DocumentsContract.Documents;
 import android.util.Log;
 import android.util.Pair;
 
@@ -162,7 +163,7 @@ public class RootsCache {
             }
         }
 
-        if (DocumentsContract.MIME_TYPE_DIRECTORY.equals(mimeType)) {
+        if (Documents.MIME_TYPE_DIR.equals(mimeType)) {
             return context.getResources().getDrawable(R.drawable.ic_dir);
         } else {
             final PackageManager pm = context.getPackageManager();

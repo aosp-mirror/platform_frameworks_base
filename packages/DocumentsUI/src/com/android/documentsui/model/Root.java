@@ -24,7 +24,9 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.DocumentsContract;
+import android.provider.DocumentsContract.Documents;
 import android.provider.DocumentsContract.RootColumns;
+import android.provider.DocumentsContract.Roots;
 
 import com.android.documentsui.R;
 
@@ -47,7 +49,7 @@ public class Root {
         final PackageManager pm = context.getPackageManager();
         final Root root = new Root();
         root.rootId = null;
-        root.rootType = DocumentsContract.ROOT_TYPE_SHORTCUT;
+        root.rootType = Roots.ROOT_TYPE_SHORTCUT;
         root.uri = null;
         root.icon = context.getResources().getDrawable(R.drawable.ic_dir);
         root.title = context.getString(R.string.root_recent);
@@ -65,7 +67,7 @@ public class Root {
         root.rootId = cursor.getString(cursor.getColumnIndex(RootColumns.ROOT_ID));
         root.rootType = cursor.getInt(cursor.getColumnIndex(RootColumns.ROOT_TYPE));
         root.uri = DocumentsContract.buildDocumentUri(
-                info.providerInfo.authority, root.rootId, DocumentsContract.ROOT_DOC_ID);
+                info.providerInfo.authority, root.rootId, Documents.DOC_ID_ROOT);
         root.icon = info.providerInfo.loadIcon(pm);
         root.title = info.providerInfo.loadLabel(pm).toString();
         root.availableBytes = cursor.getLong(cursor.getColumnIndex(RootColumns.AVAILABLE_BYTES));
