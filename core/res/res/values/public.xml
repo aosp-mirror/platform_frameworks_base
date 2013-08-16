@@ -2072,5 +2072,6 @@
   <public type="attr" name="isAsciiCapable" />
   <public type="attr" name="customRoots" />
   <public type="attr" name="autoMirrored" />
+  <public type="attr" name="supportsSwitchingToNextInputMethod" />
 
 </resources>
