@@ -498,7 +498,16 @@ public final class LocationRequest implements Parcelable {
         return mSmallestDisplacement;
     }
 
-    /** @hide */
+    /**
+     * Sets the WorkSource to use for power blaming of this location request.
+     *
+     * <p>No permissions are required to make this call, however the LocationManager
+     * will throw a SecurityException when requesting location updates if the caller
+     * doesn't have the {@link android.Manifest.permission#UPDATE_DEVICE_STATS} permission.
+     *
+     * @param workSource WorkSource defining power blame for this location request.
+     * @hide
+     */
     public void setWorkSource(WorkSource workSource) {
         mWorkSource = workSource;
     }
@@ -508,7 +517,20 @@ public final class LocationRequest implements Parcelable {
         return mWorkSource;
     }
 
-    /** @hide */
+    /**
+     * Sets whether or not this location request should be hidden from AppOps.
+     *
+     * <p>Hiding a location request from AppOps will remove user visibility in the UI as to this
+     * request's existence.  It does not affect power blaming in the Battery page.
+     *
+     * <p>No permissions are required to make this call, however the LocationManager
+     * will throw a SecurityException when requesting location updates if the caller
+     * doesn't have the {@link android.Manifest.permission#UPDATE_APP_OPS_STATS} permission.
+     *
+     * @param hideFromAppOps If true AppOps won't keep track of this location request.
+     * @see android.app.AppOpsManager
+     * @hide
+     */
     public void setHideFromAppOps(boolean hideFromAppOps) {
         mHideFromAppOps = hideFromAppOps;
     }
