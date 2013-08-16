@@ -102,7 +102,7 @@ requirements of UI and high-resolution screens.</p>
 
 <p>
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto ZIP']);"
-    href="https://github.com/google/roboto/archive/latest-hinted.zip">Roboto</a>
+    href="{@docRoot}downloads/design/roboto-1.100141.zip">Roboto</a>
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto Specemin Book']);"
     href="{@docRoot}downloads/design/Roboto_Specimen_Book_20111129.pdf">Specimen Book</a>
 </p>
