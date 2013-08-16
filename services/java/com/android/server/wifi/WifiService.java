@@ -345,6 +345,12 @@ public final class WifiService extends IWifiManager.Stub {
         return mBatchedScanSupported;
     }
 
+    public void pollBatchedScan() {
+        enforceChangePermission();
+        if (mBatchedScanSupported == false) return;
+        mWifiStateMachine.requestBatchedScanPoll();
+    }
+
     /**
      * see {@link android.net.wifi.WifiManager#requestBatchedScan()}
      */

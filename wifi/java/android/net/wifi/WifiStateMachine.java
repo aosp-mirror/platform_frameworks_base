@@ -127,6 +127,8 @@ public class WifiStateMachine extends StateMachine {
     private final List<BatchedScanResult> mBatchedScanResults =
             new ArrayList<BatchedScanResult>();
     private int mBatchedScanOwnerUid = UNKNOWN_SCAN_SOURCE;
+    private int mExpectedBatchedScans = 0;
+    private long mBatchedScanMinPollTime = 0;
 
     /* Chipset supports background scan */
     private final boolean mBackgroundScanSupported;
@@ -366,8 +368,9 @@ public class WifiStateMachine extends StateMachine {
      * arg1 = responsible UID
      * obj = the new settings
      */
-    public static final int CMD_SET_BATCH_SCAN            = BASE + 135;
+    public static final int CMD_SET_BATCHED_SCAN          = BASE + 135;
     public static final int CMD_START_NEXT_BATCHED_SCAN   = BASE + 136;
+    public static final int CMD_POLL_BATCHED_SCAN         = BASE + 137;
 
     public static final int CONNECT_MODE                   = 1;
     public static final int SCAN_ONLY_MODE                 = 2;
@@ -766,7 +769,7 @@ public class WifiStateMachine extends StateMachine {
      * start or stop batched scanning using the given settings
      */
     public void setBatchedScanSettings(BatchedScanSettings settings, int callingUid) {
-        sendMessage(CMD_SET_BATCH_SCAN, callingUid, 0, settings);
+        sendMessage(CMD_SET_BATCHED_SCAN, callingUid, 0, settings);
     }
 
     public List<BatchedScanResult> syncGetBatchedScanResultsList() {
@@ -780,6 +783,10 @@ public class WifiStateMachine extends StateMachine {
         }
     }
 
+    public void requestBatchedScanPoll() {
+        sendMessage(CMD_POLL_BATCHED_SCAN);
+    }
+
     private void startBatchedScan() {
         // first grab any existing data
         retrieveBatchedScanData();
@@ -789,8 +796,8 @@ public class WifiStateMachine extends StateMachine {
         String scansExpected = mWifiNative.setBatchedScanSettings(mBatchedScanSettings);
 
         try {
-            int expected = Integer.parseInt(scansExpected);
-            setNextBatchedAlarm(expected);
+            mExpectedBatchedScans = Integer.parseInt(scansExpected);
+            setNextBatchedAlarm(mExpectedBatchedScans);
         } catch (NumberFormatException e) {
             loge("Exception parsing WifiNative.setBatchedScanSettings response " + e);
         }
@@ -803,9 +810,27 @@ public class WifiStateMachine extends StateMachine {
 
     private void startNextBatchedScan() {
         // first grab any existing data
-        int nextCount = retrieveBatchedScanData();
+        retrieveBatchedScanData();
 
-        setNextBatchedAlarm(nextCount);
+        setNextBatchedAlarm(mExpectedBatchedScans);
+    }
+
+    private void handleBatchedScanPollRequest() {
+        // if there is no appropriate PollTime that's because we either aren't
+        // batching or we've already set a time for a poll request
+        if (mBatchedScanMinPollTime == 0) return;
+        if (mBatchedScanSettings == null) return;
+
+        long now = System.currentTimeMillis();
+
+        if (now > mBatchedScanMinPollTime) {
+            // do the poll and reset our timers
+            startNextBatchedScan();
+        } else {
+            mAlarmManager.set(AlarmManager.RTC_WAKEUP, mBatchedScanMinPollTime,
+                    mBatchedScanIntervalIntent);
+            mBatchedScanMinPollTime = 0;
+        }
     }
 
     // return true if new/different
@@ -831,6 +856,9 @@ public class WifiStateMachine extends StateMachine {
     private void setNextBatchedAlarm(int scansExpected) {
 
         if (mBatchedScanSettings == null || scansExpected < 1) return;
+
+        mBatchedScanMinPollTime = System.currentTimeMillis() +
+                mBatchedScanSettings.scanIntervalSec * 1000;
 
         if (mBatchedScanSettings.maxScansPerBatch < scansExpected) {
             scansExpected = mBatchedScanSettings.maxScansPerBatch;
@@ -876,22 +904,18 @@ public class WifiStateMachine extends StateMachine {
      *   etc
      *   "----"
      */
-    private int retrieveBatchedScanData() {
+    private void retrieveBatchedScanData() {
         String rawData = mWifiNative.getBatchedScanResults();
+        mBatchedScanMinPollTime = 0;
         if (rawData == null) {
             loge("Unexpected null BatchedScanResults");
-            return 0;
+            return;
         }
 
-        int nextCount = 0;
         int scanCount = 0;
-        final String END_OF_SCAN = "====";
-        final String END_OF_BATCH = "%%%%";
         final String END_OF_BATCHES = "----";
         final String SCANCOUNT = "scancount=";
-        final String NEXTCOUNT = "nextcount=";
         final String TRUNCATED = "trunc";
-        final String APCOUNT = "apcount=";
         final String AGE = "age=";
         final String DIST = "dist=";
         final String DISTSD = "distsd=";
@@ -905,16 +929,7 @@ public class WifiStateMachine extends StateMachine {
         }
         if (scanCount == 0) {
             loge("scanCount not found");
-            return 0;
-        }
-        if (splitData[n].startsWith(NEXTCOUNT)) {
-            try {
-                nextCount = Integer.parseInt(splitData[n++].substring(NEXTCOUNT.length()));
-            } catch (NumberFormatException e) {}
-        }
-        if (nextCount == 0) {
-            loge("nextCount not found");
-            return 0;
+            return;
         }
 
         final Intent intent = new Intent(WifiManager.BATCHED_SCAN_RESULTS_AVAILABLE_ACTION);
@@ -942,9 +957,9 @@ public class WifiStateMachine extends StateMachine {
                         if (mBatchedScanResults.size() > 0) {
                             mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
                         }
-                        return nextCount;
+                        return;
                     }
-                    if ((splitData[n].equals(END_OF_SCAN)) || splitData[n].equals(END_OF_BATCH)) {
+                    if ((splitData[n].equals(END_STR)) || splitData[n].equals(DELIMITER_STR)) {
                         if (bssid != null) {
                             batchedScanResult.scanResults.add(new ScanResult(
                                     wifiSsid, bssid, "", level, freq, tsf, dist, distSd));
@@ -955,7 +970,7 @@ public class WifiStateMachine extends StateMachine {
                             tsf = 0;
                             dist = distSd = ScanResult.UNSPECIFIED;
                         }
-                        if (splitData[n].equals(END_OF_BATCH)) {
+                        if (splitData[n].equals(END_STR)) {
                             if (batchedScanResult.scanResults.size() != 0) {
                                 mBatchedScanResults.add(batchedScanResult);
                                 batchedScanResult = new BatchedScanResult();
@@ -1010,7 +1025,7 @@ public class WifiStateMachine extends StateMachine {
                 rawData = mWifiNative.getBatchedScanResults();
                 if (rawData == null) {
                     loge("Unexpected null BatchedScanResults");
-                    return nextCount;
+                    return;
                 }
                 splitData = rawData.split("\n");
                 if (splitData.length == 0 || splitData[0].equals("ok")) {
@@ -1018,7 +1033,7 @@ public class WifiStateMachine extends StateMachine {
                     if (mBatchedScanResults.size() > 0) {
                         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
                     }
-                    return nextCount;
+                    return;
                 }
                 n = 0;
             }
@@ -2266,9 +2281,11 @@ public class WifiStateMachine extends StateMachine {
                         sendMessageAtFrontOfQueue(CMD_SET_COUNTRY_CODE, countryCode);
                     }
                     break;
-                case CMD_SET_BATCH_SCAN:
+                case CMD_SET_BATCHED_SCAN:
                     recordBatchedScanSettings((BatchedScanSettings)message.obj);
                     break;
+                case CMD_POLL_BATCHED_SCAN:
+                    handleBatchedScanPollRequest();
                 case CMD_START_NEXT_BATCHED_SCAN:
                     startNextBatchedScan();
                     break;
@@ -2808,7 +2825,7 @@ public class WifiStateMachine extends StateMachine {
                     noteScanStart(message.arg1, (WorkSource) message.obj);
                     startScanNative(WifiNative.SCAN_WITH_CONNECTION_SETUP);
                     break;
-                case CMD_SET_BATCH_SCAN:
+                case CMD_SET_BATCHED_SCAN:
                     recordBatchedScanSettings((BatchedScanSettings)message.obj);
                     startBatchedScan();
                     break;
