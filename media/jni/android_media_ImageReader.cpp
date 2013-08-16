@@ -44,6 +44,9 @@
 
 using namespace android;
 
+static const char* const OutOfResourcesException =
+    "android/view/Surface$OutOfResourcesException";
+
 enum {
     IMAGE_READER_MAX_NUM_PLANES = 3,
 };
@@ -609,7 +612,8 @@ static void ImageReader_init(JNIEnv* env, jobject thiz, jobject weakThiz,
     nativeFormat = Image_getPixelFormat(env, format);
 
     sp<BufferQueue> bq = new BufferQueue();
-    sp<CpuConsumer> consumer = new CpuConsumer(bq, true, maxImages);
+    sp<CpuConsumer> consumer = new CpuConsumer(bq, maxImages,
+                                               /*controlledByApp*/true);
     // TODO: throw dvm exOutOfMemoryError?
     if (consumer == NULL) {
         jniThrowRuntimeException(env, "Failed to allocate native CpuConsumer");
@@ -702,7 +706,17 @@ static jboolean ImageReader_imageSetup(JNIEnv* env, jobject thiz,
     status_t res = consumer->lockNextBuffer(buffer);
     if (res != NO_ERROR) {
         if (res != BAD_VALUE /*no buffers*/) {
-            ALOGE("%s Fail to lockNextBuffer with error: %d ", __FUNCTION__, res);
+            if (res == NOT_ENOUGH_DATA) {
+                jniThrowException(env, OutOfResourcesException,
+                          "Too many outstanding images, close existing images"
+                          " to be able to acquire more.");
+            } else {
+                ALOGE("%s Fail to lockNextBuffer with error: %d ",
+                      __FUNCTION__, res);
+                jniThrowExceptionFmt(env, "java/lang/IllegalStateException",
+                          "Unknown error (%d) when we tried to lock buffer.",
+                          res);
+            }
         }
         return false;
     }
@@ -714,6 +728,7 @@ static jboolean ImageReader_imageSetup(JNIEnv* env, jobject thiz,
         ALOGE("crop left: %d, top = %d", lt.x, lt.y);
         jniThrowException(env, "java/lang/UnsupportedOperationException",
                           "crop left top corner need to at origin");
+        return false;
     }
 
     // Check if the producer buffer configurations match what ImageReader configured.
