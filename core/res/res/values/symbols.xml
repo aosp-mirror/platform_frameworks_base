@@ -217,6 +217,7 @@
   <java-symbol type="id" name="pin_new_text" />
   <java-symbol type="id" name="pin_confirm_text" />
   <java-symbol type="id" name="pin_error_message" />
+  <java-symbol type="id" name="timePickerLayout" />
 
   <java-symbol type="attr" name="actionModeShareDrawable" />
   <java-symbol type="attr" name="alertDialogCenterButtons" />
@@ -773,7 +774,6 @@
   <java-symbol type="string" name="time_picker_increment_hour_button" />
   <java-symbol type="string" name="time_picker_increment_minute_button" />
   <java-symbol type="string" name="time_picker_increment_set_pm_button" />
-  <java-symbol type="string" name="time_picker_separator" />
   <java-symbol type="string" name="upload_file" />
   <java-symbol type="string" name="user_switched" />
   <java-symbol type="string" name="volume_alarm" />
