@@ -331,6 +331,11 @@ void Caches::deleteDisplayListDeferred(DisplayList* displayList) {
 void Caches::flush(FlushMode mode) {
     FLUSH_LOGD("Flushing caches (mode %d)", mode);
 
+    // We must stop tasks before clearing caches
+    if (mode > kFlushMode_Layers) {
+        tasks.stop();
+    }
+
     switch (mode) {
         case kFlushMode_Full:
             textureCache.clear();
@@ -344,7 +349,6 @@ void Caches::flush(FlushMode mode) {
             fontRenderer->flush();
             textureCache.flush();
             pathCache.clear();
-            tasks.stop();
             // fall through
         case kFlushMode_Layers:
             layerCache.clear();
