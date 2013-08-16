@@ -840,6 +840,32 @@ public class WifiManager {
     }
 
     /**
+     * Force a re-reading of batched scan results.  This will attempt
+     * to read more information from the chip, but will do so at the expense
+     * of previous data.  Rate limited to the current scan frequency.
+     *
+     * pollBatchedScan will always wait 1 period from the start of the batch
+     * before trying to read from the chip, so if your #scans/batch == 1 this will
+     * have no effect.
+     *
+     * If you had already waited 1 period before calling, this should have
+     * immediate (though async) effect.
+     *
+     * If you call before that 1 period is up this will set up a timer and fetch
+     * results when the 1 period is up.
+     *
+     * Servicing a pollBatchedScan request (immediate or after timed delay) starts a
+     * new batch, so if you were doing 10 scans/batch and called in the 4th scan, you
+     * would get data in the 4th and then again 10 scans later.
+     * @hide
+     */
+    public void pollBatchedScan() {
+        try {
+            mService.pollBatchedScan();
+        } catch (RemoteException e) { }
+    }
+
+    /**
      * Return dynamic information about the current Wi-Fi connection, if any is active.
      * @return the Wi-Fi information, contained in {@link WifiInfo}.
      */
