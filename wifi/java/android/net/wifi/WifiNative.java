@@ -82,8 +82,13 @@ public class WifiNative {
 
     public WifiNative(String interfaceName) {
         mInterfaceName = interfaceName;
-        mInterfacePrefix = "IFNAME=" + interfaceName + " ";
         mTAG = "WifiNative-" + interfaceName;
+        if (!interfaceName.equals("p2p0")) {
+            mInterfacePrefix = "IFNAME=" + interfaceName + " ";
+        } else {
+            // commands for p2p0 interface don't need prefix
+            mInterfacePrefix = "";
+        }
     }
 
     public boolean connectToSupplicant() {
