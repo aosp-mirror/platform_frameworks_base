@@ -29496,19 +29496,18 @@ package android.view.transition {
   public abstract class Transition implements java.lang.Cloneable {
     ctor public Transition();
     method public void addListener(android.view.transition.Transition.TransitionListener);
-    method protected void cancelTransition();
+    method protected void cancel();
     method protected abstract void captureValues(android.view.transition.TransitionValues, boolean);
     method public android.view.transition.Transition clone();
     method public long getDuration();
     method public android.animation.TimeInterpolator getInterpolator();
     method public java.util.ArrayList<android.view.transition.Transition.TransitionListener> getListeners();
+    method public java.lang.String getName();
     method public long getStartDelay();
     method public int[] getTargetIds();
     method public android.view.View[] getTargets();
+    method public java.lang.String[] getTransitionProperties();
     method protected android.view.transition.TransitionValues getTransitionValues(android.view.View, boolean);
-    method protected void onTransitionCancel();
-    method protected void onTransitionEnd();
-    method protected void onTransitionStart();
     method protected android.animation.Animator play(android.view.ViewGroup, android.view.transition.TransitionValues, android.view.transition.TransitionValues);
     method public void removeListener(android.view.transition.Transition.TransitionListener);
     method public android.view.transition.Transition setDuration(long);
@@ -29521,6 +29520,8 @@ package android.view.transition {
   public static abstract interface Transition.TransitionListener {
     method public abstract void onTransitionCancel(android.view.transition.Transition);
     method public abstract void onTransitionEnd(android.view.transition.Transition);
+    method public abstract void onTransitionPause(android.view.transition.Transition);
+    method public abstract void onTransitionResume(android.view.transition.Transition);
     method public abstract void onTransitionStart(android.view.transition.Transition);
   }
 
@@ -29567,6 +29568,7 @@ package android.view.transition {
     method protected android.animation.Animator appear(android.view.ViewGroup, android.view.transition.TransitionValues, int, android.view.transition.TransitionValues, int);
     method protected void captureValues(android.view.transition.TransitionValues, boolean);
     method protected android.animation.Animator disappear(android.view.ViewGroup, android.view.transition.TransitionValues, int, android.view.transition.TransitionValues, int);
+    method public boolean isVisible(android.view.transition.TransitionValues);
   }
 
 }

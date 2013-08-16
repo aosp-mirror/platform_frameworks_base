@@ -19,6 +19,7 @@ package android.view.transition;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +36,7 @@ public class Fade extends Visibility {
     private static boolean DBG = Transition.DBG && false;
 
     private static final String LOG_TAG = "Fade";
+    private static final String PROPNAME_ALPHA = "android:fade:alpha";
     private static final String PROPNAME_SCREEN_X = "android:fade:screenX";
     private static final String PROPNAME_SCREEN_Y = "android:fade:screenY";
 
@@ -74,24 +76,49 @@ public class Fade extends Visibility {
     /**
      * Utility method to handle creating and running the Animator.
      */
-    private Animator runAnimation(View view, float startAlpha, float endAlpha,
-            Animator.AnimatorListener listener) {
+    private Animator createAnimation(View view, float startAlpha, float endAlpha,
+            AnimatorListenerAdapter listener) {
+        if (startAlpha == endAlpha) {
+            // run listener if we're noop'ing the animation, to get the end-state results now
+            if (listener != null) {
+                listener.onAnimationEnd(null);
+            }
+            return null;
+        }
         final ObjectAnimator anim = ObjectAnimator.ofFloat(view, "alpha", startAlpha, endAlpha);
         if (listener != null) {
             anim.addListener(listener);
+            anim.addPauseListener(listener);
         }
-        // TODO: Maybe extract a method into Transition to run an animation that handles the
-        // duration/startDelay stuff for all subclasses.
         return anim;
     }
 
     @Override
     protected void captureValues(TransitionValues values, boolean start) {
         super.captureValues(values, start);
+        float alpha = values.view.getAlpha();
+        values.values.put(PROPNAME_ALPHA, alpha);
         int[] loc = new int[2];
         values.view.getLocationOnScreen(loc);
         values.values.put(PROPNAME_SCREEN_X, loc[0]);
         values.values.put(PROPNAME_SCREEN_Y, loc[1]);
+    }
+
+    @Override
+    protected Animator play(ViewGroup sceneRoot, TransitionValues startValues,
+            TransitionValues endValues) {
+        Animator animator = super.play(sceneRoot, startValues, endValues);
+        if (animator == null && startValues != null && endValues != null) {
+            boolean endVisible = isVisible(endValues);
+            final View endView = endValues.view;
+            float endAlpha = endView.getAlpha();
+            float startAlpha = (Float) startValues.values.get(PROPNAME_ALPHA);
+            if ((endVisible && startAlpha < endAlpha && (mFadingMode & Fade.IN) != 0) ||
+                    (!endVisible && startAlpha > endAlpha && (mFadingMode & Fade.OUT) != 0)) {
+                animator = createAnimation(endView, startAlpha, endAlpha, null);
+            }
+        }
+        return animator;
     }
 
     @Override
@@ -102,15 +129,11 @@ public class Fade extends Visibility {
             return null;
         }
         final View endView = endValues.view;
-        endView.setAlpha(0);
-        final Animator.AnimatorListener endListener = new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                // Always end animation with full alpha, in case it's canceled mid-stream
-                endView.setAlpha(1);
-            }
-        };
-        return runAnimation(endView, 0, 1, endListener);
+        // if alpha < 1, just fade it in from the current value
+        if (endView.getAlpha() == 1.0f) {
+            endView.setAlpha(0);
+        }
+        return createAnimation(endView, endView.getAlpha(), 1, null);
     }
 
     @Override
@@ -129,7 +152,7 @@ public class Fade extends Visibility {
         }
         View overlayView = null;
         View viewToKeep = null;
-        if (endView == null) {
+        if (endView == null || endView.getParent() == null) {
             // view was removed: add the start view to the Overlay
             view = startView;
             overlayView = view;
@@ -167,7 +190,7 @@ public class Fade extends Visibility {
             final View finalOverlayView = overlayView;
             final View finalViewToKeep = viewToKeep;
             final ViewGroup finalSceneRoot = sceneRoot;
-            final Animator.AnimatorListener endListener = new AnimatorListenerAdapter() {
+            final AnimatorListenerAdapter endListener = new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     finalView.setAlpha(startAlpha);
@@ -179,8 +202,22 @@ public class Fade extends Visibility {
                         finalSceneRoot.getOverlay().remove(finalOverlayView);
                     }
                 }
+
+                @Override
+                public void onAnimationPause(Animator animation) {
+                    if (finalOverlayView != null) {
+                        finalSceneRoot.getOverlay().remove(finalOverlayView);
+                    }
+                }
+
+                @Override
+                public void onAnimationResume(Animator animation) {
+                    if (finalOverlayView != null) {
+                        finalSceneRoot.getOverlay().add(finalOverlayView);
+                    }
+                }
             };
-            return runAnimation(view, startAlpha, endAlpha, endListener);
+            return createAnimation(view, startAlpha, endAlpha, endListener);
         }
         if (viewToKeep != null) {
             // TODO: find a different way to do this, like just changing the view to be
@@ -193,12 +230,42 @@ public class Fade extends Visibility {
             final View finalOverlayView = overlayView;
             final View finalViewToKeep = viewToKeep;
             final ViewGroup finalSceneRoot = sceneRoot;
-            final Animator.AnimatorListener endListener = new AnimatorListenerAdapter() {
+            final AnimatorListenerAdapter endListener = new AnimatorListenerAdapter() {
+                boolean mCanceled = false;
+                float mPausedAlpha = -1;
+
+                @Override
+                public void onAnimationPause(Animator animation) {
+                    if (finalViewToKeep != null && !mCanceled) {
+                        finalViewToKeep.setVisibility(finalVisibility);
+                    }
+                    mPausedAlpha = finalView.getAlpha();
+                    finalView.setAlpha(startAlpha);
+                }
+
+                @Override
+                public void onAnimationResume(Animator animation) {
+                    if (finalViewToKeep != null && !mCanceled) {
+                        finalViewToKeep.setVisibility(View.VISIBLE);
+                    }
+                    finalView.setAlpha(mPausedAlpha);
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    mCanceled = true;
+                    if (mPausedAlpha >= 0) {
+                        finalView.setAlpha(mPausedAlpha);
+                    }
+                }
+
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    finalView.setAlpha(startAlpha);
+                    if (!mCanceled) {
+                        finalView.setAlpha(startAlpha);
+                    }
                     // TODO: restore view offset from overlay repositioning
-                    if (finalViewToKeep != null) {
+                    if (finalViewToKeep != null && !mCanceled) {
                         finalViewToKeep.setVisibility(finalVisibility);
                     }
                     if (finalOverlayView != null) {
@@ -206,7 +273,7 @@ public class Fade extends Visibility {
                     }
                 }
             };
-            return runAnimation(view, startAlpha, endAlpha, endListener);
+            return createAnimation(view, startAlpha, endAlpha, endListener);
         }
         return null;
     }
