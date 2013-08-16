@@ -67,7 +67,7 @@ public class SyncStorageEngineTest extends AndroidTestCase {
 
     /**
      * Test that we handle the case of a history row being old enough to purge before the
-     * correcponding sync is finished. This can happen if the clock changes while we are syncing.
+     * corresponding sync is finished. This can happen if the clock changes while we are syncing.
      *
      */
     // TODO: this test causes AidlTest to fail. Omit for now
@@ -104,6 +104,17 @@ public class SyncStorageEngineTest extends AndroidTestCase {
         engine.clearAndReadState();
 
         assert(engine.getPendingOperationCount() == 1);
+        List<SyncStorageEngine.PendingOperation> pops = engine.getPendingOperations();
+        SyncStorageEngine.PendingOperation popRetrieved = pops.get(0);
+        assertEquals(pop.account, popRetrieved.account);
+        assertEquals(pop.reason, popRetrieved.reason);
+        assertEquals(pop.userId, popRetrieved.userId);
+        assertEquals(pop.syncSource, popRetrieved.syncSource);
+        assertEquals(pop.authority, popRetrieved.authority);
+        assertEquals(pop.expedited, popRetrieved.expedited);
+        assertEquals(pop.serviceName, popRetrieved.serviceName);
+        assert(android.content.PeriodicSync.syncExtrasEquals(pop.extras, popRetrieved.extras));
+
     }
 
     /**
