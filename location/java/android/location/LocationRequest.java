@@ -146,7 +146,7 @@ public final class LocationRequest implements Parcelable {
     private long mExpireAt = Long.MAX_VALUE;  // no expiry
     private int mNumUpdates = Integer.MAX_VALUE;  // no expiry
     private float mSmallestDisplacement = 0.0f;    // meters
-    private WorkSource mWorkSource = new WorkSource();
+    private WorkSource mWorkSource = null;
     private boolean mHideFromAppOps = false; // True if this request shouldn't be counted by AppOps
 
     private String mProvider = LocationManager.FUSED_PROVIDER;  // for deprecated APIs that explicitly request a provider
