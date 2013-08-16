@@ -314,7 +314,7 @@
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"neleisti perjungti programų"</string>
     <string name="permdesc_stopAppSwitches" msgid="8262195802582255021">"Neleidžiama naudotojui perjungti į kitą programą."</string>
     <string name="permlab_getTopActivityInfo" msgid="2537922311411546016">"gauti esamos programos informaciją"</string>
-    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Savininkui leidžiama gauti privačią informaciją apie dabartinę programą ir paslaugas, naudojamas ekrano priekiniame plane."</string>
+    <string name="permdesc_getTopActivityInfo" msgid="8153651434145132505">"Savininkui leidžiama gauti privačios informacijos apie dabartinę programą ir paslaugas, naudojamas ekrano priekiniame plane."</string>
     <string name="permlab_runSetActivityWatcher" msgid="892239094867182656">"stebėti ir valdyti visų programų paleidimą"</string>
     <string name="permdesc_runSetActivityWatcher" msgid="6003603162578577406">"Leidžiama programai stebėti ir valdyti, kaip sistema paleidžia veiklą. Kenkėjiškos programos gali visiškai pažeisti sistemą. Šis leidimas reikalingas tik kuriant ir jo niekada nereikia naudojant įprastai."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"siųsti pašalinto paketo perdavimą"</string>
@@ -1579,4 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"Netinkamas PIN kodas. Band. po 1 sek."</item>
     <item quantity="other" msgid="8030607343223287654">"Netinkamas PIN kodas. Band. po <xliff:g id="COUNT">%d</xliff:g> sek."</item>
   </plurals>
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Perbr. ekr. kr., kad atsir. juost."</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Perbraukite iš ekrano krašto, kad atsirastų sistemos juosta"</string>
 </resources>
