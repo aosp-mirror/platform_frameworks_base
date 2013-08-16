@@ -16,6 +16,9 @@
 
 package android.widget;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
@@ -23,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.IntProperty;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -31,6 +35,7 @@ import android.view.View.MeasureSpec;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.animation.AccelerateDecelerateInterpolator;
 
 import java.util.Locale;
 
@@ -956,6 +961,33 @@ public class ListPopupWindow {
     }
 
     /**
+     * Receives motion events forwarded from a source view. This is used
+     * internally to implement support for drag-to-open.
+     *
+     * @param src view from which the event was forwarded
+     * @param srcEvent forwarded motion event in source-local coordinates
+     * @param activePointerId id of the pointer that activated forwarding
+     * @return whether the event was handled
+     * @hide
+     */
+    public boolean onForwardedEvent(View src, MotionEvent srcEvent, int activePointerId) {
+        final DropDownListView dst = mDropDownList;
+        if (dst == null || !dst.isShown()) {
+            return false;
+        }
+
+        // Convert event to local coordinates.
+        final MotionEvent dstEvent = MotionEvent.obtainNoHistory(srcEvent);
+        src.toGlobalMotionEvent(dstEvent);
+        dst.toLocalMotionEvent(dstEvent);
+
+        // Forward converted event, then recycle it.
+        final boolean handled = dst.onForwardedEvent(dstEvent, activePointerId);
+        dstEvent.recycle();
+        return handled;
+    }
+
+    /**
      * <p>Builds the popup window's content and returns the height the popup
      * should have. Returns -1 when the content already exists.</p>
      *
@@ -1130,6 +1162,27 @@ public class ListPopupWindow {
      */
     private static class DropDownListView extends ListView {
         private static final String TAG = ListPopupWindow.TAG + ".DropDownListView";
+
+        /** Duration in milliseconds of the drag-to-open click animation. */
+        private static final long CLICK_ANIM_DURATION = 150;
+
+        /** Target alpha value for drag-to-open click animation. */
+        private static final int CLICK_ANIM_ALPHA = 0x80;
+
+        /** Wrapper around Drawable's <code>alpha</code> property. */
+        private static final IntProperty<Drawable> DRAWABLE_ALPHA =
+                new IntProperty<Drawable>("alpha") {
+                    @Override
+                    public void setValue(Drawable object, int value) {
+                        object.setAlpha(value);
+                    }
+
+                    @Override
+                    public Integer get(Drawable object) {
+                        return object.getAlpha();
+                    }
+                };
+
         /*
          * WARNING: This is a workaround for a touch mode issue.
          *
@@ -1165,6 +1218,12 @@ public class ListPopupWindow {
          */
         private boolean mHijackFocus;
 
+        /** Whether to force drawing of the pressed state selector. */
+        private boolean mDrawsInPressedState;
+
+        /** Current drag-to-open click animation, if any. */
+        private Animator mClickAnimation;
+
         /**
          * <p>Creates a new list view wrapper.</p>
          *
@@ -1175,6 +1234,119 @@ public class ListPopupWindow {
             mHijackFocus = hijackFocus;
             // TODO: Add an API to control this
             setCacheColorHint(0); // Transparent, since the background drawable could be anything.
+        }
+
+        /**
+         * Handles forwarded events.
+         *
+         * @param activePointerId id of the pointer that activated forwarding
+         * @return whether the event was handled
+         */
+        public boolean onForwardedEvent(MotionEvent event, int activePointerId) {
+            boolean handledEvent = true;
+            boolean clearPressedItem = false;
+
+            final int actionMasked = event.getActionMasked();
+            switch (actionMasked) {
+                case MotionEvent.ACTION_CANCEL:
+                    handledEvent = false;
+                    break;
+                case MotionEvent.ACTION_UP:
+                    handledEvent = false;
+                    // $FALL-THROUGH$
+                case MotionEvent.ACTION_MOVE:
+                    final int activeIndex = event.findPointerIndex(activePointerId);
+                    if (activeIndex < 0) {
+                        handledEvent = false;
+                        break;
+                    }
+
+                    final int x = (int) event.getX(activeIndex);
+                    final int y = (int) event.getY(activeIndex);
+                    final int position = pointToPosition(x, y);
+                    if (position == INVALID_POSITION) {
+                        clearPressedItem = true;
+                        break;
+                    }
+
+                    final View child = getChildAt(position - getFirstVisiblePosition());
+                    setPressedItem(child, position);
+                    handledEvent = true;
+
+                    if (actionMasked == MotionEvent.ACTION_UP) {
+                        clickPressedItem(child, position);
+                    }
+                    break;
+            }
+
+            // Failure to handle the event cancels forwarding.
+            if (!handledEvent || clearPressedItem) {
+                clearPressedItem();
+            }
+
+            return handledEvent;
+        }
+
+        /**
+         * Starts an alpha animation on the selector. When the animation ends,
+         * the list performs a click on the item.
+         */
+        private void clickPressedItem(final View child, final int position) {
+            final long id = getItemIdAtPosition(position);
+            final Animator anim = ObjectAnimator.ofInt(
+                    mSelector, DRAWABLE_ALPHA, 0xFF, CLICK_ANIM_ALPHA, 0xFF);
+            anim.setDuration(CLICK_ANIM_DURATION);
+            anim.setInterpolator(new AccelerateDecelerateInterpolator());
+            anim.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                public void onAnimationEnd(Animator animation) {
+                    performItemClick(child, position, id);
+                }
+            });
+            anim.start();
+
+            if (mClickAnimation != null) {
+                mClickAnimation.cancel();
+            }
+            mClickAnimation = anim;
+        }
+
+        private void clearPressedItem() {
+            mDrawsInPressedState = false;
+            setPressed(false);
+            updateSelectorState();
+
+            if (mClickAnimation != null) {
+                mClickAnimation.cancel();
+                mClickAnimation = null;
+            }
+        }
+
+        private void setPressedItem(View child, int position) {
+            mDrawsInPressedState = true;
+
+            // Ordering is essential. First update the pressed state and layout
+            // the children. This will ensure the selector actually gets drawn.
+            setPressed(true);
+            layoutChildren();
+
+            // Ensure that keyboard focus starts from the last touched position.
+            setSelectedPositionInt(position);
+            positionSelector(position, child);
+
+            // Refresh the drawable state to reflect the new pressed state,
+            // which will also update the selector state.
+            refreshDrawableState();
+
+            if (mClickAnimation != null) {
+                mClickAnimation.cancel();
+                mClickAnimation = null;
+            }
+        }
+
+        @Override
+        boolean touchModeDrawsInPressedState() {
+            return mDrawsInPressedState || super.touchModeDrawsInPressedState();
         }
 
         /**
