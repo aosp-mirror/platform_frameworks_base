@@ -108,6 +108,10 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         }
     }
 
+    public ListPopupWindow getPopup() {
+        return mPopup;
+    }
+
     public boolean tryShow() {
         mPopup = new ListPopupWindow(mContext, null, com.android.internal.R.attr.popupMenuStyle);
         mPopup.setOnDismissListener(this);
@@ -157,22 +161,6 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
 
     public boolean isShowing() {
         return mPopup != null && mPopup.isShowing();
-    }
-
-    /**
-     * Forwards motion events from a source view to the popup window.
-     *
-     * @param src view from which the event was forwarded
-     * @param event forwarded motion event in source-local coordinates
-     * @param activePointerId id of the pointer that activated forwarding
-     * @return whether the event was handled
-     */
-    public boolean forwardMotionEvent(View src, MotionEvent event, int activePointerId) {
-        if (mPopup == null || !mPopup.isShowing()) {
-            return false;
-        }
-
-        return mPopup.onForwardedEvent(src, event, activePointerId);
     }
 
     @Override

@@ -30,12 +30,14 @@ import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.ListPopupWindow.ForwardingListener;
 import android.widget.PopupWindow.OnDismissListener;
 
 
@@ -76,7 +78,10 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      * Use the theme-supplied value to select the dropdown mode.
      */
     private static final int MODE_THEME = -1;
-    
+
+    /** Forwarding listener used to implement drag-to-open. */
+    private ForwardingListener mForwardingListener;
+
     private SpinnerPopup mPopup;
     private DropDownAdapter mTempAdapter;
     int mDropDownWidth;
@@ -173,7 +178,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         }
 
         case MODE_DROPDOWN: {
-            DropdownPopup popup = new DropdownPopup(context, attrs, defStyle);
+            final DropdownPopup popup = new DropdownPopup(context, attrs, defStyle);
 
             mDropDownWidth = a.getLayoutDimension(
                     com.android.internal.R.styleable.Spinner_dropDownWidth,
@@ -193,6 +198,20 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             }
 
             mPopup = popup;
+            mForwardingListener = new ForwardingListener(context) {
+                @Override
+                public ListPopupWindow getPopup() {
+                    return popup;
+                }
+
+                @Override
+                public boolean onForwardingStarted() {
+                    if (!mPopup.isShowing()) {
+                        mPopup.show(getTextDirection(), getTextAlignment());
+                    }
+                    return true;
+                }
+            };
             break;
         }
         }
@@ -446,6 +465,15 @@ public class Spinner extends AbsSpinner implements OnClickListener {
      */
     public void setOnItemClickListenerInt(OnItemClickListener l) {
         super.setOnItemClickListener(l);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (mForwardingListener != null && mForwardingListener.onTouch(this, event)) {
+            return true;
+        }
+
+        return super.onTouchEvent(event);
     }
 
     @Override
