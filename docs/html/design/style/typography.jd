@@ -12,7 +12,7 @@ page.tags="textview","font"
 
 <p>
   <a class="download-button"  onClick="_gaq.push(['_trackEvent', 'Design', 'Download', 'Roboto ZIP']);"
-    href="https://github.com/google/roboto/archive/latest-hinted.zip">Download Roboto</a>
+    href="{@docRoot}downloads/design/roboto-1.100141.zip">Download Roboto</a>
 </p>
 
 <p>The Android design language relies on traditional typographic tools such as scale, space, rhythm,
