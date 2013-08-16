@@ -53,6 +53,7 @@ import org.xmlpull.v1.XmlSerializer;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -71,7 +72,7 @@ public class SyncStorageEngine extends Handler {
 
     private static final String TAG = "SyncManager";
     private static final boolean DEBUG = true;
-    private static final boolean DEBUG_FILE = true;
+    private static final String TAG_FILE = "SyncManagerFile";
 
     private static final String XML_ATTR_NEXT_AUTHORITY_ID = "nextAuthorityId";
     private static final String XML_ATTR_LISTEN_FOR_TICKLES = "listen-for-tickles";
@@ -420,9 +421,12 @@ public class SyncStorageEngine extends Handler {
         File systemDir = new File(dataDir, "system");
         File syncDir = new File(systemDir, "sync");
         syncDir.mkdirs();
+
+        maybeDeleteLegacyPendingInfoLocked(syncDir);
+
         mAccountInfoFile = new AtomicFile(new File(syncDir, "accounts.xml"));
         mStatusFile = new AtomicFile(new File(syncDir, "status.bin"));
-        mPendingFile = new AtomicFile(new File(syncDir, "pending.bin"));
+        mPendingFile = new AtomicFile(new File(syncDir, "pending.xml"));
         mStatisticsFile = new AtomicFile(new File(syncDir, "stats.bin"));
 
         readAccountInfoLocked();
@@ -676,7 +680,8 @@ public class SyncStorageEngine extends Handler {
                         continue;
                     }
                     for (AuthorityInfo authorityInfo : accountInfo.authorities.values()) {
-                        if (providerName != null && !providerName.equals(authorityInfo.authority)) {
+                        if (providerName != null
+                                && !providerName.equals(authorityInfo.authority)) {
                             continue;
                         }
                         if (authorityInfo.backoffTime != nextSyncTime
@@ -774,10 +779,12 @@ public class SyncStorageEngine extends Handler {
         }
         synchronized (mAuthorities) {
             if (toUpdate.period <= 0 && add) {
-                Log.e(TAG, "period < 0, should never happen in updateOrRemovePeriodicSync: add-" + add);
+                Log.e(TAG, "period < 0, should never happen in updateOrRemovePeriodicSync: add-"
+                        + add);
             }
             if (toUpdate.extras == null) {
-                Log.e(TAG, "period < 0, should never happen in updateOrRemovePeriodicSync: add-" + add);
+                Log.e(TAG, "null extras, should never happen in updateOrRemovePeriodicSync: add-"
+                        + add);
             }
             try {
                 AuthorityInfo authority =
@@ -806,7 +813,7 @@ public class SyncStorageEngine extends Handler {
                     if (!alreadyPresent) {
                         authority.periodicSyncs.add(new PeriodicSync(toUpdate));
                         SyncStatusInfo status = getOrCreateSyncStatusLocked(authority.ident);
-                        status.setPeriodicSyncTime(authority.periodicSyncs.size() - 1, 0);
+                        status.setPeriodicSyncTime(authority.periodicSyncs.size() - 1, 0L);
                     }
                 } else {
                     // Remove any periodic syncs that match the authority and extras.
@@ -824,7 +831,8 @@ public class SyncStorageEngine extends Handler {
                             if (status != null) {
                                 status.removePeriodicSyncTime(i);
                             } else {
-                                Log.e(TAG, "Tried removing sync status on remove periodic sync but did not find it.");
+                                Log.e(TAG, "Tried removing sync status on remove periodic sync but"
+                                        + "did not find it.");
                             }
                         } else {
                             i++;
@@ -942,7 +950,7 @@ public class SyncStorageEngine extends Handler {
             op = new PendingOperation(op);
             op.authorityId = authority.ident;
             mPendingOperations.add(op);
-            writePendingOperationsLocked();
+            appendPendingOperationLocked(op);
 
             SyncStatusInfo status = getOrCreateSyncStatusLocked(authority.ident);
             status.pending = true;
@@ -1660,7 +1668,9 @@ public class SyncStorageEngine extends Handler {
         FileInputStream fis = null;
         try {
             fis = mAccountInfoFile.openRead();
-            if (DEBUG_FILE) Log.v(TAG, "Reading " + mAccountInfoFile.getBaseFile());
+            if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+                Log.v(TAG, "Reading " + mAccountInfoFile.getBaseFile());
+            }
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(fis, null);
             int eventType = parser.getEventType();
@@ -1742,6 +1752,20 @@ public class SyncStorageEngine extends Handler {
         }
 
         maybeMigrateSettingsForRenamedAuthorities();
+    }
+
+    /**
+     * Ensure the old pending.bin is deleted, as it has been changed to pending.xml.
+     * pending.xml was used starting in KLP.
+     * @param syncDir directory where the sync files are located.
+     */
+    private void maybeDeleteLegacyPendingInfoLocked(File syncDir) {
+        File file = new File(syncDir, "pending.bin");
+        if (!file.exists()) {
+            return;
+        } else {
+            file.delete();
+        }
     }
 
     /**
@@ -1832,18 +1856,21 @@ public class SyncStorageEngine extends Handler {
                 syncable = "unknown";
             }
             authority = mAuthorities.get(id);
-            if (DEBUG_FILE) Log.v(TAG, "Adding authority: account="
-                    + accountName + " auth=" + authorityName
-                    + " user=" + userId
-                    + " enabled=" + enabled
-                    + " syncable=" + syncable);
+            if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+                Log.v(TAG, "Adding authority: account="
+                        + accountName + " auth=" + authorityName
+                        + " user=" + userId
+                        + " enabled=" + enabled
+                        + " syncable=" + syncable);
+            }
             if (authority == null) {
-                if (DEBUG_FILE) {
+                if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
                     Log.v(TAG, "Creating entry");
                 }
                 if (accountName != null && accountType != null) {
                     authority = getOrCreateAuthorityLocked(
-                            new Account(accountName, accountType), userId, authorityName, id, false);
+                            new Account(accountName, accountType), userId, authorityName, id,
+                                false);
                 } else {
                     authority = getOrCreateAuthorityLocked(
                             new ComponentName(packageName, className), userId, id, false);
@@ -1943,7 +1970,9 @@ public class SyncStorageEngine extends Handler {
      * Write all account information to the account file.
      */
     private void writeAccountInfoLocked() {
-        if (DEBUG_FILE) Log.v(TAG, "Writing new " + mAccountInfoFile.getBaseFile());
+        if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+            Log.v(TAG, "Writing new " + mAccountInfoFile.getBaseFile());
+        }
         FileOutputStream fos = null;
 
         try {
@@ -2041,7 +2070,9 @@ public class SyncStorageEngine extends Handler {
             final boolean hasType = db.getVersion() >= 11;
 
             // Copy in all of the status information, as well as accounts.
-            if (DEBUG_FILE) Log.v(TAG, "Reading legacy sync accounts db");
+            if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+                Log.v(TAG, "Reading legacy sync accounts db");
+            }
             SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
             qb.setTables("stats, status");
             HashMap<String,String> map = new HashMap<String,String>();
@@ -2151,7 +2182,9 @@ public class SyncStorageEngine extends Handler {
      * Read all sync status back in to the initial engine state.
      */
     private void readStatusLocked() {
-        if (DEBUG_FILE) Log.v(TAG, "Reading " + mStatusFile.getBaseFile());
+        if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+            Log.v(TAG, "Reading " + mStatusFile.getBaseFile());
+        }
         try {
             byte[] data = mStatusFile.readFully();
             Parcel in = Parcel.obtain();
@@ -2163,8 +2196,10 @@ public class SyncStorageEngine extends Handler {
                     SyncStatusInfo status = new SyncStatusInfo(in);
                     if (mAuthorities.indexOfKey(status.authorityId) >= 0) {
                         status.pending = false;
-                        if (DEBUG_FILE) Log.v(TAG, "Adding status for id "
-                                + status.authorityId);
+                        if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+                            Log.v(TAG, "Adding status for id "
+                                    + status.authorityId);
+                        }
                         mSyncStatus.put(status.authorityId, status);
                     }
                 } else {
@@ -2182,7 +2217,9 @@ public class SyncStorageEngine extends Handler {
      * Write all sync status to the sync status file.
      */
     private void writeStatusLocked() {
-        if (DEBUG_FILE) Log.v(TAG, "Writing new " + mStatusFile.getBaseFile());
+        if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+            Log.v(TAG, "Writing new " + mStatusFile.getBaseFile());
+        }
 
         // The file is being written, so we don't need to have a scheduled
         // write until the next change.
@@ -2211,103 +2248,97 @@ public class SyncStorageEngine extends Handler {
         }
     }
 
-    public static final int PENDING_OPERATION_VERSION = 4;
+    public static final int PENDING_OPERATION_VERSION = 3;
 
-    /**
-     * Read all pending operations back in to the initial engine state.
-     */
+    /** Read all pending operations back in to the initial engine state. */
     private void readPendingOperationsLocked() {
-        if (DEBUG_FILE) Log.v(TAG, "Reading " + mPendingFile.getBaseFile());
-        try {
-            readPendingAsXml();
-        } catch (XmlPullParserException e) {
-            Log.d(TAG, "Error parsing pending as xml, trying as parcel.");
-            try {
-                readPendingAsParcelled();
-            } catch (java.io.IOException e1) {
-                Log.i(TAG, "No initial pending operations");
+        FileInputStream fis = null;
+        if (!mPendingFile.getBaseFile().exists()) {
+            if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+                Log.v(TAG_FILE, "No pending operation file.");
+                return;
             }
         }
-    }
-
-    private void readPendingAsXml() throws XmlPullParserException {
-        FileInputStream fis = null;
         try {
             fis = mPendingFile.openRead();
-            XmlPullParser parser = Xml.newPullParser();
+            XmlPullParser parser;
+            parser = Xml.newPullParser();
             parser.setInput(fis, null);
+
             int eventType = parser.getEventType();
             while (eventType != XmlPullParser.START_TAG &&
                     eventType != XmlPullParser.END_DOCUMENT) {
                 eventType = parser.next();
             }
-            if (eventType == XmlPullParser.END_DOCUMENT) return;
+            if (eventType == XmlPullParser.END_DOCUMENT) return; // Nothing to read.
 
             String tagName = parser.getName();
-            if ("pending".equals(tagName)) {
-                int version = -1;
-                String versionString = parser.getAttributeValue(null, "version");
-                if (versionString == null ||
-                        Integer.parseInt(versionString) != PENDING_OPERATION_VERSION) {
-                    Log.w(TAG, "Unknown pending operation version "
-                            + version + "; trying to read as binary.");
-                    throw new XmlPullParserException("Unknown version.");
-                }
-                eventType = parser.next();
+            do {
                 PendingOperation pop = null;
-                do {
-                    if (eventType == XmlPullParser.START_TAG) {
-                        try {
-                            tagName = parser.getName();
-                            if (parser.getDepth() == 2 && "op".equals(tagName)) {
-                                int authorityId = Integer.valueOf(parser.getAttributeValue(
-                                        null, XML_ATTR_AUTHORITYID));
-                                boolean expedited = Boolean.valueOf(parser.getAttributeValue(
-                                        null, XML_ATTR_EXPEDITED));
-                                int syncSource = Integer.valueOf(parser.getAttributeValue(
-                                        null, XML_ATTR_SOURCE));
-                                int reason = Integer.valueOf(parser.getAttributeValue(
-                                        null, XML_ATTR_REASON));
-                                AuthorityInfo authority = mAuthorities.get(authorityId);
-                                if (DEBUG_FILE) {
-                                    Log.v(TAG, authorityId + " " + expedited + " " + syncSource + " " + reason);
-                                }
-                                if (authority != null) {
-                                    pop = new PendingOperation(
-                                            authority.account, authority.userId, reason, syncSource,
-                                            authority.authority, new Bundle(), expedited);
-                                    pop.authorityId = authorityId;
-                                    pop.flatExtras = null; // No longer used.
-                                    mPendingOperations.add(pop);
-                                    if (DEBUG_FILE) Log.v(TAG, "Adding pending op: account=" + pop.account
-                                            + " auth=" + pop.authority
+                if (eventType == XmlPullParser.START_TAG) {
+                    try {
+                        tagName = parser.getName();
+                        if (parser.getDepth() == 1 && "op".equals(tagName)) {
+                            // Verify version.
+                            String versionString =
+                                    parser.getAttributeValue(null, XML_ATTR_VERSION);
+                            if (versionString == null ||
+                                    Integer.parseInt(versionString) != PENDING_OPERATION_VERSION) {
+                                Log.w(TAG, "Unknown pending operation version " + versionString);
+                                throw new java.io.IOException("Unknown version.");
+                            }
+                            int authorityId = Integer.valueOf(parser.getAttributeValue(
+                                    null, XML_ATTR_AUTHORITYID));
+                            boolean expedited = Boolean.valueOf(parser.getAttributeValue(
+                                    null, XML_ATTR_EXPEDITED));
+                            int syncSource = Integer.valueOf(parser.getAttributeValue(
+                                    null, XML_ATTR_SOURCE));
+                            int reason = Integer.valueOf(parser.getAttributeValue(
+                                    null, XML_ATTR_REASON));
+                            AuthorityInfo authority = mAuthorities.get(authorityId);
+                            if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+                                Log.v(TAG_FILE, authorityId + " " + expedited + " " + syncSource + " "
+                                        + reason);
+                            }
+                            if (authority != null) {
+                                pop = new PendingOperation(
+                                        authority.account, authority.userId, reason,
+                                        syncSource, authority.authority, new Bundle(),
+                                        expedited);
+                                pop.flatExtras = null; // No longer used.
+                                mPendingOperations.add(pop);
+                                if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+                                    Log.v(TAG_FILE, "Adding pending op: "
+                                            + pop.authority
                                             + " src=" + pop.syncSource
                                             + " reason=" + pop.reason
                                             + " expedited=" + pop.expedited);
-                                } else {
-                                    // Skip non-existent authority;
-                                    pop = null;
-                                    if (DEBUG_FILE) {
-                                        Log.v(TAG, "No authority found for " + authorityId
-                                                + ", skipping");
-                                    }
                                 }
-                            } else if (parser.getDepth() == 3 &&
-                                        pop != null &&
-                                        "extra".equals(tagName)) {
-                                    parseExtra(parser, pop.extras);
+                            } else {
+                                // Skip non-existent authority.
+                                pop = null;
+                                if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+                                    Log.v(TAG_FILE, "No authority found for " + authorityId
+                                            + ", skipping");
+                                }
                             }
-                        } catch (NumberFormatException e) {
-                            Log.d(TAG, "Invalid data in xml file.", e);
+                        } else if (parser.getDepth() == 2 &&
+                                pop != null &&
+                                "extra".equals(tagName)) {
+                            parseExtra(parser, pop.extras);
                         }
+                    } catch (NumberFormatException e) {
+                        Log.d(TAG, "Invalid data in xml file.", e);
                     }
-                    eventType = parser.next();
-                } while(eventType != XmlPullParser.END_DOCUMENT);
-            }
+                }
+                eventType = parser.next();
+            } while(eventType != XmlPullParser.END_DOCUMENT);
         } catch (java.io.IOException e) {
-            if (fis == null) Log.i(TAG, "No initial pending operations.");
-            else Log.w(TAG, "Error reading pending data.", e);
-            return;
+            Log.w(TAG_FILE, "Error reading pending data.", e);
+        } catch (XmlPullParserException e) {
+            if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+                Log.w(TAG_FILE, "Error parsing pending ops xml.", e);
+            }
         } finally {
             if (fis != null) {
                 try {
@@ -2316,57 +2347,96 @@ public class SyncStorageEngine extends Handler {
             }
         }
     }
+
+    private static final String XML_ATTR_AUTHORITYID = "authority_id";
+    private static final String XML_ATTR_SOURCE = "source";
+    private static final String XML_ATTR_EXPEDITED = "expedited";
+    private static final String XML_ATTR_REASON = "reason";
+    private static final String XML_ATTR_VERSION = "version";
+
     /**
-     * Old format of reading pending.bin as a parcelled file. Replaced in lieu of JSON because
-     * persisting parcels is unsafe.
-     * @throws java.io.IOException
+     * Write all currently pending ops to the pending ops file.
      */
-    private void readPendingAsParcelled() throws java.io.IOException {
-        byte[] data = mPendingFile.readFully();
-        Parcel in = Parcel.obtain();
-        in.unmarshall(data, 0, data.length);
-        in.setDataPosition(0);
-        final int SIZE = in.dataSize();
-        while (in.dataPosition() < SIZE) {
-            int version = in.readInt();
-            if (version != 3 && version != 1) {
-                Log.w(TAG, "Unknown pending operation version "
-                        + version + "; dropping all ops");
-                break;
-            }
-            int authorityId = in.readInt();
-            int syncSource = in.readInt();
-            byte[] flatExtras = in.createByteArray();
-            boolean expedited;
-            if (version == PENDING_OPERATION_VERSION) {
-                expedited = in.readInt() != 0;
-            } else {
-                expedited = false;
-            }
-            int reason = in.readInt();
-            AuthorityInfo authority = mAuthorities.get(authorityId);
-            if (authority != null) {
-                Bundle extras;
-                if (flatExtras != null) {
-                    extras = unflattenBundle(flatExtras);
-                } else {
-                    // if we are unable to parse the extras for whatever reason convert this
-                    // to a regular sync by creating an empty extras
-                    extras = new Bundle();
+    private void writePendingOperationsLocked() {
+        final int N = mPendingOperations.size();
+        FileOutputStream fos = null;
+        try {
+            if (N == 0) {
+                if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+                    Log.v(TAG_FILE, "Truncating " + mPendingFile.getBaseFile());
                 }
-                PendingOperation op = new PendingOperation(
-                        authority.account, authority.userId, reason, syncSource,
-                        authority.authority, extras, expedited);
-                op.authorityId = authorityId;
-                op.flatExtras = flatExtras;
-                if (DEBUG_FILE) Log.v(TAG, "Adding pending op: account=" + op.account
-                        + " auth=" + op.authority
-                        + " src=" + op.syncSource
-                        + " reason=" + op.reason
-                        + " expedited=" + op.expedited
-                        + " extras=" + op.extras);
-                mPendingOperations.add(op);
+                mPendingFile.truncate();
+                return;
             }
+            if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+                Log.v(TAG_FILE, "Writing new " + mPendingFile.getBaseFile());
+            }
+            fos = mPendingFile.startWrite();
+            XmlSerializer out = new FastXmlSerializer();
+            out.setOutput(fos, "utf-8");
+
+            for (int i = 0; i < N; i++) {
+                PendingOperation pop = mPendingOperations.get(i);
+                writePendingOperationLocked(pop, out);
+            }
+            out.endDocument();
+            mPendingFile.finishWrite(fos);
+        } catch (java.io.IOException e1) {
+            Log.w(TAG, "Error writing pending operations", e1);
+            if (fos != null) {
+                mPendingFile.failWrite(fos);
+            }
+        }
+    }
+
+    /** Write all currently pending ops to the pending ops file. */
+     private void writePendingOperationLocked(PendingOperation pop, XmlSerializer out)
+             throws IOException {
+         // Pending operation.
+         out.startTag(null, "op");
+
+         out.attribute(null, XML_ATTR_VERSION, Integer.toString(PENDING_OPERATION_VERSION));
+         out.attribute(null, XML_ATTR_AUTHORITYID, Integer.toString(pop.authorityId));
+         out.attribute(null, XML_ATTR_SOURCE, Integer.toString(pop.syncSource));
+         out.attribute(null, XML_ATTR_EXPEDITED, Boolean.toString(pop.expedited));
+         out.attribute(null, XML_ATTR_REASON, Integer.toString(pop.reason));
+         extrasToXml(out, pop.extras);
+
+         out.endTag(null, "op");
+     }
+
+    /**
+     * Append the given operation to the pending ops file; if unable to,
+     * write all pending ops.
+     */
+    private void appendPendingOperationLocked(PendingOperation op) {
+        if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+            Log.v(TAG, "Appending to " + mPendingFile.getBaseFile());
+        }
+        FileOutputStream fos = null;
+        try {
+            fos = mPendingFile.openAppend();
+        } catch (java.io.IOException e) {
+            if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+                Log.v(TAG, "Failed append; writing full file");
+            }
+            writePendingOperationsLocked();
+            return;
+        }
+
+        try {
+            XmlSerializer out = new FastXmlSerializer();
+            out.setOutput(fos, "utf-8");
+            writePendingOperationLocked(op, out);
+            out.endDocument();
+            mPendingFile.finishWrite(fos);
+        } catch (java.io.IOException e1) {
+            Log.w(TAG, "Error writing appending operation", e1);
+            mPendingFile.failWrite(fos);
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException e) {}
         }
     }
 
@@ -2397,54 +2467,6 @@ public class SyncStorageEngine extends Handler {
             parcel.recycle();
         }
         return bundle;
-    }
-
-    private static final String XML_ATTR_AUTHORITYID = "authority_id";
-    private static final String XML_ATTR_SOURCE = "source";
-    private static final String XML_ATTR_EXPEDITED = "expedited";
-    private static final String XML_ATTR_REASON = "reason";
-    /**
-     * Write all currently pending ops to the pending ops file. TODO: Change this from xml
-     * so that we can append to this file as before.
-     */
-    private void writePendingOperationsLocked() {
-        final int N = mPendingOperations.size();
-        FileOutputStream fos = null;
-        try {
-            if (N == 0) {
-                if (DEBUG_FILE) Log.v(TAG, "Truncating " + mPendingFile.getBaseFile());
-                mPendingFile.truncate();
-                return;
-            }
-            if (DEBUG_FILE) Log.v(TAG, "Writing new " + mPendingFile.getBaseFile());
-            fos = mPendingFile.startWrite();
-            XmlSerializer out = new FastXmlSerializer();
-            out.setOutput(fos, "utf-8");
-            out.startDocument(null, true);
-            out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
-
-            out.startTag(null, "pending");
-            out.attribute(null, "version", Integer.toString(PENDING_OPERATION_VERSION));
-
-            for (int i = 0; i < N; i++) {
-                PendingOperation pop = mPendingOperations.get(i);
-                out.startTag(null, "op");
-                out.attribute(null, XML_ATTR_AUTHORITYID, Integer.toString(pop.authorityId));
-                out.attribute(null, XML_ATTR_SOURCE, Integer.toString(pop.syncSource));
-                out.attribute(null, XML_ATTR_EXPEDITED, Boolean.toString(pop.expedited));
-                out.attribute(null, XML_ATTR_REASON, Integer.toString(pop.reason));
-                extrasToXml(out, pop.extras);
-                out.endTag(null, "op");
-             }
-             out.endTag(null, "pending");
-             out.endDocument();
-             mPendingFile.finishWrite(fos);
-        } catch (java.io.IOException e1) {
-            Log.w(TAG, "Error writing pending operations", e1);
-            if (fos != null) {
-                mPendingFile.failWrite(fos);
-            }
-        }
     }
 
     private void extrasToXml(XmlSerializer out, Bundle extras) throws java.io.IOException {
@@ -2478,35 +2500,6 @@ public class SyncStorageEngine extends Handler {
             out.endTag(null, "extra");
         }
     }
-
-//    /**
-//     * Update the pending ops file, if e
-//     */
-//    private void appendPendingOperationLocked(PendingOperation op) {
-//        if (DEBUG_FILE) Log.v(TAG, "Appending to " + mPendingFile.getBaseFile());
-//        FileOutputStream fos = null;
-//        try {
-//            fos = mPendingFile.openAppend();
-//        } catch (java.io.IOException e) {
-//            if (DEBUG_FILE) Log.v(TAG, "Failed append; writing full file");
-//            writePendingOperationsLocked();
-//            return;
-//        }
-//
-//        try {
-//            Parcel out = Parcel.obtain();
-//            writePendingOperationLocked(op, out);
-//            fos.write(out.marshall());
-//            out.recycle();
-//        } catch (java.io.IOException e1) {
-//            Log.w(TAG, "Error writing pending operations", e1);
-//        } finally {
-//            try {
-//                fos.close();
-//            } catch (java.io.IOException e2) {
-//            }
-//        }
-//    }
 
     private void requestSync(Account account, int userId, int reason, String authority,
             Bundle extras) {
@@ -2568,7 +2561,9 @@ public class SyncStorageEngine extends Handler {
      * Write all sync statistics to the sync status file.
      */
     private void writeStatisticsLocked() {
-        if (DEBUG_FILE) Log.v(TAG, "Writing new " + mStatisticsFile.getBaseFile());
+        if (Log.isLoggable(TAG_FILE, Log.VERBOSE)) {
+            Log.v(TAG, "Writing new " + mStatisticsFile.getBaseFile());
+        }
 
         // The file is being written, so we don't need to have a scheduled
         // write until the next change.
@@ -2611,7 +2606,7 @@ public class SyncStorageEngine extends Handler {
         sb.append("Pending Ops: ").append(mPendingOperations.size()).append(" operation(s)\n");
         for (PendingOperation pop : mPendingOperations) {
             sb.append("(" + pop.account)
-                .append(", " + pop.userId)
+                .append(", u" + pop.userId)
                 .append(", " + pop.authority)
                 .append(", " + pop.extras)
                 .append(")\n");
