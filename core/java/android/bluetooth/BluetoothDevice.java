@@ -306,6 +306,11 @@ public final class BluetoothDevice implements Parcelable {
     public static final String ACTION_UUID =
             "android.bluetooth.device.action.UUID";
 
+    /** @hide */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_MAS_INSTANCE =
+            "android.bluetooth.device.action.MAS_INSTANCE";
+
     /**
      * Broadcast Action: Indicates a failure to retrieve the name of a remote
      * device.
@@ -522,14 +527,17 @@ public final class BluetoothDevice implements Parcelable {
      * Prefer BR/EDR transport for GATT connections to remote dual-mode devices
      * @hide
      */
-   public static final int TRANSPORT_BREDR = 1;
+    public static final int TRANSPORT_BREDR = 1;
 
     /**
      * Prefer LE transport for GATT connections to remote dual-mode devices
      * @hide
      */
-   public static final int TRANSPORT_LE = 2;
+    public static final int TRANSPORT_LE = 2;
 
+    /** @hide */
+    public static final String EXTRA_MAS_INSTANCE =
+        "android.bluetooth.device.extra.MAS_INSTANCE";
 
     /**
      * Lazy initialization. Guaranteed final after first object constructed, or
@@ -994,6 +1002,18 @@ public final class BluetoothDevice implements Parcelable {
         } catch (RemoteException e) {Log.e(TAG, "", e);}
             return false;
     }
+
+     /** @hide */
+     public boolean fetchMasInstances() {
+         if (sService == null) {
+             Log.e(TAG, "BT not enabled. Cannot query remote device for MAS instances");
+             return false;
+         }
+         try {
+             return sService.fetchRemoteMasInstances(this);
+         } catch (RemoteException e) {Log.e(TAG, "", e);}
+         return false;
+     }
 
     /** @hide */
     public int getServiceChannel(ParcelUuid uuid) {

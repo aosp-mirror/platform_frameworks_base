@@ -761,6 +761,13 @@
      messages sent to you without showing them to you.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_receiveBluetoothMap">receive Bluetooth messages (MAP)</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_receiveBluetoothMap">Allows the app to receive and process Bluetooth MAP
+      messages. This means the app could monitor or delete messages sent to your
+      device without showing them to you.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_getTasks">retrieve running apps</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_getTasks">Allows the app to retrieve information

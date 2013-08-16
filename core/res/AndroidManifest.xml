@@ -99,6 +99,7 @@
     <protected-broadcast android:name="android.bluetooth.adapter.action.LOCAL_NAME_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.device.action.UUID" />
+    <protected-broadcast android:name="android.bluetooth.device.action.MAS_INSTANCE" />
     <protected-broadcast android:name="android.bluetooth.device.action.ALIAS_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.device.action.FOUND" />
     <protected-broadcast android:name="android.bluetooth.device.action.DISAPPEARED" />
@@ -395,6 +396,15 @@
         android:protectionLevel="dangerous"
         android:label="@string/permlab_receiveWapPush"
         android:description="@string/permdesc_receiveWapPush" />
+
+    <!-- Allows an application to monitor incoming Bluetooth MAP messages, to record
+         or perform processing on them. -->
+    <!-- @hide -->
+    <permission android:name="android.permission.RECEIVE_BLUETOOTH_MAP"
+        android:permissionGroup="android.permission-group.MESSAGES"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_receiveBluetoothMap"
+        android:description="@string/permdesc_receiveBluetoothMap" />
 
     <!-- =============================================================== -->
     <!-- Permissions for accessing social info (contacts and social) -->

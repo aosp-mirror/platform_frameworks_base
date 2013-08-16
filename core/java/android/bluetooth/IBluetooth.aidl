@@ -67,6 +67,7 @@ interface IBluetooth
     int getRemoteClass(in BluetoothDevice device);
     ParcelUuid[] getRemoteUuids(in BluetoothDevice device);
     boolean fetchRemoteUuids(in BluetoothDevice device);
+    boolean fetchRemoteMasInstances(in BluetoothDevice device);
 
     boolean setPin(in BluetoothDevice device, boolean accept, int len, in byte[] pinCode);
     boolean setPasskey(in BluetoothDevice device, boolean accept, int len, in byte[]
