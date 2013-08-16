@@ -30,9 +30,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.ImageButton;
-import android.widget.ListPopupWindow;
 
 import com.android.internal.view.ActionBarPolicy;
 import com.android.internal.view.menu.ActionMenuView.ActionMenuChildView;
@@ -694,32 +692,43 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         }
 
         @Override
-        public boolean onTouchObserved(View v, MotionEvent ev) {
-            if (ev.getActionMasked() == MotionEvent.ACTION_MOVE && v.isEnabled()
-                    && !v.pointInView(ev.getX(), ev.getY(), mScaledTouchSlop)) {
-                mActivePointerId = ev.getPointerId(0);
-                v.performClick();
-                return true;
-            }
-
-            return false;
-        }
-
-        @Override
-        public boolean onTouchForwarded(View v, MotionEvent ev) {
-            if (!v.isEnabled() || mOverflowPopup == null || !mOverflowPopup.isShowing()) {
+        public boolean onTouchObserved(View src, MotionEvent srcEvent) {
+            if (!src.isEnabled()) {
                 return false;
             }
 
-            if (mActivePointerId != MotionEvent.INVALID_POINTER_ID) {
-                if (mOverflowPopup.forwardMotionEvent(v, ev, mActivePointerId)) {
+            // Always start forwarding events when the source view is touched.
+            mActivePointerId = srcEvent.getPointerId(0);
+            src.performClick();
+            return true;
+        }
+
+        @Override
+        public boolean onTouchForwarded(View src, MotionEvent srcEvent) {
+            final OverflowPopup popup = mOverflowPopup;
+            if (popup != null && popup.isShowing()) {
+                final int activePointerId = mActivePointerId;
+                if (activePointerId != MotionEvent.INVALID_POINTER_ID && src.isEnabled()
+                        && popup.forwardMotionEvent(src, srcEvent, activePointerId)) {
+                    // Handled the motion event, continue forwarding.
                     return true;
                 }
 
-                mActivePointerId = MotionEvent.INVALID_POINTER_ID;
+                final int activePointerIndex = srcEvent.findPointerIndex(activePointerId);
+                if (activePointerIndex >= 0) {
+                    final float x = srcEvent.getX(activePointerIndex);
+                    final float y = srcEvent.getY(activePointerIndex);
+                    if (src.pointInView(x, y, mScaledTouchSlop)) {
+                        // The user is touching the source view. Cancel
+                        // forwarding, but don't dismiss the popup.
+                        return false;
+                    }
+                }
+
+                popup.dismiss();
             }
 
-            mOverflowPopup.dismiss();
+            // Cancel forwarding.
             return false;
         }
     }
