@@ -226,6 +226,8 @@ void Caches::terminate() {
 
     patchCache.clear();
 
+    clearGarbage();
+
     mInitialized = false;
 }
 

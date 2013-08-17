@@ -94,6 +94,7 @@ class GLES20DisplayList extends DisplayList {
         if (hasNativeDisplayList()) {
             nReset(mFinalizer.mNativeDisplayList);
         }
+        clear();
     }
 
     @Override

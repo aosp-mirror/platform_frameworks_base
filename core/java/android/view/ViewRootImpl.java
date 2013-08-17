@@ -614,15 +614,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     void destroyHardwareResources() {
-        if (mAttachInfo.mHardwareRenderer != null) {
-            if (mAttachInfo.mHardwareRenderer.isEnabled()) {
-                mAttachInfo.mHardwareRenderer.destroyLayers(mView);
-            }
-            mAttachInfo.mHardwareRenderer.destroy(false);
-        }
-    }
-
-    void terminateHardwareResources() {
+        invalidateDisplayLists();
         if (mAttachInfo.mHardwareRenderer != null) {
             mAttachInfo.mHardwareRenderer.destroyHardwareResources(mView);
             mAttachInfo.mHardwareRenderer.destroy(false);
@@ -636,6 +628,7 @@ public final class ViewRootImpl implements ViewParent,
                 HardwareRenderer.trimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE);
             }
         } else {
+            invalidateDisplayLists();
             if (mAttachInfo.mHardwareRenderer != null &&
                     mAttachInfo.mHardwareRenderer.isEnabled()) {
                 mAttachInfo.mHardwareRenderer.destroyLayers(mView);
@@ -2554,7 +2547,7 @@ public final class ViewRootImpl implements ViewParent,
         for (int i = 0; i < count; i++) {
             final DisplayList displayList = displayLists.get(i);
             if (displayList.isDirty()) {
-                displayList.clear();
+                displayList.reset();
             }
         }
 
