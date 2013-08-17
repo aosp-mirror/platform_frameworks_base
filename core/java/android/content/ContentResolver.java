@@ -2060,7 +2060,7 @@ public abstract class ContentResolver {
 
     private final class ParcelFileDescriptorInner extends ParcelFileDescriptor {
         private final IContentProvider mContentProvider;
-        private boolean mReleaseProviderFlag = false;
+        private boolean mProviderReleased;
 
         ParcelFileDescriptorInner(ParcelFileDescriptor pfd, IContentProvider icp) {
             super(pfd);
@@ -2069,17 +2069,10 @@ public abstract class ContentResolver {
 
         @Override
         public void close() throws IOException {
-            if(!mReleaseProviderFlag) {
-                super.close();
+            super.close();
+            if (!mProviderReleased) {
                 ContentResolver.this.releaseProvider(mContentProvider);
-                mReleaseProviderFlag = true;
-            }
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            if (!mReleaseProviderFlag) {
-                close();
+                mProviderReleased = true;
             }
         }
     }
