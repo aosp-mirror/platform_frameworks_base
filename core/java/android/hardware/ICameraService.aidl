@@ -22,6 +22,7 @@ import android.hardware.IProCameraUser;
 import android.hardware.IProCameraCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.ICameraDeviceCallbacks;
+import android.hardware.camera2.utils.BinderHolder;
 import android.hardware.ICameraServiceListener;
 import android.hardware.CameraInfo;
 
@@ -37,17 +38,23 @@ interface ICameraService
 
     int getCameraInfo(int cameraId, out CameraInfo info);
 
-    ICamera connect(ICameraClient client, int cameraId,
+    int connect(ICameraClient client, int cameraId,
                     String clientPackageName,
-                    int clientUid);
+                    int clientUid,
+                    // Container for an ICamera object
+                    out BinderHolder device);
 
-    IProCameraUser connectPro(IProCameraCallbacks callbacks, int cameraId,
+    int connectPro(IProCameraCallbacks callbacks, int cameraId,
                               String clientPackageName,
-                              int clientUid);
+                              int clientUid,
+                              // Container for an IProCameraUser object
+                              out BinderHolder device);
 
-    ICameraDeviceUser connectDevice(ICameraDeviceCallbacks callbacks, int cameraId,
+    int connectDevice(ICameraDeviceCallbacks callbacks, int cameraId,
                               String clientPackageName,
-                              int clientUid);
+                              int clientUid,
+                              // Container for an ICameraDeviceUser object
+                              out BinderHolder device);
 
     int addListener(ICameraServiceListener listener);
     int removeListener(ICameraServiceListener listener);
