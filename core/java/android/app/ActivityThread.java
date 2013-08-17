@@ -3865,7 +3865,7 @@ public final class ActivityThread {
         }
     }
 
-    final void freeTextLayoutCachesIfNeeded(int configDiff) {
+    static void freeTextLayoutCachesIfNeeded(int configDiff) {
         if (configDiff != 0) {
             // Ask text layout engine to free its caches if there is a locale change
             boolean hasLocaleConfigChange = ((configDiff & ActivityInfo.CONFIG_LOCALE) != 0);

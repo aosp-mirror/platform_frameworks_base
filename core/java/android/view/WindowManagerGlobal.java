@@ -21,7 +21,6 @@ import android.app.ActivityManager;
 import android.content.ComponentCallbacks2;
 import android.content.res.Configuration;
 import android.opengl.ManagedEGLContext;
-import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -29,7 +28,6 @@ import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.Slog;
 import android.view.inputmethod.InputMethodManager;
 import com.android.internal.util.FastPrintWriter;
 
@@ -385,7 +383,7 @@ public final class WindowManagerGlobal {
                 // known windows
                 synchronized (mLock) {
                     for (int i = mRoots.size() - 1; i >= 0; --i) {
-                        mRoots.get(i).terminateHardwareResources();
+                        mRoots.get(i).destroyHardwareResources();
                     }
                 }
                 // Force a full memory flush
