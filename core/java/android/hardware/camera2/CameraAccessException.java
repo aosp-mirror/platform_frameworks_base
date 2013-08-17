@@ -48,10 +48,17 @@ public class CameraAccessException extends AndroidException {
 
     /**
      * The camera device is removable and has been disconnected from the Android
-     * device, or the camera service has shut down the connection due to a
+     * device, or the camera id used with {@link android.hardware.camera2.CameraManager#openCamera}
+     * is no longer valid, or the camera service has shut down the connection due to a
      * higher-priority access request for the camera device.
      */
     public static final int CAMERA_DISCONNECTED = 4;
+
+    /**
+     * A deprecated HAL version is in use.
+     * @hide
+     */
+    public static final int CAMERA_DEPRECATED_HAL = 1000;
 
     // Make the eclipse warning about serializable exceptions go away
     private static final long serialVersionUID = 5630338637471475675L; // randomly generated

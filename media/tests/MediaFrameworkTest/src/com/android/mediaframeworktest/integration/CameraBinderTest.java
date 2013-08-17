@@ -25,6 +25,8 @@ import android.hardware.IProCameraUser;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
+import android.hardware.camera2.utils.BinderHolder;
+import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -109,9 +111,11 @@ public class CameraBinderTest extends AndroidTestCase {
 
             String clientPackageName = getContext().getPackageName();
 
-            ICamera cameraUser = mUtils.getCameraService().connect(dummyCallbacks, cameraId,
-                    clientPackageName,
-                    CameraBinderTestUtils.USE_CALLING_UID);
+            BinderHolder holder = new BinderHolder();
+            CameraBinderDecorator.newInstance(mUtils.getCameraService())
+                    .connect(dummyCallbacks, cameraId, clientPackageName,
+                    CameraBinderTestUtils.USE_CALLING_UID, holder);
+            ICamera cameraUser = ICamera.Stub.asInterface(holder.getBinder());
             assertNotNull(String.format("Camera %s was null", cameraId), cameraUser);
 
             Log.v(TAG, String.format("Camera %s connected", cameraId));
@@ -131,9 +135,11 @@ public class CameraBinderTest extends AndroidTestCase {
 
             String clientPackageName = getContext().getPackageName();
 
-            IProCameraUser cameraUser = mUtils.getCameraService().connectPro(dummyCallbacks,
-                    cameraId,
-                    clientPackageName, CameraBinderTestUtils.USE_CALLING_UID);
+            BinderHolder holder = new BinderHolder();
+            CameraBinderDecorator.newInstance(mUtils.getCameraService())
+                    .connectPro(dummyCallbacks, cameraId,
+                    clientPackageName, CameraBinderTestUtils.USE_CALLING_UID, holder);
+            IProCameraUser cameraUser = IProCameraUser.Stub.asInterface(holder.getBinder());
             assertNotNull(String.format("Camera %s was null", cameraId), cameraUser);
 
             Log.v(TAG, String.format("Camera %s connected", cameraId));
@@ -161,9 +167,11 @@ public class CameraBinderTest extends AndroidTestCase {
 
             String clientPackageName = getContext().getPackageName();
 
-            ICameraDeviceUser cameraUser = mUtils.getCameraService().connectDevice(dummyCallbacks,
-                    cameraId,
-                    clientPackageName, CameraBinderTestUtils.USE_CALLING_UID);
+            BinderHolder holder = new BinderHolder();
+            CameraBinderDecorator.newInstance(mUtils.getCameraService())
+                    .connectDevice(dummyCallbacks, cameraId,
+                    clientPackageName, CameraBinderTestUtils.USE_CALLING_UID, holder);
+            ICameraDeviceUser cameraUser = ICameraDeviceUser.Stub.asInterface(holder.getBinder());
             assertNotNull(String.format("Camera %s was null", cameraId), cameraUser);
 
             Log.v(TAG, String.format("Camera %s connected", cameraId));
