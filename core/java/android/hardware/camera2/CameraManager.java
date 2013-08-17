@@ -22,6 +22,7 @@ import android.hardware.ICameraServiceListener;
 import android.hardware.IProCameraUser;
 import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;
+import android.hardware.camera2.utils.BinderHolder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -171,10 +172,10 @@ public final class CameraManager {
      *
      * @param cameraId The unique identifier of the camera device to open
      *
-     * @throws IllegalArgumentException if the cameraId does not match any
-     * currently connected camera device.
      * @throws CameraAccessException if the camera is disabled by device policy,
-     * or too many camera devices are already open.
+     * or too many camera devices are already open, or the cameraId does not match
+     * any currently available camera device.
+     *
      * @throws SecurityException if the application does not have permission to
      * access the camera
      *
@@ -192,16 +193,11 @@ public final class CameraManager {
                 android.hardware.camera2.impl.CameraDevice device =
                         new android.hardware.camera2.impl.CameraDevice(cameraId);
 
-                cameraUser = mCameraService.connectDevice(device.getCallbacks(),
+                BinderHolder holder = new BinderHolder();
+                mCameraService.connectDevice(device.getCallbacks(),
                         Integer.parseInt(cameraId),
-                        mContext.getPackageName(), USE_CALLING_UID);
-
-                // TODO: change ICameraService#connectDevice to return status_t
-                if (cameraUser == null) {
-                    // TEMPORARY CODE.
-                    // catch-all exception since we aren't yet getting the actual error code
-                    throw new IllegalStateException("Failed to open camera device");
-                }
+                        mContext.getPackageName(), USE_CALLING_UID, holder);
+                cameraUser = ICameraDeviceUser.Stub.asInterface(holder.getBinder());
 
                 // TODO: factor out listener to be non-nested, then move setter to constructor
                 device.setRemoteDevice(cameraUser);
@@ -214,12 +210,7 @@ public final class CameraManager {
             throw new IllegalArgumentException("Expected cameraId to be numeric, but it was: "
                     + cameraId);
         } catch (CameraRuntimeException e) {
-            if (e.getReason() == CameraAccessException.CAMERA_DISCONNECTED) {
-                throw new IllegalArgumentException("Invalid camera ID specified -- " +
-                        "perhaps the camera was physically disconnected", e);
-            } else {
-                throw e.asChecked();
-            }
+            throw e.asChecked();
         } catch (RemoteException e) {
             // impossible
             return null;

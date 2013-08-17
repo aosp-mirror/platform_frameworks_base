@@ -19,6 +19,7 @@ package android.hardware.camera2.utils;
 import static android.hardware.camera2.CameraAccessException.CAMERA_DISABLED;
 import static android.hardware.camera2.CameraAccessException.CAMERA_DISCONNECTED;
 import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
+import static android.hardware.camera2.CameraAccessException.CAMERA_DEPRECATED_HAL;
 
 import android.os.DeadObjectException;
 import android.os.RemoteException;
@@ -48,6 +49,7 @@ public class CameraBinderDecorator {
     public static final int EACCES = -13;
     public static final int EBUSY = -16;
     public static final int ENODEV = -19;
+    public static final int ENOTSUP = -129;
 
     private static class CameraBinderDecoratorListener implements Decorator.DecoratorListener {
 
@@ -75,9 +77,6 @@ public class CameraBinderDecorator {
                     case DEAD_OBJECT:
                         UncheckedThrow.throwAnyException(new CameraRuntimeException(
                                 CAMERA_DISCONNECTED));
-                        // TODO: Camera service (native side) should return
-                        // EACCES error
-                        // when there's a policy manager disabled causing this
                     case EACCES:
                         UncheckedThrow.throwAnyException(new CameraRuntimeException(
                                 CAMERA_DISABLED));
@@ -87,6 +86,9 @@ public class CameraBinderDecorator {
                     case ENODEV:
                         UncheckedThrow.throwAnyException(new CameraRuntimeException(
                                 CAMERA_DISCONNECTED));
+                    case ENOTSUP:
+                        UncheckedThrow.throwAnyException(new CameraRuntimeException(
+                                CAMERA_DEPRECATED_HAL));
                 }
 
                 /**
