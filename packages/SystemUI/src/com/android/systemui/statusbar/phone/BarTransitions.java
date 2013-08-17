@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
@@ -29,25 +32,31 @@ import com.android.systemui.R;
 public class BarTransitions {
     private static final boolean DEBUG = false;
 
-    public static final int MODE_NORMAL = 0;
+    public static final int MODE_OPAQUE = 0;
     public static final int MODE_SEMI_TRANSPARENT = 1;
     public static final int MODE_TRANSPARENT = 2;
 
     private final String mTag;
     private final View mTarget;
-    private final Drawable mOpaque;
-    private final Drawable mSemiTransparent;
+    private final int mOpaque;
+    private final int mSemiTransparent;
 
     protected Drawable mTransparent;
     private int mMode;
+
+    private final AnimatorUpdateListener mBackgroundColorListener = new AnimatorUpdateListener() {
+        @Override
+        public void onAnimationUpdate(ValueAnimator animator) {
+            mTarget.setBackgroundColor((Integer) animator.getAnimatedValue());
+        }
+    };
 
     public BarTransitions(Context context, View target) {
         mTag = "BarTransitions." + target.getClass().getSimpleName();
         mTarget = target;
         final Resources res = context.getResources();
-        mOpaque = new ColorDrawable(res.getColor(R.drawable.status_bar_background));
-        mSemiTransparent =
-                new ColorDrawable(res.getColor(R.color.status_bar_background_semi_transparent));
+        mOpaque = res.getColor(R.drawable.status_bar_background);
+        mSemiTransparent = res.getColor(R.color.status_bar_background_semi_transparent);
     }
 
     public void setTransparent(Drawable transparent) {
@@ -58,24 +67,40 @@ public class BarTransitions {
     }
 
     public void transitionTo(int mode) {
+        transitionTo(mode, false);
+    }
+
+    public void transitionTo(int mode, boolean animate) {
         if (mMode == mode) return;
         int oldMode = mMode;
         mMode = mode;
         if (!ActivityManager.isHighEndGfx()) return;
-        if (DEBUG) Log.d(mTag, String.format("transition from %s to %s",
-                modeToString(oldMode), modeToString(mode)));
-        onTransition(oldMode, mMode);
+        if (DEBUG) Log.d(mTag, modeToString(oldMode) + " -> " + modeToString(mode));
+        onTransition(oldMode, mMode, animate);
     }
 
-    protected void onTransition(int oldMode, int newMode) {
-        Drawable background = newMode == MODE_SEMI_TRANSPARENT ? mSemiTransparent
-                : newMode == MODE_TRANSPARENT ? mTransparent
-                : mOpaque;
-        mTarget.setBackground(background);
+    protected void onTransition(int oldMode, int newMode, boolean animate) {
+        if (animate && oldMode == MODE_SEMI_TRANSPARENT && newMode == MODE_OPAQUE) {
+            startColorAnimation(mSemiTransparent, mOpaque);
+        } else if (animate && oldMode == MODE_OPAQUE && newMode == MODE_SEMI_TRANSPARENT) {
+            startColorAnimation(mOpaque, mSemiTransparent);
+        } else if (newMode == MODE_OPAQUE || newMode == MODE_SEMI_TRANSPARENT) {
+            mTarget.setBackgroundColor(newMode == MODE_OPAQUE ? mOpaque : mSemiTransparent);
+        } else {
+            mTarget.setBackground(newMode == MODE_TRANSPARENT? mTransparent
+                    : newMode == MODE_SEMI_TRANSPARENT ? new ColorDrawable(mSemiTransparent)
+                    : new ColorDrawable(mOpaque));
+        }
+    }
+
+    private void startColorAnimation(int from, int to) {
+        ValueAnimator anim = ValueAnimator.ofObject(new ArgbEvaluator(), from, to);
+        anim.addUpdateListener(mBackgroundColorListener);
+        anim.start();
     }
 
     public static String modeToString(int mode) {
-        if (mode == MODE_NORMAL) return "MODE_NORMAL";
+        if (mode == MODE_OPAQUE) return "MODE_OPAQUE";
         if (mode == MODE_SEMI_TRANSPARENT) return "MODE_SEMI_TRANSPARENT";
         if (mode == MODE_TRANSPARENT) return "MODE_TRANSPARENT";
         throw new IllegalArgumentException("Unknown mode " + mode);
