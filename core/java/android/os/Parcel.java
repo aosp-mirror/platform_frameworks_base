@@ -1520,6 +1520,11 @@ public final class Parcel {
         return fd != null ? new ParcelFileDescriptor(fd) : null;
     }
 
+    /** {@hide} */
+    public final FileDescriptor readRawFileDescriptor() {
+        return nativeReadFileDescriptor(mNativePtr);
+    }
+
     /*package*/ static native FileDescriptor openFileDescriptor(String file,
             int mode) throws FileNotFoundException;
     /*package*/ static native FileDescriptor dupFileDescriptor(FileDescriptor orig)
