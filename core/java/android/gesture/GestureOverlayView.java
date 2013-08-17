@@ -486,6 +486,7 @@ public class GestureOverlayView extends FrameLayout {
 
     @Override
     protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
         cancelClearAnimation();
     }
 

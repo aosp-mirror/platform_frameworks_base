@@ -12144,7 +12144,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         removeSendViewScrolledAccessibilityEventCallback();
 
         destroyDrawingCache();
-
         destroyLayer(false);
 
         cleanupDraw();
@@ -12162,7 +12161,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mAttachInfo.mViewRootImpl.cancelInvalidate(this);
         } else {
             // Should never happen
-            clearDisplayList();
+            resetDisplayList();
         }
     }
 
@@ -12773,9 +12772,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mHardwareLayer.destroy();
                 mHardwareLayer = null;
 
-                if (mDisplayList != null) {
-                    mDisplayList.reset();
-                }
                 invalidate(true);
                 invalidateParentCaches();
             }
@@ -12796,7 +12792,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     protected void destroyHardwareResources() {
-        clearDisplayList();
+        resetDisplayList();
         destroyLayer(true);
     }
 
@@ -13041,6 +13037,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private void clearDisplayList() {
         if (mDisplayList != null) {
             mDisplayList.clear();
+        }
+    }
+
+    private void resetDisplayList() {
+        if (mDisplayList != null) {
+            mDisplayList.reset();
         }
     }
 
