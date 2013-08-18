@@ -19,8 +19,8 @@ package android.provider;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.ContentUris;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -532,7 +532,8 @@ public final class MediaStore {
         private static final Object sThumbBufLock = new Object();
         private static byte[] sThumbBuf;
 
-        private static Bitmap getMiniThumbFromFile(Cursor c, Uri baseUri, ContentResolver cr, BitmapFactory.Options options) {
+        private static Bitmap getMiniThumbFromFile(
+                Cursor c, Uri baseUri, ContentResolver cr, BitmapFactory.Options options) {
             Bitmap bitmap = null;
             Uri thumbUri = null;
             try {
@@ -577,6 +578,7 @@ public final class MediaStore {
                 if (c != null) c.close();
             }
         }
+
         /**
          * This method ensure thumbnails associated with origId are generated and decode the byte
          * stream from database (MICRO_KIND) or file (MINI_KIND).

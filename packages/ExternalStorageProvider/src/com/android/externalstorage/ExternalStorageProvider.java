@@ -22,10 +22,10 @@ import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.MatrixCursor;
+import android.database.MatrixCursor.RowBuilder;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.provider.BaseColumns;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.DocumentColumns;
 import android.provider.DocumentsContract.Documents;
@@ -45,7 +45,7 @@ import java.util.LinkedList;
 public class ExternalStorageProvider extends ContentProvider {
     private static final String TAG = "ExternalStorage";
 
-    private static final String AUTHORITY = "com.android.externalstorage";
+    private static final String AUTHORITY = "com.android.externalstorage.documents";
 
     // TODO: support multiple storage devices
 
@@ -56,6 +56,14 @@ public class ExternalStorageProvider extends ContentProvider {
     private static final int URI_DOCS_ID = 3;
     private static final int URI_DOCS_ID_CONTENTS = 4;
     private static final int URI_DOCS_ID_SEARCH = 5;
+
+    static {
+        sMatcher.addURI(AUTHORITY, "roots", URI_ROOTS);
+        sMatcher.addURI(AUTHORITY, "roots/*", URI_ROOTS_ID);
+        sMatcher.addURI(AUTHORITY, "roots/*/docs/*", URI_DOCS_ID);
+        sMatcher.addURI(AUTHORITY, "roots/*/docs/*/contents", URI_DOCS_ID_CONTENTS);
+        sMatcher.addURI(AUTHORITY, "roots/*/docs/*/search", URI_DOCS_ID_SEARCH);
+    }
 
     private HashMap<String, Root> mRoots = Maps.newHashMap();
 
@@ -68,13 +76,15 @@ public class ExternalStorageProvider extends ContentProvider {
         public File path;
     }
 
-    static {
-        sMatcher.addURI(AUTHORITY, "roots", URI_ROOTS);
-        sMatcher.addURI(AUTHORITY, "roots/*", URI_ROOTS_ID);
-        sMatcher.addURI(AUTHORITY, "roots/*/docs/*", URI_DOCS_ID);
-        sMatcher.addURI(AUTHORITY, "roots/*/docs/*/contents", URI_DOCS_ID_CONTENTS);
-        sMatcher.addURI(AUTHORITY, "roots/*/docs/*/search", URI_DOCS_ID_SEARCH);
-    }
+    private static final String[] ALL_ROOTS_COLUMNS = new String[] {
+            RootColumns.ROOT_ID, RootColumns.ROOT_TYPE, RootColumns.ICON, RootColumns.TITLE,
+            RootColumns.SUMMARY, RootColumns.AVAILABLE_BYTES
+    };
+
+    private static final String[] ALL_DOCUMENTS_COLUMNS = new String[] {
+            DocumentColumns.DOC_ID, DocumentColumns.DISPLAY_NAME, DocumentColumns.SIZE,
+            DocumentColumns.MIME_TYPE, DocumentColumns.LAST_MODIFIED, DocumentColumns.FLAGS
+    };
 
     @Override
     public boolean onCreate() {
@@ -93,64 +103,59 @@ public class ExternalStorageProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
             String sortOrder) {
-
-        // TODO: support custom projections
-        final String[] rootsProjection = new String[] {
-                BaseColumns._ID, RootColumns.ROOT_ID, RootColumns.ROOT_TYPE, RootColumns.ICON,
-                RootColumns.TITLE, RootColumns.SUMMARY, RootColumns.AVAILABLE_BYTES };
-        final String[] docsProjection = new String[] {
-                BaseColumns._ID, DocumentColumns.DISPLAY_NAME, DocumentColumns.SIZE,
-                DocumentColumns.DOC_ID, DocumentColumns.MIME_TYPE, DocumentColumns.LAST_MODIFIED,
-                DocumentColumns.FLAGS };
-
         switch (sMatcher.match(uri)) {
             case URI_ROOTS: {
-                final MatrixCursor cursor = new MatrixCursor(rootsProjection);
+                final MatrixCursor result = new MatrixCursor(
+                        projection != null ? projection : ALL_ROOTS_COLUMNS);
                 for (Root root : mRoots.values()) {
-                    includeRoot(cursor, root);
+                    includeRoot(result, root);
                 }
-                return cursor;
+                return result;
             }
             case URI_ROOTS_ID: {
                 final Root root = mRoots.get(DocumentsContract.getRootId(uri));
 
-                final MatrixCursor cursor = new MatrixCursor(rootsProjection);
-                includeRoot(cursor, root);
-                return cursor;
+                final MatrixCursor result = new MatrixCursor(
+                        projection != null ? projection : ALL_ROOTS_COLUMNS);
+                includeRoot(result, root);
+                return result;
             }
             case URI_DOCS_ID: {
                 final Root root = mRoots.get(DocumentsContract.getRootId(uri));
                 final String docId = DocumentsContract.getDocId(uri);
 
-                final MatrixCursor cursor = new MatrixCursor(docsProjection);
+                final MatrixCursor result = new MatrixCursor(
+                        projection != null ? projection : ALL_DOCUMENTS_COLUMNS);
                 final File file = docIdToFile(root, docId);
-                includeFile(cursor, root, file);
-                return cursor;
+                includeFile(result, root, file);
+                return result;
             }
             case URI_DOCS_ID_CONTENTS: {
                 final Root root = mRoots.get(DocumentsContract.getRootId(uri));
                 final String docId = DocumentsContract.getDocId(uri);
 
-                final MatrixCursor cursor = new MatrixCursor(docsProjection);
+                final MatrixCursor result = new MatrixCursor(
+                        projection != null ? projection : ALL_DOCUMENTS_COLUMNS);
                 final File parent = docIdToFile(root, docId);
 
                 for (File file : parent.listFiles()) {
-                    includeFile(cursor, root, file);
+                    includeFile(result, root, file);
                 }
 
-                return cursor;
+                return result;
             }
             case URI_DOCS_ID_SEARCH: {
                 final Root root = mRoots.get(DocumentsContract.getRootId(uri));
                 final String docId = DocumentsContract.getDocId(uri);
                 final String query = DocumentsContract.getSearchQuery(uri).toLowerCase();
 
-                final MatrixCursor cursor = new MatrixCursor(docsProjection);
+                final MatrixCursor result = new MatrixCursor(
+                        projection != null ? projection : ALL_DOCUMENTS_COLUMNS);
                 final File parent = docIdToFile(root, docId);
 
                 final LinkedList<File> pending = new LinkedList<File>();
                 pending.add(parent);
-                while (!pending.isEmpty() && cursor.getCount() < 20) {
+                while (!pending.isEmpty() && result.getCount() < 20) {
                     final File file = pending.removeFirst();
                     if (file.isDirectory()) {
                         for (File child : file.listFiles()) {
@@ -158,12 +163,12 @@ public class ExternalStorageProvider extends ContentProvider {
                         }
                     } else {
                         if (file.getName().toLowerCase().contains(query)) {
-                            includeFile(cursor, root, file);
+                            includeFile(result, root, file);
                         }
                     }
                 }
 
-                return cursor;
+                return result;
             }
             default: {
                 throw new UnsupportedOperationException("Unsupported Uri " + uri);
@@ -196,13 +201,17 @@ public class ExternalStorageProvider extends ContentProvider {
         }
     }
 
-    private void includeRoot(MatrixCursor cursor, Root root) {
-        cursor.addRow(new Object[] {
-                root.name.hashCode(), root.name, root.rootType, root.icon, root.title, root.summary,
-                root.path.getFreeSpace() });
+    private void includeRoot(MatrixCursor result, Root root) {
+        final RowBuilder row = result.newRow();
+        row.offer(RootColumns.ROOT_ID, root.name);
+        row.offer(RootColumns.ROOT_TYPE, root.rootType);
+        row.offer(RootColumns.ICON, root.icon);
+        row.offer(RootColumns.TITLE, root.title);
+        row.offer(RootColumns.SUMMARY, root.summary);
+        row.offer(RootColumns.AVAILABLE_BYTES, root.path.getFreeSpace());
     }
 
-    private void includeFile(MatrixCursor cursor, Root root, File file) {
+    private void includeFile(MatrixCursor result, Root root, File file) {
         int flags = 0;
 
         if (file.isDirectory()) {
@@ -223,8 +232,6 @@ public class ExternalStorageProvider extends ContentProvider {
         }
 
         final String docId = fileToDocId(root, file);
-        final long id = docId.hashCode();
-
         final String displayName;
         if (Documents.DOC_ID_ROOT.equals(docId)) {
             displayName = root.title;
@@ -232,8 +239,13 @@ public class ExternalStorageProvider extends ContentProvider {
             displayName = file.getName();
         }
 
-        cursor.addRow(new Object[] {
-                id, displayName, file.length(), docId, mimeType, file.lastModified(), flags });
+        final RowBuilder row = result.newRow();
+        row.offer(DocumentColumns.DOC_ID, docId);
+        row.offer(DocumentColumns.DISPLAY_NAME, displayName);
+        row.offer(DocumentColumns.SIZE, file.length());
+        row.offer(DocumentColumns.MIME_TYPE, mimeType);
+        row.offer(DocumentColumns.LAST_MODIFIED, file.lastModified());
+        row.offer(DocumentColumns.FLAGS, flags);
     }
 
     @Override
