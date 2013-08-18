@@ -388,6 +388,66 @@ public final class BluetoothA2dp implements BluetoothProfile {
     }
 
     /**
+     * Checks if Avrcp device supports the absolute volume feature.
+     *
+     * @return true if device supports absolute volume
+     * @hide
+     */
+    public boolean isAvrcpAbsoluteVolumeSupported() {
+        if (DBG) Log.d(TAG, "isAvrcpAbsoluteVolumeSupported");
+        if (mService != null && isEnabled()) {
+            try {
+                return mService.isAvrcpAbsoluteVolumeSupported();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error talking to BT service in isAvrcpAbsoluteVolumeSupported()", e);
+                return false;
+            }
+        }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+        return false;
+    }
+
+    /**
+     * Tells remote device to adjust volume. Only if absolute volume is supported.
+     *
+     * @param direction 1 to increase volume, or -1 to decrease volume
+     * @hide
+     */
+    public void adjustAvrcpAbsoluteVolume(int direction) {
+        if (DBG) Log.d(TAG, "adjustAvrcpAbsoluteVolume");
+        if (mService != null && isEnabled()) {
+            try {
+                mService.adjustAvrcpAbsoluteVolume(direction);
+                return;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error talking to BT service in adjustAvrcpAbsoluteVolume()", e);
+                return;
+            }
+        }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+    }
+
+    /**
+     * Tells remote device to set an absolute volume. Only if absolute volume is supported
+     *
+     * @param volume Absolute volume to be set on AVRCP side
+     * @hide
+     */
+    public void setAvrcpAbsoluteVolume(int volume) {
+        if (DBG) Log.d(TAG, "setAvrcpAbsoluteVolume");
+        if (mService != null && isEnabled()) {
+            try {
+                mService.setAvrcpAbsoluteVolume(volume);
+                return;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error talking to BT service in setAvrcpAbsoluteVolume()", e);
+                return;
+            }
+        }
+        if (mService == null) Log.w(TAG, "Proxy not attached to service");
+    }
+
+    /**
      * Check if A2DP profile is streaming music.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.

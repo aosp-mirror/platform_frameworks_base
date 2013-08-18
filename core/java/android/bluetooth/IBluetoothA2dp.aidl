@@ -32,5 +32,8 @@ interface IBluetoothA2dp {
     int getConnectionState(in BluetoothDevice device);
     boolean setPriority(in BluetoothDevice device, int priority);
     int getPriority(in BluetoothDevice device);
+    boolean isAvrcpAbsoluteVolumeSupported();
+    oneway void adjustAvrcpAbsoluteVolume(int direction);
+    oneway void setAvrcpAbsoluteVolume(int volume);
     boolean isA2dpPlaying(in BluetoothDevice device);
 }
