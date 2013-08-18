@@ -7,7 +7,7 @@
     <application android:label="@string/app_label">
         <provider
             android:name=".ExternalStorageProvider"
-            android:authorities="com.android.externalstorage"
+            android:authorities="com.android.externalstorage.documents"
             android:grantUriPermissions="true"
             android:exported="true"
             android:permission="android.permission.MANAGE_DOCUMENTS">
