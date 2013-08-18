@@ -905,7 +905,7 @@ public final class ActivityStackSupervisor {
                         r.task.taskId, r.shortComponentName);
             }
             if (r.isHomeActivity() && r.isNotResolverActivity()) {
-                mService.mHomeProcess = app;
+                mService.mHomeProcess.add(app);
             }
             mService.ensurePackageDexOpt(r.intent.getComponent().getPackageName());
             r.sleeping = false;
@@ -1946,7 +1946,7 @@ public final class ActivityStackSupervisor {
         // makes sense to.
         if (r.app != null && fgApp != null && r.app != fgApp
                 && r.lastVisibleTime > mService.mPreviousProcessVisibleTime
-                && r.app != mService.mHomeProcess) {
+                && !mService.mHomeProcess.contains(r.app)) {
             mService.mPreviousProcess = r.app;
             mService.mPreviousProcessVisibleTime = r.lastVisibleTime;
         }

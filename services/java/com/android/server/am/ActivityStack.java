@@ -2246,7 +2246,7 @@ final class ActivityStack {
                 if (r.state == ActivityState.RESUMED
                         || r.state == ActivityState.PAUSING
                         || r.state == ActivityState.PAUSED) {
-                    if (!r.isHomeActivity() || mService.mHomeProcess != r.app) {
+                    if (!r.isHomeActivity() || !mService.mHomeProcess.contains(r.app)) {
                         Slog.w(TAG, "  Force finishing activity "
                                 + r.intent.getComponent().flattenToShortString());
                         finishActivityLocked(r, Activity.RESULT_CANCELED, null, "crashed", false);
