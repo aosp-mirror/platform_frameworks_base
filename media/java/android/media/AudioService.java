@@ -460,6 +460,12 @@ public class AudioService extends IAudioService.Stub {
 
     private final MediaFocusControl mMediaFocusControl;
 
+    // Reference to BluetoothA2dp to query for AbsoluteVolume.
+    private BluetoothA2dp mA2dp;
+    private final Object mA2dpAvrcpLock = new Object();
+    // If absolute volume is supported in AVRCP device
+    private boolean mAvrcpAbsVolSupported = false;
+
     ///////////////////////////////////////////////////////////////////////////
     // Construction
     ///////////////////////////////////////////////////////////////////////////
@@ -901,6 +907,15 @@ public class AudioService extends IAudioService.Stub {
         int oldIndex = mStreamStates[streamType].getIndex(device);
 
         if (adjustVolume && (direction != AudioManager.ADJUST_SAME)) {
+            // Check if volume update should be send to AVRCP
+            synchronized (mA2dpAvrcpLock) {
+                if (mA2dp != null && mAvrcpAbsVolSupported) {
+                    mA2dp.adjustAvrcpAbsoluteVolume(direction);
+                    return;
+                    // No need to send volume update, because we will update the volume with a
+                    // callback from Avrcp.
+                }
+            }
             if ((direction == AudioManager.ADJUST_RAISE) &&
                     !checkSafeMediaVolume(streamTypeAlias, aliasIndex + step, device)) {
                 Log.e(TAG, "adjustStreamVolume() safe volume index = "+oldIndex);
@@ -997,6 +1012,15 @@ public class AudioService extends IAudioService.Stub {
             oldIndex = streamState.getIndex(device);
 
             index = rescaleIndex(index * 10, streamType, streamTypeAlias);
+
+            synchronized (mA2dpAvrcpLock) {
+                if (mA2dp != null && mAvrcpAbsVolSupported) {
+                    mA2dp.setAvrcpAbsoluteVolume(index);
+                    return;
+                    // No need to send volume update, because we will update the volume with a
+                    // callback from Avrcp.
+                }
+            }
 
             flags &= ~AudioManager.FLAG_FIXED_VOLUME;
             if ((streamTypeAlias == AudioSystem.STREAM_MUSIC) &&
@@ -2268,21 +2292,23 @@ public class AudioService extends IAudioService.Stub {
             List<BluetoothDevice> deviceList;
             switch(profile) {
             case BluetoothProfile.A2DP:
-                BluetoothA2dp a2dp = (BluetoothA2dp) proxy;
-                deviceList = a2dp.getConnectedDevices();
-                if (deviceList.size() > 0) {
-                    btDevice = deviceList.get(0);
-                    synchronized (mConnectedDevices) {
-                        int state = a2dp.getConnectionState(btDevice);
-                        int delay = checkSendBecomingNoisyIntent(
-                                                AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                                                (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0);
-                        queueMsgUnderWakeLock(mAudioHandler,
-                                MSG_SET_A2DP_CONNECTION_STATE,
-                                state,
-                                0,
-                                btDevice,
-                                delay);
+                synchronized (mA2dpAvrcpLock) {
+                    mA2dp = (BluetoothA2dp) proxy;
+                    deviceList = mA2dp.getConnectedDevices();
+                    if (deviceList.size() > 0) {
+                        btDevice = deviceList.get(0);
+                        synchronized (mConnectedDevices) {
+                            int state = mA2dp.getConnectionState(btDevice);
+                            int delay = checkSendBecomingNoisyIntent(
+                                                    AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+                                                    (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0);
+                            queueMsgUnderWakeLock(mAudioHandler,
+                                    MSG_SET_A2DP_CONNECTION_STATE,
+                                    state,
+                                    0,
+                                    btDevice,
+                                    delay);
+                        }
                     }
                 }
                 break;
@@ -2344,10 +2370,13 @@ public class AudioService extends IAudioService.Stub {
         public void onServiceDisconnected(int profile) {
             switch(profile) {
             case BluetoothProfile.A2DP:
-                synchronized (mConnectedDevices) {
-                    if (mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP)) {
-                        makeA2dpDeviceUnavailableNow(
-                                mConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
+                synchronized (mA2dpAvrcpLock) {
+                    mA2dp = null;
+                    synchronized (mConnectedDevices) {
+                        if (mConnectedDevices.containsKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP)) {
+                            makeA2dpDeviceUnavailableNow(
+                                    mConnectedDevices.get(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
+                        }
                     }
                 }
                 break;
@@ -3697,12 +3726,27 @@ public class AudioService extends IAudioService.Stub {
 
     private void onSetA2dpConnectionState(BluetoothDevice btDevice, int state)
     {
+        if (DEBUG_VOL) Log.d(TAG, "onSetA2dpConnectionState btDevice="+btDevice+" state="+state);
         if (btDevice == null) {
             return;
         }
         String address = btDevice.getAddress();
         if (!BluetoothAdapter.checkBluetoothAddress(address)) {
             address = "";
+        }
+
+        // Disable absolute volume, if device is disconnected
+        synchronized (mA2dpAvrcpLock) {
+            if (state == BluetoothProfile.STATE_DISCONNECTED && mAvrcpAbsVolSupported) {
+                mAvrcpAbsVolSupported = false;
+                sendMsg(mAudioHandler,
+                        MSG_SET_DEVICE_VOLUME,
+                        SENDMSG_QUEUE,
+                        getDeviceForStream(AudioSystem.STREAM_MUSIC),
+                        0,
+                        mStreamStates[AudioSystem.STREAM_MUSIC],
+                        0);
+            }
         }
         synchronized (mConnectedDevices) {
             boolean isConnected =
@@ -3752,6 +3796,31 @@ public class AudioService extends IAudioService.Stub {
                 }
             }
         }
+    }
+
+    public void avrcpSupportsAbsoluteVolume(String address, boolean support) {
+        // address is not used for now, but may be used when multiple a2dp devices are supported
+        synchronized (mA2dpAvrcpLock) {
+            mAvrcpAbsVolSupported = support;
+            if (support) {
+                VolumeStreamState streamState = mStreamStates[AudioSystem.STREAM_MUSIC];
+                int device = getDeviceForStream(AudioSystem.STREAM_MUSIC);
+                streamState.setIndex(streamState.getMaxIndex(), device);
+                sendMsg(mAudioHandler,
+                        MSG_SET_DEVICE_VOLUME,
+                        SENDMSG_QUEUE,
+                        device,
+                        0,
+                        streamState,
+                        0);
+            }
+        }
+    }
+
+    public void avrcpUpdateVolume(int oldVolume, int volume) {
+        mStreamStates[AudioSystem.STREAM_MUSIC].
+                        setIndex(volume, getDeviceForStream(AudioSystem.STREAM_MUSIC));
+        sendVolumeUpdate(AudioSystem.STREAM_MUSIC, oldVolume, volume, AudioManager.FLAG_SHOW_UI);
     }
 
     private boolean handleDeviceConnection(boolean connected, int device, String params) {
