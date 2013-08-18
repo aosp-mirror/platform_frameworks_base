@@ -780,7 +780,8 @@ public class WebView extends AbsoluteLayout
      * {@link #loadUrl(String)} instead.
      *
      * @param url the URL of the resource to load
-     * @param postData the data will be passed to "POST" request
+     * @param postData the data will be passed to "POST" request, which must be
+     *     be "application/x-www-form-urlencoded" encoded.
      */
     public void postUrl(String url, byte[] postData) {
         checkThread();
