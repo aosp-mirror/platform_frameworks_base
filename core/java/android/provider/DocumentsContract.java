@@ -36,6 +36,7 @@ import com.google.android.collect.Lists;
 
 import libcore.io.IoUtils;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -461,16 +462,27 @@ public final class DocumentsContract {
         final Bundle opts = new Bundle();
         opts.putParcelable(EXTRA_THUMBNAIL_SIZE, size);
 
-        InputStream is = null;
+        AssetFileDescriptor afd = null;
         try {
-            is = new AssetFileDescriptor.AutoCloseInputStream(
-                    resolver.openTypedAssetFileDescriptor(documentUri, "image/*", opts));
-            return BitmapFactory.decodeStream(is);
+            afd = resolver.openTypedAssetFileDescriptor(documentUri, "image/*", opts);
+
+            final FileDescriptor fd = afd.getFileDescriptor();
+            final BitmapFactory.Options bitmapOpts = new BitmapFactory.Options();
+
+            bitmapOpts.inJustDecodeBounds = true;
+            BitmapFactory.decodeFileDescriptor(fd, null, bitmapOpts);
+
+            final int widthSample = bitmapOpts.outWidth / size.x;
+            final int heightSample = bitmapOpts.outHeight / size.y;
+
+            bitmapOpts.inJustDecodeBounds = false;
+            bitmapOpts.inSampleSize = Math.min(widthSample, heightSample);
+            return BitmapFactory.decodeFileDescriptor(fd, null, bitmapOpts);
         } catch (IOException e) {
             Log.w(TAG, "Failed to load thumbnail for " + documentUri + ": " + e);
             return null;
         } finally {
-            IoUtils.closeQuietly(is);
+            IoUtils.closeQuietly(afd);
         }
     }
 

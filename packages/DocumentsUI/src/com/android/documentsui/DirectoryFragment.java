@@ -16,17 +16,24 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.DocumentsActivity.TAG;
+
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.LoaderManager.LoaderCallbacks;
 import android.content.Context;
 import android.content.Loader;
+import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.text.format.DateUtils;
 import android.text.format.Formatter;
+import android.text.format.Time;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -74,6 +81,8 @@ public class DirectoryFragment extends Fragment {
     public static final int TYPE_RECENT_OPEN = 3;
 
     private int mType = TYPE_NORMAL;
+
+    private Point mThumbSize;
 
     private DocumentsAdapter mAdapter;
     private LoaderCallbacks<List<Document>> mCallbacks;
@@ -217,7 +226,9 @@ public class DirectoryFragment extends Fragment {
             choiceMode = ListView.CHOICE_MODE_NONE;
         }
 
+        final int thumbSize;
         if (state.mode == DisplayState.MODE_GRID) {
+            thumbSize = getResources().getDimensionPixelSize(R.dimen.grid_width);
             mListView.setAdapter(null);
             mListView.setChoiceMode(ListView.CHOICE_MODE_NONE);
             mGridView.setAdapter(mAdapter);
@@ -226,6 +237,7 @@ public class DirectoryFragment extends Fragment {
             mGridView.setChoiceMode(choiceMode);
             mCurrentView = mGridView;
         } else if (state.mode == DisplayState.MODE_LIST) {
+            thumbSize = getResources().getDimensionPixelSize(android.R.dimen.app_icon_size);
             mGridView.setAdapter(null);
             mGridView.setChoiceMode(ListView.CHOICE_MODE_NONE);
             mListView.setAdapter(mAdapter);
@@ -234,6 +246,8 @@ public class DirectoryFragment extends Fragment {
         } else {
             throw new IllegalStateException();
         }
+
+        mThumbSize = new Point(thumbSize, thumbSize);
     }
 
     private OnItemClickListener mItemListener = new OnItemClickListener() {
@@ -349,9 +363,21 @@ public class DirectoryFragment extends Fragment {
             final TextView date = (TextView) convertView.findViewById(R.id.date);
             final TextView size = (TextView) convertView.findViewById(R.id.size);
 
+            final ThumbnailAsyncTask oldTask = (ThumbnailAsyncTask) icon.getTag();
+            if (oldTask != null) {
+                oldTask.cancel(false);
+            }
+
             if (doc.isThumbnailSupported()) {
-                // TODO: load thumbnails async
-                icon.setImageURI(doc.uri);
+                final Bitmap cachedResult = ThumbnailCache.get(context).get(doc.uri);
+                if (cachedResult != null) {
+                    icon.setImageBitmap(cachedResult);
+                } else {
+                    final ThumbnailAsyncTask task = new ThumbnailAsyncTask(icon, mThumbSize);
+                    icon.setImageBitmap(null);
+                    icon.setTag(task);
+                    task.execute(doc.uri);
+                }
             } else {
                 icon.setImageDrawable(RootsCache.resolveDocumentIcon(
                         context, doc.uri.getAuthority(), doc.mimeType));
@@ -380,10 +406,11 @@ public class DirectoryFragment extends Fragment {
                         (summary.getVisibility() == View.VISIBLE) ? View.VISIBLE : View.GONE);
             }
 
-            // TODO: omit year from format
-            date.setText(DateUtils.formatSameDayTime(
-                    doc.lastModified, System.currentTimeMillis(), DateFormat.SHORT,
-                    DateFormat.SHORT));
+            if (doc.lastModified == -1) {
+                date.setText(null);
+            } else {
+                date.setText(formatTime(context, doc.lastModified));
+            }
 
             if (state.showSize) {
                 size.setVisibility(View.VISIBLE);
@@ -413,5 +440,67 @@ public class DirectoryFragment extends Fragment {
         public long getItemId(int position) {
             return getItem(position).uri.hashCode();
         }
+    }
+
+    private static class ThumbnailAsyncTask extends AsyncTask<Uri, Void, Bitmap> {
+        private final ImageView mTarget;
+        private final Point mSize;
+
+        public ThumbnailAsyncTask(ImageView target, Point size) {
+            mTarget = target;
+            mSize = size;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            mTarget.setTag(this);
+        }
+
+        @Override
+        protected Bitmap doInBackground(Uri... params) {
+            final Context context = mTarget.getContext();
+            final Uri uri = params[0];
+
+            Bitmap result = null;
+            try {
+                result = DocumentsContract.getThumbnail(
+                        context.getContentResolver(), uri, mSize);
+                if (result != null) {
+                    ThumbnailCache.get(context).put(uri, result);
+                }
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to load thumbnail: " + e);
+            }
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap result) {
+            if (mTarget.getTag() == this) {
+                mTarget.setImageBitmap(result);
+                mTarget.setTag(null);
+            }
+        }
+    }
+
+    private static String formatTime(Context context, long when) {
+        // TODO: DateUtils should make this easier
+        Time then = new Time();
+        then.set(when);
+        Time now = new Time();
+        now.setToNow();
+
+        int flags = DateUtils.FORMAT_NO_NOON | DateUtils.FORMAT_NO_MIDNIGHT
+                | DateUtils.FORMAT_ABBREV_ALL;
+
+        if (then.year != now.year) {
+            flags |= DateUtils.FORMAT_SHOW_YEAR | DateUtils.FORMAT_SHOW_DATE;
+        } else if (then.yearDay != now.yearDay) {
+            flags |= DateUtils.FORMAT_SHOW_DATE;
+        } else {
+            flags |= DateUtils.FORMAT_SHOW_TIME;
+        }
+
+        return DateUtils.formatDateTime(context, when, flags);
     }
 }
