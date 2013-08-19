@@ -935,7 +935,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
 
             if (CLOSE_PANEL_WHEN_EMPTIED && mNotificationData.size() == 0
-                    && !mStatusBarWindow.isPointerDown()) {
+                    && !mNotificationPanel.isTracking()) {
                 animateCollapsePanels();
             }
         }
