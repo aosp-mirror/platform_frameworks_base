@@ -747,6 +747,7 @@ public class Activity extends ContextThemeWrapper
     int mResultCode = RESULT_CANCELED;
     Intent mResultData = null;
     private TranslucentConversionListener mTranslucentCallback;
+    private boolean mChangeCanvasToTranslucent;
 
     private boolean mTitleReady = false;
 
@@ -4903,7 +4904,9 @@ public class Activity extends ContextThemeWrapper
     public void convertFromTranslucent() {
         try {
             mTranslucentCallback = null;
-            ActivityManagerNative.getDefault().convertFromTranslucent(mToken);
+            if (ActivityManagerNative.getDefault().convertFromTranslucent(mToken)) {
+                WindowManagerGlobal.getInstance().changeCanvasOpacity(mToken, true);
+            }
         } catch (RemoteException e) {
             // pass
         }
@@ -4931,7 +4934,8 @@ public class Activity extends ContextThemeWrapper
     public void convertToTranslucent(TranslucentConversionListener callback) {
         try {
             mTranslucentCallback = callback;
-            ActivityManagerNative.getDefault().convertToTranslucent(mToken);
+            mChangeCanvasToTranslucent =
+                    ActivityManagerNative.getDefault().convertToTranslucent(mToken);
         } catch (RemoteException e) {
             // pass
         }
@@ -4942,6 +4946,9 @@ public class Activity extends ContextThemeWrapper
         if (mTranslucentCallback != null) {
             mTranslucentCallback.onTranslucentConversionComplete(drawComplete);
             mTranslucentCallback = null;
+        }
+        if (mChangeCanvasToTranslucent) {
+            WindowManagerGlobal.getInstance().changeCanvasOpacity(mToken, false);
         }
     }
 
