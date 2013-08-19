@@ -1579,8 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"Неверный PIN-код. Повторите попытку через 1 сек."</item>
     <item quantity="other" msgid="8030607343223287654">"Неверный PIN-код. Повторите попытку через <xliff:g id="COUNT">%d</xliff:g> сек."</item>
   </plurals>
-    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
-    <skip />
-    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
-    <skip />
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Провести от края к центру – открыть панель"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Чтобы открыть панель навигации, проведите пальцем от края к центру экрана"</string>
 </resources>
