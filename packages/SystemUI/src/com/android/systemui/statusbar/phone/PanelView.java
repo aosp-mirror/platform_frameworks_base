@@ -644,6 +644,10 @@ public class PanelView extends FrameLayout {
         return mClosing;
     }
 
+    public boolean isTracking() {
+        return mTracking;
+    }
+
     public void setBar(PanelBar panelBar) {
         mBar = panelBar;
     }
