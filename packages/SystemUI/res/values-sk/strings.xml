@@ -166,8 +166,7 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: pripojené"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Vyhľadávanie satelitov GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Poloha nastavená pomocou GPS"</string>
-    <!-- no translation found for accessibility_location_active (2427290146138169014) -->
-    <skip />
+    <string name="accessibility_location_active" msgid="2427290146138169014">"Žiadosti o polohu sú aktívne"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Vymazať všetky upozornenia."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Informácie o aplikácii"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Obrazovka sa automaticky otočí."</string>
@@ -204,6 +203,4 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATICKY"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Tu sa zobrazujú upozornenia"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Môžete ich kedykoľvek zobraziť tak, že posuniete prstom nadol.\nAk posuniete prstom nadol ešte raz, zobrazia sa ovládacie prvky systému."</string>
-    <string name="hiding_navigation_confirmation_message" msgid="3227814171674734332">"Panel zobrazíte posunutím cez okraj obrazovky"</string>
-    <string name="hiding_navigation_confirmation_message_long" msgid="7854368870786524950">"Systémový panel zobrazíte posunutím cez okraj obrazovky"</string>
 </resources>

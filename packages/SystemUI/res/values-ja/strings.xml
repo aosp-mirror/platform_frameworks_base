@@ -166,8 +166,7 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi接続済み"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPSで検索中"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPSにより現在地が設定されました"</string>
-    <!-- no translation found for accessibility_location_active (2427290146138169014) -->
-    <skip />
+    <string name="accessibility_location_active" msgid="2427290146138169014">"現在地リクエストがアクティブ"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"通知をすべて消去。"</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"アプリ情報"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"画面は自動的に回転します。"</string>
@@ -204,6 +203,4 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自動"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"ここに通知が表示されます"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"下にスワイプすると、いつでも通知を表示できます。\nシステムを管理するにはもう一度下にスワイプしてください。"</string>
-    <string name="hiding_navigation_confirmation_message" msgid="3227814171674734332">"バーを表示するには、画面の端からスワイプします"</string>
-    <string name="hiding_navigation_confirmation_message_long" msgid="7854368870786524950">"システムバーを表示するには、画面の端からスワイプします"</string>
 </resources>

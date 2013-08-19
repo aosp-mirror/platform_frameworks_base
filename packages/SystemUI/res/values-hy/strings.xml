@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0 
+ *
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and 
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_label" msgid="7164937344850004466">"Համակարգային UI"</string>
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Մաքրել"</string>
+    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Հեռացնել ցանկից"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Տեղեկություններ ծրագրի մասին"</string>
+    <string name="status_bar_no_recent_apps" msgid="6576392951053994640">"Թարմ հավելվածներ չկան"</string>
+    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Անտեսել վերջին ծրագրերը"</string>
+  <plurals name="status_bar_accessibility_recent_apps">
+    <item quantity="one" msgid="5854176083865845541">"1 նոր ծրագիր"</item>
+    <item quantity="other" msgid="1040784359794890744">"%d նոր ծրագիր"</item>
+  </plurals>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ծանուցումներ չկան"</string>
+    <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Ընթացիկ"</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Ծանուցումներ"</string>
+    <string name="battery_low_title" msgid="2783104807551211639">"Միացրեք լիցքավորիչը"</string>
+    <string name="battery_low_subtitle" msgid="1752040062087829196">"Մարտկոցը լիցքաթափվում է:"</string>
+    <string name="battery_low_percent_format" msgid="1077244949318261761">"մնում է <xliff:g id="NUMBER">%d%%</xliff:g>"</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"USB լիցքավորումը չի աջակցվում:\nՕգտվեք միայն գործող լիցքավորիչից:"</string>
+    <string name="battery_low_why" msgid="7279169609518386372">"Մարտկոցի օգտագործումը"</string>
+    <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"Կարգավորումներ"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
+    <string name="status_bar_settings_airplane" msgid="4879879698500955300">"Ինքնաթիռային ռեժիմ"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"Ինքնապտտվող էկրան"</string>
+    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"Համրեցնել"</string>
+    <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"Ինքնաշխատ"</string>
+    <string name="status_bar_settings_notifications" msgid="397146176280905137">"Ծանուցումներ"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth-ը կապված է"</string>
+    <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"Կարգավորել մուտքագրման եղանակները"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"Ֆիզիկական ստեղնաշար"</string>
+    <string name="usb_device_permission_prompt" msgid="834698001271562057">"Թույլատրե՞լ <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածի մուտքը USB սարք:"</string>
+    <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"Թույլատրե՞լ, որ <xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածը մուտք գործի USB լրասարք:"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Բացե՞լ <xliff:g id="ACTIVITY">%1$s</xliff:g>-ը, երբ այս USB կրիչը կապակցված է:"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Բացե՞լ <xliff:g id="ACTIVITY">%1$s</xliff:g>-ը, երբ այս USB լրասարքը կապակցված է:"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Այս USB լրասարքի հետ ոչ մի հավելված չի աշխատում: Իմացեք ավելին այս լրասարքի մասին <xliff:g id="URL">%1$s</xliff:g>-ում"</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"USB լրասարք"</string>
+    <string name="label_view" msgid="6304565553218192990">"Դիտել"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"Օգտագործել լռելյայն այս USB սարքի համար"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"Օգտագործել լռելյայն այս USB լրասարքի համար"</string>
+    <string name="usb_debugging_title" msgid="4513918393387141949">"Թույլատրե՞լ USB-ի կարգաբերումը:"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"Համակարգչի RSA-ի բանալի մատնահետքն է`\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_always" msgid="303335496705863070">"Միշտ թույլատրել այս համակարգչից"</string>
+    <string name="compat_mode_on" msgid="6623839244840638213">"Խոշորացնել` էկրանը լցնելու համար"</string>
+    <string name="compat_mode_off" msgid="4434467572461327898">"Ձգել` էկրանը լցնելու համար"</string>
+    <string name="compat_mode_help_header" msgid="7969493989397529910">"Համատեղելիության խոշորացում"</string>
+    <string name="compat_mode_help_body" msgid="4946726776359270040">"Երբ հավելվածը նախագծված է ավելի փոքր էկրանի համար, խոշորացման կարգավորիչը կհայտնվի ժամացույցի կողքին:"</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Պահում է էկրանի հանույթը…"</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Պահում է էկրանի հանույթը..."</string>
+    <string name="screenshot_saving_text" msgid="2419718443411738818">"Էկրանի հանույթը պահվում է:"</string>
+    <string name="screenshot_saved_title" msgid="6461865960961414961">"Էկրանի հանույթը լուսանկարվել է:"</string>
+    <string name="screenshot_saved_text" msgid="1152839647677558815">"Հպեք ձեր էկրանի հանույթը տեսնելու համար:"</string>
+    <string name="screenshot_failed_title" msgid="705781116746922771">"Չհաջողվեց լուսանկարել էկրանի հանույթը:"</string>
+    <string name="screenshot_failed_text" msgid="8134011269572415402">"Չհաջողվեց պահել էկրանի հանույթը: Հնարավոր է` պահոցն օգտագործման մեջ է:"</string>
+    <string name="usb_preference_title" msgid="6551050377388882787">"USB ֆայլերի փոխանցման ընտրանքներ"</string>
+    <string name="use_mtp_button_title" msgid="4333504413563023626">"Միացնել որպես մեդիա նվագարկիչ (MTP)"</string>
+    <string name="use_ptp_button_title" msgid="7517127540301625751">"Միացնել որպես ֆոտոխցիկ (PTP)"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Տեղադրել Android ֆայլերի փոխանցման հավելվածը Mac-ի համար"</string>
+    <string name="accessibility_back" msgid="567011538994429120">"Հետ"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"Տուն"</string>
+    <string name="accessibility_menu" msgid="316839303324695949">"Ցանկ"</string>
+    <string name="accessibility_recent" msgid="8571350598987952883">"Վերջին ծրագրերը"</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Միացնել մուտքագրման եղանակի կոճակը:"</string>
+    <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Համատեղելիության խոշորացման կոճակը:"</string>
+    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Դիտափոխել փոքրից ավելի մեծ էկրան:"</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth-ը միացված է:"</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth-ն անջատված է:"</string>
+    <string name="accessibility_no_battery" msgid="358343022352820946">"Մարտկոց չկա:"</string>
+    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Մարտկոցի մեկ գիծ:"</string>
+    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Մարտկոցի երկու գիծ:"</string>
+    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Մարտկոցի երեք գիծ:"</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"Մարտկոցը լիքն է:"</string>
+    <string name="accessibility_no_phone" msgid="4894708937052611281">"Հեռախոս չկա:"</string>
+    <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Հեռախոսի մեկ գիծ:"</string>
+    <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Հեռախոսի երկու գիծ:"</string>
+    <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"Հեռախոսի երեք գիծ:"</string>
+    <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"Հեռախոսի ազդանշանը լիքն է:"</string>
+    <string name="accessibility_no_data" msgid="4791966295096867555">"Տվյալներ չկան:"</string>
+    <string name="accessibility_data_one_bar" msgid="1415625833238273628">"Տվյալների մեկ գիծ:"</string>
+    <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Տվյալների երկու գիծ:"</string>
+    <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Տվյալների երեք գիծ:"</string>
+    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Տվյալների ազդանշանը լրիվ է:"</string>
+    <string name="accessibility_wifi_off" msgid="3177380296697933627">"Wifi-ը անջատված է:"</string>
+    <string name="accessibility_no_wifi" msgid="1425476551827924474">"WiFi-ը անջատված է:"</string>
+    <string name="accessibility_wifi_one_bar" msgid="7735893178010724377">"Wifi-ի մեկ գիծ:"</string>
+    <string name="accessibility_wifi_two_bars" msgid="4994274250497262434">"Wifi-ի երկու գիծ:"</string>
+    <string name="accessibility_wifi_three_bars" msgid="3495755044276588384">"WiFi-ի երեք գիծ:"</string>
+    <string name="accessibility_wifi_signal_full" msgid="6853561303586480376">"Wifi-ի ազդանշանը լիքն է:"</string>
+    <string name="accessibility_no_wimax" msgid="4329180129727630368">"WiMAX չկա:"</string>
+    <string name="accessibility_wimax_one_bar" msgid="4170994299011863648">"WiMAX-ի մեկ գիծ:"</string>
+    <string name="accessibility_wimax_two_bars" msgid="9176236858336502288">"WiMAX-ի երկու գիծ:"</string>
+    <string name="accessibility_wimax_three_bars" msgid="6116551636752103927">"WiMAX-ի երեք գիծ:"</string>
+    <string name="accessibility_wimax_signal_full" msgid="2768089986795579558">"WiMAX-ի ազդանշանը լիքն է:"</string>
+    <string name="accessibility_no_signal" msgid="7064645320782585167">"Ազդանշան չկա:"</string>
+    <string name="accessibility_not_connected" msgid="6395326276213402883">"Միացված չէ:"</string>
+    <string name="accessibility_zero_bars" msgid="3806060224467027887">"Զրո գիծ:"</string>
+    <string name="accessibility_one_bar" msgid="1685730113192081895">"Մեկ գիծ:"</string>
+    <string name="accessibility_two_bars" msgid="6437363648385206679">"Երկու գիծ:"</string>
+    <string name="accessibility_three_bars" msgid="2648241415119396648">"Երեք գիծ:"</string>
+    <string name="accessibility_signal_full" msgid="9122922886519676839">"Ազդանշանը լրիվ է:"</string>
+    <string name="accessibility_desc_on" msgid="2385254693624345265">"Միացված է:"</string>
+    <string name="accessibility_desc_off" msgid="6475508157786853157">"Անջատված է:"</string>
+    <string name="accessibility_desc_connected" msgid="8366256693719499665">"Միացված է:"</string>
+    <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
+    <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
+    <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
+    <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
+    <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_lte" msgid="5413468808637540658">"LTE"</string>
+    <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
+    <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Ռոումինգ"</string>
+    <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
+    <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM չկա:"</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-ը կապվում է:"</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Ինքնաթիռային ռեժիմ"</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"Մարտկոցը <xliff:g id="NUMBER">%d</xliff:g> տոկոս է:"</string>
+    <string name="accessibility_settings_button" msgid="799583911231893380">"Համակարգի կարգավորումներ:"</string>
+    <string name="accessibility_notifications_button" msgid="4498000369779421892">"Ծանուցումներ:"</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"Մաքրել ծանուցումը:"</string>
+    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS-ը միացված է:"</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS-ի ստացում:"</string>
+    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Հեռամուտքագրիչը միացված է:"</string>
+    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Զանգի թրթռոց:"</string>
+    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Զանգակը լռեցված է:"</string>
+    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g>-ը անտեսված է:"</string>
+    <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Ծանուցումը անտեսվեց:"</string>
+    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Ծանուցումների վահանակ:"</string>
+    <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Արագ կարգավորումներ:"</string>
+    <string name="accessibility_desc_recent_apps" msgid="9014032916410590027">"Վերջին հավելվածները:"</string>
+    <string name="accessibility_quick_settings_user" msgid="1104846699869476855">"Օգտվող <xliff:g id="USER">%s</xliff:g>:"</string>
+    <string name="accessibility_quick_settings_wifi" msgid="6099781031669728709">"<xliff:g id="SIGNAL">%1$s</xliff:g>: <xliff:g id="NETWORK">%2$s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_mobile" msgid="4876806564086241341">"Շարժական <xliff:g id="SIGNAL">%1$s</xliff:g>: <xliff:g id="TYPE">%2$s</xliff:g>: <xliff:g id="NETWORK">%3$s</xliff:g>:"</string>
+    <string name="accessibility_quick_settings_battery" msgid="1480931583381408972">"Մարտկոցը <xliff:g id="STATE">%s</xliff:g> է:"</string>
+    <string name="accessibility_quick_settings_airplane" msgid="4196876722090224753">"Ինքնաթիռային ռեժիմը <xliff:g id="STATE">%s</xliff:g> է:"</string>
+    <string name="accessibility_quick_settings_bluetooth" msgid="5749054971341882340">"Bluetooth-ը <xliff:g id="STATE">%s</xliff:g> է:"</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Զարթուցիչը դրված է <xliff:g id="TIME">%s</xliff:g>-ին:"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G տվյալները անջատված են"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G տվյալները անջատված են"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Շարժական տվյալները անջատված են"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Տվյալները անջատված են"</string>
+    <string name="data_usage_disabled_dialog" msgid="3853117269051806280">"Դուք հասել եք նշված տվյալների օգտագործման սահմանին:\n\n Եթե դուք կրկին ակտիվացնեք տվյալները, այն կարող է գանձվել օպերատորի կողմից:"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Վերամիացնել տվյալները"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ինտերնետ կապ չկա"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi-ը միացված է"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Որոնում է GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Տեղադրությունը կարգավորվել է GPS-ի կողմից"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"Տեղադրության հարցումներն ակտիվ են"</string>
+    <string name="accessibility_clear_all" msgid="5235938559247164925">"Մաքրել բոլոր ծանուցումները:"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Տեղեկություններ ծրագրի մասին"</string>
+    <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Էկրանը ինքնուրույն կպտտվի:"</string>
+    <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"Էկրանը կողպված է հորիզոնական դիրքավորման մեջ:"</string>
+    <string name="accessibility_rotation_lock_on_portrait" msgid="5809367521644012115">"Էկրանը կողպված է ուղղաձիգ դիրքավորմամբ:"</string>
+    <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
+    <string name="start_dreams" msgid="7219575858348719790">"Ցերեկային ռեժիմ"</string>
+    <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Ինքնաթիռային ռեժիմ"</string>
+    <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"Լիցքավորում` <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Լիցքավորված է"</string>
+    <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
+    <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> սարք)"</string>
+    <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth-ն անջատված է"</string>
+    <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Պայծառություն"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"Ինքնապտտում"</string>
+    <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"Պտտումը կողպված է"</string>
+    <string name="quick_settings_ime_label" msgid="7073463064369468429">"Մուտքագրման եղանակը"</string>
+    <string name="quick_settings_location_label" msgid="5011327048748762257">"Տեղադրություն"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Անջատել տեղադրությունը"</string>
+    <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Մեդիա սարք"</string>
+    <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Միայն արտակարգ իրավիճակների զանգեր"</string>
+    <string name="quick_settings_settings_label" msgid="5326556592578065401">"Կարգավորումներ"</string>
+    <string name="quick_settings_time_label" msgid="4635969182239736408">"Ժամանակը"</string>
+    <string name="quick_settings_user_label" msgid="5238995632130897840">"Ես"</string>
+    <string name="quick_settings_wifi_label" msgid="9135344704899546041">"Wi-Fi"</string>
+    <string name="quick_settings_wifi_not_connected" msgid="7171904845345573431">"Միացված չէ"</string>
+    <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"Ցանց չկա"</string>
+    <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi-ը անջատված է"</string>
+    <string name="quick_settings_wifi_display_label" msgid="6893592964463624333">"Wi-Fi ցուցադրիչ"</string>
+    <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Անլար էկրան"</string>
+    <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Պայծառություն"</string>
+    <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"Ինքնաշխատ"</string>
+    <string name="status_bar_help_title" msgid="1199237744086469217">"Ծանուցումները հայտնվում են այստեղ"</string>
+    <string name="status_bar_help_text" msgid="7874607155052076323">"Դրանք մատչեք ցանկացած պահի` սահահարվածելով:\nԿրկին սահահարվածեք ներքև` համակարգային կառավարման համար:"</string>
+</resources>
