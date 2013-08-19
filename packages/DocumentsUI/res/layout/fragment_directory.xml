@@ -42,4 +42,12 @@
         android:paddingStart="?android:attr/listPreferredItemPaddingStart"
         android:visibility="gone" />
 
+    <Button
+        android:id="@+id/more"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:text="@string/more"
+        android:visibility="gone" />
+
 </FrameLayout>

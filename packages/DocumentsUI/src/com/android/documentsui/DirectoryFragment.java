@@ -32,6 +32,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.net.Uri;
@@ -54,6 +55,7 @@ import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -79,6 +81,7 @@ public class DirectoryFragment extends Fragment {
     private View mEmptyView;
     private ListView mListView;
     private GridView mGridView;
+    private Button mMoreView;
 
     private AbsListView mCurrentView;
 
@@ -93,7 +96,7 @@ public class DirectoryFragment extends Fragment {
     private Point mThumbSize;
 
     private DocumentsAdapter mAdapter;
-    private LoaderCallbacks<List<Document>> mCallbacks;
+    private LoaderCallbacks<DirectoryResult> mCallbacks;
 
     private static final String EXTRA_TYPE = "type";
     private static final String EXTRA_URI = "uri";
@@ -150,14 +153,16 @@ public class DirectoryFragment extends Fragment {
         mGridView.setOnItemClickListener(mItemListener);
         mGridView.setMultiChoiceModeListener(mMultiListener);
 
+        mMoreView = (Button) view.findViewById(R.id.more);
+
         mAdapter = new DocumentsAdapter();
 
         final Uri uri = getArguments().getParcelable(EXTRA_URI);
         mType = getArguments().getInt(EXTRA_TYPE);
 
-        mCallbacks = new LoaderCallbacks<List<Document>>() {
+        mCallbacks = new LoaderCallbacks<DirectoryResult>() {
             @Override
-            public Loader<List<Document>> onCreateLoader(int id, Bundle args) {
+            public Loader<DirectoryResult> onCreateLoader(int id, Bundle args) {
                 final DisplayState state = getDisplayState(DirectoryFragment.this);
                 mFilter = new MimePredicate(state.acceptMimes);
 
@@ -189,12 +194,34 @@ public class DirectoryFragment extends Fragment {
             }
 
             @Override
-            public void onLoadFinished(Loader<List<Document>> loader, List<Document> data) {
-                mAdapter.swapDocuments(data);
+            public void onLoadFinished(Loader<DirectoryResult> loader, DirectoryResult result) {
+                mAdapter.swapDocuments(result.contents);
+
+                final Cursor cursor = result.cursor;
+                if (cursor != null && cursor.getExtras()
+                        .getBoolean(DocumentsContract.EXTRA_HAS_MORE, false)) {
+                    mMoreView.setText(R.string.more);
+                    mMoreView.setVisibility(View.VISIBLE);
+                    mMoreView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mMoreView.setText(R.string.loading);
+                            final Bundle bundle = new Bundle();
+                            bundle.putBoolean(DocumentsContract.EXTRA_REQUEST_MORE, true);
+                            try {
+                                cursor.respond(bundle);
+                            } catch (Exception e) {
+                                Log.w(TAG, "Failed to respond: " + e);
+                            }
+                        }
+                    });
+                } else {
+                    mMoreView.setVisibility(View.GONE);
+                }
             }
 
             @Override
-            public void onLoaderReset(Loader<List<Document>> loader) {
+            public void onLoaderReset(Loader<DirectoryResult> loader) {
                 mAdapter.swapDocuments(null);
             }
         };
@@ -407,7 +434,7 @@ public class DirectoryFragment extends Fragment {
         public void swapDocuments(List<Document> documents) {
             mDocuments = documents;
 
-            if (documents != null && documents.isEmpty()) {
+            if (mDocuments != null && mDocuments.isEmpty()) {
                 mEmptyView.setVisibility(View.VISIBLE);
             } else {
                 mEmptyView.setVisibility(View.GONE);
