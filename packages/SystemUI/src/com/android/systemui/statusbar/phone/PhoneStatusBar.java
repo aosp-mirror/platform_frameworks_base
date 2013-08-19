@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_NORMAL;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 
@@ -1938,13 +1938,21 @@ public class PhoneStatusBar extends BaseStatusBar {
     private int barMode(int vis, int transientFlag, int transparentFlag) {
         return (vis & transientFlag) != 0 ? MODE_SEMI_TRANSPARENT
                 : (vis & transparentFlag) != 0 ? MODE_TRANSPARENT
-                : MODE_NORMAL;
+                : MODE_OPAQUE;
     }
 
     @Override
     public void resumeAutohide() {
         if (mAutohideSuspended) {
             scheduleAutohide();
+            animateTransitionTo(BarTransitions.MODE_SEMI_TRANSPARENT);
+        }
+    }
+
+    private void animateTransitionTo(int newMode) {
+        mStatusBarView.getBarTransitions().transitionTo(newMode, true /*animate*/);
+        if (mNavigationBarView != null) {
+            mNavigationBarView.getBarTransitions().transitionTo(newMode, true /*animate*/);
         }
     }
 
@@ -1952,6 +1960,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     public void suspendAutohide() {
         mHandler.removeCallbacks(mAutohide);
         mAutohideSuspended = 0 != (mSystemUiVisibility & STATUS_OR_NAV_TRANSIENT);
+        animateTransitionTo(BarTransitions.MODE_OPAQUE);
     }
 
     private void cancelAutohide() {
