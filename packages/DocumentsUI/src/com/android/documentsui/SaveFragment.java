@@ -68,11 +68,12 @@ public class SaveFragment extends Fragment {
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final Context context = inflater.getContext();
+        final RootsCache roots = DocumentsApplication.getRootsCache(context);
 
         final View view = inflater.inflate(R.layout.fragment_save, container, false);
 
         final ImageView icon = (ImageView) view.findViewById(android.R.id.icon);
-        icon.setImageDrawable(RootsCache.resolveDocumentIcon(
+        icon.setImageDrawable(roots.resolveDocumentIcon(
                 context, null, getArguments().getString(EXTRA_MIME_TYPE)));
 
         mDisplayName = (EditText) view.findViewById(android.R.id.title);
