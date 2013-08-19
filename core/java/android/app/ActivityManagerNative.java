@@ -1502,16 +1502,18 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
         case CONVERT_FROM_TRANSLUCENT_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
-            convertFromTranslucent(token);
+            boolean converted = convertFromTranslucent(token);
             reply.writeNoException();
+            reply.writeInt(converted ? 1 : 0);
             return true;
         }
 
         case CONVERT_TO_TRANSLUCENT_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             IBinder token = data.readStrongBinder();
-            convertToTranslucent(token);
+            boolean converted = convertToTranslucent(token);
             reply.writeNoException();
+            reply.writeInt(converted ? 1 : 0);
             return true;
         }
 
@@ -3876,7 +3878,7 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
     }
 
-    public void convertFromTranslucent(IBinder token)
+    public boolean convertFromTranslucent(IBinder token)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -3884,11 +3886,13 @@ class ActivityManagerProxy implements IActivityManager
         data.writeStrongBinder(token);
         mRemote.transact(CONVERT_FROM_TRANSLUCENT_TRANSACTION, data, reply, 0);
         reply.readException();
+        boolean res = reply.readInt() != 0;
         data.recycle();
         reply.recycle();
+        return res;
     }
 
-    public void convertToTranslucent(IBinder token)
+    public boolean convertToTranslucent(IBinder token)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -3896,8 +3900,10 @@ class ActivityManagerProxy implements IActivityManager
         data.writeStrongBinder(token);
         mRemote.transact(CONVERT_TO_TRANSLUCENT_TRANSACTION, data, reply, 0);
         reply.readException();
+        boolean res = reply.readInt() != 0;
         data.recycle();
         reply.recycle();
+        return res;
     }
 
     public void setImmersive(IBinder token, boolean immersive)
