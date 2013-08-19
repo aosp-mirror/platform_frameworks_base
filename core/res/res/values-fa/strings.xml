@@ -1579,8 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"پین نادرست است. امتحان در ۱ ثانیه."</item>
     <item quantity="other" msgid="8030607343223287654">"پین نادرست است. امتحان در <xliff:g id="COUNT">%d</xliff:g> ثانیه."</item>
   </plurals>
-    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
-    <skip />
-    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
-    <skip />
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"کشیدن از لبه صفحه برای نمایش نوار"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"برای نمایش نوار سیستم، انگشت خود را از لبه‌ صفحه به داخل بکشید"</string>
 </resources>

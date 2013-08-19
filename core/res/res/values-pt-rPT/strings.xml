@@ -1579,8 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"PIN incorreto. Tente novamente em 1 seg."</item>
     <item quantity="other" msgid="8030607343223287654">"PIN incorreto. Tente novamente em <xliff:g id="COUNT">%d</xliff:g> seg."</item>
   </plurals>
-    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
-    <skip />
-    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
-    <skip />
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Desliz. da extr. do ecrã p/ revelar barra"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Deslize da extremidade do ecrã para revelar a barra do sistema"</string>
 </resources>

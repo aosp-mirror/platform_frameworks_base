@@ -1579,8 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"Väärä PIN. Yritä uudelleen yhden sekunnin kuluttua."</item>
     <item quantity="other" msgid="8030607343223287654">"Väärä PIN. Yritä uudelleen <xliff:g id="COUNT">%d</xliff:g> sekunnin kuluttua."</item>
   </plurals>
-    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
-    <skip />
-    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
-    <skip />
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Näytä palkki liu\'uttamalla reunasta"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Tuo järjestelmäpalkki näkyviin liu\'uttamalla ruudun reunasta"</string>
 </resources>

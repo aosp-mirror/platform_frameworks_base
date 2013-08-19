@@ -451,7 +451,7 @@
     <string name="permlab_readCalendar" msgid="5972727560257612398">"カレンダーの予定と機密情報を読み取る"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4216462049057658723">"タブレットに保存されているカレンダーの予定（友だちや同僚の予定も含めすべて）を読み取ることをアプリに許可します。これにより、アプリがカレンダーのデータを機密性に関係なく共有または保存できるようになる可能性があります。"</string>
     <string name="permdesc_readCalendar" product="default" msgid="7434548682470851583">"携帯端末に保存されているカレンダーの予定（友だちや同僚の予定も含めすべて）を読み取ることをアプリに許可します。これにより、アプリがカレンダーのデータを機密性に関係なく共有または保存できるようになる可能性があります。"</string>
-    <string name="permlab_writeCalendar" msgid="8438874755193825647">"所有者に通知せずに、カレンダーの予定の追加や変更を行い、ゲストにメールを送信する"</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"カレンダーの予定の変更や追加を行う、所有者に通知せずにゲストにメールを送信する場合がある"</string>
     <string name="permdesc_writeCalendar" product="tablet" msgid="6679035520113668528">"ユーザーがタブレットから編集できる予定（友だちや同僚の予定も含む）を追加、削除、変更することをアプリに許可します。これによりアプリは、カレンダーの所有者から発信されたかのようなメッセージを送信したり、所有者の知らないうちに予定を変更したりできるようになる可能性があります。"</string>
     <string name="permdesc_writeCalendar" product="default" msgid="2324469496327249376">"ユーザーが携帯端末から編集できる予定（友だちや同僚の予定も含む）を追加、削除、変更することをアプリに許可します。これによりアプリは、カレンダーの所有者から発信されたかのようなメッセージを送信したり、所有者の知らないうちに予定を変更したりできるようになる可能性があります。"</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"仮の位置情報でテスト"</string>
@@ -1579,8 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"PINが正しくありません。1秒後にもう一度お試しください。"</item>
     <item quantity="other" msgid="8030607343223287654">"PINが正しくありません。<xliff:g id="COUNT">%d</xliff:g>秒後にもう一度お試しください。"</item>
   </plurals>
-    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
-    <skip />
-    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
-    <skip />
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"画面の端からスワイプしてバーを表示"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"システムバーを表示するには、画面の端からスワイプします"</string>
 </resources>

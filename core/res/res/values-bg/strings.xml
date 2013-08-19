@@ -1579,8 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"Неправилен ПИН код. Опитайте отново след 1 секунда."</item>
     <item quantity="other" msgid="8030607343223287654">"Неправилен ПИН код. Опитайте отново след <xliff:g id="COUNT">%d</xliff:g> секунди."</item>
   </plurals>
-    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
-    <skip />
-    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
-    <skip />
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"За показв. на лентата прек. пръст по ръба на екрана"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Прекарайте пръст от ръба на екрана, за да се покаже системната лента"</string>
 </resources>
