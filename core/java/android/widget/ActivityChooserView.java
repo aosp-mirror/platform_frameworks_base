@@ -33,6 +33,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ActivityChooserModel.ActivityChooserModelClient;
 
 /**
@@ -229,6 +230,13 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
 
         mExpandActivityOverflowButton = (FrameLayout) findViewById(R.id.expand_activities_button);
         mExpandActivityOverflowButton.setOnClickListener(mCallbacks);
+        mExpandActivityOverflowButton.setAccessibilityDelegate(new AccessibilityDelegate() {
+            @Override
+            public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+                super.onInitializeAccessibilityNodeInfo(host, info);
+                info.setOpensPopup(true);
+            }
+        });
         mExpandActivityOverflowButtonImage =
             (ImageView) mExpandActivityOverflowButton.findViewById(R.id.image);
         mExpandActivityOverflowButtonImage.setImageDrawable(expandActivityOverflowButtonDrawable);

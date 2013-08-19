@@ -29,6 +29,7 @@ import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.View.MeasureSpec;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
@@ -593,6 +594,12 @@ public class ActionMenuPresenter extends BaseMenuPresenter
                         MeasureSpec.getSize(heightMeasureSpec), MeasureSpec.EXACTLY);
             }
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        }
+
+        @Override
+        public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+            super.onInitializeAccessibilityNodeInfo(info);
+            info.setOpensPopup(true);
         }
     }
 
