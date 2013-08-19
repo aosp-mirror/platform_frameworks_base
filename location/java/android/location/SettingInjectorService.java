@@ -69,6 +69,11 @@ import android.util.Log;
  *     to the user that it is not part of the system settings.</li>
  * </ul>
  *
+ * To ensure a good user experience, your {@link #onHandleIntent(Intent)} must complete within
+ * 200 msec even if your app is not already running. This means that both
+ * {@link android.app.Application#onCreate()} and {@link #getStatus()} must be fast. If you exceed
+ * this time, then this can delay the retrieval of settings status for other apps as well.
+ *
  * For consistency, the label and {@link #getStatus()} values should be provided in all of the
  * locales supported by the system settings app. The text should not contain offensive language.
  *
@@ -82,6 +87,7 @@ import android.util.Log;
  */
 // TODO: is there a public list of supported locales?
 // TODO: is there a public list of guidelines for settings text?
+// TODO: would a bound service be better? E.g., we could just disconnect if a service took too long
 public abstract class SettingInjectorService extends IntentService {
 
     /**
@@ -105,6 +111,12 @@ public abstract class SettingInjectorService extends IntentService {
      * @hide
      */
     public static final String MESSENGER_KEY = "messenger";
+
+    /**
+     * Intent action a client should broadcast when the value of one of its injected settings has
+     * changed, so that the setting can be updated in the UI.
+     */
+    public static final String UPDATE_INTENT = "com.android.location.InjectedSettingChanged";
 
     private final String mLogTag;
 
