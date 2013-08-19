@@ -36,28 +36,26 @@ import com.google.android.collect.Lists;
 import libcore.io.IoUtils;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 
-public class DirectoryLoader extends UriDerivativeLoader<List<Document>> {
+class DirectoryResult implements AutoCloseable {
+    Cursor cursor;
+    List<Document> contents = Lists.newArrayList();
+    Exception e;
+
+    @Override
+    public void close() throws Exception {
+        IoUtils.closeQuietly(cursor);
+    }
+}
+
+public class DirectoryLoader extends UriDerivativeLoader<Uri, DirectoryResult> {
 
     private final int mType;
     private Predicate<Document> mFilter;
     private Comparator<Document> mSortOrder;
-
-    /**
-     * Stub result that represents an internal error.
-     */
-    public static class ExceptionResult extends LinkedList<Document> {
-        public final Exception e;
-
-        public ExceptionResult(Exception e) {
-            this.e = e;
-        }
-    }
 
     public DirectoryLoader(Context context, Uri uri, int type, Predicate<Document> filter,
             Comparator<Document> sortOrder) {
@@ -68,53 +66,49 @@ public class DirectoryLoader extends UriDerivativeLoader<List<Document>> {
     }
 
     @Override
-    public List<Document> loadInBackground(Uri uri, CancellationSignal signal) {
+    public DirectoryResult loadInBackground(Uri uri, CancellationSignal signal) {
+        final DirectoryResult result = new DirectoryResult();
         try {
-            return loadInBackgroundInternal(uri, signal);
+            loadInBackgroundInternal(result, uri, signal);
         } catch (Exception e) {
-            return new ExceptionResult(e);
+            result.e = e;
         }
+        return result;
     }
 
-    private List<Document> loadInBackgroundInternal(Uri uri, CancellationSignal signal) {
-        final ArrayList<Document> result = Lists.newArrayList();
-
-        // TODO: subscribe to the notify uri from query
-
+    private void loadInBackgroundInternal(
+            DirectoryResult result, Uri uri, CancellationSignal signal) {
         final ContentResolver resolver = getContext().getContentResolver();
         final Cursor cursor = resolver.query(uri, null, null, null, getQuerySortOrder(), signal);
-        try {
-            while (cursor != null && cursor.moveToNext()) {
-                Document doc = null;
-                switch (mType) {
-                    case TYPE_NORMAL:
-                    case TYPE_SEARCH:
-                        doc = Document.fromDirectoryCursor(uri, cursor);
-                        break;
-                    case TYPE_RECENT_OPEN:
-                        try {
-                            doc = Document.fromRecentOpenCursor(resolver, cursor);
-                        } catch (FileNotFoundException e) {
-                            Log.w(TAG, "Failed to find recent: " + e);
-                        }
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Unknown type");
-                }
+        result.cursor = cursor;
+        result.cursor.registerContentObserver(mObserver);
 
-                if (doc != null && (mFilter == null || mFilter.apply(doc))) {
-                    result.add(doc);
-                }
+        while (cursor.moveToNext()) {
+            Document doc = null;
+            switch (mType) {
+                case TYPE_NORMAL:
+                case TYPE_SEARCH:
+                    doc = Document.fromDirectoryCursor(uri, cursor);
+                    break;
+                case TYPE_RECENT_OPEN:
+                    try {
+                        doc = Document.fromRecentOpenCursor(resolver, cursor);
+                    } catch (FileNotFoundException e) {
+                        Log.w(TAG, "Failed to find recent: " + e);
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown type");
             }
-        } finally {
-            IoUtils.closeQuietly(cursor);
+
+            if (doc != null && (mFilter == null || mFilter.apply(doc))) {
+                result.contents.add(doc);
+            }
         }
 
         if (mSortOrder != null) {
-            Collections.sort(result, mSortOrder);
+            Collections.sort(result.contents, mSortOrder);
         }
-
-        return result;
     }
 
     private String getQuerySortOrder() {

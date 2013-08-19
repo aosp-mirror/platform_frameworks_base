@@ -15,5 +15,18 @@
                 android:name="android.content.DOCUMENT_PROVIDER"
                 android:resource="@xml/document_provider" />
         </provider>
+
+        <!-- TODO: remove when we have real providers -->
+        <provider
+            android:name=".CloudTestDocumentsProvider"
+            android:authorities="com.android.externalstorage.cloudtest"
+            android:grantUriPermissions="true"
+            android:exported="true"
+            android:enabled="false"
+            android:permission="android.permission.MANAGE_DOCUMENTS">
+            <meta-data
+                android:name="android.content.DOCUMENT_PROVIDER"
+                android:resource="@xml/document_provider" />
+        </provider>
     </application>
 </manifest>
