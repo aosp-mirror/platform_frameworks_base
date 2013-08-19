@@ -4,11 +4,13 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -98,6 +100,12 @@ public abstract class HostApduService extends Service {
     public static final int MSG_DEACTIVATED = 2;
 
     /**
+     *
+     * @hide
+     */
+    public static final int MSG_UNHANDLED = 3;
+
+    /**
      * @hide
      */
     public static final String KEY_DATA = "data";
@@ -105,6 +113,8 @@ public abstract class HostApduService extends Service {
     /**
      * Messenger interface to NfcService for sending responses.
      * Only accessed on main thread by the message handler.
+     *
+     * @hide
      */
     Messenger mNfcService = null;
 
@@ -133,6 +143,7 @@ public abstract class HostApduService extends Service {
                         Bundle responseBundle = new Bundle();
                         responseBundle.putByteArray(KEY_DATA, responseApdu);
                         responseMsg.setData(responseBundle);
+                        responseMsg.replyTo = mMessenger;
                         try {
                             mNfcService.send(responseMsg);
                         } catch (RemoteException e) {
@@ -150,6 +161,7 @@ public abstract class HostApduService extends Service {
                     return;
                 }
                 try {
+                    msg.replyTo = mMessenger;
                     mNfcService.send(msg);
                 } catch (RemoteException e) {
                     Log.e(TAG, "RemoteException calling into NfcService.");
@@ -159,6 +171,18 @@ public abstract class HostApduService extends Service {
                 // Make sure we won't call into NfcService again
                 mNfcService = null;
                 onDeactivated(msg.arg1);
+                break;
+            case MSG_UNHANDLED:
+                if (mNfcService == null) {
+                    Log.e(TAG, "notifyUnhandled not sent; service was deactivated.");
+                    return;
+                }
+                try {
+                    msg.replyTo = mMessenger;
+                    mNfcService.send(msg);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException calling into NfcService.");
+                }
                 break;
             default:
                 super.handleMessage(msg);
@@ -190,6 +214,38 @@ public abstract class HostApduService extends Service {
     }
 
     /**
+     * Calling this method allows the service to tell the OS
+     * that it won't be able to complete this transaction -
+     * for example, because it requires data connectivity
+     * that is not present at that moment.
+     *
+     * The OS may use this indication to give the user a list
+     * of alternative applications that can handle the last
+     * AID that was selected. If the user would select an
+     * application from the list, that action by itself
+     * will not cause the default to be changed; the selected
+     * application will be invoked for the next tap only.
+     *
+     * If there are no other applications that can handle
+     * this transaction, the OS will show an error dialog
+     * indicating your service could not complete the
+     * transaction.
+     *
+     * <p>Note: this method may be called anywhere between
+     *    the first {@link #processCommandApdu(byte[], int)}
+     *    call and a {@link #onDeactivated(int)} call.
+     */
+    public final void notifyUnhandled() {
+        Message unhandledMsg = Message.obtain(null, MSG_UNHANDLED);
+        try {
+            mMessenger.send(unhandledMsg);
+        } catch (RemoteException e) {
+            Log.e("TAG", "Local messenger has died.");
+        }
+    }
+
+
+    /**
      * <p>This method will be called when a command APDU has been received
      * from a remote device. A response APDU can be provided directly
      * by returning a byte-array in this method. Note that in general
@@ -205,6 +261,33 @@ public abstract class HostApduService extends Service {
      * If you cannot return a response APDU immediately, return null
      * and use the {@link #sendResponseApdu(byte[])} method later.
      *
+     * @param commandApdu The APDU that received from the remote device
+     * @param extras A bundle containing extra data. May be null.
+     * @return a byte-array containing the response APDU, or null if no
+     *         response APDU can be sent at this point.
+     */
+    public byte[] processCommandApdu(byte[] commandApdu, Bundle extras) {
+        // TODO make this abstract
+        return processCommandApdu(commandApdu, 0);
+    }
+
+    /**
+     * <p>This method will be called when a command APDU has been received
+     * from a remote device. A response APDU can be provided directly
+     * by returning a byte-array in this method. Note that in general
+     * response APDUs must be sent as quickly as possible, given the fact
+     * that the user is likely holding his device over an NFC reader
+     * when this method is called.
+     *
+     * <p class="note">If there are multiple services that have registered for the same
+     * AIDs in their meta-data entry, you will only get called if the user has
+     * explicitly selected your service, either as a default or just for the next tap.
+     *
+     * <p class="note">This method is running on the main thread of your application.
+     * If you cannot return a response APDU immediately, return null
+     * and use the {@link #sendResponseApdu(byte[])} method later.
+     *
+     * @deprecated use {@link #processCommandApdu(byte[], Bundle)}
      * @param commandApdu
      * @param flags
      * @return a byte-array containing the response APDU, or null if no
