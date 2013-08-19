@@ -1341,7 +1341,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setScrollable(boolean scrollable) {
-        enforceNotSealed();
         setBooleanProperty(BOOLEAN_PROPERTY_SCROLLABLE, scrollable);
     }
 
@@ -1495,7 +1494,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param liveRegion If the node is a live region.
      */
     public void setLiveRegion(boolean liveRegion) {
-        enforceNotSealed();
         setBooleanProperty(BOOLEAN_PROPERTY_LIVE_REGION, liveRegion);
     }
 
@@ -1519,7 +1517,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param multiLine True if the node is multi line.
      */
     public void setMultiLine(boolean multiLine) {
-        enforceNotSealed();
         setBooleanProperty(BOOLEAN_PROPERTY_MULTI_LINE, multiLine);
     }
 
@@ -1543,7 +1540,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param opensPopup If the the node opens a popup.
      */
     public void setOpensPopup(boolean opensPopup) {
-        enforceNotSealed();
         setBooleanProperty(BOOLEAN_PROPERTY_OPENS_POPUP, opensPopup);
     }
 
@@ -1567,7 +1563,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param expandable If the node can be expanded.
      */
     public void setExpandable(boolean expandable) {
-        enforceNotSealed();
         setBooleanProperty(BOOLEAN_PROPERTY_EXPANDABLE, expandable);
     }
 
@@ -1591,7 +1586,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param expanded If the node is expanded.
      */
     public void setExpanded(boolean expanded) {
-        enforceNotSealed();
         setBooleanProperty(BOOLEAN_PROPERTY_EXPANDED, expanded);
     }
 
@@ -1615,7 +1609,6 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param dismissable If the node can be dismissed.
      */
     public void setDismissable(boolean dismissable) {
-        enforceNotSealed();
         setBooleanProperty(BOOLEAN_PROPERTY_DISMISSABLE, dismissable);
     }
 
@@ -1929,6 +1922,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setInputType(int inputType) {
+        enforceNotSealed();
         mInputType = inputType;
     }
 
