@@ -60,4 +60,7 @@
     <string name="toast_no_application">Can\'t open file</string>
     <string name="toast_failed_delete">Unable to delete some documents</string>
 
+    <string name="more">More</string>
+    <string name="loading">Loading\u2026</string>
+
 </resources>

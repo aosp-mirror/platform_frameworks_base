@@ -124,7 +124,7 @@ public class RecentsCreateFragment extends Fragment {
         }
     };
 
-    public static class RecentsCreateLoader extends UriDerivativeLoader<List<DocumentStack>> {
+    public static class RecentsCreateLoader extends UriDerivativeLoader<Uri, List<DocumentStack>> {
         public RecentsCreateLoader(Context context) {
             super(context, RecentsProvider.buildRecentCreate());
         }
