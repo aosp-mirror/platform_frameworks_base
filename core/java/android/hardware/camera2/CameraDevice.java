@@ -102,7 +102,7 @@ public interface CameraDevice extends AutoCloseable {
      * Get the static properties for this camera. These are identical to the
      * properties returned by {@link CameraManager#getCameraProperties}.
      *
-     * @return the static properties of the camera.
+     * @return the static properties of the camera
      *
      * @throws CameraAccessException if the camera device is no longer connected
      *
@@ -185,7 +185,7 @@ public interface CameraDevice extends AutoCloseable {
      * <p>Using larger resolution outputs, or more outputs, can result in slower
      * output rate from the device.</p>
      *
-     * @param outputs the new set of Surfaces that should be made available as
+     * @param outputs The new set of Surfaces that should be made available as
      * targets for captured image data.
      *
      * @throws IllegalArgumentException if the set of output Surfaces do not
@@ -205,7 +205,7 @@ public interface CameraDevice extends AutoCloseable {
      *
      * @param templateType An enumeration selecting the use case for this
      * request; one of the CameraDevice.TEMPLATE_ values.
-     * @return a filled-in CaptureRequest, except for output streams.
+     * @return a filled-in CaptureRequest, except for output streams
      *
      * @throws IllegalArgumentException if the templateType is not in the list
      * of supported templates.
@@ -238,8 +238,8 @@ public interface CameraDevice extends AutoCloseable {
      * {@link #setRepeatingBurst}, and will be processed as soon as the current
      * repeat/repeatBurst processing completes.</p>
      *
-     * @param request the settings for this capture.
-     * @param listener the callback object to notify once this request has been
+     * @param request the settings for this capture
+     * @param listener The callback object to notify once this request has been
      * processed. If null, no metadata will be produced for this capture,
      * although image data will still be produced.
      *
@@ -268,8 +268,8 @@ public interface CameraDevice extends AutoCloseable {
      * {@link #capture} repeatedly is that this method guarantees that no
      * other requests will be interspersed with the burst.</p>
      *
-     * @param requests the list of settings for this burst capture.
-     * @param listener the callback object to notify each time one of the
+     * @param requests the list of settings for this burst capture
+     * @param listener The callback object to notify each time one of the
      * requests in the burst has been processed. If null, no metadata will be
      * produced for any requests in this burst, although image data will still
      * be produced.
@@ -310,7 +310,7 @@ public interface CameraDevice extends AutoCloseable {
      * completed before the new repeat request will be used.</p>
      *
      * @param request the request to repeat indefinitely
-     * @param listener the callback object to notify every time the
+     * @param listener The callback object to notify every time the
      * request finishes processing. If null, no metadata will be
      * produced for this stream of requests, although image data will
      * still be produced.
@@ -354,8 +354,8 @@ public interface CameraDevice extends AutoCloseable {
      * {@link #setRepeatingRequest}, although any in-progress capture will be completed
      * before the new repeat burst will be used.</p>
      *
-     * @param requests the list of requests to cycle through indefinitely.
-     * @param listener the callback object to notify each time one of the
+     * @param requests the list of requests to cycle through indefinitely
+     * @param listener The callback object to notify each time one of the
      * requests in the repeating bursts has finished processing. If null, no
      * metadata will be produced for this stream of requests, although image
      * data will still be produced.
