@@ -1727,6 +1727,13 @@
         android:label="@string/permlab_recovery"
         android:description="@string/permdesc_recovery" />
 
+    <!-- Allows the system to bind to an application's idle services
+         @hide -->
+    <permission android:name="android.permission.BIND_IDLE_SERVICE"
+        android:protectionLevel="signature"
+        android:label="@string/permlab_bindIdleService"
+        android:description="@string/permdesc_bindIdleService" />
+
     <!-- ========================================= -->
     <!-- Permissions for special development tools -->
     <!-- ========================================= -->
@@ -2725,6 +2732,14 @@
                 android:exported="false">
             <intent-filter>
                 <action android:name="android.backup.TRANSPORT_HOST" />
+            </intent-filter>
+        </service>
+
+        <service android:name="com.android.server.MountServiceIdler"
+                 android:exported="false"
+                 android:permission="android.permission.BIND_IDLE_SERVICE" >
+            <intent-filter>
+                <action android:name="android.service.idle.IdleService" />
             </intent-filter>
         </service>
 

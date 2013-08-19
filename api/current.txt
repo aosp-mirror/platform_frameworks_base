@@ -4885,6 +4885,20 @@ package android.app.backup {
 
 }
 
+package android.app.maintenance {
+
+  public abstract class IdleService extends android.app.Service {
+    ctor public IdleService();
+    method public final void finishIdle();
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract boolean onIdleStart();
+    method public abstract void onIdleStop();
+    field public static final java.lang.String PERMISSION_BIND = "android.permission.BIND_IDLE_SERVICE";
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.idle.IdleService";
+  }
+
+}
+
 package android.appwidget {
 
   public class AppWidgetHost {
