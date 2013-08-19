@@ -1579,8 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"מספר PIN שגוי. נסה שוב בעוד שניה."</item>
     <item quantity="other" msgid="8030607343223287654">"מספר PIN שגוי. נסה שוב בעוד <xliff:g id="COUNT">%d</xliff:g> שניות."</item>
   </plurals>
-    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
-    <skip />
-    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
-    <skip />
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"החלק מקצה המסך כדי להציג את הסרגל"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"החלק מקצה המסך כדי להציג את סרגל המערכת"</string>
 </resources>

@@ -1579,8 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"Helytelen PIN kód. Próbálja újra 1 másodperc múlva."</item>
     <item quantity="other" msgid="8030607343223287654">"Helytelen PIN kód. Próbálja újra <xliff:g id="COUNT">%d</xliff:g> másodperc múlva."</item>
   </plurals>
-    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
-    <skip />
-    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
-    <skip />
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Csúsztatás a képernyő szélén a sávhoz"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Csúsztassa ujját a képernyő szélétől a rendszersáv megjelenítéséhez"</string>
 </resources>

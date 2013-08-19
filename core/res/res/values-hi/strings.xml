@@ -125,7 +125,7 @@
     <string name="httpErrorFile" msgid="2170788515052558676">"फ़ाइल पर नहीं पहुंचा जा सका."</string>
     <string name="httpErrorFileNotFound" msgid="6203856612042655084">"अनुरोधित फ़ाइल नहीं मिल सकी."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"बहुत सारे अनुरोधों का संसाधन हो रहा है. बाद में पुन: प्रयास करें."</string>
-    <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g> के लिए साइन इन त्रुटि"</string>
+    <string name="notification_title" msgid="8967710025036163822">"<xliff:g id="ACCOUNT">%1$s</xliff:g> के लिए प्रवेश त्रुटि"</string>
     <string name="contentServiceSync" msgid="8353523060269335667">"समन्वयन"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"समन्वयन"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"बहुत से <xliff:g id="CONTENT_TYPE">%s</xliff:g> हटाए जाते हैं."</string>
@@ -846,10 +846,10 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"प्रतिमान भूल गए?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"खाता अनलॉक"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2751368605287288808">"बहुत अधिक प्रतिमान प्रयास"</string>
-    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"अनलॉक करने के लिए, अपने Google खाते से साइन इन करें."</string>
+    <string name="lockscreen_glogin_instructions" msgid="3931816256100707784">"अनलॉक करने के लिए, अपने Google खाते से प्रवेश करें."</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"उपयोगकर्ता नाम (ईमेल)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"पासवर्ड"</string>
-    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"साइन इन करें"</string>
+    <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"प्रवेश करें"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"अमान्य उपयोगकर्ता नाम या पासवर्ड."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1696924763690379073">"अपना उपयोगकर्ता नाम या पासवर्ड भूल गए?\n"<b>"google.com/accounts/recovery"</b>" पर जाएं."</string>
     <string name="lockscreen_glogin_checking_password" msgid="7114627351286933867">"जांच रहा है…"</string>
@@ -1161,8 +1161,8 @@
     <item quantity="one" msgid="1634101450343277345">"उपलब्‍ध Wi-Fi नेटवर्क खोलें"</item>
     <item quantity="other" msgid="7915895323644292768">"खुले Wi-Fi नेटवर्क उपलब्‍ध है"</item>
   </plurals>
-    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Wi-Fi नेटवर्क में साइन इन करें"</string>
-    <string name="network_available_sign_in" msgid="8495155593358054676">"नेटवर्क में साइन इन करें"</string>
+    <string name="wifi_available_sign_in" msgid="4029489716605255386">"Wi-Fi नेटवर्क में प्रवेश करें"</string>
+    <string name="network_available_sign_in" msgid="8495155593358054676">"नेटवर्क में प्रवेश करें"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
     <skip />
     <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi से कनेक्‍ट नहीं हो सका"</string>
@@ -1499,10 +1499,10 @@
     <string name="kg_invalid_puk" msgid="3638289409676051243">"सही PUK कोड पुन: डालें. बार-बार प्रयास करने से सिम स्थायी रूप से अक्षम हो जाएगी."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"पिन कोड का मिलान नहीं होता"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"बहुत अधिक प्रतिमान प्रयास"</string>
-    <string name="kg_login_instructions" msgid="1100551261265506448">"अनलॉक करने के लिए, अपने Google खाते से साइन इन करें."</string>
+    <string name="kg_login_instructions" msgid="1100551261265506448">"अनलॉक करने के लिए, अपने Google खाते से प्रवेश करें."</string>
     <string name="kg_login_username_hint" msgid="5718534272070920364">"उपयोगकर्ता नाम (ईमेल)"</string>
     <string name="kg_login_password_hint" msgid="9057289103827298549">"पासवर्ड"</string>
-    <string name="kg_login_submit_button" msgid="5355904582674054702">"साइन इन करें"</string>
+    <string name="kg_login_submit_button" msgid="5355904582674054702">"प्रवेश करें"</string>
     <string name="kg_login_invalid_input" msgid="5754664119319872197">"अमान्य उपयोगकर्ता नाम या पासवर्ड."</string>
     <string name="kg_login_account_recovery_hint" msgid="5690709132841752974">"अपना उपयोगकर्ता नाम या पासवर्ड भूल गए?\n "<b>"google.com/accounts/recovery"</b>" पर जाएं."</string>
     <string name="kg_login_checking_password" msgid="1052685197710252395">"खाते की जांच की जा रही है…"</string>
