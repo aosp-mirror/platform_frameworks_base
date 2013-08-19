@@ -469,100 +469,100 @@ sample_dir := development/samples
 # the list here should match the list of samples included in the sdk samples package
 # (see development/build/sdk.atree)
 # remove htmlified samples for now -- samples are still available through the SDK
-# web_docs_sample_code_flags := \
+web_docs_sample_code_flags := \
 		-hdf android.hasSamples 1 \
 		-samplecode $(sample_dir)/AccelerometerPlay \
-		            resources/samples/AccelerometerPlay "Accelerometer Play" \
+ 		            samples/AccelerometerPlay "Accelerometer Play" \
 		-samplecode $(sample_dir)/ActionBarCompat \
-		            resources/samples/ActionBarCompat "Action Bar Compatibility" \
-                -samplecode $(sample_dir)/AndroidBeamDemo \
-		            resources/samples/AndroidBeamDemo "Android Beam Demo" \
-		-samplecode $(sample_dir)/ApiDemos \
-		            resources/samples/ApiDemos "API Demos" \
-		-samplecode $(sample_dir)/Support4Demos \
-		            resources/samples/Support4Demos "API 4+ Support Demos" \
-		-samplecode $(sample_dir)/Support13Demos \
-		            resources/samples/Support13Demos "API 13+ Support Demos" \
-		-samplecode $(sample_dir)/BackupRestore \
-		            resources/samples/BackupRestore "Backup and Restore" \
-		-samplecode $(sample_dir)/BluetoothChat \
-		            resources/samples/BluetoothChat "Bluetooth Chat" \
-		-samplecode $(sample_dir)/BluetoothHDP \
-		            resources/samples/BluetoothHDP "Bluetooth HDP Demo" \
-		-samplecode $(sample_dir)/BusinessCard \
-		            resources/samples/BusinessCard "Business Card" \
-		-samplecode $(sample_dir)/ContactManager \
-		            resources/samples/ContactManager "Contact Manager" \
-		-samplecode $(sample_dir)/CubeLiveWallpaper \
-		            resources/samples/CubeLiveWallpaper "Cube Live Wallpaper" \
-		-samplecode $(sample_dir)/Home \
-		            resources/samples/Home "Home" \
-		-samplecode $(sample_dir)/HoneycombGallery \
-		            resources/samples/HoneycombGallery "Honeycomb Gallery" \
-		-samplecode $(sample_dir)/JetBoy \
-		            resources/samples/JetBoy "JetBoy" \
-		-samplecode $(sample_dir)/KeyChainDemo \
-		            resources/samples/KeyChainDemo "KeyChain Demo" \
-		-samplecode $(sample_dir)/LunarLander \
-		            resources/samples/LunarLander "Lunar Lander" \
-		-samplecode $(sample_dir)/training/ads-and-ux \
-		            resources/samples/training/ads-and-ux "Mobile Advertisement Integration" \
-		-samplecode $(sample_dir)/MultiResolution \
-		            resources/samples/MultiResolution "Multiple Resolutions" \
-		-samplecode $(sample_dir)/training/multiscreen/newsreader \
-		            resources/samples/newsreader "News Reader" \
-		-samplecode $(sample_dir)/NotePad \
-		            resources/samples/NotePad "Note Pad" \
-		-samplecode $(sample_dir)/SpellChecker/SampleSpellCheckerService \
-		            resources/samples/SpellChecker/SampleSpellCheckerService "Spell Checker Service" \
-		-samplecode $(sample_dir)/SpellChecker/HelloSpellChecker \
-		            resources/samples/SpellChecker/HelloSpellChecker "Spell Checker Client" \
-		-samplecode $(sample_dir)/SampleSyncAdapter \
-		            resources/samples/SampleSyncAdapter "Sample Sync Adapter" \
-		-samplecode $(sample_dir)/RandomMusicPlayer \
-		            resources/samples/RandomMusicPlayer "Random Music Player" \
-		-samplecode $(sample_dir)/RenderScript \
-		            resources/samples/RenderScript "RenderScript" \
-		-samplecode $(sample_dir)/SearchableDictionary \
-		            resources/samples/SearchableDictionary "Searchable Dictionary v2" \
-		-samplecode $(sample_dir)/SipDemo \
-		            resources/samples/SipDemo "SIP Demo" \
-		-samplecode $(sample_dir)/Snake \
-		            resources/samples/Snake "Snake" \
-		-samplecode $(sample_dir)/SoftKeyboard \
-		            resources/samples/SoftKeyboard "Soft Keyboard" \
-		-samplecode $(sample_dir)/Spinner  \
-		            resources/samples/Spinner "Spinner" \
-		-samplecode $(sample_dir)/SpinnerTest \
-		            resources/samples/SpinnerTest "SpinnerTest" \
-		-samplecode $(sample_dir)/StackWidget \
-		            resources/samples/StackWidget "StackView Widget" \
-		-samplecode $(sample_dir)/TicTacToeLib  \
-		            resources/samples/TicTacToeLib "TicTacToeLib" \
-		-samplecode $(sample_dir)/TicTacToeMain \
-		            resources/samples/TicTacToeMain "TicTacToeMain" \
-		-samplecode $(sample_dir)/ToyVpn \
-		            resources/samples/ToyVpn "Toy VPN Client" \
-		-samplecode $(sample_dir)/USB \
-		            resources/samples/USB "USB" \
-		-samplecode $(sample_dir)/WeatherListWidget \
-		            resources/samples/WeatherListWidget "Weather List Widget" \
-		-samplecode $(sample_dir)/WiFiDirectDemo \
-                            resources/samples/WiFiDirectDemo "Wi-Fi Direct Demo" \
-		-samplecode $(sample_dir)/Wiktionary \
-		            resources/samples/Wiktionary "Wiktionary" \
-		-samplecode $(sample_dir)/WiktionarySimple \
-		            resources/samples/WiktionarySimple "Wiktionary (Simplified)" \
-		-samplecode $(sample_dir)/VoiceRecognitionService \
-		            resources/samples/VoiceRecognitionService "Voice Recognition Service" \
-		-samplecode $(sample_dir)/VoicemailProviderDemo \
-		            resources/samples/VoicemailProviderDemo "Voicemail Provider Demo" \
-		-samplecode $(sample_dir)/XmlAdapters \
-		            resources/samples/XmlAdapters "XML Adapters" \
-		-samplecode $(sample_dir)/TtsEngine \
-		            resources/samples/TtsEngine "Text To Speech Engine" \
-		-samplecode $(sample_dir)/training/device-management-policy \
-		            resources/samples/training/device-management-policy "Device Management Policy"
+ 		            samples/ActionBarCompat "Action Bar Compatibility"
+#       -samplecode $(sample_dir)/AndroidBeamDemo \
+# 		            samples/AndroidBeamDemo "Android Beam Demo" \
+# 		-samplecode $(sample_dir)/ApiDemos \
+# 		            samples/ApiDemos "API Demos" \
+# 		-samplecode $(sample_dir)/Support4Demos \
+# 		            samples/Support4Demos "API 4+ Support Demos" \
+# 		-samplecode $(sample_dir)/Support13Demos \
+# 		            samples/Support13Demos "API 13+ Support Demos" \
+# 		-samplecode $(sample_dir)/BackupRestore \
+# 		            samples/BackupRestore "Backup and Restore" \
+#		-samplecode $(sample_dir)/BluetoothChat \
+# 		            samples/BluetoothChat "Bluetooth Chat" \
+# 		-samplecode $(sample_dir)/BluetoothHDP \
+# 		            samples/BluetoothHDP "Bluetooth HDP Demo" \
+# 		-samplecode $(sample_dir)/BusinessCard \
+# 		            samples/BusinessCard "Business Card" \
+# 		-samplecode $(sample_dir)/ContactManager \
+# 		            samples/ContactManager "Contact Manager" \
+# 		-samplecode $(sample_dir)/CubeLiveWallpaper \
+# 		            samples/CubeLiveWallpaper "Cube Live Wallpaper" \
+# 		-samplecode $(sample_dir)/Home \
+# 		            samples/Home "Home" \
+# 		-samplecode $(sample_dir)/HoneycombGallery \
+# 		            samples/HoneycombGallery "Honeycomb Gallery" \
+# 		-samplecode $(sample_dir)/JetBoy \
+# 		            samples/JetBoy "JetBoy" \
+# 		-samplecode $(sample_dir)/KeyChainDemo \
+# 		            samples/KeyChainDemo "KeyChain Demo" \
+# 		-samplecode $(sample_dir)/LunarLander \
+# 		            samples/LunarLander "Lunar Lander" \
+# 		-samplecode $(sample_dir)/training/ads-and-ux \
+# 		            samples/training/ads-and-ux "Mobile Advertisement Integration" \
+# 		-samplecode $(sample_dir)/MultiResolution \
+# 		            samples/MultiResolution "Multiple Resolutions" \
+# 		-samplecode $(sample_dir)/training/multiscreen/newsreader \
+# 		            samples/newsreader "News Reader" \
+# 		-samplecode $(sample_dir)/NotePad \
+# 		            samples/NotePad "Note Pad" \
+# 		-samplecode $(sample_dir)/SpellChecker/SampleSpellCheckerService \
+# 		            samples/SpellChecker/SampleSpellCheckerService "Spell Checker Service" \
+# 		-samplecode $(sample_dir)/SpellChecker/HelloSpellChecker \
+# 		            samples/SpellChecker/HelloSpellChecker "Spell Checker Client" \
+# 		-samplecode $(sample_dir)/SampleSyncAdapter \
+# 		            samples/SampleSyncAdapter "Sample Sync Adapter" \
+# 		-samplecode $(sample_dir)/RandomMusicPlayer \
+# 		            samples/RandomMusicPlayer "Random Music Player" \
+# 		-samplecode $(sample_dir)/RenderScript \
+# 		            samples/RenderScript "RenderScript" \
+# 		-samplecode $(sample_dir)/SearchableDictionary \
+# 		            samples/SearchableDictionary "Searchable Dictionary v2" \
+# 		-samplecode $(sample_dir)/SipDemo \
+# 		            samples/SipDemo "SIP Demo" \
+# 		-samplecode $(sample_dir)/Snake \
+# 		            samples/Snake "Snake" \
+# 		-samplecode $(sample_dir)/SoftKeyboard \
+# 		            samples/SoftKeyboard "Soft Keyboard" \
+# 		-samplecode $(sample_dir)/Spinner  \
+# 		            samples/Spinner "Spinner" \
+# 		-samplecode $(sample_dir)/SpinnerTest \
+# 		            samples/SpinnerTest "SpinnerTest" \
+# 		-samplecode $(sample_dir)/StackWidget \
+# 		            samples/StackWidget "StackView Widget" \
+# 		-samplecode $(sample_dir)/TicTacToeLib  \
+# 		            samples/TicTacToeLib "TicTacToeLib" \
+# 		-samplecode $(sample_dir)/TicTacToeMain \
+# 		            samples/TicTacToeMain "TicTacToeMain" \
+# 		-samplecode $(sample_dir)/ToyVpn \
+# 		            samples/ToyVpn "Toy VPN Client" \
+# 		-samplecode $(sample_dir)/USB \
+# 		            samples/USB "USB" \
+# 		-samplecode $(sample_dir)/WeatherListWidget \
+# 		            samples/WeatherListWidget "Weather List Widget" \
+# 		-samplecode $(sample_dir)/WiFiDirectDemo \
+#                   samples/WiFiDirectDemo "Wi-Fi Direct Demo" \
+# 		-samplecode $(sample_dir)/Wiktionary \
+# 		            samples/Wiktionary "Wiktionary" \
+# 		-samplecode $(sample_dir)/WiktionarySimple \
+# 		            samples/WiktionarySimple "Wiktionary (Simplified)" \
+# 		-samplecode $(sample_dir)/VoiceRecognitionService \
+# 		            samples/VoiceRecognitionService "Voice Recognition Service" \
+# 		-samplecode $(sample_dir)/VoicemailProviderDemo \
+# 		            samples/VoicemailProviderDemo "Voicemail Provider Demo" \
+# 		-samplecode $(sample_dir)/XmlAdapters \
+# 		            samples/XmlAdapters "XML Adapters" \
+# 		-samplecode $(sample_dir)/TtsEngine \
+# 		            samples/TtsEngine "Text To Speech Engine" \
+# 		-samplecode $(sample_dir)/training/device-management-policy \
+# 		            samples/training/device-management-policy "Device Management Policy"
 
 
 ## SDK version identifiers used in the published docs
@@ -694,10 +694,9 @@ LOCAL_MODULE := online-sdk
 
 LOCAL_DROIDDOC_OPTIONS:= \
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
-		$(web_docs_sample_code_flags) \
 		-toroot / \
-		-hdf android.whichdoc online \
-		-hdf template.showLanguageMenu true
+		-hdf android.whichdoc online 
+#       $(web_docs_sample_code_flags)
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 
