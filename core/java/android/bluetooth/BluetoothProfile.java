@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2010-2014 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,6 +108,12 @@ public interface BluetoothProfile {
      * @hide
      */
     public static final int A2DP_SINK = 10;
+
+    /**
+     * Handsfree Client - HFP HF Role
+     * @hide
+     */
+    public static final int HANDSFREE_CLIENT = 16;
 
     /**
      * Default priority for devices that we try to auto-connect to and
