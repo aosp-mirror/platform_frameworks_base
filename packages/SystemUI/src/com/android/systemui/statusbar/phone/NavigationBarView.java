@@ -132,9 +132,9 @@ public class NavigationBarView extends LinearLayout {
         }
 
         @Override
-        protected void onTransition(int oldMode, int newMode) {
-            super.onTransition(oldMode, newMode);
-            final float alpha = newMode == MODE_NORMAL ? KeyButtonView.DEFAULT_QUIESCENT_ALPHA : 1f;
+        protected void onTransition(int oldMode, int newMode, boolean animate) {
+            super.onTransition(oldMode, newMode, animate);
+            final float alpha = newMode == MODE_OPAQUE ? KeyButtonView.DEFAULT_QUIESCENT_ALPHA : 1f;
             setKeyButtonViewQuiescentAlpha(getBackButton(), alpha);
             setKeyButtonViewQuiescentAlpha(getHomeButton(), alpha);
             setKeyButtonViewQuiescentAlpha(getRecentsButton(), alpha);
