@@ -85,7 +85,7 @@ public final class Rational {
      *
      * @param obj a reference to another object
      *
-     * @return boolean that determines whether or not the two Rational objects are equal.
+     * @return A boolean that determines whether or not the two Rational objects are equal.
      */
     @Override
     public boolean equals(Object obj) {
@@ -135,7 +135,7 @@ public final class Rational {
     /**
      * Calculates the greatest common divisor using Euclid's algorithm.
      *
-     * @return int value representing the gcd. Always positive.
+     * @return An int value representing the gcd. Always positive.
      * @hide
      */
     public int gcd() {

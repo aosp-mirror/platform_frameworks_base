@@ -77,8 +77,8 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
      * found in {@link CameraProperties}, {@link CaptureResult}, and
      * {@link CaptureRequest}.
      *
-     * @param key the metadata field to write.
-     * @param value the value to set the field to, which must be of a matching
+     * @param key The metadata field to write.
+     * @param value The value to set the field to, which must be of a matching
      * type to the key.
      */
     public <T> void set(Key<T> key, T value) {
@@ -109,8 +109,8 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
      *
      * @throws IllegalArgumentException if the key was not valid
      *
-     * @param key the metadata field to read.
-     * @return the value of that key, or {@code null} if the field is not set.
+     * @param key The metadata field to read.
+     * @return The value of that key, or {@code null} if the field is not set.
      */
     @SuppressWarnings("unchecked")
     public <T> T get(Key<T> key) {
@@ -495,7 +495,7 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
          *
          * <p>This value is looked up the first time, and cached subsequently.</p>
          *
-         * @return the tag numeric value corresponding to the string
+         * @return The tag numeric value corresponding to the string
          *
          * @hide
          */
@@ -534,7 +534,7 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
      *
      * <p>Useful to convert a CameraMetadata into e.g. a CaptureRequest.</p>
      *
-     * @param other metadata to swap with
+     * @param other Metadata to swap with
      * @throws NullPointerException if other was null
      * @hide
      */
@@ -596,8 +596,8 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
     /**
      * Get the underlying native type for a tag.
      *
-     * @param tag an integer tag, see e.g. {@link #getTag}
-     * @return an int enum for the metadata type, see e.g. {@link #TYPE_BYTE}
+     * @param tag An integer tag, see e.g. {@link #getTag}
+     * @return An int enum for the metadata type, see e.g. {@link #TYPE_BYTE}
      *
      * @hide
      */
@@ -611,8 +611,8 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
      *
      * <p>An empty array can be passed in to update the entry to 0 elements.</p>
      *
-     * @param tag an integer tag, see e.g. {@link #getTag}
-     * @param src an array of bytes, or null to erase the entry
+     * @param tag An integer tag, see e.g. {@link #getTag}
+     * @param src An array of bytes, or null to erase the entry
      *
      * @hide
      */
@@ -626,9 +626,9 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
      *
      * <p>An empty array can be returned to denote an existing entry with 0 elements.</p>
      *
-     * @param tag an integer tag, see e.g. {@link #getTag}
+     * @param tag An integer tag, see e.g. {@link #getTag}
      *
-     * @return null if there were 0 entries for this tag, a byte[] otherwise.
+     * @return {@code null} if there were 0 entries for this tag, a byte[] otherwise.
      * @hide
      */
     public byte[] readValues(int tag) {
@@ -651,8 +651,8 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
      * Register a non-sequential set of values to be used with the pack/unpack functions.
      * This enables get/set to correctly marshal the enum into a value that is C-compatible.
      *
-     * @param enumType the class for an enum
-     * @param values a list of values mapping to the ordinals of the enum
+     * @param enumType The class for an enum
+     * @param values A list of values mapping to the ordinals of the enum
      *
      * @hide
      */
@@ -673,8 +673,8 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
      * enums that have fully sequential values, although for C-style enums the range of values
      * may not map 1:1.
      *
-     * @param enumValue enum instance
-     * @return int guaranteed to be ABI-compatible with the C enum equivalent
+     * @param enumValue Enum instance
+     * @return Int guaranteed to be ABI-compatible with the C enum equivalent
      */
     private static <T extends Enum<T>> int getEnumValue(T enumValue) {
         int[] values;
@@ -691,9 +691,9 @@ public class CameraMetadata implements Parcelable, AutoCloseable {
     /**
      * Finds the enum corresponding to it's numeric value. Opposite of {@link #getEnumValue} method.
      *
-     * @param enumType class of the enum we want to find
-     * @param value the numeric value of the enum
-     * @return an instance of the enum
+     * @param enumType Class of the enum we want to find
+     * @param value The numeric value of the enum
+     * @return An instance of the enum
      */
     private static <T extends Enum<T>> T getEnumFromValue(Class<T> enumType, int value) {
         int ordinal;
