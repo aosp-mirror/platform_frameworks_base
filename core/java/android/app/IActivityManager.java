@@ -301,8 +301,8 @@ public interface IActivityManager extends IInterface {
 
     public void finishHeavyWeightApp() throws RemoteException;
 
-    public void convertFromTranslucent(IBinder token) throws RemoteException;
-    public void convertToTranslucent(IBinder token) throws RemoteException;
+    public boolean convertFromTranslucent(IBinder token) throws RemoteException;
+    public boolean convertToTranslucent(IBinder token) throws RemoteException;
     public void notifyActivityDrawn(IBinder token) throws RemoteException;
 
     public void setImmersive(IBinder token, boolean immersive) throws RemoteException;

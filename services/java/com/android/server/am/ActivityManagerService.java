@@ -8152,18 +8152,20 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void convertFromTranslucent(IBinder token) {
+    public boolean convertFromTranslucent(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
                 final ActivityRecord r = ActivityRecord.isInStackLocked(token);
                 if (r == null) {
-                    return;
+                    return false;
                 }
                 if (r.changeWindowTranslucency(true)) {
                     mWindowManager.setAppFullscreen(token, true);
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
+                    return true;
                 }
+                return false;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -8171,19 +8173,21 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     @Override
-    public void convertToTranslucent(IBinder token) {
+    public boolean convertToTranslucent(IBinder token) {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
                 final ActivityRecord r = ActivityRecord.isInStackLocked(token);
                 if (r == null) {
-                    return;
+                    return false;
                 }
                 if (r.changeWindowTranslucency(false)) {
                     r.task.stack.convertToTranslucent(r);
                     mWindowManager.setAppFullscreen(token, false);
                     mStackSupervisor.ensureActivitiesVisibleLocked(null, 0);
+                    return true;
                 }
+                return false;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
