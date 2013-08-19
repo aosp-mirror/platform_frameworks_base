@@ -44,6 +44,8 @@ import java.util.Map;
  *         for encoders, readable in the output format of decoders</b></td></tr>
  * <tr><td>{@link #KEY_FRAME_RATE}</td><td>Integer or Float</td><td><b>encoder-only</b></td></tr>
  * <tr><td>{@link #KEY_I_FRAME_INTERVAL}</td><td>Integer</td><td><b>encoder-only</b></td></tr>
+ * <tr><td>{@link #KEY_REPEAT_PREVIOUS_FRAME_AFTER}</td><td>Long</td><td><b>video encoder in surface-mode only</b></td></tr>
+ * <tr><td>{@link #KEY_PUSH_BLANK_BUFFERS_ON_STOP}</td><td>Integer(1)</td><td><b>video decoder rendering to a surface only</b></td></tr>
  * </table>
  *
  * Audio formats have the following keys:
@@ -141,6 +143,24 @@ public final class MediaFormat {
      * @hide
      */
     public static final String KEY_SLICE_HEIGHT = "slice-height";
+
+    /**
+     * Applies only when configuring a video encoder in "surface-input" mode.
+     * The associated value is a long and gives the time in microseconds
+     * after which the frame previously submitted to the encoder will be
+     * repeated (once) if no new frame became available since.
+     */
+    public static final String KEY_REPEAT_PREVIOUS_FRAME_AFTER
+        = "repeat-previous-frame-after";
+
+    /**
+     * If specified when configuring a video decoder rendering to a surface,
+     * causes the decoder to output "blank", i.e. black frames to the surface
+     * when stopped to clear out any previously displayed contents.
+     * The associated value is an integer of value 1.
+     */
+    public static final String KEY_PUSH_BLANK_BUFFERS_ON_STOP
+        = "push-blank-buffers-on-shutdown";
 
     /**
      * A key describing the duration (in microseconds) of the content.
