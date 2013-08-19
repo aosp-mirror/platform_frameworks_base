@@ -47,6 +47,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
 import com.android.systemui.statusbar.DelegateViewHelper;
 import com.android.systemui.statusbar.policy.DeadZone;
+import com.android.systemui.statusbar.policy.KeyButtonView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -81,9 +82,7 @@ public class NavigationBarView extends LinearLayout {
 
     private DelegateViewHelper mDelegateHelper;
     private DeadZone mDeadZone;
-    private final BarTransitions mBarTransitions;
-    private final Drawable mTransparent;
-    private final Drawable mTransparentVertical;
+    private final NavigationBarTransitions mBarTransitions;
 
     // workaround for LayoutTransitions leaving the nav buttons in a weird state (bug 5549288)
     final static boolean WORKAROUND_INVALID_LAYOUT = true;
@@ -112,6 +111,43 @@ public class NavigationBarView extends LinearLayout {
         }
     }
 
+    private final class NavigationBarTransitions extends BarTransitions {
+
+        private final Drawable mTransparentBottom;
+        private final Drawable mTransparentRight;
+
+        public NavigationBarTransitions(Context context) {
+            super(context, NavigationBarView.this);
+            final Resources res = mContext.getResources();
+            final int[] gradientColors = new int[] {
+                    res.getColor(R.color.navigation_bar_background_transparent_start),
+                    res.getColor(R.color.navigation_bar_background_transparent_end)
+            };
+            mTransparentBottom = new GradientDrawable(Orientation.BOTTOM_TOP, gradientColors);
+            mTransparentRight = new GradientDrawable(Orientation.RIGHT_LEFT, gradientColors);
+        }
+
+        public void setVertical(boolean isVertical) {
+            mTransparent = isVertical ? mTransparentRight : mTransparentBottom;
+        }
+
+        @Override
+        protected void onTransition(int oldMode, int newMode) {
+            super.onTransition(oldMode, newMode);
+            final float alpha = newMode == MODE_NORMAL ? KeyButtonView.DEFAULT_QUIESCENT_ALPHA : 1f;
+            setKeyButtonViewQuiescentAlpha(getBackButton(), alpha);
+            setKeyButtonViewQuiescentAlpha(getHomeButton(), alpha);
+            setKeyButtonViewQuiescentAlpha(getRecentsButton(), alpha);
+            setKeyButtonViewQuiescentAlpha(getMenuButton(), alpha);
+        }
+
+        private void setKeyButtonViewQuiescentAlpha(View button, float alpha) {
+            if (button instanceof KeyButtonView) {
+                ((KeyButtonView) button).setQuiescentAlpha(alpha);
+            }
+        }
+    }
+
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -130,13 +166,7 @@ public class NavigationBarView extends LinearLayout {
 
         getIcons(res);
 
-        final int[] gradientColors = new int[] {
-                res.getColor(R.color.navigation_bar_background_transparent_start),
-                res.getColor(R.color.navigation_bar_background_transparent_end)
-        };
-        mTransparent = new GradientDrawable(Orientation.BOTTOM_TOP, gradientColors);
-        mTransparentVertical = new GradientDrawable(Orientation.RIGHT_LEFT, gradientColors);
-        mBarTransitions = new BarTransitions(context, this, mTransparent);
+        mBarTransitions = new NavigationBarTransitions(context);
     }
 
     public BarTransitions getBarTransitions() {
@@ -423,7 +453,7 @@ public class NavigationBarView extends LinearLayout {
         }
 
         setNavigationIconHints(mNavigationIconHints, true);
-        mBarTransitions.setTransparent(mVertical ? mTransparentVertical : mTransparent);
+        mBarTransitions.setVertical(mVertical);
     }
 
     @Override
