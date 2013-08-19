@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_NORMAL;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSIENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
 
 import android.animation.Animator;
@@ -1912,7 +1912,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
             if (sbMode != -1 || nbMode != -1) {
                 // update transient bar autohide
-                if (sbMode == MODE_TRANSIENT || nbMode == MODE_TRANSIENT) {
+                if (sbMode == MODE_SEMI_TRANSPARENT || nbMode == MODE_SEMI_TRANSPARENT) {
                     scheduleAutohide();
                 } else {
                     cancelAutohide();
@@ -1936,7 +1936,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     private int barMode(int vis, int transientFlag, int transparentFlag) {
-        return (vis & transientFlag) != 0 ? MODE_TRANSIENT
+        return (vis & transientFlag) != 0 ? MODE_SEMI_TRANSPARENT
                 : (vis & transparentFlag) != 0 ? MODE_TRANSPARENT
                 : MODE_NORMAL;
     }

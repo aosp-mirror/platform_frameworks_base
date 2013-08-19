@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -26,6 +29,7 @@ import android.graphics.drawable.Drawable;
 import android.hardware.input.InputManager;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
@@ -41,9 +45,10 @@ import com.android.systemui.R;
 
 public class KeyButtonView extends ImageView {
     private static final String TAG = "StatusBar.KeyButtonView";
+    private static final boolean DEBUG = false;
 
     final float GLOW_MAX_SCALE_FACTOR = 1.8f;
-    final float BUTTON_QUIESCENT_ALPHA = 0.70f;
+    public static final float DEFAULT_QUIESCENT_ALPHA = 0.70f;
 
     long mDownTime;
     int mCode;
@@ -51,6 +56,7 @@ public class KeyButtonView extends ImageView {
     Drawable mGlowBG;
     int mGlowWidth, mGlowHeight;
     float mGlowAlpha = 0f, mGlowScale = 1f, mDrawingAlpha = 1f;
+    float mQuiescentAlpha = DEFAULT_QUIESCENT_ALPHA;
     boolean mSupportsLongpress = true;
     RectF mRect = new RectF(0f,0f,0f,0f);
     AnimatorSet mPressedAnim;
@@ -66,6 +72,15 @@ public class KeyButtonView extends ImageView {
                     // Just an old-fashioned ImageView
                     performLongClick();
                 }
+            }
+        }
+    };
+
+    private final AnimatorListener mRecoverToQuiescentListener = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            if (mQuiescentAlpha != mDrawingAlpha) {
+                animateToQuiescent().setDuration(200).start();
             }
         }
     };
@@ -86,7 +101,7 @@ public class KeyButtonView extends ImageView {
 
         mGlowBG = a.getDrawable(R.styleable.KeyButtonView_glowBackground);
         if (mGlowBG != null) {
-            setDrawingAlpha(BUTTON_QUIESCENT_ALPHA);
+            setDrawingAlpha(mQuiescentAlpha);
             mGlowWidth = mGlowBG.getIntrinsicWidth();
             mGlowHeight = mGlowBG.getIntrinsicHeight();
         }
@@ -116,6 +131,16 @@ public class KeyButtonView extends ImageView {
             mRect.bottom = h;
         }
         super.onDraw(canvas);
+    }
+
+    public void setQuiescentAlpha(float alpha) {
+        alpha = Math.min(Math.max(alpha, 0), 1);
+        if (alpha == mQuiescentAlpha) return;
+        mQuiescentAlpha = alpha;
+        if (DEBUG) Log.d(TAG, "New quiescent alpha = " + mQuiescentAlpha);
+        if (mGlowBG != null) {
+            setDrawingAlpha(mQuiescentAlpha);
+        }
     }
 
     public float getDrawingAlpha() {
@@ -172,6 +197,12 @@ public class KeyButtonView extends ImageView {
         }
     }
 
+    private ObjectAnimator animateToQuiescent() {
+        ObjectAnimator anim = ObjectAnimator.ofFloat(this, "drawingAlpha", mQuiescentAlpha);
+        anim.addListener(mRecoverToQuiescentListener);  // mQuiescentAlpha may change mid-animation
+        return anim;
+    }
+
     public void setPressed(boolean pressed) {
         if (mGlowBG != null) {
             if (pressed != isPressed()) {
@@ -182,8 +213,8 @@ public class KeyButtonView extends ImageView {
                 if (pressed) {
                     if (mGlowScale < GLOW_MAX_SCALE_FACTOR)
                         mGlowScale = GLOW_MAX_SCALE_FACTOR;
-                    if (mGlowAlpha < BUTTON_QUIESCENT_ALPHA)
-                        mGlowAlpha = BUTTON_QUIESCENT_ALPHA;
+                    if (mGlowAlpha < mQuiescentAlpha)
+                        mGlowAlpha = mQuiescentAlpha;
                     setDrawingAlpha(1f);
                     as.playTogether(
                         ObjectAnimator.ofFloat(this, "glowAlpha", 1f),
@@ -194,7 +225,7 @@ public class KeyButtonView extends ImageView {
                     as.playTogether(
                         ObjectAnimator.ofFloat(this, "glowAlpha", 0f),
                         ObjectAnimator.ofFloat(this, "glowScale", 1f),
-                        ObjectAnimator.ofFloat(this, "drawingAlpha", BUTTON_QUIESCENT_ALPHA)
+                        animateToQuiescent()
                     );
                     as.setDuration(500);
                 }
