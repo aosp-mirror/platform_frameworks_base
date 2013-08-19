@@ -164,7 +164,7 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Đã kết nối Wi-Fi"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Đang tìm kiếm GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Vị trí đặt bởi GPS"</string>
-    <string name="accessibility_location_active" msgid="2427290146138169014">"Yêu cầu về thông tin vị trí hiện hoạt"</string>
+    <string name="accessibility_location_active" msgid="2427290146138169014">"Yêu cầu về thông tin vị trí đang hoạt động"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Xóa tất cả thông báo."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Thông tin về ứng dụng"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Màn hình sẽ xoay tự động."</string>
