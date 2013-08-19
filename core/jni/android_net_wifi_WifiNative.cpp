@@ -25,111 +25,91 @@
 
 #include "wifi.h"
 
-#define WIFI_PKG_NAME "android/net/wifi/WifiNative"
-#define BUF_SIZE 256
+#define REPLY_BUF_SIZE 4096 // wpa_supplicant's maximum size.
 #define EVENT_BUF_SIZE 2048
 
 namespace android {
 
 static jint DBG = false;
 
-static int doCommand(char *cmd, char *replybuf, int replybuflen)
-{
-    size_t reply_len = replybuflen - 1;
-
-    if (::wifi_command(cmd, replybuf, &reply_len) != 0)
-        return -1;
-    else {
-        // Strip off trailing newline
-        if (reply_len > 0 && replybuf[reply_len-1] == '\n')
-            replybuf[reply_len-1] = '\0';
-        else
-            replybuf[reply_len] = '\0';
-        return 0;
+static bool doCommand(JNIEnv* env, jstring javaCommand,
+                      char* reply, size_t reply_len) {
+    ScopedUtfChars command(env, javaCommand);
+    if (command.c_str() == NULL) {
+        return false; // ScopedUtfChars already threw on error.
     }
+
+    if (DBG) {
+        ALOGD("doCommand: %s", command.c_str());
+    }
+
+    --reply_len; // Ensure we have room to add NUL termination.
+    if (::wifi_command(command.c_str(), reply, &reply_len) != 0) {
+        return false;
+    }
+
+    // Strip off trailing newline.
+    if (reply_len > 0 && reply[reply_len-1] == '\n') {
+        reply[reply_len-1] = '\0';
+    } else {
+        reply[reply_len] = '\0';
+    }
+    return true;
 }
 
-static jint doIntCommand(const char* fmt, ...)
-{
-    char buf[BUF_SIZE];
-    va_list args;
-    va_start(args, fmt);
-    int byteCount = vsnprintf(buf, sizeof(buf), fmt, args);
-    va_end(args);
-    if (byteCount < 0 || byteCount >= BUF_SIZE) {
-        return -1;
-    }
-    char reply[BUF_SIZE];
-    if (doCommand(buf, reply, sizeof(reply)) != 0) {
+static jint doIntCommand(JNIEnv* env, jstring javaCommand) {
+    char reply[REPLY_BUF_SIZE];
+    if (!doCommand(env, javaCommand, reply, sizeof(reply))) {
         return -1;
     }
     return static_cast<jint>(atoi(reply));
 }
 
-static jboolean doBooleanCommand(const char* expect, const char* fmt, ...)
-{
-    char buf[BUF_SIZE];
-    va_list args;
-    va_start(args, fmt);
-    int byteCount = vsnprintf(buf, sizeof(buf), fmt, args);
-    va_end(args);
-    if (byteCount < 0 || byteCount >= BUF_SIZE) {
+static jboolean doBooleanCommand(JNIEnv* env, jstring javaCommand) {
+    char reply[REPLY_BUF_SIZE];
+    if (!doCommand(env, javaCommand, reply, sizeof(reply))) {
         return JNI_FALSE;
     }
-    char reply[BUF_SIZE];
-    if (doCommand(buf, reply, sizeof(reply)) != 0) {
-        return JNI_FALSE;
-    }
-    return (strcmp(reply, expect) == 0);
+    return (strcmp(reply, "OK") == 0);
 }
 
-// Send a command to the supplicant, and return the reply as a String
-static jstring doStringCommand(JNIEnv* env, const char* fmt, ...) {
-    char buf[BUF_SIZE];
-    va_list args;
-    va_start(args, fmt);
-    int byteCount = vsnprintf(buf, sizeof(buf), fmt, args);
-    va_end(args);
-    if (byteCount < 0 || byteCount >= BUF_SIZE) {
+// Send a command to the supplicant, and return the reply as a String.
+static jstring doStringCommand(JNIEnv* env, jstring javaCommand) {
+    char reply[REPLY_BUF_SIZE];
+    if (!doCommand(env, javaCommand, reply, sizeof(reply))) {
         return NULL;
     }
-    char reply[4096];
-    if (doCommand(buf, reply, sizeof(reply)) != 0) {
-        return NULL;
-    }
-    // TODO: why not just NewStringUTF?
-    String16 str((char *)reply);
-    return env->NewString((const jchar *)str.string(), str.size());
+    return env->NewStringUTF(reply);
 }
 
 static jboolean android_net_wifi_isDriverLoaded(JNIEnv* env, jobject)
 {
-    return (jboolean)(::is_wifi_driver_loaded() == 1);
+    return (::is_wifi_driver_loaded() == 1);
 }
 
 static jboolean android_net_wifi_loadDriver(JNIEnv* env, jobject)
 {
-    return (jboolean)(::wifi_load_driver() == 0);
+    return (::wifi_load_driver() == 0);
 }
 
 static jboolean android_net_wifi_unloadDriver(JNIEnv* env, jobject)
 {
-    return (jboolean)(::wifi_unload_driver() == 0);
+    return (::wifi_unload_driver() == 0);
 }
 
 static jboolean android_net_wifi_startSupplicant(JNIEnv* env, jobject, jboolean p2pSupported)
 {
-    return (jboolean)(::wifi_start_supplicant(p2pSupported) == 0);
+    return (::wifi_start_supplicant(p2pSupported) == 0);
 }
 
 static jboolean android_net_wifi_killSupplicant(JNIEnv* env, jobject, jboolean p2pSupported)
 {
-    return (jboolean)(::wifi_stop_supplicant(p2pSupported) == 0);
+    return (::wifi_stop_supplicant(p2pSupported) == 0);
 }
 
 static jboolean android_net_wifi_connectToSupplicant(JNIEnv* env, jobject)
 {
-    return (jboolean)(::wifi_connect_to_supplicant() == 0);
+    return (::wifi_connect_to_supplicant() == 0);
 }
 
 static void android_net_wifi_closeSupplicantConnection(JNIEnv* env, jobject)
@@ -148,36 +128,16 @@ static jstring android_net_wifi_waitForEvent(JNIEnv* env, jobject)
     }
 }
 
-static jboolean android_net_wifi_doBooleanCommand(JNIEnv* env, jobject, jstring jCommand)
-{
-    ScopedUtfChars command(env, jCommand);
-
-    if (command.c_str() == NULL) {
-        return JNI_FALSE;
-    }
-    if (DBG) ALOGD("doBoolean: %s", command.c_str());
-    return doBooleanCommand("OK", "%s", command.c_str());
+static jboolean android_net_wifi_doBooleanCommand(JNIEnv* env, jobject, jstring javaCommand) {
+    return doBooleanCommand(env, javaCommand);
 }
 
-static jint android_net_wifi_doIntCommand(JNIEnv* env, jobject, jstring jCommand)
-{
-    ScopedUtfChars command(env, jCommand);
-
-    if (command.c_str() == NULL) {
-        return -1;
-    }
-    if (DBG) ALOGD("doInt: %s", command.c_str());
-    return doIntCommand("%s", command.c_str());
+static jint android_net_wifi_doIntCommand(JNIEnv* env, jobject, jstring javaCommand) {
+    return doIntCommand(env, javaCommand);
 }
 
-static jstring android_net_wifi_doStringCommand(JNIEnv* env, jobject, jstring jCommand)
-{
-    ScopedUtfChars command(env, jCommand);
-    if (command.c_str() == NULL) {
-        return NULL;
-    }
-    if (DBG) ALOGD("doString: %s", command.c_str());
-    return doStringCommand(env, "%s", command.c_str());
+static jstring android_net_wifi_doStringCommand(JNIEnv* env, jobject, jstring javaCommand) {
+    return doStringCommand(env,javaCommand);
 }
 
 
@@ -205,10 +165,9 @@ static JNINativeMethod gWifiMethods[] = {
             (void*) android_net_wifi_doStringCommand },
 };
 
-int register_android_net_wifi_WifiManager(JNIEnv* env)
-{
+int register_android_net_wifi_WifiNative(JNIEnv* env) {
     return AndroidRuntime::registerNativeMethods(env,
-            WIFI_PKG_NAME, gWifiMethods, NELEM(gWifiMethods));
+            "android/net/wifi/WifiNative", gWifiMethods, NELEM(gWifiMethods));
 }
 
 }; // namespace android
