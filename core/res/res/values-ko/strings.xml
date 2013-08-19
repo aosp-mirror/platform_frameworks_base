@@ -1579,8 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"잘못된 PIN입니다. 1초 뒤에 다시 시도하세요."</item>
     <item quantity="other" msgid="8030607343223287654">"잘못된 PIN입니다. <xliff:g id="COUNT">%d</xliff:g>초 뒤에 다시 시도하세요."</item>
   </plurals>
-    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
-    <skip />
-    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
-    <skip />
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"화면 가장자리에서 스와이프하여 표시줄 표시"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"화면 가장자리에서 스와이프하여 시스템 표시줄 표시"</string>
 </resources>

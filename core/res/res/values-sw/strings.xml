@@ -138,7 +138,7 @@
     <string name="turn_on_radio" msgid="3912793092339962371">"Washa mtandao-hewa"</string>
     <string name="turn_off_radio" msgid="8198784949987062346">"Zima pasiwaya"</string>
     <string name="screen_lock" msgid="799094655496098153">"Funga skrini"</string>
-    <string name="power_off" msgid="4266614107412865048">"Zima simu"</string>
+    <string name="power_off" msgid="4266614107412865048">"Zima"</string>
     <string name="silent_mode_silent" msgid="319298163018473078">"Programu ya milio imezimwa"</string>
     <string name="silent_mode_vibrate" msgid="7072043388581551395">"Mtetemo wa programu ya milio"</string>
     <string name="silent_mode_ring" msgid="8592241816194074353">"Programu ya milio imewashwa"</string>
@@ -153,7 +153,7 @@
     <string name="global_actions" product="tablet" msgid="408477140088053665">"Chaguo za kompyuta ndogo"</string>
     <string name="global_actions" product="default" msgid="2406416831541615258">"Chaguo za simu"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Funga skrini"</string>
-    <string name="global_action_power_off" msgid="4471879440839879722">"Zima simu"</string>
+    <string name="global_action_power_off" msgid="4471879440839879722">"Zima"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Ripoti ya hitilafu"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Chukua ripoti ya hitilafu"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Hii itakusanya maelezo kuhusu hali ya kifaa chako kwa sasa, na itume kama barua pepe. Itachukua muda mfupi tangu ripoti ya hitilafu ianze kuzalishwa hadi iwe tayari kutumwa; vumilia."</string>

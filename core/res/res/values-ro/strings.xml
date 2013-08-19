@@ -1579,8 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"PIN incorect. Reîncercați în 1 sec."</item>
     <item quantity="other" msgid="8030607343223287654">"PIN incorect. Reîncercați în <xliff:g id="COUNT">%d</xliff:g> sec."</item>
   </plurals>
-    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
-    <skip />
-    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
-    <skip />
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Glisați din margine pentru a afișa"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Glisați dinspre marginea ecranului pentru a afișa bara de sistem"</string>
 </resources>

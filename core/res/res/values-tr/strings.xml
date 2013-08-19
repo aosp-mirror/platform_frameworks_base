@@ -1579,8 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"Yanlış PIN. 1 saniye içinde tekrar deneyin."</item>
     <item quantity="other" msgid="8030607343223287654">"Yanlış PIN. <xliff:g id="COUNT">%d</xliff:g> saniye içinde tekrar deneyin."</item>
   </plurals>
-    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
-    <skip />
-    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
-    <skip />
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Çubuğu görüntülemek için ekranın kenarından hızlıca kaydırın"</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Sistem çubuğunu görüntülemek için ekranın kenarından hızlıca kaydırın"</string>
 </resources>

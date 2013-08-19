@@ -1579,8 +1579,6 @@
     <item quantity="one" msgid="4835639969503729874">"PIN incorrecto. Reintentar en 1 s"</item>
     <item quantity="other" msgid="8030607343223287654">"PIN incorrecto. Reintentar en <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
-    <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
-    <skip />
-    <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->
-    <skip />
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Desliza el borde para ver la barra."</string>
+    <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Desliza el dedo desde el borde de la pantalla para mostrar la barra del sistema."</string>
 </resources>
