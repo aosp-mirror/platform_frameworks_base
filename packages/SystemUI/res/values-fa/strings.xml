@@ -201,6 +201,4 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"خودکار"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"اعلان‌ها در اینجا نمایش داده می‌شوند"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"با کشیدن انگشت به طرف پایین به آنها دسترسی پیدا کنید.\nبرای کنترل‌های سیستم دوباره انگشت خود را به سمت پایین بکشید."</string>
-    <string name="hiding_navigation_confirmation_message" msgid="3227814171674734332">"برای نمایش نوار، انگشت خود را از لبه‌ صفحه به داخل بکشید"</string>
-    <string name="hiding_navigation_confirmation_message_long" msgid="7854368870786524950">"برای نمایش نوار سیستم، انگشت خود را از لبه‌ صفحه به داخل بکشید"</string>
 </resources>

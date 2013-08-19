@@ -164,8 +164,7 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi povezan"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"Iskanje GPS-a"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokacija nastavljena z GPS-om"</string>
-    <!-- no translation found for accessibility_location_active (2427290146138169014) -->
-    <skip />
+    <string name="accessibility_location_active" msgid="2427290146138169014">"Aktivne zahteve za lokacijo"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"Izbriši vsa obvestila."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"Podatki o aplikaciji"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"Zaslon se bo samodejno zasukal."</string>
@@ -202,6 +201,4 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"SAMODEJNO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Obvestila so prikazana tukaj"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Do njih lahko kadar koli dostopate tako, da povlečete navzdol.\nZa prikaz sistemskih kontrolnikov znova povlecite navzdol."</string>
-    <string name="hiding_navigation_confirmation_message" msgid="3227814171674734332">"Vrstico prikažete tako, da povlečete z roba zaslona"</string>
-    <string name="hiding_navigation_confirmation_message_long" msgid="7854368870786524950">"Sistemsko vrstico prikažete tako, da povlečete z roba zaslona"</string>
 </resources>

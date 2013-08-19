@@ -164,8 +164,7 @@
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi מחובר"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"מחפש GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"מיקום מוגדר על ידי GPS"</string>
-    <!-- no translation found for accessibility_location_active (2427290146138169014) -->
-    <skip />
+    <string name="accessibility_location_active" msgid="2427290146138169014">"בקשות מיקום פעילות"</string>
     <string name="accessibility_clear_all" msgid="5235938559247164925">"נקה את כל ההתראות."</string>
     <string name="status_bar_notification_inspect_item_title" msgid="1163547729015390250">"פרטי יישום"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"המסך יסתובב באופן אוטומטי."</string>
@@ -202,6 +201,4 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"אוטומטי"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"הודעות מופיעות כאן"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"גש אליהם בכל עת על ידי החלקה למטה.\nהחלק למטה שוב למעבר למרכז הבקרה של המערכת."</string>
-    <string name="hiding_navigation_confirmation_message" msgid="3227814171674734332">"החלק מקצה המסך כדי להציג את הסרגל"</string>
-    <string name="hiding_navigation_confirmation_message_long" msgid="7854368870786524950">"החלק מקצה המסך כדי להציג את סרגל המערכת"</string>
 </resources>
