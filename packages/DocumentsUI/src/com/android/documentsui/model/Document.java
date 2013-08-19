@@ -143,6 +143,14 @@ public class Document {
         return Documents.MIME_TYPE_DIR.equals(mimeType);
     }
 
+    public boolean isGridPreferred() {
+        return (flags & Documents.FLAG_PREFERS_GRID) != 0;
+    }
+
+    public boolean isDeleteSupported() {
+        return (flags & Documents.FLAG_SUPPORTS_DELETE) != 0;
+    }
+
     private static String getCursorString(Cursor cursor, String columnName) {
         final int index = cursor.getColumnIndex(columnName);
         return (index != -1) ? cursor.getString(index) : null;

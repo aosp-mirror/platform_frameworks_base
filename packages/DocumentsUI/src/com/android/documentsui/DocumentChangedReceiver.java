@@ -16,17 +16,23 @@
 
 package com.android.documentsui;
 
-import android.graphics.Bitmap;
-import android.net.Uri;
-import android.util.LruCache;
+import static com.android.documentsui.DocumentsActivity.TAG;
 
-public class ThumbnailCache extends LruCache<Uri, Bitmap> {
-    public ThumbnailCache(int maxSizeBytes) {
-        super(maxSizeBytes);
-    }
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 
+import com.android.documentsui.model.Root;
+
+/**
+ * Handles {@link Root} changes which invalidate cached data.
+ */
+public class DocumentChangedReceiver extends BroadcastReceiver {
     @Override
-    protected int sizeOf(Uri key, Bitmap value) {
-        return value.getByteCount();
+    public void onReceive(Context context, Intent intent) {
+        Log.d(TAG, "Regenerating roots cache");
+        DocumentsApplication.getRootsCache(context).update();
+        // TODO: invalidate cached data in recents provider
     }
 }

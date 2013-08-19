@@ -169,6 +169,7 @@ public class RecentsCreateFragment extends Fragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             final Context context = parent.getContext();
+            final RootsCache roots = DocumentsApplication.getRootsCache(context);
 
             if (convertView == null) {
                 final LayoutInflater inflater = LayoutInflater.from(context);
@@ -180,7 +181,7 @@ public class RecentsCreateFragment extends Fragment {
             final View summaryList = convertView.findViewById(R.id.summary_list);
 
             final DocumentStack stack = getItem(position);
-            final Root root = RootsCache.findRoot(context, stack.peek());
+            final Root root = roots.findRoot(stack.peek());
             icon.setImageDrawable(root != null ? root.icon : null);
 
             final StringBuilder builder = new StringBuilder();

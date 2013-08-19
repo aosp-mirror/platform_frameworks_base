@@ -29,6 +29,8 @@
 
     <string name="menu_open">Open</string>
     <string name="menu_save">Save</string>
+    <string name="menu_share">Share</string>
+    <string name="menu_delete">Delete</string>
 
     <string name="mode_selected_count"><xliff:g id="count" example="3">%1$d</xliff:g> selected</string>
 
@@ -54,5 +56,8 @@
     <string name="pref_device_size">Display device size</string>
 
     <string name="empty">No items</string>
+
+    <string name="toast_no_application">Can\'t open file</string>
+    <string name="toast_failed_delete">Unable to delete some documents</string>
 
 </resources>

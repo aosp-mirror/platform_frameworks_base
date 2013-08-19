@@ -79,6 +79,8 @@ public class DirectoryLoader extends UriDerivativeLoader<List<Document>> {
     private List<Document> loadInBackgroundInternal(Uri uri, CancellationSignal signal) {
         final ArrayList<Document> result = Lists.newArrayList();
 
+        // TODO: subscribe to the notify uri from query
+
         final ContentResolver resolver = getContext().getContentResolver();
         final Cursor cursor = resolver.query(uri, null, null, null, getQuerySortOrder(), signal);
         try {
