@@ -54,7 +54,7 @@ public final class CaptureResult extends CameraMetadata {
             return mBounds;
         }
 
-        /* <p>The confidence level for the detection of the face. The range is 1 to
+        /** <p>The confidence level for the detection of the face. The range is 1 to
          * 100. 100 is the highest confidence.</p>
          *
          * <p>Depending on the device, even very low-confidence faces may be

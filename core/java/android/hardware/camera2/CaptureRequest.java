@@ -69,7 +69,7 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      *
      * <p>Adding a target more than once has no effect.</p>
      *
-     * @param outputTarget surface to use as an output target for this request
+     * @param outputTarget Surface to use as an output target for this request
      */
     public void addTarget(Surface outputTarget) {
         synchronized (mLock) {
@@ -82,7 +82,7 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      *
      * <p>Removing a target that is not currently added has no effect.</p>
      *
-     * @param outputTarget surface to use as an output target for this request
+     * @param outputTarget Surface to use as an output target for this request
      */
     public void removeTarget(Surface outputTarget) {
         synchronized (mLock) {
