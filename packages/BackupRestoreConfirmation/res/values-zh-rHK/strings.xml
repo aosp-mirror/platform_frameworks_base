@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--  Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="backup_confirm_title" msgid="827563724209303345">"完整備份"</string>
+    <string name="restore_confirm_title" msgid="5469365809567486602">"完整還原"</string>
+    <string name="backup_confirm_text" msgid="1878021282758896593">"系統收到將所有資料完整備份到連線桌上電腦的要求，請問您允許進行備份嗎？\n\n如果您本人並未提出備份要求，請勿允許繼續進行這項作業。"</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"備份我的資料"</string>
+    <string name="deny_backup_button_label" msgid="6009119115581097708">"不要備份"</string>
+    <string name="restore_confirm_text" msgid="7499866728030461776">"系統收到從連線的桌上電腦完整還原所有資料的要求，請問您允許進行還原嗎？\n\n如果您本人並未提出還原要求，請勿允許繼續進行這項作業。這項作業將取代裝置上現有的全部資料！"</string>
+    <string name="allow_restore_button_label" msgid="3081286752277127827">"還原我的資料"</string>
+    <string name="deny_restore_button_label" msgid="1724367334453104378">"不要還原"</string>
+    <string name="current_password_text" msgid="8268189555578298067">"在下面輸入您目前的備份密碼："</string>
+    <string name="device_encryption_restore_text" msgid="1570864916855208992">"請在下面輸入您的裝置加密密碼。"</string>
+    <string name="device_encryption_backup_text" msgid="5866590762672844664">"請在下面輸入您的裝置加密密碼，這也會用來將封存備份加密。"</string>
+    <string name="backup_enc_password_text" msgid="4981585714795233099">"請輸入為完整備份資料加密的專用密碼。如果留空，系統將使用您目前的備份密碼："</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"如果您想將完整的備份資料加密，請在下面輸入一組密碼："</string>
+    <string name="restore_enc_password_text" msgid="6140898525580710823">"如果還原的資料經過加密處理，請在下面輸入密碼："</string>
+    <string name="toast_backup_started" msgid="550354281452756121">"正在開始備份..."</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"備份完畢"</string>
+    <string name="toast_restore_started" msgid="7881679218971277385">"正在開始還原..."</string>
+    <string name="toast_restore_ended" msgid="1764041639199696132">"還原完畢"</string>
+    <string name="toast_timeout" msgid="5276598587087626877">"操作逾時"</string>
+</resources>
