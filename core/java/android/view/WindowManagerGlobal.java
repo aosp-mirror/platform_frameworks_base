@@ -494,6 +494,21 @@ public final class WindowManagerGlobal {
             }
         }
     }
+
+    /** @hide */
+    public void changeCanvasOpacity(IBinder token, boolean opaque) {
+        if (token == null) {
+            return;
+        }
+        synchronized (mLock) {
+            for (int i = mParams.size() - 1; i >= 0; --i) {
+                if (mParams.get(i).token == token) {
+                    mRoots.get(i).changeCanvasOpacity(opaque);
+                    return;
+                }
+            }
+        }
+    }
 }
 
 final class WindowLeaked extends AndroidRuntimeException {
