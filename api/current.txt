@@ -5014,7 +5014,8 @@ package android.bluetooth {
   }
 
   public final class BluetoothGatt implements android.bluetooth.BluetoothProfile {
-    method public void abortReliableWrite(android.bluetooth.BluetoothDevice);
+    method public void abortReliableWrite();
+    method public deprecated void abortReliableWrite(android.bluetooth.BluetoothDevice);
     method public boolean beginReliableWrite();
     method public void close();
     method public boolean connect();
