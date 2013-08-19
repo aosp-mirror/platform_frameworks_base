@@ -50,63 +50,67 @@ import java.util.List;
 public class RootsCache {
 
     // TODO: cache roots in local provider to avoid spinning up backends
+    // TODO: root updates should trigger UI refresh
 
-    private static boolean sCached = false;
+    private final Context mContext;
 
     /** Map from authority to cached info */
-    private static HashMap<String, DocumentsProviderInfo> sProviders = Maps.newHashMap();
+    private HashMap<String, DocumentsProviderInfo> mProviders = Maps.newHashMap();
     /** Map from (authority+rootId) to cached info */
-    private static HashMap<Pair<String, String>, Root> sRoots = Maps.newHashMap();
+    private HashMap<Pair<String, String>, Root> mRoots = Maps.newHashMap();
 
-    public static ArrayList<Root> sRootsList = Lists.newArrayList();
+    public ArrayList<Root> mRootsList = Lists.newArrayList();
 
-    private static Root sRecentsRoot;
+    private Root mRecentsRoot;
+
+    public RootsCache(Context context) {
+        mContext = context;
+        update();
+    }
 
     /**
      * Gather roots from all known storage providers.
      */
-    private static void ensureCache(Context context) {
-        if (sCached) return;
-        sCached = true;
-
-        sProviders.clear();
-        sRoots.clear();
-        sRootsList.clear();
+    @GuardedBy("ActivityThread")
+    public void update() {
+        mProviders.clear();
+        mRoots.clear();
+        mRootsList.clear();
 
         {
             // Create special root for recents
-            final Root root = Root.buildRecents(context);
-            sRootsList.add(root);
-            sRecentsRoot = root;
+            final Root root = Root.buildRecents(mContext);
+            mRootsList.add(root);
+            mRecentsRoot = root;
         }
 
         // Query for other storage backends
-        final PackageManager pm = context.getPackageManager();
+        final PackageManager pm = mContext.getPackageManager();
         final List<ProviderInfo> providers = pm.queryContentProviders(
                 null, -1, PackageManager.GET_META_DATA);
         for (ProviderInfo providerInfo : providers) {
             if (providerInfo.metaData != null && providerInfo.metaData.containsKey(
                     DocumentsContract.META_DATA_DOCUMENT_PROVIDER)) {
                 final DocumentsProviderInfo info = DocumentsProviderInfo.parseInfo(
-                        context, providerInfo);
+                        mContext, providerInfo);
                 if (info == null) {
                     Log.w(TAG, "Missing info for " + providerInfo);
                     continue;
                 }
 
-                sProviders.put(info.providerInfo.authority, info);
+                mProviders.put(info.providerInfo.authority, info);
 
                 try {
                     // TODO: remove deprecated customRoots flag
                     // TODO: populate roots on background thread, and cache results
                     final Uri uri = DocumentsContract.buildRootsUri(providerInfo.authority);
-                    final Cursor cursor = context.getContentResolver()
+                    final Cursor cursor = mContext.getContentResolver()
                             .query(uri, null, null, null, null);
                     try {
                         while (cursor.moveToNext()) {
-                            final Root root = Root.fromCursor(context, info, cursor);
-                            sRoots.put(Pair.create(info.providerInfo.authority, root.rootId), root);
-                            sRootsList.add(root);
+                            final Root root = Root.fromCursor(mContext, info, cursor);
+                            mRoots.put(Pair.create(info.providerInfo.authority, root.rootId), root);
+                            mRootsList.add(root);
                         }
                     } finally {
                         cursor.close();
@@ -120,41 +124,36 @@ public class RootsCache {
     }
 
     @GuardedBy("ActivityThread")
-    public static DocumentsProviderInfo findProvider(Context context, String authority) {
-        ensureCache(context);
-        return sProviders.get(authority);
+    public DocumentsProviderInfo findProvider(String authority) {
+        return mProviders.get(authority);
     }
 
     @GuardedBy("ActivityThread")
-    public static Root findRoot(Context context, String authority, String rootId) {
-        ensureCache(context);
-        return sRoots.get(Pair.create(authority, rootId));
+    public Root findRoot(String authority, String rootId) {
+        return mRoots.get(Pair.create(authority, rootId));
     }
 
     @GuardedBy("ActivityThread")
-    public static Root findRoot(Context context, Document doc) {
+    public Root findRoot(Document doc) {
         final String authority = doc.uri.getAuthority();
         final String rootId = DocumentsContract.getRootId(doc.uri);
-        return findRoot(context, authority, rootId);
+        return findRoot(authority, rootId);
     }
 
     @GuardedBy("ActivityThread")
-    public static Root getRecentsRoot(Context context) {
-        ensureCache(context);
-        return sRecentsRoot;
+    public Root getRecentsRoot() {
+        return mRecentsRoot;
     }
 
     @GuardedBy("ActivityThread")
-    public static Collection<Root> getRoots(Context context) {
-        ensureCache(context);
-        return sRootsList;
+    public Collection<Root> getRoots() {
+        return mRootsList;
     }
 
     @GuardedBy("ActivityThread")
-    public static Drawable resolveDocumentIcon(Context context, String authority, String mimeType) {
+    public Drawable resolveDocumentIcon(Context context, String authority, String mimeType) {
         // Custom icons take precedence
-        ensureCache(context);
-        final DocumentsProviderInfo info = sProviders.get(authority);
+        final DocumentsProviderInfo info = mProviders.get(authority);
         if (info != null) {
             for (Icon icon : info.customIcons) {
                 if (MimePredicate.mimeMatches(icon.mimeType, mimeType)) {
