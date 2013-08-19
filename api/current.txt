@@ -12628,6 +12628,8 @@ package android.media {
     field public static final java.lang.String KEY_LANGUAGE = "language";
     field public static final java.lang.String KEY_MAX_INPUT_SIZE = "max-input-size";
     field public static final java.lang.String KEY_MIME = "mime";
+    field public static final java.lang.String KEY_PUSH_BLANK_BUFFERS_ON_STOP = "push-blank-buffers-on-shutdown";
+    field public static final java.lang.String KEY_REPEAT_PREVIOUS_FRAME_AFTER = "repeat-previous-frame-after";
     field public static final java.lang.String KEY_SAMPLE_RATE = "sample-rate";
     field public static final java.lang.String KEY_WIDTH = "width";
   }
