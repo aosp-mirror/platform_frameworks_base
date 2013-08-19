@@ -16,11 +16,20 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.DocumentsActivity.DisplayState.ACTION_CREATE;
+import static com.android.documentsui.DocumentsActivity.DisplayState.ACTION_GET_CONTENT;
+import static com.android.documentsui.DocumentsActivity.DisplayState.ACTION_MANAGE;
+import static com.android.documentsui.DocumentsActivity.DisplayState.ACTION_OPEN;
+import static com.android.documentsui.DocumentsActivity.DisplayState.MODE_GRID;
+import static com.android.documentsui.DocumentsActivity.DisplayState.MODE_LIST;
+import static com.android.documentsui.DocumentsActivity.DisplayState.SORT_ORDER_DATE;
+
 import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -61,11 +70,6 @@ import java.util.List;
 public class DocumentsActivity extends Activity {
     public static final String TAG = "Documents";
 
-    public static final int ACTION_OPEN = 1;
-    public static final int ACTION_CREATE = 2;
-    public static final int ACTION_GET_CONTENT = 3;
-    public static final int ACTION_MANAGE = 4;
-
     private int mAction;
 
     private SearchView mSearchView;
@@ -76,6 +80,8 @@ public class DocumentsActivity extends Activity {
 
     private final DisplayState mDisplayState = new DisplayState();
 
+    private RootsCache mRoots;
+
     /** Current user navigation stack; empty implies recents. */
     private DocumentStack mStack = new DocumentStack();
     /** Currently active search, overriding any stack. */
@@ -84,6 +90,8 @@ public class DocumentsActivity extends Activity {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+
+        mRoots = DocumentsApplication.getRootsCache(this);
 
         final Intent intent = getIntent();
         final String action = intent.getAction();
@@ -97,6 +105,9 @@ public class DocumentsActivity extends Activity {
             mAction = ACTION_MANAGE;
         }
 
+        // TODO: unify action in single place
+        mDisplayState.action = mAction;
+
         if (mAction == ACTION_OPEN || mAction == ACTION_GET_CONTENT) {
             mDisplayState.allowMultiple = intent.getBooleanExtra(
                     Intent.EXTRA_ALLOW_MULTIPLE, false);
@@ -104,6 +115,7 @@ public class DocumentsActivity extends Activity {
 
         if (mAction == ACTION_MANAGE) {
             mDisplayState.acceptMimes = new String[] { "*/*" };
+            mDisplayState.allowMultiple = true;
         } else if (intent.hasExtra(Intent.EXTRA_MIME_TYPES)) {
             mDisplayState.acceptMimes = intent.getStringArrayExtra(Intent.EXTRA_MIME_TYPES);
         } else {
@@ -131,7 +143,7 @@ public class DocumentsActivity extends Activity {
         }
 
         if (mAction == ACTION_MANAGE) {
-            mDisplayState.sortOrder = DisplayState.SORT_ORDER_DATE;
+            mDisplayState.sortOrder = SORT_ORDER_DATE;
         }
 
         mRootsContainer = findViewById(R.id.container_roots);
@@ -151,7 +163,7 @@ public class DocumentsActivity extends Activity {
             final String authority = rootUri.getAuthority();
             final String rootId = DocumentsContract.getRootId(rootUri);
 
-            final Root root = RootsCache.findRoot(this, authority, rootId);
+            final Root root = mRoots.findRoot(authority, rootId);
             if (root != null) {
                 onRootPicked(root, true);
             } else {
@@ -316,8 +328,8 @@ public class DocumentsActivity extends Activity {
         final MenuItem list = menu.findItem(R.id.menu_list);
         final MenuItem settings = menu.findItem(R.id.menu_settings);
 
-        grid.setVisible(mDisplayState.mode != DisplayState.MODE_GRID);
-        list.setVisible(mDisplayState.mode != DisplayState.MODE_LIST);
+        grid.setVisible(mDisplayState.mode != MODE_GRID);
+        list.setVisible(mDisplayState.mode != MODE_LIST);
 
         final boolean searchVisible;
         if (mAction == ACTION_CREATE) {
@@ -360,12 +372,14 @@ public class DocumentsActivity extends Activity {
         } else if (id == R.id.menu_search) {
             return false;
         } else if (id == R.id.menu_grid) {
-            mDisplayState.mode = DisplayState.MODE_GRID;
+            // TODO: persist explicit user mode for cwd
+            mDisplayState.mode = MODE_GRID;
             updateDisplayState();
             invalidateOptionsMenu();
             return true;
         } else if (id == R.id.menu_list) {
-            mDisplayState.mode = DisplayState.MODE_LIST;
+            // TODO: persist explicit user mode for cwd
+            mDisplayState.mode = MODE_LIST;
             updateDisplayState();
             invalidateOptionsMenu();
             return true;
@@ -466,9 +480,9 @@ public class DocumentsActivity extends Activity {
     public Root getCurrentRoot() {
         final Document cwd = getCurrentDirectory();
         if (cwd != null) {
-            return RootsCache.findRoot(this, cwd);
+            return mRoots.findRoot(cwd);
         } else {
-            return RootsCache.getRecentsRoot(this);
+            return mRoots.getRecentsRoot();
         }
     }
 
@@ -554,6 +568,12 @@ public class DocumentsActivity extends Activity {
     public void onDocumentPicked(Document doc) {
         final FragmentManager fm = getFragmentManager();
         if (doc.isDirectory()) {
+            // TODO: query display mode user preference for this dir
+            if (doc.isGridPreferred()) {
+                mDisplayState.mode = MODE_GRID;
+            } else {
+                mDisplayState.mode = MODE_LIST;
+            }
             mStack.push(doc);
             onCurrentDirectoryChanged();
         } else if (mAction == ACTION_OPEN || mAction == ACTION_GET_CONTENT) {
@@ -562,16 +582,29 @@ public class DocumentsActivity extends Activity {
         } else if (mAction == ACTION_CREATE) {
             // Replace selected file
             SaveFragment.get(fm).setReplaceTarget(doc);
+        } else if (mAction == ACTION_MANAGE) {
+            // Open the document
+            // TODO: trampoline activity for launching downloaded APKs
+            final Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.setData(doc.uri);
+            try {
+                startActivity(intent);
+            } catch (ActivityNotFoundException ex) {
+                Toast.makeText(this, R.string.toast_no_application, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
     public void onDocumentsPicked(List<Document> docs) {
-        final int size = docs.size();
-        final Uri[] uris = new Uri[size];
-        for (int i = 0; i < size; i++) {
-            uris[i] = docs.get(i).uri;
+        if (mAction == ACTION_OPEN || mAction == ACTION_GET_CONTENT) {
+            final int size = docs.size();
+            final Uri[] uris = new Uri[size];
+            for (int i = 0; i < size; i++) {
+                uris[i] = docs.get(i).uri;
+            }
+            onFinished(uris);
         }
-        onFinished(uris);
     }
 
     public void onSaveRequested(Document replaceTarget) {
@@ -645,12 +678,18 @@ public class DocumentsActivity extends Activity {
     }
 
     public static class DisplayState {
+        public int action;
         public int mode = MODE_LIST;
         public String[] acceptMimes;
         public int sortOrder = SORT_ORDER_NAME;
         public boolean allowMultiple = false;
         public boolean showSize = false;
         public boolean localOnly = false;
+
+        public static final int ACTION_OPEN = 1;
+        public static final int ACTION_CREATE = 2;
+        public static final int ACTION_GET_CONTENT = 3;
+        public static final int ACTION_MANAGE = 4;
 
         public static final int MODE_LIST = 0;
         public static final int MODE_GRID = 1;

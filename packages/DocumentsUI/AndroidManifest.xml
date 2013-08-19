@@ -4,6 +4,7 @@
     <uses-permission android:name="android.permission.MANAGE_DOCUMENTS" />
 
     <application
+        android:name=".DocumentsApplication"
         android:label="@string/app_label"
         android:supportsRtl="true">
 
@@ -50,6 +51,14 @@
             android:name=".RecentsProvider"
             android:authorities="com.android.documentsui.recents"
             android:exported="false" />
+
+        <receiver android:name=".DocumentChangedReceiver">
+            <intent-filter>
+                <action android:name="android.provider.action.DOCUMENT_CHANGED" />
+                <data android:mimeType="vnd.android.cursor.dir/root" />
+                <data android:mimeType="vnd.android.cursor.item/root" />
+            </intent-filter>
+        </receiver>
 
         <!-- TODO: remove when we have real clients -->
         <activity android:name=".TestActivity" android:enabled="false">

@@ -17,12 +17,20 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.DocumentsActivity.TAG;
+import static com.android.documentsui.DocumentsActivity.DisplayState.ACTION_MANAGE;
+import static com.android.documentsui.DocumentsActivity.DisplayState.MODE_GRID;
+import static com.android.documentsui.DocumentsActivity.DisplayState.MODE_LIST;
+import static com.android.documentsui.DocumentsActivity.DisplayState.SORT_ORDER_DATE;
+import static com.android.documentsui.DocumentsActivity.DisplayState.SORT_ORDER_NAME;
+import static com.android.documentsui.DocumentsActivity.DisplayState.SORT_ORDER_SIZE;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.Loader;
 import android.graphics.Bitmap;
 import android.graphics.Point;
@@ -50,6 +58,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.documentsui.DocumentsActivity.DisplayState;
 import com.android.documentsui.model.Document;
@@ -57,7 +66,6 @@ import com.android.documentsui.model.Root;
 import com.android.internal.util.Predicate;
 import com.google.android.collect.Lists;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -167,11 +175,11 @@ public class DirectoryFragment extends Fragment {
                 }
 
                 final Comparator<Document> sortOrder;
-                if (state.sortOrder == DisplayState.SORT_ORDER_DATE || mType == TYPE_RECENT_OPEN) {
+                if (state.sortOrder == SORT_ORDER_DATE || mType == TYPE_RECENT_OPEN) {
                     sortOrder = new Document.DateComparator();
-                } else if (state.sortOrder == DisplayState.SORT_ORDER_NAME) {
+                } else if (state.sortOrder == SORT_ORDER_NAME) {
                     sortOrder = new Document.NameComparator();
-                } else if (state.sortOrder == DisplayState.SORT_ORDER_SIZE) {
+                } else if (state.sortOrder == SORT_ORDER_SIZE) {
                     sortOrder = new Document.SizeComparator();
                 } else {
                     throw new IllegalArgumentException("Unknown sort order " + state.sortOrder);
@@ -216,8 +224,8 @@ public class DirectoryFragment extends Fragment {
         mListView.smoothScrollToPosition(0);
         mGridView.smoothScrollToPosition(0);
 
-        mListView.setVisibility(state.mode == DisplayState.MODE_LIST ? View.VISIBLE : View.GONE);
-        mGridView.setVisibility(state.mode == DisplayState.MODE_GRID ? View.VISIBLE : View.GONE);
+        mListView.setVisibility(state.mode == MODE_LIST ? View.VISIBLE : View.GONE);
+        mGridView.setVisibility(state.mode == MODE_GRID ? View.VISIBLE : View.GONE);
 
         final int choiceMode;
         if (state.allowMultiple) {
@@ -227,7 +235,7 @@ public class DirectoryFragment extends Fragment {
         }
 
         final int thumbSize;
-        if (state.mode == DisplayState.MODE_GRID) {
+        if (state.mode == MODE_GRID) {
             thumbSize = getResources().getDimensionPixelSize(R.dimen.grid_width);
             mListView.setAdapter(null);
             mListView.setChoiceMode(ListView.CHOICE_MODE_NONE);
@@ -236,7 +244,7 @@ public class DirectoryFragment extends Fragment {
             mGridView.setNumColumns(GridView.AUTO_FIT);
             mGridView.setChoiceMode(choiceMode);
             mCurrentView = mGridView;
-        } else if (state.mode == DisplayState.MODE_LIST) {
+        } else if (state.mode == MODE_LIST) {
             thumbSize = getResources().getDimensionPixelSize(android.R.dimen.app_icon_size);
             mGridView.setAdapter(null);
             mGridView.setChoiceMode(ListView.CHOICE_MODE_NONE);
@@ -269,26 +277,45 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            final DisplayState state = getDisplayState(DirectoryFragment.this);
+
+            final MenuItem open = menu.findItem(R.id.menu_open);
+            final MenuItem share = menu.findItem(R.id.menu_share);
+            final MenuItem delete = menu.findItem(R.id.menu_delete);
+
+            final boolean manageMode = state.action == ACTION_MANAGE;
+            open.setVisible(!manageMode);
+            share.setVisible(manageMode);
+            delete.setVisible(manageMode);
+
             return true;
         }
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            if (item.getItemId() == R.id.menu_open) {
-                final Uri uri = getArguments().getParcelable(EXTRA_URI);
-                final SparseBooleanArray checked = mCurrentView.getCheckedItemPositions();
-                final ArrayList<Document> docs = Lists.newArrayList();
-
-                final int size = checked.size();
-                for (int i = 0; i < size; i++) {
-                    if (checked.valueAt(i)) {
-                        final Document doc = mAdapter.getItem(checked.keyAt(i));
-                        docs.add(doc);
-                    }
+            final SparseBooleanArray checked = mCurrentView.getCheckedItemPositions();
+            final ArrayList<Document> docs = Lists.newArrayList();
+            final int size = checked.size();
+            for (int i = 0; i < size; i++) {
+                if (checked.valueAt(i)) {
+                    final Document doc = mAdapter.getItem(checked.keyAt(i));
+                    docs.add(doc);
                 }
+            }
 
-                ((DocumentsActivity) getActivity()).onDocumentsPicked(docs);
+            final int id = item.getItemId();
+            if (id == R.id.menu_open) {
+                DocumentsActivity.get(DirectoryFragment.this).onDocumentsPicked(docs);
                 return true;
+
+            } else if (id == R.id.menu_share) {
+                onShareDocuments(docs);
+                return true;
+
+            } else if (id == R.id.menu_delete) {
+                onDeleteDocuments(docs);
+                return true;
+
             } else {
                 return false;
             }
@@ -314,6 +341,58 @@ public class DirectoryFragment extends Fragment {
                     .getString(R.string.mode_selected_count, mCurrentView.getCheckedItemCount()));
         }
     };
+
+    private void onShareDocuments(List<Document> docs) {
+        final ArrayList<Uri> uris = Lists.newArrayList();
+        for (Document doc : docs) {
+            uris.add(doc.uri);
+        }
+
+        final Intent intent;
+        if (uris.size() > 1) {
+            intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addCategory(Intent.CATEGORY_DEFAULT);
+            // TODO: find common mimetype
+            intent.setType("*/*");
+            intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+        } else {
+            intent = new Intent(Intent.ACTION_SEND);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addCategory(Intent.CATEGORY_DEFAULT);
+            intent.setData(uris.get(0));
+        }
+
+        startActivity(intent);
+    }
+
+    private void onDeleteDocuments(List<Document> docs) {
+        final Context context = getActivity();
+        final ContentResolver resolver = context.getContentResolver();
+
+        boolean hadTrouble = false;
+        for (Document doc : docs) {
+            if (!doc.isDeleteSupported()) {
+                Log.w(TAG, "Skipping " + doc);
+                hadTrouble = true;
+                continue;
+            }
+
+            try {
+                if (resolver.delete(doc.uri, null, null) != 1) {
+                    Log.w(TAG, "Failed to delete " + doc);
+                    hadTrouble = true;
+                }
+            } catch (Exception e) {
+                Log.w(TAG, "Failed to delete " + doc + ": " + e);
+                hadTrouble = true;
+            }
+        }
+
+        if (hadTrouble) {
+            Toast.makeText(context, R.string.toast_failed_delete, Toast.LENGTH_SHORT).show();
+        }
+    }
 
     private static DisplayState getDisplayState(Fragment fragment) {
         return ((DocumentsActivity) fragment.getActivity()).getDisplayState();
@@ -342,11 +421,15 @@ public class DirectoryFragment extends Fragment {
             final Context context = parent.getContext();
             final DisplayState state = getDisplayState(DirectoryFragment.this);
 
+            final RootsCache roots = DocumentsApplication.getRootsCache(context);
+            final ThumbnailCache thumbs = DocumentsApplication.getThumbnailsCache(
+                    context, mThumbSize);
+
             if (convertView == null) {
                 final LayoutInflater inflater = LayoutInflater.from(context);
-                if (state.mode == DisplayState.MODE_LIST) {
+                if (state.mode == MODE_LIST) {
                     convertView = inflater.inflate(R.layout.item_doc_list, parent, false);
-                } else if (state.mode == DisplayState.MODE_GRID) {
+                } else if (state.mode == MODE_GRID) {
                     convertView = inflater.inflate(R.layout.item_doc_grid, parent, false);
                 } else {
                     throw new IllegalStateException();
@@ -369,7 +452,7 @@ public class DirectoryFragment extends Fragment {
             }
 
             if (doc.isThumbnailSupported()) {
-                final Bitmap cachedResult = ThumbnailCache.get(context).get(doc.uri);
+                final Bitmap cachedResult = thumbs.get(doc.uri);
                 if (cachedResult != null) {
                     icon.setImageBitmap(cachedResult);
                 } else {
@@ -379,7 +462,7 @@ public class DirectoryFragment extends Fragment {
                     task.execute(doc.uri);
                 }
             } else {
-                icon.setImageDrawable(RootsCache.resolveDocumentIcon(
+                icon.setImageDrawable(roots.resolveDocumentIcon(
                         context, doc.uri.getAuthority(), doc.mimeType));
             }
 
@@ -394,7 +477,7 @@ public class DirectoryFragment extends Fragment {
                     summary.setVisibility(View.INVISIBLE);
                 }
             } else if (mType == TYPE_RECENT_OPEN) {
-                final Root root = RootsCache.findRoot(context, doc);
+                final Root root = roots.findRoot(doc);
                 icon1.setVisibility(View.VISIBLE);
                 icon1.setImageDrawable(root.icon);
                 summary.setText(root.getDirectoryString());
@@ -444,11 +527,11 @@ public class DirectoryFragment extends Fragment {
 
     private static class ThumbnailAsyncTask extends AsyncTask<Uri, Void, Bitmap> {
         private final ImageView mTarget;
-        private final Point mSize;
+        private final Point mThumbSize;
 
-        public ThumbnailAsyncTask(ImageView target, Point size) {
+        public ThumbnailAsyncTask(ImageView target, Point thumbSize) {
             mTarget = target;
-            mSize = size;
+            mThumbSize = thumbSize;
         }
 
         @Override
@@ -464,9 +547,11 @@ public class DirectoryFragment extends Fragment {
             Bitmap result = null;
             try {
                 result = DocumentsContract.getThumbnail(
-                        context.getContentResolver(), uri, mSize);
+                        context.getContentResolver(), uri, mThumbSize);
                 if (result != null) {
-                    ThumbnailCache.get(context).put(uri, result);
+                    final ThumbnailCache thumbs = DocumentsApplication.getThumbnailsCache(
+                            context, mThumbSize);
+                    thumbs.put(uri, result);
                 }
             } catch (Exception e) {
                 Log.w(TAG, "Failed to load thumbnail: " + e);

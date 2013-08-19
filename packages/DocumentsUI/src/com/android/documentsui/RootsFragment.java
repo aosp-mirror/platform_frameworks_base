@@ -76,13 +76,14 @@ public class RootsFragment extends Fragment {
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final Context context = inflater.getContext();
+        final RootsCache roots = DocumentsApplication.getRootsCache(context);
 
         final View view = inflater.inflate(R.layout.fragment_roots, container, false);
         mList = (ListView) view.findViewById(android.R.id.list);
         mList.setOnItemClickListener(mItemListener);
 
         final Intent includeApps = getArguments().getParcelable(EXTRA_INCLUDE_APPS);
-        mAdapter = new SectionedRootsAdapter(context, RootsCache.getRoots(context), includeApps);
+        mAdapter = new SectionedRootsAdapter(context, roots.getRoots(), includeApps);
 
         return view;
     }
