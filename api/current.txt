@@ -9100,6 +9100,9 @@ package android.graphics {
   public class ColorMatrixColorFilter extends android.graphics.ColorFilter {
     ctor public ColorMatrixColorFilter(android.graphics.ColorMatrix);
     ctor public ColorMatrixColorFilter(float[]);
+    method public android.graphics.ColorMatrix getColorMatrix();
+    method public void setColorMatrix(android.graphics.ColorMatrix);
+    method public void setColorMatrix(float[]);
   }
 
   public class ComposePathEffect extends android.graphics.PathEffect {
@@ -9175,6 +9178,10 @@ package android.graphics {
 
   public class LightingColorFilter extends android.graphics.ColorFilter {
     ctor public LightingColorFilter(int, int);
+    method public int getColorAdd();
+    method public int getColorMultiply();
+    method public void setColorAdd(int);
+    method public void setColorMultiply(int);
   }
 
   public class LinearGradient extends android.graphics.Shader {
@@ -9649,6 +9656,10 @@ package android.graphics {
 
   public class PorterDuffColorFilter extends android.graphics.ColorFilter {
     ctor public PorterDuffColorFilter(int, android.graphics.PorterDuff.Mode);
+    method public int getColor();
+    method public android.graphics.PorterDuff.Mode getMode();
+    method public void setColor(int);
+    method public void setMode(android.graphics.PorterDuff.Mode);
   }
 
   public class PorterDuffXfermode extends android.graphics.Xfermode {
@@ -42441,11 +42452,11 @@ package java.util.concurrent {
   }
 
   public class ConcurrentHashMap extends java.util.AbstractMap implements java.util.concurrent.ConcurrentMap java.io.Serializable {
-    ctor public ConcurrentHashMap(int, float, int);
-    ctor public ConcurrentHashMap(int, float);
-    ctor public ConcurrentHashMap(int);
     ctor public ConcurrentHashMap();
+    ctor public ConcurrentHashMap(int);
     ctor public ConcurrentHashMap(java.util.Map<? extends K, ? extends V>);
+    ctor public ConcurrentHashMap(int, float);
+    ctor public ConcurrentHashMap(int, float, int);
     method public boolean contains(java.lang.Object);
     method public java.util.Enumeration<V> elements();
     method public java.util.Set<java.util.Map.Entry<K, V>> entrySet();

@@ -33,10 +33,10 @@ using namespace uirenderer;
 class SkColorFilterGlue {
 public:
     static void finalizer(JNIEnv* env, jobject clazz, SkColorFilter* obj, SkiaColorFilter* f) {
-        SkSafeUnref(obj);
+        if (obj) SkSafeUnref(obj);
         // f == NULL when not !USE_OPENGL_RENDERER, so no need to delete outside the ifdef
 #ifdef USE_OPENGL_RENDERER
-        if (android::uirenderer::Caches::hasInstance()) {
+        if (f && android::uirenderer::Caches::hasInstance()) {
             android::uirenderer::Caches::getInstance().resourceCache.destructor(f);
         } else {
             delete f;
@@ -112,7 +112,7 @@ public:
 };
 
 static JNINativeMethod colorfilter_methods[] = {
-    {"finalizer", "(II)V", (void*) SkColorFilterGlue::finalizer}
+    {"destroyFilter", "(II)V", (void*) SkColorFilterGlue::finalizer}
 };
 
 static JNINativeMethod porterduff_methods[] = {
