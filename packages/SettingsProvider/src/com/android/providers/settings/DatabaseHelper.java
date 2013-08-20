@@ -72,7 +72,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 98;
+    private static final int DATABASE_VERSION = 99;
 
     private Context mContext;
     private int mUserHandle;
@@ -1557,6 +1557,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 }
             }
             upgradeVersion = 98;
+        }
+
+        if (upgradeVersion == 98) {
+            // Add Default Dialer AutoComplete setting
+            if (mUserHandle == UserHandle.USER_OWNER) {
+                db.beginTransaction();
+                SQLiteStatement stmt = null;
+                try {
+                    stmt = db.compileStatement("INSERT OR IGNORE INTO secure(name,value)"
+                            + " VALUES(?,?);");
+                    loadIntegerSetting(stmt, Settings.Secure.DIALPAD_AUTOCOMPLETE,
+                            R.integer.def_dialpad_autocomplete);
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                    if (stmt != null) stmt.close();
+                }
+            }
+            upgradeVersion = 99;
         }
 
         // *** Remember to update DATABASE_VERSION above!
