@@ -47,6 +47,7 @@ import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.Build.VERSION_CODES;
+import android.os.UserManager;
 import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
 import android.util.AndroidException;
@@ -3269,6 +3270,23 @@ public final class Settings {
         public static final String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
 
         /**
+         * Location access disabled
+         */
+        public static final int LOCATION_MODE_OFF = 0;
+        /**
+         * Network Location Provider disabled, but GPS and other sensors enabled.
+         */
+        public static final int LOCATION_MODE_SENSORS_ONLY = 1;
+        /**
+         * Reduced power usage, such as limiting the number of GPS updates per hour.
+         */
+        public static final int LOCATION_MODE_BATTERY_SAVING = 2;
+        /**
+         * Best-effort location computation allowed.
+         */
+        public static final int LOCATION_MODE_HIGH_ACCURACY = 3;
+
+        /**
          * A flag containing settings used for biometric weak
          * @hide
          */
@@ -4319,23 +4337,27 @@ public final class Settings {
          * @param cr the content resolver to use
          * @param provider the location provider to query
          * @return true if the provider is enabled
+         * @deprecated use {@link #getLocationMode(ContentResolver)}
          */
+        @Deprecated
         public static final boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
             return isLocationProviderEnabledForUser(cr, provider, UserHandle.myUserId());
         }
 
         /**
          * Helper method for determining if the location master switch is enabled.
+         *
+         * TODO: worth retaining this method?
+         *
          * @param cr the content resolver to use
          * @return true if the master switch is enabled
+         * @deprecated use {@link #getLocationMode(ContentResolver)} != {@link #LOCATION_MODE_OFF}
          * @hide
          */
+        @Deprecated
         public static final boolean isLocationMasterSwitchEnabled(ContentResolver cr) {
-            int uid = UserHandle.myUserId();
-            synchronized (mLocationSettingsLock) {
-                return isLocationProviderEnabledForUser(cr, LocationManager.NETWORK_PROVIDER, uid)
-                        || isLocationProviderEnabledForUser(cr, LocationManager.GPS_PROVIDER, uid);
-            }
+            int mode = getLocationMode(cr);
+            return mode != LOCATION_MODE_OFF;
         }
 
         /**
@@ -4344,8 +4366,10 @@ public final class Settings {
          * @param provider the location provider to query
          * @param userId the userId to query
          * @return true if the provider is enabled
+         * @deprecated use {@link #getLocationModeForUser(ContentResolver, int)}
          * @hide
          */
+        @Deprecated
         public static final boolean isLocationProviderEnabledForUser(ContentResolver cr, String provider, int userId) {
             String allowedProviders = Settings.Secure.getStringForUser(cr,
                     LOCATION_PROVIDERS_ALLOWED, userId);
@@ -4357,7 +4381,9 @@ public final class Settings {
          * @param cr the content resolver to use
          * @param provider the location provider to enable or disable
          * @param enabled true if the provider should be enabled
+         * @deprecated use {@link #setLocationMode(ContentResolver, int)}
          */
+        @Deprecated
         public static final void setLocationProviderEnabled(ContentResolver cr,
                 String provider, boolean enabled) {
             setLocationProviderEnabledForUser(cr, provider, enabled, UserHandle.myUserId());
@@ -4368,8 +4394,11 @@ public final class Settings {
          *
          * @param cr the content resolver to use
          * @param enabled true if master switch should be enabled
+         * @deprecated use {@link #setLocationMode(ContentResolver, int)} with
+         * {@link #LOCATION_MODE_HIGH_ACCURACY}
          * @hide
          */
+        @Deprecated
         public static final void setLocationMasterSwitchEnabled(ContentResolver cr,
                 boolean enabled) {
             int uid = UserHandle.myUserId();
@@ -4386,8 +4415,10 @@ public final class Settings {
          * @param provider the location provider to enable or disable
          * @param enabled true if the provider should be enabled
          * @param userId the userId for which to enable/disable providers
+         * @deprecated use {@link #setLocationModeForUser(ContentResolver, int, int)}
          * @hide
          */
+        @Deprecated
         public static final void setLocationProviderEnabledForUser(ContentResolver cr,
                 String provider, boolean enabled, int userId) {
             synchronized (mLocationSettingsLock) {
@@ -4402,6 +4433,100 @@ public final class Settings {
                 putStringForUser(cr, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, provider,
                         userId);
             }
+        }
+
+        /**
+         * Thread-safe method for setting the location mode to one of
+         * {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
+         * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
+         *
+         * TODO: should we enforce {@link UserManager#hasUserRestriction(String)} with
+         * {@link UserManager#DISALLOW_SHARE_LOCATION}? None of the other methods in here seem to.
+         *
+         * @param cr the content resolver to use
+         * @param mode such as {@link #LOCATION_MODE_HIGH_ACCURACY}
+         * @param userId the userId for which to change mode
+         *
+         * @throws IllegalArgumentException if mode is not one of the supported values
+         */
+        public static final void setLocationModeForUser(ContentResolver cr, int mode, int userId) {
+            synchronized (mLocationSettingsLock) {
+                boolean gps = false;
+                boolean network = false;
+                switch (mode) {
+                    case LOCATION_MODE_OFF:
+                        break;
+                    case LOCATION_MODE_SENSORS_ONLY:
+                        gps = true;
+                        break;
+                    case LOCATION_MODE_BATTERY_SAVING:
+                        network = true;
+                        break;
+                    case LOCATION_MODE_HIGH_ACCURACY:
+                        gps = true;
+                        network = true;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Invalid location mode: " + mode);
+                }
+                Settings.Secure.setLocationProviderEnabledForUser(
+                        cr, LocationManager.GPS_PROVIDER, gps, userId);
+                Settings.Secure.setLocationProviderEnabledForUser(
+                        cr, LocationManager.NETWORK_PROVIDER, network, userId);
+            }
+        }
+
+        /**
+         * Thread-safe method for setting the location mode to one of
+         * {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
+         * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
+         *
+         * @param cr the content resolver to use
+         * @param mode such as {@link #LOCATION_MODE_HIGH_ACCURACY}
+         *
+         * @throws IllegalArgumentException if mode is not one of the supported values
+         */
+        public static final void setLocationMode(ContentResolver cr, int mode) {
+            setLocationModeForUser(cr, mode, UserHandle.myUserId());
+        }
+
+        /**
+         * Thread-safe method for reading the location mode, returns one of
+         * {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
+         * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
+         *
+         * @param cr the content resolver to use
+         * @param userId the userId for which to read the mode
+         * @return the location mode
+         */
+        public static final int getLocationModeForUser(ContentResolver cr, int userId) {
+            synchronized (mLocationSettingsLock) {
+                boolean gpsEnabled = Settings.Secure.isLocationProviderEnabledForUser(
+                        cr, LocationManager.GPS_PROVIDER, userId);
+                boolean networkEnabled = Settings.Secure.isLocationProviderEnabledForUser(
+                        cr, LocationManager.NETWORK_PROVIDER, userId);
+                if (gpsEnabled && networkEnabled) {
+                    return LOCATION_MODE_HIGH_ACCURACY;
+                } else if (gpsEnabled) {
+                    return LOCATION_MODE_SENSORS_ONLY;
+                } else if (networkEnabled) {
+                    return LOCATION_MODE_BATTERY_SAVING;
+                } else {
+                    return LOCATION_MODE_OFF;
+                }
+            }
+        }
+
+        /**
+         * Thread-safe method for reading the location mode, returns one of
+         * {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
+         * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
+         *
+         * @param cr the content resolver to use
+         * @return the location mode
+         */
+        public static final int getLocationMode(ContentResolver cr) {
+            return getLocationModeForUser(cr, UserHandle.myUserId());
         }
     }
 
