@@ -16,11 +16,14 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
+
 import com.android.internal.os.storage.ExternalStorageFormatter;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.org.conscrypt.TrustedCertificateStore;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -49,6 +52,7 @@ import android.content.pm.Signature;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
@@ -66,7 +70,12 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.security.Credentials;
+import android.security.IKeyChainService;
+import android.security.KeyChain;
+import android.security.KeyChain.KeyChainConnection;
 import android.util.AtomicFile;
+import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
@@ -75,6 +84,7 @@ import android.util.Xml;
 import android.view.IWindowManager;
 import android.view.WindowManagerPolicy;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -82,8 +92,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.KeyStore.TrustedCertificateEntry;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -1868,6 +1884,76 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private boolean isExtStorageEncrypted() {
         String state = SystemProperties.get("vold.decrypt");
         return !"".equals(state);
+    }
+
+    public boolean installCaCert(byte[] certBuffer) throws RemoteException {
+        mContext.enforceCallingOrSelfPermission(MANAGE_CA_CERTIFICATES, null);
+        KeyChainConnection keyChainConnection = null;
+        byte[] pemCert;
+        try {
+            X509Certificate cert = parseCert(certBuffer);
+            pemCert =  Credentials.convertToPem(cert);
+        } catch (CertificateException ce) {
+            Log.e(TAG, "Problem converting cert", ce);
+            return false;
+        } catch (IOException ioe) {
+            Log.e(TAG, "Problem reading cert", ioe);
+            return false;
+        }
+        try {
+            keyChainConnection = KeyChain.bind(mContext);
+            try {
+                keyChainConnection.getService().installCaCertificate(pemCert);
+                return true;
+            } finally {
+                if (keyChainConnection != null) {
+                    keyChainConnection.close();
+                    keyChainConnection = null;
+                }
+            }
+        } catch (InterruptedException e1) {
+            Log.w(TAG, "installCaCertsToKeyChain(): ", e1);
+            Thread.currentThread().interrupt();
+        }
+        return false;
+    }
+
+    private static X509Certificate parseCert(byte[] certBuffer)
+            throws CertificateException, IOException {
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        return (X509Certificate) certFactory.generateCertificate(new ByteArrayInputStream(
+                certBuffer));
+    }
+
+    public void uninstallCaCert(final byte[] certBuffer) {
+        mContext.enforceCallingOrSelfPermission(MANAGE_CA_CERTIFICATES, null);
+        TrustedCertificateStore certStore = new TrustedCertificateStore();
+        String alias = null;
+        try {
+            X509Certificate cert = parseCert(certBuffer);
+            alias = certStore.getCertificateAlias(cert);
+        } catch (CertificateException ce) {
+            Log.e(TAG, "Problem creating X509Certificate", ce);
+            return;
+        } catch (IOException ioe) {
+            Log.e(TAG, "Problem reading certificate", ioe);
+            return;
+        }
+        try {
+            KeyChainConnection keyChainConnection = KeyChain.bind(mContext);
+            IKeyChainService service = keyChainConnection.getService();
+            try {
+                service.deleteCaCertificate(alias);
+            } catch (RemoteException e) {
+                Log.e(TAG, "from CaCertUninstaller: ", e);
+            } finally {
+                keyChainConnection.close();
+                keyChainConnection = null;
+            }
+        } catch (InterruptedException ie) {
+            Log.w(TAG, "CaCertUninstaller: ", ie);
+            Thread.currentThread().interrupt();
+        }
     }
 
     void wipeDataLocked(int flags) {
