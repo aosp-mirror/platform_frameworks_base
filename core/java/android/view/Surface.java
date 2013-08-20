@@ -36,7 +36,7 @@ public class Surface implements Parcelable {
             throws OutOfResourcesException;
     private static native int nativeCreateFromSurfaceControl(int surfaceControlNativeObject);
 
-    private static native void nativeLockCanvas(int nativeObject, Canvas canvas, Rect dirty)
+    private static native int nativeLockCanvas(int nativeObject, Canvas canvas, Rect dirty)
             throws OutOfResourcesException;
     private static native void nativeUnlockCanvasAndPost(int nativeObject, Canvas canvas);
 
@@ -72,6 +72,7 @@ public class Surface implements Parcelable {
     final Object mLock = new Object(); // protects the native state
     private String mName;
     int mNativeObject; // package scope only for SurfaceControl access
+    private int mLockedObject;
     private int mGenerationId; // incremented each time mNativeObject changes
     private final Canvas mCanvas = new CompatibleCanvas();
 
@@ -233,7 +234,14 @@ public class Surface implements Parcelable {
             throws OutOfResourcesException, IllegalArgumentException {
         synchronized (mLock) {
             checkNotReleasedLocked();
-            nativeLockCanvas(mNativeObject, mCanvas, inOutDirty);
+            if (mLockedObject != 0) {
+                // Ideally, nativeLockCanvas() would throw in this situation and prevent the
+                // double-lock, but that won't happen if mNativeObject was updated.  We can't
+                // abandon the old mLockedObject because it might still be in use, so instead
+                // we just refuse to re-lock the Surface.
+                throw new RuntimeException("Surface was already locked");
+            }
+            mLockedObject = nativeLockCanvas(mNativeObject, mCanvas, inOutDirty);
             return mCanvas;
         }
     }
@@ -252,11 +260,21 @@ public class Surface implements Parcelable {
 
         synchronized (mLock) {
             checkNotReleasedLocked();
-            nativeUnlockCanvasAndPost(mNativeObject, canvas);
+            if (mNativeObject != mLockedObject) {
+                Log.w(TAG, "WARNING: Surface's mNativeObject (0x" +
+                        Integer.toHexString(mNativeObject) + ") != mLockedObject (0x" +
+                        Integer.toHexString(mLockedObject) +")");
+            }
+            if (mLockedObject == 0) {
+                throw new RuntimeException("Surface was not locked");
+            }
+            nativeUnlockCanvasAndPost(mLockedObject, canvas);
+            nativeRelease(mLockedObject);
+            mLockedObject = 0;
         }
     }
 
-    /** 
+    /**
      * @deprecated This API has been removed and is not supported.  Do not use.
      */
     @Deprecated
@@ -343,6 +361,10 @@ public class Surface implements Parcelable {
         }
 
         synchronized (mLock) {
+            // nativeReadFromParcel() will either return mNativeObject, or
+            // create a new native Surface and return it after reducing
+            // the reference count on mNativeObject.  Either way, it is
+            // not necessary to call nativeRelease() here.
             mName = source.readString();
             setNativeObjectLocked(nativeReadFromParcel(mNativeObject, source));
         }
@@ -365,7 +387,8 @@ public class Surface implements Parcelable {
     @Override
     public String toString() {
         synchronized (mLock) {
-            return "Surface(name=" + mName + ")";
+            return "Surface(name=" + mName + ")/@0x" +
+                    Integer.toHexString(System.identityHashCode(this));
         }
     }
 
@@ -463,7 +486,7 @@ public class Surface implements Parcelable {
         public void getMatrix(Matrix m) {
             super.getMatrix(m);
             if (mOrigMatrix == null) {
-                mOrigMatrix = new Matrix(); 
+                mOrigMatrix = new Matrix();
             }
             mOrigMatrix.set(m);
         }

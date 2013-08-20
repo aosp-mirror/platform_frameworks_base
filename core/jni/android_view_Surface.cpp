@@ -196,13 +196,13 @@ static inline void swapCanvasPtr(JNIEnv* env, jobject canvasObj, SkCanvas* newCa
   SkSafeUnref(previousCanvas);
 }
 
-static void nativeLockCanvas(JNIEnv* env, jclass clazz,
+static jint nativeLockCanvas(JNIEnv* env, jclass clazz,
         jint nativeObject, jobject canvasObj, jobject dirtyRectObj) {
     sp<Surface> surface(reinterpret_cast<Surface *>(nativeObject));
 
     if (!isSurfaceValid(surface)) {
         doThrowIAE(env);
-        return;
+        return 0;
     }
 
     Rect dirtyRect;
@@ -223,7 +223,7 @@ static void nativeLockCanvas(JNIEnv* env, jclass clazz,
                 OutOfResourcesException :
                 "java/lang/IllegalArgumentException";
         jniThrowException(env, exception, NULL);
-        return;
+        return 0;
     }
 
     // Associate a SkCanvas object to this surface
@@ -255,6 +255,13 @@ static void nativeLockCanvas(JNIEnv* env, jclass clazz,
         env->SetIntField(dirtyRectObj, gRectClassInfo.right,  dirtyRect.right);
         env->SetIntField(dirtyRectObj, gRectClassInfo.bottom, dirtyRect.bottom);
     }
+
+    // Create another reference to the surface and return it.  This reference
+    // should be passed to nativeUnlockCanvasAndPost in place of mNativeObject,
+    // because the latter could be replaced while the surface is locked.
+    sp<Surface> lockedSurface(surface);
+    lockedSurface->incStrong(&sRefBaseOwner);
+    return (int) lockedSurface.get();
 }
 
 static void nativeUnlockCanvasAndPost(JNIEnv* env, jclass clazz,
@@ -351,7 +358,7 @@ static JNINativeMethod gSurfaceMethods[] = {
             (void*)nativeIsValid },
     {"nativeIsConsumerRunningBehind", "(I)Z",
             (void*)nativeIsConsumerRunningBehind },
-    {"nativeLockCanvas", "(ILandroid/graphics/Canvas;Landroid/graphics/Rect;)V",
+    {"nativeLockCanvas", "(ILandroid/graphics/Canvas;Landroid/graphics/Rect;)I",
             (void*)nativeLockCanvas },
     {"nativeUnlockCanvasAndPost", "(ILandroid/graphics/Canvas;)V",
             (void*)nativeUnlockCanvasAndPost },
