@@ -18632,6 +18632,7 @@ package android.preference {
     method protected android.view.View onCreateView(android.view.ViewGroup);
     method public void onDependencyChanged(android.preference.Preference, boolean);
     method protected java.lang.Object onGetDefaultValue(android.content.res.TypedArray, int);
+    method public void onParentChanged(android.preference.Preference, boolean);
     method protected void onPrepareForRemoval();
     method protected void onRestoreInstanceState(android.os.Parcelable);
     method protected android.os.Parcelable onSaveInstanceState();

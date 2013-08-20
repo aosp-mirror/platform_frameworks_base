@@ -77,7 +77,7 @@ import java.util.Set;
  * @attr ref android.R.styleable#Preference_defaultValue
  * @attr ref android.R.styleable#Preference_shouldDisableView
  */
-public class Preference implements Comparable<Preference>, OnDependencyChangeListener { 
+public class Preference implements Comparable<Preference> {
     /**
      * Specify for {@link #setOrder(int)} if a specific order is not required.
      */
@@ -115,6 +115,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
     private String mDependencyKey;
     private Object mDefaultValue;
     private boolean mDependencyMet = true;
+    private boolean mParentDependencyMet = true;
     
     /**
      * @see #setShouldDisableView(boolean)
@@ -733,7 +734,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
      * @return True if this Preference is enabled, false otherwise.
      */
     public boolean isEnabled() {
-        return mEnabled && mDependencyMet;
+        return mEnabled && mDependencyMet && mParentDependencyMet;
     }
 
     /**
@@ -1259,7 +1260,24 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
             notifyChanged();
         }
     }
-    
+
+    /**
+     * Called when the implicit parent dependency changes.
+     *
+     * @param parent The Preference that this Preference depends on.
+     * @param disableChild Set true to disable this Preference.
+     */
+    public void onParentChanged(Preference parent, boolean disableChild) {
+        if (mParentDependencyMet == disableChild) {
+            mParentDependencyMet = !disableChild;
+
+            // Enabled state can change dependent preferences' states, so notify
+            notifyDependencyChange(shouldDisableDependents());
+
+            notifyChanged();
+        }
+    }
+
     /**
      * Checks whether this preference's dependents should currently be
      * disabled.
