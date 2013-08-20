@@ -348,7 +348,8 @@ public abstract class BaseStatusBar extends SystemUI implements
 
     protected View updateNotificationVetoButton(View row, StatusBarNotification n) {
         View vetoButton = row.findViewById(R.id.veto);
-        if (n.isClearable()) {
+        if (n.isClearable() || (mInterruptingNotificationEntry != null
+                && mInterruptingNotificationEntry.row == row)) {
             final String _pkg = n.getPackageName();
             final String _tag = n.getTag();
             final int _id = n.getId();
@@ -437,7 +438,6 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     public void onHeadsUpDismissed() {
-        mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
     }
 
     @Override

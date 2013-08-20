@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.NotificationData;
 public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.Callback, ExpandHelper.Callback {
     private static final String TAG = "HeadsUpNotificationView";
     private static final boolean DEBUG = false;
+    private static final boolean SPEW = DEBUG;
 
     Rect mTmpRect = new Rect();
 
@@ -88,13 +89,12 @@ public class HeadsUpNotificationView extends FrameLayout implements SwipeHelper.
         return true;
     }
 
-    public boolean isInsistent() {
-        return mHeadsUp != null
-                && (mHeadsUp.notification.getNotification().flags & Notification.FLAG_INSISTENT) != 0;
+    public boolean isClearable() {
+        return mHeadsUp == null || mHeadsUp.notification.isClearable();
     }
 
     public void setMargin(int notificationPanelMarginPx) {
-        if (DEBUG) Log.v(TAG, "setMargin() " + notificationPanelMarginPx);
+        if (SPEW) Log.v(TAG, "setMargin() " + notificationPanelMarginPx);
         if (mContentSlider != null) {
             FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mContentSlider.getLayoutParams();
             lp.setMarginStart(notificationPanelMarginPx);

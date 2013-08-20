@@ -104,7 +104,7 @@ import java.util.ArrayList;
 public class PhoneStatusBar extends BaseStatusBar {
     static final String TAG = "PhoneStatusBar";
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
-    public static final boolean SPEW = DEBUG;
+    public static final boolean SPEW = false;
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
     public static final boolean DEBUG_GESTURES = false;
 
@@ -911,9 +911,9 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     @Override
     public void resetHeadsUpDecayTimer() {
-        mHandler.removeMessages(MSG_HIDE_HEADS_UP);
         if (mUseHeadsUp && mHeadsUpNotificationDecay > 0
-                && !mHeadsUpNotificationView.isInsistent()) {
+                && mHeadsUpNotificationView.isClearable()) {
+            mHandler.removeMessages(MSG_HIDE_HEADS_UP);
             mHandler.sendEmptyMessageDelayed(MSG_HIDE_HEADS_UP, mHeadsUpNotificationDecay);
         }
     }
@@ -1066,7 +1066,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (!mShowCarrierInPanel) return;
         // The idea here is to only show the carrier label when there is enough room to see it,
         // i.e. when there aren't enough notifications to fill the panel.
-        if (DEBUG) {
+        if (SPEW) {
             Log.d(TAG, String.format("pileh=%d scrollh=%d carrierh=%d",
                     mPile.getHeight(), mScrollView.getHeight(), mCarrierLabelHeight));
         }
@@ -1110,7 +1110,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         final boolean clearable = any && mNotificationData.hasClearableItems();
 
-        if (DEBUG) {
+        if (SPEW) {
             Log.d(TAG, "setAreThereNotifications: N=" + mNotificationData.size()
                     + " any=" + any + " clearable=" + clearable);
         }
@@ -2295,7 +2295,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     @Override
     public void updateExpandedViewPos(int thingy) {
-        if (DEBUG) Log.v(TAG, "updateExpandedViewPos");
+        if (SPEW) Log.v(TAG, "updateExpandedViewPos");
 
         // on larger devices, the notification panel is propped open a bit
         mNotificationPanel.setMinimumHeight(
@@ -2524,14 +2524,16 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     public void onHeadsUpDismissed() {
         if (mInterruptingNotificationEntry == null) return;
-
-        try {
-            mBarService.onNotificationClear(
-                    mInterruptingNotificationEntry.notification.getPackageName(),
-                    mInterruptingNotificationEntry.notification.getTag(),
-                    mInterruptingNotificationEntry.notification.getId());
-        } catch (android.os.RemoteException ex) {
-            // oh well
+        mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
+        if (mHeadsUpNotificationView.isClearable()) {
+            try {
+                mBarService.onNotificationClear(
+                        mInterruptingNotificationEntry.notification.getPackageName(),
+                        mInterruptingNotificationEntry.notification.getTag(),
+                        mInterruptingNotificationEntry.notification.getId());
+            } catch (android.os.RemoteException ex) {
+                // oh well
+            }
         }
     }
 
