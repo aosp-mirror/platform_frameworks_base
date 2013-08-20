@@ -31,8 +31,10 @@ import android.os.UserHandle;
 import android.print.IPrintClient;
 import android.print.IPrintDocumentAdapter;
 import android.print.IPrintManager;
+import android.print.IPrinterDiscoveryObserver;
 import android.print.PrintAttributes;
 import android.print.PrintJobInfo;
+import android.print.PrinterId;
 import android.provider.Settings;
 import android.util.SparseArray;
 
@@ -183,6 +185,84 @@ public final class PrintManagerService extends IPrintManager.Stub {
                 return;
             }
             spooler.setPrintJobState(printJobId, PrintJobInfo.STATE_QUEUED, null);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void createPrinterDiscoverySession(IPrinterDiscoveryObserver observer,
+            int userId) {
+        final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+        final UserState userState;
+        synchronized (mLock) {
+            userState = getOrCreateUserStateLocked(resolvedUserId);
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            userState.createPrinterDiscoverySession(observer);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void destroyPrinterDiscoverySession(IPrinterDiscoveryObserver observer,
+            int userId) {
+        final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+        final UserState userState;
+        synchronized (mLock) {
+            userState = getOrCreateUserStateLocked(resolvedUserId);
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            userState.destroyPrinterDiscoverySession(observer);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void startPrinterDiscovery(IPrinterDiscoveryObserver observer,
+            List<PrinterId> priorityList, int userId) {
+        final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+        final UserState userState;
+        synchronized (mLock) {
+            userState = getOrCreateUserStateLocked(resolvedUserId);
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            userState.startPrinterDiscovery(observer, priorityList);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void stopPrinterDiscovery(IPrinterDiscoveryObserver observer, int userId) {
+        final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+        final UserState userState;
+        synchronized (mLock) {
+            userState = getOrCreateUserStateLocked(resolvedUserId);
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            userState.stopPrinterDiscovery(observer);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void requestPrinterUpdate(PrinterId printerId, int userId) {
+        final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+        final UserState userState;
+        synchronized (mLock) {
+            userState = getOrCreateUserStateLocked(resolvedUserId);
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            userState.requestPrinterUpdate(printerId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

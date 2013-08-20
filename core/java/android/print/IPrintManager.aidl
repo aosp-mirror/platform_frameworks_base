@@ -16,8 +16,10 @@
 
 package android.print;
 
+import android.print.IPrinterDiscoveryObserver;
 import android.print.IPrintDocumentAdapter;
 import android.print.IPrintClient;
+import android.print.PrinterId;
 import android.print.PrintJobInfo;
 import android.print.PrintAttributes;
 
@@ -34,4 +36,12 @@ interface IPrintManager {
             int appId, int userId);
     void cancelPrintJob(int printJobId, int appId, int userId);
     void restartPrintJob(int printJobId, int appId, int userId);
+
+    void createPrinterDiscoverySession(in IPrinterDiscoveryObserver observer, int userId);
+    void startPrinterDiscovery(in IPrinterDiscoveryObserver observer,
+            in List<PrinterId> priorityList, int userId);
+    void stopPrinterDiscovery(in IPrinterDiscoveryObserver observer, int userId);
+    void requestPrinterUpdate(in PrinterId printerId, int userId);
+    void destroyPrinterDiscoverySession(in IPrinterDiscoveryObserver observer,
+            int userId);
 }

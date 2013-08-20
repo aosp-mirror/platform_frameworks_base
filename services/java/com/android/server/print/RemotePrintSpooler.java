@@ -34,8 +34,6 @@ import android.print.IPrintSpoolerCallbacks;
 import android.print.IPrintSpoolerClient;
 import android.print.PrintAttributes;
 import android.print.PrintJobInfo;
-import android.print.PrinterId;
-import android.print.PrinterInfo;
 import android.util.Slog;
 import android.util.TimedRemoteCaller;
 
@@ -93,11 +91,6 @@ final class RemotePrintSpooler {
     public static interface PrintSpoolerCallbacks {
         public void onPrintJobQueued(PrintJobInfo printJob);
         public void onAllPrintJobsForServiceHandled(ComponentName printService);
-        public void createPrinterDiscoverySession();
-        public void destroyPrinterDiscoverySession();
-        public void startPrinterDiscovery(List<PrinterId> priorityList);
-        public void stopPrinterDiscovery();
-        public void requestPrinterUpdate(PrinterId printerId);
     }
 
     public RemotePrintSpooler(Context context, int userId,
@@ -302,78 +295,6 @@ final class RemotePrintSpooler {
         synchronized (mLock) {
             throwIfDestroyedLocked();
             unbindLocked();
-        }
-    }
-
-    public final void onPrintersAdded(List<PrinterInfo> printers) {
-        throwIfCalledOnMainThread();
-        synchronized (mLock) {
-            throwIfDestroyedLocked();
-            mCanUnbind = false;
-        }
-        try {
-            getRemoteInstanceLazy().onPrintersAdded(printers);
-        } catch (RemoteException re) {
-            Slog.e(LOG_TAG, "Error adding printers.", re);
-        } catch (TimeoutException te) {
-            Slog.e(LOG_TAG, "Error adding printers.", te);
-        } finally {
-            if (DEBUG) {
-                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier()
-                        + "] onPrintersAdded()");
-            }
-            synchronized (mLock) {
-                mCanUnbind = true;
-                mLock.notifyAll();
-            }
-        }
-    }
-
-    public final void onPrintersRemoved(List<PrinterId> printerIds) {
-        throwIfCalledOnMainThread();
-        synchronized (mLock) {
-            throwIfDestroyedLocked();
-            mCanUnbind = false;
-        }
-        try {
-            getRemoteInstanceLazy().onPrintersRemoved(printerIds);
-        } catch (RemoteException re) {
-            Slog.e(LOG_TAG, "Error removing printers.", re);
-        } catch (TimeoutException te) {
-            Slog.e(LOG_TAG, "Error removing printers.", te);
-        } finally {
-            if (DEBUG) {
-                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier()
-                        + "] onPrintersRemoved()");
-            }
-            synchronized (mLock) {
-                mCanUnbind = true;
-                mLock.notifyAll();
-            }
-        }
-    }
-
-    public final void onPrintersUpdated(List<PrinterInfo> printers) {
-        throwIfCalledOnMainThread();
-        synchronized (mLock) {
-            throwIfDestroyedLocked();
-            mCanUnbind = false;
-        }
-        try {
-            getRemoteInstanceLazy().onPrintersUpdated(printers);
-        } catch (RemoteException re) {
-            Slog.e(LOG_TAG, "Error updating printers.", re);
-        } catch (TimeoutException te) {
-            Slog.e(LOG_TAG, "Error updating printers.", te);
-        } finally {
-            if (DEBUG) {
-                Slog.i(LOG_TAG, "[user: " + mUserHandle.getIdentifier()
-                        + "] onPrintersUpdted()");
-            }
-            synchronized (mLock) {
-                mCanUnbind = true;
-                mLock.notifyAll();
-            }
         }
     }
 
@@ -667,71 +588,6 @@ final class RemotePrintSpooler {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     spooler.onAllPrintJobsHandled();
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-        }
-
-        @Override
-        public void createPrinterDiscoverySession() {
-            RemotePrintSpooler spooler = mWeakSpooler.get();
-            if (spooler != null) {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    spooler.mCallbacks.createPrinterDiscoverySession();
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-        }
-
-        @Override
-        public void destroyPrinterDiscoverySession() {
-            RemotePrintSpooler spooler = mWeakSpooler.get();
-            if (spooler != null) {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    spooler.mCallbacks.destroyPrinterDiscoverySession();
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-        }
-
-        @Override
-        public void startPrinterDiscovery(List<PrinterId> priorityList) {
-            RemotePrintSpooler spooler = mWeakSpooler.get();
-            if (spooler != null) {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    spooler.mCallbacks.startPrinterDiscovery(priorityList);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-        }
-
-        @Override
-        public void stopPrinterDiscovery() {
-            RemotePrintSpooler spooler = mWeakSpooler.get();
-            if (spooler != null) {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    spooler.mCallbacks.stopPrinterDiscovery();
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-        }
-
-        @Override
-        public void requestPrinterUpdate(PrinterId printerId) {
-            RemotePrintSpooler spooler = mWeakSpooler.get();
-            if (spooler != null) {
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    spooler.mCallbacks.requestPrinterUpdate(printerId);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
