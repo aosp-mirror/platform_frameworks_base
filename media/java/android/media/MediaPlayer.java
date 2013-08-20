@@ -38,6 +38,7 @@ import android.view.SurfaceHolder;
 import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
+import android.media.MediaFormat;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -1526,7 +1527,19 @@ public class MediaPlayer
          * ISO-639-2 language code, "und", is returned.
          */
         public String getLanguage() {
-            return mLanguage;
+            String language = mFormat.getString(MediaFormat.KEY_LANGUAGE);
+            return language == null ? "und" : language;
+        }
+
+        /**
+         * Gets the {@link MediaFormat} of the track.  If the format is
+         * unknown or could not be determined, null is returned.
+         */
+        public MediaFormat getFormat() {
+            if (mTrackType == MEDIA_TRACK_TYPE_TIMEDTEXT) {
+                return mFormat;
+            }
+            return null;
         }
 
         public static final int MEDIA_TRACK_TYPE_UNKNOWN = 0;
@@ -1535,11 +1548,20 @@ public class MediaPlayer
         public static final int MEDIA_TRACK_TYPE_TIMEDTEXT = 3;
 
         final int mTrackType;
-        final String mLanguage;
+        final MediaFormat mFormat;
 
         TrackInfo(Parcel in) {
             mTrackType = in.readInt();
-            mLanguage = in.readString();
+            // TODO: parcel in the full MediaFormat
+            String language = in.readString();
+
+            if (mTrackType == MEDIA_TRACK_TYPE_TIMEDTEXT) {
+                mFormat = MediaFormat.createSubtitleFormat(
+                    MEDIA_MIMETYPE_TEXT_SUBRIP, language);
+            } else {
+                mFormat = new MediaFormat();
+                mFormat.setString(MediaFormat.KEY_LANGUAGE, language);
+            }
         }
 
         /**
@@ -1556,7 +1578,7 @@ public class MediaPlayer
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mTrackType);
-            dest.writeString(mLanguage);
+            dest.writeString(getLanguage());
         }
 
         /**
