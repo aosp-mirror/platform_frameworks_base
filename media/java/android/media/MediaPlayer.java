@@ -39,6 +39,7 @@ import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 import android.media.MediaFormat;
+import android.media.SubtitleData;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -1336,6 +1337,7 @@ public class MediaPlayer
         mOnInfoListener = null;
         mOnVideoSizeChangedListener = null;
         mOnTimedTextListener = null;
+        mOnSubtitleDataListener = null;
         _release();
     }
 
@@ -1546,6 +1548,8 @@ public class MediaPlayer
         public static final int MEDIA_TRACK_TYPE_VIDEO = 1;
         public static final int MEDIA_TRACK_TYPE_AUDIO = 2;
         public static final int MEDIA_TRACK_TYPE_TIMEDTEXT = 3;
+        /** @hide */
+        public static final int MEDIA_TRACK_TYPE_SUBTITLE = 4;
 
         final int mTrackType;
         final MediaFormat mFormat;
@@ -1913,6 +1917,7 @@ public class MediaPlayer
     private static final int MEDIA_TIMED_TEXT = 99;
     private static final int MEDIA_ERROR = 100;
     private static final int MEDIA_INFO = 200;
+    private static final int MEDIA_SUBTITLE_DATA = 201;
 
     private class EventHandler extends Handler
     {
@@ -1989,6 +1994,18 @@ public class MediaPlayer
                         parcel.recycle();
                         mOnTimedTextListener.onTimedText(mMediaPlayer, text);
                     }
+                }
+                return;
+
+            case MEDIA_SUBTITLE_DATA:
+                if (mOnSubtitleDataListener == null) {
+                    return;
+                }
+                if (msg.obj instanceof Parcel) {
+                    Parcel parcel = (Parcel) msg.obj;
+                    SubtitleData data = new SubtitleData(parcel);
+                    parcel.recycle();
+                    mOnSubtitleDataListener.onSubtitleData(mMediaPlayer, data);
                 }
                 return;
 
@@ -2203,6 +2220,30 @@ public class MediaPlayer
 
     private OnTimedTextListener mOnTimedTextListener;
 
+    /**
+     * Interface definition of a callback to be invoked when a
+     * track has data available.
+     *
+     * @hide
+     */
+    public interface OnSubtitleDataListener
+    {
+        public void onSubtitleData(MediaPlayer mp, SubtitleData data);
+    }
+
+    /**
+     * Register a callback to be invoked when a track has data available.
+     *
+     * @param listener the callback that will be run
+     *
+     * @hide
+     */
+    public void setOnSubtitleDataListener(OnSubtitleDataListener listener)
+    {
+        mOnSubtitleDataListener = listener;
+    }
+
+    private OnSubtitleDataListener mOnSubtitleDataListener;
 
     /* Do not change these values without updating their counterparts
      * in include/media/mediaplayer.h!
