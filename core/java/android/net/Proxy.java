@@ -48,7 +48,6 @@ public final class Proxy {
     private static final String TAG = "Proxy";
 
     private static final ProxySelector sDefaultProxySelector;
-    private static PacProxySelector sPacProxySelector;
 
     /**
      * Used to notify an app that's caching the default connection proxy
@@ -352,11 +351,8 @@ public final class Proxy {
             System.clearProperty("http.nonProxyHosts");
             System.clearProperty("https.nonProxyHosts");
         }
-        if ((pacFileUrl != null) && !TextUtils.isEmpty(pacFileUrl)) {
-            if (sPacProxySelector == null) {
-                sPacProxySelector = new PacProxySelector();
-            }
-            ProxySelector.setDefault(sPacProxySelector);
+        if (!TextUtils.isEmpty(pacFileUrl)) {
+            ProxySelector.setDefault(new PacProxySelector());
         } else {
             ProxySelector.setDefault(sDefaultProxySelector);
         }
