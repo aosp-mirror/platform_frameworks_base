@@ -140,23 +140,22 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_PERSIST_MASTER_VOLUME = 2;
     private static final int MSG_PERSIST_RINGER_MODE = 3;
     private static final int MSG_MEDIA_SERVER_DIED = 4;
-    private static final int MSG_MEDIA_SERVER_STARTED = 5;
-    private static final int MSG_PLAY_SOUND_EFFECT = 6;
-    private static final int MSG_BTA2DP_DOCK_TIMEOUT = 7;
-    private static final int MSG_LOAD_SOUND_EFFECTS = 8;
-    private static final int MSG_SET_FORCE_USE = 9;
-    private static final int MSG_BT_HEADSET_CNCT_FAILED = 10;
-    private static final int MSG_SET_ALL_VOLUMES = 11;
-    private static final int MSG_PERSIST_MASTER_VOLUME_MUTE = 12;
-    private static final int MSG_REPORT_NEW_ROUTES = 13;
-    private static final int MSG_SET_FORCE_BT_A2DP_USE = 14;
-    private static final int MSG_CHECK_MUSIC_ACTIVE = 16;
-    private static final int MSG_BROADCAST_AUDIO_BECOMING_NOISY = 17;
-    private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME = 18;
-    private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED = 19;
-    private static final int MSG_PERSIST_SAFE_VOLUME_STATE = 20;
-    private static final int MSG_BROADCAST_BT_CONNECTION_STATE = 21;
-    private static final int MSG_UNLOAD_SOUND_EFFECTS = 22;
+    private static final int MSG_PLAY_SOUND_EFFECT = 5;
+    private static final int MSG_BTA2DP_DOCK_TIMEOUT = 6;
+    private static final int MSG_LOAD_SOUND_EFFECTS = 7;
+    private static final int MSG_SET_FORCE_USE = 8;
+    private static final int MSG_BT_HEADSET_CNCT_FAILED = 9;
+    private static final int MSG_SET_ALL_VOLUMES = 10;
+    private static final int MSG_PERSIST_MASTER_VOLUME_MUTE = 11;
+    private static final int MSG_REPORT_NEW_ROUTES = 12;
+    private static final int MSG_SET_FORCE_BT_A2DP_USE = 13;
+    private static final int MSG_CHECK_MUSIC_ACTIVE = 14;
+    private static final int MSG_BROADCAST_AUDIO_BECOMING_NOISY = 15;
+    private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME = 16;
+    private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED = 17;
+    private static final int MSG_PERSIST_SAFE_VOLUME_STATE = 18;
+    private static final int MSG_BROADCAST_BT_CONNECTION_STATE = 19;
+    private static final int MSG_UNLOAD_SOUND_EFFECTS = 20;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -179,8 +178,6 @@ public class AudioService extends IAudioService.Stub {
     private int mMode = AudioSystem.MODE_NORMAL;
     // protects mRingerMode
     private final Object mSettingsLock = new Object();
-
-    private boolean mMediaServerOk;
 
     private SoundPool mSoundPool;
     private final Object mSoundEffectsLock = new Object();
@@ -286,23 +283,13 @@ public class AudioService extends IAudioService.Stub {
         public void onError(int error) {
             switch (error) {
             case AudioSystem.AUDIO_STATUS_SERVER_DIED:
-                if (mMediaServerOk) {
-                    sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED, SENDMSG_NOOP, 0, 0,
-                            null, 1500);
-                    mMediaServerOk = false;
-                }
-                break;
-            case AudioSystem.AUDIO_STATUS_OK:
-                if (!mMediaServerOk) {
-                    sendMsg(mAudioHandler, MSG_MEDIA_SERVER_STARTED, SENDMSG_NOOP, 0, 0,
-                            null, 0);
-                    mMediaServerOk = true;
-                }
+                sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED,
+                        SENDMSG_NOOP, 0, 0, null, 0);
                 break;
             default:
                 break;
             }
-       }
+        }
     };
 
     /**
@@ -499,6 +486,8 @@ public class AudioService extends IAudioService.Stub {
         mMediaFocusControl = new MediaFocusControl(mAudioHandler.getLooper(),
                 mContext, /*VolumeController*/ mVolumePanel, this);
 
+        AudioSystem.setErrorCallback(mAudioSystemCallback);
+
         boolean cameraSoundForced = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_camera_sound_forced);
         mCameraSoundForced = new Boolean(cameraSoundForced);
@@ -528,14 +517,11 @@ public class AudioService extends IAudioService.Stub {
         createStreamStates();
 
         readAndSetLowRamDevice();
-        mMediaServerOk = true;
 
         // Call setRingerModeInt() to apply correct mute
         // state on streams affected by ringer mode.
         mRingerModeMutedStreams = 0;
         setRingerModeInt(getRingerMode(), false);
-
-        AudioSystem.setErrorCallback(mAudioSystemCallback);
 
         // Register for device connection intent broadcasts.
         IntentFilter intentFilter =
@@ -3432,21 +3418,17 @@ public class AudioService extends IAudioService.Stub {
                     break;
 
                 case MSG_MEDIA_SERVER_DIED:
-                    if (!mMediaServerOk) {
+                    if (AudioSystem.checkAudioFlinger() != AudioSystem.AUDIO_STATUS_OK) {
                         Log.e(TAG, "Media server died.");
-                        // Force creation of new IAudioFlinger interface so that we are notified
-                        // when new media_server process is back to life.
-                        AudioSystem.setErrorCallback(mAudioSystemCallback);
                         sendMsg(mAudioHandler, MSG_MEDIA_SERVER_DIED, SENDMSG_NOOP, 0, 0,
                                 null, 500);
+                        break;
                     }
-                    break;
-
-                case MSG_MEDIA_SERVER_STARTED:
                     Log.e(TAG, "Media server started.");
+
                     // indicate to audio HAL that we start the reconfiguration phase after a media
                     // server crash
-                    // Note that MSG_MEDIA_SERVER_STARTED message is only received when the media server
+                    // Note that we only execute this when the media server
                     // process restarts after a crash, not the first time it is started.
                     AudioSystem.setParameters("restarting=true");
 
