@@ -18,6 +18,7 @@ package android.print;
 
 import android.content.ComponentName;
 import android.os.ParcelFileDescriptor;
+import android.print.PrinterId;
 import android.print.IPrintDocumentAdapter;
 import android.print.IPrintClient;
 import android.print.IPrintSpoolerClient;
@@ -40,10 +41,15 @@ oneway interface IPrintSpooler {
     void createPrintJob(String printJobName, in IPrintClient client,
             in IPrintDocumentAdapter printAdapter, in PrintAttributes attributes,
             IPrintSpoolerCallbacks callback, int appId, int sequence);
-    void setPrintJobState(int printJobId, int status, CharSequence error,
+    void setPrintJobState(int printJobId, int status, String error,
             IPrintSpoolerCallbacks callback, int sequence);
     void setPrintJobTag(int printJobId, String tag, IPrintSpoolerCallbacks callback,
             int sequence);
     void writePrintJobData(in ParcelFileDescriptor fd, int printJobId);
     void setClient(IPrintSpoolerClient client);
+
+    // Printer discovery APIs
+    void onPrintersAdded(in List<PrinterInfo> printers);
+    void onPrintersRemoved(in List<PrinterId> printerIds);
+    void onPrintersUpdated(in List<PrinterInfo> printerIds);
 }

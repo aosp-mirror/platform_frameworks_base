@@ -18,7 +18,7 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.printspooler"
-        android:sharedUserId="android.uid.printspooler"
+        android:sharedUserId="android.uid.system"
         android:versionName="1"
         android:versionCode="1"
         coreApp="true">
@@ -51,9 +51,10 @@
         </activity>
 
         <activity
-            android:name=".ChoosePrinterActivity"
-            android:exported="false"
-            android:theme="@android:style/Theme.Holo.Light">
+            android:name=".SelectPrinterActivity"
+            android:label="@string/all_printers_label"
+            android:theme="@style/SelectPrinterActivityTheme"
+            android:exported="false">
         </activity>
 
         <receiver
