@@ -30,8 +30,6 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.print.IPrinterDiscoverySessionController;
-import android.print.IPrinterDiscoverySessionObserver;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
 import android.print.PrinterId;
@@ -79,6 +77,10 @@ final class RemotePrintService implements DeathRecipient {
 
     private boolean mDestroyed;
 
+    private boolean mAllPrintJobsHandled;
+
+    private boolean mHasPrinterDiscoverySession;
+
     public RemotePrintService(Context context, ComponentName componentName, int userId,
             RemotePrintSpooler spooler) {
         mContext = context;
@@ -97,6 +99,8 @@ final class RemotePrintService implements DeathRecipient {
     private void handleDestroy() {
         throwIfDestroyed();
         ensureUnbound();
+        mAllPrintJobsHandled = false;
+        mHasPrinterDiscoverySession = false;
         mDestroyed = true;
     }
 
@@ -110,18 +114,27 @@ final class RemotePrintService implements DeathRecipient {
     }
 
     private void handleBinderDied() {
+        mAllPrintJobsHandled = false;
+        mHasPrinterDiscoverySession = false;
         mPendingCommands.clear();
         ensureUnbound();
     }
 
     private void handleOnAllPrintJobsHandled() {
         throwIfDestroyed();
+
+        mAllPrintJobsHandled = true;
+
         if (isBound()) {
             if (DEBUG) {
                 Slog.i(LOG_TAG, "[user: " + mUserId + "] handleOnAllPrintJobsHandled()");
             }
-            // If bound and all the work is completed, then unbind.
-            ensureUnbound();
+
+            // If the service has a printer discovery session
+            // created we should not disconnect from it just yet.
+            if (!mHasPrinterDiscoverySession) {
+                ensureUnbound();
+            }
         }
     }
 
@@ -153,6 +166,9 @@ final class RemotePrintService implements DeathRecipient {
 
     private void handleOnPrintJobQueued(final PrintJobInfo printJob) {
         throwIfDestroyed();
+
+        mAllPrintJobsHandled = false;
+
         if (!isBound()) {
             ensureBound();
             mPendingCommands.add(new Runnable() {
@@ -173,20 +189,18 @@ final class RemotePrintService implements DeathRecipient {
         }
     }
 
-    public void createPrinterDiscoverySession(IPrinterDiscoverySessionObserver observer) {
-        mHandler.obtainMessage(MyHandler.MSG_CREATE_PRINTER_DISCOVERY_SESSION,
-                observer).sendToTarget();
+    public void createPrinterDiscoverySession() {
+        mHandler.sendEmptyMessage(MyHandler.MSG_CREATE_PRINTER_DISCOVERY_SESSION);
     }
 
-    private void handleCreatePrinterDiscoverySession(
-            final IPrinterDiscoverySessionObserver observer) {
+    private void handleCreatePrinterDiscoverySession() {
         throwIfDestroyed();
         if (!isBound()) {
             ensureBound();
             mPendingCommands.add(new Runnable() {
                 @Override
                 public void run() {
-                    handleCreatePrinterDiscoverySession(observer);
+                    handleCreatePrinterDiscoverySession();
                 }
             });
         } else {
@@ -194,9 +208,126 @@ final class RemotePrintService implements DeathRecipient {
                 Slog.i(LOG_TAG, "[user: " + mUserId + "] createPrinterDiscoverySession()");
             }
             try {
-                mPrintService.createPrinterDiscoverySession(observer);
+                mPrintService.createPrinterDiscoverySession();
             } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error announcing start printer dicovery.", re);
+                Slog.e(LOG_TAG, "Error creating printer dicovery session.", re);
+            }
+
+            mHasPrinterDiscoverySession = true;
+        }
+    }
+
+    public void destroyPrinterDiscoverySession() {
+        mHandler.sendEmptyMessage(MyHandler.MSG_DESTROY_PRINTER_DISCOVERY_SESSION);
+    }
+
+    private void handleDestroyPrinterDiscoverySession() {
+        throwIfDestroyed();
+        if (!isBound()) {
+            ensureBound();
+            mPendingCommands.add(new Runnable() {
+                @Override
+                public void run() {
+                    handleDestroyPrinterDiscoverySession();
+                }
+            });
+        } else {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserId + "] destroyPrinterDiscoverySession()");
+            }
+
+            mHasPrinterDiscoverySession = false;
+
+            try {
+                mPrintService.destroyPrinterDiscoverySession();
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Error destroying printer dicovery session.", re);
+            }
+
+            // If the service has no print jobs and no active discovery
+            // session anymore we should disconnect from it.
+            if (mAllPrintJobsHandled) {
+                ensureUnbound();
+            }
+        }
+    }
+
+    public void startPrinterDiscovery(List<PrinterId> priorityList) {
+        mHandler.obtainMessage(MyHandler.MSG_START_PRINTER_DISCOVERY,
+                priorityList).sendToTarget();
+    }
+
+    private void handleStartPrinterDiscovery(final List<PrinterId> priorityList) {
+        throwIfDestroyed();
+        if (!isBound()) {
+            ensureBound();
+            mPendingCommands.add(new Runnable() {
+                @Override
+                public void run() {
+                    handleStartPrinterDiscovery(priorityList);
+                }
+            });
+        } else {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserId + "] startPrinterDiscovery()");
+            }
+            try {
+                mPrintService.startPrinterDiscovery(priorityList);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Error starting printer dicovery.", re);
+            }
+        }
+    }
+
+    public void stopPrinterDiscovery() {
+        mHandler.sendEmptyMessage(MyHandler.MSG_STOP_PRINTER_DISCOVERY);
+    }
+
+    private void handleStopPrinterDiscovery() {
+        throwIfDestroyed();
+        if (!isBound()) {
+            ensureBound();
+            mPendingCommands.add(new Runnable() {
+                @Override
+                public void run() {
+                    handleStopPrinterDiscovery();
+                }
+            });
+        } else {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserId + "] stopPrinterDiscovery()");
+            }
+            try {
+                mPrintService.stopPrinterDiscovery();
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Error stopping printer dicovery.", re);
+            }
+        }
+    }
+
+    public void requestPrinterUpdate(PrinterId printerId) {
+        mHandler.obtainMessage(MyHandler.MSG_REQUEST_PRINTER_UPDATE,
+                printerId).sendToTarget();
+    }
+
+    private void handleRequestPrinterUpdate(final PrinterId printerId) {
+        throwIfDestroyed();
+        if (!isBound()) {
+            ensureBound();
+            mPendingCommands.add(new Runnable() {
+                @Override
+                public void run() {
+                    handleRequestPrinterUpdate(printerId);
+                }
+            });
+        } else {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserId + "] requestPrinterUpdate()");
+            }
+            try {
+                mPrintService.requestPrinterUpdate(printerId);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Error requesting a printer update.", re);
             }
         }
     }
@@ -279,20 +410,47 @@ final class RemotePrintService implements DeathRecipient {
     }
 
     private final class MyHandler extends Handler {
-        public static final int MSG_ON_ALL_PRINT_JOBS_HANDLED = 1;
-        public static final int MSG_ON_REQUEST_CANCEL_PRINT_JOB = 2;
-        public static final int MSG_ON_PRINT_JOB_QUEUED = 3;
-        public static final int MSG_CREATE_PRINTER_DISCOVERY_SESSION = 4;
-        public static final int MSG_DESTROY = 6;
-        public static final int MSG_BINDER_DIED = 7;
+        public static final int MSG_CREATE_PRINTER_DISCOVERY_SESSION = 1;
+        public static final int MSG_DESTROY_PRINTER_DISCOVERY_SESSION = 2;
+        public static final int MSG_START_PRINTER_DISCOVERY = 3;
+        public static final int MSG_STOP_PRINTER_DISCOVERY = 4;
+        public static final int MSG_REQUEST_PRINTER_UPDATE = 5;
+        public static final int MSG_ON_ALL_PRINT_JOBS_HANDLED = 6;
+        public static final int MSG_ON_REQUEST_CANCEL_PRINT_JOB = 7;
+        public static final int MSG_ON_PRINT_JOB_QUEUED = 8;
+        public static final int MSG_DESTROY = 9;
+        public static final int MSG_BINDER_DIED = 10;
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public void handleMessage(Message message) {
             switch (message.what) {
+                case MSG_CREATE_PRINTER_DISCOVERY_SESSION: {
+                    handleCreatePrinterDiscoverySession();
+                } break;
+
+                case MSG_DESTROY_PRINTER_DISCOVERY_SESSION: {
+                    handleDestroyPrinterDiscoverySession();
+                } break;
+
+                case MSG_START_PRINTER_DISCOVERY: {
+                    List<PrinterId> priorityList = (ArrayList<PrinterId>) message.obj;
+                    handleStartPrinterDiscovery(priorityList);
+                } break;
+
+                case MSG_STOP_PRINTER_DISCOVERY: {
+                    handleStopPrinterDiscovery();
+                } break;
+
+                case MSG_REQUEST_PRINTER_UPDATE: {
+                    PrinterId printerId = (PrinterId) message.obj;
+                    handleRequestPrinterUpdate(printerId);
+                } break;
+
                 case MSG_ON_ALL_PRINT_JOBS_HANDLED: {
                     handleOnAllPrintJobsHandled();
                 } break;
@@ -305,13 +463,6 @@ final class RemotePrintService implements DeathRecipient {
                 case MSG_ON_PRINT_JOB_QUEUED: {
                     PrintJobInfo printJob = (PrintJobInfo) message.obj;
                     handleOnPrintJobQueued(printJob);
-                } break;
-
-                case MSG_CREATE_PRINTER_DISCOVERY_SESSION: {
-                    IPrinterDiscoverySessionObserver observer =
-                            (IPrinterDiscoverySessionObserver) message.obj;
-                    handleCreatePrinterDiscoverySession(new SecurePrinterDiscoverySessionObserver(
-                            mComponentName, observer));
                 } break;
 
                 case MSG_DESTROY: {
@@ -363,7 +514,7 @@ final class RemotePrintService implements DeathRecipient {
         }
 
         @Override
-        public boolean setPrintJobState(int printJobId, int state, CharSequence error) {
+        public boolean setPrintJobState(int printJobId, int state, String error) {
             RemotePrintService service = mWeakService.get();
             if (service != null) {
                 final long identity = Binder.clearCallingIdentity();
@@ -402,79 +553,70 @@ final class RemotePrintService implements DeathRecipient {
                 }
             }
         }
-    }
-
-    private static final class SecurePrinterDiscoverySessionObserver
-            extends IPrinterDiscoverySessionObserver.Stub {
-        private final ComponentName mComponentName;
-
-        private final IPrinterDiscoverySessionObserver mDecoratedObsever;
-
-        public SecurePrinterDiscoverySessionObserver(ComponentName componentName,
-                IPrinterDiscoverySessionObserver observer) {
-            mComponentName = componentName;
-            mDecoratedObsever = observer;
-        }
 
         @Override
         public void onPrintersAdded(List<PrinterInfo> printers) {
-            throwIfPrinterIdsForPrinterInfoTampered(printers);
-            try {
-                mDecoratedObsever.onPrintersAdded(printers);
-            } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error delegating to onPrintersAdded", re);
-            }
-        }
-
-        @Override
-        public void onPrintersUpdated(List<PrinterInfo> printers) {
-            throwIfPrinterIdsForPrinterInfoTampered(printers);
-            try {
-                mDecoratedObsever.onPrintersUpdated(printers);
-            } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error delegating to onPrintersUpdated.", re);
+            RemotePrintService service = mWeakService.get();
+            if (service != null) {
+                throwIfPrinterIdsForPrinterInfoTampered(service.mComponentName, printers);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    service.mSpooler.onPrintersAdded(printers);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
         }
 
         @Override
         public void onPrintersRemoved(List<PrinterId> printerIds) {
-            throwIfPrinterIdsTampered(printerIds);
-            try {
-                mDecoratedObsever.onPrintersRemoved(printerIds);
-            } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error delegating to onPrintersRemoved", re);
+            RemotePrintService service = mWeakService.get();
+            if (service != null) {
+                throwIfPrinterIdsTampered(service.mComponentName, printerIds);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    service.mSpooler.onPrintersRemoved(printerIds);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
         }
 
         @Override
-        public void setController(IPrinterDiscoverySessionController controller) {
-            try {
-                mDecoratedObsever.setController(controller);
-            } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error setting controller", re);
+        public void onPrintersUpdated(List<PrinterInfo> printers) {
+            RemotePrintService service = mWeakService.get();
+            if (service != null) {
+                throwIfPrinterIdsForPrinterInfoTampered(service.mComponentName, printers);
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    service.mSpooler.onPrintersUpdated(printers);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
         }
 
-        private void throwIfPrinterIdsForPrinterInfoTampered(
+        private void throwIfPrinterIdsForPrinterInfoTampered(ComponentName serviceName,
                 List<PrinterInfo> printerInfos) {
             final int printerInfoCount = printerInfos.size();
             for (int i = 0; i < printerInfoCount; i++) {
                 PrinterId printerId = printerInfos.get(i).getId();
-                throwIfPrinterIdTampered(printerId);
+                throwIfPrinterIdTampered(serviceName, printerId);
             }
         }
 
-        private void throwIfPrinterIdsTampered(List<PrinterId> printerIds) {
+        private void throwIfPrinterIdsTampered(ComponentName serviceName,
+                List<PrinterId> printerIds) {
             final int printerIdCount = printerIds.size();
             for (int i = 0; i < printerIdCount; i++) {
                 PrinterId printerId = printerIds.get(i);
-                throwIfPrinterIdTampered(printerId);
+                throwIfPrinterIdTampered(serviceName, printerId);
             }
         }
 
-        private void throwIfPrinterIdTampered(PrinterId printerId) {
+        private void throwIfPrinterIdTampered(ComponentName serviceName, PrinterId printerId) {
             if (printerId == null || printerId.getServiceName() == null
-                    || !printerId.getServiceName().equals(mComponentName)) {
+                    || !printerId.getServiceName().equals(serviceName)) {
                 throw new IllegalArgumentException("Invalid printer id: " + printerId);
             }
         }

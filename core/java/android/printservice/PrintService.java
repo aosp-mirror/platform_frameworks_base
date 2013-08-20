@@ -25,7 +25,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
-import android.print.IPrinterDiscoverySessionObserver;
 import android.print.PrintJobInfo;
 import android.print.PrinterId;
 import android.util.Log;
@@ -146,6 +145,11 @@ import java.util.List;
  * {@link #SERVICE_META_DATA} and <code>&lt;{@link android.R.styleable#PrintService
  * print-service}&gt;</code>.
  * </p>
+ * <p>
+ * <strong>Note: </strong> All callbacks in this class are executed on the main
+ * application thread. You should also invoke any method of this class on the main
+ * application thread.
+ * </p>
  */
 public abstract class PrintService extends Service {
 
@@ -175,13 +179,13 @@ public abstract class PrintService extends Service {
      */
     public static final String SERVICE_META_DATA = "android.printservice";
 
-    private final Object mLock = new Object();
-
     private Handler mHandler;
 
     private IPrintServiceClient mClient;
 
     private int mLastSessionId = -1;
+
+    private PrinterDiscoverySession mDiscoverySession;
 
     @Override
     protected final void attachBaseContext(Context base) {
@@ -245,21 +249,18 @@ public abstract class PrintService extends Service {
      * @see PrintJob#isStarted() PrintJob.isStarted()
      */
     public final List<PrintJob> getActivePrintJobs() {
-        final IPrintServiceClient client;
-        synchronized (mLock) {
-            client = mClient;
-        }
-        if (client == null) {
+        throwIfNotCalledOnMainThread();
+        if (mClient == null) {
             return Collections.emptyList();
         }
         try {
             List<PrintJob> printJobs = null;
-            List<PrintJobInfo> printJobInfos = client.getPrintJobInfos();
+            List<PrintJobInfo> printJobInfos = mClient.getPrintJobInfos();
             if (printJobInfos != null) {
                 final int printJobInfoCount = printJobInfos.size();
                 printJobs = new ArrayList<PrintJob>(printJobInfoCount);
                 for (int i = 0; i < printJobInfoCount; i++) {
-                    printJobs.add(new PrintJob(printJobInfos.get(i), client));
+                    printJobs.add(new PrintJob(printJobInfos.get(i), mClient));
                 }
             }
             if (printJobs != null) {
@@ -278,23 +279,50 @@ public abstract class PrintService extends Service {
      * @return Global printer id.
      */
     public final PrinterId generatePrinterId(String localId) {
+        throwIfNotCalledOnMainThread();
         return new PrinterId(new ComponentName(getPackageName(),
                 getClass().getName()), localId);
+    }
+
+    static void throwIfNotCalledOnMainThread() {
+        if (!Looper.getMainLooper().isCurrentThread()) {
+            throw new IllegalAccessError("must be called from the main thread");
+        }
     }
 
     @Override
     public final IBinder onBind(Intent intent) {
         return new IPrintService.Stub() {
             @Override
-            public void setClient(IPrintServiceClient client) {
-                mHandler.obtainMessage(ServiceHandler.MSG_SET_CLEINT, client)
-                        .sendToTarget();
+            public void createPrinterDiscoverySession() {
+                mHandler.sendEmptyMessage(ServiceHandler.MSG_CREATE_PRINTER_DISCOVERY_SESSION);
             }
 
             @Override
-            public void createPrinterDiscoverySession(IPrinterDiscoverySessionObserver observer) {
-                mHandler.obtainMessage(ServiceHandler.MSG_ON_CREATE_PRINTER_DISCOVERY_SESSION,
-                        observer).sendToTarget();
+            public void destroyPrinterDiscoverySession() {
+                mHandler.sendEmptyMessage(ServiceHandler.MSG_DESTROY_PRINTER_DISCOVERY_SESSION);
+            }
+
+            public void startPrinterDiscovery(List<PrinterId> priorityList) {
+                mHandler.obtainMessage(ServiceHandler.MSG_START_PRINTER_DISCOVERY,
+                        priorityList).sendToTarget();
+            }
+
+            @Override
+            public void stopPrinterDiscovery() {
+                mHandler.sendEmptyMessage(ServiceHandler.MSG_STOP_PRINTER_DISCOVERY);
+            }
+
+            @Override
+            public void requestPrinterUpdate(PrinterId printerId) {
+                mHandler.obtainMessage(ServiceHandler.MSG_REQUEST_PRINTER_UPDATE,
+                        printerId).sendToTarget();
+            }
+
+            @Override
+            public void setClient(IPrintServiceClient client) {
+                mHandler.obtainMessage(ServiceHandler.MSG_SET_CLEINT, client)
+                        .sendToTarget();
             }
 
             @Override
@@ -312,33 +340,62 @@ public abstract class PrintService extends Service {
     }
 
     private final class ServiceHandler extends Handler {
-        public static final int MSG_ON_CREATE_PRINTER_DISCOVERY_SESSION = 1;
-        public static final int MSG_ON_PRINTJOB_QUEUED = 2;
-        public static final int MSG_ON_REQUEST_CANCEL_PRINTJOB = 3;
-        public static final int MSG_SET_CLEINT = 4;
+        public static final int MSG_CREATE_PRINTER_DISCOVERY_SESSION = 1;
+        public static final int MSG_DESTROY_PRINTER_DISCOVERY_SESSION = 2;
+        public static final int MSG_START_PRINTER_DISCOVERY = 3;
+        public static final int MSG_STOP_PRINTER_DISCOVERY = 4;
+        public static final int MSG_REQUEST_PRINTER_UPDATE = 5;
+        public static final int MSG_ON_PRINTJOB_QUEUED = 6;
+        public static final int MSG_ON_REQUEST_CANCEL_PRINTJOB = 7;
+        public static final int MSG_SET_CLEINT = 8;
 
         public ServiceHandler(Looper looper) {
             super(looper, null, true);
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public void handleMessage(Message message) {
             final int action = message.what;
             switch (action) {
-                case MSG_ON_CREATE_PRINTER_DISCOVERY_SESSION: {
-                    IPrinterDiscoverySessionObserver observer =
-                            (IPrinterDiscoverySessionObserver) message.obj;
+                case MSG_CREATE_PRINTER_DISCOVERY_SESSION: {
                     PrinterDiscoverySession session = onCreatePrinterDiscoverySession();
                     if (session == null) {
                         throw new NullPointerException("session cannot be null");
                     }
-                    synchronized (mLock) {
-                        if (session.getId() == mLastSessionId) {
-                            throw new IllegalStateException("cannot reuse sessions");
-                        }
-                        mLastSessionId = session.getId();
+                    if (session.getId() == mLastSessionId) {
+                        throw new IllegalStateException("cannot reuse session instances");
                     }
-                    session.setObserver(observer);
+                    mDiscoverySession = session;
+                    mLastSessionId = session.getId();
+                    session.setObserver(mClient);
+                } break;
+
+                case MSG_DESTROY_PRINTER_DISCOVERY_SESSION: {
+                    if (mDiscoverySession != null) {
+                        mDiscoverySession.destroy();
+                        mDiscoverySession = null;
+                    }
+                } break;
+
+                case MSG_START_PRINTER_DISCOVERY: {
+                    if (mDiscoverySession != null) {
+                        List<PrinterId> priorityList = (ArrayList<PrinterId>) message.obj;
+                        mDiscoverySession.startPrinterDiscovery(priorityList);
+                    }
+                } break;
+
+                case MSG_STOP_PRINTER_DISCOVERY: {
+                    if (mDiscoverySession != null) {
+                        mDiscoverySession.stopPrinterDiscovery();
+                    }
+                } break;
+
+                case MSG_REQUEST_PRINTER_UPDATE: {
+                    if (mDiscoverySession != null) {
+                        PrinterId printerId = (PrinterId) message.obj;
+                        mDiscoverySession.requestPrinterUpdate(printerId);
+                    }
                 } break;
 
                 case MSG_ON_REQUEST_CANCEL_PRINTJOB: {
@@ -352,15 +409,12 @@ public abstract class PrintService extends Service {
                 } break;
 
                 case MSG_SET_CLEINT: {
-                    IPrintServiceClient client = (IPrintServiceClient) message.obj;
-                    synchronized (mLock) {
-                        mClient = client;
-                    }
-                    if (client != null) {
+                    mClient = (IPrintServiceClient) message.obj;
+                    if (mClient != null) {
                         onConnected();
                      } else {
                         onDisconnected();
-                    }
+                     }
                 } break;
 
                 default: {

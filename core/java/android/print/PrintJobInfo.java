@@ -104,7 +104,7 @@ public final class PrintJobInfo implements Parcelable {
     private int mId;
 
     /** The human readable print job label. */
-    private CharSequence mLabel;
+    private String mLabel;
 
     /** The unique id of the printer. */
     private PrinterId mPrinterId;
@@ -128,7 +128,7 @@ public final class PrintJobInfo implements Parcelable {
     private int mCopies;
 
     /** Failure reason if this job failed. */
-    private CharSequence mFailureReason;
+    private String mFailureReason;
 
     /** The pages to print */
     private PageRange[] mPageRanges;
@@ -163,7 +163,7 @@ public final class PrintJobInfo implements Parcelable {
 
     private PrintJobInfo(Parcel parcel) {
         mId = parcel.readInt();
-        mLabel = parcel.readCharSequence();
+        mLabel = parcel.readString();
         mPrinterId = parcel.readParcelable(null);
         mPrinterName = parcel.readString();
         mState = parcel.readInt();
@@ -171,9 +171,7 @@ public final class PrintJobInfo implements Parcelable {
         mUserId = parcel.readInt();
         mTag = parcel.readString();
         mCopies = parcel.readInt();
-        if (parcel.readInt() == 1) {
-            mFailureReason = parcel.readCharSequence();
-        }
+        mFailureReason = parcel.readString();
         if (parcel.readInt() == 1) {
             Parcelable[] parcelables = parcel.readParcelableArray(null);
             mPageRanges = new PageRange[parcelables.length];
@@ -214,7 +212,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @return The label.
      */
-    public CharSequence getLabel() {
+    public String getLabel() {
         return mLabel;
     }
 
@@ -225,7 +223,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @hide
      */
-    public void setLabel(CharSequence label) {
+    public void setLabel(String label) {
         mLabel = label;
     }
 
@@ -385,7 +383,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @hide
      */
-    public CharSequence getFailureReason() {
+    public String getFailureReason() {
         return mFailureReason;
     }
 
@@ -396,7 +394,7 @@ public final class PrintJobInfo implements Parcelable {
      *
      * @hide
      */
-    public void setFailureReason(CharSequence failureReason) {
+    public void setFailureReason(String failureReason) {
         mFailureReason = failureReason;
     }
 
@@ -470,7 +468,7 @@ public final class PrintJobInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(mId);
-        parcel.writeCharSequence(mLabel);
+        parcel.writeString(mLabel);
         parcel.writeParcelable(mPrinterId, flags);
         parcel.writeString(mPrinterName);
         parcel.writeInt(mState);
@@ -478,12 +476,7 @@ public final class PrintJobInfo implements Parcelable {
         parcel.writeInt(mUserId);
         parcel.writeString(mTag);
         parcel.writeInt(mCopies);
-        if (mFailureReason != null) {
-            parcel.writeInt(1);
-            parcel.writeCharSequence(mFailureReason);
-        } else {
-            parcel.writeInt(0);
-        }
+        parcel.writeString(mFailureReason);
         if (mPageRanges != null) {
             parcel.writeInt(1);
             parcel.writeParcelableArray(mPageRanges, flags);

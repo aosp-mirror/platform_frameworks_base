@@ -324,7 +324,7 @@ public final class PdfDocument {
             /**
              * Creates a new builder with the mandatory page info attributes.
              *
-             * @param pageSize The page size in pixels.
+             * @param pageSize The page size in points, <strong>not</strong> dips.
              * @param pageNumber The page number.
              * @param density The page density in DPI.
              */
