@@ -1102,7 +1102,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      */
-    public void abortReliableWrite(BluetoothDevice mDevice) {
+    public void abortReliableWrite() {
         if (DBG) Log.d(TAG, "abortReliableWrite() - device: " + mDevice.getAddress());
         if (mService == null || mClientIf == 0) return;
 
@@ -1111,6 +1111,13 @@ public final class BluetoothGatt implements BluetoothProfile {
         } catch (RemoteException e) {
             Log.e(TAG,"",e);
         }
+    }
+
+    /**
+     * @deprecated Use {@link abortReliableWrite()}
+     */
+    public void abortReliableWrite(BluetoothDevice mDevice) {
+        abortReliableWrite();
     }
 
     /**
