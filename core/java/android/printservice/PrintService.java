@@ -76,8 +76,8 @@ import java.util.List;
  * completion, the print job should be marked as completed by calling {@link
  * PrintJob#complete() PrintJob.complete()} after which {@link PrintJob#isCompleted()
  * PrintJob.isCompleted()} would return true. In case of a failure, the print job should
- * be marked as failed by calling {@link PrintJob#fail(CharSequence) PrintJob.fail(
- * CharSequence)} after which {@link PrintJob#isFailed() PrintJob.isFailed()} would
+ * be marked as failed by calling {@link PrintJob#fail(String) PrintJob.fail(
+ * String)} after which {@link PrintJob#isFailed() PrintJob.isFailed()} would
  * return true.
  * </p>
  * <p>
