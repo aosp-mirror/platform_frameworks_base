@@ -438,7 +438,7 @@ public class ActivityManager {
 
     /** @hide */
     public static boolean isLowRamDeviceStatic() {
-        return Resources.getSystem().getBoolean(com.android.internal.R.bool.config_lowRamDevice);
+        return "true".equals(SystemProperties.get("ro.config.low_ram", "false"));
     }
 
     /**
