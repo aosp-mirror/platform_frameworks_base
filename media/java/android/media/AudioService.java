@@ -150,7 +150,6 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_PERSIST_MASTER_VOLUME_MUTE = 12;
     private static final int MSG_REPORT_NEW_ROUTES = 13;
     private static final int MSG_SET_FORCE_BT_A2DP_USE = 14;
-    private static final int MSG_SET_RSX_CONNECTION_STATE = 15; // change remote submix connection
     private static final int MSG_CHECK_MUSIC_ACTIVE = 16;
     private static final int MSG_BROADCAST_AUDIO_BECOMING_NOISY = 17;
     private static final int MSG_CONFIGURE_SAFE_MEDIA_VOLUME = 18;
@@ -2393,26 +2392,6 @@ public class AudioService extends IAudioService.Stub {
         }
     };
 
-    /** see AudioManager.setRemoteSubmixOn(boolean on) */
-    public void setRemoteSubmixOn(boolean on, int address) {
-        sendMsg(mAudioHandler, MSG_SET_RSX_CONNECTION_STATE,
-                SENDMSG_REPLACE /* replace with QUEUE when multiple addresses are supported */,
-                on ? 1 : 0 /*arg1*/,
-                address /*arg2*/,
-                null/*obj*/, 0/*delay*/);
-    }
-
-    private void onSetRsxConnectionState(int available, int address) {
-        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_IN_REMOTE_SUBMIX,
-                available == 1 ?
-                        AudioSystem.DEVICE_STATE_AVAILABLE : AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                String.valueOf(address) /*device_address*/);
-        AudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_REMOTE_SUBMIX,
-                available == 1 ?
-                        AudioSystem.DEVICE_STATE_AVAILABLE : AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                String.valueOf(address) /*device_address*/);
-    }
-
     private void onCheckMusicActive() {
         synchronized (mSafeMediaVolumeState) {
             if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_INACTIVE) {
@@ -3599,10 +3578,6 @@ public class AudioService extends IAudioService.Stub {
                     mRoutesObservers.finishBroadcast();
                     break;
                 }
-
-                case MSG_SET_RSX_CONNECTION_STATE:
-                    onSetRsxConnectionState(msg.arg1/*available*/, msg.arg2/*address*/);
-                    break;
 
                 case MSG_CHECK_MUSIC_ACTIVE:
                     onCheckMusicActive();
