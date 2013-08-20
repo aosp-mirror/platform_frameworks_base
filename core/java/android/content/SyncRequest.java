@@ -20,20 +20,19 @@ import android.accounts.Account;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Pair;
 
 public class SyncRequest implements Parcelable {
     private static final String TAG = "SyncRequest";
-    /** Account to pass to the sync adapter. Can be null. */
+    /** Account to pass to the sync adapter. May be null. */
     private final Account mAccountToSync;
     /** Authority string that corresponds to a ContentProvider. */
     private final String mAuthority;
-    /** {@link SyncService} identifier. */
+    /** Sync service identifier. May be null.*/
     private final ComponentName mComponentInfo;
     /** Bundle containing user info as well as sync settings. */
     private final Bundle mExtras;
-    /** Allow this sync request on metered networks. */
-    private final boolean mAllowMetered;
+    /** Disallow this sync request on metered networks. */
+    private final boolean mDisallowMetered;
     /**
      * Anticipated upload size in bytes.
      * TODO: Not yet used - we put this information into the bundle for simplicity.
@@ -70,14 +69,18 @@ public class SyncRequest implements Parcelable {
         return mIsPeriodic;
     }
 
+    /**
+     * {@hide}
+     * @return whether this is an expedited sync.
+     */
     public boolean isExpedited() {
         return mIsExpedited;
     }
 
     /**
      * {@hide}
-     * @return true if this sync uses an account/authority pair, or false if
-     *         this is an anonymous sync bound to an @link AnonymousSyncService.
+     * @return true if this sync uses an account/authority pair, or false if this sync is bound to
+     * a Sync Service.
      */
     public boolean hasAuthority() {
         return mIsAuthority;
@@ -85,31 +88,30 @@ public class SyncRequest implements Parcelable {
 
     /**
      * {@hide}
-     * Throws a runtime IllegalArgumentException if this function is called for an
-     * anonymous sync.
-     *
-     * @return (Account, Provider) for this SyncRequest.
+     * @return account object for this sync.
+     * @throws IllegalArgumentException if this function is called for a request that does not
+     * specify an account/provider authority.
      */
-    public Pair<Account, String> getProviderInfo() {
+    public Account getAccount() {
         if (!hasAuthority()) {
-            throw new IllegalArgumentException("Cannot getProviderInfo() for an anonymous sync.");
+            throw new IllegalArgumentException("Cannot getAccount() for a sync that does not"
+                    + "specify an authority.");
         }
-        return Pair.create(mAccountToSync, mAuthority);
+        return mAccountToSync;
     }
 
     /**
      * {@hide}
-     * Throws a runtime IllegalArgumentException if this function is called for a
-     * SyncRequest that is bound to an account/provider.
-     *
-     * @return ComponentName for the service that this sync will bind to.
+     * @return provider for this sync.
+     * @throws IllegalArgumentException if this function is called for a request that does not
+     * specify an account/provider authority.
      */
-    public ComponentName getService() {
-        if (hasAuthority()) {
-            throw new IllegalArgumentException(
-                    "Cannot getAnonymousService() for a sync that has specified a provider.");
+    public String getProvider() {
+        if (!hasAuthority()) {
+            throw new IllegalArgumentException("Cannot getProvider() for a sync that does not"
+                    + "specify a provider.");
         }
-        return mComponentInfo;
+        return mAuthority;
     }
 
     /**
@@ -127,6 +129,7 @@ public class SyncRequest implements Parcelable {
     public long getSyncFlexTime() {
         return mSyncFlexTimeSecs;
     }
+
     /**
      * {@hide}
      * @return the last point in time at which this sync must scheduled.
@@ -159,7 +162,7 @@ public class SyncRequest implements Parcelable {
         parcel.writeLong(mSyncFlexTimeSecs);
         parcel.writeLong(mSyncRunTimeSecs);
         parcel.writeInt((mIsPeriodic ? 1 : 0));
-        parcel.writeInt((mAllowMetered ? 1 : 0));
+        parcel.writeInt((mDisallowMetered ? 1 : 0));
         parcel.writeLong(mTxBytes);
         parcel.writeLong(mRxBytes);
         parcel.writeInt((mIsAuthority ? 1 : 0));
@@ -177,7 +180,7 @@ public class SyncRequest implements Parcelable {
         mSyncFlexTimeSecs = in.readLong();
         mSyncRunTimeSecs = in.readLong();
         mIsPeriodic = (in.readInt() != 0);
-        mAllowMetered = (in.readInt() != 0);
+        mDisallowMetered = (in.readInt() != 0);
         mTxBytes = in.readLong();
         mRxBytes = in.readLong();
         mIsAuthority = (in.readInt() != 0);
@@ -207,13 +210,13 @@ public class SyncRequest implements Parcelable {
         // For now we merge the sync config extras & the custom extras into one bundle.
         // TODO: pass the configuration extras through separately.
         mExtras.putAll(b.mSyncConfigExtras);
-        mAllowMetered = b.mAllowMetered;
+        mDisallowMetered = b.mDisallowMetered;
         mTxBytes = b.mTxBytes;
         mRxBytes = b.mRxBytes;
     }
 
     /**
-     * Builder class for a @link SyncRequest. As you build your SyncRequest this class will also
+     * Builder class for a {@link SyncRequest}. As you build your SyncRequest this class will also
      * perform validation.
      */
     public static class Builder {
@@ -229,12 +232,9 @@ public class SyncRequest implements Parcelable {
         private static final int SYNC_TARGET_SERVICE = 1;
         /** Specify that this is a sync with a provider. */
         private static final int SYNC_TARGET_ADAPTER = 2;
-        /**
-         * Earliest point of displacement into the future at which this sync can
-         * occur.
-         */
+        /** Earliest point of displacement into the future at which this sync can occur. */
         private long mSyncFlexTimeSecs;
-        /** Displacement into the future at which this sync must occur. */
+        /** Latest point of displacement into the future at which this sync must occur. */
         private long mSyncRunTimeSecs;
         /**
          * Sync configuration information - custom user data explicitly provided by the developer.
@@ -253,7 +253,7 @@ public class SyncRequest implements Parcelable {
         /** Expected download transfer in bytes. */
         private long mRxBytes = -1L;
         /** Whether or not this sync can occur on metered networks. Default false. */
-        private boolean mAllowMetered;
+        private boolean mDisallowMetered;
         /** Priority of this sync relative to others from calling app [-2, 2]. Default 0. */
         private int mPriority = 0;
         /**
@@ -283,9 +283,8 @@ public class SyncRequest implements Parcelable {
         private boolean mExpedited;
 
         /**
-         * The {@link SyncService} component that
-         * contains the sync logic if this is a provider-less sync, otherwise
-         * null.
+         * The sync component that contains the sync logic if this is a provider-less sync,
+         * otherwise null.
          */
         private ComponentName mComponentName;
         /**
@@ -303,46 +302,28 @@ public class SyncRequest implements Parcelable {
         }
 
         /**
-         * Developer can define timing constraints for this one-shot request.
-         * These values are elapsed real-time.
-         *
-         * @param whenSeconds The time in seconds at which you want this
-         *            sync to occur.
-         * @param beforeSeconds The amount of time in advance of whenSeconds that this
-         *               sync may be permitted to occur. This is rounded up to a minimum of 5
-         *               seconds, for any sync for which whenSeconds > 5.
+         * Request that a sync occur immediately.
          *
          * Example
          * <pre>
-         *     Perform an immediate sync.
-         *     SyncRequest.Builder builder = (new SyncRequest.Builder()).syncOnce(0, 0);
-         *     That is, a sync 0 seconds from now with 0 seconds of flex.
-         *
-         *     Perform a sync in exactly 5 minutes.
-         *     SyncRequest.Builder builder =
-         *       new SyncRequest.Builder().syncOnce(5 * MIN_IN_SECS, 0);
-         *
-         *     Perform a sync in 5 minutes, with one minute of leeway (between 4 and 5 minutes from
-         *     now).
-         *     SyncRequest.Builder builder =
-         *       new SyncRequest.Builder().syncOnce(5 * MIN_IN_SECS, 1 * MIN_IN_SECS);
+         *     SyncRequest.Builder builder = (new SyncRequest.Builder()).syncOnce();
          * </pre>
          */
-        public Builder syncOnce(long whenSeconds, long beforeSeconds) {
+        public Builder syncOnce() {
             if (mSyncType != SYNC_TYPE_UNKNOWN) {
                 throw new IllegalArgumentException("Sync type has already been defined.");
             }
             mSyncType = SYNC_TYPE_ONCE;
-            setupInterval(whenSeconds, beforeSeconds);
+            setupInterval(0, 0);
             return this;
         }
 
         /**
          * Build a periodic sync. Either this or syncOnce() <b>must</b> be called for this builder.
-         * Syncs are identified by target {@link SyncService}/{@link android.provider} and by the
-         * contents of the extras bundle.
-         * You cannot reuse the same builder for one-time syncs after having specified a periodic
-         * sync (by calling this function). If you do, an <code>IllegalArgumentException</code>
+         * Syncs are identified by target {@link android.provider}/{@link android.accounts.Account}
+         * and by the contents of the extras bundle.
+         * You cannot reuse the same builder for one-time syncs (by calling this function) after
+         * having specified a periodic sync. If you do, an <code>IllegalArgumentException</code>
          * will be thrown.
          *
          * Example usage.
@@ -394,6 +375,7 @@ public class SyncRequest implements Parcelable {
         }
 
         /**
+         * {@hide}
          * Developer can provide insight into their payload size; optional. -1 specifies unknown,
          * so that you are not restricted to defining both fields.
          *
@@ -407,21 +389,20 @@ public class SyncRequest implements Parcelable {
         }
 
         /**
-         * @param allow false to allow this transfer on metered networks. Default true.
+         * @see android.net.ConnectivityManager#isActiveNetworkMetered()
+         * @param disallow true to enforce that this transfer not occur on metered networks.
+         *                 Default false.
          */
-        public Builder setAllowMetered(boolean allow) {
-            mAllowMetered = true;
+        public Builder setDisallowMetered(boolean disallow) {
+            mDisallowMetered = disallow;
             return this;
         }
 
         /**
-         * Specify an authority and account for this transfer. Cannot be used with
-         * {@link #setSyncAdapter(ComponentName cname)}.
+         * Specify an authority and account for this transfer.
          *
-         * @param authority
-         * @param account Account to sync. Can be null unless this is a periodic
-         *            sync, for which verification by the ContentResolver will
-         *            fail. If a sync is performed without an account, the
+         * @param authority String identifying which content provider to sync.
+         * @param account Account to sync. Can be null unless this is a periodic sync.
          */
         public Builder setSyncAdapter(Account account, String authority) {
             if (mSyncTarget != SYNC_TARGET_UNKNOWN) {
@@ -435,26 +416,10 @@ public class SyncRequest implements Parcelable {
         }
 
         /**
-         * Specify the {@link SyncService} component for this sync. This is not validated until
-         * sync time so providing an incorrect component name here will not fail. Cannot be used
-         * with {@link #setSyncAdapter(Account account, String authority)}.
-         *
-         * @param cname ComponentName to identify your Anonymous service
-         */
-        public Builder setSyncAdapter(ComponentName cname) {
-            if (mSyncTarget != SYNC_TARGET_UNKNOWN) {
-                throw new IllegalArgumentException("Sync target has already been defined.");
-            }
-            mSyncTarget = SYNC_TARGET_SERVICE;
-            mComponentName = cname;
-            mAccount = null;
-            mAuthority = null;
-            return this;
-        }
-
-        /**
-         * Developer-provided extras handed back when sync actually occurs. This bundle is copied
-         * into the SyncRequest returned by {@link #build()}.
+         * Optional developer-provided extras handed back in
+         * {@link AbstractThreadedSyncAdapter#onPerformSync(Account, Bundle, String,
+         * ContentProviderClient, SyncResult)} occurs. This bundle is copied into the SyncRequest
+         * returned by {@link #build()}.
          *
          * Example:
          * <pre>
@@ -468,7 +433,7 @@ public class SyncRequest implements Parcelable {
          *     Bundle extras = new Bundle();
          *     extras.setString("data", syncData);
          *     builder.setExtras(extras);
-         *     ContentResolver.sync(builder.build()); // Each sync() request creates a unique sync.
+         *     ContentResolver.sync(builder.build()); // Each sync() request is for a unique sync.
          *   }
          * </pre>
          * Only values of the following types may be used in the extras bundle:
@@ -509,7 +474,8 @@ public class SyncRequest implements Parcelable {
         /**
          * Convenience function for setting {@link ContentResolver#SYNC_EXTRAS_IGNORE_SETTINGS}.
          *
-         * Not valid for periodic sync and will throw an <code>IllegalArgumentException</code> in
+         * A sync can specify that system sync settings be ignored (user has turned sync off). Not
+         * valid for periodic sync and will throw an <code>IllegalArgumentException</code> in
          * {@link #build()}.
          *
          * @param ignoreSettings true to ignore the sync automatically settings. Default false.
@@ -522,13 +488,13 @@ public class SyncRequest implements Parcelable {
         /**
          * Convenience function for setting {@link ContentResolver#SYNC_EXTRAS_IGNORE_BACKOFF}.
          *
-         * Ignoring back-off will force the sync scheduling process to ignore any back-off that was
-         * the result of a failed sync, as well as to invalidate any {@link SyncResult#delayUntil}
-         * value that may have been set by the adapter. Successive failures will not honor this
-         * flag. Not valid for periodic sync and will throw an <code>IllegalArgumentException</code>
-         * in {@link #build()}.
+         * Force the sync scheduling process to ignore any back-off that was the result of a failed
+         * sync, as well as to invalidate any {@link SyncResult#delayUntil} value that may have
+         * been set by the adapter. Successive failures will not honor this flag. Not valid for
+         * periodic sync and will throw an <code>IllegalArgumentException</code> in
+         * {@link #build()}.
          *
-         * @param ignoreBackoff ignore back off settings. Default false.
+         * @param ignoreBackoff ignore back-off settings. Default false.
          */
         public Builder setIgnoreBackoff(boolean ignoreBackoff) {
             mIgnoreBackoff = ignoreBackoff;
@@ -538,8 +504,9 @@ public class SyncRequest implements Parcelable {
         /**
          * Convenience function for setting {@link ContentResolver#SYNC_EXTRAS_MANUAL}.
          *
-         * Not valid for periodic sync and will throw an <code>IllegalArgumentException</code> in
-         * {@link #build()}.
+         * A manual sync is functionally equivalent to calling {@link #setIgnoreBackoff(boolean)}
+         * and {@link #setIgnoreSettings(boolean)}. Not valid for periodic sync and will throw an
+         * <code>IllegalArgumentException</code> in {@link #build()}.
          *
          * @param isManual User-initiated sync or not. Default false.
          */
@@ -549,7 +516,7 @@ public class SyncRequest implements Parcelable {
         }
 
         /**
-         * An expedited sync runs immediately and can preempt other non-expedited running syncs.
+         * An expedited sync runs immediately and will preempt another non-expedited running sync.
          *
          * Not valid for periodic sync and will throw an <code>IllegalArgumentException</code> in
          * {@link #build()}.
@@ -562,6 +529,7 @@ public class SyncRequest implements Parcelable {
         }
 
         /**
+         * {@hide}
          * @param priority the priority of this request among all requests from the calling app.
          * Range of [-2,2] similar to how this is done with notifications.
          */
@@ -581,18 +549,18 @@ public class SyncRequest implements Parcelable {
          *         builder.
          */
         public SyncRequest build() {
-            // Validate the extras bundle
-            ContentResolver.validateSyncExtrasBundle(mCustomExtras);
             if (mCustomExtras == null) {
                 mCustomExtras = new Bundle();
             }
+            // Validate the extras bundle
+            ContentResolver.validateSyncExtrasBundle(mCustomExtras);
             // Combine builder extra flags into the config bundle.
             mSyncConfigExtras = new Bundle();
             if (mIgnoreBackoff) {
                 mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, true);
             }
-            if (mAllowMetered) {
-                mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_ALLOW_METERED, true);
+            if (mDisallowMetered) {
+                mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_DISALLOW_METERED, true);
             }
             if (mIgnoreSettings) {
                 mSyncConfigExtras.putBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, true);
@@ -613,13 +581,22 @@ public class SyncRequest implements Parcelable {
                 // If this is a periodic sync ensure than invalid extras were not set.
                 validatePeriodicExtras(mCustomExtras);
                 validatePeriodicExtras(mSyncConfigExtras);
+                // Verify that account and provider are not null.
+                if (mAccount == null) {
+                    throw new IllegalArgumentException("Account must not be null for periodic"
+                            + " sync.");
+                }
+                if (mAuthority == null) {
+                    throw new IllegalArgumentException("Authority must not be null for periodic"
+                            + " sync.");
+                }
             } else if (mSyncType == SYNC_TYPE_UNKNOWN) {
                 throw new IllegalArgumentException("Must call either syncOnce() or syncPeriodic()");
             }
             // Ensure that a target for the sync has been set.
             if (mSyncTarget == SYNC_TARGET_UNKNOWN) {
-                throw new IllegalArgumentException("Must specify an adapter with one of"
-                    + "setSyncAdapter(ComponentName) or setSyncAdapter(Account, String");
+                throw new IllegalArgumentException("Must specify an adapter with "
+                        + "setSyncAdapter(Account, String");
             }
             return new SyncRequest(this);
         }

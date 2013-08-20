@@ -29,17 +29,13 @@ public class PeriodicSync implements Parcelable {
     public final Account account;
     /** The authority of the sync. Can be null. */
     public final String authority;
-    /** The service for syncing, if this is an anonymous sync. Can be null.*/
-    public final ComponentName service;
     /** Any extras that parameters that are to be passed to the sync adapter. */
     public final Bundle extras;
     /** How frequently the sync should be scheduled, in seconds. Kept around for API purposes. */
     public final long period;
-    /** Whether this periodic sync uses a service. */
-    public final boolean isService;
     /**
-     * How much flexibility can be taken in scheduling the sync, in seconds.
      * {@hide}
+     * How much flexibility can be taken in scheduling the sync, in seconds.
      */
     public final long flexTime;
 
@@ -52,76 +48,44 @@ public class PeriodicSync implements Parcelable {
     public PeriodicSync(Account account, String authority, Bundle extras, long periodInSeconds) {
         this.account = account;
         this.authority = authority;
-        this.service = null;
-        this.isService = false;
         if (extras == null) {
             this.extras = new Bundle();
         } else {
             this.extras = new Bundle(extras);
         }
         this.period = periodInSeconds;
-        // Old API uses default flex time. No-one should be using this ctor anyway.
+        // Initialise to a sane value.
         this.flexTime = 0L;
     }
 
-    // TODO: Add copy ctor from SyncRequest?
-
     /**
-     * Create a copy of a periodic sync.
      * {@hide}
+     * Create a copy of a periodic sync.
      */
     public PeriodicSync(PeriodicSync other) {
         this.account = other.account;
         this.authority = other.authority;
-        this.service = other.service;
-        this.isService = other.isService;
         this.extras = new Bundle(other.extras);
         this.period = other.period;
         this.flexTime = other.flexTime;
     }
 
     /**
-     * A PeriodicSync for a sync with a specified provider.
      * {@hide}
+     * A PeriodicSync for a sync with a specified provider.
      */
     public PeriodicSync(Account account, String authority, Bundle extras,
             long period, long flexTime) {
         this.account = account;
         this.authority = authority;
-        this.service = null;
-        this.isService = false;
-        this.extras = new Bundle(extras);
-        this.period = period;
-        this.flexTime = flexTime;
-    }
-
-    /**
-     * A PeriodicSync for a sync with a specified SyncService.
-     * {@hide}
-     */
-    public PeriodicSync(ComponentName service, Bundle extras,
-            long period,
-            long flexTime) {
-        this.account = null;
-        this.authority = null;
-        this.service = service;
-        this.isService = true;
         this.extras = new Bundle(extras);
         this.period = period;
         this.flexTime = flexTime;
     }
 
     private PeriodicSync(Parcel in) {
-        this.isService = (in.readInt() != 0);
-        if (this.isService) {
-            this.service = in.readParcelable(null);
-            this.account = null;
-            this.authority = null;
-        } else {
-            this.account = in.readParcelable(null);
-            this.authority = in.readString();
-            this.service = null;
-        }
+        this.account = in.readParcelable(null);
+        this.authority = in.readString();
         this.extras = in.readBundle();
         this.period = in.readLong();
         this.flexTime = in.readLong();
@@ -134,13 +98,8 @@ public class PeriodicSync implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(isService ? 1 : 0);
-        if (account == null && authority == null) {
-            dest.writeParcelable(service, flags);
-        } else {
-            dest.writeParcelable(account, flags);
-            dest.writeString(authority);
-        }
+        dest.writeParcelable(account, flags);
+        dest.writeString(authority);
         dest.writeBundle(extras);
         dest.writeLong(period);
         dest.writeLong(flexTime);
@@ -167,17 +126,8 @@ public class PeriodicSync implements Parcelable {
             return false;
         }
         final PeriodicSync other = (PeriodicSync) o;
-        if (this.isService != other.isService) {
-            return false;
-        }
-        boolean equal = false;
-        if (this.isService) {
-            equal = service.equals(other.service);
-        } else {
-            equal = account.equals(other.account)
-                    && authority.equals(other.authority);
-        }
-        return equal
+        return account.equals(other.account)
+            && authority.equals(other.authority)
             && period == other.period
             && syncExtrasEquals(extras, other.extras);
     }
@@ -208,7 +158,6 @@ public class PeriodicSync implements Parcelable {
     public String toString() {
         return "account: " + account +
                ", authority: " + authority +
-               ", service: " + service +
                ". period: " + period + "s " +
                ", flex: " + flexTime;
     }
