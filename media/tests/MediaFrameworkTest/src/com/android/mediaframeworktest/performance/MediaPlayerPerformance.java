@@ -86,9 +86,9 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
     private Writer mProcMemWriter;
     private Writer mMemWriter;
 
-    private CamcorderProfile mCamcorderProfile = CamcorderProfile.get(CAMERA_ID);
-    private int mVideoWidth = mCamcorderProfile.videoFrameWidth;
-    private int mVideoHeight = mCamcorderProfile.videoFrameHeight;
+    private CamcorderProfile mCamcorderProfile;
+    private int mVideoWidth;
+    private int mVideoHeight;
 
     Camera mCamera;
 
@@ -99,6 +99,12 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        //Check if the device support the camcorder
+        CamcorderProfile mCamcorderProfile = CamcorderProfile.get(CAMERA_ID);
+        if (mCamcorderProfile != null) {
+            mVideoWidth = mCamcorderProfile.videoFrameWidth;
+            mVideoHeight = mCamcorderProfile.videoFrameHeight;
+        }
         //Insert a 2 second before launching the test activity. This is
         //the workaround for the race condition of requesting the updated surface.
         Thread.sleep(2000);
@@ -332,7 +338,7 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
         // USER     PID   PPID  VSIZE  RSS     WCHAN    PC         NAME
         // media     131   1     13676  4796  ffffffff 400b1bd0 S media.log
         // media     219   131   37768  6892  ffffffff 400b236c S /system/bin/mediaserver
-        String memusage = poList[2].concat("\n");
+        String memusage = poList[poList.length-1].concat("\n");
         return memusage;
     }
 
@@ -410,59 +416,65 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
     // Test case 4: Capture the memory usage after every 20 video only recorded
     @LargeTest
     public void testH263RecordVideoOnlyMemoryUsage() throws Exception {
-        boolean memoryResult = false;
-        mStartPid = getMediaserverPid();
-        int frameRate = MediaProfileReader.getMaxFrameRateForCodec(MediaRecorder.VideoEncoder.H263);
-        assertTrue("H263 video recording frame rate", frameRate != -1);
-        for (int i = 0; i < NUM_STRESS_LOOP; i++) {
-            assertTrue(stressVideoRecord(frameRate, mVideoWidth, mVideoHeight,
-                    MediaRecorder.VideoEncoder.H263, MediaRecorder.OutputFormat.MPEG_4,
-                    MediaNames.RECORDED_VIDEO_3GP, true));
-            getMemoryWriteToLog(i);
-            writeProcmemInfo();
+        if (mCamcorderProfile != null) {
+            boolean memoryResult = false;
+            mStartPid = getMediaserverPid();
+            int frameRate = MediaProfileReader
+                    .getMaxFrameRateForCodec(MediaRecorder.VideoEncoder.H263);
+            assertTrue("H263 video recording frame rate", frameRate != -1);
+            for (int i = 0; i < NUM_STRESS_LOOP; i++) {
+                assertTrue(stressVideoRecord(frameRate, mVideoWidth, mVideoHeight,
+                        MediaRecorder.VideoEncoder.H263, MediaRecorder.OutputFormat.MPEG_4,
+                        MediaNames.RECORDED_VIDEO_3GP, true));
+                getMemoryWriteToLog(i);
+                writeProcmemInfo();
+            }
+            memoryResult = validateMemoryResult(mStartPid, mStartMemory, ENCODER_LIMIT);
+            assertTrue("H263 record only memory test", memoryResult);
         }
-        memoryResult = validateMemoryResult(mStartPid, mStartMemory, ENCODER_LIMIT);
-        assertTrue("H263 record only memory test", memoryResult);
     }
 
     // Test case 5: Capture the memory usage after every 20 video only recorded
     @LargeTest
     public void testMpeg4RecordVideoOnlyMemoryUsage() throws Exception {
-        boolean memoryResult = false;
-
-        mStartPid = getMediaserverPid();
-        int frameRate = MediaProfileReader.getMaxFrameRateForCodec
-                (MediaRecorder.VideoEncoder.MPEG_4_SP);
-        assertTrue("MPEG4 video recording frame rate", frameRate != -1);
-        for (int i = 0; i < NUM_STRESS_LOOP; i++) {
-            assertTrue(stressVideoRecord(frameRate, mVideoWidth, mVideoHeight,
-                    MediaRecorder.VideoEncoder.MPEG_4_SP, MediaRecorder.OutputFormat.MPEG_4,
-                    MediaNames.RECORDED_VIDEO_3GP, true));
-            getMemoryWriteToLog(i);
-            writeProcmemInfo();
+        if (mCamcorderProfile != null) {
+            boolean memoryResult = false;
+            mStartPid = getMediaserverPid();
+            int frameRate = MediaProfileReader.getMaxFrameRateForCodec
+                    (MediaRecorder.VideoEncoder.MPEG_4_SP);
+            assertTrue("MPEG4 video recording frame rate", frameRate != -1);
+            for (int i = 0; i < NUM_STRESS_LOOP; i++) {
+                assertTrue(stressVideoRecord(frameRate, mVideoWidth, mVideoHeight,
+                        MediaRecorder.VideoEncoder.MPEG_4_SP, MediaRecorder.OutputFormat.MPEG_4,
+                        MediaNames.RECORDED_VIDEO_3GP, true));
+                getMemoryWriteToLog(i);
+                writeProcmemInfo();
+            }
+            memoryResult = validateMemoryResult(mStartPid, mStartMemory, ENCODER_LIMIT);
+            assertTrue("mpeg4 record only memory test", memoryResult);
         }
-        memoryResult = validateMemoryResult(mStartPid, mStartMemory, ENCODER_LIMIT);
-        assertTrue("mpeg4 record only memory test", memoryResult);
     }
 
     // Test case 6: Capture the memory usage after every 20 video and audio
     // recorded
     @LargeTest
     public void testRecordVideoAudioMemoryUsage() throws Exception {
-        boolean memoryResult = false;
-
-        mStartPid = getMediaserverPid();
-        int frameRate = MediaProfileReader.getMaxFrameRateForCodec(MediaRecorder.VideoEncoder.H263);
-        assertTrue("H263 video recording frame rate", frameRate != -1);
-        for (int i = 0; i < NUM_STRESS_LOOP; i++) {
-            assertTrue(stressVideoRecord(frameRate, mVideoWidth, mVideoHeight,
-                    MediaRecorder.VideoEncoder.H263, MediaRecorder.OutputFormat.MPEG_4,
-                    MediaNames.RECORDED_VIDEO_3GP, false));
-            getMemoryWriteToLog(i);
-            writeProcmemInfo();
+        if (mCamcorderProfile != null) {
+            boolean memoryResult = false;
+            mStartPid = getMediaserverPid();
+            int frameRate = MediaProfileReader
+                    .getMaxFrameRateForCodec(MediaRecorder.VideoEncoder.H263);
+            assertTrue("H263 video recording frame rate", frameRate != -1);
+            for (int i = 0; i < NUM_STRESS_LOOP; i++) {
+                assertTrue(stressVideoRecord(frameRate, mVideoWidth, mVideoHeight,
+                        MediaRecorder.VideoEncoder.H263, MediaRecorder.OutputFormat.MPEG_4,
+                        MediaNames.RECORDED_VIDEO_3GP, false));
+                getMemoryWriteToLog(i);
+                writeProcmemInfo();
+            }
+            memoryResult = validateMemoryResult(mStartPid, mStartMemory, ENCODER_LIMIT);
+            assertTrue("H263 audio video record memory test", memoryResult);
         }
-        memoryResult = validateMemoryResult(mStartPid, mStartMemory, ENCODER_LIMIT);
-        assertTrue("H263 audio video record memory test", memoryResult);
     }
 
     // Test case 7: Capture the memory usage after every 20 audio only recorded
