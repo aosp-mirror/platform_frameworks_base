@@ -1128,6 +1128,11 @@
     <string name="permdesc_anyCodecForPlayback">Allows the app to use any installed
         media decoder to decode for playback.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. This permission allows the app to install or uninstall trusted credentials, a.k.a. CA certificates. [CHAR LIMIT=NONE] -->
+    <string name="permlab_manageCaCertificates">manage trusted credentials</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE]-->
+    <string name="permdesc_manageCaCertificates">Allows the app to install and uninstall CA certificates as trusted credentials.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_diagnostic">read/write to resources owned by diag</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

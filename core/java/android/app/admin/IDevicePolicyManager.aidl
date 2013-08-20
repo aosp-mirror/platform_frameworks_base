@@ -102,4 +102,7 @@ interface IDevicePolicyManager {
     boolean isDeviceOwner(String packageName);
     String getDeviceOwner();
     String getDeviceOwnerName();
+
+    boolean installCaCert(in byte[] certBuffer);
+    void uninstallCaCert(in byte[] certBuffer);
 }
