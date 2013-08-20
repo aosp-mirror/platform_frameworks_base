@@ -202,7 +202,7 @@ private:
 // since we "may" create a purgeable imageref, we require the stream be ref'able
 // i.e. dynamically allocated, since its lifetime may exceed the current stack
 // frame.
-static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
+static jobject doDecode(JNIEnv* env, SkStreamRewindable* stream, jobject padding,
         jobject options, bool allowPurgeable, bool forcePurgeable = false) {
 
     int sampleSize = 1;
@@ -459,24 +459,15 @@ static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteA
         jobject padding, jobject options) {
 
     jobject bitmap = NULL;
-    SkStream* stream = CreateJavaInputStreamAdaptor(env, is, storage, 0);
+    SkAutoTUnref<SkStreamRewindable> stream(GetRewindableStream(env, is, storage));
 
-    if (stream) {
+    if (stream.get()) {
         // for now we don't allow purgeable with java inputstreams
+        // FIXME: GetRewindableStream may have made a copy, in which case
+        // purgeable should be allowed.
         bitmap = doDecode(env, stream, padding, options, false, false);
-        stream->unref();
     }
     return bitmap;
-}
-
-static ssize_t getFDSize(int fd) {
-    off64_t curr = ::lseek64(fd, 0, SEEK_CUR);
-    if (curr < 0) {
-        return 0;
-    }
-    size_t size = ::lseek(fd, 0, SEEK_END);
-    ::lseek64(fd, curr, SEEK_SET);
-    return size;
 }
 
 static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fileDescriptor,
@@ -512,44 +503,16 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz, jobject fi
     return doDecode(env, stream, padding, bitmapFactoryOptions, weOwnTheFD);
 }
 
-/*  make a deep copy of the asset, and return it as a stream, or NULL if there
-    was an error.
- */
-static SkStream* copyAssetToStream(Asset* asset) {
-    // if we could "ref/reopen" the asset, we may not need to copy it here
-    off64_t size = asset->seek(0, SEEK_SET);
-    if ((off64_t)-1 == size) {
-        SkDebugf("---- copyAsset: asset rewind failed\n");
-        return NULL;
-    }
-
-    size = asset->getLength();
-    if (size <= 0) {
-        SkDebugf("---- copyAsset: asset->getLength() returned %d\n", size);
-        return NULL;
-    }
-
-    SkStream* stream = new SkMemoryStream(size);
-    void* data = const_cast<void*>(stream->getMemoryBase());
-    off64_t len = asset->read(data, size);
-    if (len != size) {
-        SkDebugf("---- copyAsset: asset->read(%d) returned %d\n", size, len);
-        delete stream;
-        stream = NULL;
-    }
-    return stream;
-}
-
 static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jint native_asset,
         jobject padding, jobject options) {
 
-    SkStream* stream;
+    SkStreamRewindable* stream;
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
     bool forcePurgeable = optionsPurgeable(env, options);
     if (forcePurgeable) {
         // if we could "ref/reopen" the asset, we may not need to copy it here
         // and we could assume optionsShareable, since assets are always RO
-        stream = copyAssetToStream(asset);
+        stream = CopyAssetToStream(asset);
         if (stream == NULL) {
             return NULL;
         }
@@ -559,7 +522,7 @@ static jobject nativeDecodeAsset(JNIEnv* env, jobject clazz, jint native_asset,
         stream = new AssetStreamAdaptor(asset);
     }
     SkAutoUnref aur(stream);
-    return doDecode(env, stream, padding, options, true, forcePurgeable);
+    return doDecode(env, stream, padding, options, forcePurgeable, forcePurgeable);
 }
 
 static jobject nativeDecodeByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
@@ -572,7 +535,7 @@ static jobject nativeDecodeByteArray(JNIEnv* env, jobject, jbyteArray byteArray,
      */
     bool purgeable = optionsPurgeable(env, options) && !optionsJustBounds(env, options);
     AutoJavaByteArray ar(env, byteArray);
-    SkStream* stream = new SkMemoryStream(ar.ptr() + offset, length, purgeable);
+    SkMemoryStream* stream = new SkMemoryStream(ar.ptr() + offset, length, purgeable);
     SkAutoUnref aur(stream);
     return doDecode(env, stream, NULL, options, purgeable);
 }

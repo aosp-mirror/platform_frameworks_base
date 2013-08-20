@@ -23,7 +23,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 
-import java.io.BufferedInputStream;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -545,28 +544,28 @@ public class BitmapFactory {
             return null;
         }
 
-        Bitmap bm;
+        Bitmap bm = null;
 
         Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "decodeBitmap");
         try {
-            // we need mark/reset to work properly
-            if (!is.markSupported()) {
-                is = new BufferedInputStream(is, DECODE_BUFFER_SIZE);
-            }
-
-            // so we can call reset() if a given codec gives up after reading up to
-            // this many bytes. FIXME: need to find out from the codecs what this
-            // value should be.
-            is.mark(1024);
-
+            boolean decodeGenericStream = true;
             if (is instanceof AssetManager.AssetInputStream) {
                 final int asset = ((AssetManager.AssetInputStream) is).getAssetInt();
                 bm = nativeDecodeAsset(asset, outPadding, opts);
-            } else {
-                // pass some temp storage down to the native code. 1024 is made up,
-                // but should be large enough to avoid too many small calls back
-                // into is.read(...) This number is not related to the value passed
-                // to mark(...) above.
+                // Do not follow the normal case.
+                decodeGenericStream = false;
+            } else if (is instanceof FileInputStream) {
+                try {
+                    FileDescriptor fd = ((FileInputStream) is).getFD();
+                    // decodeFileDescriptor will take care of throwing the IAE and
+                    // calling setDensityFromOptions.
+                    return decodeFileDescriptor(fd, outPadding, opts);
+                } catch (IOException e) {
+                    // Fall through to nativeDecodeStream.
+                }
+            }
+
+            if (decodeGenericStream) {
                 byte [] tempStorage = null;
                 if (opts != null) tempStorage = opts.inTempStorage;
                 if (tempStorage == null) tempStorage = new byte[DECODE_BUFFER_SIZE];
@@ -610,26 +609,41 @@ public class BitmapFactory {
      *                   no bitmap is returned (null) then padding is
      *                   unchanged.
      * @param opts null-ok; Options that control downsampling and whether the
-     *             image should be completely decoded, or just is size returned.
+     *             image should be completely decoded, or just its size returned.
      * @return the decoded bitmap, or null
      */
     public static Bitmap decodeFileDescriptor(FileDescriptor fd, Rect outPadding, Options opts) {
-        if (nativeIsSeekable(fd)) {
-            Bitmap bm = nativeDecodeFileDescriptor(fd, outPadding, opts);
+        Bitmap bm;
+
+        Trace.traceBegin(Trace.TRACE_TAG_GRAPHICS, "decodeFileDescriptor");
+        try {
+            if (nativeIsSeekable(fd)) {
+                bm = nativeDecodeFileDescriptor(fd, outPadding, opts);
+            } else {
+                FileInputStream fis = new FileInputStream(fd);
+                // FIXME: If nativeDecodeStream grabbed the pointer to tempStorage
+                // from Options, this code would not need to be duplicated.
+                byte [] tempStorage = null;
+                if (opts != null) tempStorage = opts.inTempStorage;
+                if (tempStorage == null) tempStorage = new byte[DECODE_BUFFER_SIZE];
+                try {
+                    bm = nativeDecodeStream(fis, tempStorage, outPadding, opts);
+                } finally {
+                    try {
+                        fis.close();
+                    } catch (Throwable t) {/* ignore */}
+                }
+            }
+
             if (bm == null && opts != null && opts.inBitmap != null) {
                 throw new IllegalArgumentException("Problem decoding into existing bitmap");
             }
-            return bm;
-        } else {
-            FileInputStream fis = new FileInputStream(fd);
-            try {
-                return decodeStream(fis, outPadding, opts);
-            } finally {
-                try {
-                    fis.close();
-                } catch (Throwable t) {/* ignore */}
-            }
+
+            setDensityFromOptions(bm, opts);
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_GRAPHICS);
         }
+        return bm;
     }
 
     /**

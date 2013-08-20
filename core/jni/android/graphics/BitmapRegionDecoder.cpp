@@ -76,27 +76,6 @@ private:
     int fHeight;
 };
 
-static SkMemoryStream* buildSkMemoryStream(SkStream *stream) {
-    size_t bufferSize = 4096;
-    size_t streamLen = 0;
-    size_t len;
-    char* data = (char*)sk_malloc_throw(bufferSize);
-
-    while ((len = stream->read(data + streamLen,
-                    bufferSize - streamLen)) != 0) {
-        streamLen += len;
-        if (streamLen == bufferSize) {
-            bufferSize *= 2;
-            data = (char*)sk_realloc_throw(data, bufferSize);
-        }
-    }
-    data = (char*)sk_realloc_throw(data, streamLen);
-
-    SkMemoryStream* streamMem = new SkMemoryStream();
-    streamMem->setMemoryOwned(data, streamLen);
-    return streamMem;
-}
-
 static jobject createBitmapRegionDecoder(JNIEnv* env, SkStream* stream) {
     SkImageDecoder* decoder = SkImageDecoder::Factory(stream);
     int width, height;
@@ -161,14 +140,12 @@ static jobject nativeNewInstanceFromStream(JNIEnv* env, jobject clazz,
                                   jbyteArray storage, // byte[]
                                   jboolean isShareable) {
     jobject brd = NULL;
-    SkStream* stream = CreateJavaInputStreamAdaptor(env, is, storage, 1024);
+    // for now we don't allow shareable with java inputstreams
+    SkStream* stream = CopyJavaInputStream(env, is, storage);
 
     if (stream) {
-        // for now we don't allow shareable with java inputstreams
-        SkMemoryStream* mStream = buildSkMemoryStream(stream);
-        brd = createBitmapRegionDecoder(env, mStream);
-        SkSafeUnref(mStream); // the decoder now holds a reference
-        stream->unref();
+        brd = createBitmapRegionDecoder(env, stream);
+        stream->unref(); // the decoder now holds a reference
     }
     return brd;
 }
@@ -176,14 +153,14 @@ static jobject nativeNewInstanceFromStream(JNIEnv* env, jobject clazz,
 static jobject nativeNewInstanceFromAsset(JNIEnv* env, jobject clazz,
                                  jint native_asset, // Asset
                                  jboolean isShareable) {
-    SkStream* stream, *assStream;
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
-    assStream = new AssetStreamAdaptor(asset);
-    stream = buildSkMemoryStream(assStream);
-    assStream->unref();
+    SkAutoTUnref<SkMemoryStream> stream(CopyAssetToStream(asset));
+    if (NULL == stream.get()) {
+        return NULL;
+    }
 
-    jobject brd = createBitmapRegionDecoder(env, stream);
-    SkSafeUnref(stream); // the decoder now holds a reference
+    jobject brd = createBitmapRegionDecoder(env, stream.get());
+    // The decoder now holds a reference to stream.
     return brd;
 }
 
