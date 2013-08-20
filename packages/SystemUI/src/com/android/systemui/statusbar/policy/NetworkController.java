@@ -430,7 +430,8 @@ public class NetworkController extends BroadcastReceiver {
         @Override
         public void onServiceStateChanged(ServiceState state) {
             if (DEBUG) {
-                Log.d(TAG, "onServiceStateChanged state=" + state.getState());
+                Log.d(TAG, "onServiceStateChanged voiceState=" + state.getVoiceRegState()
+                        + " dataState=" + state.getDataRegState());
             }
             mServiceState = state;
             updateTelephonySignalStrength();
@@ -506,10 +507,16 @@ public class NetworkController extends BroadcastReceiver {
 
     private boolean hasService() {
         if (mServiceState != null) {
-            switch (mServiceState.getState()) {
-                case ServiceState.STATE_OUT_OF_SERVICE:
+            // Consider the device to be in service if either voice or data service is available.
+            // Some SIM cards are marketed as data-only and do not support voice service, and on
+            // these SIM cards, we want to show signal bars for data service as well as the "no
+            // service" or "emergency calls only" text that indicates that voice is not available.
+            switch(mServiceState.getVoiceRegState()) {
                 case ServiceState.STATE_POWER_OFF:
                     return false;
+                case ServiceState.STATE_OUT_OF_SERVICE:
+                case ServiceState.STATE_EMERGENCY_ONLY:
+                    return mServiceState.getDataRegState() == ServiceState.STATE_IN_SERVICE;
                 default:
                     return true;
             }
