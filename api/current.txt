@@ -21150,16 +21150,20 @@ package android.provider {
     method public static float getFloat(android.content.ContentResolver, java.lang.String) throws android.provider.Settings.SettingNotFoundException;
     method public static int getInt(android.content.ContentResolver, java.lang.String, int);
     method public static int getInt(android.content.ContentResolver, java.lang.String) throws android.provider.Settings.SettingNotFoundException;
+    method public static final int getLocationMode(android.content.ContentResolver);
+    method public static final int getLocationModeForUser(android.content.ContentResolver, int);
     method public static long getLong(android.content.ContentResolver, java.lang.String, long);
     method public static long getLong(android.content.ContentResolver, java.lang.String) throws android.provider.Settings.SettingNotFoundException;
     method public static java.lang.String getString(android.content.ContentResolver, java.lang.String);
     method public static android.net.Uri getUriFor(java.lang.String);
-    method public static final boolean isLocationProviderEnabled(android.content.ContentResolver, java.lang.String);
+    method public static final deprecated boolean isLocationProviderEnabled(android.content.ContentResolver, java.lang.String);
     method public static boolean putFloat(android.content.ContentResolver, java.lang.String, float);
     method public static boolean putInt(android.content.ContentResolver, java.lang.String, int);
     method public static boolean putLong(android.content.ContentResolver, java.lang.String, long);
     method public static boolean putString(android.content.ContentResolver, java.lang.String, java.lang.String);
-    method public static final void setLocationProviderEnabled(android.content.ContentResolver, java.lang.String, boolean);
+    method public static final void setLocationMode(android.content.ContentResolver, int);
+    method public static final void setLocationModeForUser(android.content.ContentResolver, int, int);
+    method public static final deprecated void setLocationProviderEnabled(android.content.ContentResolver, java.lang.String, boolean);
     field public static final java.lang.String ACCESSIBILITY_ENABLED = "accessibility_enabled";
     field public static final java.lang.String ACCESSIBILITY_SPEAK_PASSWORD = "speak_password";
     field public static final deprecated java.lang.String ADB_ENABLED = "adb_enabled";
@@ -21178,6 +21182,10 @@ package android.provider {
     field public static final deprecated java.lang.String HTTP_PROXY = "http_proxy";
     field public static final java.lang.String INPUT_METHOD_SELECTOR_VISIBILITY = "input_method_selector_visibility";
     field public static final deprecated java.lang.String INSTALL_NON_MARKET_APPS = "install_non_market_apps";
+    field public static final int LOCATION_MODE_BATTERY_SAVING = 2; // 0x2
+    field public static final int LOCATION_MODE_HIGH_ACCURACY = 3; // 0x3
+    field public static final int LOCATION_MODE_OFF = 0; // 0x0
+    field public static final int LOCATION_MODE_SENSORS_ONLY = 1; // 0x1
     field public static final java.lang.String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
     field public static final java.lang.String LOCK_PATTERN_ENABLED = "lock_pattern_autolock";
     field public static final deprecated java.lang.String LOCK_PATTERN_TACTILE_FEEDBACK_ENABLED = "lock_pattern_tactile_feedback_enabled";
