@@ -19038,7 +19038,7 @@ package android.print {
     method public android.print.PrintAttributes getAttributes();
     method public int getCopies();
     method public int getId();
-    method public java.lang.CharSequence getLabel();
+    method public java.lang.String getLabel();
     method public android.print.PageRange[] getPages();
     method public android.print.PrinterId getPrinterId();
     method public int getState();
@@ -19162,7 +19162,7 @@ package android.printservice {
   public final class PrintJob {
     method public boolean cancel();
     method public boolean complete();
-    method public boolean fail(java.lang.CharSequence);
+    method public boolean fail(java.lang.String);
     method public android.printservice.PrintDocument getDocument();
     method public int getId();
     method public android.print.PrintJobInfo getInfo();
@@ -19191,11 +19191,15 @@ package android.printservice {
   }
 
   public abstract class PrinterDiscoverySession {
-    ctor public PrinterDiscoverySession(android.content.Context);
+    ctor public PrinterDiscoverySession();
     method public final void addPrinters(java.util.List<android.print.PrinterInfo>);
-    method public abstract void onClose();
-    method public abstract void onOpen(java.util.List<android.print.PrinterId>);
+    method public final java.util.List<android.print.PrinterInfo> getPrinters();
+    method public final boolean isDestroyed();
+    method public final boolean isPrinterDiscoveryStarted();
+    method public abstract void onDestroy();
     method public abstract void onRequestPrinterUpdate(android.print.PrinterId);
+    method public abstract void onStartPrinterDiscovery(java.util.List<android.print.PrinterId>);
+    method public abstract void onStopPrinterDiscovery();
     method public final void removePrinters(java.util.List<android.print.PrinterId>);
     method public final void updatePrinters(java.util.List<android.print.PrinterInfo>);
   }

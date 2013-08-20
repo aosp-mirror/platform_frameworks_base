@@ -58,10 +58,31 @@
     <!-- Title for the temporary dialog show while an app is generating a print job. [CHAR LIMIT=30] -->
     <string name="generating_print_job">Generating print job</string>
 
-    <!-- Choose printer activity -->
+    <!-- Title for the save as PDF option in the printer list. [CHAR LIMIT=30] -->
+    <string name="save_as_pdf">Save as PDF</string>
+
+    <!-- Title for the open all printers UI option in the printer list. [CHAR LIMIT=30] -->
+    <string name="all_printers">All printers\.\.\.</string>
+
+    <!-- Title for the searching for printers option in the printer list
+         (only option if not printers are available). [CHAR LIMIT=40] -->
+    <string name="searching_for_printers">Searching for printers\.\.\.</string>
+
+    <!-- Select printer activity -->
 
     <!-- Title for the share action bar menu item. [CHAR LIMIT=20] -->
     <string name="search">Search</string>
+
+    <!-- Title for the select printer activity. [CHAR LIMIT=30] -->
+    <string name="all_printers_label">All printers</string>
+
+    <!-- Add printer dialog  -->
+
+    <!-- Title for the alert dialog for selecting a print service. [CHAR LIMIT=50] -->
+    <string name="choose_print_service">Choose print service</string>
+
+    <!-- Title for the button to search the play store for print services. [CHAR LIMIT=50] -->
+    <string name="search_play_store">Search in play store</string>
 
     <!-- Notifications -->
 

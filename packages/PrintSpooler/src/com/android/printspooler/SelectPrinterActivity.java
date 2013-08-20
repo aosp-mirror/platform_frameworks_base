@@ -17,12 +17,25 @@
 package com.android.printspooler;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.print.PrinterId;
 
-public class ChoosePrinterActivity extends Activity {
+import com.android.printspooler.SelectPrinterFragment.OnPrinterSelectedListener;
+
+public class SelectPrinterActivity extends Activity implements OnPrinterSelectedListener {
 
     @Override
-    public void onCreate(Bundle bundle) {
-        setContentView(R.layout.choose_printer_activity);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.select_printer_activity);
+    }
+
+    @Override
+    public void onPrinterSelected(PrinterId printer) {
+        Intent intent = new Intent();
+        intent.putExtra(PrintJobConfigActivity.INTENT_EXTRA_PRINTER_ID, printer);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 }

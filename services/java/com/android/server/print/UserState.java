@@ -21,8 +21,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.print.IPrinterDiscoverySessionObserver;
 import android.print.PrintJobInfo;
+import android.print.PrinterId;
 import android.printservice.PrintServiceInfo;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -105,7 +105,7 @@ final class UserState implements PrintSpoolerCallbacks {
     }
 
     @Override
-    public void createPrinterDiscoverySession(IPrinterDiscoverySessionObserver observer) {
+    public void createPrinterDiscoverySession() {
         final List<RemotePrintService> services;
         synchronized (mLock) {
             throwIfDestroyedLocked();
@@ -117,7 +117,73 @@ final class UserState implements PrintSpoolerCallbacks {
         final int serviceCount = services.size();
         for (int i = 0; i < serviceCount; i++) {
             RemotePrintService service = services.get(i);
-            service.createPrinterDiscoverySession(observer);
+            service.createPrinterDiscoverySession();
+        }
+    }
+
+    @Override
+    public void destroyPrinterDiscoverySession() {
+        final List<RemotePrintService> services;
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            if (mActiveServices.isEmpty()) {
+                return;
+            }
+            services = new ArrayList<RemotePrintService>(mActiveServices.values());
+        }
+        final int serviceCount = services.size();
+        for (int i = 0; i < serviceCount; i++) {
+            RemotePrintService service = services.get(i);
+            service.destroyPrinterDiscoverySession();
+        }
+    }
+
+    @Override
+    public void startPrinterDiscovery(List<PrinterId> printerIds) {
+        final List<RemotePrintService> services;
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            if (mActiveServices.isEmpty()) {
+                return;
+            }
+            services = new ArrayList<RemotePrintService>(mActiveServices.values());
+        }
+        final int serviceCount = services.size();
+        for (int i = 0; i < serviceCount; i++) {
+            RemotePrintService service = services.get(i);
+            service.startPrinterDiscovery(printerIds);
+        }
+    }
+
+    @Override
+    public void stopPrinterDiscovery() {
+        final List<RemotePrintService> services;
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            if (mActiveServices.isEmpty()) {
+                return;
+            }
+            services = new ArrayList<RemotePrintService>(mActiveServices.values());
+        }
+        final int serviceCount = services.size();
+        for (int i = 0; i < serviceCount; i++) {
+            RemotePrintService service = services.get(i);
+            service.stopPrinterDiscovery();
+        }
+    }
+
+    @Override
+    public void requestPrinterUpdate(PrinterId printerId) {
+        final RemotePrintService service;
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            if (mActiveServices.isEmpty()) {
+                return;
+            }
+            service = mActiveServices.get(printerId.getServiceName());
+        }
+        if (service != null) {
+            service.requestPrinterUpdate(printerId);
         }
     }
 

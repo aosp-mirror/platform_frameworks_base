@@ -16,7 +16,7 @@
 
 package android.printservice;
 
-import android.print.IPrinterDiscoverySessionObserver;
+import android.print.PrinterId;
 import android.print.PrintJobInfo;
 import android.printservice.IPrintServiceClient;
 
@@ -29,5 +29,10 @@ oneway interface IPrintService {
     void setClient(IPrintServiceClient client);
     void requestCancelPrintJob(in PrintJobInfo printJobInfo);
     void onPrintJobQueued(in PrintJobInfo printJobInfo);
-    void createPrinterDiscoverySession(IPrinterDiscoverySessionObserver observer);
+
+    void createPrinterDiscoverySession();
+    void startPrinterDiscovery(in List<PrinterId> priorityList);
+    void stopPrinterDiscovery();
+    void requestPrinterUpdate(in PrinterId printerId);
+    void destroyPrinterDiscoverySession();
 }

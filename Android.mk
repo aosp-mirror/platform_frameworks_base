@@ -162,8 +162,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IVibratorService.aidl \
 	core/java/android/service/notification/INotificationListener.aidl \
 	core/java/android/print/ILayoutResultCallback.aidl \
-	core/java/android/print/IPrinterDiscoverySessionController.aidl \
-	core/java/android/print/IPrinterDiscoverySessionObserver.aidl \
 	core/java/android/print/IPrintDocumentAdapter.aidl \
 	core/java/android/print/IPrintClient.aidl \
 	core/java/android/print/IPrintManager.aidl \
