@@ -41,11 +41,15 @@ enum AudioError {
 
 static int check_AudioSystem_Command(status_t status)
 {
-    if (status == NO_ERROR) {
+    switch (status) {
+    case DEAD_OBJECT:
+        return kAudioStatusMediaServerDied;
+    case NO_ERROR:
         return kAudioStatusOk;
-    } else {
-        return kAudioStatusError;
+    default:
+        break;
     }
+    return kAudioStatusError;
 }
 
 static int
@@ -122,21 +126,9 @@ android_media_AudioSystem_error_callback(status_t err)
 
     jclass clazz = env->FindClass(kClassPathName);
 
-    int error;
-
-    switch (err) {
-    case DEAD_OBJECT:
-        error = kAudioStatusMediaServerDied;
-        break;
-    case NO_ERROR:
-        error = kAudioStatusOk;
-        break;
-    default:
-        error = kAudioStatusError;
-        break;
-    }
-
-    env->CallStaticVoidMethod(clazz, env->GetStaticMethodID(clazz, "errorCallbackFromNative","(I)V"), error);
+    env->CallStaticVoidMethod(clazz, env->GetStaticMethodID(clazz,
+                              "errorCallbackFromNative","(I)V"),
+                              check_AudioSystem_Command(err));
 }
 
 static int
@@ -283,6 +275,12 @@ android_media_AudioSystem_setLowRamDevice(JNIEnv *env, jobject clazz, jboolean i
     return (jint) AudioSystem::setLowRamDevice((bool) isLowRamDevice);
 }
 
+static int
+android_media_AudioSystem_checkAudioFlinger(JNIEnv *env, jobject clazz)
+{
+    return check_AudioSystem_Command(AudioSystem::checkAudioFlinger());
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
@@ -310,6 +308,7 @@ static JNINativeMethod gMethods[] = {
     {"getPrimaryOutputFrameCount",   "()I", (void *)android_media_AudioSystem_getPrimaryOutputFrameCount},
     {"getOutputLatency",    "(I)I",     (void *)android_media_AudioSystem_getOutputLatency},
     {"setLowRamDevice",     "(Z)I",     (void *)android_media_AudioSystem_setLowRamDevice},
+    {"checkAudioFlinger",    "()I",     (void *)android_media_AudioSystem_checkAudioFlinger},
 };
 
 int register_android_media_AudioSystem(JNIEnv *env)
