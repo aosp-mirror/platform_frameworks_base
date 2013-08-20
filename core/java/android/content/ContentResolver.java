@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-
 /**
  * This class provides applications access to the content model.
  *
@@ -328,7 +327,7 @@ public abstract class ContentResolver {
      * content URL can be returned when opened as as stream with
      * {@link #openTypedAssetFileDescriptor}.  Note that the types here are
      * not necessarily a superset of the type returned by {@link #getType} --
-     * many content providers can not return a raw stream for the structured
+     * many content providers cannot return a raw stream for the structured
      * data that they contain.
      *
      * @param url A Uri identifying content (either a list or specific type),
@@ -485,6 +484,9 @@ public abstract class ContentResolver {
             if (qCursor != null) {
                 qCursor.close();
             }
+            if (cancellationSignal != null) {
+                cancellationSignal.setRemote(null);
+            }
             if (unstableProvider != null) {
                 releaseUnstableProvider(unstableProvider);
             }
@@ -531,7 +533,7 @@ public abstract class ContentResolver {
             // with sufficient testing.
             return new FileInputStream(uri.getPath());
         } else {
-            AssetFileDescriptor fd = openAssetFileDescriptor(uri, "r");
+            AssetFileDescriptor fd = openAssetFileDescriptor(uri, "r", null);
             try {
                 return fd != null ? fd.createInputStream() : null;
             } catch (IOException e) {
@@ -571,7 +573,7 @@ public abstract class ContentResolver {
      */
     public final OutputStream openOutputStream(Uri uri, String mode)
             throws FileNotFoundException {
-        AssetFileDescriptor fd = openAssetFileDescriptor(uri, mode);
+        AssetFileDescriptor fd = openAssetFileDescriptor(uri, mode, null);
         try {
             return fd != null ? fd.createOutputStream() : null;
         } catch (IOException e) {
@@ -597,6 +599,15 @@ public abstract class ContentResolver {
      *
      * <p>See {@link #openAssetFileDescriptor(Uri, String)} for more information
      * on these schemes.
+     * <p>
+     * If opening with the exclusive "r" or "w" modes, the returned
+     * ParcelFileDescriptor could be a pipe or socket pair to enable streaming
+     * of data. Opening with the "rw" mode implies a file on disk that supports
+     * seeking. If possible, always use an exclusive mode to give the underlying
+     * {@link ContentProvider} the most flexibility.
+     * <p>
+     * If you are writing a file, and need to communicate an error to the
+     * provider, use {@link ParcelFileDescriptor#closeWithError(String)}.
      *
      * @param uri The desired URI to open.
      * @param mode The file mode to use, as per {@link ContentProvider#openFile
@@ -607,9 +618,54 @@ public abstract class ContentResolver {
      * file exists under the URI or the mode is invalid.
      * @see #openAssetFileDescriptor(Uri, String)
      */
+    public final ParcelFileDescriptor openFileDescriptor(Uri uri, String mode)
+            throws FileNotFoundException {
+        return openFileDescriptor(uri, mode, null);
+    }
+
+    /**
+     * Open a raw file descriptor to access data under a URI.  This
+     * is like {@link #openAssetFileDescriptor(Uri, String)}, but uses the
+     * underlying {@link ContentProvider#openFile}
+     * ContentProvider.openFile()} method, so will <em>not</em> work with
+     * providers that return sub-sections of files.  If at all possible,
+     * you should use {@link #openAssetFileDescriptor(Uri, String)}.  You
+     * will receive a FileNotFoundException exception if the provider returns a
+     * sub-section of a file.
+     *
+     * <h5>Accepts the following URI schemes:</h5>
+     * <ul>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * </ul>
+     *
+     * <p>See {@link #openAssetFileDescriptor(Uri, String)} for more information
+     * on these schemes.
+     * <p>
+     * If opening with the exclusive "r" or "w" modes, the returned
+     * ParcelFileDescriptor could be a pipe or socket pair to enable streaming
+     * of data. Opening with the "rw" mode implies a file on disk that supports
+     * seeking. If possible, always use an exclusive mode to give the underlying
+     * {@link ContentProvider} the most flexibility.
+     * <p>
+     * If you are writing a file, and need to communicate an error to the
+     * provider, use {@link ParcelFileDescriptor#closeWithError(String)}.
+     *
+     * @param uri The desired URI to open.
+     * @param mode The file mode to use, as per {@link ContentProvider#openFile
+     * ContentProvider.openFile}.
+     * @param signal A signal to cancel the operation in progress, or null if
+     *            none. If the operation is canceled, then
+     *            {@link OperationCanceledException} will be thrown.
+     * @return Returns a new ParcelFileDescriptor pointing to the file.  You
+     * own this descriptor and are responsible for closing it when done.
+     * @throws FileNotFoundException Throws FileNotFoundException if no
+     * file exists under the URI or the mode is invalid.
+     * @see #openAssetFileDescriptor(Uri, String)
+     */
     public final ParcelFileDescriptor openFileDescriptor(Uri uri,
-            String mode) throws FileNotFoundException {
-        AssetFileDescriptor afd = openAssetFileDescriptor(uri, mode);
+            String mode, CancellationSignal cancellationSignal) throws FileNotFoundException {
+        AssetFileDescriptor afd = openAssetFileDescriptor(uri, mode, cancellationSignal);
         if (afd == null) {
             return null;
         }
@@ -677,8 +733,64 @@ public abstract class ContentResolver {
      * @throws FileNotFoundException Throws FileNotFoundException of no
      * file exists under the URI or the mode is invalid.
      */
+    public final AssetFileDescriptor openAssetFileDescriptor(Uri uri, String mode)
+            throws FileNotFoundException {
+        return openAssetFileDescriptor(uri, mode, null);
+    }
+
+    /**
+     * Open a raw file descriptor to access data under a URI.  This
+     * interacts with the underlying {@link ContentProvider#openAssetFile}
+     * method of the provider associated with the given URI, to retrieve any file stored there.
+     *
+     * <h5>Accepts the following URI schemes:</h5>
+     * <ul>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * </ul>
+     * <h5>The android.resource ({@link #SCHEME_ANDROID_RESOURCE}) Scheme</h5>
+     * <p>
+     * A Uri object can be used to reference a resource in an APK file.  The
+     * Uri should be one of the following formats:
+     * <ul>
+     * <li><code>android.resource://package_name/id_number</code><br/>
+     * <code>package_name</code> is your package name as listed in your AndroidManifest.xml.
+     * For example <code>com.example.myapp</code><br/>
+     * <code>id_number</code> is the int form of the ID.<br/>
+     * The easiest way to construct this form is
+     * <pre>Uri uri = Uri.parse("android.resource://com.example.myapp/" + R.raw.my_resource");</pre>
+     * </li>
+     * <li><code>android.resource://package_name/type/name</code><br/>
+     * <code>package_name</code> is your package name as listed in your AndroidManifest.xml.
+     * For example <code>com.example.myapp</code><br/>
+     * <code>type</code> is the string form of the resource type.  For example, <code>raw</code>
+     * or <code>drawable</code>.
+     * <code>name</code> is the string form of the resource name.  That is, whatever the file
+     * name was in your res directory, without the type extension.
+     * The easiest way to construct this form is
+     * <pre>Uri uri = Uri.parse("android.resource://com.example.myapp/raw/my_resource");</pre>
+     * </li>
+     * </ul>
+     *
+     * <p>Note that if this function is called for read-only input (mode is "r")
+     * on a content: URI, it will instead call {@link #openTypedAssetFileDescriptor}
+     * for you with a MIME type of "*\/*".  This allows such callers to benefit
+     * from any built-in data conversion that a provider implements.
+     *
+     * @param uri The desired URI to open.
+     * @param mode The file mode to use, as per {@link ContentProvider#openAssetFile
+     * ContentProvider.openAssetFile}.
+     * @param signal A signal to cancel the operation in progress, or null if
+     *            none. If the operation is canceled, then
+     *            {@link OperationCanceledException} will be thrown.
+     * @return Returns a new ParcelFileDescriptor pointing to the file.  You
+     * own this descriptor and are responsible for closing it when done.
+     * @throws FileNotFoundException Throws FileNotFoundException of no
+     * file exists under the URI or the mode is invalid.
+     */
     public final AssetFileDescriptor openAssetFileDescriptor(Uri uri,
-            String mode) throws FileNotFoundException {
+            String mode, CancellationSignal cancellationSignal) throws FileNotFoundException {
         String scheme = uri.getScheme();
         if (SCHEME_ANDROID_RESOURCE.equals(scheme)) {
             if (!"r".equals(mode)) {
@@ -696,7 +808,7 @@ public abstract class ContentResolver {
             return new AssetFileDescriptor(pfd, 0, -1);
         } else {
             if ("r".equals(mode)) {
-                return openTypedAssetFileDescriptor(uri, "*/*", null);
+                return openTypedAssetFileDescriptor(uri, "*/*", null, cancellationSignal);
             } else {
                 IContentProvider unstableProvider = acquireUnstableProvider(uri);
                 if (unstableProvider == null) {
@@ -706,8 +818,16 @@ public abstract class ContentResolver {
                 AssetFileDescriptor fd = null;
 
                 try {
+                    ICancellationSignal remoteCancellationSignal = null;
+                    if (cancellationSignal != null) {
+                        cancellationSignal.throwIfCanceled();
+                        remoteCancellationSignal = unstableProvider.createCancellationSignal();
+                        cancellationSignal.setRemote(remoteCancellationSignal);
+                    }
+
                     try {
-                        fd = unstableProvider.openAssetFile(mPackageName, uri, mode);
+                        fd = unstableProvider.openAssetFile(
+                                mPackageName, uri, mode, remoteCancellationSignal);
                         if (fd == null) {
                             // The provider will be released by the finally{} clause
                             return null;
@@ -721,7 +841,8 @@ public abstract class ContentResolver {
                         if (stableProvider == null) {
                             throw new FileNotFoundException("No content provider: " + uri);
                         }
-                        fd = stableProvider.openAssetFile(mPackageName, uri, mode);
+                        fd = stableProvider.openAssetFile(
+                                mPackageName, uri, mode, remoteCancellationSignal);
                         if (fd == null) {
                             // The provider will be released by the finally{} clause
                             return null;
@@ -749,6 +870,9 @@ public abstract class ContentResolver {
                 } catch (FileNotFoundException e) {
                     throw e;
                 } finally {
+                    if (cancellationSignal != null) {
+                        cancellationSignal.setRemote(null);
+                    }
                     if (stableProvider != null) {
                         releaseProvider(stableProvider);
                     }
@@ -788,8 +912,45 @@ public abstract class ContentResolver {
      * @throws FileNotFoundException Throws FileNotFoundException of no
      * data of the desired type exists under the URI.
      */
+    public final AssetFileDescriptor openTypedAssetFileDescriptor(
+            Uri uri, String mimeType, Bundle opts) throws FileNotFoundException {
+        return openTypedAssetFileDescriptor(uri, mimeType, opts, null);
+    }
+
+    /**
+     * Open a raw file descriptor to access (potentially type transformed)
+     * data from a "content:" URI.  This interacts with the underlying
+     * {@link ContentProvider#openTypedAssetFile} method of the provider
+     * associated with the given URI, to retrieve retrieve any appropriate
+     * data stream for the data stored there.
+     *
+     * <p>Unlike {@link #openAssetFileDescriptor}, this function only works
+     * with "content:" URIs, because content providers are the only facility
+     * with an associated MIME type to ensure that the returned data stream
+     * is of the desired type.
+     *
+     * <p>All text/* streams are encoded in UTF-8.
+     *
+     * @param uri The desired URI to open.
+     * @param mimeType The desired MIME type of the returned data.  This can
+     * be a pattern such as *\/*, which will allow the content provider to
+     * select a type, though there is no way for you to determine what type
+     * it is returning.
+     * @param opts Additional provider-dependent options.
+     * @param signal A signal to cancel the operation in progress, or null if
+     *            none. If the operation is canceled, then
+     *            {@link OperationCanceledException} will be thrown.
+     * @return Returns a new ParcelFileDescriptor from which you can read the
+     * data stream from the provider.  Note that this may be a pipe, meaning
+     * you can't seek in it.  The only seek you should do is if the
+     * AssetFileDescriptor contains an offset, to move to that offset before
+     * reading.  You own this descriptor and are responsible for closing it when done.
+     * @throws FileNotFoundException Throws FileNotFoundException of no
+     * data of the desired type exists under the URI.
+     */
     public final AssetFileDescriptor openTypedAssetFileDescriptor(Uri uri,
-            String mimeType, Bundle opts) throws FileNotFoundException {
+            String mimeType, Bundle opts, CancellationSignal cancellationSignal)
+            throws FileNotFoundException {
         IContentProvider unstableProvider = acquireUnstableProvider(uri);
         if (unstableProvider == null) {
             throw new FileNotFoundException("No content provider: " + uri);
@@ -798,8 +959,16 @@ public abstract class ContentResolver {
         AssetFileDescriptor fd = null;
 
         try {
+            ICancellationSignal remoteCancellationSignal = null;
+            if (cancellationSignal != null) {
+                cancellationSignal.throwIfCanceled();
+                remoteCancellationSignal = unstableProvider.createCancellationSignal();
+                cancellationSignal.setRemote(remoteCancellationSignal);
+            }
+
             try {
-                fd = unstableProvider.openTypedAssetFile(mPackageName, uri, mimeType, opts);
+                fd = unstableProvider.openTypedAssetFile(
+                        mPackageName, uri, mimeType, opts, remoteCancellationSignal);
                 if (fd == null) {
                     // The provider will be released by the finally{} clause
                     return null;
@@ -813,7 +982,8 @@ public abstract class ContentResolver {
                 if (stableProvider == null) {
                     throw new FileNotFoundException("No content provider: " + uri);
                 }
-                fd = stableProvider.openTypedAssetFile(mPackageName, uri, mimeType, opts);
+                fd = stableProvider.openTypedAssetFile(
+                        mPackageName, uri, mimeType, opts, remoteCancellationSignal);
                 if (fd == null) {
                     // The provider will be released by the finally{} clause
                     return null;
@@ -841,6 +1011,9 @@ public abstract class ContentResolver {
         } catch (FileNotFoundException e) {
             throw e;
         } finally {
+            if (cancellationSignal != null) {
+                cancellationSignal.setRemote(null);
+            }
             if (stableProvider != null) {
                 releaseProvider(stableProvider);
             }

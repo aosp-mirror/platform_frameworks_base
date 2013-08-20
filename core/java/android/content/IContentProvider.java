@@ -46,9 +46,11 @@ public interface IContentProvider extends IInterface {
             throws RemoteException;
     public int update(String callingPkg, Uri url, ContentValues values, String selection,
             String[] selectionArgs) throws RemoteException;
-    public ParcelFileDescriptor openFile(String callingPkg, Uri url, String mode)
+    public ParcelFileDescriptor openFile(
+            String callingPkg, Uri url, String mode, ICancellationSignal signal)
             throws RemoteException, FileNotFoundException;
-    public AssetFileDescriptor openAssetFile(String callingPkg, Uri url, String mode)
+    public AssetFileDescriptor openAssetFile(
+            String callingPkg, Uri url, String mode, ICancellationSignal signal)
             throws RemoteException, FileNotFoundException;
     public ContentProviderResult[] applyBatch(String callingPkg,
             ArrayList<ContentProviderOperation> operations)
@@ -60,7 +62,7 @@ public interface IContentProvider extends IInterface {
     // Data interchange.
     public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException;
     public AssetFileDescriptor openTypedAssetFile(String callingPkg, Uri url, String mimeType,
-            Bundle opts) throws RemoteException, FileNotFoundException;
+            Bundle opts, ICancellationSignal signal) throws RemoteException, FileNotFoundException;
 
     /* IPC constants */
     static final String descriptor = "android.content.IContentProvider";

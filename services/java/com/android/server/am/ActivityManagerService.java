@@ -7644,7 +7644,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             sCallerIdentity.set(new Identity(
                     Binder.getCallingPid(), Binder.getCallingUid()));
             try {
-                pfd = cph.provider.openFile(null, uri, "r");
+                pfd = cph.provider.openFile(null, uri, "r", null);
             } catch (FileNotFoundException e) {
                 // do nothing; pfd will be returned null
             } finally {
