@@ -12807,6 +12807,7 @@ package android.media {
 
   public static class MediaPlayer.TrackInfo implements android.os.Parcelable {
     method public int describeContents();
+    method public android.media.MediaFormat getFormat();
     method public java.lang.String getLanguage();
     method public int getTrackType();
     method public void writeToParcel(android.os.Parcel, int);
