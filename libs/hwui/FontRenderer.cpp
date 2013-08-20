@@ -737,7 +737,7 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, int
             }
 
             mRsElement = RSC::Element::A_8(mRs);
-            mRsScript = new RSC::ScriptIntrinsicBlur(mRs, mRsElement);
+            mRsScript = RSC::ScriptIntrinsicBlur::create(mRs, mRsElement);
         }
 
         RSC::sp<const RSC::Type> t = RSC::Type::create(mRs, mRsElement, width, height, 0);
@@ -749,7 +749,8 @@ void FontRenderer::blurImage(uint8_t** image, int32_t width, int32_t height, int
                 outImage);
 
         mRsScript->setRadius(radius);
-        mRsScript->blur(ain, aout);
+        mRsScript->setInput(ain);
+        mRsScript->forEach(aout);
 
         // replace the original image's pointer, avoiding a copy back to the original buffer
         free(*image);
