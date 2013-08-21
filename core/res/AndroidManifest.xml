@@ -108,6 +108,10 @@
     <protected-broadcast android:name="android.bluetooth.device.action.PAIRING_REQUEST" />
     <protected-broadcast android:name="android.bluetooth.device.action.PAIRING_CANCEL" />
     <protected-broadcast android:name="android.bluetooth.device.action.CONNECTION_ACCESS_REPLY" />
+    <protected-broadcast android:name="android.bluetooth.device.action.CONNECTION_ACCESS_CANCEL" />
+    <protected-broadcast android:name="android.bluetooth.device.action.CONNECTION_ACCESS_REQUEST" />
+    <protected-broadcast android:name="android.bluetooth.devicepicker.action.LAUNCH" />
+    <protected-broadcast android:name="android.bluetooth.devicepicker.action.DEVICE_SELECTED" />
     <protected-broadcast
         android:name="android.bluetooth.headset.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
@@ -121,7 +125,30 @@
     <protected-broadcast
         android:name="android.bluetooth.input.profile.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast
+        android:name="android.bluetooth.input.profile.action.PROTOCOL_MODE_CHANGED" />
+    <protected-broadcast
+        android:name="android.bluetooth.input.profile.action.VIRTUAL_UNPLUG_STATUS" />
+    <protected-broadcast
         android:name="android.bluetooth.pan.profile.action.CONNECTION_STATE_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.pbap.intent.action.PBAP_STATE_CHANGED" />
+    <protected-broadcast android:name="android.btopp.intent.action.INCOMING_FILE_NOTIFICATION" />
+    <protected-broadcast android:name="android.btopp.intent.action.BT_OPP_HANDOVER_STARTED" />
+    <protected-broadcast android:name="android.btopp.intent.action.TRANSFER_COMPLETE" />
+    <protected-broadcast android:name="android.btopp.intent.action.USER_CONFIRMATION_TIMEOUT" />
+    <protected-broadcast android:name="android.btopp.intent.action.BT_OPP_TRANSFER_PROGRESS" />
+    <protected-broadcast android:name="android.btopp.intent.action.LIST" />
+    <protected-broadcast android:name="android.btopp.intent.action.OPEN_OUTBOUND" />
+    <protected-broadcast android:name="android.btopp.intent.action.HIDE_COMPLETE" />
+    <protected-broadcast android:name="android.btopp.intent.action.CONFIRM" />
+    <protected-broadcast android:name="android.btopp.intent.action.HIDE" />
+    <protected-broadcast android:name="android.btopp.intent.action.BT_OPP_TRANSFER_DONE" />
+    <protected-broadcast android:name="android.btopp.intent.action.RETRY" />
+    <protected-broadcast android:name="android.btopp.intent.action.OPEN" />
+    <protected-broadcast android:name="android.btopp.intent.action.OPEN_INBOUND" />
+    <protected-broadcast android:name="com.android.bluetooth.pbap.authchall" />
+    <protected-broadcast android:name="com.android.bluetooth.pbap.userconfirmtimeout" />
+    <protected-broadcast android:name="com.android.bluetooth.pbap.authresponse" />
+    <protected-broadcast android:name="com.android.bluetooth.pbap.authcancelled" />
 
     <protected-broadcast android:name="android.hardware.display.action.WIFI_DISPLAY_STATUS_CHANGED" />
 
