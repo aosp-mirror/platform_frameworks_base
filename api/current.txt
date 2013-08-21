@@ -11017,6 +11017,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_EXPOSURE_TIME;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_FRAME_DURATION;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_SENSITIVITY;
+    field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TEMPERATURE;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TIMESTAMP;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_DETECT_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_IDS;
