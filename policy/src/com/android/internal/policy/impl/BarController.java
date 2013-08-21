@@ -40,24 +40,31 @@ public class BarController {
 
     private final String mTag;
     private final int mTransientFlag;
+    private final int mUnhideFlag;
     private final int mStatusBarManagerId;
     private final Handler mHandler;
     private final Object mServiceAquireLock = new Object();
     private IStatusBarService mStatusBarService;
 
     private WindowState mWin;
+    private int mState;
     private int mTransientBarState;
     private boolean mPendingShow;
 
-    public BarController(String tag, int transientFlag, int statusBarManagerId) {
+    public BarController(String tag, int transientFlag, int unhideFlag, int statusBarManagerId) {
         mTag = "BarController." + tag;
         mTransientFlag = transientFlag;
+        mUnhideFlag = unhideFlag;
         mStatusBarManagerId = statusBarManagerId;
         mHandler = new Handler();
     }
 
     public void setWindow(WindowState win) {
         mWin = win;
+    }
+
+    public boolean isHidden() {
+        return mState == StatusBarManager.WINDOW_STATE_HIDDEN;
     }
 
     public void showTransient() {
@@ -70,49 +77,75 @@ public class BarController {
         return mTransientBarState == TRANSIENT_BAR_SHOWING;
     }
 
-    public void adjustSystemUiVisibilityLw(int visibility) {
+    public void adjustSystemUiVisibilityLw(int oldVis, int vis) {
         if (mWin != null && mTransientBarState == TRANSIENT_BAR_SHOWING &&
-                (visibility & mTransientFlag) == 0) {
+                (vis & mTransientFlag) == 0) {
+            // sysui requests hide
             setTransientBarState(TRANSIENT_BAR_HIDING);
             setBarShowingLw(false);
+        } else if (mWin != null && (oldVis & mUnhideFlag) != 0 && (vis & mUnhideFlag) == 0) {
+            // sysui ready to unhide
+            setBarShowingLw(true);
         }
     }
 
     public boolean setBarShowingLw(final boolean show) {
         if (mWin == null) return false;
-
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    IStatusBarService statusbar = getStatusBarService();
-                    if (statusbar != null) {
-                        statusbar.setWindowState(mStatusBarManagerId, show
-                                ? StatusBarManager.WINDOW_STATE_SHOWING
-                                : StatusBarManager.WINDOW_STATE_HIDING);
-                    }
-                } catch (RemoteException e) {
-                    // re-acquire status bar service next time it is needed.
-                    mStatusBarService = null;
-                }
-            }
-        });
         if (show && mTransientBarState == TRANSIENT_BAR_HIDING) {
             mPendingShow = true;
             return false;
         }
-        return show ? mWin.showLw(true) : mWin.hideLw(true);
+        final boolean oldVis = mWin.isVisibleLw();
+        final boolean oldAnim = mWin.isAnimatingLw();
+        final boolean rt = show ? mWin.showLw(true) : mWin.hideLw(true);
+        final int state = computeState(oldVis, oldAnim, mWin.isVisibleLw(), mWin.isAnimatingLw());
+        if (state > -1) {
+            updateState(state);
+        }
+        return rt;
+    }
+
+    private int computeState(boolean oldVis, boolean oldAnim, boolean newVis, boolean newAnim) {
+        return (!newVis && !newAnim) ? StatusBarManager.WINDOW_STATE_HIDDEN
+                : (!oldVis && newVis && newAnim) ? StatusBarManager.WINDOW_STATE_SHOWING
+                : (oldVis && newVis && !oldAnim && newAnim) ? StatusBarManager.WINDOW_STATE_HIDING
+                : -1;
+    }
+
+    private void updateState(final int state) {
+        if (state != mState) {
+            mState = state;
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        IStatusBarService statusbar = getStatusBarService();
+                        if (statusbar != null) {
+                            statusbar.setWindowState(mStatusBarManagerId, state);
+                        }
+                    } catch (RemoteException e) {
+                        // re-acquire status bar service next time it is needed.
+                        mStatusBarService = null;
+                    }
+                }
+            });
+        }
     }
 
     public boolean checkHiddenLw() {
-        if (mWin != null && mTransientBarState == TRANSIENT_BAR_HIDING && !mWin.isVisibleLw()) {
-            // Finished animating out, clean up and reset style
-            setTransientBarState(TRANSIENT_BAR_NONE);
-            if (mPendingShow) {
-                setBarShowingLw(true);
-                mPendingShow = false;
+        if (mWin != null) {
+            if (!mWin.isVisibleLw() && !mWin.isAnimatingLw()) {
+                updateState(StatusBarManager.WINDOW_STATE_HIDDEN);
             }
-            return true;
+            if (mTransientBarState == TRANSIENT_BAR_HIDING && !mWin.isVisibleLw()) {
+                // Finished animating out, clean up and reset style
+                setTransientBarState(TRANSIENT_BAR_NONE);
+                if (mPendingShow) {
+                    setBarShowingLw(true);
+                    mPendingShow = false;
+                }
+                return true;
+            }
         }
         return false;
     }
@@ -134,12 +167,11 @@ public class BarController {
 
     public int updateVisibilityLw(boolean allowed, int oldVis, int vis) {
         if (mWin == null) return vis;
-
         if (mTransientBarState == TRANSIENT_BAR_SHOWING) { // transient bar requested
             if (allowed) {
                 vis |= mTransientFlag;
                 if ((oldVis & mTransientFlag) == 0) {
-                    setBarShowingLw(true);
+                    vis |= mUnhideFlag;  // tell sysui we're ready to unhide
                 }
             } else {
                 setTransientBarState(TRANSIENT_BAR_NONE);  // request denied

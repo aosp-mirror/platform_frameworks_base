@@ -236,7 +236,7 @@ public class CommandQueue extends IStatusBar.Stub {
 
     public void setWindowState(int window, int state) {
         synchronized (mList) {
-            mHandler.removeMessages(MSG_SET_WINDOW_STATE);
+            // don't coalesce these
             mHandler.obtainMessage(MSG_SET_WINDOW_STATE, window, state, null).sendToTarget();
         }
     }

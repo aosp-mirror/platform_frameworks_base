@@ -554,9 +554,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     MyOrientationListener mOrientationListener;
 
     private final BarController mStatusBarController = new BarController("StatusBar",
-            View.STATUS_BAR_TRANSIENT, StatusBarManager.WINDOW_STATUS_BAR);
+            View.STATUS_BAR_TRANSIENT,
+            View.STATUS_BAR_UNHIDE,
+            StatusBarManager.WINDOW_STATUS_BAR);
+
     private final BarController mNavigationBarController = new BarController("NavigationBar",
-            View.NAVIGATION_BAR_TRANSIENT, StatusBarManager.WINDOW_NAVIGATION_BAR);
+            View.NAVIGATION_BAR_TRANSIENT,
+            View.NAVIGATION_BAR_UNHIDE,
+            StatusBarManager.WINDOW_NAVIGATION_BAR);
+
     private TransientNavigationConfirmation mTransientNavigationConfirmation;
 
     private SystemGesturesPointerEventListener mSystemGestures;
@@ -2551,8 +2557,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public int adjustSystemUiVisibilityLw(int visibility) {
-        mStatusBarController.adjustSystemUiVisibilityLw(visibility);
-        mNavigationBarController.adjustSystemUiVisibilityLw(visibility);
+        mStatusBarController.adjustSystemUiVisibilityLw(mLastSystemUiFlags, visibility);
+        mNavigationBarController.adjustSystemUiVisibilityLw(mLastSystemUiFlags, visibility);
 
         // Reset any bits in mForceClearingStatusBarVisibility that
         // are now clear.
@@ -5084,6 +5090,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         vis = mNavigationBarController.updateVisibilityLw(isTransientNav, oldVis, vis);
 
+        // don't send low profile updates if the system bars are hidden
+        if (mStatusBarController.isHidden() && mNavigationBarController.isHidden()) {
+            vis &= ~View.SYSTEM_UI_FLAG_LOW_PROFILE;
+        }
         return vis;
     }
 
