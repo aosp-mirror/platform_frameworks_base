@@ -19227,10 +19227,17 @@ package android.provider {
   public final class AlarmClock {
     ctor public AlarmClock();
     field public static final java.lang.String ACTION_SET_ALARM = "android.intent.action.SET_ALARM";
+    field public static final java.lang.String ACTION_SET_TIMER = "android.intent.action.SET_TIMER";
+    field public static final java.lang.String EXTRA_DAYS = "android.intent.extra.alarm.DAYS";
+    field public static final java.lang.String EXTRA_DELETE_AFTER_USE = "android.intent.extra.alarm.DELETE_AFTER_USE";
     field public static final java.lang.String EXTRA_HOUR = "android.intent.extra.alarm.HOUR";
+    field public static final java.lang.String EXTRA_LENGTH = "android.intent.extra.alarm.LENGTH";
     field public static final java.lang.String EXTRA_MESSAGE = "android.intent.extra.alarm.MESSAGE";
     field public static final java.lang.String EXTRA_MINUTES = "android.intent.extra.alarm.MINUTES";
+    field public static final java.lang.String EXTRA_RINGTONE = "android.intent.extra.alarm.RINGTONE";
     field public static final java.lang.String EXTRA_SKIP_UI = "android.intent.extra.alarm.SKIP_UI";
+    field public static final java.lang.String EXTRA_VIBRATE = "android.intent.extra.alarm.VIBRATE";
+    field public static final java.lang.String VALUE_RINGTONE_SILENT = "silent";
   }
 
   public abstract interface BaseColumns {
