@@ -407,6 +407,10 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Ļauj lietotnei lasīt informāciju no dažādiem sistēmas žurnālfailiem. Šādi lietotne var atrast vispārīgu informāciju par jūsu darbībām tālrunī, tostarp arī personas vai privātu informāciju."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"multivides failu atskaņošanai izmantot jebkuru dekodētāju"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Ļauj lietotnei izmantot jebkuru instalētu multivides failu dekodētāju, lai dekodētu failus atskaņošanai."</string>
+    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
+    <skip />
+    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"lasīt grupas “diag” resursus un rakstīt tajos"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Ļauj lietotnei lasīt un rakstīt jebkurā resursā, kas pieder diagnostikas grupai, piemēram, failiem mapē /dev. Tas var ietekmēt sistēmas stabilitāti un drošību. Var izmantot ražotājs vai operators TIKAI konkrētas aparatūras diagnostikai."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"iespējot vai atspējot lietotnes komponentus"</string>

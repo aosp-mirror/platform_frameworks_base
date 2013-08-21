@@ -407,6 +407,10 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"앱이 시스템의 다양한 로그 파일을 읽을 수 있도록 허용합니다. 이렇게 되면 앱이 개인정보 또는 비공개 정보를 포함하여 휴대전화로 수행하는 작업에 대한 일반적인 정보를 검색할 수 있습니다."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"재생에 모든 미디어 디코더 사용"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"애플리케이션에서 설치된 모든 미디어 디코더를 사용하여 재생하는 데 디코딩할 수 있도록 허용합니다."</string>
+    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
+    <skip />
+    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"진단 그룹 소유의 리소스 읽기/쓰기"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"앱이 진단 그룹 소유의 리소스(예: /dev에 있는 파일)를 읽고 쓸 수 있도록 허용합니다. 이 기능은 시스템 안정성 및 보안에 영향을 미칠 수 있으므로 제조업체 또는 사업자가 하드웨어 관련 진단을 수행하는 경우에만 사용해야 합니다."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"앱 구성요소 사용 또는 사용 안함"</string>

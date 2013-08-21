@@ -407,6 +407,10 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Pozwala aplikacji na odczyt różnych plików dzienników systemowych. Dzięki temu może ona poznać ogólne informacje na temat korzystania z telefonu, co potencjalnie może obejmować również informacje prywatne lub osobiste."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"użycie dowolnego dekodera multimediów w celu odtwarzania"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Pozwala aplikacji na użycie dowolnego zainstalowanego dekodera multimediów do odtwarzania."</string>
+    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
+    <skip />
+    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"czytanie/zapisywanie w zasobach należących do diagnostyki"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Pozwala aplikacji na czytanie i zapisywanie wszystkich zasobów należących do grupy diagnostyki, na przykład plików w katalogu /dev. Może to potencjalnie wpłynąć na stabilność i bezpieczeństwo systemu. Powinno być wykorzystywane WYŁĄCZNIE do diagnozowania sprzętu przez producenta lub operatora."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"włączanie lub wyłączanie składników aplikacji"</string>

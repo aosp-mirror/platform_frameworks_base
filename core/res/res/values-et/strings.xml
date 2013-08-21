@@ -407,6 +407,10 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Võimaldab rakendusel lugeda süsteemi erinevaid logifaile. Nii on võimalik avastada üldist teavet selle kohta, mida te telefoniga teete, mis võib kaasata ka isiklikku või privaatset teavet."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"Mis tahes meediumidekooderi kasutamine taasesituseks"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Võimaldab rakendusel taasesituseks kasutada mis tahes installitud meediumidekooderit."</string>
+    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
+    <skip />
+    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"loe/kirjuta valija allikaid"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Võimaldab rakendusel lugeda valimisrühma mis tahes ressurssi ja sellesse kirjutada (näiteks kaustas /dev olevad failid). See võib mõjutada süsteemi stabiilsust ja turvet. Seda tohiks kasutada tootja või operaator AINULT riistvaraspetsiifiliseks diagnostikaks."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"Rakenduse komponentide lubamine või keelamine"</string>

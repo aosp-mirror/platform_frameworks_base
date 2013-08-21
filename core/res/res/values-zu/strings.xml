@@ -407,6 +407,10 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Ivumela uhlelo lokusebenza ukufunda kumafayela okungena ahlukene esistimu. Lokhu kuvumela ukuthola ukwaziswa okuvamile mayelana nokuthi wenzani ngefoni, kuhlanganise ukwaziswa komuntu siqu noma kwangasese."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"sebenzisa noma isiphi isiqophi semidiya ukudlala"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Ivumela insiza ukusebenzisa noma isiphi isiqophi semidiya esifakiwe ukuqopha ukudlala."</string>
+    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
+    <skip />
+    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"funda/bhalela emithombweni ephethwe idayegi"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Ivumela uhlelo lokusebenza ukufunda nokubhala kunoma yimuphi umthombo weqembu ledayegi; ngokwesibonelo, amafayela akwi/dev. Lokhu kungase kuthinte kakhulu ukuba nokuphepha kohlelo. Lokhu kumele kusebenziselwe KUPHELA ukuhlola ihadiwe okucacile ngumkhiqizi noma u-opheretha."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"vumela noma vimbela izingxenye zensiza"</string>
