@@ -196,7 +196,8 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             // Create screenshot directory if it doesn't exist
             mScreenshotDir.mkdirs();
 
-            // media provider uses seconds, not milliseconds
+            // media provider uses seconds for DATE_MODIFIED and DATE_ADDED, but milliseconds
+            // for DATE_TAKEN
             long dateSeconds = mImageTime / 1000;
 
             // Save the screenshot to the MediaStore
@@ -205,7 +206,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             values.put(MediaStore.Images.ImageColumns.DATA, mImageFilePath);
             values.put(MediaStore.Images.ImageColumns.TITLE, mImageFileName);
             values.put(MediaStore.Images.ImageColumns.DISPLAY_NAME, mImageFileName);
-            values.put(MediaStore.Images.ImageColumns.DATE_TAKEN, dateSeconds);
+            values.put(MediaStore.Images.ImageColumns.DATE_TAKEN, mImageTime);
             values.put(MediaStore.Images.ImageColumns.DATE_ADDED, dateSeconds);
             values.put(MediaStore.Images.ImageColumns.DATE_MODIFIED, dateSeconds);
             values.put(MediaStore.Images.ImageColumns.MIME_TYPE, "image/png");
