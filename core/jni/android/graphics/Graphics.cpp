@@ -347,27 +347,32 @@ SkRegion* GraphicsJNI::getNativeRegion(JNIEnv* env, jobject region)
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buffer,
-                                  bool isMutable, jbyteArray ninepatch, jintArray layoutbounds,
-                                  int density)
+        int bitmapCreateFlags, jbyteArray ninepatch, jintArray layoutbounds, int density)
 {
     SkASSERT(bitmap);
     SkASSERT(bitmap->pixelRef());
+    bool isMutable = bitmapCreateFlags & kBitmapCreateFlag_Mutable;
+    bool isPremultiplied = bitmapCreateFlags & kBitmapCreateFlag_Premultiplied;
+
     jobject obj = env->NewObject(gBitmap_class, gBitmap_constructorMethodID,
-            static_cast<jint>(reinterpret_cast<uintptr_t>(bitmap)),
-            buffer, isMutable, ninepatch, layoutbounds, density);
+            static_cast<jint>(reinterpret_cast<uintptr_t>(bitmap)), buffer,
+            bitmap->width(), bitmap->height(), density, isMutable, isPremultiplied,
+            ninepatch, layoutbounds);
     hasException(env); // For the side effect of logging.
     return obj;
 }
 
-jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, bool isMutable,
-                            jbyteArray ninepatch, int density)
+jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, int bitmapCreateFlags,
+        jbyteArray ninepatch, int density)
 {
-    return createBitmap(env, bitmap, NULL, isMutable, ninepatch, NULL, density);
+    return createBitmap(env, bitmap, NULL, bitmapCreateFlags, ninepatch, NULL, density);
 }
 
-void GraphicsJNI::reinitBitmap(JNIEnv* env, jobject javaBitmap)
+void GraphicsJNI::reinitBitmap(JNIEnv* env, jobject javaBitmap, SkBitmap* bitmap,
+        bool isPremultiplied)
 {
-    env->CallVoidMethod(javaBitmap, gBitmap_reinitMethodID);
+    env->CallVoidMethod(javaBitmap, gBitmap_reinitMethodID,
+            bitmap->width(), bitmap->height(), isPremultiplied);
 }
 
 int GraphicsJNI::getBitmapAllocationByteCount(JNIEnv* env, jobject javaBitmap)
@@ -593,9 +598,8 @@ int register_android_graphics_Graphics(JNIEnv* env)
 
     gBitmap_class = make_globalref(env, "android/graphics/Bitmap");
     gBitmap_nativeInstanceID = getFieldIDCheck(env, gBitmap_class, "mNativeBitmap", "I");
-    gBitmap_constructorMethodID = env->GetMethodID(gBitmap_class, "<init>",
-                                            "(I[BZ[B[II)V");
-    gBitmap_reinitMethodID = env->GetMethodID(gBitmap_class, "reinit", "()V");
+    gBitmap_constructorMethodID = env->GetMethodID(gBitmap_class, "<init>", "(I[BIIIZZ[B[I)V");
+    gBitmap_reinitMethodID = env->GetMethodID(gBitmap_class, "reinit", "(IIZ)V");
     gBitmap_getAllocationByteCountMethodID = env->GetMethodID(gBitmap_class, "getAllocationByteCount", "()I");
     gBitmapRegionDecoder_class = make_globalref(env, "android/graphics/BitmapRegionDecoder");
     gBitmapRegionDecoder_constructorMethodID = env->GetMethodID(gBitmapRegionDecoder_class, "<init>", "(I)V");

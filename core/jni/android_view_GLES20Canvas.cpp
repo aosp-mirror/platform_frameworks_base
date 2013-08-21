@@ -417,7 +417,7 @@ static void android_view_GLES20Canvas_drawBitmapData(JNIEnv* env, jobject clazz,
         return;
     }
 
-    if (!GraphicsJNI::SetPixels(env, colors, offset, stride, 0, 0, width, height, *bitmap)) {
+    if (!GraphicsJNI::SetPixels(env, colors, offset, stride, 0, 0, width, height, *bitmap, true)) {
         delete bitmap;
         return;
     }

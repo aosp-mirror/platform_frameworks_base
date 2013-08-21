@@ -201,6 +201,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, SkBitmapRegionDecoder *b
     SkBitmap::Config prefConfig = SkBitmap::kNo_Config;
     bool doDither = true;
     bool preferQualityOverSpeed = false;
+    bool requireUnpremultiplied = false;
 
     if (NULL != options) {
         sampleSize = env->GetIntField(options, gOptions_sampleSizeFieldID);
@@ -216,11 +217,13 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, SkBitmapRegionDecoder *b
                 gOptions_preferQualityOverSpeedFieldID);
         // Get the bitmap for re-use if it exists.
         tileBitmap = env->GetObjectField(options, gOptions_bitmapFieldID);
+        requireUnpremultiplied = env->GetBooleanField(options, gOptions_premultipliedFieldID);
     }
 
     decoder->setDitherImage(doDither);
     decoder->setPreferQualityOverSpeed(preferQualityOverSpeed);
-    AutoDecoderCancel   adc(options, decoder);
+    decoder->setRequireUnpremultipliedColors(requireUnpremultiplied);
+    AutoDecoderCancel adc(options, decoder);
 
     // To fix the race condition in case "requestCancelDecode"
     // happens earlier than AutoDecoderCancel object is added
@@ -270,7 +273,10 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, SkBitmapRegionDecoder *b
 
     JavaPixelAllocator* allocator = (JavaPixelAllocator*) decoder->getAllocator();
     jbyteArray buff = allocator->getStorageObjAndReset();
-    return GraphicsJNI::createBitmap(env, bitmap, buff, false, NULL, NULL, -1);
+
+    int bitmapCreateFlags = 0;
+    if (!requireUnpremultiplied) bitmapCreateFlags |= GraphicsJNI::kBitmapCreateFlag_Premultiplied;
+    return GraphicsJNI::createBitmap(env, bitmap, buff, bitmapCreateFlags, NULL, NULL, -1);
 }
 
 static int nativeGetHeight(JNIEnv* env, jobject, SkBitmapRegionDecoder *brd) {

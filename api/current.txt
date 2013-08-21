@@ -8831,6 +8831,7 @@ package android.graphics {
     method public void setHeight(int);
     method public void setPixel(int, int, int);
     method public void setPixels(int[], int, int, int, int, int, int);
+    method public final void setPremultiplied(boolean);
     method public void setWidth(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
@@ -8880,6 +8881,7 @@ package android.graphics {
     field public boolean inMutable;
     field public boolean inPreferQualityOverSpeed;
     field public android.graphics.Bitmap.Config inPreferredConfig;
+    field public boolean inPremultiplied;
     field public boolean inPurgeable;
     field public int inSampleSize;
     field public boolean inScaled;
