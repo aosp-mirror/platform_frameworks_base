@@ -1876,6 +1876,24 @@ public final class InputMethodManager {
     }
 
     /**
+     * Returns true if the current IME needs to offer the users a way to switch to a next input
+     * method. When the user triggers it, the IME has to call {@link #switchToNextInputMethod} to
+     * switch to a next input method which is selected by the system.
+     * @param imeToken Supplies the identifying token given to an input method when it was started,
+     * which allows it to perform this operation on itself.
+     */
+    public boolean shouldOfferSwitchingToNextInputMethod(IBinder imeToken) {
+        synchronized (mH) {
+            try {
+                return mService.shouldOfferSwitchingToNextInputMethod(imeToken);
+            } catch (RemoteException e) {
+                Log.w(TAG, "IME died: " + mCurId, e);
+                return false;
+            }
+        }
+    }
+
+    /**
      * Set additional input method subtypes. Only a process which shares the same uid with the IME
      * can add additional input method subtypes to the IME.
      * Please note that a subtype's status is stored in the system.

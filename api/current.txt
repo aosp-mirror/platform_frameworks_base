@@ -29298,6 +29298,7 @@ package android.view.inputmethod {
     method public boolean setCurrentInputMethodSubtype(android.view.inputmethod.InputMethodSubtype);
     method public void setInputMethod(android.os.IBinder, java.lang.String);
     method public void setInputMethodAndSubtype(android.os.IBinder, java.lang.String, android.view.inputmethod.InputMethodSubtype);
+    method public boolean shouldOfferSwitchingToNextInputMethod(android.os.IBinder);
     method public void showInputMethodAndSubtypeEnabler(java.lang.String);
     method public void showInputMethodPicker();
     method public boolean showSoftInput(android.view.View, int);
