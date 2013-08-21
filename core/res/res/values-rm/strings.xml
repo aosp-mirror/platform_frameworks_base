@@ -652,6 +652,10 @@
     <skip />
     <!-- no translation found for permdesc_anyCodecForPlayback (8283912488433189010) -->
     <skip />
+    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
+    <skip />
+    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"leger/scriver en resursas che appartegnan a diagnostics"</string>
     <!-- no translation found for permdesc_diagnostic (6608295692002452283) -->
     <skip />

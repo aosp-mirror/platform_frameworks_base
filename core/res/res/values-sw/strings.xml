@@ -407,6 +407,10 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Inaruhusu programu kusoma kutoka kwa faili mbalimbali za kumbukumbu za mfumo. Hii inairuhusu kutambua maelezo ya jumla kuhusu unachofanya na simu, yanayoweza kujumuisha maelezo ya kibinafsi na ya siri."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"Tumia chombo chochote cha habari cha kufasiria maandishi ya siri ili kucheza tena."</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Huruhusu programu kutumia vyombo vyovyote vya habari vilivyosakinishwa ili kusimbua kwa ajili ya kucheza tena."</string>
+    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
+    <skip />
+    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"soma/andika kwa vyanzo vinavyomilikiwa na diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Inaruhusu programu kusoma na kuandika kwa chanzo chochote kinachomilikiwa na kikundi cha diag; kwa mfano, faili katika /dev. Hii inaweza kuathiri udhabiti na usalama wa mfumo. Hii inapaswa kutumiwa TU kwa utambuzi mahsusi wa maunzi na mtengenezaji au opareta."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"wezesha au lemeza vijenzi vya programu"</string>

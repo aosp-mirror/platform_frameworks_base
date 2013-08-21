@@ -407,6 +407,10 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Permite aplicaţiei să citească din diverse fişiere jurnal ale sistemului. În acest mod poate descoperi informaţii generale cu privire la utilizarea telefonului de către dvs., care ar putea include şi informaţii personale sau private."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"utilizaţi orice decodor media pentru redare"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Permite aplicaţiei să utilizeze orice decodor media instalat pentru a decodifica redarea."</string>
+    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
+    <skip />
+    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"citire/scriere în resursele deţinute de diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permite aplicaţiei să citească şi să scrie în orice resursă deţinută de grupul diag, de ex., fişierele din /dev. Această permisiune ar putea să afecteze stabilitatea şi securitatea sistemului. Permisiunea trebuie utilizată NUMAI de producător sau de operator pentru diagnostice specifice pentru hardware."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activare sau dezactivare a componentelor aplicaţiei"</string>
