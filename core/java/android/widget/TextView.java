@@ -8173,6 +8173,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 info.addAction(AccessibilityNodeInfo.ACTION_CUT);
             }
         }
+
+        if (!isSingleLine()) {
+            info.setMultiLine(true);
+        }
     }
 
     @Override
