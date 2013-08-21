@@ -21,12 +21,12 @@ import android.annotation.SdkConstant.SdkConstantType;
 
 /**
  * The AlarmClock provider contains an Intent action and extras that can be used
- * to start an Activity to set a new alarm in an alarm clock application.
+ * to start an Activity to set a new alarm or timer in an alarm clock application.
  *
- * Applications that wish to receive the ACTION_SET_ALARM Intent should create
- * an activity to handle the Intent that requires the permission
+ * Applications that wish to receive the ACTION_SET_ALARM  and ACTION_SET_TIMER Intents
+ * should create an activity to handle the Intent that requires the permission
  * com.android.alarm.permission.SET_ALARM.  Applications that wish to create a
- * new alarm should use
+ * new alarm or timer should use
  * {@link android.content.Context#startActivity Context.startActivity()} so that
  * the user has the option of choosing which alarm clock application to use.
  */
@@ -34,49 +34,212 @@ public final class AlarmClock {
     /**
      * Activity Action: Set an alarm.
      * <p>
-     * Input: Nothing.
-     * <p>
-     * Output: Nothing.
+     * Activates an existing alarm or creates a new one.
+     * </p><p>
+     * This action requests an alarm to be set for a given time of day. If an alarm already
+     * exists for this time, an implementation may use it rather than create a new one. If no time
+     * of day is specified, the implementation should start an activity that is capable of setting
+     * an alarm (SKIP_UI is ignored in this case). This action always enables the alarm.
+     * </p>
+     * <h3>Request parameters</h3>
+     * <ul>
+     * <li>{@link #EXTRA_HOUR} <em>(optional)</em>: The hour of the alarm being set.
+     * <li>{@link #EXTRA_MINUTES} <em>(optional)</em>: The minutes of the alarm being set.
+     * <li>{@link #EXTRA_DAYS} <em>(optional)</em>: Weekdays for repeating alarm.
+     * <li>{@link #EXTRA_MESSAGE} <em>(optional)</em>: A custom message for the alarm.
+     * <li>{@link #EXTRA_RINGTONE} <em>(optional)</em>: A ringtone to play with this alarm.
+     * <li>{@link #EXTRA_VIBRATE} <em>(optional)</em>: Whether or not to activate the device
+     * vibrator for this alarm.
+     * <li>{@link #EXTRA_SKIP_UI} <em>(optional)</em>: Whether or not to display an activity for
+     * setting this alarm.
+     * <li>{@link #EXTRA_DELETE_AFTER_USE} <em>(optional)</em>: Whether or not to delete this
+     * alarm after it is dismissed.
+     * </ul>
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SET_ALARM = "android.intent.action.SET_ALARM";
 
     /**
-     * Activity Extra: Provide a custom message for the alarm.
+     * Activity Action: Set a timer.
      * <p>
-     * This can be passed as an extra field in the Intent created with
-     * ACTION_SET_ALARM.
+     * Activates an existing timer or creates a new one.
+     * </p><p>
+     * This action requests a timer to be started for a specific {@link #EXTRA_LENGTH length} of
+     * time. If a timer already exists for this {@link #EXTRA_LENGTH length}, an implementation may
+     * use it rather than create a new one. If no {@link #EXTRA_LENGTH length} is specified, the
+     * implementation should start an activity that is capable of setting a timer
+     * ({@link #EXTRA_SKIP_UI} is ignored in this case).
+     * </p><p>
+     * An existing timer should only be used if it matches the provided extras and is not currently
+     * in use.
+     * </p>
+     *
+     * <h3>Request parameters</h3>
+     * <ul>
+     * <li>{@link #EXTRA_LENGTH} <em>(optional)</em>: The length of the timer being set.
+     * <li>{@link #EXTRA_MESSAGE} <em>(optional)</em>: A custom message for the timer.
+     * <li>{@link #EXTRA_SKIP_UI} <em>(optional)</em>: Whether or not to display an activity for
+     * setting this timer.
+     * <li>{@link #EXTRA_DELETE_AFTER_USE} <em>(optional)</em>: Whether or not to delete this
+     * timer after it is dismissed.
+     * </ul>
      */
-    public static final String EXTRA_MESSAGE = "android.intent.extra.alarm.MESSAGE";
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SET_TIMER = "android.intent.action.SET_TIMER";
 
     /**
-     * Activity Extra: The hour of the alarm being set.
+     * Bundle extra: Weekdays for repeating alarm.
      * <p>
-     * This value can be passed as an extra field to the Intent created with
-     * ACTION_SET_ALARM.  If it is not provided, the behavior is undefined and
-     * is up to the application.  The value is an integer and ranges from 0 to
-     * 23.
+     * Used by {@link #ACTION_SET_ALARM}.
+     * </p><p>
+     * The value is an {@code ArrayList<Integer>}. Each item can be:
+     * </p>
+     * <ul>
+     * <li> {@link java.util.Calendar#SUNDAY},
+     * <li> {@link java.util.Calendar#MONDAY},
+     * <li> {@link java.util.Calendar#TUESDAY},
+     * <li> {@link java.util.Calendar#WEDNESDAY},
+     * <li> {@link java.util.Calendar#THURSDAY},
+     * <li> {@link java.util.Calendar#FRIDAY},
+     * <li> {@link java.util.Calendar#SATURDAY}
+     * </ul>
+     * <p>
+     * Note: If this extra is provided, {@link #EXTRA_DELETE_AFTER_USE} is ignored.
+     * </p>
+     */
+    public static final String EXTRA_DAYS = "android.intent.extra.alarm.DAYS";
+
+    /**
+     * Bundle extra: Whether or not to delete this alarm/timer after it's dismissed.
+     * <p>
+     * Used by {@link #ACTION_SET_ALARM} and {@link #ACTION_SET_TIMER}.
+     * </p><p>
+     * If this value is true, the alarm/timer used by this action should be deleted after it's been
+     * dismissed. The alarm/timer should only be removed if was actually created by the action. If
+     * an existing alarm/timer was used, it should not be deleted after it's dismissed.
+     * </p><p>
+     * The value is a {@link Boolean}.
+     * </p>
+     *
+     * @see #ACTION_SET_ALARM
+     * @see #ACTION_SET_TIMER
+     */
+    public static final String EXTRA_DELETE_AFTER_USE = "android.intent.extra.alarm.DELETE_AFTER_USE";
+
+    /**
+     * Bundle extra: The hour of the alarm.
+     * <p>
+     * Used by {@link #ACTION_SET_ALARM}.
+     * </p><p>
+     * This extra is optional. If not provided, an implementation should open an activity
+     * that allows a user to set an alarm with user provided time.
+     * </p><p>
+     * The value is an {@link Integer} and ranges from 0 to 23.
+     * </p>
+     *
+     * @see #ACTION_SET_ALARM
+     * @see #EXTRA_MINUTES
+     * @see #EXTRA_DAYS
      */
     public static final String EXTRA_HOUR = "android.intent.extra.alarm.HOUR";
 
     /**
-     * Activity Extra: The minutes of the alarm being set.
+     * Bundle extra: The length of the timer in seconds.
      * <p>
-     * This value can be passed as an extra field to the Intent created with
-     * ACTION_SET_ALARM.  If it is not provided, the behavior is undefined and
-     * is up to the application.  The value is an integer and ranges from 0 to
-     * 59.
+     * Used by {@link #ACTION_SET_TIMER}.
+     * </p><p>
+     * This extra is optional. If not provided, an implementation should open an activity
+     * that allows a user to set a timer with user provided length.
+     * </p><p>
+     * The value is an {@link Integer} and ranges from 1 to 86400 (24 hours).
+     * </p>
+     *
+     * @see #ACTION_SET_TIMER
+     */
+    public static final String EXTRA_LENGTH = "android.intent.extra.alarm.LENGTH";
+
+    /**
+     * Bundle extra: A custom message for the alarm or timer.
+     * <p>
+     * Used by {@link #ACTION_SET_ALARM} and {@link #ACTION_SET_TIMER}.
+     * </p><p>
+     * The value is a {@link String}.
+     * </p>
+     *
+     * @see #ACTION_SET_ALARM
+     * @see #ACTION_SET_TIMER
+     */
+    public static final String EXTRA_MESSAGE = "android.intent.extra.alarm.MESSAGE";
+
+    /**
+     * Bundle extra: The minutes of the alarm.
+     * <p>
+     * Used by {@link #ACTION_SET_ALARM}.
+     * </p><p>
+     * The value is an {@link Integer} and ranges from 0 to 59. If not provided, it defaults to 0.
+     * </p>
+     *
+     * @see #ACTION_SET_ALARM
+     * @see #EXTRA_HOUR
+     * @see #EXTRA_DAYS
      */
     public static final String EXTRA_MINUTES = "android.intent.extra.alarm.MINUTES";
 
     /**
-     * Activity Extra: Optionally skip the application UI.
+     * Bundle extra: A ringtone to be played with this alarm.
      * <p>
-     * This value can be passed as an extra field to the Intent created with
-     * ACTION_SET_ALARM.  If true, the application is asked to bypass any
-     * intermediate UI and instead pop a toast indicating the result then
-     * finish the Activity.  If false, the application may display intermediate
-     * UI like a confirmation dialog or alarm settings.  The default is false.
+     * Used by {@link #ACTION_SET_ALARM}.
+     * </p><p>
+     * This value is a {@link String} and can either be set to {@link #RINGTONE_SILENT} or to a
+     * content URI of the media to be played. If not specified or the URI doesn't exist,
+     * {@code "content://settings/system/alarm_alert} will be used.
+     * </p>
+     *
+     * @see #ACTION_SET_ALARM
+     * @see #RINGTONE_SILENT
+     * @see #EXTRA_VIBRATE
+     */
+    public static final String EXTRA_RINGTONE = "android.intent.extra.alarm.RINGTONE";
+
+    /**
+     * Bundle extra: Whether or not to display an activity after performing the action.
+     * <p>
+     * Used by {@link #ACTION_SET_ALARM} and {@link #ACTION_SET_TIMER}.
+     * </p><p>
+     * If true, the application is asked to bypass any intermediate UI. If false, the application
+     * may display intermediate UI like a confirmation dialog or settings.
+     * </p><p>
+     * The value is a {@link Boolean}. The default is {@code false}.
+     * </p>
+     *
+     * @see #ACTION_SET_ALARM
+     * @see #ACTION_SET_TIMER
      */
     public static final String EXTRA_SKIP_UI = "android.intent.extra.alarm.SKIP_UI";
+
+    /**
+     * Bundle extra: Whether or not to activate the device vibrator.
+     * <p>
+     * Used by {@link #ACTION_SET_ALARM}.
+     * </p><p>
+     * The value is a {@link Boolean}. The default is {@code true}.
+     * </p>
+     *
+     * @see #ACTION_SET_ALARM
+     * @see #EXTRA_RINGTONE
+     * @see #RINGTONE_SILENT
+     */
+    public static final String EXTRA_VIBRATE = "android.intent.extra.alarm.VIBRATE";
+
+    /**
+     * Bundle extra value: Indicates no ringtone should be played.
+     * <p>
+     * Used by {@link #ACTION_SET_ALARM}, passed in through {@link #EXTRA_RINGTONE}.
+     * </p>
+     *
+     * @see #ACTION_SET_ALARM
+     * @see #EXTRA_RINGTONE
+     * @see #EXTRA_VIBRATE
+     */
+    public static final String VALUE_RINGTONE_SILENT = "silent";
 }
