@@ -344,4 +344,16 @@
     security mode. -->
     <dimen name="kg_small_widget_height">160dp</dimen>
 
+    <!-- Rounded corner radius for video subtitles. -->
+    <dimen name="subtitle_corner_radius">2dp</dimen>
+
+    <!-- Shadow radius for video subtitles. -->
+    <dimen name="subtitle_shadow_radius">2dp</dimen>
+
+    <!-- Shadow offset for video subtitles. -->
+    <dimen name="subtitle_shadow_offset">2dp</dimen>
+
+    <!-- Outline width for video subtitles. -->
+    <dimen name="subtitle_outline_width">2dp</dimen>
+
 </resources>
