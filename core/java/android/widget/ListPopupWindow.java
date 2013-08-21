@@ -33,6 +33,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.View.OnTouchListener;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -961,33 +962,6 @@ public class ListPopupWindow {
     }
 
     /**
-     * Receives motion events forwarded from a source view. This is used
-     * internally to implement support for drag-to-open.
-     *
-     * @param src view from which the event was forwarded
-     * @param srcEvent forwarded motion event in source-local coordinates
-     * @param activePointerId id of the pointer that activated forwarding
-     * @return whether the event was handled
-     * @hide
-     */
-    public boolean onForwardedEvent(View src, MotionEvent srcEvent, int activePointerId) {
-        final DropDownListView dst = mDropDownList;
-        if (dst == null || !dst.isShown()) {
-            return false;
-        }
-
-        // Convert event to local coordinates.
-        final MotionEvent dstEvent = MotionEvent.obtainNoHistory(srcEvent);
-        src.toGlobalMotionEvent(dstEvent);
-        dst.toLocalMotionEvent(dstEvent);
-
-        // Forward converted event, then recycle it.
-        final boolean handled = dst.onForwardedEvent(dstEvent, activePointerId);
-        dstEvent.recycle();
-        return handled;
-    }
-
-    /**
      * <p>Builds the popup window's content and returns the height the popup
      * should have. Returns -1 when the content already exists.</p>
      *
@@ -1152,6 +1126,147 @@ public class ListPopupWindow {
         if (listContent > 0) otherHeights += padding;
 
         return listContent + otherHeights;
+    }
+
+    /**
+     * Abstract class that forwards touch events to a {@link ListPopupWindow}.
+     *
+     * @hide
+     */
+    public static abstract class ForwardingListener implements View.OnTouchListener {
+        /** Scaled touch slop, used for detecting movement outside bounds. */
+        private final float mScaledTouchSlop;
+
+        /** Whether this listener is currently forwarding touch events. */
+        private boolean mForwarding;
+
+        /** The id of the first pointer down in the current event stream. */
+        private int mActivePointerId;
+
+        public ForwardingListener(Context context) {
+            mScaledTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        }
+
+        /**
+         * Returns the popup to which this listener is forwarding events.
+         * <p>
+         * Override this to return the correct popup. If the popup is displayed
+         * asynchronously, you may also need to override
+         * {@link #onForwardingStopped} to prevent premature cancelation of
+         * forwarding.
+         *
+         * @return the popup to which this listener is forwarding events
+         */
+        public abstract ListPopupWindow getPopup();
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            final boolean wasForwarding = mForwarding;
+            final boolean forwarding;
+            if (wasForwarding) {
+                forwarding = onTouchForwarded(v, event) || !onForwardingStopped();
+            } else {
+                forwarding = onTouchObserved(v, event) && onForwardingStarted();
+            }
+
+            mForwarding = forwarding;
+            return forwarding || wasForwarding;
+        }
+
+        /**
+         * Called when forwarding would like to start.
+         * <p>
+         * By default, this will show the popup returned by {@link #getPopup()}.
+         * It may be overridden to perform another action, like clicking the
+         * source view or preparing the popup before showing it.
+         *
+         * @return true to start forwarding, false otherwise
+         */
+        public boolean onForwardingStarted() {
+            final ListPopupWindow popup = getPopup();
+            if (popup != null && !popup.isShowing()) {
+                popup.show();
+            }
+            return true;
+        }
+
+        /**
+         * Called when forwarding would like to stop.
+         * <p>
+         * By default, this will dismiss the popup returned by
+         * {@link #getPopup()}. It may be overridden to perform some other
+         * action.
+         *
+         * @return true to stop forwarding, false otherwise
+         */
+        public boolean onForwardingStopped() {
+            final ListPopupWindow popup = getPopup();
+            if (popup != null && popup.isShowing()) {
+                popup.dismiss();
+            }
+            return true;
+        }
+
+        /**
+         * Observes motion events and determines when to start forwarding.
+         *
+         * @param src view from which the event originated
+         * @param srcEvent motion event in source view coordinates
+         * @return true to start forwarding motion events, false otherwise
+         */
+        private boolean onTouchObserved(View src, MotionEvent srcEvent) {
+            if (!src.isEnabled()) {
+                return false;
+            }
+
+            // The first pointer down is always the active pointer.
+            final int actionMasked = srcEvent.getActionMasked();
+            if (actionMasked == MotionEvent.ACTION_DOWN) {
+                mActivePointerId = srcEvent.getPointerId(0);
+            }
+
+            final int activePointerIndex = srcEvent.findPointerIndex(mActivePointerId);
+            if (activePointerIndex >= 0) {
+                final float x = srcEvent.getX(activePointerIndex);
+                final float y = srcEvent.getY(activePointerIndex);
+                if (!src.pointInView(x, y, mScaledTouchSlop)) {
+                    // The pointer has moved outside of the view.
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /**
+         * Handled forwarded motion events and determines when to stop
+         * forwarding.
+         *
+         * @param src view from which the event originated
+         * @param srcEvent motion event in source view coordinates
+         * @return true to continue forwarding motion events, false to cancel
+         */
+        private boolean onTouchForwarded(View src, MotionEvent srcEvent) {
+            final ListPopupWindow popup = getPopup();
+            if (popup == null || !popup.isShowing()) {
+                return false;
+            }
+
+            final DropDownListView dst = popup.mDropDownList;
+            if (dst == null || !dst.isShown()) {
+                return false;
+            }
+
+            // Convert event to destination-local coordinates.
+            final MotionEvent dstEvent = MotionEvent.obtainNoHistory(srcEvent);
+            src.toGlobalMotionEvent(dstEvent);
+            dst.toLocalMotionEvent(dstEvent);
+
+            // Forward converted event to destination view, then recycle it.
+            final boolean handled = dst.onForwardedEvent(dstEvent, mActivePointerId);
+            dstEvent.recycle();
+            return handled;
+        }
     }
 
     /**
