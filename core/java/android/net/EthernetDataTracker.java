@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * ConnectivityService.
  * @hide
  */
-public class EthernetDataTracker implements NetworkStateTracker {
+public class EthernetDataTracker extends BaseNetworkStateTracker {
     private static final String NETWORKTYPE = "ETHERNET";
     private static final String TAG = "Ethernet";
 
@@ -46,15 +46,11 @@ public class EthernetDataTracker implements NetworkStateTracker {
     private AtomicBoolean mDefaultRouteSet = new AtomicBoolean(false);
 
     private static boolean mLinkUp;
-    private LinkProperties mLinkProperties;
-    private LinkCapabilities mLinkCapabilities;
-    private NetworkInfo mNetworkInfo;
     private InterfaceObserver mInterfaceObserver;
     private String mHwAddr;
 
     /* For sending events to connectivity service handler */
     private Handler mCsHandler;
-    private Context mContext;
 
     private static EthernetDataTracker sInstance;
     private static String sIfaceMatch = "";

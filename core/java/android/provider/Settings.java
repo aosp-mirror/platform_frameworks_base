@@ -5346,6 +5346,17 @@ public final class Settings {
          */
         public static final String CONNECTIVITY_CHANGE_DELAY = "connectivity_change_delay";
 
+
+        /**
+         * Network sampling interval, in seconds. We'll generate link information
+         * about bytes/packets sent and error rates based on data sampled in this interval
+         *
+         * @hide
+         */
+
+        public static final String CONNECTIVITY_SAMPLING_INTERVAL_IN_SECONDS =
+                "connectivity_sampling_interval_in_seconds";
+
         /**
          * The series of successively longer delays used in retrying to download PAC file.
          * Last delay is used between successful PAC downloads.

@@ -1442,4 +1442,43 @@ public class ConnectivityManager {
         }
         return null;
     }
+
+    /**
+     * get the information about a specific network link
+     * @hide
+     */
+    public LinkInfo getLinkInfo(int networkType) {
+        try {
+            LinkInfo li = mService.getLinkInfo(networkType);
+            return li;
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * get the information of currently active network link
+     * @hide
+     */
+    public LinkInfo getActiveLinkInfo() {
+        try {
+            LinkInfo li = mService.getActiveLinkInfo();
+            return li;
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * get the information of all network links
+     * @hide
+     */
+    public LinkInfo[] getAllLinkInfo() {
+        try {
+            LinkInfo[] li = mService.getAllLinkInfo();
+            return li;
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
 }
