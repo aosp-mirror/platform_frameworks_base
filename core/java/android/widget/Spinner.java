@@ -645,6 +645,10 @@ public class Spinner extends AbsSpinner implements OnClickListener {
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(Spinner.class.getName());
+
+        if (mAdapter != null) {
+            info.setOpensPopup(true);
+        }
     }
 
     /**
