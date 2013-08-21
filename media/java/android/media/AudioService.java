@@ -1912,7 +1912,16 @@ public class AudioService extends IAudioService.Stub {
         if (!checkAudioSettingsPermission("setSpeakerphoneOn()")) {
             return;
         }
-        mForcedUseForComm = on ? AudioSystem.FORCE_SPEAKER : AudioSystem.FORCE_NONE;
+
+        if (on) {
+            if (mForcedUseForComm == AudioSystem.FORCE_BT_SCO) {
+                    sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
+                            AudioSystem.FOR_RECORD, AudioSystem.FORCE_NONE, null, 0);
+            }
+            mForcedUseForComm = AudioSystem.FORCE_SPEAKER;
+        } else if (mForcedUseForComm == AudioSystem.FORCE_SPEAKER){
+            mForcedUseForComm = AudioSystem.FORCE_NONE;
+        }
 
         sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
                 AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, null, 0);
@@ -1928,7 +1937,12 @@ public class AudioService extends IAudioService.Stub {
         if (!checkAudioSettingsPermission("setBluetoothScoOn()")) {
             return;
         }
-        mForcedUseForComm = on ? AudioSystem.FORCE_BT_SCO : AudioSystem.FORCE_NONE;
+
+        if (on) {
+            mForcedUseForComm = AudioSystem.FORCE_BT_SCO;
+        } else if (mForcedUseForComm == AudioSystem.FORCE_BT_SCO) {
+            mForcedUseForComm = AudioSystem.FORCE_NONE;
+        }
 
         sendMsg(mAudioHandler, MSG_SET_FORCE_USE, SENDMSG_QUEUE,
                 AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, null, 0);
