@@ -48,10 +48,12 @@ import java.net.URLConnection;
  * @hide
  */
 public class PacManager {
-    public static final String PROXY_PACKAGE = "com.android.pacprocessor";
-    public static final String PROXY_SERVICE = "com.android.pacprocessor.PacService";
-    public static final String PROXY_SERVICE_NAME = "com.android.net.IProxyService";
+    public static final String PAC_PACKAGE = "com.android.pacprocessor";
+    public static final String PAC_SERVICE = "com.android.pacprocessor.PacService";
+    public static final String PAC_SERVICE_NAME = "com.android.net.IProxyService";
 
+    public static final String PROXY_PACKAGE = "com.android.proxyhandler";
+    public static final String PROXY_SERVICE = "com.android.proxyhandler.ProxyService";
 
     private static final String TAG = "PacManager";
 
@@ -73,6 +75,7 @@ public class PacManager {
     private IProxyService mProxyService;
     private PendingIntent mPacRefreshIntent;
     private ServiceConnection mConnection;
+    private ServiceConnection mProxyConnection;
     private Context mContext;
 
     private int mCurrentDelay;
@@ -229,7 +232,7 @@ public class PacManager {
             return;
         }
         Intent intent = new Intent();
-        intent.setClassName(PROXY_PACKAGE, PROXY_SERVICE);
+        intent.setClassName(PAC_PACKAGE, PAC_SERVICE);
         mConnection = new ServiceConnection() {
             @Override
             public void onServiceDisconnected(ComponentName component) {
@@ -242,12 +245,12 @@ public class PacManager {
             public void onServiceConnected(ComponentName component, IBinder binder) {
                 synchronized (mProxyLock) {
                     try {
-                        Log.d(TAG, "Adding service " + PROXY_SERVICE_NAME + " "
+                        Log.d(TAG, "Adding service " + PAC_SERVICE_NAME + " "
                                 + binder.getInterfaceDescriptor());
                     } catch (RemoteException e1) {
                         Log.e(TAG, "Remote Exception", e1);
                     }
-                    ServiceManager.addService(PROXY_SERVICE_NAME, binder);
+                    ServiceManager.addService(PAC_SERVICE_NAME, binder);
                     mProxyService = IProxyService.Stub.asInterface(binder);
                     if (mProxyService == null) {
                         Log.e(TAG, "No proxy service");
@@ -262,13 +265,27 @@ public class PacManager {
                 }
             }
         };
-        Log.e(TAG, "Attempting to bind");
         mContext.bindService(intent, mConnection,
+                Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND | Context.BIND_NOT_VISIBLE);
+
+        intent = new Intent();
+        intent.setClassName(PROXY_PACKAGE, PROXY_SERVICE);
+        mProxyConnection = new ServiceConnection() {
+            @Override
+            public void onServiceDisconnected(ComponentName component) {
+            }
+
+            @Override
+            public void onServiceConnected(ComponentName component, IBinder binder) {
+            }
+        };
+        mContext.bindService(intent, mProxyConnection,
                 Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND | Context.BIND_NOT_VISIBLE);
     }
 
     private void unbind() {
         mContext.unbindService(mConnection);
+        mContext.unbindService(mProxyConnection);
         mConnection = null;
     }
 }
