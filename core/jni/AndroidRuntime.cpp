@@ -371,19 +371,6 @@ static int hasDir(const char* dir)
 }
 
 /*
- * We just want failed write() calls to just return with an error.
- */
-static void blockSigpipe()
-{
-    sigset_t mask;
-
-    sigemptyset(&mask);
-    sigaddset(&mask, SIGPIPE);
-    if (sigprocmask(SIG_BLOCK, &mask, NULL) != 0)
-        ALOGW("WARNING: SIGPIPE not blocked\n");
-}
-
-/*
  * Read the persistent locale.
  */
 static void readLocale(char* language, char* region)
@@ -803,8 +790,6 @@ void AndroidRuntime::start(const char* className, const char* options)
 {
     ALOGD("\n>>>>>> AndroidRuntime START %s <<<<<<\n",
             className != NULL ? className : "(unknown)");
-
-    blockSigpipe();
 
     /*
      * 'startSystemServer == true' means runtime is obsolete and not run from
