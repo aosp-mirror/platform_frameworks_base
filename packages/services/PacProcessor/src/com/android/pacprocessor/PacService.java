@@ -25,6 +25,9 @@ import android.util.Log;
 
 import com.android.net.IProxyService;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 public class PacService extends Service {
     private static final String TAG = "PacService";
 
@@ -68,7 +71,18 @@ public class PacService extends Service {
 
         @Override
         public String resolvePacFile(String host, String url) throws RemoteException {
-            return mPacNative.makeProxyRequest(url, host);
+            try {
+                // Check for characters that could be used for an injection attack.
+                new URL(url);
+                for (char c : host.toCharArray()) {
+                    if (!Character.isLetterOrDigit(c) && (c != '.') && (c != '-')) {
+                        throw new RemoteException("Invalid host was passed");
+                    }
+                }
+                return mPacNative.makeProxyRequest(url, host);
+            } catch (MalformedURLException e) {
+                throw new RemoteException("Invalid URL was passed");
+            }
         }
 
         @Override
