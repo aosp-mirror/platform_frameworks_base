@@ -57,7 +57,6 @@ import android.net.http.SslCertificate;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -2897,7 +2896,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      */
     @Override
     public void exportToPdf(java.io.OutputStream out, int width, int height,
-            ValueCallback<Boolean> resultCallback, CancellationSignal cancellationSignal) {
+            ValueCallback<Boolean> resultCallback) {
         // K-only API not implemented in WebViewClassic.
         throw new IllegalStateException("This API not supported on Android 4.3 and earlier");
 

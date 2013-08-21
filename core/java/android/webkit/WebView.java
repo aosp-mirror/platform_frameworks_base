@@ -28,7 +28,6 @@ import android.graphics.drawable.Drawable;
 import android.net.http.SslCertificate;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.Looper;
 import android.os.Message;
 import android.os.StrictMode;
@@ -1044,26 +1043,24 @@ public class WebView extends AbsoluteLayout
      * @param width          The page width. Should be larger than 0.
      * @param height         The page height. Should be larger than 0.
      * @param resultCallback A callback to be invoked when the PDF content is exported.
-     *                       A true indicates success, and a false failure. Cannot be null.
-     * @param cancellationSignal Signal for cancelling the PDF conversion request. Must not
-     *                       be null.
+     *                       A true indicates success, and a false failure.
      *
-     * The PDF conversion is done asynchronously and the PDF output is written to the provided
-     * outputstream. The caller should not close the outputstream until the resultCallback is
-     * called, indicating PDF conversion is complete. Webview cannot be drawn during the pdf
-     * export so the  application is recommended to take it offscreen, or putting in a layer
-     * with an overlaid progress UI / spinner.
+     * TODO: explain method parameters, margins, consider making the callback
+     * return more meaningful information, explain any threading concerns, HW
+     * draw limitations, and make it public.
+     * TODO: at the moment we are asking app to provide paper size information (width
+     * and height). This is likely not ideal (I think need margin info too).
+     * Another approach would be using PrintAttributes. This is to be clarified later.
      *
-     * If the caller cancels the task using the cancellationSignal, the cancellation will be
-     * acked using the resultCallback signal.
-     *
-     * TODO(sgurun) margins, explain the units, make it public.
+     * TODO: explain this webview will not draw during export (onDraw will clear to
+     * background color) so recommend taking it offscreen, or putting in a layer with an
+     * overlaid progress UI / spinner.
      * @hide
      */
     public void exportToPdf(OutputStream out, int width, int height,
-            ValueCallback<Boolean> resultCallback, CancellationSignal cancellationSignal) {
+            ValueCallback<Boolean> resultCallback) {
         checkThread();
-        mProvider.exportToPdf(out, width, height, resultCallback, cancellationSignal);
+        mProvider.exportToPdf(out, width, height, resultCallback);
     }
 
     /**
