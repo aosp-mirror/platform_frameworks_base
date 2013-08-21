@@ -877,18 +877,30 @@ public final class CaptureResult extends CameraMetadata {
      * Table mapping blue input values to output
      * values
      * </p>
+     * <p>
+     * Tonemapping / contrast / gamma curve for the blue
+     * channel, to use when android.tonemap.mode is CONTRAST_CURVE.
+     * </p><p>
+     * See android.tonemap.curveRed for more details.
+     * </p>
      */
-    public static final Key<Float> TONEMAP_CURVE_BLUE =
-            new Key<Float>("android.tonemap.curveBlue", float.class);
+    public static final Key<float[]> TONEMAP_CURVE_BLUE =
+            new Key<float[]>("android.tonemap.curveBlue", float[].class);
 
     /**
      * <p>
      * Table mapping green input values to output
      * values
      * </p>
+     * <p>
+     * Tonemapping / contrast / gamma curve for the green
+     * channel, to use when android.tonemap.mode is CONTRAST_CURVE.
+     * </p><p>
+     * See android.tonemap.curveRed for more details.
+     * </p>
      */
-    public static final Key<Float> TONEMAP_CURVE_GREEN =
-            new Key<Float>("android.tonemap.curveGreen", float.class);
+    public static final Key<float[]> TONEMAP_CURVE_GREEN =
+            new Key<float[]>("android.tonemap.curveGreen", float[].class);
 
     /**
      * <p>
@@ -896,9 +908,17 @@ public final class CaptureResult extends CameraMetadata {
      * values
      * </p>
      * <p>
-     * .The input range must be monotonically increasing
-     * with N, and values between entries should be linearly
-     * interpolated. For example, if the array is: [0.0, 0.0,
+     * Tonemapping / contrast / gamma curve for the red
+     * channel, to use when android.tonemap.mode is CONTRAST_CURVE.
+     * </p><p>
+     * Since the input and output ranges may vary depending on
+     * the camera pipeline, the input and output pixel values
+     * are represented by normalized floating-point values
+     * between 0 and 1, with 0 == black and 1 == white.
+     * </p><p>
+     * The curve should be linearly interpolated between the
+     * defined points. The points will be listed in increasing
+     * order of P_IN. For example, if the array is: [0.0, 0.0,
      * 0.3, 0.5, 1.0, 1.0], then the input->output mapping
      * for a few sample points would be: 0 -> 0, 0.15 ->
      * 0.25, 0.3 -> 0.5, 0.5 -> 0.64

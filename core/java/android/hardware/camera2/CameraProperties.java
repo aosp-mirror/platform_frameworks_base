@@ -384,8 +384,8 @@ public final class CameraProperties extends CameraMetadata {
      * Needed for FOV calculation for old API
      * </p>
      */
-    public static final Key<android.hardware.camera2.Size> SENSOR_INFO_PHYSICAL_SIZE =
-            new Key<android.hardware.camera2.Size>("android.sensor.info.physicalSize", android.hardware.camera2.Size.class);
+    public static final Key<float[]> SENSOR_INFO_PHYSICAL_SIZE =
+            new Key<float[]>("android.sensor.info.physicalSize", float[].class);
 
     /**
      * <p>
