@@ -50,12 +50,20 @@ public class RationalTest extends junit.framework.TestCase {
         assertEquals(1, r.getNumerator());
         assertEquals(2, r.getDenominator());
 
-        // Dividing by zero is not allowed
-        try {
-            r = new Rational(1, 0);
-            fail("Expected Rational constructor to throw an IllegalArgumentException");
-        } catch(IllegalArgumentException e) {
-        }
+        // Infinity.
+        r = new Rational(1, 0);
+        assertEquals(0, r.getNumerator());
+        assertEquals(0, r.getDenominator());
+
+        // Negative infinity.
+        r = new Rational(-1, 0);
+        assertEquals(0, r.getNumerator());
+        assertEquals(0, r.getDenominator());
+
+        // NaN.
+        r = new Rational(0, 0);
+        assertEquals(0, r.getNumerator());
+        assertEquals(0, r.getDenominator());
     }
 
     @SmallTest
@@ -110,5 +118,34 @@ public class RationalTest extends junit.framework.TestCase {
         assertEquals(moreComplicated, moreComplicated2);
         assertEquals(moreComplicated2, moreComplicated);
 
+        Rational nan = new Rational(0, 0);
+        Rational nan2 = new Rational(0, 0);
+        assertTrue(nan.equals(nan));
+        assertTrue(nan.equals(nan2));
+        assertTrue(nan2.equals(nan));
+        assertFalse(nan.equals(r));
+        assertFalse(r.equals(nan));
+
+        // Infinities of the same sign are equal.
+        Rational posInf = new Rational(1, 0);
+        Rational posInf2 = new Rational(2, 0);
+        Rational negInf = new Rational(-1, 0);
+        Rational negInf2 = new Rational(-2, 0);
+        assertEquals(posInf, posInf);
+        assertEquals(negInf, negInf);
+        assertEquals(posInf, posInf2);
+        assertEquals(negInf, negInf2);
+
+        // Infinities aren't equal to anything else.
+        assertFalse(posInf.equals(negInf));
+        assertFalse(negInf.equals(posInf));
+        assertFalse(negInf.equals(r));
+        assertFalse(posInf.equals(r));
+        assertFalse(r.equals(negInf));
+        assertFalse(r.equals(posInf));
+        assertFalse(posInf.equals(nan));
+        assertFalse(negInf.equals(nan));
+        assertFalse(nan.equals(posInf));
+        assertFalse(nan.equals(negInf));
     }
 }
