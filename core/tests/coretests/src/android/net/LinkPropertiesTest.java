@@ -306,5 +306,61 @@ public class LinkPropertiesTest extends TestCase {
         for (LinkProperties link : rmnet0.getStackedLinks()) {
             assertFalse("newname".equals(link.getInterfaceName()));
         }
+
+        assertTrue(rmnet0.removeStackedLink(clat4));
+        assertEquals(0, rmnet0.getStackedLinks().size());
+        assertEquals(1, rmnet0.getAddresses().size());
+        assertEquals(1, rmnet0.getLinkAddresses().size());
+        assertEquals(1, rmnet0.getAllAddresses().size());
+        assertEquals(1, rmnet0.getAllLinkAddresses().size());
+
+        assertFalse(rmnet0.removeStackedLink(clat4));
+    }
+
+    @SmallTest
+    public void testAddressMethods() {
+        LinkProperties lp = new LinkProperties();
+
+        // No addresses.
+        assertFalse(lp.hasIPv4Address());
+        assertFalse(lp.hasIPv6Address());
+
+        // Addresses on stacked links don't count.
+        LinkProperties stacked = new LinkProperties();
+        stacked.setInterfaceName("stacked");
+        lp.addStackedLink(stacked);
+        stacked.addLinkAddress(LINKADDRV4);
+        stacked.addLinkAddress(LINKADDRV6);
+        assertTrue(stacked.hasIPv4Address());
+        assertTrue(stacked.hasIPv6Address());
+        assertFalse(lp.hasIPv4Address());
+        assertFalse(lp.hasIPv6Address());
+        lp.removeStackedLink(stacked);
+        assertFalse(lp.hasIPv4Address());
+        assertFalse(lp.hasIPv6Address());
+
+        // Addresses on the base link.
+        // Check the return values of hasIPvXAddress and ensure the add/remove methods return true
+        // iff something changes.
+        assertTrue(lp.addLinkAddress(LINKADDRV6));
+        assertFalse(lp.hasIPv4Address());
+        assertTrue(lp.hasIPv6Address());
+
+        assertTrue(lp.removeLinkAddress(LINKADDRV6));
+        assertTrue(lp.addLinkAddress(LINKADDRV4));
+        assertTrue(lp.hasIPv4Address());
+        assertFalse(lp.hasIPv6Address());
+
+        assertTrue(lp.addLinkAddress(LINKADDRV6));
+        assertTrue(lp.hasIPv4Address());
+        assertTrue(lp.hasIPv6Address());
+
+        // Adding an address twice has no effect.
+        // Removing an address that's not present has no effect.
+        assertFalse(lp.addLinkAddress(LINKADDRV4));
+        assertTrue(lp.hasIPv4Address());
+        assertTrue(lp.removeLinkAddress(LINKADDRV4));
+        assertFalse(lp.hasIPv4Address());
+        assertFalse(lp.removeLinkAddress(LINKADDRV4));
     }
 }
