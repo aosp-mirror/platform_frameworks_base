@@ -181,6 +181,10 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      *~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~*/
 
     /**
+     * <p>
+     * When android.sensor.awbMode is not OFF, TRANSFORM_MATRIX
+     * should be ignored.
+     * </p>
      * @see #COLOR_CORRECTION_MODE_TRANSFORM_MATRIX
      * @see #COLOR_CORRECTION_MODE_FAST
      * @see #COLOR_CORRECTION_MODE_HIGH_QUALITY
@@ -197,7 +201,8 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * This matrix is either set by HAL when the request
      * android.colorCorrection.mode is not TRANSFORM_MATRIX, or
      * directly by the application in the request when the
-     * androird.colorCorrection.mode is TRANSFORM_MATRIX.
+     * android.colorCorrection.mode is TRANSFORM_MATRIX.
+     * </p><p>
      * In the latter case, the HAL may round the matrix to account
      * for precision issues; the final rounded matrix should be
      * reported back in this matrix result metadata.
@@ -219,6 +224,11 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * does not support a separate gain for even/odd green channels,
      * it should use the G_even value,and write G_odd equal to
      * G_even in the output result metadata.
+     * </p><p>
+     * This array is either set by HAL when the request
+     * android.colorCorrection.mode is not TRANSFORM_MATRIX, or
+     * directly by the application in the request when the
+     * android.colorCorrection.mode is TRANSFORM_MATRIX.
      * </p><p>
      * The ouput should be the gains actually applied by the HAL to
      * the current frame.
@@ -781,7 +791,10 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
     /**
      * <p>
      * Duration each pixel is exposed to
-     * light
+     * light.
+     * </p><p>
+     * If the sensor can't expose this exact duration, it should shorten the
+     * duration exposed to the nearest possible value (rather than expose longer).
      * </p>
      * <p>
      * 1/10000 - 30 sec range. No bulb mode
@@ -808,6 +821,9 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * Gain applied to image data. Must be
      * implemented through analog gain only if set to values
      * below 'maximum analog sensitivity'.
+     * </p><p>
+     * If the sensor can't apply this exact gain, it should lessen the
+     * gain to the nearest possible value (rather than gain more).
      * </p>
      * <p>
      * ISO 12232:2006 REI method
@@ -913,6 +929,13 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * compensation, the HAL must report whether setting the
      * black level lock was successful in the output result
      * metadata.
+     * </p><p>
+     * The black level locking must happen at the sensor, and not at the ISP.
+     * If for some reason black level locking is no longer legal (for example,
+     * the analog gain has changed, which forces black levels to be
+     * recalculated), then the HAL is free to override this request (and it
+     * must report 'OFF' when this does happen) until the next time locking
+     * is legal again.
      * </p>
      */
     public static final Key<Boolean> BLACK_LEVEL_LOCK =
