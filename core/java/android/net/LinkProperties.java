@@ -23,6 +23,7 @@ import android.text.TextUtils;
 
 import java.net.InetAddress;
 import java.net.Inet4Address;
+import java.net.Inet6Address;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -153,8 +154,28 @@ public class LinkProperties implements Parcelable {
         return addresses;
     }
 
-    public void addLinkAddress(LinkAddress address) {
-        if (address != null) mLinkAddresses.add(address);
+    /**
+     * Adds a link address if it does not exist, or update it if it does.
+     * @param address The {@code LinkAddress} to add.
+     * @return true if the address was added, false if it already existed.
+     */
+    public boolean addLinkAddress(LinkAddress address) {
+        // TODO: when the LinkAddress has other attributes beyond the
+        // address and the prefix length, update them here.
+        if (address != null && !mLinkAddresses.contains(address)) {
+            mLinkAddresses.add(address);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Removes a link address.
+     * @param address The {@code LinkAddress} to remove.
+     * @return true if the address was removed, false if it did not exist.
+     */
+    public boolean removeLinkAddress(LinkAddress toRemove) {
+        return mLinkAddresses.remove(toRemove);
     }
 
     /**
@@ -245,11 +266,14 @@ public class LinkProperties implements Parcelable {
      * of stacked links. If link is null, nothing changes.
      *
      * @param link The link to add.
+     * @return true if the link was stacked, false otherwise.
      */
-    public void addStackedLink(LinkProperties link) {
+    public boolean addStackedLink(LinkProperties link) {
         if (link != null && link.getInterfaceName() != null) {
             mStackedLinks.put(link.getInterfaceName(), link);
+            return true;
         }
+        return false;
     }
 
     /**
@@ -258,12 +282,15 @@ public class LinkProperties implements Parcelable {
      * If there a stacked link with the same interfacename as link, it is
      * removed. Otherwise, nothing changes.
      *
-     * @param link The link to add.
+     * @param link The link to remove.
+     * @return true if the link was removed, false otherwise.
      */
-    public void removeStackedLink(LinkProperties link) {
+    public boolean removeStackedLink(LinkProperties link) {
         if (link != null && link.getInterfaceName() != null) {
-            mStackedLinks.remove(link.getInterfaceName());
+            LinkProperties removed = mStackedLinks.remove(link.getInterfaceName());
+            return removed != null;
         }
+        return false;
     }
 
     /**
@@ -333,6 +360,20 @@ public class LinkProperties implements Parcelable {
     public boolean hasIPv4Address() {
         for (LinkAddress address : mLinkAddresses) {
           if (address.getAddress() instanceof Inet4Address) {
+            return true;
+          }
+        }
+        return false;
+    }
+
+    /**
+     * Returns true if this link has an IPv6 address.
+     *
+     * @return {@code true} if there is an IPv6 address, {@code false} otherwise.
+     */
+    public boolean hasIPv6Address() {
+        for (LinkAddress address : mLinkAddresses) {
+          if (address.getAddress() instanceof Inet6Address) {
             return true;
           }
         }

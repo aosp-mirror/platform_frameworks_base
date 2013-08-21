@@ -3982,8 +3982,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         // Get the type of addresses supported by this link
                         LinkProperties lp = mCs.getLinkProperties(
                                 ConnectivityManager.TYPE_MOBILE_HIPRI);
-                        boolean linkHasIpv4 = hasIPv4Address(lp);
-                        boolean linkHasIpv6 = hasIPv6Address(lp);
+                        boolean linkHasIpv4 = lp.hasIPv4Address();
+                        boolean linkHasIpv6 = lp.hasIPv6Address();
                         log("isMobileOk: linkHasIpv4=" + linkHasIpv4
                                 + " linkHasIpv6=" + linkHasIpv6);
 
@@ -4127,20 +4127,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
-
-        public boolean hasIPv4Address(LinkProperties lp) {
-            return lp.hasIPv4Address();
-        }
-
-        // Not implemented in LinkProperties, do it here.
-        public boolean hasIPv6Address(LinkProperties lp) {
-            for (LinkAddress address : lp.getLinkAddresses()) {
-              if (address.getAddress() instanceof Inet6Address) {
-                return true;
-              }
-            }
-            return false;
         }
 
         private void log(String s) {
