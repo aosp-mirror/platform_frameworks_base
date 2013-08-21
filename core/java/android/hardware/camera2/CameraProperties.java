@@ -16,10 +16,6 @@
 
 package android.hardware.camera2;
 
-import android.graphics.Rect;
-
-import java.util.List;
-
 /**
  * <p>The properties describing a
  * {@link CameraDevice CameraDevice}.</p>
