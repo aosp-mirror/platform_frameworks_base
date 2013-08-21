@@ -44,6 +44,7 @@ public class BitmapFactory {
         public Options() {
             inDither = false;
             inScaled = true;
+            inPremultiplied = true;
         }
 
         /**
@@ -123,6 +124,26 @@ public class BitmapFactory {
          * default.
          */
         public Bitmap.Config inPreferredConfig = Bitmap.Config.ARGB_8888;
+
+        /**
+         * If true (which is the default), the resulting bitmap will have its
+         * color channels pre-multipled by the alpha channel.
+         *
+         * <p>This should NOT be set to false for images to be directly drawn by
+         * the view system or through a {@link Canvas}. The view system and
+         * {@link Canvas} assume all drawn images are pre-multiplied to simplify
+         * draw-time blending, and will throw a RuntimeException when
+         * un-premultiplied are drawn.</p>
+         *
+         * <p>This is likely only useful if you want to manipulate raw encoded
+         * image data, e.g. with RenderScript or custom OpenGL.</p>
+         *
+         * <p>This does not affect bitmaps without an alpha channel.</p>
+         *
+         * @see Bitmap#hasAlpha()
+         * @see Bitmap#isPremultiplied()
+         */
+        public boolean inPremultiplied;
 
         /**
          * If dither is true, the decoder will attempt to dither the decoded

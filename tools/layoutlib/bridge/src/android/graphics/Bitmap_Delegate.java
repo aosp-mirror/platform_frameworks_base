@@ -551,8 +551,10 @@ public final class Bitmap_Delegate {
         int nativeInt = sManager.addNewDelegate(delegate);
 
         // and create/return a new Bitmap with it
-        return new Bitmap(nativeInt, null /* buffer */, isMutable, null /*ninePatchChunk*/,
-                density);
+        // TODO: pass correct width, height, isPremultiplied
+        return new Bitmap(nativeInt, null /* buffer */, -1 /* width */, -1 /* height */, density,
+                          isMutable, true /* isPremultiplied */,
+                          null /*ninePatchChunk*/, null /* layoutBounds */);
     }
 
     /**

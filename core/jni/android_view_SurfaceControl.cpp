@@ -195,7 +195,8 @@ static jobject nativeScreenshotBitmap(JNIEnv* env, jclass clazz, jobject display
         bitmap->setPixels(NULL);
     }
 
-    return GraphicsJNI::createBitmap(env, bitmap, false, NULL);
+    return GraphicsJNI::createBitmap(env, bitmap,
+            GraphicsJNI::kBitmapCreateFlag_Premultiplied, NULL);
 }
 
 static void nativeScreenshot(JNIEnv* env, jclass clazz,

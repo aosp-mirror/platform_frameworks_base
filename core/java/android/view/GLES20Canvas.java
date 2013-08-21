@@ -776,7 +776,7 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawPatch(NinePatch patch, Rect dst, Paint paint) {
         Bitmap bitmap = patch.getBitmap();
-        if (bitmap.isRecycled()) throw new IllegalArgumentException("Cannot draw recycled bitmaps");
+        throwIfCannotDraw(bitmap);
         // Shaders are ignored when drawing patches
         int modifier = paint != null ? setupColorFilter(paint) : MODIFIER_NONE;
         try {
@@ -791,7 +791,7 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawPatch(NinePatch patch, RectF dst, Paint paint) {
         Bitmap bitmap = patch.getBitmap();
-        if (bitmap.isRecycled()) throw new IllegalArgumentException("Cannot draw recycled bitmaps");
+        throwIfCannotDraw(bitmap);
         // Shaders are ignored when drawing patches
         int modifier = paint != null ? setupColorFilter(paint) : MODIFIER_NONE;
         try {
@@ -808,7 +808,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
-        if (bitmap.isRecycled()) throw new IllegalArgumentException("Cannot draw recycled bitmaps");
+        throwIfCannotDraw(bitmap);
         // Shaders are ignored when drawing bitmaps
         int modifiers = paint != null ? setupModifiers(bitmap, paint) : MODIFIER_NONE;
         try {
@@ -824,7 +824,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint) {
-        if (bitmap.isRecycled()) throw new IllegalArgumentException("Cannot draw recycled bitmaps");
+        throwIfCannotDraw(bitmap);
         // Shaders are ignored when drawing bitmaps
         int modifiers = paint != null ? setupModifiers(bitmap, paint) : MODIFIER_NONE;
         try {
@@ -841,7 +841,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint) {
-        if (bitmap.isRecycled()) throw new IllegalArgumentException("Cannot draw recycled bitmaps");
+        throwIfCannotDraw(bitmap);
         // Shaders are ignored when drawing bitmaps
         int modifiers = paint != null ? setupModifiers(bitmap, paint) : MODIFIER_NONE;
         try {
@@ -868,7 +868,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, RectF dst, Paint paint) {
-        if (bitmap.isRecycled()) throw new IllegalArgumentException("Cannot draw recycled bitmaps");
+        throwIfCannotDraw(bitmap);
         // Shaders are ignored when drawing bitmaps
         int modifiers = paint != null ? setupModifiers(bitmap, paint) : MODIFIER_NONE;
         try {
@@ -944,7 +944,7 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public void drawBitmapMesh(Bitmap bitmap, int meshWidth, int meshHeight, float[] verts,
             int vertOffset, int[] colors, int colorOffset, Paint paint) {
-        if (bitmap.isRecycled()) throw new IllegalArgumentException("Cannot draw recycled bitmaps");
+        throwIfCannotDraw(bitmap);
         if (meshWidth < 0 || meshHeight < 0 || vertOffset < 0 || colorOffset < 0) {
             throw new ArrayIndexOutOfBoundsException();
         }

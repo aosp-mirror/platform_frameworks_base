@@ -14,6 +14,7 @@
 #include "AutoDecodeCancel.h"
 #include "Utils.h"
 #include "JNIHelp.h"
+#include "GraphicsJNI.h"
 
 #include <android_runtime/AndroidRuntime.h>
 #include <androidfw/Asset.h>
@@ -25,6 +26,7 @@
 jfieldID gOptions_justBoundsFieldID;
 jfieldID gOptions_sampleSizeFieldID;
 jfieldID gOptions_configFieldID;
+jfieldID gOptions_premultipliedFieldID;
 jfieldID gOptions_mutableFieldID;
 jfieldID gOptions_ditherFieldID;
 jfieldID gOptions_purgeableFieldID;
@@ -213,6 +215,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     float scale = 1.0f;
     bool isPurgeable = forcePurgeable || (allowPurgeable && optionsPurgeable(env, options));
     bool preferQualityOverSpeed = false;
+    bool requireUnpremultiplied = false;
 
     jobject javaBitmap = NULL;
 
@@ -233,6 +236,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         doDither = env->GetBooleanField(options, gOptions_ditherFieldID);
         preferQualityOverSpeed = env->GetBooleanField(options,
                 gOptions_preferQualityOverSpeedFieldID);
+        requireUnpremultiplied = !env->GetBooleanField(options, gOptions_premultipliedFieldID);
         javaBitmap = env->GetObjectField(options, gOptions_bitmapFieldID);
 
         if (env->GetBooleanField(options, gOptions_scaledFieldID)) {
@@ -256,6 +260,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     decoder->setSampleSize(sampleSize);
     decoder->setDitherImage(doDither);
     decoder->setPreferQualityOverSpeed(preferQualityOverSpeed);
+    decoder->setRequireUnpremultipliedColors(requireUnpremultiplied);
 
     SkBitmap* outputBitmap = NULL;
     unsigned int existingBufferSize = 0;
@@ -434,14 +439,20 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     adb.detach();
 
     if (javaBitmap != NULL) {
-        GraphicsJNI::reinitBitmap(env, javaBitmap);
+        bool isPremultiplied = !requireUnpremultiplied;
+        GraphicsJNI::reinitBitmap(env, javaBitmap, outputBitmap, isPremultiplied);
         outputBitmap->notifyPixelsChanged();
         // If a java bitmap was passed in for reuse, pass it back
         return javaBitmap;
     }
+
+    int bitmapCreateFlags = 0x0;
+    if (isMutable) bitmapCreateFlags |= GraphicsJNI::kBitmapCreateFlag_Mutable;
+    if (!requireUnpremultiplied) bitmapCreateFlags |= GraphicsJNI::kBitmapCreateFlag_Premultiplied;
+
     // now create the java bitmap
     return GraphicsJNI::createBitmap(env, outputBitmap, javaAllocator.getStorageObj(),
-            isMutable, ninePatchChunk, layoutBounds, -1);
+            bitmapCreateFlags, ninePatchChunk, layoutBounds, -1);
 }
 
 static jobject nativeDecodeStream(JNIEnv* env, jobject clazz, jobject is, jbyteArray storage,
@@ -624,6 +635,7 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     gOptions_sampleSizeFieldID = getFieldIDCheck(env, options_class, "inSampleSize", "I");
     gOptions_configFieldID = getFieldIDCheck(env, options_class, "inPreferredConfig",
             "Landroid/graphics/Bitmap$Config;");
+    gOptions_premultipliedFieldID = getFieldIDCheck(env, options_class, "inPremultiplied", "Z");
     gOptions_mutableFieldID = getFieldIDCheck(env, options_class, "inMutable", "Z");
     gOptions_ditherFieldID = getFieldIDCheck(env, options_class, "inDither", "Z");
     gOptions_purgeableFieldID = getFieldIDCheck(env, options_class, "inPurgeable", "Z");
