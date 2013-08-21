@@ -38,6 +38,8 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
+import com.android.internal.widget.AutoScrollHelper.AbsListViewAutoScroller;
+
 import java.util.Locale;
 
 /**
@@ -1276,8 +1278,6 @@ public class ListPopupWindow {
      * passed to the drop down in this mode; the list only looks focused.</p>
      */
     private static class DropDownListView extends ListView {
-        private static final String TAG = ListPopupWindow.TAG + ".DropDownListView";
-
         /** Duration in milliseconds of the drag-to-open click animation. */
         private static final long CLICK_ANIM_DURATION = 150;
 
@@ -1339,6 +1339,9 @@ public class ListPopupWindow {
         /** Current drag-to-open click animation, if any. */
         private Animator mClickAnimation;
 
+        /** Helper for drag-to-open auto scrolling. */
+        private AbsListViewAutoScroller mScrollHelper;
+
         /**
          * <p>Creates a new list view wrapper.</p>
          *
@@ -1397,6 +1400,17 @@ public class ListPopupWindow {
             // Failure to handle the event cancels forwarding.
             if (!handledEvent || clearPressedItem) {
                 clearPressedItem();
+            }
+
+            // Manage automatic scrolling.
+            if (handledEvent) {
+                if (mScrollHelper == null) {
+                    mScrollHelper = new AbsListViewAutoScroller(this);
+                }
+                mScrollHelper.setEnabled(true);
+                mScrollHelper.onTouch(this, event);
+            } else if (mScrollHelper != null) {
+                mScrollHelper.setEnabled(false);
             }
 
             return handledEvent;
