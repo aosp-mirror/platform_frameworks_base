@@ -37,12 +37,13 @@ public class BarTransitions {
     public static final int MODE_TRANSPARENT = 2;
 
     private final String mTag;
-    private final View mTarget;
-    private final int mOpaque;
-    private final int mSemiTransparent;
+    protected final View mTarget;
+    protected final int mOpaque;
+    protected final int mSemiTransparent;
 
     protected Drawable mTransparent;
     private int mMode;
+    private ValueAnimator mBackgroundColorAnimator;
 
     private final AnimatorUpdateListener mBackgroundColorListener = new AnimatorUpdateListener() {
         @Override
@@ -80,10 +81,11 @@ public class BarTransitions {
     }
 
     protected void onTransition(int oldMode, int newMode, boolean animate) {
+        cancelBackgroundColorAnimation();
         if (animate && oldMode == MODE_SEMI_TRANSPARENT && newMode == MODE_OPAQUE) {
-            startColorAnimation(mSemiTransparent, mOpaque);
+            startBackgroundColorAnimation(mSemiTransparent, mOpaque);
         } else if (animate && oldMode == MODE_OPAQUE && newMode == MODE_SEMI_TRANSPARENT) {
-            startColorAnimation(mOpaque, mSemiTransparent);
+            startBackgroundColorAnimation(mOpaque, mSemiTransparent);
         } else if (newMode == MODE_OPAQUE || newMode == MODE_SEMI_TRANSPARENT) {
             mTarget.setBackgroundColor(newMode == MODE_OPAQUE ? mOpaque : mSemiTransparent);
         } else {
@@ -93,10 +95,17 @@ public class BarTransitions {
         }
     }
 
-    private void startColorAnimation(int from, int to) {
-        ValueAnimator anim = ValueAnimator.ofObject(new ArgbEvaluator(), from, to);
-        anim.addUpdateListener(mBackgroundColorListener);
-        anim.start();
+    private void startBackgroundColorAnimation(int from, int to) {
+        mBackgroundColorAnimator = ValueAnimator.ofObject(new ArgbEvaluator(), from, to);
+        mBackgroundColorAnimator.addUpdateListener(mBackgroundColorListener);
+        mBackgroundColorAnimator.start();
+    }
+
+    private void cancelBackgroundColorAnimation() {
+        if (mBackgroundColorAnimator != null && mBackgroundColorAnimator.isStarted()) {
+            mBackgroundColorAnimator.cancel();
+            mBackgroundColorAnimator = null;
+        }
     }
 
     public static String modeToString(int mode) {
