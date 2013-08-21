@@ -133,6 +133,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         public static final int InterfaceChange           = 600;
         public static final int BandwidthControl          = 601;
         public static final int InterfaceClassActivity    = 613;
+        public static final int InterfaceAddressChange    = 614;
     }
 
     /**
@@ -393,6 +394,36 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         setFirewallEnabled(mFirewallEnabled || LockdownVpnTracker.isEnabled());
     }
 
+    /**
+     * Notify our observers of a new or updated interface address.
+     */
+    private void notifyAddressUpdated(String address, String iface, int flags, int scope) {
+        final int length = mObservers.beginBroadcast();
+        for (int i = 0; i < length; i++) {
+            try {
+                mObservers.getBroadcastItem(i).addressUpdated(address, iface, flags, scope);
+            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
+            }
+        }
+        mObservers.finishBroadcast();
+    }
+
+    /**
+     * Notify our observers of a deleted interface address.
+     */
+    private void notifyAddressRemoved(String address, String iface, int flags, int scope) {
+        final int length = mObservers.beginBroadcast();
+        for (int i = 0; i < length; i++) {
+            try {
+                mObservers.getBroadcastItem(i).addressRemoved(address, iface, flags, scope);
+            } catch (RemoteException e) {
+            } catch (RuntimeException e) {
+            }
+        }
+        mObservers.finishBroadcast();
+    }
+
     //
     // Netd Callback handling
     //
@@ -473,6 +504,32 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                     }
                     boolean isActive = cooked[2].equals("active");
                     notifyInterfaceClassActivity(cooked[3], isActive);
+                    return true;
+                    // break;
+            case NetdResponseCode.InterfaceAddressChange:
+                    /*
+                     * A network address change occurred
+                     * Format: "NNN Address updated <addr> <iface> <flags> <scope>"
+                     *         "NNN Address removed <addr> <iface> <flags> <scope>"
+                     */
+                    String msg = String.format("Invalid event from daemon (%s)", raw);
+                    if (cooked.length < 6 || !cooked[1].equals("Address")) {
+                        throw new IllegalStateException(msg);
+                    }
+
+                    int flags, scope;
+                    try {
+                        flags = Integer.parseInt(cooked[5]);
+                        scope = Integer.parseInt(cooked[6]);
+                    } catch(NumberFormatException e) {
+                        throw new IllegalStateException(msg);
+                    }
+
+                    if (cooked[2].equals("updated")) {
+                        notifyAddressUpdated(cooked[3], cooked[4], flags, scope);
+                    } else {
+                        notifyAddressRemoved(cooked[3], cooked[4], flags, scope);
+                    }
                     return true;
                     // break;
             default: break;

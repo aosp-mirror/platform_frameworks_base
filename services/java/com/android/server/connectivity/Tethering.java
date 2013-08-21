@@ -315,6 +315,10 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         }
     }
 
+    public void addressUpdated(String address, String iface, int flags, int scope) {}
+
+    public void addressRemoved(String address, String iface, int flags, int scope) {}
+
     public void limitReached(String limitName, String iface) {}
 
     public void interfaceClassDataActivityChanged(String label, boolean active) {}
