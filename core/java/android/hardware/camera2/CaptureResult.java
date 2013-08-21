@@ -138,7 +138,8 @@ public final class CaptureResult extends CameraMetadata {
      * This matrix is either set by HAL when the request
      * android.colorCorrection.mode is not TRANSFORM_MATRIX, or
      * directly by the application in the request when the
-     * androird.colorCorrection.mode is TRANSFORM_MATRIX.
+     * android.colorCorrection.mode is TRANSFORM_MATRIX.
+     * </p><p>
      * In the latter case, the HAL may round the matrix to account
      * for precision issues; the final rounded matrix should be
      * reported back in this matrix result metadata.
@@ -160,6 +161,11 @@ public final class CaptureResult extends CameraMetadata {
      * does not support a separate gain for even/odd green channels,
      * it should use the G_even value,and write G_odd equal to
      * G_even in the output result metadata.
+     * </p><p>
+     * This array is either set by HAL when the request
+     * android.colorCorrection.mode is not TRANSFORM_MATRIX, or
+     * directly by the application in the request when the
+     * android.colorCorrection.mode is TRANSFORM_MATRIX.
      * </p><p>
      * The ouput should be the gains actually applied by the HAL to
      * the current frame.
@@ -651,7 +657,10 @@ public final class CaptureResult extends CameraMetadata {
     /**
      * <p>
      * Duration each pixel is exposed to
-     * light
+     * light.
+     * </p><p>
+     * If the sensor can't expose this exact duration, it should shorten the
+     * duration exposed to the nearest possible value (rather than expose longer).
      * </p>
      * <p>
      * 1/10000 - 30 sec range. No bulb mode
@@ -678,6 +687,9 @@ public final class CaptureResult extends CameraMetadata {
      * Gain applied to image data. Must be
      * implemented through analog gain only if set to values
      * below 'maximum analog sensitivity'.
+     * </p><p>
+     * If the sensor can't apply this exact gain, it should lessen the
+     * gain to the nearest possible value (rather than gain more).
      * </p>
      * <p>
      * ISO 12232:2006 REI method
@@ -698,6 +710,18 @@ public final class CaptureResult extends CameraMetadata {
      */
     public static final Key<Long> SENSOR_TIMESTAMP =
             new Key<Long>("android.sensor.timestamp", long.class);
+
+    /**
+     * <p>
+     * The temperature of the sensor, sampled at the time
+     * exposure began for this frame.
+     * </p><p>
+     * The thermal diode being queried should be inside the sensor PCB, or
+     * somewhere close to it.
+     * </p>
+     */
+    public static final Key<Float> SENSOR_TEMPERATURE =
+            new Key<Float>("android.sensor.temperature", float.class);
 
     /**
      * <p>
@@ -759,7 +783,8 @@ public final class CaptureResult extends CameraMetadata {
      * detected faces
      * </p>
      * <p>
-     * Only available if faceDetectMode != OFF
+     * Only available if faceDetectMode != OFF. The value should be
+     * meaningful (for example, setting 100 at all times is illegal).
      * </p>
      */
     public static final Key<byte[]> STATISTICS_FACE_SCORES =
@@ -776,6 +801,9 @@ public final class CaptureResult extends CameraMetadata {
      * of 1; all other sections should have gains above 1.
      * the map should be on the order of 30-40 rows, and
      * must be smaller than 64x64.
+     * </p><p>
+     * When android.colorCorrection.mode = TRANSFORM_MATRIX, the map
+     * must take into account the colorCorrection settings.
      * </p>
      */
     public static final Key<float[]> STATISTICS_LENS_SHADING_MAP =
@@ -794,6 +822,9 @@ public final class CaptureResult extends CameraMetadata {
      * </p><p>
      * The 4 channel gains are defined in Bayer domain,
      * see android.colorCorrection.gains for details.
+     * </p><p>
+     * This value should always be calculated by the AWB block,
+     * regardless of the android.control.* current values.
      * </p>
      */
     public static final Key<float[]> STATISTICS_PREDICTED_COLOR_GAINS =
@@ -817,6 +848,9 @@ public final class CaptureResult extends CameraMetadata {
      * </p><p>
      * These estimates must be provided for all frames, even if
      * capture settings and color transforms are set by the application.
+     * </p><p>
+     * This value should always be calculated by the AWB block,
+     * regardless of the android.control.* current values.
      * </p>
      */
     public static final Key<Rational[]> STATISTICS_PREDICTED_COLOR_TRANSFORM =
@@ -917,6 +951,13 @@ public final class CaptureResult extends CameraMetadata {
      * compensation, the HAL must report whether setting the
      * black level lock was successful in the output result
      * metadata.
+     * </p><p>
+     * The black level locking must happen at the sensor, and not at the ISP.
+     * If for some reason black level locking is no longer legal (for example,
+     * the analog gain has changed, which forces black levels to be
+     * recalculated), then the HAL is free to override this request (and it
+     * must report 'OFF' when this does happen) until the next time locking
+     * is legal again.
      * </p>
      */
     public static final Key<Boolean> BLACK_LEVEL_LOCK =
