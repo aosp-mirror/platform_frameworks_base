@@ -24,6 +24,7 @@ import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraProperties;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.utils.CameraRuntimeException;
+import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -67,7 +68,8 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     }
 
     public void setRemoteDevice(ICameraDeviceUser remoteDevice) {
-        mRemoteDevice = remoteDevice;
+        // TODO: Move from decorator to direct binder-mediated exceptions
+        mRemoteDevice = CameraBinderDecorator.newInstance(remoteDevice);
     }
 
     @Override
