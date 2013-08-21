@@ -166,11 +166,16 @@ bool Caches::initProperties() {
         debugLayersUpdates = false;
     }
 
+    debugOverdraw = false;
     if (property_get(PROPERTY_DEBUG_OVERDRAW, property, NULL) > 0) {
         INIT_LOGD("  Overdraw debug enabled: %s", property);
-        debugOverdraw = !strcmp(property, "show");
-    } else {
-        debugOverdraw = false;
+        if (!strcmp(property, "show")) {
+            debugOverdraw = true;
+            mOverdrawDebugColorSet = kColorSet_Default;
+        } else if (!strcmp(property, "show_deuteranomaly")) {
+            debugOverdraw = true;
+            mOverdrawDebugColorSet = kColorSet_Deuteranomaly;
+        }
     }
 
     // See Properties.h for valid values
@@ -234,6 +239,16 @@ void Caches::terminate() {
 ///////////////////////////////////////////////////////////////////////////////
 // Debug
 ///////////////////////////////////////////////////////////////////////////////
+
+uint32_t Caches::getOverdrawColor(uint32_t amount) const {
+    static uint32_t sOverdrawColors[2][4] = {
+            { 0x2f0000ff, 0x2f00ff00, 0x3fff0000, 0x7fff0000 },
+            { 0x2f0000ff, 0x4fffff00, 0x5fff8ad8, 0x7fff0000 }
+    };
+    if (amount < 1) amount = 1;
+    if (amount > 4) amount = 4;
+    return sOverdrawColors[mOverdrawDebugColorSet][amount - 1];
+}
 
 void Caches::dumpMemoryUsage() {
     String8 stringLog;

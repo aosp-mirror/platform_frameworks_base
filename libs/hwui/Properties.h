@@ -70,8 +70,15 @@ enum DebugLevel {
 #define PROPERTY_DEBUG_LAYERS_UPDATES "debug.hwui.show_layers_updates"
 
 /**
- * Used to enable/disable overdraw debugging. The accepted values are
- * "show", "count" and "false". The default value is "false".
+ * Used to enable/disable overdraw debugging.
+ *
+ * The accepted values are
+ * "show", to show overdraw
+ * "show_deuteranomaly", to show overdraw if you suffer from Deuteranomaly
+ * "count", to show an overdraw counter
+ * "false", to disable overdraw debugging
+ *
+ * The default value is "false".
  */
 #define PROPERTY_DEBUG_OVERDRAW "debug.hwui.overdraw"
 
