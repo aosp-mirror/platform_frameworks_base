@@ -3855,12 +3855,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * the ViewGroup will be animated according to the animations defined in that LayoutTransition
      * object. By default, the transition object is null (so layout changes are not animated).
      *
+     * <p>Replacing a non-null transition will cause that previous transition to be
+     * canceled, if it is currently running, to restore this container to
+     * its correct post-transition state.</p>
+     *
      * @param transition The LayoutTransition object that will animated changes in layout. A value
      * of <code>null</code> means no transition will run on layout changes.
      * @attr ref android.R.styleable#ViewGroup_animateLayoutChanges
      */
     public void setLayoutTransition(LayoutTransition transition) {
         if (mTransition != null) {
+            mTransition.cancel();
             mTransition.removeTransitionListener(mLayoutTransitionListener);
         }
         mTransition = transition;
