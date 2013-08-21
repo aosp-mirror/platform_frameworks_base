@@ -27130,6 +27130,7 @@ package android.view {
     method public long getTimeDelta();
     method public boolean isInProgress();
     method public boolean onTouchEvent(android.view.MotionEvent);
+    method public void setQuickScaleEnabled(boolean);
   }
 
   public static abstract interface ScaleGestureDetector.OnScaleGestureListener {
