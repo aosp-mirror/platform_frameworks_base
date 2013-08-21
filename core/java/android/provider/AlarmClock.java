@@ -190,13 +190,13 @@ public final class AlarmClock {
      * <p>
      * Used by {@link #ACTION_SET_ALARM}.
      * </p><p>
-     * This value is a {@link String} and can either be set to {@link #RINGTONE_SILENT} or to a
-     * content URI of the media to be played. If not specified or the URI doesn't exist,
+     * This value is a {@link String} and can either be set to {@link #VALUE_RINGTONE_SILENT} or
+     * to a content URI of the media to be played. If not specified or the URI doesn't exist,
      * {@code "content://settings/system/alarm_alert} will be used.
      * </p>
      *
      * @see #ACTION_SET_ALARM
-     * @see #RINGTONE_SILENT
+     * @see #VALUE_RINGTONE_SILENT
      * @see #EXTRA_VIBRATE
      */
     public static final String EXTRA_RINGTONE = "android.intent.extra.alarm.RINGTONE";
@@ -227,7 +227,7 @@ public final class AlarmClock {
      *
      * @see #ACTION_SET_ALARM
      * @see #EXTRA_RINGTONE
-     * @see #RINGTONE_SILENT
+     * @see #VALUE_RINGTONE_SILENT
      */
     public static final String EXTRA_VIBRATE = "android.intent.extra.alarm.VIBRATE";
 
