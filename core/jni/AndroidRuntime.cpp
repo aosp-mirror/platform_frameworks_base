@@ -589,6 +589,12 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         mOptions.add(opt);
     }
 
+    property_get("ro.config.low_ram", propBuf, "");
+    if (strcmp(propBuf, "true") == 0) {
+      opt.optionString = "-XX:LowMemoryMode";
+      mOptions.add(opt);
+    }
+
     /*
      * Enable or disable dexopt features, such as bytecode verification and
      * calculation of register maps for precise GC.
