@@ -123,15 +123,17 @@ public class LocationController extends BroadcastReceiver {
         final ContentResolver cr = mContext.getContentResolver();
         // When enabling location, a user consent dialog will pop up, and the
         // setting won't be fully enabled until the user accepts the agreement.
-        Settings.Secure.setLocationMasterSwitchEnabled(cr, enabled);
+        int mode = enabled
+                ? Settings.Secure.LOCATION_MODE_HIGH_ACCURACY : Settings.Secure.LOCATION_MODE_OFF;
+        Settings.Secure.setLocationMode(cr, mode);
     }
 
     /**
-     * Returns true if either gps or network location are enabled in settings.
+     * Returns true if location isn't disabled in settings.
      */
     public boolean isLocationEnabled() {
-        ContentResolver contentResolver = mContext.getContentResolver();
-        return Settings.Secure.isLocationMasterSwitchEnabled(contentResolver);
+        ContentResolver resolver = mContext.getContentResolver();
+        return Settings.Secure.getLocationMode(resolver) != Settings.Secure.LOCATION_MODE_OFF;
     }
 
     /**
