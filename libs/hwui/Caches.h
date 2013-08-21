@@ -150,6 +150,12 @@ public:
     }
 
     /**
+     * Returns a non-premultiplied ARGB color for the specified
+     * amount of overdraw (1 for 1x, 2 for 2x, etc.)
+     */
+    uint32_t getOverdrawColor(uint32_t amount) const;
+
+    /**
      * Call this on each frame to ensure that garbage is deleted from
      * GPU memory.
      */
@@ -348,6 +354,11 @@ public:
     PFNGLGETOBJECTLABELEXTPROC getLabel;
 
 private:
+    enum OverdrawColorSet {
+        kColorSet_Default = 0,
+        kColorSet_Deuteranomaly
+    };
+
     void initFont();
     void initExtensions();
     void initConstraints();
@@ -400,6 +411,8 @@ private:
     uint32_t mFunctorsCount;
 
     GLuint mBoundTextures[REQUIRED_TEXTURE_UNITS_COUNT];
+
+    OverdrawColorSet mOverdrawDebugColorSet;
 }; // class Caches
 
 }; // namespace uirenderer

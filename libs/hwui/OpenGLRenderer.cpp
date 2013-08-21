@@ -530,14 +530,22 @@ void OpenGLRenderer::renderOverdraw() {
         mCaches.setScissor(clip->left, mFirstSnapshot->height - clip->bottom,
                 clip->right - clip->left, clip->bottom - clip->top);
 
+        // 1x overdraw
         mCaches.stencil.enableDebugTest(2);
-        drawColor(0x2f0000ff, SkXfermode::kSrcOver_Mode);
+        drawColor(mCaches.getOverdrawColor(1), SkXfermode::kSrcOver_Mode);
+
+        // 2x overdraw
         mCaches.stencil.enableDebugTest(3);
-        drawColor(0x2f00ff00, SkXfermode::kSrcOver_Mode);
+        drawColor(mCaches.getOverdrawColor(2), SkXfermode::kSrcOver_Mode);
+
+        // 3x overdraw
         mCaches.stencil.enableDebugTest(4);
-        drawColor(0x3fff0000, SkXfermode::kSrcOver_Mode);
+        drawColor(mCaches.getOverdrawColor(3), SkXfermode::kSrcOver_Mode);
+
+        // 4x overdraw and higher
         mCaches.stencil.enableDebugTest(4, true);
-        drawColor(0x7fff0000, SkXfermode::kSrcOver_Mode);
+        drawColor(mCaches.getOverdrawColor(4), SkXfermode::kSrcOver_Mode);
+
         mCaches.stencil.disable();
     }
 }
