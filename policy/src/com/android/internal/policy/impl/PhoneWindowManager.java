@@ -556,11 +556,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private final BarController mStatusBarController = new BarController("StatusBar",
             View.STATUS_BAR_TRANSIENT,
             View.STATUS_BAR_UNHIDE,
+            View.SYSTEM_UI_FLAG_TRANSPARENT_STATUS,
             StatusBarManager.WINDOW_STATUS_BAR);
 
     private final BarController mNavigationBarController = new BarController("NavigationBar",
             View.NAVIGATION_BAR_TRANSIENT,
             View.NAVIGATION_BAR_UNHIDE,
+            View.SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION,
             StatusBarManager.WINDOW_NAVIGATION_BAR);
 
     private TransientNavigationConfirmation mTransientNavigationConfirmation;
@@ -2739,7 +2741,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         // We currently want to hide the navigation UI.
                         mNavigationBarController.setBarShowingLw(false);
                     }
-                    if (navVisible && !navTransparent && !mNavigationBar.isAnimatingLw()) {
+                    if (navVisible && !navTransparent && !mNavigationBar.isAnimatingLw()
+                            && !mNavigationBarController.wasRecentlyTransparent()) {
                         // If the opaque nav bar is currently requested to be visible,
                         // and not in the process of animating on or off, then
                         // we can tell the app that it is covered by it.
@@ -2762,7 +2765,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         // We currently want to hide the navigation UI.
                         mNavigationBarController.setBarShowingLw(false);
                     }
-                    if (navVisible && !navTransparent && !mNavigationBar.isAnimatingLw()) {
+                    if (navVisible && !navTransparent && !mNavigationBar.isAnimatingLw()
+                            && !mNavigationBarController.wasRecentlyTransparent()) {
                         // If the nav bar is currently requested to be visible,
                         // and not in the process of animating on or off, then
                         // we can tell the app that it is covered by it.
@@ -2832,7 +2836,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mCurLeft, mCurTop, mCurRight, mCurBottom));
                 }
                 if (mStatusBar.isVisibleLw() && !mStatusBar.isAnimatingLw()
-                        && !statusBarTransient && !statusBarTransparent) {
+                        && !statusBarTransient && !statusBarTransparent
+                        && !mStatusBarController.wasRecentlyTransparent()) {
                     // If the opaque status bar is currently requested to be visible,
                     // and not in the process of animating on or off, then
                     // we can tell the app that it is covered by it.
@@ -5011,7 +5016,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mForcingShowNavBar && mFocusedWindow.getSurfaceLayer() < mForcingShowNavBarLayer) {
             tmpVisibility &= ~View.SYSTEM_UI_CLEARABLE_FLAGS;
         }
-        final int visibility = updateTransientBarsLw(mLastSystemUiFlags, tmpVisibility);
+        final int visibility = updateSystemBarsLw(mLastSystemUiFlags, tmpVisibility);
         final int diff = visibility ^ mLastSystemUiFlags;
         final boolean needsMenu = mFocusedWindow.getNeedsMenuLw(mTopFullscreenOpaqueWindowState);
         if (diff == 0 && mLastFocusNeedsMenu == needsMenu
@@ -5039,7 +5044,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return diff;
     }
 
-    private int updateTransientBarsLw(int oldVis, int vis) {
+    private int updateSystemBarsLw(int oldVis, int vis) {
         if (ImmersiveModeTesting.enabled) {
             vis = ImmersiveModeTesting.applyForced(mFocusedWindow, vis);
         }

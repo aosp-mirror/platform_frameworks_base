@@ -60,6 +60,10 @@ public class BarTransitions {
         mSemiTransparent = res.getColor(R.color.status_bar_background_semi_transparent);
     }
 
+    public int getMode() {
+        return mMode;
+    }
+
     public void setTransparent(Drawable transparent) {
         mTransparent = transparent;
         if (mMode == MODE_TRANSPARENT) {
@@ -80,16 +84,24 @@ public class BarTransitions {
         onTransition(oldMode, mMode, animate);
     }
 
+    protected Integer getBackgroundColor(int mode) {
+        if (mode == MODE_SEMI_TRANSPARENT) return mSemiTransparent;
+        if (mode == MODE_OPAQUE) return mOpaque;
+        return null;
+    }
+
     protected void onTransition(int oldMode, int newMode, boolean animate) {
         cancelBackgroundColorAnimation();
-        if (animate && oldMode == MODE_SEMI_TRANSPARENT && newMode == MODE_OPAQUE) {
-            startBackgroundColorAnimation(mSemiTransparent, mOpaque);
-        } else if (animate && oldMode == MODE_OPAQUE && newMode == MODE_SEMI_TRANSPARENT) {
-            startBackgroundColorAnimation(mOpaque, mSemiTransparent);
-        } else if (newMode == MODE_OPAQUE || newMode == MODE_SEMI_TRANSPARENT) {
-            mTarget.setBackgroundColor(newMode == MODE_OPAQUE ? mOpaque : mSemiTransparent);
+        Integer oldColor = getBackgroundColor(oldMode);
+        Integer newColor = getBackgroundColor(newMode);
+        if (oldColor != null && newColor != null) {
+            if (animate) {
+                startBackgroundColorAnimation(oldColor, newColor);
+            } else {
+                mTarget.setBackgroundColor(newColor);
+            }
         } else {
-            mTarget.setBackground(newMode == MODE_TRANSPARENT? mTransparent
+            mTarget.setBackground(newMode == MODE_TRANSPARENT ? mTransparent
                     : newMode == MODE_SEMI_TRANSPARENT ? new ColorDrawable(mSemiTransparent)
                     : new ColorDrawable(mOpaque));
         }

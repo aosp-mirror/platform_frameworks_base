@@ -843,7 +843,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
         if (SPEW) Log.d(TAG, "addIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
                 + " icon=" + icon);
-        StatusBarIconView view = new StatusBarIconView(mContext, slot, null);
+        StatusBarIconView view = new StatusBarIconView(mContext, slot, null, getStatusBarMode());
         view.set(icon);
         mStatusIcons.addView(view, viewIndex, new LinearLayout.LayoutParams(mIconSize, mIconSize));
     }
@@ -1921,6 +1921,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
+    @Override
+    protected int getStatusBarMode() {
+        return mStatusBarView.getBarTransitions().getMode();
+    }
+
     private int updateBarMode(int oldVis, int newVis, BarTransitions transitions,
             int transientFlag, int transparentFlag, int windowState) {
         final int oldMode = barMode(oldVis, transientFlag, transparentFlag);
@@ -1928,8 +1933,7 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (oldMode == newMode) {
             return -1; // no mode change
         }
-        boolean animate = windowState == StatusBarManager.WINDOW_STATE_SHOWING
-                && oldMode == MODE_SEMI_TRANSPARENT && newMode == MODE_OPAQUE;
+        final boolean animate = windowState == StatusBarManager.WINDOW_STATE_SHOWING;
         transitions.transitionTo(newMode, animate);
         return newMode;
     }
