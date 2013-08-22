@@ -29,13 +29,18 @@ import android.util.Log;
  */
 public final class WebViewFactory {
     private static final boolean DEFAULT_TO_EXPERIMENTAL_WEBVIEW = true;
+    // REMEMBER: property names must be <= 31 chars total.
     private static final String EXPERIMENTAL_PROPERTY_DEFAULT_OFF = "persist.sys.webview.exp";
-    private static final String EXPERIMENTAL_PROPERTY_DEFAULT_ON  = "persist.sys.webview.exp_on";
+    private static final String EXPERIMENTAL_PROPERTY_DEFAULT_ON =
+            "persist.sys.webview." + Build.ID;
 
-    // Modify the persisted property name when the experiment is on-by-default, so that any user
-    // setting override lives in a different property namespace.
-    private static final String WEBVIEW_EXPERIMENTAL_PROPERTY = DEFAULT_TO_EXPERIMENTAL_WEBVIEW ?
-        EXPERIMENTAL_PROPERTY_DEFAULT_ON : EXPERIMENTAL_PROPERTY_DEFAULT_OFF;
+    // Modify the persisted property name when the new webview is on-by-default, so that any user
+    // setting override only lives as long as that build.
+    private static final String LONG_PROPERTY_NAME = DEFAULT_TO_EXPERIMENTAL_WEBVIEW ?
+            EXPERIMENTAL_PROPERTY_DEFAULT_ON : EXPERIMENTAL_PROPERTY_DEFAULT_OFF;
+    private static final String WEBVIEW_EXPERIMENTAL_PROPERTY =
+            LONG_PROPERTY_NAME.length() > SystemProperties.PROP_NAME_MAX ?
+            LONG_PROPERTY_NAME.substring(0, SystemProperties.PROP_NAME_MAX) : LONG_PROPERTY_NAME;
 
     private static final String FORCE_PROVIDER_PROPERTY = "webview.force_provider";
     private static final String FORCE_PROVIDER_PROPERTY_VALUE_CHROMIUM = "chromium";
@@ -80,8 +85,7 @@ public final class WebViewFactory {
 
     /** @hide */
     public static void setUseExperimentalWebView(boolean enable) {
-        SystemProperties.set(WebViewFactory.WEBVIEW_EXPERIMENTAL_PROPERTY,
-                enable ? "true" : "false");
+        SystemProperties.set(WEBVIEW_EXPERIMENTAL_PROPERTY, enable ? "true" : "false");
         Log.i(LOGTAG, "Use Experimental WebView changed: "
                 + SystemProperties.get(WebViewFactory.WEBVIEW_EXPERIMENTAL_PROPERTY, ""));
     }
@@ -90,6 +94,11 @@ public final class WebViewFactory {
     public static boolean useExperimentalWebView() {
         return SystemProperties.getBoolean(WEBVIEW_EXPERIMENTAL_PROPERTY,
             DEFAULT_TO_EXPERIMENTAL_WEBVIEW);
+    }
+
+    /** @hide */
+    public static boolean isUseExperimentalWebViewSet() {
+        return !SystemProperties.get(WEBVIEW_EXPERIMENTAL_PROPERTY).isEmpty();
     }
 
     static WebViewFactoryProvider getProvider() {
