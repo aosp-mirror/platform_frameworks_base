@@ -4344,22 +4344,6 @@ public final class Settings {
         }
 
         /**
-         * Helper method for determining if the location master switch is enabled.
-         *
-         * TODO: worth retaining this method?
-         *
-         * @param cr the content resolver to use
-         * @return true if the master switch is enabled
-         * @deprecated use {@link #getLocationMode(ContentResolver)} != {@link #LOCATION_MODE_OFF}
-         * @hide
-         */
-        @Deprecated
-        public static final boolean isLocationMasterSwitchEnabled(ContentResolver cr) {
-            int mode = getLocationMode(cr);
-            return mode != LOCATION_MODE_OFF;
-        }
-
-        /**
          * Helper method for determining if a location provider is enabled.
          * @param cr the content resolver to use
          * @param provider the location provider to query
@@ -4386,26 +4370,6 @@ public final class Settings {
         public static final void setLocationProviderEnabled(ContentResolver cr,
                 String provider, boolean enabled) {
             setLocationProviderEnabledForUser(cr, provider, enabled, UserHandle.myUserId());
-        }
-
-        /**
-         * Thread-safe method for enabling or disabling the location master switch.
-         *
-         * @param cr the content resolver to use
-         * @param enabled true if master switch should be enabled
-         * @deprecated use {@link #setLocationMode(ContentResolver, int)} with
-         * {@link #LOCATION_MODE_HIGH_ACCURACY}
-         * @hide
-         */
-        @Deprecated
-        public static final void setLocationMasterSwitchEnabled(ContentResolver cr,
-                boolean enabled) {
-            int uid = UserHandle.myUserId();
-            synchronized (mLocationSettingsLock) {
-                setLocationProviderEnabledForUser(cr, LocationManager.GPS_PROVIDER, enabled, uid);
-                setLocationProviderEnabledForUser(cr, LocationManager.NETWORK_PROVIDER, enabled,
-                        uid);
-            }
         }
 
         /**
