@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.net.LinkInfo;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.NetworkQuotaInfo;
@@ -145,4 +146,11 @@ interface IConnectivityManager
     String getMobileProvisioningUrl();
 
     String getMobileRedirectedProvisioningUrl();
+
+    LinkInfo getLinkInfo(int networkType);
+
+    LinkInfo getActiveLinkInfo();
+
+    LinkInfo[] getAllLinkInfo();
+
 }

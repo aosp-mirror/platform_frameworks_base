@@ -31,6 +31,7 @@ import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -56,6 +57,7 @@ import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.LinkInfo;
 import android.net.LinkProperties.CompareResult;
 import android.net.MobileDataStateTracker;
 import android.net.NetworkConfig;
@@ -68,6 +70,7 @@ import android.net.NetworkUtils;
 import android.net.Proxy;
 import android.net.ProxyProperties;
 import android.net.RouteInfo;
+import android.net.SamplingDataTracker;
 import android.net.Uri;
 import android.net.wifi.WifiStateTracker;
 import android.net.wimax.WimaxManagerConstants;
@@ -144,8 +147,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -173,6 +178,23 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     // system property that can override DEFAULT_FAIL_FAST_TIME_MS
     private static final String FAIL_FAST_TIME_MS =
             "persist.radio.fail_fast_time_ms";
+
+    private static final String ACTION_PKT_CNT_SAMPLE_INTERVAL_ELAPSED =
+            "android.net.ConnectivityService.action.PKT_CNT_SAMPLE_INTERVAL_ELAPSED";
+
+    private static final int SAMPLE_INTERVAL_ELAPSED_REQURST_CODE = 0;
+
+    private PendingIntent mSampleIntervalElapsedIntent;
+
+    // Set network sampling interval at 12 minutes, this way, even if the timers get
+    // aggregated, it will fire at around 15 minutes, which should allow us to
+    // aggregate this timer with other timers (specially the socket keep alive timers)
+    private static final int DEFAULT_SAMPLING_INTERVAL_IN_SECONDS = (VDBG ? 30 : 12 * 60);
+
+    // start network sampling a minute after booting ...
+    private static final int DEFAULT_START_SAMPLING_INTERVAL_IN_SECONDS = (VDBG ? 30 : 60);
+
+    AlarmManager mAlarmManager;
 
     // used in recursive route setting to add gateways for the host for which
     // a host route was requested.
@@ -326,6 +348,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private static final int EVENT_ENABLE_FAIL_FAST_MOBILE_DATA = 14;
 
+    /**
+     * user internally to indicate that data sampling interval is up
+     */
+    private static final int EVENT_SAMPLE_INTERVAL_ELAPSED = 15;
+
     /** Handler used for internal events. */
     private InternalHandler mHandler;
     /** Handler used for incoming {@link NetworkStateTracker} events. */
@@ -392,6 +419,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     List mProtectedNetworks;
 
     private DataConnectionStats mDataConnectionStats;
+
     private AtomicInteger mEnableFailFastMobileDataTag = new AtomicInteger(0);
 
     TelephonyManager mTelephonyManager;
@@ -633,6 +661,29 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         mDataConnectionStats = new DataConnectionStats(mContext);
         mDataConnectionStats.startMonitoring();
+
+        // start network sampling ..
+        Intent intent = new Intent(ACTION_PKT_CNT_SAMPLE_INTERVAL_ELAPSED, null);
+        mSampleIntervalElapsedIntent = PendingIntent.getBroadcast(mContext,
+                SAMPLE_INTERVAL_ELAPSED_REQURST_CODE, intent, 0);
+
+        mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
+        setAlarm(DEFAULT_START_SAMPLING_INTERVAL_IN_SECONDS * 1000, mSampleIntervalElapsedIntent);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_PKT_CNT_SAMPLE_INTERVAL_ELAPSED);
+        mContext.registerReceiver(
+                new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        String action = intent.getAction();
+                        if (action.equals(ACTION_PKT_CNT_SAMPLE_INTERVAL_ELAPSED)) {
+                            mHandler.sendMessage(mHandler.obtainMessage
+                                    (EVENT_SAMPLE_INTERVAL_ELAPSED));
+                        }
+                    }
+                },
+                new IntentFilter(filter));
 
         mPacManager = new PacManager(mContext);
     }
@@ -1911,6 +1962,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 //            if (mActiveDefaultNetwork != -1) {
 //                currentPriority = mNetConfigs[mActiveDefaultNetwork].mPriority;
 //            }
+
             for (int checkType=0; checkType <= ConnectivityManager.MAX_NETWORK_TYPE; checkType++) {
                 if (checkType == prevNetType) continue;
                 if (mNetConfigs[checkType] == null) continue;
@@ -1925,6 +1977,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 // optimization should work and we need to investigate why it doesn't work.
 // This could be related to how DEACTIVATE_DATA_CALL is reporting its
 // complete before it is really complete.
+
 //                if (!mNetTrackers[checkType].isAvailable()) continue;
 
 //                if (currentPriority >= mNetConfigs[checkType].mPriority) continue;
@@ -2520,12 +2573,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
 
-   /**
+    /**
      * Reads the network specific TCP buffer sizes from SystemProperties
      * net.tcp.buffersize.[default|wifi|umts|edge|gprs] and set them for system
      * wide use
      */
-   private void updateNetworkSettings(NetworkStateTracker nt) {
+    private void updateNetworkSettings(NetworkStateTracker nt) {
         String key = nt.getTcpBufferSizesPropName();
         String bufferSizes = key == null ? null : SystemProperties.get(key);
 
@@ -2547,7 +2600,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-   /**
+    /**
      * Writes TCP buffer sizes to /sys/kernel/ipv4/tcp_[r/w]mem_[min/def/max]
      * which maps to /proc/sys/net/ipv4/tcp_rmem and tcpwmem
      *
@@ -2956,6 +3009,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                 + " != tag:" + tag);
                     }
                 }
+                case EVENT_SAMPLE_INTERVAL_ELAPSED:
+                    handleNetworkSamplingTimeout();
+                    break;
             }
         }
     }
@@ -4357,4 +4413,92 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
     };
+
+    @Override
+    public LinkInfo getLinkInfo(int networkType) {
+        enforceAccessPermission();
+        if (isNetworkTypeValid(networkType)) {
+            return mNetTrackers[networkType].getLinkInfo();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public LinkInfo getActiveLinkInfo() {
+        enforceAccessPermission();
+        if (isNetworkTypeValid(mActiveDefaultNetwork)) {
+            return mNetTrackers[mActiveDefaultNetwork].getLinkInfo();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public LinkInfo[] getAllLinkInfo() {
+        enforceAccessPermission();
+        final ArrayList<LinkInfo> result = Lists.newArrayList();
+        for (NetworkStateTracker tracker : mNetTrackers) {
+            if (tracker != null) {
+                LinkInfo li = tracker.getLinkInfo();
+                if (li != null) {
+                    result.add(li);
+                }
+            }
+        }
+
+        return result.toArray(new LinkInfo[result.size()]);
+    }
+
+    /* Infrastructure for network sampling */
+
+    private void handleNetworkSamplingTimeout() {
+
+        log("Sampling interval elapsed, updating statistics ..");
+
+        // initialize list of interfaces ..
+        Map<String, SamplingDataTracker.SamplingSnapshot> mapIfaceToSample =
+                new HashMap<String, SamplingDataTracker.SamplingSnapshot>();
+        for (NetworkStateTracker tracker : mNetTrackers) {
+            if (tracker != null) {
+                String ifaceName = tracker.getNetworkInterfaceName();
+                if (ifaceName != null) {
+                    mapIfaceToSample.put(ifaceName, null);
+                }
+            }
+        }
+
+        // Read samples for all interfaces
+        SamplingDataTracker.getSamplingSnapshots(mapIfaceToSample);
+
+        // process samples for all networks
+        for (NetworkStateTracker tracker : mNetTrackers) {
+            if (tracker != null) {
+                String ifaceName = tracker.getNetworkInterfaceName();
+                SamplingDataTracker.SamplingSnapshot ss = mapIfaceToSample.get(ifaceName);
+                if (ss != null) {
+                    // end the previous sampling cycle
+                    tracker.stopSampling(ss);
+                    // start a new sampling cycle ..
+                    tracker.startSampling(ss);
+                }
+            }
+        }
+
+        log("Done.");
+
+        int samplingIntervalInSeconds = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.CONNECTIVITY_SAMPLING_INTERVAL_IN_SECONDS,
+                DEFAULT_SAMPLING_INTERVAL_IN_SECONDS);
+
+        if (DBG) log("Setting timer for " + String.valueOf(samplingIntervalInSeconds) + "seconds");
+
+        setAlarm(samplingIntervalInSeconds * 1000, mSampleIntervalElapsedIntent);
+    }
+
+    void setAlarm(int timeoutInMilliseconds, PendingIntent intent) {
+        long wakeupTime = SystemClock.elapsedRealtime() + timeoutInMilliseconds;
+        mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, wakeupTime, intent);
+    }
 }
+

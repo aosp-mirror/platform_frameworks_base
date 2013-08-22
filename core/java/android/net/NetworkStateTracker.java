@@ -83,7 +83,6 @@ public interface NetworkStateTracker {
      */
     public static final int EVENT_NETWORK_DISCONNECTED = BASE_NETWORK_STATE_TRACKER + 5;
 
-
     /**
      * -------------------------------------------------------------
      * Control Interface
@@ -118,6 +117,12 @@ public interface NetworkStateTracker {
      * @return a copy of this connections capabilities, may be empty but never null.
      */
     public LinkCapabilities getLinkCapabilities();
+
+    /**
+     * Get interesting information about this network link
+     * @return a copy of link information, null if not available
+     */
+    public LinkInfo getLinkInfo();
 
     /**
      * Return the system properties name associated with the tcp buffer sizes
@@ -234,4 +239,20 @@ public interface NetworkStateTracker {
      * the underlying network specific code.
      */
     public void supplyMessenger(Messenger messenger);
+
+    /*
+     * Network interface name that we'll lookup for sampling data
+     */
+    public String getNetworkInterfaceName();
+
+    /*
+     * Save the starting sample
+     */
+    public void startSampling(SamplingDataTracker.SamplingSnapshot s);
+
+    /*
+     * Save the ending sample
+     */
+    public void stopSampling(SamplingDataTracker.SamplingSnapshot s);
+
 }
