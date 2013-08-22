@@ -22,7 +22,6 @@ import android.content.SharedPreferences;
 public class Prefs {
     private static final String SHARED_PREFS_NAME = "status_bar";
 
-    public static final String SHOWN_COMPAT_MODE_HELP = "shown_compat_mode_help";
     public static final String SHOWN_QUICK_SETTINGS_HELP = "shown_quick_settings_help";
 
     public static SharedPreferences read(Context context) {
