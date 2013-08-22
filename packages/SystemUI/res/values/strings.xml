@@ -160,12 +160,6 @@
          [CHAR LIMIT=25] -->
     <string name="compat_mode_off">Stretch to fill screen</string>
 
-    <!-- Compatibility mode help screen: header text. [CHAR LIMIT=50] -->
-    <string name="compat_mode_help_header">Compatibility zoom</string>
-
-    <!-- Compatibility mode help screen: body text. [CHAR LIMIT=150] -->
-    <string name="compat_mode_help_body">When an app was designed for a smaller screen, a zoom control will appear by the clock.</string>
-
     <!-- Notification ticker displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=30] -->
     <string name="screenshot_saving_ticker">Saving screenshot\u2026</string>
     <!-- Notification title displayed when a screenshot is being saved to the Gallery. [CHAR LIMIT=50] -->
