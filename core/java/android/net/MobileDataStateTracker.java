@@ -28,6 +28,8 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.telephony.PhoneStateListener;
+import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -49,7 +51,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * {@hide}
  */
-public class MobileDataStateTracker implements NetworkStateTracker {
+public class MobileDataStateTracker extends BaseNetworkStateTracker {
 
     private static final String TAG = "MobileDataStateTracker";
     private static final boolean DBG = true;
@@ -59,12 +61,8 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     private ITelephony mPhoneService;
 
     private String mApnType;
-    private NetworkInfo mNetworkInfo;
     private boolean mTeardownRequested = false;
     private Handler mTarget;
-    private Context mContext;
-    private LinkProperties mLinkProperties;
-    private LinkCapabilities mLinkCapabilities;
     private boolean mPrivateDnsRouteSet = false;
     private boolean mDefaultRouteSet = false;
 
@@ -77,6 +75,10 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     private AsyncChannel mDataConnectionTrackerAc;
 
     private AtomicBoolean mIsCaptivePortal = new AtomicBoolean(false);
+
+    private SignalStrength mSignalStrength;
+
+    private SamplingDataTracker mSamplingDataTracker = new SamplingDataTracker();
 
     /**
      * Create a new MobileDataStateTracker
@@ -108,7 +110,18 @@ public class MobileDataStateTracker implements NetworkStateTracker {
 
         mContext.registerReceiver(new MobileDataStateReceiver(), filter);
         mMobileDataState = PhoneConstants.DataState.DISCONNECTED;
+
+        TelephonyManager tm = (TelephonyManager)mContext.getSystemService(
+                Context.TELEPHONY_SERVICE);
+        tm.listen(mPhoneStateListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
     }
+
+    private final PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
+        @Override
+        public void onSignalStrengthsChanged(SignalStrength signalStrength) {
+            mSignalStrength = signalStrength;
+        }
+    };
 
     static class MdstHandler extends Handler {
         private MobileDataStateTracker mMdst;
@@ -251,6 +264,30 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                             setDetailedState(DetailedState.CONNECTED, reason, apnName);
                             break;
                     }
+
+                    if (VDBG) {
+                        Slog.d(TAG, "TelephonyMgr.DataConnectionStateChanged");
+                        if (mNetworkInfo != null) {
+                            Slog.d(TAG, "NetworkInfo = " + mNetworkInfo.toString());
+                            Slog.d(TAG, "subType = " + String.valueOf(mNetworkInfo.getSubtype()));
+                            Slog.d(TAG, "subType = " + mNetworkInfo.getSubtypeName());
+                        }
+                        if (mLinkProperties != null) {
+                            Slog.d(TAG, "LinkProperties = " + mLinkProperties.toString());
+                        } else {
+                            Slog.d(TAG, "LinkProperties = " );
+                        }
+
+                        if (mLinkCapabilities != null) {
+                            Slog.d(TAG, "LinkCapabilities = " + mLinkCapabilities.toString());
+                        } else {
+                            Slog.d(TAG, "LinkCapabilities = " );
+                        }
+                    }
+
+
+                    /* lets not sample traffic data across state changes */
+                    mSamplingDataTracker.resetSamplingData();
                 } else {
                     // There was no state change. Check if LinkProperties has been updated.
                     if (TextUtils.equals(reason, PhoneConstants.REASON_LINK_PROPERTIES_CHANGED)) {
@@ -283,7 +320,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                 String apnName = intent.getStringExtra(PhoneConstants.DATA_APN_KEY);
                 if (DBG) {
                     log("Received " + intent.getAction() +
-                                " broadcast" + reason == null ? "" : "(" + reason + ")");
+                                " broadcast" + (reason == null ? "" : "(" + reason + ")"));
                 }
                 setDetailedState(DetailedState.FAILED, reason, apnName);
             } else {
@@ -557,7 +594,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         return writer.toString();
     }
 
-   /**
+    /**
      * Internal method supporting the ENABLE_MMS feature.
      * @param apnType the type of APN to be enabled or disabled (e.g., mms)
      * @param enable {@code true} to enable the specified APN type,
@@ -617,9 +654,11 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         }
     }
 
+
     /**
      * @see android.net.NetworkStateTracker#getLinkProperties()
      */
+    @Override
     public LinkProperties getLinkProperties() {
         return new LinkProperties(mLinkProperties);
     }
@@ -627,6 +666,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     /**
      * @see android.net.NetworkStateTracker#getLinkCapabilities()
      */
+    @Override
     public LinkCapabilities getLinkCapabilities() {
         return new LinkCapabilities(mLinkCapabilities);
     }
@@ -647,5 +687,153 @@ public class MobileDataStateTracker implements NetworkStateTracker {
 
     static private void sloge(String s) {
         Slog.e(TAG, s);
+    }
+
+    @Override
+    public LinkInfo getLinkInfo() {
+        if (mNetworkInfo == null || mNetworkInfo.getType() == ConnectivityManager.TYPE_NONE) {
+            // no data available yet; just return
+            return null;
+        }
+
+        MobileLinkInfo li = new MobileLinkInfo();
+
+        li.mNetworkType = mNetworkInfo.getType();
+
+        mSamplingDataTracker.setCommonLinkInfoFields(li);
+
+        if (mNetworkInfo.getSubtype() != TelephonyManager.NETWORK_TYPE_UNKNOWN) {
+            li.mMobileNetworkType = mNetworkInfo.getSubtype();
+
+            NetworkDataEntry entry = getNetworkDataEntry(mNetworkInfo.getSubtype());
+            if (entry != null) {
+                li.mTheoreticalRxBandwidth = entry.downloadBandwidth;
+                li.mTheoreticalRxBandwidth = entry.uploadBandwidth;
+                li.mTheoreticalLatency = entry.latency;
+            }
+
+            if (mSignalStrength != null) {
+                li.mNormalizedSignalStrength = getNormalizedSignalStrength(
+                        li.mMobileNetworkType, mSignalStrength);
+            }
+        }
+
+        SignalStrength ss = mSignalStrength;
+        if (ss != null) {
+
+            li.mRssi = ss.getGsmSignalStrength();
+            li.mGsmErrorRate = ss.getGsmBitErrorRate();
+            li.mCdmaDbm = ss.getCdmaDbm();
+            li.mCdmaEcio = ss.getCdmaEcio();
+            li.mEvdoDbm = ss.getEvdoDbm();
+            li.mEvdoEcio = ss.getEvdoEcio();
+            li.mEvdoSnr = ss.getEvdoSnr();
+            li.mLteSignalStrength = ss.getLteSignalStrength();
+            li.mLteRsrp = ss.getLteRsrp();
+            li.mLteRsrq = ss.getLteRsrq();
+            li.mLteRssnr = ss.getLteRssnr();
+            li.mLteCqi = ss.getLteCqi();
+        }
+
+        if (VDBG) {
+            Slog.d(TAG, "Returning LinkInfo with"
+                    + " MobileNetworkType = " + String.valueOf(li.mMobileNetworkType)
+                    + " Theoretical Rx BW = " + String.valueOf(li.mTheoreticalRxBandwidth)
+                    + " gsm Signal Strength = " + String.valueOf(li.mRssi)
+                    + " cdma Signal Strength = " + String.valueOf(li.mCdmaDbm)
+                    + " evdo Signal Strength = " + String.valueOf(li.mEvdoDbm)
+                    + " Lte Signal Strength = " + String.valueOf(li.mLteSignalStrength));
+        }
+
+        return li;
+    }
+
+    static class NetworkDataEntry {
+        public int networkType;
+        public int downloadBandwidth;               // in kbps
+        public int uploadBandwidth;                 // in kbps
+        public int latency;                         // in millisecond
+
+        NetworkDataEntry(int i1, int i2, int i3, int i4) {
+            networkType = i1;
+            downloadBandwidth = i2;
+            uploadBandwidth = i3;
+            latency = i4;
+        }
+    }
+
+    private static NetworkDataEntry [] mTheoreticalBWTable = new NetworkDataEntry[] {
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_EDGE,     237,   118, -1),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_GPRS,      48,    40, -1),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_UMTS,     384,    64, -1),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_HSDPA,  14400,    -1, -1),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_HSUPA,  14400,  5760, -1),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_HSPA,   14400,  5760, -1),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_HSPAP,  21000,  5760, -1),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_CDMA,      -1,    -1, -1),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_1xRTT,     -1,    -1, -1),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_EVDO_0,  2468,   153, -1),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_EVDO_A,  3072,  1800, -1),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_EVDO_B, 14700,  1800, -1),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_IDEN,      -1,    -1, -1),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_LTE,   100000, 50000, -1),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_EHRPD,     -1,    -1, -1),
+    };
+
+    private static NetworkDataEntry getNetworkDataEntry(int networkType) {
+        for (NetworkDataEntry entry : mTheoreticalBWTable) {
+            if (entry.networkType == networkType) {
+                return entry;
+            }
+        }
+
+        Slog.e(TAG, "Could not find Theoretical BW entry for " + String.valueOf(networkType));
+        return null;
+    }
+
+    private static int getNormalizedSignalStrength(int networkType, SignalStrength ss) {
+
+        int level;
+
+        switch(networkType) {
+            case TelephonyManager.NETWORK_TYPE_EDGE:
+            case TelephonyManager.NETWORK_TYPE_GPRS:
+            case TelephonyManager.NETWORK_TYPE_UMTS:
+            case TelephonyManager.NETWORK_TYPE_HSDPA:
+            case TelephonyManager.NETWORK_TYPE_HSUPA:
+            case TelephonyManager.NETWORK_TYPE_HSPA:
+            case TelephonyManager.NETWORK_TYPE_HSPAP:
+                level = ss.getGsmLevel();
+                break;
+            case TelephonyManager.NETWORK_TYPE_CDMA:
+            case TelephonyManager.NETWORK_TYPE_1xRTT:
+                level = ss.getCdmaLevel();
+                break;
+            case TelephonyManager.NETWORK_TYPE_EVDO_0:
+            case TelephonyManager.NETWORK_TYPE_EVDO_A:
+            case TelephonyManager.NETWORK_TYPE_EVDO_B:
+                level = ss.getEvdoLevel();
+                break;
+            case TelephonyManager.NETWORK_TYPE_LTE:
+                level = ss.getLteLevel();
+                break;
+            case TelephonyManager.NETWORK_TYPE_IDEN:
+            case TelephonyManager.NETWORK_TYPE_EHRPD:
+            default:
+                return LinkInfo.UNKNOWN;
+        }
+
+        return (level * LinkInfo.NORMALIZED_SIGNAL_STRENGTH_RANGE) /
+                SignalStrength.NUM_SIGNAL_STRENGTH_BINS;
+    }
+
+    @Override
+    public void startSampling(SamplingDataTracker.SamplingSnapshot s) {
+        mSamplingDataTracker.startSampling(s);
+    }
+
+    @Override
+    public void stopSampling(SamplingDataTracker.SamplingSnapshot s) {
+        mSamplingDataTracker.stopSampling(s);
     }
 }
