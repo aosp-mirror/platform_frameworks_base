@@ -20,6 +20,7 @@ import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -49,6 +50,7 @@ import android.provider.ContactsContract;
 import android.provider.ContactsContract.CommonDataKinds.Phone;
 import android.provider.ContactsContract.Profile;
 import android.provider.Settings;
+import android.security.KeyChain;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -89,6 +91,7 @@ class QuickSettings {
     private ViewGroup mContainerView;
 
     private DisplayManager mDisplayManager;
+    private DevicePolicyManager mDevicePolicyManager;
     private WifiDisplayStatus mWifiDisplayStatus;
     private PhoneStatusBar mStatusBarService;
     private BluetoothState mBluetoothState;
@@ -100,6 +103,7 @@ class QuickSettings {
     private LocationController mLocationController;
 
     private AsyncTask<Void, Void, Pair<String, Drawable>> mUserInfoTask;
+    private AsyncTask<Void, Void, Pair<Boolean, Boolean>> mQueryCertTask;
 
     private LevelListDrawable mBatteryLevels;
     private LevelListDrawable mChargingBatteryLevels;
@@ -116,6 +120,8 @@ class QuickSettings {
 
     public QuickSettings(Context context, QuickSettingsContainerView container) {
         mDisplayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
+        mDevicePolicyManager
+            = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
         mContext = context;
         mContainerView = container;
         mModel = new QuickSettingsModel(context);
@@ -137,6 +143,7 @@ class QuickSettings {
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
+        filter.addAction(KeyChain.ACTION_STORAGE_CHANGED);
         mContext.registerReceiver(mReceiver, filter);
 
         IntentFilter profileFilter = new IntentFilter();
@@ -179,6 +186,26 @@ class QuickSettings {
         batteryController.addStateChangedCallback(mModel);
         locationController.addSettingsChangedCallback(mModel);
         rotationLockController.addRotationLockControllerCallback(mModel);
+    }
+
+    private void queryForSslCaCerts() {
+        mQueryCertTask = new AsyncTask<Void, Void, Pair<Boolean, Boolean>>() {
+            @Override
+            protected Pair<Boolean, Boolean> doInBackground(Void... params) {
+                boolean hasCert = mDevicePolicyManager.hasAnyCaCertsInstalled();
+                boolean isManaged = mDevicePolicyManager.getDeviceOwner() != null;
+
+                return Pair.create(hasCert, isManaged);
+            }
+            @Override
+            protected void onPostExecute(Pair<Boolean, Boolean> result) {
+                super.onPostExecute(result);
+                boolean hasCert = result.first;
+                boolean isManaged = result.second;
+                mModel.setSslCaCertWarningTileInfo(hasCert, isManaged);
+            }
+        };
+        mQueryCertTask.execute();
     }
 
     private void queryForUserInformation() {
@@ -254,6 +281,7 @@ class QuickSettings {
         addTemporaryTiles(mContainerView, inflater);
 
         queryForUserInformation();
+        queryForSslCaCerts();
         mTilesSetUp = true;
     }
 
@@ -721,6 +749,25 @@ class QuickSettings {
         });
         parent.addView(imeTile);
         */
+
+        // SSL CA Cert Warning.
+        final QuickSettingsBasicTile sslCaCertWarningTile = new QuickSettingsBasicTile(mContext);
+        sslCaCertWarningTile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                collapsePanels();
+                showSslCaCertWarningDialog();
+            }
+        });
+
+        sslCaCertWarningTile.setImageResource(
+                com.android.internal.R.drawable.indicator_input_error);
+        sslCaCertWarningTile.setTextResource(R.string.ssl_ca_cert_warning);
+
+        mModel.addSslCaCertWarningTile(sslCaCertWarningTile,
+                new QuickSettingsModel.BasicRefreshCallback(sslCaCertWarningTile)
+                        .setShowWhenEnabled(true));
+        parent.addView(sslCaCertWarningTile);
     }
 
     void updateResources() {
@@ -777,6 +824,45 @@ class QuickSettings {
         dialog.show();
     }
 
+    private void showSslCaCertWarningDialog() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+        builder.setTitle(R.string.ssl_ca_cert_dialog_title);
+        builder.setCancelable(true);
+        final boolean hasDeviceOwner = mDevicePolicyManager.getDeviceOwner() != null;
+        int buttonLabel;
+        if (hasDeviceOwner) {
+            // Institutional case.  Show informational message.
+            String message = mContext.getResources().getString(R.string.ssl_ca_cert_info_message,
+                    mDevicePolicyManager.getDeviceOwnerName());
+            builder.setMessage(message);
+            buttonLabel = R.string.done_button;
+        } else {
+            // Consumer case.  Show scary warning.
+            builder.setMessage(R.string.ssl_ca_cert_warning_message);
+            buttonLabel = R.string.ssl_ca_cert_settings_button;
+        }
+
+        builder.setPositiveButton(buttonLabel, new OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // do something.
+                if (hasDeviceOwner) {
+                    // Close
+                } else {
+                    startSettingsActivity("com.android.settings.TRUSTED_CREDENTIALS_USER");
+                }
+            }
+        });
+
+        final Dialog dialog = builder.create();
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        try {
+            WindowManagerGlobal.getWindowManagerService().dismissKeyguard();
+        } catch (RemoteException e) {
+        }
+        dialog.show();
+    }
+
     private void updateWifiDisplayStatus() {
         mWifiDisplayStatus = mDisplayManager.getWifiDisplayStatus();
         applyWifiDisplayStatus();
@@ -801,6 +887,7 @@ class QuickSettings {
         }
         if (mTilesSetUp) {
             queryForUserInformation();
+            queryForSslCaCerts();
         }
     }
 
@@ -829,6 +916,8 @@ class QuickSettings {
                 if (mUseDefaultAvatar) {
                     queryForUserInformation();
                 }
+            } else if (KeyChain.ACTION_STORAGE_CHANGED.equals(action)) {
+                queryForSslCaCerts();
             }
         }
     };
