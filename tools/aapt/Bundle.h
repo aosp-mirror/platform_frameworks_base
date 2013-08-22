@@ -51,7 +51,7 @@ public:
           mForce(false), mGrayscaleTolerance(0), mMakePackageDirs(false),
           mUpdate(false), mExtending(false),
           mRequireLocalization(false), mPseudolocalize(false),
-          mWantUTF16(false), mValues(false),
+          mWantUTF16(false), mValues(false), mIncludeMetaData(false),
           mCompressionMethod(0), mJunkPath(false), mOutputAPKFile(NULL),
           mManifestPackageNameOverride(NULL), mInstrumentationPackageNameOverride(NULL),
           mAutoAddOverlay(false), mGenDependencies(false),
@@ -99,6 +99,8 @@ public:
     void setWantUTF16(bool val) { mWantUTF16 = val; }
     bool getValues(void) const { return mValues; }
     void setValues(bool val) { mValues = val; }
+    bool getIncludeMetaData(void) const { return mIncludeMetaData; }
+    void setIncludeMetaData(bool val) { mIncludeMetaData = val; }
     int getCompressionMethod(void) const { return mCompressionMethod; }
     void setCompressionMethod(int val) { mCompressionMethod = val; }
     bool getJunkPath(void) const { return mJunkPath; }
@@ -253,6 +255,7 @@ private:
     bool        mPseudolocalize;
     bool        mWantUTF16;
     bool        mValues;
+    bool        mIncludeMetaData;
     int         mCompressionMethod;
     bool        mJunkPath;
     const char* mOutputAPKFile;

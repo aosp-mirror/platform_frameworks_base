@@ -47,7 +47,7 @@ void usage(void)
         " %s l[ist] [-v] [-a] file.{zip,jar,apk}\n"
         "   List contents of Zip-compatible archive.\n\n", gProgName);
     fprintf(stderr,
-        " %s d[ump] [--values] WHAT file.{apk} [asset [asset ...]]\n"
+        " %s d[ump] [--values] [--include-meta-data] WHAT file.{apk} [asset [asset ...]]\n"
         "   strings          Print the contents of the resource table string pool in the APK.\n"
         "   badging          Print the label and icon for the app declared in APK.\n"
         "   permissions      Print the permissions from the APK.\n"
@@ -138,6 +138,8 @@ void usage(void)
         "   --debug-mode\n"
         "       inserts android:debuggable=\"true\" in to the application node of the\n"
         "       manifest, making the application debuggable even on production devices.\n"
+        "   --include-meta-data\n"
+        "       when used with \"dump badging\" also includes meta-data tags.\n"
         "   --min-sdk-version\n"
         "       inserts android:minSdkVersion in to manifest.  If the version is 7 or\n"
         "       higher, the default encoding for resources will be in UTF-8.\n"
@@ -530,6 +532,8 @@ int main(int argc, char* const argv[])
                     bundle.setVersionName(argv[0]);
                 } else if (strcmp(cp, "-values") == 0) {
                     bundle.setValues(true);
+                } else if (strcmp(cp, "-include-meta-data") == 0) {
+                    bundle.setIncludeMetaData(true);
                 } else if (strcmp(cp, "-custom-package") == 0) {
                     argc--;
                     argv++;
