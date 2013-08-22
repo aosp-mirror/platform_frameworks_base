@@ -283,6 +283,11 @@ void PathCache::generateTexture(const PathDescription& entry, SkBitmap* bitmap,
             mCache.put(entry, texture);
         }
     } else {
+        // It's okay to add a texture that's bigger than the cache since
+        // we'll trim the cache later when addToCache is set to false
+        if (!addToCache) {
+            mSize += size;
+        }
         texture->cleanup = true;
     }
 }
