@@ -407,6 +407,8 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">" ከስርዓቱ የተለያዩ የማስታወሻ ፋይሎች ውስጥ ለማንበብ ለመተግበሪያይፈቅዳሉ። ይህ ስለ ስልክህ ምን እያደረክበት እንደሆነ የግላዊ  ወይም የግል መረጃን ጨምሮ ጠቅላላ መረጃ ለማግኘት ይፈቅዳል።"</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"ለመልሰህ አጫውት ማንኛውምንም የማህደረ መረጃ ዲኮደር ተጠቀም"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"ለመልሰህ አጫውት ፍታን በማንኛውም የተጫኑ በማህደረ መረጃ ዲኮደር ለመጠቀም  ለመተግበሪያ ይፈቅዳል።"</string>
+    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"የታመኑ ምስክርነቶችን ያስተዳድሩ"</string>
+    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"መተግበሪያው CA የምስክር ወረቀቶችን እንደሚታመኑ ምስክርነቶች አንዲጭን እና እንዲያራግፍ ይፍቀዱ።"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"በdiag ባለቤትነት ያሉ ንብረቶችን አንብብ/ፃፍ"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"በዲያግ ቡድን ባለቤትነት ወደ አለ ማንኛውም ንብረት ለምሳሌ በ/dev ያሉ ፋይሎች ለማንበብ እና ለመፃፍ ለመተግበሪያው ይፈቅዳሉ። ይህ በመሰረቱ የስርዓት መረጋጋትን እና ደህንነትን ሊጎዳ ይችላል። ይህ ውስን የሀርድዌር-ተኮር ዲያግኖስቲክስ በአምራቹ ወይም ከዋኙ ብቻ መሆን አለበት።"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"የመተግበሪያ ምንዝሮችን አንቃ ወይም አቦዝን"</string>
@@ -1579,6 +1581,6 @@
     <item quantity="one" msgid="4835639969503729874">"ትክክል ያልሆነ ፒን። በ1 ሰከንድ ውስጥ እንደገና ይሞክሩ።"</item>
     <item quantity="other" msgid="8030607343223287654">"ትክክል ያልሆነ ፒን። በ<xliff:g id="COUNT">%d</xliff:g> ሰከንዶች ውስጥ እንደገና ይሞክሩ።"</item>
   </plurals>
-    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"አሞሌውን ለማሳየት የማያ ገጹን ጠርዝ ላይ ያንሸራትቱ"</string>
+    <string name="transient_navigation_confirmation" msgid="4907844043611123426">"አሞሌውን ለማሳየት የማያ ገጹ ጠርዝ ላይ ያንሸራትቱ"</string>
     <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"አሞሌውን ለማሳየት ከማያ ገጹ ጠርዝ ጀምረው ያንሸራትቱ"</string>
 </resources>

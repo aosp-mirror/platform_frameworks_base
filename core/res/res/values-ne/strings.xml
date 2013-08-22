@@ -407,6 +407,10 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"प्रणालीका विभिन्न फाइलहरूबाट पढ्न अनुप्रयोगलाई अनुमति दिन्छ। सम्भाव्य रूपमा व्यक्तिगत र निजी सूचनासहित तपाईँ फोनसँग के गरिरहनु भएको छ भन्ने बारेको साधारण सूचना पत्ता लगाउन यसलाई अनुमति दिन्छ।"</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"पछाडि बजाउनको लागि कुनै मिडिया प्रयोग गर्नुहोस्"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"अनुप्रयोगलाई प्लेब्याक डिकोड गर्न कुनै पनि स्थापित मिडिया डिकोडर प्रयोगको लागि अनुमति दिन्छ।"</string>
+    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
+    <skip />
+    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"diag को स्वामित्वमा रहेको संसाधनहरूमा पढ्नुहोस्/लेख्नुहोस्"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"अनुप्रयोगलाई diag समूहद्वारा स्वामित्व प्राप्त कुनै पनि स्रोतहरूमा पढ्न र लेख्न अनुमति दिन्छ; उदाहरणको लागि, /dev  मा फाइलहरू। यसले सम्भवतः प्रणाली स्थिरता र सुरक्षामा प्रभाव पार्न सक्दछ। यो केवल निर्माता वा संचालकद्वारा हार्डवेयर-निर्दिष्टको लागि प्रयोग हुन सक्दछ।"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"अनुप्रयोग अंशहरू सक्षम वा अक्षम गर्नुहोस्"</string>
