@@ -293,6 +293,18 @@ public class RemoteControlClient
      * @see #setPlaybackPositionUpdateListener(OnPlaybackPositionUpdateListener)
      */
     public final static int FLAG_KEY_MEDIA_POSITION_UPDATE = 1 << 8;
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * Flag indicating a RemoteControlClient supports ratings.
+     * This flag must be set in order for components that display the RemoteControlClient
+     * information, to display ratings information, and, if ratings are declared editable
+     * (by calling {@link MetadataEditor#addEditableKey(int)} with the
+     * {@link MetadataEditor#LONG_KEY_RATING_BY_USER} key), it will enable the user to rate
+     * the media.
+     * @see #setTransportControlFlags(int)
+     */
+    public final static int FLAG_KEY_MEDIA_RATING = 1 << 9;
 
     /**
      * @hide
@@ -389,7 +401,10 @@ public class RemoteControlClient
     private static final int[] METADATA_KEYS_TYPE_LONG = {
         MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER,
         MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER,
-        MediaMetadataRetriever.METADATA_KEY_DURATION };
+        MediaMetadataRetriever.METADATA_KEY_DURATION,
+        MetadataEditor.LONG_KEY_RATING_TYPE,
+        MetadataEditor.LONG_KEY_RATING_BY_OTHERS,
+        MetadataEditor.LONG_KEY_RATING_BY_USER};
 
     /**
      * Class used to modify metadata in a {@link RemoteControlClient} object.
@@ -400,6 +415,10 @@ public class RemoteControlClient
      * instance of the MetadataEditor.
      */
     public class MetadataEditor {
+        /**
+         * Mask of editable keys.
+         */
+        private long mEditableKeys;
         /**
          * @hide
          */
@@ -431,6 +450,78 @@ public class RemoteControlClient
          * The metadata key for the content artwork / album art.
          */
         public final static int BITMAP_KEY_ARTWORK = 100;
+        /**
+         * @hide
+         * CANDIDATE FOR PUBLIC API
+         * The metadata key qualifying the content rating.
+         * The value associated with this key may be: {@link #RATING_HEART},
+         * {@link #RATING_THUMB_UP_DOWN}, or a non-null positive integer expressing a maximum
+         * number of "stars" for the rating, for which a typical value is 3 or 5.
+         */
+        public final static int LONG_KEY_RATING_TYPE = 101;
+        /**
+         * @hide
+         * CANDIDATE FOR PUBLIC API
+         * The metadata key for the content's average rating, not the user's rating.
+         * The value associated with this key may be: an integer value between 0 and 100,
+         * or {@link #RATING_NOT_RATED} to express that no average rating is available.
+         * <p></p>
+         * Note that a rating value up to 100 is not incompatible with a rating type using up
+         * to 5 stars for instance, as the average may be an non-integer number of stars.
+         * <p></p>
+         * When the rating type is:
+         * <ul>
+         * <li>{@link #RATING_HEART}, a rating of 50 to 100 means "heart selected",</li>
+         * <li>{@link #RATING_THUMB_UP_DOWN}, a rating of 0 to 49 means "thumb down", 50 means
+         *     both "thumb up" and "thumb down" selected, 51 to 100 means "thumb up"</li>
+         * <li>a non-null positive integer, the rating value is mapped to the number of stars, e.g.
+         *     with a maximum of 5 stars, a rating of 21 to 40 maps to 2 stars.</li>
+         * </ul>
+         * @see #LONG_KEY_RATING_BY_USER
+         */
+        public final static int LONG_KEY_RATING_BY_OTHERS = 102;
+
+        // editable keys
+        /**
+         * @hide
+         * Editable key mask
+         */
+        public final static int KEY_EDITABLE_MASK = 0x1FFFFFFF;
+        /**
+         * @hide
+         * CANDIDATE FOR PUBLIC API
+         * The metadata key for the content's rating by the user.
+         * The value associated with this key may be: an integer value between 0 and 100,
+         * or {@link #RATING_NOT_RATED} to express that the user hasn't rated this content.
+         * Rules for the interpretation of the rating value according to the rating style are
+         * the same as for {@link #LONG_KEY_RATING_BY_OTHERS}
+         */
+        public final static int LONG_KEY_RATING_BY_USER = 0x10000001;
+
+        /**
+         * @hide
+         * CANDIDATE FOR PUBLIC API
+         * A rating style with a single degree of rating, "heart" vs "no heart". Can be used to
+         * indicate the content referred to is a favorite (or not).
+         * @see #LONG_KEY_RATING_TYPE
+         */
+        public final static long RATING_HEART = -1;
+        /**
+         * @hide
+         * CANDIDATE FOR PUBLIC API
+         * A rating style for "thumb up" vs "thumb down".
+         * @see #LONG_KEY_RATING_TYPE
+         */
+        public final static long RATING_THUMB_UP_DOWN = -2;
+        /**
+         * @hide
+         * CANDIDATE FOR PUBLIC API
+         * A rating value indicating no rating is available.
+         * @see #LONG_KEY_RATING_BY_OTHERS
+         * @see #LONG_KEY_RATING_BY_USER
+         */
+        public final static long RATING_NOT_RATED = -101;
+
         /**
          * @hide
          * TODO(jmtrivi) have lockscreen and music move to the new key name
@@ -529,6 +620,7 @@ public class RemoteControlClient
          * Clears all the metadata that has been set since the MetadataEditor instance was
          *     created with {@link RemoteControlClient#editMetadata(boolean)}.
          */
+        // TODO add in javadoc that this doesn't call clearEditableKeys()
         public synchronized void clear() {
             if (mApplied) {
                 Log.e(TAG, "Can't clear a previously applied MetadataEditor");
@@ -536,6 +628,40 @@ public class RemoteControlClient
             }
             mEditorMetadata.clear();
             mEditorArtwork = null;
+        }
+
+        /**
+         * @hide
+         * CANDIDATE FOR PUBLIC API
+         */
+        public synchronized void addEditableKey(int key) {
+            if (mApplied) {
+                Log.e(TAG, "Can't change editable keys of a previously applied MetadataEditor");
+                return;
+            }
+            // only one editable key at the moment, so we're not wasting memory on an array
+            // of editable keys to check the validity of the key, just hardcode the supported key.
+            if (key == MetadataEditor.LONG_KEY_RATING_BY_USER) {
+                mEditableKeys |= (MetadataEditor.KEY_EDITABLE_MASK & key);
+                mMetadataChanged = true;
+            } else {
+                Log.e(TAG, "Metadata key " + key + " cannot be edited");
+            }
+        }
+
+        /**
+         * @hide
+         * CANDIDATE FOR PUBLIC API
+         */
+        public synchronized void clearEditableKeys() {
+            if (mApplied) {
+                Log.e(TAG, "Can't clear editable keys of a previously applied MetadataEditor");
+                return;
+            }
+            if (mEditableKeys != 0) {
+                mEditableKeys = 0;
+                mMetadataChanged = true;
+            }
         }
 
         /**
@@ -552,6 +678,8 @@ public class RemoteControlClient
             synchronized(mCacheLock) {
                 // assign the edited data
                 mMetadata = new Bundle(mEditorMetadata);
+                // add the information about editable keys
+                mMetadata.putLong(String.valueOf(KEY_EDITABLE_MASK), mEditableKeys);
                 if ((mOriginalArtwork != null) && (!mOriginalArtwork.equals(mEditorArtwork))) {
                     mOriginalArtwork.recycle();
                 }
@@ -585,6 +713,7 @@ public class RemoteControlClient
             editor.mEditorArtwork = null;
             editor.mMetadataChanged = true;
             editor.mArtworkChanged = true;
+            editor.mEditableKeys = 0;
         } else {
             editor.mEditorMetadata = new Bundle(mMetadata);
             editor.mEditorArtwork = mOriginalArtwork;
@@ -750,6 +879,45 @@ public class RemoteControlClient
             sendTransportControlInfo_syncCacheLock();
         }
     }
+
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * TODO ADD DESCRIPTION
+     */
+    public interface OnMetadataUpdateListener  {
+        /**
+         * TODO ADD DESCRIPTION
+         * @param key
+         * @param newValue
+         */
+        void onMetadataUpdateLong(int key, long newValue);
+        /**
+         * TODO ADD DESCRIPTION
+         * @param key
+         * @param newValue
+         */
+        void onMetadataUpdateString(int key, String newValue);
+        /**
+         * TODO ADD DESCRIPTION
+         * @param key
+         * @param newValue
+         */
+        void onMetadataUpdateBitmap(int key, Bitmap newValue);
+    }
+
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * TODO ADD DESCRIPTION
+     * @param l
+     */
+    public void setMetadataUpdateListener(OnMetadataUpdateListener l) {
+        synchronized(mCacheLock) {
+            mMetadataUpdateListener = l;
+        }
+    }
+
 
     /**
      * Interface definition for a callback to be invoked when the media playback position is
@@ -1023,6 +1191,11 @@ public class RemoteControlClient
      */
     private OnGetPlaybackPositionListener mPositionProvider;
     /**
+     * Listener registered by user of RemoteControlClient to receive edit changes to metadata
+     * it exposes.
+     */
+    private OnMetadataUpdateListener mMetadataUpdateListener;
+    /**
      * The current remote control client generation ID across the system, as known by this object
      */
     private int mCurrentClientGenId = -1;
@@ -1163,6 +1336,15 @@ public class RemoteControlClient
                         new Long(timeMs)));
             }
         }
+
+        public void updateMetadata(int generationId, int key, long value) {
+            // only post messages, we can't block here
+            if (mEventHandler != null) {
+                mEventHandler.sendMessage(mEventHandler.obtainMessage(
+                        MSG_UPDATE_METADATA_LONG, generationId /* arg1 */, key /* arg2*/,
+                        new Long(value)));
+            }
+        }
     };
 
     /**
@@ -1206,6 +1388,7 @@ public class RemoteControlClient
     private final static int MSG_SEEK_TO = 10;
     private final static int MSG_POSITION_DRIFT_CHECK = 11;
     private final static int MSG_DISPLAY_WANTS_POS_SYNC = 12;
+    private final static int MSG_UPDATE_METADATA_LONG = 13;
 
     private class EventHandler extends Handler {
         public EventHandler(RemoteControlClient rcc, Looper looper) {
@@ -1258,6 +1441,9 @@ public class RemoteControlClient
                     break;
                 case MSG_DISPLAY_WANTS_POS_SYNC:
                     onDisplayWantsSync((IRemoteControlDisplay)msg.obj, msg.arg1 == 1);
+                    break;
+                case MSG_UPDATE_METADATA_LONG:
+                    onUpdateMetadata(msg.arg1, msg.arg2, ((Long)msg.obj).longValue());
                     break;
                 default:
                     Log.e(TAG, "Unknown event " + msg.what + " in RemoteControlClient handler");
@@ -1534,6 +1720,14 @@ public class RemoteControlClient
         synchronized (mCacheLock) {
             if ((mCurrentClientGenId == generationId) && (mPositionUpdateListener != null)) {
                 mPositionUpdateListener.onPlaybackPositionUpdate(timeMs);
+            }
+        }
+    }
+
+    private void onUpdateMetadata(int generationId, int key, long value) {
+        synchronized (mCacheLock) {
+            if ((mCurrentClientGenId == generationId) && (mMetadataUpdateListener != null)) {
+                mMetadataUpdateListener.onMetadataUpdateLong(key, value);
             }
         }
     }

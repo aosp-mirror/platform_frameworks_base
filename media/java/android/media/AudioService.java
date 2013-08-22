@@ -4174,7 +4174,7 @@ public class AudioService extends IAudioService.Stub {
     public void unregisterMediaButtonIntent(PendingIntent pi) {
         mMediaFocusControl.unregisterMediaButtonIntent(pi);
     }
- 
+
     public int registerRemoteControlClient(PendingIntent mediaIntent,
             IRemoteControlClient rcClient, String callingPckg) {
         return mMediaFocusControl.registerRemoteControlClient(mediaIntent, rcClient, callingPckg);
@@ -4187,6 +4187,10 @@ public class AudioService extends IAudioService.Stub {
 
     public void setRemoteControlClientPlaybackPosition(int generationId, long timeMs) {
         mMediaFocusControl.setRemoteControlClientPlaybackPosition(generationId, timeMs);
+    }
+
+    public void updateRemoteControlClientMetadata(int generationId, int key, long value) {
+        mMediaFocusControl.updateRemoteControlClientMetadata(generationId, key, value);
     }
 
     public void registerRemoteVolumeObserverForRcc(int rccId, IRemoteVolumeObserver rvo) {
