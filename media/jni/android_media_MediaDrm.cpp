@@ -348,14 +348,14 @@ void JDrm::notify(DrmPlugin::EventType eventType, int extra, const Parcel *obj) 
 
 
 // static
-bool JDrm::IsCryptoSchemeSupported(const uint8_t uuid[16]) {
+bool JDrm::IsCryptoSchemeSupported(const uint8_t uuid[16], const String8 &mimeType) {
     sp<IDrm> drm = MakeDrm();
 
     if (drm == NULL) {
         return false;
     }
 
-    return drm->isCryptoSchemeSupported(uuid);
+    return drm->isCryptoSchemeSupported(uuid, mimeType);
 }
 
 status_t JDrm::initCheck() const {
@@ -611,7 +611,7 @@ static void android_media_MediaDrm_native_finalize(
 }
 
 static jboolean android_media_MediaDrm_isCryptoSchemeSupportedNative(
-        JNIEnv *env, jobject thiz, jbyteArray uuidObj) {
+    JNIEnv *env, jobject thiz, jbyteArray uuidObj, jstring jmimeType) {
 
     if (uuidObj == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
@@ -628,7 +628,12 @@ static jboolean android_media_MediaDrm_isCryptoSchemeSupportedNative(
         return false;
     }
 
-    return JDrm::IsCryptoSchemeSupported(uuid.array());
+    String8 mimeType;
+    if (jmimeType != NULL) {
+        mimeType = JStringToString8(env, jmimeType);
+    }
+
+    return JDrm::IsCryptoSchemeSupported(uuid.array(), mimeType);
 }
 
 static jbyteArray android_media_MediaDrm_openSession(
@@ -1212,7 +1217,7 @@ static JNINativeMethod gMethods[] = {
     { "native_finalize", "()V",
       (void *)android_media_MediaDrm_native_finalize },
 
-    { "isCryptoSchemeSupportedNative", "([B)Z",
+    { "isCryptoSchemeSupportedNative", "([BLjava/lang/String;)Z",
       (void *)android_media_MediaDrm_isCryptoSchemeSupportedNative },
 
     { "openSession", "()[B",
