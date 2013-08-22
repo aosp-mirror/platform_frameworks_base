@@ -179,6 +179,14 @@ interface IAudioService {
      * @param timeMs the time in ms to seek to, must be positive.
      */
      void setRemoteControlClientPlaybackPosition(int generationId, long timeMs);
+     /**
+      * Notify the user of a RemoteControlClient that it should update its metadata
+      * @param generationId the RemoteControlClient generation counter for which this request is
+      *         issued. Requests for an older generation than current one will be ignored.
+      * @param key the metadata key for which a new value exists
+      * @param value the new metadata value
+      */
+     void updateRemoteControlClientMetadata(int generationId, int key, long value);
 
     /**
      * Do not use directly, use instead

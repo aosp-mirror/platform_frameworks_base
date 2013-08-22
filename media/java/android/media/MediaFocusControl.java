@@ -138,6 +138,7 @@ public class MediaFocusControl implements OnFinished {
     private static final int MSG_PROMOTE_RCC = 6;
     private static final int MSG_RCC_NEW_PLAYBACK_STATE = 7;
     private static final int MSG_RCC_SEEK_REQUEST = 8;
+    private static final int MSG_RCC_UPDATE_METADATA_LONG = 9;
 
     // sendMsg() flags
     /** If the msg is already queued, replace it with this one. */
@@ -188,18 +189,27 @@ public class MediaFocusControl implements OnFinished {
                     onNewPlaybackInfoForRcc(msg.arg1 /* rccId */, msg.arg2 /* key */,
                             ((Integer)msg.obj).intValue() /* value */);
                     break;
+
                 case MSG_RCC_NEW_VOLUME_OBS:
                     onRegisterVolumeObserverForRcc(msg.arg1 /* rccId */,
                             (IRemoteVolumeObserver)msg.obj /* rvo */);
                     break;
+
                 case MSG_RCC_NEW_PLAYBACK_STATE:
                     onNewPlaybackStateForRcc(msg.arg1 /* rccId */,
                             msg.arg2 /* state */,
                             (RccPlaybackState)msg.obj /* newState */);
                     break;
+
                 case MSG_RCC_SEEK_REQUEST:
                     onSetRemoteControlClientPlaybackPosition(
                             msg.arg1 /* generationId */, ((Long)msg.obj).longValue() /* timeMs */);
+                    break;
+
+                case MSG_RCC_UPDATE_METADATA_LONG:
+                    onUpdateRemoteControlClientMetadataLong(msg.arg1 /*genId*/, msg.arg2 /*key*/,
+                            ((Long)msg.obj).longValue() /* value */);
+                    break;
 
                 case MSG_PROMOTE_RCC:
                     onPromoteRcc(msg.arg1);
@@ -2063,6 +2073,36 @@ public class MediaFocusControl implements OnFinished {
                         mCurrentRcClient.seekTo(generationId, timeMs);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Current valid remote client is dead: "+e);
+                        mCurrentRcClient = null;
+                    }
+                }
+            }
+        }
+    }
+
+    protected void updateRemoteControlClientMetadata(int genId, int key, long value) {
+        sendMsg(mEventHandler, MSG_RCC_UPDATE_METADATA_LONG, SENDMSG_QUEUE,
+                genId /* arg1 */, key /* arg2 */, Long.valueOf(value) /* obj */, 0 /* delay */);
+    }
+
+    private void onUpdateRemoteControlClientMetadataLong(int genId, int key, long value) {
+        if(DEBUG_RC) Log.d(TAG, "onUpdateRemoteControlClientMetadataLong(genId=" + genId +
+                ", what=" + key + ",val=" + value + ")");
+        synchronized(mRCStack) {
+            synchronized(mCurrentRcLock) {
+                if ((mCurrentRcClient != null) && (mCurrentRcClientGen == genId)) {
+                    try {
+                        switch (key) {
+                            case RemoteControlClient.MetadataEditor.LONG_KEY_RATING_BY_USER:
+                                mCurrentRcClient.updateMetadata(genId, key, value);
+                                break;
+                            default:
+                                Log.e(TAG, "unhandled metadata key " + key + " update for RCC "
+                                        + genId);
+                                break;
+                        }
+                    } catch (RemoteException e) {
+                        Log.e(TAG, "Current valid remote client is dead", e);
                         mCurrentRcClient = null;
                     }
                 }

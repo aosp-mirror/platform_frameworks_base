@@ -2360,6 +2360,24 @@ public class AudioManager {
     }
 
     /**
+     * @hide
+     * Notify the user of a RemoteControlClient that it should update its metadata
+     * @param generationId the RemoteControlClient generation counter for which this request is
+     *         issued. Requests for an older generation than current one will be ignored.
+     * @param key the metadata key for which a new value exists
+     * @param value the new metadata value
+     */
+    public void updateRemoteControlClientMetadata(int generationId, int key, long value) {
+        IAudioService service = getService();
+        try {
+            service.updateRemoteControlClientMetadata(generationId, key, value);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in updateRemoteControlClientMetadata("+ generationId + ", "
+                    + key +", " + value + ")", e);
+        }
+    }
+
+    /**
      *  @hide
      *  Reload audio settings. This method is called by Settings backup
      *  agent when audio settings are restored and causes the AudioService
