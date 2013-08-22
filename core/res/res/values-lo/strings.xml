@@ -407,6 +407,10 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"ອະນຸຍາດໃຫ້ແອັບຯອ່ານໄຟລ໌ບັນທຶກລະບົບຕ່າງໆຂອງລະບົບ. ຄຸນສົມບັດນີ້ຈະອະນຸຍາດໃຫ້ແອັບຯ ສາມາດຄົ້ນພົບຂໍ້ມູນທົ່ວໄປ ກ່ຽວກັບສິ່ງທີ່ທ່ານກຳລັງເຮັດກັບໂທລະສັບ ເຊິ່ງອາດຮວມເຖິງຂໍ້ມູນສ່ວນໂຕນຳໄດ້."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"ໃຊ້ຕົວຖອດລະຫັດໃດກໍໄດ້ເພື່ອການຫຼິ້ນ"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"ອະນຸຍາດໃຫ້ແອັບຯໃຊ້ທຸກຕົວຖອດລະຫັດສື່ທີ່ຕິດຕັ້ງໄວ້ແລ້ວ ເພື່ອການຖອດລະຫັດການຫຼິ້ນໄຟລ໌ຕ່າງໆ."</string>
+    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
+    <skip />
+    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"ອ່ານ/ຂຽນ ໃສ່ຊັບພະຍາກອນທີ່ເປັນຂອງກຸ່ມວິໄຈ"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"ອະນຸຍາດໃຫ້ແອັບພລິເຄຊັນອ່ານ ແລະຂຽນ ໃສ່ທຸກຊັບພະຍາກອນທີ່ເປັນຂອງກຸ່ມວິນິໄສ; ຕົວຢ່າງ: ໄຟລ໌ໃນ /dev. ສິ່ງນີ້ອາດສົ່ງຜົນກະທົບຕໍ່ຄວາມສະຖຽນ ແລະຄວາມປອດໄພຂອງລະບົບ. ສິ່ງນີ້ຄວນໃຊ້ສຳຫຼັບການວິເຄາະບັນຫາຈຳເພາະ ຂອງບາງຮາດແວໂດຍຜູ່ຜະລິດ ຫຼືຜູ່ປະຕິບັດການເທົ່ານັ້ນ."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"ເປີດ ຫຼືປິດນຳໃຊ້ອົງປະກອບຂອງແອັບຯ"</string>

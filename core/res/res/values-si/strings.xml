@@ -407,6 +407,10 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"පද්ධතියේ විවිධ ලොග් ගොනු කියවීමට යෙදුමට අවසර දෙන්න. පුද්ගලික සහ පෞද්ගලික තොරතුරු ඇතුළත්ව ඔබ දුරකථනයෙන් කුමක් කරන්නෙහිද යනාදී සාමාන්‍ය තොරතුරු සෙවීමට මෙයට අවසර දෙන්න."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"නැවත ධාවනය සඳහා ඕනෑම මාධ්‍ය විකේතකයක් හාවිතා කරන්න"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"නැවත ධාවනය සඳහා විකේතනය කිරීමට ඕනෑම ස්ථාපිත මාධ්‍ය විකේතකයක් භාවිතයට යෙදුමට අවසර දෙන්න."</string>
+    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
+    <skip />
+    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"Diag විසින් හිමිකාරත්වය දරණ සම්පත්වලට කියවීම/ ලිවිම"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Diag කණ්ඩායමට අයිති ඕනෑම සම්පතක් කියවීමට සහ ලිවීමට යෙදුමට අවසර දෙන්න. උදාහරණයක් ලෙස /dev තුල ඇති ගොනු. මෙයට පද්ධති ස්ථායිතාවට සහ ආරක්ෂාවට බලපෑම් කිරීමට හැකියාවක් ඇත. නිෂ්පාදක හෝ ක්‍රියාකරු විසින් දෘඩාංග-විශේෂිත දෝෂ නිර්ණය සඳහා පමණක් මෙය යොදාගත යුතුය."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"යෙදුම් අංග සබල හෝ අබල කිරීම"</string>

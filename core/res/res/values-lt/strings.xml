@@ -407,6 +407,10 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Leidžiama programai skaityti iš įvairių sistemos žurnalų failų. Taip galima atrasti bendrą informaciją apie tai, ką darote telefonu, potencialiai įtraukiant asmeninę ar privačią informaciją."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"atkuriant naudoti bet kurį medijos dekoderį"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Leidžiama programai naudoti bet kurį įdiegtą medijos dekoderį norint iššifruoti atkūrimą."</string>
+    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
+    <skip />
+    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"skaityti / rašyti ištekliuose, priklausančiuose diagnostikai"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Leidžiama programai skaityti ir rašyti visuose diagnostikos grupei priklausančiuose ištekliuose, pvz., failuose, esančiuose /dev. Tai gali paveikti sistemos stabilumą ir saugą. Tai turėtų būti naudojama TIK gamintojui ar operatoriui atliekant aparatinės įrangos diagnostiką."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"įgalinti programos komponentus arba jų neleisti"</string>

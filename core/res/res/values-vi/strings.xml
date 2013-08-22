@@ -407,6 +407,10 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Cho phép ứng dụng đọc từ nhiều tệp nhật ký khác nhau của hệ thống. Quyền này cho phép ứng dụng phát hiện thông tin chung về những gì bạn đang thực hiện với điện thoại, có thể bao gồm thông tin cá nhân hoặc riêng tư."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"sử dụng bất kỳ bộ giải mã phương tiện nào để phát lại"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Cho phép ứng dụng sử dụng bất kỳ trình giải mã phương tiện nào đã cài đặt nhằm giải mã để phát lại."</string>
+    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
+    <skip />
+    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"đọc/ghi vào tài nguyên do chẩn đoán sở hữu"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Cho phép ứng dụng đọc và ghi vào bất kỳ tài nguyên nào do nhóm chẩn đoán sở hữu; ví dụ: các tệp trong /dev. Quyền này có thể ảnh hưởng đến sự ổn định và tính bảo mật của hệ thống. CHỈ nên sử dụng quyền này cho các chẩn đoán phần cứng cụ thể của nhà sản xuất hoặc nhà cung cấp."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"bật hoặc tắt cấu phần ứng dụng"</string>

@@ -407,6 +407,10 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"允許應用程式讀取系統的各種記錄檔。這會允許應用程式查看一般的電話使用資訊，可能包括您的個人或私人資訊。"</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"使用任何媒體解碼器進行播放"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"允許應用程式使用任何已安裝的媒體解碼器為播放解碼。"</string>
+    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
+    <skip />
+    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
+    <skip />
     <string name="permlab_diagnostic" msgid="8076743953908000342">"讀取/寫入由診斷應用程式擁有的資源"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"允許應用程式讀取及寫入診斷群組所擁有的任何資源 (例如：位於 /dev 中的檔案)。這可能會影響系統的穩定性及安全性，只應對製造商或網絡供應商所使用的硬件專用診斷程式開放這項權限。"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"啟用或停用應用程式元件"</string>
