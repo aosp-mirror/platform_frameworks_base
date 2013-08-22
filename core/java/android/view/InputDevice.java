@@ -574,6 +574,16 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
+     * Gets whether the device is capable of producing the list of keycodes.
+     * @param keys The list of android keycodes to check for.
+     * @return An array of booleans where each member specifies whether the device is capable of
+     * generating the keycode given by the corresponding value at the same index in the keys array.
+     */
+    public boolean[] hasKeys(int... keys) {
+        return InputManager.getInstance().deviceHasKeys(mId, keys);
+    }
+
+    /**
      * Gets information about the range of values for a particular {@link MotionEvent} axis.
      * If the device supports multiple sources, the same axis may have different meanings
      * for each source.  Returns information about the first axis found for any source.
