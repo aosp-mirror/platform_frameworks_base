@@ -1235,8 +1235,11 @@ public class LocationManagerService extends ILocationManager.Stub {
                     if (UserHandle.getUserId(record.mReceiver.mUid) == mCurrentUserId) {
                         LocationRequest locationRequest = record.mRequest;
                         if (locationRequest.getInterval() <= thresholdInterval) {
-                            if (record.mReceiver.mWorkSource != null) {
+                            if (record.mReceiver.mWorkSource != null
+                                    && record.mReceiver.mWorkSource.size() > 0
+                                    && record.mReceiver.mWorkSource.getName(0) != null) {
                                 // Assign blame to another work source.
+                                // Can only assign blame if the WorkSource contains names.
                                 worksource.add(record.mReceiver.mWorkSource);
                             } else {
                                 // Assign blame to caller.
