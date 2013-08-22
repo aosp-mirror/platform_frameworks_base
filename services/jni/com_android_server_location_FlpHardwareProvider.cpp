@@ -14,7 +14,7 @@
  * limitations under the license.
  */
 
-#define LOG_TAG "FuseLocationProvider"
+#define LOG_TAG "FlpHardwareProvider"
 #define LOG_NDEBUG  0
 
 #define WAKE_LOCK_NAME  "FLP"
@@ -65,8 +65,7 @@ static inline void ThrowOnError(
   }
 
   ALOGE("Error %d in '%s'", resultCode, methodName);
-  jclass exceptionClass = env->FindClass("java/lang/RuntimeException");
-  env->ThrowNew(exceptionClass, methodName);
+  env->FatalError(methodName);
 }
 
 static bool IsValidCallbackThread() {
@@ -768,7 +767,7 @@ static void InjectLocation(JNIEnv* env, jobject object, jobject locationObject) 
   FlpLocation location;
   TranslateFromObject(env, locationObject, location);
   int result = sFlpInterface->inject_location(&location);
-  if (result != FLP_RESULT_ERROR) {
+  if (result != FLP_RESULT_SUCCESS) {
     // do not throw but log, this operation should be fire and forget
     ALOGE("Error %d in '%s'", result, __FUNCTION__);
   }
