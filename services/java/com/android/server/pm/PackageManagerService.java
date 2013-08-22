@@ -91,6 +91,7 @@ import android.content.pm.ManifestDigest;
 import android.content.pm.VerificationParams;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -116,6 +117,7 @@ import android.os.Environment.UserEnvironment;
 import android.os.UserManager;
 import android.security.KeyStore;
 import android.security.SystemKeyStore;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -157,6 +159,8 @@ import libcore.io.ErrnoException;
 import libcore.io.IoUtils;
 import libcore.io.Libcore;
 import libcore.io.StructStat;
+
+import com.android.internal.R;
 
 /**
  * Keep track of all those .apks everywhere.
@@ -420,6 +424,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     final ResolveInfo mResolveInfo = new ResolveInfo();
     ComponentName mResolveComponentName;
     PackageParser.Package mPlatformPackage;
+    ComponentName mCustomResolverComponentName;
+
+    boolean mResolverReplaced = false;
 
     // Set of pending broadcasts for aggregating enable/disable of components.
     static class PendingPackageBroadcasts {
@@ -1114,6 +1121,15 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             mRestoredSettings = mSettings.readLPw(this, sUserManager.getUsers(false),
                     mSdkVersion, mOnlyCore);
+
+            String customResolverActivity = Resources.getSystem().getString(
+                    R.string.config_customResolverActivity);
+            if (TextUtils.isEmpty(customResolverActivity)) {
+                customResolverActivity = null;
+            } else {
+                mCustomResolverComponentName = ComponentName.unflattenFromString(
+                        customResolverActivity);
+            }
 
             long startTime = SystemClock.uptimeMillis();
 
@@ -3979,6 +3995,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_PRIVILEGED;
         }
 
+        if (mCustomResolverComponentName != null &&
+                mCustomResolverComponentName.getPackageName().equals(pkg.packageName)) {
+            setUpCustomResolverActivity(pkg);
+        }
+
         if (pkg.packageName.equals("android")) {
             synchronized (mPackages) {
                 if (mAndroidApplication != null) {
@@ -3990,26 +4011,28 @@ public class PackageManagerService extends IPackageManager.Stub {
                     return null;
                 }
 
-                // Set up information for our fall-back user intent resolution
-                // activity.
+                // Set up information for our fall-back user intent resolution activity.
                 mPlatformPackage = pkg;
                 pkg.mVersionCode = mSdkVersion;
                 mAndroidApplication = pkg.applicationInfo;
-                mResolveActivity.applicationInfo = mAndroidApplication;
-                mResolveActivity.name = ResolverActivity.class.getName();
-                mResolveActivity.packageName = mAndroidApplication.packageName;
-                mResolveActivity.processName = "system:ui";
-                mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
-                mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
-                mResolveActivity.theme = com.android.internal.R.style.Theme_Holo_Dialog_Alert;
-                mResolveActivity.exported = true;
-                mResolveActivity.enabled = true;
-                mResolveInfo.activityInfo = mResolveActivity;
-                mResolveInfo.priority = 0;
-                mResolveInfo.preferredOrder = 0;
-                mResolveInfo.match = 0;
-                mResolveComponentName = new ComponentName(
-                        mAndroidApplication.packageName, mResolveActivity.name);
+
+                if (!mResolverReplaced) {
+                    mResolveActivity.applicationInfo = mAndroidApplication;
+                    mResolveActivity.name = ResolverActivity.class.getName();
+                    mResolveActivity.packageName = mAndroidApplication.packageName;
+                    mResolveActivity.processName = "system:ui";
+                    mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
+                    mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS;
+                    mResolveActivity.theme = com.android.internal.R.style.Theme_Holo_Dialog_Alert;
+                    mResolveActivity.exported = true;
+                    mResolveActivity.enabled = true;
+                    mResolveInfo.activityInfo = mResolveActivity;
+                    mResolveInfo.priority = 0;
+                    mResolveInfo.preferredOrder = 0;
+                    mResolveInfo.match = 0;
+                    mResolveComponentName = new ComponentName(
+                            mAndroidApplication.packageName, mResolveActivity.name);
+                }
             }
         }
 
@@ -4872,6 +4895,30 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return pkg;
+    }
+
+    private void setUpCustomResolverActivity(PackageParser.Package pkg) {
+        synchronized (mPackages) {
+            mResolverReplaced = true;
+            // Set up information for custom user intent resolution activity.
+            mResolveActivity.applicationInfo = pkg.applicationInfo;
+            mResolveActivity.name = mCustomResolverComponentName.getClassName();
+            mResolveActivity.packageName = pkg.applicationInfo.packageName;
+            mResolveActivity.processName = null;
+            mResolveActivity.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
+            mResolveActivity.flags = ActivityInfo.FLAG_EXCLUDE_FROM_RECENTS |
+                    ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS;
+            mResolveActivity.theme = 0;
+            mResolveActivity.exported = true;
+            mResolveActivity.enabled = true;
+            mResolveInfo.activityInfo = mResolveActivity;
+            mResolveInfo.priority = 0;
+            mResolveInfo.preferredOrder = 0;
+            mResolveInfo.match = 0;
+            mResolveComponentName = mCustomResolverComponentName;
+            Slog.i(TAG, "Replacing default ResolverActivity with custom activity: " +
+                    mResolveComponentName);
+        }
     }
 
     private void setInternalAppNativeLibraryPath(PackageParser.Package pkg,
