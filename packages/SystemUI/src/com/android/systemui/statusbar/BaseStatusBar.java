@@ -437,7 +437,7 @@ public abstract class BaseStatusBar extends SystemUI implements
     }
 
     public void onHeadsUpDismissed() {
-        // pass
+        mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
     }
 
     @Override
@@ -958,20 +958,20 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (DEBUG) Log.d(TAG, "reusing notification for key: " + key);
             oldEntry.notification = notification;
             try {
-                // Reapply the RemoteViews
-                contentView.reapply(mContext, oldEntry.expanded, mOnClickHandler);
-                if (bigContentView != null && oldEntry.getBigContentView() != null) {
-                    bigContentView.reapply(mContext, oldEntry.getBigContentView(), mOnClickHandler);
+                updateNotificationViews(oldEntry, notification);
+
+                if (ENABLE_HEADS_UP && mInterruptingNotificationEntry != null
+                        && oldNotification == mInterruptingNotificationEntry.notification) {
+                    if (!shouldInterrupt(notification)) {
+                        if (DEBUG) Log.d(TAG, "no longer interrupts!");
+                        mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
+                    } else {
+                        if (DEBUG) Log.d(TAG, "updating the current heads up:" + notification);
+                        mInterruptingNotificationEntry.notification = notification;
+                        updateNotificationViews(mInterruptingNotificationEntry, notification);
+                    }
                 }
-                // update the contentIntent
-                final PendingIntent contentIntent = notification.getNotification().contentIntent;
-                if (contentIntent != null) {
-                    final View.OnClickListener listener = makeClicker(contentIntent,
-                            notification.getPackageName(), notification.getTag(), notification.getId());
-                    oldEntry.content.setOnClickListener(listener);
-                } else {
-                    oldEntry.content.setOnClickListener(null);
-                }
+
                 // Update the icon.
                 final StatusBarIcon ic = new StatusBarIcon(notification.getPackageName(),
                         notification.getUser(),
@@ -997,7 +997,7 @@ public abstract class BaseStatusBar extends SystemUI implements
             if (DEBUG) Log.d(TAG, "notification is " + (isTopAnyway ? "top" : "not top"));
             final boolean wasExpanded = oldEntry.row.isUserExpanded();
             removeNotificationViews(key);
-            addNotificationViews(key, notification);
+            addNotificationViews(key, notification);  // will also replace the heads up
             if (wasExpanded) {
                 final NotificationData.Entry newEntry = mNotificationData.findByKey(key);
                 newEntry.row.setExpanded(true);
@@ -1022,17 +1022,25 @@ public abstract class BaseStatusBar extends SystemUI implements
         // Recalculate the position of the sliding windows and the titles.
         setAreThereNotifications();
         updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
+    }
 
-        // See if we need to update the heads up.
-        if (ENABLE_HEADS_UP && mInterruptingNotificationEntry != null
-                && oldNotification == mInterruptingNotificationEntry.notification) {
-            if (DEBUG) Log.d(TAG, "updating the current heads up:" + notification);
-            // XXX: this is a hack for Alarms. The real implementation will need to *update*
-            // the heads up.
-            if (!shouldInterrupt(notification)) {
-                if (DEBUG) Log.d(TAG, "no longer interrupts!");
-                mHandler.sendEmptyMessage(MSG_HIDE_HEADS_UP);
-            }
+    private void updateNotificationViews(NotificationData.Entry entry,
+            StatusBarNotification notification) {
+        final RemoteViews contentView = notification.getNotification().contentView;
+        final RemoteViews bigContentView = notification.getNotification().bigContentView;
+        // Reapply the RemoteViews
+        contentView.reapply(mContext, entry.expanded, mOnClickHandler);
+        if (bigContentView != null && entry.getBigContentView() != null) {
+            bigContentView.reapply(mContext, entry.getBigContentView(), mOnClickHandler);
+        }
+        // update the contentIntent
+        final PendingIntent contentIntent = notification.getNotification().contentIntent;
+        if (contentIntent != null) {
+            final View.OnClickListener listener = makeClicker(contentIntent,
+                    notification.getPackageName(), notification.getTag(), notification.getId());
+            entry.content.setOnClickListener(listener);
+        } else {
+            entry.content.setOnClickListener(null);
         }
     }
 
