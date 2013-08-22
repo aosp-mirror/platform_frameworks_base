@@ -265,7 +265,7 @@ public class Input {
     }
 
     private static final int getSource(int inputSource, int defaultSource) {
-        return inputSource == -1 ? defaultSource : inputSource;
+        return inputSource == InputDevice.SOURCE_UNKNOWN ? defaultSource : inputSource;
     }
 
     private void showUsage() {
