@@ -654,13 +654,13 @@ LOCAL_MODULE := offline-sdk
 
 LOCAL_DROIDDOC_OPTIONS:=\
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
-                $(web_docs_sample_code_flags) \
-                -offlinemode \
+		-offlinemode \
 		-title "Android SDK" \
 		-proofread $(OUT_DOCS)/$(LOCAL_MODULE)-proofread.txt \
 		-todo $(OUT_DOCS)/$(LOCAL_MODULE)-docs-todo.html \
 		-sdkvalues $(OUT_DOCS) \
 		-hdf android.whichdoc offline
+#		$(web_docs_sample_code_flags)
 
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
@@ -696,7 +696,7 @@ LOCAL_DROIDDOC_OPTIONS:= \
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
 		-toroot / \
 		-hdf android.whichdoc online 
-#       $(web_docs_sample_code_flags)
+#		$(web_docs_sample_code_flags)
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 
@@ -720,11 +720,11 @@ LOCAL_MODULE := ds
 
 LOCAL_DROIDDOC_OPTIONS:= \
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
-		$(web_docs_sample_code_flags) \
 		-devsite \
 		-toroot / \
 		-hdf android.whichdoc online \
 		-hdf devsite true
+#		$(web_docs_sample_code_flags)
 
 LOCAL_DROIDDOC_CUSTOM_TEMPLATE_DIR:=build/tools/droiddoc/templates-sdk
 
