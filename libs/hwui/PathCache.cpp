@@ -214,7 +214,22 @@ void PathCache::operator()(PathDescription& entry, PathTexture*& texture) {
 void PathCache::removeTexture(PathTexture* texture) {
     if (texture) {
         const uint32_t size = texture->width * texture->height;
-        mSize -= size;
+
+        // If there is a pending task we must wait for it to return
+        // before attempting our cleanup
+        const sp<Task<SkBitmap*> >& task = texture->task();
+        if (task != NULL) {
+            SkBitmap* bitmap = task->getResult();
+            texture->clearTask();
+        } else {
+            // If there is a pending task, the path was not added
+            // to the cache and the size wasn't increased
+            if (size > mSize) {
+                ALOGE("Removing path texture of size %d will leave "
+                        "the cache in an inconsistent state", size);
+            }
+            mSize -= size;
+        }
 
         PATH_LOGD("PathCache::delete name, size, mSize = %d, %d, %d",
                 texture->id, size, mSize);

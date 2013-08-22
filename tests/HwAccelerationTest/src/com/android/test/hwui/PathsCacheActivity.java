@@ -88,13 +88,18 @@ public class PathsCacheActivity extends Activity {
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-            
-            Log.d("OpenGLRenderer", "Start frame");
 
             canvas.drawARGB(255, 255, 255, 255);
 
             canvas.save();
             canvas.translate(550.0f, 60.0f);
+            canvas.drawPath(mPath, mMediumPaint);
+
+            mPath.reset();
+            buildPath(mPath);
+
+            canvas.translate(30.0f, 30.0f);
+            canvas.drawPath(mPath, mMediumPaint);
             canvas.drawPath(mPath, mMediumPaint);
 
             mPath.reset();
