@@ -108,7 +108,19 @@ public final class MediaDrm {
      * @param uuid The UUID of the crypto scheme.
      */
     public static final boolean isCryptoSchemeSupported(UUID uuid) {
-        return isCryptoSchemeSupportedNative(getByteArrayFromUUID(uuid));
+        return isCryptoSchemeSupportedNative(getByteArrayFromUUID(uuid), null);
+    }
+
+    /**
+     * Query if the given scheme identified by its UUID is supported on
+     * this device, and whether the drm plugin is able to handle the
+     * media container format specified by mimeType.
+     * @param uuid The UUID of the crypto scheme.
+     * @param mimeType The MIME type of the media container, e.g. "video/mp4"
+     *   or "video/webm"
+     */
+    public static final boolean isCryptoSchemeSupported(UUID uuid, String mimeType) {
+        return isCryptoSchemeSupportedNative(getByteArrayFromUUID(uuid), mimeType);
     }
 
     private static final byte[] getByteArrayFromUUID(UUID uuid) {
@@ -124,7 +136,8 @@ public final class MediaDrm {
         return uuidBytes;
     }
 
-    private static final native boolean isCryptoSchemeSupportedNative(byte[] uuid);
+    private static final native boolean isCryptoSchemeSupportedNative(byte[] uuid,
+                                                                      String mimeType);
 
     /**
      * Instantiate a MediaDrm object
