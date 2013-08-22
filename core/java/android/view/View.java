@@ -6680,8 +6680,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Returns whether this View is accessibility focused.
      *
      * @return True if this View is accessibility focused.
+     * @hide
      */
-    boolean isAccessibilityFocused() {
+    public boolean isAccessibilityFocused() {
         return (mPrivateFlags2 & PFLAG2_ACCESSIBILITY_FOCUSED) != 0;
     }
 
@@ -7389,7 +7390,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void dispatchStartTemporaryDetach() {
-        clearAccessibilityFocus();
         clearDisplayList();
 
         onStartTemporaryDetach();
@@ -11860,7 +11860,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         jumpDrawablesToCurrentState();
 
-        clearAccessibilityFocus();
         resetSubtreeAccessibilityStateChanged();
 
         if (isFocused()) {

@@ -42,7 +42,6 @@ import android.view.ViewParent;
 import android.view.ViewRootImpl;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.view.accessibility.AccessibilityNodeProvider;
 import android.widget.RemoteViews.RemoteView;
 
 import java.util.ArrayList;
@@ -1507,10 +1506,6 @@ public class ListView extends AbsListView {
             View oldFirst = null;
             View newSel = null;
 
-            AccessibilityNodeInfo accessibilityFocusLayoutRestoreNode = null;
-            View accessibilityFocusLayoutRestoreView = null;
-            int accessibilityFocusPosition = INVALID_POSITION;
-
             // Remember stuff we will need down below
             switch (mLayoutMode) {
             case LAYOUT_SET_SELECTION:
@@ -1565,31 +1560,14 @@ public class ListView extends AbsListView {
 
             setSelectedPositionInt(mNextSelectedPosition);
 
-            // Remember which child, if any, had accessibility focus. This must
-            // occur before recycling any views, since that will clear
-            // accessibility focus.
-            // TODO: This should rely on transient state.
-            final ViewRootImpl viewRootImpl = getViewRootImpl();
-            if (viewRootImpl != null) {
-                final View accessFocusedView = viewRootImpl.getAccessibilityFocusedHost();
-                if (accessFocusedView != null) {
-                    final View accessFocusedChild = findAccessibilityFocusedChild(
-                            accessFocusedView);
-                    if (accessFocusedChild != null) {
-                        if (!dataChanged || isDirectChildHeaderOrFooter(accessFocusedChild)) {
-                            // If the views won't be changing, try to maintain
-                            // focus on the current view host and (if
-                            // applicable) its virtual view.
-                            accessibilityFocusLayoutRestoreView = accessFocusedView;
-                            accessibilityFocusLayoutRestoreNode = viewRootImpl
-                                    .getAccessibilityFocusedVirtualView();
-                        } else {
-                            // Otherwise, try to maintain focus at the same
-                            // position.
-                            accessibilityFocusPosition = getPositionForView(accessFocusedChild);
-                        }
-                    }
-                }
+            // Remember which child, if any, had accessibility focus.
+            final int accessibilityFocusPosition;
+            final View accessFocusedChild = getAccessibilityFocusedChild();
+            if (accessFocusedChild != null) {
+                accessibilityFocusPosition = getPositionForView(accessFocusedChild);
+                accessFocusedChild.setHasTransientState(true);
+            } else {
+                accessibilityFocusPosition = INVALID_POSITION;
             }
 
             // Ensure the child containing focus, if any, has transient state.
@@ -1704,25 +1682,20 @@ public class ListView extends AbsListView {
                 }
             }
 
-            // Attempt to restore accessibility focus.
-            if (accessibilityFocusLayoutRestoreView != null) {
-                final AccessibilityNodeProvider provider =
-                        accessibilityFocusLayoutRestoreView.getAccessibilityNodeProvider();
-                if ((accessibilityFocusLayoutRestoreNode != null) && (provider != null)) {
-                    final int virtualViewId = AccessibilityNodeInfo.getVirtualDescendantId(
-                            accessibilityFocusLayoutRestoreNode.getSourceNodeId());
-                    provider.performAction(virtualViewId,
-                            AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
-                } else {
-                    accessibilityFocusLayoutRestoreView.requestAccessibilityFocus();
-                }
-            } else if (accessibilityFocusPosition != INVALID_POSITION) {
-                // Bound the position within the visible children.
-                final int position = MathUtils.constrain(
-                        (accessibilityFocusPosition - mFirstPosition), 0, (getChildCount() - 1));
-                final View restoreView = getChildAt(position);
-                if (restoreView != null) {
-                    restoreView.requestAccessibilityFocus();
+            if (accessFocusedChild != null) {
+                accessFocusedChild.setHasTransientState(false);
+
+                // If we failed to maintain accessibility focus on the previous
+                // view, attempt to restore it to the previous position.
+                if (!accessFocusedChild.isAccessibilityFocused()
+                    && accessibilityFocusPosition != INVALID_POSITION) {
+                    // Bound the position within the visible children.
+                    final int position = MathUtils.constrain(
+                            accessibilityFocusPosition - mFirstPosition, 0, getChildCount() - 1);
+                    final View restoreView = getChildAt(position);
+                    if (restoreView != null) {
+                        restoreView.requestAccessibilityFocus();
+                    }
                 }
             }
 
@@ -1754,42 +1727,31 @@ public class ListView extends AbsListView {
     }
 
     /**
-     * @param focusedView the view that has accessibility focus.
-     * @return the direct child that contains accessibility focus.
+     * @return the direct child that contains accessibility focus, or null if no
+     *         child contains accessibility focus
      */
-    private View findAccessibilityFocusedChild(View focusedView) {
+    private View getAccessibilityFocusedChild() {
+        final ViewRootImpl viewRootImpl = getViewRootImpl();
+        if (viewRootImpl == null) {
+            return null;
+        }
+
+        View focusedView = viewRootImpl.getAccessibilityFocusedHost();
+        if (focusedView == null) {
+            return null;
+        }
+
         ViewParent viewParent = focusedView.getParent();
         while ((viewParent instanceof View) && (viewParent != this)) {
             focusedView = (View) viewParent;
             viewParent = viewParent.getParent();
         }
+
         if (!(viewParent instanceof View)) {
             return null;
         }
+
         return focusedView;
-    }
-
-    /**
-     * @param child a direct child of this list.
-     * @return Whether child is a header or footer view.
-     */
-    private boolean isDirectChildHeaderOrFooter(View child) {
-
-        final ArrayList<FixedViewInfo> headers = mHeaderViewInfos;
-        final int numHeaders = headers.size();
-        for (int i = 0; i < numHeaders; i++) {
-            if (child == headers.get(i).view) {
-                return true;
-            }
-        }
-        final ArrayList<FixedViewInfo> footers = mFooterViewInfos;
-        final int numFooters = footers.size();
-        for (int i = 0; i < numFooters; i++) {
-            if (child == footers.get(i).view) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
