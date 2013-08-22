@@ -143,6 +143,10 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     @Override
     public void captureBurst(List<CaptureRequest> requests, CaptureListener listener)
             throws CameraAccessException {
+        if (requests.isEmpty()) {
+            Log.w(TAG, "Capture burst request list is empty, do nothing!");
+            return;
+        }
         // TODO
         throw new UnsupportedOperationException("Burst capture implemented yet");
 
@@ -183,6 +187,10 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     @Override
     public void setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener)
             throws CameraAccessException {
+        if (requests.isEmpty()) {
+            Log.w(TAG, "Set Repeating burst request list is empty, do nothing!");
+            return;
+        }
         // TODO
         throw new UnsupportedOperationException("Burst capture implemented yet");
     }
