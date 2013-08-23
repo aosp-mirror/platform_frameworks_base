@@ -114,7 +114,6 @@ import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
-import com.android.net.IProxyService;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.DataConnectionStats;
 import com.android.server.connectivity.Nat464Xlat;
@@ -3471,7 +3470,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void sendProxyBroadcast(ProxyProperties proxy) {
         if (proxy == null) proxy = new ProxyProperties("", 0, "");
-        mPacManager.setCurrentProxyScriptUrl(proxy);
+        if (mPacManager.setCurrentProxyScriptUrl(proxy)) return;
         if (DBG) log("sending Proxy Broadcast for " + proxy);
         Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |

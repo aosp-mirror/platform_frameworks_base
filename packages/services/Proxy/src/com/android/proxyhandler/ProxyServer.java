@@ -15,8 +15,11 @@
  */
 package com.android.proxyhandler;
 
+import android.net.ProxyProperties;
+import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.net.IProxyPortListener;
 import com.google.android.collect.Lists;
 
 import java.io.IOException;
@@ -49,6 +52,8 @@ public class ProxyServer extends Thread {
     public boolean mIsRunning = false;
 
     private ServerSocket serverSocket;
+    private int mPort;
+    private IProxyPortListener mCallback;
 
     private class ProxyConnection implements Runnable {
         private Socket connection;
@@ -179,31 +184,57 @@ public class ProxyServer extends Thread {
 
     public ProxyServer() {
         threadExecutor = Executors.newCachedThreadPool();
+        mPort = -1;
+        mCallback = null;
     }
 
     @Override
     public void run() {
         try {
-            serverSocket = new ServerSocket(ProxyService.PORT);
+            serverSocket = new ServerSocket(0);
 
-            serverSocket.setReuseAddress(true);
+            if (serverSocket != null) {
+                setPort(serverSocket.getLocalPort());
 
-            while (mIsRunning) {
-                try {
-                    ProxyConnection parser = new ProxyConnection(serverSocket.accept());
+                while (mIsRunning) {
+                    try {
+                        ProxyConnection parser = new ProxyConnection(serverSocket.accept());
 
-                    threadExecutor.execute(parser);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                        threadExecutor.execute(parser);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         } catch (SocketException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(TAG, "Failed to start proxy server", e);
+        } catch (IOException e1) {
+            Log.e(TAG, "Failed to start proxy server", e1);
         }
 
         mIsRunning = false;
+    }
+
+    public synchronized void setPort(int port) {
+        if (mCallback != null) {
+            try {
+                mCallback.setProxyPort(port);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Proxy failed to report port to PacManager", e);
+            }
+        }
+        mPort = port;
+    }
+
+    public synchronized void setCallback(IProxyPortListener callback) {
+        if (mPort != -1) {
+            try {
+                callback.setProxyPort(mPort);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Proxy failed to report port to PacManager", e);
+            }
+        }
+        mCallback = callback;
     }
 
     public synchronized void startServer() {
@@ -221,5 +252,13 @@ public class ProxyServer extends Thread {
                 e.printStackTrace();
             }
         }
+    }
+
+    public boolean isBound() {
+        return (mPort != -1);
+    }
+
+    public int getPort() {
+        return mPort;
     }
 }
