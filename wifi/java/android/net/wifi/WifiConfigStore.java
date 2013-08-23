@@ -37,6 +37,7 @@ import android.os.HandlerThread;
 import android.os.UserHandle;
 import android.security.KeyStore;
 import android.text.TextUtils;
+import android.util.LocalLog;
 import android.util.Log;
 
 import java.io.BufferedInputStream;
@@ -108,7 +109,7 @@ class WifiConfigStore {
 
     private Context mContext;
     private static final String TAG = "WifiConfigStore";
-    private static final boolean DBG = false;
+    private static final boolean DBG = true;
 
     /* configured networks with network id as the key */
     private HashMap<Integer, WifiConfiguration> mConfiguredNetworks =
@@ -145,12 +146,19 @@ class WifiConfigStore {
     private static final String EXCLUSION_LIST_KEY = "exclusionList";
     private static final String EOS = "eos";
 
+    private final LocalLog mLocalLog;
+
     private WifiNative mWifiNative;
     private final KeyStore mKeyStore = KeyStore.getInstance();
 
     WifiConfigStore(Context c, WifiNative wn) {
         mContext = c;
         mWifiNative = wn;
+
+        if (DBG) {
+            mLocalLog = new LocalLog(1024);                         // takes about 64 K
+            mWifiNative.setLocalLog(mLocalLog);
+        }
     }
 
     /**
@@ -212,6 +220,7 @@ class WifiConfigStore {
      * @return false if the network id is invalid
      */
     boolean selectNetwork(int netId) {
+        localLog("selectNetwork", netId);
         if (netId == INVALID_NETWORK_ID) return false;
 
         // Reset the priority of each network at start or if it goes too high.
@@ -248,6 +257,7 @@ class WifiConfigStore {
      * @return network update result
      */
     NetworkUpdateResult saveNetwork(WifiConfiguration config) {
+        localLog("saveNetwork", config.networkId);
         // A new network cannot have null SSID
         if (config == null || (config.networkId == INVALID_NETWORK_ID &&
                 config.SSID == null)) {
@@ -296,6 +306,7 @@ class WifiConfigStore {
      * @return {@code true} if it succeeds, {@code false} otherwise
      */
     boolean forgetNetwork(int netId) {
+        localLog("forgetNetwork", netId);
         if (mWifiNative.removeNetwork(netId)) {
             mWifiNative.saveConfig();
             removeConfigAndSendBroadcastIfNeeded(netId);
@@ -316,6 +327,7 @@ class WifiConfigStore {
      * @return network Id
      */
     int addOrUpdateNetwork(WifiConfiguration config) {
+        localLog("addOrUpdateNetwork", config.networkId);
         NetworkUpdateResult result = addOrUpdateNetworkNative(config);
         if (result.getNetworkId() != WifiConfiguration.INVALID_NETWORK_ID) {
             sendConfiguredNetworksChangedBroadcast(mConfiguredNetworks.get(result.getNetworkId()),
@@ -335,6 +347,7 @@ class WifiConfigStore {
      * @return {@code true} if it succeeds, {@code false} otherwise
      */
     boolean removeNetwork(int netId) {
+        localLog("removeNetwork", netId);
         boolean ret = mWifiNative.removeNetwork(netId);
         if (ret) {
             removeConfigAndSendBroadcastIfNeeded(netId);
@@ -369,8 +382,10 @@ class WifiConfigStore {
     boolean enableNetwork(int netId, boolean disableOthers) {
         boolean ret = enableNetworkWithoutBroadcast(netId, disableOthers);
         if (disableOthers) {
+            localLog("enableNetwork(disableOthers=true) ", netId);
             sendConfiguredNetworksChangedBroadcast();
         } else {
+            localLog("enableNetwork(disableOthers=false) ", netId);
             WifiConfiguration enabledNetwork = null;
             synchronized(mConfiguredNetworks) {
                 enabledNetwork = mConfiguredNetworks.get(netId);
@@ -397,6 +412,7 @@ class WifiConfigStore {
     }
 
     void disableAllNetworks() {
+        localLog("disableAllNetworks");
         boolean networkDisabled = false;
         for(WifiConfiguration config : mConfiguredNetworks.values()) {
             if(config != null && config.status != Status.DISABLED) {
@@ -429,6 +445,7 @@ class WifiConfigStore {
      * @return {@code true} if it succeeds, {@code false} otherwise
      */
     boolean disableNetwork(int netId, int reason) {
+        localLog("disableNetwork", netId);
         boolean ret = mWifiNative.disableNetwork(netId);
         WifiConfiguration network = null;
         WifiConfiguration config = mConfiguredNetworks.get(netId);
@@ -639,10 +656,13 @@ class WifiConfigStore {
             config.proxySettings = ProxySettings.NONE;
             mConfiguredNetworks.put(config.networkId, config);
             mNetworkIds.put(configKey(config), config.networkId);
+            localLog("loaded configured network", config.networkId);
         }
 
         readIpAndProxyConfigurations();
         sendConfiguredNetworksChangedBroadcast();
+
+        localLog("loadConfiguredNetworks loaded " + mNetworkIds.size() + " networks");
     }
 
     /* Mark all networks except specified netId as disabled */
@@ -972,6 +992,9 @@ class WifiConfigStore {
          * network configuration. Otherwise, the networkId should
          * refer to an existing configuration.
          */
+
+        localLog("addOrUpdateNetworkNative " + config.getPrintableSsid());
+
         int netId = config.networkId;
         boolean newNetwork = false;
         // networkId of INVALID_NETWORK_ID means we want to create a new network
@@ -1577,6 +1600,12 @@ class WifiConfigStore {
             pw.println(conf);
         }
         pw.println();
+
+        if (mLocalLog != null) {
+            pw.println("WifiConfigStore - Log Begin ----");
+            mLocalLog.dump(fd, pw, args);
+            pw.println("WifiConfigStore - Log End ----");
+        }
     }
 
     public String getConfigFile() {
@@ -1590,4 +1619,28 @@ class WifiConfigStore {
     private void log(String s) {
         Log.d(TAG, s);
     }
+
+    private void localLog(String s) {
+        if (mLocalLog != null) {
+            mLocalLog.log(s);
+        }
+    }
+
+    private void localLog(String s, int netId) {
+        if (mLocalLog == null) {
+            return;
+        }
+
+        WifiConfiguration config;
+        synchronized(mConfiguredNetworks) {
+            config = mConfiguredNetworks.get(netId);
+        }
+
+        if (config != null) {
+            mLocalLog.log(s + " " + config.getPrintableSsid());
+        } else {
+            mLocalLog.log(s + " " + netId);
+        }
+    }
+
 }

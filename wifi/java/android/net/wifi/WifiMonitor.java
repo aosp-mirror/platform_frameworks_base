@@ -435,6 +435,7 @@ public class WifiMonitor {
                     } else {
                         mIfaceMap.remove(iface);
                         m.mWifiStateMachine.sendMessage(SUP_DISCONNECTION_EVENT);
+                        Log.e(TAG, "startMonitoring(" + iface + ") failed!");
                         break;
                     }
                 }
