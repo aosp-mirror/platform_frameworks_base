@@ -35,6 +35,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.StrictMode;
+import android.provider.DocumentsContract;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -2650,11 +2651,16 @@ public class Intent implements Parcelable, Cloneable {
      * multiple selection), then it can specify {@link #EXTRA_ALLOW_MULTIPLE} to
      * indicate this.
      * <p>
-     * All returned URIs can be opened as a stream with
-     * {@link ContentResolver#openInputStream(Uri)}.
+     * Callers must include {@link #CATEGORY_OPENABLE} in the Intent so that
+     * returned URIs can be opened with
+     * {@link ContentResolver#openFileDescriptor(Uri, String)}.
      * <p>
      * Output: The URI of the item that was picked. This must be a content: URI
-     * so that any receiver can access it.
+     * so that any receiver can access it. If multiple documents were selected,
+     * they are returned in {@link #getClipData()}.
+     *
+     * @see DocumentsContract
+     * @see DocumentsContract#getOpenDocuments(Context)
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_OPEN_DOCUMENT = "android.intent.action.OPEN_DOCUMENT";
@@ -2669,11 +2675,14 @@ public class Intent implements Parcelable, Cloneable {
      * optionally hint at the MIME type being created by setting
      * {@link #setType(String)}.
      * <p>
-     * All returned URIs can be opened as a stream with
-     * {@link ContentResolver#openOutputStream(Uri)}.
+     * Callers must include {@link #CATEGORY_OPENABLE} in the Intent so that
+     * returned URIs can be opened with
+     * {@link ContentResolver#openFileDescriptor(Uri, String)}.
      * <p>
      * Output: The URI of the item that was created. This must be a content: URI
      * so that any receiver can access it.
+     *
+     * @see DocumentsContract
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CREATE_DOCUMENT = "android.intent.action.CREATE_DOCUMENT";

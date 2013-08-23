@@ -30,6 +30,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
+import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.util.Log;
 
 import com.google.android.collect.Lists;
@@ -41,8 +43,33 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * The contract between a storage backend and the platform. Contains definitions
- * for the supported URIs and columns.
+ * Defines the contract between a documents provider and the platform.
+ * <p>
+ * A document provider is a {@link ContentProvider} that presents a set of
+ * documents in a hierarchical structure. The system provides UI that visualizes
+ * all available document providers, offering users the ability to open existing
+ * documents or create new documents.
+ * <p>
+ * Each provider expresses one or more "roots" which each serve as the top-level
+ * of a tree. For example, a root could represent an account, or a physical
+ * storage device. Under each root, documents are referenced by a unique
+ * {@link DocumentColumns#DOC_ID}, and each root starts at the
+ * {@link Documents#DOC_ID_ROOT} document.
+ * <p>
+ * Documents can be either an openable file (with a specific MIME type), or a
+ * directory containing additional documents (with the
+ * {@link Documents#MIME_TYPE_DIR} MIME type). Each document can have different
+ * capabilities, as described by {@link DocumentColumns#FLAGS}. The same
+ * {@link DocumentColumns#DOC_ID} can be included in multiple directories.
+ * <p>
+ * Document providers must be protected with the
+ * {@link android.Manifest.permission#MANAGE_DOCUMENTS} permission, which can
+ * only be requested by the system. The system-provided UI then issues narrow
+ * Uri permission grants for individual documents when the user explicitly picks
+ * documents.
+ *
+ * @see Intent#ACTION_OPEN_DOCUMENT
+ * @see Intent#ACTION_CREATE_DOCUMENT
  */
 public final class DocumentsContract {
     private static final String TAG = "Documents";
@@ -59,6 +86,9 @@ public final class DocumentsContract {
     /** {@hide} */
     public static final String ACTION_DOCUMENT_CHANGED = "android.provider.action.DOCUMENT_CHANGED";
 
+    /**
+     * Constants for individual documents.
+     */
     public static class Documents {
         private Documents() {
         }
@@ -73,7 +103,7 @@ public final class DocumentsContract {
 
         /**
          * {@link DocumentColumns#DOC_ID} value representing the root directory of a
-         * storage root.
+         * documents root.
          */
         public static final String DOC_ID_ROOT = "0";
 
@@ -144,8 +174,8 @@ public final class DocumentsContract {
 
     /**
      * Extra boolean flag included in a directory {@link Cursor#getExtras()}
-     * indicating that the backend can provide additional data if requested,
-     * such as additional search results.
+     * indicating that the document provider can provide additional data if
+     * requested, such as additional search results.
      */
     public static final String EXTRA_HAS_MORE = "has_more";
 
@@ -170,21 +200,24 @@ public final class DocumentsContract {
     private static final String PARAM_LOCAL_ONLY = "localOnly";
 
     /**
-     * Build URI representing the roots in a storage backend.
+     * Build Uri representing the roots offered by a document provider.
      */
     public static Uri buildRootsUri(String authority) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority).appendPath(PATH_ROOTS).build();
     }
 
+    /**
+     * Build Uri representing a specific root offered by a document provider.
+     */
     public static Uri buildRootUri(String authority, String rootId) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority).appendPath(PATH_ROOTS).appendPath(rootId).build();
     }
 
     /**
-     * Build URI representing the given {@link DocumentColumns#DOC_ID} in a
-     * storage root.
+     * Build Uri representing the given {@link DocumentColumns#DOC_ID} in a
+     * document provider.
      */
     public static Uri buildDocumentUri(String authority, String rootId, String docId) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(authority)
@@ -193,8 +226,8 @@ public final class DocumentsContract {
     }
 
     /**
-     * Build URI representing the contents of the given directory in a storage
-     * backend. The given document must be {@link Documents#MIME_TYPE_DIR}.
+     * Build Uri representing the contents of the given directory in a document
+     * provider. The given document must be {@link Documents#MIME_TYPE_DIR}.
      */
     public static Uri buildContentsUri(String authority, String rootId, String docId) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(authority)
@@ -203,8 +236,9 @@ public final class DocumentsContract {
     }
 
     /**
-     * Build URI representing a search for matching documents under a directory
-     * in a storage backend.
+     * Build Uri representing a search for matching documents under a specific
+     * directory in a document provider. The given document must have
+     * {@link Documents#FLAG_SUPPORTS_SEARCH}.
      */
     public static Uri buildSearchUri(String authority, String rootId, String docId, String query) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(authority)
@@ -212,20 +246,36 @@ public final class DocumentsContract {
                 .appendPath(PATH_SEARCH).appendQueryParameter(PARAM_QUERY, query).build();
     }
 
+    /**
+     * Convenience method for {@link #buildDocumentUri(String, String, String)},
+     * extracting authority and root from the given Uri.
+     */
     public static Uri buildDocumentUri(Uri relatedUri, String docId) {
         return buildDocumentUri(relatedUri.getAuthority(), getRootId(relatedUri), docId);
     }
 
+    /**
+     * Convenience method for {@link #buildContentsUri(String, String, String)},
+     * extracting authority and root from the given Uri.
+     */
     public static Uri buildContentsUri(Uri relatedUri) {
         return buildContentsUri(
                 relatedUri.getAuthority(), getRootId(relatedUri), getDocId(relatedUri));
     }
 
+    /**
+     * Convenience method for
+     * {@link #buildSearchUri(String, String, String, String)}, extracting
+     * authority and root from the given Uri.
+     */
     public static Uri buildSearchUri(Uri relatedUri, String query) {
         return buildSearchUri(
                 relatedUri.getAuthority(), getRootId(relatedUri), getDocId(relatedUri), query);
     }
 
+    /**
+     * Extract the {@link RootColumns#ROOT_ID} from the given Uri.
+     */
     public static String getRootId(Uri documentUri) {
         final List<String> paths = documentUri.getPathSegments();
         if (paths.size() < 2) {
@@ -237,6 +287,9 @@ public final class DocumentsContract {
         return paths.get(1);
     }
 
+    /**
+     * Extract the {@link DocumentColumns#DOC_ID} from the given Uri.
+     */
     public static String getDocId(Uri documentUri) {
         final List<String> paths = documentUri.getPathSegments();
         if (paths.size() < 4) {
@@ -252,15 +305,17 @@ public final class DocumentsContract {
     }
 
     /**
-     * Return requested search query from the given Uri.
+     * Return requested search query from the given Uri, as constructed by
+     * {@link #buildSearchUri(String, String, String, String)}.
      */
     public static String getSearchQuery(Uri documentUri) {
         return documentUri.getQueryParameter(PARAM_QUERY);
     }
 
     /**
-     * Mark the given Uri to indicate that only locally-available contents
-     * should be returned.
+     * Mark the given Uri to indicate that only locally-available data should be
+     * returned. That is, no network connections should be initiated to provide
+     * the metadata or content.
      */
     public static Uri setLocalOnly(Uri documentUri) {
         return documentUri.buildUpon()
@@ -268,20 +323,21 @@ public final class DocumentsContract {
     }
 
     /**
-     * Return if the given Uri is requesting that only locally-available content
-     * be returned. That is, no network connections should be initiated to
-     * provide the metadata or content.
+     * Return if the given Uri is requesting that only locally-available data be
+     * returned. That is, no network connections should be initiated to provide
+     * the metadata or content.
      */
     public static boolean isLocalOnly(Uri documentUri) {
         return documentUri.getBooleanQueryParameter(PARAM_LOCAL_ONLY, false);
     }
 
     /**
-     * These are standard columns for document URIs. Storage backend providers
-     * <em>must</em> support at least these columns when queried.
+     * Standard columns for document queries. Document providers <em>must</em>
+     * support at least these columns when queried.
      *
-     * @see Intent#ACTION_OPEN_DOCUMENT
-     * @see Intent#ACTION_CREATE_DOCUMENT
+     * @see DocumentsContract#buildDocumentUri(String, String, String)
+     * @see DocumentsContract#buildContentsUri(String, String, String)
+     * @see DocumentsContract#buildSearchUri(String, String, String, String)
      */
     public interface DocumentColumns extends OpenableColumns {
         /**
@@ -296,8 +352,8 @@ public final class DocumentsContract {
         /**
          * MIME type of a document, matching the value returned by
          * {@link ContentResolver#getType(android.net.Uri)}. This field must be
-         * provided when a new document is created, but after that the field is
-         * read-only.
+         * provided when a new document is created. This field is read-only to
+         * document clients.
          * <p>
          * Type: STRING
          *
@@ -308,7 +364,9 @@ public final class DocumentsContract {
         /**
          * Timestamp when a document was last modified, in milliseconds since
          * January 1, 1970 00:00:00.0 UTC. This field is read-only to document
-         * clients.
+         * clients. Document providers can update this field using events from
+         * {@link OnCloseListener} or other reliable
+         * {@link ParcelFileDescriptor} transport.
          * <p>
          * Type: INTEGER (long)
          *
@@ -325,13 +383,17 @@ public final class DocumentsContract {
         public static final String FLAGS = "flags";
 
         /**
-         * Summary for this document, or {@code null} to omit.
+         * Summary for this document, or {@code null} to omit. This field is
+         * read-only to document clients.
          * <p>
          * Type: STRING
          */
         public static final String SUMMARY = "summary";
     }
 
+    /**
+     * Constants for individual document roots.
+     */
     public static class Roots {
         private Roots() {
         }
@@ -340,7 +402,8 @@ public final class DocumentsContract {
         public static final String MIME_TYPE_ITEM = "vnd.android.cursor.item/root";
 
         /**
-         * Root that represents a cloud-based storage service.
+         * Root that represents a storage service, such as a cloud-based
+         * service.
          *
          * @see RootColumns#ROOT_TYPE
          */
@@ -371,15 +434,17 @@ public final class DocumentsContract {
     }
 
     /**
-     * These are standard columns for the roots URI.
+     * Standard columns for document root queries.
      *
      * @see DocumentsContract#buildRootsUri(String)
+     * @see DocumentsContract#buildRootUri(String, String)
      */
     public interface RootColumns {
         public static final String ROOT_ID = "root_id";
 
         /**
-         * Storage root type, use for clustering.
+         * Storage root type, use for clustering. This field is read-only to
+         * document clients.
          * <p>
          * Type: INTEGER (int)
          *
@@ -389,8 +454,9 @@ public final class DocumentsContract {
         public static final String ROOT_TYPE = "root_type";
 
         /**
-         * Icon resource ID for this storage root, or {@code 0} to use the
-         * default {@link ProviderInfo#icon}.
+         * Icon resource ID for this storage root, or {@code null} to use the
+         * default {@link ProviderInfo#icon}. This field is read-only to
+         * document clients.
          * <p>
          * Type: INTEGER (int)
          */
@@ -398,22 +464,25 @@ public final class DocumentsContract {
 
         /**
          * Title for this storage root, or {@code null} to use the default
-         * {@link ProviderInfo#labelRes}.
+         * {@link ProviderInfo#labelRes}. This field is read-only to document
+         * clients.
          * <p>
          * Type: STRING
          */
         public static final String TITLE = "title";
 
         /**
-         * Summary for this storage root, or {@code null} to omit.
+         * Summary for this storage root, or {@code null} to omit. This field is
+         * read-only to document clients.
          * <p>
          * Type: STRING
          */
         public static final String SUMMARY = "summary";
 
         /**
-         * Number of free bytes of available in this storage root, or -1 if
-         * unknown or unbounded.
+         * Number of free bytes of available in this storage root, or
+         * {@code null} if unknown or unbounded. This field is read-only to
+         * document clients.
          * <p>
          * Type: INTEGER (long)
          */
@@ -452,7 +521,7 @@ public final class DocumentsContract {
 
     /**
      * Return thumbnail representing the document at the given URI. Callers are
-     * responsible for their own caching. Given document must have
+     * responsible for their own in-memory caching. Given document must have
      * {@link Documents#FLAG_SUPPORTS_THUMBNAIL} set.
      *
      * @return decoded thumbnail, or {@code null} if problem was encountered.
