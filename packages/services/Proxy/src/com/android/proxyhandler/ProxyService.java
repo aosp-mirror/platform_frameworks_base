@@ -1,3 +1,18 @@
+/**
+ * Copyright (c) 2013, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.android.proxyhandler;
 
 import android.app.Service;
@@ -18,43 +33,17 @@ public class ProxyService extends Service {
     /** Keep these values up-to-date with PacManager.java */
     public static final String KEY_PROXY = "keyProxy";
     public static final String HOST = "localhost";
+    // STOPSHIP This being a static port means it can be hijacked by other apps.
     public static final int PORT = 8182;
     public static final String EXCL_LIST = "";
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null) {
-            if (handleCommand(intent)) {
-                return START_REDELIVER_INTENT;
-            }
-        }
-        return START_NOT_STICKY;
-    }
-
-    private boolean handleCommand(Intent intent) {
-        Bundle bundle = intent.getExtras();
-        ProxyProperties proxy = null;
-        if ((bundle != null) && bundle.containsKey(Proxy.EXTRA_PROXY_INFO)) {
-            proxy = bundle.getParcelable(Proxy.EXTRA_PROXY_INFO);
-            if ((proxy != null) && !TextUtils.isEmpty(proxy.getPacFileUrl())) {
-                startProxy(proxy);
-                return true;
-            } else {
-                stopSelf();
-            }
-        } else {
-            stopSelf();
-        }
-        return false;
-    }
-
-
-    private void startProxy(ProxyProperties proxy) {
+    public void onCreate() {
+        super.onCreate();
         if (server == null) {
             server = new ProxyServer();
             server.startServer();
         }
-        server.setProxy(proxy);
     }
 
     @Override
