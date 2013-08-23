@@ -68,6 +68,30 @@ include the action bar on devices running Android 2.1 or higher."
 
       <li class="nav-section">
         <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/basics/supporting-devices/index.html"
+             description=
+             "How to build your app with alternative resources that provide an
+             optimized user experience on multiple device form factors using a single APK."
+            >Supporting Different Devices</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/basics/supporting-devices/languages.html">
+            Supporting Different Languages
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/supporting-devices/screens.html">
+            Supporting Different Screens
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/basics/supporting-devices/platforms.html">
+            Supporting Different Platform Versions
+          </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
           <a href="<?cs var:toroot ?>training/basics/activity-lifecycle/index.html"
              description=
              "How Android activities live and die and how to create
@@ -89,30 +113,6 @@ include the action bar on devices running Android 2.1 or higher."
           </li>
           <li><a href="<?cs var:toroot ?>training/basics/activity-lifecycle/recreating.html">
             Recreating an Activity
-          </a>
-          </li>
-        </ul>
-      </li>
-
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/basics/supporting-devices/index.html"
-             description=
-             "How to build your app with alternative resources that provide an
-             optimized user experience on multiple device form factors using a single APK."
-            >Supporting Different Devices</a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/basics/supporting-devices/languages.html">
-            Supporting Different Languages
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/basics/supporting-devices/screens.html">
-            Supporting Different Screens
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/basics/supporting-devices/platforms.html">
-            Supporting Different Platform Versions
           </a>
           </li>
         </ul>
