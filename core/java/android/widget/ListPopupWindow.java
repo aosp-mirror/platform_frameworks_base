@@ -32,6 +32,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.MeasureSpec;
+import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -1133,9 +1134,19 @@ public class ListPopupWindow {
      *
      * @hide
      */
-    public static abstract class ForwardingListener implements View.OnTouchListener {
+    public static abstract class ForwardingListener
+            implements View.OnTouchListener, View.OnAttachStateChangeListener {
         /** Scaled touch slop, used for detecting movement outside bounds. */
         private final float mScaledTouchSlop;
+
+        /** Timeout before disallowing intercept on the source's parent. */
+        private final int mTapTimeout;
+
+        /** Source view from which events are forwarded. */
+        private final View mSrc;
+
+        /** Runnable used to prevent conflicts with scrolling parents. */
+        private Runnable mDisallowIntercept;
 
         /** Whether this listener is currently forwarding touch events. */
         private boolean mForwarding;
@@ -1143,8 +1154,12 @@ public class ListPopupWindow {
         /** The id of the first pointer down in the current event stream. */
         private int mActivePointerId;
 
-        public ForwardingListener(Context context) {
-            mScaledTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+        public ForwardingListener(View src) {
+            mSrc = src;
+            mScaledTouchSlop = ViewConfiguration.get(src.getContext()).getScaledTouchSlop();
+            mTapTimeout = ViewConfiguration.getTapTimeout();
+
+            src.addOnAttachStateChangeListener(this);
         }
 
         /**
@@ -1164,13 +1179,27 @@ public class ListPopupWindow {
             final boolean wasForwarding = mForwarding;
             final boolean forwarding;
             if (wasForwarding) {
-                forwarding = onTouchForwarded(v, event) || !onForwardingStopped();
+                forwarding = onTouchForwarded(event) || !onForwardingStopped();
             } else {
-                forwarding = onTouchObserved(v, event) && onForwardingStarted();
+                forwarding = onTouchObserved(event) && onForwardingStarted();
             }
 
             mForwarding = forwarding;
             return forwarding || wasForwarding;
+        }
+
+        @Override
+        public void onViewAttachedToWindow(View v) {
+        }
+
+        @Override
+        public void onViewDetachedFromWindow(View v) {
+            mForwarding = false;
+            mActivePointerId = MotionEvent.INVALID_POINTER_ID;
+
+            if (mDisallowIntercept != null) {
+                mSrc.removeCallbacks(mDisallowIntercept);
+            }
         }
 
         /**
@@ -1182,7 +1211,7 @@ public class ListPopupWindow {
          *
          * @return true to start forwarding, false otherwise
          */
-        public boolean onForwardingStarted() {
+        protected boolean onForwardingStarted() {
             final ListPopupWindow popup = getPopup();
             if (popup != null && !popup.isShowing()) {
                 popup.show();
@@ -1199,7 +1228,7 @@ public class ListPopupWindow {
          *
          * @return true to stop forwarding, false otherwise
          */
-        public boolean onForwardingStopped() {
+        protected boolean onForwardingStopped() {
             final ListPopupWindow popup = getPopup();
             if (popup != null && popup.isShowing()) {
                 popup.dismiss();
@@ -1210,29 +1239,45 @@ public class ListPopupWindow {
         /**
          * Observes motion events and determines when to start forwarding.
          *
-         * @param src view from which the event originated
          * @param srcEvent motion event in source view coordinates
          * @return true to start forwarding motion events, false otherwise
          */
-        private boolean onTouchObserved(View src, MotionEvent srcEvent) {
+        private boolean onTouchObserved(MotionEvent srcEvent) {
+            final View src = mSrc;
             if (!src.isEnabled()) {
                 return false;
             }
 
-            // The first pointer down is always the active pointer.
             final int actionMasked = srcEvent.getActionMasked();
-            if (actionMasked == MotionEvent.ACTION_DOWN) {
-                mActivePointerId = srcEvent.getPointerId(0);
-            }
-
-            final int activePointerIndex = srcEvent.findPointerIndex(mActivePointerId);
-            if (activePointerIndex >= 0) {
-                final float x = srcEvent.getX(activePointerIndex);
-                final float y = srcEvent.getY(activePointerIndex);
-                if (!src.pointInView(x, y, mScaledTouchSlop)) {
-                    // The pointer has moved outside of the view.
-                    return true;
-                }
+            switch (actionMasked) {
+                case MotionEvent.ACTION_DOWN:
+                    mActivePointerId = srcEvent.getPointerId(0);
+                    if (mDisallowIntercept == null) {
+                        mDisallowIntercept = new DisallowIntercept();
+                    }
+                    src.postDelayed(mDisallowIntercept, mTapTimeout);
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    final int activePointerIndex = srcEvent.findPointerIndex(mActivePointerId);
+                    if (activePointerIndex >= 0) {
+                        final float x = srcEvent.getX(activePointerIndex);
+                        final float y = srcEvent.getY(activePointerIndex);
+                        if (!src.pointInView(x, y, mScaledTouchSlop)) {
+                            // The pointer has moved outside of the view.
+                            if (mDisallowIntercept != null) {
+                                src.removeCallbacks(mDisallowIntercept);
+                            }
+                            src.getParent().requestDisallowInterceptTouchEvent(true);
+                            return true;
+                        }
+                    }
+                    break;
+                case MotionEvent.ACTION_CANCEL:
+                case MotionEvent.ACTION_UP:
+                    if (mDisallowIntercept != null) {
+                        src.removeCallbacks(mDisallowIntercept);
+                    }
+                    break;
             }
 
             return false;
@@ -1242,11 +1287,11 @@ public class ListPopupWindow {
          * Handled forwarded motion events and determines when to stop
          * forwarding.
          *
-         * @param src view from which the event originated
          * @param srcEvent motion event in source view coordinates
          * @return true to continue forwarding motion events, false to cancel
          */
-        private boolean onTouchForwarded(View src, MotionEvent srcEvent) {
+        private boolean onTouchForwarded(MotionEvent srcEvent) {
+            final View src = mSrc;
             final ListPopupWindow popup = getPopup();
             if (popup == null || !popup.isShowing()) {
                 return false;
@@ -1266,6 +1311,14 @@ public class ListPopupWindow {
             final boolean handled = dst.onForwardedEvent(dstEvent, mActivePointerId);
             dstEvent.recycle();
             return handled;
+        }
+
+        private class DisallowIntercept implements Runnable {
+            @Override
+            public void run() {
+                final ViewParent parent = mSrc.getParent();
+                parent.requestDisallowInterceptTouchEvent(true);
+            }
         }
     }
 
