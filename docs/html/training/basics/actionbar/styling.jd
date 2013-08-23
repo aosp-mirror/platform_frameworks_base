@@ -20,7 +20,7 @@ trainingnavtop=true
 <ul>
   <li><a href="{@docRoot}guide/topics/ui/themes.html">Styles and Themes</a></li>
   <li><a class="external-link" target="_blank"
-  href="http://jgilfelt.github.io/android-actionbarstylegenerator/">Android Action Bar Style
+  href="http://www.actionbarstylegenerator.com">Android Action Bar Style
   Generator</a></li>
 </ul>
 
@@ -146,13 +146,13 @@ background like this:</p>
     &lt;style name="CustomActionBarTheme"
            parent="&#64;style/Theme.Holo.Light.DarkActionBar">
         &lt;item name="android:actionBarStyle">&#64;style/MyActionBar&lt;/item>
-    &lt;style>
+    &lt;/style>
 
     &lt;!-- ActionBar styles -->
     &lt;style name="MyActionBar"
            parent="&#64;style/Widget.Holo.Light.ActionBar.Solid.Inverse">
         &lt;item name="android:background">&#64;drawable/actionbar_background&lt;/item>
-    &lt;style>
+    &lt;/style>
 &lt;/resources>
 </pre>
 
@@ -178,7 +178,7 @@ background like this:</p>
 
         &lt;!-- Support library compatibility -->
         &lt;item name="actionBarStyle">&#64;style/MyActionBar&lt;/item>
-    &lt;style>
+    &lt;/style>
 
     &lt;!-- ActionBar styles -->
     &lt;style name="MyActionBar"
@@ -187,7 +187,7 @@ background like this:</p>
 
         &lt;!-- Support library compatibility -->
         &lt;item name="background">&#64;drawable/actionbar_background&lt;/item>
-    &lt;style>
+    &lt;/style>
 &lt;/resources>
 </pre>
 
@@ -236,25 +236,25 @@ for each text element:</p>
         &lt;item name="android:actionBarStyle">&#64;style/MyActionBar&lt;/item>
         &lt;item name="android:actionBarTabTextStyle">&#64;style/MyActionBarTabText&lt;/item>
         &lt;item name="android:actionMenuTextColor">&#64;color/actionbar_text&lt;/item>
-    &lt;style>
+    &lt;/style>
 
     &lt;!-- ActionBar styles -->
     &lt;style name="MyActionBar"
            parent="&#64;style/Widget.Holo.ActionBar">
         &lt;item name="android:titleTextStyle">&#64;style/MyActionBarTitleText&lt;/item>
-    &lt;style>
+    &lt;/style>
 
     &lt;!-- ActionBar title text -->
     &lt;style name="MyActionBarTitleText"
            parent="&#64;style/TextAppearance.Holo.Widget.ActionBar.Title">
         &lt;item name="android:textColor">&#64;color/actionbar_text&lt;/item>
-    &lt;style>
+    &lt;/style>
 
     &lt;!-- ActionBar tabs text styles -->
     &lt;style name="MyActionBarTabText"
            parent="&#64;style/Widget.Holo.ActionBar.TabText">
         &lt;item name="android:textColor">&#64;color/actionbar_text&lt;/item>
-    &lt;style>
+    &lt;/style>
 &lt;/resources>
 </pre>
 
@@ -280,7 +280,7 @@ for each text element:</p>
         &lt;item name="actionBarStyle">&#64;style/MyActionBar&lt;/item>
         &lt;item name="actionBarTabTextStyle">&#64;style/MyActionBarTabText&lt;/item>
         &lt;item name="actionMenuTextColor">&#64;color/actionbar_text&lt;/item>
-    &lt;style>
+    &lt;/style>
 
     &lt;!-- ActionBar styles -->
     &lt;style name="MyActionBar"
@@ -289,21 +289,21 @@ for each text element:</p>
 
         &lt;!-- Support library compatibility -->
         &lt;item name="titleTextStyle">&#64;style/MyActionBarTitleText&lt;/item>
-    &lt;style>
+    &lt;/style>
 
     &lt;!-- ActionBar title text -->
     &lt;style name="MyActionBarTitleText"
            parent="&#64;style/TextAppearance.<strong>AppCompat</strong>.Widget.ActionBar.Title">
         &lt;item name="android:textColor">&#64;color/actionbar_text&lt;/item>
         &lt;!-- The textColor property is backward compatible with the Support Library -->
-    &lt;style>
+    &lt;/style>
 
     &lt;!-- ActionBar tabs text -->
     &lt;style name="MyActionBarTabText"
            parent="&#64;style/Widget.<strong>AppCompat</strong>.ActionBar.TabText">
         &lt;item name="android:textColor">&#64;color/actionbar_text&lt;/item>
         &lt;!-- The textColor property is backward compatible with the Support Library -->
-    &lt;style>
+    &lt;/style>
 &lt;/resources>
 </pre>
 
@@ -392,14 +392,14 @@ for several different states of an action bar tab:</p>
     &lt;style name="CustomActionBarTheme"
            parent="&#64;style/Theme.Holo">
         &lt;item name="android:actionBarTabStyle">&#64;style/MyActionBarTabs&lt;/item>
-    &lt;style>
+    &lt;/style>
 
     &lt;!-- ActionBar tabs styles -->
     &lt;style name="MyActionBarTabs"
            parent="&#64;style/Widget.Holo.ActionBar.TabView">
         &lt;!-- tab indicator -->
         &lt;item name="android:background">&#64;drawable/actionbar_tab_indicator&lt;/item>
-    &lt;style>
+    &lt;/style>
 &lt;/resources>
 </pre>
 
@@ -420,7 +420,7 @@ for several different states of an action bar tab:</p>
 
         &lt;!-- Support library compatibility -->
         &lt;item name="actionBarTabStyle">&#64;style/MyActionBarTabs&lt;/item>
-    &lt;style>
+    &lt;/style>
 
     &lt;!-- ActionBar tabs styles -->
     &lt;style name="MyActionBarTabs"
@@ -430,7 +430,7 @@ for several different states of an action bar tab:</p>
 
         &lt;!-- Support library compatibility -->
         &lt;item name="background">&#64;drawable/actionbar_tab_indicator&lt;/item>
-    &lt;style>
+    &lt;/style>
 &lt;/resources>
 </pre>
 
@@ -442,7 +442,7 @@ for several different states of an action bar tab:</p>
   href="{@docRoot}guide/topics/ui/themes.html">Styles and Themes</a> guide.</li>
   <li>For even more complete styling for the action bar,
 try the <a class="external-link" target="_blank"
-  href="www://http.actionbarstylegenerator.com">Android Action Bar Style
+  href="http://www.actionbarstylegenerator.com">Android Action Bar Style
   Generator</a>.</li>
 </ul>
 </div>
