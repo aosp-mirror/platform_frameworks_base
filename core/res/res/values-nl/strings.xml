@@ -470,8 +470,6 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Hiermee kan de app SurfaceFlinger-functies op laag niveau gebruiken."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"framebuffer lezen"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Hiermee kan de app de inhoud van de framebuffer lezen."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"toegang krijgen tot InputFlinger"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Hiermee kan de app InputFlinger-functies op laag niveau gebruiken."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"wifi-displays configureren"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"De app toestaan wifi-displays te configureren en hiermee verbinding te maken."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"wifi-displays beheren"</string>

@@ -407,10 +407,8 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Umožňuje aplikaci číst různé systémové soubory protokolů. Toto oprávnění aplikaci umožní získat obecné informace o činnostech s telefonem, které by mohly obsahovat osobní či soukromé informace."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"použít jakýkoliv dekodér pro přehrávání médií"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Umožňuje aplikaci používat libovolný nainstalovaný dekodér médií k dekódování při přehrávání."</string>
-    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
-    <skip />
-    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
-    <skip />
+    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"správa důvěryhodných identifikačních údajů"</string>
+    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Umožňuje aplikaci instalovat a odinstalovat certifikáty CA jako důvěryhodné identifikační údaje."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"čtení nebo zápis do prostředků funkce diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Umožňuje aplikaci číst libovolné prostředky ve skupině diag, např. soubory ve složce /dev, a zapisovat do nich. Může dojít k ovlivnění stability a bezpečnosti systému. Toto nastavení by měl používat POUZE výrobce či operátor pro diagnostiku hardwaru."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"aktivace či deaktivace komponent aplikací"</string>
@@ -472,8 +470,6 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Umožňuje aplikaci používat nízkoúrovňové funkce SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"čtení vyrovnávací paměti snímků"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Umožňuje aplikaci číst obsah vyrovnávací paměti snímků."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"přístup k funkci InputFlinger"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Umožňuje aplikaci používat nízkoúrovňové funkce InputFlinger."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"konfigurovat displeje přes Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Povoluje aplikaci připojit a konfigurovat displeje přes Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"ovládat displeje přes Wi-Fi"</string>
