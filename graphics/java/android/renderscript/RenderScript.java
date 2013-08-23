@@ -18,6 +18,7 @@ package android.renderscript;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -61,10 +62,23 @@ public class RenderScript {
     static boolean sInitialized;
     native static void _nInit();
 
+    static Object sRuntime;
+    static Method registerNativeAllocation;
+    static Method registerNativeFree;
 
     static {
         sInitialized = false;
         if (!SystemProperties.getBoolean("config.disable_renderscript", false)) {
+            try {
+                Class<?> vm_runtime = Class.forName("dalvik.system.VMRuntime");
+                Method get_runtime = vm_runtime.getDeclaredMethod("getRuntime");
+                sRuntime = get_runtime.invoke(null);
+                registerNativeAllocation = vm_runtime.getDeclaredMethod("registerNativeAllocation", Integer.TYPE);
+                registerNativeFree = vm_runtime.getDeclaredMethod("registerNativeFree", Integer.TYPE);
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Error loading GC methods: " + e);
+                throw new RSRuntimeException("Error loading GC methods: " + e);
+            }
             try {
                 System.loadLibrary("rs_jni");
                 _nInit();
