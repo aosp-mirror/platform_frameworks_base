@@ -2790,7 +2790,10 @@ public class WifiStateMachine extends StateMachine {
             } else {
                 /* Driver stop may have disabled networks, enable right after start */
                 mWifiConfigStore.enableAllNetworks();
+
+                if (DBG) log("Attempting to reconnect to wifi network ..");
                 mWifiNative.reconnect();
+
                 // Status pulls in the current supplicant state and network connection state
                 // events over the monitor connection. This helps framework sync up with
                 // current supplicant state

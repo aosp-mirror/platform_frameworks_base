@@ -20,6 +20,7 @@ import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pGroup;
 import android.text.TextUtils;
 import android.net.wifi.p2p.nsd.WifiP2pServiceInfo;
+import android.util.LocalLog;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -91,6 +92,18 @@ public class WifiNative {
         }
     }
 
+
+    private LocalLog mLocalLog;
+
+    public void setLocalLog(LocalLog l) {
+        mLocalLog = l;
+    }
+
+    private void localLog(String s) {
+        if (mLocalLog != null)
+            mLocalLog.log(mInterfaceName + ": " + s);
+    }
+
     public boolean connectToSupplicant() {
         return connectToSupplicantNative();
     }
@@ -144,15 +157,18 @@ public class WifiNative {
     }
 
     public String listNetworks() {
+        localLog("LIST_NETWORKS");
         return doStringCommand("LIST_NETWORKS");
     }
 
     public int addNetwork() {
+        localLog("ADD_NETWORK");
         return doIntCommand("ADD_NETWORK");
     }
 
     public boolean setNetworkVariable(int netId, String name, String value) {
         if (TextUtils.isEmpty(name) || TextUtils.isEmpty(value)) return false;
+        localLog("SET_NETWORK " + netId + " " + name + "=" + value);
         return doBooleanCommand("SET_NETWORK " + netId + " " + name + " " + value);
     }
 
@@ -162,22 +178,27 @@ public class WifiNative {
     }
 
     public boolean removeNetwork(int netId) {
+        localLog("REMOVE_NETWORK " + netId);
         return doBooleanCommand("REMOVE_NETWORK " + netId);
     }
 
     public boolean enableNetwork(int netId, boolean disableOthers) {
         if (disableOthers) {
+            localLog("SELECT_NETWORK " + netId);
             return doBooleanCommand("SELECT_NETWORK " + netId);
         } else {
+            localLog("ENABLE_NETWORK " + netId);
             return doBooleanCommand("ENABLE_NETWORK " + netId);
         }
     }
 
     public boolean disableNetwork(int netId) {
+        localLog("DISABLE_NETWORK " + netId);
         return doBooleanCommand("DISABLE_NETWORK " + netId);
     }
 
     public boolean reconnect() {
+        localLog("RECONNECT");
         return doBooleanCommand("RECONNECT");
     }
 
@@ -376,6 +397,7 @@ public class WifiNative {
     }
 
     public boolean saveConfig() {
+        localLog("SAVE_CONFIG");
         return doBooleanCommand("SAVE_CONFIG");
     }
 
