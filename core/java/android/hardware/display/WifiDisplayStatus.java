@@ -39,6 +39,9 @@ public final class WifiDisplayStatus implements Parcelable {
     private final WifiDisplay mActiveDisplay;
     private final WifiDisplay[] mDisplays;
 
+    /** Session info needed for Miracast Certification */
+    private final WifiDisplaySessionInfo mSessionInfo;
+
     /** Feature state: Wifi display is not available on this device. */
     public static final int FEATURE_STATE_UNAVAILABLE = 0;
     /** Feature state: Wifi display is disabled, probably because Wifi is disabled. */
@@ -76,8 +79,11 @@ public final class WifiDisplayStatus implements Parcelable {
                 displays[i] = WifiDisplay.CREATOR.createFromParcel(in);
             }
 
+            WifiDisplaySessionInfo sessionInfo =
+                    WifiDisplaySessionInfo.CREATOR.createFromParcel(in);
+
             return new WifiDisplayStatus(featureState, scanState, activeDisplayState,
-                    activeDisplay, displays);
+                    activeDisplay, displays, sessionInfo);
         }
 
         public WifiDisplayStatus[] newArray(int size) {
@@ -87,11 +93,11 @@ public final class WifiDisplayStatus implements Parcelable {
 
     public WifiDisplayStatus() {
         this(FEATURE_STATE_UNAVAILABLE, SCAN_STATE_NOT_SCANNING, DISPLAY_STATE_NOT_CONNECTED,
-                null, WifiDisplay.EMPTY_ARRAY);
+                null, WifiDisplay.EMPTY_ARRAY, null);
     }
 
-    public WifiDisplayStatus(int featureState, int scanState,
-            int activeDisplayState, WifiDisplay activeDisplay, WifiDisplay[] displays) {
+    public WifiDisplayStatus(int featureState, int scanState, int activeDisplayState,
+            WifiDisplay activeDisplay, WifiDisplay[] displays, WifiDisplaySessionInfo sessionInfo) {
         if (displays == null) {
             throw new IllegalArgumentException("displays must not be null");
         }
@@ -101,6 +107,8 @@ public final class WifiDisplayStatus implements Parcelable {
         mActiveDisplayState = activeDisplayState;
         mActiveDisplay = activeDisplay;
         mDisplays = displays;
+
+        mSessionInfo = (sessionInfo != null) ? sessionInfo : new WifiDisplaySessionInfo();
     }
 
     /**
@@ -144,11 +152,18 @@ public final class WifiDisplayStatus implements Parcelable {
 
     /**
      * Gets the list of Wifi displays, returns a combined list of all available
-     * Wifi displays as reported by the most recent scan, and all remembered 
+     * Wifi displays as reported by the most recent scan, and all remembered
      * Wifi displays (not necessarily available at the time).
      */
     public WifiDisplay[] getDisplays() {
         return mDisplays;
+    }
+
+    /**
+     * Gets the Wifi display session info (required for certification only)
+     */
+    public WifiDisplaySessionInfo getSessionInfo() {
+        return mSessionInfo;
     }
 
     @Override
@@ -168,6 +183,8 @@ public final class WifiDisplayStatus implements Parcelable {
         for (WifiDisplay display : mDisplays) {
             display.writeToParcel(dest, flags);
         }
+
+        mSessionInfo.writeToParcel(dest, flags);
     }
 
     @Override
@@ -183,6 +200,7 @@ public final class WifiDisplayStatus implements Parcelable {
                 + ", activeDisplayState=" + mActiveDisplayState
                 + ", activeDisplay=" + mActiveDisplay
                 + ", displays=" + Arrays.toString(mDisplays)
+                + ", sessionInfo=" + mSessionInfo
                 + "}";
     }
 }

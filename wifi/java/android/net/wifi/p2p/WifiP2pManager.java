@@ -30,6 +30,7 @@ import android.net.wifi.p2p.nsd.WifiP2pServiceResponse;
 import android.net.wifi.p2p.nsd.WifiP2pUpnpServiceInfo;
 import android.net.wifi.p2p.nsd.WifiP2pUpnpServiceResponse;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Handler;
 import android.os.Looper;
@@ -430,6 +431,28 @@ public class WifiP2pManager {
     /** @hide */
     public static final int START_WPS_SUCCEEDED                     = BASE + 64;
 
+    /** @hide */
+    public static final int START_LISTEN                            = BASE + 65;
+    /** @hide */
+    public static final int START_LISTEN_FAILED                     = BASE + 66;
+    /** @hide */
+    public static final int START_LISTEN_SUCCEEDED                  = BASE + 67;
+
+    /** @hide */
+    public static final int STOP_LISTEN                             = BASE + 68;
+    /** @hide */
+    public static final int STOP_LISTEN_FAILED                      = BASE + 69;
+    /** @hide */
+    public static final int STOP_LISTEN_SUCCEEDED                   = BASE + 70;
+
+    /** @hide */
+    public static final int SET_CHANNEL                             = BASE + 71;
+    /** @hide */
+    public static final int SET_CHANNEL_FAILED                      = BASE + 72;
+    /** @hide */
+    public static final int SET_CHANNEL_SUCCEEDED                   = BASE + 73;
+
+
     /**
      * Create a new WifiP2pManager instance. Applications use
      * {@link android.content.Context#getSystemService Context.getSystemService()} to retrieve
@@ -667,6 +690,9 @@ public class WifiP2pManager {
                     case DELETE_PERSISTENT_GROUP_FAILED:
                     case SET_WFD_INFO_FAILED:
                     case START_WPS_FAILED:
+                    case START_LISTEN_FAILED:
+                    case STOP_LISTEN_FAILED:
+                    case SET_CHANNEL_FAILED:
                         if (listener != null) {
                             ((ActionListener) listener).onFailure(message.arg1);
                         }
@@ -689,6 +715,9 @@ public class WifiP2pManager {
                     case DELETE_PERSISTENT_GROUP_SUCCEEDED:
                     case SET_WFD_INFO_SUCCEEDED:
                     case START_WPS_SUCCEEDED:
+                    case START_LISTEN_SUCCEEDED:
+                    case STOP_LISTEN_SUCCEEDED:
+                    case SET_CHANNEL_SUCCEEDED:
                         if (listener != null) {
                             ((ActionListener) listener).onSuccess();
                         }
@@ -953,6 +982,22 @@ public class WifiP2pManager {
     public void removeGroup(Channel c, ActionListener listener) {
         checkChannel(c);
         c.mAsyncChannel.sendMessage(REMOVE_GROUP, 0, c.putListener(listener));
+    }
+
+    /** @hide */
+    public void listen(Channel c, boolean enable, ActionListener listener) {
+        checkChannel(c);
+        c.mAsyncChannel.sendMessage(enable ? START_LISTEN : STOP_LISTEN,
+                0, c.putListener(listener));
+    }
+
+    /** @hide */
+    public void setWifiP2pChannels(Channel c, int lc, int oc, ActionListener listener) {
+        checkChannel(c);
+        Bundle p2pChannels = new Bundle();
+        p2pChannels.putInt("lc", lc);
+        p2pChannels.putInt("oc", oc);
+        c.mAsyncChannel.sendMessage(SET_CHANNEL, 0, c.putListener(listener), p2pChannels);
     }
 
     /**

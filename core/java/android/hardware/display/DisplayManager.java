@@ -325,6 +325,16 @@ public final class DisplayManager {
         mGlobal.connectWifiDisplay(deviceAddress);
     }
 
+    /** @hide */
+    public void pauseWifiDisplay() {
+        mGlobal.pauseWifiDisplay();
+    }
+
+    /** @hide */
+    public void resumeWifiDisplay() {
+        mGlobal.resumeWifiDisplay();
+    }
+
     /**
      * Disconnects from the current Wifi display.
      * The results are sent as a {@link #ACTION_WIFI_DISPLAY_STATUS_CHANGED} broadcast.

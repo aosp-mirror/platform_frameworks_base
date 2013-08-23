@@ -497,6 +497,48 @@ public final class DisplayManagerService extends IDisplayManager.Stub {
         }
     }
 
+    @Override
+    public void pauseWifiDisplay() {
+        if (mContext.checkCallingPermission(
+                android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
+                        != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY"
+                    + "permission to pause a wifi display session.");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mSyncRoot) {
+                if (mWifiDisplayAdapter != null) {
+                    mWifiDisplayAdapter.requestPauseLocked();
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public void resumeWifiDisplay() {
+        if (mContext.checkCallingPermission(
+                android.Manifest.permission.CONFIGURE_WIFI_DISPLAY)
+                        != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires CONFIGURE_WIFI_DISPLAY"
+                    + "permission to resume a wifi display session.");
+        }
+
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mSyncRoot) {
+                if (mWifiDisplayAdapter != null) {
+                    mWifiDisplayAdapter.requestResumeLocked();
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
     @Override // Binder call
     public void disconnectWifiDisplay() {
         final long token = Binder.clearCallingIdentity();
