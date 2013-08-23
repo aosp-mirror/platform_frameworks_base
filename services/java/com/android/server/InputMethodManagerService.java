@@ -2159,6 +2159,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
+    public boolean shouldOfferSwitchingToNextInputMethod(IBinder token) {
+        if (!calledFromValidUser()) {
+            return false;
+        }
+        synchronized (mMethodMap) {
+            final ImeSubtypeListItem nextSubtype = mImListManager.getNextInputMethod(
+                    false /* onlyCurrentIme */, mMethodMap.get(mCurMethodId), mCurrentSubtype);
+            if (nextSubtype == null) {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    @Override
     public InputMethodSubtype getLastInputMethodSubtype() {
         if (!calledFromValidUser()) {
             return null;
