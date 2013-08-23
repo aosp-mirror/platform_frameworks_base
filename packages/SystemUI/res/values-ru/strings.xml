@@ -61,8 +61,6 @@
     <string name="usb_debugging_always" msgid="303335496705863070">"Всегда разрешать отладку с этого компьютера"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Подогнать по размерам экрана"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Растянуть на весь экран"</string>
-    <string name="compat_mode_help_header" msgid="7969493989397529910">"Масштаб и совместимость"</string>
-    <string name="compat_mode_help_body" msgid="4946726776359270040">"Если приложение рассчитано на экран меньших размеров, рядом с часами появятся средства масштабирования."</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Сохранение..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Сохранение..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Сохранение..."</string>
@@ -205,4 +203,16 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АВТОНАСТРОЙКА"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Это панель уведомлений"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Ее можно открыть, пролистнув экран вниз.\nЧтобы открыть настройки, проведите пальцем вниз ещё раз."</string>
+    <!-- no translation found for ssl_ca_cert_warning (5848402127455021714) -->
+    <skip />
+    <!-- no translation found for done_button (1759387181766603361) -->
+    <skip />
+    <!-- no translation found for ssl_ca_cert_dialog_title (1273796967092027291) -->
+    <skip />
+    <!-- no translation found for ssl_ca_cert_info_message (5430320539555358452) -->
+    <skip />
+    <!-- no translation found for ssl_ca_cert_warning_message (2033091656129963669) -->
+    <skip />
+    <!-- no translation found for ssl_ca_cert_settings_button (7946956977377166709) -->
+    <skip />
 </resources>
