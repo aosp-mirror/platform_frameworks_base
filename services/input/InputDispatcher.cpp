@@ -1275,21 +1275,7 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
             // Try to assign the pointer to the first foreground window we find, if there is one.
             newTouchedWindowHandle = mTempTouchState.getFirstForegroundWindowHandle();
             if (newTouchedWindowHandle == NULL) {
-                // There is no touched window.  If this is an initial down event
-                // then wait for a window to appear that will handle the touch.  This is
-                // to ensure that we report an ANR in the case where an application has started
-                // but not yet put up a window and the user is starting to get impatient.
-                if (maskedAction == AMOTION_EVENT_ACTION_DOWN
-                        && mFocusedApplicationHandle != NULL) {
-                    injectionResult = handleTargetsNotReadyLocked(currentTime, entry,
-                            mFocusedApplicationHandle, NULL, nextWakeupTime,
-                            "Waiting because there is no touchable window that can "
-                            "handle the event but there is focused application that may "
-                            "eventually add a new window when it finishes starting up.");
-                    goto Unresponsive;
-                }
-
-                ALOGI("Dropping event because there is no touched window.");
+                ALOGI("Dropping event because there is no touchable window at (%d, %d).", x, y);
                 injectionResult = INPUT_EVENT_INJECTION_FAILED;
                 goto Failed;
             }
