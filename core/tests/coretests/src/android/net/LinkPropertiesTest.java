@@ -363,4 +363,19 @@ public class LinkPropertiesTest extends TestCase {
         assertFalse(lp.hasIPv4Address());
         assertFalse(lp.removeLinkAddress(LINKADDRV4));
     }
+
+    @SmallTest
+    public void testSetLinkAddresses() {
+        LinkProperties lp = new LinkProperties();
+        lp.addLinkAddress(LINKADDRV4);
+        lp.addLinkAddress(LINKADDRV6);
+
+        LinkProperties lp2 = new LinkProperties();
+        lp2.addLinkAddress(LINKADDRV6);
+
+        assertFalse(lp.equals(lp2));
+
+        lp2.setLinkAddresses(lp.getLinkAddresses());
+        assertTrue(lp.equals(lp));
+    }
 }

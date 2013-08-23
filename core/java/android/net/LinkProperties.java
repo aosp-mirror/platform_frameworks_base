@@ -197,6 +197,16 @@ public class LinkProperties implements Parcelable {
         return addresses;
     }
 
+    /**
+     * Replaces the LinkAddresses on this link with the given collection of addresses.
+     */
+    public void setLinkAddresses(Collection<LinkAddress> addresses) {
+        mLinkAddresses.clear();
+        for (LinkAddress address: addresses) {
+            addLinkAddress(address);
+        }
+    }
+
     public void addDns(InetAddress dns) {
         if (dns != null) mDnses.add(dns);
     }
