@@ -18,7 +18,7 @@
 
     <style name="PrintJobConfigActivityTheme" parent="@android:style/Theme.Holo.Light.NoActionBar">
         <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowSoftInputMode">stateAlwaysHidden|adjustPan</item>
+        <item name="android:windowSoftInputMode">stateAlwaysHidden|adjustResize</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:colorBackgroundCacheHint">@android:color/transparent</item>

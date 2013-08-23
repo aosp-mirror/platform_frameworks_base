@@ -16,17 +16,17 @@
 
 package android.print;
 
-import android.content.ComponentName;
-import android.print.PrintJobInfo;
-
+import android.print.IPrintClient;
+import android.print.PrinterId;
+import android.print.PrinterInfo;
 
 /**
- * Interface for receiving interesting state updates from the print spooler.
+ * Interface for observing discovered printers by a discovery session.
  *
  * @hide
  */
-oneway interface IPrintSpoolerClient {
-    void onPrintJobQueued(in PrintJobInfo printJob);
-    void onAllPrintJobsForServiceHandled(in ComponentName printService);
-    void onAllPrintJobsHandled();
+oneway interface IPrinterDiscoveryObserver {
+    void onPrintersAdded(in List<PrinterInfo> printers);
+    void onPrintersRemoved(in List<PrinterId> printerIds);
+    void onPrintersUpdated(in List<PrinterInfo> printerIds);
 }
