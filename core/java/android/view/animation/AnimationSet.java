@@ -114,7 +114,7 @@ public class AnimationSet extends Animation {
      * Constructor to use when building an AnimationSet from code
      * 
      * @param shareInterpolator Pass true if all of the animations in this set
-     *        should use the interpolator assocciated with this AnimationSet.
+     *        should use the interpolator associated with this AnimationSet.
      *        Pass false if each animation should use its own interpolator.
      */
     public AnimationSet(boolean shareInterpolator) {
