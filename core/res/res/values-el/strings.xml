@@ -470,8 +470,6 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Επιτρέπει σε μια εφαρμογή να χρησιμοποιεί λειτουργίες SurfaceFlinger χαμηλού επιπέδου."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"ανάγνωση προσωρινής μνήμης πλαισίου"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Επιτρέπει στην εφαρμογή την ανάγνωση του περιεχομένου της προσωρινής μνήμης πλαισίου."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"πρόσβαση στο InputFlinger"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Επιτρέπει σε μια εφαρμογή να χρησιμοποιεί λειτουργίες InputFlinger χαμηλού επιπέδου."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"διαμόρφωση οθονών Wifi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Επιτρέπει τη διαμόρφωση της εφαρμογής και τη σύνδεσης σε οθόνες Wifi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"έλεγχος οθονών Wifi"</string>

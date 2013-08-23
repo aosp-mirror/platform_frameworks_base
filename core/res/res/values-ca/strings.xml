@@ -407,10 +407,8 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Permet que l\'aplicació llegeixi els diversos fitxers de registre del sistema. Això li permet descobrir informació general sobre què estàs fent amb el telèfon i, potencialment, pot incloure informació personal o privada."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"utilitza qualsevol descodificador de mitjans per a la reproducció"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Permet que l\'aplicació utilitzi qualsevol descodificador de mitjans instal·lat per descodificar per a la reproducció."</string>
-    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
-    <skip />
-    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
-    <skip />
+    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"gestiona les credencials de confiança"</string>
+    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permet que l\'aplicació instal·li i desinstal·li certificats de CA com a credencials de confiança."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"llegir/escriure recursos propietat de diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permet que l\'aplicació llegeixi i escrigui a qualsevol recurs propietat del grup diag; per exemple, els fitxers de /dev. Això podria afectar l\'estabilitat i la seguretat del sistema. NOMÉS l\'hauria d\'utilitzar el fabricant o l\'operador per a diagnòstics específics de maquinari."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activa o desactiva els components de l\'aplicació"</string>
@@ -472,8 +470,6 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permet que l\'aplicació utilitzi funcions SurfaceFlinger de baix nivell."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"llegir la memòria intermèdia de marcs"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Permet que l\'aplicació llegeixi el contingut de la memòria intermèdia de marcs."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"accedeix a InputFlinger"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Permet que l\'aplicació utilitzi funcions InputFlinger de baix nivell."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configuració de les pantalles Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Permet a l\'aplicació configurar-se i connectar-se a les pantalles Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"control de les pantalles Wi-Fi"</string>

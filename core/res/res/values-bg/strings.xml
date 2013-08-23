@@ -407,10 +407,8 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Разрешава на приложението да чете от различните регистрационни файлове на системата. Това му позволява да получи обща информация какво правите с телефона, потенциално включително и лични или поверителни данни."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"използване на всеки медиен декодер за възпроизвеждане"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Разрешава на приложението да използва всеки инсталиран медиен декодер с цел декодиране за възпроизвеждане."</string>
-    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
-    <skip />
-    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
-    <skip />
+    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"управление на надеждните идентификационни данни"</string>
+    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Разрешава на приложението да инсталира и деинсталира сертификати от сертифициращи органи като надеждни идентификационни данни."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"четене/запис в ресурси, притежавани от diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Разрешава на приложението да чете и записва във всеки ресурс, притежаван от групата diag, например файловете в /dev. Това потенциално може да засегне стабилността и сигурността на системата. То трябва да се използва САМО за диагностика, конкретно за хардуера, от страна на производителя или оператора."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"активиране или деактивиране на компоненти на приложенията"</string>
@@ -472,8 +470,6 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Разрешава на приложението да използва функциите на SurfaceFlinger от ниско ниво."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"четене на кадровия буфер"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Разрешава на приложението да чете съдържанието на кадровия буфер."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"достъп до InputFlinger"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Разрешава на приложението да използва функциите на InputFlinger от ниско ниво."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"конфигуриране на дисплеите през WiFi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Разрешава на приложението да конфигурира и да се свързва с дисплеите през WiFi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"контролиране на дисплеите през WiFi"</string>
