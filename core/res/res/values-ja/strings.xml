@@ -407,6 +407,8 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"システムの各種ログファイルの読み取りをアプリに許可します。許可すると、アプリでは携帯端末の使用に関する全般的な情報を読み取れるようになります。この情報には個人情報や機密情報が含まれる場合があります。"</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"再生用にメディア デコーダーを使用"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"インストール済みのメディアデコーダーを使用して再生用にデコードすることをアプリに許可します。"</string>
+    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"信頼できる認証情報の管理"</string>
+    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"CA証明書を信頼できる認証情報としてインストールしたりアンインストールしたりすることをアプリに許可します。"</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"diagが所有するリソースの読み書き"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"diagグループが所有するリソース（/dev内のファイルなど）の読み書きをアプリに許可します。許可すると、システムの安定性とセキュリティに影響が生じる可能性があります。メーカー/通信事業者によるハードウェア固有の診断以外には使用しないでください。"</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"アプリのコンポーネントの有効/無効化"</string>
@@ -468,8 +470,6 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"SurfaceFlingerの低レベルの機能の使用をアプリに許可します。"</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"フレームバッファの読み取り"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"フレームバッファの内容の読み取りをアプリに許可します。"</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"InputFlingerへのアクセス"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"InputFlingerの低レベルの機能を使用することをアプリに許可します。"</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wi-Fiディスプレイの設定"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Wi-Fiディスプレイを設定して接続することをアプリに許可します。"</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wi-Fiディスプレイの制御"</string>

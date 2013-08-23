@@ -468,8 +468,6 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Tətbiqə aşağı səviyyəli SurfaceFnger özəlliklərini istifadə etməyə icazə verir."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"freym buferi oxuyur"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Tətbiqə freym buferinin kontentini oxumaq icazəsi verir."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"InputFlinger keçidi"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Tətbiqə aşağı səviyyəli InputFlinger funksiyalarını istifadə etməyə icazə verir."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wifi görüntülərini quraşdır"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Tətbiqə Wifi görüntülərini quraşdırmağa və onlara qoşulmağa imkan verir."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"WiFi görüntülərini dəyişir"</string>

@@ -407,6 +407,8 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"للسماح للتطبيق بالقراءة من ملفات سجلات النظام المتنوعة. ويسمح ذلك للتطبيق باكتشاف المعلومات العامة حول ما تفعله بالهاتف، ومن المحتمل أن يتضمن معلومات شخصية أو خاصة."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"استخدام أي برنامج فك تشفير وسائط من أجل التشغيل"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"السماح للتطبيق باستخدام أي برنامج فك تشفير وسائط مثبت لفك التشفير من أجل التشغيل."</string>
+    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"إدارة بيانات الاعتماد الموثوقة"</string>
+    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"السماح للتطبيق بتثبيت شهادات CA وإلغاء تثبيتها باعتبارها بيانات اعتماد محل ثقة."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"قراءة/كتابة إلى الموارد المملوكة بواسطة التشخيص"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"للسماح للتطبيق بالقراءة والكتابة إلى أي مورد مملوك بواسطة مجموعة التشخيصات؛ على سبيل المثال، الملفات في /dev. من المحتمل أن يؤثر ذلك في استقرار النظام وأمانه. يجب ألا يستخدم ذلك سوى للتشخيصات الخاصة بالنظام من قِبل المصنِّع أو المشغِّل."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"تمكين مكونات التطبيق أو تعطيلها"</string>
@@ -468,8 +470,6 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"للسماح للتطبيق باستخدام ميزات SurfaceFlinger ذات المستوى المنخفض."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"قراءة المخزن المؤقت للإطارات"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"للسماح للتطبيق بقراءة محتوى المخزن المؤقت للإطارات."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"الدخول إلى InputFlinger"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"للسماح للتطبيق باستخدام ميزات InputFlinger ذات المستوى المنخفض."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"تهيئة شاشات Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"للسماح للتطبيق بتهيئة شاشات Wi-Fi والاتصال بها."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"التحكم في شاشات Wi-Fi"</string>

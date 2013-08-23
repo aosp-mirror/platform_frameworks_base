@@ -468,8 +468,6 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Antaa sovelluksen käyttää SurfaceFlingerin matalan tason ominaisuuksia."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"lue kehyspuskuria"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Antaa sovelluksen lukea kehyspuskurin sisältöä."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"InputFlingerin käyttäminen"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Antaa sovelluksen käyttää InputFlingerin matalan tason ominaisuuksia."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"määritä wifi-näyttöjen asetukset"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Antaa sovelluksen määrittää wifi-näyttöjä ja muodostaa yhteyden niihin."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"hallitse wifi-näyttöjä"</string>

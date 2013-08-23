@@ -22,8 +22,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"O"</string>
     <string name="kilobyteShort" msgid="5973789783504771878">"KO"</string>
-    <string name="megabyteShort" msgid="6355851576770428922">"MO"</string>
-    <string name="gigabyteShort" msgid="3259882455212193214">"GO"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
     <string name="terabyteShort" msgid="231613018159186962">"TO"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PO"</string>
     <string name="fileSizeSuffix" msgid="9164292791500531949">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
@@ -229,11 +229,11 @@
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Accesează cardul SD."</string>
     <string name="permgrouplab_accessibilityFeatures" msgid="7919025602283593907">"Funcții de accesibilitate"</string>
     <string name="permgroupdesc_accessibilityFeatures" msgid="4205196881678144335">"Funcții pe care tehnologia de asistare le poate solicita."</string>
-    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperați conținutul ferestrei"</string>
+    <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperează conținutul ferestrei"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspectează conținutul unei ferestre cu care interacționați."</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activați funcția Explorați prin atingere"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activează funcția Explorați prin atingere"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="5800552516779249356">"Elementele atinse vor fi rostite cu voce tare, iar ecranul poate fi explorat utilizând gesturi."</string>
-    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Activați accesibilitatea web îmbunătățită"</string>
+    <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Activează accesibilitatea web îmbunătățită"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Pot fi instalate scripturi pentru a face conținutul aplicațiilor mai accesibil."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Remarcă textul pe care îl introduceți"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"Include date personale, cum ar fi numere ale cardurilor de credit sau parole."</string>
@@ -407,6 +407,8 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Permite aplicaţiei să citească din diverse fişiere jurnal ale sistemului. În acest mod poate descoperi informaţii generale cu privire la utilizarea telefonului de către dvs., care ar putea include şi informaţii personale sau private."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"utilizaţi orice decodor media pentru redare"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Permite aplicaţiei să utilizeze orice decodor media instalat pentru a decodifica redarea."</string>
+    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"gestionarea acreditărilor de încredere"</string>
+    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Permite aplicației să instaleze și să dezinstaleze certificate CA ca acreditări de încredere."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"citire/scriere în resursele deţinute de diag"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Permite aplicaţiei să citească şi să scrie în orice resursă deţinută de grupul diag, de ex., fişierele din /dev. Această permisiune ar putea să afecteze stabilitatea şi securitatea sistemului. Permisiunea trebuie utilizată NUMAI de producător sau de operator pentru diagnostice specifice pentru hardware."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"activare sau dezactivare a componentelor aplicaţiei"</string>
@@ -468,8 +470,6 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permite aplicaţiei să utilizeze funcţiile de nivel redus SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"citire zonă tampon de cadre"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Permite aplicaţiei să citească conţinutul zonei-tampon a cadrului."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"acces la InputFlinger"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Permite aplicației să utilizeze funcțiile de nivel redus InputFlinger."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configurează afişaje Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Permite aplicaţiei să configureze şi să se conecteze la afişaje Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"controlează afişaje Wi-Fi"</string>
@@ -600,7 +600,7 @@
     <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Schimbaţi starea WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Permite aplicaţiei să conecteze şi să deconecteze tableta la şi de la reţelele WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Permite aplicaţiei să conecteze şi să deconecteze telefonul la şi de la reţelele WiMAX."</string>
-    <string name="permlab_bluetooth" msgid="6127769336339276828">"împerechează dispozitive Bluetooth"</string>
+    <string name="permlab_bluetooth" msgid="6127769336339276828">"conectează dispozitive Bluetooth"</string>
     <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Permite aplicaţiei să vadă configuraţia tabletei Bluetooth, să efectueze şi să accepte conexiuni cu dispozitive împerecheate."</string>
     <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Permite aplicaţiei să vadă configuraţia telefonului Bluetooth, să efectueze şi să accepte conexiuni cu dispozitive împerecheate."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controlare schimb de date prin Near Field Communication"</string>

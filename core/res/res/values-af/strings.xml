@@ -468,8 +468,6 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Laat die program toe om SurfaceFlinger se laevlak-kenmerke te gebruik."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"lees raambuffer"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Laat die program toe om die inhoud van die raambuffer te lees."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"kry toegang tot InputFlinger"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Laat die program toe om InputFlinger se laevlak-kenmerke te gebruik."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"stel Wi-Fi-skerms op"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Laat die program toe om Wi-Fi-skerms op te stel en daaraan te koppel."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"beheer Wi-Fi-skerms"</string>

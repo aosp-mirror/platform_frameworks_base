@@ -468,8 +468,6 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"एप्‍लिकेशन को SurfaceFlinger निम्‍न-स्‍तर सुविधाएं उपयोग करने देता है."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"फ़्रेम बफ़र पढ़ें"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"एप्‍लिकेशन को फ़्रेम बफ़र की सामग्री पढ़ने देता है."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"InputFlinger एक्सेस करें"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"एप्‍लिकेशन को InputFlinger निम्‍न-स्‍तर सुविधाओं का उपयोग करने देता है."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wifi डिस्प्ले को कॉन्फ़िगर करें"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"एप्लिकेशन को कॉन्फ़िगर करने देता है और Wifi डिस्प्ले से कनेक्ट करता है."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wifi डिस्प्ले को नियंत्रित करें"</string>

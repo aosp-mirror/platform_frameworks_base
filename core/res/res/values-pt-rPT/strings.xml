@@ -468,8 +468,6 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Permite à aplicação utilizar funcionalidades de SurfaceFlinger de nível inferior."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"ler memória intermédia de fotogramas"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Permite à aplicação ler o conteúdo da memória intermédia de fotogramas."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"aceder a InputFlinger"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Permite que a aplicação utilize funcionalidades de InputFlinger de nível inferior."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"configurar visores Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Permite que a aplicação se configure e se ligue a visores Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"controlar visores Wi-Fi"</string>

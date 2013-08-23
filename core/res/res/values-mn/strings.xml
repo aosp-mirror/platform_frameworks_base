@@ -468,8 +468,6 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Апп нь SurfaceFlinger доод-төвшиний функцийг ашиглах боломжтой."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"Фрэйм буферээс унших"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Апп нь фрэйм буферын контентыг унших боломжтой."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"InputFlinger-т хандалт хийх"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Апп-д SurfaceFlinger доод-түвшний функцуудыг ашиглах боломж олгоно."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"Wifi дэлгэцийг тохируулах"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Апп нь Wifi дэлгэцийг тохируулах болон холбогдох боломжтой."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"Wifi дэлгэцийг удирдах"</string>

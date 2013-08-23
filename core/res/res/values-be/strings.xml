@@ -479,10 +479,6 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Дазваляе прыкладанням выкарыстоўваць нізкаўзроўневыя функцыі SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"чытаць буфер кадраў"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Дазваляе прыкладанням счытваць змесціва буферу кадра."</string>
-    <!-- no translation found for permlab_accessInputFlinger (5348635270689553857) -->
-    <skip />
-    <!-- no translation found for permdesc_accessInputFlinger (2104864941201226616) -->
-    <skip />
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"налада дысплеяў Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Дазволiць прыкладанню наладжвацца i падключацца да дысплеяў Wi-Fi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"кіраванне дысплеямi Wi-Fi"</string>

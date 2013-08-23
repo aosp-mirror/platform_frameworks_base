@@ -765,10 +765,6 @@
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"leger il paraculp da frame"</string>
     <!-- no translation found for permdesc_readFrameBuffer (4937405521809454680) -->
     <skip />
-    <!-- no translation found for permlab_accessInputFlinger (5348635270689553857) -->
-    <skip />
-    <!-- no translation found for permdesc_accessInputFlinger (2104864941201226616) -->
-    <skip />
     <!-- no translation found for permlab_configureWifiDisplay (5595661694746742168) -->
     <skip />
     <!-- no translation found for permdesc_configureWifiDisplay (7916815158690218065) -->

@@ -407,6 +407,8 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Aplikaciji omogućuje čitanje raznih sistemskih datoteka zapisnika. Tako može otkriti opće informacije o tome što radite na telefonu, što potencijalno uključuje osobne ili privatne informacije."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"upotrijebi bilo koji dekoder za reprodukciju"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Aplikaciji omogućuje korištenje bilo kojim instaliranim dekoderom medija za dekodiranje radi reprodukcije."</string>
+    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"upravljanje pouzdanim vjerodajnicama"</string>
+    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Omogućuje aplikaciji instaliranje i deinstaliranje CA certifikata kao pouzdanih vjerodajnica."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"pisanje/čitanje u resursima čije je vlasnik dijagnostika"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Aplikaciji omogućuje čitanje i pisanje na bilo koji resurs u vlasništvu dijag. grupe; na primjer, datoteke u sustavu /dev. To bi moglo utjecati na stabilnost sustava i sigurnost. Dozvolu bi trebao upotrebljavati proizvođač ili operater SAMO za dijagnostiku koja se odnosi na hardver."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"omogućavanje ili onemogućavanje komponenti aplikacije"</string>
@@ -468,8 +470,6 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Aplikaciji omogućuje upotrebu značajki niske razine SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"čitanje međuspremnika okvira"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Aplikaciji omogućuje čitanje sadržaja međuspremnika okvira."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"pristupi InputFlingeru"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Dopušta aplikaciji upotrebu značajki niske razine InputFlingera."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"konfiguriraj Wifi zaslone"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Omogućuje aplikaciji konfiguriranje i povezivanje s Wi-Fi zaslonima."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"upravljaj Wifi zaslonima"</string>

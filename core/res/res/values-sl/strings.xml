@@ -468,8 +468,6 @@
     <string name="permdesc_accessSurfaceFlinger" msgid="1041619516733293551">"Programu omogoča uporabo funkcij nizke ravni SurfaceFlinger."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"branje grafičnega/slikovnega medpomnilnika"</string>
     <string name="permdesc_readFrameBuffer" msgid="4937405521809454680">"Programu omogoča branje vsebine grafičnega/slikovnega medpomnilnika."</string>
-    <string name="permlab_accessInputFlinger" msgid="5348635270689553857">"dostop do funkcij InputFlinger"</string>
-    <string name="permdesc_accessInputFlinger" msgid="2104864941201226616">"Aplikaciji dovoljuje uporabo funkcij InputFlinger nizke ravni."</string>
     <string name="permlab_configureWifiDisplay" msgid="5595661694746742168">"konfiguriranje zaslonov Wi-Fi"</string>
     <string name="permdesc_configureWifiDisplay" msgid="7916815158690218065">"Omogoča aplikaciji konfiguriranje zaslonov Wi-Fi in povezovanje z njimi."</string>
     <string name="permlab_controlWifiDisplay" msgid="393641276723695496">"nadzor zaslonov Wi-Fi"</string>
