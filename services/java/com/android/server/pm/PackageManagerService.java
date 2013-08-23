@@ -5509,10 +5509,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                         // version of the one on the data partition, but which
                         // granted a new system permission that it didn't have
                         // before.  In this case we do want to allow the app to
-                        // now get the new permission, because it is allowed by
-                        // the system image.
-                        allowed = false;
-                        if (sysPs.pkg != null) {
+                        // now get the new permission if the new system-partition
+                        // apk is privileged to get it.
+                        if (sysPs.pkg != null && isPrivilegedApp(pkg)) {
                             for (int j=0;
                                     j<sysPs.pkg.requestedPermissions.size(); j++) {
                                 if (perm.equals(
