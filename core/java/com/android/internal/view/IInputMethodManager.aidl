@@ -56,7 +56,7 @@ interface IInputMethodManager {
     InputBindResult windowGainedFocus(in IInputMethodClient client, in IBinder windowToken,
             int controlFlags, int softInputMode, int windowFlags,
             in EditorInfo attribute, IInputContext inputContext);
-            
+
     void showInputMethodPickerFromClient(in IInputMethodClient client);
     void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
     void setInputMethod(in IBinder token, String id);
@@ -71,6 +71,7 @@ interface IInputMethodManager {
     boolean setCurrentInputMethodSubtype(in InputMethodSubtype subtype);
     boolean switchToLastInputMethod(in IBinder token);
     boolean switchToNextInputMethod(in IBinder token, boolean onlyCurrentIme);
+    boolean shouldOfferSwitchingToNextInputMethod(in IBinder token);
     boolean setInputMethodEnabled(String id, boolean enabled);
     oneway void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
 }
