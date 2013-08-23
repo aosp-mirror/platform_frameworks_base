@@ -16,20 +16,26 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.StatusBarIconView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
@@ -49,10 +55,56 @@ public class PhoneStatusBarView extends PanelBar {
     private final StatusBarTransitions mBarTransitions;
 
     private final class StatusBarTransitions extends BarTransitions {
+        private final int mTransparent;
+
         public StatusBarTransitions(Context context) {
             super(context, PhoneStatusBarView.this);
             final Resources res = context.getResources();
-            mTransparent = res.getDrawable(R.color.status_bar_background_transparent);
+            mTransparent = res.getColor(R.color.status_bar_background_transparent);
+        }
+
+        @Override
+        protected Integer getBackgroundColor(int mode) {
+            if (mode == MODE_TRANSPARENT) return mTransparent;
+            return super.getBackgroundColor(mode);
+        }
+
+        @Override
+        protected void onTransition(int oldMode, int newMode, boolean animate) {
+            super.onTransition(oldMode, newMode, animate);
+            if (animate) {
+                List<Animator> animators = new ArrayList<Animator>();
+                for(StatusBarIconView icon : findStatusBarIcons()) {
+                    animators.add(icon.animateTransitionTo(newMode));
+                }
+                AnimatorSet set = new AnimatorSet();
+                set.playTogether(animators);
+                set.start();
+            } else {
+                for(StatusBarIconView icon : findStatusBarIcons()) {
+                    icon.setAlpha(icon.getAlphaFor(newMode));
+                }
+            }
+        }
+
+        private List<StatusBarIconView> findStatusBarIcons() {
+            List<StatusBarIconView> icons = new ArrayList<StatusBarIconView>();
+            findStatusBarIcons(icons, findViewById(R.id.moreIcon));
+            findStatusBarIcons(icons, findViewById(R.id.statusIcons));
+            findStatusBarIcons(icons, findViewById(R.id.notificationIcons));
+            return icons;
+        }
+
+        private void findStatusBarIcons(List<StatusBarIconView> icons, View v) {
+            if (v instanceof StatusBarIconView) {
+                icons.add((StatusBarIconView) v);
+            } else if (v instanceof ViewGroup) {
+                ViewGroup group = (ViewGroup) v;
+                final int N = group.getChildCount();
+                for (int i = 0; i < N; i++) {
+                    findStatusBarIcons(icons, group.getChildAt(i));
+                }
+            }
         }
     }
 

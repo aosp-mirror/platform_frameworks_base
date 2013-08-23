@@ -16,6 +16,11 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
+
+import android.animation.ObjectAnimator;
 import android.app.Notification;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -48,10 +53,13 @@ public class StatusBarIconView extends AnimatedImageView {
     private int mNumberY;
     private String mNumberText;
     private Notification mNotification;
+    private final float mAlphaWhenOpaque;
+    private final float mAlphaWhenTransparent = 1;
 
-    public StatusBarIconView(Context context, String slot, Notification notification) {
+    public StatusBarIconView(Context context, String slot, Notification notification, int mode) {
         super(context);
         final Resources res = context.getResources();
+        mAlphaWhenOpaque = res.getFraction(R.dimen.status_bar_icon_drawing_alpha, 1, 1);
         mSlot = slot;
         mNumberPain = new Paint();
         mNumberPain.setTextAlign(Paint.Align.CENTER);
@@ -68,8 +76,7 @@ public class StatusBarIconView extends AnimatedImageView {
             final float scale = (float)imageBounds / (float)outerBounds;
             setScaleX(scale);
             setScaleY(scale);
-            final float alpha = res.getFraction(R.dimen.status_bar_icon_drawing_alpha, 1, 1);
-            setAlpha(alpha);
+            setAlpha(getAlphaFor(mode));
         }
 
         setScaleType(ImageView.ScaleType.CENTER);
@@ -78,13 +85,22 @@ public class StatusBarIconView extends AnimatedImageView {
     public StatusBarIconView(Context context, AttributeSet attrs) {
         super(context, attrs);
         final Resources res = context.getResources();
+        mAlphaWhenOpaque = res.getFraction(R.dimen.status_bar_icon_drawing_alpha, 1, 1);
         final int outerBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
         final int imageBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
         final float scale = (float)imageBounds / (float)outerBounds;
         setScaleX(scale);
         setScaleY(scale);
-        final float alpha = res.getFraction(R.dimen.status_bar_icon_drawing_alpha, 1, 1);
-        setAlpha(alpha);
+        setAlpha(getAlphaFor(MODE_OPAQUE));
+    }
+
+    public ObjectAnimator animateTransitionTo(int mode) {
+        return ObjectAnimator.ofFloat(this, "alpha", getAlpha(), getAlphaFor(mode));
+    }
+
+    public float getAlphaFor(int mode) {
+        final boolean isTransparent = mode == MODE_SEMI_TRANSPARENT || mode == MODE_TRANSPARENT;
+        return isTransparent ? mAlphaWhenTransparent : mAlphaWhenOpaque;
     }
 
     private static boolean streq(String a, String b) {
