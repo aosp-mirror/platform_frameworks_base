@@ -203,6 +203,12 @@ public class BridgeIInputMethodManager implements IInputMethodManager {
     }
 
     @Override
+        public boolean shouldOfferSwitchingToNextInputMethod(IBinder arg0) throws RemoteException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
     public void updateStatusIcon(IBinder arg0, String arg1, int arg2) throws RemoteException {
         // TODO Auto-generated method stub
 
