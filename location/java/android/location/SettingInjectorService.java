@@ -176,8 +176,15 @@ public abstract class SettingInjectorService extends IntentService {
 
         /**
          * Constructor.
+         * <p/>
+         * Note that to prevent churn in the settings list, there is no support for dynamically
+         * choosing to hide a setting. Instead you should provide a {@code enabled} value of false,
+         * which will gray the setting out and disable the link from "Settings > Location"
+         * to your setting activity. One reason why you might choose to do this is if
+         * {@link android.provider.Settings.Secure#getLocationMode(android.content.ContentResolver)}
+         * is {@link android.provider.Settings.Secure#LOCATION_MODE_OFF}.
          *
-         * @param summary the {@link Preference#getSummary()} value
+         * @param summary the {@link Preference#getSummary()} value (allowed to be null or empty)
          * @param enabled the {@link Preference#isEnabled()} value
          */
         public Status(String summary, boolean enabled) {
