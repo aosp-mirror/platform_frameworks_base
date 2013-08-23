@@ -16,6 +16,9 @@
 
 package android.animation;
 
+import android.graphics.Path;
+import android.graphics.PointF;
+import android.util.FloatMath;
 import android.util.FloatProperty;
 import android.util.IntProperty;
 import android.util.Log;
@@ -176,8 +179,8 @@ public class PropertyValuesHolder implements Cloneable {
      * start, through all intermediate values to the end value. When used with ObjectAnimator,
      * the elements of the array represent the parameters of the setter function.
      *
-     * @param propertyName The name of the property being animated. Can also be the name of the
-     *                     entire setter method. Should not be null.
+     * @param propertyName The name of the property being animated. Can also be the
+     *                     case-sensitive name of the entire setter method. Should not be null.
      * @param values The values that the property will animate between.
      * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
      * @see IntArrayEvaluator#IntArrayEvaluator(int[])
@@ -201,6 +204,26 @@ public class PropertyValuesHolder implements Cloneable {
         }
         IntArrayEvaluator evaluator = new IntArrayEvaluator(new int[numParameters]);
         return new MultiIntValuesHolder(propertyName, null, evaluator, (Object[]) values);
+    }
+
+    /**
+     * Constructs and returns a PropertyValuesHolder with a given property name to use
+     * as a multi-int setter. The values are animated along the path, with the first
+     * parameter of the setter set to the x coordinate and the second set to the y coordinate.
+     *
+     * @param propertyName The name of the property being animated. Can also be the
+     *                     case-sensitive name of the entire setter method. Should not be null.
+     *                     The setter must take exactly two <code>int</code> parameters.
+     * @param path The Path along which the values should be animated.
+     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+     * @see ObjectAnimator#ofPropertyValuesHolder(Object, PropertyValuesHolder...)
+     */
+    public static PropertyValuesHolder ofMultiInt(String propertyName, Path path) {
+        Keyframe[] keyframes = createKeyframes(path);
+        KeyframeSet keyframeSet = KeyframeSet.ofKeyframe(keyframes);
+        TypeEvaluator<PointF> evaluator = new PointFEvaluator(new PointF());
+        PointFToIntArray converter = new PointFToIntArray();
+        return new MultiIntValuesHolder(propertyName, converter, evaluator, keyframeSet);
     }
 
     /**
@@ -276,8 +299,8 @@ public class PropertyValuesHolder implements Cloneable {
      * start, through all intermediate values to the end value. When used with ObjectAnimator,
      * the elements of the array represent the parameters of the setter function.
      *
-     * @param propertyName The name of the property being animated. Can also be the name of the
-     *                     entire setter method. Should not be null.
+     * @param propertyName The name of the property being animated. Can also be the
+     *                     case-sensitive name of the entire setter method. Should not be null.
      * @param values The values that the property will animate between.
      * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
      * @see FloatArrayEvaluator#FloatArrayEvaluator(float[])
@@ -301,6 +324,26 @@ public class PropertyValuesHolder implements Cloneable {
         }
         FloatArrayEvaluator evaluator = new FloatArrayEvaluator(new float[numParameters]);
         return new MultiFloatValuesHolder(propertyName, null, evaluator, (Object[]) values);
+    }
+
+    /**
+     * Constructs and returns a PropertyValuesHolder with a given property name to use
+     * as a multi-float setter. The values are animated along the path, with the first
+     * parameter of the setter set to the x coordinate and the second set to the y coordinate.
+     *
+     * @param propertyName The name of the property being animated. Can also be the
+     *                     case-sensitive name of the entire setter method. Should not be null.
+     *                     The setter must take exactly two <code>float</code> parameters.
+     * @param path The Path along which the values should be animated.
+     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+     * @see ObjectAnimator#ofPropertyValuesHolder(Object, PropertyValuesHolder...)
+     */
+    public static PropertyValuesHolder ofMultiFloat(String propertyName, Path path) {
+        Keyframe[] keyframes = createKeyframes(path);
+        KeyframeSet keyframeSet = KeyframeSet.ofKeyframe(keyframes);
+        TypeEvaluator<PointF> evaluator = new PointFEvaluator(new PointF());
+        PointFToFloatArray converter = new PointFToFloatArray();
+        return new MultiFloatValuesHolder(propertyName, converter, evaluator, keyframeSet);
     }
 
     /**
@@ -367,6 +410,27 @@ public class PropertyValuesHolder implements Cloneable {
     }
 
     /**
+     * Constructs and returns a PropertyValuesHolder with a given property name and
+     * a Path along which the values should be animated. This variant supports a
+     * <code>TypeConverter</code> to convert from <code>PointF</code> to the target
+     * type.
+     *
+     * @param propertyName The name of the property being animated.
+     * @param converter Converts a PointF to the type associated with the setter. May be
+     *                  null if conversion is unnecessary.
+     * @param path The Path along which the values should be animated.
+     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+     */
+    public static PropertyValuesHolder ofObject(String propertyName,
+            TypeConverter<PointF, ?> converter, Path path) {
+        Keyframe[] keyframes = createKeyframes(path);
+        PropertyValuesHolder pvh = ofKeyframe(propertyName, keyframes);
+        pvh.setEvaluator(new PointFEvaluator(new PointF()));
+        pvh.setConverter(converter);
+        return pvh;
+    }
+
+    /**
      * Constructs and returns a PropertyValuesHolder with a given property and
      * set of Object values. This variant also takes a TypeEvaluator because the system
      * cannot automatically interpolate between objects of unknown type.
@@ -411,6 +475,27 @@ public class PropertyValuesHolder implements Cloneable {
         pvh.setConverter(converter);
         pvh.setObjectValues(values);
         pvh.setEvaluator(evaluator);
+        return pvh;
+    }
+
+    /**
+     * Constructs and returns a PropertyValuesHolder with a given property and
+     * a Path along which the values should be animated. This variant supports a
+     * <code>TypeConverter</code> to convert from <code>PointF</code> to the target
+     * type.
+     *
+     * @param property The property being animated. Should not be null.
+     * @param converter Converts a PointF to the type associated with the setter. May be
+     *                  null if conversion is unnecessary.
+     * @param path The Path along which the values should be animated.
+     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+     */
+    public static <V> PropertyValuesHolder ofObject(Property<?, V> property,
+            TypeConverter<PointF, V> converter, Path path) {
+        Keyframe[] keyframes = createKeyframes(path);
+        PropertyValuesHolder pvh = ofKeyframe(property, keyframes);
+        pvh.setEvaluator(new PointFEvaluator(new PointF()));
+        pvh.setConverter(converter);
         return pvh;
     }
 
@@ -1438,6 +1523,113 @@ public class PropertyValuesHolder implements Cloneable {
             }
         }
     }
+
+    /* Path interpolation relies on approximating the Path as a series of line segments.
+       The line segments are recursively divided until there is less than 1/2 pixel error
+       between the lines and the curve. Each point of the line segment is converted
+       to a Keyframe and a linear interpolation between Keyframes creates a good approximation
+       of the curve.
+
+       The fraction for each Keyframe is the length along the Path to the point, divided by
+       the total Path length. Two points may have the same fraction in the case of a move
+       command causing a disjoint Path.
+
+       The value for each Keyframe is either the point as a PointF or one of the x or y
+       coordinates as an int or float. In the latter case, two Keyframes are generated for
+       each point that have the same fraction. */
+
+    /**
+     * Returns separate Keyframes arrays for the x and y coordinates along a Path. If
+     * isInt is true, the Keyframes will be IntKeyframes, otherwise they will be FloatKeyframes.
+     * The element at index 0 are the x coordinate Keyframes and element at index 1 are the
+     * y coordinate Keyframes. The returned values can be linearly interpolated and get less
+     * than 1/2 pixel error.
+     */
+    static Keyframe[][] createKeyframes(Path path, boolean isInt) {
+        if (path == null || path.isEmpty()) {
+            throw new IllegalArgumentException("The path must not be null or empty");
+        }
+        float[] pointComponents = path.approximate(0.5f);
+
+        int numPoints = pointComponents.length / 3;
+
+        Keyframe[][] keyframes = new Keyframe[2][];
+        keyframes[0] = new Keyframe[numPoints];
+        keyframes[1] = new Keyframe[numPoints];
+        int componentIndex = 0;
+        for (int i = 0; i < numPoints; i++) {
+            float fraction = pointComponents[componentIndex++];
+            float x = pointComponents[componentIndex++];
+            float y = pointComponents[componentIndex++];
+            if (isInt) {
+                keyframes[0][i] = Keyframe.ofInt(fraction, Math.round(x));
+                keyframes[1][i] = Keyframe.ofInt(fraction, Math.round(y));
+            } else {
+                keyframes[0][i] = Keyframe.ofFloat(fraction, x);
+                keyframes[1][i] = Keyframe.ofFloat(fraction, y);
+            }
+        }
+        return keyframes;
+    }
+
+    /**
+     * Returns PointF Keyframes for a Path. The resulting points can be linearly interpolated
+     * with less than 1/2 pixel in error.
+     */
+    private static Keyframe[] createKeyframes(Path path) {
+        if (path == null || path.isEmpty()) {
+            throw new IllegalArgumentException("The path must not be null or empty");
+        }
+        float[] pointComponents = path.approximate(0.5f);
+
+        int numPoints = pointComponents.length / 3;
+
+        Keyframe[] keyframes = new Keyframe[numPoints];
+        int componentIndex = 0;
+        for (int i = 0; i < numPoints; i++) {
+            float fraction = pointComponents[componentIndex++];
+            float x = pointComponents[componentIndex++];
+            float y = pointComponents[componentIndex++];
+            keyframes[i] = Keyframe.ofObject(fraction, new PointF(x, y));
+        }
+        return keyframes;
+    }
+
+    /**
+     * Convert from PointF to float[] for multi-float setters along a Path.
+     */
+    private static class PointFToFloatArray extends TypeConverter<PointF, float[]> {
+        private float[] mCoordinates = new float[2];
+
+        public PointFToFloatArray() {
+            super(PointF.class, float[].class);
+        }
+
+        @Override
+        public float[] convert(PointF value) {
+            mCoordinates[0] = value.x;
+            mCoordinates[1] = value.y;
+            return mCoordinates;
+        }
+    };
+
+    /**
+     * Convert from PointF to int[] for multi-int setters along a Path.
+     */
+    private static class PointFToIntArray extends TypeConverter<PointF, int[]> {
+        private int[] mCoordinates = new int[2];
+
+        public PointFToIntArray() {
+            super(PointF.class, int[].class);
+        }
+
+        @Override
+        public int[] convert(PointF value) {
+            mCoordinates[0] = Math.round(value.x);
+            mCoordinates[1] = Math.round(value.y);
+            return mCoordinates;
+        }
+    };
 
     native static private int nGetIntMethod(Class targetClass, String methodName);
     native static private int nGetFloatMethod(Class targetClass, String methodName);
