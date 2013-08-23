@@ -20,10 +20,13 @@ import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.UriMatcher;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MatrixCursor.RowBuilder;
+import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.DocumentsContract;
@@ -296,9 +299,41 @@ public class ExternalStorageProvider extends ContentProvider {
                 final Root root = mRoots.get(DocumentsContract.getRootId(uri));
                 final String docId = DocumentsContract.getDocId(uri);
 
-                // TODO: offer as thumbnail
                 final File file = docIdToFile(root, docId);
                 return ParcelFileDescriptor.open(file, ContentResolver.modeToMode(uri, mode));
+            }
+            default: {
+                throw new UnsupportedOperationException("Unsupported Uri " + uri);
+            }
+        }
+    }
+
+    @Override
+    public AssetFileDescriptor openTypedAssetFile(Uri uri, String mimeTypeFilter, Bundle opts)
+            throws FileNotFoundException {
+        if (opts == null || !opts.containsKey(DocumentsContract.EXTRA_THUMBNAIL_SIZE)) {
+            return super.openTypedAssetFile(uri, mimeTypeFilter, opts);
+        }
+
+        switch (sMatcher.match(uri)) {
+            case URI_DOCS_ID: {
+                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
+                final String docId = DocumentsContract.getDocId(uri);
+
+                final File file = docIdToFile(root, docId);
+                final ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
+                        file, ParcelFileDescriptor.MODE_READ_ONLY);
+
+                try {
+                    final ExifInterface exif = new ExifInterface(file.getAbsolutePath());
+                    final long[] thumb = exif.getThumbnailRange();
+                    if (thumb != null) {
+                        return new AssetFileDescriptor(pfd, thumb[0], thumb[1]);
+                    }
+                } catch (IOException e) {
+                }
+
+                return new AssetFileDescriptor(pfd, 0, AssetFileDescriptor.UNKNOWN_LENGTH);
             }
             default: {
                 throw new UnsupportedOperationException("Unsupported Uri " + uri);
