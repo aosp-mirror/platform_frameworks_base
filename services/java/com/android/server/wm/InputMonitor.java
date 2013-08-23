@@ -312,6 +312,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     }
 
     /* Notifies that the input device configuration has changed. */
+    @Override
     public void notifyConfigurationChanged() {
         mService.sendNewConfiguration();
 
@@ -337,12 +338,14 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     }
 
     /* Notifies that the lid switch changed state. */
+    @Override
     public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
         mService.mPolicy.notifyLidSwitchChanged(whenNanos, lidOpen);
     }
     
     /* Provides an opportunity for the window manager policy to intercept early key
      * processing as soon as the key has been read from the device. */
+    @Override
     public int interceptKeyBeforeQueueing(
             KeyEvent event, int policyFlags, boolean isScreenOn) {
         return mService.mPolicy.interceptKeyBeforeQueueing(event, policyFlags, isScreenOn);
@@ -351,12 +354,14 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     /* Provides an opportunity for the window manager policy to intercept early
      * motion event processing when the screen is off since these events are normally
      * dropped. */
+    @Override
     public int interceptMotionBeforeQueueingWhenScreenOff(int policyFlags) {
         return mService.mPolicy.interceptMotionBeforeQueueingWhenScreenOff(policyFlags);
     }
 
     /* Provides an opportunity for the window manager policy to process a key before
      * ordinary dispatch. */
+    @Override
     public long interceptKeyBeforeDispatching(
             InputWindowHandle focus, KeyEvent event, int policyFlags) {
         WindowState windowState = focus != null ? (WindowState) focus.windowState : null;
@@ -365,6 +370,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     
     /* Provides an opportunity for the window manager policy to process a key that
      * the application did not handle. */
+    @Override
     public KeyEvent dispatchUnhandledKey(
             InputWindowHandle focus, KeyEvent event, int policyFlags) {
         WindowState windowState = focus != null ? (WindowState) focus.windowState : null;
@@ -372,6 +378,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     }
 
     /* Callback to get pointer layer. */
+    @Override
     public int getPointerLayer() {
         return mService.mPolicy.windowTypeToLayerLw(WindowManager.LayoutParams.TYPE_POINTER)
                 * WindowManagerService.TYPE_LAYER_MULTIPLIER
