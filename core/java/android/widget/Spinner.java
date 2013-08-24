@@ -675,7 +675,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         info.setClassName(Spinner.class.getName());
 
         if (mAdapter != null) {
-            info.setOpensPopup(true);
+            info.setCanOpenPopup(true);
         }
     }
 

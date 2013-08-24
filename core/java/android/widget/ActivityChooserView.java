@@ -234,7 +234,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
             @Override
             public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
                 super.onInitializeAccessibilityNodeInfo(host, info);
-                info.setOpensPopup(true);
+                info.setCanOpenPopup(true);
             }
         });
         mExpandActivityOverflowButtonImage =

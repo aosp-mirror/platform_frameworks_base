@@ -630,7 +630,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
         @Override
         public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
             super.onInitializeAccessibilityNodeInfo(info);
-            info.setOpensPopup(true);
+            info.setCanOpenPopup(true);
         }
     }
 
