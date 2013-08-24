@@ -74,8 +74,7 @@ public final class DisplayManager {
      * richer second screen experiences.
      * </p>
      *
-     * @see android.app.Presentation for information about presenting content
-     * on secondary displays.
+     * @see android.app.Presentation
      * @see Display#FLAG_PRESENTATION
      * @see #getDisplays(String)
      */
@@ -138,8 +137,7 @@ public final class DisplayManager {
      * more special-purpose displays.
      * </p>
      *
-     * @see android.app.Presentation for information about presenting content
-     * on secondary displays.
+     * @see android.app.Presentation
      * @see #createVirtualDisplay
      * @see #DISPLAY_CATEGORY_PRESENTATION
      * @see Display#FLAG_PRESENTATION
@@ -168,7 +166,7 @@ public final class DisplayManager {
      * The content of secure windows will be blanked if shown on this display.
      * </p>
      *
-     * @see Display#FLAG_SECURE for information about secure displays.
+     * @see Display#FLAG_SECURE
      * @see #createVirtualDisplay
      */
     public static final int VIRTUAL_DISPLAY_FLAG_SECURE = 1 << 2;
