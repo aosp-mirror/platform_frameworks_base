@@ -16,6 +16,9 @@
 
 package android.provider;
 
+import static android.net.TrafficStats.KB_IN_BYTES;
+import static libcore.io.OsConstants.SEEK_SET;
+
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -36,7 +39,10 @@ import android.util.Log;
 
 import com.google.android.collect.Lists;
 
+import libcore.io.ErrnoException;
+import libcore.io.IoBridge;
 import libcore.io.IoUtils;
+import libcore.io.Libcore;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -527,25 +533,53 @@ public final class DocumentsContract {
      * @return decoded thumbnail, or {@code null} if problem was encountered.
      */
     public static Bitmap getThumbnail(ContentResolver resolver, Uri documentUri, Point size) {
-        final Bundle opts = new Bundle();
-        opts.putParcelable(EXTRA_THUMBNAIL_SIZE, size);
+        final Bundle openOpts = new Bundle();
+        openOpts.putParcelable(DocumentsContract.EXTRA_THUMBNAIL_SIZE, size);
 
         AssetFileDescriptor afd = null;
         try {
-            afd = resolver.openTypedAssetFileDescriptor(documentUri, "image/*", opts);
+            afd = resolver.openTypedAssetFileDescriptor(documentUri, "image/*", openOpts);
 
             final FileDescriptor fd = afd.getFileDescriptor();
-            final BitmapFactory.Options bitmapOpts = new BitmapFactory.Options();
+            final long offset = afd.getStartOffset();
+            final long length = afd.getDeclaredLength();
 
-            bitmapOpts.inJustDecodeBounds = true;
-            BitmapFactory.decodeFileDescriptor(fd, null, bitmapOpts);
+            // Some thumbnails might be a region inside a larger file, such as
+            // an EXIF thumbnail. Since BitmapFactory aggressively seeks around
+            // the entire file, we read the region manually.
+            byte[] region = null;
+            if (offset > 0 && length <= 64 * KB_IN_BYTES) {
+                region = new byte[(int) length];
+                Libcore.os.lseek(fd, offset, SEEK_SET);
+                if (IoBridge.read(fd, region, 0, region.length) != region.length) {
+                    region = null;
+                }
+            }
 
-            final int widthSample = bitmapOpts.outWidth / size.x;
-            final int heightSample = bitmapOpts.outHeight / size.y;
+            // We requested a rough thumbnail size, but the remote size may have
+            // returned something giant, so defensively scale down as needed.
+            final BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inJustDecodeBounds = true;
+            if (region != null) {
+                BitmapFactory.decodeByteArray(region, 0, region.length, opts);
+            } else {
+                BitmapFactory.decodeFileDescriptor(fd, null, opts);
+            }
 
-            bitmapOpts.inJustDecodeBounds = false;
-            bitmapOpts.inSampleSize = Math.min(widthSample, heightSample);
-            return BitmapFactory.decodeFileDescriptor(fd, null, bitmapOpts);
+            final int widthSample = opts.outWidth / size.x;
+            final int heightSample = opts.outHeight / size.y;
+
+            opts.inJustDecodeBounds = false;
+            opts.inSampleSize = Math.min(widthSample, heightSample);
+            Log.d(TAG, "Decoding with sample size " + opts.inSampleSize);
+            if (region != null) {
+                return BitmapFactory.decodeByteArray(region, 0, region.length, opts);
+            } else {
+                return BitmapFactory.decodeFileDescriptor(fd, null, opts);
+            }
+        } catch (ErrnoException e) {
+            Log.w(TAG, "Failed to load thumbnail for " + documentUri + ": " + e);
+            return null;
         } catch (IOException e) {
             Log.w(TAG, "Failed to load thumbnail for " + documentUri + ": " + e);
             return null;
