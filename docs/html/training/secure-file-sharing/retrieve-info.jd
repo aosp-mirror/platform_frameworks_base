@@ -1,0 +1,110 @@
+page.title=Retrieving File Information
+
+trainingnavtop=true
+@jd:body
+
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- table of contents -->
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#RetrieveMimeType">Retrieve a File's MIME Type</a></li>
+  <li><a href="#RetrieveFileInfo">Retrieve a File's Name and Size</a></li>
+</ol>
+
+<!-- other docs (NOT javadocs) -->
+<h2>You should also read</h2>
+<ul>
+  <li><a href="{@docRoot}guide/topics/providers/content-provider-basics.html#SimpleQuery"
+  >Retrieving Data from the Provider</a></li>
+</ul>
+
+</div>
+</div>
+<p>
+    Before a client app tries to work with a file for which it has a content URI, the app can
+    request information about the file from the server app, including the file's data type and
+    file size. The data type helps the client app to determine if it can handle the file, and the
+    file size helps the client app set up buffering and caching for the file.
+</p>
+<p>
+    This lesson demonstrates how to query the server app's
+    {@link android.support.v4.content.FileProvider} to retrieve a file's MIME type and size.
+</p>
+<h2 id="RetrieveMimeType">Retrieve a File's MIME Type</h2>
+<p>
+    A file's data type indicates to the client app how it should handle the file's contents. To get
+    the data type of a shared file given its content URI, the client app calls
+    {@link android.content.ContentResolver#getType ContentResolver.getType()}. This method returns
+    the file's MIME type. By default, a
+    {@link android.support.v4.content.FileProvider} determines the file's MIME type from its
+    filename extension.
+</p>
+<p>
+    The following code snippet demonstrates how a client app retrieves the MIME type of a file once
+    the server app has returned the content URI to the client:
+</p>
+<pre>
+    ...
+    /*
+     * Get the file's content URI from the incoming Intent, then
+     * get the file's MIME type
+     */
+    Uri returnUri = returnIntent.getData();
+    String mimeType = getContentResolver().getType(returnUri);
+    ...
+</pre>
+<h2 id="RetrieveFileInfo">Retrieve a File's Name and Size</h2>
+<p>
+    The {@link android.support.v4.content.FileProvider} class has a default implementation of the
+    {@link android.support.v4.content.FileProvider#query query()} method that returns the
+    name and size of the file associated with a content URI in a
+    {@link android.database.Cursor}. The default implementation returns two columns:
+</p>
+<dl>
+    <dt>{@link android.provider.OpenableColumns#DISPLAY_NAME DISPLAY_NAME}</dt>
+    <dd>
+        The file's name, as a {@link java.lang.String}. This value is the same as the value returned
+        by {@link java.io.File#getName File.getName()}.
+    </dd>
+    <dt>{@link android.provider.OpenableColumns#SIZE SIZE}</dt>
+    <dd>
+        The size of the file in bytes, as a {@code long} This value is the same as the value
+        returned by {@link java.io.File#length File.length()}
+    </dd>
+</dl>
+<p>
+    The client app can get both the {@link android.provider.OpenableColumns#DISPLAY_NAME
+    DISPLAY_NAME} and {@link android.provider.OpenableColumns#SIZE SIZE} for a file by setting all
+    of the arguments of {@link android.support.v4.content.FileProvider#query query()} to
+    {@code null} except for the content URI. For example, this code snippet retrieves a file's
+    {@link android.provider.OpenableColumns#DISPLAY_NAME DISPLAY_NAME} and
+    {@link android.provider.OpenableColumns#SIZE SIZE} and displays each one in separate
+    {@link android.widget.TextView}:
+</p>
+<pre>
+    ...
+    /*
+     * Get the file's content URI from the incoming Intent,
+     * then query the server app to get the file's display name
+     * and size.
+     */
+    Uri returnUri = returnIntent.getData();
+    Cursor returnCursor =
+            getContentResolver().query(returnUri, null, null, null, null);
+    /*
+     * Get the column indexes of the data in the Cursor,
+     * move to the first row in the Cursor, get the data,
+     * and display it.
+     */
+    int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+    int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
+    returnCursor.moveToFirst();
+    TextView nameView = (TextView) findViewById(R.id.filename_text);
+    TextView sizeView = (TextView) findViewById(R.id.filesize_text);
+    nameView.setText(returnCursor.getString(nameIndex));
+    sizeView.setText(Long.toString(returnCursor.getLong(sizeIndex)));
+    ...
+</pre>
