@@ -3156,14 +3156,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             + mOverscanScreenWidth;
                     pf.bottom = df.bottom = of.bottom = cf.bottom = mOverscanScreenTop
                             + mOverscanScreenHeight;
-                } else if (attrs.type == WindowManager.LayoutParams.TYPE_WALLPAPER) {
-                    // The wallpaper mostly goes into the overscan region.
-                    pf.left = df.left = of.left = cf.left = mRestrictedOverscanScreenLeft;
-                    pf.top = df.top = of.top = cf.top = mRestrictedOverscanScreenTop;
+                } else if (attrs.type == TYPE_WALLPAPER) {
+                    // The wallpaper also has Real Ultimate Power.
+                    pf.left = df.left = of.left = cf.left = mUnrestrictedScreenLeft;
+                    pf.top = df.top = of.top = cf.top = mUnrestrictedScreenTop;
                     pf.right = df.right = of.right = cf.right
-                            = mRestrictedOverscanScreenLeft + mRestrictedOverscanScreenWidth;
+                            = mUnrestrictedScreenLeft + mUnrestrictedScreenWidth;
                     pf.bottom = df.bottom = of.bottom = cf.bottom
-                            = mRestrictedOverscanScreenTop + mRestrictedOverscanScreenHeight;
+                            = mUnrestrictedScreenTop + mUnrestrictedScreenHeight;
                 } else if ((attrs.flags & FLAG_LAYOUT_IN_OVERSCAN) != 0
                         && attrs.type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
                         && attrs.type <= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
