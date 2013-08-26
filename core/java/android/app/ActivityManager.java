@@ -490,6 +490,7 @@ public class ActivityManager {
 
         /**
          * The id of the ActivityStack this Task was on most recently.
+         * @hide
          */
         public int stackId;
 
