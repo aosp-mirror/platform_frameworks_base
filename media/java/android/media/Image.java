@@ -55,11 +55,11 @@ public interface Image extends AutoCloseable {
      * the planes is as follows:
      *
      * <table>
-     * <th>
-     *   <td>Format</td>
-     *   <td>Plane count</td>
-     *   <td>Layout details</td>
-     * </th>
+     * <tr>
+     *   <th>Format</th>
+     *   <th>Plane count</th>
+     *   <th>Layout details</th>
+     * </tr>
      * <tr>
      *   <td>{@link android.graphics.ImageFormat#JPEG}</td>
      *   <td>1</td>
