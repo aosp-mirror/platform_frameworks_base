@@ -407,10 +407,8 @@
     <string name="permdesc_readLogs" product="default" msgid="2063438140241560443">"Uygulamaya, sisteme ait çeşitli günlük dosyalarındaki bilgileri okuma izni verir. Bu izin, uygulamanın, kişisel ve gizli bilgileriniz de dahil olmak üzere telefonda yaptıklarınızla ilgili genel bilgileri bulmasına olanak verir."</string>
     <string name="permlab_anyCodecForPlayback" msgid="715805555823881818">"oynatma için herhangi bir medya kod çözücüyü kullan"</string>
     <string name="permdesc_anyCodecForPlayback" msgid="8283912488433189010">"Uygulamaya, oynatma kodunu çözmek için herhangi bir yüklü medya kod çözücüyü kullanma izni verir."</string>
-    <!-- no translation found for permlab_manageCaCertificates (1678391896786882014) -->
-    <skip />
-    <!-- no translation found for permdesc_manageCaCertificates (4015644047196937014) -->
-    <skip />
+    <string name="permlab_manageCaCertificates" msgid="1678391896786882014">"güvenilen kimlik bilgilerini yönetme"</string>
+    <string name="permdesc_manageCaCertificates" msgid="4015644047196937014">"Uygulamaya, güvenilir kimlik bilgileri olarak CA sertifikaları yükleme veya sertifikaların yüklemelerini kaldırma izni verir."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"sahibi tanılama olan kaynakları oku/bunlara yaz"</string>
     <string name="permdesc_diagnostic" msgid="6608295692002452283">"Uygulamaya, tanılama grubunun sahip olduğu tüm kaynaklara (örneğin /dev içindeki dosyalar) okuma ve yazma izni verir. Bu işlevin sistem kararlılığını ve güvenliğini olumsuz etkileme olasılığı vardır. Üretici veya operatör tarafından YALNIZCA donanıma özgü tanılama için kullanılmalıdır."</string>
     <string name="permlab_changeComponentState" msgid="6335576775711095931">"uygulama bileşenlerini etkinleştir veya devre dışı bırak"</string>
