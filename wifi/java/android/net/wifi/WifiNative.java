@@ -619,6 +619,37 @@ public class WifiNative {
         return doBooleanCommand("P2P_LISTEN " + timeout);
     }
 
+    public boolean p2pExtListen(boolean enable, int period, int interval) {
+        if (enable && interval < period) {
+            return false;
+        }
+        return doBooleanCommand("P2P_EXT_LISTEN"
+                    + (enable ? (" " + period + " " + interval) : ""));
+    }
+
+    public boolean p2pSetChannel(int lc, int oc) {
+        if (DBG) Log.d(mTAG, "p2pSetChannel: lc="+lc+", oc="+oc);
+
+        if (lc >=1 && lc <= 11) {
+            if (!doBooleanCommand("P2P_SET listen_channel " + lc)) {
+                return false;
+            }
+        } else if (lc != 0) {
+            return false;
+        }
+
+        if (oc >= 1 && oc <= 165 ) {
+            int freq = (oc <= 14 ? 2407 : 5000) + oc * 5;
+            return doBooleanCommand("P2P_SET disallow_freq 1000-"
+                    + (freq - 5) + "," + (freq + 5) + "-6000");
+        } else if (oc == 0) {
+            /* oc==0 disables "P2P_SET disallow_freq" (enables all freqs) */
+            return doBooleanCommand("P2P_SET disallow_freq \"\"");
+        }
+
+        return false;
+    }
+
     public boolean p2pFlush() {
         return doBooleanCommand("P2P_FLUSH");
     }
