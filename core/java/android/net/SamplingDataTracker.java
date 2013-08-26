@@ -37,12 +37,12 @@ public class SamplingDataTracker
 
     public static class SamplingSnapshot
     {
-        public int  mTxByteCount;
-        public int  mRxByteCount;
-        public int  mTxPacketCount;
-        public int  mRxPacketCount;
-        public int  mTxPacketErrorCount;
-        public int  mRxPacketErrorCount;
+        public long mTxByteCount;
+        public long mRxByteCount;
+        public long mTxPacketCount;
+        public long mRxPacketCount;
+        public long mTxPacketErrorCount;
+        public long mRxPacketErrorCount;
         public long mTimestamp;
     }
 
@@ -76,32 +76,37 @@ public class SamplingDataTracker
                 if (DBG) Slog.d(TAG, "Found data for interface " + currentIface);
                 if (mapIfaceToSample.containsKey(currentIface)) {
 
-                    SamplingSnapshot ss = new SamplingSnapshot();
+                    try {
+                        SamplingSnapshot ss = new SamplingSnapshot();
 
-                    ss.mTxByteCount        = Integer.parseInt(tokens[1]);
-                    ss.mTxPacketCount      = Integer.parseInt(tokens[2]);
-                    ss.mTxPacketErrorCount = Integer.parseInt(tokens[3]);
-                    ss.mRxByteCount        = Integer.parseInt(tokens[9]);
-                    ss.mRxPacketCount      = Integer.parseInt(tokens[10]);
-                    ss.mRxPacketErrorCount = Integer.parseInt(tokens[11]);
+                        ss.mTxByteCount        = Long.parseLong(tokens[1]);
+                        ss.mTxPacketCount      = Long.parseLong(tokens[2]);
+                        ss.mTxPacketErrorCount = Long.parseLong(tokens[3]);
+                        ss.mRxByteCount        = Long.parseLong(tokens[9]);
+                        ss.mRxPacketCount      = Long.parseLong(tokens[10]);
+                        ss.mRxPacketErrorCount = Long.parseLong(tokens[11]);
 
-                    ss.mTimestamp          = SystemClock.elapsedRealtime();
+                        ss.mTimestamp          = SystemClock.elapsedRealtime();
 
-                    if (DBG) {
-                        Slog.d(TAG, "Interface = " + currentIface);
-                        Slog.d(TAG, "ByteCount = " + String.valueOf(ss.mTxByteCount));
-                        Slog.d(TAG, "TxPacketCount = " + String.valueOf(ss.mTxPacketCount));
-                        Slog.d(TAG, "TxPacketErrorCount = "
-                                + String.valueOf(ss.mTxPacketErrorCount));
-                        Slog.d(TAG, "RxByteCount = " + String.valueOf(ss.mRxByteCount));
-                        Slog.d(TAG, "RxPacketCount = " + String.valueOf(ss.mRxPacketCount));
-                        Slog.d(TAG, "RxPacketErrorCount = "
-                                + String.valueOf(ss.mRxPacketErrorCount));
-                        Slog.d(TAG, "Timestamp = " + String.valueOf(ss.mTimestamp));
-                        Slog.d(TAG, "---------------------------");
+                        if (DBG) {
+                            Slog.d(TAG, "Interface = " + currentIface);
+                            Slog.d(TAG, "ByteCount = " + String.valueOf(ss.mTxByteCount));
+                            Slog.d(TAG, "TxPacketCount = " + String.valueOf(ss.mTxPacketCount));
+                            Slog.d(TAG, "TxPacketErrorCount = "
+                                    + String.valueOf(ss.mTxPacketErrorCount));
+                            Slog.d(TAG, "RxByteCount = " + String.valueOf(ss.mRxByteCount));
+                            Slog.d(TAG, "RxPacketCount = " + String.valueOf(ss.mRxPacketCount));
+                            Slog.d(TAG, "RxPacketErrorCount = "
+                                    + String.valueOf(ss.mRxPacketErrorCount));
+                            Slog.d(TAG, "Timestamp = " + String.valueOf(ss.mTimestamp));
+                            Slog.d(TAG, "---------------------------");
+                        }
+
+                        mapIfaceToSample.put(currentIface, ss);
+
+                    } catch (NumberFormatException e) {
+                        // just ignore this data point
                     }
-
-                    mapIfaceToSample.put(currentIface, ss);
                 }
             }
 
@@ -179,7 +184,7 @@ public class SamplingDataTracker
         }
     }
 
-    public int getSampledTxByteCount() {
+    public long getSampledTxByteCount() {
         synchronized(mSamplingDataLock) {
             if (mBeginningSample != null && mEndingSample != null) {
                 return mEndingSample.mTxByteCount - mBeginningSample.mTxByteCount;
@@ -189,7 +194,7 @@ public class SamplingDataTracker
         }
     }
 
-    public int getSampledTxPacketCount() {
+    public long getSampledTxPacketCount() {
         synchronized(mSamplingDataLock) {
             if (mBeginningSample != null && mEndingSample != null) {
                 return mEndingSample.mTxPacketCount - mBeginningSample.mTxPacketCount;
@@ -199,7 +204,7 @@ public class SamplingDataTracker
         }
     }
 
-    public int getSampledTxPacketErrorCount() {
+    public long getSampledTxPacketErrorCount() {
         synchronized(mSamplingDataLock) {
             if (mBeginningSample != null && mEndingSample != null) {
                 return mEndingSample.mTxPacketErrorCount - mBeginningSample.mTxPacketErrorCount;
@@ -209,7 +214,7 @@ public class SamplingDataTracker
         }
     }
 
-    public int getSampledRxByteCount() {
+    public long getSampledRxByteCount() {
         synchronized(mSamplingDataLock) {
             if (mBeginningSample != null && mEndingSample != null) {
                 return mEndingSample.mRxByteCount - mBeginningSample.mRxByteCount;
@@ -219,7 +224,7 @@ public class SamplingDataTracker
         }
     }
 
-    public int getSampledRxPacketCount() {
+    public long getSampledRxPacketCount() {
         synchronized(mSamplingDataLock) {
             if (mBeginningSample != null && mEndingSample != null) {
                 return mEndingSample.mRxPacketCount - mBeginningSample.mRxPacketCount;
@@ -229,31 +234,31 @@ public class SamplingDataTracker
         }
     }
 
-    public int getSampledPacketCount() {
+    public long getSampledPacketCount() {
         return getSampledPacketCount(mBeginningSample, mEndingSample);
     }
 
-    public int getSampledPacketCount(SamplingSnapshot begin, SamplingSnapshot end) {
+    public long getSampledPacketCount(SamplingSnapshot begin, SamplingSnapshot end) {
         if (begin != null && end != null) {
-            int rxPacketCount = end.mRxPacketCount - begin.mRxPacketCount;
-            int txPacketCount = end.mTxPacketCount - begin.mTxPacketCount;
+            long rxPacketCount = end.mRxPacketCount - begin.mRxPacketCount;
+            long txPacketCount = end.mTxPacketCount - begin.mTxPacketCount;
             return rxPacketCount + txPacketCount;
         } else {
             return LinkInfo.UNKNOWN;
         }
     }
 
-    public int getSampledPacketErrorCount() {
+    public long getSampledPacketErrorCount() {
         if (mBeginningSample != null && mEndingSample != null) {
-            int rxPacketErrorCount = getSampledRxPacketErrorCount();
-            int txPacketErrorCount = getSampledTxPacketErrorCount();
+            long rxPacketErrorCount = getSampledRxPacketErrorCount();
+            long txPacketErrorCount = getSampledTxPacketErrorCount();
             return rxPacketErrorCount + txPacketErrorCount;
         } else {
             return LinkInfo.UNKNOWN;
         }
     }
 
-    public int getSampledRxPacketErrorCount() {
+    public long getSampledRxPacketErrorCount() {
         synchronized(mSamplingDataLock) {
             if (mBeginningSample != null && mEndingSample != null) {
                 return mEndingSample.mRxPacketErrorCount - mBeginningSample.mRxPacketErrorCount;
