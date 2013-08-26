@@ -33,7 +33,7 @@ import java.io.PrintWriter;
  * Controls state/behavior specific to a system bar window.
  */
 public class BarController {
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private static final int TRANSIENT_BAR_NONE = 0;
     private static final int TRANSIENT_BAR_SHOWING = 1;
@@ -126,6 +126,7 @@ public class BarController {
     private void updateState(final int state) {
         if (state != mState) {
             mState = state;
+            if (DEBUG) Slog.d(mTag, "mState: " + StatusBarManager.windowStateToString(state));
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -135,6 +136,7 @@ public class BarController {
                             statusbar.setWindowState(mStatusBarManagerId, state);
                         }
                     } catch (RemoteException e) {
+                        if (DEBUG) Slog.w(mTag, "Error posting window state", e);
                         // re-acquire status bar service next time it is needed.
                         mStatusBarService = null;
                     }
@@ -204,7 +206,7 @@ public class BarController {
                 mLastTransparent = SystemClock.uptimeMillis();
             }
             mTransientBarState = state;
-            if (DEBUG) Slog.d(mTag, "New state: " + transientBarStateToString(state));
+            if (DEBUG) Slog.d(mTag, "mTransientBarState: " + transientBarStateToString(state));
         }
     }
 
@@ -227,8 +229,10 @@ public class BarController {
 
     public void dump(PrintWriter pw, String prefix) {
         if (mWin != null) {
-            pw.print(prefix); pw.print(mTag); pw.print(' ');
-            pw.print("mTransientBar"); pw.print('=');
+            pw.print(prefix); pw.println(mTag);
+            pw.print("  "); pw.print("mState"); pw.print('=');
+            pw.println(StatusBarManager.windowStateToString(mState));
+            pw.print("  "); pw.print("mTransientBar"); pw.print('=');
             pw.println(transientBarStateToString(mTransientBarState));
         }
     }

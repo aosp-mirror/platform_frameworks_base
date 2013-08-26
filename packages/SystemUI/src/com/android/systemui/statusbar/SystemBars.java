@@ -22,6 +22,9 @@ import android.util.Log;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 /**
  * Ensure a single status bar service implementation is running at all times.
  *
@@ -64,6 +67,13 @@ public class SystemBars extends SystemUI implements ServiceMonitor.Callbacks {
             return WAIT_FOR_BARS_TO_DIE;
         }
         return 0;
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mStatusBar != null) {
+            mStatusBar.dump(fd, pw, args);
+        }
     }
 
     private void createStatusBarFromConfig() {
