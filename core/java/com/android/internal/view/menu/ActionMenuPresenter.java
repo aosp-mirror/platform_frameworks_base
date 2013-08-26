@@ -565,7 +565,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
             setVisibility(VISIBLE);
             setEnabled(true);
 
-            setOnTouchListener(new ForwardingListener(context) {
+            setOnTouchListener(new ForwardingListener(this) {
                 @Override
                 public ListPopupWindow getPopup() {
                     if (mOverflowPopup == null) {

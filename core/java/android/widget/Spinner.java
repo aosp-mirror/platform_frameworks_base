@@ -198,7 +198,7 @@ public class Spinner extends AbsSpinner implements OnClickListener {
             }
 
             mPopup = popup;
-            mForwardingListener = new ForwardingListener(context) {
+            mForwardingListener = new ForwardingListener(this) {
                 @Override
                 public ListPopupWindow getPopup() {
                     return popup;
