@@ -654,9 +654,9 @@ public abstract class ContentResolver {
      * @param uri The desired URI to open.
      * @param mode The file mode to use, as per {@link ContentProvider#openFile
      * ContentProvider.openFile}.
-     * @param signal A signal to cancel the operation in progress, or null if
-     *            none. If the operation is canceled, then
-     *            {@link OperationCanceledException} will be thrown.
+     * @param cancellationSignal A signal to cancel the operation in progress,
+     *         or null if none. If the operation is canceled, then
+     *         {@link OperationCanceledException} will be thrown.
      * @return Returns a new ParcelFileDescriptor pointing to the file.  You
      * own this descriptor and are responsible for closing it when done.
      * @throws FileNotFoundException Throws FileNotFoundException if no
@@ -781,7 +781,7 @@ public abstract class ContentResolver {
      * @param uri The desired URI to open.
      * @param mode The file mode to use, as per {@link ContentProvider#openAssetFile
      * ContentProvider.openAssetFile}.
-     * @param signal A signal to cancel the operation in progress, or null if
+     * @param cancellationSignal A signal to cancel the operation in progress, or null if
      *            none. If the operation is canceled, then
      *            {@link OperationCanceledException} will be thrown.
      * @return Returns a new ParcelFileDescriptor pointing to the file.  You
@@ -937,9 +937,9 @@ public abstract class ContentResolver {
      * select a type, though there is no way for you to determine what type
      * it is returning.
      * @param opts Additional provider-dependent options.
-     * @param signal A signal to cancel the operation in progress, or null if
-     *            none. If the operation is canceled, then
-     *            {@link OperationCanceledException} will be thrown.
+     * @param cancellationSignal A signal to cancel the operation in progress,
+     *         or null if none. If the operation is canceled, then
+     *         {@link OperationCanceledException} will be thrown.
      * @return Returns a new ParcelFileDescriptor from which you can read the
      * data stream from the provider.  Note that this may be a pipe, meaning
      * you can't seek in it.  The only seek you should do is if the
