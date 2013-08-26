@@ -1876,9 +1876,13 @@ public final class InputMethodManager {
     }
 
     /**
-     * Returns true if the current IME needs to offer the users a way to switch to a next input
-     * method. When the user triggers it, the IME has to call {@link #switchToNextInputMethod} to
-     * switch to a next input method which is selected by the system.
+     * Returns true if the current IME needs to offer the users ways to switch to a next input
+     * method (e.g. a globe key.).
+     * When an IME sets supportsSwitchingToNextInputMethod and this method returns true,
+     * the IME has to offer ways to to invoke {@link #switchToNextInputMethod} accordingly.
+     * <p> Note that the system determines the most appropriate next input method
+     * and subtype in order to provide the consistent user experience in switching
+     * between IMEs and subtypes.
      * @param imeToken Supplies the identifying token given to an input method when it was started,
      * which allows it to perform this operation on itself.
      */
