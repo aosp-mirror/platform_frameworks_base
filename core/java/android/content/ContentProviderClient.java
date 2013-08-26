@@ -63,14 +63,7 @@ public class ContentProviderClient {
     /** See {@link ContentProvider#query ContentProvider.query} */
     public Cursor query(Uri url, String[] projection, String selection,
             String[] selectionArgs, String sortOrder) throws RemoteException {
-        try {
-            return query(url, projection, selection,  selectionArgs, sortOrder, null);
-        } catch (DeadObjectException e) {
-            if (!mStable) {
-                mContentResolver.unstableProviderDied(mContentProvider);
-            }
-            throw e;
-        }
+        return query(url, projection, selection,  selectionArgs, sortOrder, null);
     }
 
     /** See {@link ContentProvider#query ContentProvider.query} */
@@ -177,8 +170,25 @@ public class ContentProviderClient {
      */
     public ParcelFileDescriptor openFile(Uri url, String mode)
             throws RemoteException, FileNotFoundException {
+        return openFile(url, mode, null);
+    }
+
+    /**
+     * See {@link ContentProvider#openFile ContentProvider.openFile}.  Note that
+     * this <em>does not</em>
+     * take care of non-content: URIs such as file:.  It is strongly recommended
+     * you use the {@link ContentResolver#openFileDescriptor
+     * ContentResolver.openFileDescriptor} API instead.
+     */
+    public ParcelFileDescriptor openFile(Uri url, String mode, CancellationSignal signal)
+            throws RemoteException, FileNotFoundException {
+        ICancellationSignal remoteSignal = null;
+        if (signal != null) {
+            remoteSignal = mContentProvider.createCancellationSignal();
+            signal.setRemote(remoteSignal);
+        }
         try {
-            return mContentProvider.openFile(mPackageName, url, mode);
+            return mContentProvider.openFile(mPackageName, url, mode, remoteSignal);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -196,8 +206,25 @@ public class ContentProviderClient {
      */
     public AssetFileDescriptor openAssetFile(Uri url, String mode)
             throws RemoteException, FileNotFoundException {
+        return openAssetFile(url, mode, null);
+    }
+
+    /**
+     * See {@link ContentProvider#openAssetFile ContentProvider.openAssetFile}.
+     * Note that this <em>does not</em>
+     * take care of non-content: URIs such as file:.  It is strongly recommended
+     * you use the {@link ContentResolver#openAssetFileDescriptor
+     * ContentResolver.openAssetFileDescriptor} API instead.
+     */
+    public AssetFileDescriptor openAssetFile(Uri url, String mode, CancellationSignal signal)
+            throws RemoteException, FileNotFoundException {
+        ICancellationSignal remoteSignal = null;
+        if (signal != null) {
+            remoteSignal = mContentProvider.createCancellationSignal();
+            signal.setRemote(remoteSignal);
+        }
         try {
-            return mContentProvider.openAssetFile(mPackageName, url, mode);
+            return mContentProvider.openAssetFile(mPackageName, url, mode, remoteSignal);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);
@@ -208,10 +235,22 @@ public class ContentProviderClient {
 
     /** See {@link ContentProvider#openTypedAssetFile ContentProvider.openTypedAssetFile} */
     public final AssetFileDescriptor openTypedAssetFileDescriptor(Uri uri,
-            String mimeType, Bundle opts)
+            String mimeType, Bundle opts) throws RemoteException, FileNotFoundException {
+        return openTypedAssetFileDescriptor(uri, mimeType, opts, null);
+    }
+
+    /** See {@link ContentProvider#openTypedAssetFile ContentProvider.openTypedAssetFile} */
+    public final AssetFileDescriptor openTypedAssetFileDescriptor(Uri uri,
+            String mimeType, Bundle opts, CancellationSignal signal)
             throws RemoteException, FileNotFoundException {
+        ICancellationSignal remoteSignal = null;
+        if (signal != null) {
+            remoteSignal = mContentProvider.createCancellationSignal();
+            signal.setRemote(remoteSignal);
+        }
         try {
-            return mContentProvider.openTypedAssetFile(mPackageName, uri, mimeType, opts);
+            return mContentProvider.openTypedAssetFile(
+                    mPackageName, uri, mimeType, opts, remoteSignal);
         } catch (DeadObjectException e) {
             if (!mStable) {
                 mContentResolver.unstableProviderDied(mContentProvider);

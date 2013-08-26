@@ -16,11 +16,9 @@
 
 package android.content;
 
-import static android.content.pm.PackageManager.GET_PROVIDERS;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.app.AppOpsManager;
-import android.content.pm.PackageManager;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.content.res.AssetFileDescriptor;
@@ -261,17 +259,21 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         }
 
         @Override
-        public ParcelFileDescriptor openFile(String callingPkg, Uri uri, String mode)
+        public ParcelFileDescriptor openFile(
+                String callingPkg, Uri uri, String mode, ICancellationSignal cancellationSignal)
                 throws FileNotFoundException {
             enforceFilePermission(callingPkg, uri, mode);
-            return ContentProvider.this.openFile(uri, mode);
+            return ContentProvider.this.openFile(
+                    uri, mode, CancellationSignal.fromTransport(cancellationSignal));
         }
 
         @Override
-        public AssetFileDescriptor openAssetFile(String callingPkg, Uri uri, String mode)
+        public AssetFileDescriptor openAssetFile(
+                String callingPkg, Uri uri, String mode, ICancellationSignal cancellationSignal)
                 throws FileNotFoundException {
             enforceFilePermission(callingPkg, uri, mode);
-            return ContentProvider.this.openAssetFile(uri, mode);
+            return ContentProvider.this.openAssetFile(
+                    uri, mode, CancellationSignal.fromTransport(cancellationSignal));
         }
 
         @Override
@@ -286,9 +288,10 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
 
         @Override
         public AssetFileDescriptor openTypedAssetFile(String callingPkg, Uri uri, String mimeType,
-                Bundle opts) throws FileNotFoundException {
+                Bundle opts, ICancellationSignal cancellationSignal) throws FileNotFoundException {
             enforceFilePermission(callingPkg, uri, "r");
-            return ContentProvider.this.openTypedAssetFile(uri, mimeType, opts);
+            return ContentProvider.this.openTypedAssetFile(
+                    uri, mimeType, opts, CancellationSignal.fromTransport(cancellationSignal));
         }
 
         @Override
@@ -874,6 +877,18 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * <p>The returned ParcelFileDescriptor is owned by the caller, so it is
      * their responsibility to close it when done.  That is, the implementation
      * of this method should create a new ParcelFileDescriptor for each call.
+     * <p>
+     * If opened with the exclusive "r" or "w" modes, the returned
+     * ParcelFileDescriptor can be a pipe or socket pair to enable streaming
+     * of data. Opening with the "rw" or "rwt" modes implies a file on disk that
+     * supports seeking.
+     * <p>
+     * If you need to detect when the returned ParcelFileDescriptor has been
+     * closed, or if the remote process has crashed or encountered some other
+     * error, you can use {@link ParcelFileDescriptor#open(File, int,
+     * android.os.Handler, android.os.ParcelFileDescriptor.OnCloseListener)},
+     * {@link ParcelFileDescriptor#createReliablePipe()}, or
+     * {@link ParcelFileDescriptor#createReliableSocketPair()}.
      *
      * <p class="note">For use in Intents, you will want to implement {@link #getType}
      * to return the appropriate MIME type for the data returned here with
@@ -911,6 +926,74 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     }
 
     /**
+     * Override this to handle requests to open a file blob.
+     * The default implementation always throws {@link FileNotFoundException}.
+     * This method can be called from multiple threads, as described in
+     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
+     *
+     * <p>This method returns a ParcelFileDescriptor, which is returned directly
+     * to the caller.  This way large data (such as images and documents) can be
+     * returned without copying the content.
+     *
+     * <p>The returned ParcelFileDescriptor is owned by the caller, so it is
+     * their responsibility to close it when done.  That is, the implementation
+     * of this method should create a new ParcelFileDescriptor for each call.
+     * <p>
+     * If opened with the exclusive "r" or "w" modes, the returned
+     * ParcelFileDescriptor can be a pipe or socket pair to enable streaming
+     * of data. Opening with the "rw" or "rwt" modes implies a file on disk that
+     * supports seeking.
+     * <p>
+     * If you need to detect when the returned ParcelFileDescriptor has been
+     * closed, or if the remote process has crashed or encountered some other
+     * error, you can use {@link ParcelFileDescriptor#open(File, int,
+     * android.os.Handler, android.os.ParcelFileDescriptor.OnCloseListener)},
+     * {@link ParcelFileDescriptor#createReliablePipe()}, or
+     * {@link ParcelFileDescriptor#createReliableSocketPair()}.
+     *
+     * <p class="note">For use in Intents, you will want to implement {@link #getType}
+     * to return the appropriate MIME type for the data returned here with
+     * the same URI.  This will allow intent resolution to automatically determine the data MIME
+     * type and select the appropriate matching targets as part of its operation.</p>
+     *
+     * <p class="note">For better interoperability with other applications, it is recommended
+     * that for any URIs that can be opened, you also support queries on them
+     * containing at least the columns specified by {@link android.provider.OpenableColumns}.
+     * You may also want to support other common columns if you have additional meta-data
+     * to supply, such as {@link android.provider.MediaStore.MediaColumns#DATE_ADDED}
+     * in {@link android.provider.MediaStore.MediaColumns}.</p>
+     *
+     * @param uri The URI whose file is to be opened.
+     * @param mode Access mode for the file. May be "r" for read-only access,
+     *            "w" for write-only access, "rw" for read and write access, or
+     *            "rwt" for read and write access that truncates any existing
+     *            file.
+     * @param signal A signal to cancel the operation in progress, or
+     *            {@code null} if none. For example, if you are downloading a
+     *            file from the network to service a "rw" mode request, you
+     *            should periodically call
+     *            {@link CancellationSignal#throwIfCanceled()} to check whether
+     *            the client has canceled the request and abort the download.
+     *
+     * @return Returns a new ParcelFileDescriptor which you can use to access
+     * the file.
+     *
+     * @throws FileNotFoundException Throws FileNotFoundException if there is
+     * no file associated with the given URI or the mode is invalid.
+     * @throws SecurityException Throws SecurityException if the caller does
+     * not have permission to access the file.
+     *
+     * @see #openAssetFile(Uri, String)
+     * @see #openFileHelper(Uri, String)
+     * @see #getType(android.net.Uri)
+     */
+    public ParcelFileDescriptor openFile(Uri uri, String mode, CancellationSignal signal)
+            throws FileNotFoundException {
+        return openFile(uri, mode);
+    }
+
+    /**
      * This is like {@link #openFile}, but can be implemented by providers
      * that need to be able to return sub-sections of files, often assets
      * inside of their .apk.
@@ -924,11 +1007,14 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * {@link ContentResolver#openInputStream ContentResolver.openInputStream}
      * or {@link ContentResolver#openOutputStream ContentResolver.openOutputStream}
      * methods.
+     * <p>
+     * The returned AssetFileDescriptor can be a pipe or socket pair to enable
+     * streaming of data.
      *
      * <p class="note">If you are implementing this to return a full file, you
      * should create the AssetFileDescriptor with
      * {@link AssetFileDescriptor#UNKNOWN_LENGTH} to be compatible with
-     * applications that can not handle sub-sections of files.</p>
+     * applications that cannot handle sub-sections of files.</p>
      *
      * <p class="note">For use in Intents, you will want to implement {@link #getType}
      * to return the appropriate MIME type for the data returned here with
@@ -962,6 +1048,68 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             throws FileNotFoundException {
         ParcelFileDescriptor fd = openFile(uri, mode);
         return fd != null ? new AssetFileDescriptor(fd, 0, -1) : null;
+    }
+
+    /**
+     * This is like {@link #openFile}, but can be implemented by providers
+     * that need to be able to return sub-sections of files, often assets
+     * inside of their .apk.
+     * This method can be called from multiple threads, as described in
+     * <a href="{@docRoot}guide/topics/fundamentals/processes-and-threads.html#Threads">Processes
+     * and Threads</a>.
+     *
+     * <p>If you implement this, your clients must be able to deal with such
+     * file slices, either directly with
+     * {@link ContentResolver#openAssetFileDescriptor}, or by using the higher-level
+     * {@link ContentResolver#openInputStream ContentResolver.openInputStream}
+     * or {@link ContentResolver#openOutputStream ContentResolver.openOutputStream}
+     * methods.
+     * <p>
+     * The returned AssetFileDescriptor can be a pipe or socket pair to enable
+     * streaming of data.
+     *
+     * <p class="note">If you are implementing this to return a full file, you
+     * should create the AssetFileDescriptor with
+     * {@link AssetFileDescriptor#UNKNOWN_LENGTH} to be compatible with
+     * applications that cannot handle sub-sections of files.</p>
+     *
+     * <p class="note">For use in Intents, you will want to implement {@link #getType}
+     * to return the appropriate MIME type for the data returned here with
+     * the same URI.  This will allow intent resolution to automatically determine the data MIME
+     * type and select the appropriate matching targets as part of its operation.</p>
+     *
+     * <p class="note">For better interoperability with other applications, it is recommended
+     * that for any URIs that can be opened, you also support queries on them
+     * containing at least the columns specified by {@link android.provider.OpenableColumns}.</p>
+     *
+     * @param uri The URI whose file is to be opened.
+     * @param mode Access mode for the file.  May be "r" for read-only access,
+     * "w" for write-only access (erasing whatever data is currently in
+     * the file), "wa" for write-only access to append to any existing data,
+     * "rw" for read and write access on any existing data, and "rwt" for read
+     * and write access that truncates any existing file.
+     * @param signal A signal to cancel the operation in progress, or
+     *            {@code null} if none. For example, if you are downloading a
+     *            file from the network to service a "rw" mode request, you
+     *            should periodically call
+     *            {@link CancellationSignal#throwIfCanceled()} to check whether
+     *            the client has canceled the request and abort the download.
+     *
+     * @return Returns a new AssetFileDescriptor which you can use to access
+     * the file.
+     *
+     * @throws FileNotFoundException Throws FileNotFoundException if there is
+     * no file associated with the given URI or the mode is invalid.
+     * @throws SecurityException Throws SecurityException if the caller does
+     * not have permission to access the file.
+     *
+     * @see #openFile(Uri, String)
+     * @see #openFileHelper(Uri, String)
+     * @see #getType(android.net.Uri)
+     */
+    public AssetFileDescriptor openAssetFile(Uri uri, String mode, CancellationSignal signal)
+            throws FileNotFoundException {
+        return openAssetFile(uri, mode);
     }
 
     /**
@@ -1041,6 +1189,9 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      *
      * <p>See {@link ClipData} for examples of the use and implementation
      * of this method.
+     * <p>
+     * The returned AssetFileDescriptor can be a pipe or socket pair to enable
+     * streaming of data.
      *
      * <p class="note">For better interoperability with other applications, it is recommended
      * that for any URIs that can be opened, you also support queries on them
@@ -1084,6 +1235,64 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             return openAssetFile(uri, "r");
         }
         throw new FileNotFoundException("Can't open " + uri + " as type " + mimeTypeFilter);
+    }
+
+
+    /**
+     * Called by a client to open a read-only stream containing data of a
+     * particular MIME type.  This is like {@link #openAssetFile(Uri, String)},
+     * except the file can only be read-only and the content provider may
+     * perform data conversions to generate data of the desired type.
+     *
+     * <p>The default implementation compares the given mimeType against the
+     * result of {@link #getType(Uri)} and, if they match, simply calls
+     * {@link #openAssetFile(Uri, String)}.
+     *
+     * <p>See {@link ClipData} for examples of the use and implementation
+     * of this method.
+     * <p>
+     * The returned AssetFileDescriptor can be a pipe or socket pair to enable
+     * streaming of data.
+     *
+     * <p class="note">For better interoperability with other applications, it is recommended
+     * that for any URIs that can be opened, you also support queries on them
+     * containing at least the columns specified by {@link android.provider.OpenableColumns}.
+     * You may also want to support other common columns if you have additional meta-data
+     * to supply, such as {@link android.provider.MediaStore.MediaColumns#DATE_ADDED}
+     * in {@link android.provider.MediaStore.MediaColumns}.</p>
+     *
+     * @param uri The data in the content provider being queried.
+     * @param mimeTypeFilter The type of data the client desires.  May be
+     * a pattern, such as *\/*, if the caller does not have specific type
+     * requirements; in this case the content provider will pick its best
+     * type matching the pattern.
+     * @param opts Additional options from the client.  The definitions of
+     * these are specific to the content provider being called.
+     * @param signal A signal to cancel the operation in progress, or
+     *            {@code null} if none. For example, if you are downloading a
+     *            file from the network to service a "rw" mode request, you
+     *            should periodically call
+     *            {@link CancellationSignal#throwIfCanceled()} to check whether
+     *            the client has canceled the request and abort the download.
+     *
+     * @return Returns a new AssetFileDescriptor from which the client can
+     * read data of the desired type.
+     *
+     * @throws FileNotFoundException Throws FileNotFoundException if there is
+     * no file associated with the given URI or the mode is invalid.
+     * @throws SecurityException Throws SecurityException if the caller does
+     * not have permission to access the data.
+     * @throws IllegalArgumentException Throws IllegalArgumentException if the
+     * content provider does not support the requested MIME type.
+     *
+     * @see #getStreamTypes(Uri, String)
+     * @see #openAssetFile(Uri, String)
+     * @see ClipDescription#compareMimeTypes(String, String)
+     */
+    public AssetFileDescriptor openTypedAssetFile(
+            Uri uri, String mimeTypeFilter, Bundle opts, CancellationSignal signal)
+            throws FileNotFoundException {
+        return openTypedAssetFile(uri, mimeTypeFilter, opts);
     }
 
     /**

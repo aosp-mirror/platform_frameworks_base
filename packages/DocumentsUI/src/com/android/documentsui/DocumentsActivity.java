@@ -584,7 +584,6 @@ public class DocumentsActivity extends Activity {
             SaveFragment.get(fm).setReplaceTarget(doc);
         } else if (mAction == ACTION_MANAGE) {
             // Open the document
-            // TODO: trampoline activity for launching downloaded APKs
             final Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.setData(doc.uri);

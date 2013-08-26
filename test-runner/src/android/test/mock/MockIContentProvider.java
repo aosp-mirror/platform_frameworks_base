@@ -61,11 +61,13 @@ public class MockIContentProvider implements IContentProvider {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
-    public ParcelFileDescriptor openFile(String callingPackage, Uri url, String mode) {
+    public ParcelFileDescriptor openFile(
+            String callingPackage, Uri url, String mode, ICancellationSignal signal) {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
-    public AssetFileDescriptor openAssetFile(String callingPackage, Uri uri, String mode) {
+    public AssetFileDescriptor openAssetFile(
+            String callingPackage, Uri uri, String mode, ICancellationSignal signal) {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
@@ -104,7 +106,7 @@ public class MockIContentProvider implements IContentProvider {
     }
 
     public AssetFileDescriptor openTypedAssetFile(String callingPackage, Uri url, String mimeType,
-            Bundle opts) throws RemoteException, FileNotFoundException {
+            Bundle opts, ICancellationSignal signal) throws RemoteException, FileNotFoundException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 
