@@ -402,6 +402,7 @@ public class RemoteControlClient
         MediaMetadataRetriever.METADATA_KEY_CD_TRACK_NUMBER,
         MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER,
         MediaMetadataRetriever.METADATA_KEY_DURATION,
+        MediaMetadataRetriever.METADATA_KEY_YEAR,
         MetadataEditor.LONG_KEY_RATING_TYPE,
         MetadataEditor.LONG_KEY_RATING_BY_OTHERS,
         MetadataEditor.LONG_KEY_RATING_BY_USER};
