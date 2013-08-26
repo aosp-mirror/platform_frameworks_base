@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.StatusBarManager.windowStateToString;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
@@ -109,6 +110,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     public static final boolean DEBUG_GESTURES = false;
 
     public static final boolean DEBUG_CLINGS = false;
+    public static final boolean DEBUG_WINDOW_STATE = true;
 
     public static final boolean ENABLE_NOTIFICATION_PANEL_CLING = false;
 
@@ -1844,7 +1846,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 && window == StatusBarManager.WINDOW_STATUS_BAR
                 && mStatusBarWindowState != state) {
             mStatusBarWindowState = state;
-            if (DEBUG) Log.d(TAG, "Status bar " + StatusBarManager.windowStateToString(state));
+            if (DEBUG_WINDOW_STATE) Log.d(TAG, "Status bar " + windowStateToString(state));
             mStatusBarWindow.setEnabled(showing);
             if (!showing) {
                 mStatusBarView.collapseAllPanels(false);
@@ -1854,7 +1856,7 @@ public class PhoneStatusBar extends BaseStatusBar {
                 && window == StatusBarManager.WINDOW_NAVIGATION_BAR
                 && mNavigationBarWindowState != state) {
             mNavigationBarWindowState = state;
-            if (DEBUG) Log.d(TAG, "Navigation bar " + StatusBarManager.windowStateToString(state));
+            if (DEBUG_WINDOW_STATE) Log.d(TAG, "Navigation bar " + windowStateToString(state));
             mNavigationBarView.setEnabled(showing);
         }
     }
@@ -2177,6 +2179,15 @@ public class PhoneStatusBar extends BaseStatusBar {
                     + " scroll " + mScrollView.getScrollX() + "," + mScrollView.getScrollY());
         }
 
+        pw.print("  mStatusBarWindowState=");
+        pw.println(windowStateToString(mStatusBarWindowState));
+        dumpBarTransitions(pw, "mStatusBarView", mStatusBarView.getBarTransitions());
+        if (mNavigationBarView != null) {
+            pw.print("  mNavigationBarWindowState=");
+            pw.println(windowStateToString(mNavigationBarWindowState));
+            dumpBarTransitions(pw, "mNavigationBarView", mNavigationBarView.getBarTransitions());
+        }
+
         pw.print("  mNavigationBarView=");
         if (mNavigationBarView == null) {
             pw.println("null");
@@ -2240,6 +2251,11 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
 
         mNetworkController.dump(fd, pw, args);
+    }
+
+    private static void dumpBarTransitions(PrintWriter pw, String var, BarTransitions transitions) {
+        pw.print("  "); pw.print(var); pw.print(".BarTransitions.mMode=");
+        pw.println(BarTransitions.modeToString(transitions.getMode()));
     }
 
     @Override
