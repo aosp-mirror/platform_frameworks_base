@@ -1193,7 +1193,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * An optional field on {@link #ACTION_ASSIST} and {@link #ACTION_VOICE_ASSIST}
-     * containing an the names of the application package of foreground services at the time
+     * containing the application package names of foreground services at the time
      * of the assist request.  This is an array of {@link String}s, with one entry
      * per service.
      */
