@@ -61,8 +61,6 @@
     <string name="usb_debugging_always" msgid="303335496705863070">"Tillåt alltid på den här datorn"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zooma för att fylla skärm"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Dra för att fylla skärmen"</string>
-    <string name="compat_mode_help_header" msgid="7969493989397529910">"Zoom i kompatibilitetsläge"</string>
-    <string name="compat_mode_help_body" msgid="4946726776359270040">"När en app är anpassad för en mindre skärm visas ett zoomreglage vid klockan."</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Skärmdumpen sparas ..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Skärmdumpen sparas ..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Skärmdumpen sparas."</string>
@@ -201,4 +199,10 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Meddelanden visas här"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Du kommer åt dem när som helst genom att dra nedåt.\nDra nedåt igen om du vill visa systemkontroller."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Nätverket kan vara övervakat"</string>
+    <string name="done_button" msgid="1759387181766603361">"Klart"</string>
+    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Nätverksövervakning"</string>
+    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Enheten hanteras av: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nAdministratören kan övervaka dina aktiviteter på nätverket, inklusive e-post, appar och säkra webbplatser.\n\nKontakta din administratör om du vill veta mer."</string>
+    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"Dina nätverksaktiviteter kan övervakas av tredje part\n, inklusive e-post, appar och säkra webbplatser.\n\nDetta är möjligt eftersom tillförlitlig autentisering har installerats på enheten."</string>
+    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Kontrollera tillförlitlig autentisering"</string>
 </resources>

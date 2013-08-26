@@ -61,8 +61,6 @@
     <string name="usb_debugging_always" msgid="303335496705863070">"Von diesem Computer immer zulassen"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom auf Bildschirmgröße"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Auf Bildschirmgröße anpassen"</string>
-    <string name="compat_mode_help_header" msgid="7969493989397529910">"Kompatibilitätszoom"</string>
-    <string name="compat_mode_help_body" msgid="4946726776359270040">"Wenn eine App für einen kleineren Bildschirm ausgelegt ist, wird ein Zoom-Steuerelement neben der Uhr angezeigt."</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Screenshot wird gespeichert..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Screenshot wird gespeichert..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Screenshot wird gespeichert..."</string>
@@ -203,4 +201,10 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTO"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Benachrichtigungen erscheinen hier"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Greifen Sie jederzeit auf sie zu, indem Sie nach unten wischen.\nWischen Sie für Systemeinstellungen erneut nach unten."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Das Netzwerk wird möglicherweise überwacht."</string>
+    <string name="done_button" msgid="1759387181766603361">"Fertig"</string>
+    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Netzwerküberwachung"</string>
+    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Dieses Gerät wird von <xliff:g id="MANAGING_DOMAIN">%s</xliff:g> verwaltet.\n\nIhr Administrator kann Ihre Netzwerkaktivitäten überwachen, einschließlich E-Mails, Apps und sicheren Websites.\n\nWenden Sie sich für weitere Informationen an Ihren Administrator."</string>
+    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"Dritte können Ihre Netzwerkaktivitäten\nüberwachen, einschließlich E-Mails, Apps und sicheren Websites.\n\nDies wird durch vertrauenswürdige Anmeldedaten ermöglicht, die auf Ihrem Gerät installiert sind."</string>
+    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Vertrauenswürdige Anmeldedaten überprüfen"</string>
 </resources>

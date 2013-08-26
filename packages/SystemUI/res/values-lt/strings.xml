@@ -61,8 +61,6 @@
     <string name="usb_debugging_always" msgid="303335496705863070">"Visada leisti iš šio kompiuterio"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Keisti mast., kad atit. ekr."</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Ištempti, kad atit. ekr."</string>
-    <string name="compat_mode_help_header" msgid="7969493989397529910">"Suderinamumo mastelio keitimas"</string>
-    <string name="compat_mode_help_body" msgid="4946726776359270040">"Kai programa bus pritaikyta mažesniam ekranui, mastelio keitimo valdiklis bus parodytas šalia laikrodžio."</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Išsaugoma ekrano kopija..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Išsaugoma ekrano kopija..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Išsaugoma ekrano kopija."</string>
@@ -201,4 +199,10 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATINIS"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Pranešimai rodomi čia"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Perbraukę žemyn bet kuriuo metu pasieksite pranešimus.\nJei norite naudoti sistemos valdiklius, perbraukite žemyn dar kartą."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Tinklas gali būti stebimas"</string>
+    <string name="done_button" msgid="1759387181766603361">"Atlikta"</string>
+    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Tinklo stebėjimas"</string>
+    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Šį įrenginį tvarko <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nAdministratorius gali stebėti jūsų tinklo veiklą, įskaitant el. paštą, programas ir saugias svetaines.\n\nJei norite gauti daugiau informacijos, susisiekite su administratoriumi."</string>
+    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"Trečioji šalis gali stebėti jūsų tinklo\nveiklą, įskaitant el. paštą, programas ir saugias svetaines.\n\nVisa tai įmanoma dėl jūsų įrenginyje įdiegtų patikimų prisijungimo duomenų."</string>
+    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Tikrinti patikimus prisijungimo duomenis"</string>
 </resources>
