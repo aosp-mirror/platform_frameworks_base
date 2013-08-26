@@ -138,6 +138,7 @@ public class LockPatternUtils {
             = "lockscreen.biometricweakeverchosen";
     public final static String LOCKSCREEN_POWER_BUTTON_INSTANTLY_LOCKS
             = "lockscreen.power_button_instantly_locks";
+    public final static String LOCKSCREEN_WIDGETS_ENABLED = "lockscreen.widgets_enabled";
 
     public final static String PASSWORD_HISTORY_KEY = "lockscreen.passwordhistory";
 
@@ -1053,28 +1054,38 @@ public class LockPatternUtils {
         return nextAlarm;
     }
 
-    private boolean getBoolean(String secureSettingKey, boolean defaultValue) {
+    private boolean getBoolean(String secureSettingKey, boolean defaultValue, int userId) {
         try {
-            return getLockSettings().getBoolean(secureSettingKey, defaultValue,
-                    getCurrentOrCallingUserId());
+            return getLockSettings().getBoolean(secureSettingKey, defaultValue, userId);
         } catch (RemoteException re) {
             return defaultValue;
         }
     }
 
-    private void setBoolean(String secureSettingKey, boolean enabled) {
+    private boolean getBoolean(String secureSettingKey, boolean defaultValue) {
+        return getBoolean(secureSettingKey, defaultValue, getCurrentOrCallingUserId());
+    }
+
+    private void setBoolean(String secureSettingKey, boolean enabled, int userId) {
         try {
-            getLockSettings().setBoolean(secureSettingKey, enabled, getCurrentOrCallingUserId());
+            getLockSettings().setBoolean(secureSettingKey, enabled, userId);
         } catch (RemoteException re) {
             // What can we do?
             Log.e(TAG, "Couldn't write boolean " + secureSettingKey + re);
         }
     }
 
+    private void setBoolean(String secureSettingKey, boolean enabled) {
+        setBoolean(secureSettingKey, enabled, getCurrentOrCallingUserId());
+    }
+
     public int[] getAppWidgets() {
+        return getAppWidgets(UserHandle.USER_CURRENT);
+    }
+
+    private int[] getAppWidgets(int userId) {
         String appWidgetIdString = Settings.Secure.getStringForUser(
-                mContentResolver, Settings.Secure.LOCK_SCREEN_APPWIDGET_IDS,
-                UserHandle.USER_CURRENT);
+                mContentResolver, Settings.Secure.LOCK_SCREEN_APPWIDGET_IDS, userId);
         String delims = ",";
         if (appWidgetIdString != null && appWidgetIdString.length() > 0) {
             String[] appWidgetStringIds = appWidgetIdString.split(delims);
@@ -1359,6 +1370,37 @@ public class LockPatternUtils {
             // Shouldn't happen!
         }
         return false;
+    }
+
+    /**
+     * Determine whether the user has selected any non-system widgets in keyguard
+     *
+     * @return true if widgets have been selected
+     */
+    public boolean hasWidgetsEnabledInKeyguard(int userid) {
+        int widgets[] = getAppWidgets(userid);
+        for (int i = 0; i < widgets.length; i++) {
+            if (widgets[i] > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean getWidgetsEnabled() {
+        return getWidgetsEnabled(getCurrentOrCallingUserId());
+    }
+
+    public boolean getWidgetsEnabled(int userId) {
+        return getBoolean(LOCKSCREEN_WIDGETS_ENABLED, false, userId);
+    }
+
+    public void setWidgetsEnabled(boolean enabled) {
+        setWidgetsEnabled(enabled, getCurrentOrCallingUserId());
+    }
+
+    public void setWidgetsEnabled(boolean enabled, int userId) {
+        setBoolean(LOCKSCREEN_WIDGETS_ENABLED, enabled, userId);
     }
 
 }

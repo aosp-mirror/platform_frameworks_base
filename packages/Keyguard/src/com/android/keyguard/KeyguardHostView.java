@@ -217,7 +217,7 @@ public class KeyguardHostView extends KeyguardViewBase {
             mCleanupAppWidgetsOnBootCompleted = true;
             return;
         }
-        if (!mSafeModeEnabled && !widgetsDisabledByDpm()) {
+        if (!mSafeModeEnabled && !widgetsDisabled()) {
             // Clean up appWidgetIds that are bound to lockscreen, but not actually used
             // This is only to clean up after another bug: we used to not call
             // deleteAppWidgetId when a user manually deleted a widget in keyguard. This code
@@ -413,8 +413,11 @@ public class KeyguardHostView extends KeyguardViewBase {
         return disabledFeatures;
     }
 
-    private boolean widgetsDisabledByDpm() {
-        return (mDisabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL) != 0;
+    private boolean widgetsDisabled() {
+        boolean disabledByDpm =
+                (mDisabledFeatures & DevicePolicyManager.KEYGUARD_DISABLE_WIDGETS_ALL) != 0;
+        boolean disabledByUser = !mLockPatternUtils.getWidgetsEnabled();
+        return disabledByDpm || disabledByUser;
     }
 
     private boolean cameraDisabledByDpm() {
@@ -1149,7 +1152,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private void addDefaultWidgets() {
-        if (!mSafeModeEnabled && !widgetsDisabledByDpm()) {
+        if (!mSafeModeEnabled && !widgetsDisabled()) {
             LayoutInflater inflater = LayoutInflater.from(mContext);
             View addWidget = inflater.inflate(R.layout.keyguard_add_widget, this, false);
             mAppWidgetContainer.addWidget(addWidget, 0);
@@ -1209,7 +1212,7 @@ public class KeyguardHostView extends KeyguardViewBase {
     }
 
     private void addWidgetsFromSettings() {
-        if (mSafeModeEnabled || widgetsDisabledByDpm()) {
+        if (mSafeModeEnabled || widgetsDisabled()) {
             return;
         }
 
@@ -1246,7 +1249,6 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         try {
             mAppWidgetManager.bindAppWidgetId(appWidgetId, defaultAppWidget);
-
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Error when trying to bind default AppWidget: " + e);
             mAppWidgetHost.deleteAppWidgetId(appWidgetId);
@@ -1254,6 +1256,7 @@ public class KeyguardHostView extends KeyguardViewBase {
         }
         return appWidgetId;
     }
+
     public void checkAppWidgetConsistency() {
         // Since this method may bind a widget (which we can't do until boot completed) we
         // may have to defer it until after boot complete.
@@ -1272,7 +1275,8 @@ public class KeyguardHostView extends KeyguardViewBase {
         if (!widgetPageExists) {
             final int insertPageIndex = getInsertPageIndex();
 
-            final boolean userAddedWidgetsEnabled = !widgetsDisabledByDpm();
+            final boolean userAddedWidgetsEnabled = !widgetsDisabled();
+
             boolean addedDefaultAppWidget = false;
 
             if (!mSafeModeEnabled) {

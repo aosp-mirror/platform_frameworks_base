@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import android.app.ActivityManagerNative;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -27,6 +28,9 @@ import static android.Manifest.permission.READ_PROFILE;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
+import android.media.AudioManager;
+import android.media.AudioService;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.RemoteException;
@@ -37,6 +41,7 @@ import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.widget.ILockSettings;
@@ -391,7 +396,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         private static final String TAG = "LockSettingsDB";
         private static final String DATABASE_NAME = "locksettings.db";
 
-        private static final int DATABASE_VERSION = 1;
+        private static final int DATABASE_VERSION = 2;
 
         public DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -424,7 +429,45 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int currentVersion) {
-            // Nothing yet
+            int upgradeVersion = oldVersion;
+            if (upgradeVersion == 1) {
+                // Set the initial value for {@link LockPatternUtils#LOCKSCREEN_WIDGETS_ENABLED}
+                // during upgrade based on whether each user previously had widgets in keyguard.
+                maybeEnableWidgetSettingForUsers(db);
+                upgradeVersion = 2;
+            }
+
+            if (upgradeVersion != DATABASE_VERSION) {
+                Log.w(TAG, "Failed to upgrade database!");
+            }
+        }
+
+        private void maybeEnableWidgetSettingForUsers(SQLiteDatabase db) {
+            final UserManager um = (UserManager) mContext.getSystemService(USER_SERVICE);
+            final ContentResolver cr = mContext.getContentResolver();
+            final LockPatternUtils utils = new LockPatternUtils(mContext);
+            final List<UserInfo> users = um.getUsers();
+            for (int i = 0; i < users.size(); i++) {
+                final int userId = users.get(i).id;
+                final boolean enabled = utils.hasWidgetsEnabledInKeyguard(userId);
+                Log.v(TAG, "Widget upgrade uid=" + userId + ", enabled="
+                        + enabled + ", w[]=" + utils.getAppWidgets());
+                loadSetting(db, LockPatternUtils.LOCKSCREEN_WIDGETS_ENABLED, userId, enabled);
+            }
+        }
+
+        private void loadSetting(SQLiteDatabase db, String key, int userId, boolean value) {
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement(
+                        "INSERT OR REPLACE INTO locksettings(name,user,value) VALUES(?,?,?);");
+                stmt.bindString(1, key);
+                stmt.bindLong(2, userId);
+                stmt.bindLong(3, value ? 1 : 0);
+                stmt.execute();
+            } finally {
+                if (stmt != null) stmt.close();
+            }
         }
     }
 
