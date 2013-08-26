@@ -721,7 +721,13 @@ public class WifiEnterpriseConfig implements Parcelable {
         String value = mFields.get(key);
         // Uninitialized or known to be empty after reading from supplicant
         if (TextUtils.isEmpty(value) || EMPTY_VALUE.equals(value)) return "";
-        return removeDoubleQuotes(value).substring(prefix.length());
+
+        value = removeDoubleQuotes(value);
+        if (value.startsWith(prefix)) {
+            return value.substring(prefix.length());
+        } else {
+            return value;
+        }
     }
 
     /** Set a value with an optional prefix at key
