@@ -61,6 +61,8 @@ final class RemotePrintService implements DeathRecipient {
 
     private final RemotePrintSpooler mSpooler;
 
+    private final UserState mUserState;
+
     private final int mUserId;
 
     private final List<Runnable> mPendingCommands = new ArrayList<Runnable>();
@@ -82,8 +84,9 @@ final class RemotePrintService implements DeathRecipient {
     private boolean mHasPrinterDiscoverySession;
 
     public RemotePrintService(Context context, ComponentName componentName, int userId,
-            RemotePrintSpooler spooler) {
+            RemotePrintSpooler spooler, UserState userState) {
         mContext = context;
+        mUserState = userState;
         mComponentName = componentName;
         mIntent = new Intent().setComponent(mComponentName);
         mUserId = userId;
@@ -561,7 +564,7 @@ final class RemotePrintService implements DeathRecipient {
                 throwIfPrinterIdsForPrinterInfoTampered(service.mComponentName, printers);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    service.mSpooler.onPrintersAdded(printers);
+                    service.mUserState.onPrintersAdded(printers);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -575,7 +578,7 @@ final class RemotePrintService implements DeathRecipient {
                 throwIfPrinterIdsTampered(service.mComponentName, printerIds);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    service.mSpooler.onPrintersRemoved(printerIds);
+                    service.mUserState.onPrintersRemoved(printerIds);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
@@ -589,7 +592,7 @@ final class RemotePrintService implements DeathRecipient {
                 throwIfPrinterIdsForPrinterInfoTampered(service.mComponentName, printers);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    service.mSpooler.onPrintersUpdated(printers);
+                    service.mUserState.onPrintersUpdated(printers);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }

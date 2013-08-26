@@ -21,6 +21,9 @@ import android.content.Context;
 import android.content.Loader;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.print.PrintManager;
+import android.print.PrinterDiscoverySession;
+import android.print.PrinterDiscoverySession.OnPrintersChangeListener;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
 import android.util.ArrayMap;
@@ -30,7 +33,6 @@ import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.util.FastXmlSerializer;
-import com.android.printspooler.PrintSpoolerService.PrinterDiscoverySession;
 
 import libcore.io.IoUtils;
 
@@ -62,7 +64,7 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
 
     private static final int MAX_HISTORY_LENGTH = 50;
 
-    private static final int MAX_HISTORICAL_PRINTER_COUNT = 4;
+    private static final int MAX_FAVORITE_PRINTER_COUNT = 4;
 
     private final Map<PrinterId, PrinterInfo> mPrinters =
             new LinkedHashMap<PrinterId, PrinterInfo>();
@@ -96,7 +98,7 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
     @Override
     protected void onStartLoading() {
         if (DEBUG) {
-            Log.i(LOG_TAG, "onStartLoading()");
+            Log.i(LOG_TAG, "onStartLoading()" + FusedPrintersProvider.this.hashCode());
         }
         // The contract is that if we already have a valid,
         // result the we have to deliver it immediately.
@@ -113,7 +115,7 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
     @Override
     protected void onStopLoading() {
         if (DEBUG) {
-            Log.i(LOG_TAG, "onStopLoading()");
+            Log.i(LOG_TAG, "onStopLoading()" + FusedPrintersProvider.this.hashCode());
         }
         onCancelLoad();
     }
@@ -121,7 +123,7 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
     @Override
     protected void onForceLoad() {
         if (DEBUG) {
-            Log.i(LOG_TAG, "onForceLoad()");
+            Log.i(LOG_TAG, "onForceLoad()" + FusedPrintersProvider.this.hashCode());
         }
         onCancelLoad();
         loadInternal();
@@ -129,12 +131,21 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
 
     private void loadInternal() {
         if (mDiscoverySession == null) {
-            mDiscoverySession = new MyPrinterDiscoverySession();
+            PrintManager printManager = (PrintManager) getContext()
+                    .getSystemService(Context.PRINT_SERVICE);
+            mDiscoverySession = printManager.createPrinterDiscoverySession();
+            mDiscoverySession.setOnPrintersChangeListener(new OnPrintersChangeListener() {
+                @Override
+                public void onPrintersChanged() {
+                    deliverResult(new ArrayList<PrinterInfo>(
+                            mDiscoverySession.getPrinters()));
+                }
+            });
             mPersistenceManager.readPrinterHistory();
         }
         if (mPersistenceManager.isReadHistoryCompleted()
-                && !mDiscoverySession.isStarted()) {
-            final int favoriteCount = Math.min(MAX_HISTORICAL_PRINTER_COUNT,
+                && !mDiscoverySession.isPrinterDiscoveryStarted()) {
+            final int favoriteCount = Math.min(MAX_FAVORITE_PRINTER_COUNT,
                     mFavoritePrinters.size());
             List<PrinterId> printerIds = new ArrayList<PrinterId>(favoriteCount);
             for (int i = 0; i < favoriteCount; i++) {
@@ -147,13 +158,14 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
     @Override
     protected boolean onCancelLoad() {
         if (DEBUG) {
-            Log.i(LOG_TAG, "onCancelLoad()");
+            Log.i(LOG_TAG, "onCancelLoad()" + FusedPrintersProvider.this.hashCode());
         }
         return cancelInternal();
     }
 
     private boolean cancelInternal() {
-        if (mDiscoverySession != null && mDiscoverySession.isStarted()) {
+        if (mDiscoverySession != null
+                && mDiscoverySession.isPrinterDiscoveryStarted()) {
             mDiscoverySession.stopPrinterDiscovery();
             return true;
         } else if (mPersistenceManager.isReadHistoryInProgress()) {
@@ -165,7 +177,7 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
     @Override
     protected void onReset() {
         if (DEBUG) {
-            Log.i(LOG_TAG, "onReset()");
+            Log.i(LOG_TAG, "onReset()" + FusedPrintersProvider.this.hashCode());
         }
         onStopLoading();
         mPrinters.clear();
@@ -178,73 +190,15 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
     @Override
     protected void onAbandon() {
         if (DEBUG) {
-            Log.i(LOG_TAG, "onAbandon()");
+            Log.i(LOG_TAG, "onAbandon()" + FusedPrintersProvider.this.hashCode());
         }
         onStopLoading();
     }
 
     public void refreshPrinter(PrinterId printerId) {
-        if (isStarted() && mDiscoverySession != null && mDiscoverySession.isStarted()) {
-            mDiscoverySession.requestPrinterUpdated(printerId);
-        }
-    }
-
-    private final class MyPrinterDiscoverySession extends PrinterDiscoverySession {
-
-        @Override
-        public void onPrintersAdded(List<PrinterInfo> printers) {
-            if (DEBUG) {
-                Log.i(LOG_TAG, "MyPrinterDiscoverySession#onPrintersAdded()");
-            }
-            boolean printersAdded = false;
-            final int addedPrinterCount = printers.size();
-            for (int i = 0; i < addedPrinterCount; i++) {
-                PrinterInfo printer = printers.get(i);
-                if (!mPrinters.containsKey(printer.getId())) {
-                    mPrinters.put(printer.getId(), printer);
-                    printersAdded = true;
-                }
-            }
-            if (printersAdded) {
-                deliverResult(new ArrayList<PrinterInfo>(mPrinters.values()));
-            }
-        }
-
-        @Override
-        public void onPrintersRemoved(List<PrinterId> printerIds) {
-            if (DEBUG) {
-                Log.i(LOG_TAG, "MyPrinterDiscoverySession#onPrintersRemoved()");
-            }
-            boolean removedPrinters = false;
-            final int removedPrinterCount = printerIds.size();
-            for (int i = 0; i < removedPrinterCount; i++) {
-                PrinterId removedPrinterId = printerIds.get(i);
-                if (mPrinters.remove(removedPrinterId) != null) {
-                    removedPrinters = true;
-                }
-            }
-            if (removedPrinters) {
-                deliverResult(new ArrayList<PrinterInfo>(mPrinters.values()));
-            }
-        }
-
-        @Override
-        public void onPrintersUpdated(List<PrinterInfo> printers) {
-            if (DEBUG) {
-                Log.i(LOG_TAG, "MyPrinterDiscoverySession#onPrintersUpdated()");
-            }
-            boolean updatedPrinters = false;
-            final int updatedPrinterCount = printers.size();
-            for (int i = 0; i < updatedPrinterCount; i++) {
-                PrinterInfo updatedPrinter = printers.get(i);
-                if (mPrinters.containsKey(updatedPrinter.getId())) {
-                    mPrinters.put(updatedPrinter.getId(), updatedPrinter);
-                    updatedPrinters = true;
-                }
-            }
-            if (updatedPrinters) {
-                deliverResult(new ArrayList<PrinterInfo>(mPrinters.values()));
-            }
+        if (isStarted() && mDiscoverySession != null
+                && mDiscoverySession.isPrinterDiscoveryStarted()) {
+            mDiscoverySession.requestPrinterUpdate(printerId);
         }
     }
 
@@ -280,7 +234,7 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
             @Override
             protected void onPostExecute(List<PrinterInfo> printers) {
                 if (DEBUG) {
-                    Log.i(LOG_TAG, "read history completed");
+                    Log.i(LOG_TAG, "read history completed" + FusedPrintersProvider.this.hashCode());
                 }
 
                 mHistoricalPrinters = printers;
@@ -290,7 +244,7 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
 
                 // We want the first few favorite printers on top of the list.
                 final int favoriteCount = Math.min(mFavoritePrinters.size(),
-                        MAX_HISTORICAL_PRINTER_COUNT);
+                        MAX_FAVORITE_PRINTER_COUNT);
                 for (int i = 0; i < favoriteCount; i++) {
                     PrinterInfo favoritePrinter = mFavoritePrinters.get(i);
                     mPrinters.put(favoritePrinter.getId(), favoritePrinter);
@@ -299,6 +253,10 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
                 mReadHistoryInProgress = false;
                 mReadHistoryCompleted = true;
 
+                // Deliver the favorites.
+                deliverResult(mFavoritePrinters);
+
+                // Start loading the available printers.
                 loadInternal();
             }
 

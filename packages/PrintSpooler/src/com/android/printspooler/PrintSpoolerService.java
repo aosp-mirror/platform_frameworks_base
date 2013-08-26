@@ -103,8 +103,6 @@ public final class PrintSpoolerService extends Service {
 
     private NotificationController mNotificationController;
 
-    private PrinterDiscoverySession mDiscoverySession;
-
     public static PrintSpoolerService peekInstance() {
         synchronized (sLock) {
             return sInstance;
@@ -225,60 +223,8 @@ public final class PrintSpoolerService extends Service {
                         HandlerCallerCallback.MSG_SET_CLIENT, client);
                 mHandlerCaller.executeOrSendMessage(message);
             }
-
-            @Override
-            public void onPrintersAdded(List<PrinterInfo> printers) {
-                Message message = mHandlerCaller.obtainMessageO(
-                        HandlerCallerCallback.MSG_ON_PRINTERS_ADDED, printers);
-                mHandlerCaller.executeOrSendMessage(message);
-            }
-
-            @Override
-            public void onPrintersRemoved(List<PrinterId> printerIds) {
-                Message message = mHandlerCaller.obtainMessageO(
-                        HandlerCallerCallback.MSG_ON_PRINTERS_REMOVED, printerIds);
-                mHandlerCaller.executeOrSendMessage(message);
-            }
-
-            @Override
-            public void onPrintersUpdated(List<PrinterInfo> printers) {
-                Message message = mHandlerCaller.obtainMessageO(
-                        HandlerCallerCallback.MSG_ON_PRINTERS_UPDATED, printers);
-                mHandlerCaller.executeOrSendMessage(message);
-            }
         };
     }
-
-    public void createPrinterDiscoverySession() {
-        Message message = mHandlerCaller.obtainMessage(
-                HandlerCallerCallback.MSG_CREATE_PRINTER_DISCOVERY_SESSION);
-        mHandlerCaller.executeOrSendMessage(message);
-    }
-
-    public void destroyPrinterDiscoverySession() {
-        Message message = mHandlerCaller.obtainMessage(
-                HandlerCallerCallback.MSG_DESTROY_PRINTER_DISCOVERY_SESSION);
-        mHandlerCaller.executeOrSendMessage(message);
-    }
-
-    public void startPrinterDiscovery(List<PrinterId> priorityList) {
-        Message message = mHandlerCaller.obtainMessageO(
-                HandlerCallerCallback.MSG_START_PRINTER_DISCOVERY, priorityList);
-        mHandlerCaller.executeOrSendMessage(message);
-    }
-
-    public void stopPrinterDiscovery() {
-        Message message = mHandlerCaller.obtainMessage(
-                HandlerCallerCallback.MSG_STOP_PRINTER_DISCOVERY);
-        mHandlerCaller.executeOrSendMessage(message);
-    }
-
-    public void requestPrinterUpdate(PrinterId pritnerId) {
-        Message message = mHandlerCaller.obtainMessageO(
-                HandlerCallerCallback.MSG_REQUEST_PRINTER_UPDATE, pritnerId);
-        mHandlerCaller.executeOrSendMessage(message);
-    }
-
 
     private void sendOnPrintJobQueued(PrintJobInfo printJob) {
         Message message = mHandlerCaller.obtainMessageO(
@@ -299,16 +245,6 @@ public final class PrintSpoolerService extends Service {
     }
 
     private final class HandlerCallerCallback implements HandlerCaller.Callback {
-        public static final int MSG_CREATE_PRINTER_DISCOVERY_SESSION = 1;
-        public static final int MSG_DESTROY_PRINTER_DISCOVERY_SESSION = 2;
-        public static final int MSG_START_PRINTER_DISCOVERY = 3;
-        public static final int MSG_STOP_PRINTER_DISCOVERY = 4;
-        public static final int MSG_REQUEST_PRINTER_UPDATE = 5;
-
-        public static final int MSG_ON_PRINTERS_ADDED = 6;
-        public static final int MSG_ON_PRINTERS_REMOVED = 7;
-        public static final int MSG_ON_PRINTERS_UPDATED = 8;
-
         public static final int MSG_SET_CLIENT = 9;
         public static final int MSG_START_PRINT_JOB_CONFIG_ACTIVITY = 10;
         public static final int MSG_ON_PRINT_JOB_QUEUED = 11;
@@ -317,81 +253,8 @@ public final class PrintSpoolerService extends Service {
         public static final int MSG_CHECK_ALL_PRINTJOBS_HANDLED = 14;
 
         @Override
-        @SuppressWarnings("unchecked")
         public void executeMessage(Message message) {
             switch (message.what) {
-                case MSG_CREATE_PRINTER_DISCOVERY_SESSION: {
-                    final IPrintSpoolerClient client;
-                    synchronized (mLock) {
-                        client = mClient;
-                    }
-                    if (client != null) {
-                        try {
-                            client.createPrinterDiscoverySession();
-                        } catch (RemoteException re) {
-                            Log.e(LOG_TAG, "Error creating printer discovery session.", re);
-                        }
-                    }
-                } break;
-
-                case MSG_DESTROY_PRINTER_DISCOVERY_SESSION: {
-                    final IPrintSpoolerClient client;
-                    synchronized (mLock) {
-                        client = mClient;
-                    }
-                    if (client != null) {
-                        try {
-                            client.destroyPrinterDiscoverySession();
-                        } catch (RemoteException re) {
-                            Log.e(LOG_TAG, "Error destroying printer discovery session.", re);
-                        }
-                    }
-                } break;
-
-                case MSG_START_PRINTER_DISCOVERY: {
-                    final IPrintSpoolerClient client;
-                    synchronized (mLock) {
-                        client = mClient;
-                    }
-                    if (client != null) {
-                        List<PrinterId> priorityList = (ArrayList<PrinterId>) message.obj;
-                        try {
-                            client.startPrinterDiscovery(priorityList);
-                        } catch (RemoteException re) {
-                            Log.e(LOG_TAG, "Error starting printer discovery.", re);
-                        }
-                    }
-                } break;
-
-                case MSG_STOP_PRINTER_DISCOVERY: {
-                    final IPrintSpoolerClient client;
-                    synchronized (mLock) {
-                        client = mClient;
-                    }
-                    if (client != null) {
-                        try {
-                            client.stopPrinterDiscovery();
-                        } catch (RemoteException re) {
-                            Log.e(LOG_TAG, "Error stopping printer discovery.", re);
-                        }
-                    }
-                } break;
-
-                case MSG_REQUEST_PRINTER_UPDATE: {
-                    final IPrintSpoolerClient client;
-                    synchronized (mLock) {
-                        client = mClient;
-                    }
-                    if (client != null) {
-                        PrinterId printerId = (PrinterId) message.obj;
-                        try {
-                            client.requestPrinterUpdate(printerId);
-                        } catch (RemoteException re) {
-                            Log.e(LOG_TAG, "Error requesing printer update.", re);
-                        }
-                    }
-                } break;
-
                 case MSG_SET_CLIENT: {
                     synchronized (mLock) {
                         mClient = (IPrintSpoolerClient) message.obj;
@@ -451,39 +314,6 @@ public final class PrintSpoolerService extends Service {
 
                 case MSG_CHECK_ALL_PRINTJOBS_HANDLED: {
                     checkAllPrintJobsHandled();
-                } break;
-
-                case MSG_ON_PRINTERS_ADDED: {
-                    final PrinterDiscoverySession session;
-                    synchronized (mLock) {
-                        session = mDiscoverySession;
-                    }
-                    if (session != null) {
-                        List<PrinterInfo> printers = (ArrayList<PrinterInfo>) message.obj;
-                        session.onPrintersAdded(printers);
-                    }
-                } break;
-
-                case MSG_ON_PRINTERS_REMOVED: {
-                    final PrinterDiscoverySession session;
-                    synchronized (mLock) {
-                        session = mDiscoverySession;
-                    }
-                    if (session != null) {
-                        List<PrinterId> printerIds = (ArrayList<PrinterId>) message.obj;
-                        session.onPrintersRemoved(printerIds);
-                    }
-                } break;
-
-                case MSG_ON_PRINTERS_UPDATED: {
-                    final PrinterDiscoverySession session;
-                    synchronized (mLock) {
-                        session = mDiscoverySession;
-                    }
-                    if (session != null) {
-                        List<PrinterInfo> printers = (ArrayList<PrinterInfo>) message.obj;
-                        session.onPrintersUpdated(printers);
-                    }
                 } break;
             }
         }
@@ -580,12 +410,6 @@ public final class PrintSpoolerService extends Service {
             if (!hasActivePrintJobsLocked()) {
                 notifyOnAllPrintJobsHandled();
             }
-        }
-    }
-
-    private void setPrinterDiscoverySessionClient(PrinterDiscoverySession session) {
-        synchronized (mLock) {
-            mDiscoverySession = session;
         }
     }
 
@@ -1351,47 +1175,5 @@ public final class PrintSpoolerService extends Service {
             }
             return true;
         }
-    }
-
-    public static abstract class PrinterDiscoverySession {
-
-        private PrintSpoolerService mService;
-
-        private boolean mIsStarted;
-
-        public PrinterDiscoverySession() {
-            mService = PrintSpoolerService.peekInstance();
-            mService.createPrinterDiscoverySession();
-            mService.setPrinterDiscoverySessionClient(this);
-        }
-
-        public final void startPrinterDisovery(List<PrinterId> priorityList) {
-            mIsStarted = true;
-            mService.startPrinterDiscovery(priorityList);
-        }
-
-        public final void stopPrinterDiscovery() {
-            mIsStarted = false;
-            mService.stopPrinterDiscovery();
-        }
-
-        public void requestPrinterUpdated(PrinterId printerId) {
-            mService.requestPrinterUpdate(printerId);
-        }
-
-        public final void destroy() {
-            mService.setPrinterDiscoverySessionClient(null);
-            mService.destroyPrinterDiscoverySession();
-        }
-
-        public final boolean isStarted() {
-            return mIsStarted;
-        }
-
-        public abstract void onPrintersAdded(List<PrinterInfo> printers);
-
-        public abstract void onPrintersRemoved(List<PrinterId> printerIds);
-
-        public abstract void onPrintersUpdated(List<PrinterInfo> printers);
     }
 }

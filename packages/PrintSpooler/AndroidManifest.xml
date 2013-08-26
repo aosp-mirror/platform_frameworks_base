@@ -18,12 +18,12 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.printspooler"
-        android:sharedUserId="android.uid.system"
+        android:sharedUserId="android.uid.printspooler"
         android:versionName="1"
         android:versionCode="1"
         coreApp="true">
 
-    <uses-sdk android:minSdkVersion="17" android:targetSdkVersion="17"/>
+    <uses-sdk android:minSdkVersion="18" android:targetSdkVersion="18"/>
 
     <uses-permission android:name="android.permission.ACCESS_ALL_PRINT_JOBS"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
@@ -36,7 +36,8 @@
     <application
             android:allowClearUserData="false"
             android:label="@string/app_label"
-            android:allowBackup= "false">
+            android:allowBackup= "false"
+            android:supportsRtl="true">
 
         <service
             android:name=".PrintSpoolerService"
@@ -46,6 +47,7 @@
 
         <activity
             android:name=".PrintJobConfigActivity"
+            android:configChanges="orientation|screenSize"
             android:exported="false"
             android:theme="@style/PrintJobConfigActivityTheme">
         </activity>
