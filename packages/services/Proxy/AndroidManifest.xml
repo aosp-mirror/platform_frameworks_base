@@ -13,12 +13,5 @@
             android:exported="true">
         </service>
 
-        <receiver android:name=".ProxyServiceReceiver">
-
-            <intent-filter>
-                <action android:name="android.intent.action.PROXY_CHANGE" />
-            </intent-filter>
-        </receiver>
-
     </application>
 </manifest>
