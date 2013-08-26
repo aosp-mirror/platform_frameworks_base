@@ -16,21 +16,26 @@
 
 package android.hardware.camera2.impl;
 
-import android.hardware.camera2.CameraMetadata;
-import android.hardware.camera2.CaptureResult;
-import android.hardware.camera2.ICameraDeviceUser;
-import android.hardware.camera2.ICameraDeviceCallbacks;
+import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
+
 import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CameraProperties;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.utils.CameraRuntimeException;
+import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.ICameraDeviceCallbacks;
+import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.utils.CameraBinderDecorator;
+import android.hardware.camera2.utils.CameraRuntimeException;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Surface;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Stack;
 
@@ -54,6 +59,8 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             new HashMap<Integer, CaptureListenerHolder>();
 
     private final Stack<Integer> mRepeatingRequestIdStack = new Stack<Integer>();
+    // Map stream IDs to Surfaces
+    private final SparseArray<Surface> mConfiguredOutputs = new SparseArray<Surface>();
 
     private final String mCameraId;
 
@@ -94,18 +101,49 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     @Override
     public void configureOutputs(List<Surface> outputs) throws CameraAccessException {
         synchronized (mLock) {
-            // TODO: delete outputs that aren't in this list that were configured previously
-            for (Surface s : outputs) {
-                try {
+            HashSet<Surface> addSet = new HashSet<Surface>(outputs);    // Streams to create
+            List<Integer> deleteList = new ArrayList<Integer>();        // Streams to delete
+
+            // Determine which streams need to be created, which to be deleted
+            for (int i = 0; i < mConfiguredOutputs.size(); ++i) {
+                int streamId = mConfiguredOutputs.keyAt(i);
+                Surface s = mConfiguredOutputs.valueAt(i);
+
+                if (!outputs.contains(s)) {
+                    deleteList.add(streamId);
+                } else {
+                    addSet.remove(s);  // Don't create a stream previously created
+                }
+            }
+
+            try {
+                // TODO: mRemoteDevice.beginConfigure
+
+                // Delete all streams first (to free up HW resources)
+                for (Integer streamId : deleteList) {
+                    mRemoteDevice.deleteStream(streamId);
+                    mConfiguredOutputs.delete(streamId);
+                }
+
+                // Add all new streams
+                for (Surface s : addSet) {
                     // TODO: remove width,height,format since we are ignoring
                     // it.
-                    mRemoteDevice.createStream(0, 0, 0, s);
-                } catch (CameraRuntimeException e) {
-                    throw e.asChecked();
-                } catch (RemoteException e) {
-                    // impossible
-                    return;
+                    int streamId = mRemoteDevice.createStream(0, 0, 0, s);
+                    mConfiguredOutputs.put(streamId, s);
                 }
+
+                // TODO: mRemoteDevice.endConfigure
+            } catch (CameraRuntimeException e) {
+                if (e.getReason() == CAMERA_IN_USE) {
+                    throw new IllegalStateException("The camera is currently busy." +
+                            " You must call waitUntilIdle before trying to reconfigure.");
+                }
+
+                throw e.asChecked();
+            } catch (RemoteException e) {
+                // impossible
+                return;
             }
         }
     }
