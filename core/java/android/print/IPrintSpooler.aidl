@@ -18,7 +18,6 @@ package android.print;
 
 import android.content.ComponentName;
 import android.os.ParcelFileDescriptor;
-import android.print.PrinterId;
 import android.print.IPrintDocumentAdapter;
 import android.print.IPrintClient;
 import android.print.IPrintSpoolerClient;
@@ -47,9 +46,4 @@ oneway interface IPrintSpooler {
             int sequence);
     void writePrintJobData(in ParcelFileDescriptor fd, int printJobId);
     void setClient(IPrintSpoolerClient client);
-
-    // Printer discovery APIs
-    void onPrintersAdded(in List<PrinterInfo> printers);
-    void onPrintersRemoved(in List<PrinterId> printerIds);
-    void onPrintersUpdated(in List<PrinterInfo> printerIds);
 }

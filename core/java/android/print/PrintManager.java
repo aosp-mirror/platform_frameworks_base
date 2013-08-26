@@ -204,6 +204,13 @@ public final class PrintManager {
         return null;
     }
 
+    /**
+     * @hide
+     */
+    public PrinterDiscoverySession createPrinterDiscoverySession() {
+        return new PrinterDiscoverySession(mService, mContext, mUserId);
+    }
+
     private static final class PrintClient extends IPrintClient.Stub {
 
         private final WeakReference<PrintManager> mWeakPrintManager;

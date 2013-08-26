@@ -18,8 +18,6 @@ package android.os;
 
 import android.util.ArrayMap;
 
-import java.util.HashMap;
-
 /**
  * Takes care of the grunt work of maintaining a list of remote interfaces,
  * typically for the use of performing callbacks from a
