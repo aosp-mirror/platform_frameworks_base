@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view.transition;
+package android.transition;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -28,6 +28,8 @@ import android.view.animation.DecelerateInterpolator;
  * This transition captures the visibility of target objects before and
  * after a scene change and animates any changes by sliding the target
  * objects into or out of place.
+ *
+ * @hide
  */
 public class Slide extends Visibility {
 
@@ -37,7 +39,7 @@ public class Slide extends Visibility {
     private static final TimeInterpolator sDecelerator = new DecelerateInterpolator();
 
     @Override
-    protected Animator appear(ViewGroup sceneRoot,
+    public Animator onAppear(ViewGroup sceneRoot,
             TransitionValues startValues, int startVisibility,
             TransitionValues endValues, int endVisibility) {
         View endView = (endValues != null) ? endValues.view : null;
@@ -49,7 +51,7 @@ public class Slide extends Visibility {
     }
 
     @Override
-    protected Animator disappear(ViewGroup sceneRoot,
+    public Animator onDisappear(ViewGroup sceneRoot,
             TransitionValues startValues, int startVisibility,
             TransitionValues endValues, int endVisibility) {
         View startView = (startValues != null) ? startValues.view : null;

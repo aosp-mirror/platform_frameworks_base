@@ -17,14 +17,14 @@ package com.android.transitiontests;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.transition.ChangeBounds;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Fade;
-import android.view.transition.Move;
-import android.view.transition.Recolor;
-import android.view.transition.Scene;
-import android.view.transition.TransitionGroup;
-import android.view.transition.TransitionManager;
+import android.transition.Fade;
+import android.transition.Recolor;
+import android.transition.Scene;
+import android.transition.TransitionSet;
+import android.transition.TransitionManager;
 
 
 public class Demo4 extends Activity {
@@ -41,20 +41,22 @@ public class Demo4 extends Activity {
         View container = (View) findViewById(R.id.container);
         mSceneRoot = (ViewGroup) container.getParent();
 
-        mSearchScreen = new Scene(mSceneRoot, R.layout.search_screen, this);
-        mResultsScreen = new Scene(mSceneRoot, R.layout.results_screen, this);
+        mSearchScreen = Scene.getSceneForLayout(mSceneRoot, R.layout.search_screen, this);
+        mResultsScreen = Scene.getSceneForLayout(mSceneRoot, R.layout.results_screen, this);
 
-        TransitionGroup transitionToResults = new TransitionGroup();
+        TransitionSet transitionToResults = new TransitionSet();
         Fade fade = new Fade();
-        fade.setTargetIds(R.id.resultsText, R.id.resultsList);
+        fade.addTargetId(R.id.resultsText).addTargetId(R.id.resultsList);
         fade.setStartDelay(300);
         fade.setDuration(1000);
-        transitionToResults.addTransitions(fade, new Move().setTargetIds(R.id.searchContainer),
-                new Recolor().setTargetIds(R.id.container));
+        transitionToResults.addTransition(fade).
+                addTransition(new ChangeBounds().addTargetId(R.id.searchContainer)).
+                addTransition(new Recolor().addTargetId(R.id.container));
 
-        TransitionGroup transitionToSearch = new TransitionGroup();
-        transitionToSearch.addTransitions(fade, new Move().setTargetIds(R.id.searchContainer),
-                new Recolor().setTargetIds(R.id.container));
+        TransitionSet transitionToSearch = new TransitionSet();
+        transitionToSearch.addTransition(fade).
+                addTransition(new ChangeBounds().addTargetId(R.id.searchContainer)).
+                addTransition(new Recolor().addTargetId(R.id.container));
 
         mTransitionManager = new TransitionManager();
         mTransitionManager.setTransition(mSearchScreen, transitionToSearch);

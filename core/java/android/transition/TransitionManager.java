@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package android.view.transition;
+package android.transition;
 
+import android.content.Context;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
@@ -34,14 +34,36 @@ import java.util.ArrayList;
  * situations. Specifying other transitions for particular scene changes is
  * only necessary if the application wants different transition behavior
  * in these situations.
+ *
+ * <p>TransitionManagers can be declared in XML resource files inside the
+ * <code>res/transition</code> directory. TransitionManager resources consist of
+ * the <code>transitionManager</code>tag name, containing one or more
+ * <code>transition</code> tags, each of which describe the relationship of
+ * that transition to the from/to scene information in that tag.
+ * For example, here is a resource file that declares several scene
+ * transitions:</p>
+ *
+ * {@sample development/samples/ApiDemos/res/transition/transitions_mgr.xml TransitionManager}
+ *
+ * <p>For each of the <code>fromScene</code> and <code>toScene</code> attributes,
+ * there is a reference to a standard XML layout file. This is equivalent to
+ * creating a scene from a layout in code by calling
+ * {@link Scene#getSceneForLayout(ViewGroup, int, Context)}. For the
+ * <code>transition</code> attribute, there is a reference to a resource
+ * file in the <code>res/transition</code> directory which describes that
+ * transition.</p>
+ *
+ * Information on XML resource descriptions for transitions can be found for
+ * {@link android.R.styleable#Transition}, {@link android.R.styleable#TransitionSet},
+ * {@link android.R.styleable#TransitionTarget}, {@link android.R.styleable#Fade},
+ * and {@link android.R.styleable#TransitionManager}.
  */
 public class TransitionManager {
     // TODO: how to handle enter/exit?
 
     private static String LOG_TAG = "TransitionManager";
 
-    private static final Transition sDefaultTransition = new AutoTransition();
-    private Transition mDefaultTransition = new AutoTransition();
+    private static Transition sDefaultTransition = new AutoTransition();
 
     ArrayMap<Scene, Transition> mSceneTransitions = new ArrayMap<Scene, Transition>();
     ArrayMap<Scene, ArrayMap<Scene, Transition>> mScenePairTransitions =
@@ -59,7 +81,7 @@ public class TransitionManager {
      * @param transition The default transition to be used for scene changes.
      */
     public void setDefaultTransition(Transition transition) {
-        mDefaultTransition = transition;
+        sDefaultTransition = transition;
     }
 
     /**
@@ -69,8 +91,8 @@ public class TransitionManager {
      * @return The current default transition.
      * @see #setDefaultTransition(Transition)
      */
-    public Transition getDefaultTransition() {
-        return mDefaultTransition;
+    public static Transition getDefaultTransition() {
+        return sDefaultTransition;
     }
 
     /**
@@ -80,7 +102,7 @@ public class TransitionManager {
      * transition to run.
      * @param transition The transition that will play when the given scene is
      * entered. A value of null will result in the default behavior of
-     * using {@link AutoTransition}.
+     * using the {@link #getDefaultTransition() default transition} instead.
      */
     public void setTransition(Scene scene, Transition transition) {
         mSceneTransitions.put(scene, transition);
@@ -96,7 +118,7 @@ public class TransitionManager {
      * be run
      * @param transition The transition that will play when the given scene is
      * entered. A value of null will result in the default behavior of
-     * using {@link AutoTransition}.
+     * using the {@link #getDefaultTransition() default transition} instead.
      */
     public void setTransition(Scene fromScene, Scene toScene, Transition transition) {
         ArrayMap<Scene, Transition> sceneTransitionMap = mScenePairTransitions.get(toScene);
@@ -114,15 +136,15 @@ public class TransitionManager {
      *
      * @param scene The scene being entered
      * @return The Transition to be used for the given scene change. If no
-     * Transition was specified for this scene change, {@link AutoTransition}
-     * will be used instead.
+     * Transition was specified for this scene change, the {@link #getDefaultTransition()
+     * default transition} will be used instead.
      */
     private Transition getTransition(Scene scene) {
         Transition transition = null;
         ViewGroup sceneRoot = scene.getSceneRoot();
         if (sceneRoot != null) {
             // TODO: cached in Scene instead? long-term, cache in View itself
-            Scene currScene = sceneRoot.getCurrentScene();
+            Scene currScene = Scene.getCurrentScene(sceneRoot);
             if (currScene != null) {
                 ArrayMap<Scene, Transition> sceneTransitionMap = mScenePairTransitions.get(scene);
                 if (sceneTransitionMap != null) {
@@ -134,7 +156,7 @@ public class TransitionManager {
             }
         }
         transition = mSceneTransitions.get(scene);
-        return (transition != null) ? transition : new AutoTransition();
+        return (transition != null) ? transition : sDefaultTransition;
     }
 
     /**
@@ -234,7 +256,7 @@ public class TransitionManager {
         }
 
         // Notify previous scene that it is being exited
-        Scene previousScene = sceneRoot.getCurrentScene();
+        Scene previousScene = Scene.getCurrentScene(sceneRoot);
         if (previousScene != null) {
             previousScene.exit();
         }
@@ -256,7 +278,7 @@ public class TransitionManager {
     }
 
     /**
-     * Static utility method to simply change to the given scene using
+     * Convenience method to simply change to the given scene using
      * the default transition for TransitionManager.
      *
      * @param scene The Scene to change to
@@ -266,15 +288,14 @@ public class TransitionManager {
     }
 
     /**
-     * Static utility method to simply change to the given scene using
+     * Convenience method to simply change to the given scene using
      * the given transition.
      *
      * <p>Passing in <code>null</code> for the transition parameter will
      * result in the scene changing without any transition running, and is
      * equivalent to calling {@link Scene#exit()} on the scene root's
-     * {@link ViewGroup#getCurrentScene() current scene}, followed by
-     * {@link Scene#enter()} on the scene specified by the <code>scene</code>
-     * parameter.</p>
+     * current scene, followed by {@link Scene#enter()} on the scene
+     * specified by the <code>scene</code> parameter.</p>
      *
      * @param scene The Scene to change to
      * @param transition The transition to use for this scene change. A
@@ -285,55 +306,20 @@ public class TransitionManager {
     }
 
     /**
-     * Static utility method to simply change to a scene defined by the
-     * code in the given runnable, which will be executed after
-     * the current values have been captured for the transition.
-     * This is equivalent to creating a Scene and calling {@link
-     * Scene#setEnterAction(Runnable)} with the runnable, then calling
-     * {@link #go(Scene, Transition)}. The transition used will be the
-     * default provided by TransitionManager.
-     *
-     * @param sceneRoot The root of the View hierarchy used when this scene
-     * runs a transition automatically.
-     * @param action The runnable whose {@link Runnable#run() run()} method will
-     * be called.
-     */
-    public static void go(ViewGroup sceneRoot, Runnable action) {
-        Scene scene = new Scene(sceneRoot);
-        scene.setEnterAction(action);
-        changeScene(scene, sDefaultTransition);
-    }
-
-    /**
-     * Static utility method to simply change to a scene defined by the
-     * code in the given runnable, which will be executed after
-     * the current values have been captured for the transition.
-     * This is equivalent to creating a Scene and calling {@link
-     * Scene#setEnterAction(Runnable)} with the runnable, then calling
-     * {@link #go(Scene, Transition)}. The given transition will be
-     * used to animate the changes.
-     *
-     * <p>Passing in <code>null</code> for the transition parameter will
-     * result in the scene changing without any transition running, and is
-     * equivalent to calling {@link Scene#exit()} on the scene root's
-     * {@link ViewGroup#getCurrentScene() current scene}, followed by
-     * {@link Scene#enter()} on a new scene specified by the
-     * <code>action</code> parameter.</p>
+     * Convenience method to animate, using the default transition,
+     * to a new scene defined by all changes within the given scene root between
+     * calling this method and the next rendering frame.
+     * Equivalent to calling {@link #beginDelayedTransition(ViewGroup, Transition)}
+     * with a value of <code>null</code> for the <code>transition</code> parameter.
      *
      * @param sceneRoot The root of the View hierarchy to run the transition on.
-     * @param action The runnable whose {@link Runnable#run() run()} method will
-     * be called.
-     * @param transition The transition to use for this change. A
-     * value of null causes the change to happen with no transition.
      */
-    public static void go(ViewGroup sceneRoot, Runnable action, Transition transition) {
-        Scene scene = new Scene(sceneRoot);
-        scene.setEnterAction(action);
-        changeScene(scene, transition);
+    public static void beginDelayedTransition(final ViewGroup sceneRoot) {
+        beginDelayedTransition(sceneRoot, null);
     }
 
     /**
-     * Static utility method to animate to a new scene defined by all changes within
+     * Convenience method to animate to a new scene defined by all changes within
      * the given scene root between calling this method and the next rendering frame.
      * Calling this method causes TransitionManager to capture current values in the
      * scene root and then post a request to run a transition on the next frame.
@@ -367,7 +353,7 @@ public class TransitionManager {
             }
             final Transition finalTransition = transition.clone();
             sceneChangeSetup(sceneRoot, transition);
-            sceneRoot.setCurrentScene(null);
+            Scene.setCurrentScene(sceneRoot, null);
             sceneChangeRunTransition(sceneRoot, finalTransition);
         }
     }

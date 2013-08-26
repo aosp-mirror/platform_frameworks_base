@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package android.view.transition;
+package android.transition;
 
 import android.animation.Animator;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.ArrayMap;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import java.util.Map;
 
 /**
  * This transition tracks changes during scene changes to the
@@ -36,22 +33,34 @@ import java.util.Map;
  * {@link TextView#setTextColor(android.content.res.ColorStateList)
  * color} of the text for target TextViews. If the color changes between
  * scenes, the color change is animated.
+ *
+ * @hide
  */
 public class Recolor extends Transition {
 
     private static final String PROPNAME_BACKGROUND = "android:recolor:background";
     private static final String PROPNAME_TEXT_COLOR = "android:recolor:textColor";
 
-    @Override
-    protected void captureValues(TransitionValues values, boolean start) {
-        values.values.put(PROPNAME_BACKGROUND, values.view.getBackground());
-        if (values.view instanceof TextView) {
-            values.values.put(PROPNAME_TEXT_COLOR, ((TextView)values.view).getCurrentTextColor());
+    private void captureValues(TransitionValues transitionValues) {
+        transitionValues.values.put(PROPNAME_BACKGROUND, transitionValues.view.getBackground());
+        if (transitionValues.view instanceof TextView) {
+            transitionValues.values.put(PROPNAME_TEXT_COLOR,
+                    ((TextView)transitionValues.view).getCurrentTextColor());
         }
     }
 
     @Override
-    protected Animator play(ViewGroup sceneRoot, TransitionValues startValues,
+    public void captureStartValues(TransitionValues transitionValues) {
+        captureValues(transitionValues);
+    }
+
+    @Override
+    public void captureEndValues(TransitionValues transitionValues) {
+        captureValues(transitionValues);
+    }
+
+    @Override
+    public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
             TransitionValues endValues) {
         if (startValues == null || endValues == null) {
             return null;

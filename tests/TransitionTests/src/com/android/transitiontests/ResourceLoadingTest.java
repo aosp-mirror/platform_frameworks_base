@@ -19,10 +19,10 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Scene;
-import android.view.transition.TransitionInflater;
-import android.view.transition.Transition;
-import android.view.transition.TransitionManager;
+import android.transition.Scene;
+import android.transition.TransitionInflater;
+import android.transition.Transition;
+import android.transition.TransitionManager;
 
 
 public class ResourceLoadingTest extends Activity {
@@ -54,7 +54,7 @@ public class ResourceLoadingTest extends Activity {
                 mTransitionManager =
                         inflater.inflateTransitionManager(R.transition.my_transition_mgr,
                                 mSceneRoot);
-                Scene loadedScene = inflater.inflateScene(R.scene.my_scene, mSceneRoot);
+                Scene loadedScene = new Scene(mSceneRoot);
                 System.out.println("loadedScene = " + loadedScene);
                 Transition loadedTransition = inflater.inflateTransition(R.transition.my_transition);
                 System.out.println("loadedTransition = " + loadedTransition);
@@ -63,11 +63,11 @@ public class ResourceLoadingTest extends Activity {
             }
         }
         if (mCurrentScene == RESULTS_SCREEN) {
-            Scene scene = mInflater.inflateScene(R.scene.search_scene, mSceneRoot);
+            Scene scene = Scene.getSceneForLayout(mSceneRoot, R.layout.search_screen, this);
             mTransitionManager.transitionTo(scene);
             mCurrentScene = SEARCH_SCREEN;
         } else {
-            Scene scene = mInflater.inflateScene(R.scene.results_scene, mSceneRoot);
+            Scene scene = Scene.getSceneForLayout(mSceneRoot, R.layout.results_screen, this);
             mTransitionManager.transitionTo(scene);
             mCurrentScene = RESULTS_SCREEN;
         }

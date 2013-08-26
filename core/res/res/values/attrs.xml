@@ -4511,24 +4511,71 @@
     </declare-styleable>
 
     <!-- ========================== -->
-    <!-- State class attributes -->
+    <!-- Transition attributes -->
     <!-- ========================== -->
     <eat-comment />
 
-    <declare-styleable name="Scene">
-        <attr name="layout" />
-    </declare-styleable>
-
+    <!-- Use specific transition subclass names as the root tag of the XML resource that
+         describes a {@link android.transition.Transition Transition},
+         such as <code>move</code>, <code>fade</code>, and <code>set</code>. -->
     <declare-styleable name="Transition">
+        <!-- Amount of time (in milliseconds) that the transition should run. -->
         <attr name="duration" />
-        <attr name="startOffset" />
+        <!-- Delay in milliseconds before the transition starts. -->
+        <attr name="startDelay" format="integer" />
+        <!-- Interpolator to be used in the animations spawned by this transition. -->
         <attr name="interpolator" />
-        <attr name="targetID" format="reference" />
     </declare-styleable>
 
+    <!-- Use <code>fade</code>as the root tag of the XML resource that
+         describes a {@link android.transition.Fade Fade} transition.
+         The attributes of the {@link android.R.styleable#Transition Transition}
+         resource are available in addition to the specific attributes of Fade
+         described here. -->
+    <declare-styleable name="Fade">
+        <attr name="fadingMode">
+            <!-- Fade will only fade appearing items in. -->
+            <enum name="fade_in" value="1" />
+            <!-- Fade will only fade disappearing items out. -->
+            <enum name="fade_out" value="2" />
+            <!-- Fade will fade appearing items in and disappearing items out. -->
+            <enum name="fade_in_out" value="3" />
+        </attr>
+    </declare-styleable>
+
+    <!-- Use <code>target</code> as the root tag of the XML resource that
+     describes a {@link android.transition.Transition#addTargetId(int)
+     targetId} of a transition. There can be one or more targets inside
+     a <code>targets</code> tag, which is itself inside an appropriate
+     {@link android.R.styleable#Transition Transition} tag.
+     -->
+    <declare-styleable name="TransitionTarget">
+        <!-- The id of a target on which this transition will animate changes. -->
+        <attr name="targetId" format="reference" />
+    </declare-styleable>
+
+    <!-- Use <code>set</code> as the root tag of the XML resource that
+         describes a {@link android.transition.TransitionSet
+         TransitionSet} transition. -->
+    <declare-styleable name="TransitionSet">
+        <attr name="transitionOrdering">
+            <!-- child transitions should be played together. -->
+            <enum name="together" value="0" />
+            <!-- child transitions should be played sequentially, in the same order
+            as the xml. -->
+            <enum name="sequential" value="1" />
+        </attr>
+    </declare-styleable>
+
+    <!-- Use <code>transitionManager</code> as the root tag of the XML resource that
+         describes a {@link android.transition.TransitionManager
+         TransitionManager}. -->
     <declare-styleable name="TransitionManager">
+        <!-- The id of a transition to be used in a particular scene change. -->
         <attr name="transition" format="reference" />
+        <!-- The originating scene in this scene change. -->
         <attr name="fromScene" format="reference" />
+        <!-- The destination scene in this scene change. -->
         <attr name="toScene" format="reference" />
     </declare-styleable>
 

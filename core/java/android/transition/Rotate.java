@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view.transition;
+package android.transition;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -24,18 +24,25 @@ import android.view.ViewGroup;
 /**
  * This transition captures the rotation property of targets before and after
  * the scene change and animates any changes.
+ *
+ * @hide
  */
 public class Rotate extends Transition {
 
     private static final String PROPNAME_ROTATION = "android:rotate:rotation";
 
     @Override
-    protected void captureValues(TransitionValues values, boolean start) {
-        values.values.put(PROPNAME_ROTATION, values.view.getRotation());
+    public void captureStartValues(TransitionValues transitionValues) {
+        transitionValues.values.put(PROPNAME_ROTATION, transitionValues.view.getRotation());
     }
 
     @Override
-    protected Animator play(ViewGroup sceneRoot, TransitionValues startValues,
+    public void captureEndValues(TransitionValues transitionValues) {
+        transitionValues.values.put(PROPNAME_ROTATION, transitionValues.view.getRotation());
+    }
+
+    @Override
+    public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
             TransitionValues endValues) {
         if (startValues == null || endValues == null) {
             return null;

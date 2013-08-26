@@ -27,11 +27,11 @@ import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Crossfade;
-import android.view.transition.Move;
-import android.view.transition.Scene;
-import android.view.transition.TransitionGroup;
-import android.view.transition.TransitionManager;
+import android.transition.Crossfade;
+import android.transition.ChangeBounds;
+import android.transition.Scene;
+import android.transition.TransitionSet;
+import android.transition.TransitionManager;
 import android.widget.Button;
 
 import static android.widget.LinearLayout.LayoutParams;
@@ -66,8 +66,9 @@ public class SurfaceAndTextureViews extends Activity {
         mTextureView.setLayoutParams(new LayoutParams(SMALL_SIZE, SMALL_SIZE));
         container.addView(mTextureView);
 
-        final TransitionGroup transition = new TransitionGroup();
-        transition.addTransitions(new Move(), new Crossfade().setTargetIds(0, 1, 2));
+        final TransitionSet transition = new TransitionSet();
+        transition.addTransition(new ChangeBounds()).addTransition(new Crossfade().addTargetId(0).
+                addTargetId(1).addTargetId(2));
 
         toggleButton.setOnClickListener(new View.OnClickListener() {
             @Override

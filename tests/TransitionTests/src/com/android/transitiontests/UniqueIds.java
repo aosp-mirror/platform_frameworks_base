@@ -20,11 +20,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Scene;
-import android.view.transition.Transition;
+import android.transition.Scene;
+import android.transition.Transition;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.view.transition.TransitionManager;
+import android.transition.TransitionManager;
 
 
 import java.util.HashMap;
