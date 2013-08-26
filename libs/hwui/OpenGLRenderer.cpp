@@ -449,14 +449,8 @@ status_t OpenGLRenderer::invokeFunctors(Rect& dirty) {
 status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     if (mSnapshot->isIgnored()) return DrawGlInfo::kStatusDone;
 
-    interrupt();
     detachFunctor(functor);
 
-    mCaches.enableScissor();
-    if (mDirtyClip) {
-        setScissorFromClip();
-        setStencilFromClip();
-    }
 
     Rect clip(*mSnapshot->clipRect);
     clip.snapToPixelBoundaries();
@@ -477,6 +471,15 @@ status_t OpenGLRenderer::callDrawGLFunction(Functor* functor, Rect& dirty) {
     info.height = getSnapshot()->height;
     getSnapshot()->transform->copyTo(&info.transform[0]);
 
+    // setup GL state for functor
+    if (mDirtyClip) {
+        setScissorFromClip();
+        setStencilFromClip(); // can issue draws, so must precede enableScissor()/interrupt()
+    }
+    mCaches.enableScissor();
+    interrupt();
+
+    // call functor immediately after GL state setup
     status_t result = (*functor)(DrawGlInfo::kModeDraw, &info);
 
     if (result != DrawGlInfo::kStatusDone) {
