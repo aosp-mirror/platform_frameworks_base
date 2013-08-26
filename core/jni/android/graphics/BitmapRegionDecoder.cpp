@@ -217,7 +217,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, SkBitmapRegionDecoder *b
                 gOptions_preferQualityOverSpeedFieldID);
         // Get the bitmap for re-use if it exists.
         tileBitmap = env->GetObjectField(options, gOptions_bitmapFieldID);
-        requireUnpremultiplied = env->GetBooleanField(options, gOptions_premultipliedFieldID);
+        requireUnpremultiplied = !env->GetBooleanField(options, gOptions_premultipliedFieldID);
     }
 
     decoder->setDitherImage(doDither);
