@@ -201,16 +201,10 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自動"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"系統會在這裡顯示通知"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"向下滑動即可隨時存取通知。\n再次向下滑動即可使用系統控制項。"</string>
-    <!-- no translation found for ssl_ca_cert_warning (5848402127455021714) -->
-    <skip />
-    <!-- no translation found for done_button (1759387181766603361) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_dialog_title (1273796967092027291) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_info_message (5430320539555358452) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_warning_message (2033091656129963669) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_settings_button (7946956977377166709) -->
-    <skip />
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"網路可能會受到監控"</string>
+    <string name="done_button" msgid="1759387181766603361">"完成"</string>
+    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"網路監控"</string>
+    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"這個裝置由下列網域管理：<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>。\n\n您的管理員可以監控您的網路活動，包括收發電子郵件、使用應用程式及瀏覽安全網站。\n\n如需詳細資訊，請與您的管理員聯絡。"</string>
+    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"第三方可以監控您的網路活動，\n包括收發電子郵件、使用應用程式及瀏覽安全網站。\n\n如果您在裝置上安裝信任的憑證，就會造成這種情況。"</string>
+    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"檢查信任的憑證"</string>
 </resources>

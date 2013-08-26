@@ -199,16 +199,10 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"تلقائي"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"تظهر الإشعارات هنا"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"يمكنك الدخول إليها في أي وقت بالتمرير السريع إلى أسفل.\nيمكنك التمرير السريع إلى أسفل مرة أخرى للوصول إلى عناصر تحكم النظام."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5848402127455021714) -->
-    <skip />
-    <!-- no translation found for done_button (1759387181766603361) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_dialog_title (1273796967092027291) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_info_message (5430320539555358452) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_warning_message (2033091656129963669) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_settings_button (7946956977377166709) -->
-    <skip />
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"قد تكون الشبكة مراقبة"</string>
+    <string name="done_button" msgid="1759387181766603361">"تم"</string>
+    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"مراقبة الشبكات"</string>
+    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"هذا الجهاز يديره: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nيستطيع مشرفك مراقبة أنشطة الشبكة بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب الآمنة.\n\nللمزيد من المعلومات، اتصل بالمشرف."</string>
+    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"بإمكان الطرف الثالث مراقبة أنشطة\nالشبكة، بما في ذلك الرسائل الإلكترونية والتطبيقات ومواقع الويب الآمنة.\n\nوتجعل بيانات الاعتماد الموثوق فيها والمثبتة على جهازك حدوث هذا ممكنًا."</string>
+    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"التحقق من بيانات الاعتماد الموثوق فيها"</string>
 </resources>
