@@ -205,13 +205,13 @@ private void crossfade() {
     // Animate the loading view to 0% opacity. After the animation ends,
     // set its visibility to GONE as an optimization step (it won't
     // participate in layout passes, etc.)
-    mHideView.animate()
+    mLoadingView.animate()
             .alpha(0f)
             .setDuration(mShortAnimationDuration)
             .setListener(new AnimatorListenerAdapter() {
                 &#64;Override
                 public void onAnimationEnd(Animator animation) {
-                    mHideView.setVisibility(View.GONE);
+                    mLoadingView.setVisibility(View.GONE);
                 }
             });
 }
