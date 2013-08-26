@@ -269,6 +269,23 @@ public interface ViewParent {
     /**
      * Called when a child view now has or no longer is tracking transient state.
      *
+     * <p>"Transient state" is any state that a View might hold that is not expected to
+     * be reflected in the data model that the View currently presents. This state only
+     * affects the presentation to the user within the View itself, such as the current
+     * state of animations in progress or the state of a text selection operation.</p>
+     *
+     * <p>Transient state is useful for hinting to other components of the View system
+     * that a particular view is tracking something complex but encapsulated.
+     * A <code>ListView</code> for example may acknowledge that list item Views
+     * with transient state should be preserved within their position or stable item ID
+     * instead of treating that view as trivially replaceable by the backing adapter.
+     * This allows adapter implementations to be simpler instead of needing to track
+     * the state of item view animations in progress such that they could be restored
+     * in the event of an unexpected recycling and rebinding of attached item views.</p>
+     *
+     * <p>This method is called on a parent view when a child view or a view within
+     * its subtree begins or ends tracking of internal transient state.</p>
+     *
      * @param child Child view whose state has changed
      * @param hasTransientState true if this child has transient state
      */
