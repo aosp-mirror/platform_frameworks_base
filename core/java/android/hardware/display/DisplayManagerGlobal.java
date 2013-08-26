@@ -287,6 +287,22 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    public void pauseWifiDisplay() {
+        try {
+            mDm.pauseWifiDisplay();
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Failed to pause Wifi display.", ex);
+        }
+    }
+
+    public void resumeWifiDisplay() {
+        try {
+            mDm.resumeWifiDisplay();
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Failed to resume Wifi display.", ex);
+        }
+    }
+
     public void disconnectWifiDisplay() {
         try {
             mDm.disconnectWifiDisplay();
