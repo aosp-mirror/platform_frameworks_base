@@ -2375,7 +2375,7 @@ public abstract class Context {
 
     /**
      * {@link android.print.PrintManager} for printing and managing
-     * printers and print taks.
+     * printers and print tasks.
      *
      * @see #getSystemService
      * @see android.print.PrintManager
