@@ -125,7 +125,7 @@ public class LocationController extends BroadcastReceiver {
         // setting won't be fully enabled until the user accepts the agreement.
         int mode = enabled
                 ? Settings.Secure.LOCATION_MODE_HIGH_ACCURACY : Settings.Secure.LOCATION_MODE_OFF;
-        Settings.Secure.setLocationMode(cr, mode);
+        Settings.Secure.putInt(cr, Settings.Secure.LOCATION_MODE, mode);
     }
 
     /**
@@ -133,7 +133,9 @@ public class LocationController extends BroadcastReceiver {
      */
     public boolean isLocationEnabled() {
         ContentResolver resolver = mContext.getContentResolver();
-        return Settings.Secure.getLocationMode(resolver) != Settings.Secure.LOCATION_MODE_OFF;
+        int mode = Settings.Secure.getInt(resolver, Settings.Secure.LOCATION_MODE,
+                Settings.Secure.LOCATION_MODE_OFF);
+        return mode != Settings.Secure.LOCATION_MODE_OFF;
     }
 
     /**
