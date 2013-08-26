@@ -217,6 +217,8 @@ static void TranslateFromObject(
   }
 
   // TODO: wire sources_used if Location class exposes them
+
+  env->DeleteLocalRef(locationClass);
 }
 
 /*
@@ -257,6 +259,8 @@ static void TranslateFromObject(
 
   jmethodID getFlags = env->GetMethodID(batchOptionsClass, "getFlags", "()I");
   batchOptions.flags = env->CallIntMethod(batchOptionsObject, getFlags);
+
+  env->DeleteLocalRef(batchOptionsClass);
 }
 
 /*
@@ -326,6 +330,8 @@ static void TranslateGeofenceFromGeofenceHardwareRequestParcelable(
   options->last_transition = env->CallIntMethod(geofenceRequestObject, getLastTransition);
 
   // TODO: set data.sources_to_use when available
+
+  env->DeleteLocalRef(geofenceRequestClass);
 }
 
 /*
@@ -408,6 +414,8 @@ static void TranslateToObject(const FlpLocation* location, jobject& locationObje
   }
 
   // TODO: wire FlpLocation::sources_used when needed
+
+  sCallbackEnv->DeleteLocalRef(locationClass);
 }
 
 /*
@@ -430,6 +438,8 @@ static void TranslateToObjectArray(
     sCallbackEnv->SetObjectArrayElement(locationsArray, i, locationObject);
     sCallbackEnv->DeleteLocalRef(locationObject);
   }
+
+  sCallbackEnv->DeleteLocalRef(locationClass);
 }
 
 static void LocationCallback(int32_t locationsCount, FlpLocation** locations) {
@@ -455,6 +465,10 @@ static void LocationCallback(int32_t locationsCount, FlpLocation** locations) {
       locationsArray
       );
   CheckExceptions(sCallbackEnv, __FUNCTION__);
+
+  if(locationsArray != NULL) {
+    sCallbackEnv->DeleteLocalRef(locationsArray);
+  }
 }
 
 static void AcquireWakelock() {
@@ -522,6 +536,10 @@ static void GeofenceTransitionCallback(
       sourcesUsed
       );
   CheckExceptions(sCallbackEnv, __FUNCTION__);
+
+  if(locationObject != NULL) {
+    sCallbackEnv->DeleteLocalRef(locationObject);
+  }
 }
 
 static void GeofenceMonitorStatusCallback(
@@ -545,6 +563,10 @@ static void GeofenceMonitorStatusCallback(
       locationObject
       );
   CheckExceptions(sCallbackEnv, __FUNCTION__);
+
+  if(locationObject != NULL) {
+    sCallbackEnv->DeleteLocalRef(locationObject);
+  }
 }
 
 static void GeofenceAddCallback(int32_t geofenceId, int32_t result) {
@@ -843,6 +865,7 @@ static void AddGeofences(
     jobject geofenceObject = env->GetObjectArrayElement(geofenceRequestsArray, i);
 
     TranslateGeofenceFromGeofenceHardwareRequestParcelable(env, geofenceObject, geofences[i]);
+    env->DeleteLocalRef(geofenceObject);
   }
 
   sFlpGeofencingInterface->add_geofences(geofenceRequestsCount, &geofences);
