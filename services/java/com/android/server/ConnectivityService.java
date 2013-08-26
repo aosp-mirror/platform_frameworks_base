@@ -3572,6 +3572,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                          enabled));
     }
 
+    private boolean isMobileDataStateTrackerReady() {
+        MobileDataStateTracker mdst =
+                (MobileDataStateTracker) mNetTrackers[ConnectivityManager.TYPE_MOBILE];
+        return (mdst != null) && (mdst.isReady());
+    }
+
     @Override
     public int checkMobileProvisioning(boolean sendNotification, int suggestedTimeOutMs,
             final ResultReceiver resultReceiver) {
@@ -3739,13 +3745,25 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
 
             try {
-                // Enable fail fast as we'll do retries here and use a
-                // hipri connection so the default connection stays active.
-                log("isMobileOk: start hipri url=" + params.mUrl);
-                mCs.setEnableFailFastMobileData(DctConstants.ENABLED);
-
                 // Continue trying to connect until time has run out
                 long endTime = SystemClock.elapsedRealtime() + params.mTimeOutMs;
+
+                if (!mCs.isMobileDataStateTrackerReady()) {
+                    // Wait for MobileDataStateTracker to be ready.
+                    if (DBG) log("isMobileOk: mdst is not ready");
+                    while(SystemClock.elapsedRealtime() < endTime) {
+                        if (mCs.isMobileDataStateTrackerReady()) {
+                            // Enable fail fast as we'll do retries here and use a
+                            // hipri connection so the default connection stays active.
+                            if (DBG) log("isMobileOk: mdst ready, enable fail fast of mobile data");
+                            mCs.setEnableFailFastMobileData(DctConstants.ENABLED);
+                            break;
+                        }
+                        sleep(1);
+                    }
+                }
+
+                log("isMobileOk: start hipri url=" + params.mUrl);
 
                 // First wait until we can start using hipri
                 Binder binder = new Binder();
