@@ -35,6 +35,9 @@ interface IBluetoothHeadset {
     boolean startVoiceRecognition(in BluetoothDevice device);
     boolean stopVoiceRecognition(in BluetoothDevice device);
     boolean isAudioConnected(in BluetoothDevice device);
+    boolean sendVendorSpecificResultCode(in BluetoothDevice device,
+                                         in String command,
+                                         in String arg);
 
     // APIs that can be made public in future
     int getBatteryUsageHint(in BluetoothDevice device);
