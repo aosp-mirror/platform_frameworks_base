@@ -668,7 +668,9 @@ public class PhoneStatusBar extends BaseStatusBar {
     @Override
     protected void updateSearchPanel() {
         super.updateSearchPanel();
-        mNavigationBarView.setDelegateView(mSearchPanelView);
+        if (mNavigationBarView != null) {
+            mNavigationBarView.setDelegateView(mSearchPanelView);
+        }
     }
 
     @Override
@@ -679,19 +681,23 @@ public class PhoneStatusBar extends BaseStatusBar {
         // we want to freeze the sysui state wherever it is
         mSearchPanelView.setSystemUiVisibility(mSystemUiVisibility);
 
-        WindowManager.LayoutParams lp =
-            (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
-        lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        mWindowManager.updateViewLayout(mNavigationBarView, lp);
+        if (mNavigationBarView != null) {
+            WindowManager.LayoutParams lp =
+                (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
+            lp.flags &= ~WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+            mWindowManager.updateViewLayout(mNavigationBarView, lp);
+        }
     }
 
     @Override
     public void hideSearchPanel() {
         super.hideSearchPanel();
-        WindowManager.LayoutParams lp =
-            (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
-        lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
-        mWindowManager.updateViewLayout(mNavigationBarView, lp);
+        if (mNavigationBarView != null) {
+            WindowManager.LayoutParams lp =
+                (android.view.WindowManager.LayoutParams) mNavigationBarView.getLayoutParams();
+            lp.flags |= WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
+            mWindowManager.updateViewLayout(mNavigationBarView, lp);
+        }
     }
 
     protected int getStatusBarGravity() {
@@ -1897,7 +1903,8 @@ public class PhoneStatusBar extends BaseStatusBar {
                     mStatusBarWindowState);
 
             // update navigation bar mode
-            int nbMode = updateBarMode(oldVal, newVal, mNavigationBarView.getBarTransitions(),
+            int nbMode = mNavigationBarView == null ? -1 : updateBarMode(
+                    oldVal, newVal, mNavigationBarView.getBarTransitions(),
                     View.NAVIGATION_BAR_TRANSIENT, View.SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION,
                     mNavigationBarWindowState);
 
