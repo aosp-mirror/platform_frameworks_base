@@ -280,6 +280,20 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     }
 
     @Override
+    public void flush() throws CameraAccessException {
+        synchronized (mLock) {
+            try {
+                mRemoteDevice.flush();
+            } catch (CameraRuntimeException e) {
+                throw e.asChecked();
+            } catch (RemoteException e) {
+                // impossible
+                return;
+            }
+        }
+    }
+
+    @Override
     public void close() throws Exception {
 
         // TODO: every method should throw IllegalStateException after close has been called

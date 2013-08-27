@@ -45,4 +45,6 @@ interface ICameraDeviceUser
     int getCameraInfo(out CameraMetadata info);
 
     int waitUntilIdle();
+
+    int flush();
 }
