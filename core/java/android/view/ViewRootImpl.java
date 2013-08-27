@@ -228,7 +228,6 @@ public final class ViewRootImpl implements ViewParent,
 
     InputStage mFirstInputStage;
     InputStage mFirstPostImeInputStage;
-    SyntheticInputStage mSyntheticInputStage;
 
     boolean mWindowAttributesChanged = false;
     int mWindowAttributesChangesFlag = 0;
@@ -590,8 +589,8 @@ public final class ViewRootImpl implements ViewParent,
 
                 // Set up the input pipeline.
                 CharSequence counterSuffix = attrs.getTitle();
-                mSyntheticInputStage = new SyntheticInputStage();
-                InputStage viewPostImeStage = new ViewPostImeInputStage(mSyntheticInputStage);
+                InputStage syntheticInputStage = new SyntheticInputStage();
+                InputStage viewPostImeStage = new ViewPostImeInputStage(syntheticInputStage);
                 InputStage nativePostImeStage = new NativePostImeInputStage(viewPostImeStage,
                         "aq:native-post-ime:" + counterSuffix);
                 InputStage earlyPostImeStage = new EarlyPostImeInputStage(nativePostImeStage);
@@ -3774,9 +3773,6 @@ public final class ViewRootImpl implements ViewParent,
         private int processKeyEvent(QueuedInputEvent q) {
             final KeyEvent event = (KeyEvent)q.mEvent;
 
-            // The synthetic stage occasionally needs to know about keys in order to debounce taps
-            mSyntheticInputStage.notifyKeyEvent(event);
-
             // Deliver the key to the view hierarchy.
             if (mView.dispatchKeyEvent(event)) {
                 return FINISH_HANDLED;
@@ -3948,10 +3944,6 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
             super.onDeliverToNext(q);
-        }
-
-        public void notifyKeyEvent(KeyEvent e) {
-            mTouchNavigation.notifyKeyEvent(e);
         }
     }
 
@@ -4380,15 +4372,6 @@ public final class ViewRootImpl implements ViewParent,
 
         /* TODO: These constants should eventually be moved to ViewConfiguration. */
 
-        // Tap timeout in milliseconds.
-        private static final int TAP_TIMEOUT = 250;
-
-        // Debounce timeout for touch nav devices with a button under their pad, in milliseconds
-        private static final int DEBOUNCE_TIME = 250;
-
-        // The maximum distance traveled for a gesture to be considered a tap in millimeters.
-        private static final int TAP_SLOP_MILLIMETERS = 5;
-
         // The nominal distance traveled to move by one unit.
         private static final int TICK_DISTANCE_MILLIMETERS = 12;
 
@@ -4415,13 +4398,6 @@ public final class ViewRootImpl implements ViewParent,
         private boolean mCurrentDeviceSupported;
 
         /* Configuration for the current input device. */
-
-        // The tap timeout and scaled slop.
-        private int mConfigTapTimeout;
-        private float mConfigTapSlop;
-
-        // Amount of time to wait between button presses and tap generation for debouncing
-        private int mConfigDebounceTime;
 
         // The scaled tick distance.  A movement of this amount should generally translate
         // into a single dpad event in a given direction.
@@ -4471,8 +4447,6 @@ public final class ViewRootImpl implements ViewParent,
         // The last time a confirm key was pressed on the touch nav device
         private long mLastConfirmKeyTime = Long.MAX_VALUE;
 
-        private boolean mHasButtonUnderPad;
-
         public SyntheticTouchNavigationHandler() {
             super(true);
         }
@@ -4509,21 +4483,15 @@ public final class ViewRootImpl implements ViewParent,
                         float nominalRes = (xRes + yRes) * 0.5f;
 
                         // Precompute all of the configuration thresholds we will need.
-                        mConfigTapTimeout = TAP_TIMEOUT;
-                        mConfigTapSlop = TAP_SLOP_MILLIMETERS * nominalRes;
                         mConfigTickDistance = TICK_DISTANCE_MILLIMETERS * nominalRes;
                         mConfigMinFlingVelocity =
                                 MIN_FLING_VELOCITY_TICKS_PER_SECOND * mConfigTickDistance;
                         mConfigMaxFlingVelocity =
                                 MAX_FLING_VELOCITY_TICKS_PER_SECOND * mConfigTickDistance;
-                        mConfigDebounceTime = DEBOUNCE_TIME;
-                        mHasButtonUnderPad = device.hasButtonUnderPad();
 
                         if (LOCAL_DEBUG) {
                             Log.d(LOCAL_TAG, "Configured device " + mCurrentDeviceId
                                     + " (" + Integer.toHexString(mCurrentSource) + "): "
-                                    + "mConfigTapTimeout=" + mConfigTapTimeout
-                                    + ", mConfigTapSlop=" + mConfigTapSlop
                                     + ", mConfigTickDistance=" + mConfigTickDistance
                                     + ", mConfigMinFlingVelocity=" + mConfigMinFlingVelocity
                                     + ", mConfigMaxFlingVelocity=" + mConfigMaxFlingVelocity);
@@ -4585,18 +4553,7 @@ public final class ViewRootImpl implements ViewParent,
 
                     // Detect taps and flings.
                     if (action == MotionEvent.ACTION_UP) {
-                        if (!mConsumedMovement
-                                && Math.hypot(mLastX - mStartX, mLastY - mStartY) < mConfigTapSlop
-                                && time <= mStartTime + mConfigTapTimeout) {
-                            if (!mHasButtonUnderPad ||
-                                        time >= mLastConfirmKeyTime + mConfigDebounceTime) {
-                                // It's a tap!
-                                finishKeys(time);
-                                sendKeyDownOrRepeat(time, KeyEvent.KEYCODE_DPAD_CENTER, metaState);
-                                sendKeyUp(time);
-                            }
-                        } else if (mConsumedMovement
-                                && mPendingKeyCode != KeyEvent.KEYCODE_UNKNOWN) {
+                        if (mConsumedMovement && mPendingKeyCode != KeyEvent.KEYCODE_UNKNOWN) {
                             // It might be a fling.
                             mVelocityTracker.computeCurrentVelocity(1000, mConfigMaxFlingVelocity);
                             final float vx = mVelocityTracker.getXVelocity(mActivePointerId);
@@ -4624,13 +4581,6 @@ public final class ViewRootImpl implements ViewParent,
                 final long time = event.getEventTime();
                 finishKeys(time);
                 finishTracking(time);
-            }
-        }
-
-        public void notifyKeyEvent(KeyEvent e) {
-            final int keyCode = e.getKeyCode();
-            if (KeyEvent.isConfirmKey(e.getKeyCode())) {
-                mLastConfirmKeyTime  = e.getDownTime();
             }
         }
 
