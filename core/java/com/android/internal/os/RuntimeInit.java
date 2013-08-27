@@ -334,6 +334,7 @@ public class RuntimeInit {
             }
         } catch (Throwable t2) {
             Slog.e(TAG, "Error reporting WTF", t2);
+            Slog.e(TAG, "Original WTF:", t);
         }
     }
 
