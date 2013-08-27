@@ -18,6 +18,7 @@ package com.android.server;
 
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -105,13 +106,24 @@ final class NativeDaemonConnector implements Runnable, Handler.Callback, Watchdo
         return true;
     }
 
+    private LocalSocketAddress determineSocketAddress() {
+        // If we're testing, set up a socket in a namespace that's accessible to test code.
+        // In order to ensure that unprivileged apps aren't able to impersonate native daemons on
+        // production devices, even if said native daemons ill-advisedly pick a socket name that
+        // starts with __test__, only allow this on debug builds.
+        if (mSocket.startsWith("__test__") && Build.IS_DEBUGGABLE) {
+            return new LocalSocketAddress(mSocket);
+        } else {
+            return new LocalSocketAddress(mSocket, LocalSocketAddress.Namespace.RESERVED);
+        }
+    }
+
     private void listenToSocket() throws IOException {
         LocalSocket socket = null;
 
         try {
             socket = new LocalSocket();
-            LocalSocketAddress address = new LocalSocketAddress(mSocket,
-                    LocalSocketAddress.Namespace.RESERVED);
+            LocalSocketAddress address = determineSocketAddress();
 
             socket.connect(address);
 
