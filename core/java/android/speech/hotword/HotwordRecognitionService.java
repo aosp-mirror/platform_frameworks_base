@@ -152,7 +152,7 @@ public abstract class HotwordRecognitionService extends Service {
         }
         try {
             Log.e(TAG, "Recognition service called without RECORD_AUDIO permissions");
-            listener.onHotwordError(HotwordRecognizer.ERROR_INSUFFICIENT_PERMISSIONS);
+            listener.onHotwordError(HotwordRecognizer.ERROR_FAILED);
         } catch (RemoteException e) {
             Log.e(TAG, "onHotwordError(ERROR_INSUFFICIENT_PERMISSIONS) message failed", e);
         }
