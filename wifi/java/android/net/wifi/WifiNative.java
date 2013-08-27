@@ -268,7 +268,11 @@ public class WifiNative {
         }
         if (settings.channelSet != null && !settings.channelSet.isEmpty()) {
             cmd += " CHANNEL=<";
-            for (String channel : settings.channelSet) cmd += " " + channel;
+            int i = 0;
+            for (String channel : settings.channelSet) {
+                cmd += (i > 0 ? "," : "") + channel;
+                ++i;
+            }
             cmd += ">";
         }
         if (settings.maxApForDistance != BatchedScanSettings.UNSPECIFIED) {
