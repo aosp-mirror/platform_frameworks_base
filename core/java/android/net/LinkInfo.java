@@ -30,7 +30,7 @@ import android.os.Parcelable;
  */
 public class LinkInfo implements Parcelable
 {
-    public static final int UNKNOWN = Integer.MAX_VALUE;
+    public static final int UNKNOWN = -1;
 
     public static final int NORMALIZED_MIN_SIGNAL_STRENGTH = 0;
 
@@ -43,8 +43,8 @@ public class LinkInfo implements Parcelable
 
     public int mNormalizedSignalStrength = UNKNOWN;
 
-    public int mPacketCount = UNKNOWN;
-    public int mPacketErrorCount = UNKNOWN;
+    public long mPacketCount = UNKNOWN;
+    public long mPacketErrorCount = UNKNOWN;
     public int mTheoreticalTxBandwidth = UNKNOWN;
     public int mTheoreticalRxBandwidth = UNKNOWN;
     public int mTheoreticalLatency = UNKNOWN;
@@ -82,8 +82,8 @@ public class LinkInfo implements Parcelable
         dest.writeInt(objectType);
         dest.writeInt(mNetworkType);
         dest.writeInt(mNormalizedSignalStrength);
-        dest.writeInt(mPacketCount);
-        dest.writeInt(mPacketErrorCount);
+        dest.writeLong(mPacketCount);
+        dest.writeLong(mPacketErrorCount);
         dest.writeInt(mTheoreticalTxBandwidth);
         dest.writeInt(mTheoreticalRxBandwidth);
         dest.writeInt(mTheoreticalLatency);
@@ -116,8 +116,8 @@ public class LinkInfo implements Parcelable
     protected void initializeFromParcel(Parcel in) {
         mNetworkType = in.readInt();
         mNormalizedSignalStrength = in.readInt();
-        mPacketCount = in.readInt();
-        mPacketErrorCount = in.readInt();
+        mPacketCount = in.readLong();
+        mPacketErrorCount = in.readLong();
         mTheoreticalTxBandwidth = in.readInt();
         mTheoreticalRxBandwidth = in.readInt();
         mTheoreticalLatency = in.readInt();
