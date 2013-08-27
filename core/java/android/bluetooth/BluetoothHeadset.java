@@ -849,10 +849,10 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * Sends a vendor-specific unsolicited result code to the headset.
      *
      * <p>The actual string to be sent is <code>command + ": " + arg</code>.
-     * For example, if {@code command} is {@link VENDOR_RESULT_CODE_COMMAND_ANDROID} and {@code arg}
+     * For example, if {@code command} is {@link #VENDOR_RESULT_CODE_COMMAND_ANDROID} and {@code arg}
      * is {@code "0"}, the string <code>"+ANDROID: 0"</code> will be sent.
      *
-     * <p>Currently only {@link VENDOR_RESULT_CODE_COMMAND_ANDROID} is allowed as {@code command}.
+     * <p>Currently only {@link #VENDOR_RESULT_CODE_COMMAND_ANDROID} is allowed as {@code command}.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
