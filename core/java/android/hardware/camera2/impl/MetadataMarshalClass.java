@@ -26,7 +26,7 @@ public interface MetadataMarshalClass<T> {
      * @param value the value of type T that we wish to write into the byte buffer
      * @param buffer the byte buffer into which the marshalled object will be written
      * @param nativeType the native type, e.g.
-     *        {@link android.hardware.camera2.CameraMetadata#TYPE_BYTE TYPE_BYTE}.
+     *        {@link android.hardware.camera2.impl.CameraMetadataNative#TYPE_BYTE TYPE_BYTE}.
      *        Guaranteed to be one for which isNativeTypeSupported returns true.
      * @param sizeOnly if this is true, don't write to the byte buffer. calculate the size only.
      * @return the size that needs to be written to the byte buffer
@@ -37,7 +37,7 @@ public interface MetadataMarshalClass<T> {
      * Unmarshal a new object instance from the byte buffer.
      * @param buffer the byte buffer, from which we will read the object
      * @param nativeType the native type, e.g.
-     *        {@link android.hardware.camera2.CameraMetadata#TYPE_BYTE TYPE_BYTE}.
+     *        {@link android.hardware.camera2.impl.CameraMetadataNative#TYPE_BYTE TYPE_BYTE}.
      *        Guaranteed to be one for which isNativeTypeSupported returns true.
      * @return a new instance of type T read from the byte buffer
      */
@@ -50,7 +50,7 @@ public interface MetadataMarshalClass<T> {
      * will are likely to only support one type.
      *
      * @param nativeType the native type, e.g.
-     *        {@link android.hardware.camera2.CameraMetadata#TYPE_BYTE TYPE_BYTE}
+     *        {@link android.hardware.camera2.impl.CameraMetadataNative#TYPE_BYTE TYPE_BYTE}
      * @return true if it supports, false otherwise
      */
     boolean isNativeTypeSupported(int nativeType);
@@ -60,7 +60,7 @@ public interface MetadataMarshalClass<T> {
     /**
      * How many bytes T will take up if marshalled to/from nativeType
      * @param nativeType the native type, e.g.
-     *        {@link android.hardware.camera2.CameraMetadata#TYPE_BYTE TYPE_BYTE}
+     *        {@link android.hardware.camera2.impl.CameraMetadataNative#TYPE_BYTE TYPE_BYTE}
      * @return a size in bytes, or NATIVE_SIZE_DYNAMIC if the size is dynamic
      */
     int getNativeSize(int nativeType);

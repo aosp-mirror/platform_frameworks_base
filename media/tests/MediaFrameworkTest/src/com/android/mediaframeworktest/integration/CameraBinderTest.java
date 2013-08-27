@@ -25,6 +25,7 @@ import android.hardware.IProCameraUser;
 import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
+import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.utils.BinderHolder;
 import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.os.Binder;
@@ -155,7 +156,7 @@ public class CameraBinderTest extends AndroidTestCase {
         }
 
         @Override
-        public void onResultReceived(int frameId, CameraMetadata result) throws RemoteException {
+        public void onResultReceived(int frameId, CameraMetadataNative result) throws RemoteException {
         }
     }
 

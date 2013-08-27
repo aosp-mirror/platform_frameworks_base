@@ -18,6 +18,7 @@ package android.hardware.camera2;
 
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.camera2.impl.CameraMetadataNative;
 
 /**
  * <p>The results of a single image capture from the image sensor.</p>
@@ -34,10 +35,20 @@ import android.graphics.Rect;
  *
  */
 public final class CaptureResult extends CameraMetadata {
+
+    private final CameraMetadataNative mResults;
+
     /**
+     * Takes ownership of the passed-in properties object
      * @hide
      */
-    public CaptureResult() {
+    public CaptureResult(CameraMetadataNative results) {
+        mResults = results;
+    }
+
+    @Override
+    public <T> T get(Key<T> key) {
+        return mResults.get(key);
     }
 
     /**

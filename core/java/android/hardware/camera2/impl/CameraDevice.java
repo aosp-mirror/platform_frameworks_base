@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Stack;
 
 /**
- * HAL2.1+ implementation of CameraDevice Use CameraManager#open to instantiate
+ * HAL2.1+ implementation of CameraDevice. Use CameraManager#open to instantiate
  */
 public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
@@ -90,8 +90,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     @Override
     public CameraProperties getProperties() throws CameraAccessException {
 
-        CameraProperties properties = new CameraProperties();
-        CameraMetadata info = new CameraMetadata();
+        CameraMetadataNative info = new CameraMetadataNative();
 
         try {
             mRemoteDevice.getCameraInfo(/*out*/info);
@@ -102,7 +101,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
             return null;
         }
 
-        properties.swap(info);
+        CameraProperties properties = new CameraProperties(info);
         return properties;
     }
 
@@ -157,11 +156,11 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
     }
 
     @Override
-    public CaptureRequest createCaptureRequest(int templateType) throws CameraAccessException {
-
+    public CaptureRequest.Builder createCaptureRequest(int templateType)
+            throws CameraAccessException {
         synchronized (mLock) {
 
-            CameraMetadata templatedRequest = new CameraMetadata();
+            CameraMetadataNative templatedRequest = new CameraMetadataNative();
 
             try {
                 mRemoteDevice.createDefaultRequest(templateType, /* out */templatedRequest);
@@ -172,11 +171,10 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 return null;
             }
 
-            CaptureRequest request = new CaptureRequest();
-            request.swap(templatedRequest);
+            CaptureRequest.Builder builder =
+                    new CaptureRequest.Builder(templatedRequest);
 
-            return request;
-
+            return builder;
         }
     }
 
@@ -404,7 +402,8 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         }
 
         @Override
-        public void onResultReceived(int requestId, CameraMetadata result) throws RemoteException {
+        public void onResultReceived(int requestId, CameraMetadataNative result)
+                throws RemoteException {
             if (DEBUG) {
                 Log.d(TAG, "Received result for id " + requestId);
             }
@@ -432,8 +431,7 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 return;
             }
 
-            final CaptureResult resultAsCapture = new CaptureResult();
-            resultAsCapture.swap(result);
+            final CaptureResult resultAsCapture = new CaptureResult(result);
 
             holder.getHandler().post(
                 new Runnable() {

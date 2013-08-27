@@ -15,8 +15,6 @@
  */
 package android.hardware.camera2.impl;
 
-import android.hardware.camera2.CameraMetadata;
-
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
@@ -71,7 +69,7 @@ public class MetadataMarshalString implements MetadataMarshalClass<String> {
 
     @Override
     public boolean isNativeTypeSupported(int nativeType) {
-        return nativeType == CameraMetadata.TYPE_BYTE;
+        return nativeType == CameraMetadataNative.TYPE_BYTE;
     }
 
     @Override

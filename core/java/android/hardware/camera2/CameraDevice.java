@@ -230,15 +230,17 @@ public interface CameraDevice extends AutoCloseable {
     public void configureOutputs(List<Surface> outputs) throws CameraAccessException;
 
     /**
-     * <p>Create a {@link CaptureRequest} initialized with template for a target
-     * use case. The settings are chosen to be the best options for the specific
-     * camera device, so it is not recommended to reuse the same request for a
-     * different camera device; create a request for that device and override
-     * the settings as desired, instead.</p>
+     * <p>Create a {@link CaptureRequest.Builder} for new capture requests,
+     * initialized with template for a target use case. The settings are chosen
+     * to be the best options for the specific camera device, so it is not
+     * recommended to reuse the same request for a different camera device;
+     * create a builder specific for that device and template and override the
+     * settings as desired, instead.</p>
      *
      * @param templateType An enumeration selecting the use case for this
      * request; one of the CameraDevice.TEMPLATE_ values.
-     * @return a filled-in CaptureRequest, except for output streams
+     * @return a builder for a capture request, initialized with default
+     * settings for that template, and no output streams
      *
      * @throws IllegalArgumentException if the templateType is not in the list
      * of supported templates.
@@ -252,7 +254,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see #TEMPLATE_VIDEO_SNAPSHOT
      * @see #TEMPLATE_MANUAL
      */
-    public CaptureRequest createCaptureRequest(int templateType)
+    public CaptureRequest.Builder createCaptureRequest(int templateType)
             throws CameraAccessException;
 
     /**
@@ -262,10 +264,10 @@ public interface CameraDevice extends AutoCloseable {
      * including sensor, lens, flash, and post-processing settings.</p>
      *
      * <p>Each request will produce one {@link CaptureResult} and produce new
-     * frames for one or more target Surfaces, set with CaptureRequests's {@link
-     * CaptureRequest#addTarget}. The target surfaces must be configured as
-     * active outputs with {@link #configureOutputs} before calling this
-     * method.</p>
+     * frames for one or more target Surfaces, set with the CaptureRequest
+     * builder's {@link CaptureRequest.Builder#addTarget} method. The target
+     * surfaces must be configured as active outputs with
+     * {@link #configureOutputs} before calling this method.</p>
      *
      * <p>Multiple requests can be in progress at once. They are processed in
      * first-in, first-out order, with minimal delays between each
@@ -303,10 +305,11 @@ public interface CameraDevice extends AutoCloseable {
      * calls.
      *
      * <p>The requests will be captured in order, each capture producing one
-     * {@link CaptureResult} and image buffers for one or more target {@link
-     * android.view.Surface surfaces}. The target surfaces for each request (set
-     * with {@link CaptureRequest#addTarget}) must be configured as active
-     * outputs with {@link #configureOutputs} before calling this method.</p>
+     * {@link CaptureResult} and image buffers for one or more target
+     * {@link android.view.Surface surfaces}. The target surfaces for each
+     * request (set with {@link CaptureRequest.Builder#addTarget}) must be
+     * configured as active outputs with {@link #configureOutputs} before
+     * calling this method.</p>
      *
      * <p>The main difference between this method and simply calling
      * {@link #capture} repeatedly is that this method guarantees that no

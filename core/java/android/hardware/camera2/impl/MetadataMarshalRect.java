@@ -16,7 +16,6 @@
 package android.hardware.camera2.impl;
 
 import android.graphics.Rect;
-import android.hardware.camera2.CameraMetadata;
 
 import java.nio.ByteBuffer;
 
@@ -58,7 +57,7 @@ public class MetadataMarshalRect implements MetadataMarshalClass<Rect> {
 
     @Override
     public boolean isNativeTypeSupported(int nativeType) {
-        return nativeType == CameraMetadata.TYPE_INT32;
+        return nativeType == CameraMetadataNative.TYPE_INT32;
     }
 
     @Override

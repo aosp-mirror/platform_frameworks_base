@@ -15,7 +15,6 @@
  */
 package android.hardware.camera2.impl;
 
-import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.Size;
 
 import java.nio.ByteBuffer;
@@ -51,7 +50,7 @@ public class MetadataMarshalSize implements MetadataMarshalClass<Size> {
 
     @Override
     public boolean isNativeTypeSupported(int nativeType) {
-        return nativeType == CameraMetadata.TYPE_INT32;
+        return nativeType == CameraMetadataNative.TYPE_INT32;
     }
 
     @Override

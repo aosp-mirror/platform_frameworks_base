@@ -20,6 +20,7 @@ import android.content.Context;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceListener;
 import android.hardware.IProCameraUser;
+import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.utils.CameraBinderDecorator;
 import android.hardware.camera2.utils.CameraRuntimeException;
 import android.hardware.camera2.utils.BinderHolder;
@@ -178,7 +179,7 @@ public final class CameraManager {
         // TODO: implement and call a service function to get the capabilities on C++ side
 
         // TODO: get properties from service
-        return new CameraProperties();
+        return new CameraProperties(new CameraMetadataNative());
     }
 
     /**
