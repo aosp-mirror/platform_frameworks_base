@@ -3865,8 +3865,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     public void setLayoutTransition(LayoutTransition transition) {
         if (mTransition != null) {
-            mTransition.cancel();
-            mTransition.removeTransitionListener(mLayoutTransitionListener);
+            LayoutTransition previousTransition = mTransition;
+            previousTransition.cancel();
+            previousTransition.removeTransitionListener(mLayoutTransitionListener);
         }
         mTransition = transition;
         if (mTransition != null) {
