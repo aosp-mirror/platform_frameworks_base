@@ -2931,6 +2931,11 @@ public final class Settings {
                 throws SettingNotFoundException {
             String v = getStringForUser(cr, name, userHandle);
             try {
+                if (LOCATION_MODE.equals(name)) {
+                    // HACK ALERT: temporary hack to work around b/10491283.
+                    // TODO: once b/10491283 fixed, remove this hack
+                    return getLocationModeForUser(cr, userHandle);
+                }
                 return Integer.parseInt(v);
             } catch (NumberFormatException e) {
                 throw new SettingNotFoundException(name);
@@ -2957,6 +2962,11 @@ public final class Settings {
         /** @hide */
         public static boolean putIntForUser(ContentResolver cr, String name, int value,
                 int userHandle) {
+            if (LOCATION_MODE.equals(name)) {
+                // HACK ALERT: temporary hack to work around b/10491283.
+                // TODO: once b/10491283 fixed, remove this hack
+                return setLocationModeForUser(cr, value, userHandle);
+            }
             return putStringForUser(cr, name, Integer.toString(value), userHandle);
         }
 
@@ -3265,8 +3275,19 @@ public final class Settings {
 
         /**
          * Comma-separated list of location providers that activities may access.
+         *
+         * @deprecated use {@link #LOCATION_MODE}
          */
+        @Deprecated
         public static final String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
+
+        /**
+         * The degree of location access enabled by the user, for use with {@link
+         * #putInt(ContentResolver, String, int)} and {@link #getInt(ContentResolver, String)}. Must
+         * be one of {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
+         * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
+         */
+        public static final String LOCATION_MODE = "location_mode";
 
         /**
          * Location access disabled
@@ -4328,7 +4349,7 @@ public final class Settings {
          * @param cr the content resolver to use
          * @param provider the location provider to query
          * @return true if the provider is enabled
-         * @deprecated use {@link #getLocationMode(ContentResolver)}
+         * @deprecated use {@link #getInt(ContentResolver, String)} and {@link #LOCATION_MODE}
          */
         @Deprecated
         public static final boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
@@ -4341,7 +4362,8 @@ public final class Settings {
          * @param provider the location provider to query
          * @param userId the userId to query
          * @return true if the provider is enabled
-         * @deprecated use {@link #getLocationModeForUser(ContentResolver, int)}
+         * @deprecated use {@link #getIntForUser(ContentResolver, String, int, int)} and
+         *             {@link #LOCATION_MODE}
          * @hide
          */
         @Deprecated
@@ -4356,7 +4378,7 @@ public final class Settings {
          * @param cr the content resolver to use
          * @param provider the location provider to enable or disable
          * @param enabled true if the provider should be enabled
-         * @deprecated use {@link #setLocationMode(ContentResolver, int)}
+         * @deprecated use {@link #putInt(ContentResolver, String, int)} and {@link #LOCATION_MODE}
          */
         @Deprecated
         public static final void setLocationProviderEnabled(ContentResolver cr,
@@ -4366,15 +4388,18 @@ public final class Settings {
 
         /**
          * Thread-safe method for enabling or disabling a single location provider.
+         *
          * @param cr the content resolver to use
          * @param provider the location provider to enable or disable
          * @param enabled true if the provider should be enabled
          * @param userId the userId for which to enable/disable providers
-         * @deprecated use {@link #setLocationModeForUser(ContentResolver, int, int)}
+         * @return true if the value was set, false on database errors
+         * @deprecated use {@link #putIntForUser(ContentResolver, String, int, int)} and
+         *             {@link #LOCATION_MODE}
          * @hide
          */
         @Deprecated
-        public static final void setLocationProviderEnabledForUser(ContentResolver cr,
+        public static final boolean setLocationProviderEnabledForUser(ContentResolver cr,
                 String provider, boolean enabled, int userId) {
             synchronized (mLocationSettingsLock) {
                 // to ensure thread safety, we write the provider name with a '+' or '-'
@@ -4385,7 +4410,7 @@ public final class Settings {
                 } else {
                     provider = "-" + provider;
                 }
-                putStringForUser(cr, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, provider,
+                return putStringForUser(cr, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, provider,
                         userId);
             }
         }
@@ -4395,13 +4420,20 @@ public final class Settings {
          * {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
          * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
          *
+         * TODO: remove callers, make private
+         *
          * @param cr the content resolver to use
          * @param mode such as {@link #LOCATION_MODE_HIGH_ACCURACY}
          * @param userId the userId for which to change mode
+         * @return true if the value was set, false on database errors
          *
          * @throws IllegalArgumentException if mode is not one of the supported values
+         *
+         * @deprecated use {@link #putIntForUser(ContentResolver, String, int, int)} and
+         *             {@link #LOCATION_MODE}
          */
-        public static final void setLocationModeForUser(ContentResolver cr, int mode, int userId) {
+        @Deprecated
+        public static final boolean setLocationModeForUser(ContentResolver cr, int mode, int userId) {
             synchronized (mLocationSettingsLock) {
                 boolean gps = false;
                 boolean network = false;
@@ -4421,10 +4453,11 @@ public final class Settings {
                     default:
                         throw new IllegalArgumentException("Invalid location mode: " + mode);
                 }
-                Settings.Secure.setLocationProviderEnabledForUser(
+                boolean gpsSuccess = Settings.Secure.setLocationProviderEnabledForUser(
                         cr, LocationManager.GPS_PROVIDER, gps, userId);
-                Settings.Secure.setLocationProviderEnabledForUser(
+                boolean nlpSuccess = Settings.Secure.setLocationProviderEnabledForUser(
                         cr, LocationManager.NETWORK_PROVIDER, network, userId);
+                return gpsSuccess && nlpSuccess;
             }
         }
 
@@ -4433,11 +4466,15 @@ public final class Settings {
          * {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
          * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
          *
+         * TODO: remove callers, delete
+         *
          * @param cr the content resolver to use
          * @param mode such as {@link #LOCATION_MODE_HIGH_ACCURACY}
          *
          * @throws IllegalArgumentException if mode is not one of the supported values
+         * @deprecated use {@link #putInt(ContentResolver, String, int)} and {@link #LOCATION_MODE}
          */
+        @Deprecated
         public static final void setLocationMode(ContentResolver cr, int mode) {
             setLocationModeForUser(cr, mode, UserHandle.myUserId());
         }
@@ -4447,10 +4484,16 @@ public final class Settings {
          * {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
          * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
          *
+         * TODO: remove callers, make private
+         *
          * @param cr the content resolver to use
          * @param userId the userId for which to read the mode
          * @return the location mode
+         *
+         * @deprecated use {@link #getIntForUser(ContentResolver, String, int, int)} and
+         *             {@link #LOCATION_MODE}
          */
+        @Deprecated
         public static final int getLocationModeForUser(ContentResolver cr, int userId) {
             synchronized (mLocationSettingsLock) {
                 boolean gpsEnabled = Settings.Secure.isLocationProviderEnabledForUser(
@@ -4474,9 +4517,14 @@ public final class Settings {
          * {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
          * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
          *
+         * TODO: remove callers, delete
+         *
          * @param cr the content resolver to use
          * @return the location mode
+         *
+         * @deprecated use {@link #getInt(ContentResolver, String, int)} and {@link #LOCATION_MODE}
          */
+        @Deprecated
         public static final int getLocationMode(ContentResolver cr) {
             return getLocationModeForUser(cr, UserHandle.myUserId());
         }
