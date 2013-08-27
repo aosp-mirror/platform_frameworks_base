@@ -67,8 +67,8 @@ public class HotwordRecognizer {
     /** RecognitionService busy. */
     public static final int ERROR_RECOGNIZER_BUSY = 2;
 
-    /** Insufficient permissions */
-    public static final int ERROR_INSUFFICIENT_PERMISSIONS = 3;
+    /** This indicates a permanent failure and the clients shouldn't retry on this */
+    public static final int ERROR_FAILED = 3;
 
     /** Client-side errors */
     public static final int ERROR_CLIENT = 4;
@@ -77,7 +77,7 @@ public class HotwordRecognizer {
     public static final int ERROR_TIMEOUT = 5;
 
     /** The service received concurrent start calls */
-    public static final int WARNING_SERVICE_ALREADY_STARTED = 6;
+    public static final int ERROR_SERVICE_ALREADY_STARTED = 6;
 
     /** action codes */
     private static final int MSG_START = 1;
@@ -223,7 +223,7 @@ public class HotwordRecognizer {
                 return;
             }
         } else {
-            mListener.onHotwordError(WARNING_SERVICE_ALREADY_STARTED);
+            mListener.onHotwordError(ERROR_SERVICE_ALREADY_STARTED);
             return;
         }
         putMessage(Message.obtain(mHandler, MSG_START));
