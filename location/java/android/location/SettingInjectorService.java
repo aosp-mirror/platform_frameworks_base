@@ -102,16 +102,6 @@ public abstract class SettingInjectorService extends IntentService {
     public static final String SUMMARY_KEY = "summary";
 
     /**
-     * TODO: delete after switching SettingsInjector to use {@link #SUMMARY_KEY}.
-     *
-     * @deprecated use {@link #SUMMARY_KEY}
-     *
-     * @hide
-     */
-    @Deprecated
-    public static final String STATUS_KEY = "status";
-
-    /**
      * Name of the bundle key for the string specifying whether the setting is currently enabled.
      *
      * @hide
@@ -131,14 +121,6 @@ public abstract class SettingInjectorService extends IntentService {
      */
     public static final String ACTION_INJECTED_SETTING_CHANGED =
             "com.android.location.InjectedSettingChanged";
-
-    /**
-     * TODO: delete after switching callers to use {@link #ACTION_INJECTED_SETTING_CHANGED}.
-     *
-     * @deprecated use {@link #ACTION_INJECTED_SETTING_CHANGED}
-     */
-    @Deprecated
-    public static final String UPDATE_INTENT = ACTION_INJECTED_SETTING_CHANGED;
 
     private final String mName;
 
@@ -170,7 +152,6 @@ public abstract class SettingInjectorService extends IntentService {
         Message message = Message.obtain();
         Bundle bundle = new Bundle();
         if (status != null) {
-            bundle.putString(STATUS_KEY, status.summary);
             bundle.putString(SUMMARY_KEY, status.summary);
             bundle.putBoolean(ENABLED_KEY, status.enabled);
         }
@@ -214,7 +195,7 @@ public abstract class SettingInjectorService extends IntentService {
          * choosing to hide a setting. Instead you should provide a {@code enabled} value of false,
          * which will gray the setting out and disable the link from "Settings > Location"
          * to your setting activity. One reason why you might choose to do this is if
-         * {@link android.provider.Settings.Secure#getLocationMode(android.content.ContentResolver)}
+         * {@link android.provider.Settings.Secure#LOCATION_MODE}
          * is {@link android.provider.Settings.Secure#LOCATION_MODE_OFF}.
          *
          * It is possible that the user may click on the setting before you return a false value for
