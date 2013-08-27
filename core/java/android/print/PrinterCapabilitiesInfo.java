@@ -863,12 +863,12 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
             while (currentModes > 0) {
                 final int currentMode = (1 << Integer.numberOfTrailingZeros(currentModes));
                 currentModes &= ~currentMode;
-                PrintAttributes.enfoceValidFittingMode(currentMode);
+                PrintAttributes.enforceValidFittingMode(currentMode);
             }
             if ((fittingModes & defaultFittingMode) == 0) {
                 throw new IllegalArgumentException("Default fitting mode not in fiting modes.");
             }
-            PrintAttributes.enfoceValidFittingMode(defaultFittingMode);
+            PrintAttributes.enforceValidFittingMode(defaultFittingMode);
             mPrototype.mFittingModes = fittingModes;
             mPrototype.mDefaults[PROPERTY_FITTING_MODE] = defaultFittingMode;
             return this;
