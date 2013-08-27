@@ -49,7 +49,7 @@
     <array name="batterymeter_color_values">
         <item>#FFFF0000</item>
         <item>#FFFE6600</item>
-        <item>#FF3792B4</item>
+        <item>#FFFFFFFF</item>
     </array>
 
 </resources>

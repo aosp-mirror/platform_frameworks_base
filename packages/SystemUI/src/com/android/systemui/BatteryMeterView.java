@@ -55,6 +55,7 @@ public class BatteryMeterView extends View {
     private int mHeight;
     private int mWidth;
     private String mWarningString;
+    private final int mChargeColor;
 
     private class BatteryTracker extends BroadcastReceiver {
         // current battery status
@@ -191,6 +192,7 @@ public class BatteryMeterView extends View {
         mWarningTextPaint.setTextAlign(Paint.Align.CENTER);
 
         mLightning = getResources().getDrawable(R.drawable.lightning);
+        mChargeColor = getResources().getColor(R.color.batterymeter_charge_color);
     }
 
     @Override
@@ -202,6 +204,7 @@ public class BatteryMeterView extends View {
     }
 
     private int getColorForLevel(int percent) {
+        if (mTracker.plugged) return mChargeColor;
         int thresh, color = 0;
         for (int i=0; i<mColors.length; i+=2) {
             thresh = mColors[i];
