@@ -19,6 +19,7 @@ package android.nfc;
 import android.app.Activity;
 import android.app.Application;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.util.Log;
@@ -111,6 +112,9 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
         NfcAdapter.CreateBeamUrisCallback uriCallback = null;
         Uri[] uris = null;
         int flags = 0;
+        int readerModeFlags = 0;
+        Binder token;
+
         public NfcActivityState(Activity activity) {
             if (activity.getWindow().isDestroyed()) {
                 throw new IllegalStateException("activity is already destroyed");
@@ -120,6 +124,7 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
             resumed = activity.isResumed();
 
             this.activity = activity;
+            this.token = new Binder();
             registerApplication(activity.getApplication());
         }
         public void destroy() {
@@ -131,6 +136,8 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
             onNdefPushCompleteCallback = null;
             uriCallback = null;
             uris = null;
+            readerModeFlags = 0;
+            token = null;
         }
         @Override
         public String toString() {
@@ -188,6 +195,44 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
         mActivities = new LinkedList<NfcActivityState>();
         mApps = new ArrayList<NfcApplicationState>(1);  // Android VM usually has 1 app
         mDefaultEvent = new NfcEvent(mAdapter);
+    }
+
+    public void enableReaderMode(Activity activity, int flags) {
+        boolean isResumed;
+        Binder token;
+        synchronized (NfcActivityManager.this) {
+            NfcActivityState state = getActivityState(activity);
+            state.readerModeFlags = flags;
+            token = state.token;
+            isResumed = state.resumed;
+        }
+        if (isResumed) {
+            setReaderMode(token, flags);
+        }
+    }
+
+    public void disableReaderMode(Activity activity) {
+        boolean isResumed;
+        Binder token;
+        synchronized (NfcActivityManager.this) {
+            NfcActivityState state = getActivityState(activity);
+            state.readerModeFlags = 0;
+            token = state.token;
+            isResumed = state.resumed;
+        }
+        if (isResumed) {
+            setReaderMode(token, 0);
+        }
+
+    }
+
+    public void setReaderMode(Binder token, int flags) {
+        if (DBG) Log.d(TAG, "Setting reader mode");
+        try {
+            NfcAdapter.sService.setReaderMode(token, flags);
+        } catch (RemoteException e) {
+            mAdapter.attemptDeadServiceRecovery(e);
+        }
     }
 
     public void setNdefPushContentUri(Activity activity, Uri[] uris) {
@@ -341,11 +386,18 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
     /** Callback from Activity life-cycle, on main thread */
     @Override
     public void onActivityResumed(Activity activity) {
+        int readerModeFlags = 0;
+        Binder token;
         synchronized (NfcActivityManager.this) {
             NfcActivityState state = findActivityState(activity);
             if (DBG) Log.d(TAG, "onResume() for " + activity + " " + state);
             if (state == null) return;
             state.resumed = true;
+            token = state.token;
+            readerModeFlags = state.readerModeFlags;
+        }
+        if (readerModeFlags != 0) {
+            setReaderMode(token, readerModeFlags);
         }
         requestNfcServiceCallback();
     }
@@ -353,11 +405,19 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
     /** Callback from Activity life-cycle, on main thread */
     @Override
     public void onActivityPaused(Activity activity) {
+        boolean readerModeFlagsSet;
+        Binder token;
         synchronized (NfcActivityManager.this) {
             NfcActivityState state = findActivityState(activity);
             if (DBG) Log.d(TAG, "onPause() for " + activity + " " + state);
             if (state == null) return;
             state.resumed = false;
+            token = state.token;
+            readerModeFlagsSet = state.readerModeFlags != 0;
+        }
+        if (readerModeFlagsSet) {
+            // Restore default p2p modes
+            setReaderMode(token, 0);
         }
     }
 
@@ -381,5 +441,4 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
             }
         }
     }
-
 }

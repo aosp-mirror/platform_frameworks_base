@@ -48,5 +48,6 @@ interface INfcAdapter
 
     void dispatch(in Tag tag);
 
+    void setReaderMode (IBinder b, int flags);
     void setP2pModes(int initatorModes, int targetModes);
 }

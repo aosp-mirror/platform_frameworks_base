@@ -15042,8 +15042,10 @@ package android.nfc {
   public final class NfcAdapter {
     method public void disableForegroundDispatch(android.app.Activity);
     method public deprecated void disableForegroundNdefPush(android.app.Activity);
+    method public void disableReaderMode(android.app.Activity);
     method public void enableForegroundDispatch(android.app.Activity, android.app.PendingIntent, android.content.IntentFilter[], java.lang.String[][]);
     method public deprecated void enableForegroundNdefPush(android.app.Activity, android.nfc.NdefMessage);
+    method public void enableReaderMode(android.app.Activity, int);
     method public static android.nfc.NfcAdapter getDefaultAdapter(android.content.Context);
     method public boolean isEnabled();
     method public boolean isNdefPushEnabled();
@@ -15060,6 +15062,12 @@ package android.nfc {
     field public static final java.lang.String EXTRA_ID = "android.nfc.extra.ID";
     field public static final java.lang.String EXTRA_NDEF_MESSAGES = "android.nfc.extra.NDEF_MESSAGES";
     field public static final java.lang.String EXTRA_TAG = "android.nfc.extra.TAG";
+    field public static final int FLAG_READER_KOVIO = 16; // 0x10
+    field public static final int FLAG_READER_NFC_A = 1; // 0x1
+    field public static final int FLAG_READER_NFC_B = 2; // 0x2
+    field public static final int FLAG_READER_NFC_F = 4; // 0x4
+    field public static final int FLAG_READER_NFC_V = 8; // 0x8
+    field public static final int FLAG_READER_SKIP_NDEF_CHECK = 128; // 0x80
     field public static final int STATE_OFF = 1; // 0x1
     field public static final int STATE_ON = 3; // 0x3
     field public static final int STATE_TURNING_OFF = 4; // 0x4
