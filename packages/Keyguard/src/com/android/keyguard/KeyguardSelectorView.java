@@ -45,7 +45,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
     private static final String ASSIST_ICON_METADATA_NAME =
         "com.android.systemui.action_assist_icon";
     // Flag to enable/disable hotword detection on lock screen.
-    private static final boolean FLAG_HOTWORD = true;
+    private static final boolean FLAG_HOTWORD = false;
 
     private KeyguardSecurityCallback mCallback;
     private GlowPadView mGlowPadView;
@@ -332,7 +332,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
      * it attempts to stop hotwording if it's running.
      */
     private void maybeStartHotwordDetector() {
-        if (FLAG_HOTWORD) {
+        if (FLAG_HOTWORD && mHotwordClient != null) {
             if (DEBUG) Log.d(TAG, "maybeStartHotwordDetector()");
             // Don't start it if the screen is off or not showing
             PowerManager powerManager = (PowerManager) getContext().getSystemService(
@@ -357,7 +357,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
      * Stop hotword detector if HOTWORDING_ENABLED is true.
      */
     private void maybeStopHotwordDetector() {
-        if (FLAG_HOTWORD) {
+        if (FLAG_HOTWORD && mHotwordClient != null) {
             if (DEBUG) Log.d(TAG, "maybeStopHotwordDetector()");
             mHotwordClient.stop();
         }
