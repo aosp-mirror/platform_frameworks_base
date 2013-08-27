@@ -17,6 +17,12 @@ class SkPicture;
 
 class GraphicsJNI {
 public:
+    enum BitmapCreateFlags {
+        kBitmapCreateFlag_None = 0x0,
+        kBitmapCreateFlag_Mutable = 0x1,
+        kBitmapCreateFlag_Premultiplied = 0x2,
+    };
+
     // returns true if an exception is set (and dumps it out to the Log)
     static bool hasException(JNIEnv*);
 
