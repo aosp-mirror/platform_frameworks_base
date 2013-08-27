@@ -2895,6 +2895,11 @@ public final class Settings {
 
         /** @hide */
         public static int getIntForUser(ContentResolver cr, String name, int def, int userHandle) {
+            if (LOCATION_MODE.equals(name)) {
+                // HACK ALERT: temporary hack to work around b/10491283.
+                // TODO: once b/10491283 fixed, remove this hack
+                return getLocationModeForUser(cr, userHandle);
+            }
             String v = getStringForUser(cr, name, userHandle);
             try {
                 return v != null ? Integer.parseInt(v) : def;
@@ -2929,13 +2934,13 @@ public final class Settings {
         /** @hide */
         public static int getIntForUser(ContentResolver cr, String name, int userHandle)
                 throws SettingNotFoundException {
+            if (LOCATION_MODE.equals(name)) {
+                // HACK ALERT: temporary hack to work around b/10491283.
+                // TODO: once b/10491283 fixed, remove this hack
+                return getLocationModeForUser(cr, userHandle);
+            }
             String v = getStringForUser(cr, name, userHandle);
             try {
-                if (LOCATION_MODE.equals(name)) {
-                    // HACK ALERT: temporary hack to work around b/10491283.
-                    // TODO: once b/10491283 fixed, remove this hack
-                    return getLocationModeForUser(cr, userHandle);
-                }
                 return Integer.parseInt(v);
             } catch (NumberFormatException e) {
                 throw new SettingNotFoundException(name);
@@ -3282,15 +3287,18 @@ public final class Settings {
         public static final String LOCATION_PROVIDERS_ALLOWED = "location_providers_allowed";
 
         /**
-         * The degree of location access enabled by the user, for use with {@link
-         * #putInt(ContentResolver, String, int)} and {@link #getInt(ContentResolver, String)}. Must
-         * be one of {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
-         * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
+         * The degree of location access enabled by the user.
+         * <p/>
+         * When used with {@link #putInt(ContentResolver, String, int)}, must be one of {@link
+         * #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY}, {@link
+         * #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}. When used with {@link
+         * #getInt(ContentResolver, String)}, the caller must gracefully handle additional location
+         * modes that might be added in the future.
          */
         public static final String LOCATION_MODE = "location_mode";
 
         /**
-         * Location access disabled
+         * Location access disabled.
          */
         public static final int LOCATION_MODE_OFF = 0;
         /**
@@ -4420,20 +4428,15 @@ public final class Settings {
          * {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
          * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
          *
-         * TODO: remove callers, make private
-         *
          * @param cr the content resolver to use
          * @param mode such as {@link #LOCATION_MODE_HIGH_ACCURACY}
          * @param userId the userId for which to change mode
          * @return true if the value was set, false on database errors
          *
          * @throws IllegalArgumentException if mode is not one of the supported values
-         *
-         * @deprecated use {@link #putIntForUser(ContentResolver, String, int, int)} and
-         *             {@link #LOCATION_MODE}
          */
-        @Deprecated
-        public static final boolean setLocationModeForUser(ContentResolver cr, int mode, int userId) {
+        private static final boolean setLocationModeForUser(ContentResolver cr, int mode,
+                int userId) {
             synchronized (mLocationSettingsLock) {
                 boolean gps = false;
                 boolean network = false;
@@ -4462,39 +4465,15 @@ public final class Settings {
         }
 
         /**
-         * Thread-safe method for setting the location mode to one of
-         * {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
-         * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
-         *
-         * TODO: remove callers, delete
-         *
-         * @param cr the content resolver to use
-         * @param mode such as {@link #LOCATION_MODE_HIGH_ACCURACY}
-         *
-         * @throws IllegalArgumentException if mode is not one of the supported values
-         * @deprecated use {@link #putInt(ContentResolver, String, int)} and {@link #LOCATION_MODE}
-         */
-        @Deprecated
-        public static final void setLocationMode(ContentResolver cr, int mode) {
-            setLocationModeForUser(cr, mode, UserHandle.myUserId());
-        }
-
-        /**
          * Thread-safe method for reading the location mode, returns one of
          * {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
          * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
          *
-         * TODO: remove callers, make private
-         *
          * @param cr the content resolver to use
          * @param userId the userId for which to read the mode
          * @return the location mode
-         *
-         * @deprecated use {@link #getIntForUser(ContentResolver, String, int, int)} and
-         *             {@link #LOCATION_MODE}
          */
-        @Deprecated
-        public static final int getLocationModeForUser(ContentResolver cr, int userId) {
+        private static final int getLocationModeForUser(ContentResolver cr, int userId) {
             synchronized (mLocationSettingsLock) {
                 boolean gpsEnabled = Settings.Secure.isLocationProviderEnabledForUser(
                         cr, LocationManager.GPS_PROVIDER, userId);
@@ -4510,23 +4489,6 @@ public final class Settings {
                     return LOCATION_MODE_OFF;
                 }
             }
-        }
-
-        /**
-         * Thread-safe method for reading the location mode, returns one of
-         * {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
-         * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
-         *
-         * TODO: remove callers, delete
-         *
-         * @param cr the content resolver to use
-         * @return the location mode
-         *
-         * @deprecated use {@link #getInt(ContentResolver, String, int)} and {@link #LOCATION_MODE}
-         */
-        @Deprecated
-        public static final int getLocationMode(ContentResolver cr) {
-            return getLocationModeForUser(cr, UserHandle.myUserId());
         }
     }
 
