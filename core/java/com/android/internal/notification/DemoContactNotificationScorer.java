@@ -41,8 +41,8 @@ import java.util.List;
  */
 
 public class DemoContactNotificationScorer implements NotificationScorer {
-    private static final String TAG = "StarredContactScoring";
-    private static final boolean DBG = true;
+    private static final String TAG = "DemoContactNotificationScorer";
+    private static final boolean DBG = false;
 
     protected static final boolean ENABLE_CONTACT_SCORER = true;
     private static final String SETTING_ENABLE_SCORER = "contact_scorer_enabled";
