@@ -34,6 +34,8 @@ public class DdmHandleProfiling extends ChunkHandler {
     public static final int CHUNK_MPSS = type("MPSS");
     public static final int CHUNK_MPSE = type("MPSE");
     public static final int CHUNK_MPRQ = type("MPRQ");
+    public static final int CHUNK_SPSS = type("SPSS");
+    public static final int CHUNK_SPSE = type("SPSE");
 
     private static DdmHandleProfiling mInstance = new DdmHandleProfiling();
 
@@ -50,6 +52,8 @@ public class DdmHandleProfiling extends ChunkHandler {
         DdmServer.registerHandler(CHUNK_MPSS, mInstance);
         DdmServer.registerHandler(CHUNK_MPSE, mInstance);
         DdmServer.registerHandler(CHUNK_MPRQ, mInstance);
+        DdmServer.registerHandler(CHUNK_SPSS, mInstance);
+        DdmServer.registerHandler(CHUNK_SPSE, mInstance);
     }
 
     /**
@@ -82,6 +86,10 @@ public class DdmHandleProfiling extends ChunkHandler {
             return handleMPSE(request);
         } else if (type == CHUNK_MPRQ) {
             return handleMPRQ(request);
+        } else if (type == CHUNK_SPSS) {
+            return handleSPSS(request);
+        } else if (type == CHUNK_SPSE) {
+            return handleSPSE(request);
         } else {
             throw new RuntimeException("Unknown packet "
                 + ChunkHandler.name(type));
@@ -144,7 +152,7 @@ public class DdmHandleProfiling extends ChunkHandler {
         }
 
         try {
-            Debug.startMethodTracingDdms(bufferSize, flags);
+            Debug.startMethodTracingDdms(bufferSize, flags, false, 0);
             return null;        // empty response
         } catch (RuntimeException re) {
             return createFailChunk(1, re.getMessage());
@@ -183,6 +191,48 @@ public class DdmHandleProfiling extends ChunkHandler {
         /* create a non-empty reply so the handler fires on completion */
         byte[] reply = { (byte) result };
         return new Chunk(CHUNK_MPRQ, reply, 0, reply.length);
+    }
+
+    /*
+     * Handle a "Sample Profiling w/Streaming Start" request.
+     */
+    private Chunk handleSPSS(Chunk request) {
+        ByteBuffer in = wrapChunk(request);
+
+        int bufferSize = in.getInt();
+        int flags = in.getInt();
+        int interval = in.getInt();
+        if (false) {
+            Log.v("ddm-heap", "Sample prof stream start: size=" + bufferSize
+                + ", flags=" + flags + ", interval=" + interval);
+        }
+
+        try {
+            Debug.startMethodTracingDdms(bufferSize, flags, true, interval);
+            return null;        // empty response
+        } catch (RuntimeException re) {
+            return createFailChunk(1, re.getMessage());
+        }
+    }
+
+    /*
+     * Handle a "Sample Profiling w/Streaming End" request.
+     */
+    private Chunk handleSPSE(Chunk request) {
+        if (false) {
+            Log.v("ddm-heap", "Sample prof stream end");
+        }
+
+        try {
+            Debug.stopMethodTracing();
+        } catch (RuntimeException re) {
+            Log.w("ddm-heap", "Sample prof stream end failed: "
+                + re.getMessage());
+            return createFailChunk(1, re.getMessage());
+        }
+
+        /* VM sent the (perhaps very large) response directly */
+        return null;
     }
 }
 
