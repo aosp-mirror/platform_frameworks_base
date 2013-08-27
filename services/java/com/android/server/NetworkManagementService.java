@@ -95,6 +95,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     private static final String TAG = "NetworkManagementService";
     private static final boolean DBG = false;
     private static final String NETD_TAG = "NetdConnector";
+    private static final String NETD_SOCKET_NAME = "netd";
 
     private static final String ADD = "add";
     private static final String REMOVE = "remove";
@@ -187,7 +188,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
      *
      * @param context  Binder context for this service
      */
-    private NetworkManagementService(Context context) {
+    private NetworkManagementService(Context context, String socket) {
         mContext = context;
 
         if ("simulator".equals(SystemProperties.get("ro.product.device"))) {
@@ -195,15 +196,16 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         }
 
         mConnector = new NativeDaemonConnector(
-                new NetdCallbackReceiver(), "netd", 10, NETD_TAG, 160);
+                new NetdCallbackReceiver(), socket, 10, NETD_TAG, 160);
         mThread = new Thread(mConnector, NETD_TAG);
 
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
     }
 
-    public static NetworkManagementService create(Context context) throws InterruptedException {
-        final NetworkManagementService service = new NetworkManagementService(context);
+    static NetworkManagementService create(Context context,
+            String socket) throws InterruptedException {
+        final NetworkManagementService service = new NetworkManagementService(context, socket);
         final CountDownLatch connectedSignal = service.mConnectedSignal;
         if (DBG) Slog.d(TAG, "Creating NetworkManagementService");
         service.mThread.start();
@@ -211,6 +213,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         connectedSignal.await();
         if (DBG) Slog.d(TAG, "Connected");
         return service;
+    }
+
+    public static NetworkManagementService create(Context context) throws InterruptedException {
+        return create(context, NETD_SOCKET_NAME);
     }
 
     public void systemReady() {
