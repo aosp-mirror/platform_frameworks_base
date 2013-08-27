@@ -443,6 +443,10 @@ public class TimePicker extends FrameLayout {
      * Set the current hour.
      */
     public void setCurrentHour(Integer currentHour) {
+        setCurrentHour(currentHour, true);
+    }
+
+    private void setCurrentHour(Integer currentHour, boolean notifyTimeChanged) {
         // why was Integer used in the first place?
         if (currentHour == null || currentHour == getCurrentHour()) {
             return;
@@ -463,7 +467,9 @@ public class TimePicker extends FrameLayout {
             updateAmPmControl();
         }
         mHourSpinner.setValue(currentHour);
-        onTimeChanged();
+        if (notifyTimeChanged) {
+            onTimeChanged();
+        }
     }
 
     /**
@@ -481,8 +487,10 @@ public class TimePicker extends FrameLayout {
         mIs24HourView = is24HourView;
         getHourFormatData();
         updateHourControl();
-        // set value after spinner range is updated
-        setCurrentHour(currentHour);
+        // set value after spinner range is updated - be aware that because mIs24HourView has
+        // changed then getCurrentHour() is not equal to the currentHour we cached before so
+        // explicitly ask for *not* propagating any onTimeChanged()
+        setCurrentHour(currentHour, false /* no onTimeChanged() */);
         updateMinuteControl();
         updateAmPmControl();
     }
