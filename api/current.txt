@@ -11958,7 +11958,6 @@ package android.location {
     method protected abstract android.location.SettingInjectorService.Status getStatus();
     method protected final void onHandleIntent(android.content.Intent);
     field public static final java.lang.String ACTION_INJECTED_SETTING_CHANGED = "com.android.location.InjectedSettingChanged";
-    field public static final deprecated java.lang.String UPDATE_INTENT = "com.android.location.InjectedSettingChanged";
   }
 
   public static final class SettingInjectorService.Status {
@@ -21299,8 +21298,6 @@ package android.provider {
     method public static float getFloat(android.content.ContentResolver, java.lang.String) throws android.provider.Settings.SettingNotFoundException;
     method public static int getInt(android.content.ContentResolver, java.lang.String, int);
     method public static int getInt(android.content.ContentResolver, java.lang.String) throws android.provider.Settings.SettingNotFoundException;
-    method public static final deprecated int getLocationMode(android.content.ContentResolver);
-    method public static final deprecated int getLocationModeForUser(android.content.ContentResolver, int);
     method public static long getLong(android.content.ContentResolver, java.lang.String, long);
     method public static long getLong(android.content.ContentResolver, java.lang.String) throws android.provider.Settings.SettingNotFoundException;
     method public static java.lang.String getString(android.content.ContentResolver, java.lang.String);
@@ -21310,8 +21307,6 @@ package android.provider {
     method public static boolean putInt(android.content.ContentResolver, java.lang.String, int);
     method public static boolean putLong(android.content.ContentResolver, java.lang.String, long);
     method public static boolean putString(android.content.ContentResolver, java.lang.String, java.lang.String);
-    method public static final deprecated void setLocationMode(android.content.ContentResolver, int);
-    method public static final deprecated boolean setLocationModeForUser(android.content.ContentResolver, int, int);
     method public static final deprecated void setLocationProviderEnabled(android.content.ContentResolver, java.lang.String, boolean);
     field public static final java.lang.String ACCESSIBILITY_ENABLED = "accessibility_enabled";
     field public static final java.lang.String ACCESSIBILITY_SPEAK_PASSWORD = "speak_password";
