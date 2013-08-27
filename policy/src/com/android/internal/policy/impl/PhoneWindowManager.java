@@ -2692,7 +2692,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             final int sysui = mLastSystemUiFlags;
             boolean navVisible = (sysui & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0;
             boolean navTransparent = (sysui & View.SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION) != 0;
-            boolean transientAllowed = (sysui & View.SYSTEM_UI_FLAG_ALLOW_TRANSIENT) != 0;
+            boolean transientAllowed = (sysui & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0;
             navTransparent &= !transientAllowed;  // transient trumps transparent
 
             // When the navigation bar isn't visible, we put up a fake
@@ -5054,13 +5054,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (statusBarHasFocus) {
             int flags = View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_ALLOW_TRANSIENT;
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE;
             vis = (vis & ~flags) | (mLastSystemUiFlags & flags);
         }
 
         // update status bar
         boolean transientAllowed =
-                (vis & View.SYSTEM_UI_FLAG_ALLOW_TRANSIENT) != 0;
+                (vis & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0;
         boolean hideStatusBarWM =
                 (mFocusedWindow.getAttrs().flags
                         & WindowManager.LayoutParams.FLAG_FULLSCREEN) != 0;
@@ -5105,7 +5105,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean isTransientNavigationAllowed(int vis) {
         return mNavigationBar != null
                 && (vis & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
-                && (vis & View.SYSTEM_UI_FLAG_ALLOW_TRANSIENT) != 0;
+                && (vis & View.SYSTEM_UI_FLAG_IMMERSIVE) != 0;
     }
 
     // Temporary helper that allows testing immersive mode on existing apps
@@ -5133,7 +5133,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (sForced.contains(parseActivity(focused))) {
                 vis |= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
                        View.SYSTEM_UI_FLAG_FULLSCREEN |
-                       View.SYSTEM_UI_FLAG_ALLOW_TRANSIENT;
+                       View.SYSTEM_UI_FLAG_IMMERSIVE;
             }
             return vis;
         }
