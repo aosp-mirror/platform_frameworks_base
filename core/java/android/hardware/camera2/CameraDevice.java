@@ -303,7 +303,8 @@ public interface CameraDevice extends AutoCloseable {
      * preview or other continuous stream of frames, without having to submit
      * requests through {@link #capture} at video rates.</p>
      *
-     * <p>To stop the repeating capture, call {@link #stopRepeating}</p>
+     * <p>To stop the repeating capture, call {@link #stopRepeating}. Calling
+     * {@link #flush} will also clear the request.</p>
      *
      * <p>Calling repeat will replace a burst set up by {@link
      * #setRepeatingBurst}, although any in-progress burst will be
@@ -323,6 +324,8 @@ public interface CameraDevice extends AutoCloseable {
      * @see #capture
      * @see #captureBurst
      * @see #setRepeatingBurst
+     * @see #stopRepeating
+     * @see #flush
      */
     public void setRepeatingRequest(CaptureRequest request, CaptureListener listener)
             throws CameraAccessException;
@@ -348,7 +351,8 @@ public interface CameraDevice extends AutoCloseable {
      * requests through {@link #capture} at video rates.</p>
      *
      * <p>To stop the repeating capture, call {@link #stopRepeating}. Any
-     * ongoing burst will still be completed, however.</p>
+     * ongoing burst will still be completed, however. Calling
+     * {@link #flush} will also clear the request.</p>
      *
      * <p>Calling repeatBurst will replace a repeating request set up by
      * {@link #setRepeatingRequest}, although any in-progress capture will be completed
@@ -367,6 +371,8 @@ public interface CameraDevice extends AutoCloseable {
      * @see #capture
      * @see #captureBurst
      * @see #setRepeatingRequest
+     * @see #stopRepeating
+     * @see #flush
      */
     public void setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener)
             throws CameraAccessException;
@@ -433,6 +439,38 @@ public interface CameraDevice extends AutoCloseable {
      * asynchronous errors.
      */
     public void setErrorListener(ErrorListener listener);
+
+    /**
+     * Flush all captures currently pending and in-progress as fast as
+     * possible.
+     *
+     * <p>The camera device will discard all of its current work as fast as
+     * possible. Some in-flight captures may complete successfully and call
+     * {@link CaptureListener#onCaptureComplete}, while others will trigger
+     * their {@link CaptureListener#onCaptureFailed} callbacks. If a repeating
+     * request or a repeating burst is set, it will be cleared by the flush.</p>
+     *
+     * <p>This method is the fastest way to idle the camera device for
+     * reconfiguration with {@link #configureOutputs}, at the cost of discarding
+     * in-progress work. Once the flush is complete, the idle callback will be
+     * called.</p>
+     *
+     * <p>Flushing will introduce at least a brief pause in the stream of data
+     * from the camera device, since once the flush is complete, the first new
+     * request has to make it through the entire camera pipeline before new
+     * output buffers are produced.</p>
+     *
+     * <p>This means that using {@code flush()} to simply remove pending
+     * requests is not recommended; it's best used for quickly switching output
+     * configurations, or for cancelling long in-progress requests (such as a
+     * multi-second capture).</p>
+     *
+     * @throws CameraAccessException if the camera device is no longer connected
+     * @see #setRepeatingRequest
+     * @see #setRepeatingBurst
+     * @see #configureOutputs
+     */
+    public void flush() throws CameraAccessException;
 
     /**
      * Close the connection to this camera device. After this call, all calls to
