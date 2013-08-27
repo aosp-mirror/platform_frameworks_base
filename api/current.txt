@@ -11957,7 +11957,8 @@ package android.location {
     ctor public SettingInjectorService(java.lang.String);
     method protected abstract android.location.SettingInjectorService.Status getStatus();
     method protected final void onHandleIntent(android.content.Intent);
-    field public static final java.lang.String UPDATE_INTENT = "com.android.location.InjectedSettingChanged";
+    field public static final java.lang.String ACTION_INJECTED_SETTING_CHANGED = "com.android.location.InjectedSettingChanged";
+    field public static final deprecated java.lang.String UPDATE_INTENT = "com.android.location.InjectedSettingChanged";
   }
 
   public static final class SettingInjectorService.Status {
