@@ -39,8 +39,8 @@ public final class WifiLinkInfo extends LinkInfo
     public int  mRssi = UNKNOWN;
 
     /* packet statistics */
-    public int  mTxGood = UNKNOWN;
-    public int  mTxBad = UNKNOWN;
+    public long  mTxGood = UNKNOWN;
+    public long  mTxBad = UNKNOWN;
 
     /**
      * Implement the Parcelable interface.
@@ -51,8 +51,8 @@ public final class WifiLinkInfo extends LinkInfo
 
         dest.writeInt(mType);
         dest.writeInt(mRssi);
-        dest.writeInt(mTxGood);
-        dest.writeInt(mTxBad);
+        dest.writeLong(mTxGood);
+        dest.writeLong(mTxBad);
 
         dest.writeString(mBssid);
     }
@@ -65,8 +65,8 @@ public final class WifiLinkInfo extends LinkInfo
 
         li.mType =  in.readInt();
         li.mRssi =  in.readInt();
-        li.mTxGood =  in.readInt();
-        li.mTxBad =  in.readInt();
+        li.mTxGood =  in.readLong();
+        li.mTxBad =  in.readLong();
 
         li.mBssid =  in.readString();
 
