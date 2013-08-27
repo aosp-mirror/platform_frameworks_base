@@ -183,9 +183,12 @@ public class TransitionManager {
                     final ArrayMap<ViewGroup, ArrayList<Transition>> runningTransitions =
                             getRunningTransitions();
                     ArrayList<Transition> currentTransitions = runningTransitions.get(sceneRoot);
+                    ArrayList<Transition> previousRunningTransitions = null;
                     if (currentTransitions == null) {
                         currentTransitions = new ArrayList<Transition>();
                         runningTransitions.put(sceneRoot, currentTransitions);
+                    } else if (currentTransitions.size() > 0) {
+                        previousRunningTransitions = new ArrayList<Transition>(currentTransitions);
                     }
                     currentTransitions.add(transition);
                     transition.addListener(new Transition.TransitionListenerAdapter() {
@@ -197,6 +200,11 @@ public class TransitionManager {
                         }
                     });
                     transition.captureValues(sceneRoot, false);
+                    if (previousRunningTransitions != null) {
+                        for (Transition runningTransition : previousRunningTransitions) {
+                            runningTransition.resume();
+                        }
+                    }
                     transition.playTransition(sceneRoot);
 
                     // Returning false from onPreDraw() skips the current frame. This is

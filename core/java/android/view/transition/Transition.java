@@ -843,7 +843,6 @@ public abstract class Transition implements Cloneable {
         for (int i = numOldAnims - 1; i >= 0; i--) {
             Animator anim = runningAnimators.keyAt(i);
             if (anim != null) {
-                anim.resume();
                 AnimationInfo oldInfo = runningAnimators.get(anim);
                 if (oldInfo != null) {
                     boolean cancel = false;
@@ -851,22 +850,25 @@ public abstract class Transition implements Cloneable {
                     View oldView = oldInfo.view;
                     TransitionValues newValues = mEndValues.viewValues != null ?
                             mEndValues.viewValues.get(oldView) : null;
-                    if (oldValues == null || newValues == null) {
-                        if (oldValues != null || newValues != null) {
+                    if (oldValues != null) {
+                        // if oldValues null, then transition didn't care to stash values,
+                        // and won't get canceled
+                        if (newValues == null) {
                             cancel = true;
-                        }
-                    } else {
-                        for (String key : oldValues.values.keySet()) {
-                            Object oldValue = oldValues.values.get(key);
-                            Object newValue = newValues.values.get(key);
-                            if ((oldValue == null && newValue != null) ||
-                                    (oldValue != null && !oldValue.equals(newValue))) {
-                                cancel = true;
-                                if (DBG) {
-                                    Log.d(LOG_TAG, "Transition.play: oldValue != newValue for " +
-                                            key + ": old, new = " + oldValue + ", " + newValue);
+                        } else {
+                            for (String key : oldValues.values.keySet()) {
+                                Object oldValue = oldValues.values.get(key);
+                                Object newValue = newValues.values.get(key);
+                                if (oldValue != null && newValue != null &&
+                                        !oldValue.equals(newValue)) {
+                                    cancel = true;
+                                    if (DBG) {
+                                        Log.d(LOG_TAG, "Transition.playTransition: " +
+                                                "oldValue != newValue for " + key +
+                                                ": old, new = " + oldValue + ", " + newValue);
+                                    }
+                                    break;
                                 }
-                                break;
                             }
                         }
                     }

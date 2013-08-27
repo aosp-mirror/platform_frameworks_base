@@ -78,6 +78,10 @@ public class TextChange extends Transition {
      */
     public static final int CHANGE_BEHAVIOR_OUT_IN = 3;
 
+    private static final String[] sTransitionProperties = {
+            PROPNAME_TEXT
+    };
+
     /**
      * Sets the type of changing animation that will be run, one of
      * {@link #CHANGE_BEHAVIOR_KEEP} and {@link #CHANGE_BEHAVIOR_OUT_IN}.
@@ -89,6 +93,11 @@ public class TextChange extends Transition {
         if (changeBehavior >= CHANGE_BEHAVIOR_KEEP && changeBehavior <= CHANGE_BEHAVIOR_OUT_IN) {
             mChangeBehavior = changeBehavior;
         }
+    }
+
+    @Override
+    public String[] getTransitionProperties() {
+        return sTransitionProperties;
     }
 
     @Override
@@ -111,7 +120,7 @@ public class TextChange extends Transition {
         final TextView view = (TextView) endValues.view;
         Map<String, Object> startVals = startValues.values;
         Map<String, Object> endVals = endValues.values;
-        String startText = (String) startVals.get(PROPNAME_TEXT);
+        final String startText = (String) startVals.get(PROPNAME_TEXT);
         final String endText = (String) endVals.get(PROPNAME_TEXT);
         if (!startText.equals(endText)) {
             view.setText(startText);
@@ -121,7 +130,10 @@ public class TextChange extends Transition {
                 anim.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        view.setText(endText);
+                        if (startText.equals(view.getText())) {
+                            // Only set if it hasn't been changed since anim started
+                            view.setText(endText);
+                        }
                     }
                 });
             } else {
@@ -143,7 +155,10 @@ public class TextChange extends Transition {
                     outAnim.addListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
-                            view.setText(endText);
+                            if (startText.equals(view.getText())) {
+                                // Only set if it hasn't been changed since anim started
+                                view.setText(endText);
+                            }
                         }
                     });
                 }
@@ -169,6 +184,20 @@ public class TextChange extends Transition {
                     anim = inAnim;
                 }
             }
+            TransitionListener transitionListener = new TransitionListenerAdapter() {
+                boolean mCanceled = false;
+
+                @Override
+                public void onTransitionPause(Transition transition) {
+                    view.setText(endText);
+                }
+
+                @Override
+                public void onTransitionResume(Transition transition) {
+                    view.setText(startText);
+                }
+            };
+            addListener(transitionListener);
             return anim;
         }
         return null;
