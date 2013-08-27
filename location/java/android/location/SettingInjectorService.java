@@ -27,7 +27,7 @@ import android.util.Log;
 
 /**
  * Dynamically specifies the summary (subtile) and enabled status of a preference injected into
- * the "Settings > Location > Location services" list.
+ * the "Settings &gt; Location &gt; Location services" list.
  *
  * The location services list is intended for use only by preferences that affect multiple apps from
  * the same developer. Location settings that apply only to one app should be shown within that app,
@@ -35,24 +35,25 @@ import android.util.Log;
  *
  * To add a preference to the list, a subclass of {@link SettingInjectorService} must be declared in
  * the manifest as so:
- * <pre>
- *     <service android:name="com.example.android.injector.MyInjectorService" >
- *         <intent-filter>
- *             <action android:name="com.android.settings.InjectedLocationSetting" />
- *         </intent-filter>
  *
- *         <meta-data
+ * <pre>
+ *     &lt;service android:name="com.example.android.injector.MyInjectorService" &gt;
+ *         &lt;intent-filter&gt;
+ *             &lt;action android:name="com.android.settings.InjectedLocationSetting" /&gt;
+ *         &lt;/intent-filter&gt;
+ *
+ *         &lt;meta-data
  *             android:name="com.android.settings.InjectedLocationSetting"
- *             android:resource="@xml/my_injected_location_setting" />
- *     </service>
+ *             android:resource="@xml/my_injected_location_setting" /&gt;
+ *     &lt;/service&gt;
  * </pre>
  * The resource file specifies the static data for the setting:
  * <pre>
- *     <injected-location-setting xmlns:android="http://schemas.android.com/apk/res/android"
+ *     &lt;injected-location-setting xmlns:android="http://schemas.android.com/apk/res/android"
  *         android:label="@string/injected_setting_label"
  *         android:icon="@drawable/ic_launcher"
  *         android:settingsActivity="com.example.android.injector.MySettingActivity"
- *     />
+ *     /&gt;
  * </pre>
  * Here:
  * <ul>
@@ -90,12 +91,24 @@ import android.util.Log;
 // TODO: would a bound service be better? E.g., we could just disconnect if a service took too long
 public abstract class SettingInjectorService extends IntentService {
 
+    private static final String TAG = "SettingInjectorService";
+
     /**
-     * Name of the bundle key for the string specifying the status of the setting (e.g., "ON" or
+     * Name of the bundle key for the string specifying the summary for the setting (e.g., "ON" or
      * "OFF").
      *
      * @hide
      */
+    public static final String SUMMARY_KEY = "summary";
+
+    /**
+     * TODO: delete after switching SettingsInjector to use {@link #SUMMARY_KEY}.
+     *
+     * @deprecated use {@link #SUMMARY_KEY}
+     *
+     * @hide
+     */
+    @Deprecated
     public static final String STATUS_KEY = "status";
 
     /**
@@ -116,22 +129,27 @@ public abstract class SettingInjectorService extends IntentService {
      * Intent action a client should broadcast when the value of one of its injected settings has
      * changed, so that the setting can be updated in the UI.
      */
-    public static final String UPDATE_INTENT = "com.android.location.InjectedSettingChanged";
+    public static final String ACTION_INJECTED_SETTING_CHANGED =
+            "com.android.location.InjectedSettingChanged";
 
-    private final String mLogTag;
+    /**
+     * TODO: delete after switching callers to use {@link #ACTION_INJECTED_SETTING_CHANGED}.
+     *
+     * @deprecated use {@link #ACTION_INJECTED_SETTING_CHANGED}
+     */
+    @Deprecated
+    public static final String UPDATE_INTENT = ACTION_INJECTED_SETTING_CHANGED;
+
+    private final String mName;
 
     /**
      * Constructor.
      *
-     * @param logTag used for logging, must be less than 23 characters
+     * @param name used to name the worker thread and in log messages
      */
-    public SettingInjectorService(String logTag) {
-        super(logTag);
-
-        // Fast fail if log tag is too long
-        Log.isLoggable(logTag, Log.WARN);
-
-        mLogTag = logTag;
+    public SettingInjectorService(String name) {
+        super(name);
+        mName = name;
     }
 
     @Override
@@ -140,23 +158,32 @@ public abstract class SettingInjectorService extends IntentService {
         // to pass intent into getStatus())
         Messenger messenger = intent.getParcelableExtra(MESSENGER_KEY);
 
-        Status status = getStatus();
+        Status status;
+        try {
+            status = getStatus();
+        } catch (RuntimeException e) {
+            Log.e(TAG, mName + ": error getting status", e);
+            status = null;
+        }
 
         // Send the status back to the caller via the messenger
         Message message = Message.obtain();
         Bundle bundle = new Bundle();
-        bundle.putString(STATUS_KEY, status.summary);
-        bundle.putBoolean(ENABLED_KEY, status.enabled);
+        if (status != null) {
+            bundle.putString(STATUS_KEY, status.summary);
+            bundle.putString(SUMMARY_KEY, status.summary);
+            bundle.putBoolean(ENABLED_KEY, status.enabled);
+        }
         message.setData(bundle);
 
-        if (Log.isLoggable(mLogTag, Log.DEBUG)) {
-            Log.d(mLogTag,
-                    "received " + intent + " and " + status + ", sending message: " + message);
+        if (Log.isLoggable(TAG, Log.DEBUG)) {
+            Log.d(TAG, mName + ": received " + intent + " and " + status
+                    + ", sending message: " + message);
         }
         try {
             messenger.send(message);
         } catch (RemoteException e) {
-            Log.e(mLogTag, "", e);
+            Log.e(TAG, mName + ": sending status failed", e);
         }
     }
 
@@ -170,8 +197,14 @@ public abstract class SettingInjectorService extends IntentService {
      */
     public static final class Status {
 
+        /**
+         * The {@link Preference#getSummary()} value
+         */
         public final String summary;
 
+        /**
+         * The {@link Preference#isEnabled()} value
+         */
         public final boolean enabled;
 
         /**
@@ -183,6 +216,11 @@ public abstract class SettingInjectorService extends IntentService {
          * to your setting activity. One reason why you might choose to do this is if
          * {@link android.provider.Settings.Secure#getLocationMode(android.content.ContentResolver)}
          * is {@link android.provider.Settings.Secure#LOCATION_MODE_OFF}.
+         *
+         * It is possible that the user may click on the setting before you return a false value for
+         * {@code enabled}, so your settings activity must handle the case where it is invoked even
+         * though the setting is disabled. The simplest approach may be to simply call
+         * {@link android.app.Activity#finish()} when disabled.
          *
          * @param summary the {@link Preference#getSummary()} value (allowed to be null or empty)
          * @param enabled the {@link Preference#isEnabled()} value
