@@ -10856,6 +10856,7 @@ package android.hardware.camera2 {
     method public abstract void close() throws java.lang.Exception;
     method public abstract void configureOutputs(java.util.List<android.view.Surface>) throws android.hardware.camera2.CameraAccessException;
     method public abstract android.hardware.camera2.CaptureRequest createCaptureRequest(int) throws android.hardware.camera2.CameraAccessException;
+    method public abstract void flush() throws android.hardware.camera2.CameraAccessException;
     method public abstract android.hardware.camera2.CameraProperties getProperties() throws android.hardware.camera2.CameraAccessException;
     method public abstract void setErrorListener(android.hardware.camera2.CameraDevice.ErrorListener);
     method public abstract void setRepeatingBurst(java.util.List<android.hardware.camera2.CaptureRequest>, android.hardware.camera2.CameraDevice.CaptureListener) throws android.hardware.camera2.CameraAccessException;
