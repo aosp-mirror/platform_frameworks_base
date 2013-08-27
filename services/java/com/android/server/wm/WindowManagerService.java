@@ -943,7 +943,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // order of applications.
         WindowState pos = null;
 
-        final ArrayList<Task> tasks = win.getStack().getTasks();
+        final ArrayList<Task> tasks = displayContent.getTasks();
         int taskNdx;
         int tokenNdx = -1;
         for (taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
@@ -7983,11 +7983,8 @@ public class WindowManagerService extends IWindowManager.Stub
         int curLayer = 0;
         int i;
 
-        if (DEBUG_LAYERS) {
-            RuntimeException here = new RuntimeException("here");
-            here.fillInStackTrace();
-            Slog.v(TAG, "Assigning layers", here);
-        }
+        if (DEBUG_LAYERS) Slog.v(TAG, "Assigning layers based on windows=" + windows,
+                new RuntimeException("here").fillInStackTrace());
 
         boolean anyLayerChanged = false;
 
