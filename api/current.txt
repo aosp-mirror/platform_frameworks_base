@@ -28688,6 +28688,7 @@ package android.view.accessibility {
     method public void addAction(int);
     method public void addChild(android.view.View);
     method public void addChild(android.view.View, int);
+    method public boolean canOpenPopup();
     method public int describeContents();
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(java.lang.String);
     method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId(java.lang.String);
@@ -28696,18 +28697,17 @@ package android.view.accessibility {
     method public int getActions();
     method public void getBoundsInParent(android.graphics.Rect);
     method public void getBoundsInScreen(android.graphics.Rect);
-    method public android.os.Bundle getBundle();
     method public android.view.accessibility.AccessibilityNodeInfo getChild(int);
     method public int getChildCount();
     method public java.lang.CharSequence getClassName();
     method public android.view.accessibility.AccessibilityNodeInfo.CollectionInfo getCollectionInfo();
     method public android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo getCollectionItemInfo();
     method public java.lang.CharSequence getContentDescription();
+    method public android.os.Bundle getExtras();
     method public int getInputType();
     method public android.view.accessibility.AccessibilityNodeInfo getLabelFor();
     method public android.view.accessibility.AccessibilityNodeInfo getLabeledBy();
     method public int getMovementGranularities();
-    method public boolean getOpensPopup();
     method public java.lang.CharSequence getPackageName();
     method public android.view.accessibility.AccessibilityNodeInfo getParent();
     method public android.view.accessibility.AccessibilityNodeInfo.RangeInfo getRangeInfo();
@@ -28746,6 +28746,7 @@ package android.view.accessibility {
     method public void setAccessibilityFocused(boolean);
     method public void setBoundsInParent(android.graphics.Rect);
     method public void setBoundsInScreen(android.graphics.Rect);
+    method public void setCanOpenPopup(boolean);
     method public void setCheckable(boolean);
     method public void setChecked(boolean);
     method public void setClassName(java.lang.CharSequence);
@@ -28770,7 +28771,6 @@ package android.view.accessibility {
     method public void setLongClickable(boolean);
     method public void setMovementGranularities(int);
     method public void setMultiLine(boolean);
-    method public void setOpensPopup(boolean);
     method public void setPackageName(java.lang.CharSequence);
     method public void setParent(android.view.View);
     method public void setParent(android.view.View, int);
@@ -28822,17 +28822,17 @@ package android.view.accessibility {
   }
 
   public static final class AccessibilityNodeInfo.CollectionInfo {
-    method public int getHorizontalSize();
-    method public int getVerticalSize();
+    method public int getColumnCount();
+    method public int getRowCount();
     method public boolean isHierarchical();
     method public static android.view.accessibility.AccessibilityNodeInfo.CollectionInfo obtain(int, int, boolean);
   }
 
   public static final class AccessibilityNodeInfo.CollectionItemInfo {
-    method public int getHorizontalPosition();
-    method public int getHorizontalSpan();
-    method public int getVerticalPosition();
-    method public int getVerticalSpan();
+    method public int getColumnIndex();
+    method public int getColumnSpan();
+    method public int getRowIndex();
+    method public int getRowSpan();
     method public boolean isHeading();
     method public static android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo obtain(int, int, int, int, boolean);
   }

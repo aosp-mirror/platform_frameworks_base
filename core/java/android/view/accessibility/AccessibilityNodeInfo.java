@@ -518,7 +518,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private int mTextSelectionEnd = UNDEFINED;
     private int mInputType = InputType.TYPE_NULL;
 
-    private Bundle mBundle;
+    private Bundle mExtras;
 
     private int mConnectionId = UNDEFINED;
 
@@ -1471,9 +1471,18 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Gets if the node is a live region for whose changes the user
-     * should be notified. It is the responsibility of the accessibility
+     * Gets if the node is a live region.
+     * <p>
+     * A live region is a node that contains information that is important
+     * for the user and when it changes the user has to be notified. For
+     * example, if the user plays a video and the application shows a
+     * progress indicator with the percentage of buffering, then the progress
+     * indicator should be marked as a live region.
+     * </p>
+     * <p>
+     * It is the responsibility of the accessibility
      * service to monitor this region and notify the user if it changes.
+     * </p>
      *
      * @return If the node is a live region.
      */
@@ -1525,7 +1534,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @return If the the node opens a popup.
      */
-    public boolean getOpensPopup() {
+    public boolean canOpenPopup() {
         return getBooleanProperty(BOOLEAN_PROPERTY_OPENS_POPUP);
     }
 
@@ -1539,7 +1548,8 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @param opensPopup If the the node opens a popup.
      */
-    public void setOpensPopup(boolean opensPopup) {
+    public void setCanOpenPopup(boolean opensPopup) {
+        enforceNotSealed();
         setBooleanProperty(BOOLEAN_PROPERTY_OPENS_POPUP, opensPopup);
     }
 
@@ -1927,7 +1937,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Gets an optional bundle with additional data. The bundle
+     * Gets an optional bundle with extra data. The bundle
      * is lazily created and never <code>null</code>.
      * <p>
      * <strong>Note:</strong> It is recommended to use the package
@@ -1939,11 +1949,11 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @return The bundle.
      */
-    public Bundle getBundle() {
-        if (mBundle == null) {
-            mBundle = new Bundle();
+    public Bundle getExtras() {
+        if (mExtras == null) {
+            mExtras = new Bundle();
         }
-        return mBundle;
+        return mExtras;
     }
 
     /**
@@ -2194,9 +2204,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         parcel.writeInt(mTextSelectionEnd);
         parcel.writeInt(mInputType);
 
-        if (mBundle != null) {
+        if (mExtras != null) {
             parcel.writeInt(1);
-            parcel.writeBundle(mBundle);
+            parcel.writeBundle(mExtras);
         } else {
             parcel.writeInt(0);
         }
@@ -2213,8 +2223,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         if (mCollectionInfo != null) {
             parcel.writeInt(1);
-            parcel.writeInt(mCollectionInfo.getHorizontalSize());
-            parcel.writeInt(mCollectionInfo.getVerticalSize());
+            parcel.writeInt(mCollectionInfo.getRowCount());
+            parcel.writeInt(mCollectionInfo.getColumnCount());
             parcel.writeInt(mCollectionInfo.isHierarchical() ? 1 : 0);
         } else {
             parcel.writeInt(0);
@@ -2222,10 +2232,10 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         if (mCollectionItemInfo != null) {
             parcel.writeInt(1);
-            parcel.writeInt(mCollectionItemInfo.getHorizontalPosition());
-            parcel.writeInt(mCollectionItemInfo.getHorizontalSpan());
-            parcel.writeInt(mCollectionItemInfo.getVerticalPosition());
-            parcel.writeInt(mCollectionItemInfo.getVerticalSpan());
+            parcel.writeInt(mCollectionItemInfo.getColumnIndex());
+            parcel.writeInt(mCollectionItemInfo.getColumnSpan());
+            parcel.writeInt(mCollectionItemInfo.getRowIndex());
+            parcel.writeInt(mCollectionItemInfo.getRowSpan());
             parcel.writeInt(mCollectionItemInfo.isHeading() ? 1 : 0);
         } else {
             parcel.writeInt(0);
@@ -2266,8 +2276,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         mTextSelectionStart = other.mTextSelectionStart;
         mTextSelectionEnd = other.mTextSelectionEnd;
         mInputType = other.mInputType;
-        if (other.mBundle != null && !other.mBundle.isEmpty()) {
-            getBundle().putAll(other.mBundle);
+        if (other.mExtras != null && !other.mExtras.isEmpty()) {
+            getExtras().putAll(other.mExtras);
         }
         mRangeInfo = other.mRangeInfo;
         mCollectionInfo = other.mCollectionInfo;
@@ -2323,7 +2333,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mInputType = parcel.readInt();
 
         if (parcel.readInt() == 1) {
-            getBundle().putAll(parcel.readBundle());
+            getExtras().putAll(parcel.readBundle());
         }
 
         if (parcel.readInt() == 1) {
@@ -2376,8 +2386,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         mTextSelectionStart = UNDEFINED;
         mTextSelectionEnd = UNDEFINED;
         mInputType = InputType.TYPE_NULL;
-        if (mBundle != null) {
-            mBundle.clear();
+        if (mExtras != null) {
+            mExtras.clear();
         }
         if (mRangeInfo != null) {
             mRangeInfo.recycle();
@@ -2677,7 +2687,15 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Class with information if a node is a collection. Use
-     * {@link CollectionInfo#obtain(int, int, boolean) to an instance.
+     * {@link CollectionInfo#obtain(int, int, boolean)} to get an instance.
+     * <p>
+     * A collection of items has rows and columns and may be hierarchical.
+     * For example, a horizontal list is a collection with one column, as
+     * many rows as the list items, and is not hierarchical; A table is a
+     * collection with several rows, several columns, and is not hierarchical;
+     * A vertical tree is a hierarchical collection with one column and
+     * as many rows as the first level children.
+     * </p>
      */
     public static final class CollectionInfo {
         private static final int MAX_POOL_SIZE = 20;
@@ -2685,54 +2703,54 @@ public class AccessibilityNodeInfo implements Parcelable {
         private static final SynchronizedPool<CollectionInfo> sPool =
                 new SynchronizedPool<CollectionInfo>(MAX_POOL_SIZE);
 
-        private int mHorizontalSize;
-        private int mVerticalSize;
+        private int mRowCount;
+        private int mColumnCount;
         private boolean mHierarchical;
 
         /**
          * Obtains a pooled instance.
          *
-         * @param horizontalSize The horizontal size.
-         * @param verticalSize The vertical size.
+         * @param rowCount The number of rows.
+         * @param columnCount The number of columns.
          * @param hierarchical Whether the collection is hierarchical.
          */
-        public static CollectionInfo obtain(int horizontalSize, int verticalSize,
+        public static CollectionInfo obtain(int rowCount, int columnCount,
                 boolean hierarchical) {
             CollectionInfo info = sPool.acquire();
-            return (info != null) ? info : new CollectionInfo(horizontalSize,
-                    verticalSize, hierarchical);
+            return (info != null) ? info : new CollectionInfo(rowCount,
+                    columnCount, hierarchical);
         }
 
         /**
          * Creates a new instance.
          *
-         * @param horizontalSize The horizontal size.
-         * @param verticalSize The vertical size.
+         * @param rowCount The number of rows.
+         * @param columnCount The number of columns.
          * @param hierarchical Whether the collection is hierarchical.
          */
-        private CollectionInfo(int horizontalSize, int verticalSize,
+        private CollectionInfo(int rowCount, int columnCount,
                 boolean hierarchical) {
-            mHorizontalSize = horizontalSize;
-            mVerticalSize = verticalSize;
+            mRowCount = rowCount;
+            mColumnCount = columnCount;
             mHierarchical = hierarchical;
         }
 
         /**
-         * Gets the horizontal size in terms of item positions.
+         * Gets the number of rows.
          *
-         * @return The size.
+         * @return The row count.
          */
-        public int getHorizontalSize() {
-            return mHorizontalSize;
+        public int getRowCount() {
+            return mRowCount;
         }
 
         /**
-         * Gets the vertical size in terms of item positions.
+         * Gets the number of columns.
          *
-         * @return The size.
+         * @return The column count.
          */
-        public int getVerticalSize() {
-            return mVerticalSize;
+        public int getColumnCount() {
+            return mColumnCount;
         }
 
         /**
@@ -2753,15 +2771,23 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         private void clear() {
-            mHorizontalSize = 0;
-            mVerticalSize = 0;
+            mRowCount = 0;
+            mColumnCount = 0;
             mHierarchical = false;
         }
     }
 
     /**
      * Class with information if a node is a collection item. Use
-     * {@link CollectionItemInfo#obtain(int, int, int, int, boolean) to get an instance.
+     * {@link CollectionItemInfo#obtain(int, int, int, int, boolean)}
+     * to get an instance.
+     * <p>
+     * A collection item is contained in a collection, it starts at
+     * a given row and column in the collection, and spans one or
+     * more rows and columns. For example, a header of two related
+     * table columns starts at the first row and the first column,
+     * spans one row and two columns.
+     * </p>
      */
     public static final class CollectionItemInfo {
         private static final int MAX_POOL_SIZE = 20;
@@ -2772,79 +2798,77 @@ public class AccessibilityNodeInfo implements Parcelable {
         /**
          * Obtains a pooled instance.
          *
-         * @param horizontalPosition The horizontal item position.
-         * @param horizontalSpan The horizontal item span.
-         * @param verticalPosition The vertical item position.
-         * @param verticalSpan The vertical item span.
+         * @param rowIndex The row index at which the item is located.
+         * @param rowSpan The number of rows the item spans.
+         * @param columnIndex The column index at which the item is located.
+         * @param columnSpan The number of columns the item spans.
          * @param heading Whether the item is a heading.
          */
-        public static CollectionItemInfo obtain(int horizontalPosition, int horizontalSpan,
-                int verticalPosition, int verticalSpan, boolean heading) {
+        public static CollectionItemInfo obtain(int rowIndex, int rowSpan,
+                int columnIndex, int columnSpan, boolean heading) {
             CollectionItemInfo info = sPool.acquire();
-            return (info != null) ? info : new CollectionItemInfo(horizontalPosition,
-                    horizontalSpan, verticalPosition, verticalSpan, heading);
+            return (info != null) ? info : new CollectionItemInfo(rowIndex,
+                    rowSpan, columnIndex, columnSpan, heading);
         }
 
         private boolean mHeading;
-        private int mHorizontalPosition;
-        private int mVerticalPosition;
-        private int mHorizontalSpan;
-        private int mVerticalSpan;
+        private int mColumnIndex;
+        private int mRowIndex;
+        private int mColumnSpan;
+        private int mRowSpan;
 
         /**
          * Creates a new instance.
          *
-         * @param horizontalPosition The horizontal item position.
-         * @param horizontalSpan The horizontal item span.
-         * @param verticalPosition The vertical item position.
-         * @param verticalSpan The vertical item span.
+         * @param rowIndex The row index at which the item is located.
+         * @param rowSpan The number of rows the item spans.
+         * @param columnIndex The column index at which the item is located.
+         * @param columnSpan The number of columns the item spans.
          * @param heading Whether the item is a heading.
          */
-        private CollectionItemInfo(int horizontalPosition, int horizontalSpan,
-                int verticalPosition, int verticalSpan, boolean heading) {
-            mHorizontalPosition = horizontalPosition;
-            mHorizontalSpan = horizontalSpan;
-            mVerticalPosition = verticalPosition;
-            mVerticalSpan = verticalSpan;
+        private CollectionItemInfo(int rowIndex, int rowSpan,
+                int columnIndex, int columnSpan, boolean heading) {
+            mRowIndex = rowIndex;
+            mRowSpan = rowSpan;
+            mColumnIndex = columnIndex;
+            mColumnSpan = columnSpan;
             mHeading = heading;
         }
 
         /**
-         * Gets the horizontal item position in the parent collection.
+         * Gets the column index at which the item is located.
          *
-         * @return The position.
+         * @return The column index.
          */
-        public int getHorizontalPosition() {
-            return mHorizontalPosition;
+        public int getColumnIndex() {
+            return mColumnIndex;
         }
 
         /**
-         * Gets the vertical item position in the parent collection.
+         * Gets the row index at which the item is located.
          *
-         * @return The position.
+         * @return The row index.
          */
-        public int getVerticalPosition() {
-            return mVerticalPosition;
+        public int getRowIndex() {
+            return mRowIndex;
         }
 
         /**
-         * Gets the horizontal span in terms of item positions
-         * of the parent collection.
+         * Gets the number of columns the item spans.
          *
-         * @return The span.
+         * @return The column span.
          */
-        public int getHorizontalSpan() {
-            return mHorizontalSpan;
+        public int getColumnSpan() {
+            return mColumnSpan;
         }
 
         /**
-         * Gets the vertical span in terms of item positions
-         * of the parent collection.
+         * Gets the number of rows the item spans.
          *
-         * @return The span.
+         * @return The row span.
          */
-        public int getVerticalSpan() {
-            return mVerticalSpan;
+        public int getRowSpan() {
+            return mRowSpan;
         }
 
         /**
@@ -2866,10 +2890,10 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         private void clear() {
-            mHorizontalPosition = 0;
-            mHorizontalSpan = 0;
-            mVerticalPosition = 0;
-            mVerticalSpan = 0;
+            mColumnIndex = 0;
+            mColumnSpan = 0;
+            mRowIndex = 0;
+            mRowSpan = 0;
             mHeading = false;
         }
     }
