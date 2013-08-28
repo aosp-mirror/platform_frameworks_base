@@ -178,7 +178,7 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> მოწყობილობა)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth გამორთულია"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"სიკაშკაშე"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"ავტოროტაცია"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="336054930362580584">"ავტო მობრუნება"</string>
     <string name="quick_settings_rotation_locked_label" msgid="8058646447242565486">"როტაციის ჩაკეტვა"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"შეყვანის მეთოდი"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"მდებარეობა"</string>
@@ -199,16 +199,10 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ავტომატურად"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"შეტყობინებები აქ გამოჩნდება"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"მათზე წვდომისათვის, ნებისმიერ დროს გადაფურცლეთ ქვემოთ.\nსისტემის კონტროლისთვისაც გადაფურცლეთ ქვემოთ."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5848402127455021714) -->
-    <skip />
-    <!-- no translation found for done_button (1759387181766603361) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_dialog_title (1273796967092027291) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_info_message (5430320539555358452) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_warning_message (2033091656129963669) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_settings_button (7946956977377166709) -->
-    <skip />
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"შესაძლოა ქსელი მონიტორინგის ქვეშ იმყოფება"</string>
+    <string name="done_button" msgid="1759387181766603361">"დასრულდა"</string>
+    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"ქსელის მონიტორინგი"</string>
+    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"თქვენ მოწყობილობის მმართველი არის: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nთქვენს ადმინისტრატოს შეუძლია განახორციელოს თქვენი ქსელის აქტივობის მონიტორინგი, მათ შორის ელფოსტების, აპების და უსაფრთხო ვებსაიტების მონიტორინგი.\n\nდამატებითი ინფორმაციისათვის, დაუკავშირდით ადმინისტრატორს."</string>
+    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"მესამე მხარეს შეუძლია განახორციელოდს თქვენი ქსელის \nაქტივობა, მათ შორის ელფოსტები, აპები და უსაფრთხო ვებსაიტები.\n\nეს შესაძლებელია თქვენს მოწყობილობაზე დაყენებული სანდო ავთენტიკაციის მონაცემების საშუალებით."</string>
+    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"სანდო ავთენტიკაციის მონაცემების შემოწმება"</string>
 </resources>

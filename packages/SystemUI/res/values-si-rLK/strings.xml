@@ -199,16 +199,10 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ස්වයංක්‍රීය"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"දැනුම්දීම් මෙතන පෙන්නුම් කරයි"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"පහලට සර්පණය කිරීමෙන් ඕනෑම වෙලාවක ඒවා වෙත පිවිසෙන්න.\nපද්ධති පාලක සඳහා නැවත පහළට සර්පණය කරන්න."</string>
-    <!-- no translation found for ssl_ca_cert_warning (5848402127455021714) -->
-    <skip />
-    <!-- no translation found for done_button (1759387181766603361) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_dialog_title (1273796967092027291) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_info_message (5430320539555358452) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_warning_message (2033091656129963669) -->
-    <skip />
-    <!-- no translation found for ssl_ca_cert_settings_button (7946956977377166709) -->
-    <skip />
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ජාලය අධීක්ෂණයවනවා විය හැක"</string>
+    <string name="done_button" msgid="1759387181766603361">"හරි"</string>
+    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"ජාල අධීක්ෂණය"</string>
+    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"මෙම උපාංගය කළමනාකරණය කරනුයේ: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nඔබගේ පරිපාලකයා ඊ-තැපැල්, යෙදුම්, සහ ආරක්‍ෂිත වෙබ් අඩවි ඇතුළුව ඔබගේ ජාල ක්‍රියාකාරකම් අධීක්ෂණය කිරීමට හැකියාව ඇත.\n\nවැඩි විස්තර සඳහා, ඔබේ පරිපාලකයා සම්බන්ධ කරගන්න."</string>
+    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"තුන්වන පාර්ශවයකට ඔබගේ ජාලය අධීක්ෂණය කිරීමට හැකියාව ඇත\nක්‍රියාකාරකම්, ඊ-තැපැල්, යෙදුම් සහ ආරක්‍ෂිත වෙබ් අඩවි ඇතුළුව.\n\nඔබගේ උපාංගය මත ස්ථාපිත විශ්වාසදයී අක්තපත්‍ර මෙය සිදුවීමේ හැකියාව ඇතිකරයි."</string>
+    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"විශ්වාසදායී අක්තපත්‍ර පරික්ෂා කරන්න"</string>
 </resources>
