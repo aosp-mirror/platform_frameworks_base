@@ -86,9 +86,9 @@ public class DelegateViewHelper {
         }
 
         if (action == MotionEvent.ACTION_DOWN) {
-            mBar.suspendAutohide();
+            mBar.setInteracting(true);
         } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-            mBar.resumeAutohide();
+            mBar.setInteracting(false);
         }
 
         mDelegateView.getLocationOnScreen(mTempPoint);

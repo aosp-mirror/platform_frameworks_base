@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
+import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
@@ -170,7 +172,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     StatusBarWindowView mStatusBarWindow;
     PhoneStatusBarView mStatusBarView;
-    private int mStatusBarWindowState;
+    private int mStatusBarWindowState = WINDOW_STATE_SHOWING;
 
     int mPixelFormat;
     Object mQueueLock = new Object();
@@ -234,7 +236,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
     // on-screen navigation buttons
     private NavigationBarView mNavigationBarView = null;
-    private int mNavigationBarWindowState;
+    private int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
 
     // the tracker view
     int mTrackingPosition; // the position of the top of the tracking view.
@@ -312,7 +314,10 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     };
 
+    private boolean mInteracting;
     private boolean mAutohideSuspended;
+    private int mStatusBarMode;
+    private int mNavigationBarMode;
 
     private final Runnable mAutohide = new Runnable() {
         @Override
@@ -1394,7 +1399,7 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         visibilityChanged(true);
 
-        suspendAutohide();
+        setInteracting(true);
     }
 
     public void animateCollapsePanels() {
@@ -1678,8 +1683,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             mPostCollapseCleanup = null;
         }
 
-        // Reschedule suspended auto-hide if necessary
-        resumeAutohide();
+        setInteracting(false);
     }
 
     /**
@@ -1826,7 +1830,7 @@ public class PhoneStatusBar extends BaseStatusBar {
             hideCling();
         }
 
-        suspendAutohide();
+        setInteracting(true);
         return false;
     }
 
@@ -1843,11 +1847,12 @@ public class PhoneStatusBar extends BaseStatusBar {
         if (mNavigationBarView != null) {
             mNavigationBarView.setNavigationIconHints(hints);
         }
+        checkBarModes();
     }
 
     @Override // CommandQueue
     public void setWindowState(int window, int state) {
-        boolean showing = state == StatusBarManager.WINDOW_STATE_SHOWING;
+        boolean showing = state == WINDOW_STATE_SHOWING;
         if (mStatusBarWindow != null
                 && window == StatusBarManager.WINDOW_STATUS_BAR
                 && mStatusBarWindowState != state) {
@@ -1898,17 +1903,28 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
 
             // update status bar mode
-            int sbMode = updateBarMode(oldVal, newVal, mStatusBarView.getBarTransitions(),
-                    View.STATUS_BAR_TRANSIENT, View.SYSTEM_UI_FLAG_TRANSPARENT_STATUS,
-                    mStatusBarWindowState);
+            final int sbMode = computeBarMode(oldVal, newVal, mStatusBarView.getBarTransitions(),
+                    View.STATUS_BAR_TRANSIENT, View.SYSTEM_UI_FLAG_TRANSPARENT_STATUS);
 
             // update navigation bar mode
-            int nbMode = mNavigationBarView == null ? -1 : updateBarMode(
+            final int nbMode = mNavigationBarView == null ? -1 : computeBarMode(
                     oldVal, newVal, mNavigationBarView.getBarTransitions(),
-                    View.NAVIGATION_BAR_TRANSIENT, View.SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION,
-                    mNavigationBarWindowState);
-
-            if (sbMode != -1 || nbMode != -1) {
+                    View.NAVIGATION_BAR_TRANSIENT, View.SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION);
+            final boolean sbModeChanged = sbMode != -1;
+            final boolean nbModeChanged = nbMode != -1;
+            boolean checkBarModes = false;
+            if (sbModeChanged && sbMode != mStatusBarMode) {
+                mStatusBarMode = sbMode;
+                checkBarModes = true;
+            }
+            if (nbModeChanged && nbMode != mNavigationBarMode) {
+                mNavigationBarMode = nbMode;
+                checkBarModes = true;
+            }
+            if (checkBarModes) {
+                checkBarModes();
+            }
+            if (sbModeChanged || nbModeChanged) {
                 // update transient bar autohide
                 if (sbMode == MODE_SEMI_TRANSPARENT || nbMode == MODE_SEMI_TRANSPARENT) {
                     scheduleAutohide();
@@ -1935,15 +1951,13 @@ public class PhoneStatusBar extends BaseStatusBar {
         return mStatusBarView.getBarTransitions().getMode();
     }
 
-    private int updateBarMode(int oldVis, int newVis, BarTransitions transitions,
-            int transientFlag, int transparentFlag, int windowState) {
+    private int computeBarMode(int oldVis, int newVis, BarTransitions transitions,
+            int transientFlag, int transparentFlag) {
         final int oldMode = barMode(oldVis, transientFlag, transparentFlag);
         final int newMode = barMode(newVis, transientFlag, transparentFlag);
         if (oldMode == newMode) {
             return -1; // no mode change
         }
-        final boolean animate = windowState == StatusBarManager.WINDOW_STATE_SHOWING;
-        transitions.transitionTo(newMode, animate);
         return newMode;
     }
 
@@ -1953,35 +1967,49 @@ public class PhoneStatusBar extends BaseStatusBar {
                 : MODE_OPAQUE;
     }
 
-    private final Runnable mResumeSemiTransparent = new Runnable() {
+    private void checkBarModes() {
+        checkBarMode(mStatusBarMode, mStatusBarWindowState, mStatusBarView.getBarTransitions());
+        if (mNavigationBarView != null) {
+            checkBarMode(mNavigationBarMode,
+                    mNavigationBarWindowState, mNavigationBarView.getBarTransitions());
+        }
+    }
+
+    private void checkBarMode(int mode, int windowState, BarTransitions transitions) {
+        final boolean imeVisible = (mNavigationIconHints & NAVIGATION_HINT_BACK_ALT) != 0;
+        final int finalMode = imeVisible || mInteracting ? MODE_OPAQUE : mode;
+        final boolean animate = windowState == WINDOW_STATE_SHOWING;
+        transitions.transitionTo(finalMode, animate);
+    }
+
+    private final Runnable mCheckBarModes = new Runnable() {
         @Override
         public void run() {
-            if ((mSystemUiVisibility & STATUS_OR_NAV_TRANSIENT) != 0) {
-                animateTransitionTo(BarTransitions.MODE_SEMI_TRANSPARENT);
-            }
+            checkBarModes();
         }};
 
     @Override
-    public void resumeAutohide() {
+    public void setInteracting(boolean interacting) {
+        mInteracting = interacting;
+        if (mInteracting) {
+            suspendAutohide();
+        } else {
+            resumeSuspendedAutohide();
+        }
+        checkBarModes();
+    }
+
+    private void resumeSuspendedAutohide() {
         if (mAutohideSuspended) {
             scheduleAutohide();
-            mHandler.postDelayed(mResumeSemiTransparent, 500); // longer than home -> launcher
+            mHandler.postDelayed(mCheckBarModes, 500); // longer than home -> launcher
         }
     }
 
-    private void animateTransitionTo(int newMode) {
-        mStatusBarView.getBarTransitions().transitionTo(newMode, true /*animate*/);
-        if (mNavigationBarView != null) {
-            mNavigationBarView.getBarTransitions().transitionTo(newMode, true /*animate*/);
-        }
-    }
-
-    @Override
-    public void suspendAutohide() {
+    private void suspendAutohide() {
         mHandler.removeCallbacks(mAutohide);
-        mHandler.removeCallbacks(mResumeSemiTransparent);
+        mHandler.removeCallbacks(mCheckBarModes);
         mAutohideSuspended = (mSystemUiVisibility & STATUS_OR_NAV_TRANSIENT) != 0;
-        animateTransitionTo(BarTransitions.MODE_OPAQUE);
     }
 
     private void cancelAutohide() {
@@ -2087,8 +2115,8 @@ public class PhoneStatusBar extends BaseStatusBar {
             || ((vis & InputMethodService.IME_VISIBLE) != 0);
 
         mCommandQueue.setNavigationIconHints(
-                altBack ? (mNavigationIconHints | StatusBarManager.NAVIGATION_HINT_BACK_ALT)
-                        : (mNavigationIconHints & ~StatusBarManager.NAVIGATION_HINT_BACK_ALT));
+                altBack ? (mNavigationIconHints | NAVIGATION_HINT_BACK_ALT)
+                        : (mNavigationIconHints & ~NAVIGATION_HINT_BACK_ALT));
         if (mQS != null) mQS.setImeWindowStatus(vis > 0);
     }
 
@@ -2186,12 +2214,17 @@ public class PhoneStatusBar extends BaseStatusBar {
                     + " scroll " + mScrollView.getScrollX() + "," + mScrollView.getScrollY());
         }
 
+        pw.print("  mInteracting="); pw.println(mInteracting);
         pw.print("  mStatusBarWindowState=");
         pw.println(windowStateToString(mStatusBarWindowState));
+        pw.print("  mStatusBarMode=");
+        pw.println(BarTransitions.modeToString(mStatusBarMode));
         dumpBarTransitions(pw, "mStatusBarView", mStatusBarView.getBarTransitions());
         if (mNavigationBarView != null) {
             pw.print("  mNavigationBarWindowState=");
             pw.println(windowStateToString(mNavigationBarWindowState));
+            pw.print("  mNavigationBarMode=");
+            pw.println(BarTransitions.modeToString(mNavigationBarMode));
             dumpBarTransitions(pw, "mNavigationBarView", mNavigationBarView.getBarTransitions());
         }
 

@@ -112,9 +112,11 @@ public class NavigationBarView extends LinearLayout {
     }
 
     private final class NavigationBarTransitions extends BarTransitions {
+        private static final boolean ENABLE_GRADIENT = false;  // until we can smooth transition
 
         private final Drawable mTransparentBottom;
         private final Drawable mTransparentRight;
+        private final int mTransparentColor;
 
         public NavigationBarTransitions(Context context) {
             super(context, NavigationBarView.this);
@@ -125,10 +127,18 @@ public class NavigationBarView extends LinearLayout {
             };
             mTransparentBottom = new GradientDrawable(Orientation.BOTTOM_TOP, gradientColors);
             mTransparentRight = new GradientDrawable(Orientation.RIGHT_LEFT, gradientColors);
+            mTransparentColor = res.getColor(R.color.status_bar_background_transparent);
         }
 
         public void setVertical(boolean isVertical) {
+            if (!ENABLE_GRADIENT) return;
             mTransparent = isVertical ? mTransparentRight : mTransparentBottom;
+        }
+
+        @Override
+        protected Integer getBackgroundColor(int mode) {
+            if (!ENABLE_GRADIENT && mode == MODE_TRANSPARENT) return mTransparentColor;
+            return super.getBackgroundColor(mode);
         }
 
         @Override

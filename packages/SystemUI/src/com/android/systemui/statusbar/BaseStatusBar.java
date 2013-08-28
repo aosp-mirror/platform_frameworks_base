@@ -1102,11 +1102,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         return km.inKeyguardRestrictedInputMode();
     }
 
-    public void suspendAutohide() {
-        // hook for subclasses
-    }
-
-    public void resumeAutohide() {
+    public void setInteracting(boolean interacting) {
         // hook for subclasses
     }
 
