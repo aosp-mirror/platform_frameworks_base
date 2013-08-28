@@ -1028,26 +1028,29 @@ public class CalendarView extends FrameLayout {
      * Sets up the strings to be used by the header.
      */
     private void setUpHeader() {
+        final String[] tinyWeekdayNames = LocaleData.get(Locale.getDefault()).tinyWeekdayNames;
         mDayLabels = new String[mDaysPerWeek];
-        for (int i = mFirstDayOfWeek, count = mFirstDayOfWeek + mDaysPerWeek; i < count; i++) {
-            int calendarDay = (i > Calendar.SATURDAY) ? i - Calendar.SATURDAY : i;
-            mDayLabels[i - mFirstDayOfWeek] = DateUtils.getDayOfWeekString(calendarDay,
-                    DateUtils.LENGTH_SHORTEST);
+        for (int i = 0; i < mDaysPerWeek; i++) {
+            final int j = i + mFirstDayOfWeek;
+            final int calendarDay = (j > Calendar.SATURDAY) ? j - Calendar.SATURDAY : j;
+            mDayLabels[i] = tinyWeekdayNames[calendarDay];
         }
-
+        // Deal with week number
         TextView label = (TextView) mDayNamesHeader.getChildAt(0);
         if (mShowWeekNumber) {
             label.setVisibility(View.VISIBLE);
         } else {
             label.setVisibility(View.GONE);
         }
-        for (int i = 1, count = mDayNamesHeader.getChildCount(); i < count; i++) {
-            label = (TextView) mDayNamesHeader.getChildAt(i);
+        // Deal with day labels
+        final int count = mDayNamesHeader.getChildCount();
+        for (int i = 0; i < count - 1; i++) {
+            label = (TextView) mDayNamesHeader.getChildAt(i + 1);
             if (mWeekDayTextAppearanceResId > -1) {
                 label.setTextAppearance(mContext, mWeekDayTextAppearanceResId);
             }
-            if (i < mDaysPerWeek + 1) {
-                label.setText(mDayLabels[i - 1]);
+            if (i < mDaysPerWeek) {
+                label.setText(mDayLabels[i]);
                 label.setVisibility(View.VISIBLE);
             } else {
                 label.setVisibility(View.GONE);

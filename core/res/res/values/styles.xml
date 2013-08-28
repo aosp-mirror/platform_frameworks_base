@@ -529,7 +529,6 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.CalendarView">
         <item name="android:showWeekNumber">true</item>
-        <item name="android:firstDayOfWeek">1</item>
         <item name="android:minDate">01/01/1900</item>
         <item name="android:maxDate">12/31/2100</item>
         <item name="android:shownWeekCount">6</item>
