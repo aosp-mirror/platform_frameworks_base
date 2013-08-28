@@ -21,7 +21,6 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -113,8 +112,9 @@ public abstract class HotwordRecognitionService extends Service {
                 listener.onHotwordError(HotwordRecognizer.ERROR_RECOGNIZER_BUSY);
                 Log.w(TAG, "stopRecognition called by a different caller - ignoring");
             } else { // the correct state
-                HotwordRecognitionService.this.onStopHotwordRecognition(mCurrentCallback);
+                mCurrentCallback.onHotwordRecognitionStopped();
                 mCurrentCallback = null;
+                HotwordRecognitionService.this.onStopHotwordRecognition();
             }
         } catch (RemoteException e) { // occurs if onError fails
             if (DBG) Log.d(TAG, "onError call from stopRecognition failed");
@@ -139,27 +139,6 @@ public abstract class HotwordRecognitionService extends Service {
     }
 
     /**
-     * Checks whether the caller has sufficient permissions
-     *
-     * @param listener to send the error message to in case of error
-     * @return {@code true} if the caller has enough permissions, {@code false} otherwise
-     */
-    private boolean checkPermissions(IHotwordRecognitionListener listener) {
-        if (DBG) Log.d(TAG, "checkPermissions");
-        if (checkCallingOrSelfPermission(
-                android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        try {
-            Log.e(TAG, "Recognition service called without RECORD_AUDIO permissions");
-            listener.onHotwordError(HotwordRecognizer.ERROR_FAILED);
-        } catch (RemoteException e) {
-            Log.e(TAG, "onHotwordError(ERROR_INSUFFICIENT_PERMISSIONS) message failed", e);
-        }
-        return false;
-    }
-
-    /**
      * Notifies the service to start a recognition.
      *
      * @param callback that receives the callbacks from the service.
@@ -168,10 +147,8 @@ public abstract class HotwordRecognitionService extends Service {
 
     /**
      * Notifies the service to stop recognition.
-     *
-     * @param callback that receives the callbacks from the service.
      */
-    public abstract void onStopHotwordRecognition(Callback callback);
+    public abstract void onStopHotwordRecognition();
 
     /** Binder of the hotword recognition service */
     private static class RecognitionServiceBinder extends IHotwordRecognitionService.Stub {
@@ -183,7 +160,7 @@ public abstract class HotwordRecognitionService extends Service {
 
         public void startHotwordRecognition(IHotwordRecognitionListener listener) {
             if (DBG) Log.d(TAG, "startRecognition called by: " + listener.asBinder());
-            if (mInternalService != null && mInternalService.checkPermissions(listener)) {
+            if (mInternalService != null) {
                 mInternalService.mHandler.sendMessage(
                         Message.obtain(mInternalService.mHandler, MSG_START_RECOGNITION, listener));
             }
