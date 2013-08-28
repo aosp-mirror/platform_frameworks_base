@@ -61,8 +61,6 @@
     <string name="usb_debugging_always" msgid="303335496705863070">"همیشه از این رایانه انجام شود"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"بزرگنمایی برای پر کردن صفحه"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"گسترده کردن برای پر کردن صفحه"</string>
-    <string name="compat_mode_help_header" msgid="7969493989397529910">"بزرگنمایی سازگاری"</string>
-    <string name="compat_mode_help_body" msgid="4946726776359270040">"اگر یک برنامه برای صفحه کوچک تری طراحی شده باشد، یک کنترل بزرگنمایی توسط ساعت نشان داده می‌شود."</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"در حال ذخیره تصویر صفحه..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"در حال ذخیره تصویر صفحه..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"تصویر صفحه ذخیره شد."</string>
@@ -201,4 +199,10 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"خودکار"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"اعلان‌ها در اینجا نمایش داده می‌شوند"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"با کشیدن انگشت به طرف پایین به آنها دسترسی پیدا کنید.\nبرای کنترل‌های سیستم دوباره انگشت خود را به سمت پایین بکشید."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ممکن است شبکه نظارت شده باشد"</string>
+    <string name="done_button" msgid="1759387181766603361">"انجام شد"</string>
+    <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"نظارت بر شبکه"</string>
+    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"مدیریت دستگاه توسط: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nسرپرست شما می‌تواند فعالیت شبکه شما را نظارت کند، از جمله ایمیل‌ها، برنامه‌ها، و وب‌سایت‌های ایمن.\n\nبرای کسب اطلاعات بیشتر، با سرپرستتان تماس بگیرید."</string>
+    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"یک شخص ثالث قادر به نظارت بر فعالیت\nشبکه شما، از جمله ایمیل‌ها، برنامه‌ها، و وب‌سایت‌های ایمن است.\n\nیک اعتبارنامه قابل اعتماد نصب شده بر روی دستگاه شما این کار را امکان‌پذیر می‌کند."</string>
+    <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"بررسی اعتبارنامه‌های قابل اعتماد"</string>
 </resources>
