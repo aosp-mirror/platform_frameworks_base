@@ -32,6 +32,7 @@ import android.os.UserHandle;
 import android.print.IPrintManager;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 /**
@@ -64,22 +65,27 @@ public class NotificationController {
                     + " state:" + PrintJobInfo.stateToString(printJob.getState()));
         }
         switch (printJob.getState()) {
-            case PrintJobInfo.STATE_QUEUED: {
-                createPrintingNotificaiton(printJob);
+            case PrintJobInfo.STATE_QUEUED:
+            case PrintJobInfo.STATE_STARTED: {
+                createPrintingNotification(printJob);
             } break;
 
             case PrintJobInfo.STATE_FAILED: {
-                createFailedNotificaiton(printJob);
+                createFailedNotification(printJob);
             } break;
 
             case PrintJobInfo.STATE_COMPLETED:
             case PrintJobInfo.STATE_CANCELED: {
                 removeNotification(printJob.getId());
             } break;
+
+            case PrintJobInfo.STATE_BLOCKED: {
+                createBlockedNotification(printJob);
+            } break;
         }
     }
 
-    private void createPrintingNotificaiton(PrintJobInfo printJob) {
+    private void createPrintingNotification(PrintJobInfo printJob) {
         Notification.Builder builder = new Notification.Builder(mContext)
                 .setSmallIcon(R.drawable.stat_notify_print)
                 .setContentTitle(mContext.getString(R.string.printing_notification_title_template,
@@ -93,17 +99,36 @@ public class NotificationController {
         mNotificationManager.notify(printJob.getId(), builder.build());
     }
 
-    private void createFailedNotificaiton(PrintJobInfo printJob) {
+    private void createFailedNotification(PrintJobInfo printJob) {
+        String reason = !TextUtils.isEmpty(printJob.getStateReason())
+                ? printJob.getStateReason() : mContext.getString(R.string.reason_unknown);
+
         Notification.Builder builder = new Notification.Builder(mContext)
                 .setSmallIcon(R.drawable.stat_notify_error)
                 .setContentTitle(mContext.getString(R.string.failed_notification_title_template,
                         printJob.getLabel()))
                 .addAction(R.drawable.stat_notify_cancelling, mContext.getString(R.string.cancel),
                         createCancelIntent(printJob))
-                // TODO: Use appropriate icon when assets are ready
                 .addAction(android.R.drawable.ic_secure, mContext.getString(R.string.restart),
                         createRestartIntent(printJob.getId()))
-                .setContentText(printJob.getFailureReason())
+                .setContentText(reason)
+                .setWhen(System.currentTimeMillis())
+                .setOngoing(true)
+                .setShowWhen(true);
+        mNotificationManager.notify(printJob.getId(), builder.build());
+    }
+
+    private void createBlockedNotification(PrintJobInfo printJob) {
+        String reason = !TextUtils.isEmpty(printJob.getStateReason())
+                ? printJob.getStateReason() : mContext.getString(R.string.reason_unknown);
+
+        Notification.Builder builder = new Notification.Builder(mContext)
+                .setSmallIcon(R.drawable.stat_notify_error)
+                .setContentTitle(mContext.getString(R.string.blocked_notification_title_template,
+                        printJob.getLabel()))
+                .addAction(R.drawable.stat_notify_cancelling, mContext.getString(R.string.cancel),
+                        createCancelIntent(printJob))
+                .setContentText(reason)
                 .setWhen(System.currentTimeMillis())
                 .setOngoing(true)
                 .setShowWhen(true);

@@ -19,8 +19,12 @@ package com.android.server.print;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -46,6 +50,7 @@ import com.android.server.print.RemotePrintSpooler.PrintSpoolerCallbacks;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,6 +67,11 @@ final class UserState implements PrintSpoolerCallbacks {
     private static final int MAX_ITEMS_PER_CALLBACK = 100;
 
     private static final char COMPONENT_NAME_SEPARATOR = ':';
+
+    private static final String SHARED_PREFERENCES_FILE = "shared_prefs";
+
+    private static final String KEY_SYSTEM_PRINT_SERVICES_ENABLED =
+            "KEY_SYSTEM_PRINT_SERVICES_ENABLED";
 
     private final SimpleStringSplitter mStringColonSplitter =
             new SimpleStringSplitter(COMPONENT_NAME_SEPARATOR);
@@ -95,6 +105,7 @@ final class UserState implements PrintSpoolerCallbacks {
         mUserId = userId;
         mLock = lock;
         mSpooler = new RemotePrintSpooler(context, userId, this);
+        enableSystemPrintServicesOnce();
     }
 
     @Override
@@ -190,7 +201,7 @@ final class UserState implements PrintSpoolerCallbacks {
         }
     }
 
-    public void requestPrinterUpdate(PrinterId printerId) {
+    public void validatePrinters(List<PrinterId> printerIds) {
         synchronized (mLock) {
             throwIfDestroyedLocked();
             // No services - nothing to do.
@@ -202,7 +213,39 @@ final class UserState implements PrintSpoolerCallbacks {
                 return;
             }
             // Request an updated.
-            mPrinterDiscoverySession.requestPrinterUpdateLocked(printerId);
+            mPrinterDiscoverySession.validatePrintersLocked(printerIds);
+        }
+    }
+
+    public void startPrinterStateTracking(PrinterId printerId) {
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            // No services - nothing to do.
+            if (mActiveServices.isEmpty()) {
+                return;
+            }
+            // No session - nothing to do.
+            if (mPrinterDiscoverySession == null) {
+                return;
+            }
+            // Request start tracking the printer.
+            mPrinterDiscoverySession.startPrinterStateTrackingLocked(printerId);
+        }
+    }
+
+    public void stopPrinterStateTracking(PrinterId printerId) {
+        synchronized (mLock) {
+            throwIfDestroyedLocked();
+            // No services - nothing to do.
+            if (mActiveServices.isEmpty()) {
+                return;
+            }
+            // No session - nothing to do.
+            if (mPrinterDiscoverySession == null) {
+                return;
+            }
+            // Request stop tracking the printer.
+            mPrinterDiscoverySession.stopPrinterStateTrackingLocked(printerId);
         }
     }
 
@@ -365,6 +408,36 @@ final class UserState implements PrintSpoolerCallbacks {
         return false;
     }
 
+    private void enableSystemPrintServicesOnce() {
+        SharedPreferences preferences = mContext.getSharedPreferences(
+                SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
+        if (preferences.getInt(KEY_SYSTEM_PRINT_SERVICES_ENABLED, 0) == 0) {
+            Editor editor = preferences.edit();
+            editor.putInt(KEY_SYSTEM_PRINT_SERVICES_ENABLED, 1);
+            editor.commit();
+
+            readInstalledPrintServicesLocked();
+
+            StringBuilder builder = new StringBuilder();
+
+            final int serviceCount = mInstalledServices.size();
+            for (int i = 0; i < serviceCount; i++) {
+                ServiceInfo serviceInfo = mInstalledServices.get(i).getResolveInfo().serviceInfo;
+                if ((serviceInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                    ComponentName serviceName = new ComponentName(
+                            serviceInfo.packageName, serviceInfo.name);
+                    if (builder.length() > 0) {
+                        builder.append(":");
+                    }
+                    builder.append(serviceName.flattenToString());
+                }
+            }
+
+            Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                    Settings.Secure.ENABLED_PRINT_SERVICES, builder.toString(), mUserId);
+        }
+    }
+
     private void onConfigurationChangedLocked() {
         final int installedCount = mInstalledServices.size();
         for (int i = 0; i < installedCount; i++) {
@@ -415,6 +488,8 @@ final class UserState implements PrintSpoolerCallbacks {
 
         private final List<IBinder> mStartedPrinterDiscoveryTokens = new ArrayList<IBinder>();
 
+        private final List<PrinterId> mStateTrackedPrinters = new ArrayList<PrinterId>();
+
         private final Handler mHandler;
 
         private boolean mIsDestroyed;
@@ -461,14 +536,10 @@ final class UserState implements PrintSpoolerCallbacks {
             }
 
             // If printer discovery is ongoing and the start request has a list
-            // of printer to be checked, then we just request refreshing each of
-            // them rather making another start discovery request.
+            // of printer to be checked, then we just request validating them.
             if (!mStartedPrinterDiscoveryTokens.isEmpty()
                     && priorityList != null && !priorityList.isEmpty()) {
-                final int priorityIdCount = priorityList.size();
-                for (int i = 0; i < priorityIdCount; i++) {
-                    requestPrinterUpdate(priorityList.get(i));
-                }
+                validatePrinters(priorityList);
                 return;
             }
 
@@ -508,20 +579,97 @@ final class UserState implements PrintSpoolerCallbacks {
                     .sendToTarget();
         }
 
-        public void requestPrinterUpdateLocked(PrinterId printerId) {
+        public void validatePrintersLocked(List<PrinterId> printerIds) {
             if (mIsDestroyed) {
-                Log.w(LOG_TAG, "Not updating pritner - session destroyed");
+                Log.w(LOG_TAG, "Not validating pritners - session destroyed");
                 return;
             }
-            RemotePrintService service = mActiveServices.get(printerId.getServiceName());
-            if (service != null) {
-                SomeArgs args = SomeArgs.obtain();
-                args.arg1 = service;
-                args.arg2 = printerId;
-                mHandler.obtainMessage(SessionHandler
-                        .MSG_REQUEST_PRINTER_UPDATE, args)
-                        .sendToTarget();
+
+            List<PrinterId> remainingList = new ArrayList<PrinterId>(printerIds);
+            while (!remainingList.isEmpty()) {
+                Iterator<PrinterId> iterator = remainingList.iterator();
+                // Gather the printers per service and request a validation.
+                List<PrinterId> updateList = new ArrayList<PrinterId>();
+                ComponentName serviceName = null;
+                while (iterator.hasNext()) {
+                    PrinterId printerId = iterator.next();
+                    if (updateList.isEmpty()) {
+                        updateList.add(printerId);
+                        serviceName = printerId.getServiceName();
+                        iterator.remove();
+                    } else if (printerId.getServiceName().equals(serviceName)) {
+                        updateList.add(printerId);
+                        iterator.remove();
+                    }
+                }
+                // Schedule a notification of the service.
+                RemotePrintService service = mActiveServices.get(serviceName);
+                if (service != null) {
+                    SomeArgs args = SomeArgs.obtain();
+                    args.arg1 = service;
+                    args.arg2 = updateList;
+                    mHandler.obtainMessage(SessionHandler
+                            .MSG_VALIDATE_PRINTERS, args)
+                            .sendToTarget();
+                }
             }
+        }
+
+        public final void startPrinterStateTrackingLocked(PrinterId printerId) {
+            if (mIsDestroyed) {
+                Log.w(LOG_TAG, "Not starting printer state tracking - session destroyed");
+                return;
+            }
+            // If printer discovery is not started - nothing to do.
+            if (mStartedPrinterDiscoveryTokens.isEmpty()) {
+                return;
+            }
+            final boolean containedPrinterId = mStateTrackedPrinters.contains(printerId);
+            // Keep track of the number of requests to track this one.
+            mStateTrackedPrinters.add(printerId);
+            // If we were tracking this printer - nothing to do.
+            if (containedPrinterId) {
+                return;
+            }
+            // No service - nothing to do.
+            RemotePrintService service = mActiveServices.get(printerId.getServiceName());
+            if (service == null) {
+                return;
+            }
+            // Ask the service to start tracking.
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = service;
+            args.arg2 = printerId;
+            mHandler.obtainMessage(SessionHandler
+                    .MSG_START_PRINTER_STATE_TRACKING, args)
+                    .sendToTarget();
+        }
+
+        public final void stopPrinterStateTrackingLocked(PrinterId printerId) {
+            if (mIsDestroyed) {
+                Log.w(LOG_TAG, "Not stopping printer state tracking - session destroyed");
+                return;
+            }
+            // If printer discovery is not started - nothing to do.
+            if (mStartedPrinterDiscoveryTokens.isEmpty()) {
+                return;
+            }
+            // If we did not track this printer - nothing to do.
+            if (!mStateTrackedPrinters.remove(printerId)) {
+                return;
+            }
+            // No service - nothing to do.
+            RemotePrintService service = mActiveServices.get(printerId.getServiceName());
+            if (service == null) {
+                return;
+            }
+            // Ask the service to start tracking.
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = service;
+            args.arg2 = printerId;
+            mHandler.obtainMessage(SessionHandler
+                    .MSG_STOP_PRINTER_STATE_TRACKING, args)
+                    .sendToTarget();
         }
 
         public void onDestroyed() {
@@ -532,6 +680,12 @@ final class UserState implements PrintSpoolerCallbacks {
             if (mIsDestroyed) {
                 Log.w(LOG_TAG, "Not destroying - session destroyed");
                 return;
+            }
+            // Make sure printer tracking is stopped.
+            final int printerCount = mStateTrackedPrinters.size();
+            for (int i = 0; i < printerCount; i++) {
+                PrinterId printerId = mStateTrackedPrinters.get(i);
+                stopPrinterStateTracking(printerId);
             }
             // Make sure discovery is stopped.
             final int observerCount = mStartedPrinterDiscoveryTokens.size();
@@ -744,9 +898,19 @@ final class UserState implements PrintSpoolerCallbacks {
             }
         }
 
-        private void handleRequestPrinterUpdate(RemotePrintService service,
+        private void handleValidatePrinters(RemotePrintService service,
+                List<PrinterId> printerIds) {
+            service.validatePrinters(printerIds);
+        }
+
+        private void handleStartPrinterStateTracking(RemotePrintService service,
                 PrinterId printerId) {
-            service.requestPrinterUpdate(printerId);
+            service.startPrinterStateTracking(printerId);
+        }
+
+        private void handleStopPrinterStateTracking(RemotePrintService service,
+                PrinterId printerId) {
+            service.stopPrinterStateTracking(printerId);
         }
 
         private void handlePrintersAdded(IPrinterDiscoveryObserver observer,
@@ -804,7 +968,9 @@ final class UserState implements PrintSpoolerCallbacks {
             public static final int MSG_DISPATCH_DESTROY_PRINTER_DISCOVERY_SESSION = 9;
             public static final int MSG_DISPATCH_START_PRINTER_DISCOVERY = 10;
             public static final int MSG_DISPATCH_STOP_PRINTER_DISCOVERY = 11;
-            public static final int MSG_REQUEST_PRINTER_UPDATE = 12;
+            public static final int MSG_VALIDATE_PRINTERS = 12;
+            public static final int MSG_START_PRINTER_STATE_TRACKING = 13;
+            public static final int MSG_STOP_PRINTER_STATE_TRACKING = 14;
 
             SessionHandler(Looper looper) {
                 super(looper, null, false);
@@ -878,13 +1044,29 @@ final class UserState implements PrintSpoolerCallbacks {
                         handleDispatchStopPrinterDiscovery(services);
                     } break;
 
-                    case MSG_REQUEST_PRINTER_UPDATE: {
+                    case MSG_VALIDATE_PRINTERS: {
+                        SomeArgs args = (SomeArgs) message.obj;
+                        RemotePrintService service = (RemotePrintService) args.arg1;
+                        List<PrinterId> printerIds = (List<PrinterId>) args.arg2;
+                        args.recycle();
+                        handleValidatePrinters(service, printerIds);
+                    } break;
+
+                    case MSG_START_PRINTER_STATE_TRACKING: {
                         SomeArgs args = (SomeArgs) message.obj;
                         RemotePrintService service = (RemotePrintService) args.arg1;
                         PrinterId printerId = (PrinterId) args.arg2;
                         args.recycle();
-                        handleRequestPrinterUpdate(service, printerId);
+                        handleStartPrinterStateTracking(service, printerId);
                     } break;
+
+                    case MSG_STOP_PRINTER_STATE_TRACKING: {
+                        SomeArgs args = (SomeArgs) message.obj;
+                        RemotePrintService service = (RemotePrintService) args.arg1;
+                        PrinterId printerId = (PrinterId) args.arg2;
+                        args.recycle();
+                        handleStopPrinterStateTracking(service, printerId);
+                    }
                 }
             }
         }

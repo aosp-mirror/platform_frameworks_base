@@ -20,18 +20,22 @@
         package="com.android.printspooler"
         android:sharedUserId="android.uid.printspooler"
         android:versionName="1"
-        android:versionCode="1"
-        coreApp="true">
+        android:versionCode="1">
 
-    <uses-sdk android:minSdkVersion="18" android:targetSdkVersion="18"/>
+    <!-- Allows an application to call APIs that give it access to all print jobs
+         on the device. Usually an app can access only the print jobs it created.
+    -->
+    <permission
+        android:name="com.android.printspooler.permission.ACCESS_ALL_PRINT_JOBS"
+        android:label="@string/permlab_accessAllPrintJobs"
+        android:description="@string/permdesc_accessAllPrintJobs"
+        android:protectionLevel="signature" />
 
+    <uses-permission android:name="com.android.printspooler.permission.ACCESS_ALL_PRINT_JOBS"/>
     <uses-permission android:name="android.permission.ACCESS_ALL_PRINT_JOBS"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
-    <permission android:name="android.permission.BIND_PRINT_SPOOLER_SERVICE"
-        android:label="@string/permlab_bindPrintSpoolerService"
-        android:description="@string/permdesc_bindPrintSpoolerService"
-        android:protectionLevel="signature" />
+    <uses-sdk android:minSdkVersion="18" android:targetSdkVersion="18"/>
 
     <application
             android:allowClearUserData="false"
