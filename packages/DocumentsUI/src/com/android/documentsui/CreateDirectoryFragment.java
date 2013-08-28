@@ -20,14 +20,14 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
+import android.content.ContentProviderClient;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.DocumentsContract.DocumentColumns;
+import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Documents;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,8 +35,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.documentsui.model.Document;
-
-import java.io.FileNotFoundException;
 
 /**
  * Dialog to create a new directory.
@@ -58,7 +56,7 @@ public class CreateDirectoryFragment extends DialogFragment {
         final LayoutInflater dialogInflater = LayoutInflater.from(builder.getContext());
 
         final View view = dialogInflater.inflate(R.layout.dialog_create_dir, null, false);
-        final EditText text1 = (EditText)view.findViewById(android.R.id.text1);
+        final EditText text1 = (EditText) view.findViewById(android.R.id.text1);
 
         builder.setTitle(R.string.menu_create_dir);
         builder.setView(view);
@@ -68,24 +66,25 @@ public class CreateDirectoryFragment extends DialogFragment {
             public void onClick(DialogInterface dialog, int which) {
                 final String displayName = text1.getText().toString();
 
-                final ContentValues values = new ContentValues();
-                values.put(DocumentColumns.MIME_TYPE, Documents.MIME_TYPE_DIR);
-                values.put(DocumentColumns.DISPLAY_NAME, displayName);
-
                 final DocumentsActivity activity = (DocumentsActivity) getActivity();
                 final Document cwd = activity.getCurrentDirectory();
 
-                Uri childUri = resolver.insert(cwd.uri, values);
+                final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
+                        cwd.uri.getAuthority());
                 try {
+                    final String docId = DocumentsContract.createDocument(client,
+                            DocumentsContract.getDocId(cwd.uri), Documents.MIME_TYPE_DIR,
+                            displayName);
+
                     // Navigate into newly created child
+                    final Uri childUri = DocumentsContract.buildDocumentUri(
+                            cwd.uri.getAuthority(), docId);
                     final Document childDoc = Document.fromUri(resolver, childUri);
                     activity.onDocumentPicked(childDoc);
-                } catch (FileNotFoundException e) {
-                    childUri = null;
-                }
-
-                if (childUri == null) {
+                } catch (Exception e) {
                     Toast.makeText(context, R.string.save_error, Toast.LENGTH_SHORT).show();
+                } finally {
+                    ContentProviderClient.closeQuietly(client);
                 }
             }
         });

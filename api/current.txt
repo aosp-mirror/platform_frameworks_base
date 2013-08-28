@@ -20781,40 +20781,46 @@ package android.provider {
   }
 
   public final class DocumentsContract {
-    ctor public DocumentsContract();
-    method public static android.net.Uri buildContentsUri(java.lang.String, java.lang.String, java.lang.String);
-    method public static android.net.Uri buildContentsUri(android.net.Uri);
-    method public static android.net.Uri buildDocumentUri(java.lang.String, java.lang.String, java.lang.String);
-    method public static android.net.Uri buildDocumentUri(android.net.Uri, java.lang.String);
-    method public static android.net.Uri buildRootUri(java.lang.String, java.lang.String);
-    method public static android.net.Uri buildRootsUri(java.lang.String);
-    method public static android.net.Uri buildSearchUri(java.lang.String, java.lang.String, java.lang.String, java.lang.String);
-    method public static android.net.Uri buildSearchUri(android.net.Uri, java.lang.String);
-    method public static android.net.Uri createDocument(android.content.ContentResolver, android.net.Uri, java.lang.String, java.lang.String);
+    method public static android.net.Uri buildDocumentUri(java.lang.String, java.lang.String);
     method public static java.lang.String getDocId(android.net.Uri);
     method public static android.net.Uri[] getOpenDocuments(android.content.Context);
-    method public static java.lang.String getRootId(android.net.Uri);
-    method public static java.lang.String getSearchQuery(android.net.Uri);
-    method public static android.graphics.Bitmap getThumbnail(android.content.ContentResolver, android.net.Uri, android.graphics.Point);
-    method public static boolean isLocalOnly(android.net.Uri);
-    method public static void notifyRootsChanged(android.content.Context, java.lang.String);
-    method public static boolean renameDocument(android.content.ContentResolver, android.net.Uri, java.lang.String);
-    method public static android.net.Uri setLocalOnly(android.net.Uri);
-    field public static final java.lang.String EXTRA_HAS_MORE = "has_more";
-    field public static final java.lang.String EXTRA_REQUEST_MORE = "request_more";
-    field public static final java.lang.String EXTRA_THUMBNAIL_SIZE = "thumbnail_size";
+    field public static final java.lang.String EXTRA_ERROR = "error";
+    field public static final java.lang.String EXTRA_INFO = "info";
+    field public static final java.lang.String EXTRA_LOADING = "loading";
   }
 
   public static abstract interface DocumentsContract.DocumentColumns implements android.provider.OpenableColumns {
     field public static final java.lang.String DOC_ID = "doc_id";
     field public static final java.lang.String FLAGS = "flags";
+    field public static final java.lang.String ICON = "icon";
     field public static final java.lang.String LAST_MODIFIED = "last_modified";
     field public static final java.lang.String MIME_TYPE = "mime_type";
     field public static final java.lang.String SUMMARY = "summary";
   }
 
-  public static class DocumentsContract.Documents {
-    field public static final java.lang.String DOC_ID_ROOT = "0";
+  public static final class DocumentsContract.DocumentRoot implements android.os.Parcelable {
+    ctor public DocumentsContract.DocumentRoot();
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int FLAG_LOCAL_ONLY = 2; // 0x2
+    field public static final int FLAG_SUPPORTS_CREATE = 1; // 0x1
+    field public static final int ROOT_TYPE_DEVICE = 3; // 0x3
+    field public static final int ROOT_TYPE_DEVICE_ADVANCED = 4; // 0x4
+    field public static final int ROOT_TYPE_SERVICE = 1; // 0x1
+    field public static final int ROOT_TYPE_SHORTCUT = 2; // 0x2
+    field public long availableBytes;
+    field public java.lang.String docId;
+    field public int flags;
+    field public int icon;
+    field public java.lang.String[] mimeTypes;
+    field public java.lang.String recentDocId;
+    field public int rootType;
+    field public java.lang.String summary;
+    field public java.lang.String title;
+  }
+
+  public static final class DocumentsContract.Documents {
     field public static final int FLAG_PREFERS_GRID = 64; // 0x40
     field public static final int FLAG_SUPPORTS_CREATE = 1; // 0x1
     field public static final int FLAG_SUPPORTS_DELETE = 4; // 0x4
@@ -20822,25 +20828,32 @@ package android.provider {
     field public static final int FLAG_SUPPORTS_SEARCH = 16; // 0x10
     field public static final int FLAG_SUPPORTS_THUMBNAIL = 8; // 0x8
     field public static final int FLAG_SUPPORTS_WRITE = 32; // 0x20
-    field public static final java.lang.String MIME_TYPE_DIR = "vnd.android.cursor.dir/doc";
+    field public static final java.lang.String MIME_TYPE_DIR = "vnd.android.doc/dir";
   }
 
-  public static abstract interface DocumentsContract.RootColumns {
-    field public static final java.lang.String AVAILABLE_BYTES = "available_bytes";
-    field public static final java.lang.String ICON = "icon";
-    field public static final java.lang.String ROOT_ID = "root_id";
-    field public static final java.lang.String ROOT_TYPE = "root_type";
-    field public static final java.lang.String SUMMARY = "summary";
-    field public static final java.lang.String TITLE = "title";
-  }
-
-  public static class DocumentsContract.Roots {
-    field public static final java.lang.String MIME_TYPE_DIR = "vnd.android.cursor.dir/root";
-    field public static final java.lang.String MIME_TYPE_ITEM = "vnd.android.cursor.item/root";
-    field public static final int ROOT_TYPE_DEVICE = 3; // 0x3
-    field public static final int ROOT_TYPE_DEVICE_ADVANCED = 4; // 0x4
-    field public static final int ROOT_TYPE_SERVICE = 1; // 0x1
-    field public static final int ROOT_TYPE_SHORTCUT = 2; // 0x2
+  public abstract class DocumentsProvider extends android.content.ContentProvider {
+    ctor public DocumentsProvider();
+    method public final android.os.Bundle callFromPackage(java.lang.String, java.lang.String, java.lang.String, android.os.Bundle);
+    method public java.lang.String createDocument(java.lang.String, java.lang.String, java.lang.String) throws java.io.FileNotFoundException;
+    method public final int delete(android.net.Uri, java.lang.String, java.lang.String[]);
+    method public void deleteDocument(java.lang.String) throws java.io.FileNotFoundException;
+    method public abstract java.util.List<android.provider.DocumentsContract.DocumentRoot> getDocumentRoots();
+    method public java.lang.String getType(java.lang.String) throws java.io.FileNotFoundException;
+    method public final java.lang.String getType(android.net.Uri);
+    method public final android.net.Uri insert(android.net.Uri, android.content.ContentValues);
+    method public void notifyDocumentRootsChanged();
+    method public abstract android.os.ParcelFileDescriptor openDocument(java.lang.String, java.lang.String, android.os.CancellationSignal) throws java.io.FileNotFoundException;
+    method public android.content.res.AssetFileDescriptor openDocumentThumbnail(java.lang.String, android.graphics.Point, android.os.CancellationSignal) throws java.io.FileNotFoundException;
+    method public final android.os.ParcelFileDescriptor openFile(android.net.Uri, java.lang.String) throws java.io.FileNotFoundException;
+    method public final android.os.ParcelFileDescriptor openFile(android.net.Uri, java.lang.String, android.os.CancellationSignal) throws java.io.FileNotFoundException;
+    method public final android.content.res.AssetFileDescriptor openTypedAssetFile(android.net.Uri, java.lang.String, android.os.Bundle) throws java.io.FileNotFoundException;
+    method public final android.content.res.AssetFileDescriptor openTypedAssetFile(android.net.Uri, java.lang.String, android.os.Bundle, android.os.CancellationSignal) throws java.io.FileNotFoundException;
+    method public final android.database.Cursor query(android.net.Uri, java.lang.String[], java.lang.String, java.lang.String[], java.lang.String);
+    method public abstract android.database.Cursor queryDocument(java.lang.String) throws java.io.FileNotFoundException;
+    method public abstract android.database.Cursor queryDocumentChildren(java.lang.String) throws java.io.FileNotFoundException;
+    method public android.database.Cursor querySearch(java.lang.String, java.lang.String) throws java.io.FileNotFoundException;
+    method public void renameDocument(java.lang.String, java.lang.String) throws java.io.FileNotFoundException;
+    method public final int update(android.net.Uri, android.content.ContentValues, java.lang.String, java.lang.String[]);
   }
 
   public final deprecated class LiveFolders implements android.provider.BaseColumns {

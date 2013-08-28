@@ -21,12 +21,11 @@ import static com.android.documentsui.DocumentsActivity.TAG;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.provider.DocumentsContract.DocumentRoot;
 import android.util.Log;
 
-import com.android.documentsui.model.Root;
-
 /**
- * Handles {@link Root} changes which invalidate cached data.
+ * Handles {@link DocumentRoot} changes which invalidate cached data.
  */
 public class DocumentChangedReceiver extends BroadcastReceiver {
     @Override

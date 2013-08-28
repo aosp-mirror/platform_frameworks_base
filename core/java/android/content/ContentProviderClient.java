@@ -316,4 +316,11 @@ public class ContentProviderClient {
     public ContentProvider getLocalContentProvider() {
         return ContentProvider.coerceToLocalContentProvider(mContentProvider);
     }
+
+    /** {@hide} */
+    public static void closeQuietly(ContentProviderClient client) {
+        if (client != null) {
+            client.release();
+        }
+    }
 }
