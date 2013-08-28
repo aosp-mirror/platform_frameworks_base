@@ -702,6 +702,10 @@ public final class BluetoothGatt implements BluetoothProfile {
      * @param start Start or stop advertising
      */
     /*package*/ void listen(boolean start) {
+        if (mContext == null || !mContext.getResources().
+            getBoolean(com.android.internal.R.bool.config_bluetooth_le_peripheral_mode_supported)) {
+            throw new UnsupportedOperationException("BluetoothGatt#listen is blocked");
+        }
         if (DBG) Log.d(TAG, "listen() - start: " + start);
         if (mService == null || mClientIf == 0) return;
 
@@ -728,6 +732,10 @@ public final class BluetoothGatt implements BluetoothProfile {
     /*package*/ void setAdvData(boolean advData, boolean includeName, boolean includeTxPower,
                            Integer minInterval, Integer maxInterval,
                            Integer appearance, Byte[] manufacturerData) {
+        if (mContext == null || !mContext.getResources().
+            getBoolean(com.android.internal.R.bool.config_bluetooth_le_peripheral_mode_supported)) {
+            throw new UnsupportedOperationException("BluetoothGatt#setAdvData is blocked");
+        }
         if (DBG) Log.d(TAG, "setAdvData()");
         if (mService == null || mClientIf == 0) return;
 
