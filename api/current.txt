@@ -30370,6 +30370,7 @@ package android.widget {
     method protected void layoutChildren();
     method public void onFilterComplete(int);
     method public void onGlobalLayout();
+    method public void onInitializeAccessibilityNodeInfoForItem(android.view.View, int, android.view.accessibility.AccessibilityNodeInfo);
     method public boolean onRemoteAdapterConnected();
     method public void onRemoteAdapterDisconnected();
     method public void onRestoreInstanceState(android.os.Parcelable);
