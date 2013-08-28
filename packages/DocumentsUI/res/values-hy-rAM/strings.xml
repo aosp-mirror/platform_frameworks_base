@@ -16,71 +16,38 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_label (2783841764617238354) -->
-    <skip />
-    <!-- no translation found for title_open (4353228937663917801) -->
-    <skip />
-    <!-- no translation found for title_save (2433679664882857999) -->
-    <skip />
-    <!-- no translation found for menu_create_dir (5947289605844398389) -->
-    <skip />
-    <!-- no translation found for menu_grid (6878021334497835259) -->
-    <skip />
-    <!-- no translation found for menu_list (7279285939892417279) -->
-    <skip />
-    <!-- no translation found for menu_sort (7677740407158414452) -->
-    <skip />
-    <!-- no translation found for menu_search (3816712084502856974) -->
-    <skip />
-    <!-- no translation found for menu_settings (6008033148948428823) -->
-    <skip />
-    <!-- no translation found for menu_open (432922957274920903) -->
-    <skip />
-    <!-- no translation found for menu_save (2394743337684426338) -->
-    <skip />
-    <!-- no translation found for menu_share (3075149983979628146) -->
-    <skip />
-    <!-- no translation found for menu_delete (8138799623850614177) -->
-    <skip />
-    <!-- no translation found for mode_selected_count (459111894725594625) -->
-    <skip />
-    <!-- no translation found for sort_name (9183560467917256779) -->
-    <skip />
-    <!-- no translation found for sort_date (586080032956151448) -->
-    <skip />
-    <!-- no translation found for sort_size (3350681319735474741) -->
-    <skip />
-    <!-- no translation found for drawer_open (4545466532430226949) -->
-    <skip />
-    <!-- no translation found for drawer_close (7602734368552123318) -->
-    <skip />
-    <!-- no translation found for save_error (6167009778003223664) -->
-    <skip />
-    <!-- no translation found for root_recent (4470053704320518133) -->
-    <skip />
-    <!-- no translation found for root_available_bytes (8568452858617033281) -->
-    <skip />
-    <!-- no translation found for root_type_service (2857362700576006694) -->
-    <skip />
-    <!-- no translation found for root_type_shortcut (3318760609471618093) -->
-    <skip />
-    <!-- no translation found for root_type_device (7121342474653483538) -->
-    <skip />
-    <!-- no translation found for root_type_apps (8838065367985945189) -->
-    <skip />
-    <!-- no translation found for pref_advanced_devices (903257239609301276) -->
-    <skip />
-    <!-- no translation found for pref_file_size (2826879315743961459) -->
-    <skip />
-    <!-- no translation found for pref_device_size (3542106883278997222) -->
-    <skip />
-    <!-- no translation found for empty (7858882803708117596) -->
-    <skip />
-    <!-- no translation found for toast_no_application (1339885974067891667) -->
-    <skip />
-    <!-- no translation found for toast_failed_delete (2180678019407244069) -->
-    <skip />
-    <!-- no translation found for more (7117420986529297171) -->
-    <skip />
+    <string name="app_label" msgid="2783841764617238354">"Փաստաթղթեր"</string>
+    <string name="title_open" msgid="4353228937663917801">"Բացել այստեղից"</string>
+    <string name="title_save" msgid="2433679664882857999">"Պահել այստեղ"</string>
+    <string name="menu_create_dir" msgid="5947289605844398389">"Ստեղծել թղթապանակ"</string>
+    <string name="menu_grid" msgid="6878021334497835259">"Ցանցային տեսք"</string>
+    <string name="menu_list" msgid="7279285939892417279">"Ցուցակի տեսք"</string>
+    <string name="menu_sort" msgid="7677740407158414452">"Դասավորել ըստ"</string>
+    <string name="menu_search" msgid="3816712084502856974">"Որոնել"</string>
+    <string name="menu_settings" msgid="6008033148948428823">"Կարգավորումներ"</string>
+    <string name="menu_open" msgid="432922957274920903">"Բացել"</string>
+    <string name="menu_save" msgid="2394743337684426338">"Պահել"</string>
+    <string name="menu_share" msgid="3075149983979628146">"Համօգտագործել"</string>
+    <string name="menu_delete" msgid="8138799623850614177">"Ջնջել"</string>
+    <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> ընտրված"</string>
+    <string name="sort_name" msgid="9183560467917256779">"Ըստ անվան"</string>
+    <string name="sort_date" msgid="586080032956151448">"Ըստ փոփոխման ամսաթվի"</string>
+    <string name="sort_size" msgid="3350681319735474741">"Ըստ չափի"</string>
+    <string name="drawer_open" msgid="4545466532430226949">"Ցույց տալ արմատները"</string>
+    <string name="drawer_close" msgid="7602734368552123318">"Թաքցնել արմատները"</string>
+    <string name="save_error" msgid="6167009778003223664">"Չհաջողվեց պահել փաստաթուղթը"</string>
+    <string name="root_recent" msgid="4470053704320518133">"Վերջին"</string>
+    <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> ազատ է"</string>
+    <string name="root_type_service" msgid="2857362700576006694">"Ծառայություններ"</string>
+    <string name="root_type_shortcut" msgid="3318760609471618093">"Դյուրանցումներ"</string>
+    <string name="root_type_device" msgid="7121342474653483538">"Սարքեր"</string>
+    <string name="root_type_apps" msgid="8838065367985945189">"Հավելյալ ծրագրեր"</string>
+    <string name="pref_advanced_devices" msgid="903257239609301276">"Ցուցադրել ընդլայնված սարքերը"</string>
+    <string name="pref_file_size" msgid="2826879315743961459">"Ցուցադրել ֆայլի չափը"</string>
+    <string name="pref_device_size" msgid="3542106883278997222">"Ցուցադրել սարքի չափը"</string>
+    <string name="empty" msgid="7858882803708117596">"Տարրեր չկան"</string>
+    <string name="toast_no_application" msgid="1339885974067891667">"Հնարավոր չէ բացել ֆայլը"</string>
+    <string name="toast_failed_delete" msgid="2180678019407244069">"Անհնար է ջնջել որոշ փաստաթղթեր"</string>
+    <string name="more" msgid="7117420986529297171">"Ավելին"</string>
     <string name="loading" msgid="7933681260296021180">"Բեռնում..."</string>
 </resources>
