@@ -194,7 +194,7 @@ public final class ImageReader implements AutoCloseable {
 
         Looper looper;
         mHandler = handler;
-        if (mHandler == null) {
+        if (listener != null && mHandler == null) {
             if ((looper = Looper.myLooper()) != null) {
                 mHandler = new Handler();
             } else {
@@ -283,7 +283,7 @@ public final class ImageReader implements AutoCloseable {
             return;
         }
 
-        if (ir.mHandler != null) {
+        if (ir.mHandler != null && ir.mImageListener != null) {
             ir.mHandler.post(new Runnable() {
                 @Override
                 public void run() {
