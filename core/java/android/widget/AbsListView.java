@@ -2309,33 +2309,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             super.onInitializeAccessibilityNodeInfo(host, info);
 
             final int position = getPositionForView(host);
-            final ListAdapter adapter = getAdapter();
-
-            if ((position == INVALID_POSITION) || (adapter == null)) {
-                return;
-            }
-
-            if (!isEnabled() || !adapter.isEnabled(position)) {
-                return;
-            }
-
-            if (position == getSelectedItemPosition()) {
-                info.setSelected(true);
-                info.addAction(AccessibilityNodeInfo.ACTION_CLEAR_SELECTION);
-            } else {
-                info.addAction(AccessibilityNodeInfo.ACTION_SELECT);
-            }
-
-            if (isClickable()) {
-                info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
-                info.setClickable(true);
-            }
-
-            if (isLongClickable()) {
-                info.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
-                info.setLongClickable(true);
-            }
-
+            onInitializeAccessibilityNodeInfoForItem(host, position, info);
         }
 
         @Override
@@ -2385,6 +2359,45 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             }
 
             return false;
+        }
+    }
+
+    /**
+     * Initializes an {@link AccessibilityNodeInfo} with information about a
+     * particular item in the list.
+     *
+     * @param view View representing the list item.
+     * @param position Position of the list item within the adapter.
+     * @param info Node info to populate.
+     */
+    public void onInitializeAccessibilityNodeInfoForItem(
+            View view, int position, AccessibilityNodeInfo info) {
+        final ListAdapter adapter = getAdapter();
+        if (position == INVALID_POSITION || adapter == null) {
+            // The item doesn't exist, so there's not much we can do here.
+            return;
+        }
+
+        if (!isEnabled() || !adapter.isEnabled(position)) {
+            info.setEnabled(false);
+            return;
+        }
+
+        if (position == getSelectedItemPosition()) {
+            info.setSelected(true);
+            info.addAction(AccessibilityNodeInfo.ACTION_CLEAR_SELECTION);
+        } else {
+            info.addAction(AccessibilityNodeInfo.ACTION_SELECT);
+        }
+
+        if (isClickable()) {
+            info.addAction(AccessibilityNodeInfo.ACTION_CLICK);
+            info.setClickable(true);
+        }
+
+        if (isLongClickable()) {
+            info.addAction(AccessibilityNodeInfo.ACTION_LONG_CLICK);
+            info.setLongClickable(true);
         }
     }
 

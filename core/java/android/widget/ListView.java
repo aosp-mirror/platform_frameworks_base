@@ -42,6 +42,8 @@ import android.view.ViewParent;
 import android.view.ViewRootImpl;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.CollectionInfo;
+import android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo;
 import android.widget.RemoteViews.RemoteView;
 
 import java.util.ArrayList;
@@ -3778,5 +3780,20 @@ public class ListView extends AbsListView {
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(ListView.class.getName());
+
+        final int count = getCount();
+        final CollectionInfo collectionInfo = CollectionInfo.obtain(1, count, false);
+        info.setCollectionInfo(collectionInfo);
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfoForItem(
+            View view, int position, AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoForItem(view, position, info);
+
+        final LayoutParams lp = (LayoutParams) view.getLayoutParams();
+        final boolean isHeading = lp != null && lp.viewType != ITEM_VIEW_TYPE_HEADER_OR_FOOTER;
+        final CollectionItemInfo itemInfo = CollectionItemInfo.obtain(0, 1, position, 1, isHeading);
+        info.setCollectionItemInfo(itemInfo);
     }
 }

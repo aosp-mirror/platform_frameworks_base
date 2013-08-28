@@ -30,7 +30,10 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.AccessibilityNodeInfo.CollectionInfo;
+import android.view.accessibility.AccessibilityNodeInfo.CollectionItemInfo;
 import android.view.animation.GridLayoutAnimationController;
+import android.widget.AbsListView.LayoutParams;
 import android.widget.RemoteViews.RemoteView;
 
 
@@ -2259,5 +2262,37 @@ public class GridView extends AbsListView {
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setClassName(GridView.class.getName());
+
+        final int columnsCount = getNumColumns();
+        final int rowsCount = getCount() / columnsCount;
+        final CollectionInfo collectionInfo = CollectionInfo.obtain(columnsCount, rowsCount, false);
+        info.setCollectionInfo(collectionInfo);
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfoForItem(
+            View view, int position, AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfoForItem(view, position, info);
+
+        final int count = getCount();
+        final int columnsCount = getNumColumns();
+        final int rowsCount = count / columnsCount;
+
+        final int row;
+        final int column;
+        if (!mStackFromBottom) {
+            column = position % columnsCount;
+            row = position / columnsCount;
+        } else {
+            final int invertedIndex = count - 1 - position;
+
+            column = columnsCount - 1 - (invertedIndex % columnsCount);
+            row = rowsCount - 1 - invertedIndex / columnsCount;
+        }
+
+        final LayoutParams lp = (LayoutParams) view.getLayoutParams();
+        final boolean isHeading = lp != null && lp.viewType != ITEM_VIEW_TYPE_HEADER_OR_FOOTER;
+        final CollectionItemInfo itemInfo = CollectionItemInfo.obtain(column, 1, row, 1, isHeading);
+        info.setCollectionItemInfo(itemInfo);
     }
 }
