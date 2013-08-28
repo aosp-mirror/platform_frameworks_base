@@ -2073,5 +2073,6 @@
   <public type="attr" name="customRoots" />
   <public type="attr" name="autoMirrored" />
   <public type="attr" name="supportsSwitchingToNextInputMethod" />
+  <public type="attr" name="requireDeviceUnlock" />
 
 </resources>

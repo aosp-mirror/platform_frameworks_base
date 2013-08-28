@@ -867,6 +867,7 @@ package android {
     field public static final int reqKeyboardType = 16843304; // 0x1010228
     field public static final int reqNavigation = 16843306; // 0x101022a
     field public static final int reqTouchScreen = 16843303; // 0x1010227
+    field public static final int requireDeviceUnlock = 16843754; // 0x10103ea
     field public static final int required = 16843406; // 0x101028e
     field public static final int requiredAccountType = 16843734; // 0x10103d6
     field public static final int requiredForAllUsers = 16843728; // 0x10103d0
@@ -7328,7 +7329,7 @@ package android.content.pm {
     field public static final java.lang.String FEATURE_LOCATION_NETWORK = "android.hardware.location.network";
     field public static final java.lang.String FEATURE_MICROPHONE = "android.hardware.microphone";
     field public static final java.lang.String FEATURE_NFC = "android.hardware.nfc";
-    field public static final java.lang.String FEATURE_NFC_HCE = "android.hardware.nfc.hce";
+    field public static final java.lang.String FEATURE_NFC_HOST_CARD_EMULATION = "android.hardware.nfc.hce";
     field public static final java.lang.String FEATURE_SCREEN_LANDSCAPE = "android.hardware.screen.landscape";
     field public static final java.lang.String FEATURE_SCREEN_PORTRAIT = "android.hardware.screen.portrait";
     field public static final java.lang.String FEATURE_SENSOR_ACCELEROMETER = "android.hardware.sensor.accelerometer";
