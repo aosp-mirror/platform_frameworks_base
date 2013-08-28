@@ -3355,8 +3355,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
             ProxyProperties p = new ProxyProperties(data[0], proxyPort, "");
             setGlobalProxy(p);
-        } else {
-            setGlobalProxy(null);
         }
     }
 
