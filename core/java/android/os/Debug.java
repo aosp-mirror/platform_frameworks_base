@@ -518,8 +518,9 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      *
      * @hide
      */
-    public static void startMethodTracingDdms(int bufferSize, int flags) {
-        VMDebug.startMethodTracingDdms(bufferSize, flags);
+    public static void startMethodTracingDdms(int bufferSize, int flags,
+        boolean samplingEnabled, int intervalUs) {
+        VMDebug.startMethodTracingDdms(bufferSize, flags, samplingEnabled, intervalUs);
     }
 
     /**
