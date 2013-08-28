@@ -93,10 +93,17 @@ public class WifiNative {
     }
 
 
-    private LocalLog mLocalLog;
+    private static final LocalLog mLocalLog = new LocalLog(1024);
+    private int mCmdId;
 
-    public void setLocalLog(LocalLog l) {
-        mLocalLog = l;
+    public LocalLog getLocalLog() {
+        return mLocalLog;
+    }
+
+    private int getNewCmdId() {
+        synchronized (mLocalLog) {
+            return mCmdId++;
+        }
     }
 
     private void localLog(String s) {
@@ -105,10 +112,12 @@ public class WifiNative {
     }
 
     public boolean connectToSupplicant() {
+        localLog(mInterfacePrefix + "connectToSupplicant");
         return connectToSupplicantNative();
     }
 
     public void closeSupplicantConnection() {
+        localLog(mInterfacePrefix + "closeSupplicantConnection");
         closeSupplicantConnectionNative();
     }
 
@@ -118,15 +127,32 @@ public class WifiNative {
 
     private boolean doBooleanCommand(String command) {
         if (DBG) Log.d(mTAG, "doBoolean: " + command);
-        return doBooleanCommandNative(mInterfacePrefix + command);
+        int cmdId = getNewCmdId();
+        localLog(cmdId + "->" + mInterfacePrefix + command);
+        boolean result = doBooleanCommandNative(mInterfacePrefix + command);
+        localLog(cmdId + "<-" + result);
+        return result;
     }
 
     private int doIntCommand(String command) {
         if (DBG) Log.d(mTAG, "doInt: " + command);
-        return doIntCommandNative(mInterfacePrefix + command);
+        int cmdId = getNewCmdId();
+        localLog(cmdId + "->" + mInterfacePrefix + command);
+        int result = doIntCommandNative(mInterfacePrefix + command);
+        localLog(cmdId + "<-" + result);
+        return result;
     }
 
     private String doStringCommand(String command) {
+        if (DBG) Log.d(mTAG, "doString: " + command);
+        int cmdId = getNewCmdId();
+        localLog(cmdId + "->" + mInterfacePrefix + command);
+        String result = doStringCommandNative(mInterfacePrefix + command);
+        localLog(cmdId + "<-" + result);
+        return result;
+    }
+
+    private String doStringCommandWithoutLogging(String command) {
         if (DBG) Log.d(mTAG, "doString: " + command);
         return doStringCommandNative(mInterfacePrefix + command);
     }
@@ -157,48 +183,42 @@ public class WifiNative {
     }
 
     public String listNetworks() {
-        localLog("LIST_NETWORKS");
         return doStringCommand("LIST_NETWORKS");
     }
 
     public int addNetwork() {
-        localLog("ADD_NETWORK");
         return doIntCommand("ADD_NETWORK");
     }
 
     public boolean setNetworkVariable(int netId, String name, String value) {
         if (TextUtils.isEmpty(name) || TextUtils.isEmpty(value)) return false;
-        localLog("SET_NETWORK " + netId + " " + name + "=" + value);
         return doBooleanCommand("SET_NETWORK " + netId + " " + name + " " + value);
     }
 
     public String getNetworkVariable(int netId, String name) {
         if (TextUtils.isEmpty(name)) return null;
-        return doStringCommand("GET_NETWORK " + netId + " " + name);
+
+        // GET_NETWORK will likely flood the logs ...
+        return doStringCommandWithoutLogging("GET_NETWORK " + netId + " " + name);
     }
 
     public boolean removeNetwork(int netId) {
-        localLog("REMOVE_NETWORK " + netId);
         return doBooleanCommand("REMOVE_NETWORK " + netId);
     }
 
     public boolean enableNetwork(int netId, boolean disableOthers) {
         if (disableOthers) {
-            localLog("SELECT_NETWORK " + netId);
             return doBooleanCommand("SELECT_NETWORK " + netId);
         } else {
-            localLog("ENABLE_NETWORK " + netId);
             return doBooleanCommand("ENABLE_NETWORK " + netId);
         }
     }
 
     public boolean disableNetwork(int netId) {
-        localLog("DISABLE_NETWORK " + netId);
         return doBooleanCommand("DISABLE_NETWORK " + netId);
     }
 
     public boolean reconnect() {
-        localLog("RECONNECT");
         return doBooleanCommand("RECONNECT");
     }
 
@@ -242,7 +262,7 @@ public class WifiNative {
      * MASK=<N> see wpa_supplicant/src/common/wpa_ctrl.h for details
      */
     public String scanResults(int sid) {
-        return doStringCommand("BSS RANGE=" + sid + "- MASK=0x21987");
+        return doStringCommandWithoutLogging("BSS RANGE=" + sid + "- MASK=0x21987");
     }
 
     /**
@@ -401,7 +421,6 @@ public class WifiNative {
     }
 
     public boolean saveConfig() {
-        localLog("SAVE_CONFIG");
         return doBooleanCommand("SAVE_CONFIG");
     }
 
@@ -456,7 +475,7 @@ public class WifiNative {
      * FREQUENCY=0
      */
     public String signalPoll() {
-        return doStringCommand("SIGNAL_POLL");
+        return doStringCommandWithoutLogging("SIGNAL_POLL");
     }
 
     /** Example outout:
