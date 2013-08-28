@@ -4406,6 +4406,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void setError(CharSequence error, Drawable icon) {
         createEditorIfNeeded();
         mEditor.setError(error, icon);
+        notifyViewAccessibilityStateChangedIfNeeded();
     }
 
     @Override
@@ -8147,6 +8148,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (mEditor != null) {
             info.setInputType(mEditor.mInputType);
+
+            if (mEditor.mError != null) {
+                info.setContentInvalid(true);
+            }
         }
 
         if (!TextUtils.isEmpty(mText)) {
