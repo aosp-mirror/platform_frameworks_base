@@ -21,6 +21,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.os.Handler;
@@ -82,7 +84,6 @@ public class HotwordRecognizer {
     /** action codes */
     private static final int MSG_START = 1;
     private static final int MSG_STOP = 2;
-    private final static int MSG_CHANGE_LISTENER = 3;
 
     /** The underlying HotwordRecognitionService endpoint */
     private IHotwordRecognitionService mService;
@@ -106,9 +107,6 @@ public class HotwordRecognizer {
                     break;
                 case MSG_STOP:
                     handleStopRecognition();
-                    break;
-                case MSG_CHANGE_LISTENER:
-                    handleChangeListener((HotwordRecognitionListener) msg.obj);
                     break;
             }
         }
@@ -138,24 +136,38 @@ public class HotwordRecognizer {
     }
 
     /**
-     * Factory method to create a new {@code HotwordRecognizer}. Please note that
-     * {@link #setRecognitionListener(HotwordRecognitionListener)}
-     * should be called before dispatching any command to the created {@code HotwordRecognizer},
-     * otherwise no notifications will be received.
+     * Factory method to create a new {@code HotwordRecognizer}.
      *
      * @param context in which to create {@code HotwordRecognizer}
      * @return a new {@code HotwordRecognizer}
      */
     public static HotwordRecognizer createHotwordRecognizer(final Context context) {
-        return createHotwordRecognizer(context, null);
+        ComponentName serviceComponent = null;
+        // Resolve to a default ComponentName.
+        final List<ResolveInfo> list = context.getPackageManager().queryIntentServices(
+                new Intent(HotwordRecognitionService.SERVICE_INTERFACE), 0);
+        for (int i = 0; i < list.size(); i++) {
+            final ResolveInfo ri = list.get(i);
+            if (!ri.serviceInfo.enabled) {
+                continue;
+            }
+            if ((ri.serviceInfo.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM)
+                    != PackageManager.MATCH_DEFAULT_ONLY) {
+                serviceComponent = new ComponentName(
+                        ri.serviceInfo.packageName, ri.serviceInfo.name);
+                break;
+            }
+        }
+        // If all else fails, pick the first one.
+        if (serviceComponent == null && !list.isEmpty()) {
+            serviceComponent =  new ComponentName(
+                    list.get(0).serviceInfo.packageName, list.get(0).serviceInfo.name);
+        }
+        return createHotwordRecognizer(context, serviceComponent);
     }
 
-
     /**
-     * Factory method to create a new {@code HotwordRecognizer}. Please note that
-     * {@link #setRecognitionListener(HotwordRecognitionListener)}
-     * should be called before dispatching any command to the created {@code HotwordRecognizer},
-     * otherwise no notifications will be received.
+     * Factory method to create a new {@code HotwordRecognizer}.
      *
      * Use this version of the method to specify a specific service to direct this
      * {@link HotwordRecognizer} to. Normally you would not use this; use
@@ -177,40 +189,26 @@ public class HotwordRecognizer {
     }
 
     /**
-     * Sets the listener that will receive all the callbacks. The previous unfinished commands will
-     * be executed with the old listener, while any following command will be executed with the new
-     * listener.
+     * Starts recognizing hotword and sets the listener that will receive the callbacks.
      *
      * @param listener listener that will receive all the callbacks from the created
      *        {@link HotwordRecognizer}, this must not be null.
      */
-    public void setRecognitionListener(HotwordRecognitionListener listener) {
-        checkIsCalledFromMainThread();
-        putMessage(Message.obtain(mHandler, MSG_CHANGE_LISTENER, listener));
-    }
-
-    /**
-     * Starts recognizing hotword. Please note that
-     * {@link #setRecognitionListener(HotwordRecognitionListener)} should be called beforehand,
-     * otherwise no notifications will be received.
-     */
-    public void startRecognition() {
+    public void startRecognition(HotwordRecognitionListener listener) {
         checkIsCalledFromMainThread();
         if (mConnection == null) { // first time connection
+            if (listener == null) {
+                throw new IllegalArgumentException("listener must not be null");
+            }
+
             mConnection = new Connection();
-
             Intent serviceIntent = new Intent(HotwordRecognitionService.SERVICE_INTERFACE);
-
+            mListener.mInternalListener = listener;
 
             if (mServiceComponent == null) {
-                // TODO: Resolve the ComponentName here and use it.
-                String serviceComponent = null;
-                if (TextUtils.isEmpty(serviceComponent)) {
-                    Log.e(TAG, "no selected voice recognition service");
-                    mListener.onHotwordError(ERROR_CLIENT);
-                    return;
-                }
-                serviceIntent.setComponent(ComponentName.unflattenFromString(serviceComponent));
+                Log.e(TAG, "no selected voice recognition service");
+                mListener.onHotwordError(ERROR_CLIENT);
+                return;
             } else {
                 serviceIntent.setComponent(mServiceComponent);
             }
@@ -222,17 +220,15 @@ public class HotwordRecognizer {
                 mListener.onHotwordError(ERROR_CLIENT);
                 return;
             }
+            putMessage(Message.obtain(mHandler, MSG_START));
         } else {
             mListener.onHotwordError(ERROR_SERVICE_ALREADY_STARTED);
             return;
         }
-        putMessage(Message.obtain(mHandler, MSG_START));
     }
 
     /**
-     * Stops recognizing hotword. Please note that
-     * {@link #setRecognitionListener(HotwordRecognitionListener)} should be called beforehand,
-     * otherwise no notifications will be received.
+     * Stops recognizing hotword.
      */
     public void stopRecognition() {
         checkIsCalledFromMainThread();
@@ -243,19 +239,6 @@ public class HotwordRecognizer {
     private HotwordRecognizer(Context context, ComponentName serviceComponent) {
         mContext = context;
         mServiceComponent = serviceComponent;
-    }
-
-    /**
-     * Destroys the {@code HotwordRecognizer} object.
-     */
-    public void destroy() {
-        if (mConnection != null) {
-            mContext.unbindService(mConnection);
-        }
-        mPendingTasks.clear();
-        mService = null;
-        mConnection = null;
-        mListener.mInternalListener = null;
     }
 
     private void handleStartRecognition() {
@@ -271,24 +254,25 @@ public class HotwordRecognizer {
         }
     }
 
-
     private void handleStopRecognition() {
         if (!checkOpenConnection()) {
             return;
         }
         try {
             mService.stopHotwordRecognition(mListener);
+            if (mConnection != null) {
+                mContext.unbindService(mConnection);
+            }
             if (DBG) Log.d(TAG, "service stopRecognition command succeeded");
         } catch (final RemoteException e) {
             Log.e(TAG, "stopRecognition() failed", e);
             mListener.onHotwordError(ERROR_CLIENT);
+        } finally {
+            mPendingTasks.clear();
+            mService = null;
+            mConnection = null;
+            mListener.mInternalListener = null;
         }
-    }
-
-    /** changes the listener */
-    private void handleChangeListener(HotwordRecognitionListener listener) {
-        if (DBG) Log.d(TAG, "handleChangeListener, listener=" + listener);
-        mListener.mInternalListener = listener;
     }
 
     private boolean checkOpenConnection() {
