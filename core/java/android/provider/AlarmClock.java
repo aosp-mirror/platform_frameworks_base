@@ -36,10 +36,15 @@ public final class AlarmClock {
      * <p>
      * Activates an existing alarm or creates a new one.
      * </p><p>
-     * This action requests an alarm to be set for a given time of day. If an alarm already
-     * exists for this time, an implementation may use it rather than create a new one. If no time
-     * of day is specified, the implementation should start an activity that is capable of setting
-     * an alarm (SKIP_UI is ignored in this case). This action always enables the alarm.
+     * This action requests an alarm to be set for a given time of day. If no time of day is
+     * specified, an implementation should start an activity that is capable of setting an alarm
+     * ({@link #EXTRA_SKIP_UI} is ignored in this case). If a time of day is specified, and
+     * {@link #EXTRA_SKIP_UI} is {@code true}, and the alarm is not repeating, the implementation
+     * should remove this alarm after it has been dismissed. If an identical alarm exists matching
+     * all parameters, the implementation may re-use it instead of creating a new one (in this case,
+     * the alarm should not be removed after dismissal).
+     *
+     * This action always enables the alarm.
      * </p>
      * <h3>Request parameters</h3>
      * <ul>
@@ -52,8 +57,6 @@ public final class AlarmClock {
      * vibrator for this alarm.
      * <li>{@link #EXTRA_SKIP_UI} <em>(optional)</em>: Whether or not to display an activity for
      * setting this alarm.
-     * <li>{@link #EXTRA_DELETE_AFTER_USE} <em>(optional)</em>: Whether or not to delete this
-     * alarm after it is dismissed.
      * </ul>
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -65,13 +68,14 @@ public final class AlarmClock {
      * Activates an existing timer or creates a new one.
      * </p><p>
      * This action requests a timer to be started for a specific {@link #EXTRA_LENGTH length} of
-     * time. If a timer already exists for this {@link #EXTRA_LENGTH length}, an implementation may
-     * use it rather than create a new one. If no {@link #EXTRA_LENGTH length} is specified, the
-     * implementation should start an activity that is capable of setting a timer
-     * ({@link #EXTRA_SKIP_UI} is ignored in this case).
-     * </p><p>
-     * An existing timer should only be used if it matches the provided extras and is not currently
-     * in use.
+     * time. If no {@link #EXTRA_LENGTH length} is specified, the implementation should start an
+     * activity that is capable of setting a timer ({@link #EXTRA_SKIP_UI} is ignored in this case).
+     * If a {@link #EXTRA_LENGTH length} is specified, and {@link #EXTRA_SKIP_UI} is {@code true},
+     * the implementation should remove this timer after it has been dismissed. If an identical,
+     * unused timer exists matching both parameters, an implementation may re-use it instead of
+     * creating a new one (in this case, the timer should not be removed after dismissal).
+     *
+     * This action always starts the timer.
      * </p>
      *
      * <h3>Request parameters</h3>
@@ -80,8 +84,6 @@ public final class AlarmClock {
      * <li>{@link #EXTRA_MESSAGE} <em>(optional)</em>: A custom message for the timer.
      * <li>{@link #EXTRA_SKIP_UI} <em>(optional)</em>: Whether or not to display an activity for
      * setting this timer.
-     * <li>{@link #EXTRA_DELETE_AFTER_USE} <em>(optional)</em>: Whether or not to delete this
-     * timer after it is dismissed.
      * </ul>
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
@@ -103,28 +105,8 @@ public final class AlarmClock {
      * <li> {@link java.util.Calendar#FRIDAY},
      * <li> {@link java.util.Calendar#SATURDAY}
      * </ul>
-     * <p>
-     * Note: If this extra is provided, {@link #EXTRA_DELETE_AFTER_USE} is ignored.
-     * </p>
      */
     public static final String EXTRA_DAYS = "android.intent.extra.alarm.DAYS";
-
-    /**
-     * Bundle extra: Whether or not to delete this alarm/timer after it's dismissed.
-     * <p>
-     * Used by {@link #ACTION_SET_ALARM} and {@link #ACTION_SET_TIMER}.
-     * </p><p>
-     * If this value is true, the alarm/timer used by this action should be deleted after it's been
-     * dismissed. The alarm/timer should only be removed if was actually created by the action. If
-     * an existing alarm/timer was used, it should not be deleted after it's dismissed.
-     * </p><p>
-     * The value is a {@link Boolean}.
-     * </p>
-     *
-     * @see #ACTION_SET_ALARM
-     * @see #ACTION_SET_TIMER
-     */
-    public static final String EXTRA_DELETE_AFTER_USE = "android.intent.extra.alarm.DELETE_AFTER_USE";
 
     /**
      * Bundle extra: The hour of the alarm.
