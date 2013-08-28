@@ -180,6 +180,7 @@ class HTML5VideoViewProxy extends Handler
             if (!mHTML5VideoView.fullScreenExited() && mHTML5VideoView.isFullScreenMode()) {
                 WebChromeClient client = webView.getWebChromeClient();
                 if (client != null) {
+                    if (DebugFlags.TRACE_CALLBACK) Log.d(CallbackProxy.LOGTAG, "onHideCustomView");
                     client.onHideCustomView();
                 }
             }
@@ -405,6 +406,7 @@ class HTML5VideoViewProxy extends Handler
             case ERROR: {
                 WebChromeClient client = mWebView.getWebChromeClient();
                 if (client != null) {
+                    if (DebugFlags.TRACE_CALLBACK) Log.d(CallbackProxy.LOGTAG, "onHideCustomView");
                     client.onHideCustomView();
                 }
                 break;
@@ -412,6 +414,9 @@ class HTML5VideoViewProxy extends Handler
             case LOAD_DEFAULT_POSTER: {
                 WebChromeClient client = mWebView.getWebChromeClient();
                 if (client != null) {
+                    if (DebugFlags.TRACE_CALLBACK) {
+                        Log.d(CallbackProxy.LOGTAG, "getDefaultVideoPoster");
+                    }
                     doSetPoster(client.getDefaultVideoPoster());
                 }
                 break;
