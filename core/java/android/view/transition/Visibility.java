@@ -53,7 +53,7 @@ public abstract class Visibility extends Transition {
 
     private static final String PROPNAME_VISIBILITY = "android:visibility:visibility";
     private static final String PROPNAME_PARENT = "android:visibility:parent";
-    private static String[] sTransitionProperties = {
+    private static final String[] sTransitionProperties = {
             PROPNAME_VISIBILITY,
             PROPNAME_PARENT,
     };

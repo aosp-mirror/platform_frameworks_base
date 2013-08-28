@@ -40,7 +40,7 @@ public class Move extends Transition {
     private static final String PROPNAME_PARENT = "android:move:parent";
     private static final String PROPNAME_WINDOW_X = "android:move:windowX";
     private static final String PROPNAME_WINDOW_Y = "android:move:windowY";
-    private static String[] sTransitionProperties = {
+    private static final String[] sTransitionProperties = {
             PROPNAME_BOUNDS,
             PROPNAME_PARENT,
             PROPNAME_WINDOW_X,
