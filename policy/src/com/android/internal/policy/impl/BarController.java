@@ -51,7 +51,7 @@ public class BarController {
     private IStatusBarService mStatusBarService;
 
     private WindowState mWin;
-    private int mState;
+    private int mState = StatusBarManager.WINDOW_STATE_SHOWING;
     private int mTransientBarState;
     private boolean mPendingShow;
     private long mLastTransparent;
@@ -110,7 +110,7 @@ public class BarController {
         final boolean oldAnim = mWin.isAnimatingLw();
         final boolean rt = show ? mWin.showLw(true) : mWin.hideLw(true);
         final int state = computeState(oldVis, oldAnim, mWin.isVisibleLw(), mWin.isAnimatingLw());
-        if (state > -1) {
+        if (state > -1 && mWin.hasDrawnLw()) {
             updateState(state);
         }
         return rt;
@@ -146,7 +146,7 @@ public class BarController {
     }
 
     public boolean checkHiddenLw() {
-        if (mWin != null) {
+        if (mWin != null && mWin.hasDrawnLw()) {
             if (!mWin.isVisibleLw() && !mWin.isAnimatingLw()) {
                 updateState(StatusBarManager.WINDOW_STATE_HIDDEN);
             }
@@ -230,9 +230,9 @@ public class BarController {
     public void dump(PrintWriter pw, String prefix) {
         if (mWin != null) {
             pw.print(prefix); pw.println(mTag);
-            pw.print("  "); pw.print("mState"); pw.print('=');
+            pw.print(prefix); pw.print("  "); pw.print("mState"); pw.print('=');
             pw.println(StatusBarManager.windowStateToString(mState));
-            pw.print("  "); pw.print("mTransientBar"); pw.print('=');
+            pw.print(prefix); pw.print("  "); pw.print("mTransientBar"); pw.print('=');
             pw.println(transientBarStateToString(mTransientBarState));
         }
     }
