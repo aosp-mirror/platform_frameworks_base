@@ -42,6 +42,7 @@ import android.print.IPrintDocumentAdapter;
 import android.print.IWriteResultCallback;
 import android.print.PageRange;
 import android.print.PrintAttributes;
+import android.print.PrintAttributes.Margins;
 import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Resolution;
 import android.print.PrintDocumentAdapter;
@@ -388,14 +389,20 @@ public class PrintJobConfigActivity extends Activity {
             final boolean infoChanged = !info.equals(mDocument.info);
             if (infoChanged) {
                 mDocument.info = info;
+                // Set the info.
                 PrintSpoolerService.peekInstance().setPrintJobPrintDocumentInfoNoPersistence(
                         mPrintJobId, info);
             }
+
+            // Update the fitting mode based on the document type.
+            updateCurrentFittingMode(info);
 
             // If the document info or the layout changed, then
             // drop the pages since we have to fetch them again.
             if (infoChanged || layoutChanged) {
                 mDocument.pages = null;
+                PrintSpoolerService.peekInstance().setPrintJobPagesNoPersistence(
+                        mPrintJobId, null);
             }
 
             // No pages means that the user selected an invalid range while we
@@ -489,7 +496,7 @@ public class PrintJobConfigActivity extends Activity {
             } else if (PageRangeUtils.contains(mDocument.pages, mRequestedPages)) {
                 // We requested specific pages and got more but not all pages.
                 // Hence, we have to offset appropriately the printed pages to
-                // excle the pages we did not request. Note that pages is
+                // exclude the pages we did not request. Note that pages is
                 // guaranteed to be not null and not empty.
                 final int offset = mDocument.pages[0].getStart() - pages[0].getStart();
                 PageRange[] offsetPages = Arrays.copyOf(mDocument.pages, mDocument.pages.length);
@@ -514,6 +521,10 @@ public class PrintJobConfigActivity extends Activity {
             }
 
             if (mEditor.isDone()) {
+                // Update the print attributes based on whether the application
+                // handled some of the print attribute constraints, e.g. rotation.
+                updateAndSaveCurrentPrintAttributes(mDocument.info);
+
                 if (mEditor.isPrintingToPdf()) {
                     PrintJobInfo printJob = PrintSpoolerService.peekInstance()
                             .getPrintJobInfo(mPrintJobId, PrintManager.APP_ID_ANY);
@@ -534,6 +545,58 @@ public class PrintJobConfigActivity extends Activity {
             mControllerState = CONTROLLER_STATE_FAILED;
             Log.e(LOG_TAG, "Error during write: " + error);
             PrintJobConfigActivity.this.finish();
+        }
+
+        private void updateCurrentFittingMode(PrintDocumentInfo document) {
+            // Update the fitting mode based on content type.
+            switch (document.getContentType()) {
+                case PrintDocumentInfo.CONTENT_TYPE_DOCUMENT: {
+                    mCurrPrintAttributes.setFittingMode(
+                            PrintAttributes.FITTING_MODE_SCALE_TO_FIT);
+                } break;
+
+                case PrintDocumentInfo.CONTENT_TYPE_PHOTO: {
+                    mCurrPrintAttributes.setFittingMode(
+                            PrintAttributes.FITTING_MODE_SCALE_TO_FILL);
+                }
+            }
+        }
+
+        private void updateAndSaveCurrentPrintAttributes(PrintDocumentInfo document) {
+            PrintAttributes attributes = mTempPrintAttributes;
+            attributes.copyFrom(mCurrPrintAttributes);
+
+            // Update the orientation
+            if (document.getOrientation() == PrintAttributes.ORIENTATION_LANDSCAPE) {
+                if (attributes.getOrientation() == PrintAttributes.ORIENTATION_LANDSCAPE) {
+                    // If the document is in landscape and we want to print it in
+                    // landscape, then we do not need to rotate, so portrait.
+                    attributes.setOrientation(PrintAttributes.ORIENTATION_PORTRAIT);
+                } else {
+                    // If the document is in landscape and we want to print it in
+                    // portrait, then we have to rotate the content, so landscape.
+                    attributes.setOrientation(PrintAttributes.ORIENTATION_LANDSCAPE);
+                }
+            }
+
+            // Update margins.
+            Margins documentMargins = document.getMargins();
+            if (documentMargins.getLeftMils() != 0
+                    || documentMargins.getTopMils() != 0
+                    || documentMargins.getRightMils() != 0
+                    || documentMargins.getBottomMils() != 0) {
+                // If the application has applied some of the margins, then
+                // the printer should only apply the difference.
+                Margins oldMargins = attributes.getMargins();
+                attributes.setMargins(new Margins(
+                        oldMargins.getLeftMils() - documentMargins.getLeftMils(),
+                        oldMargins.getTopMils() - documentMargins.getTopMils(),
+                        oldMargins.getRightMils() - documentMargins.getRightMils(),
+                        oldMargins.getBottomMils() - documentMargins.getBottomMils()));
+            }
+
+            PrintSpoolerService.peekInstance().setPrintJobAttributesNoPersistence(
+                    mPrintJobId, attributes);
         }
 
         private final class ControllerHandler extends Handler {
@@ -1409,8 +1472,6 @@ public class PrintJobConfigActivity extends Activity {
                 mOrientationSpinner.setEnabled(false);
                 mRangeOptionsSpinner.setEnabled(false);
                 mPageRangeEditText.setEnabled(false);
-                // TODO: Remove entirely or implement print preview.
-//                mPrintPreviewButton.setEnabled(false);
                 mPrintButton.setEnabled(false);
                 return false;
             }
@@ -1473,10 +1534,6 @@ public class PrintJobConfigActivity extends Activity {
                 mPageRangeEditText.setEnabled(false);
                 mPageRangeEditText.setVisibility(View.INVISIBLE);
                 mPageRangeTitle.setVisibility(View.INVISIBLE);
-
-//                // Print preview
-//                mPrintPreviewButton.setEnabled(false);
-//                mPrintPreviewButton.setText(getString(R.string.print_preview));
 
                 // Print
                 mPrintButton.setEnabled(false);
@@ -1548,6 +1605,8 @@ public class PrintJobConfigActivity extends Activity {
 
                 // Color mode.
                 final int colorModes = capabilities.getColorModes();
+
+                // If the color modes changed, we update the adapter and the spinner.
                 boolean colorModesChanged = false;
                 if (Integer.bitCount(colorModes) != mColorModeSpinnerAdapter.getCount()) {
                     colorModesChanged = true;
@@ -1567,6 +1626,11 @@ public class PrintJobConfigActivity extends Activity {
                     }
                 }
                 if (colorModesChanged) {
+                    // Remember the old color mode to try selecting it again.
+                    int oldColorModeNewIndex = AdapterView.INVALID_POSITION;
+                    final int oldColorMode = mCurrPrintAttributes.getColorMode();
+
+                    // Rebuild the adapter data.
                     mColorModeSpinnerAdapter.clear();
                     String[] colorModeLabels = getResources().getStringArray(
                             R.array.color_mode_labels);
@@ -1575,6 +1639,10 @@ public class PrintJobConfigActivity extends Activity {
                         final int colorBitOffset = Integer.numberOfTrailingZeros(
                                 remainingColorModes);
                         final int colorMode = 1 << colorBitOffset;
+                        if (colorMode == oldColorMode) {
+                            // Update the index of the old selection.
+                            oldColorModeNewIndex = colorBitOffset;
+                        }
                         remainingColorModes &= ~colorMode;
                         mColorModeSpinnerAdapter.add(new SpinnerItem<Integer>(colorMode,
                                 colorModeLabels[colorBitOffset]));
@@ -1585,11 +1653,14 @@ public class PrintJobConfigActivity extends Activity {
                         mColorModeSpinner.setSelection(AdapterView.INVALID_POSITION);
                     } else {
                         mColorModeSpinner.setEnabled(true);
-                        final int selectedColorModeIndex = Integer.numberOfTrailingZeros(
-                                (colorModes & defaultAttributes.getColorMode()));
-                        if (mColorModeSpinner.getSelectedItemPosition() != selectedColorModeIndex) {
-                            mIgnoreNextColorModeChange = true;
-                            mColorModeSpinner.setSelection(selectedColorModeIndex);
+                        if (oldColorModeNewIndex != AdapterView.INVALID_POSITION) {
+                            // Select the old color mode - nothing really changed.
+                            setColorModeSpinnerSelectionNoCallback(oldColorModeNewIndex);
+                        } else {
+                            final int selectedColorModeIndex = Integer.numberOfTrailingZeros(
+                                    (colorModes & defaultAttributes.getColorMode()));
+                            someAttributeSelectionChanged = setColorModeSpinnerSelectionNoCallback(
+                                    selectedColorModeIndex);
                         }
                     }
                 }
@@ -1597,6 +1668,8 @@ public class PrintJobConfigActivity extends Activity {
 
                 // Orientation.
                 final int orientations = capabilities.getOrientations();
+
+                // If the orientations changed, we update the adapter and the spinner.
                 boolean orientationsChanged = false;
                 if (Integer.bitCount(orientations) != mOrientationSpinnerAdapter.getCount()) {
                     orientationsChanged = true;
@@ -1617,6 +1690,10 @@ public class PrintJobConfigActivity extends Activity {
                     }
                 }
                 if (orientationsChanged) {
+                    // Remember the old orientation to try selecting it again.
+                    int oldOrientationNewIndex = AdapterView.INVALID_POSITION;
+                    final int oldOrientation = mCurrPrintAttributes.getOrientation();
+
                     mOrientationSpinnerAdapter.clear();
                     String[] orientationLabels = getResources().getStringArray(
                             R.array.orientation_labels);
@@ -1625,6 +1702,10 @@ public class PrintJobConfigActivity extends Activity {
                         final int orientationBitOffset = Integer.numberOfTrailingZeros(
                                 remainingOrientations);
                         final int orientation = 1 << orientationBitOffset;
+                        if (orientation == oldOrientation) {
+                            // Update the index of the old selection.
+                            oldOrientationNewIndex = orientationBitOffset;
+                        }
                         remainingOrientations &= ~orientation;
                         mOrientationSpinnerAdapter.add(new SpinnerItem<Integer>(orientation,
                                 orientationLabels[orientationBitOffset]));
@@ -1635,12 +1716,15 @@ public class PrintJobConfigActivity extends Activity {
                         mOrientationSpinner.setSelection(AdapterView.INVALID_POSITION);
                     } else {
                         mOrientationSpinner.setEnabled(true);
-                        final int selectedOrientationIndex = Integer.numberOfTrailingZeros(
-                                (orientations & defaultAttributes.getOrientation()));
-                        if (mOrientationSpinner.getSelectedItemPosition()
-                                != selectedOrientationIndex) {
-                            mIgnoreNextOrientationChange = true;
-                            mOrientationSpinner.setSelection(selectedOrientationIndex);
+                        if (oldOrientationNewIndex != AdapterView.INVALID_POSITION) {
+                            // Select the old orientation - nothing really changed.
+                            setOrientationSpinnerSelectionNoCallback(oldOrientationNewIndex);
+                        } else {
+                            final int selectedOrientationIndex = Integer.numberOfTrailingZeros(
+                                    (orientations & defaultAttributes.getOrientation()));
+                            someAttributeSelectionChanged =
+                                    setOrientationSpinnerSelectionNoCallback(
+                                            selectedOrientationIndex);
                         }
                     }
                 }
@@ -1648,23 +1732,27 @@ public class PrintJobConfigActivity extends Activity {
 
                 // Range options
                 PrintDocumentInfo info = mDocument.info;
-                if (info != null && (info.getPageCount() > 1
+                if (info != null && (info.getPageCount() > 0
                         || info.getPageCount() == PrintDocumentInfo.PAGE_COUNT_UNKNOWN)) {
-                    mRangeOptionsSpinner.setEnabled(true);
-                    if (mRangeOptionsSpinner.getSelectedItemPosition() > 0) {
-                        if (!mPageRangeEditText.isEnabled()) {
-                            mPageRangeEditText.setEnabled(true);
-                            mPageRangeEditText.setVisibility(View.VISIBLE);
-                            mPageRangeTitle.setVisibility(View.VISIBLE);
-                            mPageRangeEditText.requestFocus();
-                            InputMethodManager imm = (InputMethodManager)
-                                    getSystemService(INPUT_METHOD_SERVICE);
-                            imm.showSoftInput(mPageRangeEditText, 0);
-                        }
+                    if (info.getPageCount() == 1) {
+                        mRangeOptionsSpinner.setEnabled(false);
                     } else {
-                        mPageRangeEditText.setEnabled(false);
-                        mPageRangeEditText.setVisibility(View.INVISIBLE);
-                        mPageRangeTitle.setVisibility(View.INVISIBLE);
+                        mRangeOptionsSpinner.setEnabled(true);
+                        if (mRangeOptionsSpinner.getSelectedItemPosition() > 0) {
+                            if (!mPageRangeEditText.isEnabled()) {
+                                mPageRangeEditText.setEnabled(true);
+                                mPageRangeEditText.setVisibility(View.VISIBLE);
+                                mPageRangeTitle.setVisibility(View.VISIBLE);
+                                mPageRangeEditText.requestFocus();
+                                InputMethodManager imm = (InputMethodManager)
+                                        getSystemService(INPUT_METHOD_SERVICE);
+                                imm.showSoftInput(mPageRangeEditText, 0);
+                            }
+                        } else {
+                            mPageRangeEditText.setEnabled(false);
+                            mPageRangeEditText.setVisibility(View.INVISIBLE);
+                            mPageRangeTitle.setVisibility(View.INVISIBLE);
+                        }
                     }
                     final int pageCount = mDocument.info.getPageCount();
                     mRangeOptionsTitle.setText(getString(R.string.label_pages,
@@ -1702,15 +1790,8 @@ public class PrintJobConfigActivity extends Activity {
                             && (TextUtils.isEmpty(mPageRangeEditText.getText()) || hasErrors()))
                         || (mRangeOptionsSpinner.getSelectedItemPosition() == 0
                             && (!mController.hasPerformedLayout() || hasErrors()))) {
-//                    mPrintPreviewButton.setEnabled(false);
                     mPrintButton.setEnabled(false);
                 } else {
-//                    mPrintPreviewButton.setEnabled(true);
-//                    if (hasPdfViewer()) {
-//                        mPrintPreviewButton.setText(getString(R.string.print_preview));
-//                    } else {
-//                        mPrintPreviewButton.setText(getString(R.string.install_for_print_preview));
-//                    }
                     mPrintButton.setEnabled(true);
                 }
 
@@ -1737,6 +1818,24 @@ public class PrintJobConfigActivity extends Activity {
             if (mMediaSizeSpinner.getSelectedItemPosition() != position) {
                 mIgnoreNextMediaSizeChange = true;
                 mMediaSizeSpinner.setSelection(position);
+                return true;
+            }
+            return false;
+        }
+
+        private boolean setColorModeSpinnerSelectionNoCallback(int position) {
+            if (mColorModeSpinner.getSelectedItemPosition() != position) {
+                mIgnoreNextColorModeChange = true;
+                mColorModeSpinner.setSelection(position);
+                return true;
+            }
+            return false;
+        }
+
+        private boolean setOrientationSpinnerSelectionNoCallback(int position) {
+            if (mOrientationSpinner.getSelectedItemPosition() != position) {
+                mIgnoreNextOrientationChange = true;
+                mOrientationSpinner.setSelection(position);
                 return true;
             }
             return false;
@@ -1785,13 +1884,6 @@ public class PrintJobConfigActivity extends Activity {
             return mPageRangeEditText.getVisibility() == View.VISIBLE
                     && mPageRangeEditText.getError() != null;
         }
-
-//        private boolean hasPdfViewer() {
-//            Intent intent = new Intent(Intent.ACTION_VIEW);
-//            intent.setType("application/pdf");
-//            return !getPackageManager().queryIntentActivities(intent,
-//                    PackageManager.MATCH_DEFAULT_ONLY).isEmpty();
-//        }
 
         private final class SpinnerItem<T> {
             final T value;
@@ -1998,7 +2090,7 @@ public class PrintJobConfigActivity extends Activity {
                     .create();
 
                 return new PrinterInfo.Builder(printerId, getString(R.string.save_as_pdf),
-                        PrinterInfo.STATUS_READY)
+                        PrinterInfo.STATUS_IDLE)
                     .setCapabilities(capabilities)
                     .create();
             }

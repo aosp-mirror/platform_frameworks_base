@@ -50,9 +50,15 @@ public final class PrintAttributes implements Parcelable {
 
 
     /** Fitting mode: No fitting. */
-    public static final int FITTING_MODE_NONE = 0x00000001;
-    /** Fitting mode: Fit the content to the page. */
-    public static final int FITTING_MODE_FIT_TO_PAGE = 0x00000002;
+    public static final int FITTING_MODE_NONE = 1 << 0;
+    /** Fitting mode: Scale the content to fit in the page
+     * without cropping it in any dimension. */
+    public static final int FITTING_MODE_SCALE_TO_FIT = 1 << 1;
+    /**
+     * Fitting mode: Uniformly scale the content to fill the entire page
+     * potentially cropping the content if it overflows in one dimension.
+     */
+    public static final int FITTING_MODE_SCALE_TO_FILL = 1 << 2;
 
 
     private static final int VALID_DUPLEX_MODES =
@@ -62,7 +68,7 @@ public final class PrintAttributes implements Parcelable {
             COLOR_MODE_MONOCHROME | COLOR_MODE_COLOR;
 
     private static final int VALID_FITTING_MODES =
-            FITTING_MODE_NONE | FITTING_MODE_FIT_TO_PAGE;
+            FITTING_MODE_NONE | FITTING_MODE_SCALE_TO_FIT | FITTING_MODE_SCALE_TO_FILL;
 
     private static final int VALID_ORIENTATIONS =
             ORIENTATION_PORTRAIT | ORIENTATION_LANDSCAPE;
@@ -252,7 +258,8 @@ public final class PrintAttributes implements Parcelable {
      * @return The fitting mode or zero if not set.
      *
      * @see #FITTING_MODE_NONE
-     * @see #FITTING_MODE_FIT_TO_PAGE
+     * @see #FITTING_MODE_SCALE_TO_FILL
+     * @see #FITTING_MODE_SCALE_TO_FIT
      */
     public int getFittingMode() {
         return mFittingMode;
@@ -264,12 +271,13 @@ public final class PrintAttributes implements Parcelable {
      * @param The fitting mode.
      *
      * @see #FITTING_MODE_NONE
-     * @see #FITTING_MODE_FIT_TO_PAGE
+     * @see #FITTING_MODE_SCALE_TO_FILL
+     * @see #FITTING_MODE_SCALE_TO_FIT
      *
      * @hide
      */
     public void setFittingMode(int fittingMode) {
-        enfoceValidFittingMode(fittingMode);
+        enforceValidFittingMode(fittingMode);
         mFittingMode = fittingMode;
     }
 
@@ -1220,6 +1228,8 @@ public final class PrintAttributes implements Parcelable {
      * This class specifies content margins.
      */
     public static final class Margins {
+        public static final Margins NO_MARGINS = new Margins(0,  0,  0,  0);
+
         private final int mLeftMils;
         private final int mTopMils;
         private final int mRightMils;
@@ -1232,24 +1242,13 @@ public final class PrintAttributes implements Parcelable {
          * @param topMils The top margin in mils (thousands of an inch).
          * @param rightMils The right margin in mils (thousands of an inch).
          * @param bottomMils The bottom margin in mils (thousands of an inch).
-         *
-         * @throws IllegalArgumentException If the leftMils is less than zero.
-         * @throws IllegalArgumentException If the topMils is less than zero.
-         * @throws IllegalArgumentException If the rightMils is less than zero.
-         * @throws IllegalArgumentException If the bottomMils is less than zero.
          */
         public Margins(int leftMils, int topMils, int rightMils, int bottomMils) {
-            if (leftMils < 0) {
-                throw new IllegalArgumentException("leftMils cannot be less than zero.");
+            if (leftMils > rightMils) {
+                throw new IllegalArgumentException("leftMils cannot be less than rightMils.");
             }
-            if (topMils < 0) {
-                throw new IllegalArgumentException("topMils cannot be less than zero.");
-            }
-            if (rightMils < 0) {
-                throw new IllegalArgumentException("rightMils cannot be less than zero.");
-            }
-            if (bottomMils < 0) {
-                throw new IllegalArgumentException("bottomMils cannot be less than zero.");
+            if (topMils > bottomMils) {
+                throw new IllegalArgumentException("topMils cannot be less than bottomMils.");
             }
             mTopMils = topMils;
             mLeftMils = leftMils;
@@ -1504,8 +1503,11 @@ public final class PrintAttributes implements Parcelable {
             case FITTING_MODE_NONE: {
                 return "FITTING_MODE_NONE";
             }
-            case FITTING_MODE_FIT_TO_PAGE: {
-                return "FITTING_MODE_FIT_TO_PAGE";
+            case FITTING_MODE_SCALE_TO_FIT: {
+                return "FITTING_MODE_SCALE_TO_FIT";
+            }
+            case FITTING_MODE_SCALE_TO_FILL: {
+                return "FITTING_MODE_SCALE_TO_FILL";
             }
             default:
                 return "FITTING_MODE_UNKNOWN";
@@ -1513,25 +1515,25 @@ public final class PrintAttributes implements Parcelable {
     }
 
     static void enforceValidDuplexMode(int duplexMode) {
-        if ((duplexMode & VALID_DUPLEX_MODES) == 0) {
+        if ((duplexMode & VALID_DUPLEX_MODES) == 0 && Integer.bitCount(duplexMode) == 1) {
             throw new IllegalArgumentException("invalid duplex mode: " + duplexMode);
         }
     }
 
     static void enforceValidColorMode(int colorMode) {
-        if ((colorMode & VALID_COLOR_MODES) == 0) {
+        if ((colorMode & VALID_COLOR_MODES) == 0 && Integer.bitCount(colorMode) == 1) {
             throw new IllegalArgumentException("invalid color mode: " + colorMode);
         }
     }
 
-    static void enfoceValidFittingMode(int fittingMode) {
-        if ((fittingMode & VALID_FITTING_MODES) == 0) {
+    static void enforceValidFittingMode(int fittingMode) {
+        if ((fittingMode & VALID_FITTING_MODES) == 0 && Integer.bitCount(fittingMode) == 1) {
             throw new IllegalArgumentException("invalid fitting mode: " + fittingMode);
         }
     }
 
     static void enforceValidOrientation(int orientation) {
-        if ((orientation & VALID_ORIENTATIONS) == 0) {
+        if ((orientation & VALID_ORIENTATIONS) == 0 && Integer.bitCount(orientation) == 1) {
             throw new IllegalArgumentException("invalid orientation: " + orientation);
         }
     }
