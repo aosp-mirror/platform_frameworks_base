@@ -1,7 +1,0 @@
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="ok">OK</string>
-    <plurals name="a_plural">
-        <item quantity="one">A dog</item>
-        <item quantity="other">Some dogs</item>
-    </plurals>
-</resources>
