@@ -42,8 +42,6 @@ public final class PageRange implements Parcelable {
      * @throws IllegalArgumentException If start is less than zero.
      * @throws IllegalArgumentException If end is less than zero.
      * @throws IllegalArgumentException If start greater than end.
-     *
-     * @hide
      */
     public PageRange(int start, int end) {
         if (start < 0) {

@@ -44,7 +44,7 @@ import java.util.List;
  * PdfDocument document = PdfDocument.open();
  *
  * // crate a page description
- * PageInfo pageInfo = new PageInfo.Builder(new Rect(0, 0, 100, 100), 1, 300).create();
+ * PageInfo pageInfo = new PageInfo.Builder(new Rect(0, 0, 100, 100), 1).create();
  *
  * // start a page
  * Page page = document.startPage(pageInfo);
@@ -125,8 +125,7 @@ public final class PdfDocument {
             throw new IllegalStateException("Previous page not finished!");
         }
         Canvas canvas = new PdfCanvas(nativeCreatePage(pageInfo.mPageSize,
-                pageInfo.mContentSize, pageInfo.mInitialTransform.native_instance),
-                pageInfo.mDensity);
+                pageInfo.mContentSize, pageInfo.mInitialTransform.native_instance));
         mCurrentPage = new Page(canvas, pageInfo);
         return mCurrentPage;
     }
@@ -230,23 +229,12 @@ public final class PdfDocument {
 
     private final class PdfCanvas extends Canvas {
 
-        public PdfCanvas(int nativeCanvas, int density) {
+        public PdfCanvas(int nativeCanvas) {
             super(nativeCanvas);
-            super.setDensity(density);
         }
 
         @Override
         public void setBitmap(Bitmap bitmap) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void setDensity(int density) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void setScreenDensity(int density) {
             throw new UnsupportedOperationException();
         }
     }
@@ -259,7 +247,6 @@ public final class PdfDocument {
         private Rect mContentSize;
         private Matrix mInitialTransform;
         private int mPageNumber;
-        private int mDensity;
 
         /**
          * Creates a new instance.
@@ -269,7 +256,7 @@ public final class PdfDocument {
         }
 
         /**
-         * Gets the page size in pixels.
+         * Gets the page size in PostScript points (1/72th of an inch).
          *
          * @return The page size.
          */
@@ -278,7 +265,7 @@ public final class PdfDocument {
         }
 
         /**
-         * Get the content size in pixels.
+         * Get the content size in PostScript points (1/72th of an inch).
          *
          * @return The content size.
          */
@@ -307,15 +294,6 @@ public final class PdfDocument {
         }
 
         /**
-         * Gets the density of the page in DPI.
-         *
-         * @return The density.
-         */
-        public int getDesity() {
-            return mDensity;
-        }
-
-        /**
          * Builder for creating a {@link PageInfo}.
          */
         public static final class Builder {
@@ -324,11 +302,10 @@ public final class PdfDocument {
             /**
              * Creates a new builder with the mandatory page info attributes.
              *
-             * @param pageSize The page size in points, <strong>not</strong> dips.
+             * @param pageSize The page size in PostScript (1/72th of an inch).
              * @param pageNumber The page number.
-             * @param density The page density in DPI.
              */
-            public Builder(Rect pageSize, int pageNumber, int density) {
+            public Builder(Rect pageSize, int pageNumber) {
                 if (pageSize.width() == 0 || pageSize.height() == 0) {
                     throw new IllegalArgumentException("page width and height" +
                             " must be greater than zero!");
@@ -336,16 +313,12 @@ public final class PdfDocument {
                 if (pageNumber < 0) {
                     throw new IllegalArgumentException("pageNumber cannot be less than zero!");
                 }
-                if (density <= 0) {
-                    throw new IllegalArgumentException("density must be greater than zero!");
-                }
                 mPageInfo.mPageSize = pageSize;
                 mPageInfo.mPageNumber = pageNumber;
-                mPageInfo.mDensity = density;
             }
 
             /**
-             * Sets the content size in pixels.
+             * Sets the content size in PostScript point (1/72th of an inch).
              *
              * @param contentSize The content size.
              */
