@@ -25,10 +25,14 @@ import android.text.TextUtils;
  */
 public final class PrinterInfo implements Parcelable {
 
-    /** Printer status: the printer is ready to print. */
-    public static final int STATUS_READY = 1;
+    /** Printer status: the printer is idle and ready to print. */
+    public static final int STATUS_IDLE = 1;
 
-    // TODO: Add printer status constants.
+    /** Printer status: the printer is busy printing. */
+    public static final int STATUS_BUSY = 2;
+
+    /** Printer status: the printer is not available. */
+    public static final int STATUS_UNAVAILABLE = 3;
 
     private PrinterId mId;
 
@@ -237,6 +241,21 @@ public final class PrinterInfo implements Parcelable {
         }
 
         /**
+         * Sets the printer status.
+         *
+         * @param status The status.
+         * @return This builder.
+         *
+         * @see PrinterInfo#STATUS_IDLE
+         * @see PrinterInfo#STATUS_BUSY
+         * @see PrinterInfo#STATUS_UNAVAILABLE
+         */
+        public Builder setStatus(int status) {
+            mPrototype.mStatus = status;
+            return this;
+        }
+
+        /**
          * Sets the printer name.
          *
          * @param name The name.
@@ -279,7 +298,9 @@ public final class PrinterInfo implements Parcelable {
         }
 
         private boolean isValidStatus(int status) {
-            return (status == PrinterInfo.STATUS_READY);
+            return (status == STATUS_IDLE
+                    || status == STATUS_IDLE
+                    || status == STATUS_UNAVAILABLE);
         }
     }
 
