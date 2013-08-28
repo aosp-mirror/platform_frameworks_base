@@ -64,17 +64,6 @@ public class BarTransitions {
         return mMode;
     }
 
-    public void setTransparent(Drawable transparent) {
-        mTransparent = transparent;
-        if (mMode == MODE_TRANSPARENT) {
-            transitionTo(MODE_TRANSPARENT);
-        }
-    }
-
-    public void transitionTo(int mode) {
-        transitionTo(mode, false);
-    }
-
     public void transitionTo(int mode, boolean animate) {
         if (mMode == mode) return;
         int oldMode = mMode;
