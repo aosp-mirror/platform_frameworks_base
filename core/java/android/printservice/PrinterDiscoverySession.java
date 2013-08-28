@@ -53,15 +53,23 @@ import java.util.List;
  * session. Printers are <strong>not</strong> persisted across sessions.
  * </p>
  * <p>
- * The system will make a call to
- * {@link PrinterDiscoverySession#onRequestPrinterUpdate(PrinterId)} if you
- * need to update a given printer. It is possible that you add a printer without
+ * The system will make a call to {@link #onValidatePrinters(List)} if you
+ * need to update some printers. It is possible that you add a printer without
  * specifying its capabilities. This enables you to avoid querying all discovered
  * printers for their capabilities, rather querying the capabilities of a printer
  * only if necessary. For example, the system will request that you update a printer
- * if it gets selected by the user. If you did not report the printer capabilities
- * when adding it, you must do so after the system requests a printer update.
- * Otherwise, the printer will be ignored.
+ * if it gets selected by the user. When validating printers you do not need to
+ * provide the printers' capabilities but may do so.
+ * </p>
+ * <p>
+ * If the system is interested in being constantly updated for the state of a
+ * printer you will receive a call to {@link #onStartPrinterStateTracking(PrinterId)}
+ * after which you will have to do a best effort to keep the system updated for
+ * changes in the printer state and capabilities. You also <strong>must</strong>
+ * update the printer capabilities if you did not provide them when adding it, or
+ * the printer will be ignored. When the system is no longer interested in getting
+ * updates for a printer you will receive a call to {@link #onStopPrinterStateTracking(
+ * PrinterId)}.
  * </p>
  * <p>
  * <strong>Note: </strong> All callbacks in this class are executed on the main
@@ -115,7 +123,7 @@ public abstract class PrinterDiscoverySession {
      * the printer that was added but not removed.
      * <p>
      * <strong>Note: </strong> Calls to this method after the session is
-     * destroyed, i.e. after the {@link #onDestroy()} callback, will be ignored.
+     * destroyed, that is after the {@link #onDestroy()} callback, will be ignored.
      * </p>
      *
      * @return The printers.
@@ -139,7 +147,7 @@ public abstract class PrinterDiscoverySession {
      * times during the life of this session. Duplicates will be ignored.
      * <p>
      * <strong>Note: </strong> Calls to this method after the session is
-     * destroyed, i.e. after the {@link #onDestroy()} callback, will be ignored.
+     * destroyed, that is after the {@link #onDestroy()} callback, will be ignored.
      * </p>
      *
      * @param printers The printers to add.
@@ -218,7 +226,7 @@ public abstract class PrinterDiscoverySession {
      * call this method multiple times during the lifetime of this session.
      * <p>
      * <strong>Note: </strong> Calls to this method after the session is
-     * destroyed, i.e. after the {@link #onDestroy()} callback, will be ignored.
+     * destroyed, that is after the {@link #onDestroy()} callback, will be ignored.
      * </p>
      *
      * @param printerIds The ids of the removed printers.
@@ -293,7 +301,7 @@ public abstract class PrinterDiscoverySession {
      * during the lifetime of this session.
      * <p>
      * <strong>Note: </strong> Calls to this method after the session is
-     * destroyed, i.e. after the {@link #onDestroy()} callback, will be ignored.
+     * destroyed, that is after the {@link #onDestroy()} callback, will be ignored.
      * </p>
      *
      * @param printers The printers to update.
@@ -441,7 +449,9 @@ public abstract class PrinterDiscoverySession {
      * <p>
      * <strong>Note: </strong>You are also given a list of printers whose availability
      * has to be checked first. For example, these printers could be the user's favorite
-     * ones, therefore they have to be verified first.
+     * ones, therefore they have to be verified first. You do <strong>not need</strong>
+     * to provide the capabilities of the printers, rather verify whether they exist
+     * similarly to {@link #onValidatePrinters(List)}.
      * </p>
      *
      * @param priorityList The list of printers to validate first. Never null.
@@ -463,9 +473,28 @@ public abstract class PrinterDiscoverySession {
     public abstract void onStopPrinterDiscovery();
 
     /**
-     * Requests that you update a printer. You are responsible for updating
-     * the printer by also reporting its capabilities via calling {@link
-     * #updatePrinters(List)}.
+     * Callback asking you to validate that the given printers are valid, that
+     * is they exist. You are responsible for checking whether these printers
+     * exist and for the ones that do exist notify the system via calling
+     * {@link #updatePrinters(List)}.
+     * <p>
+     * <strong>Note: </strong> You are <strong>not required</strong> to provide
+     * the printer capabilities when updating the printers that do exist.
+     * <p>
+     *
+     * @param printerIds The printers to validate.
+     *
+     * @see #updatePrinters(List)
+     * @see PrinterInfo.Builder#setCapabilities(PrinterCapabilitiesInfo)
+     *      PrinterInfo.Builder.setCapabilities(PrinterCapabilitiesInfo)
+     */
+    public abstract void onValidatePrinters(List<PrinterId> printerIds);
+
+    /**
+     * Callback asking you to start tracking the state of a printer. Tracking
+     * the state means that you should do a best effort to observe the state
+     * of this printer and notify the system if that state changes via calling
+     * {@link #updatePrinters(List)}.
      * <p>
      * <strong>Note: </strong> A printer can be initially added without its
      * capabilities to avoid polling printers that the user will not select.
@@ -473,18 +502,33 @@ public abstract class PrinterDiscoverySession {
      * printer <strong>including</strong> its capabilities. Otherwise, the
      * printer will be ignored.
      * <p>
-     * A scenario when you may be requested to update a printer is if the user
-     * selects it and the system has to present print options UI based on the
-     * printer's capabilities.
+     * <p>
+     * A scenario when you may be requested to track a printer's state is if
+     * the user selects that printer and the system has to present print
+     * options UI based on the printer's capabilities. In this case the user
+     * should be promptly informed if, for example, the printer becomes
+     * unavailable.
      * </p>
      *
-     * @param printerId The printer id.
+     * @param printerId The printer to start tracking.
      *
+     * @see #onStopPrinterStateTracking(PrinterId)
      * @see #updatePrinters(List)
      * @see PrinterInfo.Builder#setCapabilities(PrinterCapabilitiesInfo)
      *      PrinterInfo.Builder.setCapabilities(PrinterCapabilitiesInfo)
      */
-    public abstract void onRequestPrinterUpdate(PrinterId printerId);
+    public abstract void onStartPrinterStateTracking(PrinterId printerId);
+
+    /**
+     * Callback asking you to stop tracking the state of a printer. The passed
+     * in printer id is the one for which you received a call to {@link
+     * #onStartPrinterStateTracking(PrinterId)}.
+     *
+     * @param printerId The printer to stop tracking.
+     *
+     * @see #onStartPrinterStateTracking(PrinterId)
+     */
+    public abstract void onStopPrinterStateTracking(PrinterId printerId);
 
     /**
      * Notifies you that the session is destroyed. After this callback is invoked
@@ -538,9 +582,21 @@ public abstract class PrinterDiscoverySession {
         }
     }
 
-    void requestPrinterUpdate(PrinterId printerId) {
-        if (!mIsDestroyed) {
-            onRequestPrinterUpdate(printerId);
+    void validatePrinters(List<PrinterId> printerIds) {
+        if (!mIsDestroyed && mObserver != null) {
+            onValidatePrinters(printerIds);
+        }
+    }
+
+    void startPrinterStateTracking(PrinterId printerId) {
+        if (!mIsDestroyed && mObserver != null) {
+            onStartPrinterStateTracking(printerId);
+        }
+    }
+
+    void stopPrinterStateTracking(PrinterId printerId) {
+        if (!mIsDestroyed && mObserver != null) {
+            onStopPrinterStateTracking(printerId);
         }
     }
 

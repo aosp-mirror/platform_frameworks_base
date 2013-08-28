@@ -60,6 +60,7 @@ public final class PrintDocumentInfo implements Parcelable {
     private int mColorMode;
     private Margins mMargins;
     private MediaSize mMediaSize;
+    private long mDataSize;
 
     /**
      * Creates a new instance.
@@ -82,6 +83,7 @@ public final class PrintDocumentInfo implements Parcelable {
         mColorMode = prototype.mColorMode;
         mMargins = prototype.mMargins;
         mMediaSize = prototype.mMediaSize;
+        mDataSize = prototype.mDataSize;
     }
 
     /**
@@ -98,6 +100,7 @@ public final class PrintDocumentInfo implements Parcelable {
         mColorMode = parcel.readInt();
         mMargins = Margins.createFromParcel(parcel);
         mMediaSize = MediaSize.createFromParcel(parcel);
+        mDataSize = parcel.readLong();
     }
 
     /**
@@ -188,6 +191,26 @@ public final class PrintDocumentInfo implements Parcelable {
         return mMediaSize;
     }
 
+    /**
+     * Gets the document data size in bytes.
+     *
+     * @return The data size.
+     */
+    public long getDataSize() {
+        return mDataSize;
+    }
+
+    /**
+     * Sets the document data size in bytes.
+     *
+     * @param dataSize The data size.
+     *
+     * @hide
+     */
+    public void setDataSize(long dataSize) {
+        mDataSize = dataSize;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -203,6 +226,7 @@ public final class PrintDocumentInfo implements Parcelable {
         parcel.writeInt(mColorMode);
         mMargins.writeToParcel(parcel);
         mMediaSize.writeToParcel(parcel);
+        parcel.writeLong(mDataSize);
     }
 
     @Override
@@ -217,6 +241,8 @@ public final class PrintDocumentInfo implements Parcelable {
         result = prime * result + mColorMode;
         result = prime * result + (mMargins != null ? mMargins.hashCode() : 0);
         result = prime * result + (mMediaSize != null ? mMediaSize.hashCode() : 0);
+        result = prime * result + (int) mDataSize;
+        result = prime * result + (int) mDataSize >> 32;
         return result;
     }
 
@@ -264,6 +290,9 @@ public final class PrintDocumentInfo implements Parcelable {
         } else if (!mMediaSize.equals(other.mMediaSize)) {
             return false;
         }
+        if (mDataSize != other.mDataSize) {
+            return false;
+        }
         return true;
     }
 
@@ -279,6 +308,7 @@ public final class PrintDocumentInfo implements Parcelable {
         builder.append(", colorMode=").append(PrintAttributes.colorModeToString(mColorMode));
         builder.append(", margins=").append(mMargins);
         builder.append(", mediaSize=").append(mMediaSize);
+        builder.append(", size=").append(mDataSize);
         builder.append("}");
         return builder.toString();
     }

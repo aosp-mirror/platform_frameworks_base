@@ -44,6 +44,13 @@ public final class PrintJobInfo implements Parcelable {
     public static final int STATE_ANY_VISIBLE_TO_CLIENTS = -2;
 
     /**
+     * Constant for matching any active print job state.
+     *
+     * @hide
+     */
+    public static final int STATE_ANY_ACTIVE = -3;
+
+    /**
      * Print job state: The print job is being created but not yet
      * ready to be printed.
      * <p>
@@ -55,7 +62,7 @@ public final class PrintJobInfo implements Parcelable {
     public static final int STATE_CREATED = 1;
 
     /**
-     * Print job status: The print jobs is created, it is ready
+     * Print job state: The print jobs is created, it is ready
      * to be printed and should be processed.
      * <p>
      * Next valid states: {@link #STATE_STARTED}, {@link #STATE_FAILED},
@@ -65,40 +72,49 @@ public final class PrintJobInfo implements Parcelable {
     public static final int STATE_QUEUED = 2;
 
     /**
-     * Print job status: The print job is being printed.
+     * Print job state: The print job is being printed.
      * <p>
      * Next valid states: {@link #STATE_COMPLETED}, {@link #STATE_FAILED},
-     * {@link #STATE_CANCELED}
+     * {@link #STATE_CANCELED}, {@link #STATE_BLOCKED}
      * </p>
      */
     public static final int STATE_STARTED = 3;
 
     /**
-     * Print job status: The print job was successfully printed.
-     * This is a terminal state.
+     * Print job state: The print job is blocked.
      * <p>
-     * Next valid states: None
+     * Next valid states: {@link #STATE_FAILED}, {@link #STATE_CANCELED},
+     * {@link #STATE_STARTED}
      * </p>
      */
-    public static final int STATE_COMPLETED = 4;
+    public static final int STATE_BLOCKED = 4;
 
     /**
-     * Print job status: The print job was printing but printing failed.
+     * Print job state: The print job was successfully printed.
      * This is a terminal state.
      * <p>
      * Next valid states: None
      * </p>
      */
-    public static final int STATE_FAILED = 5;
+    public static final int STATE_COMPLETED = 5;
 
     /**
-     * Print job status: The print job was canceled.
+     * Print job state: The print job was printing but printing failed.
      * This is a terminal state.
      * <p>
      * Next valid states: None
      * </p>
      */
-    public static final int STATE_CANCELED = 6;
+    public static final int STATE_FAILED = 6;
+
+    /**
+     * Print job state: The print job was canceled.
+     * This is a terminal state.
+     * <p>
+     * Next valid states: None
+     * </p>
+     */
+    public static final int STATE_CANCELED = 7;
 
     /** The unique print job id. */
     private int mId;
@@ -127,8 +143,8 @@ public final class PrintJobInfo implements Parcelable {
     /** How many copies to print. */
     private int mCopies;
 
-    /** Failure reason if this job failed. */
-    private String mFailureReason;
+    /** Reason for the print job being in its current state. */
+    private String mStateReason;
 
     /** The pages to print */
     private PageRange[] mPageRanges;
@@ -155,7 +171,7 @@ public final class PrintJobInfo implements Parcelable {
         mUserId = other.mUserId;
         mTag = other.mTag;
         mCopies = other.mCopies;
-        mFailureReason = other.mFailureReason;
+        mStateReason = other.mStateReason;
         mPageRanges = other.mPageRanges;
         mAttributes = other.mAttributes;
         mDocumentInfo = other.mDocumentInfo;
@@ -171,7 +187,7 @@ public final class PrintJobInfo implements Parcelable {
         mUserId = parcel.readInt();
         mTag = parcel.readString();
         mCopies = parcel.readInt();
-        mFailureReason = parcel.readString();
+        mStateReason = parcel.readString();
         if (parcel.readInt() == 1) {
             Parcelable[] parcelables = parcel.readParcelableArray(null);
             mPageRanges = new PageRange[parcelables.length];
@@ -377,25 +393,27 @@ public final class PrintJobInfo implements Parcelable {
     }
 
     /**
-     * The failure reason if this print job failed.
+     * Gets the reason for the print job being in the current state.
      *
-     * @return The failure reason.
+     * @return The reason, or null if there is no reason or the
+     * reason is unknown.
      *
      * @hide
      */
-    public String getFailureReason() {
-        return mFailureReason;
+    public String getStateReason() {
+        return mStateReason;
     }
 
     /**
-     * The failure reason if this print job failed.
+     * Sets the reason for the print job being in the current state.
      *
-     * @param failureReason The failure reason.
+     * @param stateReason The reason, or null if there is no reason
+     * or the reason is unknown.
      *
      * @hide
      */
-    public void setFailureReason(String failureReason) {
-        mFailureReason = failureReason;
+    public void setStateReason(String stateReason) {
+        mStateReason = stateReason;
     }
 
     /**
@@ -476,7 +494,7 @@ public final class PrintJobInfo implements Parcelable {
         parcel.writeInt(mUserId);
         parcel.writeString(mTag);
         parcel.writeInt(mCopies);
-        parcel.writeString(mFailureReason);
+        parcel.writeString(mStateReason);
         if (mPageRanges != null) {
             parcel.writeInt(1);
             parcel.writeParcelableArray(mPageRanges, flags);
