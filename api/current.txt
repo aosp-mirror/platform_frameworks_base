@@ -31382,6 +31382,7 @@ package android.widget {
     ctor public ListPopupWindow(android.content.Context, android.util.AttributeSet, int);
     ctor public ListPopupWindow(android.content.Context, android.util.AttributeSet, int, int);
     method public void clearListSelection();
+    method public android.view.View.OnTouchListener createDragToOpenListener(android.view.View);
     method public void dismiss();
     method public android.view.View getAnchorView();
     method public int getAnimationStyle();
@@ -31593,6 +31594,7 @@ package android.widget {
   public class PopupMenu {
     ctor public PopupMenu(android.content.Context, android.view.View);
     method public void dismiss();
+    method public android.view.View.OnTouchListener getDragToOpenListener();
     method public android.view.Menu getMenu();
     method public android.view.MenuInflater getMenuInflater();
     method public void inflate(int);

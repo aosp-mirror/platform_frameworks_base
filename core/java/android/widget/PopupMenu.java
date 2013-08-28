@@ -26,6 +26,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnTouchListener;
+import android.widget.ListPopupWindow.ForwardingListener;
 
 /**
  * A PopupMenu displays a {@link Menu} in a modal popup window anchored to a {@link View}.
@@ -40,6 +42,7 @@ public class PopupMenu implements MenuBuilder.Callback, MenuPresenter.Callback {
     private MenuPopupHelper mPopup;
     private OnMenuItemClickListener mMenuItemClickListener;
     private OnDismissListener mDismissListener;
+    private OnTouchListener mDragListener;
 
     /**
      * Callback interface used to notify the application that the menu has closed.
@@ -68,6 +71,33 @@ public class PopupMenu implements MenuBuilder.Callback, MenuPresenter.Callback {
         mAnchor = anchor;
         mPopup = new MenuPopupHelper(context, mMenu, anchor);
         mPopup.setCallback(this);
+    }
+
+    /**
+     * Returns an {@link OnTouchListener} that can be added to the anchor view
+     * to implement drag-to-open behavior.
+     * <p>
+     * When the listener is set on a view, touching that view and dragging
+     * outside of its bounds will open the popup window. Lifting will select the
+     * currently touched list item.
+     * <p>
+     * Example usage:
+     * <pre>PopupMenu myPopup = new PopupMenu(context, myAnchor);
+     * myAnchor.setOnTouchListener(myPopup.getDragToOpenListener());</pre>
+     *
+     * @return a touch listener that controls drag-to-open behavior
+     */
+    public OnTouchListener getDragToOpenListener() {
+        if (mDragListener == null) {
+            mDragListener = new ForwardingListener(mAnchor) {
+                @Override
+                public ListPopupWindow getPopup() {
+                    return mPopup.getPopup();
+                }
+            };
+        }
+
+        return mDragListener;
     }
 
     /**

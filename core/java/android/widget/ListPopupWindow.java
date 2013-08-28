@@ -965,6 +965,33 @@ public class ListPopupWindow {
     }
 
     /**
+     * Returns an {@link OnTouchListener} that can be added to the source view
+     * to implement drag-to-open behavior. Generally, the source view should be
+     * the same view that was passed to {@link #setAnchorView}.
+     * <p>
+     * When the listener is set on a view, touching that view and dragging
+     * outside of its bounds will open the popup window. Lifting will select the
+     * currently touched list item.
+     * <p>
+     * Example usage:
+     * <pre>ListPopupWindow myPopup = new ListPopupWindow(context);
+     * myPopup.setAnchor(myAnchor);
+     * OnTouchListener dragListener = myPopup.createDragToOpenListener(myAnchor);
+     * myAnchor.setOnTouchListener(dragListener);</pre>
+     *
+     * @param src the view on which the resulting listener will be set
+     * @return a touch listener that controls drag-to-open behavior
+     */
+    public OnTouchListener createDragToOpenListener(View src) {
+        return new ForwardingListener(src) {
+            @Override
+            public ListPopupWindow getPopup() {
+                return ListPopupWindow.this;
+            }
+        };
+    }
+
+    /**
      * <p>Builds the popup window's content and returns the height the popup
      * should have. Returns -1 when the content already exists.</p>
      *
