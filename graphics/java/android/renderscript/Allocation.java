@@ -79,7 +79,7 @@ public class Allocation extends BaseObj {
     int mCurrentCount;
     static HashMap<Integer, Allocation> mAllocationMap =
             new HashMap<Integer, Allocation>();
-    IoInputNotifier mBufferNotifier;
+    OnBufferAvailableListener mBufferNotifier;
 
     /**
      * The usage of the Allocation.  These signal to RenderScript where to place
@@ -1825,26 +1825,22 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * @hide
-     *
      * Interface to handle notification when new buffers are available via
      * {@link #USAGE_IO_INPUT}. An application will receive one notification
      * when a buffer is available. Additional buffers will not trigger new
      * notifications until a buffer is processed.
      */
-    public interface IoInputNotifier {
+    public interface OnBufferAvailableListener {
         public void onBufferAvailable(Allocation a);
     }
 
     /**
-     * @hide
-     *
      * Set a notification handler for {@link #USAGE_IO_INPUT}.
      *
-     * @param callback instance of the IoInputNotifier class to be called
-     *                 when buffer arrive.
+     * @param callback instance of the OnBufferAvailableListener
+     *                 class to be called when buffer arrive.
      */
-    public void setIoInputNotificationHandler(IoInputNotifier callback) {
+    public void setOnBufferAvailableListener(OnBufferAvailableListener callback) {
         synchronized(mAllocationMap) {
             mAllocationMap.put(new Integer(getID(mRS)), this);
             mBufferNotifier = callback;
