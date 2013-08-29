@@ -29,7 +29,6 @@
 #include "CreateJavaOutputStreamAdaptor.h"
 #include "Utils.h"
 #include "JNIHelp.h"
-#include "SkTScopedPtr.h"
 
 #include <android_runtime/AndroidRuntime.h>
 #include "android_util_Binder.h"
@@ -238,7 +237,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, SkBitmapRegionDecoder *b
     region.fRight = start_x + width;
     region.fBottom = start_y + height;
     SkBitmap* bitmap = NULL;
-    SkTScopedPtr<SkBitmap> adb;
+    SkAutoTDelete<SkBitmap> adb;
 
     if (tileBitmap != NULL) {
         // Re-use bitmap.
@@ -269,7 +268,7 @@ static jobject nativeDecodeRegion(JNIEnv* env, jobject, SkBitmapRegionDecoder *b
     }
 
     // detach bitmap from its autodeleter, since we want to own it now
-    adb.release();
+    adb.detach();
 
     JavaPixelAllocator* allocator = (JavaPixelAllocator*) decoder->getAllocator();
     jbyteArray buff = allocator->getStorageObjAndReset();
