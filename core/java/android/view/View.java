@@ -2375,20 +2375,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public static final int SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = 0x00000400;
 
     /**
-     * Flag for {@link #setSystemUiVisibility(int)}: View would like to receive touch events
-     * when hiding the status bar with {@link #SYSTEM_UI_FLAG_FULLSCREEN} and/or hiding the
-     * navigation bar with {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION} instead of having the system
-     * clear these flags upon interaction.  The system may compensate by temporarily overlaying
-     * semi-transparent system bars while also delivering the event.
+     * Flag for {@link #setSystemUiVisibility(int)}: View would like to remain interactive when
+     * hiding the status bar with {@link #SYSTEM_UI_FLAG_FULLSCREEN} and/or hiding the navigation
+     * bar with {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}.  Use this flag to create an immersive
+     * experience while also hiding the system bars.  If this flag is not set,
+     * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION} will be force cleared by the system on any user
+     * interaction, and {@link #SYSTEM_UI_FLAG_FULLSCREEN} will be force-cleared by the system
+     * if the user swipes from the top of the screen.
+     * <p>When system bars are hidden in immersive mode, they can be revealed temporarily with
+     * system gestures, such as swiping from the top of the screen.  These transient system bars
+     * will overlay app’s content, may have some degree of transparency, and will automatically
+     * hide after a short timeout.
+     * </p><p>Since this flag is a modifier for {@link #SYSTEM_UI_FLAG_FULLSCREEN} and
+     * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, it only has an effect when used in combination
+     * with one or both of those flags.</p>
      */
-    public static final int SYSTEM_UI_FLAG_ALLOW_TRANSIENT = 0x00000800;
+    public static final int SYSTEM_UI_FLAG_IMMERSIVE = 0x00000800;
 
     /**
      * Flag for {@link #setSystemUiVisibility(int)}: View would like the status bar to have
      * transparency.
      *
      * <p>The transparency request may be denied if the bar is in another mode with a specific
-     * style, like {@link #SYSTEM_UI_FLAG_ALLOW_TRANSIENT transient mode}.
+     * style, like {@link #SYSTEM_UI_FLAG_IMMERSIVE immersive mode}.
      */
     public static final int SYSTEM_UI_FLAG_TRANSPARENT_STATUS = 0x00001000;
 
@@ -2397,7 +2406,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * transparency.
      *
      * <p>The transparency request may be denied if the bar is in another mode with a specific
-     * style, like {@link #SYSTEM_UI_FLAG_ALLOW_TRANSIENT transient mode}.
+     * style, like {@link #SYSTEM_UI_FLAG_IMMERSIVE immersive mode}.
      */
     public static final int SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION = 0x00002000;
 
@@ -16664,7 +16673,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param visibility  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE},
      * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, {@link #SYSTEM_UI_FLAG_FULLSCREEN},
      * {@link #SYSTEM_UI_FLAG_LAYOUT_STABLE}, {@link #SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION},
-     * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}, {@link #SYSTEM_UI_FLAG_ALLOW_TRANSIENT},
+     * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}, {@link #SYSTEM_UI_FLAG_IMMERSIVE},
      * {@link #SYSTEM_UI_FLAG_TRANSPARENT_STATUS},
      * and {@link #SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION}.
      */
@@ -16682,7 +16691,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE},
      * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, {@link #SYSTEM_UI_FLAG_FULLSCREEN},
      * {@link #SYSTEM_UI_FLAG_LAYOUT_STABLE}, {@link #SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION},
-     * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}, {@link #SYSTEM_UI_FLAG_ALLOW_TRANSIENT},
+     * {@link #SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}, {@link #SYSTEM_UI_FLAG_IMMERSIVE},
      * {@link #SYSTEM_UI_FLAG_TRANSPARENT_STATUS},
      * and {@link #SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION}.
      */
