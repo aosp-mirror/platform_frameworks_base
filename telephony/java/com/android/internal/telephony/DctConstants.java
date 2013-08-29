@@ -94,6 +94,8 @@ public class DctConstants {
     public static final int EVENT_DISCONNECT_DC_RETRYING = BASE + 34;
     public static final int EVENT_DATA_SETUP_COMPLETE_ERROR = BASE + 35;
     public static final int CMD_SET_ENABLE_FAIL_FAST_MOBILE_DATA = BASE + 36;
+    public static final int CMD_ENABLE_MOBILE_PROVISIONING = BASE + 37;
+    public static final int CMD_IS_PROVISIONING_APN = BASE + 38;
 
     /***** Constants *****/
 
@@ -112,4 +114,5 @@ public class DctConstants {
     public static final int ENABLED = 1;
 
     public static final String APN_TYPE_KEY = "apnType";
+    public static final String PROVISIONING_URL_KEY = "provisioningUrl";
 }

@@ -703,6 +703,7 @@
   <java-symbol type="string" name="preposition_for_time" />
   <java-symbol type="string" name="progress_erasing" />
   <java-symbol type="string" name="progress_unmounting" />
+  <java-symbol type="string" name="mobile_provisioning_apn" />
   <java-symbol type="string" name="mobile_provisioning_url" />
   <java-symbol type="string" name="mobile_redirected_provisioning_url" />
   <java-symbol type="string" name="reboot_safemode_confirm" />
