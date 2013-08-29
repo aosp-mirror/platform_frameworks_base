@@ -3399,17 +3399,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param context The Context the view is running in, through which it can
      *        access the current theme, resources, etc.
      * @param attrs The attributes of the XML tag that is inflating the view.
-     * @param defStyle The default style to apply to this view. If 0, no style
-     *        will be applied (beyond what is included in the theme). This may
-     *        either be an attribute resource, whose value will be retrieved
-     *        from the current theme, or an explicit style resource.
+     * @param defStyleAttr An attribute in the current theme that contains a
+     *        reference to a style resource to apply to this view. If 0, no
+     *        default style will be applied.
      * @see #View(Context, AttributeSet)
      */
-    public View(Context context, AttributeSet attrs, int defStyle) {
+    public View(Context context, AttributeSet attrs, int defStyleAttr) {
         this(context);
 
         TypedArray a = context.obtainStyledAttributes(attrs, com.android.internal.R.styleable.View,
-                defStyle, 0);
+                defStyleAttr, 0);
 
         Drawable background = null;
 
