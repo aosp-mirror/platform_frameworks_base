@@ -15261,6 +15261,7 @@ package android.nfc.cardemulation {
 
   public final class CardEmulationManager {
     method public static synchronized android.nfc.cardemulation.CardEmulationManager getInstance(android.nfc.NfcAdapter);
+    method public int getSelectionModeForCategory(java.lang.String);
     method public boolean isDefaultServiceForAid(android.content.ComponentName, java.lang.String);
     method public boolean isDefaultServiceForCategory(android.content.ComponentName, java.lang.String);
     field public static final java.lang.String ACTION_CHANGE_DEFAULT = "android.nfc.cardemulation.ACTION_CHANGE_DEFAULT";
@@ -15268,6 +15269,9 @@ package android.nfc.cardemulation {
     field public static final java.lang.String CATEGORY_PAYMENT = "payment";
     field public static final java.lang.String EXTRA_CATEGORY = "category";
     field public static final java.lang.String EXTRA_SERVICE_COMPONENT = "component";
+    field public static final int SELECTION_MODE_ALWAYS_ASK = 1; // 0x1
+    field public static final int SELECTION_MODE_ASK_IF_CONFLICT = 2; // 0x2
+    field public static final int SELECTION_MODE_PREFER_DEFAULT = 0; // 0x0
   }
 
   public abstract class HostApduService extends android.app.Service {

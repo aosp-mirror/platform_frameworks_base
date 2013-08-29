@@ -27,6 +27,7 @@ import android.nfc.INfcCardEmulation;
 import android.nfc.NfcAdapter;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -78,19 +79,68 @@ public final class CardEmulationManager {
      */
     public static final String CATEGORY_OTHER = "other";
 
+    /**
+     * Return value for {@link #getSelectionModeForCategory(String)}.
+     *
+     * <p>In this mode, the user has set a default service for this
+     *    AID category. If a remote reader selects any of the AIDs
+     *    that the default service has registered in this category,
+     *    that service will automatically be bound to to handle
+     *    the transaction.
+     *
+     * <p>There are still cases where a service that is
+     *    not the default for a category can selected:
+     *    <p>
+     *    If a remote reader selects an AID in this category
+     *    that is not handled by the default service, and there is a set
+     *    of other services {S} that do handle this AID, the
+     *    user is asked if he wants to use any of the services in
+     *    {S} instead.
+     *    <p>
+     *    As a special case, if the size of {S} is one, containing a single service X,
+     *    and all AIDs X has registered in this category are not
+     *    registered by any other service, then X will be
+     *    selected automatically without asking the user.
+     *    <p>Example:
+     *    <ul>
+     *    <li>Service A registers AIDs "1", "2" and "3" in the category
+     *    <li>Service B registers AIDs "3" and "4" in the category
+     *    <li>Service C registers AIDs "5" and "6" in the category
+     *    </ul>
+     *    In this case, the following will happen when service A
+     *    is the default:
+     *    <ul>
+     *    <li>Reader selects AID "1", "2" or "3": service A is invoked automatically
+     *    <li>Reader selects AID "4": the user is asked to confirm he
+     *        wants to use service B, because its AIDs overlap with service A.
+     *    <li>Reader selects AID "5" or "6": service C is invoked automatically,
+     *        because all AIDs it has asked for are only registered by C,
+     *        and there is no overlap.
+     *    </ul>
+     *
+     */
+    public static final int SELECTION_MODE_PREFER_DEFAULT = 0;
+
+    /**
+     * Return value for {@link #getSelectionModeForCategory(String)}.
+     *
+     * <p>In this mode, whenever an AID of this category is selected,
+     *    the user is asked which service he wants to use to handle
+     *    the transaction, even if there is only one matching service.
+     */
+    public static final int SELECTION_MODE_ALWAYS_ASK = 1;
+
+    /**
+     * Return value for {@link #getSelectionModeForCategory(String)}.
+     *
+     * <p>In this mode, the user will only be asked to select a service
+     *    if the selected AID has been registered by multiple applications.
+     */
+    public static final int SELECTION_MODE_ASK_IF_CONFLICT = 2;
+
     static boolean sIsInitialized = false;
     static HashMap<Context, CardEmulationManager> sCardEmuManagers = new HashMap();
     static INfcCardEmulation sService;
-
-    /**
-     * @hide
-     */
-    public static final String PAYMENT_MODE_AUTO = "auto";
-
-    /**
-     * @hide
-     */
-    public static final String PAYMENT_MODE_MANUAL = "manual";
 
     final Context mContext;
 
@@ -113,7 +163,7 @@ public final class CardEmulationManager {
                 throw new UnsupportedOperationException();
             }
             try {
-                if (!pm.hasSystemFeature(PackageManager.FEATURE_NFC_HCE)) {
+                if (!pm.hasSystemFeature(PackageManager.FEATURE_NFC_HOST_CARD_EMULATION)) {
                     Log.e(TAG, "This device does not support card emulation");
                     throw new UnsupportedOperationException();
                 }
@@ -137,6 +187,10 @@ public final class CardEmulationManager {
      * Allows an application to query whether a service is currently
      * the default service to handle a card emulation category.
      *
+     * <p>Note that if {@link #getSelectionModeForCategory(String)}
+     * returns {@link #SELECTION_MODE_ALWAYS_ASK}, this method will always
+     * return false.
+     *
      * @param service The ComponentName of the service
      * @param category The category
      * @return whether service is currently the default service for the category.
@@ -147,6 +201,10 @@ public final class CardEmulationManager {
         } catch (RemoteException e) {
             // Try one more time
             recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
             try {
                 return sService.isDefaultServiceForCategory(UserHandle.myUserId(), service,
                         category);
@@ -182,6 +240,33 @@ public final class CardEmulationManager {
                 Log.e(TAG, "Failed to reach CardEmulationService.");
                 return false;
             }
+        }
+    }
+
+    /**
+     * Returns the application selection mode for the passed in category.
+     * Valid return values are:
+     * <p>{@link #SELECTION_MODE_PREFER_DEFAULT} the user has requested a default
+     *    application for this category, which will be preferred.
+     * <p>{@link #SELECTION_MODE_ALWAYS_ASK} the user has requested to be asked
+     *    every time what app he would like to use in this category.
+     * <p>{@link #SELECTION_MODE_ASK_IF_CONFLICT} the user will only be asked
+     *    to pick a service if there is a conflict.
+     * @param category The category, for example {@link #CATEGORY_PAYMENT}
+     * @return
+     */
+    public int getSelectionModeForCategory(String category) {
+        if (CATEGORY_PAYMENT.equals(category)) {
+            String defaultComponent = Settings.Secure.getString(mContext.getContentResolver(),
+                    Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT);
+            if (defaultComponent != null) {
+                return SELECTION_MODE_PREFER_DEFAULT;
+            } else {
+                return SELECTION_MODE_ALWAYS_ASK;
+            }
+        } else {
+            // All other categories are in "only ask if conflict" mode
+            return SELECTION_MODE_ASK_IF_CONFLICT;
         }
     }
 
