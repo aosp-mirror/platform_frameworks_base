@@ -41,7 +41,9 @@ interface IPrintManager {
     void startPrinterDiscovery(in IPrinterDiscoveryObserver observer,
             in List<PrinterId> priorityList, int userId);
     void stopPrinterDiscovery(in IPrinterDiscoveryObserver observer, int userId);
-    void requestPrinterUpdate(in PrinterId printerId, int userId);
+    void validatePrinters(in List<PrinterId> printerIds, int userId);
+    void startPrinterStateTracking(in PrinterId printerId, int userId);
+    void stopPrinterStateTracking(in PrinterId printerId, int userId);
     void destroyPrinterDiscoverySession(in IPrinterDiscoveryObserver observer,
             int userId);
 }

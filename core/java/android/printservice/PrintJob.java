@@ -18,6 +18,7 @@ package android.printservice;
 
 import android.os.RemoteException;
 import android.print.PrintJobInfo;
+import android.text.TextUtils;
 import android.util.Log;
 
 /**
@@ -123,6 +124,21 @@ public final class PrintJob {
     }
 
     /**
+     * Gets whether this print job is blocked. Such a print job is halted
+     * due to an abnormal condition and can be started or canceled or failed.
+     *
+     * @return Whether the print job is blocked.
+     *
+     * @see #start()
+     * @see #cancel()
+     * @see #fail(CharSequence)
+     */
+    public boolean isBlocked() {
+        PrintService.throwIfNotCalledOnMainThread();
+        return getInfo().getState() == PrintJobInfo.STATE_BLOCKED;
+    }
+
+    /**
      * Gets whether this print job is completed. Such a print job
      * is successfully printed. This is a final state.
      *
@@ -163,16 +179,44 @@ public final class PrintJob {
 
     /**
      * Starts the print job. You should call this method if {@link
-     * #isQueued()} returns true and you started printing.
+     * #isQueued()} or {@link #isBlocked()} returns true and you started
+     * resumed printing.
      *
-     * @return Whether the job as started.
+     * @return Whether the job was started.
      *
      * @see #isQueued()
+     * @see #isBlocked()
      */
     public boolean start() {
         PrintService.throwIfNotCalledOnMainThread();
-        if (isQueued()) {
+        final int state = getInfo().getState();
+        if (state == PrintJobInfo.STATE_QUEUED
+                || state == PrintJobInfo.STATE_BLOCKED) {
             return setState(PrintJobInfo.STATE_STARTED, null);
+        }
+        return false;
+    }
+
+    /**
+     * Blocks the print job. You should call this method if {@link
+     * #isStarted()} or {@link #isBlocked()} returns true and you need
+     * to block the print job. For example, the user has to add some
+     * paper to continue printing. To resume the print job call {@link
+     * #start()}.
+     *
+     * @return Whether the job was blocked.
+     *
+     * @see #isStarted()
+     * @see #isBlocked()
+     */
+    public boolean block(String reason) {
+        PrintService.throwIfNotCalledOnMainThread();
+        PrintJobInfo info = getInfo();
+        final int state = info.getState();
+        if (state == PrintJobInfo.STATE_STARTED
+                || (state == PrintJobInfo.STATE_BLOCKED
+                        && !TextUtils.equals(info.getStateReason(), reason))) {
+            return setState(PrintJobInfo.STATE_BLOCKED, reason);
         }
         return false;
     }
@@ -195,8 +239,8 @@ public final class PrintJob {
 
     /**
      * Fails the print job. You should call this method if {@link
-     * #isQueued()} or {@link #isStarted()} returns true you failed
-     * while printing.
+     * #isQueued()} or {@link #isStarted()} or {@link #isBlocked()}
+     * returns true you failed while printing.
      *
      * @param error The human readable, short, and translated reason
      * for the failure.
@@ -204,10 +248,11 @@ public final class PrintJob {
      *
      * @see #isQueued()
      * @see #isStarted()
+     * @see #isBlocked()
      */
     public boolean fail(String error) {
         PrintService.throwIfNotCalledOnMainThread();
-        if (isQueued() || isStarted()) {
+        if (!isInImmutableState()) {
             return setState(PrintJobInfo.STATE_FAILED, error);
         }
         return false;
@@ -215,18 +260,19 @@ public final class PrintJob {
 
     /**
      * Cancels the print job. You should call this method if {@link
-     * #isQueued()} or {@link #isStarted()} returns true and you canceled
-     * the print job as a response to a call to {@link
-     * PrintService#onRequestCancelPrintJob(PrintJob)}.
+     * #isQueued()} or {@link #isStarted() or #isBlocked()} returns
+     * true and you canceled the print job as a response to a call to
+     * {@link PrintService#onRequestCancelPrintJob(PrintJob)}.
      *
      * @return Whether the job is canceled.
      *
      * @see #isStarted()
      * @see #isQueued()
+     * @see #isBlocked()
      */
     public boolean cancel() {
         PrintService.throwIfNotCalledOnMainThread();
-        if (isQueued() || isStarted()) {
+        if (!isInImmutableState()) {
             return setState(PrintJobInfo.STATE_CANCELED, null);
         }
         return false;
@@ -277,7 +323,8 @@ public final class PrintJob {
     private boolean isInImmutableState() {
         final int state = mCachedInfo.getState();
         return state == PrintJobInfo.STATE_COMPLETED
-                || state == PrintJobInfo.STATE_CANCELED;
+                || state == PrintJobInfo.STATE_CANCELED
+                || state == PrintJobInfo.STATE_FAILED;
     }
 
     private boolean setState(int state, String error) {
@@ -287,7 +334,7 @@ public final class PrintJob {
                 // we may not be able to re-fetch it later if the job gets
                 // removed from the spooler as a result of the state change.
                 mCachedInfo.setState(state);
-                mCachedInfo.setFailureReason(error);
+                mCachedInfo.setStateReason(error);
                 return true;
             }
         } catch (RemoteException re) {

@@ -74,6 +74,7 @@ public final class PrinterDiscoverySession {
     public final void startPrinterDisovery(List<PrinterId> priorityList) {
         if (isDestroyed()) {
             Log.w(LOG_TAG, "Ignoring start printers dsicovery - session destroyed");
+            return;
         }
         if (!mIsPrinterDiscoveryStarted) {
             mIsPrinterDiscoveryStarted = true;
@@ -88,6 +89,7 @@ public final class PrinterDiscoverySession {
     public final void stopPrinterDiscovery() {
         if (isDestroyed()) {
             Log.w(LOG_TAG, "Ignoring stop printers discovery - session destroyed");
+            return;
         }
         if (mIsPrinterDiscoveryStarted) {
             mIsPrinterDiscoveryStarted = false;
@@ -99,14 +101,39 @@ public final class PrinterDiscoverySession {
         }
     }
 
-    public final void requestPrinterUpdate(PrinterId printerId) {
+    public final void startPrinterStateTracking(PrinterId printerId) {
         if (isDestroyed()) {
-            Log.w(LOG_TAG, "Ignoring reqeust printer update - session destroyed");
+            Log.w(LOG_TAG, "Ignoring start printer state tracking - session destroyed");
+            return;
         }
         try {
-            mPrintManager.requestPrinterUpdate(printerId, mUserId);
+            mPrintManager.startPrinterStateTracking(printerId, mUserId);
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error requesting printer update", re);
+            Log.e(LOG_TAG, "Error starting printer state tracking", re);
+        }
+    }
+
+    public final void stopPrinterStateTracking(PrinterId printerId) {
+        if (isDestroyed()) {
+            Log.w(LOG_TAG, "Ignoring stop printer state tracking - session destroyed");
+            return;
+        }
+        try {
+            mPrintManager.stopPrinterStateTracking(printerId, mUserId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error stoping printer state tracking", re);
+        }
+    }
+
+    public final void validatePrinters(List<PrinterId> printerIds) {
+        if (isDestroyed()) {
+            Log.w(LOG_TAG, "Ignoring validate printers - session destroyed");
+            return;
+        }
+        try {
+            mPrintManager.validatePrinters(printerIds, mUserId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error validating printers", re);
         }
     }
 

@@ -25,6 +25,7 @@ package android {
     field public static final java.lang.String BIND_NFC_SERVICE = "android.permission.BIND_NFC_SERVICE";
     field public static final java.lang.String BIND_NOTIFICATION_LISTENER_SERVICE = "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE";
     field public static final java.lang.String BIND_PRINT_SERVICE = "android.permission.BIND_PRINT_SERVICE";
+    field public static final java.lang.String BIND_PRINT_SPOOLER_SERVICE = "android.permission.BIND_PRINT_SPOOLER_SERVICE";
     field public static final java.lang.String BIND_REMOTEVIEWS = "android.permission.BIND_REMOTEVIEWS";
     field public static final java.lang.String BIND_TEXT_SERVICE = "android.permission.BIND_TEXT_SERVICE";
     field public static final java.lang.String BIND_VPN_SERVICE = "android.permission.BIND_VPN_SERVICE";
@@ -19147,7 +19148,7 @@ package android.print {
     method public void onFinish();
     method public abstract void onLayout(android.print.PrintAttributes, android.print.PrintAttributes, android.os.CancellationSignal, android.print.PrintDocumentAdapter.LayoutResultCallback, android.os.Bundle);
     method public void onStart();
-    method public abstract void onWrite(android.print.PageRange[], java.io.FileDescriptor, android.os.CancellationSignal, android.print.PrintDocumentAdapter.WriteResultCallback);
+    method public abstract void onWrite(android.print.PageRange[], android.os.ParcelFileDescriptor, android.os.CancellationSignal, android.print.PrintDocumentAdapter.WriteResultCallback);
     field public static final java.lang.String METADATA_KEY_PRINT_PREVIEW = "KEY_METADATA_PRINT_PREVIEW";
   }
 
@@ -19167,6 +19168,7 @@ package android.print {
     method public int describeContents();
     method public int getColorMode();
     method public int getContentType();
+    method public long getDataSize();
     method public int getFittingMode();
     method public android.print.PrintAttributes.Margins getMargins();
     method public android.print.PrintAttributes.MediaSize getMediaSize();
@@ -19198,7 +19200,7 @@ package android.print {
   public class PrintFileDocumentAdapter extends android.print.PrintDocumentAdapter {
     ctor public PrintFileDocumentAdapter(android.content.Context, java.io.File, android.print.PrintDocumentInfo);
     method public void onLayout(android.print.PrintAttributes, android.print.PrintAttributes, android.os.CancellationSignal, android.print.PrintDocumentAdapter.LayoutResultCallback, android.os.Bundle);
-    method public void onWrite(android.print.PageRange[], java.io.FileDescriptor, android.os.CancellationSignal, android.print.PrintDocumentAdapter.WriteResultCallback);
+    method public void onWrite(android.print.PageRange[], android.os.ParcelFileDescriptor, android.os.CancellationSignal, android.print.PrintDocumentAdapter.WriteResultCallback);
   }
 
   public final class PrintJob {
@@ -19220,9 +19222,10 @@ package android.print {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int PRINT_JOB_ID_UNDEFINED = -1; // 0xffffffff
-    field public static final int STATE_CANCELED = 6; // 0x6
-    field public static final int STATE_COMPLETED = 4; // 0x4
-    field public static final int STATE_FAILED = 5; // 0x5
+    field public static final int STATE_BLOCKED = 4; // 0x4
+    field public static final int STATE_CANCELED = 7; // 0x7
+    field public static final int STATE_COMPLETED = 5; // 0x5
+    field public static final int STATE_FAILED = 6; // 0x6
     field public static final int STATE_QUEUED = 2; // 0x2
     field public static final int STATE_STARTED = 3; // 0x3
   }
@@ -19340,17 +19343,19 @@ package android.print.pdf {
 package android.printservice {
 
   public final class PrintDocument {
-    method public java.io.FileDescriptor getData();
+    method public android.os.ParcelFileDescriptor getData();
     method public android.print.PrintDocumentInfo getInfo();
   }
 
   public final class PrintJob {
+    method public boolean block(java.lang.String);
     method public boolean cancel();
     method public boolean complete();
     method public boolean fail(java.lang.String);
     method public android.printservice.PrintDocument getDocument();
     method public int getId();
     method public android.print.PrintJobInfo getInfo();
+    method public boolean isBlocked();
     method public boolean isCancelled();
     method public boolean isCompleted();
     method public boolean isFailed();
@@ -19382,9 +19387,11 @@ package android.printservice {
     method public final boolean isDestroyed();
     method public final boolean isPrinterDiscoveryStarted();
     method public abstract void onDestroy();
-    method public abstract void onRequestPrinterUpdate(android.print.PrinterId);
     method public abstract void onStartPrinterDiscovery(java.util.List<android.print.PrinterId>);
+    method public abstract void onStartPrinterStateTracking(android.print.PrinterId);
     method public abstract void onStopPrinterDiscovery();
+    method public abstract void onStopPrinterStateTracking(android.print.PrinterId);
+    method public abstract void onValidatePrinters(java.util.List<android.print.PrinterId>);
     method public final void removePrinters(java.util.List<android.print.PrinterId>);
     method public final void updatePrinters(java.util.List<android.print.PrinterInfo>);
   }

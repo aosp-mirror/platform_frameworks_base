@@ -21,12 +21,15 @@ import android.os.RemoteException;
 import android.print.PrintDocumentInfo;
 import android.util.Log;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
 
 /**
  * This class represents a printed document from the perspective of a print
  * service. It exposes APIs to query the document and obtain its data.
+ * <p>
+ * <strong>Note: </strong> All methods of this class must be executed on the
+ * main application thread.
+ * </p>
  */
 public final class PrintDocument {
 
@@ -51,6 +54,7 @@ public final class PrintDocument {
      * @return The document info.
      */
     public PrintDocumentInfo getInfo() {
+        PrintService.throwIfNotCalledOnMainThread();
         return mInfo;
     }
 
@@ -64,7 +68,8 @@ public final class PrintDocument {
      *
      * @return A file descriptor for reading the data.
      */
-    public FileDescriptor getData() {
+    public ParcelFileDescriptor getData() {
+        PrintService.throwIfNotCalledOnMainThread();
         ParcelFileDescriptor source = null;
         ParcelFileDescriptor sink = null;
         try {
@@ -72,7 +77,7 @@ public final class PrintDocument {
             source = fds[0];
             sink = fds[1];
             mPrintServiceClient.writePrintJobData(sink, mPrintJobId);
-            return source.getFileDescriptor();
+            return source;
         } catch (IOException ioe) {
             Log.e(LOG_TAG, "Error calling getting print job data!", ioe);
         } catch (RemoteException re) {

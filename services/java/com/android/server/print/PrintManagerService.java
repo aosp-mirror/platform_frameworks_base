@@ -254,7 +254,7 @@ public final class PrintManagerService extends IPrintManager.Stub {
     }
 
     @Override
-    public void requestPrinterUpdate(PrinterId printerId, int userId) {
+    public void validatePrinters(List<PrinterId> printerIds, int userId) {
         final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
         final UserState userState;
         synchronized (mLock) {
@@ -262,7 +262,37 @@ public final class PrintManagerService extends IPrintManager.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            userState.requestPrinterUpdate(printerId);
+            userState.validatePrinters(printerIds);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void startPrinterStateTracking(PrinterId printerId, int userId) {
+        final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+        final UserState userState;
+        synchronized (mLock) {
+            userState = getOrCreateUserStateLocked(resolvedUserId);
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            userState.startPrinterStateTracking(printerId);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void stopPrinterStateTracking(PrinterId printerId, int userId) {
+        final int resolvedUserId = resolveCallingUserEnforcingPermissions(userId);
+        final UserState userState;
+        synchronized (mLock) {
+            userState = getOrCreateUserStateLocked(resolvedUserId);
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            userState.stopPrinterStateTracking(printerId);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -432,10 +462,12 @@ public final class PrintManagerService extends IPrintManager.Stub {
         if (appId == callingAppId) {
             return appId;
         }
-        if (mContext.checkCallingPermission(Manifest.permission.ACCESS_ALL_PRINT_JOBS)
+        if (mContext.checkCallingPermission(
+                "com.android.printspooler.permission.ACCESS_ALL_PRINT_JOBS")
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Call from app " + callingAppId + " as app "
-                    + appId + " without permission ACCESS_ALL_PRINT_JOBS");
+                    + appId + " without com.android.printspooler.permission"
+                    + ".ACCESS_ALL_PRINT_JOBS");
         }
         return appId;
     }
