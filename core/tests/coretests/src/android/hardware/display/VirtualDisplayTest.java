@@ -26,6 +26,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.Image;
 import android.media.ImageReader;
+import android.media.ImageReader.MaxImagesAcquiredException;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -83,8 +84,8 @@ public class VirtualDisplayTest extends AndroidTestCase {
 
         mImageReaderLock.lock();
         try {
-            mImageReader = new ImageReader(WIDTH, HEIGHT, PixelFormat.RGBA_8888, 2);
-            mImageReader.setImageAvailableListener(mImageListener, mHandler);
+            mImageReader = ImageReader.newInstance(WIDTH, HEIGHT, PixelFormat.RGBA_8888, 2);
+            mImageReader.setOnImageAvailableListener(mImageListener, mHandler);
             mSurface = mImageReader.getSurface();
         } finally {
             mImageReaderLock.unlock();
@@ -409,19 +410,11 @@ public class VirtualDisplayTest extends AndroidTestCase {
                 }
 
                 Log.d(TAG, "New image available from virtual display.");
-                Image image = reader.getNextImage();
+
+                // Get the latest buffer.
+                Image image = reader.acquireLatestImage();
                 if (image != null) {
                     try {
-                        // Get the latest buffer.
-                        for (;;) {
-                            Image nextImage = reader.getNextImage();
-                            if (nextImage == null) {
-                                break;
-                            }
-                            reader.releaseImage(image);
-                            image = nextImage;
-                        }
-
                         // Scan for colors.
                         int color = scanImage(image);
                         synchronized (this) {
@@ -431,9 +424,12 @@ public class VirtualDisplayTest extends AndroidTestCase {
                             }
                         }
                     } finally {
-                        reader.releaseImage(image);
+                        image.close();
                     }
                 }
+            } catch (MaxImagesAcquiredException e) {
+                // We should never try to consume more buffers than maxImages.
+                throw new IllegalStateException(e);
             } finally {
                 mImageReaderLock.unlock();
             }

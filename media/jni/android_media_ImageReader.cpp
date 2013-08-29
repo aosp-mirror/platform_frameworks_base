@@ -43,8 +43,8 @@
 
 using namespace android;
 
-static const char* const OutOfResourcesException =
-    "android/view/Surface$OutOfResourcesException";
+static const char* const MaxImagesAcquiredException =
+    "android/media/ImageReader$MaxImagesAcquiredException";
 
 enum {
     IMAGE_READER_MAX_NUM_PLANES = 3,
@@ -700,7 +700,7 @@ static jboolean ImageReader_imageSetup(JNIEnv* env, jobject thiz,
     if (buffer == NULL) {
         ALOGW("Unable to acquire a lockedBuffer, very likely client tries to lock more than"
             " maxImages buffers");
-        jniThrowException(env, OutOfResourcesException,
+        jniThrowException(env, MaxImagesAcquiredException,
                   "Too many outstanding images, close existing images"
                   " to be able to acquire more.");
         return false;
@@ -709,7 +709,7 @@ static jboolean ImageReader_imageSetup(JNIEnv* env, jobject thiz,
     if (res != NO_ERROR) {
         if (res != BAD_VALUE /*no buffers*/) {
             if (res == NOT_ENOUGH_DATA) {
-                jniThrowException(env, OutOfResourcesException,
+                jniThrowException(env, MaxImagesAcquiredException,
                           "Too many outstanding images, close existing images"
                           " to be able to acquire more.");
             } else {
