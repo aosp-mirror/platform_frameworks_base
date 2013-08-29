@@ -216,6 +216,12 @@ interface IPackageManager {
 
     void resetPreferredActivities(int userId);
 
+    ResolveInfo getLastChosenActivity(in Intent intent,
+            String resolvedType, int flags);
+
+    void setLastChosenActivity(in Intent intent, String resolvedType, int flags,
+            in IntentFilter filter, int match, in ComponentName activity);
+
     void addPreferredActivity(in IntentFilter filter, int match,
             in ComponentName[] set, in ComponentName activity, int userId);
 
@@ -226,7 +232,7 @@ interface IPackageManager {
 
     int getPreferredActivities(out List<IntentFilter> outFilters,
             out List<ComponentName> outActivities, String packageName);
-    
+
     /**
      * As per {@link android.content.pm.PackageManager#setComponentEnabledSetting}.
      */
