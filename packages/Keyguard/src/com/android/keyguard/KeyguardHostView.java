@@ -1213,6 +1213,7 @@ public class KeyguardHostView extends KeyguardViewBase {
 
     private void addWidgetsFromSettings() {
         if (mSafeModeEnabled || widgetsDisabled()) {
+            addDefaultStatusWidget(0);
             return;
         }
 
