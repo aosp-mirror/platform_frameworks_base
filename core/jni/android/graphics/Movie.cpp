@@ -1,8 +1,10 @@
+#include "ScopedLocalRef.h"
 #include "SkMovie.h"
 #include "SkStream.h"
 #include "GraphicsJNI.h"
 #include "SkTemplates.h"
 #include "SkUtils.h"
+#include "Utils.h"
 #include "CreateJavaOutputStreamAdaptor.h"
 
 #include <androidfw/Asset.h>
@@ -83,9 +85,14 @@ static jobject movie_decodeStream(JNIEnv* env, jobject clazz, jobject istream) {
 
     NPE_CHECK_RETURN_ZERO(env, istream);
 
-    // what is the lifetime of the array? Can the skstream hold onto it?
-    jbyteArray byteArray = env->NewByteArray(16*1024);
-    SkStream* strm = CreateJavaInputStreamAdaptor(env, istream, byteArray);
+    SkStreamRewindable* strm = CheckForAssetStream(env, istream);
+    jbyteArray byteArray = NULL;
+    ScopedLocalRef<jbyteArray> scoper(env, NULL);
+    if (NULL == strm) {
+        byteArray = env->NewByteArray(16*1024);
+        scoper.reset(byteArray);
+        strm = GetRewindableStream(env, istream, byteArray);
+    }
     if (NULL == strm) {
         return 0;
     }
