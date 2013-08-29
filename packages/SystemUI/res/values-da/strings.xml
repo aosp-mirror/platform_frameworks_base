@@ -203,6 +203,6 @@
     <string name="done_button" msgid="1759387181766603361">"Udfør"</string>
     <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Overvågning af netværk"</string>
     <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Denne enhed er administreret af: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nDin administrator kan overvåge dine netværksaktiviteter, f.eks. e-mails, apps og sikre websites.\n\nFå flere oplysninger ved at kontakte din administrator."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"En tredjepart kan overvåge dine netværksaktiviteter, \nf.eks.e-mails, apps og sikre websites.\n\nBetroede loginoplysninger, der er installeret på enheden, gør dette muligt."</string>
+    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"En tredjepart kan overvåge dine netværksaktiviteter, \nf.eks.e-mails, apps og sikre websites.\n\nBetroede loginoplysninger, der er installeret på din enhed, gør dette muligt."</string>
     <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Kontrollér betroede loginoplysninger"</string>
 </resources>

@@ -201,7 +201,7 @@
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMÀTICA"</string>
     <string name="status_bar_help_title" msgid="1199237744086469217">"Les notificacions apareixen aquí"</string>
     <string name="status_bar_help_text" msgid="7874607155052076323">"Accedeix-hi en qualsevol moment: només has de fer lliscar el dit cap avall.\nTorna a fer lliscar el dit cap avall per fer que es mostrin els controls del sistema."</string>
-    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Pot ser que se supervisi la xarxa."</string>
+    <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Pot ser que la xarxa se supervisi."</string>
     <string name="done_button" msgid="1759387181766603361">"Fet"</string>
     <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Supervisió de xarxes"</string>
     <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> administra aquest dispositiu.\n\nEl teu administrador té capacitat per supervisar la teva activitat de xarxa, inclosos els correus electrònics, les aplicacions i els llocs web segurs.\n\nPer obtenir més informació, contacta amb l\'administrador."</string>
