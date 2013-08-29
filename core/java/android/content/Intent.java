@@ -2687,10 +2687,6 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CREATE_DOCUMENT = "android.intent.action.CREATE_DOCUMENT";
 
-    /** {@hide} */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_MANAGE_DOCUMENT = "android.intent.action.MANAGE_DOCUMENT";
-
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).

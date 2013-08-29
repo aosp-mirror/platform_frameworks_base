@@ -21,7 +21,10 @@ import static com.android.documentsui.model.Document.asFileNotFoundException;
 
 import android.content.ContentResolver;
 import android.net.Uri;
+import android.provider.DocumentsContract.DocumentRoot;
 import android.util.Log;
+
+import com.android.documentsui.RootsCache;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -61,5 +64,19 @@ public class DocumentStack extends LinkedList<Document> {
 
         // TODO: handle roots that have gone missing
         return stack;
+    }
+
+    public DocumentRoot getRoot(RootsCache roots) {
+        return roots.findRoot(getLast().uri);
+    }
+
+    public String getTitle(RootsCache roots) {
+        if (size() == 1) {
+            return getRoot(roots).title;
+        } else if (size() > 1) {
+            return peek().displayName;
+        } else {
+            return null;
+        }
     }
 }

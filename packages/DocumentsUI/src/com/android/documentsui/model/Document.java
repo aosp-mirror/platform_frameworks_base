@@ -53,17 +53,11 @@ public class Document {
         this.size = size;
     }
 
-    public static Document fromRoot(ContentResolver resolver, Root root)
-            throws FileNotFoundException {
-        return fromUri(resolver, root.uri);
-    }
-
     public static Document fromDirectoryCursor(Uri parent, Cursor cursor) {
         final String authority = parent.getAuthority();
-        final String rootId = DocumentsContract.getRootId(parent);
         final String docId = getCursorString(cursor, DocumentColumns.DOC_ID);
 
-        final Uri uri = DocumentsContract.buildDocumentUri(authority, rootId, docId);
+        final Uri uri = DocumentsContract.buildDocumentUri(authority, docId);
         final String mimeType = getCursorString(cursor, DocumentColumns.MIME_TYPE);
         final String displayName = getCursorString(cursor, DocumentColumns.DISPLAY_NAME);
         final long lastModified = getCursorLong(cursor, DocumentColumns.LAST_MODIFIED);
@@ -74,6 +68,7 @@ public class Document {
         return new Document(uri, mimeType, displayName, lastModified, flags, summary, size);
     }
 
+    @Deprecated
     public static Document fromRecentOpenCursor(ContentResolver resolver, Cursor recentCursor)
             throws FileNotFoundException {
         final Uri uri = Uri.parse(getCursorString(recentCursor, RecentsProvider.COL_URI));
@@ -176,7 +171,7 @@ public class Document {
         return (index != -1) ? cursor.getInt(index) : 0;
     }
 
-    public static class NameComparator implements Comparator<Document> {
+    public static class DisplayNameComparator implements Comparator<Document> {
         @Override
         public int compare(Document lhs, Document rhs) {
             final boolean leftDir = lhs.isDirectory();
@@ -185,12 +180,12 @@ public class Document {
             if (leftDir != rightDir) {
                 return leftDir ? -1 : 1;
             } else {
-                return Root.compareToIgnoreCaseNullable(lhs.displayName, rhs.displayName);
+                return compareToIgnoreCaseNullable(lhs.displayName, rhs.displayName);
             }
         }
     }
 
-    public static class DateComparator implements Comparator<Document> {
+    public static class LastModifiedComparator implements Comparator<Document> {
         @Override
         public int compare(Document lhs, Document rhs) {
             return Long.compare(rhs.lastModified, lhs.lastModified);
@@ -212,5 +207,11 @@ public class Document {
         final FileNotFoundException fnfe = new FileNotFoundException(t.getMessage());
         fnfe.initCause(t);
         throw fnfe;
+    }
+
+    public static int compareToIgnoreCaseNullable(String lhs, String rhs) {
+        if (lhs == null) return -1;
+        if (rhs == null) return 1;
+        return lhs.compareToIgnoreCase(rhs);
     }
 }

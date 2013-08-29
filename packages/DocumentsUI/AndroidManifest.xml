@@ -35,9 +35,9 @@
             </intent-filter>
             <!-- data expected to point at existing root to manage -->
             <intent-filter>
-                <action android:name="android.intent.action.MANAGE_DOCUMENT" />
+                <action android:name="android.provider.action.MANAGE_DOCUMENTS" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.cursor.item/root" />
+                <data android:mimeType="vnd.android.doc/dir" />
             </intent-filter>
         </activity>
 

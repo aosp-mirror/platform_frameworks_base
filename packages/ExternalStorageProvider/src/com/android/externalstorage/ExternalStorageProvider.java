@@ -16,205 +16,130 @@
 
 package com.android.externalstorage;
 
-import android.content.ContentProvider;
 import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.UriMatcher;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.database.MatrixCursor.RowBuilder;
+import android.graphics.Point;
 import android.media.ExifInterface;
-import android.net.Uri;
-import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.DocumentColumns;
+import android.provider.DocumentsContract.DocumentRoot;
 import android.provider.DocumentsContract.Documents;
-import android.provider.DocumentsContract.RootColumns;
-import android.provider.DocumentsContract.Roots;
-import android.util.Log;
+import android.provider.DocumentsProvider;
 import android.webkit.MimeTypeMap;
 
+import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
-public class ExternalStorageProvider extends ContentProvider {
+public class ExternalStorageProvider extends DocumentsProvider {
     private static final String TAG = "ExternalStorage";
 
-    private static final String AUTHORITY = "com.android.externalstorage.documents";
+    // docId format: root:path/to/file
 
-    // TODO: support multiple storage devices
-
-    private static final UriMatcher sMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-
-    private static final int URI_ROOTS = 1;
-    private static final int URI_ROOTS_ID = 2;
-    private static final int URI_DOCS_ID = 3;
-    private static final int URI_DOCS_ID_CONTENTS = 4;
-    private static final int URI_DOCS_ID_SEARCH = 5;
-
-    static {
-        sMatcher.addURI(AUTHORITY, "roots", URI_ROOTS);
-        sMatcher.addURI(AUTHORITY, "roots/*", URI_ROOTS_ID);
-        sMatcher.addURI(AUTHORITY, "roots/*/docs/*", URI_DOCS_ID);
-        sMatcher.addURI(AUTHORITY, "roots/*/docs/*/contents", URI_DOCS_ID_CONTENTS);
-        sMatcher.addURI(AUTHORITY, "roots/*/docs/*/search", URI_DOCS_ID_SEARCH);
-    }
-
-    private HashMap<String, Root> mRoots = Maps.newHashMap();
-
-    private static class Root {
-        public int rootType;
-        public String name;
-        public int icon = 0;
-        public String title = null;
-        public String summary = null;
-        public File path;
-    }
-
-    private static final String[] ALL_ROOTS_COLUMNS = new String[] {
-            RootColumns.ROOT_ID, RootColumns.ROOT_TYPE, RootColumns.ICON, RootColumns.TITLE,
-            RootColumns.SUMMARY, RootColumns.AVAILABLE_BYTES
-    };
-
-    private static final String[] ALL_DOCUMENTS_COLUMNS = new String[] {
+    private static final String[] SUPPORTED_COLUMNS = new String[] {
             DocumentColumns.DOC_ID, DocumentColumns.DISPLAY_NAME, DocumentColumns.SIZE,
             DocumentColumns.MIME_TYPE, DocumentColumns.LAST_MODIFIED, DocumentColumns.FLAGS
     };
 
+    private ArrayList<DocumentRoot> mRoots;
+    private HashMap<String, DocumentRoot> mTagToRoot;
+    private HashMap<String, File> mTagToPath;
+
     @Override
     public boolean onCreate() {
-        mRoots.clear();
+        mRoots = Lists.newArrayList();
+        mTagToRoot = Maps.newHashMap();
+        mTagToPath = Maps.newHashMap();
 
-        final Root root = new Root();
-        root.rootType = Roots.ROOT_TYPE_DEVICE_ADVANCED;
-        root.name = "primary";
-        root.title = getContext().getString(R.string.root_internal_storage);
-        root.path = Environment.getExternalStorageDirectory();
-        mRoots.put(root.name, root);
+        // TODO: support multiple storage devices
+
+        try {
+            final String tag = "primary";
+            final File path = Environment.getExternalStorageDirectory();
+            mTagToPath.put(tag, path);
+
+            final DocumentRoot root = new DocumentRoot();
+            root.docId = getDocIdForFile(path);
+            root.rootType = DocumentRoot.ROOT_TYPE_DEVICE_ADVANCED;
+            root.title = getContext().getString(R.string.root_internal_storage);
+            root.icon = R.drawable.ic_pdf;
+            root.flags = DocumentRoot.FLAG_LOCAL_ONLY;
+            mRoots.add(root);
+            mTagToRoot.put(tag, root);
+        } catch (FileNotFoundException e) {
+            throw new IllegalStateException(e);
+        }
 
         return true;
     }
 
-    @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
-            String sortOrder) {
-        switch (sMatcher.match(uri)) {
-            case URI_ROOTS: {
-                final MatrixCursor result = new MatrixCursor(
-                        projection != null ? projection : ALL_ROOTS_COLUMNS);
-                for (Root root : mRoots.values()) {
-                    includeRoot(result, root);
-                }
-                return result;
-            }
-            case URI_ROOTS_ID: {
-                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
+    private String getDocIdForFile(File file) throws FileNotFoundException {
+        String path = file.getAbsolutePath();
 
-                final MatrixCursor result = new MatrixCursor(
-                        projection != null ? projection : ALL_ROOTS_COLUMNS);
-                includeRoot(result, root);
-                return result;
-            }
-            case URI_DOCS_ID: {
-                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
-                final String docId = DocumentsContract.getDocId(uri);
-
-                final MatrixCursor result = new MatrixCursor(
-                        projection != null ? projection : ALL_DOCUMENTS_COLUMNS);
-                final File file = docIdToFile(root, docId);
-                includeFile(result, root, file);
-                return result;
-            }
-            case URI_DOCS_ID_CONTENTS: {
-                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
-                final String docId = DocumentsContract.getDocId(uri);
-
-                final MatrixCursor result = new MatrixCursor(
-                        projection != null ? projection : ALL_DOCUMENTS_COLUMNS);
-                final File parent = docIdToFile(root, docId);
-
-                for (File file : parent.listFiles()) {
-                    includeFile(result, root, file);
-                }
-
-                return result;
-            }
-            case URI_DOCS_ID_SEARCH: {
-                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
-                final String docId = DocumentsContract.getDocId(uri);
-                final String query = DocumentsContract.getSearchQuery(uri).toLowerCase();
-
-                final MatrixCursor result = new MatrixCursor(
-                        projection != null ? projection : ALL_DOCUMENTS_COLUMNS);
-                final File parent = docIdToFile(root, docId);
-
-                final LinkedList<File> pending = new LinkedList<File>();
-                pending.add(parent);
-                while (!pending.isEmpty() && result.getCount() < 20) {
-                    final File file = pending.removeFirst();
-                    if (file.isDirectory()) {
-                        for (File child : file.listFiles()) {
-                            pending.add(child);
-                        }
-                    } else {
-                        if (file.getName().toLowerCase().contains(query)) {
-                            includeFile(result, root, file);
-                        }
-                    }
-                }
-
-                return result;
-            }
-            default: {
-                throw new UnsupportedOperationException("Unsupported Uri " + uri);
+        // Find the most-specific root path
+        Map.Entry<String, File> mostSpecific = null;
+        for (Map.Entry<String, File> root : mTagToPath.entrySet()) {
+            final String rootPath = root.getValue().getPath();
+            if (path.startsWith(rootPath) && (mostSpecific == null
+                    || rootPath.length() > mostSpecific.getValue().getPath().length())) {
+                mostSpecific = root;
             }
         }
-    }
 
-    private String fileToDocId(Root root, File file) {
-        String rootPath = root.path.getAbsolutePath();
-        final String path = file.getAbsolutePath();
-        if (path.equals(rootPath)) {
-            return Documents.DOC_ID_ROOT;
+        if (mostSpecific == null) {
+            throw new FileNotFoundException("Failed to find root that contains " + path);
         }
 
-        if (!rootPath.endsWith("/")) {
-            rootPath += "/";
-        }
-        if (!path.startsWith(rootPath)) {
-            throw new IllegalArgumentException("File " + path + " outside root " + root.path);
+        // Start at first char of path under root
+        final String rootPath = mostSpecific.getValue().getPath();
+        if (rootPath.equals(path)) {
+            path = "";
+        } else if (rootPath.endsWith("/")) {
+            path = path.substring(rootPath.length());
         } else {
-            return path.substring(rootPath.length());
+            path = path.substring(rootPath.length() + 1);
         }
+
+        return mostSpecific.getKey() + ':' + path;
     }
 
-    private File docIdToFile(Root root, String docId) {
-        if (Documents.DOC_ID_ROOT.equals(docId)) {
-            return root.path;
+    private File getFileForDocId(String docId) throws FileNotFoundException {
+        final int splitIndex = docId.indexOf(':', 1);
+        final String tag = docId.substring(0, splitIndex);
+        final String path = docId.substring(splitIndex + 1);
+
+        File target = mTagToPath.get(tag);
+        if (target == null) {
+            throw new FileNotFoundException("No root for " + tag);
+        }
+        target = new File(target, path);
+        if (!target.exists()) {
+            throw new FileNotFoundException("Missing file for " + docId + " at " + target);
+        }
+        return target;
+    }
+
+    private void includeFile(MatrixCursor result, String docId, File file)
+            throws FileNotFoundException {
+        if (docId == null) {
+            docId = getDocIdForFile(file);
         } else {
-            return new File(root.path, docId);
+            file = getFileForDocId(docId);
         }
-    }
 
-    private void includeRoot(MatrixCursor result, Root root) {
-        final RowBuilder row = result.newRow();
-        row.offer(RootColumns.ROOT_ID, root.name);
-        row.offer(RootColumns.ROOT_TYPE, root.rootType);
-        row.offer(RootColumns.ICON, root.icon);
-        row.offer(RootColumns.TITLE, root.title);
-        row.offer(RootColumns.SUMMARY, root.summary);
-        row.offer(RootColumns.AVAILABLE_BYTES, root.path.getFreeSpace());
-    }
-
-    private void includeFile(MatrixCursor result, Root root, File file) {
         int flags = 0;
 
         if (file.isDirectory()) {
@@ -229,17 +154,10 @@ public class ExternalStorageProvider extends ContentProvider {
             flags |= Documents.FLAG_SUPPORTS_DELETE;
         }
 
+        final String displayName = file.getName();
         final String mimeType = getTypeForFile(file);
         if (mimeType.startsWith("image/")) {
             flags |= Documents.FLAG_SUPPORTS_THUMBNAIL;
-        }
-
-        final String docId = fileToDocId(root, file);
-        final String displayName;
-        if (Documents.DOC_ID_ROOT.equals(docId)) {
-            displayName = root.title;
-        } else {
-            displayName = file.getName();
         }
 
         final RowBuilder row = result.newRow();
@@ -252,26 +170,129 @@ public class ExternalStorageProvider extends ContentProvider {
     }
 
     @Override
-    public String getType(Uri uri) {
-        switch (sMatcher.match(uri)) {
-            case URI_ROOTS: {
-                return Roots.MIME_TYPE_DIR;
+    public List<DocumentRoot> getDocumentRoots() {
+        // Update free space
+        for (String tag : mTagToRoot.keySet()) {
+            final DocumentRoot root = mTagToRoot.get(tag);
+            final File path = mTagToPath.get(tag);
+            root.availableBytes = path.getFreeSpace();
+        }
+        return mRoots;
+    }
+
+    @Override
+    public String createDocument(String docId, String mimeType, String displayName)
+            throws FileNotFoundException {
+        final File parent = getFileForDocId(docId);
+        displayName = validateDisplayName(mimeType, displayName);
+
+        final File file = new File(parent, displayName);
+        if (Documents.MIME_TYPE_DIR.equals(mimeType)) {
+            if (!file.mkdir()) {
+                throw new IllegalStateException("Failed to mkdir " + file);
             }
-            case URI_ROOTS_ID: {
-                return Roots.MIME_TYPE_ITEM;
+        } else {
+            try {
+                if (!file.createNewFile()) {
+                    throw new IllegalStateException("Failed to touch " + file);
+                }
+            } catch (IOException e) {
+                throw new IllegalStateException("Failed to touch " + file + ": " + e);
             }
-            case URI_DOCS_ID: {
-                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
-                final String docId = DocumentsContract.getDocId(uri);
-                return getTypeForFile(docIdToFile(root, docId));
-            }
-            default: {
-                throw new UnsupportedOperationException("Unsupported Uri " + uri);
-            }
+        }
+        return getDocIdForFile(file);
+    }
+
+    @Override
+    public void renameDocument(String docId, String displayName) throws FileNotFoundException {
+        final File file = getFileForDocId(docId);
+        final File newFile = new File(file.getParentFile(), displayName);
+        if (!file.renameTo(newFile)) {
+            throw new IllegalStateException("Failed to rename " + docId);
+        }
+        // TODO: update any outstanding grants
+    }
+
+    @Override
+    public void deleteDocument(String docId) throws FileNotFoundException {
+        final File file = getFileForDocId(docId);
+        if (!file.delete()) {
+            throw new IllegalStateException("Failed to delete " + file);
         }
     }
 
-    private String getTypeForFile(File file) {
+    @Override
+    public Cursor queryDocument(String docId) throws FileNotFoundException {
+        final MatrixCursor result = new MatrixCursor(SUPPORTED_COLUMNS);
+        includeFile(result, docId, null);
+        return result;
+    }
+
+    @Override
+    public Cursor queryDocumentChildren(String docId) throws FileNotFoundException {
+        final MatrixCursor result = new MatrixCursor(SUPPORTED_COLUMNS);
+        final File parent = getFileForDocId(docId);
+        for (File file : parent.listFiles()) {
+            includeFile(result, null, file);
+        }
+        return result;
+    }
+
+    @Override
+    public Cursor querySearch(String docId, String query) throws FileNotFoundException {
+        final MatrixCursor result = new MatrixCursor(SUPPORTED_COLUMNS);
+        final File parent = getFileForDocId(docId);
+
+        final LinkedList<File> pending = new LinkedList<File>();
+        pending.add(parent);
+        while (!pending.isEmpty() && result.getCount() < 20) {
+            final File file = pending.removeFirst();
+            if (file.isDirectory()) {
+                for (File child : file.listFiles()) {
+                    pending.add(child);
+                }
+            } else {
+                if (file.getName().toLowerCase().contains(query)) {
+                    includeFile(result, null, file);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public String getType(String docId) throws FileNotFoundException {
+        final File file = getFileForDocId(docId);
+        return getTypeForFile(file);
+    }
+
+    @Override
+    public ParcelFileDescriptor openDocument(String docId, String mode, CancellationSignal signal)
+            throws FileNotFoundException {
+        final File file = getFileForDocId(docId);
+        return ParcelFileDescriptor.open(file, ContentResolver.modeToMode(null, mode));
+    }
+
+    @Override
+    public AssetFileDescriptor openDocumentThumbnail(
+            String docId, Point sizeHint, CancellationSignal signal) throws FileNotFoundException {
+        final File file = getFileForDocId(docId);
+        final ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
+                file, ParcelFileDescriptor.MODE_READ_ONLY);
+
+        try {
+            final ExifInterface exif = new ExifInterface(file.getAbsolutePath());
+            final long[] thumb = exif.getThumbnailRange();
+            if (thumb != null) {
+                return new AssetFileDescriptor(pfd, thumb[0], thumb[1]);
+            }
+        } catch (IOException e) {
+        }
+
+        return new AssetFileDescriptor(pfd, 0, AssetFileDescriptor.UNKNOWN_LENGTH);
+    }
+
+    private static String getTypeForFile(File file) {
         if (file.isDirectory()) {
             return Documents.MIME_TYPE_DIR;
         } else {
@@ -279,7 +300,7 @@ public class ExternalStorageProvider extends ContentProvider {
         }
     }
 
-    private String getTypeForName(String name) {
+    private static String getTypeForName(String name) {
         final int lastDot = name.lastIndexOf('.');
         if (lastDot >= 0) {
             final String extension = name.substring(lastDot + 1);
@@ -292,129 +313,7 @@ public class ExternalStorageProvider extends ContentProvider {
         return "application/octet-stream";
     }
 
-    @Override
-    public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
-        switch (sMatcher.match(uri)) {
-            case URI_DOCS_ID: {
-                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
-                final String docId = DocumentsContract.getDocId(uri);
-
-                final File file = docIdToFile(root, docId);
-                return ParcelFileDescriptor.open(file, ContentResolver.modeToMode(uri, mode));
-            }
-            default: {
-                throw new UnsupportedOperationException("Unsupported Uri " + uri);
-            }
-        }
-    }
-
-    @Override
-    public AssetFileDescriptor openTypedAssetFile(Uri uri, String mimeTypeFilter, Bundle opts)
-            throws FileNotFoundException {
-        if (opts == null || !opts.containsKey(DocumentsContract.EXTRA_THUMBNAIL_SIZE)) {
-            return super.openTypedAssetFile(uri, mimeTypeFilter, opts);
-        }
-
-        switch (sMatcher.match(uri)) {
-            case URI_DOCS_ID: {
-                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
-                final String docId = DocumentsContract.getDocId(uri);
-
-                final File file = docIdToFile(root, docId);
-                final ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
-                        file, ParcelFileDescriptor.MODE_READ_ONLY);
-
-                try {
-                    final ExifInterface exif = new ExifInterface(file.getAbsolutePath());
-                    final long[] thumb = exif.getThumbnailRange();
-                    if (thumb != null) {
-                        return new AssetFileDescriptor(pfd, thumb[0], thumb[1]);
-                    }
-                } catch (IOException e) {
-                }
-
-                return new AssetFileDescriptor(pfd, 0, AssetFileDescriptor.UNKNOWN_LENGTH);
-            }
-            default: {
-                throw new UnsupportedOperationException("Unsupported Uri " + uri);
-            }
-        }
-    }
-
-    @Override
-    public Uri insert(Uri uri, ContentValues values) {
-        switch (sMatcher.match(uri)) {
-            case URI_DOCS_ID: {
-                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
-                final String docId = DocumentsContract.getDocId(uri);
-
-                final File parent = docIdToFile(root, docId);
-
-                final String mimeType = values.getAsString(DocumentColumns.MIME_TYPE);
-                final String name = validateDisplayName(
-                        values.getAsString(DocumentColumns.DISPLAY_NAME), mimeType);
-
-                final File file = new File(parent, name);
-                if (Documents.MIME_TYPE_DIR.equals(mimeType)) {
-                    if (!file.mkdir()) {
-                        return null;
-                    }
-
-                } else {
-                    try {
-                        if (!file.createNewFile()) {
-                            return null;
-                        }
-                    } catch (IOException e) {
-                        Log.w(TAG, "Failed to create file", e);
-                        return null;
-                    }
-                }
-
-                final String newDocId = fileToDocId(root, file);
-                return DocumentsContract.buildDocumentUri(AUTHORITY, root.name, newDocId);
-            }
-            default: {
-                throw new UnsupportedOperationException("Unsupported Uri " + uri);
-            }
-        }
-    }
-
-    @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        switch (sMatcher.match(uri)) {
-            case URI_DOCS_ID: {
-                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
-                final String docId = DocumentsContract.getDocId(uri);
-
-                final File file = docIdToFile(root, docId);
-                final File newFile = new File(
-                        file.getParentFile(), values.getAsString(DocumentColumns.DISPLAY_NAME));
-                return file.renameTo(newFile) ? 1 : 0;
-            }
-            default: {
-                throw new UnsupportedOperationException("Unsupported Uri " + uri);
-            }
-        }
-    }
-
-    @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
-        switch (sMatcher.match(uri)) {
-            case URI_DOCS_ID: {
-                final Root root = mRoots.get(DocumentsContract.getRootId(uri));
-                final String docId = DocumentsContract.getDocId(uri);
-
-                final File file = docIdToFile(root, docId);
-                return file.delete() ? 1 : 0;
-            }
-            default: {
-                throw new UnsupportedOperationException("Unsupported Uri " + uri);
-            }
-        }
-    }
-
-    private String validateDisplayName(String displayName, String mimeType) {
+    private static String validateDisplayName(String mimeType, String displayName) {
         if (Documents.MIME_TYPE_DIR.equals(mimeType)) {
             return displayName;
         } else {

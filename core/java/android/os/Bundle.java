@@ -22,6 +22,7 @@ import android.util.SparseArray;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -540,6 +541,13 @@ public final class Bundle implements Parcelable, Cloneable {
      */
     public void putParcelableArrayList(String key,
         ArrayList<? extends Parcelable> value) {
+        unparcel();
+        mMap.put(key, value);
+        mFdsKnown = false;
+    }
+
+    /** {@hide} */
+    public void putParcelableList(String key, List<? extends Parcelable> value) {
         unparcel();
         mMap.put(key, value);
         mFdsKnown = false;
