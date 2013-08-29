@@ -12332,7 +12332,7 @@ package android.media {
     field public static final int EULER_Z = 2; // 0x2
   }
 
-  public abstract interface Image implements java.lang.AutoCloseable {
+  public abstract class Image implements java.lang.AutoCloseable {
     method public abstract void close();
     method public abstract int getFormat();
     method public abstract int getHeight();
@@ -12341,23 +12341,30 @@ package android.media {
     method public abstract int getWidth();
   }
 
-  public static abstract interface Image.Plane {
+  public static abstract class Image.Plane {
     method public abstract java.nio.ByteBuffer getBuffer();
     method public abstract int getPixelStride();
     method public abstract int getRowStride();
   }
 
-  public final class ImageReader implements java.lang.AutoCloseable {
-    ctor public ImageReader(int, int, int, int);
+  public class ImageReader implements java.lang.AutoCloseable {
+    method public android.media.Image acquireLatestImage() throws android.media.ImageReader.MaxImagesAcquiredException;
+    method public android.media.Image acquireNextImage() throws android.media.ImageReader.MaxImagesAcquiredException;
     method public void close();
     method public int getHeight();
     method public int getImageFormat();
     method public int getMaxImages();
-    method public android.media.Image getNextImage();
     method public android.view.Surface getSurface();
     method public int getWidth();
-    method public void releaseImage(android.media.Image);
-    method public void setImageAvailableListener(android.media.ImageReader.OnImageAvailableListener, android.os.Handler);
+    method public static android.media.ImageReader newInstance(int, int, int, int);
+    method public void setOnImageAvailableListener(android.media.ImageReader.OnImageAvailableListener, android.os.Handler);
+  }
+
+  public static class ImageReader.MaxImagesAcquiredException extends java.lang.Exception {
+    ctor public ImageReader.MaxImagesAcquiredException();
+    ctor public ImageReader.MaxImagesAcquiredException(java.lang.String);
+    ctor public ImageReader.MaxImagesAcquiredException(java.lang.String, java.lang.Throwable);
+    ctor public ImageReader.MaxImagesAcquiredException(java.lang.Throwable);
   }
 
   public static abstract interface ImageReader.OnImageAvailableListener {
