@@ -583,6 +583,29 @@ public class ConnectivityManager {
     }
 
     /**
+     * Returns details about the Provisioning or currently active default data network. When
+     * connected, this network is the default route for outgoing connections.
+     * You should always check {@link NetworkInfo#isConnected()} before initiating
+     * network traffic. This may return {@code null} when there is no default
+     * network.
+     *
+     * @return a {@link NetworkInfo} object for the current default network
+     *        or {@code null} if no network default network is currently active
+     *
+     * <p>This method requires the call to hold the permission
+     * {@link android.Manifest.permission#ACCESS_NETWORK_STATE}.
+     *
+     * {@hide}
+     */
+    public NetworkInfo getProvisioningOrActiveNetworkInfo() {
+        try {
+            return mService.getProvisioningOrActiveNetworkInfo();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Returns the IP information for the current default network.
      *
      * @return a {@link LinkProperties} object describing the IP info
@@ -1316,63 +1339,19 @@ public class ConnectivityManager {
     }
 
     /**
-     * The ResultReceiver resultCode for checkMobileProvisioning (CMP_RESULT_CODE)
-     */
-
-    /**
-     * No connection was possible to the network.
-     * {@hide}
-     */
-    public static final int CMP_RESULT_CODE_NO_CONNECTION = 0;
-
-    /**
-     * A connection was made to the internet, all is well.
-     * {@hide}
-     */
-    public static final int CMP_RESULT_CODE_CONNECTABLE = 1;
-
-    /**
-     * A connection was made but there was a redirection, we appear to be in walled garden.
-     * This is an indication of a warm sim on a mobile network.
-     * {@hide}
-     */
-    public static final int CMP_RESULT_CODE_REDIRECTED = 2;
-
-    /**
-     * A connection was made but no dns server was available to resolve a name to address.
-     * This is an indication of a warm sim on a mobile network.
+     * Check mobile provisioning.
      *
-     * {@hide}
-     */
-    public static final int CMP_RESULT_CODE_NO_DNS = 3;
-
-    /**
-     * A connection was made but could not open a TCP connection.
-     * This is an indication of a warm sim on a mobile network.
-     * {@hide}
-     */
-    public static final int CMP_RESULT_CODE_NO_TCP_CONNECTION = 4;
-
-    /**
-     * Check mobile provisioning. The resultCode passed to
-     * onReceiveResult will be one of the CMP_RESULT_CODE_xxxx values above.
-     * This may take a minute or more to complete.
-     *
-     * @param sendNotificaiton, when true a notification will be sent to user.
      * @param suggestedTimeOutMs, timeout in milliseconds
-     * @param resultReceiver needs to  be supplied to receive the result
      *
      * @return time out that will be used, maybe less that suggestedTimeOutMs
      * -1 if an error.
      *
      * {@hide}
      */
-    public int checkMobileProvisioning(boolean sendNotification, int suggestedTimeOutMs,
-            ResultReceiver resultReceiver) {
+    public int checkMobileProvisioning(int suggestedTimeOutMs) {
         int timeOutMs = -1;
         try {
-            timeOutMs = mService.checkMobileProvisioning(sendNotification, suggestedTimeOutMs,
-                    resultReceiver);
+            timeOutMs = mService.checkMobileProvisioning(suggestedTimeOutMs);
         } catch (RemoteException e) {
         }
         return timeOutMs;
@@ -1400,5 +1379,21 @@ public class ConnectivityManager {
         } catch (RemoteException e) {
         }
         return null;
+    }
+
+    /**
+     * Set sign in error notification to visible or in visible
+     *
+     * @param visible
+     * @param networkType
+     *
+     * {@hide}
+     */
+    public void setProvisioningNotificationVisible(boolean visible, int networkType,
+            String extraInfo, String url) {
+        try {
+            mService.setProvisioningNotificationVisible(visible, networkType, extraInfo, url);
+        } catch (RemoteException e) {
+        }
     }
 }

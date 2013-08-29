@@ -145,6 +145,29 @@ public class TelephonyIntents {
     public static final String ACTION_ANY_DATA_CONNECTION_STATE_CHANGED
             = "android.intent.action.ANY_DATA_STATE";
 
+    /**
+     * Broadcast Action: Occurs when a data connection connects to a provisioning apn
+     * and is broadcast by the low level data connection code.
+     * The intent will have the following extra values:</p>
+     * <ul>
+     *   <li><em>apn</em> - A string that is the APN associated with this
+     *      connection.</li>
+     *   <li><em>apnType</em> - A string array of APN types associated with
+     *      this connection.  The APN type <code>"*"</code> is a special
+     *      type that means this APN services all types.</li>
+     *   <li><em>linkProperties</em> - The <code>LinkProperties</code> for this APN</li>
+     *   <li><em>linkCapabilities</em> - The <code>linkCapabilities</code> for this APN</li>
+     *   <li><em>iface</em> - A string that is the name of the interface</li>
+     * </ul>
+     *
+     * <p class="note">
+     * Requires the READ_PHONE_STATE permission.
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     */
+    public static final String ACTION_DATA_CONNECTION_CONNECTED_TO_PROVISIONING_APN
+            = "android.intent.action.DATA_CONNECTION_CONNECTED_TO_PROVISIONING_APN";
 
     /**
      * Broadcast Action: An attempt to establish a data connection has failed.

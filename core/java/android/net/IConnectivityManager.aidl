@@ -46,6 +46,8 @@ interface IConnectivityManager
     NetworkInfo getNetworkInfo(int networkType);
     NetworkInfo[] getAllNetworkInfo();
 
+    NetworkInfo getProvisioningOrActiveNetworkInfo();
+
     boolean isNetworkSupported(int networkType);
 
     LinkProperties getActiveLinkProperties();
@@ -135,9 +137,11 @@ interface IConnectivityManager
 
     int findConnectionTypeForIface(in String iface);
 
-    int checkMobileProvisioning(boolean sendNotification, int suggestedTimeOutMs, in ResultReceiver resultReceiver);
+    int checkMobileProvisioning(int suggestedTimeOutMs);
 
     String getMobileProvisioningUrl();
 
     String getMobileRedirectedProvisioningUrl();
+
+    void setProvisioningNotificationVisible(boolean visible, int networkType, in String extraInfo, in String url);
 }
