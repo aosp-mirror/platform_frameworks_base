@@ -1323,7 +1323,7 @@
     <string name="submit" msgid="1602335572089911941">"Trimiteţi"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Mod Maşină activat"</string>
     <string name="car_mode_disable_notification_message" msgid="8035230537563503262">"Atingeţi pentru a ieşi din modul Maşină."</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"Tethering sau hotspot active"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Tethering sau hotspot activ"</string>
     <string name="tethered_notification_message" msgid="6857031760103062982">"Atingeţi pentru a configura."</string>
     <string name="back_button_label" msgid="2300470004503343439">"Înapoi"</string>
     <string name="next_button_label" msgid="1080555104677992408">"Înainte"</string>
