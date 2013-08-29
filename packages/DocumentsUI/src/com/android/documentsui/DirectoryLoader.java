@@ -26,7 +26,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
-import android.provider.DocumentsContract.DocumentColumns;
 import android.util.Log;
 
 import com.android.documentsui.model.Document;
@@ -77,9 +76,10 @@ public class DirectoryLoader extends UriDerivativeLoader<Uri, DirectoryResult> {
     }
 
     private void loadInBackgroundInternal(
-            DirectoryResult result, Uri uri, CancellationSignal signal) {
+            DirectoryResult result, Uri uri, CancellationSignal signal) throws RuntimeException {
+        // TODO: switch to using unstable CPC
         final ContentResolver resolver = getContext().getContentResolver();
-        final Cursor cursor = resolver.query(uri, null, null, null, getQuerySortOrder(), signal);
+        final Cursor cursor = resolver.query(uri, null, null, null, null, signal);
         result.cursor = cursor;
         result.cursor.registerContentObserver(mObserver);
 
@@ -108,18 +108,6 @@ public class DirectoryLoader extends UriDerivativeLoader<Uri, DirectoryResult> {
 
         if (mSortOrder != null) {
             Collections.sort(result.contents, mSortOrder);
-        }
-    }
-
-    private String getQuerySortOrder() {
-        if (mSortOrder instanceof Document.DateComparator) {
-            return DocumentColumns.LAST_MODIFIED + " DESC";
-        } else if (mSortOrder instanceof Document.NameComparator) {
-            return DocumentColumns.DISPLAY_NAME + " ASC";
-        } else if (mSortOrder instanceof Document.SizeComparator) {
-            return DocumentColumns.SIZE + " DESC";
-        } else {
-            return null;
         }
     }
 }

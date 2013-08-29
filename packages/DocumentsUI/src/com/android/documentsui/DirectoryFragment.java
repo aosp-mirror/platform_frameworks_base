@@ -20,8 +20,8 @@ import static com.android.documentsui.DocumentsActivity.TAG;
 import static com.android.documentsui.DocumentsActivity.DisplayState.ACTION_MANAGE;
 import static com.android.documentsui.DocumentsActivity.DisplayState.MODE_GRID;
 import static com.android.documentsui.DocumentsActivity.DisplayState.MODE_LIST;
-import static com.android.documentsui.DocumentsActivity.DisplayState.SORT_ORDER_DATE;
-import static com.android.documentsui.DocumentsActivity.DisplayState.SORT_ORDER_NAME;
+import static com.android.documentsui.DocumentsActivity.DisplayState.SORT_ORDER_DISPLAY_NAME;
+import static com.android.documentsui.DocumentsActivity.DisplayState.SORT_ORDER_LAST_MODIFIED;
 import static com.android.documentsui.DocumentsActivity.DisplayState.SORT_ORDER_SIZE;
 
 import android.app.Fragment;
@@ -32,7 +32,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.net.Uri;
@@ -55,7 +54,6 @@ import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -64,7 +62,6 @@ import android.widget.Toast;
 
 import com.android.documentsui.DocumentsActivity.DisplayState;
 import com.android.documentsui.model.Document;
-import com.android.documentsui.model.Root;
 import com.android.internal.util.Predicate;
 import com.google.android.collect.Lists;
 
@@ -81,7 +78,6 @@ public class DirectoryFragment extends Fragment {
     private View mEmptyView;
     private ListView mListView;
     private GridView mGridView;
-    private Button mMoreView;
 
     private AbsListView mCurrentView;
 
@@ -110,7 +106,8 @@ public class DirectoryFragment extends Fragment {
     }
 
     public static void showSearch(FragmentManager fm, Uri uri, String query) {
-        final Uri searchUri = DocumentsContract.buildSearchUri(uri, query);
+        final Uri searchUri = DocumentsContract.buildSearchUri(
+                uri.getAuthority(), DocumentsContract.getDocId(uri), query);
         show(fm, TYPE_SEARCH, searchUri);
     }
 
@@ -153,8 +150,6 @@ public class DirectoryFragment extends Fragment {
         mGridView.setOnItemClickListener(mItemListener);
         mGridView.setMultiChoiceModeListener(mMultiListener);
 
-        mMoreView = (Button) view.findViewById(R.id.more);
-
         mAdapter = new DocumentsAdapter();
 
         final Uri uri = getArguments().getParcelable(EXTRA_URI);
@@ -168,22 +163,19 @@ public class DirectoryFragment extends Fragment {
 
                 Uri contentsUri;
                 if (mType == TYPE_NORMAL) {
-                    contentsUri = DocumentsContract.buildContentsUri(uri);
+                    contentsUri = DocumentsContract.buildChildrenUri(
+                            uri.getAuthority(), DocumentsContract.getDocId(uri));
                 } else if (mType == TYPE_RECENT_OPEN) {
                     contentsUri = RecentsProvider.buildRecentOpen();
                 } else {
                     contentsUri = uri;
                 }
 
-                if (state.localOnly) {
-                    contentsUri = DocumentsContract.setLocalOnly(contentsUri);
-                }
-
                 final Comparator<Document> sortOrder;
-                if (state.sortOrder == SORT_ORDER_DATE || mType == TYPE_RECENT_OPEN) {
-                    sortOrder = new Document.DateComparator();
-                } else if (state.sortOrder == SORT_ORDER_NAME) {
-                    sortOrder = new Document.NameComparator();
+                if (state.sortOrder == SORT_ORDER_LAST_MODIFIED || mType == TYPE_RECENT_OPEN) {
+                    sortOrder = new Document.LastModifiedComparator();
+                } else if (state.sortOrder == SORT_ORDER_DISPLAY_NAME) {
+                    sortOrder = new Document.DisplayNameComparator();
                 } else if (state.sortOrder == SORT_ORDER_SIZE) {
                     sortOrder = new Document.SizeComparator();
                 } else {
@@ -196,28 +188,6 @@ public class DirectoryFragment extends Fragment {
             @Override
             public void onLoadFinished(Loader<DirectoryResult> loader, DirectoryResult result) {
                 mAdapter.swapDocuments(result.contents);
-
-                final Cursor cursor = result.cursor;
-                if (cursor != null && cursor.getExtras()
-                        .getBoolean(DocumentsContract.EXTRA_HAS_MORE, false)) {
-                    mMoreView.setText(R.string.more);
-                    mMoreView.setVisibility(View.VISIBLE);
-                    mMoreView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            mMoreView.setText(R.string.loading);
-                            final Bundle bundle = new Bundle();
-                            bundle.putBoolean(DocumentsContract.EXTRA_REQUEST_MORE, true);
-                            try {
-                                cursor.respond(bundle);
-                            } catch (Exception e) {
-                                Log.w(TAG, "Failed to respond: " + e);
-                            }
-                        }
-                    });
-                } else {
-                    mMoreView.setVisibility(View.GONE);
-                }
             }
 
             @Override
@@ -489,8 +459,7 @@ public class DirectoryFragment extends Fragment {
                     task.execute(doc.uri);
                 }
             } else {
-                icon.setImageDrawable(roots.resolveDocumentIcon(
-                        context, doc.uri.getAuthority(), doc.mimeType));
+                icon.setImageDrawable(RootsCache.resolveDocumentIcon(context, doc.mimeType));
             }
 
             title.setText(doc.displayName);
@@ -504,11 +473,7 @@ public class DirectoryFragment extends Fragment {
                     summary.setVisibility(View.INVISIBLE);
                 }
             } else if (mType == TYPE_RECENT_OPEN) {
-                final Root root = roots.findRoot(doc);
-                icon1.setVisibility(View.VISIBLE);
-                icon1.setImageDrawable(root.icon);
-                summary.setText(root.getDirectoryString());
-                summary.setVisibility(View.VISIBLE);
+                // TODO: resolve storage root
             }
 
             if (summaryGrid != null) {

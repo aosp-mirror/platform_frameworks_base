@@ -73,8 +73,8 @@ public class SaveFragment extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_save, container, false);
 
         final ImageView icon = (ImageView) view.findViewById(android.R.id.icon);
-        icon.setImageDrawable(roots.resolveDocumentIcon(
-                context, null, getArguments().getString(EXTRA_MIME_TYPE)));
+        icon.setImageDrawable(
+                RootsCache.resolveDocumentIcon(context, getArguments().getString(EXTRA_MIME_TYPE)));
 
         mDisplayName = (EditText) view.findViewById(android.R.id.title);
         mDisplayName.addTextChangedListener(mDisplayNameWatcher);

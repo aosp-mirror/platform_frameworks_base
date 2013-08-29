@@ -18,30 +18,24 @@ package com.android.documentsui;
 
 import static com.android.documentsui.DocumentsActivity.TAG;
 
+import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
-import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.DocumentsContract;
+import android.provider.DocumentsContract.DocumentRoot;
 import android.provider.DocumentsContract.Documents;
 import android.util.Log;
-import android.util.Pair;
 
-import com.android.documentsui.model.Document;
-import com.android.documentsui.model.DocumentsProviderInfo;
-import com.android.documentsui.model.DocumentsProviderInfo.Icon;
-import com.android.documentsui.model.Root;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Objects;
 import com.google.android.collect.Lists;
-import com.google.android.collect.Maps;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -54,14 +48,9 @@ public class RootsCache {
 
     private final Context mContext;
 
-    /** Map from authority to cached info */
-    private HashMap<String, DocumentsProviderInfo> mProviders = Maps.newHashMap();
-    /** Map from (authority+rootId) to cached info */
-    private HashMap<Pair<String, String>, Root> mRoots = Maps.newHashMap();
+    public List<DocumentRoot> mRoots = Lists.newArrayList();
 
-    public ArrayList<Root> mRootsList = Lists.newArrayList();
-
-    private Root mRecentsRoot;
+    private DocumentRoot mRecentsRoot;
 
     public RootsCache(Context context) {
         mContext = context;
@@ -73,95 +62,78 @@ public class RootsCache {
      */
     @GuardedBy("ActivityThread")
     public void update() {
-        mProviders.clear();
         mRoots.clear();
-        mRootsList.clear();
 
         {
             // Create special root for recents
-            final Root root = Root.buildRecents(mContext);
-            mRootsList.add(root);
+            final DocumentRoot root = new DocumentRoot();
+            root.rootType = DocumentRoot.ROOT_TYPE_SHORTCUT;
+            root.docId = null;
+            root.icon = R.drawable.ic_dir;
+            root.title = mContext.getString(R.string.root_recent);
+            root.summary = null;
+            root.availableBytes = -1;
+
+            mRoots.add(root);
             mRecentsRoot = root;
         }
 
         // Query for other storage backends
+        final ContentResolver resolver = mContext.getContentResolver();
         final PackageManager pm = mContext.getPackageManager();
         final List<ProviderInfo> providers = pm.queryContentProviders(
                 null, -1, PackageManager.GET_META_DATA);
-        for (ProviderInfo providerInfo : providers) {
-            if (providerInfo.metaData != null && providerInfo.metaData.containsKey(
+        for (ProviderInfo info : providers) {
+            if (info.metaData != null && info.metaData.containsKey(
                     DocumentsContract.META_DATA_DOCUMENT_PROVIDER)) {
-                final DocumentsProviderInfo info = DocumentsProviderInfo.parseInfo(
-                        mContext, providerInfo);
-                if (info == null) {
-                    Log.w(TAG, "Missing info for " + providerInfo);
-                    continue;
-                }
 
-                mProviders.put(info.providerInfo.authority, info);
-
+                // TODO: remove deprecated customRoots flag
+                // TODO: populate roots on background thread, and cache results
+                final ContentProviderClient client = resolver
+                        .acquireUnstableContentProviderClient(info.authority);
                 try {
-                    // TODO: remove deprecated customRoots flag
-                    // TODO: populate roots on background thread, and cache results
-                    final Uri uri = DocumentsContract.buildRootsUri(providerInfo.authority);
-                    final Cursor cursor = mContext.getContentResolver()
-                            .query(uri, null, null, null, null);
-                    try {
-                        while (cursor.moveToNext()) {
-                            final Root root = Root.fromCursor(mContext, info, cursor);
-                            mRoots.put(Pair.create(info.providerInfo.authority, root.rootId), root);
-                            mRootsList.add(root);
-                        }
-                    } finally {
-                        cursor.close();
+                    final List<DocumentRoot> roots = DocumentsContract.getDocumentRoots(client);
+                    for (DocumentRoot root : roots) {
+                        root.authority = info.authority;
                     }
+                    mRoots.addAll(roots);
                 } catch (Exception e) {
-                    Log.w(TAG, "Failed to load some roots from " + info.providerInfo.authority
-                            + ": " + e);
+                    Log.w(TAG, "Failed to load some roots from " + info.authority + ": " + e);
+                } finally {
+                    ContentProviderClient.closeQuietly(client);
                 }
             }
         }
     }
 
-    @GuardedBy("ActivityThread")
-    public DocumentsProviderInfo findProvider(String authority) {
-        return mProviders.get(authority);
+    public DocumentRoot findRoot(Uri uri) {
+        final String authority = uri.getAuthority();
+        final String docId = DocumentsContract.getDocId(uri);
+        for (DocumentRoot root : mRoots) {
+            if (Objects.equal(root.authority, authority) && Objects.equal(root.docId, docId)) {
+                return root;
+            }
+        }
+        return null;
     }
 
     @GuardedBy("ActivityThread")
-    public Root findRoot(String authority, String rootId) {
-        return mRoots.get(Pair.create(authority, rootId));
-    }
-
-    @GuardedBy("ActivityThread")
-    public Root findRoot(Document doc) {
-        final String authority = doc.uri.getAuthority();
-        final String rootId = DocumentsContract.getRootId(doc.uri);
-        return findRoot(authority, rootId);
-    }
-
-    @GuardedBy("ActivityThread")
-    public Root getRecentsRoot() {
+    public DocumentRoot getRecentsRoot() {
         return mRecentsRoot;
     }
 
     @GuardedBy("ActivityThread")
-    public Collection<Root> getRoots() {
-        return mRootsList;
+    public boolean isRecentsRoot(DocumentRoot root) {
+        return mRecentsRoot == root;
     }
 
     @GuardedBy("ActivityThread")
-    public Drawable resolveDocumentIcon(Context context, String authority, String mimeType) {
-        // Custom icons take precedence
-        final DocumentsProviderInfo info = mProviders.get(authority);
-        if (info != null) {
-            for (Icon icon : info.customIcons) {
-                if (MimePredicate.mimeMatches(icon.mimeType, mimeType)) {
-                    return icon.icon;
-                }
-            }
-        }
+    public List<DocumentRoot> getRoots() {
+        return mRoots;
+    }
 
+    @GuardedBy("ActivityThread")
+    public static Drawable resolveDocumentIcon(Context context, String mimeType) {
         if (Documents.MIME_TYPE_DIR.equals(mimeType)) {
             return context.getResources().getDrawable(R.drawable.ic_dir);
         } else {
