@@ -122,6 +122,7 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.LogPrinter;
+import android.util.PrintStreamPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
@@ -2595,6 +2596,37 @@ public class PackageManagerService extends IPackageManager.Stub {
         return chooseBestActivity(intent, resolvedType, flags, query, userId);
     }
 
+    @Override
+    public void setLastChosenActivity(Intent intent, String resolvedType, int flags,
+            IntentFilter filter, int match, ComponentName activity) {
+        final int userId = UserHandle.getCallingUserId();
+        if (DEBUG_PREFERRED) {
+            Log.v(TAG, "setLastChosenActivity intent=" + intent
+                + " resolvedType=" + resolvedType
+                + " flags=" + flags
+                + " filter=" + filter
+                + " match=" + match
+                + " activity=" + activity);
+            filter.dump(new PrintStreamPrinter(System.out), "    ");
+        }
+        intent.setComponent(null);
+        List<ResolveInfo> query = queryIntentActivities(intent, resolvedType, flags, userId);
+        // Find any earlier preferred or last chosen entries and nuke them
+        findPreferredActivity(intent, resolvedType,
+                flags, query, 0, false, true, userId);
+        // Add the new activity as the last chosen for this filter
+        addPreferredActivityInternal(filter, match, null, activity, false, userId);
+    }
+
+    @Override
+    public ResolveInfo getLastChosenActivity(Intent intent, String resolvedType, int flags) {
+        final int userId = UserHandle.getCallingUserId();
+        if (DEBUG_PREFERRED) Log.v(TAG, "Querying last chosen activity for " + intent);
+        List<ResolveInfo> query = queryIntentActivities(intent, resolvedType, flags, userId);
+        return findPreferredActivity(intent, resolvedType, flags, query, 0,
+                false, false, userId);
+    }
+
     private ResolveInfo chooseBestActivity(Intent intent, String resolvedType,
             int flags, List<ResolveInfo> query, int userId) {
         if (query != null) {
@@ -2620,7 +2652,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 // If we have saved a preference for a preferred activity for
                 // this Intent, use that.
                 ResolveInfo ri = findPreferredActivity(intent, resolvedType,
-                        flags, query, r0.priority, userId);
+                        flags, query, r0.priority, true, false, userId);
                 if (ri != null) {
                     return ri;
                 }
@@ -2639,16 +2671,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         return null;
     }
 
-    ResolveInfo findPreferredActivity(Intent intent, String resolvedType,
-            int flags, List<ResolveInfo> query, int priority, int userId) {
+    ResolveInfo findPreferredActivity(Intent intent, String resolvedType, int flags,
+            List<ResolveInfo> query, int priority, boolean always,
+            boolean removeMatches, int userId) {
         if (!sUserManager.exists(userId)) return null;
         // writer
         synchronized (mPackages) {
             if (intent.getSelector() != null) {
-                intent = intent.getSelector(); 
+                intent = intent.getSelector();
             }
             if (DEBUG_PREFERRED) intent.addFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
             PreferredIntentResolver pir = mSettings.mPreferredActivities.get(userId);
+            // Get the list of preferred activities that handle the intent
             List<PreferredActivity> prefs = pir != null
                     ? pir.queryIntent(intent, resolvedType,
                             (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0, userId)
@@ -2683,7 +2717,25 @@ public class PackageManagerService extends IPackageManager.Stub {
                 final int M = prefs.size();
                 for (int i=0; i<M; i++) {
                     final PreferredActivity pa = prefs.get(i);
+                    if (DEBUG_PREFERRED) {
+                        Log.v(TAG, "Checking PreferredActivity ds="
+                                + (pa.countDataSchemes() > 0 ? pa.getDataScheme(0) : "<none>")
+                                + "\n  component=" + pa.mPref.mComponent);
+                        pa.dump(new PrintStreamPrinter(System.out), "  ");
+                    }
                     if (pa.mPref.mMatch != match) {
+                        if (DEBUG_PREFERRED) {
+                            Log.v(TAG, "Skipping bad match "
+                                    + Integer.toHexString(pa.mPref.mMatch));
+                        }
+                        continue;
+                    }
+                    // If it's not an "always" type preferred activity and that's what we're
+                    // looking for, skip it.
+                    if (always && !pa.mPref.mAlways) {
+                        if (DEBUG_PREFERRED) {
+                            Log.v(TAG, "Skipping lastChosen entry");
+                        }
                         continue;
                     }
                     final ActivityInfo ai = getActivityInfo(pa.mPref.mComponent,
@@ -2717,22 +2769,41 @@ public class PackageManagerService extends IPackageManager.Stub {
                             continue;
                         }
 
-                        // Okay we found a previously set preferred app.
+                        if (removeMatches) {
+                            pir.removeFilter(pa);
+                            if (DEBUG_PREFERRED) {
+                                Log.v(TAG, "Removing match " + pa.mPref.mComponent);
+                            }
+                            break;
+                        }
+
+                        // Okay we found a previously set preferred or last chosen app.
                         // If the result set is different from when this
                         // was created, we need to clear it and re-ask the
-                        // user their preference.
-                        if (!pa.mPref.sameSet(query, priority)) {
+                        // user their preference, if we're looking for an "always" type entry.
+                        if (always && !pa.mPref.sameSet(query, priority)) {
                             Slog.i(TAG, "Result set changed, dropping preferred activity for "
                                     + intent + " type " + resolvedType);
+                            if (DEBUG_PREFERRED) {
+                                Log.v(TAG, "Removing preferred activity since set changed "
+                                        + pa.mPref.mComponent);
+                            }
                             pir.removeFilter(pa);
+                            // Re-add the filter as a "last chosen" entry (!always)
+                            PreferredActivity lastChosen = new PreferredActivity(
+                                    pa, pa.mPref.mMatch, null, pa.mPref.mComponent, false);
+                            pir.addFilter(lastChosen);
+                            mSettings.writePackageRestrictionsLPr(userId);
                             return null;
                         }
 
-                        // Yay!
+                        // Yay! Either the set matched or we're looking for the last chosen
+                        mSettings.writePackageRestrictionsLPr(userId);
                         return ri;
                     }
                 }
             }
+            mSettings.writePackageRestrictionsLPr(userId);
         }
         return null;
     }
@@ -9606,9 +9677,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         return Build.VERSION_CODES.CUR_DEVELOPMENT;
     }
-    
+
     public void addPreferredActivity(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity, int userId) {
+        addPreferredActivityInternal(filter, match, set, activity, true, userId);
+    }
+
+    private void addPreferredActivityInternal(IntentFilter filter, int match,
+            ComponentName[] set, ComponentName activity, boolean always, int userId) {
         // writer
         int callingUid = Binder.getCallingUid();
         enforceCrossUserPermission(callingUid, userId, true, "add preferred activity");
@@ -9629,7 +9705,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             Slog.i(TAG, "Adding preferred activity " + activity + " for user " + userId + " :");
             filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
             mSettings.editPreferredActivitiesLPw(userId).addFilter(
-                    new PreferredActivity(filter, match, set, activity));
+                    new PreferredActivity(filter, match, set, activity, always));
             mSettings.writePackageRestrictionsLPr(userId);
         }
     }
@@ -9691,7 +9767,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
-            addPreferredActivity(filter, match, set, activity, callingUserId);
+            addPreferredActivityInternal(filter, match, set, activity, true, callingUserId);
         }
     }
 
@@ -9736,8 +9812,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             Iterator<PreferredActivity> it = pir.filterIterator();
             while (it.hasNext()) {
                 PreferredActivity pa = it.next();
+                // Mark entry for removal only if it matches the package name
+                // and the entry is of type "always".
                 if (packageName == null ||
-                        pa.mPref.mComponent.getPackageName().equals(packageName)) {
+                        (pa.mPref.mComponent.getPackageName().equals(packageName)
+                                && pa.mPref.mAlways)) {
                     if (removed == null) {
                         removed = new ArrayList<PreferredActivity>();
                     }
@@ -9781,7 +9860,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 while (it.hasNext()) {
                     final PreferredActivity pa = it.next();
                     if (packageName == null
-                            || pa.mPref.mComponent.getPackageName().equals(packageName)) {
+                            || (pa.mPref.mComponent.getPackageName().equals(packageName)
+                                    && pa.mPref.mAlways)) {
                         if (outFilters != null) {
                             outFilters.add(new IntentFilter(pa));
                         }

@@ -1526,8 +1526,8 @@
   <java-symbol type="string" name="enable_explore_by_touch_warning_title" />
   <java-symbol type="string" name="enable_explore_by_touch_warning_message" />
 
-  <java-symbol type="layout" name="resolver_grid" />
-  <java-symbol type="id" name="resolver_grid" />
+  <java-symbol type="layout" name="resolver_list" />
+  <java-symbol type="id" name="resolver_list" />
   <java-symbol type="id" name="button_once" />
   <java-symbol type="id" name="button_always" />
   <java-symbol type="integer" name="config_maxResolverActivityColumns" />
