@@ -202,7 +202,7 @@
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Rețeaua poate fi monitorizată"</string>
     <string name="done_button" msgid="1759387181766603361">"Terminat"</string>
     <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Monitorizarea rețelei"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Acest dispozitiv este gestionat de: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nAdministratorul este capabil să monitorizeze activitatea dvs. în rețea, inclusiv mesajele e-mail, aplicațiile și site-urile sigure.\n\nPentru mai multe informații, contactați administratorul."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"O parte terță poate monitoriza activitatea dvs. în\nrețea, inclusiv mesajele e-mail, aplicațiile și site-urile sigure.\n\nAcest lucru este posibil deoarece există o acreditare de încredere instalată pe dispozitivul dvs."</string>
+    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Acest dispozitiv este gestionat de: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nAdministratorul este capabil să monitorizeze activitatea dvs. în rețea, inclusiv mesajele e-mail, aplicațiile și site-urile securizate.\n\nPentru mai multe informații, contactați administratorul."</string>
+    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"O terță parte poate monitoriza activitatea dvs. în\nrețea, inclusiv mesajele e-mail, aplicațiile și site-urile securizate.\n\nAcest lucru este posibil deoarece există o acreditare de încredere instalată pe dispozitivul dvs."</string>
     <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Verificați acreditările de încredere"</string>
 </resources>
