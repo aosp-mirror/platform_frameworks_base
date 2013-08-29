@@ -22,7 +22,7 @@ import static com.android.documentsui.DocumentsActivity.DisplayState.ACTION_MANA
 import static com.android.documentsui.DocumentsActivity.DisplayState.ACTION_OPEN;
 import static com.android.documentsui.DocumentsActivity.DisplayState.MODE_GRID;
 import static com.android.documentsui.DocumentsActivity.DisplayState.MODE_LIST;
-import static com.android.documentsui.DocumentsActivity.DisplayState.SORT_ORDER_DATE;
+import static com.android.documentsui.DocumentsActivity.DisplayState.SORT_ORDER_LAST_MODIFIED;
 
 import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
@@ -32,6 +32,7 @@ import android.app.FragmentManager;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ComponentName;
+import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -41,7 +42,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
-import android.provider.DocumentsContract.DocumentColumns;
+import android.provider.DocumentsContract.DocumentRoot;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -61,7 +62,6 @@ import android.widget.Toast;
 
 import com.android.documentsui.model.Document;
 import com.android.documentsui.model.DocumentStack;
-import com.android.documentsui.model.Root;
 
 import java.io.FileNotFoundException;
 import java.util.Arrays;
@@ -101,7 +101,7 @@ public class DocumentsActivity extends Activity {
             mAction = ACTION_CREATE;
         } else if (Intent.ACTION_GET_CONTENT.equals(action)) {
             mAction = ACTION_GET_CONTENT;
-        } else if (Intent.ACTION_MANAGE_DOCUMENT.equals(action)) {
+        } else if (DocumentsContract.ACTION_MANAGE_DOCUMENTS.equals(action)) {
             mAction = ACTION_MANAGE;
         }
 
@@ -143,7 +143,7 @@ public class DocumentsActivity extends Activity {
         }
 
         if (mAction == ACTION_MANAGE) {
-            mDisplayState.sortOrder = SORT_ORDER_DATE;
+            mDisplayState.sortOrder = SORT_ORDER_LAST_MODIFIED;
         }
 
         mRootsContainer = findViewById(R.id.container_roots);
@@ -160,10 +160,7 @@ public class DocumentsActivity extends Activity {
             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
             final Uri rootUri = intent.getData();
-            final String authority = rootUri.getAuthority();
-            final String rootId = DocumentsContract.getRootId(rootUri);
-
-            final Root root = mRoots.findRoot(authority, rootId);
+            final DocumentRoot root = mRoots.findRoot(rootUri);
             if (root != null) {
                 onRootPicked(root, true);
             } else {
@@ -255,10 +252,10 @@ public class DocumentsActivity extends Activity {
             mDrawerToggle.setDrawerIndicatorEnabled(true);
 
         } else {
-            final Root root = getCurrentRoot();
-            actionBar.setIcon(root != null ? root.icon : null);
+            final DocumentRoot root = getCurrentRoot();
+            actionBar.setIcon(root != null ? root.loadIcon(this) : null);
 
-            if (root.isRecents) {
+            if (mRoots.isRecentsRoot(root)) {
                 actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
                 actionBar.setTitle(root.title);
             } else {
@@ -441,9 +438,8 @@ public class DocumentsActivity extends Activity {
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
             final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
 
-            final Document cwd = getCurrentDirectory();
-            if (cwd != null) {
-                title.setText(cwd.displayName);
+            if (mStack.size() > 0) {
+                title.setText(mStack.getTitle(mRoots));
             } else {
                 // No directory means recents
                 title.setText(R.string.root_recent);
@@ -477,10 +473,9 @@ public class DocumentsActivity extends Activity {
         }
     };
 
-    public Root getCurrentRoot() {
-        final Document cwd = getCurrentDirectory();
-        if (cwd != null) {
-            return mRoots.findRoot(cwd);
+    public DocumentRoot getCurrentRoot() {
+        if (mStack.size() > 0) {
+            return mStack.getRoot(mRoots);
         } else {
             return mRoots.getRecentsRoot();
         }
@@ -538,13 +533,14 @@ public class DocumentsActivity extends Activity {
         onCurrentDirectoryChanged();
     }
 
-    public void onRootPicked(Root root, boolean closeDrawer) {
+    public void onRootPicked(DocumentRoot root, boolean closeDrawer) {
         // Clear entire backstack and start in new root
         mStack.clear();
 
-        if (!root.isRecents) {
+        if (!mRoots.isRecentsRoot(root)) {
             try {
-                onDocumentPicked(Document.fromRoot(getContentResolver(), root));
+                final Uri uri = DocumentsContract.buildDocumentUri(root.authority, root.docId);
+                onDocumentPicked(Document.fromUri(getContentResolver(), uri));
             } catch (FileNotFoundException e) {
             }
         } else {
@@ -611,16 +607,21 @@ public class DocumentsActivity extends Activity {
     }
 
     public void onSaveRequested(String mimeType, String displayName) {
-        final ContentValues values = new ContentValues();
-        values.put(DocumentColumns.MIME_TYPE, mimeType);
-        values.put(DocumentColumns.DISPLAY_NAME, displayName);
-
         final Document cwd = getCurrentDirectory();
-        final Uri childUri = getContentResolver().insert(cwd.uri, values);
-        if (childUri != null) {
+        final String authority = cwd.uri.getAuthority();
+
+        final ContentProviderClient client = getContentResolver()
+                .acquireUnstableContentProviderClient(authority);
+        try {
+            final String docId = DocumentsContract.createDocument(client,
+                    DocumentsContract.getDocId(cwd.uri), mimeType, displayName);
+
+            final Uri childUri = DocumentsContract.buildDocumentUri(authority, docId);
             onFinished(childUri);
-        } else {
+        } catch (Exception e) {
             Toast.makeText(this, R.string.save_error, Toast.LENGTH_SHORT).show();
+        } finally {
+            ContentProviderClient.closeQuietly(client);
         }
     }
 
@@ -680,7 +681,7 @@ public class DocumentsActivity extends Activity {
         public int action;
         public int mode = MODE_LIST;
         public String[] acceptMimes;
-        public int sortOrder = SORT_ORDER_NAME;
+        public int sortOrder = SORT_ORDER_DISPLAY_NAME;
         public boolean allowMultiple = false;
         public boolean showSize = false;
         public boolean localOnly = false;
@@ -693,8 +694,8 @@ public class DocumentsActivity extends Activity {
         public static final int MODE_LIST = 0;
         public static final int MODE_GRID = 1;
 
-        public static final int SORT_ORDER_NAME = 0;
-        public static final int SORT_ORDER_DATE = 1;
+        public static final int SORT_ORDER_DISPLAY_NAME = 0;
+        public static final int SORT_ORDER_LAST_MODIFIED = 1;
         public static final int SORT_ORDER_SIZE = 2;
     }
 
