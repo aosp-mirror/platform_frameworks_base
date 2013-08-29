@@ -212,7 +212,8 @@
   <java-symbol type="id" name="sms_short_code_remember_undo_instruction" />
   <java-symbol type="id" name="breadcrumb_section" />
   <java-symbol type="id" name="action_bar_spinner" />
-  <java-symbol type="id" name="pin_message" />
+  <java-symbol type="id" name="pin_cancel_button" />
+  <java-symbol type="id" name="pin_ok_button" />
   <java-symbol type="id" name="pin_text" />
   <java-symbol type="id" name="pin_new_text" />
   <java-symbol type="id" name="pin_confirm_text" />
@@ -870,7 +871,10 @@
   <java-symbol type="string" name="mediaSize_na_ledger" />
   <java-symbol type="string" name="mediaSize_na_tabloid" />
   <java-symbol type="string" name="reason_unknown" />
+  <java-symbol type="string" name="restr_pin_enter_admin_pin" />
   <java-symbol type="string" name="restr_pin_enter_pin" />
+  <java-symbol type="string" name="restr_pin_incorrect" />
+  <java-symbol type="string" name="restr_pin_try_later" />
   <java-symbol type="string" name="write_fail_reason_cancelled" />
   <java-symbol type="string" name="write_fail_reason_cannot_write" />
   <java-symbol type="string" name="transient_navigation_confirmation" />

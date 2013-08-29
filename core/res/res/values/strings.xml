@@ -4296,8 +4296,12 @@
     <!-- Print fail reason: unknown. [CHAR LIMIT=25] -->
     <string name="reason_unknown">unknown</string>
 
+    <!-- PIN entry dialog title for entering the administrator PIN [CHAR LIMIT=none] -->
+    <string name="restr_pin_enter_admin_pin">Enter administrator PIN</string>
     <!-- PIN entry dialog label/hint for PIN [CHAR LIMIT=none] -->
     <string name="restr_pin_enter_pin">Enter PIN</string>
+    <!-- PIN entry dialog label/hint for incorrect PIN entry [CHAR LIMIT=none] -->
+    <string name="restr_pin_incorrect">Incorrect</string>
     <!-- PIN entry dialog label/hint for old PIN [CHAR LIMIT=none] -->
     <string name="restr_pin_enter_old_pin">Current PIN</string>
     <!-- PIN entry dialog label for new PIN [CHAR LIMIT=none] -->
@@ -4313,9 +4317,11 @@
     <!-- PIN entry dialog countdown message for next chance to enter the PIN [CHAR LIMIT=none] -->
     <!-- Phrase describing a time duration using seconds [CHAR LIMIT=16] -->
     <plurals name="restr_pin_countdown">
-        <item quantity="one">Incorrect PIN. Try again in 1 second.</item>
-        <item quantity="other">Incorrect PIN. Try again in <xliff:g id="count">%d</xliff:g> seconds.</item>
+        <item quantity="one">Try again in 1 second</item>
+        <item quantity="other">Try again in <xliff:g id="count">%d</xliff:g> seconds</item>
     </plurals>
+    <!-- PIN entry dialog tells the user to not enter a PIN for a while. [CHAR LIMIT=none] -->
+    <string name="restr_pin_try_later">Try again later</string>
 
     <!-- Toast bar message when hiding the transient navigation bar [CHAR LIMIT=35] -->
     <string name="transient_navigation_confirmation">Swipe edge of screen to reveal bar</string>

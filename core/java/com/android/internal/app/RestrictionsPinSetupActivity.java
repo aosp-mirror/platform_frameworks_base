@@ -16,9 +16,7 @@
 
 package com.android.internal.app;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.UserManager;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -44,17 +42,13 @@ public class RestrictionsPinSetupActivity extends RestrictionsPinActivity {
         ap.mTitle = getString(R.string.restr_pin_enter_pin);
         ap.mPositiveButtonText = getString(R.string.ok);
         ap.mNegativeButtonText = getString(R.string.cancel);
-        ap.mPositiveButtonListener = this;
-        ap.mNegativeButtonListener = this;
         LayoutInflater inflater =
                 (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         ap.mView = inflater.inflate(R.layout.restrictions_pin_setup, null);
 
         mPinText = (EditText) ap.mView.findViewById(R.id.pin_text);
-        mPinMessage = (TextView) ap.mView.findViewById(R.id.pin_message);
         mNewPinText = (EditText) ap.mView.findViewById(R.id.pin_new_text);
         mConfirmPinText = (EditText) ap.mView.findViewById(R.id.pin_confirm_text);
-        mPinErrorMessage = (TextView) ap.mView.findViewById(R.id.pin_error_message);
         mNewPinText.addTextChangedListener(this);
         mConfirmPinText.addTextChangedListener(this);
 
@@ -72,19 +66,7 @@ public class RestrictionsPinSetupActivity extends RestrictionsPinActivity {
         return false;
     }
 
-    private void setPositiveButtonState(boolean enabled) {
-        mAlert.getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(enabled);
-    }
-
-    public void onClick(DialogInterface dialog, int which) {
-        setResult(RESULT_CANCELED);
-        if (which == AlertDialog.BUTTON_POSITIVE) {
-            performPositiveButtonAction();
-        } else if (which == AlertDialog.BUTTON_NEGATIVE) {
-            finish();
-        }
-    }
-
+    @Override
     protected void performPositiveButtonAction() {
         if (mHasRestrictionsPin) {
             int result = mUserManager.checkRestrictionsPin(mPinText.getText().toString());
@@ -115,7 +97,6 @@ public class RestrictionsPinSetupActivity extends RestrictionsPinActivity {
         boolean showError = !TextUtils.isEmpty(pin1) && !TextUtils.isEmpty(pin2);
         // TODO: Check recovery email address as well
         setPositiveButtonState(match);
-        mPinErrorMessage.setVisibility((match || !showError) ? View.INVISIBLE : View.VISIBLE);
     }
 
     @Override
