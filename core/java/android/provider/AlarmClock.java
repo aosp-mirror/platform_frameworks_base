@@ -90,6 +90,15 @@ public final class AlarmClock {
     public static final String ACTION_SET_TIMER = "android.intent.action.SET_TIMER";
 
     /**
+     * Activity Action: Show the alarms.
+     * <p>
+     * This action opens the alarms page.
+     * </p>
+     */
+     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+     public static final String ACTION_SHOW_ALARMS = "android.intent.action.SHOW_ALARMS";
+
+    /**
      * Bundle extra: Weekdays for repeating alarm.
      * <p>
      * Used by {@link #ACTION_SET_ALARM}.
