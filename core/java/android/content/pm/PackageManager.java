@@ -957,9 +957,21 @@ public abstract class PackageManager {
      * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports host-
      * based NFC card emulation.
+     *
+     * TODO remove when depending apps have moved to new constant.
+     * @hide
+     * @deprecated
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_NFC_HCE = "android.hardware.nfc.hce";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports host-
+     * based NFC card emulation.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_NFC_HOST_CARD_EMULATION = "android.hardware.nfc.hce";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
