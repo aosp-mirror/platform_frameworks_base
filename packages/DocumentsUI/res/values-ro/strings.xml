@@ -18,8 +18,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Documente"</string>
     <string name="title_open" msgid="4353228937663917801">"Deschideți din"</string>
-    <string name="title_save" msgid="2433679664882857999">"Salvaţi în"</string>
-    <string name="menu_create_dir" msgid="5947289605844398389">"Creaţi un dosar"</string>
+    <string name="title_save" msgid="2433679664882857999">"Salvați în"</string>
+    <string name="menu_create_dir" msgid="5947289605844398389">"Creați un dosar"</string>
     <string name="menu_grid" msgid="6878021334497835259">"Afișare tip grilă"</string>
     <string name="menu_list" msgid="7279285939892417279">"Afișare tip listă"</string>
     <string name="menu_sort" msgid="7677740407158414452">"Sortați după"</string>
@@ -32,9 +32,9 @@
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> selectate"</string>
     <string name="sort_name" msgid="9183560467917256779">"După nume"</string>
     <string name="sort_date" msgid="586080032956151448">"După data modificării"</string>
-    <string name="sort_size" msgid="3350681319735474741">"În funcţie de dimensiune"</string>
-    <string name="drawer_open" msgid="4545466532430226949">"Afișați directoarele principale"</string>
-    <string name="drawer_close" msgid="7602734368552123318">"Ascundeți directoarele principale"</string>
+    <string name="sort_size" msgid="3350681319735474741">"După dimensiune"</string>
+    <string name="drawer_open" msgid="4545466532430226949">"Afișați directoarele rădăcină"</string>
+    <string name="drawer_close" msgid="7602734368552123318">"Ascundeți directoarele rădăcină"</string>
     <string name="save_error" msgid="6167009778003223664">"Salvarea documentului nu a reușit"</string>
     <string name="root_recent" msgid="4470053704320518133">"Recente"</string>
     <string name="root_available_bytes" msgid="8568452858617033281">"<xliff:g id="SIZE">%1$s</xliff:g> spațiu liber"</string>
@@ -46,7 +46,7 @@
     <string name="pref_file_size" msgid="2826879315743961459">"Afișați dimensiunile fișierelor"</string>
     <string name="pref_device_size" msgid="3542106883278997222">"Afișați capacitatea de stocare a dispozitivelor"</string>
     <string name="empty" msgid="7858882803708117596">"Nu există elemente"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"Fişierul nu poate fi deschis"</string>
+    <string name="toast_no_application" msgid="1339885974067891667">"Fișierul nu poate fi deschis"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"Unele documente nu au putut fi șterse"</string>
     <string name="more" msgid="7117420986529297171">"Mai multe"</string>
     <string name="loading" msgid="7933681260296021180">"Se încarcă…"</string>
