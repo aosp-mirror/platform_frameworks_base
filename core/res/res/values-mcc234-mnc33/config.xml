@@ -35,4 +35,14 @@
          "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type"
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
     <string translatable="false" name="config_tether_apndata">Consumer Broadband,consumerbroadband,,,,,,,,,234,33,,DUN</string>
+
+    <!-- Don't use roaming icon for considered operators -->
+    <string-array translatable="false" name="config_operatorConsideredNonRoaming">
+        <item>23430</item>
+        <item>23431</item>
+        <item>23432</item>
+        <item>23433</item>
+        <item>23434</item>
+        <item>23486</item>
+    </string-array>
 </resources>
