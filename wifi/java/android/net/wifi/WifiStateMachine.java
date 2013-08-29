@@ -56,13 +56,11 @@ import android.net.wifi.WpsResult.Status;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pService;
 import android.os.BatteryStats;
-import android.os.Binder;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.PowerManager;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -70,7 +68,6 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
-import android.util.Log;
 import android.util.LruCache;
 import android.text.TextUtils;
 
@@ -86,7 +83,6 @@ import com.android.server.net.BaseNetworkObserver;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.net.InetAddress;
-import java.net.Inet6Address;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -303,8 +299,6 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_DELAYED_STOP_DRIVER              = BASE + 18;
     /* A delayed message sent to start driver when it fail to come up */
     static final int CMD_DRIVER_START_TIMED_OUT           = BASE + 19;
-    /* Ready to switch to network as default */
-    static final int CMD_CAPTIVE_CHECK_COMPLETE           = BASE + 20;
 
     /* Start the soft access point */
     static final int CMD_START_AP                         = BASE + 21;
@@ -536,8 +530,6 @@ public class WifiStateMachine extends StateMachine {
     private State mObtainingIpState = new ObtainingIpState();
     /* Waiting for link quality verification to be complete */
     private State mVerifyingLinkState = new VerifyingLinkState();
-    /* Waiting for captive portal check to be complete */
-    private State mCaptivePortalCheckState = new CaptivePortalCheckState();
     /* Connected with IP addr */
     private State mConnectedState = new ConnectedState();
     /* disconnect issued, waiting for network disconnect confirmation */
@@ -774,7 +766,6 @@ public class WifiStateMachine extends StateMachine {
                         addState(mL2ConnectedState, mConnectModeState);
                             addState(mObtainingIpState, mL2ConnectedState);
                             addState(mVerifyingLinkState, mL2ConnectedState);
-                            addState(mCaptivePortalCheckState, mL2ConnectedState);
                             addState(mConnectedState, mL2ConnectedState);
                         addState(mDisconnectingState, mConnectModeState);
                         addState(mDisconnectedState, mConnectModeState);
@@ -1275,10 +1266,6 @@ public class WifiStateMachine extends StateMachine {
         } else {
             sendMessage(CMD_STOP_DRIVER);
         }
-    }
-
-    public void captivePortalCheckComplete() {
-        sendMessage(CMD_CAPTIVE_CHECK_COMPLETE);
     }
 
     /**
@@ -2459,7 +2446,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_STOP_DRIVER:
                 case CMD_DELAYED_STOP_DRIVER:
                 case CMD_DRIVER_START_TIMED_OUT:
-                case CMD_CAPTIVE_CHECK_COMPLETE:
                 case CMD_START_AP:
                 case CMD_START_AP_SUCCESS:
                 case CMD_START_AP_FAILURE:
@@ -3731,29 +3717,17 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case WifiWatchdogStateMachine.GOOD_LINK_DETECTED:
                     log(getName() + " GOOD_LINK_DETECTED: transition to captive portal check");
-                    transitionTo(mCaptivePortalCheckState);
-                    break;
-                default:
-                    if (DBG) log(getName() + " what=" + message.what + " NOT_HANDLED");
-                    return NOT_HANDLED;
-            }
-            return HANDLED;
-        }
-    }
+                    // Send out a broadcast with the CAPTIVE_PORTAL_CHECK to preserve
+                    // existing behaviour. The captive portal check really happens after we
+                    // transition into DetailedState.CONNECTED.
+                    setNetworkDetailedState(DetailedState.CAPTIVE_PORTAL_CHECK);
+                    mWifiConfigStore.updateStatus(mLastNetworkId,
+                            DetailedState.CAPTIVE_PORTAL_CHECK);
+                    sendNetworkStateChangeBroadcast(mLastBssid);
 
-    class CaptivePortalCheckState extends State {
-        @Override
-        public void enter() {
-            log(getName() + " enter");
-            setNetworkDetailedState(DetailedState.CAPTIVE_PORTAL_CHECK);
-            mWifiConfigStore.updateStatus(mLastNetworkId, DetailedState.CAPTIVE_PORTAL_CHECK);
-            sendNetworkStateChangeBroadcast(mLastBssid);
-        }
-        @Override
-        public boolean processMessage(Message message) {
-            switch (message.what) {
-                case CMD_CAPTIVE_CHECK_COMPLETE:
-                    log(getName() + " CMD_CAPTIVE_CHECK_COMPLETE");
+                    // NOTE: This might look like an odd place to enable IPV6 but this is in
+                    // response to transitioning into GOOD_LINK_DETECTED. Similarly, we disable
+                    // ipv6 when we transition into POOR_LINK_DETECTED in mConnectedState.
                     try {
                         mNwService.enableIpv6(mInterfaceName);
                     } catch (RemoteException re) {
@@ -3761,12 +3735,16 @@ public class WifiStateMachine extends StateMachine {
                     } catch (IllegalStateException e) {
                         loge("Failed to enable IPv6: " + e);
                     }
+
+                    log(getName() + " GOOD_LINK_DETECTED: transition to CONNECTED");
                     setNetworkDetailedState(DetailedState.CONNECTED);
                     mWifiConfigStore.updateStatus(mLastNetworkId, DetailedState.CONNECTED);
                     sendNetworkStateChangeBroadcast(mLastBssid);
                     transitionTo(mConnectedState);
+
                     break;
                 default:
+                    if (DBG) log(getName() + " what=" + message.what + " NOT_HANDLED");
                     return NOT_HANDLED;
             }
             return HANDLED;
@@ -3798,6 +3776,7 @@ public class WifiStateMachine extends StateMachine {
             }
             return HANDLED;
         }
+
         @Override
         public void exit() {
             /* Request a CS wakelock during transition to mobile */

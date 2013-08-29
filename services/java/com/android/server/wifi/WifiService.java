@@ -930,11 +930,6 @@ public final class WifiService extends IWifiManager.Stub {
         mWifiStateMachine.reconnectCommand();
     }
 
-    public void captivePortalCheckComplete() {
-        enforceConnectivityInternalPermission();
-        mWifiStateMachine.captivePortalCheckComplete();
-    }
-
     /**
      * see {@link android.net.wifi.WifiManager#stopWifi}
      *

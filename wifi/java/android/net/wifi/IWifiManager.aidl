@@ -111,8 +111,6 @@ interface IWifiManager
 
     String getConfigFile();
 
-    void captivePortalCheckComplete();
-
     void enableTdls(String remoteIPAddress, boolean enable);
 
     void enableTdlsWithMacAddress(String remoteMacAddress, boolean enable);

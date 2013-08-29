@@ -115,14 +115,6 @@ public class WifiStateTracker extends BaseNetworkStateTracker {
         return true;
     }
 
-    /**
-     * Captive check is complete, switch to network
-     */
-    @Override
-    public void captivePortalCheckComplete() {
-        mWifiManager.captivePortalCheckComplete();
-    }
-
     @Override
     public void captivePortalCheckCompleted(boolean isCaptivePortal) {
         // not implemented

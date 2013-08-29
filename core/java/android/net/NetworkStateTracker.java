@@ -144,11 +144,6 @@ public interface NetworkStateTracker {
     public boolean reconnect();
 
     /**
-     * Ready to switch on to the network after captive portal check
-     */
-    public void captivePortalCheckComplete();
-
-    /**
      * Captive portal check has completed
      */
     public void captivePortalCheckCompleted(boolean isCaptive);

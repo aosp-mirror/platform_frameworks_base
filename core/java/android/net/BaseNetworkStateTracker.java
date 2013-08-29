@@ -20,9 +20,9 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Messenger;
 
-import com.android.internal.util.Preconditions;
-
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.android.internal.util.Preconditions;
 
 /**
  * Interface to control and observe state of a specific network, hiding
@@ -105,11 +105,6 @@ public abstract class BaseNetworkStateTracker implements NetworkStateTracker {
     @Override
     public LinkQualityInfo getLinkQualityInfo() {
         return null;
-    }
-
-    @Override
-    public void captivePortalCheckComplete() {
-        // not implemented
     }
 
     @Override

@@ -2316,36 +2316,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    private void handleCaptivePortalTrackerCheck(NetworkInfo info) {
-        if (DBG) log("Captive portal check " + info);
-        int type = info.getType();
-        final NetworkStateTracker thisNet = mNetTrackers[type];
-        if (mNetConfigs[type].isDefault()) {
-            if (mActiveDefaultNetwork != -1 && mActiveDefaultNetwork != type) {
-                if (isNewNetTypePreferredOverCurrentNetType(type)) {
-                    if (DBG) log("Captive check on " + info.getTypeName());
-                    mCaptivePortalTracker.detectCaptivePortal(new NetworkInfo(info));
-                    return;
-                } else {
-                    if (DBG) log("Tear down low priority net " + info.getTypeName());
-                    teardown(thisNet);
-                    return;
-                }
-            }
-        }
-
-        if (DBG) log("handleCaptivePortalTrackerCheck: call captivePortalCheckComplete ni=" + info);
-        thisNet.captivePortalCheckComplete();
-    }
-
-    /** @hide */
-    @Override
-    public void captivePortalCheckComplete(NetworkInfo info) {
-        enforceConnectivityInternalPermission();
-        if (DBG) log("captivePortalCheckComplete: ni=" + info);
-        mNetTrackers[info.getType()].captivePortalCheckComplete();
-    }
-
     /** @hide */
     @Override
     public void captivePortalCheckCompleted(NetworkInfo info, boolean isCaptivePortal) {
@@ -2972,9 +2942,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (info.getDetailedState() ==
                             NetworkInfo.DetailedState.FAILED) {
                         handleConnectionFailure(info);
-                    } else if (info.getDetailedState() ==
-                            DetailedState.CAPTIVE_PORTAL_CHECK) {
-                        handleCaptivePortalTrackerCheck(info);
                     } else if (info.isConnectedToProvisioningNetwork()) {
                         /**
                          * TODO: Create ConnectivityManager.TYPE_MOBILE_PROVISIONING

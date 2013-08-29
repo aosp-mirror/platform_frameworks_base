@@ -129,8 +129,6 @@ interface IConnectivityManager
 
     boolean updateLockdownVpn();
 
-    void captivePortalCheckComplete(in NetworkInfo info);
-
     void captivePortalCheckCompleted(in NetworkInfo info, boolean isCaptivePortal);
 
     void supplyMessenger(int networkType, in Messenger messenger);

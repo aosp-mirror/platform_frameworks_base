@@ -460,11 +460,6 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
     }
 
     @Override
-    public void captivePortalCheckComplete() {
-        // not implemented
-    }
-
-    @Override
     public void captivePortalCheckCompleted(boolean isCaptivePortal) {
         if (mIsCaptivePortal.getAndSet(isCaptivePortal) != isCaptivePortal) {
             // Captive portal change enable/disable failing fast

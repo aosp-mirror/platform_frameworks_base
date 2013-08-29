@@ -2157,13 +2157,6 @@ public class WifiManager {
         }
     }
 
-    /** @hide */
-    public void captivePortalCheckComplete() {
-        try {
-            mService.captivePortalCheckComplete();
-        } catch (RemoteException e) {}
-    }
-
     protected void finalize() throws Throwable {
         try {
             synchronized (sThreadRefLock) {

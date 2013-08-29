@@ -1330,24 +1330,6 @@ public class ConnectivityManager {
 
     /**
      * Signal that the captive portal check on the indicated network
-     * is complete and we can turn the network on for general use.
-     *
-     * @param info the {@link NetworkInfo} object for the networkType
-     *        in question.
-     *
-     * <p>This method requires the call to hold the permission
-     * {@link android.Manifest.permission#CONNECTIVITY_INTERNAL}.
-     * {@hide}
-     */
-    public void captivePortalCheckComplete(NetworkInfo info) {
-        try {
-            mService.captivePortalCheckComplete(info);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
-     * Signal that the captive portal check on the indicated network
      * is complete and whether its a captive portal or not.
      *
      * @param info the {@link NetworkInfo} object for the networkType

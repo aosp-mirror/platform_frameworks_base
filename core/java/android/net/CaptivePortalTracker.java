@@ -84,13 +84,12 @@ public class CaptivePortalTracker extends StateMachine {
     private String mServer;
     private String mUrl;
     private boolean mIsCaptivePortalCheckEnabled = false;
-    private IConnectivityManager mConnService;
-    private TelephonyManager mTelephonyManager;
-    private WifiManager mWifiManager;
-    private Context mContext;
+    private final IConnectivityManager mConnService;
+    private final TelephonyManager mTelephonyManager;
+    private final WifiManager mWifiManager;
+    private final Context mContext;
     private NetworkInfo mNetworkInfo;
 
-    private static final int CMD_DETECT_PORTAL          = 0;
     private static final int CMD_CONNECTIVITY_CHANGE    = 1;
     private static final int CMD_DELAYED_CAPTIVE_CHECK  = 2;
 
@@ -98,14 +97,15 @@ public class CaptivePortalTracker extends StateMachine {
     private static final int DELAYED_CHECK_INTERVAL_MS = 10000;
     private int mDelayedCheckToken = 0;
 
-    private State mDefaultState = new DefaultState();
-    private State mNoActiveNetworkState = new NoActiveNetworkState();
-    private State mActiveNetworkState = new ActiveNetworkState();
-    private State mDelayedCaptiveCheckState = new DelayedCaptiveCheckState();
+    private final State mDefaultState = new DefaultState();
+    private final State mNoActiveNetworkState = new NoActiveNetworkState();
+    private final State mActiveNetworkState = new ActiveNetworkState();
+    private final State mDelayedCaptiveCheckState = new DelayedCaptiveCheckState();
 
     private static final String SETUP_WIZARD_PACKAGE = "com.google.android.setupwizard";
     private boolean mDeviceProvisioned = false;
-    private ProvisioningObserver mProvisioningObserver;
+    @SuppressWarnings("unused")
+    private final ProvisioningObserver mProvisioningObserver;
 
     private CaptivePortalTracker(Context context, IConnectivityManager cs) {
         super(TAG);
@@ -174,29 +174,11 @@ public class CaptivePortalTracker extends StateMachine {
         return captivePortal;
     }
 
-    public void detectCaptivePortal(NetworkInfo info) {
-        sendMessage(obtainMessage(CMD_DETECT_PORTAL, info));
-    }
-
     private class DefaultState extends State {
 
         @Override
         public boolean processMessage(Message message) {
-            if (DBG) log(getName() + message.toString());
-            switch (message.what) {
-                case CMD_DETECT_PORTAL:
-                    NetworkInfo info = (NetworkInfo) message.obj;
-                    // Checking on a secondary connection is not supported
-                    // yet
-                    notifyPortalCheckComplete(info);
-                    break;
-                case CMD_CONNECTIVITY_CHANGE:
-                case CMD_DELAYED_CAPTIVE_CHECK:
-                    break;
-                default:
-                    loge("Ignoring " + message);
-                    break;
-            }
+            loge("Ignoring " + message);
             return HANDLED;
         }
     }
@@ -313,19 +295,6 @@ public class CaptivePortalTracker extends StateMachine {
                     return NOT_HANDLED;
             }
             return HANDLED;
-        }
-    }
-
-    private void notifyPortalCheckComplete(NetworkInfo info) {
-        if (info == null) {
-            loge("notifyPortalCheckComplete on null");
-            return;
-        }
-        try {
-            if (DBG) log("notifyPortalCheckComplete: ni=" + info);
-            mConnService.captivePortalCheckComplete(info);
-        } catch(RemoteException e) {
-            e.printStackTrace();
         }
     }
 
@@ -464,7 +433,6 @@ public class CaptivePortalTracker extends StateMachine {
                 latencyBroadcast.putExtra(EXTRA_NETWORK_TYPE, mTelephonyManager.getNetworkType());
                 List<CellInfo> info = mTelephonyManager.getAllCellInfo();
                 if (info == null) return;
-                StringBuffer uniqueCellId = new StringBuffer();
                 int numRegisteredCellInfo = 0;
                 for (CellInfo cellInfo : info) {
                     if (cellInfo.isRegistered()) {

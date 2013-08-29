@@ -270,11 +270,6 @@ public class EthernetDataTracker extends BaseNetworkStateTracker {
     }
 
     @Override
-    public void captivePortalCheckComplete() {
-        // not implemented
-    }
-
-    @Override
     public void captivePortalCheckCompleted(boolean isCaptivePortal) {
         // not implemented
     }
