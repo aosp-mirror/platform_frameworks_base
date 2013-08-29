@@ -21714,6 +21714,7 @@ package android.renderscript {
     method public deprecated synchronized void resize(int);
     method public void setFromFieldPacker(int, android.renderscript.FieldPacker);
     method public void setFromFieldPacker(int, int, android.renderscript.FieldPacker);
+    method public void setOnBufferAvailableListener(android.renderscript.Allocation.OnBufferAvailableListener);
     method public void setSurface(android.view.Surface);
     method public void syncAll(int);
     field public static final int USAGE_GRAPHICS_CONSTANTS = 8; // 0x8
@@ -21732,6 +21733,10 @@ package android.renderscript {
     enum_constant public static final android.renderscript.Allocation.MipmapControl MIPMAP_FULL;
     enum_constant public static final android.renderscript.Allocation.MipmapControl MIPMAP_NONE;
     enum_constant public static final android.renderscript.Allocation.MipmapControl MIPMAP_ON_SYNC_TO_TEXTURE;
+  }
+
+  public static abstract interface Allocation.OnBufferAvailableListener {
+    method public abstract void onBufferAvailable(android.renderscript.Allocation);
   }
 
   public class AllocationAdapter extends android.renderscript.Allocation {
