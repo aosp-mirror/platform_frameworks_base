@@ -21,6 +21,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.CancellationSignal.OnCancelListener;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 import com.android.internal.R;
@@ -28,7 +29,6 @@ import com.android.internal.R;
 import libcore.io.IoUtils;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -81,7 +81,7 @@ public class PrintFileDocumentAdapter extends PrintDocumentAdapter {
     }
 
     @Override
-    public void onWrite(PageRange[] pages, FileDescriptor destination,
+    public void onWrite(PageRange[] pages, ParcelFileDescriptor destination,
             CancellationSignal cancellationSignal, WriteResultCallback callback) {
         mWriteFileAsyncTask = new WriteFileAsyncTask(destination, cancellationSignal, callback);
         mWriteFileAsyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,
@@ -90,13 +90,13 @@ public class PrintFileDocumentAdapter extends PrintDocumentAdapter {
 
     private final class WriteFileAsyncTask extends AsyncTask<Void, Void, Void> {
 
-        private final FileDescriptor mDestination;
+        private final ParcelFileDescriptor mDestination;
 
         private final WriteResultCallback mResultCallback;
 
         private final CancellationSignal mCancellationSignal;
 
-        public WriteFileAsyncTask(FileDescriptor destination,
+        public WriteFileAsyncTask(ParcelFileDescriptor destination,
                 CancellationSignal cancellationSignal, WriteResultCallback callback) {
             mDestination = destination;
             mResultCallback = callback;
@@ -112,7 +112,7 @@ public class PrintFileDocumentAdapter extends PrintDocumentAdapter {
         @Override
         protected Void doInBackground(Void... params) {
             InputStream in = null;
-            OutputStream out = new FileOutputStream(mDestination);
+            OutputStream out = new FileOutputStream(mDestination.getFileDescriptor());
             final byte[] buffer = new byte[8192];
             try {
                 in = new FileInputStream(mFile);

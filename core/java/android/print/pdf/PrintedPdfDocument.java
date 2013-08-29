@@ -111,7 +111,10 @@ public final class PrintedPdfDocument {
      * @see #finishPage(Page)
      */
     public Page startPage(int pageNumber) {
-        PageInfo pageInfo = new PageInfo.Builder(mPageSize, 0).create();
+        PageInfo pageInfo = new PageInfo
+                .Builder(mPageSize, 0)
+                .setContentSize(mContentSize)
+                .create();
         Page page = mDocument.startPage(pageInfo);
         return page;
     }

@@ -75,6 +75,8 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
 
     private List<PrinterInfo> mFavoritePrinters;
 
+    private PrinterId mTrackedPrinter;
+
     public FusedPrintersProvider(Context context) {
         super(context);
         mPersistenceManager = new PersistenceManager(context);
@@ -166,6 +168,10 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
     private boolean cancelInternal() {
         if (mDiscoverySession != null
                 && mDiscoverySession.isPrinterDiscoveryStarted()) {
+            if (mTrackedPrinter != null) {
+                mDiscoverySession.stopPrinterStateTracking(mTrackedPrinter);
+                mTrackedPrinter = null;
+            }
             mDiscoverySession.stopPrinterDiscovery();
             return true;
         } else if (mPersistenceManager.isReadHistoryInProgress()) {
@@ -195,10 +201,14 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
         onStopLoading();
     }
 
-    public void refreshPrinter(PrinterId printerId) {
+    public void setTrackedPrinter(PrinterId printerId) {
         if (isStarted() && mDiscoverySession != null
                 && mDiscoverySession.isPrinterDiscoveryStarted()) {
-            mDiscoverySession.requestPrinterUpdate(printerId);
+            if (mTrackedPrinter != null) {
+                mDiscoverySession.stopPrinterStateTracking(mTrackedPrinter);
+            }
+            mTrackedPrinter = printerId;
+            mDiscoverySession.startPrinterStateTracking(printerId);
         }
     }
 

@@ -1919,13 +1919,10 @@
         android:description="@string/permdesc_bindNfcService"
         android:protectionLevel="signature" />
 
-    <!-- Allows an application to call APIs that give it access to all print jobs
-         on the device. Usually an app can access only the print jobts it created.
-         This permission is not available to third party applications.
-         @hide -->
-    <permission android:name="android.permission.ACCESS_ALL_PRINT_JOBS"
-        android:label="@string/permlab_accessAllPrintJobs"
-        android:description="@string/permdesc_accessAllPrintJobs"
+    <!-- Must be required by the PrintSpooler to ensure that only the system can bind to it. -->
+    <permission android:name="android.permission.BIND_PRINT_SPOOLER_SERVICE"
+        android:label="@string/permlab_bindPrintSpoolerService"
+        android:description="@string/permdesc_bindPrintSpoolerService"
         android:protectionLevel="signature" />
 
     <!-- Must be required by a TextService (e.g. SpellCheckerService)

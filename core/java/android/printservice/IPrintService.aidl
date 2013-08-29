@@ -33,6 +33,8 @@ oneway interface IPrintService {
     void createPrinterDiscoverySession();
     void startPrinterDiscovery(in List<PrinterId> priorityList);
     void stopPrinterDiscovery();
-    void requestPrinterUpdate(in PrinterId printerId);
+    void validatePrinters(in List<PrinterId> printerIds);
+    void startPrinterStateTracking(in PrinterId printerId);
+    void stopPrinterStateTracking(in PrinterId printerId);
     void destroyPrinterDiscoverySession();
 }

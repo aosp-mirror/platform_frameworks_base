@@ -24,8 +24,6 @@ LOCAL_PACKAGE_NAME := PrintSpooler
 
 LOCAL_JAVA_LIBRARIES := framework-base
 
-LOCAL_CERTIFICATE := platform
-
 LOCAL_PROGUARD_ENABLED := disabled
 
 include $(BUILD_PACKAGE)
