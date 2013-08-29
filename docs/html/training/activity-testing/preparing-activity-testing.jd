@@ -1,0 +1,95 @@
+page.title=Setting Up Your Test Environment
+trainingnavtop=true
+
+@jd:body
+
+<!-- This is the training bar -->
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+  <li><a href="#eclipse">Set Up Eclipse for Testing</a></li>
+  <li><a href="#cmdline">Set Up the Command Line Interface for Testing</a></li>
+</ol>
+
+<h2>You should also read</h2>
+<ul>
+<li><a href="{@docRoot}sdk/index.html">Getting the SDK Bundle</a></li>
+<li><a href="{@docRoot}tools/testing/testing_eclipse.html">Testing from Eclipse
+with ADT</a></li>
+<li><a href="{@docRoot}tools/testing/testing_otheride.html">Testing from Other
+IDEs</a></li>
+</ul>
+
+<h2>Try it out</h2>
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/AndroidTestingFun.zip"
+class="button">Download the demo</a>
+ <p class="filename">AndroidTestingFun.zip</p>
+</div>
+
+</div>
+</div>
+
+<p>Before you start writing and running your tests, you should set up your test
+development environment. This lesson teaches you how to set up the Eclipse
+IDE to build and run tests, and how to
+build and run tests with the Gradle framework by using the command line
+interface.</p>
+
+<p class="note"><strong>Note:</strong> To help you get started, the lessons are
+based on Eclipse with the ADT plugin. However, for your own test development, you
+are free to use the IDE of your choice or the command-line.</p>
+
+<h2 id="eclipse">Set Up Eclipse for Testing</h2>
+<p>Eclipse with the Android Developer Tools (ADT) plugin provides an integrated
+development environment for you to create, build, and run Android application
+test cases from a graphical user interface (GUI). A convenient feature that
+Eclipse provides is the ability to auto-generate a new test project that
+corresponds with your Android application project</a>.
+
+<p>To set up your test environment in Eclipse:</p>
+
+<ol>
+<li><a href="{@docRoot}sdk/installing/bundle.html">Download and install the
+Eclipse ADT plugin</a>, if you haven’t installed it yet.</li>
+<li>Import or create the Android application project that you want to test
+against.</li>
+<li>Generate a test project that corresponds to the application project under
+test. To generate a test project for the app project that you imported:</p>
+   <ol type="a">
+   <li>In the Package Explorer, right-click on your app project, then
+select <strong>Android Tools</strong> &gt; <strong>New Test Project</strong>.</li>
+   <li>In the New Android Test Project wizard, set the property
+values for your test project then click <strong>Finish</strong>.</li>
+   </ol>
+</li>
+</ol>
+<p>You should now be able to create, build, and run test
+cases from your Eclipse environment. To learn how to perform these tasks in
+Eclipse, proceed to <a href="activity-basic-testing.html">Creating and Running 
+a Test Case</a>.</p>
+
+<h2 id="cmdline">Set Up the Command Line Interface for Testing</h2>
+<p>If you are using Gradle version 1.6 or higher as your build environment, you
+can build and run your Android application tests from the command line by using
+the Gradle Wrapper. Make sure that in your {@code gradle.build} file, the
+<a href={@docRoot}guide/topics/manifest/uses-sdk-element.html#min>minSdkVersion</a>
+attribute in the {@code defaultConfig} section is set to 8 or higher. You can
+refer to the sample {@code gradle.build} file that is
+included in the download bundle for this training class.</p>
+<p>To run your tests with the Gradle Wrapper:</p>
+<ol>
+   <li>Connect a physical Android device to your machine or launch the Android
+Emulator.</li>
+   <li>Run the following command from your project directory:
+      <pre>./gradlew build connectedCheck</pre>
+   </li>
+</ol>
+<p>To learn more about using Gradle for Android testing, see the
+<a href="//tools.android.com/tech-docs/new-build-system/user-guide#TOC-Testing">Gradle Plugin User Guide</a>.</p>
+<p>To learn more about using command line tools other than Gradle for test
+development, see
+<a href="{@docRoot}tools/testing/testing_otheride.html">Testing from Other IDEs</a>.</p>
+

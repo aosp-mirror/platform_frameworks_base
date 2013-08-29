@@ -1,0 +1,68 @@
+page.title=Testing Your Android Activity
+page.tags="testing"
+
+trainingnavtop=true
+startpage=true
+
+@jd:body
+
+<div id="tb-wrapper">
+<div id="tb">
+
+<!-- Required platform, tools, add-ons, devices, knowledge, etc. -->
+<h2>Dependencies and prerequisites</h2>
+<ul>
+  <li>Android 2.2 (API Level 8) or higher.</li>
+</ul>
+
+<h2>You Should Also Read</h2>
+<ul>
+<li><a href="{@docRoot}tools/testing/index.html">Testing
+(Developer's Guide)</a></li>
+</ul>
+
+</div>
+</div>
+
+<p>You should be writing and running tests as part of your Android application
+development cycle. Well-written tests can help you to catch bugs early in
+development and give you confidence in your code.</p>
+
+<p>A <em>test case</em> defines a set of objects and methods to run multiple
+tests independently from each other. Test cases can be organized into
+<em>test suites</em> and run programmatically, in a repeatable manner, with
+a <em>test runner</em> provided by a testing framework.</p>
+
+<p>The lessons in this class teaches you how to use the Android's custom
+testing framework that is based on the popular JUnit framework. You can
+write test cases to verify specific behavior in your application, and check for
+consistency across different Android devices. Your test cases also serve as a
+form of internal code documentation by describing the expected behavior of
+app components.</p>
+
+<h2>Lessons</h2>
+
+<!-- Create a list of the lessons in this class along with a short description
+of each lesson. These should be short and to the point. It should be clear from
+reading the summary whether someone will want to jump to a lesson or not.-->
+
+<dl>
+  <dt><b><a href="preparing-activity-testing.html">Setting Up Your Test
+Environment</a></b></dt>
+    <dd>Learn how to create your test project.</dd>
+  <dt><b><a href="activity-basic-testing.html">Creating and Running a Test 
+Case</a></b></dt>
+    <dd>Learn how to write test cases to verify the
+expected properties of your {@link android.app.Activity}, and run the test
+cases with the {@code Instrumentation} test runner provided by the Android
+framework.</dd>
+  <dt><b><a href="activity-ui-testing.html">Testing UI Components</a></b></dt>
+    <dd>Learn how to test the behavior of specific UI
+components in your {@link android.app.Activity}.</dd>
+  <dt><b><a href="activity-unit-testing.html">Creating Unit Tests</a></b></dt>
+    <dd>Learn how to how to perform unit testing to
+verify the behavior of an Activity in isolation.</dd>
+  <dt><b><a href="activity-functional-testing.html">Creating Functional Tests</a></b></dt>
+    <dd>Learn how to perform functional testing to
+verify the interaction of multiple Activities.</dd>
+
