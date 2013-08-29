@@ -27,6 +27,8 @@ import android.net.http.SslCertificate;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
+import android.print.PrintAttributes;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -41,7 +43,6 @@ import android.webkit.WebView.PictureListener;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.OutputStream;
 import java.util.Map;
 
 /**
@@ -148,8 +149,9 @@ public interface WebViewProvider {
 
     public Picture capturePicture();
 
-    public void exportToPdf(OutputStream out, int width, int height,
-            ValueCallback<Boolean> resultCallback, CancellationSignal cancellationSignal);
+    public void exportToPdf(ParcelFileDescriptor fd, PrintAttributes attributes,
+            ValueCallback<Boolean> resultCallback, CancellationSignal cancellationSignal)
+            throws java.io.IOException;
 
     public float getScale();
 
