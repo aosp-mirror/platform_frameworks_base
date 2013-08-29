@@ -26,8 +26,6 @@ import android.app.IStopUserCallback;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.RestrictionEntry;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -42,7 +40,6 @@ import android.os.Handler;
 import android.os.IUserManager;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.AtomicFile;
@@ -50,7 +47,6 @@ import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
-import android.util.SparseLongArray;
 import android.util.TimeUtils;
 import android.util.Xml;
 
@@ -163,8 +159,6 @@ public class UserManagerService extends IUserManager.Stub {
     private boolean mGuestEnabled;
     private int mNextSerialNumber;
     private int mUserVersion = 0;
-    // Temporary cleanup variable, this and associated code should be removed later.
-    private boolean mUnblockAppsTemp;
 
     private static UserManagerService sInstance;
 
@@ -241,8 +235,6 @@ public class UserManagerService extends IUserManager.Stub {
         final Context context = ActivityThread.systemMain().getSystemContext();
         mUserPackageMonitor.register(context,
                 null, UserHandle.ALL, false);
-        context.registerReceiver(mBootCompletedReceiver,
-                new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
         userForeground(UserHandle.USER_OWNER);
     }
 
@@ -502,12 +494,6 @@ public class UserManagerService extends IUserManager.Stub {
         return mUserIds;
     }
 
-    private void readUserList() {
-        synchronized (mPackagesLock) {
-            readUserListLocked();
-        }
-    }
-
     private void readUserListLocked() {
         mGuestEnabled = false;
         if (!mUserListFile.exists()) {
@@ -601,20 +587,8 @@ public class UserManagerService extends IUserManager.Stub {
             userVersion = 2;
         }
 
-        if (userVersion < 3) {
-            // Remove restrictions PIN for all users
-            for (int i = 0; i < mRestrictionsPinStates.size(); i++) {
-                int userId = mRestrictionsPinStates.keyAt(i);
-                RestrictionsPinState state = mRestrictionsPinStates.valueAt(i);
-                if (state.salt != 0 && state.pinHash != null) {
-                    removeRestrictionsForUser(userId, false);
-                }
-            }
-            userVersion = 3;
-        }
 
         if (userVersion < 4) {
-            mUnblockAppsTemp = true;
             userVersion = 4;
         }
 
@@ -634,6 +608,7 @@ public class UserManagerService extends IUserManager.Stub {
                 UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY | UserInfo.FLAG_INITIALIZED);
         mUsers.put(0, primary);
         mNextSerialNumber = MIN_USER_ID;
+        mUserVersion = USER_VERSION;
 
         Bundle restrictions = new Bundle();
         mUserRestrictions.append(UserHandle.USER_OWNER, restrictions);
@@ -1585,21 +1560,6 @@ public class UserManagerService extends IUserManager.Stub {
             final boolean uninstalled = isPackageDisappearing(pkg) == PACKAGE_PERMANENT_CHANGE;
             if (uninstalled && userId >= 0 && !isPackageInstalled(pkg, userId)) {
                 cleanAppRestrictionsForPackage(pkg, userId);
-            }
-        }
-    };
-
-    private BroadcastReceiver mBootCompletedReceiver = new BroadcastReceiver() {
-        @Override public void onReceive(Context context, Intent intent) {
-            // This code block can be removed after cleanup
-            if (mUnblockAppsTemp) {
-                synchronized (mPackagesLock) {
-                    // Unblock apps due to removal of restrictions feature
-                    for (int i = 0; i < mUsers.size(); i++) {
-                        int userId = mUsers.keyAt(i);
-                        unblockAllAppsForUser(userId);
-                    }
-                }
             }
         }
     };
