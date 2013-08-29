@@ -109,7 +109,7 @@
     <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित नहीं किया गया"</string>
     <string name="fcComplete" msgid="3118848230966886575">"सुविधा कोड पूर्ण."</string>
     <string name="fcError" msgid="3327560126588500777">"कनेक्‍शन समस्‍या या अमान्‍य सुविधा कोड."</string>
-    <string name="httpErrorOk" msgid="1191919378083472204">"ठीक"</string>
+    <string name="httpErrorOk" msgid="1191919378083472204">"ठीक है"</string>
     <string name="httpError" msgid="7956392511146698522">"कोई नेटवर्क त्रुटि हुई थी."</string>
     <string name="httpErrorLookup" msgid="4711687456111963163">"URL नहीं मिल सका."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="6299980280442076799">"साइट प्रमाणीकरण योजना समर्थित नहीं है."</string>
@@ -1062,7 +1062,7 @@
     <string name="VideoView_error_title" msgid="3534509135438353077">"वीडियो समस्‍याएं"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"यह वीडियो इस उपकरण पर स्ट्रीमिंग के लिए मान्‍य नहीं है."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"यह वीडियो नहीं चलाया जा सकता."</string>
-    <string name="VideoView_error_button" msgid="2822238215100679592">"ठीक"</string>
+    <string name="VideoView_error_button" msgid="2822238215100679592">"ठीक है"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="7245353528818587908">"अपराह्न"</string>
     <string name="Noon" msgid="3342127745230013127">"अपराह्न"</string>
@@ -1087,9 +1087,9 @@
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"हो सकता है कुछ सिस्टम फ़ंक्शन कार्य न करें"</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> चल रहा है"</string>
     <string name="app_running_notification_text" msgid="4653586947747330058">"अधिक जानकारी के लिए या एप्लिकेशन रोकने के लिए स्पर्श करें."</string>
-    <string name="ok" msgid="5970060430562524910">"ठीक"</string>
+    <string name="ok" msgid="5970060430562524910">"ठीक है"</string>
     <string name="cancel" msgid="6442560571259935130">"रद्द करें"</string>
-    <string name="yes" msgid="5362982303337969312">"ठीक"</string>
+    <string name="yes" msgid="5362982303337969312">"ठीक है"</string>
     <string name="no" msgid="5141531044935541497">"रद्द करें"</string>
     <string name="dialog_alert_title" msgid="2049658708609043103">"ध्यानाकर्षण"</string>
     <string name="loading" msgid="7933681260296021180">"लोड हो रहे हैं..."</string>
@@ -1109,7 +1109,7 @@
     <string name="anr_activity_process" msgid="5776209883299089767">"गतिविधि <xliff:g id="ACTIVITY">%1$s</xliff:g> प्रतिसाद नहीं दे रही है.\n\nक्या आप इसे बंद करना चाहते हैं?"</string>
     <string name="anr_application_process" msgid="8941757607340481057">"<xliff:g id="APPLICATION">%1$s</xliff:g> प्रतिसाद नहीं दे रहा है. क्या आप इसे बंद करना चाहते हैं?"</string>
     <string name="anr_process" msgid="6513209874880517125">"प्रक्रिया <xliff:g id="PROCESS">%1$s</xliff:g> प्रतिसाद नहीं दे रही है.\n\nक्‍या आप इसे बंद करना चाहते हैं?"</string>
-    <string name="force_close" msgid="8346072094521265605">"ठीक"</string>
+    <string name="force_close" msgid="8346072094521265605">"ठीक है"</string>
     <string name="report" msgid="4060218260984795706">"रिपोर्ट करें"</string>
     <string name="wait" msgid="7147118217226317732">"प्रतीक्षा करें"</string>
     <string name="webpage_unresponsive" msgid="3272758351138122503">"पृष्ठ प्रतिसाद नहीं दे रहा है.\n\nक्‍या आप इसे बंद करना चाहते हैं?"</string>
@@ -1229,7 +1229,7 @@
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"USB संग्रहण चालू करें"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="5100428757107469454">"यदि आप USB संग्रहण चालू करते हैं, तो आपके द्वारा उपयोग किए जा रहे कुछ एप्‍लिकेशन रुक जाएंगे और हो सकता है कि वे तब तक अनुपलब्‍ध रहें जब तक कि आप USB संग्रहण बंद नहीं कर देते."</string>
     <string name="dlg_error_title" msgid="7323658469626514207">"USB कार्यवाही विफल"</string>
-    <string name="dlg_ok" msgid="7376953167039865701">"ठीक"</string>
+    <string name="dlg_ok" msgid="7376953167039865701">"ठीक है"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"किसी मीडिया उपकरण के रूप में कनेक्‍ट किया गया"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"कैमरे के रूप में कनेक्‍ट करें"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"किसी इंस्‍टॉलर के रूप में कनेक्‍ट किया गया"</string>
