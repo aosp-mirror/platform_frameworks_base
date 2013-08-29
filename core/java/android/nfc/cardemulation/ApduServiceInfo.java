@@ -75,16 +75,22 @@ public final class ApduServiceInfo implements Parcelable {
     final HashMap<String, AidGroup> mCategoryToGroup;
 
     /**
+     * Whether this service should only be started when the device is unlocked.
+     */
+    final boolean mRequiresDeviceUnlock;
+
+    /**
      * @hide
      */
     public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
-            ArrayList<AidGroup> aidGroups) {
+            ArrayList<AidGroup> aidGroups, boolean requiresUnlock) {
         this.mService = info;
         this.mDescription = description;
         this.mAidGroups = aidGroups;
         this.mAids = new ArrayList<String>();
         this.mCategoryToGroup = new HashMap<String, AidGroup>();
         this.mOnHost = onHost;
+        this.mRequiresDeviceUnlock = requiresUnlock;
         for (AidGroup aidGroup : aidGroups) {
             this.mCategoryToGroup.put(aidGroup.category, aidGroup);
             this.mAids.addAll(aidGroup.aids);
@@ -132,12 +138,16 @@ public final class ApduServiceInfo implements Parcelable {
                 mService = info;
                 mDescription = sa.getString(
                         com.android.internal.R.styleable.HostApduService_description);
+                mRequiresDeviceUnlock = sa.getBoolean(
+                        com.android.internal.R.styleable.HostApduService_requireDeviceUnlock,
+                        false);
             } else {
                 TypedArray sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.OffHostApduService);
                 mService = info;
                 mDescription = sa.getString(
                         com.android.internal.R.styleable.OffHostApduService_description);
+                mRequiresDeviceUnlock = false;
             }
 
             mAidGroups = new ArrayList<AidGroup>();
@@ -226,6 +236,10 @@ public final class ApduServiceInfo implements Parcelable {
         return mOnHost;
     }
 
+    public boolean requiresUnlock() {
+        return mRequiresDeviceUnlock;
+    }
+
     public CharSequence loadLabel(PackageManager pm) {
         return mService.loadLabel(pm);
     }
@@ -287,6 +301,7 @@ public final class ApduServiceInfo implements Parcelable {
         if (mAidGroups.size() > 0) {
             dest.writeTypedList(mAidGroups);
         }
+        dest.writeInt(mRequiresDeviceUnlock ? 1 : 0);
     };
 
     public static final Parcelable.Creator<ApduServiceInfo> CREATOR =
@@ -301,7 +316,8 @@ public final class ApduServiceInfo implements Parcelable {
             if (numGroups > 0) {
                 source.readTypedList(aidGroups, AidGroup.CREATOR);
             }
-            return new ApduServiceInfo(info, onHost, description, aidGroups);
+            boolean requiresUnlock = (source.readInt() != 0) ? true : false;
+            return new ApduServiceInfo(info, onHost, description, aidGroups, requiresUnlock);
         }
 
         @Override
