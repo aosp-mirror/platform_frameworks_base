@@ -1,0 +1,166 @@
+page.title=Creating Functional Tests
+trainingnavtop=true
+@jd:body
+
+<!-- This is the training bar -->
+<div id="tb-wrapper">
+<div id="tb">
+
+<h2>This lesson teaches you to</h2>
+<ol>
+   <li><a href="#test_methods">Add Test Method to Validate Functional Behavior</a>
+   <ol>
+      <li><a href="#activitymonitor">Set Up an ActivityMonitor</a></li>
+      <li><a href="#keyinput">Send Keyboard Input Using Instrumentation</a></li>
+   </ol>
+   </li>
+</ol>
+
+<h2>Try it out</h2>
+<div class="download-box">
+ <a href="http://developer.android.com/shareables/training/AndroidTestingFun.zip"
+class="button">Download the demo</a>
+ <p class="filename">AndroidTestingFun.zip</p>
+</div>
+
+</div>
+</div>
+<p>Functional testing involves verifying that individual application
+components work together as expected by the user. For example, you can create a
+functional test to verify that an {@link android.app.Activity} correctly
+launches a target {@link android.app.Activity} when the user performs a UI
+interaction.</p>
+
+<p>To create a functional test for your {@link android.app.Activity}, your test
+class should extend {@link android.test.ActivityInstrumentationTestCase2}.
+Unlike {@link android.test.ActivityUnitTestCase},
+tests in {@link android.test.ActivityInstrumentationTestCase2} can
+communicate with the Android system and send keyboard input and click events to
+the UI.</p>
+
+<p>For a complete test case example, take a look at
+{@code SenderActivityTest.java} in the sample app.</p>
+
+<h2 id="test_methods">Add Test Method to Validate Functional Behavior</h2>
+<p id="test_goals">Your functional testing goals might include:</p>
+<ul>
+<li>Verifying that a target {@link android.app.Activity} is started when a
+UI control is pushed in the sender {@link android.app.Activity}.</li>
+<li>Verifying that the target {@link android.app.Activity} displays the
+correct data based on the user's input in the sender
+{@link android.app.Activity}.</li>
+</ul>
+<p>You might implement your test method like this:</p>
+
+<pre>
+&#64;MediumTest
+public void testSendMessageToReceiverActivity() {
+    final Button sendToReceiverButton = (Button) 
+            mSenderActivity.findViewById(R.id.send_message_button);
+
+    final EditText senderMessageEditText = (EditText) 
+            mSenderActivity.findViewById(R.id.message_input_edit_text);
+
+    // Set up an ActivityMonitor
+    ...
+
+    // Send string input value
+    ...
+
+    // Validate that ReceiverActivity is started
+    ...
+
+    // Validate that ReceiverActivity has the correct data
+    ...
+
+    // Remove the ActivityMonitor
+    ...
+}
+</pre>
+<p>The test waits for an {@link android.app.Activity} that matches this monitor,
+otherwise returns null after a timeout elapses. If {@code ReceiverActivity} was
+started, the {@link android.app.Instrumentation.ActivityMonitor ActivityMonitor}
+that you set
+up earlier receives a hit. You can use the assertion methods to verify that
+the {@code ReceiverActivity} is indeed started, and that the hit count on the
+{@link android.app.Instrumentation.ActivityMonitor ActivityMonitor} incremented
+as expected.</p>
+
+<h2 id="activitymonitor">Set up an ActivityMonitor</h2>
+<p>To monitor a single {@link android.app.Activity} in your application, you
+can register an {@link android.app.Instrumentation.ActivityMonitor ActivityMonitor}.
+The {@link android.app.Instrumentation.ActivityMonitor ActivityMonitor} is
+notified by the system whenever an {@link android.app.Activity} that matches your criteria is started.
+If a match is found, the monitor’s hit count is updated.</p>
+<p>Generally, to use an
+{@link android.app.Instrumentation.ActivityMonitor ActivityMonitor}, you should:</p>
+<ol>
+<li>Retrieve the {@link android.app.Instrumentation} instance for your test
+case by using the
+{@link android.test.InstrumentationTestCase#getInstrumentation()} method.</li>
+<li>Add an instance of {@link android.app.Instrumentation.ActivityMonitor} to
+the current instrumentation using one of the {@link android.app.Instrumentation}
+{@code addMonitor()} methods. The match criteria can be specified as an
+{@link android.content.IntentFilter} or a class name string.</li>
+<li>Wait for the {@link android.app.Activity} to start.</li>
+<li>Verify that the monitor hits were incremented.</li>
+<li>Remove the monitor.</li>
+</ol>
+<p>For example:</p>
+<pre>
+// Set up an ActivityMonitor
+ActivityMonitor receiverActivityMonitor =
+        getInstrumentation().addMonitor(ReceiverActivity.class.getName(),
+        null, false);
+
+// Validate that ReceiverActivity is started
+TouchUtils.clickView(this, sendToReceiverButton);
+ReceiverActivity receiverActivity = (ReceiverActivity) 
+        receiverActivityMonitor.waitForActivityWithTimeout(TIMEOUT_IN_MS);
+assertNotNull("ReceiverActivity is null", receiverActivity);
+assertEquals("Monitor for ReceiverActivity has not been called",
+        1, receiverActivityMonitor.getHits());
+assertEquals("Activity is of wrong type",
+        ReceiverActivity.class, receiverActivity.getClass());
+
+// Remove the ActivityMonitor
+getInstrumentation().removeMonitor(receiverActivityMonitor);
+</pre>
+
+<h2 id="keyinput">Send Keyboard Input Using Instrumentation</h2>
+<p>If your {@link android.app.Activity} has an {@link android.widget.EditText}
+field, you might want to test that users can enter values into the
+{@link android.widget.EditText} object.</p>
+<p>Generally, to send a string input value to an {@link android.widget.EditText}
+object in {@link android.test.ActivityInstrumentationTestCase2}, you should:</p>
+<ol>
+<li>Use the {@link android.app.Instrumentation#runOnMainSync(java.lang.Runnable) runOnMainSync()}
+method to run the {@link android.view.View#requestFocus()} call synchronously
+in a loop. This way, the UI thread is blocked until focus is received.</li>
+<li>Call {@link android.app.Instrumentation#waitForIdleSync()} method to wait
+for the main thread to become idle (that is, have no more events to process).</li>
+<li>Send a text string to the {@link android.widget.EditText} by calling
+{@link android.app.Instrumentation#sendStringSync(java.lang.String)
+sendStringSync()} and pass your input string as the parameter.</p>
+</ol>
+<p>For example:</p>
+<pre>
+// Send string input value
+getInstrumentation().runOnMainSync(new Runnable() {
+    &#64;Override
+    public void run() {
+        senderMessageEditText.requestFocus();
+    }
+});
+getInstrumentation().waitForIdleSync();
+getInstrumentation().sendStringSync("Hello Android!");
+getInstrumentation().waitForIdleSync();
+</pre>
+
+
+
+
+
+
+
+
