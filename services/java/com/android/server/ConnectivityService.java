@@ -36,6 +36,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothTetheringDataTracker;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -152,6 +153,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -424,9 +426,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     TelephonyManager mTelephonyManager;
 
-    // We only want one checkMobileProvisioning after booting.
-    volatile boolean mFirstProvisioningCheckStarted = false;
-
     public ConnectivityService(Context context, INetworkManagementService netd,
             INetworkStatsService statsService, INetworkPolicyManager policyManager) {
         // Currently, omitting a NetworkFactory will create one internally
@@ -656,9 +655,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mSettingsObserver = new SettingsObserver(mHandler, EVENT_APPLY_GLOBAL_HTTP_PROXY);
         mSettingsObserver.observe(mContext);
 
-        mCaptivePortalTracker = CaptivePortalTracker.makeCaptivePortalTracker(mContext, this);
-        loadGlobalProxy();
-
         mDataConnectionStats = new DataConnectionStats(mContext);
         mDataConnectionStats.startMonitoring();
 
@@ -686,6 +682,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 new IntentFilter(filter));
 
         mPacManager = new PacManager(mContext);
+
+        filter = new IntentFilter();
+        filter.addAction(CONNECTED_TO_PROVISIONING_NETWORK_ACTION);
+        mContext.registerReceiver(mProvisioningReceiver, filter);
     }
 
     /**
@@ -952,6 +952,46 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         enforceAccessPermission();
         final int uid = Binder.getCallingUid();
         return getNetworkInfo(mActiveDefaultNetwork, uid);
+    }
+
+    /**
+     * Find the first Provisioning network.
+     *
+     * @return NetworkInfo or null if none.
+     */
+    private NetworkInfo getProvisioningNetworkInfo() {
+        enforceAccessPermission();
+
+        // Find the first Provisioning Network
+        NetworkInfo provNi = null;
+        for (NetworkInfo ni : getAllNetworkInfo()) {
+            if (ni.getDetailedState()
+                    == NetworkInfo.DetailedState.CONNECTED_TO_PROVISIONING_NETWORK) {
+                provNi = ni;
+                break;
+            }
+        }
+        if (DBG) log("getProvisioningNetworkInfo: X provNi=" + provNi);
+        return provNi;
+    }
+
+    /**
+     * Find the first Provisioning network or the ActiveDefaultNetwork
+     * if there is no Provisioning network
+     *
+     * @return NetworkInfo or null if none.
+     */
+    @Override
+    public NetworkInfo getProvisioningOrActiveNetworkInfo() {
+        enforceAccessPermission();
+
+        NetworkInfo provNi = getProvisioningNetworkInfo();
+        if (provNi == null) {
+            final int uid = Binder.getCallingUid();
+            provNi = getNetworkInfo(mActiveDefaultNetwork, uid);
+        }
+        if (DBG) log("getProvisioningOrActiveNetworkInfo: X provNi=" + provNi);
+        return provNi;
     }
 
     public NetworkInfo getActiveNetworkInfoUnfiltered() {
@@ -1316,8 +1356,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                 feature);
                     }
                     if (network.reconnect()) {
+                        if (DBG) log("startUsingNetworkFeature X: return APN_REQUEST_STARTED");
                         return PhoneConstants.APN_REQUEST_STARTED;
                     } else {
+                        if (DBG) log("startUsingNetworkFeature X: return APN_REQUEST_FAILED");
                         return PhoneConstants.APN_REQUEST_FAILED;
                     }
                 } else {
@@ -1329,9 +1371,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             mNetRequestersPids[usedNetworkType].add(currentPid);
                         }
                     }
+                    if (DBG) log("startUsingNetworkFeature X: return -1 unsupported feature.");
                     return -1;
                 }
             }
+            if (DBG) log("startUsingNetworkFeature X: return APN_TYPE_NOT_AVAILABLE");
             return PhoneConstants.APN_TYPE_NOT_AVAILABLE;
          } finally {
             if (DBG) {
@@ -1365,11 +1409,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
         if (found && u != null) {
+            if (VDBG) log("stopUsingNetworkFeature: X");
             // stop regardless of how many other time this proc had called start
             return stopUsingNetworkFeature(u, true);
         } else {
             // none found!
-            if (VDBG) log("stopUsingNetworkFeature - not a live request, ignoring");
+            if (VDBG) log("stopUsingNetworkFeature: X not a live request, ignoring");
             return 1;
         }
     }
@@ -1952,6 +1997,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
          */
         if (mNetConfigs[prevNetType].isDefault()) {
             if (mActiveDefaultNetwork == prevNetType) {
+                if (DBG) {
+                    log("tryFailover: set mActiveDefaultNetwork=-1, prevNetType=" + prevNetType);
+                }
                 mActiveDefaultNetwork = -1;
             }
 
@@ -2146,6 +2194,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     void systemReady() {
+        mCaptivePortalTracker = CaptivePortalTracker.makeCaptivePortalTracker(mContext, this);
+        loadGlobalProxy();
+
         synchronized(this) {
             mSystemReady = true;
             if (mInitialBroadcast != null) {
@@ -2176,10 +2227,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     };
 
     private boolean isNewNetTypePreferredOverCurrentNetType(int type) {
-        if ((type != mNetworkPreference &&
-                    mNetConfigs[mActiveDefaultNetwork].priority >
-                    mNetConfigs[type].priority) ||
-                mNetworkPreference == mActiveDefaultNetwork) return false;
+        if (((type != mNetworkPreference)
+                      && (mNetConfigs[mActiveDefaultNetwork].priority > mNetConfigs[type].priority))
+                   || (mNetworkPreference == mActiveDefaultNetwork)) {
+            return false;
+        }
         return true;
     }
 
@@ -2192,6 +2244,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         boolean isFailover = info.isFailover();
         final NetworkStateTracker thisNet = mNetTrackers[newNetType];
         final String thisIface = thisNet.getLinkProperties().getInterfaceName();
+
+        if (VDBG) {
+            log("handleConnect: E newNetType=" + newNetType + " thisIface=" + thisIface
+                    + " isFailover" + isFailover);
+        }
 
         // if this is a default net and other default is running
         // kill the one not preferred
@@ -2355,6 +2412,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private void handleConnectivityChange(int netType, boolean doReset) {
         int resetMask = doReset ? NetworkUtils.RESET_ALL_ADDRESSES : 0;
         boolean exempt = ConnectivityManager.isNetworkTypeExempt(netType);
+        if (VDBG) {
+            log("handleConnectivityChange: netType=" + netType + " doReset=" + doReset
+                    + " resetMask=" + resetMask);
+        }
 
         /*
          * If a non-default network is enabled, add the host routes that
@@ -2422,7 +2483,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         boolean resetDns = updateRoutes(newLp, curLp, mNetConfigs[netType].isDefault(), exempt);
 
         if (resetMask != 0 || resetDns) {
+            if (VDBG) log("handleConnectivityChange: resetting");
             if (curLp != null) {
+                if (VDBG) log("handleConnectivityChange: resetting curLp=" + curLp);
                 for (String iface : curLp.getAllInterfaceNames()) {
                     if (TextUtils.isEmpty(iface) == false) {
                         if (resetMask != 0) {
@@ -2459,6 +2522,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // Update 464xlat state.
         NetworkStateTracker tracker = mNetTrackers[netType];
         if (mClat.requiresClat(netType, tracker)) {
+
             // If the connection was previously using clat, but is not using it now, stop the clat
             // daemon. Normally, this happens automatically when the connection disconnects, but if
             // the disconnect is not reported, or if the connection's LinkProperties changed for
@@ -2512,6 +2576,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         for (RouteInfo r : routeDiff.removed) {
             if (isLinkDefault || ! r.isDefaultRoute()) {
+                if (VDBG) log("updateRoutes: default remove route r=" + r);
                 removeRoute(curLp, r, TO_DEFAULT_TABLE);
             }
             if (isLinkDefault == false) {
@@ -2849,9 +2914,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         public void handleMessage(Message msg) {
             NetworkInfo info;
             switch (msg.what) {
-                case NetworkStateTracker.EVENT_STATE_CHANGED:
+                case NetworkStateTracker.EVENT_STATE_CHANGED: {
                     info = (NetworkInfo) msg.obj;
-                    int type = info.getType();
                     NetworkInfo.State state = info.getState();
 
                     if (VDBG || (state == NetworkInfo.State.CONNECTED) ||
@@ -2861,15 +2925,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             state + "/" + info.getDetailedState());
                     }
 
-                    // After booting we'll check once for mobile provisioning
-                    // if we've provisioned by and connected.
-                    if (!mFirstProvisioningCheckStarted
+                    // Since mobile has the notion of a network/apn that can be used for
+                    // provisioning we need to check every time we're connected as
+                    // CaptiveProtalTracker won't detected it because DCT doesn't report it
+                    // as connected as ACTION_ANY_DATA_CONNECTION_STATE_CHANGED instead its
+                    // reported as ACTION_DATA_CONNECTION_CONNECTED_TO_PROVISIONING_APN. Which
+                    // is received by MDST and sent here as EVENT_STATE_CHANGED.
+                    if (ConnectivityManager.isNetworkTypeMobile(info.getType())
                             && (0 != Settings.Global.getInt(mContext.getContentResolver(),
                                         Settings.Global.DEVICE_PROVISIONED, 0))
                             && (state == NetworkInfo.State.CONNECTED)) {
-                        log("check provisioning after booting");
-                        mFirstProvisioningCheckStarted = true;
-                        checkMobileProvisioning(true, CheckMp.MAX_TIMEOUT_MS, null);
+                        checkMobileProvisioning(CheckMp.MAX_TIMEOUT_MS);
                     }
 
                     EventLogTags.writeConnectivityStateChanged(
@@ -2881,6 +2947,30 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     } else if (info.getDetailedState() ==
                             DetailedState.CAPTIVE_PORTAL_CHECK) {
                         handleCaptivePortalTrackerCheck(info);
+                    } else if (info.getDetailedState() ==
+                            DetailedState.CONNECTED_TO_PROVISIONING_NETWORK) {
+                        /**
+                         * TODO: Create ConnectivityManager.TYPE_MOBILE_PROVISIONING
+                         * for now its an in between network, its a network that
+                         * is actually a default network but we don't want it to be
+                         * announced as such to keep background applications from
+                         * trying to use it. It turns out that some still try so we
+                         * take the additional step of clearing any default routes
+                         * to the link that may have incorrectly setup by the lower
+                         * levels.
+                         */
+                        LinkProperties lp = getLinkProperties(info.getType());
+                        if (DBG) {
+                            log("EVENT_STATE_CHANGED: connected to provisioning network, lp=" + lp);
+                        }
+
+                        // Clear any default routes setup by the radio so
+                        // any activity by applications trying to use this
+                        // connection will fail until the provisioning network
+                        // is enabled.
+                        for (RouteInfo r : lp.getRoutes()) {
+                            removeRoute(lp, r, TO_DEFAULT_TABLE);
+                        }
                     } else if (state == NetworkInfo.State.DISCONNECTED) {
                         handleDisconnect(info);
                     } else if (state == NetworkInfo.State.SUSPENDED) {
@@ -2899,18 +2989,21 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         mLockdownTracker.onNetworkInfoChanged(info);
                     }
                     break;
-                case NetworkStateTracker.EVENT_CONFIGURATION_CHANGED:
+                }
+                case NetworkStateTracker.EVENT_CONFIGURATION_CHANGED: {
                     info = (NetworkInfo) msg.obj;
                     // TODO: Temporary allowing network configuration
                     //       change not resetting sockets.
                     //       @see bug/4455071
                     handleConnectivityChange(info.getType(), false);
                     break;
-                case NetworkStateTracker.EVENT_NETWORK_SUBTYPE_CHANGED:
+                }
+                case NetworkStateTracker.EVENT_NETWORK_SUBTYPE_CHANGED: {
                     info = (NetworkInfo) msg.obj;
-                    type = info.getType();
+                    int type = info.getType();
                     updateNetworkSettings(mNetTrackers[type]);
                     break;
+                }
             }
         }
     }
@@ -3806,76 +3899,153 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                          enabled));
     }
 
+    private boolean isMobileDataStateTrackerReady() {
+        MobileDataStateTracker mdst =
+                (MobileDataStateTracker) mNetTrackers[ConnectivityManager.TYPE_MOBILE_HIPRI];
+        return (mdst != null) && (mdst.isReady());
+    }
+
+    /**
+     * The ResultReceiver resultCode for checkMobileProvisioning (CMP_RESULT_CODE)
+     */
+
+    /**
+     * No connection was possible to the network.
+     */
+    public static final int CMP_RESULT_CODE_NO_CONNECTION = 0;
+
+    /**
+     * A connection was made to the internet, all is well.
+     */
+    public static final int CMP_RESULT_CODE_CONNECTABLE = 1;
+
+    /**
+     * A connection was made but there was a redirection, we appear to be in walled garden.
+     * This is an indication of a warm sim on a mobile network.
+     */
+    public static final int CMP_RESULT_CODE_REDIRECTED = 2;
+
+    /**
+     * A connection was made but no dns server was available to resolve a name to address.
+     * This is an indication of a warm sim on a mobile network.
+     */
+    public static final int CMP_RESULT_CODE_NO_DNS = 3;
+
+    /**
+     * A connection was made but could not open a TCP connection.
+     * This is an indication of a warm sim on a mobile network.
+     */
+    public static final int CMP_RESULT_CODE_NO_TCP_CONNECTION = 4;
+
+    /**
+     * The mobile network is a provisioning network.
+     * This is an indication of a warm sim on a mobile network.
+     */
+    public static final int CMP_RESULT_CODE_PROVISIONING_NETWORK = 5;
+
+    AtomicBoolean mIsCheckingMobileProvisioning = new AtomicBoolean(false);
+
     @Override
-    public int checkMobileProvisioning(final boolean sendNotification, int suggestedTimeOutMs,
-            final ResultReceiver resultReceiver) {
-        log("checkMobileProvisioning: E sendNotification=" + sendNotification
-                + " suggestedTimeOutMs=" + suggestedTimeOutMs
-                + " resultReceiver=" + resultReceiver);
-        enforceChangePermission();
-
-        mFirstProvisioningCheckStarted = true;
-
-        int timeOutMs = suggestedTimeOutMs;
-        if (suggestedTimeOutMs > CheckMp.MAX_TIMEOUT_MS) {
-            timeOutMs = CheckMp.MAX_TIMEOUT_MS;
-        }
-
-        // Check that mobile networks are supported
-        if (!isNetworkSupported(ConnectivityManager.TYPE_MOBILE)
-                || !isNetworkSupported(ConnectivityManager.TYPE_MOBILE_HIPRI)) {
-            log("checkMobileProvisioning: X no mobile network");
-            if (resultReceiver != null) {
-                resultReceiver.send(ConnectivityManager.CMP_RESULT_CODE_NO_CONNECTION, null);
-            }
-            return timeOutMs;
-        }
+    public int checkMobileProvisioning(int suggestedTimeOutMs) {
+        int timeOutMs = -1;
+        if (DBG) log("checkMobileProvisioning: E suggestedTimeOutMs=" + suggestedTimeOutMs);
+        enforceConnectivityInternalPermission();
 
         final long token = Binder.clearCallingIdentity();
         try {
+            timeOutMs = suggestedTimeOutMs;
+            if (suggestedTimeOutMs > CheckMp.MAX_TIMEOUT_MS) {
+                timeOutMs = CheckMp.MAX_TIMEOUT_MS;
+            }
+
+            // Check that mobile networks are supported
+            if (!isNetworkSupported(ConnectivityManager.TYPE_MOBILE)
+                    || !isNetworkSupported(ConnectivityManager.TYPE_MOBILE_HIPRI)) {
+                if (DBG) log("checkMobileProvisioning: X no mobile network");
+                return timeOutMs;
+            }
+
+            // If we're already checking don't do it again
+            // TODO: Add a queue of results...
+            if (mIsCheckingMobileProvisioning.getAndSet(true)) {
+                if (DBG) log("checkMobileProvisioning: X already checking ignore for the moment");
+                return timeOutMs;
+            }
+
+            // Start off with notification off
+            setProvNotificationVisible(false, ConnectivityManager.TYPE_NONE, null, null);
+
+            // See if we've alreadying determined if we've got a provsioning connection
+            // if so we don't need to do anything active
+            MobileDataStateTracker mdstDefault = (MobileDataStateTracker)
+                    mNetTrackers[ConnectivityManager.TYPE_MOBILE];
+            boolean isDefaultProvisioning = mdstDefault.isProvisioningNetwork();
+
+            MobileDataStateTracker mdstHipri = (MobileDataStateTracker)
+                    mNetTrackers[ConnectivityManager.TYPE_MOBILE_HIPRI];
+            boolean isHipriProvisioning = mdstHipri.isProvisioningNetwork();
+
+            if (isDefaultProvisioning || isHipriProvisioning) {
+                if (mIsNotificationVisible) {
+                    if (DBG) {
+                        log("checkMobileProvisioning: provisioning-ignore notification is visible");
+                    }
+                } else {
+                    NetworkInfo ni = null;
+                    if (isDefaultProvisioning) {
+                        ni = mdstDefault.getNetworkInfo();
+                    }
+                    if (isHipriProvisioning) {
+                        ni = mdstHipri.getNetworkInfo();
+                    }
+                    String url = getMobileProvisioningUrl();
+                    if ((ni != null) && (!TextUtils.isEmpty(url))) {
+                        setProvNotificationVisible(true, ni.getType(), ni.getExtraInfo(), url);
+                    } else {
+                        if (DBG) log("checkMobileProvisioning: provisioning but no url, ignore");
+                    }
+                }
+                mIsCheckingMobileProvisioning.set(false);
+                return timeOutMs;
+            }
+
             CheckMp checkMp = new CheckMp(mContext, this);
             CheckMp.CallBack cb = new CheckMp.CallBack() {
                 @Override
                 void onComplete(Integer result) {
-                    log("CheckMp.onComplete: result=" + result);
-                    if (resultReceiver != null) {
-                        log("CheckMp.onComplete: send result");
-                        resultReceiver.send(result, null);
-                    }
-                    if (!sendNotification) {
-                        log("CheckMp.onComplete: done, not sending notification");
-                        return;
-                    }
+                    if (DBG) log("CheckMp.onComplete: result=" + result);
                     NetworkInfo ni =
                             mNetTrackers[ConnectivityManager.TYPE_MOBILE_HIPRI].getNetworkInfo();
                     switch(result) {
-                        case ConnectivityManager.CMP_RESULT_CODE_CONNECTABLE:
-                        case ConnectivityManager.CMP_RESULT_CODE_NO_CONNECTION: {
-                            log("CheckMp.onComplete: ignore, connected or no connection");
+                        case CMP_RESULT_CODE_CONNECTABLE:
+                        case CMP_RESULT_CODE_NO_CONNECTION: {
+                            if (DBG) log("CheckMp.onComplete: ignore, connected or no connection");
                             break;
                         }
-                        case ConnectivityManager.CMP_RESULT_CODE_REDIRECTED: {
-                            log("CheckMp.onComplete: warm sim");
+                        case CMP_RESULT_CODE_REDIRECTED: {
+                            if (DBG) log("CheckMp.onComplete: warm sim");
                             String url = getMobileProvisioningUrl();
                             if (TextUtils.isEmpty(url)) {
                                 url = getMobileRedirectedProvisioningUrl();
                             }
                             if (TextUtils.isEmpty(url) == false) {
-                                log("CheckMp.onComplete: warm sim (redirected), url=" + url);
-                                setNotificationVisible(true, ni, url);
+                                if (DBG) log("CheckMp.onComplete: warm (redirected), url=" + url);
+                                setProvNotificationVisible(true, ni.getType(), ni.getExtraInfo(),
+                                        url);
                             } else {
-                                log("CheckMp.onComplete: warm sim (redirected), no url");
+                                if (DBG) log("CheckMp.onComplete: warm (redirected), no url");
                             }
                             break;
                         }
-                        case ConnectivityManager.CMP_RESULT_CODE_NO_DNS:
-                        case ConnectivityManager.CMP_RESULT_CODE_NO_TCP_CONNECTION: {
+                        case CMP_RESULT_CODE_NO_DNS:
+                        case CMP_RESULT_CODE_NO_TCP_CONNECTION: {
                             String url = getMobileProvisioningUrl();
                             if (TextUtils.isEmpty(url) == false) {
-                                log("CheckMp.onComplete: warm sim (no dns/tcp), url=" + url);
-                                setNotificationVisible(true, ni, url);
+                                if (DBG) log("CheckMp.onComplete: warm (no dns/tcp), url=" + url);
+                                setProvNotificationVisible(true, ni.getType(), ni.getExtraInfo(),
+                                        url);
                             } else {
-                                log("CheckMp.onComplete: warm sim (no dns/tcp), no url");
+                                if (DBG) log("CheckMp.onComplete: warm (no dns/tcp), no url");
                             }
                             break;
                         }
@@ -3884,16 +4054,16 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             break;
                         }
                     }
+                    mIsCheckingMobileProvisioning.set(false);
                 }
             };
             CheckMp.Params params =
                     new CheckMp.Params(checkMp.getDefaultUrl(), timeOutMs, cb);
-            log("checkMobileProvisioning: params=" + params);
-            setNotificationVisible(false, null, null);
+            if (DBG) log("checkMobileProvisioning: params=" + params);
             checkMp.execute(params);
         } finally {
             Binder.restoreCallingIdentity(token);
-            log("checkMobileProvisioning: X");
+            if (DBG) log("checkMobileProvisioning: X");
         }
         return timeOutMs;
     }
@@ -3965,25 +4135,37 @@ public class ConnectivityService extends IConnectivityManager.Stub {
          * a known address that fetches the data we expect.
          */
         private synchronized Integer isMobileOk(Params params) {
-            Integer result = ConnectivityManager.CMP_RESULT_CODE_NO_CONNECTION;
+            Integer result = CMP_RESULT_CODE_NO_CONNECTION;
             Uri orgUri = Uri.parse(params.mUrl);
             Random rand = new Random();
             mParams = params;
 
             if (mCs.isNetworkSupported(ConnectivityManager.TYPE_MOBILE) == false) {
                 log("isMobileOk: not mobile capable");
-                result = ConnectivityManager.CMP_RESULT_CODE_NO_CONNECTION;
+                result = CMP_RESULT_CODE_NO_CONNECTION;
                 return result;
             }
 
             try {
-                // Enable fail fast as we'll do retries here and use a
-                // hipri connection so the default connection stays active.
-                log("isMobileOk: start hipri url=" + params.mUrl);
-                mCs.setEnableFailFastMobileData(DctConstants.ENABLED);
-
                 // Continue trying to connect until time has run out
                 long endTime = SystemClock.elapsedRealtime() + params.mTimeOutMs;
+
+                if (!mCs.isMobileDataStateTrackerReady()) {
+                    // Wait for MobileDataStateTracker to be ready.
+                    if (DBG) log("isMobileOk: mdst is not ready");
+                    while(SystemClock.elapsedRealtime() < endTime) {
+                        if (mCs.isMobileDataStateTrackerReady()) {
+                            // Enable fail fast as we'll do retries here and use a
+                            // hipri connection so the default connection stays active.
+                            if (DBG) log("isMobileOk: mdst ready, enable fail fast of mobile data");
+                            mCs.setEnableFailFastMobileData(DctConstants.ENABLED);
+                            break;
+                        }
+                        sleep(1);
+                    }
+                }
+
+                log("isMobileOk: start hipri url=" + params.mUrl);
 
                 // First wait until we can start using hipri
                 Binder binder = new Binder();
@@ -3996,7 +4178,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             break;
                     }
                     if (VDBG) log("isMobileOk: hipri not started yet");
-                    result = ConnectivityManager.CMP_RESULT_CODE_NO_CONNECTION;
+                    result = CMP_RESULT_CODE_NO_CONNECTION;
                     sleep(1);
                 }
 
@@ -4009,13 +4191,24 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         NetworkInfo.State state = mCs
                                 .getNetworkInfo(ConnectivityManager.TYPE_MOBILE_HIPRI).getState();
                         if (state != NetworkInfo.State.CONNECTED) {
-                            if (VDBG) {
+                            if (true/*VDBG*/) {
                                 log("isMobileOk: not connected ni=" +
                                     mCs.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_HIPRI));
                             }
                             sleep(1);
-                            result = ConnectivityManager.CMP_RESULT_CODE_NO_CONNECTION;
+                            result = CMP_RESULT_CODE_NO_CONNECTION;
                             continue;
+                        }
+
+                        // Hipri has started check if this is a provisioning url
+                        MobileDataStateTracker mdst = (MobileDataStateTracker)
+                                mCs.mNetTrackers[ConnectivityManager.TYPE_MOBILE_HIPRI];
+                        if (mdst.isProvisioningNetwork()) {
+                            if (DBG) log("isMobileOk: isProvisioningNetwork is true, no TCP conn");
+                            result = CMP_RESULT_CODE_NO_TCP_CONNECTION;
+                            return result;
+                        } else {
+                            if (DBG) log("isMobileOk: isProvisioningNetwork is false, continue");
                         }
 
                         // Get of the addresses associated with the url host. We need to use the
@@ -4028,7 +4221,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             addresses = InetAddress.getAllByName(orgUri.getHost());
                         } catch (UnknownHostException e) {
                             log("isMobileOk: UnknownHostException");
-                            result = ConnectivityManager.CMP_RESULT_CODE_NO_DNS;
+                            result = CMP_RESULT_CODE_NO_DNS;
                             return result;
                         }
                         log("isMobileOk: addresses=" + inetAddressesToString(addresses));
@@ -4093,9 +4286,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                 urlConn.setRequestProperty("Connection", "close");
                                 int responseCode = urlConn.getResponseCode();
                                 if (responseCode == 204) {
-                                    result = ConnectivityManager.CMP_RESULT_CODE_CONNECTABLE;
+                                    result = CMP_RESULT_CODE_CONNECTABLE;
                                 } else {
-                                    result = ConnectivityManager.CMP_RESULT_CODE_REDIRECTED;
+                                    result = CMP_RESULT_CODE_REDIRECTED;
                                 }
                                 log("isMobileOk: connected responseCode=" + responseCode);
                                 urlConn.disconnect();
@@ -4109,7 +4302,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                 }
                             }
                         }
-                        result = ConnectivityManager.CMP_RESULT_CODE_NO_TCP_CONNECTION;
+                        result = CMP_RESULT_CODE_NO_TCP_CONNECTION;
                         log("isMobileOk: loops|timed out");
                         return result;
                     } catch (Exception e) {
@@ -4123,6 +4316,23 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mCs.setEnableFailFastMobileData(DctConstants.DISABLED);
                 mCs.stopUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
                         Phone.FEATURE_ENABLE_HIPRI);
+
+                // Wait for hipri to disconnect.
+                long endTime = SystemClock.elapsedRealtime() + 5000;
+
+                while(SystemClock.elapsedRealtime() < endTime) {
+                    NetworkInfo.State state = mCs
+                            .getNetworkInfo(ConnectivityManager.TYPE_MOBILE_HIPRI).getState();
+                    if (state != NetworkInfo.State.DISCONNECTED) {
+                        if (VDBG) {
+                            log("isMobileOk: connected ni=" +
+                                mCs.getNetworkInfo(ConnectivityManager.TYPE_MOBILE_HIPRI));
+                        }
+                        sleep(1);
+                        continue;
+                    }
+                }
+
                 log("isMobileOk: X result=" + result);
             }
             return result;
@@ -4188,10 +4398,55 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    private static final String NOTIFICATION_ID = "CaptivePortal.Notification";
+    // TODO: Move to ConnectivityManager and make public?
+    private static final String CONNECTED_TO_PROVISIONING_NETWORK_ACTION =
+            "com.android.server.connectivityservice.CONNECTED_TO_PROVISIONING_NETWORK_ACTION";
 
-    private void setNotificationVisible(boolean visible, NetworkInfo networkInfo, String url) {
-        log("setNotificationVisible: E visible=" + visible + " ni=" + networkInfo + " url=" + url);
+    private BroadcastReceiver mProvisioningReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(CONNECTED_TO_PROVISIONING_NETWORK_ACTION)) {
+                handleMobileProvisioningAction(intent.getStringExtra("EXTRA_URL"));
+            }
+        }
+    };
+
+    private void handleMobileProvisioningAction(String url) {
+        // Notication mark notification as not visible
+        setProvNotificationVisible(false, ConnectivityManager.TYPE_NONE, null, null);
+
+        // If provisioning network handle as a special case,
+        // otherwise launch browser with the intent directly.
+        NetworkInfo ni = getProvisioningNetworkInfo();
+        if ((ni != null) && ni.getDetailedState() ==
+                    NetworkInfo.DetailedState.CONNECTED_TO_PROVISIONING_NETWORK) {
+            if (DBG) log("handleMobileProvisioningAction: on provisioning network");
+            MobileDataStateTracker mdst = (MobileDataStateTracker)
+                    mNetTrackers[ConnectivityManager.TYPE_MOBILE];
+            mdst.enableMobileProvisioning(url);
+        } else {
+            if (DBG) log("handleMobileProvisioningAction: on default network");
+            Intent newIntent =
+                    new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            newIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
+                    Intent.FLAG_ACTIVITY_NEW_TASK);
+            try {
+                mContext.startActivity(newIntent);
+            } catch (ActivityNotFoundException e) {
+                loge("handleMobileProvisioningAction: startActivity failed" + e);
+            }
+        }
+    }
+
+    private static final String NOTIFICATION_ID = "CaptivePortal.Notification";
+    private volatile boolean mIsNotificationVisible = false;
+
+    private void setProvNotificationVisible(boolean visible, int networkType, String extraInfo,
+            String url) {
+        if (DBG) {
+            log("setProvNotificationVisible: E visible=" + visible + " networkType=" + networkType
+                + " extraInfo=" + extraInfo + " url=" + url);
+        }
 
         Resources r = Resources.getSystem();
         NotificationManager notificationManager = (NotificationManager) mContext
@@ -4201,50 +4456,64 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             CharSequence title;
             CharSequence details;
             int icon;
-            switch (networkInfo.getType()) {
+            Intent intent;
+            Notification notification = new Notification();
+            switch (networkType) {
                 case ConnectivityManager.TYPE_WIFI:
-                    log("setNotificationVisible: TYPE_WIFI");
                     title = r.getString(R.string.wifi_available_sign_in, 0);
                     details = r.getString(R.string.network_available_sign_in_detailed,
-                            networkInfo.getExtraInfo());
+                            extraInfo);
                     icon = R.drawable.stat_notify_wifi_in_range;
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
+                            Intent.FLAG_ACTIVITY_NEW_TASK);
+                    notification.contentIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
                     break;
                 case ConnectivityManager.TYPE_MOBILE:
                 case ConnectivityManager.TYPE_MOBILE_HIPRI:
-                    log("setNotificationVisible: TYPE_MOBILE|HIPRI");
                     title = r.getString(R.string.network_available_sign_in, 0);
                     // TODO: Change this to pull from NetworkInfo once a printable
                     // name has been added to it
                     details = mTelephonyManager.getNetworkOperatorName();
                     icon = R.drawable.stat_notify_rssi_in_range;
+                    intent = new Intent(CONNECTED_TO_PROVISIONING_NETWORK_ACTION);
+                    intent.putExtra("EXTRA_URL", url);
+                    intent.setFlags(0);
+                    notification.contentIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
                     break;
                 default:
-                    log("setNotificationVisible: other type=" + networkInfo.getType());
                     title = r.getString(R.string.network_available_sign_in, 0);
                     details = r.getString(R.string.network_available_sign_in_detailed,
-                            networkInfo.getExtraInfo());
+                            extraInfo);
                     icon = R.drawable.stat_notify_rssi_in_range;
+                    intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
+                            Intent.FLAG_ACTIVITY_NEW_TASK);
+                    notification.contentIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
                     break;
             }
 
-            Notification notification = new Notification();
             notification.when = 0;
             notification.icon = icon;
             notification.flags = Notification.FLAG_AUTO_CANCEL;
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
-                    Intent.FLAG_ACTIVITY_NEW_TASK);
-            notification.contentIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
             notification.tickerText = title;
             notification.setLatestEventInfo(mContext, title, details, notification.contentIntent);
 
-            log("setNotificaitionVisible: notify notificaiton=" + notification);
-            notificationManager.notify(NOTIFICATION_ID, 1, notification);
+            try {
+                notificationManager.notify(NOTIFICATION_ID, 1, notification);
+            } catch (NullPointerException npe) {
+                loge("setNotificaitionVisible: visible notificationManager npe=" + npe);
+                npe.printStackTrace();
+            }
         } else {
-            log("setNotificaitionVisible: cancel");
-            notificationManager.cancel(NOTIFICATION_ID, 1);
+            try {
+                notificationManager.cancel(NOTIFICATION_ID, 1);
+            } catch (NullPointerException npe) {
+                loge("setNotificaitionVisible: cancel notificationManager npe=" + npe);
+                npe.printStackTrace();
+            }
         }
-        log("setNotificationVisible: X visible=" + visible + " ni=" + networkInfo + " url=" + url);
+        mIsNotificationVisible = visible;
     }
 
     /** Location to an updatable file listing carrier provisioning urls.
@@ -4371,6 +4640,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         return url;
+    }
+
+    @Override
+    public void setProvisioningNotificationVisible(boolean visible, int networkType,
+            String extraInfo, String url) {
+        enforceConnectivityInternalPermission();
+        setProvNotificationVisible(visible, networkType, extraInfo, url);
     }
 
     private void onUserStart(int userId) {
