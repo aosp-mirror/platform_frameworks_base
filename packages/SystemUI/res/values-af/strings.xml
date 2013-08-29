@@ -202,7 +202,7 @@
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Netwerk kan dalk gemonitor word"</string>
     <string name="done_button" msgid="1759387181766603361">"Klaar"</string>
     <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Netwerkmonitering"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Hierdie toestel word bestuur deur: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nJou administrator is bevoeg om jou netwerkaktiwiteit te monitor, insluitend e-pos, programme en veilige webwerwe.\n\nKontak jou administrator vir meer inligting."</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"\'n Derdeparty is bevoeg om jou netwerk\n-aktiwiteit te monitor, insluitend e-pos, programme en veilige webwerwe.\n\n\'n Vertroude eiebewys wat op jou toestel geïnstalleer is, maak dit moontlik."</string>
+    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"Hierdie toestel word bestuur deur: <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>.\n\nJou administrateur kan jou netwerkaktiwiteit monitor, insluitend e-pos, programme en veilige webwerwe.\n\nKontak jou administrateur vir meer inligting."</string>
+    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"\'n Derdeparty kan jou netwerk\n-aktiwiteit monitor, insluitend e-pos, programme en veilige webwerwe.\n\n\'n Vertroude eiebewys wat op jou toestel geïnstalleer is, maak dit moontlik."</string>
     <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"Gaan vertroude eiebewyse na"</string>
 </resources>

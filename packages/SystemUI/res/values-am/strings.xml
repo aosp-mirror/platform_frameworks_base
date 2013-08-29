@@ -202,7 +202,7 @@
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"አውታረ መረብ በክትትል ውስጥ ሊሆን ይችላል"</string>
     <string name="done_button" msgid="1759387181766603361">"ተከናውኗል"</string>
     <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"የአውታረ መረብ ክትትል"</string>
-    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"መሳሪያው የሚተዳደረው በሚከተለው ነው፦ <xliff:g id="MANAGING_DOMAIN">%s</xliff:g>። \n\nአስተዳዳሪዎ ኢሜይሎችዎን፣ መተግበሪያዎችዎን እና ደህንነታቸው አስተማማኝ የሆኑ ድር ጣቢያዎችን ጨምሮ የአውታረ መረብ እንቅስቃሴዎን መከታተል ይችላል።\n\nለተጨማሪ መረጃ አስተዳዳሪዎን ያግኙ።"</string>
-    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"ሶስተኛ ወገን ኢሜይሎችዎን፣ መተግበሪያዎችዎን እና ደህንነታቸው አስተማማኝ የሆኑ ድር ጣቢያዎችን ጨምሮ የአውታረ መረብ\n እንቅስቃሴዎን መከታተል ይችላል።\n\nበመሳሪያዎ ላይ የተጫነ የታመነ ምስክርነት ይህን የሚቻል አድርጎታል።"</string>
+    <string name="ssl_ca_cert_info_message" msgid="5430320539555358452">"መሳሪያው የሚተዳደረው፦ በ<xliff:g id="MANAGING_DOMAIN">%s</xliff:g>። \n\nአስተዳዳሪዎ ኢሜይሎችዎን፣ መተግበሪያዎችዎን እና ደህንነታቸው አስተማማኝ የሆኑ ድር ጣቢያዎችን ጨምሮ የአውታረ መረብ እንቅስቃሴዎን መከታተል ይችላል።\n\nለተጨማሪ መረጃ አስተዳዳሪዎን ያግኙ።"</string>
+    <string name="ssl_ca_cert_warning_message" msgid="2033091656129963669">"ሶስተኛ ወገን ኢሜይሎችዎን፣ መተግበሪያዎችዎን እና ደህንነታቸው አስተማማኝ የሆኑ\nድር ጣቢያዎችን ጨምሮ አውታረ መረብ እንቅስቃሴዎን መከታተል ይችላል።\n\nበመሳሪያዎ ላይ የተጫነ የታመነ ምስክርነት ይህን የሚቻል አድርጎታል።"</string>
     <string name="ssl_ca_cert_settings_button" msgid="7946956977377166709">"የታመኑ ምስክርነቶችን ይፈትሹ"</string>
 </resources>
