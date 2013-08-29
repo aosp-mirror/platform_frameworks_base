@@ -31,6 +31,7 @@ import android.net.wifi.WifiConfiguration.Status;
 import android.net.wifi.NetworkUpdateResult;
 import static android.net.wifi.WifiConfiguration.INVALID_NETWORK_ID;
 import android.os.Environment;
+import android.os.FileObserver;
 import android.os.Message;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -42,12 +43,16 @@ import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -111,6 +116,8 @@ class WifiConfigStore {
     private static final String TAG = "WifiConfigStore";
     private static final boolean DBG = true;
 
+    private static final String SUPPLICANT_CONFIG_FILE = "/data/misc/wifi/wpa_supplicant.conf";
+
     /* configured networks with network id as the key */
     private HashMap<Integer, WifiConfiguration> mConfiguredNetworks =
             new HashMap<Integer, WifiConfiguration>();
@@ -147,6 +154,7 @@ class WifiConfigStore {
     private static final String EOS = "eos";
 
     private final LocalLog mLocalLog;
+    WpaConfigFileObserver mFileObserver;
 
     private WifiNative mWifiNative;
     private final KeyStore mKeyStore = KeyStore.getInstance();
@@ -156,10 +164,27 @@ class WifiConfigStore {
         mWifiNative = wn;
 
         if (DBG) {
-            mLocalLog = new LocalLog(1024);                         // takes about 64 K
-            mWifiNative.setLocalLog(mLocalLog);
+            mLocalLog = mWifiNative.getLocalLog();
+            mFileObserver = new WpaConfigFileObserver();
+            mFileObserver.startWatching();
         }
     }
+
+    class WpaConfigFileObserver extends FileObserver {
+
+        public WpaConfigFileObserver() {
+            super(SUPPLICANT_CONFIG_FILE, CLOSE_WRITE);
+        }
+
+        @Override
+        public void onEvent(int event, String path) {
+            if (event == CLOSE_WRITE) {
+                File file = new File(SUPPLICANT_CONFIG_FILE);
+                localLog("wpa_supplicant.conf changed; new size = " + file.length());
+            }
+        }
+    }
+
 
     /**
      * Fetch the list of configured networks
@@ -332,7 +357,7 @@ class WifiConfigStore {
         if (result.getNetworkId() != WifiConfiguration.INVALID_NETWORK_ID) {
             sendConfiguredNetworksChangedBroadcast(mConfiguredNetworks.get(result.getNetworkId()),
                     result.isNewNetwork ? WifiManager.CHANGE_REASON_ADDED :
-                        WifiManager.CHANGE_REASON_CONFIG_CHANGE);
+                            WifiManager.CHANGE_REASON_CONFIG_CHANGE);
         }
         return result.getNetworkId();
     }
@@ -636,6 +661,7 @@ class WifiConfigStore {
             try {
                 config.networkId = Integer.parseInt(result[0]);
             } catch(NumberFormatException e) {
+                loge("Failed to read network-id '" + result[0] + "'");
                 continue;
             }
             if (result.length > 3) {
@@ -663,6 +689,31 @@ class WifiConfigStore {
         sendConfiguredNetworksChangedBroadcast();
 
         localLog("loadConfiguredNetworks loaded " + mNetworkIds.size() + " networks");
+
+        if (mNetworkIds.size() == 0) {
+            // no networks? Lets log if the wpa_supplicant.conf file contents
+            BufferedReader reader = null;
+            try {
+                reader = new BufferedReader(new FileReader(SUPPLICANT_CONFIG_FILE));
+                localLog("--- Begin wpa_supplicant.conf Contents ---");
+                for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                    localLog(line);
+                }
+                localLog("--- End wpa_supplicant.conf Contents ---");
+            } catch (FileNotFoundException e) {
+                localLog("Could not open " + SUPPLICANT_CONFIG_FILE + ", " + e);
+            } catch (IOException e) {
+                localLog("Could not read " + SUPPLICANT_CONFIG_FILE + ", " + e);
+            } finally {
+                try {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                } catch (IOException e) {
+                    // Just ignore the fact that we couldn't close
+                }
+            }
+        }
     }
 
     /* Mark all networks except specified netId as disabled */
