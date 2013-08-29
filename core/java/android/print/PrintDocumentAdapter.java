@@ -18,8 +18,8 @@ package android.print;
 
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.ParcelFileDescriptor;
 
-import java.io.FileDescriptor;
 import java.util.List;
 
 /**
@@ -41,7 +41,7 @@ import java.util.List;
  * <li>
  * After every call to {@link #onLayout(PrintAttributes, PrintAttributes,
  * CancellationSignal, LayoutResultCallback, Bundle)}, you may get a call to
- * {@link #onWrite(PageRange[], FileDescriptor, CancellationSignal, WriteResultCallback)}
+ * {@link #onWrite(PageRange[], ParcelFileDescriptor, CancellationSignal, WriteResultCallback)}
  * asking you to write a PDF file with the content for specific pages.
  * </li>
  * <li>
@@ -64,7 +64,7 @@ import java.util.List;
  * PrintAttributes, CancellationSignal, LayoutResultCallback, Bundle)} on
  * the UI thread (assuming onStart initializes resources needed for layout).
  * This will ensure that the UI does not change while you are laying out the
- * printed content. Then you can handle {@link #onWrite(PageRange[], FileDescriptor,
+ * printed content. Then you can handle {@link #onWrite(PageRange[], ParcelFileDescriptor,
  * CancellationSignal, WriteResultCallback)} and {@link #onFinish()} on another
  * thread. This will ensure that the UI is frozen for the minimal amount of
  * time. Also this assumes that you will generate the printed content in
@@ -150,10 +150,10 @@ public abstract class PrintDocumentAdapter {
      * from of a PDF file to the given file descriptor. This method is invoked
      * on the main thread.
      *<p>
-     * After you are done writing, you should <strong>not</strong> close the
-     * file descriptor, rather you must invoke: {@link WriteResultCallback
-     * #onWriteFinished(List)}, if writing completed successfully; or {@link
-     * WriteResultCallback#onWriteFailed(CharSequence)}, if an error occurred.
+     * After you are done writing, you should close the file descriptor and
+     * invoke {@link WriteResultCallback #onWriteFinished(List)}, if writing
+     * completed successfully; or {@link WriteResultCallback#onWriteFailed(
+     * CharSequence)}, if an error occurred.
      * </p>
      * <p>
      * <strong>Note:</strong> If the printed content is large, it is a good
@@ -171,7 +171,7 @@ public abstract class PrintDocumentAdapter {
      * @see WriteResultCallback
      * @see CancellationSignal
      */
-    public abstract void onWrite(PageRange[] pages, FileDescriptor destination,
+    public abstract void onWrite(PageRange[] pages, ParcelFileDescriptor destination,
             CancellationSignal cancellationSignal, WriteResultCallback callback);
 
     /**
@@ -185,7 +185,7 @@ public abstract class PrintDocumentAdapter {
 
     /**
      * Base class for implementing a callback for the result of {@link
-     * PrintDocumentAdapter#onWrite(PageRange[], FileDescriptor, CancellationSignal,
+     * PrintDocumentAdapter#onWrite(PageRange[], ParcelFileDescriptor, CancellationSignal,
      * WriteResultCallback)}.
      */
     public static abstract class WriteResultCallback {

@@ -36,7 +36,6 @@ import com.android.internal.os.SomeArgs;
 import libcore.io.IoUtils;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -163,7 +162,7 @@ public final class PrintManager {
      * @param pdfFile The PDF file to print.
      * @param documentInfo Information about the printed document.
      * @param attributes The default print job attributes.
-     * @return The created print job.
+     * @return The created print job on success or null on failure.
      *
      * @see PrintJob
      */
@@ -181,7 +180,7 @@ public final class PrintManager {
      * @param printJobName A name for the new print job.
      * @param documentAdapter An adapter that emits the document to print.
      * @param attributes The default print job attributes.
-     * @return The created print job.
+     * @return The created print job on success or null on failure.
      *
      * @see PrintJob
      */
@@ -279,7 +278,7 @@ public final class PrintManager {
             }
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = pages;
-            args.arg2 = fd.getFileDescriptor();
+            args.arg2 = fd;
             args.arg3 = callback;
             args.argi1 = sequence;
             mHandler.removeMessages(MyHandler.MSG_WRITE);
@@ -342,7 +341,7 @@ public final class PrintManager {
                     case MSG_WRITE: {
                         SomeArgs args = (SomeArgs) message.obj;
                         PageRange[] pages = (PageRange[]) args.arg1;
-                        FileDescriptor fd = (FileDescriptor) args.arg2;
+                        ParcelFileDescriptor fd = (ParcelFileDescriptor) args.arg2;
                         IWriteResultCallback callback = (IWriteResultCallback) args.arg3;
                         final int sequence = args.argi1;
                         args.recycle();
@@ -428,12 +427,12 @@ public final class PrintManager {
         }
 
         private final class MyWriteResultCallback extends WriteResultCallback {
-            private FileDescriptor mFd;
+            private ParcelFileDescriptor mFd;
             private int mSequence;
             private IWriteResultCallback mCallback;
 
             public MyWriteResultCallback(IWriteResultCallback callback,
-                    FileDescriptor fd, int sequence) {
+                    ParcelFileDescriptor fd, int sequence) {
                 mFd = fd;
                 mSequence = sequence;
                 mCallback = callback;

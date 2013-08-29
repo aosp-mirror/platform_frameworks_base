@@ -314,8 +314,20 @@ public abstract class PrintService extends Service {
             }
 
             @Override
-            public void requestPrinterUpdate(PrinterId printerId) {
-                mHandler.obtainMessage(ServiceHandler.MSG_REQUEST_PRINTER_UPDATE,
+            public void validatePrinters(List<PrinterId> printerIds) {
+                mHandler.obtainMessage(ServiceHandler.MSG_VALIDATE_PRINTERS,
+                        printerIds).sendToTarget();
+            }
+
+            @Override
+            public void startPrinterStateTracking(PrinterId printerId) {
+                mHandler.obtainMessage(ServiceHandler.MSG_START_PRINTER_STATE_TRACKING,
+                        printerId).sendToTarget();
+            }
+
+            @Override
+            public void stopPrinterStateTracking(PrinterId printerId) {
+                mHandler.obtainMessage(ServiceHandler.MSG_STOP_PRINTER_STATE_TRACKING,
                         printerId).sendToTarget();
             }
 
@@ -344,10 +356,12 @@ public abstract class PrintService extends Service {
         public static final int MSG_DESTROY_PRINTER_DISCOVERY_SESSION = 2;
         public static final int MSG_START_PRINTER_DISCOVERY = 3;
         public static final int MSG_STOP_PRINTER_DISCOVERY = 4;
-        public static final int MSG_REQUEST_PRINTER_UPDATE = 5;
-        public static final int MSG_ON_PRINTJOB_QUEUED = 6;
-        public static final int MSG_ON_REQUEST_CANCEL_PRINTJOB = 7;
-        public static final int MSG_SET_CLEINT = 8;
+        public static final int MSG_VALIDATE_PRINTERS = 5;
+        public static final int MSG_START_PRINTER_STATE_TRACKING = 6;
+        public static final int MSG_STOP_PRINTER_STATE_TRACKING = 7;
+        public static final int MSG_ON_PRINTJOB_QUEUED = 8;
+        public static final int MSG_ON_REQUEST_CANCEL_PRINTJOB = 9;
+        public static final int MSG_SET_CLEINT = 10;
 
         public ServiceHandler(Looper looper) {
             super(looper, null, true);
@@ -391,10 +405,24 @@ public abstract class PrintService extends Service {
                     }
                 } break;
 
-                case MSG_REQUEST_PRINTER_UPDATE: {
+                case MSG_VALIDATE_PRINTERS: {
+                    if (mDiscoverySession != null) {
+                        List<PrinterId> printerIds = (List<PrinterId>) message.obj;
+                        mDiscoverySession.validatePrinters(printerIds);
+                    }
+                } break;
+
+                case MSG_START_PRINTER_STATE_TRACKING: {
                     if (mDiscoverySession != null) {
                         PrinterId printerId = (PrinterId) message.obj;
-                        mDiscoverySession.requestPrinterUpdate(printerId);
+                        mDiscoverySession.startPrinterStateTracking(printerId);
+                    }
+                } break;
+
+                case MSG_STOP_PRINTER_STATE_TRACKING: {
+                    if (mDiscoverySession != null) {
+                        PrinterId printerId = (PrinterId) message.obj;
+                        mDiscoverySession.stopPrinterStateTracking(printerId);
                     }
                 } break;
 

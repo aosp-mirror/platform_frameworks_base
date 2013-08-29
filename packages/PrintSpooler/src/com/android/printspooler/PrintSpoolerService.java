@@ -335,7 +335,9 @@ public final class PrintSpoolerService extends Service {
                 final boolean sameState = (state == printJob.getState())
                         || (state == PrintJobInfo.STATE_ANY)
                         || (state == PrintJobInfo.STATE_ANY_VISIBLE_TO_CLIENTS
-                        && printJob.getState() > PrintJobInfo.STATE_CREATED);
+                            && isStateVisibleToUser(printJob.getState()))
+                        || (state == PrintJobInfo.STATE_ANY_ACTIVE
+                            && isActiveState(printJob.getState()));
                 if (sameComponent && sameAppId && sameState) {
                     if (foundPrintJobs == null) {
                         foundPrintJobs = new ArrayList<PrintJobInfo>();
@@ -345,6 +347,11 @@ public final class PrintSpoolerService extends Service {
             }
         }
         return foundPrintJobs;
+    }
+
+    private boolean isStateVisibleToUser(int state) {
+        return (isActiveState(state) && (state == PrintJobInfo.STATE_FAILED
+                || state == PrintJobInfo.STATE_COMPLETED|| state == PrintJobInfo.STATE_CANCELED));
     }
 
     public PrintJobInfo getPrintJobInfo(int printJobId, int appId) {
@@ -389,14 +396,12 @@ public final class PrintSpoolerService extends Service {
 
             switch (printJob.getState()) {
                 case PrintJobInfo.STATE_QUEUED:
-                case PrintJobInfo.STATE_STARTED: {
-                    // We have a print job that was queued or started in the
-                    // past
-                    // but the device battery died or a crash occurred. In this
-                    // case
-                    // we assume the print job failed and let the user decide
-                    // whether
-                    // to restart the job or just
+                case PrintJobInfo.STATE_STARTED:
+                case PrintJobInfo.STATE_BLOCKED: {
+                    // We have a print job that was queued or started or blocked in
+                    // the past but the device battery died or a crash occurred. In
+                    // this case we assume the print job failed and let the user
+                    // decide whether to restart the job or just cancel it.
                     setPrintJobState(printJob.getId(), PrintJobInfo.STATE_FAILED,
                             getString(R.string.no_connection_to_printer));
                 }
@@ -501,7 +506,7 @@ public final class PrintSpoolerService extends Service {
                 success = true;
 
                 printJob.setState(state);
-                printJob.setFailureReason(error);
+                printJob.setStateReason(error);
                 mNotificationController.onPrintJobStateChanged(printJob);
 
                 if (DEBUG_PRINT_JOB_LIFECYCLE) {
@@ -568,7 +573,8 @@ public final class PrintSpoolerService extends Service {
     private boolean isActiveState(int printJobState) {
         return printJobState == PrintJobInfo.STATE_CREATED
                 || printJobState == PrintJobInfo.STATE_QUEUED
-                || printJobState == PrintJobInfo.STATE_STARTED;
+                || printJobState == PrintJobInfo.STATE_STARTED
+                || printJobState == PrintJobInfo.STATE_BLOCKED;
     }
 
     public boolean setPrintJobTag(int printJobId, String tag) {

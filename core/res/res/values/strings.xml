@@ -984,12 +984,13 @@
     <string name="permdesc_bindPrintService">Allows the holder to bind to the top-level
         interface of a print service. Should never be needed for normal apps.</string>
 
-    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessAllPrintJobs">access all print jobs</string>
-    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessAllPrintJobs">Allows the holder to access print jobs
-        created by another app. Should never be needed for normal apps.</string>
-
+    <!-- Title of an application permission, listed so the user can choose
+         whether they want to allow the application to do this. -->
+    <string name="permlab_bindPrintSpoolerService">bind to a print spooler service</string>
+    <!-- Description of an application permission, listed so the user can
+         choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindPrintSpoolerService">Allows the holder to bind to the top-level
+        interface of a print spooler service. Should never be needed for normal apps.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bindNfcService">bind to NFC service</string>
@@ -4291,6 +4292,9 @@
     <string name="write_fail_reason_cancelled">Cancelled</string>
     <!-- Write fail reason: couldn't write the printed content. [CHAR LIMIT=none] -->
     <string name="write_fail_reason_cannot_write">Error writing content</string>
+
+    <!-- Print fail reason: unknown. [CHAR LIMIT=25] -->
+    <string name="reason_unknown">unknown</string>
 
     <!-- PIN entry dialog label/hint for PIN [CHAR LIMIT=none] -->
     <string name="restr_pin_enter_pin">Enter PIN</string>

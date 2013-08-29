@@ -25,6 +25,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
+import android.os.AsyncTask;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
@@ -37,6 +38,8 @@ import android.print.PrinterInfo;
 import android.printservice.IPrintService;
 import android.printservice.IPrintServiceClient;
 import android.util.Slog;
+
+import com.android.internal.R;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -121,6 +124,36 @@ final class RemotePrintService implements DeathRecipient {
         mHasPrinterDiscoverySession = false;
         mPendingCommands.clear();
         ensureUnbound();
+
+        // Makes sure all active print jobs are failed since the service
+        // just died. Do this off the main thread since we do to allow
+        // calls into the spooler on the main thread.
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                failAllActivePrintJobs();
+                return null;
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+    }
+
+    private void failAllActivePrintJobs() {
+        List<PrintJobInfo> printJobs = mSpooler.getPrintJobInfos(mComponentName,
+                PrintJobInfo.STATE_ANY_ACTIVE, PrintManager.APP_ID_ANY);
+        if (printJobs == null) {
+            return;
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            final int printJobCount = printJobs.size();
+            for (int i = 0; i < printJobCount; i++) {
+                PrintJobInfo printJob = printJobs.get(i);
+                mSpooler.setPrintJobState(printJob.getId(), PrintJobInfo.STATE_FAILED,
+                        mContext.getString(R.string.reason_unknown));
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
     }
 
     private void handleOnAllPrintJobsHandled() {
@@ -308,29 +341,83 @@ final class RemotePrintService implements DeathRecipient {
         }
     }
 
-    public void requestPrinterUpdate(PrinterId printerId) {
-        mHandler.obtainMessage(MyHandler.MSG_REQUEST_PRINTER_UPDATE,
-                printerId).sendToTarget();
+    public void validatePrinters(List<PrinterId> printerIds) {
+        mHandler.obtainMessage(MyHandler.MSG_VALIDATE_PRINTERS,
+                printerIds).sendToTarget();
     }
 
-    private void handleRequestPrinterUpdate(final PrinterId printerId) {
+    private void handleValidatePrinters(final List<PrinterId> printerIds) {
         throwIfDestroyed();
         if (!isBound()) {
             ensureBound();
             mPendingCommands.add(new Runnable() {
                 @Override
                 public void run() {
-                    handleRequestPrinterUpdate(printerId);
+                    handleValidatePrinters(printerIds);
                 }
             });
         } else {
             if (DEBUG) {
-                Slog.i(LOG_TAG, "[user: " + mUserId + "] requestPrinterUpdate()");
+                Slog.i(LOG_TAG, "[user: " + mUserId + "] handleValidatePrinters()");
             }
             try {
-                mPrintService.requestPrinterUpdate(printerId);
+                mPrintService.validatePrinters(printerIds);
             } catch (RemoteException re) {
-                Slog.e(LOG_TAG, "Error requesting a printer update.", re);
+                Slog.e(LOG_TAG, "Error requesting printers validation.", re);
+            }
+        }
+    }
+
+    public void startPrinterStateTracking(PrinterId printerId) {
+        mHandler.obtainMessage(MyHandler.MSG_START_PRINTER_STATE_TRACKING,
+                printerId).sendToTarget();
+    }
+
+    private void handleStartPrinterStateTracking(final PrinterId printerId) {
+        throwIfDestroyed();
+        if (!isBound()) {
+            ensureBound();
+            mPendingCommands.add(new Runnable() {
+                @Override
+                public void run() {
+                    handleStartPrinterStateTracking(printerId);
+                }
+            });
+        } else {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserId + "] handleStartPrinterTracking()");
+            }
+            try {
+                mPrintService.startPrinterStateTracking(printerId);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Error requesting start printer tracking.", re);
+            }
+        }
+    }
+
+    public void stopPrinterStateTracking(PrinterId printerId) {
+        mHandler.obtainMessage(MyHandler.MSG_STOP_PRINTER_STATE_TRACKING,
+                printerId).sendToTarget();
+    }
+
+    private void handleStopPrinterStateTracking(final PrinterId printerId) {
+        throwIfDestroyed();
+        if (!isBound()) {
+            ensureBound();
+            mPendingCommands.add(new Runnable() {
+                @Override
+                public void run() {
+                    handleStopPrinterStateTracking(printerId);
+                }
+            });
+        } else {
+            if (DEBUG) {
+                Slog.i(LOG_TAG, "[user: " + mUserId + "] handleStopPrinterTracking()");
+            }
+            try {
+                mPrintService.stopPrinterStateTracking(printerId);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG, "Error requesting stop printer tracking.", re);
             }
         }
     }
@@ -417,12 +504,14 @@ final class RemotePrintService implements DeathRecipient {
         public static final int MSG_DESTROY_PRINTER_DISCOVERY_SESSION = 2;
         public static final int MSG_START_PRINTER_DISCOVERY = 3;
         public static final int MSG_STOP_PRINTER_DISCOVERY = 4;
-        public static final int MSG_REQUEST_PRINTER_UPDATE = 5;
-        public static final int MSG_ON_ALL_PRINT_JOBS_HANDLED = 6;
-        public static final int MSG_ON_REQUEST_CANCEL_PRINT_JOB = 7;
-        public static final int MSG_ON_PRINT_JOB_QUEUED = 8;
-        public static final int MSG_DESTROY = 9;
-        public static final int MSG_BINDER_DIED = 10;
+        public static final int MSG_VALIDATE_PRINTERS = 5;
+        public static final int MSG_START_PRINTER_STATE_TRACKING = 6;
+        public static final int MSG_STOP_PRINTER_STATE_TRACKING = 7;
+        public static final int MSG_ON_ALL_PRINT_JOBS_HANDLED = 8;
+        public static final int MSG_ON_REQUEST_CANCEL_PRINT_JOB = 9;
+        public static final int MSG_ON_PRINT_JOB_QUEUED = 10;
+        public static final int MSG_DESTROY = 11;
+        public static final int MSG_BINDER_DIED = 12;
 
         public MyHandler(Looper looper) {
             super(looper, null, false);
@@ -449,9 +538,19 @@ final class RemotePrintService implements DeathRecipient {
                     handleStopPrinterDiscovery();
                 } break;
 
-                case MSG_REQUEST_PRINTER_UPDATE: {
+                case MSG_VALIDATE_PRINTERS: {
+                    List<PrinterId> printerIds = (List<PrinterId>) message.obj;
+                    handleValidatePrinters(printerIds);
+                } break;
+
+                case MSG_START_PRINTER_STATE_TRACKING: {
                     PrinterId printerId = (PrinterId) message.obj;
-                    handleRequestPrinterUpdate(printerId);
+                    handleStartPrinterStateTracking(printerId);
+                } break;
+
+                case MSG_STOP_PRINTER_STATE_TRACKING: {
+                    PrinterId printerId = (PrinterId) message.obj;
+                    handleStopPrinterStateTracking(printerId);
                 } break;
 
                 case MSG_ON_ALL_PRINT_JOBS_HANDLED: {

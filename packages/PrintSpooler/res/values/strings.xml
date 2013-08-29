@@ -94,6 +94,9 @@
     <!-- Template for the notificaiton label for a failed print job. [CHAR LIMIT=25] -->
     <string name="failed_notification_title_template">Printer error <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
 
+    <!-- Template for the notificaiton label for a blocked print job. [CHAR LIMIT=25] -->
+    <string name="blocked_notification_title_template">Printer blocked <xliff:g id="print_job_name" example="foo.jpg">%1$s</xliff:g></string>
+
     <!-- Label for the notification button for cancelling a print job. [CHAR LIMIT=25] -->
     <string name="cancel">Cancel</string>
 
@@ -102,6 +105,9 @@
 
     <!-- Message that there is no connection to a printer. [CHAR LIMIT=40] -->
     <string name="no_connection_to_printer">No connection to printer</string>
+
+    <!-- Label for an unknown reason for failed or blocked print job. [CHAR LIMIT=25] -->
+    <string name="reason_unknown">unknown</string>
 
     <!-- Arrays -->
 
@@ -129,12 +135,14 @@
         <item>Range</item>
     </string-array>
 
-    <!-- Title of an application permission, listed so the user can choose
-         whether they want to allow the application to do this. -->
-    <string name="permlab_bindPrintSpoolerService">bind to a print spooler service</string>
-    <!-- Description of an application permission, listed so the user can
-         choose whether they want to allow the application to do this. -->
-    <string name="permdesc_bindPrintSpoolerService">Allows the holder to bind to the top-level
-        interface of a print spooler service. Should never be needed for normal apps.</string>
+    <!-- Permissions -->
+
+    <!-- Title of an application permission, listed so the user can choose whether they want
+         to allow the application to do this. -->
+    <string name="permlab_accessAllPrintJobs">access all print jobs</string>
+    <!-- Description of an application permission, listed so the user can choose whether
+         they want to allow the application to do this. -->
+    <string name="permdesc_accessAllPrintJobs">Allows the holder to access print jobs
+        created by another app. Should never be needed for normal apps.</string>
 
 </resources>

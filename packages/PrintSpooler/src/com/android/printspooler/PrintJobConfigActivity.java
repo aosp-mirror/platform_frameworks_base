@@ -473,6 +473,11 @@ public class PrintJobConfigActivity extends Activity {
 
             mControllerState = CONTROLLER_STATE_WRITE_COMPLETED;
 
+            // Update the document size.
+            File file = PrintSpoolerService.peekInstance()
+                    .generateFileForPrintJob(mPrintJobId);
+            mDocument.info.setDataSize(file.length());
+
             // Update which pages we have fetched.
             mDocument.pages = PageRangeUtils.normalize(pages);
 
@@ -1117,7 +1122,7 @@ public class PrintJobConfigActivity extends Activity {
                         (Loader<?>) getLoaderManager().getLoader(
                                 LOADER_ID_PRINTERS_LOADER);
                 if (printersLoader != null) {
-                    printersLoader.refreshPrinter(printer.getId());
+                    printersLoader.setTrackedPrinter(printer.getId());
                 }
             }
         }
@@ -1351,10 +1356,6 @@ public class PrintJobConfigActivity extends Activity {
             return mEditorState == EDITOR_STATE_CONFIRMED_PRINT;
         }
 
-//        public void confirmPreview() {
-//            mEditorState = EDITOR_STATE_CONFIRMED_PREVIEW;
-//        }
-
         public PageRange[] getRequestedPages() {
             if (hasErrors()) {
                 return null;
@@ -1374,7 +1375,7 @@ public class PrintJobConfigActivity extends Activity {
                         toIndex = Integer.parseInt(range.substring(
                                 dashIndex + 1, range.length())) - 1;
                     } else {
-                        fromIndex = toIndex = Integer.parseInt(range);
+                        fromIndex = toIndex = Integer.parseInt(range) - 1;
                     }
 
                     PageRange pageRange = new PageRange(fromIndex, toIndex);
