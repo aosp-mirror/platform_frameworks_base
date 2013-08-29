@@ -5,6 +5,7 @@
 #include "GraphicsJNI.h"
 #include "SkDither.h"
 #include "SkUnPreMultiply.h"
+#include "SkStream.h"
 
 #include <binder/Parcel.h>
 #include "android_os_Parcel.h"

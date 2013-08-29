@@ -17,7 +17,6 @@ package android.graphics;
 
 import android.content.res.AssetManager;
 
-import java.io.BufferedInputStream;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -108,12 +107,6 @@ public final class BitmapRegionDecoder {
      */
     public static BitmapRegionDecoder newInstance(InputStream is,
             boolean isShareable) throws IOException {
-        // we need mark/reset to work properly in JNI
-
-        if (!is.markSupported()) {
-            is = new BufferedInputStream(is, 16 * 1024);
-        }
-
         if (is instanceof AssetManager.AssetInputStream) {
             return nativeNewInstance(
                     ((AssetManager.AssetInputStream) is).getAssetInt(),
