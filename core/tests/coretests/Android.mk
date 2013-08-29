@@ -22,7 +22,7 @@ LOCAL_SRC_FILES := \
 	$(call all-java-files-under, EnabledTestApp/src)
 
 LOCAL_DX_FLAGS := --core-library
-LOCAL_STATIC_JAVA_LIBRARIES := core-tests android-common frameworks-core-util-lib mockwebserver guava littlemock
+LOCAL_STATIC_JAVA_LIBRARIES := core-tests-support android-common frameworks-core-util-lib mockwebserver guava littlemock
 LOCAL_JAVA_LIBRARIES := android.test.runner conscrypt telephony-common
 LOCAL_PACKAGE_NAME := FrameworksCoreTests
 
