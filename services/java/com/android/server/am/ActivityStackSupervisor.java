@@ -1426,8 +1426,7 @@ public final class ActivityStackSupervisor {
                             if ((launchFlags &
                                     (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME))
                                     == (FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_TASK_ON_HOME)) {
-                                // Caller wants to appear on home activity, so before starting
-                                // their own activity we will bring home to the front.
+                                // Caller wants to appear on home activity.
                                 r.mLaunchHomeTaskNext = true;
                             }
                             targetStack.moveTaskToFrontLocked(intentActivity.task, r, options);
@@ -1541,6 +1540,8 @@ public final class ActivityStackSupervisor {
                         // don't use that intent!)  And for paranoia, make
                         // sure we have correctly resumed the top activity.
                         if (doResume) {
+                            // Reset flag so it gets correctly reevaluated.
+                            intentActivity.mLaunchHomeTaskNext = false;
                             setLaunchHomeTaskNextFlag(sourceRecord, intentActivity, targetStack);
                             targetStack.resumeTopActivityLocked(null, options);
                         } else {
