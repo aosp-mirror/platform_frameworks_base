@@ -21,17 +21,21 @@ include $(LOCAL_PATH)/common.mk
 # Validate all key maps.
 include $(CLEAR_VARS)
 
-validatekeymaps := $(HOST_OUT_EXECUTABLES)/validatekeymaps$(HOST_EXECUTABLE_SUFFIX)
-files := \
-    $(foreach file,$(keylayouts),frameworks/base/data/keyboards/$(file)) \
-    $(foreach file,$(keycharmaps),frameworks/base/data/keyboards/$(file)) \
-    $(foreach file,$(keyconfigs),frameworks/base/data/keyboards/$(file))
-
 LOCAL_MODULE := validate_framework_keymaps
-LOCAL_MODULE_TAGS := optional
-LOCAL_REQUIRED_MODULES := validatekeymaps
+intermediates := $(call intermediates-dir-for,ETC,$(LOCAL_MODULE),,COMMON)
+LOCAL_BUILT_MODULE := $(intermediates)/stamp
 
-validate_framework_keymaps: $(files)
-	$(hide) $(validatekeymaps) $(files)
+validatekeymaps := $(HOST_OUT_EXECUTABLES)/validatekeymaps$(HOST_EXECUTABLE_SUFFIX)
+$(LOCAL_BUILT_MODULE): PRIVATE_VALIDATEKEYMAPS := $(validatekeymaps)
+$(LOCAL_BUILT_MODULE) : $(framework_keylayouts) $(framework_keycharmaps) $(framework_keyconfigs) | $(validatekeymaps)
+	$(hide) $(PRIVATE_VALIDATEKEYMAPS) $^
+	$(hide) mkdir -p $(dir $@) && touch $@
 
-include $(BUILD_PHONY_PACKAGE)
+# Run validatekeymaps uncondionally for platform build.
+droidcore all_modules : $(LOCAL_BUILT_MODULE)
+
+# Reset temp vars.
+validatekeymaps :=
+framework_keylayouts :=
+framework_keycharmaps :=
+framework_keyconfigs :=
