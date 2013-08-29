@@ -20,6 +20,7 @@
 
 #include "SkCanvas.h"
 #include "SkPicture.h"
+#include "SkStream.h"
 #include "SkTemplates.h"
 #include "CreateJavaOutputStreamAdaptor.h"
 
@@ -38,10 +39,9 @@ public:
     static SkPicture* deserialize(JNIEnv* env, jobject, jobject jstream,
                                   jbyteArray jstorage) {
         SkPicture* picture = NULL;
-        SkStream* strm = CreateJavaInputStreamAdaptor(env, jstream, jstorage);
-        if (strm) {
-            picture = SkPicture::CreateFromStream(strm);
-            delete strm;
+        SkAutoTUnref<SkStream> strm(WrapJavaInputStream(env, jstream, jstorage));
+        if (strm.get()) {
+            picture = SkPicture::CreateFromStream(strm.get());
         }
         return picture;
     }
