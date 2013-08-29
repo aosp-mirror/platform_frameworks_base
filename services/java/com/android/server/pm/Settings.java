@@ -2071,7 +2071,7 @@ final class Settings {
                 if (path != null) {
                     filter.addDataPath(path);
                 }
-                PreferredActivity pa = new PreferredActivity(filter, match, set, cn);
+                PreferredActivity pa = new PreferredActivity(filter, match, set, cn, true);
                 editPreferredActivitiesLPw(userId).addFilter(pa);
             } else if (!haveNonSys) {
                 Slog.w(TAG, "No component found for default preferred activity " + cn);
