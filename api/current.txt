@@ -5956,6 +5956,7 @@ package android.content {
     field public static final int BIND_WAIVE_PRIORITY = 32; // 0x20
     field public static final java.lang.String BLUETOOTH_SERVICE = "bluetooth";
     field public static final java.lang.String CAMERA_SERVICE = "camera";
+    field public static final java.lang.String CAPTIONING_SERVICE = "captioning";
     field public static final java.lang.String CLIPBOARD_SERVICE = "clipboard";
     field public static final java.lang.String CONNECTIVITY_SERVICE = "connectivity";
     field public static final int CONTEXT_IGNORE_SECURITY = 2; // 0x2
@@ -21196,6 +21197,7 @@ package android.provider {
     field public static final java.lang.String ACTION_APPLICATION_DEVELOPMENT_SETTINGS = "android.settings.APPLICATION_DEVELOPMENT_SETTINGS";
     field public static final java.lang.String ACTION_APPLICATION_SETTINGS = "android.settings.APPLICATION_SETTINGS";
     field public static final java.lang.String ACTION_BLUETOOTH_SETTINGS = "android.settings.BLUETOOTH_SETTINGS";
+    field public static final java.lang.String ACTION_CAPTIONING_SETTINGS = "android.settings.CAPTIONING_SETTINGS";
     field public static final java.lang.String ACTION_DATA_ROAMING_SETTINGS = "android.settings.DATA_ROAMING_SETTINGS";
     field public static final java.lang.String ACTION_DATE_SETTINGS = "android.settings.DATE_SETTINGS";
     field public static final java.lang.String ACTION_DEVICE_INFO_SETTINGS = "android.settings.DEVICE_INFO_SETTINGS";
@@ -28905,15 +28907,15 @@ package android.view.accessibility {
   }
 
   public class CaptioningManager {
-    ctor public CaptioningManager();
-    method public static final float getFontSize(android.content.ContentResolver);
-    method public static final java.util.Locale getLocale(android.content.ContentResolver);
-    method public static final boolean isEnabled(android.content.ContentResolver);
-    field public static final java.lang.String ACTION_CAPTIONING_SETTINGS = "android.settings.CAPTIONING_SETTINGS";
+    method public void addCaptioningStateChangeListener(android.view.accessibility.CaptioningManager.CaptioningChangeListener);
+    method public final float getFontScale();
+    method public final java.util.Locale getLocale();
+    method public android.view.accessibility.CaptioningManager.CaptionStyle getUserStyle();
+    method public final boolean isEnabled();
+    method public void removeCaptioningStateChangeListener(android.view.accessibility.CaptioningManager.CaptioningChangeListener);
   }
 
   public static final class CaptioningManager.CaptionStyle {
-    method public static android.view.accessibility.CaptioningManager.CaptionStyle defaultUserStyle(android.content.ContentResolver);
     method public android.graphics.Typeface getTypeface();
     field public static final int EDGE_TYPE_DROP_SHADOW = 2; // 0x2
     field public static final int EDGE_TYPE_NONE = 0; // 0x0
@@ -28922,6 +28924,14 @@ package android.view.accessibility {
     field public final int edgeColor;
     field public final int edgeType;
     field public final int foregroundColor;
+  }
+
+  public abstract class CaptioningManager.CaptioningChangeListener {
+    ctor public CaptioningManager.CaptioningChangeListener();
+    method public void onEnabledChanged(boolean);
+    method public void onFontScaleChanged(float);
+    method public void onLocaleChanged(java.util.Locale);
+    method public void onUserStyleChanged(android.view.accessibility.CaptioningManager.CaptionStyle);
   }
 
 }
