@@ -47,7 +47,7 @@
     <string name="pref_device_size" msgid="3542106883278997222">"Prikaži veličinu uređaja"</string>
     <string name="empty" msgid="7858882803708117596">"Nema stavki"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"Datoteku nije moguće otvoriti"</string>
-    <string name="toast_failed_delete" msgid="2180678019407244069">"Nije bilo moguće izbrisati neke dokumente"</string>
+    <string name="toast_failed_delete" msgid="2180678019407244069">"Nije moguće izbrisati neke dokumente"</string>
     <string name="more" msgid="7117420986529297171">"Više"</string>
     <string name="loading" msgid="7933681260296021180">"Učitavanje…"</string>
 </resources>

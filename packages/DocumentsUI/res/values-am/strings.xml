@@ -17,9 +17,9 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"ሰነዶች"</string>
-    <string name="title_open" msgid="4353228937663917801">"ይክፈቱ ከ"</string>
-    <string name="title_save" msgid="2433679664882857999">"ያስቀምጡ ወደ"</string>
-    <string name="menu_create_dir" msgid="5947289605844398389">"አቃፊ ይፍጠሩ"</string>
+    <string name="title_open" msgid="4353228937663917801">"ክፈት ከ"</string>
+    <string name="title_save" msgid="2433679664882857999">"አስቀምጥ ወደ"</string>
+    <string name="menu_create_dir" msgid="5947289605844398389">"አቃፊ ፍጠር"</string>
     <string name="menu_grid" msgid="6878021334497835259">"የፍርግርግ እይታ"</string>
     <string name="menu_list" msgid="7279285939892417279">"የዝርዝር እይታ"</string>
     <string name="menu_sort" msgid="7677740407158414452">"ደርድር በ"</string>
@@ -31,7 +31,7 @@
     <string name="menu_delete" msgid="8138799623850614177">"ሰርዝ"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> ተመርጠዋል"</string>
     <string name="sort_name" msgid="9183560467917256779">"በስም"</string>
-    <string name="sort_date" msgid="586080032956151448">"በተስተካከሉበት ቀን"</string>
+    <string name="sort_date" msgid="586080032956151448">"በተለወጠበት ቀን"</string>
     <string name="sort_size" msgid="3350681319735474741">"በመጠን"</string>
     <string name="drawer_open" msgid="4545466532430226949">"ስሮችን አሳይ"</string>
     <string name="drawer_close" msgid="7602734368552123318">"ስሮችን ደብቅ"</string>

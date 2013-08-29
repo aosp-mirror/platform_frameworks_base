@@ -30,7 +30,7 @@
     <string name="menu_share" msgid="3075149983979628146">"Kongsi"</string>
     <string name="menu_delete" msgid="8138799623850614177">"Padam"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"<xliff:g id="COUNT">%1$d</xliff:g> dipilih"</string>
-    <string name="sort_name" msgid="9183560467917256779">"Oleh nama"</string>
+    <string name="sort_name" msgid="9183560467917256779">"Mengikut nama"</string>
     <string name="sort_date" msgid="586080032956151448">"Diubah suai mengikut tarikh"</string>
     <string name="sort_size" msgid="3350681319735474741">"Mengikut saiz"</string>
     <string name="drawer_open" msgid="4545466532430226949">"Tunjukkan akar"</string>

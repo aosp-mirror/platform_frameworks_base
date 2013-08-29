@@ -18,7 +18,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"Dokumente"</string>
     <string name="title_open" msgid="4353228937663917801">"Maak oop vanaf"</string>
-    <string name="title_save" msgid="2433679664882857999">"Stoor in"</string>
+    <string name="title_save" msgid="2433679664882857999">"Stoor na"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"Skep vouer"</string>
     <string name="menu_grid" msgid="6878021334497835259">"Roosteraansig"</string>
     <string name="menu_list" msgid="7279285939892417279">"Lysaansig"</string>
@@ -41,13 +41,13 @@
     <string name="root_type_service" msgid="2857362700576006694">"Dienste"</string>
     <string name="root_type_shortcut" msgid="3318760609471618093">"Kortpaaie"</string>
     <string name="root_type_device" msgid="7121342474653483538">"Toestelle"</string>
-    <string name="root_type_apps" msgid="8838065367985945189">"Nog meer programme"</string>
+    <string name="root_type_apps" msgid="8838065367985945189">"Nog programme"</string>
     <string name="pref_advanced_devices" msgid="903257239609301276">"Wys gevorderde toestelle"</string>
     <string name="pref_file_size" msgid="2826879315743961459">"Wys lêergrootte"</string>
     <string name="pref_device_size" msgid="3542106883278997222">"Wys toestelgrootte"</string>
     <string name="empty" msgid="7858882803708117596">"Geen items nie"</string>
-    <string name="toast_no_application" msgid="1339885974067891667">"Kan nie lêer oopmaak nie"</string>
-    <string name="toast_failed_delete" msgid="2180678019407244069">"Kan nie sommige dokumente uitvee nie"</string>
-    <string name="more" msgid="7117420986529297171">"Nog meer"</string>
+    <string name="toast_no_application" msgid="1339885974067891667">"Kan lêer nie oopmaak nie"</string>
+    <string name="toast_failed_delete" msgid="2180678019407244069">"Kan sommige dokumente nie uitvee nie"</string>
+    <string name="more" msgid="7117420986529297171">"Nog"</string>
     <string name="loading" msgid="7933681260296021180">"Laai tans..."</string>
 </resources>

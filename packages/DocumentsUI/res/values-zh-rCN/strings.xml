@@ -17,8 +17,8 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="2783841764617238354">"文档"</string>
-    <string name="title_open" msgid="4353228937663917801">"打开方式："</string>
-    <string name="title_save" msgid="2433679664882857999">"保存到："</string>
+    <string name="title_open" msgid="4353228937663917801">"打开文件"</string>
+    <string name="title_save" msgid="2433679664882857999">"保存文件"</string>
     <string name="menu_create_dir" msgid="5947289605844398389">"新建文件夹"</string>
     <string name="menu_grid" msgid="6878021334497835259">"网格视图"</string>
     <string name="menu_list" msgid="7279285939892417279">"列表视图"</string>
@@ -27,7 +27,7 @@
     <string name="menu_settings" msgid="6008033148948428823">"设置"</string>
     <string name="menu_open" msgid="432922957274920903">"打开"</string>
     <string name="menu_save" msgid="2394743337684426338">"保存"</string>
-    <string name="menu_share" msgid="3075149983979628146">"共享"</string>
+    <string name="menu_share" msgid="3075149983979628146">"分享"</string>
     <string name="menu_delete" msgid="8138799623850614177">"删除"</string>
     <string name="mode_selected_count" msgid="459111894725594625">"已选择<xliff:g id="COUNT">%1$d</xliff:g>项"</string>
     <string name="sort_name" msgid="9183560467917256779">"按名称"</string>
@@ -45,7 +45,7 @@
     <string name="pref_advanced_devices" msgid="903257239609301276">"显示高级设备"</string>
     <string name="pref_file_size" msgid="2826879315743961459">"显示文件大小"</string>
     <string name="pref_device_size" msgid="3542106883278997222">"显示设备大小"</string>
-    <string name="empty" msgid="7858882803708117596">"无任何项"</string>
+    <string name="empty" msgid="7858882803708117596">"无任何文件"</string>
     <string name="toast_no_application" msgid="1339885974067891667">"无法打开文件"</string>
     <string name="toast_failed_delete" msgid="2180678019407244069">"无法删除部分文档"</string>
     <string name="more" msgid="7117420986529297171">"更多"</string>
