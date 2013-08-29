@@ -160,9 +160,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Mtindo wa kimya"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Sauti Imezimwa"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Sauti imewashwa"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"gumzo ya ndege"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Modi ya ndege"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Hali ya ndege IMEWASHWA"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"gumzo ya ndege IMEZIMWA"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Modi ya ndege IMEZIMWA"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mtindo salama"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Mfumo wa Android"</string>
