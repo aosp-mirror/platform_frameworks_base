@@ -1205,6 +1205,45 @@ include the action bar on devices running Android 2.1 or higher."
   </li>
   <!-- End security and user info -->
 
+  <li class="nav-section">
+    <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>training/testing.html">
+      <span class="small">Best Practices for</span><br/>
+              Testing
+      </a>
+    </div>
+    <ul>
+      <li class="nav-section">
+      <div class="nav-section-header"><a href="<?cs var:toroot ?>training/activity-testing/index.html"
+         description="How to test Activities in your Android applications.">
+            Testing Your Activity
+          </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/activity-testing/preparing-activity-testing.html">
+            <span class="en">Setting Up Your Test Environment</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/activity-testing/activity-basic-testing.html">
+            <span class="en">Creating and Running a Test Case</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/activity-testing/activity-ui-testing.html">
+            <span class="en">Testing UI Components</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/activity-testing/activity-unit-testing.html">
+            <span class="en">Creating Unit Tests</span>
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/activity-testing/activity-functional-testing.html">
+            <span class="en">Creating Functional Tests</span>
+          </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <!-- End best Testing -->
 
   <li class="nav-section">
     <div class="nav-section-header">
