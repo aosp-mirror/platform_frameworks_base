@@ -155,7 +155,7 @@ CpuConsumer::LockedBuffer* JNIImageReaderContext::getLockedBuffer() {
     return buffer;
 }
 
-void JNIImageReaderContext::returnLockedBuffer(CpuConsumer::LockedBuffer * buffer) {
+void JNIImageReaderContext::returnLockedBuffer(CpuConsumer::LockedBuffer* buffer) {
     mBuffers.push_back(buffer);
 }
 
@@ -698,8 +698,11 @@ static jboolean ImageReader_imageSetup(JNIEnv* env, jobject thiz,
     CpuConsumer* consumer = ctx->getCpuConsumer();
     CpuConsumer::LockedBuffer* buffer = ctx->getLockedBuffer();
     if (buffer == NULL) {
-        ALOGE("Unable to acquire a lockedBuffer, very likely client tries to lock more than"
-            "maxImages buffers");
+        ALOGW("Unable to acquire a lockedBuffer, very likely client tries to lock more than"
+            " maxImages buffers");
+        jniThrowException(env, OutOfResourcesException,
+                  "Too many outstanding images, close existing images"
+                  " to be able to acquire more.");
         return false;
     }
     status_t res = consumer->lockNextBuffer(buffer);
