@@ -31,7 +31,9 @@ import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.StrictMode;
+import android.print.PrintAttributes;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -49,7 +51,6 @@ import android.widget.AbsoluteLayout;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.OutputStream;
 import java.util.Map;
 
 /**
@@ -1042,7 +1043,9 @@ public class WebView extends AbsoluteLayout
      * Exports the contents of this Webview as PDF. Only supported for API levels
      * {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE} and above.
      *
-     * @param out            The stream to export the PDF contents to. Cannot be null.
+     * TODO(sgurun) the parameter list is stale. Fix it before unhiding.
+     *
+     * @param fd             The FileDescriptor to export the PDF contents to. Cannot be null.
      * @param width          The page width. Should be larger than 0.
      * @param height         The page height. Should be larger than 0.
      * @param resultCallback A callback to be invoked when the PDF content is exported.
@@ -1051,21 +1054,26 @@ public class WebView extends AbsoluteLayout
      *                       be null.
      *
      * The PDF conversion is done asynchronously and the PDF output is written to the provided
-     * outputstream. The caller should not close the outputstream until the resultCallback is
-     * called, indicating PDF conversion is complete. Webview cannot be drawn during the pdf
-     * export so the  application is recommended to take it offscreen, or putting in a layer
-     * with an overlaid progress UI / spinner.
+     * file descriptor. The caller should not close the file descriptor until the resultCallback
+     * is called, indicating PDF conversion is complete. Webview will never close the file
+     * descriptor.
+     * Limitations: Webview cannot be drawn during the PDF export so the  application is
+     * recommended to take it offscreen, or putting in a layer with an overlaid progress
+     * UI / spinner.
      *
      * If the caller cancels the task using the cancellationSignal, the cancellation will be
      * acked using the resultCallback signal.
      *
+     * Throws an exception if an IO error occurs accessing the file descriptor.
+     *
      * TODO(sgurun) margins, explain the units, make it public.
      * @hide
      */
-    public void exportToPdf(OutputStream out, int width, int height,
-            ValueCallback<Boolean> resultCallback, CancellationSignal cancellationSignal) {
+    public void exportToPdf(ParcelFileDescriptor fd, PrintAttributes attributes,
+            ValueCallback<Boolean> resultCallback, CancellationSignal cancellationSignal)
+            throws java.io.IOException {
         checkThread();
-        mProvider.exportToPdf(out, width, height, resultCallback, cancellationSignal);
+        mProvider.exportToPdf(fd, attributes, resultCallback, cancellationSignal);
     }
 
     /**
