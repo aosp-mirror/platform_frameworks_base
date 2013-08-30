@@ -1190,11 +1190,22 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     break;
                 case WifiMonitor.P2P_PROV_DISC_PBC_REQ_EVENT:
                 case WifiMonitor.P2P_PROV_DISC_ENTER_PIN_EVENT:
-                case WifiMonitor.P2P_PROV_DISC_SHOW_PIN_EVENT:
                     //We let the supplicant handle the provision discovery response
                     //and wait instead for the GO_NEGOTIATION_REQUEST_EVENT.
                     //Handling provision discovery and issuing a p2p_connect before
                     //group negotiation comes through causes issues
+                    break;
+                case WifiMonitor.P2P_PROV_DISC_SHOW_PIN_EVENT:
+                    WifiP2pProvDiscEvent provDisc = (WifiP2pProvDiscEvent) message.obj;
+                    WifiP2pDevice device = provDisc.device;
+                    if (device == null) {
+                        Slog.d(TAG, "Device entry is null");
+                        break;
+                    }
+                    notifyP2pProvDiscShowPinRequest(provDisc.pin, device.deviceAddress);
+                    mPeers.updateStatus(device.deviceAddress, WifiP2pDevice.INVITED);
+                    sendPeersChangedBroadcast();
+                    transitionTo(mGroupNegotiationState);
                     break;
                 case WifiP2pManager.CREATE_GROUP:
                     mAutonomousGroup = true;
@@ -2126,6 +2137,36 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             .setTitle(r.getString(R.string.wifi_p2p_invitation_sent_title))
             .setView(textEntryView)
             .setPositiveButton(r.getString(R.string.ok), null)
+            .create();
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        dialog.show();
+    }
+
+    private void notifyP2pProvDiscShowPinRequest(String pin, String peerAddress) {
+        Resources r = Resources.getSystem();
+        final String tempDevAddress = peerAddress;
+        final String tempPin = pin;
+
+        final View textEntryView = LayoutInflater.from(mContext)
+                .inflate(R.layout.wifi_p2p_dialog, null);
+
+        ViewGroup group = (ViewGroup) textEntryView.findViewById(R.id.info);
+        addRowToDialog(group, R.string.wifi_p2p_to_message, getDeviceName(peerAddress));
+        addRowToDialog(group, R.string.wifi_p2p_show_pin_message, pin);
+
+        AlertDialog dialog = new AlertDialog.Builder(mContext)
+            .setTitle(r.getString(R.string.wifi_p2p_invitation_sent_title))
+            .setView(textEntryView)
+            .setPositiveButton(r.getString(R.string.accept), new OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            mSavedPeerConfig = new WifiP2pConfig();
+                            mSavedPeerConfig.deviceAddress = tempDevAddress;
+                            mSavedPeerConfig.wps.setup = WpsInfo.DISPLAY;
+                            mSavedPeerConfig.wps.pin = tempPin;
+                            mWifiNative.p2pConnect(mSavedPeerConfig, FORM_GROUP);
+                        }
+                    })
+            .setCancelable(false)
             .create();
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
         dialog.show();
