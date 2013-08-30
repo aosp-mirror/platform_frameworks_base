@@ -2011,6 +2011,17 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
+     * {@link android.view.accessibility.CaptioningManager} for obtaining
+     * captioning properties and listening for changes in captioning
+     * preferences.
+     *
+     * @see #getSystemService
+     * @see android.view.accessibility.CaptioningManager
+     */
+    public static final String CAPTIONING_SERVICE = "captioning";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.app.NotificationManager} for controlling keyguard.
      *
      * @see #getSystemService
