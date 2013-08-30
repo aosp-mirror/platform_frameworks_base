@@ -351,9 +351,9 @@ not_valid_surface:
                 "Make sure the SurfaceTexture is valid");
         return 0;
     }
-    
+
     sp<IGraphicBufferProducer> producer(SurfaceTexture_getProducer(_env, native_window));
-    window = new Surface(producer);
+    window = new Surface(producer, true);
     if (window == NULL)
         goto not_valid_surface;
 
