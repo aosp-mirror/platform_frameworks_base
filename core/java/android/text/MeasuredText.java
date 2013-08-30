@@ -46,7 +46,7 @@ class MeasuredText {
     }
 
     private static final Object[] sLock = new Object[0];
-    private static MeasuredText[] sCached = new MeasuredText[3];
+    private static final MeasuredText[] sCached = new MeasuredText[3];
 
     static MeasuredText obtain() {
         MeasuredText mt;
