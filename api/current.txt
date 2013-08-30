@@ -9926,7 +9926,7 @@ package android.graphics {
     method public abstract void onFrameAvailable(android.graphics.SurfaceTexture);
   }
 
-  public static class SurfaceTexture.OutOfResourcesException extends java.lang.Exception {
+  public static deprecated class SurfaceTexture.OutOfResourcesException extends java.lang.Exception {
     ctor public SurfaceTexture.OutOfResourcesException();
     ctor public SurfaceTexture.OutOfResourcesException(java.lang.String);
   }
@@ -27311,7 +27311,7 @@ package android.view {
     field public static final int ROTATION_90 = 1; // 0x1
   }
 
-  public static class Surface.OutOfResourcesException extends java.lang.Exception {
+  public static class Surface.OutOfResourcesException extends java.lang.RuntimeException {
     ctor public Surface.OutOfResourcesException();
     ctor public Surface.OutOfResourcesException(java.lang.String);
   }

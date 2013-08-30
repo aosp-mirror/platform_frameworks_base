@@ -37,7 +37,7 @@
 namespace android {
 
 static const char* const OutOfResourcesException =
-    "android/graphics/SurfaceTexture$OutOfResourcesException";
+    "android/view/Surface$OutOfResourcesException";
 static const char* const IllegalStateException = "java/lang/IllegalStateException";
 const char* const kSurfaceTextureClassPathName = "android/graphics/SurfaceTexture";
 
