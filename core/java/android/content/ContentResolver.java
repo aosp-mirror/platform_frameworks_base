@@ -141,7 +141,7 @@ public abstract class ContentResolver {
     public static final String SYNC_EXTRAS_PRIORITY = "sync_priority";
 
     /** {@hide} Flag to allow sync to occur on metered network. */
-    public static final String SYNC_EXTRAS_ALLOW_METERED = "allow_metered";
+    public static final String SYNC_EXTRAS_DISALLOW_METERED = "disallow_metered";
 
     /**
      * Set by the SyncManager to request that the SyncAdapter initialize itself for
@@ -1669,7 +1669,7 @@ public abstract class ContentResolver {
             new SyncRequest.Builder()
                 .setSyncAdapter(account, authority)
                 .setExtras(extras)
-                .syncOnce(0, 0)     // Immediate sync.
+                .syncOnce()
                 .build();
         requestSync(request);
     }
@@ -1677,6 +1677,9 @@ public abstract class ContentResolver {
     /**
      * Register a sync with the SyncManager. These requests are built using the
      * {@link SyncRequest.Builder}.
+     *
+     * @param request The immutable SyncRequest object containing the sync parameters. Use
+     * {@link SyncRequest.Builder} to construct these.
      */
     public static void requestSync(SyncRequest request) {
         try {
@@ -1812,6 +1815,9 @@ public abstract class ContentResolver {
      * {@link #SYNC_EXTRAS_INITIALIZE}, {@link #SYNC_EXTRAS_FORCE},
      * {@link #SYNC_EXTRAS_EXPEDITED}, {@link #SYNC_EXTRAS_MANUAL} set to true.
      * If any are supplied then an {@link IllegalArgumentException} will be thrown.
+     * <p>As of API level 19 this function introduces a default flexibility of ~4% (up to a maximum
+     * of one hour in the day) into the requested period. Use
+     * {@link SyncRequest.Builder#syncPeriodic(long, long)} to set this flexibility manually.
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#WRITE_SYNC_SETTINGS}.
@@ -1872,22 +1878,6 @@ public abstract class ContentResolver {
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }
-    }
-
-    /**
-     * Remove the specified sync. This will remove any syncs that have been scheduled to run, but
-     * will not cancel any running syncs.
-     * <p>This method requires the caller to hold the permission</p>
-     * If the request is for a periodic sync this will cancel future occurrences of the sync.
-     *
-     * It is possible to cancel a sync using a SyncRequest object that is different from the object
-     * with which you requested the sync. Do so by building a SyncRequest with exactly the same
-     * service/adapter, frequency, <b>and</b> extras bundle.
-     *
-     * @param request SyncRequest object containing information about sync to cancel.
-     */
-    public static void cancelSync(SyncRequest request) {
-        // TODO: Finish this implementation.
     }
 
     /**
