@@ -25760,7 +25760,7 @@ package android.util {
     method public android.util.JsonWriter value(java.lang.Number) throws java.io.IOException;
   }
 
-  public abstract interface LayoutDirection {
+  public final class LayoutDirection {
     field public static final int INHERIT = 2; // 0x2
     field public static final int LOCALE = 3; // 0x3
     field public static final int LTR = 0; // 0x0
