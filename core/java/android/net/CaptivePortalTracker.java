@@ -397,17 +397,14 @@ public class CaptivePortalTracker extends StateMachine {
             long responseTimestamp = SystemClock.elapsedRealtime();
 
             // we got a valid response, but not from the real google
-            boolean isCaptivePortal = urlConnection.getResponseCode() != 204;
+            int rspCode = urlConnection.getResponseCode();
+            boolean isCaptivePortal = rspCode != 204;
 
             sendNetworkConditionsBroadcast(true /* response received */, isCaptivePortal,
                     requestTimestamp, responseTimestamp);
+
+            if (DBG) log("isCaptivePortal: ret=" + isCaptivePortal + " rspCode=" + rspCode);
             return isCaptivePortal;
-        } catch (SocketTimeoutException e) {
-            if (DBG) log("Probably a portal: exception " + e);
-            if (requestTimestamp != -1) {
-                sendFailedCaptivePortalCheckBroadcast(requestTimestamp);
-            } // else something went wrong with setting up the urlConnection
-            return true;
         } catch (IOException e) {
             if (DBG) log("Probably not a portal: exception " + e);
             if (requestTimestamp != -1) {
