@@ -15259,12 +15259,12 @@ package android.nfc {
 
 package android.nfc.cardemulation {
 
-  public final class CardEmulationManager {
-    method public static synchronized android.nfc.cardemulation.CardEmulationManager getInstance(android.nfc.NfcAdapter);
+  public final class CardEmulation {
+    method public static synchronized android.nfc.cardemulation.CardEmulation getInstance(android.nfc.NfcAdapter);
     method public int getSelectionModeForCategory(java.lang.String);
     method public boolean isDefaultServiceForAid(android.content.ComponentName, java.lang.String);
     method public boolean isDefaultServiceForCategory(android.content.ComponentName, java.lang.String);
-    field public static final java.lang.String ACTION_CHANGE_DEFAULT = "android.nfc.cardemulation.ACTION_CHANGE_DEFAULT";
+    field public static final java.lang.String ACTION_CHANGE_DEFAULT = "android.nfc.cardemulation.action.ACTION_CHANGE_DEFAULT";
     field public static final java.lang.String CATEGORY_OTHER = "other";
     field public static final java.lang.String CATEGORY_PAYMENT = "payment";
     field public static final java.lang.String EXTRA_CATEGORY = "category";
@@ -15284,15 +15284,15 @@ package android.nfc.cardemulation {
     method public final void sendResponseApdu(byte[]);
     field public static final int DEACTIVATION_DESELECTED = 1; // 0x1
     field public static final int DEACTIVATION_LINK_LOSS = 0; // 0x0
-    field public static final java.lang.String SERVICE_INTERFACE = "android.nfc.HostApduService";
-    field public static final java.lang.String SERVICE_META_DATA = "android.nfc.HostApduService";
+    field public static final java.lang.String SERVICE_INTERFACE = "android.nfc.cardemulation.action.HOST_APDU_SERVICE";
+    field public static final java.lang.String SERVICE_META_DATA = "android.nfc.cardemulation.host_apdu_service";
   }
 
   public abstract class OffHostApduService extends android.app.Service {
     ctor public OffHostApduService();
     method public abstract android.os.IBinder onBind(android.content.Intent);
-    field public static final java.lang.String SERVICE_INTERFACE = "android.nfc.OffHostApduService";
-    field public static final java.lang.String SERVICE_META_DATA = "android.nfc.OffHostApduService";
+    field public static final java.lang.String SERVICE_INTERFACE = "android.nfc.cardemulation.action.OFF_HOST_APDU_SERVICE";
+    field public static final java.lang.String SERVICE_META_DATA = "android.nfc.cardemulation.off_host_apdu_service";
   }
 
 }
