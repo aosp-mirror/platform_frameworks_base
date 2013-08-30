@@ -111,40 +111,6 @@ public class SyncOperation implements Comparable {
         this.key = toKey();
     }
 
-    public SyncOperation(SyncRequest request, int userId, int reason, int source, long backoff,
-            long delayUntil, boolean allowParallelSyncs) {
-        if (request.hasAuthority()) {
-            Pair<Account, String> providerInfo = request.getProviderInfo();
-            this.account = providerInfo.first;
-            this.authority = providerInfo.second;
-            this.service = null;
-        } else {
-            this.service = request.getService();
-            this.account = null;
-            this.authority = null;
-        }
-        this.userId = userId;
-        this.reason = reason;
-        this.syncSource = source;
-        this.allowParallelSyncs = allowParallelSyncs;
-        this.extras = new Bundle(extras);
-        cleanBundle(this.extras);
-        this.delayUntil = delayUntil;
-        this.backoff = backoff;
-        final long now = SystemClock.elapsedRealtime();
-        if (request.isExpedited()) {
-            this.expedited = true;
-            this.latestRunTime = now;
-            this.flexTime = 0;
-        } else {
-            this.expedited = false;
-            this.latestRunTime = now + (request.getSyncRunTime() * 1000);
-            this.flexTime = request.getSyncFlexTime() * 1000;
-        }
-        updateEffectiveRunTime();
-        this.key = toKey();
-    }
-
     /**
      * Make sure the bundle attached to this SyncOperation doesn't have unnecessary
      * flags set.
@@ -159,7 +125,7 @@ public class SyncOperation implements Comparable {
         removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_DISCARD_LOCAL_DELETIONS);
         removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_EXPEDITED);
         removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_OVERRIDE_TOO_MANY_DELETIONS);
-        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_ALLOW_METERED);
+        removeFalseExtra(bundle, ContentResolver.SYNC_EXTRAS_DISALLOW_METERED);
 
         // Remove Config data.
         bundle.remove(ContentResolver.SYNC_EXTRAS_EXPECTED_UPLOAD);
@@ -245,8 +211,8 @@ public class SyncOperation implements Comparable {
         }
     }
 
-    public boolean isMetered() {
-        return extras.getBoolean(ContentResolver.SYNC_EXTRAS_ALLOW_METERED, false);
+    public boolean isMeteredDisallowed() {
+        return extras.getBoolean(ContentResolver.SYNC_EXTRAS_DISALLOW_METERED, false);
     }
 
     public boolean isInitialization() {

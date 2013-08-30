@@ -19,7 +19,6 @@ package com.android.server.content;
 import android.Manifest;
 import android.accounts.Account;
 import android.app.ActivityManager;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IContentService;
@@ -363,8 +362,8 @@ public final class ContentService extends IContentService.Stub {
             if (syncManager != null) {
                 if (request.hasAuthority()) {
                     // Sync Adapter registered with the system - old API.
-                    final  Account account = request.getProviderInfo().first;
-                    final String provider = request.getProviderInfo().second;
+                    final  Account account = request.getAccount();
+                    final String provider = request.getProvider();
                     if (request.isPeriodic()) {
                         mContext.enforceCallingOrSelfPermission(
                                 Manifest.permission.WRITE_SYNC_SETTINGS,
@@ -386,20 +385,7 @@ public final class ContentService extends IContentService.Stub {
                                 false /* onlyThoseWithUnknownSyncableState */);
                     }
                 } else {
-                    // Anonymous sync - new API.
-                    final ComponentName syncService = request.getService();
-                    if (request.isPeriodic()) {
-                        throw new RuntimeException("Periodic anonymous syncs not implemented yet.");
-                    } else {
-                        long beforeRuntimeMillis = (flextime) * 1000;
-                        long runtimeMillis = runAtTime * 1000;
-                        syncManager.scheduleSync(
-                              syncService, userId, uId, extras,
-                              beforeRuntimeMillis,
-                              runtimeMillis,
-                              false /* onlyThoseWithUnknownSyncableState */); // Empty function.
-                        throw new RuntimeException("One-off anonymous syncs not implemented yet.");
-                    }
+                    Log.w(TAG, "Unrecognised sync parameters, doing nothing.");
                 }
             }
         } finally {
