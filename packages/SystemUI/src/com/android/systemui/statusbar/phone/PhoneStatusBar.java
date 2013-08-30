@@ -37,7 +37,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.Canvas;
@@ -97,7 +96,6 @@ import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 import com.android.systemui.statusbar.policy.OnSizeChangedListener;
-import com.android.systemui.statusbar.policy.Prefs;
 import com.android.systemui.statusbar.policy.RotationLockController;
 
 import java.io.FileDescriptor;
@@ -111,10 +109,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     public static final boolean DUMPTRUCK = true; // extra dumpsys info
     public static final boolean DEBUG_GESTURES = false;
 
-    public static final boolean DEBUG_CLINGS = false;
     public static final boolean DEBUG_WINDOW_STATE = true;
-
-    public static final boolean ENABLE_NOTIFICATION_PANEL_CLING = false;
 
     public static final boolean SETTINGS_DRAG_SHORTCUT = true;
 
@@ -250,11 +245,6 @@ public class PhoneStatusBar extends BaseStatusBar {
     int mEdgeBorder; // corresponds to R.dimen.status_bar_edge_ignore
     boolean mTracking;
     VelocityTracker mVelocityTracker;
-
-    // help screen
-    private boolean mClingShown;
-    private ViewGroup mCling;
-    private boolean mSuppressStatusBarDrags; // while a cling is up, briefly deaden the bar to give things time to settle
 
     int[] mAbsPos = new int[2];
     Runnable mPostCollapseCleanup = null;
@@ -613,13 +603,6 @@ public class PhoneStatusBar extends BaseStatusBar {
             } else {
                 mQS = null; // fly away, be free
             }
-        }
-
-        mClingShown = ! (DEBUG_CLINGS
-            || !Prefs.read(mContext).getBoolean(Prefs.SHOWN_QUICK_SETTINGS_HELP, false));
-
-        if (!ENABLE_NOTIFICATION_PANEL_CLING || ActivityManager.isRunningInTestHarness()) {
-            mClingShown = true;
         }
 
 //        final ImageView wimaxRSSI =
@@ -1733,63 +1716,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         }
     }
 
-    public boolean isClinging() {
-        return mCling != null && mCling.getVisibility() == View.VISIBLE;
-    }
-
-    public void hideCling() {
-        if (isClinging()) {
-            mCling.animate().alpha(0f).setDuration(250).start();
-            mCling.setVisibility(View.GONE);
-            mSuppressStatusBarDrags = false;
-        }
-    }
-
-    public void showCling() {
-        // lazily inflate this to accommodate orientation change
-        final ViewStub stub = (ViewStub) mStatusBarWindow.findViewById(R.id.status_bar_cling_stub);
-        if (stub == null) {
-            mClingShown = true;
-            return; // no clings on this device
-        }
-
-        mSuppressStatusBarDrags = true;
-
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mCling = (ViewGroup) stub.inflate();
-
-                mCling.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        return true; // e eats everything
-                    }});
-                mCling.findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        hideCling();
-                    }});
-
-                mCling.setAlpha(0f);
-                mCling.setVisibility(View.VISIBLE);
-                mCling.animate().alpha(1f);
-
-                mClingShown = true;
-                SharedPreferences.Editor editor = Prefs.edit(mContext);
-                editor.putBoolean(Prefs.SHOWN_QUICK_SETTINGS_HELP, true);
-                editor.apply();
-
-                makeExpandedVisible(); // enforce visibility in case the shade is still animating closed
-                animateExpandNotificationsPanel();
-
-                mSuppressStatusBarDrags = false;
-            }
-        }, 500);
-
-        animateExpandNotificationsPanel();
-    }
-
     public boolean interceptTouchEvent(MotionEvent event) {
         if (DEBUG_GESTURES) {
             if (event.getActionMasked() != MotionEvent.ACTION_MOVE) {
@@ -1813,21 +1739,6 @@ public class PhoneStatusBar extends BaseStatusBar {
 
         if (DEBUG_GESTURES) {
             mGestureRec.add(event);
-        }
-
-        // Cling (first-run help) handling.
-        // The cling is supposed to show the first time you drag, or even tap, the status bar.
-        // It should show the notification panel, then fade in after half a second, giving you
-        // an explanation of what just happened, as well as teach you how to access quick
-        // settings (another drag). The user can dismiss the cling by clicking OK or by
-        // dragging quick settings into view.
-        final int act = event.getActionMasked();
-        if (mSuppressStatusBarDrags) {
-            return true;
-        } else if (act == MotionEvent.ACTION_UP && !mClingShown) {
-            showCling();
-        } else {
-            hideCling();
         }
 
         setInteracting(true);
