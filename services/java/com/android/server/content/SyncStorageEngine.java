@@ -71,7 +71,7 @@ import java.util.TimeZone;
 public class SyncStorageEngine extends Handler {
 
     private static final String TAG = "SyncManager";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final String TAG_FILE = "SyncManagerFile";
 
     private static final String XML_ATTR_NEXT_AUTHORITY_ID = "nextAuthorityId";
