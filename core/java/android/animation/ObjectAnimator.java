@@ -228,6 +228,53 @@ public final class ObjectAnimator extends ValueAnimator {
     }
 
     /**
+     * Constructs and returns an ObjectAnimator that animates over int values for a multiple
+     * parameters setter. Only public methods that take only int parameters are supported.
+     * Each <code>int[]</code> contains a complete set of parameters to the setter method.
+     * At least two <code>int[]</code> values must be provided, a start and end. More than two
+     * values imply a starting value, values to animate through along the way, and an ending
+     * value (these values will be distributed evenly across the duration of the animation).
+     *
+     * @param target The object whose property is to be animated. This object may
+     * have a public method on it called <code>setName()</code>, where <code>name</code> is
+     * the value of the <code>propertyName</code> parameter. <code>propertyName</code> may also
+     * be the case-sensitive complete name of the public setter method.
+     * @param propertyName The name of the property being animated or the name of the setter method.
+     * @param values A set of values that the animation will animate between over time.
+     * @return An ObjectAnimator object that is set up to animate between the given values.
+     */
+    public static ObjectAnimator ofMultiInt(Object target, String propertyName, int[][] values) {
+        PropertyValuesHolder pvh = PropertyValuesHolder.ofMultiInt(propertyName, values);
+        return ofPropertyValuesHolder(target, pvh);
+    }
+
+    /**
+     * Constructs and returns an ObjectAnimator that animates over values for a multiple int
+     * parameters setter. Only public methods that take only int parameters are supported.
+     * <p>At least two values must be provided, a start and end. More than two
+     * values imply a starting value, values to animate through along the way, and an ending
+     * value (these values will be distributed evenly across the duration of the animation).</p>
+     *
+     * @param target The object whose property is to be animated. This object may
+     * have a public method on it called <code>setName()</code>, where <code>name</code> is
+     * the value of the <code>propertyName</code> parameter. <code>propertyName</code> may also
+     * be the complete name of the public method.
+     * @param propertyName The name of the property being animated or the name of the setter method.
+     * @param converter Converts T objects into int parameters for the multi-value setter.
+     * @param evaluator A TypeEvaluator that will be called on each animation frame to
+     * provide the necessary interpolation between the Object values to derive the animated
+     * value.
+     * @param values A set of values that the animation will animate between over time.
+     * @return An ObjectAnimator object that is set up to animate between the given values.
+     */
+    public static <T> ObjectAnimator ofMultiInt(Object target, String propertyName,
+            TypeConverter<T, int[]> converter, TypeEvaluator<T> evaluator, T... values) {
+        PropertyValuesHolder pvh = PropertyValuesHolder.ofMultiInt(propertyName, converter,
+                evaluator, values);
+        return ObjectAnimator.ofPropertyValuesHolder(target, pvh);
+    }
+
+    /**
      * Constructs and returns an ObjectAnimator that animates between float values. A single
      * value implies that that value is the one being animated to. Two values imply starting
      * and ending values. More than two values imply a starting value, values to animate through
@@ -264,6 +311,54 @@ public final class ObjectAnimator extends ValueAnimator {
         ObjectAnimator anim = new ObjectAnimator(target, property);
         anim.setFloatValues(values);
         return anim;
+    }
+
+    /**
+     * Constructs and returns an ObjectAnimator that animates over float values for a multiple
+     * parameters setter. Only public methods that take only float parameters are supported.
+     * Each <code>float[]</code> contains a complete set of parameters to the setter method.
+     * At least two <code>float[]</code> values must be provided, a start and end. More than two
+     * values imply a starting value, values to animate through along the way, and an ending
+     * value (these values will be distributed evenly across the duration of the animation).
+     *
+     * @param target The object whose property is to be animated. This object may
+     * have a public method on it called <code>setName()</code>, where <code>name</code> is
+     * the value of the <code>propertyName</code> parameter. <code>propertyName</code> may also
+     * be the complete name of the public method.
+     * @param propertyName The name of the property being animated or the name of the setter method.
+     * @param values A set of values that the animation will animate between over time.
+     * @return An ObjectAnimator object that is set up to animate between the given values.
+     */
+    public static ObjectAnimator ofMultiFloat(Object target, String propertyName,
+            float[][] values) {
+        PropertyValuesHolder pvh = PropertyValuesHolder.ofMultiFloat(propertyName, values);
+        return ofPropertyValuesHolder(target, pvh);
+    }
+
+    /**
+     * Constructs and returns an ObjectAnimator that animates over values for a multiple float
+     * parameters setter. Only public methods that take only float parameters are supported.
+     * <p>At least two values must be provided, a start and end. More than two
+     * values imply a starting value, values to animate through along the way, and an ending
+     * value (these values will be distributed evenly across the duration of the animation).</p>
+     *
+     * @param target The object whose property is to be animated. This object may
+     * have a public method on it called <code>setName()</code>, where <code>name</code> is
+     * the value of the <code>propertyName</code> parameter. <code>propertyName</code> may also
+     * be the case-sensitive complete name of the public setter method.
+     * @param propertyName The name of the property being animated or the name of the setter method.
+     * @param converter Converts T objects into float parameters for the multi-value setter.
+     * @param evaluator A TypeEvaluator that will be called on each animation frame to
+     * provide the necessary interpolation between the Object values to derive the animated
+     * value.
+     * @param values A set of values that the animation will animate between over time.
+     * @return An ObjectAnimator object that is set up to animate between the given values.
+     */
+    public static <T> ObjectAnimator ofMultiFloat(Object target, String propertyName,
+            TypeConverter<T, float[]> converter, TypeEvaluator<T> evaluator, T... values) {
+        PropertyValuesHolder pvh = PropertyValuesHolder.ofMultiFloat(propertyName, converter,
+                evaluator, values);
+        return ObjectAnimator.ofPropertyValuesHolder(target, pvh);
     }
 
     /**

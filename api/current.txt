@@ -2433,9 +2433,21 @@ package android.animation {
     method public java.lang.Object evaluate(float, java.lang.Object, java.lang.Object);
   }
 
+  public class FloatArrayEvaluator implements android.animation.TypeEvaluator {
+    ctor public FloatArrayEvaluator();
+    ctor public FloatArrayEvaluator(float[]);
+    method public float[] evaluate(float, float[], float[]);
+  }
+
   public class FloatEvaluator implements android.animation.TypeEvaluator {
     ctor public FloatEvaluator();
     method public java.lang.Float evaluate(float, java.lang.Number, java.lang.Number);
+  }
+
+  public class IntArrayEvaluator implements android.animation.TypeEvaluator {
+    ctor public IntArrayEvaluator();
+    ctor public IntArrayEvaluator(int[]);
+    method public int[] evaluate(float, int[], int[]);
   }
 
   public class IntEvaluator implements android.animation.TypeEvaluator {
@@ -2510,6 +2522,10 @@ package android.animation {
     method public static android.animation.ObjectAnimator ofFloat(T, android.util.Property<T, java.lang.Float>, float...);
     method public static android.animation.ObjectAnimator ofInt(java.lang.Object, java.lang.String, int...);
     method public static android.animation.ObjectAnimator ofInt(T, android.util.Property<T, java.lang.Integer>, int...);
+    method public static android.animation.ObjectAnimator ofMultiFloat(java.lang.Object, java.lang.String, float[][]);
+    method public static android.animation.ObjectAnimator ofMultiFloat(java.lang.Object, java.lang.String, android.animation.TypeConverter<T, float[]>, android.animation.TypeEvaluator<T>, T...);
+    method public static android.animation.ObjectAnimator ofMultiInt(java.lang.Object, java.lang.String, int[][]);
+    method public static android.animation.ObjectAnimator ofMultiInt(java.lang.Object, java.lang.String, android.animation.TypeConverter<T, int[]>, android.animation.TypeEvaluator<T>, T...);
     method public static android.animation.ObjectAnimator ofObject(java.lang.Object, java.lang.String, android.animation.TypeEvaluator, java.lang.Object...);
     method public static android.animation.ObjectAnimator ofObject(T, android.util.Property<T, V>, android.animation.TypeEvaluator<V>, V...);
     method public static android.animation.ObjectAnimator ofObject(T, android.util.Property<T, P>, android.animation.TypeConverter<V, P>, android.animation.TypeEvaluator<V>, V...);
@@ -2528,6 +2544,12 @@ package android.animation {
     method public static android.animation.PropertyValuesHolder ofInt(android.util.Property<?, java.lang.Integer>, int...);
     method public static android.animation.PropertyValuesHolder ofKeyframe(java.lang.String, android.animation.Keyframe...);
     method public static android.animation.PropertyValuesHolder ofKeyframe(android.util.Property, android.animation.Keyframe...);
+    method public static android.animation.PropertyValuesHolder ofMultiFloat(java.lang.String, float[][]);
+    method public static android.animation.PropertyValuesHolder ofMultiFloat(java.lang.String, android.animation.TypeConverter<V, float[]>, android.animation.TypeEvaluator<V>, V...);
+    method public static android.animation.PropertyValuesHolder ofMultiFloat(java.lang.String, android.animation.TypeConverter<T, float[]>, android.animation.TypeEvaluator<T>, android.animation.Keyframe...);
+    method public static android.animation.PropertyValuesHolder ofMultiInt(java.lang.String, int[][]);
+    method public static android.animation.PropertyValuesHolder ofMultiInt(java.lang.String, android.animation.TypeConverter<V, int[]>, android.animation.TypeEvaluator<V>, V...);
+    method public static android.animation.PropertyValuesHolder ofMultiInt(java.lang.String, android.animation.TypeConverter<T, int[]>, android.animation.TypeEvaluator<T>, android.animation.Keyframe...);
     method public static android.animation.PropertyValuesHolder ofObject(java.lang.String, android.animation.TypeEvaluator, java.lang.Object...);
     method public static android.animation.PropertyValuesHolder ofObject(android.util.Property, android.animation.TypeEvaluator<V>, V...);
     method public static android.animation.PropertyValuesHolder ofObject(android.util.Property<?, V>, android.animation.TypeConverter<T, V>, android.animation.TypeEvaluator<T>, T...);

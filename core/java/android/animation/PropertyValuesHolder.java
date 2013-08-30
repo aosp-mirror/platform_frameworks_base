@@ -171,6 +171,84 @@ public class PropertyValuesHolder implements Cloneable {
 
     /**
      * Constructs and returns a PropertyValuesHolder with a given property name and
+     * set of <code>int[]</code> values. At least two <code>int[]</code> values must be supplied,
+     * a start and end value. If more values are supplied, the values will be animated from the
+     * start, through all intermediate values to the end value. When used with ObjectAnimator,
+     * the elements of the array represent the parameters of the setter function.
+     *
+     * @param propertyName The name of the property being animated. Can also be the name of the
+     *                     entire setter method. Should not be null.
+     * @param values The values that the property will animate between.
+     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+     * @see IntArrayEvaluator#IntArrayEvaluator(int[])
+     * @see ObjectAnimator#ofMultiInt(Object, String, TypeConverter, TypeEvaluator, Object[])
+     */
+    public static PropertyValuesHolder ofMultiInt(String propertyName, int[][] values) {
+        if (values.length < 2) {
+            throw new IllegalArgumentException("At least 2 values must be supplied");
+        }
+        int numParameters = 0;
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] == null) {
+                throw new IllegalArgumentException("values must not be null");
+            }
+            int length = values[i].length;
+            if (i == 0) {
+                numParameters = length;
+            } else if (length != numParameters) {
+                throw new IllegalArgumentException("Values must all have the same length");
+            }
+        }
+        IntArrayEvaluator evaluator = new IntArrayEvaluator(new int[numParameters]);
+        return new MultiIntValuesHolder(propertyName, null, evaluator, (Object[]) values);
+    }
+
+    /**
+     * Constructs and returns a PropertyValuesHolder with a given property and
+     * set of Object values for use with ObjectAnimator multi-value setters. The Object
+     * values are converted to <code>int[]</code> using the converter.
+     *
+     * @param propertyName The property being animated or complete name of the setter.
+     *                     Should not be null.
+     * @param converter Used to convert the animated value to setter parameters.
+     * @param evaluator A TypeEvaluator that will be called on each animation frame to
+     * provide the necessary interpolation between the Object values to derive the animated
+     * value.
+     * @param values The values that the property will animate between.
+     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+     * @see ObjectAnimator#ofMultiInt(Object, String, TypeConverter, TypeEvaluator, Object[])
+     * @see ObjectAnimator#ofPropertyValuesHolder(Object, PropertyValuesHolder...)
+     */
+    public static <V> PropertyValuesHolder ofMultiInt(String propertyName,
+            TypeConverter<V, int[]> converter, TypeEvaluator<V> evaluator, V... values) {
+        return new MultiIntValuesHolder(propertyName, converter, evaluator, values);
+    }
+
+    /**
+     * Constructs and returns a PropertyValuesHolder object with the specified property name or
+     * setter name for use in a multi-int setter function using ObjectAnimator. The values can be
+     * of any type, but the type should be consistent so that the supplied
+     * {@link android.animation.TypeEvaluator} can be used to to evaluate the animated value. The
+     * <code>converter</code> converts the values to parameters in the setter function.
+     *
+     * <p>At least two values must be supplied, a start and an end value.</p>
+     *
+     * @param propertyName The name of the property to associate with the set of values. This
+     *                     may also be the complete name of a setter function.
+     * @param converter    Converts <code>values</code> into int parameters for the setter.
+     *                     Can be null if the Keyframes have int[] values.
+     * @param evaluator    Used to interpolate between values.
+     * @param values       The values at specific fractional times to evaluate between
+     * @return A PropertyValuesHolder for a multi-int parameter setter.
+     */
+    public static <T> PropertyValuesHolder ofMultiInt(String propertyName,
+            TypeConverter<T, int[]> converter, TypeEvaluator<T> evaluator, Keyframe... values) {
+        KeyframeSet keyframeSet = KeyframeSet.ofKeyframe(values);
+        return new MultiIntValuesHolder(propertyName, converter, evaluator, keyframeSet);
+    }
+
+    /**
+     * Constructs and returns a PropertyValuesHolder with a given property name and
      * set of float values.
      * @param propertyName The name of the property being animated.
      * @param values The values that the named property will animate between.
@@ -189,6 +267,83 @@ public class PropertyValuesHolder implements Cloneable {
      */
     public static PropertyValuesHolder ofFloat(Property<?, Float> property, float... values) {
         return new FloatPropertyValuesHolder(property, values);
+    }
+
+    /**
+     * Constructs and returns a PropertyValuesHolder with a given property name and
+     * set of <code>float[]</code> values. At least two <code>float[]</code> values must be supplied,
+     * a start and end value. If more values are supplied, the values will be animated from the
+     * start, through all intermediate values to the end value. When used with ObjectAnimator,
+     * the elements of the array represent the parameters of the setter function.
+     *
+     * @param propertyName The name of the property being animated. Can also be the name of the
+     *                     entire setter method. Should not be null.
+     * @param values The values that the property will animate between.
+     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+     * @see FloatArrayEvaluator#FloatArrayEvaluator(float[])
+     * @see ObjectAnimator#ofMultiFloat(Object, String, TypeConverter, TypeEvaluator, Object[])
+     */
+    public static PropertyValuesHolder ofMultiFloat(String propertyName, float[][] values) {
+        if (values.length < 2) {
+            throw new IllegalArgumentException("At least 2 values must be supplied");
+        }
+        int numParameters = 0;
+        for (int i = 0; i < values.length; i++) {
+            if (values[i] == null) {
+                throw new IllegalArgumentException("values must not be null");
+            }
+            int length = values[i].length;
+            if (i == 0) {
+                numParameters = length;
+            } else if (length != numParameters) {
+                throw new IllegalArgumentException("Values must all have the same length");
+            }
+        }
+        FloatArrayEvaluator evaluator = new FloatArrayEvaluator(new float[numParameters]);
+        return new MultiFloatValuesHolder(propertyName, null, evaluator, (Object[]) values);
+    }
+
+    /**
+     * Constructs and returns a PropertyValuesHolder with a given property and
+     * set of Object values for use with ObjectAnimator multi-value setters. The Object
+     * values are converted to <code>float[]</code> using the converter.
+     *
+     * @param propertyName The property being animated or complete name of the setter.
+     *                     Should not be null.
+     * @param converter Used to convert the animated value to setter parameters.
+     * @param evaluator A TypeEvaluator that will be called on each animation frame to
+     * provide the necessary interpolation between the Object values to derive the animated
+     * value.
+     * @param values The values that the property will animate between.
+     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+     * @see ObjectAnimator#ofMultiFloat(Object, String, TypeConverter, TypeEvaluator, Object[])
+     */
+    public static <V> PropertyValuesHolder ofMultiFloat(String propertyName,
+            TypeConverter<V, float[]> converter, TypeEvaluator<V> evaluator, V... values) {
+        return new MultiFloatValuesHolder(propertyName, converter, evaluator, values);
+    }
+
+    /**
+     * Constructs and returns a PropertyValuesHolder object with the specified property name or
+     * setter name for use in a multi-float setter function using ObjectAnimator. The values can be
+     * of any type, but the type should be consistent so that the supplied
+     * {@link android.animation.TypeEvaluator} can be used to to evaluate the animated value. The
+     * <code>converter</code> converts the values to parameters in the setter function.
+     *
+     * <p>At least two values must be supplied, a start and an end value.</p>
+     *
+     * @param propertyName The name of the property to associate with the set of values. This
+     *                     may also be the complete name of a setter function.
+     * @param converter    Converts <code>values</code> into float parameters for the setter.
+     *                     Can be null if the Keyframes have float[] values.
+     * @param evaluator    Used to interpolate between values.
+     * @param values       The values at specific fractional times to evaluate between
+     * @return A PropertyValuesHolder for a multi-float parameter setter.
+     */
+    public static <T> PropertyValuesHolder ofMultiFloat(String propertyName,
+            TypeConverter<T, float[]> converter, TypeEvaluator<T> evaluator, Keyframe... values) {
+        KeyframeSet keyframeSet = KeyframeSet.ofKeyframe(values);
+        return new MultiFloatValuesHolder(propertyName, converter, evaluator, keyframeSet);
     }
 
     /**
@@ -1078,8 +1233,227 @@ public class PropertyValuesHolder implements Cloneable {
 
     }
 
+    static class MultiFloatValuesHolder extends PropertyValuesHolder {
+        private int mJniSetter;
+        private static final HashMap<Class, HashMap<String, Integer>> sJNISetterPropertyMap =
+                new HashMap<Class, HashMap<String, Integer>>();
+
+        public MultiFloatValuesHolder(String propertyName, TypeConverter converter,
+                TypeEvaluator evaluator, Object... values) {
+            super(propertyName);
+            setConverter(converter);
+            setObjectValues(values);
+            setEvaluator(evaluator);
+        }
+
+        public MultiFloatValuesHolder(String propertyName, TypeConverter converter,
+                TypeEvaluator evaluator, KeyframeSet keyframeSet) {
+            super(propertyName);
+            setConverter(converter);
+            mKeyframeSet = keyframeSet;
+            setEvaluator(evaluator);
+        }
+
+        /**
+         * Internal function to set the value on the target object, using the setter set up
+         * earlier on this PropertyValuesHolder object. This function is called by ObjectAnimator
+         * to handle turning the value calculated by ValueAnimator into a value set on the object
+         * according to the name of the property.
+         *
+         * @param target The target object on which the value is set
+         */
+        @Override
+        void setAnimatedValue(Object target) {
+            float[] values = (float[]) getAnimatedValue();
+            int numParameters = values.length;
+            if (mJniSetter != 0) {
+                switch (numParameters) {
+                    case 1:
+                        nCallFloatMethod(target, mJniSetter, values[0]);
+                        break;
+                    case 2:
+                        nCallTwoFloatMethod(target, mJniSetter, values[0], values[1]);
+                        break;
+                    case 4:
+                        nCallFourFloatMethod(target, mJniSetter, values[0], values[1],
+                                values[2], values[3]);
+                        break;
+                    default: {
+                        nCallMultipleFloatMethod(target, mJniSetter, values);
+                        break;
+                    }
+                }
+            }
+        }
+
+        /**
+         * Internal function (called from ObjectAnimator) to set up the setter and getter
+         * prior to running the animation. No getter can be used for multiple parameters.
+         *
+         * @param target The object on which the setter exists.
+         */
+        @Override
+        void setupSetterAndGetter(Object target) {
+            setupSetter(target.getClass());
+        }
+
+        @Override
+        void setupSetter(Class targetClass) {
+            if (mJniSetter != 0) {
+                return;
+            }
+            try {
+                mPropertyMapLock.writeLock().lock();
+                HashMap<String, Integer> propertyMap = sJNISetterPropertyMap.get(targetClass);
+                if (propertyMap != null) {
+                    Integer jniSetterInteger = propertyMap.get(mPropertyName);
+                    if (jniSetterInteger != null) {
+                        mJniSetter = jniSetterInteger;
+                    }
+                }
+                if (mJniSetter == 0) {
+                    String methodName = getMethodName("set", mPropertyName);
+                    calculateValue(0f);
+                    float[] values = (float[]) getAnimatedValue();
+                    int numParams = values.length;
+                    try {
+                        mJniSetter = nGetMultipleFloatMethod(targetClass, methodName, numParams);
+                    } catch (NoSuchMethodError e) {
+                        // try without the 'set' prefix
+                        mJniSetter = nGetMultipleFloatMethod(targetClass, mPropertyName, numParams);
+                    }
+                    if (mJniSetter != 0) {
+                        if (propertyMap == null) {
+                            propertyMap = new HashMap<String, Integer>();
+                            sJNISetterPropertyMap.put(targetClass, propertyMap);
+                        }
+                        propertyMap.put(mPropertyName, mJniSetter);
+                    }
+                }
+            } finally {
+                mPropertyMapLock.writeLock().unlock();
+            }
+        }
+    }
+
+    static class MultiIntValuesHolder extends PropertyValuesHolder {
+        private int mJniSetter;
+        private static final HashMap<Class, HashMap<String, Integer>> sJNISetterPropertyMap =
+                new HashMap<Class, HashMap<String, Integer>>();
+
+        public MultiIntValuesHolder(String propertyName, TypeConverter converter,
+                TypeEvaluator evaluator, Object... values) {
+            super(propertyName);
+            setConverter(converter);
+            setObjectValues(values);
+            setEvaluator(evaluator);
+        }
+
+        public MultiIntValuesHolder(String propertyName, TypeConverter converter,
+                TypeEvaluator evaluator, KeyframeSet keyframeSet) {
+            super(propertyName);
+            setConverter(converter);
+            mKeyframeSet = keyframeSet;
+            setEvaluator(evaluator);
+        }
+
+        /**
+         * Internal function to set the value on the target object, using the setter set up
+         * earlier on this PropertyValuesHolder object. This function is called by ObjectAnimator
+         * to handle turning the value calculated by ValueAnimator into a value set on the object
+         * according to the name of the property.
+         *
+         * @param target The target object on which the value is set
+         */
+        @Override
+        void setAnimatedValue(Object target) {
+            int[] values = (int[]) getAnimatedValue();
+            int numParameters = values.length;
+            if (mJniSetter != 0) {
+                switch (numParameters) {
+                    case 1:
+                        nCallIntMethod(target, mJniSetter, values[0]);
+                        break;
+                    case 2:
+                        nCallTwoIntMethod(target, mJniSetter, values[0], values[1]);
+                        break;
+                    case 4:
+                        nCallFourIntMethod(target, mJniSetter, values[0], values[1],
+                                values[2], values[3]);
+                        break;
+                    default: {
+                        nCallMultipleIntMethod(target, mJniSetter, values);
+                        break;
+                    }
+                }
+            }
+        }
+
+        /**
+         * Internal function (called from ObjectAnimator) to set up the setter and getter
+         * prior to running the animation. No getter can be used for multiple parameters.
+         *
+         * @param target The object on which the setter exists.
+         */
+        @Override
+        void setupSetterAndGetter(Object target) {
+            setupSetter(target.getClass());
+        }
+
+        @Override
+        void setupSetter(Class targetClass) {
+            if (mJniSetter != 0) {
+                return;
+            }
+            try {
+                mPropertyMapLock.writeLock().lock();
+                HashMap<String, Integer> propertyMap = sJNISetterPropertyMap.get(targetClass);
+                if (propertyMap != null) {
+                    Integer jniSetterInteger = propertyMap.get(mPropertyName);
+                    if (jniSetterInteger != null) {
+                        mJniSetter = jniSetterInteger;
+                    }
+                }
+                if (mJniSetter == 0) {
+                    String methodName = getMethodName("set", mPropertyName);
+                    calculateValue(0f);
+                    int[] values = (int[]) getAnimatedValue();
+                    int numParams = values.length;
+                    try {
+                        mJniSetter = nGetMultipleIntMethod(targetClass, methodName, numParams);
+                    } catch (NoSuchMethodError e) {
+                        // try without the 'set' prefix
+                        mJniSetter = nGetMultipleIntMethod(targetClass, mPropertyName, numParams);
+                    }
+                    if (mJniSetter != 0) {
+                        if (propertyMap == null) {
+                            propertyMap = new HashMap<String, Integer>();
+                            sJNISetterPropertyMap.put(targetClass, propertyMap);
+                        }
+                        propertyMap.put(mPropertyName, mJniSetter);
+                    }
+                }
+            } finally {
+                mPropertyMapLock.writeLock().unlock();
+            }
+        }
+    }
+
     native static private int nGetIntMethod(Class targetClass, String methodName);
     native static private int nGetFloatMethod(Class targetClass, String methodName);
+    native static private int nGetMultipleIntMethod(Class targetClass, String methodName,
+            int numParams);
+    native static private int nGetMultipleFloatMethod(Class targetClass, String methodName,
+            int numParams);
     native static private void nCallIntMethod(Object target, int methodID, int arg);
     native static private void nCallFloatMethod(Object target, int methodID, float arg);
+    native static private void nCallTwoIntMethod(Object target, int methodID, int arg1, int arg2);
+    native static private void nCallFourIntMethod(Object target, int methodID, int arg1, int arg2,
+            int arg3, int arg4);
+    native static private void nCallMultipleIntMethod(Object target, int methodID, int[] args);
+    native static private void nCallTwoFloatMethod(Object target, int methodID, float arg1,
+            float arg2);
+    native static private void nCallFourFloatMethod(Object target, int methodID, float arg1,
+            float arg2, float arg3, float arg4);
+    native static private void nCallMultipleFloatMethod(Object target, int methodID, float[] args);
 }
