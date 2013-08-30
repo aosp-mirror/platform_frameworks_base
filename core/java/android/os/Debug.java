@@ -524,11 +524,13 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
     }
 
     /**
-     * Determine whether method tracing is currently active.
+     * Determine whether method tracing is currently active and what type is
+     * active.
+     *
      * @hide
      */
-    public static boolean isMethodTracingActive() {
-        return VMDebug.isMethodTracingActive();
+    public static int getMethodTracingMode() {
+        return VMDebug.getMethodTracingMode();
     }
 
     /**
