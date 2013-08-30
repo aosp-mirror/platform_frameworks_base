@@ -56,8 +56,12 @@ public final class ScriptIntrinsicColorMatrix extends ScriptIntrinsic {
      *          this parameter is ignored. The Element type check is
      *          performed in the kernel launch.
      *
+     * @deprecated Use the single argument version as Element is now
+     *             ignored.
+     *
      * @return ScriptIntrinsicColorMatrix
      */
+    @Deprecated
     public static ScriptIntrinsicColorMatrix create(RenderScript rs, Element e) {
         return create(rs);
     }
