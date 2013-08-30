@@ -186,7 +186,7 @@ public class DdmHandleProfiling extends ChunkHandler {
      * Handle a "Method PRofiling Query" request.
      */
     private Chunk handleMPRQ(Chunk request) {
-        int result = Debug.isMethodTracingActive() ? 1 : 0;
+        int result = Debug.getMethodTracingMode();
 
         /* create a non-empty reply so the handler fires on completion */
         byte[] reply = { (byte) result };
