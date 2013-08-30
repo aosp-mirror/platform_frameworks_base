@@ -151,7 +151,7 @@ public final class ScriptIntrinsicHistogram extends ScriptIntrinsic {
      *
      * @param ain The input image
      */
-    public void forEach_dot(Allocation ain) {
+    public void forEach_Dot(Allocation ain) {
         if (mOut.getType().getElement().getVectorSize() != 1) {
             throw new RSIllegalArgumentException("Output vector size must be one.");
         }
@@ -170,7 +170,7 @@ public final class ScriptIntrinsicHistogram extends ScriptIntrinsic {
      *
      * @return Script.KernelID The KernelID object.
      */
-    public Script.KernelID getKernelID_seperate() {
+    public Script.KernelID getKernelID_Separate() {
         return createKernelID(0, 3, null, null);
     }
 
