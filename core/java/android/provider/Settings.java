@@ -690,6 +690,19 @@ public final class Settings {
     public static final String ACTION_NOTIFICATION_LISTENER_SETTINGS
             = "android.settings.NOTIFICATION_LISTENER_SETTINGS";
 
+    /**
+     * Activity Action: Show settings for video captioning.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you safeguard
+     * against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CAPTIONING_SETTINGS = "android.settings.CAPTIONING_SETTINGS";
+
     // End of Intent actions for Settings
 
     /**
@@ -3588,7 +3601,7 @@ public final class Settings {
          * <li>{@link #ACCESSIBILITY_CAPTIONING_EDGE_COLOR}
          * <li>{@link #ACCESSIBILITY_CAPTIONING_EDGE_TYPE}
          * <li>{@link #ACCESSIBILITY_CAPTIONING_TYPEFACE}
-         * <li>{@link #ACCESSIBILITY_CAPTIONING_FONT_SIZE}
+         * <li>{@link #ACCESSIBILITY_CAPTIONING_FONT_SCALE}
          * </ul>
          *
          * @hide
@@ -3610,9 +3623,8 @@ public final class Settings {
          * Integer property that specifies the preset style for captions, one
          * of:
          * <ul>
-         * <li>{@link android.view.accessibility.CaptioningManager#PRESET_WHITE_ON_BLACK}
-         * <li>{@link android.view.accessibility.CaptioningManager#PRESET_BLACK_ON_WHITE}
-         * <li>{@link android.view.accessibility.CaptioningManager#PRESET_CUSTOM}
+         * <li>{@link android.view.accessibility.CaptioningManager.CaptionStyle#PRESET_CUSTOM}
+         * <li>a valid index of {@link android.view.accessibility.CaptioningManager.CaptionStyle#PRESETS}
          * </ul>
          *
          * @see java.util.Locale#toString
@@ -3644,9 +3656,9 @@ public final class Settings {
         /**
          * Integer property that specifes the edge type for captions, one of:
          * <ul>
-         * <li>{@link android.view.accessibility.CaptioningManager#EDGE_TYPE_NONE}
-         * <li>{@link android.view.accessibility.CaptioningManager#EDGE_TYPE_OUTLINE}
-         * <li>{@link android.view.accessibility.CaptioningManager#EDGE_TYPE_DROP_SHADOWED}
+         * <li>{@link android.view.accessibility.CaptioningManager.CaptionStyle#EDGE_TYPE_NONE}
+         * <li>{@link android.view.accessibility.CaptioningManager.CaptionStyle#EDGE_TYPE_OUTLINE}
+         * <li>{@link android.view.accessibility.CaptioningManager.CaptionStyle#EDGE_TYPE_DROP_SHADOW}
          * </ul>
          *
          * @see #ACCESSIBILITY_CAPTIONING_EDGE_COLOR
@@ -3682,13 +3694,12 @@ public final class Settings {
                 "accessibility_captioning_typeface";
 
         /**
-         * Integer point property that specifies font size for captions in
-         * scaled pixels (sp).
+         * Floating point property that specifies font scaling for captions.
          *
          * @hide
          */
-        public static final String ACCESSIBILITY_CAPTIONING_FONT_SIZE =
-                "accessibility_captioning_font_size";
+        public static final String ACCESSIBILITY_CAPTIONING_FONT_SCALE =
+                "accessibility_captioning_font_scale";
 
         /**
          * The timout for considering a press to be a long press in milliseconds.
@@ -4327,7 +4338,7 @@ public final class Settings {
             ACCESSIBILITY_CAPTIONING_EDGE_TYPE,
             ACCESSIBILITY_CAPTIONING_EDGE_COLOR,
             ACCESSIBILITY_CAPTIONING_TYPEFACE,
-            ACCESSIBILITY_CAPTIONING_FONT_SIZE,
+            ACCESSIBILITY_CAPTIONING_FONT_SCALE,
             TTS_USE_DEFAULTS,
             TTS_DEFAULT_RATE,
             TTS_DEFAULT_PITCH,
