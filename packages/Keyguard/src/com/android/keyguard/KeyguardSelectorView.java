@@ -16,6 +16,7 @@
 package com.android.keyguard;
 
 import android.animation.ObjectAnimator;
+import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.app.admin.DevicePolicyManager;
@@ -23,7 +24,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.UserHandle;
@@ -41,15 +41,15 @@ import com.android.internal.telephony.IccCardConstants.State;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.multiwaveview.GlowPadView;
 import com.android.internal.widget.multiwaveview.GlowPadView.OnTriggerListener;
-import com.android.keyguard.KeyguardHostView.OnDismissAction;
 
 public class KeyguardSelectorView extends LinearLayout implements KeyguardSecurityView {
     private static final boolean DEBUG = KeyguardHostView.DEBUG;
     private static final String TAG = "SecuritySelectorView";
     private static final String ASSIST_ICON_METADATA_NAME =
         "com.android.systemui.action_assist_icon";
-    // Flag to enable/disable hotword detection on lock screen.
-    private static final boolean FLAG_HOTWORD = true;
+
+    // Don't enable hotword on limited-memory devices.
+    private static final boolean ENABLE_HOTWORD = !ActivityManager.isLowRamDeviceStatic();
 
     // TODO: Fix this to be non-static.
     private static HotwordRecognizer sHotwordClient;
@@ -132,7 +132,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
 
         @Override
         public void onPhoneStateChanged(int phoneState) {
-            if (FLAG_HOTWORD) {
+            if (ENABLE_HOTWORD) {
                 // We need to stop hotword detection when a call state is not idle anymore.
                 if (phoneState != TelephonyManager.CALL_STATE_IDLE) {
                     if (DEBUG) Log.d(TAG, "Stopping due to call state not being idle");
@@ -183,7 +183,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
         mSecurityMessageDisplay = new KeyguardMessageArea.Helper(this);
         View bouncerFrameView = findViewById(R.id.keyguard_selector_view_frame);
         mBouncerFrame = bouncerFrameView.getBackground();
-        if (FLAG_HOTWORD && sHotwordClient == null) {
+        if (ENABLE_HOTWORD && sHotwordClient == null) {
             sHotwordClient = HotwordRecognizer.createHotwordRecognizer(getContext());
         }
     }
@@ -334,7 +334,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
      * it attempts to stop hotword detection if it's running.
      */
     private void maybeStartHotwordDetector() {
-        if (FLAG_HOTWORD && sHotwordClient != null) {
+        if (ENABLE_HOTWORD && sHotwordClient != null) {
             if (DEBUG) Log.d(TAG, "maybeStartHotwordDetector()");
             // Don't start it if the screen is off or not showing
             PowerManager powerManager = (PowerManager) getContext().getSystemService(
@@ -364,7 +364,7 @@ public class KeyguardSelectorView extends LinearLayout implements KeyguardSecuri
      * Stop hotword detector if HOTWORDING_ENABLED is true.
      */
     private void maybeStopHotwordDetector() {
-        if (FLAG_HOTWORD && sHotwordClient != null) {
+        if (ENABLE_HOTWORD && sHotwordClient != null) {
             if (DEBUG) Log.d(TAG, "maybeStopHotwordDetector()");
             try {
                 sHotwordClient.stopRecognition();
