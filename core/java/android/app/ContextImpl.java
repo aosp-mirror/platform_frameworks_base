@@ -105,6 +105,7 @@ import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.CaptioningManager;
 import android.view.inputmethod.InputMethodManager;
 import android.view.textservice.TextServicesManager;
 import android.accounts.AccountManager;
@@ -305,6 +306,11 @@ class ContextImpl extends Context {
         registerService(ACCESSIBILITY_SERVICE, new ServiceFetcher() {
                 public Object getService(ContextImpl ctx) {
                     return AccessibilityManager.getInstance(ctx);
+                }});
+
+        registerService(CAPTIONING_SERVICE, new ServiceFetcher() {
+                public Object getService(ContextImpl ctx) {
+                    return new CaptioningManager(ctx);
                 }});
 
         registerService(ACCOUNT_SERVICE, new ServiceFetcher() {

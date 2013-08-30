@@ -17,58 +17,77 @@
 package android.view.accessibility;
 
 import android.content.ContentResolver;
+import android.content.Context;
+import android.database.ContentObserver;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
+import android.os.Handler;
 import android.provider.Settings.Secure;
 import android.text.TextUtils;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 /**
- * Contains methods for accessing preferred video captioning state and
+ * Contains methods for accessing and monitoring preferred video captioning state and visual
  * properties.
+ * <p>
+ * To obtain a handle to the captioning manager, do the following:
+ * <p>
+ * <code>
+ * <pre>CaptioningManager captioningManager =
+ *        (CaptioningManager) context.getSystemService(Context.CAPTIONING_SERVICE);</pre>
+ * </code>
  */
 public class CaptioningManager {
-    /**
-     * Activity Action: Show settings for video captioning.
-     * <p>
-     * In some cases, a matching Activity may not exist, so ensure you safeguard
-     * against this.
-     * <p>
-     * Input: Nothing.
-     * <p>
-     * Output: Nothing.
-     */
-    public static final String ACTION_CAPTIONING_SETTINGS = "android.settings.CAPTIONING_SETTINGS";
-
-    private static final int DEFAULT_PRESET = 0;
+    /** Default captioning enabled value. */
     private static final int DEFAULT_ENABLED = 0;
-    private static final float DEFAULT_FONT_SIZE = 24;
+
+    /** Default style preset as an index into {@link CaptionStyle#PRESETS}. */
+    private static final int DEFAULT_PRESET = 0;
+
+    /** Default scaling value for caption fonts. */
+    private static final float DEFAULT_FONT_SCALE = 1;
+
+    private final ArrayList<CaptioningChangeListener>
+            mListeners = new ArrayList<CaptioningChangeListener>();
+    private final Handler mHandler = new Handler();
+
+    private final ContentResolver mContentResolver;
 
     /**
-     * @param cr Resolver to access the database with.
-     * @return The user's preferred caption enabled state.
-     */
-    public static final boolean isEnabled(ContentResolver cr) {
-        return Secure.getInt(cr, Secure.ACCESSIBILITY_CAPTIONING_ENABLED, DEFAULT_ENABLED) == 1;
-    }
-
-    /**
-     * @param cr Resolver to access the database with.
-     * @return The raw locale string for the user's preferred caption language.
+     * Creates a new captioning manager for the specified context.
+     *
      * @hide
      */
-    public static final String getRawLocale(ContentResolver cr) {
-        return Secure.getString(cr, Secure.ACCESSIBILITY_CAPTIONING_LOCALE);
+    public CaptioningManager(Context context) {
+        mContentResolver = context.getContentResolver();
     }
 
     /**
-     * @param cr Resolver to access the database with.
-     * @return The locale for the user's preferred caption language, or null if
-     *         not specified.
+     * @return the user's preferred captioning enabled state
      */
-    public static final Locale getLocale(ContentResolver cr) {
-        final String rawLocale = getRawLocale(cr);
+    public final boolean isEnabled() {
+        return Secure.getInt(
+                mContentResolver, Secure.ACCESSIBILITY_CAPTIONING_ENABLED, DEFAULT_ENABLED) == 1;
+    }
+
+    /**
+     * @return the raw locale string for the user's preferred captioning
+     *         language
+     * @hide
+     */
+    public final String getRawLocale() {
+        return Secure.getString(mContentResolver, Secure.ACCESSIBILITY_CAPTIONING_LOCALE);
+    }
+
+    /**
+     * @return the locale for the user's preferred captioning language, or null
+     *         if not specified
+     */
+    public final Locale getLocale() {
+        final String rawLocale = getRawLocale();
         if (!TextUtils.isEmpty(rawLocale)) {
             final String[] splitLocale = rawLocale.split("_");
             switch (splitLocale.length) {
@@ -85,14 +104,151 @@ public class CaptioningManager {
     }
 
     /**
-     * @param cr Resolver to access the database with.
-     * @return The user's preferred font size for video captions, or 0 if not
-     *         specified.
+     * @return the user's preferred font scaling factor for video captions, or 1 if not
+     *         specified
      */
-    public static final float getFontSize(ContentResolver cr) {
-        return Secure.getFloat(cr, Secure.ACCESSIBILITY_CAPTIONING_FONT_SIZE, DEFAULT_FONT_SIZE);
+    public final float getFontScale() {
+        return Secure.getFloat(
+                mContentResolver, Secure.ACCESSIBILITY_CAPTIONING_FONT_SCALE, DEFAULT_FONT_SCALE);
     }
 
+    /**
+     * @return the raw preset number, or the first preset if not specified
+     * @hide
+     */
+    public int getRawUserStyle() {
+        return Secure.getInt(
+                mContentResolver, Secure.ACCESSIBILITY_CAPTIONING_PRESET, DEFAULT_PRESET);
+    }
+
+    /**
+     * @return the user's preferred visual properties for captions as a
+     *         {@link CaptionStyle}, or the default style if not specified
+     */
+    public CaptionStyle getUserStyle() {
+        final int preset = getRawUserStyle();
+        if (preset == CaptionStyle.PRESET_CUSTOM) {
+            return CaptionStyle.getCustomStyle(mContentResolver);
+        }
+
+        return CaptionStyle.PRESETS[preset];
+    }
+
+    /**
+     * Adds a listener for changes in the user's preferred captioning enabled
+     * state and visual properties.
+     *
+     * @param listener the listener to add
+     */
+    public void addCaptioningStateChangeListener(CaptioningChangeListener listener) {
+        synchronized (mListeners) {
+            if (mListeners.isEmpty()) {
+                registerObserver(Secure.ACCESSIBILITY_CAPTIONING_ENABLED);
+                registerObserver(Secure.ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR);
+                registerObserver(Secure.ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR);
+                registerObserver(Secure.ACCESSIBILITY_CAPTIONING_EDGE_TYPE);
+                registerObserver(Secure.ACCESSIBILITY_CAPTIONING_EDGE_COLOR);
+                registerObserver(Secure.ACCESSIBILITY_CAPTIONING_TYPEFACE);
+                registerObserver(Secure.ACCESSIBILITY_CAPTIONING_FONT_SCALE);
+                registerObserver(Secure.ACCESSIBILITY_CAPTIONING_LOCALE);
+            }
+
+            mListeners.add(listener);
+        }
+    }
+
+    private void registerObserver(String key) {
+        mContentResolver.registerContentObserver(Secure.getUriFor(key), false, mContentObserver);
+    }
+
+    /**
+     * Removes a listener previously added using
+     * {@link #addCaptioningStateChangeListener}.
+     *
+     * @param listener the listener to remove
+     */
+    public void removeCaptioningStateChangeListener(CaptioningChangeListener listener) {
+        synchronized (mListeners) {
+            mListeners.remove(listener);
+
+            if (mListeners.isEmpty()) {
+                mContentResolver.unregisterContentObserver(mContentObserver);
+            }
+        }
+    }
+
+    private void notifyEnabledChanged() {
+        final boolean enabled = isEnabled();
+        synchronized (mListeners) {
+            for (CaptioningChangeListener listener : mListeners) {
+                listener.onEnabledChanged(enabled);
+            }
+        }
+    }
+
+    private void notifyUserStyleChanged() {
+        final CaptionStyle userStyle = getUserStyle();
+        synchronized (mListeners) {
+            for (CaptioningChangeListener listener : mListeners) {
+                listener.onUserStyleChanged(userStyle);
+            }
+        }
+    }
+
+    private void notifyLocaleChanged() {
+        final Locale locale = getLocale();
+        synchronized (mListeners) {
+            for (CaptioningChangeListener listener : mListeners) {
+                listener.onLocaleChanged(locale);
+            }
+        }
+    }
+
+    private void notifyFontScaleChanged() {
+        final float fontScale = getFontScale();
+        synchronized (mListeners) {
+            for (CaptioningChangeListener listener : mListeners) {
+                listener.onFontScaleChanged(fontScale);
+            }
+        }
+    }
+
+    private final ContentObserver mContentObserver = new ContentObserver(mHandler) {
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            final String uriPath = uri.getPath();
+            final String name = uriPath.substring(uriPath.lastIndexOf('/') + 1);
+            if (Secure.ACCESSIBILITY_CAPTIONING_ENABLED.equals(name)) {
+                notifyEnabledChanged();
+            } else if (Secure.ACCESSIBILITY_CAPTIONING_LOCALE.equals(name)) {
+                notifyLocaleChanged();
+            } else if (Secure.ACCESSIBILITY_CAPTIONING_FONT_SCALE.equals(name)) {
+                notifyFontScaleChanged();
+            } else {
+                // We only need a single callback when multiple style properties
+                // change in rapid succession.
+                mHandler.removeCallbacks(mStyleChangedRunnable);
+                mHandler.post(mStyleChangedRunnable);
+            }
+        }
+    };
+
+    /**
+     * Runnable posted when user style properties change. This is used to
+     * prevent unnecessary change notifications when multiple properties change
+     * in rapid succession.
+     */
+    private final Runnable mStyleChangedRunnable = new Runnable() {
+        @Override
+        public void run() {
+            notifyUserStyleChanged();
+        }
+    };
+
+    /**
+     * Specifies visual properties for video captions, including foreground and
+     * background colors, edge properties, and typeface.
+     */
     public static final class CaptionStyle {
         private static final CaptionStyle WHITE_ON_BLACK;
         private static final CaptionStyle BLACK_ON_WHITE;
@@ -155,8 +311,8 @@ public class CaptioningManager {
         }
 
         /**
-         * @return The preferred {@link Typeface} for video captions, or null if
-         *         not specified.
+         * @return the preferred {@link Typeface} for video captions, or null if
+         *         not specified
          */
         public Typeface getTypeface() {
             if (mParsedTypeface == null && !TextUtils.isEmpty(mRawTypeface)) {
@@ -168,41 +324,20 @@ public class CaptioningManager {
         /**
          * @hide
          */
-        public static int getRawPreset(ContentResolver cr) {
-            return Secure.getInt(cr, Secure.ACCESSIBILITY_CAPTIONING_PRESET, DEFAULT_PRESET);
-        }
-
-        /**
-         * @param cr Resolver to access the database with.
-         * @return The user's preferred caption style.
-         */
-        public static CaptionStyle defaultUserStyle(ContentResolver cr) {
-            final int preset = getRawPreset(cr);
-            if (preset == PRESET_CUSTOM) {
-                return getCustomStyle(cr);
-            }
-
-            return PRESETS[preset];
-        }
-
-        /**
-         * @hide
-         */
         public static CaptionStyle getCustomStyle(ContentResolver cr) {
+            final CaptionStyle defStyle = CaptionStyle.DEFAULT_CUSTOM;
             final int foregroundColor = Secure.getInt(
-                    cr, Secure.ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR,
-                    DEFAULT_CUSTOM.foregroundColor);
-            final int backgroundColor = Secure.getInt(cr,
-                    Secure.ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR,
-                    DEFAULT_CUSTOM.backgroundColor);
+                    cr, Secure.ACCESSIBILITY_CAPTIONING_FOREGROUND_COLOR, defStyle.foregroundColor);
+            final int backgroundColor = Secure.getInt(
+                    cr, Secure.ACCESSIBILITY_CAPTIONING_BACKGROUND_COLOR, defStyle.backgroundColor);
             final int edgeType = Secure.getInt(
-                    cr, Secure.ACCESSIBILITY_CAPTIONING_EDGE_TYPE, DEFAULT_CUSTOM.edgeType);
+                    cr, Secure.ACCESSIBILITY_CAPTIONING_EDGE_TYPE, defStyle.edgeType);
             final int edgeColor = Secure.getInt(
-                    cr, Secure.ACCESSIBILITY_CAPTIONING_EDGE_COLOR, DEFAULT_CUSTOM.edgeColor);
+                    cr, Secure.ACCESSIBILITY_CAPTIONING_EDGE_COLOR, defStyle.edgeColor);
 
             String rawTypeface = Secure.getString(cr, Secure.ACCESSIBILITY_CAPTIONING_TYPEFACE);
             if (rawTypeface == null) {
-                rawTypeface = DEFAULT_CUSTOM.mRawTypeface;
+                rawTypeface = defStyle.mRawTypeface;
             }
 
             return new CaptionStyle(
@@ -224,6 +359,47 @@ public class CaptioningManager {
             };
 
             DEFAULT_CUSTOM = WHITE_ON_BLACK;
+        }
+    }
+
+    /**
+     * Listener for changes in captioning properties, including enabled state
+     * and user style preferences.
+     */
+    public abstract class CaptioningChangeListener {
+        /**
+         * Called when the captioning enabled state changes.
+         *
+         * @param enabled the user's new preferred captioning enabled state
+         */
+        public void onEnabledChanged(boolean enabled) {
+        }
+
+        /**
+         * Called when the captioning user style changes.
+         *
+         * @param userStyle the user's new preferred style
+         * @see CaptioningManager#getUserStyle()
+         */
+        public void onUserStyleChanged(CaptionStyle userStyle) {
+        }
+
+        /**
+         * Called when the captioning locale changes.
+         *
+         * @param locale the preferred captioning locale
+         * @see CaptioningManager#getLocale()
+         */
+        public void onLocaleChanged(Locale locale) {
+        }
+
+        /**
+         * Called when the captioning font scaling factor changes.
+         *
+         * @param fontScale the preferred font scaling factor
+         * @see CaptioningManager#getFontScale()
+         */
+        public void onFontScaleChanged(float fontScale) {
         }
     }
 }
