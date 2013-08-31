@@ -407,12 +407,13 @@ public final class ActivityManagerService extends ActivityManagerNative
         @Override
         public void run() {
             if (activityExtras == null) {
-                Slog.w(TAG, "getAssistContextExtras failed: timeout retrieving from " + activity);
+                Slog.w(TAG, "getAssistContextExtras failed: timeout retrieving from activtity "
+                        + activity);
             }
             for (int i = 0; i < services.size(); i++) {
                 if (servicesExtras[i] == null) {
-                    Slog.w(TAG, "getAssistContextExtras failed: timeout retrieving from "
-                            + services.get(i));
+                    Slog.w(TAG, "getAssistContextExtras failed: timeout retrieving from service "
+                            + i + " " + services.get(i));
                 }
             }
             synchronized (this) {
