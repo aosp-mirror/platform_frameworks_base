@@ -40,8 +40,8 @@ import java.util.List;
 public class LocationController extends BroadcastReceiver {
     // The name of the placeholder corresponding to the location request status icon.
     // This string corresponds to config_statusBarIcons in core/res/res/values/config.xml.
-    private static final String LOCATION_STATUS_ICON_PLACEHOLDER = "location";
-    private static final int LOCATION_STATUS_ICON_ID
+    public static final String LOCATION_STATUS_ICON_PLACEHOLDER = "location";
+    public static final int LOCATION_STATUS_ICON_ID
         = R.drawable.stat_sys_device_access_location_found;
 
     private static final int[] mHighPowerRequestAppOpArray
