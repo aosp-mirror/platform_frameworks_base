@@ -20,7 +20,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
-import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -28,13 +27,13 @@ import android.content.DialogInterface.OnClickListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
-import android.provider.DocumentsContract.Documents;
+import android.provider.DocumentsContract.Document;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.android.documentsui.model.Document;
+import com.android.documentsui.model.DocumentInfo;
 
 /**
  * Dialog to create a new directory.
@@ -67,24 +66,17 @@ public class CreateDirectoryFragment extends DialogFragment {
                 final String displayName = text1.getText().toString();
 
                 final DocumentsActivity activity = (DocumentsActivity) getActivity();
-                final Document cwd = activity.getCurrentDirectory();
+                final DocumentInfo cwd = activity.getCurrentDirectory();
 
-                final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
-                        cwd.uri.getAuthority());
                 try {
-                    final String docId = DocumentsContract.createDocument(client,
-                            DocumentsContract.getDocId(cwd.uri), Documents.MIME_TYPE_DIR,
-                            displayName);
+                    final Uri childUri = DocumentsContract.createDocument(
+                            resolver, cwd.uri, Document.MIME_TYPE_DIR, displayName);
 
                     // Navigate into newly created child
-                    final Uri childUri = DocumentsContract.buildDocumentUri(
-                            cwd.uri.getAuthority(), docId);
-                    final Document childDoc = Document.fromUri(resolver, childUri);
+                    final DocumentInfo childDoc = DocumentInfo.fromUri(resolver, childUri);
                     activity.onDocumentPicked(childDoc);
                 } catch (Exception e) {
                     Toast.makeText(context, R.string.save_error, Toast.LENGTH_SHORT).show();
-                } finally {
-                    ContentProviderClient.closeQuietly(client);
                 }
             }
         });

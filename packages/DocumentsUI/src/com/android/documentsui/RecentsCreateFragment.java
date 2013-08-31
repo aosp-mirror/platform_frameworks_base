@@ -29,7 +29,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
-import android.provider.DocumentsContract.DocumentRoot;
 import android.text.TextUtils.TruncateAt;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -43,6 +42,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.documentsui.model.DocumentStack;
+import com.android.documentsui.model.RootInfo;
 import com.google.android.collect.Lists;
 
 import libcore.io.IoUtils;
@@ -181,7 +181,7 @@ public class RecentsCreateFragment extends Fragment {
             final View summaryList = convertView.findViewById(R.id.summary_list);
 
             final DocumentStack stack = getItem(position);
-            final DocumentRoot root = stack.getRoot(roots);
+            final RootInfo root = stack.getRoot(roots);
             icon.setImageDrawable(root.loadIcon(context));
 
             final StringBuilder builder = new StringBuilder();

@@ -42,7 +42,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
-import android.provider.DocumentsContract.DocumentRoot;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -60,8 +59,9 @@ import android.widget.SearchView.OnQueryTextListener;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.documentsui.model.Document;
+import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.DocumentStack;
+import com.android.documentsui.model.RootInfo;
 
 import java.io.FileNotFoundException;
 import java.util.Arrays;
@@ -160,7 +160,7 @@ public class DocumentsActivity extends Activity {
             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
             final Uri rootUri = intent.getData();
-            final DocumentRoot root = mRoots.findRoot(rootUri);
+            final RootInfo root = mRoots.findRoot(rootUri);
             if (root != null) {
                 onRootPicked(root, true);
             } else {
@@ -252,7 +252,7 @@ public class DocumentsActivity extends Activity {
             mDrawerToggle.setDrawerIndicatorEnabled(true);
 
         } else {
-            final DocumentRoot root = getCurrentRoot();
+            final RootInfo root = getCurrentRoot();
             actionBar.setIcon(root != null ? root.loadIcon(this) : null);
 
             if (mRoots.isRecentsRoot(root)) {
@@ -317,7 +317,7 @@ public class DocumentsActivity extends Activity {
         super.onPrepareOptionsMenu(menu);
 
         final FragmentManager fm = getFragmentManager();
-        final Document cwd = getCurrentDirectory();
+        final DocumentInfo cwd = getCurrentDirectory();
 
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
         final MenuItem search = menu.findItem(R.id.menu_search);
@@ -473,7 +473,7 @@ public class DocumentsActivity extends Activity {
         }
     };
 
-    public DocumentRoot getCurrentRoot() {
+    public RootInfo getCurrentRoot() {
         if (mStack.size() > 0) {
             return mStack.getRoot(mRoots);
         } else {
@@ -481,7 +481,7 @@ public class DocumentsActivity extends Activity {
         }
     }
 
-    public Document getCurrentDirectory() {
+    public DocumentInfo getCurrentDirectory() {
         return mStack.peek();
     }
 
@@ -491,7 +491,7 @@ public class DocumentsActivity extends Activity {
 
     private void onCurrentDirectoryChanged() {
         final FragmentManager fm = getFragmentManager();
-        final Document cwd = getCurrentDirectory();
+        final DocumentInfo cwd = getCurrentDirectory();
 
         if (cwd == null) {
             // No directory means recents
@@ -533,14 +533,14 @@ public class DocumentsActivity extends Activity {
         onCurrentDirectoryChanged();
     }
 
-    public void onRootPicked(DocumentRoot root, boolean closeDrawer) {
+    public void onRootPicked(RootInfo root, boolean closeDrawer) {
         // Clear entire backstack and start in new root
         mStack.clear();
 
         if (!mRoots.isRecentsRoot(root)) {
             try {
-                final Uri uri = DocumentsContract.buildDocumentUri(root.authority, root.docId);
-                onDocumentPicked(Document.fromUri(getContentResolver(), uri));
+                final Uri uri = DocumentsContract.buildDocumentUri(root.authority, root.documentId);
+                onDocumentPicked(DocumentInfo.fromUri(getContentResolver(), uri));
             } catch (FileNotFoundException e) {
             }
         } else {
@@ -561,7 +561,7 @@ public class DocumentsActivity extends Activity {
         finish();
     }
 
-    public void onDocumentPicked(Document doc) {
+    public void onDocumentPicked(DocumentInfo doc) {
         final FragmentManager fm = getFragmentManager();
         if (doc.isDirectory()) {
             // TODO: query display mode user preference for this dir
@@ -591,7 +591,7 @@ public class DocumentsActivity extends Activity {
         }
     }
 
-    public void onDocumentsPicked(List<Document> docs) {
+    public void onDocumentsPicked(List<DocumentInfo> docs) {
         if (mAction == ACTION_OPEN || mAction == ACTION_GET_CONTENT) {
             final int size = docs.size();
             final Uri[] uris = new Uri[size];
@@ -602,21 +602,19 @@ public class DocumentsActivity extends Activity {
         }
     }
 
-    public void onSaveRequested(Document replaceTarget) {
+    public void onSaveRequested(DocumentInfo replaceTarget) {
         onFinished(replaceTarget.uri);
     }
 
     public void onSaveRequested(String mimeType, String displayName) {
-        final Document cwd = getCurrentDirectory();
+        final DocumentInfo cwd = getCurrentDirectory();
         final String authority = cwd.uri.getAuthority();
 
         final ContentProviderClient client = getContentResolver()
                 .acquireUnstableContentProviderClient(authority);
         try {
-            final String docId = DocumentsContract.createDocument(client,
-                    DocumentsContract.getDocId(cwd.uri), mimeType, displayName);
-
-            final Uri childUri = DocumentsContract.buildDocumentUri(authority, docId);
+            final Uri childUri = DocumentsContract.createDocument(
+                    getContentResolver(), cwd.uri, mimeType, displayName);
             onFinished(childUri);
         } catch (Exception e) {
             Toast.makeText(this, R.string.save_error, Toast.LENGTH_SHORT).show();
@@ -701,7 +699,7 @@ public class DocumentsActivity extends Activity {
 
     private void dumpStack() {
         Log.d(TAG, "Current stack:");
-        for (Document doc : mStack) {
+        for (DocumentInfo doc : mStack) {
             Log.d(TAG, "--> " + doc);
         }
     }
