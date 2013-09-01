@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <!-- kill app long press back key-->
-  <java-symbol type="string" name="ras_kill_app_long_press_back_key_message" />
-  <java-symbol type="integer" name="ras_config_kill_app_long_press_back_key_timeout" />
+    <!-- kill app long press back key-->
+    <java-symbol type="string" name="ras_kill_app_long_press_back_key_message" />
+    <java-symbol type="integer" name="ras_config_kill_app_long_press_back_key_timeout" />
+    <!-- Package Manager -->
+    <java-symbol type="array" name="config_disabledComponents" />
 </resources>
