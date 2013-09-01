@@ -20,9 +20,9 @@ import static com.android.documentsui.DocumentsActivity.TAG;
 import static com.android.documentsui.DocumentsActivity.DisplayState.ACTION_MANAGE;
 import static com.android.documentsui.DocumentsActivity.DisplayState.MODE_GRID;
 import static com.android.documentsui.DocumentsActivity.DisplayState.MODE_LIST;
-import static com.android.documentsui.DocumentsActivity.DisplayState.SORT_ORDER_DISPLAY_NAME;
-import static com.android.documentsui.DocumentsActivity.DisplayState.SORT_ORDER_LAST_MODIFIED;
-import static com.android.documentsui.DocumentsActivity.DisplayState.SORT_ORDER_SIZE;
+import static com.android.documentsui.model.DocumentInfo.getCursorInt;
+import static com.android.documentsui.model.DocumentInfo.getCursorLong;
+import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -32,12 +32,14 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.Loader;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
+import android.provider.DocumentsContract.Document;
 import android.text.format.DateUtils;
 import android.text.format.Formatter;
 import android.text.format.Time;
@@ -66,7 +68,6 @@ import com.android.internal.util.Predicate;
 import com.google.android.collect.Lists;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -85,7 +86,6 @@ public class DirectoryFragment extends Fragment {
 
     public static final int TYPE_NORMAL = 1;
     public static final int TYPE_SEARCH = 2;
-    public static final int TYPE_RECENT_OPEN = 3;
 
     private int mType = TYPE_NORMAL;
 
@@ -99,6 +99,8 @@ public class DirectoryFragment extends Fragment {
 
     private static AtomicInteger sLoaderId = new AtomicInteger(4000);
 
+    private int mLastSortOrder = -1;
+
     private final int mLoaderId = sLoaderId.incrementAndGet();
 
     public static void showNormal(FragmentManager fm, Uri uri) {
@@ -111,8 +113,9 @@ public class DirectoryFragment extends Fragment {
         show(fm, TYPE_SEARCH, searchUri);
     }
 
+    @Deprecated
     public static void showRecentsOpen(FragmentManager fm) {
-        show(fm, TYPE_RECENT_OPEN, null);
+        // TODO: new recents behavior
     }
 
     private static void show(FragmentManager fm, int type, Uri uri) {
@@ -137,7 +140,6 @@ public class DirectoryFragment extends Fragment {
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final Context context = inflater.getContext();
-
         final View view = inflater.inflate(R.layout.fragment_directory, container, false);
 
         mEmptyView = view.findViewById(android.R.id.empty);
@@ -150,79 +152,64 @@ public class DirectoryFragment extends Fragment {
         mGridView.setOnItemClickListener(mItemListener);
         mGridView.setMultiChoiceModeListener(mMultiListener);
 
-        mAdapter = new DocumentsAdapter();
+        return view;
+    }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        final Context context = getActivity();
         final Uri uri = getArguments().getParcelable(EXTRA_URI);
+
+        mAdapter = new DocumentsAdapter(uri.getAuthority());
         mType = getArguments().getInt(EXTRA_TYPE);
 
         mCallbacks = new LoaderCallbacks<DirectoryResult>() {
             @Override
             public Loader<DirectoryResult> onCreateLoader(int id, Bundle args) {
                 final DisplayState state = getDisplayState(DirectoryFragment.this);
-                mFilter = new MimePredicate(state.acceptMimes);
 
                 Uri contentsUri;
                 if (mType == TYPE_NORMAL) {
                     contentsUri = DocumentsContract.buildChildDocumentsUri(
                             uri.getAuthority(), DocumentsContract.getDocumentId(uri));
-                } else if (mType == TYPE_RECENT_OPEN) {
-                    contentsUri = RecentsProvider.buildRecentOpen();
                 } else {
                     contentsUri = uri;
                 }
 
-                final Comparator<DocumentInfo> sortOrder;
-                if (state.sortOrder == SORT_ORDER_LAST_MODIFIED || mType == TYPE_RECENT_OPEN) {
-                    sortOrder = new DocumentInfo.LastModifiedComparator();
-                } else if (state.sortOrder == SORT_ORDER_DISPLAY_NAME) {
-                    sortOrder = new DocumentInfo.DisplayNameComparator();
-                } else if (state.sortOrder == SORT_ORDER_SIZE) {
-                    sortOrder = new DocumentInfo.SizeComparator();
-                } else {
-                    throw new IllegalArgumentException("Unknown sort order " + state.sortOrder);
-                }
-
-                return new DirectoryLoader(context, contentsUri, mType, null, sortOrder);
+                return new DirectoryLoader(context, contentsUri, state.sortOrder);
             }
 
             @Override
             public void onLoadFinished(Loader<DirectoryResult> loader, DirectoryResult result) {
-                mAdapter.swapDocuments(result.contents);
+                mAdapter.swapCursor(result.cursor);
             }
 
             @Override
             public void onLoaderReset(Loader<DirectoryResult> loader) {
-                mAdapter.swapDocuments(null);
+                mAdapter.swapCursor(null);
             }
         };
 
         updateDisplayState();
-
-        return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        getLoaderManager().restartLoader(mLoaderId, getArguments(), mCallbacks);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        getLoaderManager().destroyLoader(mLoaderId);
     }
 
     public void updateDisplayState() {
         final DisplayState state = getDisplayState(this);
 
-        // TODO: avoid kicking loader when nothing changed
-        getLoaderManager().restartLoader(mLoaderId, getArguments(), mCallbacks);
+        if (mLastSortOrder != state.sortOrder) {
+            getLoaderManager().restartLoader(mLoaderId, null, mCallbacks);
+            mLastSortOrder = state.sortOrder;
+        }
+
         mListView.smoothScrollToPosition(0);
         mGridView.smoothScrollToPosition(0);
 
         mListView.setVisibility(state.mode == MODE_LIST ? View.VISIBLE : View.GONE);
         mGridView.setVisibility(state.mode == MODE_GRID ? View.VISIBLE : View.GONE);
+
+        mFilter = new MimePredicate(state.acceptMimes);
 
         final int choiceMode;
         if (state.allowMultiple) {
@@ -258,7 +245,9 @@ public class DirectoryFragment extends Fragment {
     private OnItemClickListener mItemListener = new OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            final DocumentInfo doc = mAdapter.getItem(position);
+            final Cursor cursor = mAdapter.getItem(position);
+            final Uri uri = getArguments().getParcelable(EXTRA_URI);
+            final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(uri, cursor);
             if (mFilter.apply(doc)) {
                 ((DocumentsActivity) getActivity()).onDocumentPicked(doc);
             }
@@ -295,7 +284,9 @@ public class DirectoryFragment extends Fragment {
             final int size = checked.size();
             for (int i = 0; i < size; i++) {
                 if (checked.valueAt(i)) {
-                    final DocumentInfo doc = mAdapter.getItem(checked.keyAt(i));
+                    final Cursor cursor = mAdapter.getItem(checked.keyAt(i));
+                    final Uri uri = getArguments().getParcelable(EXTRA_URI);
+                    final DocumentInfo doc = DocumentInfo.fromDirectoryCursor(uri, cursor);
                     docs.add(doc);
                 }
             }
@@ -328,8 +319,9 @@ public class DirectoryFragment extends Fragment {
                 ActionMode mode, int position, long id, boolean checked) {
             if (checked) {
                 // Directories cannot be checked
-                final DocumentInfo doc = mAdapter.getItem(position);
-                if (doc.isDirectory()) {
+                final Cursor cursor = mAdapter.getItem(position);
+                final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+                if (Document.MIME_TYPE_DIR.equals(docMimeType)) {
                     mCurrentView.setItemChecked(position, false);
                 }
             }
@@ -396,15 +388,18 @@ public class DirectoryFragment extends Fragment {
     }
 
     private class DocumentsAdapter extends BaseAdapter {
-        private List<DocumentInfo> mDocuments;
+        private final String mAuthority;
 
-        public DocumentsAdapter() {
+        private Cursor mCursor;
+
+        public DocumentsAdapter(String authority) {
+            mAuthority = authority;
         }
 
-        public void swapDocuments(List<DocumentInfo> documents) {
-            mDocuments = documents;
+        public void swapCursor(Cursor cursor) {
+            mCursor = cursor;
 
-            if (mDocuments != null && mDocuments.isEmpty()) {
+            if (isEmpty()) {
                 mEmptyView.setVisibility(View.VISIBLE);
             } else {
                 mEmptyView.setVisibility(View.GONE);
@@ -433,7 +428,16 @@ public class DirectoryFragment extends Fragment {
                 }
             }
 
-            final DocumentInfo doc = getItem(position);
+            final Cursor cursor = getItem(position);
+
+            final String docId = getCursorString(cursor, Document.COLUMN_DOCUMENT_ID);
+            final String docMimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+            final String docDisplayName = getCursorString(cursor, Document.COLUMN_DISPLAY_NAME);
+            final long docLastModified = getCursorLong(cursor, Document.COLUMN_LAST_MODIFIED);
+            final int docIcon = getCursorInt(cursor, Document.COLUMN_ICON);
+            final int docFlags = getCursorInt(cursor, Document.COLUMN_FLAGS);
+            final String docSummary = getCursorString(cursor, Document.COLUMN_SUMMARY);
+            final long docSize = getCursorLong(cursor, Document.COLUMN_SIZE);
 
             final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
@@ -448,32 +452,31 @@ public class DirectoryFragment extends Fragment {
                 oldTask.cancel(false);
             }
 
-            if (doc.isThumbnailSupported()) {
-                final Bitmap cachedResult = thumbs.get(doc.uri);
+            if ((docFlags & Document.FLAG_SUPPORTS_THUMBNAIL) != 0) {
+                final Uri uri = DocumentsContract.buildDocumentUri(mAuthority, docId);
+                final Bitmap cachedResult = thumbs.get(uri);
                 if (cachedResult != null) {
                     icon.setImageBitmap(cachedResult);
                 } else {
                     final ThumbnailAsyncTask task = new ThumbnailAsyncTask(icon, mThumbSize);
                     icon.setImageBitmap(null);
                     icon.setTag(task);
-                    task.execute(doc.uri);
+                    task.execute(uri);
                 }
+            } else if (docIcon != 0) {
+                icon.setImageDrawable(DocumentInfo.loadIcon(context, mAuthority, docIcon));
             } else {
-                icon.setImageDrawable(RootsCache.resolveDocumentIcon(context, doc.mimeType));
+                icon.setImageDrawable(RootsCache.resolveDocumentIcon(context, docMimeType));
             }
 
-            title.setText(doc.displayName);
+            title.setText(docDisplayName);
 
-            if (mType == TYPE_NORMAL || mType == TYPE_SEARCH) {
-                icon1.setVisibility(View.GONE);
-                if (doc.summary != null) {
-                    summary.setText(doc.summary);
-                    summary.setVisibility(View.VISIBLE);
-                } else {
-                    summary.setVisibility(View.INVISIBLE);
-                }
-            } else if (mType == TYPE_RECENT_OPEN) {
-                // TODO: resolve storage root
+            icon1.setVisibility(View.GONE);
+            if (docSummary != null) {
+                summary.setText(docSummary);
+                summary.setVisibility(View.VISIBLE);
+            } else {
+                summary.setVisibility(View.INVISIBLE);
             }
 
             if (summaryGrid != null) {
@@ -481,18 +484,18 @@ public class DirectoryFragment extends Fragment {
                         (summary.getVisibility() == View.VISIBLE) ? View.VISIBLE : View.GONE);
             }
 
-            if (doc.lastModified == -1) {
+            if (docLastModified == -1) {
                 date.setText(null);
             } else {
-                date.setText(formatTime(context, doc.lastModified));
+                date.setText(formatTime(context, docLastModified));
             }
 
             if (state.showSize) {
                 size.setVisibility(View.VISIBLE);
-                if (doc.isDirectory() || doc.size == -1) {
+                if (Document.MIME_TYPE_DIR.equals(docMimeType) || docSize == -1) {
                     size.setText(null);
                 } else {
-                    size.setText(Formatter.formatFileSize(context, doc.size));
+                    size.setText(Formatter.formatFileSize(context, docSize));
                 }
             } else {
                 size.setVisibility(View.GONE);
@@ -503,17 +506,20 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public int getCount() {
-            return mDocuments != null ? mDocuments.size() : 0;
+            return mCursor != null ? mCursor.getCount() : 0;
         }
 
         @Override
-        public DocumentInfo getItem(int position) {
-            return mDocuments.get(position);
+        public Cursor getItem(int position) {
+            if (mCursor != null) {
+                mCursor.moveToPosition(position);
+            }
+            return mCursor;
         }
 
         @Override
         public long getItemId(int position) {
-            return getItem(position).uri.hashCode();
+            return position;
         }
     }
 

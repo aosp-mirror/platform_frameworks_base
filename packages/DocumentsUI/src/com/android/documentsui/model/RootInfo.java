@@ -21,8 +21,6 @@ import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.provider.DocumentsContract.Root;
@@ -56,17 +54,6 @@ public class RootInfo {
     }
 
     public Drawable loadIcon(Context context) {
-        if (icon != 0) {
-            if (authority != null) {
-                final PackageManager pm = context.getPackageManager();
-                final ProviderInfo info = pm.resolveContentProvider(authority, 0);
-                if (info != null) {
-                    return pm.getDrawable(info.packageName, icon, info.applicationInfo);
-                }
-            } else {
-                return context.getResources().getDrawable(icon);
-            }
-        }
-        return null;
+        return DocumentInfo.loadIcon(context, authority, icon);
     }
 }
