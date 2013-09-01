@@ -29935,7 +29935,7 @@ package android.webkit {
     method public deprecated void onConsoleMessage(java.lang.String, int, java.lang.String);
     method public boolean onConsoleMessage(android.webkit.ConsoleMessage);
     method public boolean onCreateWindow(android.webkit.WebView, boolean, boolean, android.os.Message);
-    method public void onExceededDatabaseQuota(java.lang.String, java.lang.String, long, long, long, android.webkit.WebStorage.QuotaUpdater);
+    method public deprecated void onExceededDatabaseQuota(java.lang.String, java.lang.String, long, long, long, android.webkit.WebStorage.QuotaUpdater);
     method public void onGeolocationPermissionsHidePrompt();
     method public void onGeolocationPermissionsShowPrompt(java.lang.String, android.webkit.GeolocationPermissions.Callback);
     method public void onHideCustomView();
@@ -29945,7 +29945,7 @@ package android.webkit {
     method public boolean onJsPrompt(android.webkit.WebView, java.lang.String, java.lang.String, java.lang.String, android.webkit.JsPromptResult);
     method public deprecated boolean onJsTimeout();
     method public void onProgressChanged(android.webkit.WebView, int);
-    method public void onReachedMaxAppCacheSize(long, long, android.webkit.WebStorage.QuotaUpdater);
+    method public deprecated void onReachedMaxAppCacheSize(long, long, android.webkit.WebStorage.QuotaUpdater);
     method public void onReceivedIcon(android.webkit.WebView, android.graphics.Bitmap);
     method public void onReceivedTitle(android.webkit.WebView, java.lang.String);
     method public void onReceivedTouchIconUrl(android.webkit.WebView, java.lang.String, boolean);
@@ -30001,12 +30001,12 @@ package android.webkit {
     method public int getCacheMode();
     method public synchronized java.lang.String getCursiveFontFamily();
     method public synchronized boolean getDatabaseEnabled();
-    method public synchronized java.lang.String getDatabasePath();
+    method public deprecated synchronized java.lang.String getDatabasePath();
     method public synchronized int getDefaultFixedFontSize();
     method public synchronized int getDefaultFontSize();
     method public synchronized java.lang.String getDefaultTextEncodingName();
     method public static java.lang.String getDefaultUserAgent(android.content.Context);
-    method public android.webkit.WebSettings.ZoomDensity getDefaultZoom();
+    method public deprecated android.webkit.WebSettings.ZoomDensity getDefaultZoom();
     method public boolean getDisplayZoomControls();
     method public synchronized boolean getDomStorageEnabled();
     method public synchronized java.lang.String getFantasyFontFamily();
@@ -30043,11 +30043,11 @@ package android.webkit {
     method public void setCacheMode(int);
     method public synchronized void setCursiveFontFamily(java.lang.String);
     method public synchronized void setDatabaseEnabled(boolean);
-    method public synchronized void setDatabasePath(java.lang.String);
+    method public deprecated synchronized void setDatabasePath(java.lang.String);
     method public synchronized void setDefaultFixedFontSize(int);
     method public synchronized void setDefaultFontSize(int);
     method public synchronized void setDefaultTextEncodingName(java.lang.String);
-    method public void setDefaultZoom(android.webkit.WebSettings.ZoomDensity);
+    method public deprecated void setDefaultZoom(android.webkit.WebSettings.ZoomDensity);
     method public void setDisplayZoomControls(boolean);
     method public synchronized void setDomStorageEnabled(boolean);
     method public deprecated void setEnableSmoothTransition(boolean);
@@ -30090,9 +30090,10 @@ package android.webkit {
   public static final class WebSettings.LayoutAlgorithm extends java.lang.Enum {
     method public static android.webkit.WebSettings.LayoutAlgorithm valueOf(java.lang.String);
     method public static final android.webkit.WebSettings.LayoutAlgorithm[] values();
-    enum_constant public static final android.webkit.WebSettings.LayoutAlgorithm NARROW_COLUMNS;
+    enum_constant public static final deprecated android.webkit.WebSettings.LayoutAlgorithm NARROW_COLUMNS;
     enum_constant public static final android.webkit.WebSettings.LayoutAlgorithm NORMAL;
     enum_constant public static final deprecated android.webkit.WebSettings.LayoutAlgorithm SINGLE_COLUMN;
+    enum_constant public static final android.webkit.WebSettings.LayoutAlgorithm TEXT_AUTOSIZING;
   }
 
   public static final class WebSettings.PluginState extends java.lang.Enum {
@@ -30145,7 +30146,7 @@ package android.webkit {
     method public long getUsage();
   }
 
-  public static abstract interface WebStorage.QuotaUpdater {
+  public static abstract deprecated interface WebStorage.QuotaUpdater {
     method public abstract void updateQuota(long);
   }
 
@@ -30173,7 +30174,7 @@ package android.webkit {
     method public boolean canGoForward();
     method public deprecated boolean canZoomIn();
     method public deprecated boolean canZoomOut();
-    method public android.graphics.Picture capturePicture();
+    method public deprecated android.graphics.Picture capturePicture();
     method public void clearCache(boolean);
     method public void clearFormData();
     method public void clearHistory();
@@ -30190,7 +30191,7 @@ package android.webkit {
     method public void findAllAsync(java.lang.String);
     method public void findNext(boolean);
     method public void flingScroll(int, int);
-    method public void freeMemory();
+    method public deprecated void freeMemory();
     method public android.net.http.SslCertificate getCertificate();
     method public int getContentHeight();
     method public android.graphics.Bitmap getFavicon();
