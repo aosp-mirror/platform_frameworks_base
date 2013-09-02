@@ -2753,7 +2753,8 @@ public class Editor {
                 suggestions[suggestionInfo.suggestionIndex] = originalText;
 
                 // Restore previous SuggestionSpans
-                final int lengthDifference = suggestion.length() - (spanEnd - spanStart);
+                final int realSuggestionLength = mTextView.getText().toString().length();
+                final int lengthDifference = realSuggestionLength - (spanEnd - spanStart);
                 for (int i = 0; i < length; i++) {
                     // Only spans that include the modified region make sense after replacement
                     // Spans partially included in the replaced region are removed, there is no
