@@ -30,7 +30,7 @@ import android.os.Bundle;
  * </ul>
  *
  * Any additional parameters sent to the text to speech service are passed in
- * uninterpreted, see the @code{params} argument in {@link TextToSpeech#speak}
+ * uninterpreted, see the {@code params} argument in {@link TextToSpeech#speak}
  * and {@link TextToSpeech#synthesizeToFile}.
  */
 public final class SynthesisRequest {
