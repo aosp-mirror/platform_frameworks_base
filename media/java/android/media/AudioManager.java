@@ -444,6 +444,19 @@ public class AudioManager {
 
     /**
      * @hide
+     * @param KeyEvent
+     */
+    protected void dispatchMediaKeyEvent(KeyEvent keyEvent) {
+        IAudioService service = getService();
+        try {
+            service.dispatchMediaKeyEvent(keyEvent);
+        } catch (RemoteException e) {
+            Log.e(TAG, "dispatchMediaKeyEvent threw exception ", e);
+        }
+    }
+
+    /**
+     * @hide
      */
     public void preDispatchKeyEvent(KeyEvent event, int stream) {
         /*
@@ -2235,6 +2248,49 @@ public class AudioManager {
 
     /**
      * @hide
+     * CANDIDATE FOR PUBLIC API
+     * @param rctlr
+     * @return true if the {@link RemoteController} was successfully registered, false if an
+     *     error occurred, due to an internal system error, or insufficient permissions.
+     */
+    public boolean registerRemoteController(RemoteController rctlr) {
+        if (rctlr == null) {
+            return false;
+        }
+        IAudioService service = getService();
+        try {
+            boolean reg = service.registerRemoteControlDisplay(rctlr.getRcDisplay(),
+                    // passing a negative value for art work width and height
+                    //   as they are still unknown at this stage
+                    /*w*/-1, /*h*/ -1);
+            rctlr.setIsRegistered(reg);
+            return reg;
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in registerRemoteControlDisplay " + e);
+            return false;
+        }
+    }
+
+    /**
+     * @hide
+     * CANDIDATE FOR PUBLIC API
+     * @param rctlr
+     */
+    public void unregisterRemoteController(RemoteController rctlr) {
+        if (rctlr == null) {
+            return;
+        }
+        IAudioService service = getService();
+        try {
+            service.unregisterRemoteControlDisplay(rctlr.getRcDisplay());
+            rctlr.setIsRegistered(false);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in unregisterRemoteControlDisplay " + e);
+        }
+    }
+
+    /**
+     * @hide
      * Registers a remote control display that will be sent information by remote control clients.
      * Use this method if your IRemoteControlDisplay is not going to display artwork, otherwise
      * use {@link #registerRemoteControlDisplay(IRemoteControlDisplay, int, int)} to pass the
@@ -2263,8 +2319,6 @@ public class AudioManager {
         }
         IAudioService service = getService();
         try {
-            // passing a negative value for art work width and height as they are unknown at
-            // this stage
             service.registerRemoteControlDisplay(rcd, w, h);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in registerRemoteControlDisplay " + e);
@@ -2357,13 +2411,15 @@ public class AudioManager {
 
     /**
      * @hide
-     * Notify the user of a RemoteControlClient that it should update its metadata
+     * Notify the user of a RemoteControlClient that it should update its metadata with the
+     * new value for the given key.
      * @param generationId the RemoteControlClient generation counter for which this request is
      *         issued. Requests for an older generation than current one will be ignored.
      * @param key the metadata key for which a new value exists
      * @param value the new metadata value
      */
-    public void updateRemoteControlClientMetadata(int generationId, int key, long value) {
+    public void updateRemoteControlClientMetadata(int generationId, int key,
+            Rating value) {
         IAudioService service = getService();
         try {
             service.updateRemoteControlClientMetadata(generationId, key, value);
