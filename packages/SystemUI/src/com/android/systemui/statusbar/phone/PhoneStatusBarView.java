@@ -16,8 +16,12 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
+import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
+
 import android.animation.Animator;
 import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
@@ -27,15 +31,10 @@ import android.util.EventLog;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.StatusBarIconView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
@@ -56,11 +55,22 @@ public class PhoneStatusBarView extends PanelBar {
 
     private final class StatusBarTransitions extends BarTransitions {
         private final int mTransparent;
+        private final float mAlphaWhenOpaque;
+        private final float mAlphaWhenTransparent = 1;
+        private View mLeftSide;
+        private View mRightSide;
 
         public StatusBarTransitions(Context context) {
             super(context, PhoneStatusBarView.this);
             final Resources res = context.getResources();
             mTransparent = res.getColor(R.color.status_bar_background_transparent);
+            mAlphaWhenOpaque = res.getFraction(R.dimen.status_bar_icon_drawing_alpha, 1, 1);
+        }
+
+        public void init() {
+            mLeftSide = findViewById(R.id.notification_icon_area);
+            mRightSide = findViewById(R.id.system_icon_area);
+            applyMode(getMode(), false /*animate*/);
         }
 
         @Override
@@ -69,41 +79,32 @@ public class PhoneStatusBarView extends PanelBar {
             return super.getBackgroundColor(mode);
         }
 
+        public ObjectAnimator animateTransitionTo(View v, float toAlpha) {
+            return ObjectAnimator.ofFloat(v, "alpha", v.getAlpha(), toAlpha);
+        }
+
+        public float getAlphaFor(int mode) {
+            final boolean isTransparent = mode == MODE_SEMI_TRANSPARENT || mode == MODE_TRANSPARENT;
+            return isTransparent ? mAlphaWhenTransparent : mAlphaWhenOpaque;
+        }
+
         @Override
         protected void onTransition(int oldMode, int newMode, boolean animate) {
             super.onTransition(oldMode, newMode, animate);
+            applyMode(newMode, animate);
+        }
+
+        private void applyMode(int mode, boolean animate) {
+            float newAlpha = getAlphaFor(mode);
             if (animate) {
-                List<Animator> animators = new ArrayList<Animator>();
-                for(StatusBarIconView icon : findStatusBarIcons()) {
-                    animators.add(icon.animateTransitionTo(newMode));
-                }
+                ObjectAnimator lhs = animateTransitionTo(mLeftSide, newAlpha);
+                ObjectAnimator rhs = animateTransitionTo(mRightSide, newAlpha);
                 AnimatorSet set = new AnimatorSet();
-                set.playTogether(animators);
+                set.playTogether(lhs, rhs);
                 set.start();
             } else {
-                for(StatusBarIconView icon : findStatusBarIcons()) {
-                    icon.setAlpha(icon.getAlphaFor(newMode));
-                }
-            }
-        }
-
-        private List<StatusBarIconView> findStatusBarIcons() {
-            List<StatusBarIconView> icons = new ArrayList<StatusBarIconView>();
-            findStatusBarIcons(icons, findViewById(R.id.moreIcon));
-            findStatusBarIcons(icons, findViewById(R.id.statusIcons));
-            findStatusBarIcons(icons, findViewById(R.id.notificationIcons));
-            return icons;
-        }
-
-        private void findStatusBarIcons(List<StatusBarIconView> icons, View v) {
-            if (v instanceof StatusBarIconView) {
-                icons.add((StatusBarIconView) v);
-            } else if (v instanceof ViewGroup) {
-                ViewGroup group = (ViewGroup) v;
-                final int N = group.getChildCount();
-                for (int i = 0; i < N; i++) {
-                    findStatusBarIcons(icons, group.getChildAt(i));
-                }
+                mLeftSide.setAlpha(newAlpha);
+                mRightSide.setAlpha(newAlpha);
             }
         }
     }
@@ -140,6 +141,7 @@ public class PhoneStatusBarView extends PanelBar {
         for (PanelView pv : mPanels) {
             pv.setRubberbandingEnabled(!mFullWidthNotifications);
         }
+        mBarTransitions.init();
     }
 
     @Override
