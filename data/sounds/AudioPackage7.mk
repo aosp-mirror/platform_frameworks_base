@@ -18,6 +18,7 @@ PRODUCT_COPY_FILES += \
 	$(LOCAL_PATH)/effects/ogg/KeypressStandard_120.ogg:system/media/audio/ui/KeypressStandard.ogg \
 	$(LOCAL_PATH)/effects/ogg/KeypressSpacebar_120.ogg:system/media/audio/ui/KeypressSpacebar.ogg \
 	$(LOCAL_PATH)/effects/ogg/KeypressDelete_120.ogg:system/media/audio/ui/KeypressDelete.ogg \
+	$(LOCAL_PATH)/effects/ogg/KeypressInvalid_120.ogg:system/media/audio/ui/KeypressInvalid.ogg \
 	$(LOCAL_PATH)/effects/ogg/KeypressReturn_120.ogg:system/media/audio/ui/KeypressReturn.ogg \
 	$(LOCAL_PATH)/effects/ogg/VideoRecord.ogg:system/media/audio/ui/VideoRecord.ogg \
 	$(LOCAL_PATH)/effects/ogg/camera_click.ogg:system/media/audio/ui/camera_click.ogg \
