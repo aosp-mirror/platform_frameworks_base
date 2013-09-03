@@ -102,8 +102,8 @@ public class LinearGradient extends Shader {
         final LinearGradient copy;
         switch (mType) {
             case TYPE_COLORS_AND_POSITIONS:
-                copy = new LinearGradient(mX0, mY0, mX1, mY1, mColors.clone(), mPositions.clone(),
-                        mTileMode);
+                copy = new LinearGradient(mX0, mY0, mX1, mY1, mColors.clone(),
+                        mPositions != null ? mPositions.clone() : null, mTileMode);
                 break;
             case TYPE_COLOR_START_AND_COLOR_END:
                 copy = new LinearGradient(mX0, mY0, mX1, mY1, mColor0, mColor1, mTileMode);
