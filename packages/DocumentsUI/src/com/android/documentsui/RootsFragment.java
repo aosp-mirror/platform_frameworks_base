@@ -16,8 +16,6 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.DocumentsActivity.TAG;
-
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -28,7 +26,6 @@ import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.provider.DocumentsContract.Root;
 import android.text.format.Formatter;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,6 +36,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.android.documentsui.DocumentsActivity.State;
 import com.android.documentsui.SectionedListAdapter.SectionAdapter;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
@@ -76,14 +74,10 @@ public class RootsFragment extends Fragment {
     public View onCreateView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final Context context = inflater.getContext();
-        final RootsCache roots = DocumentsApplication.getRootsCache(context);
 
         final View view = inflater.inflate(R.layout.fragment_roots, container, false);
         mList = (ListView) view.findViewById(android.R.id.list);
         mList.setOnItemClickListener(mItemListener);
-
-        final Intent includeApps = getArguments().getParcelable(EXTRA_INCLUDE_APPS);
-        mAdapter = new SectionedRootsAdapter(context, roots.getRoots(), includeApps);
 
         return view;
     }
@@ -91,9 +85,20 @@ public class RootsFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        updateRootsAdapter();
+    }
 
+    private void updateRootsAdapter() {
         final Context context = getActivity();
-        mAdapter.updateVisible(SettingsActivity.getDisplayAdvancedDevices(context));
+
+        final State state = ((DocumentsActivity) context).getDisplayState();
+        state.showAdvanced = SettingsActivity.getDisplayAdvancedDevices(context);
+
+        final RootsCache roots = DocumentsApplication.getRootsCache(context);
+        final List<RootInfo> matchingRoots = roots.getMatchingRoots(state);
+        final Intent includeApps = getArguments().getParcelable(EXTRA_INCLUDE_APPS);
+
+        mAdapter = new SectionedRootsAdapter(context, matchingRoots, includeApps);
         mList.setAdapter(mAdapter);
     }
 
@@ -211,18 +216,15 @@ public class RootsFragment extends Fragment {
         private final RootsAdapter mServices;
         private final RootsAdapter mShortcuts;
         private final RootsAdapter mDevices;
-        private final RootsAdapter mDevicesAdvanced;
         private final AppsAdapter mApps;
 
         public SectionedRootsAdapter(Context context, List<RootInfo> roots, Intent includeApps) {
             mServices = new RootsAdapter(context, R.string.root_type_service);
             mShortcuts = new RootsAdapter(context, R.string.root_type_shortcut);
             mDevices = new RootsAdapter(context, R.string.root_type_device);
-            mDevicesAdvanced = new RootsAdapter(context, R.string.root_type_device);
             mApps = new AppsAdapter(context);
 
             for (RootInfo root : roots) {
-                Log.d(TAG, "Found rootType=" + root.rootType);
                 switch (root.rootType) {
                     case Root.ROOT_TYPE_SERVICE:
                         mServices.add(root);
@@ -231,10 +233,7 @@ public class RootsFragment extends Fragment {
                         mShortcuts.add(root);
                         break;
                     case Root.ROOT_TYPE_DEVICE:
-                        mDevicesAdvanced.add(root);
-                        if ((root.flags & Root.FLAG_ADVANCED) == 0) {
-                            mDevices.add(root);
-                        }
+                        mDevices.add(root);
                         break;
                 }
             }
@@ -256,23 +255,16 @@ public class RootsFragment extends Fragment {
             mServices.sort(comp);
             mShortcuts.sort(comp);
             mDevices.sort(comp);
-            mDevicesAdvanced.sort(comp);
-        }
 
-        public void updateVisible(boolean showAdvanced) {
-            clearSections();
             if (mServices.getCount() > 0) {
                 addSection(mServices);
             }
             if (mShortcuts.getCount() > 0) {
                 addSection(mShortcuts);
             }
-
-            final RootsAdapter devices = showAdvanced ? mDevicesAdvanced : mDevices;
-            if (devices.getCount() > 0) {
-                addSection(devices);
+            if (mDevices.getCount() > 0) {
+                addSection(mDevices);
             }
-
             if (mApps.getCount() > 0) {
                 addSection(mApps);
             }
@@ -282,6 +274,12 @@ public class RootsFragment extends Fragment {
     public static class RootComparator implements Comparator<RootInfo> {
         @Override
         public int compare(RootInfo lhs, RootInfo rhs) {
+            if (lhs.authority == null) {
+                return -1;
+            } else if (rhs.authority == null) {
+                return 1;
+            }
+
             final int score = DocumentInfo.compareToIgnoreCaseNullable(lhs.title, rhs.title);
             if (score != 0) {
                 return score;
