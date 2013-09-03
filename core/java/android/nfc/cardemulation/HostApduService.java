@@ -40,13 +40,31 @@ public abstract class HostApduService extends Service {
      */
     @SdkConstant(SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE =
-            "android.nfc.HostApduService";
+            "android.nfc.cardemulation.action.HOST_APDU_SERVICE";
 
     /**
      * The name of the meta-data element that contains
      * more information about this service.
      */
-    public static final String SERVICE_META_DATA = "android.nfc.HostApduService";
+    public static final String SERVICE_META_DATA =
+            "android.nfc.cardemulation.host_apdu_service";
+
+    /**
+     * The {@link Intent} that must be declared as handled by the service.
+     * TODO Remove
+     * @hide
+     */
+    public static final String OLD_SERVICE_INTERFACE =
+            "android.nfc.HostApduService";
+
+    /**
+     * The name of the meta-data element that contains
+     * more information about this service.
+     *
+     * TODO Remove
+     * @hide
+     */
+    public static final String OLD_SERVICE_META_DATA = "android.nfc.HostApduService";
 
     /**
      * Reason for {@link #onDeactivated(int)}.
