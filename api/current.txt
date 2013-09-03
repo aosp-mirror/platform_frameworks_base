@@ -12892,7 +12892,9 @@ package android.media {
     field public static final int MEDIA_INFO_BUFFERING_START = 701; // 0x2bd
     field public static final int MEDIA_INFO_METADATA_UPDATE = 802; // 0x322
     field public static final int MEDIA_INFO_NOT_SEEKABLE = 801; // 0x321
+    field public static final int MEDIA_INFO_SUBTITLE_TIMED_OUT = 902; // 0x386
     field public static final int MEDIA_INFO_UNKNOWN = 1; // 0x1
+    field public static final int MEDIA_INFO_UNSUPPORTED_SUBTITLE = 901; // 0x385
     field public static final int MEDIA_INFO_VIDEO_RENDERING_START = 3; // 0x3
     field public static final int MEDIA_INFO_VIDEO_TRACK_LAGGING = 700; // 0x2bc
     field public static final java.lang.String MEDIA_MIMETYPE_TEXT_SUBRIP = "application/x-subrip";
@@ -32659,6 +32661,7 @@ package android.widget {
     ctor public VideoView(android.content.Context);
     ctor public VideoView(android.content.Context, android.util.AttributeSet);
     ctor public VideoView(android.content.Context, android.util.AttributeSet, int);
+    method public void addSubtitleSource(java.io.InputStream, android.media.MediaFormat);
     method public boolean canPause();
     method public boolean canSeekBackward();
     method public boolean canSeekForward();
