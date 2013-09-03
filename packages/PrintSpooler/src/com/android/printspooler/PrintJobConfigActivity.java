@@ -817,6 +817,10 @@ public class PrintJobConfigActivity extends Activity {
                     }
 
                     if (id == DEST_ADAPTER_ITEM_ID_ALL_PRINTERS) {
+                        // The selection changed to the all printers item. We
+                        // want to select back the last selected printer.
+                        mIgnoreNextDestinationChange = true;
+                        mEditor.selectPrinter(mCurrentPrinter.getId());
                         startSelectPrinterActivity();
                         return;
                     }
@@ -1024,7 +1028,7 @@ public class PrintJobConfigActivity extends Activity {
             mDestinationSpinnerAdapter.registerDataSetObserver(new DataSetObserver() {
                 @Override
                 public void onChanged() {
-                    // Initially, we have only sage to PDF as a printer but after some
+                    // Initially, we have only safe to PDF as a printer but after some
                     // printers are loaded we want to select the user's favorite one
                     // which is the first.
                     if (!mFavoritePrinterSelected && mDestinationSpinnerAdapter.getCount() > 2) {
@@ -1042,6 +1046,15 @@ public class PrintJobConfigActivity extends Activity {
                                 PrinterInfo printer = (PrinterInfo) item;
                                 if (!printer.getId().equals(mCurrentPrinter.getId())) {
                                     continue;
+                                }
+
+                                // If the current printer became available and has no
+                                // capabilities, we refresh it.
+                                if (mCurrentPrinter.getStatus() == PrinterInfo.STATUS_UNAVAILABLE
+                                        && printer.getStatus() != PrinterInfo.STATUS_UNAVAILABLE
+                                        && printer.getCapabilities() == null) {
+                                    refreshCurrentPrinter();
+                                    return;
                                 }
 
                                 // Update the UI if capabilities changed.
@@ -1123,6 +1136,18 @@ public class PrintJobConfigActivity extends Activity {
                                 LOADER_ID_PRINTERS_LOADER);
                 if (printersLoader != null) {
                     printersLoader.setTrackedPrinter(printer.getId());
+                }
+            }
+        }
+
+        public void addCurrentPrinterToHistory() {
+            PrinterInfo printer = (PrinterInfo) mDestinationSpinner.getSelectedItem();
+            if (printer != null) {
+                FusedPrintersProvider printersLoader = (FusedPrintersProvider)
+                        (Loader<?>) getLoaderManager().getLoader(
+                                LOADER_ID_PRINTERS_LOADER);
+                if (printersLoader != null) {
+                    printersLoader.addHistoricalPrinter(printer);
                 }
             }
         }
@@ -1348,6 +1373,7 @@ public class PrintJobConfigActivity extends Activity {
         }
 
         public void confirmPrint() {
+            addCurrentPrinterToHistory();
             mEditorState = EDITOR_STATE_CONFIRMED_PRINT;
             showUi(UI_GENERATING_PRINT_JOB, null);
         }
@@ -1772,7 +1798,6 @@ public class PrintJobConfigActivity extends Activity {
                     mPageRangeEditText.setVisibility(View.INVISIBLE);
                     mPageRangeTitle.setVisibility(View.INVISIBLE);
                 }
-                mRangeOptionsSpinner.setEnabled(true);
 
                 // Print/Print preview
                 if (mDestinationSpinner.getSelectedItemId()
@@ -1871,8 +1896,6 @@ public class PrintJobConfigActivity extends Activity {
         }
 
         private void startSelectPrinterActivity() {
-            mIgnoreNextDestinationChange = true;
-            mDestinationSpinner.setSelection(0);
             Intent intent = new Intent(PrintJobConfigActivity.this,
                     SelectPrinterActivity.class);
             startActivityForResult(intent, ACTIVITY_REQUEST_SELECT_PRINTER);
@@ -1958,6 +1981,9 @@ public class PrintJobConfigActivity extends Activity {
                 if (mPrinters.isEmpty()) {
                     if (position == 0) {
                         return DEST_ADAPTER_ITEM_ID_SAVE_AS_PDF;
+                    }
+                    if (position == 1) {
+                        return DEST_ADAPTER_ITEM_ID_ALL_PRINTERS;
                     }
                 } else {
                     if (position == 1) {
@@ -2059,7 +2085,7 @@ public class PrintJobConfigActivity extends Activity {
                     PrinterInfo printer = (PrinterInfo) mPrinters.get(i);
                     if (printer.getId().equals(mLastShownPrinterId)) {
                         // If already in the list - do nothing.
-                        if (i < getCount() - 1) {
+                        if (i < getCount() - 2) {
                             return;
                         }
                         // Else replace the last one.
