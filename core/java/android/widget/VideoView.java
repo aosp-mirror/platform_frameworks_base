@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Canvas;
 import android.media.AudioManager;
 import android.media.MediaFormat;
 import android.media.MediaPlayer;
@@ -42,6 +43,7 @@ import android.widget.MediaController.MediaPlayerControl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Vector;
 
@@ -93,6 +95,15 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
     private boolean     mCanPause;
     private boolean     mCanSeekBack;
     private boolean     mCanSeekForward;
+
+    /** List of views overlaid on top of the video. */
+    private ArrayList<View> mOverlays;
+
+    /**
+     * Listener for overlay layout changes. Invalidates the video view to ensure
+     * that captions are redrawn whenever their layout changes.
+     */
+    private OnLayoutChangeListener mOverlayLayoutListener;
 
     public VideoView(Context context) {
         super(context);
@@ -765,5 +776,102 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             foo.release();
         }
         return mAudioSession;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+
+        // Layout overlay views, if necessary.
+        if (changed && mOverlays != null && !mOverlays.isEmpty()) {
+            measureAndLayoutOverlays();
+        }
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+        super.draw(canvas);
+
+        final int count = mOverlays.size();
+        for (int i = 0; i < count; i++) {
+            final View overlay = mOverlays.get(i);
+            overlay.draw(canvas);
+        }
+    }
+
+    /**
+     * Adds a view to be overlaid on top of this video view. During layout, the
+     * view will be forced to match the bounds, less padding, of the video view.
+     * <p>
+     * Overlays are drawn in the order they are added. The last added overlay
+     * will be drawn on top.
+     *
+     * @param overlay the view to overlay
+     * @see #removeOverlay(View)
+     */
+    private void addOverlay(View overlay) {
+        if (mOverlays == null) {
+            mOverlays = new ArrayList<View>(1);
+        }
+
+        if (mOverlayLayoutListener == null) {
+            mOverlayLayoutListener = new OnLayoutChangeListener() {
+                @Override
+                public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                        int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                    invalidate();
+                }
+            };
+        }
+
+        if (mOverlays.isEmpty()) {
+            setWillNotDraw(false);
+        }
+
+        mOverlays.add(overlay);
+        overlay.addOnLayoutChangeListener(mOverlayLayoutListener);
+        measureAndLayoutOverlays();
+    }
+
+    /**
+     * Removes a view previously added using {@link #addOverlay}.
+     *
+     * @param overlay the view to remove
+     * @see #addOverlay(View)
+     */
+    private void removeOverlay(View overlay) {
+        if (mOverlays == null) {
+            return;
+        }
+
+        overlay.removeOnLayoutChangeListener(mOverlayLayoutListener);
+        mOverlays.remove(overlay);
+
+        if (mOverlays.isEmpty()) {
+            setWillNotDraw(true);
+        }
+
+        invalidate();
+    }
+
+    /**
+     * Forces a measurement and layout pass for all overlaid views.
+     *
+     * @see #addOverlay(View)
+     */
+    private void measureAndLayoutOverlays() {
+        final int left = getPaddingLeft();
+        final int top = getPaddingTop();
+        final int right = getWidth() - left - getPaddingRight();
+        final int bottom = getHeight() - top - getPaddingBottom();
+        final int widthSpec = MeasureSpec.makeMeasureSpec(right - left, MeasureSpec.EXACTLY);
+        final int heightSpec = MeasureSpec.makeMeasureSpec(bottom - top, MeasureSpec.EXACTLY);
+
+        final int count = mOverlays.size();
+        for (int i = 0; i < count; i++) {
+            final View overlay = mOverlays.get(i);
+            overlay.measure(widthSpec, heightSpec);
+            overlay.layout(left, top, right, bottom);
+        }
     }
 }
