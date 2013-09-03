@@ -16,11 +16,13 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_DISPLAY_NAME;
+import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_LAST_MODIFIED;
+import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_SIZE;
+
 import android.database.AbstractCursor;
 import android.database.Cursor;
 import android.provider.DocumentsContract.Document;
-
-import com.android.documentsui.DocumentsActivity.DisplayState;
 
 /**
  * Cursor wrapper that presents a sorted view of the underlying cursor. Handles
@@ -39,12 +41,12 @@ public class SortingCursorWrapper extends AbstractCursor {
         final int count = cursor.getCount();
         mPosition = new int[count];
         switch (sortOrder) {
-            case DisplayState.SORT_ORDER_DISPLAY_NAME:
+            case SORT_ORDER_DISPLAY_NAME:
                 mValueString = new String[count];
                 mValueLong = null;
                 break;
-            case DisplayState.SORT_ORDER_LAST_MODIFIED:
-            case DisplayState.SORT_ORDER_SIZE:
+            case SORT_ORDER_LAST_MODIFIED:
+            case SORT_ORDER_SIZE:
                 mValueString = null;
                 mValueLong = new long[count];
                 break;
@@ -63,7 +65,7 @@ public class SortingCursorWrapper extends AbstractCursor {
             mPosition[i] = i;
 
             switch (sortOrder) {
-                case DisplayState.SORT_ORDER_DISPLAY_NAME:
+                case SORT_ORDER_DISPLAY_NAME:
                     final String mimeType = cursor.getString(mimeTypeIndex);
                     final String displayName = cursor.getString(displayNameIndex);
                     if (Document.MIME_TYPE_DIR.equals(mimeType)) {
@@ -72,24 +74,24 @@ public class SortingCursorWrapper extends AbstractCursor {
                         mValueString[i] = displayName;
                     }
                     break;
-                case DisplayState.SORT_ORDER_LAST_MODIFIED:
+                case SORT_ORDER_LAST_MODIFIED:
                     mValueLong[i] = cursor.getLong(lastModifiedIndex);
                     break;
-                case DisplayState.SORT_ORDER_SIZE:
+                case SORT_ORDER_SIZE:
                     mValueLong[i] = cursor.getLong(sizeIndex);
                     break;
             }
         }
 
         switch (sortOrder) {
-            case DisplayState.SORT_ORDER_DISPLAY_NAME:
+            case SORT_ORDER_DISPLAY_NAME:
                 synchronized (SortingCursorWrapper.class) {
 
                     binarySort(mPosition, mValueString);
                 }
                 break;
-            case DisplayState.SORT_ORDER_LAST_MODIFIED:
-            case DisplayState.SORT_ORDER_SIZE:
+            case SORT_ORDER_LAST_MODIFIED:
+            case SORT_ORDER_SIZE:
                 binarySort(mPosition, mValueLong);
                 break;
         }

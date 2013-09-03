@@ -16,6 +16,10 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_DISPLAY_NAME;
+import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_LAST_MODIFIED;
+import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_SIZE;
+
 import android.content.AsyncTaskLoader;
 import android.content.ContentProviderClient;
 import android.content.Context;
@@ -24,8 +28,6 @@ import android.net.Uri;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
 import android.provider.DocumentsContract.Document;
-
-import com.android.documentsui.DocumentsActivity.DisplayState;
 
 import libcore.io.IoUtils;
 
@@ -149,11 +151,11 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
 
     private String getQuerySortOrder() {
         switch (mSortOrder) {
-            case DisplayState.SORT_ORDER_DISPLAY_NAME:
+            case SORT_ORDER_DISPLAY_NAME:
                 return Document.COLUMN_DISPLAY_NAME + " ASC";
-            case DisplayState.SORT_ORDER_LAST_MODIFIED:
+            case SORT_ORDER_LAST_MODIFIED:
                 return Document.COLUMN_LAST_MODIFIED + " DESC";
-            case DisplayState.SORT_ORDER_SIZE:
+            case SORT_ORDER_SIZE:
                 return Document.COLUMN_SIZE + " DESC";
             default:
                 return null;

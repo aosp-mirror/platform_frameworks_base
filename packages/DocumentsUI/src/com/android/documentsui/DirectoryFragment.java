@@ -17,9 +17,9 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.DocumentsActivity.TAG;
-import static com.android.documentsui.DocumentsActivity.DisplayState.ACTION_MANAGE;
-import static com.android.documentsui.DocumentsActivity.DisplayState.MODE_GRID;
-import static com.android.documentsui.DocumentsActivity.DisplayState.MODE_LIST;
+import static com.android.documentsui.DocumentsActivity.State.ACTION_MANAGE;
+import static com.android.documentsui.DocumentsActivity.State.MODE_GRID;
+import static com.android.documentsui.DocumentsActivity.State.MODE_LIST;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
@@ -62,7 +62,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.documentsui.DocumentsActivity.DisplayState;
+import com.android.documentsui.DocumentsActivity.State;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.internal.util.Predicate;
 import com.google.android.collect.Lists;
@@ -168,7 +168,7 @@ public class DirectoryFragment extends Fragment {
         mCallbacks = new LoaderCallbacks<DirectoryResult>() {
             @Override
             public Loader<DirectoryResult> onCreateLoader(int id, Bundle args) {
-                final DisplayState state = getDisplayState(DirectoryFragment.this);
+                final State state = getDisplayState(DirectoryFragment.this);
 
                 Uri contentsUri;
                 if (mType == TYPE_NORMAL) {
@@ -196,7 +196,7 @@ public class DirectoryFragment extends Fragment {
     }
 
     public void updateDisplayState() {
-        final DisplayState state = getDisplayState(this);
+        final State state = getDisplayState(this);
 
         if (mLastSortOrder != state.sortOrder) {
             getLoaderManager().restartLoader(mLoaderId, null, mCallbacks);
@@ -263,7 +263,7 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            final DisplayState state = getDisplayState(DirectoryFragment.this);
+            final State state = getDisplayState(DirectoryFragment.this);
 
             final MenuItem open = menu.findItem(R.id.menu_open);
             final MenuItem share = menu.findItem(R.id.menu_share);
@@ -294,14 +294,17 @@ public class DirectoryFragment extends Fragment {
             final int id = item.getItemId();
             if (id == R.id.menu_open) {
                 DocumentsActivity.get(DirectoryFragment.this).onDocumentsPicked(docs);
+                mode.finish();
                 return true;
 
             } else if (id == R.id.menu_share) {
                 onShareDocuments(docs);
+                mode.finish();
                 return true;
 
             } else if (id == R.id.menu_delete) {
                 onDeleteDocuments(docs);
+                mode.finish();
                 return true;
 
             } else {
@@ -332,26 +335,36 @@ public class DirectoryFragment extends Fragment {
     };
 
     private void onShareDocuments(List<DocumentInfo> docs) {
-        final ArrayList<Uri> uris = Lists.newArrayList();
-        for (DocumentInfo doc : docs) {
-            uris.add(doc.uri);
-        }
+        Intent intent;
+        if (docs.size() == 1) {
+            final DocumentInfo doc = docs.get(0);
 
-        final Intent intent;
-        if (uris.size() > 1) {
-            intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intent.addCategory(Intent.CATEGORY_DEFAULT);
-            // TODO: find common mimetype
-            intent.setType("*/*");
-            intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-        } else {
             intent = new Intent(Intent.ACTION_SEND);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.addCategory(Intent.CATEGORY_DEFAULT);
-            intent.setData(uris.get(0));
+            intent.setType(doc.mimeType);
+            intent.putExtra(Intent.EXTRA_STREAM, doc.uri);
+
+        } else if (docs.size() > 1) {
+            intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addCategory(Intent.CATEGORY_DEFAULT);
+
+            final ArrayList<String> mimeTypes = Lists.newArrayList();
+            final ArrayList<Uri> uris = Lists.newArrayList();
+            for (DocumentInfo doc : docs) {
+                mimeTypes.add(doc.mimeType);
+                uris.add(doc.uri);
+            }
+
+            intent.setType(findCommonMimeType(mimeTypes));
+            intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+
+        } else {
+            return;
         }
 
+        intent = Intent.createChooser(intent, getActivity().getText(R.string.share_via));
         startActivity(intent);
     }
 
@@ -383,7 +396,7 @@ public class DirectoryFragment extends Fragment {
         }
     }
 
-    private static DisplayState getDisplayState(Fragment fragment) {
+    private static State getDisplayState(Fragment fragment) {
         return ((DocumentsActivity) fragment.getActivity()).getDisplayState();
     }
 
@@ -411,7 +424,7 @@ public class DirectoryFragment extends Fragment {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             final Context context = parent.getContext();
-            final DisplayState state = getDisplayState(DirectoryFragment.this);
+            final State state = getDisplayState(DirectoryFragment.this);
 
             final RootsCache roots = DocumentsApplication.getRootsCache(context);
             final ThumbnailCache thumbs = DocumentsApplication.getThumbnailsCache(
@@ -585,5 +598,29 @@ public class DirectoryFragment extends Fragment {
         }
 
         return DateUtils.formatDateTime(context, when, flags);
+    }
+
+    private String findCommonMimeType(List<String> mimeTypes) {
+        String[] commonType = mimeTypes.get(0).split("/");
+        if (commonType.length != 2) {
+            return "*/*";
+        }
+
+        for (int i = 1; i < mimeTypes.size(); i++) {
+            String[] type = mimeTypes.get(i).split("/");
+            if (type.length != 2) continue;
+
+            if (!commonType[1].equals(type[1])) {
+                commonType[1] = "*";
+            }
+
+            if (!commonType[0].equals(type[0])) {
+                commonType[0] = "*";
+                commonType[1] = "*";
+                break;
+            }
+        }
+
+        return commonType[0] + "/" + commonType[1];
     }
 }

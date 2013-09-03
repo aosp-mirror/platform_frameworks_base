@@ -11,10 +11,7 @@
         <!-- TODO: allow rotation when state saving is in better shape -->
         <activity
             android:name=".DocumentsActivity"
-            android:finishOnCloseSystemDialogs="true"
-            android:excludeFromRecents="true"
-            android:theme="@android:style/Theme.Holo.Light"
-            android:screenOrientation="nosensor">
+            android:theme="@android:style/Theme.Holo.Light">
             <intent-filter android:priority="100">
                 <action android:name="android.intent.action.OPEN_DOCUMENT" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -37,7 +34,7 @@
             <intent-filter>
                 <action android:name="android.provider.action.MANAGE_DOCUMENTS" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.doc/dir" />
+                <data android:mimeType="vnd.android.document/directory" />
             </intent-filter>
         </activity>
 

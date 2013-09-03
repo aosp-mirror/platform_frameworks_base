@@ -47,7 +47,9 @@ import com.google.android.collect.Lists;
 
 import libcore.io.IoUtils;
 
-import java.io.FileNotFoundException;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -138,12 +140,13 @@ public class RecentsCreateFragment extends Fragment {
                     uri, null, null, null, RecentsProvider.COL_TIMESTAMP + " DESC", signal);
             try {
                 while (cursor != null && cursor.moveToNext()) {
-                    final String rawStack = cursor.getString(
+                    final byte[] raw = cursor.getBlob(
                             cursor.getColumnIndex(RecentsProvider.COL_PATH));
                     try {
-                        final DocumentStack stack = DocumentStack.deserialize(resolver, rawStack);
+                        final DocumentStack stack = new DocumentStack();
+                        stack.read(new DataInputStream(new ByteArrayInputStream(raw)));
                         result.add(stack);
-                    } catch (FileNotFoundException e) {
+                    } catch (IOException e) {
                         Log.w(TAG, "Failed to resolve stack: " + e);
                     }
                 }

@@ -30,13 +30,19 @@ import com.android.documentsui.RecentsProvider;
 
 import libcore.io.IoUtils;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.ProtocolException;
 import java.util.Comparator;
 
 /**
  * Representation of a {@link Document}.
  */
-public class DocumentInfo {
+public class DocumentInfo implements Durable {
+    private static final int VERSION_INIT = 1;
+
     public Uri uri;
     public String mimeType;
     public String displayName;
@@ -45,6 +51,55 @@ public class DocumentInfo {
     public String summary;
     public long size;
     public int icon;
+
+    public DocumentInfo() {
+        reset();
+    }
+
+    @Override
+    public void reset() {
+        uri = null;
+        mimeType = null;
+        displayName = null;
+        lastModified = -1;
+        flags = 0;
+        summary = null;
+        size = -1;
+        icon = 0;
+    }
+
+    @Override
+    public void read(DataInputStream in) throws IOException {
+        final int version = in.readInt();
+        switch (version) {
+            case VERSION_INIT:
+                final String rawUri = DurableUtils.readNullableString(in);
+                uri = rawUri != null ? Uri.parse(rawUri) : null;
+                mimeType = DurableUtils.readNullableString(in);
+                displayName = DurableUtils.readNullableString(in);
+                lastModified = in.readLong();
+                flags = in.readInt();
+                summary = DurableUtils.readNullableString(in);
+                size = in.readLong();
+                icon = in.readInt();
+                break;
+            default:
+                throw new ProtocolException("Unknown version " + version);
+        }
+    }
+
+    @Override
+    public void write(DataOutputStream out) throws IOException {
+        out.writeInt(VERSION_INIT);
+        DurableUtils.writeNullableString(out, uri.toString());
+        DurableUtils.writeNullableString(out, mimeType);
+        DurableUtils.writeNullableString(out, displayName);
+        out.writeLong(lastModified);
+        out.writeInt(flags);
+        DurableUtils.writeNullableString(out, summary);
+        out.writeLong(size);
+        out.writeInt(icon);
+    }
 
     public static DocumentInfo fromDirectoryCursor(Uri parent, Cursor cursor) {
         final DocumentInfo doc = new DocumentInfo();
