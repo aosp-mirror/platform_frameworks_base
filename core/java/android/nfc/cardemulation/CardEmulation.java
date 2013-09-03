@@ -33,12 +33,8 @@ import android.util.Log;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * TODO Remove when calling .apks are upgraded
- * @hide
- */
-public final class CardEmulationManager {
-    static final String TAG = "CardEmulationManager";
+public final class CardEmulation {
+    static final String TAG = "CardEmulation";
 
     /**
      * Activity action: ask the user to change the default
@@ -51,7 +47,7 @@ public final class CardEmulationManager {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CHANGE_DEFAULT =
-            "android.nfc.cardemulation.ACTION_CHANGE_DEFAULT";
+            "android.nfc.cardemulation.action.ACTION_CHANGE_DEFAULT";
 
     /**
      * The category extra for {@link #ACTION_CHANGE_DEFAULT}
@@ -143,17 +139,17 @@ public final class CardEmulationManager {
     public static final int SELECTION_MODE_ASK_IF_CONFLICT = 2;
 
     static boolean sIsInitialized = false;
-    static HashMap<Context, CardEmulationManager> sCardEmuManagers = new HashMap();
+    static HashMap<Context, CardEmulation> sCardEmus = new HashMap();
     static INfcCardEmulation sService;
 
     final Context mContext;
 
-    private CardEmulationManager(Context context, INfcCardEmulation service) {
+    private CardEmulation(Context context, INfcCardEmulation service) {
         mContext = context.getApplicationContext();
         sService = service;
     }
 
-    public static synchronized CardEmulationManager getInstance(NfcAdapter adapter) {
+    public static synchronized CardEmulation getInstance(NfcAdapter adapter) {
         if (adapter == null) throw new NullPointerException("NfcAdapter is null");
         Context context = adapter.getContext();
         if (context == null) {
@@ -177,12 +173,12 @@ public final class CardEmulationManager {
             }
             sIsInitialized = true;
         }
-        CardEmulationManager manager = sCardEmuManagers.get(context);
+        CardEmulation manager = sCardEmus.get(context);
         if (manager == null) {
             // Get card emu service
             INfcCardEmulation service = adapter.getCardEmulationService();
-            manager = new CardEmulationManager(context, service);
-            sCardEmuManagers.put(context, manager);
+            manager = new CardEmulation(context, service);
+            sCardEmus.put(context, manager);
         }
         return manager;
     }
