@@ -2611,6 +2611,9 @@
         <!-- Whether the device must be unlocked before routing data to this service.
              The default is false.-->
         <attr name="requireDeviceUnlock" format="boolean"/>
+        <!-- A drawable that can be rendered in Android's system UI for representing
+             the service. -->
+        <attr name="apduServiceBanner" format="reference"/>
     </declare-styleable>
 
     <!-- Use <code>offhost-apdu-service</code> as the root tag of the XML resource that
@@ -2621,6 +2624,9 @@
         <!-- Short description of the functionality the service implements. This attribute
              is mandatory.-->
         <attr name="description" />
+        <!-- A drawable that can be rendered in Android's system UI for representing
+             the service. -->
+        <attr name="apduServiceBanner"/>
     </declare-styleable>
 
     <!-- Specify one or more <code>aid-group</code> elements inside a
