@@ -898,6 +898,8 @@ public class RenderScript {
     Element mElement_LONG_3;
     Element mElement_LONG_4;
 
+    Element mElement_YUV;
+
     Element mElement_MATRIX_4X4;
     Element mElement_MATRIX_3X3;
     Element mElement_MATRIX_2X2;
