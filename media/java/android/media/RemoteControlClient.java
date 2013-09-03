@@ -294,14 +294,13 @@ public class RemoteControlClient
      */
     public final static int FLAG_KEY_MEDIA_POSITION_UPDATE = 1 << 8;
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
      * Flag indicating a RemoteControlClient supports ratings.
      * This flag must be set in order for components that display the RemoteControlClient
      * information, to display ratings information, and, if ratings are declared editable
      * (by calling {@link MetadataEditor#addEditableKey(int)} with the
      * {@link MetadataEditor#LONG_KEY_RATING_BY_USER} key), it will enable the user to rate
-     * the media.
+     * the media, with values being received through the interface set with
+     * {@link #setMetadataUpdateListener(OnMetadataUpdateListener)}.
      * @see #setTransportControlFlags(int)
      */
     public final static int FLAG_KEY_MEDIA_RATING = 1 << 9;
@@ -452,8 +451,6 @@ public class RemoteControlClient
          */
         public final static int BITMAP_KEY_ARTWORK = 100;
         /**
-         * @hide
-         * CANDIDATE FOR PUBLIC API
          * The metadata key qualifying the content rating.
          * The value associated with this key may be: {@link #RATING_HEART},
          * {@link #RATING_THUMB_UP_DOWN}, or a non-null positive integer expressing a maximum
@@ -461,8 +458,6 @@ public class RemoteControlClient
          */
         public final static int LONG_KEY_RATING_TYPE = 101;
         /**
-         * @hide
-         * CANDIDATE FOR PUBLIC API
          * The metadata key for the content's average rating, not the user's rating.
          * The value associated with this key may be: an integer value between 0 and 100,
          * or {@link #RATING_NOT_RATED} to express that no average rating is available.
@@ -472,11 +467,12 @@ public class RemoteControlClient
          * <p></p>
          * When the rating type is:
          * <ul>
-         * <li>{@link #RATING_HEART}, a rating of 50 to 100 means "heart selected",</li>
-         * <li>{@link #RATING_THUMB_UP_DOWN}, a rating of 0 to 49 means "thumb down", 50 means
-         *     both "thumb up" and "thumb down" selected, 51 to 100 means "thumb up"</li>
+         * <li>{@link #RATING_HEART}, a rating of 51 to 100 means "heart selected",</li>
+         * <li>{@link #RATING_THUMB_UP_DOWN}, a rating of 0 to 50 means "thumb down",
+         *     51 to 100 means "thumb up"</li>
          * <li>a non-null positive integer, the rating value is mapped to the number of stars, e.g.
-         *     with a maximum of 5 stars, a rating of 21 to 40 maps to 2 stars.</li>
+         *     with a maximum of 5 stars, a rating of 0 maps to 0 stars, 1 to 20 maps to 1 star,
+         *     21 to 40 maps to 2 stars, etc.</li>
          * </ul>
          * @see #LONG_KEY_RATING_BY_USER
          */
@@ -489,34 +485,29 @@ public class RemoteControlClient
          */
         public final static int KEY_EDITABLE_MASK = 0x1FFFFFFF;
         /**
-         * @hide
-         * CANDIDATE FOR PUBLIC API
-         * The metadata key for the content's rating by the user.
+         * The metadata key for the content's user rating.
          * The value associated with this key may be: an integer value between 0 and 100,
          * or {@link #RATING_NOT_RATED} to express that the user hasn't rated this content.
          * Rules for the interpretation of the rating value according to the rating style are
-         * the same as for {@link #LONG_KEY_RATING_BY_OTHERS}
+         * the same as for {@link #LONG_KEY_RATING_BY_OTHERS}.
+         * This key can be flagged as "editable" (with {@link #addEditableKey(int)}) to enable
+         * receiving user rating values through the
+         * {@link android.media.RemoteControlClient.OnMetadataUpdateListener} interface.
          */
         public final static int LONG_KEY_RATING_BY_USER = 0x10000001;
 
         /**
-         * @hide
-         * CANDIDATE FOR PUBLIC API
          * A rating style with a single degree of rating, "heart" vs "no heart". Can be used to
          * indicate the content referred to is a favorite (or not).
          * @see #LONG_KEY_RATING_TYPE
          */
         public final static long RATING_HEART = -1;
         /**
-         * @hide
-         * CANDIDATE FOR PUBLIC API
          * A rating style for "thumb up" vs "thumb down".
          * @see #LONG_KEY_RATING_TYPE
          */
         public final static long RATING_THUMB_UP_DOWN = -2;
         /**
-         * @hide
-         * CANDIDATE FOR PUBLIC API
          * A rating value indicating no rating is available.
          * @see #LONG_KEY_RATING_BY_OTHERS
          * @see #LONG_KEY_RATING_BY_USER
@@ -573,7 +564,9 @@ public class RemoteControlClient
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_DISC_NUMBER},
          *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_DURATION} (with a value
          *      expressed in milliseconds),
-         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_YEAR}.
+         *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_YEAR},
+         *      {@link #LONG_KEY_RATING_BY_OTHERS}, {@link #LONG_KEY_RATING_BY_USER},
+         *      {@link #LONG_KEY_RATING_TYPE}.
          * @param value The long value for the given key
          * @return Returns a reference to the same MetadataEditor object, so you can chain put
          *      calls together.
@@ -620,8 +613,9 @@ public class RemoteControlClient
         /**
          * Clears all the metadata that has been set since the MetadataEditor instance was
          *     created with {@link RemoteControlClient#editMetadata(boolean)}.
+         * Note that clearing the metadata doesn't reset the editable keys
+         * (use {@link #clearEditableKeys()} instead).
          */
-        // TODO add in javadoc that this doesn't call clearEditableKeys()
         public synchronized void clear() {
             if (mApplied) {
                 Log.e(TAG, "Can't clear a previously applied MetadataEditor");
@@ -632,8 +626,11 @@ public class RemoteControlClient
         }
 
         /**
-         * @hide
-         * CANDIDATE FOR PUBLIC API
+         * Flag the given key as being editable.
+         * This will declare the metadata field as eligible to be updated, with new values
+         * received through the {@link RemoteControlClient.OnMetadataUpdateListener} interface.
+         * @param key the type of metadata that can be edited. The supported key is
+         *     {@link #LONG_KEY_RATING_BY_USER}.
          */
         public synchronized void addEditableKey(int key) {
             if (mApplied) {
@@ -651,8 +648,7 @@ public class RemoteControlClient
         }
 
         /**
-         * @hide
-         * CANDIDATE FOR PUBLIC API
+         * Causes all metadata fields to be read-only.
          */
         public synchronized void clearEditableKeys() {
             if (mApplied) {
@@ -869,7 +865,8 @@ public class RemoteControlClient
      *      {@link #FLAG_KEY_MEDIA_STOP},
      *      {@link #FLAG_KEY_MEDIA_FAST_FORWARD},
      *      {@link #FLAG_KEY_MEDIA_NEXT},
-     *      {@link #FLAG_KEY_MEDIA_POSITION_UPDATE}
+     *      {@link #FLAG_KEY_MEDIA_POSITION_UPDATE},
+     *      {@link #FLAG_KEY_MEDIA_RATING}.
      */
     public void setTransportControlFlags(int transportControlFlags) {
         synchronized(mCacheLock) {
@@ -882,36 +879,39 @@ public class RemoteControlClient
     }
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
-     * TODO ADD DESCRIPTION
+     * Interface definition for a callback to be invoked when one of the metadata values has
+     * been updated.
      */
     public interface OnMetadataUpdateListener  {
         /**
-         * TODO ADD DESCRIPTION
-         * @param key
-         * @param newValue
+         * Called on the implementer to notify that the metadata field for the given key has
+         * been updated to the new value of type <code>long</long>.
+         * @param key the identifier of the updated metadata field of type <code>long</long>.
+         * @param newValue the new <code>long</long> value for the key
          */
         void onMetadataUpdateLong(int key, long newValue);
         /**
-         * TODO ADD DESCRIPTION
-         * @param key
-         * @param newValue
+         * Called on the implementer to notify that the metadata field for the given key has
+         * been updated to the new <code>String</long>.
+         * @param key the identifier of the updated metadata field of type <code>String</long>.
+         * @param newValue the new <code>String</long> value for the key
          */
         void onMetadataUpdateString(int key, String newValue);
         /**
-         * TODO ADD DESCRIPTION
-         * @param key
-         * @param newValue
+         * Called on the implementer to notify that the metadata field for the given key has
+         * been updated to the new {@link android.graphics.Bitmap}.
+         * @param key the identifier of the updated metadata field of type
+         *     {@link android.graphics.Bitmap}.
+         * @param newValue the new {@link android.graphics.Bitmap} for the key
          */
         void onMetadataUpdateBitmap(int key, Bitmap newValue);
     }
 
     /**
-     * @hide
-     * CANDIDATE FOR PUBLIC API
-     * TODO ADD DESCRIPTION
-     * @param l
+     * Sets the listener to be called whenever the metadata is updated.
+     * New metadata values will be received in the same thread as the one in which
+     * RemoteControlClient was created.
+     * @param l the metadata update listener
      */
     public void setMetadataUpdateListener(OnMetadataUpdateListener l) {
         synchronized(mCacheLock) {
