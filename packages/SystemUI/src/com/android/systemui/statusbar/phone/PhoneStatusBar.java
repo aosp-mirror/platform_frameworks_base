@@ -839,7 +839,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
         if (SPEW) Log.d(TAG, "addIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
                 + " icon=" + icon);
-        StatusBarIconView view = new StatusBarIconView(mContext, slot, null, getStatusBarMode());
+        StatusBarIconView view = new StatusBarIconView(mContext, slot, null);
         view.set(icon);
         mStatusIcons.addView(view, viewIndex, new LinearLayout.LayoutParams(mIconSize, mIconSize));
     }
@@ -1855,11 +1855,6 @@ public class PhoneStatusBar extends BaseStatusBar {
             // send updated sysui visibility to window manager
             notifyUiVisibilityChanged(mSystemUiVisibility);
         }
-    }
-
-    @Override
-    protected int getStatusBarMode() {
-        return mStatusBarView.getBarTransitions().getMode();
     }
 
     private int computeBarMode(int oldVis, int newVis, BarTransitions transitions,
