@@ -27,6 +27,7 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 
 import com.android.documentsui.RecentsProvider;
+import com.android.documentsui.RootCursorWrapper;
 
 import libcore.io.IoUtils;
 
@@ -101,9 +102,9 @@ public class DocumentInfo implements Durable {
         out.writeInt(icon);
     }
 
-    public static DocumentInfo fromDirectoryCursor(Uri parent, Cursor cursor) {
+    public static DocumentInfo fromDirectoryCursor(Cursor cursor) {
         final DocumentInfo doc = new DocumentInfo();
-        final String authority = parent.getAuthority();
+        final String authority = getCursorString(cursor, RootCursorWrapper.COLUMN_AUTHORITY);
         final String docId = getCursorString(cursor, Document.COLUMN_DOCUMENT_ID);
         doc.uri = DocumentsContract.buildDocumentUri(authority, docId);
         doc.mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);

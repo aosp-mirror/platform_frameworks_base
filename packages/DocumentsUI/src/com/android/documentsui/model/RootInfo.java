@@ -25,6 +25,8 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.provider.DocumentsContract.Root;
 
+import java.util.Objects;
+
 /**
  * Representation of a {@link Root}.
  */
@@ -55,5 +57,24 @@ public class RootInfo {
 
     public Drawable loadIcon(Context context) {
         return DocumentInfo.loadIcon(context, authority, icon);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof RootInfo) {
+            final RootInfo root = (RootInfo) o;
+            return Objects.equals(authority, root.authority) && Objects.equals(rootId, root.rootId);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(authority, rootId);
+    }
+
+    public String getDirectoryString() {
+        return (summary != null) ? summary : title;
     }
 }

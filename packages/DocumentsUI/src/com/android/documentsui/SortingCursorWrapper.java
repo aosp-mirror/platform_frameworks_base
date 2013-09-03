@@ -54,11 +54,6 @@ public class SortingCursorWrapper extends AbstractCursor {
                 throw new IllegalArgumentException();
         }
 
-        final int mimeTypeIndex = cursor.getColumnIndex(Document.COLUMN_MIME_TYPE);
-        final int displayNameIndex = cursor.getColumnIndex(Document.COLUMN_DISPLAY_NAME);
-        final int lastModifiedIndex = cursor.getColumnIndex(Document.COLUMN_LAST_MODIFIED);
-        final int sizeIndex = cursor.getColumnIndex(Document.COLUMN_SIZE);
-
         cursor.moveToPosition(-1);
         for (int i = 0; i < count; i++) {
             cursor.moveToNext();
@@ -66,8 +61,10 @@ public class SortingCursorWrapper extends AbstractCursor {
 
             switch (sortOrder) {
                 case SORT_ORDER_DISPLAY_NAME:
-                    final String mimeType = cursor.getString(mimeTypeIndex);
-                    final String displayName = cursor.getString(displayNameIndex);
+                    final String mimeType = cursor.getString(
+                            cursor.getColumnIndex(Document.COLUMN_MIME_TYPE));
+                    final String displayName = cursor.getString(
+                            cursor.getColumnIndex(Document.COLUMN_DISPLAY_NAME));
                     if (Document.MIME_TYPE_DIR.equals(mimeType)) {
                         mValueString[i] = '\001' + displayName;
                     } else {
@@ -75,10 +72,11 @@ public class SortingCursorWrapper extends AbstractCursor {
                     }
                     break;
                 case SORT_ORDER_LAST_MODIFIED:
-                    mValueLong[i] = cursor.getLong(lastModifiedIndex);
+                    mValueLong[i] = cursor.getLong(
+                            cursor.getColumnIndex(Document.COLUMN_LAST_MODIFIED));
                     break;
                 case SORT_ORDER_SIZE:
-                    mValueLong[i] = cursor.getLong(sizeIndex);
+                    mValueLong[i] = cursor.getLong(cursor.getColumnIndex(Document.COLUMN_SIZE));
                     break;
             }
         }

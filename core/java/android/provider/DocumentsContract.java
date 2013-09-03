@@ -411,6 +411,15 @@ public final class DocumentsContract {
          * @see Intent#EXTRA_MIME_TYPES
          */
         public static final int FLAG_PROVIDES_IMAGES = 1 << 5;
+
+        /**
+         * Flag indicating that this root can report recently modified
+         * documents.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsContract#buildRecentDocumentsUri(String, String)
+         */
+        public static final int FLAG_SUPPORTS_RECENTS = 1 << 6;
     }
 
     /**
