@@ -50,7 +50,9 @@ import java.util.Map;
  */
 class CallbackProxy extends Handler {
     // Logging tag
-    private static final String LOGTAG = "CallbackProxy";
+    static final String LOGTAG = "WebViewCallback";
+    // Enables API callback tracing
+    private static final boolean TRACE = DebugFlags.TRACE_CALLBACK;
     // Instance of WebViewClient that is the client callback.
     private volatile WebViewClient mWebViewClient;
     // Instance of WebChromeClient for handling all chrome functions.
@@ -258,6 +260,7 @@ class CallbackProxy extends Handler {
         }
         boolean override = false;
         if (mWebViewClient != null) {
+            if (TRACE) Log.d(LOGTAG, "shouldOverrideUrlLoading=" + overrideUrl);
             override = mWebViewClient.shouldOverrideUrlLoading(mWebView.getWebView(),
                     overrideUrl);
         } else {
@@ -307,6 +310,7 @@ class CallbackProxy extends Handler {
                 String startedUrl = msg.getData().getString("url");
                 mWebView.onPageStarted(startedUrl);
                 if (mWebViewClient != null) {
+                    if (TRACE) Log.d(LOGTAG, "onPageStarted=" + startedUrl);
                     mWebViewClient.onPageStarted(mWebView.getWebView(), startedUrl,
                             (Bitmap) msg.obj);
                 }
@@ -316,18 +320,21 @@ class CallbackProxy extends Handler {
                 String finishedUrl = (String) msg.obj;
                 mWebView.onPageFinished(finishedUrl);
                 if (mWebViewClient != null) {
+                    if (TRACE) Log.d(LOGTAG, "onPageFinished=" + finishedUrl);
                     mWebViewClient.onPageFinished(mWebView.getWebView(), finishedUrl);
                 }
                 break;
 
             case RECEIVED_ICON:
                 if (mWebChromeClient != null) {
+                    if (TRACE) Log.d(LOGTAG, "onReceivedIcon");
                     mWebChromeClient.onReceivedIcon(mWebView.getWebView(), (Bitmap) msg.obj);
                 }
                 break;
 
             case RECEIVED_TOUCH_ICON_URL:
                 if (mWebChromeClient != null) {
+                    if (TRACE) Log.d(LOGTAG, "onReceivedTouchIconUrl");
                     mWebChromeClient.onReceivedTouchIconUrl(mWebView.getWebView(),
                             (String) msg.obj, msg.arg1 == 1);
                 }
@@ -335,6 +342,7 @@ class CallbackProxy extends Handler {
 
             case RECEIVED_TITLE:
                 if (mWebChromeClient != null) {
+                    if (TRACE) Log.d(LOGTAG, "onReceivedTitle");
                     mWebChromeClient.onReceivedTitle(mWebView.getWebView(),
                             (String) msg.obj);
                 }
@@ -345,6 +353,7 @@ class CallbackProxy extends Handler {
                     int reasonCode = msg.arg1;
                     final String description  = msg.getData().getString("description");
                     final String failUrl  = msg.getData().getString("failingUrl");
+                    if (TRACE) Log.d(LOGTAG, "onReceivedError=" + failUrl);
                     mWebViewClient.onReceivedError(mWebView.getWebView(), reasonCode,
                             description, failUrl);
                 }
@@ -356,6 +365,7 @@ class CallbackProxy extends Handler {
                 Message dontResend =
                         (Message) msg.getData().getParcelable("dontResend");
                 if (mWebViewClient != null) {
+                    if (TRACE) Log.d(LOGTAG, "onFormResubmission");
                     mWebViewClient.onFormResubmission(mWebView.getWebView(), dontResend,
                             resend);
                 } else {
@@ -379,6 +389,7 @@ class CallbackProxy extends Handler {
                     HttpAuthHandler handler = (HttpAuthHandler) msg.obj;
                     String host = msg.getData().getString("host");
                     String realm = msg.getData().getString("realm");
+                    if (TRACE) Log.d(LOGTAG, "onReceivedHttpAuthRequest");
                     mWebViewClient.onReceivedHttpAuthRequest(mWebView.getWebView(), handler,
                             host, realm);
                 }
@@ -388,6 +399,7 @@ class CallbackProxy extends Handler {
                 if (mWebViewClient != null) {
                     HashMap<String, Object> map =
                         (HashMap<String, Object>) msg.obj;
+                    if (TRACE) Log.d(LOGTAG, "onReceivedSslError");
                     mWebViewClient.onReceivedSslError(mWebView.getWebView(),
                             (SslErrorHandler) map.get("handler"),
                             (SslError) map.get("error"));
@@ -396,6 +408,7 @@ class CallbackProxy extends Handler {
 
             case PROCEEDED_AFTER_SSL_ERROR:
                 if (mWebViewClient != null && mWebViewClient instanceof WebViewClientClassicExt) {
+                    if (TRACE) Log.d(LOGTAG, "onProceededAfterSslError");
                     ((WebViewClientClassicExt) mWebViewClient).onProceededAfterSslError(
                             mWebView.getWebView(),
                             (SslError) msg.obj);
@@ -404,6 +417,7 @@ class CallbackProxy extends Handler {
 
             case CLIENT_CERT_REQUEST:
                 if (mWebViewClient != null  && mWebViewClient instanceof WebViewClientClassicExt) {
+                    if (TRACE) Log.d(LOGTAG, "onReceivedClientCertRequest");
                     HashMap<String, Object> map = (HashMap<String, Object>) msg.obj;
                     ((WebViewClientClassicExt) mWebViewClient).onReceivedClientCertRequest(
                             mWebView.getWebView(),
@@ -418,6 +432,7 @@ class CallbackProxy extends Handler {
                 // changed.
                 synchronized (this) {
                     if (mWebChromeClient != null) {
+                        if (TRACE) Log.d(LOGTAG, "onProgressChanged=" + mLatestProgress);
                         mWebChromeClient.onProgressChanged(mWebView.getWebView(),
                                 mLatestProgress);
                     }
@@ -427,14 +442,18 @@ class CallbackProxy extends Handler {
 
             case UPDATE_VISITED:
                 if (mWebViewClient != null) {
+                    String url = (String) msg.obj;
+                    if (TRACE) Log.d(LOGTAG, "doUpdateVisitedHistory=" + url);
                     mWebViewClient.doUpdateVisitedHistory(mWebView.getWebView(),
-                            (String) msg.obj, msg.arg1 != 0);
+                            url, msg.arg1 != 0);
                 }
                 break;
 
             case LOAD_RESOURCE:
                 if (mWebViewClient != null) {
-                    mWebViewClient.onLoadResource(mWebView.getWebView(), (String) msg.obj);
+                    String url = (String) msg.obj;
+                    if (TRACE) Log.d(LOGTAG, "onLoadResource=" + url);
+                    mWebViewClient.onLoadResource(mWebView.getWebView(), url);
                 }
                 break;
 
@@ -448,6 +467,7 @@ class CallbackProxy extends Handler {
                     String referer = msg.getData().getString("referer");
                     Long contentLength = msg.getData().getLong("contentLength");
 
+                    if (TRACE) Log.d(LOGTAG, "onDownloadStart");
                     if (mDownloadListener instanceof BrowserDownloadListener) {
                         ((BrowserDownloadListener) mDownloadListener).onDownloadStart(url,
                              userAgent, contentDisposition, mimetype, referer, contentLength);
@@ -460,6 +480,7 @@ class CallbackProxy extends Handler {
 
             case CREATE_WINDOW:
                 if (mWebChromeClient != null) {
+                    if (TRACE) Log.d(LOGTAG, "onCreateWindow");
                     if (!mWebChromeClient.onCreateWindow(mWebView.getWebView(),
                                 msg.arg1 == 1, msg.arg2 == 1,
                                 (Message) msg.obj)) {
@@ -473,12 +494,14 @@ class CallbackProxy extends Handler {
 
             case REQUEST_FOCUS:
                 if (mWebChromeClient != null) {
+                    if (TRACE) Log.d(LOGTAG, "onRequestFocus");
                     mWebChromeClient.onRequestFocus(mWebView.getWebView());
                 }
                 break;
 
             case CLOSE_WINDOW:
                 if (mWebChromeClient != null) {
+                    if (TRACE) Log.d(LOGTAG, "onCloseWindow");
                     mWebChromeClient.onCloseWindow(((WebViewClassic) msg.obj).getWebView());
                 }
                 break;
@@ -500,6 +523,7 @@ class CallbackProxy extends Handler {
 
             case ASYNC_KEYEVENTS:
                 if (mWebViewClient != null) {
+                    if (TRACE) Log.d(LOGTAG, "onUnhandledKeyEvent");
                     mWebViewClient.onUnhandledKeyEvent(mWebView.getWebView(),
                             (KeyEvent) msg.obj);
                 }
@@ -521,6 +545,7 @@ class CallbackProxy extends Handler {
                     WebStorage.QuotaUpdater quotaUpdater =
                         (WebStorage.QuotaUpdater) map.get("quotaUpdater");
 
+                    if (TRACE) Log.d(LOGTAG, "onExceededDatabaseQuota");
                     mWebChromeClient.onExceededDatabaseQuota(url,
                             databaseIdentifier, quota, estimatedDatabaseSize,
                             totalQuota, quotaUpdater);
@@ -538,6 +563,7 @@ class CallbackProxy extends Handler {
                     WebStorage.QuotaUpdater quotaUpdater =
                         (WebStorage.QuotaUpdater) map.get("quotaUpdater");
 
+                    if (TRACE) Log.d(LOGTAG, "onReachedMaxAppCacheSize");
                     mWebChromeClient.onReachedMaxAppCacheSize(requiredStorage,
                             quota, quotaUpdater);
                 }
@@ -551,6 +577,7 @@ class CallbackProxy extends Handler {
                     GeolocationPermissions.Callback callback =
                             (GeolocationPermissions.Callback)
                             map.get("callback");
+                    if (TRACE) Log.d(LOGTAG, "onGeolocationPermissionsShowPrompt");
                     mWebChromeClient.onGeolocationPermissionsShowPrompt(origin,
                             callback);
                 }
@@ -558,6 +585,7 @@ class CallbackProxy extends Handler {
 
             case GEOLOCATION_PERMISSIONS_HIDE_PROMPT:
                 if (mWebChromeClient != null) {
+                    if (TRACE) Log.d(LOGTAG, "onGeolocationPermissionsHidePrompt");
                     mWebChromeClient.onGeolocationPermissionsHidePrompt();
                 }
                 break;
@@ -566,6 +594,7 @@ class CallbackProxy extends Handler {
                 if (mWebChromeClient != null) {
                     final JsResultReceiver receiver = (JsResultReceiver) msg.obj;
                     JsDialogHelper helper = new JsDialogHelper(receiver.mJsResult, msg);
+                    if (TRACE) Log.d(LOGTAG, "onJsAlert");
                     if (!helper.invokeCallback(mWebChromeClient, mWebView.getWebView())) {
                         helper.showDialog(mContext);
                     }
@@ -577,6 +606,7 @@ class CallbackProxy extends Handler {
                 if(mWebChromeClient != null) {
                     final JsResultReceiver receiver = (JsResultReceiver) msg.obj;
                     final JsResult res = receiver.mJsResult;
+                    if (TRACE) Log.d(LOGTAG, "onJsTimeout");
                     if (mWebChromeClient.onJsTimeout()) {
                         res.confirm();
                     } else {
@@ -598,6 +628,7 @@ class CallbackProxy extends Handler {
 
             case SCALE_CHANGED:
                 if (mWebViewClient != null) {
+                    if (TRACE) Log.d(LOGTAG, "onScaleChanged");
                     mWebViewClient.onScaleChanged(mWebView.getWebView(), msg.getData()
                             .getFloat("old"), msg.getData().getFloat("new"));
                 }
@@ -624,6 +655,7 @@ class CallbackProxy extends Handler {
                 ConsoleMessage.MessageLevel messageLevel =
                         ConsoleMessage.MessageLevel.values()[msgLevel];
 
+                if (TRACE) Log.d(LOGTAG, "onConsoleMessage");
                 if (!mWebChromeClient.onConsoleMessage(new ConsoleMessage(message, sourceID,
                         lineNumber, messageLevel))) {
                     // If false was returned the user did not provide their own console function so
@@ -654,12 +686,14 @@ class CallbackProxy extends Handler {
 
             case GET_VISITED_HISTORY:
                 if (mWebChromeClient != null) {
+                    if (TRACE) Log.d(LOGTAG, "getVisitedHistory");
                     mWebChromeClient.getVisitedHistory((ValueCallback<String[]>)msg.obj);
                 }
                 break;
 
             case OPEN_FILE_CHOOSER:
                 if (mWebChromeClient != null) {
+                    if (TRACE) Log.d(LOGTAG, "openFileChooser");
                     UploadFileMessageData data = (UploadFileMessageData)msg.obj;
                     mWebChromeClient.openFileChooser(data.getUploadFile(), data.getAcceptType(),
                             data.getCapture());
@@ -668,6 +702,7 @@ class CallbackProxy extends Handler {
 
             case ADD_HISTORY_ITEM:
                 if (mWebBackForwardListClient != null) {
+                    if (TRACE) Log.d(LOGTAG, "onNewHistoryItem");
                     mWebBackForwardListClient.onNewHistoryItem(
                             (WebHistoryItem) msg.obj);
                 }
@@ -693,6 +728,7 @@ class CallbackProxy extends Handler {
                     String realm = msg.getData().getString("realm");
                     String account = msg.getData().getString("account");
                     String args = msg.getData().getString("args");
+                    if (TRACE) Log.d(LOGTAG, "onReceivedLoginRequest");
                     mWebViewClient.onReceivedLoginRequest(mWebView.getWebView(), realm,
                             account, args);
                 }
@@ -910,6 +946,7 @@ class CallbackProxy extends Handler {
             return null;
         }
         // Note: This method does _not_ send a message.
+        if (TRACE) Log.d(LOGTAG, "shouldInterceptRequest=" + url);
         WebResourceResponse r =
                 mWebViewClient.shouldInterceptRequest(mWebView.getWebView(), url);
         if (r == null) {
