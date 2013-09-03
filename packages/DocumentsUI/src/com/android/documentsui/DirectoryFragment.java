@@ -61,7 +61,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.documentsui.DocumentsActivity.DisplayState;
-import com.android.documentsui.model.Document;
+import com.android.documentsui.model.DocumentInfo;
 import com.android.internal.util.Predicate;
 import com.google.android.collect.Lists;
 
@@ -81,7 +81,7 @@ public class DirectoryFragment extends Fragment {
 
     private AbsListView mCurrentView;
 
-    private Predicate<Document> mFilter;
+    private Predicate<DocumentInfo> mFilter;
 
     public static final int TYPE_NORMAL = 1;
     public static final int TYPE_SEARCH = 2;
@@ -106,8 +106,8 @@ public class DirectoryFragment extends Fragment {
     }
 
     public static void showSearch(FragmentManager fm, Uri uri, String query) {
-        final Uri searchUri = DocumentsContract.buildSearchUri(
-                uri.getAuthority(), DocumentsContract.getDocId(uri), query);
+        final Uri searchUri = DocumentsContract.buildSearchDocumentsUri(
+                uri.getAuthority(), DocumentsContract.getDocumentId(uri), query);
         show(fm, TYPE_SEARCH, searchUri);
     }
 
@@ -163,21 +163,21 @@ public class DirectoryFragment extends Fragment {
 
                 Uri contentsUri;
                 if (mType == TYPE_NORMAL) {
-                    contentsUri = DocumentsContract.buildChildrenUri(
-                            uri.getAuthority(), DocumentsContract.getDocId(uri));
+                    contentsUri = DocumentsContract.buildChildDocumentsUri(
+                            uri.getAuthority(), DocumentsContract.getDocumentId(uri));
                 } else if (mType == TYPE_RECENT_OPEN) {
                     contentsUri = RecentsProvider.buildRecentOpen();
                 } else {
                     contentsUri = uri;
                 }
 
-                final Comparator<Document> sortOrder;
+                final Comparator<DocumentInfo> sortOrder;
                 if (state.sortOrder == SORT_ORDER_LAST_MODIFIED || mType == TYPE_RECENT_OPEN) {
-                    sortOrder = new Document.LastModifiedComparator();
+                    sortOrder = new DocumentInfo.LastModifiedComparator();
                 } else if (state.sortOrder == SORT_ORDER_DISPLAY_NAME) {
-                    sortOrder = new Document.DisplayNameComparator();
+                    sortOrder = new DocumentInfo.DisplayNameComparator();
                 } else if (state.sortOrder == SORT_ORDER_SIZE) {
-                    sortOrder = new Document.SizeComparator();
+                    sortOrder = new DocumentInfo.SizeComparator();
                 } else {
                     throw new IllegalArgumentException("Unknown sort order " + state.sortOrder);
                 }
@@ -258,7 +258,7 @@ public class DirectoryFragment extends Fragment {
     private OnItemClickListener mItemListener = new OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            final Document doc = mAdapter.getItem(position);
+            final DocumentInfo doc = mAdapter.getItem(position);
             if (mFilter.apply(doc)) {
                 ((DocumentsActivity) getActivity()).onDocumentPicked(doc);
             }
@@ -291,11 +291,11 @@ public class DirectoryFragment extends Fragment {
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             final SparseBooleanArray checked = mCurrentView.getCheckedItemPositions();
-            final ArrayList<Document> docs = Lists.newArrayList();
+            final ArrayList<DocumentInfo> docs = Lists.newArrayList();
             final int size = checked.size();
             for (int i = 0; i < size; i++) {
                 if (checked.valueAt(i)) {
-                    final Document doc = mAdapter.getItem(checked.keyAt(i));
+                    final DocumentInfo doc = mAdapter.getItem(checked.keyAt(i));
                     docs.add(doc);
                 }
             }
@@ -328,7 +328,7 @@ public class DirectoryFragment extends Fragment {
                 ActionMode mode, int position, long id, boolean checked) {
             if (checked) {
                 // Directories cannot be checked
-                final Document doc = mAdapter.getItem(position);
+                final DocumentInfo doc = mAdapter.getItem(position);
                 if (doc.isDirectory()) {
                     mCurrentView.setItemChecked(position, false);
                 }
@@ -339,9 +339,9 @@ public class DirectoryFragment extends Fragment {
         }
     };
 
-    private void onShareDocuments(List<Document> docs) {
+    private void onShareDocuments(List<DocumentInfo> docs) {
         final ArrayList<Uri> uris = Lists.newArrayList();
-        for (Document doc : docs) {
+        for (DocumentInfo doc : docs) {
             uris.add(doc.uri);
         }
 
@@ -363,12 +363,12 @@ public class DirectoryFragment extends Fragment {
         startActivity(intent);
     }
 
-    private void onDeleteDocuments(List<Document> docs) {
+    private void onDeleteDocuments(List<DocumentInfo> docs) {
         final Context context = getActivity();
         final ContentResolver resolver = context.getContentResolver();
 
         boolean hadTrouble = false;
-        for (Document doc : docs) {
+        for (DocumentInfo doc : docs) {
             if (!doc.isDeleteSupported()) {
                 Log.w(TAG, "Skipping " + doc);
                 hadTrouble = true;
@@ -396,12 +396,12 @@ public class DirectoryFragment extends Fragment {
     }
 
     private class DocumentsAdapter extends BaseAdapter {
-        private List<Document> mDocuments;
+        private List<DocumentInfo> mDocuments;
 
         public DocumentsAdapter() {
         }
 
-        public void swapDocuments(List<Document> documents) {
+        public void swapDocuments(List<DocumentInfo> documents) {
             mDocuments = documents;
 
             if (mDocuments != null && mDocuments.isEmpty()) {
@@ -433,7 +433,7 @@ public class DirectoryFragment extends Fragment {
                 }
             }
 
-            final Document doc = getItem(position);
+            final DocumentInfo doc = getItem(position);
 
             final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
@@ -507,7 +507,7 @@ public class DirectoryFragment extends Fragment {
         }
 
         @Override
-        public Document getItem(int position) {
+        public DocumentInfo getItem(int position) {
             return mDocuments.get(position);
         }
 
@@ -538,8 +538,8 @@ public class DirectoryFragment extends Fragment {
 
             Bitmap result = null;
             try {
-                result = DocumentsContract.getThumbnail(
-                        context.getContentResolver(), uri, mThumbSize);
+                result = DocumentsContract.getDocumentThumbnail(
+                        context.getContentResolver(), uri, mThumbSize, null);
                 if (result != null) {
                     final ThumbnailCache thumbs = DocumentsApplication.getThumbnailsCache(
                             context, mThumbSize);

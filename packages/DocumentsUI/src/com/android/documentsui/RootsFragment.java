@@ -26,7 +26,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
-import android.provider.DocumentsContract.DocumentRoot;
+import android.provider.DocumentsContract.Root;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,7 +40,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.android.documentsui.SectionedListAdapter.SectionAdapter;
-import com.android.documentsui.model.Document;
+import com.android.documentsui.model.DocumentInfo;
+import com.android.documentsui.model.RootInfo;
 
 import java.util.Comparator;
 import java.util.List;
@@ -101,8 +102,8 @@ public class RootsFragment extends Fragment {
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             final DocumentsActivity activity = DocumentsActivity.get(RootsFragment.this);
             final Object item = mAdapter.getItem(position);
-            if (item instanceof DocumentRoot) {
-                activity.onRootPicked((DocumentRoot) item, true);
+            if (item instanceof RootInfo) {
+                activity.onRootPicked((RootInfo) item, true);
             } else if (item instanceof ResolveInfo) {
                 activity.onAppPicked((ResolveInfo) item);
             } else {
@@ -111,7 +112,7 @@ public class RootsFragment extends Fragment {
         }
     };
 
-    private static class RootsAdapter extends ArrayAdapter<DocumentRoot> implements SectionAdapter {
+    private static class RootsAdapter extends ArrayAdapter<RootInfo> implements SectionAdapter {
         private int mHeaderId;
 
         public RootsAdapter(Context context, int headerId) {
@@ -131,15 +132,13 @@ public class RootsFragment extends Fragment {
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
             final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
 
-            final DocumentRoot root = getItem(position);
+            final RootInfo root = getItem(position);
             icon.setImageDrawable(root.loadIcon(context));
             title.setText(root.title);
 
             // Device summary is always available space
             final String summaryText;
-            if ((root.rootType == DocumentRoot.ROOT_TYPE_DEVICE
-                    || root.rootType == DocumentRoot.ROOT_TYPE_DEVICE_ADVANCED)
-                    && root.availableBytes >= 0) {
+            if (root.rootType == Root.ROOT_TYPE_DEVICE && root.availableBytes >= 0) {
                 summaryText = context.getString(R.string.root_available_bytes,
                         Formatter.formatFileSize(context, root.availableBytes));
             } else {
@@ -215,28 +214,27 @@ public class RootsFragment extends Fragment {
         private final RootsAdapter mDevicesAdvanced;
         private final AppsAdapter mApps;
 
-        public SectionedRootsAdapter(Context context, List<DocumentRoot> roots, Intent includeApps) {
+        public SectionedRootsAdapter(Context context, List<RootInfo> roots, Intent includeApps) {
             mServices = new RootsAdapter(context, R.string.root_type_service);
             mShortcuts = new RootsAdapter(context, R.string.root_type_shortcut);
             mDevices = new RootsAdapter(context, R.string.root_type_device);
             mDevicesAdvanced = new RootsAdapter(context, R.string.root_type_device);
             mApps = new AppsAdapter(context);
 
-            for (DocumentRoot root : roots) {
+            for (RootInfo root : roots) {
                 Log.d(TAG, "Found rootType=" + root.rootType);
                 switch (root.rootType) {
-                    case DocumentRoot.ROOT_TYPE_SERVICE:
+                    case Root.ROOT_TYPE_SERVICE:
                         mServices.add(root);
                         break;
-                    case DocumentRoot.ROOT_TYPE_SHORTCUT:
+                    case Root.ROOT_TYPE_SHORTCUT:
                         mShortcuts.add(root);
                         break;
-                    case DocumentRoot.ROOT_TYPE_DEVICE:
-                        mDevices.add(root);
+                    case Root.ROOT_TYPE_DEVICE:
                         mDevicesAdvanced.add(root);
-                        break;
-                    case DocumentRoot.ROOT_TYPE_DEVICE_ADVANCED:
-                        mDevicesAdvanced.add(root);
+                        if ((root.flags & Root.FLAG_ADVANCED) == 0) {
+                            mDevices.add(root);
+                        }
                         break;
                 }
             }
@@ -281,14 +279,14 @@ public class RootsFragment extends Fragment {
         }
     }
 
-    public static class RootComparator implements Comparator<DocumentRoot> {
+    public static class RootComparator implements Comparator<RootInfo> {
         @Override
-        public int compare(DocumentRoot lhs, DocumentRoot rhs) {
-            final int score = Document.compareToIgnoreCaseNullable(lhs.title, rhs.title);
+        public int compare(RootInfo lhs, RootInfo rhs) {
+            final int score = DocumentInfo.compareToIgnoreCaseNullable(lhs.title, rhs.title);
             if (score != 0) {
                 return score;
             } else {
-                return Document.compareToIgnoreCaseNullable(lhs.summary, rhs.summary);
+                return DocumentInfo.compareToIgnoreCaseNullable(lhs.summary, rhs.summary);
             }
         }
     }

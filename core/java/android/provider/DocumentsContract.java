@@ -19,7 +19,6 @@ package android.provider;
 import static android.net.TrafficStats.KB_IN_BYTES;
 import static libcore.io.OsConstants.SEEK_SET;
 
-import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -30,16 +29,13 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcel;
+import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
-import android.os.Parcelable;
 import android.util.Log;
 
-import com.android.internal.util.Preconditions;
 import com.google.android.collect.Lists;
 
 import libcore.io.ErrnoException;
@@ -62,9 +58,12 @@ import java.util.List;
 public final class DocumentsContract {
     private static final String TAG = "Documents";
 
-    // content://com.example/docs/12/
-    // content://com.example/docs/12/children/
-    // content://com.example/docs/12/search/?query=pony
+    // content://com.example/root/
+    // content://com.example/root/sdcard/
+    // content://com.example/root/sdcard/recent/
+    // content://com.example/document/12/
+    // content://com.example/document/12/children/
+    // content://com.example/document/12/search/?query=pony
 
     private DocumentsContract() {
     }
@@ -75,207 +74,69 @@ public final class DocumentsContract {
     /** {@hide} */
     public static final String ACTION_MANAGE_DOCUMENTS = "android.provider.action.MANAGE_DOCUMENTS";
 
-    /** {@hide} */
-    public static final String
-            ACTION_DOCUMENT_ROOT_CHANGED = "android.provider.action.DOCUMENT_ROOT_CHANGED";
-
     /**
-     * Constants for individual documents.
+     * Constants related to a document, including {@link Cursor} columns names
+     * and flags.
+     * <p>
+     * A document can be either an openable file (with a specific MIME type), or
+     * a directory containing additional documents (with the
+     * {@link #MIME_TYPE_DIR} MIME type).
+     * <p>
+     * All columns are <em>read-only</em> to client applications.
      */
-    public final static class Documents {
-        private Documents() {
+    public final static class Document {
+        private Document() {
         }
 
         /**
-         * MIME type of a document which is a directory that may contain additional
-         * documents.
-         */
-        public static final String MIME_TYPE_DIR = "vnd.android.doc/dir";
-
-        /**
-         * Flag indicating that a document is a directory that supports creation of
-         * new files within it.
-         *
-         * @see DocumentColumns#FLAGS
-         */
-        public static final int FLAG_SUPPORTS_CREATE = 1;
-
-        /**
-         * Flag indicating that a document is renamable.
-         *
-         * @see DocumentColumns#FLAGS
-         */
-        public static final int FLAG_SUPPORTS_RENAME = 1 << 1;
-
-        /**
-         * Flag indicating that a document is deletable.
-         *
-         * @see DocumentColumns#FLAGS
-         */
-        public static final int FLAG_SUPPORTS_DELETE = 1 << 2;
-
-        /**
-         * Flag indicating that a document can be represented as a thumbnail.
-         *
-         * @see DocumentColumns#FLAGS
-         */
-        public static final int FLAG_SUPPORTS_THUMBNAIL = 1 << 3;
-
-        /**
-         * Flag indicating that a document is a directory that supports search.
-         *
-         * @see DocumentColumns#FLAGS
-         */
-        public static final int FLAG_SUPPORTS_SEARCH = 1 << 4;
-
-        /**
-         * Flag indicating that a document supports writing.
-         *
-         * @see DocumentColumns#FLAGS
-         */
-        public static final int FLAG_SUPPORTS_WRITE = 1 << 5;
-
-        /**
-         * Flag indicating that a document is a directory that prefers its contents
-         * be shown in a larger format grid. Usually suitable when a directory
-         * contains mostly pictures.
-         *
-         * @see DocumentColumns#FLAGS
-         */
-        public static final int FLAG_PREFERS_GRID = 1 << 6;
-    }
-
-    /**
-     * Extra boolean flag included in a directory {@link Cursor#getExtras()}
-     * indicating that a document provider is still loading data. For example, a
-     * provider has returned some results, but is still waiting on an
-     * outstanding network request.
-     *
-     * @see ContentResolver#notifyChange(Uri, android.database.ContentObserver,
-     *      boolean)
-     */
-    public static final String EXTRA_LOADING = "loading";
-
-    /**
-     * Extra string included in a directory {@link Cursor#getExtras()}
-     * providing an informational message that should be shown to a user. For
-     * example, a provider may wish to indicate that not all documents are
-     * available.
-     */
-    public static final String EXTRA_INFO = "info";
-
-    /**
-     * Extra string included in a directory {@link Cursor#getExtras()} providing
-     * an error message that should be shown to a user. For example, a provider
-     * may wish to indicate that a network error occurred. The user may choose
-     * to retry, resulting in a new query.
-     */
-    public static final String EXTRA_ERROR = "error";
-
-    /** {@hide} */
-    public static final String METHOD_GET_ROOTS = "android:getRoots";
-    /** {@hide} */
-    public static final String METHOD_CREATE_DOCUMENT = "android:createDocument";
-    /** {@hide} */
-    public static final String METHOD_RENAME_DOCUMENT = "android:renameDocument";
-    /** {@hide} */
-    public static final String METHOD_DELETE_DOCUMENT = "android:deleteDocument";
-
-    /** {@hide} */
-    public static final String EXTRA_AUTHORITY = "authority";
-    /** {@hide} */
-    public static final String EXTRA_PACKAGE_NAME = "packageName";
-    /** {@hide} */
-    public static final String EXTRA_URI = "uri";
-    /** {@hide} */
-    public static final String EXTRA_ROOTS = "roots";
-    /** {@hide} */
-    public static final String EXTRA_THUMBNAIL_SIZE = "thumbnail_size";
-
-    private static final String PATH_DOCS = "docs";
-    private static final String PATH_CHILDREN = "children";
-    private static final String PATH_SEARCH = "search";
-
-    private static final String PARAM_QUERY = "query";
-
-    /**
-     * Build Uri representing the given {@link DocumentColumns#DOC_ID} in a
-     * document provider.
-     */
-    public static Uri buildDocumentUri(String authority, String docId) {
-        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
-                .authority(authority).appendPath(PATH_DOCS).appendPath(docId).build();
-    }
-
-    /**
-     * Build Uri representing the contents of the given directory in a document
-     * provider. The given document must be {@link Documents#MIME_TYPE_DIR}.
-     *
-     * @hide
-     */
-    public static Uri buildChildrenUri(String authority, String docId) {
-        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(authority)
-                .appendPath(PATH_DOCS).appendPath(docId).appendPath(PATH_CHILDREN).build();
-    }
-
-    /**
-     * Build Uri representing a search for matching documents under a specific
-     * directory in a document provider. The given document must have
-     * {@link Documents#FLAG_SUPPORTS_SEARCH}.
-     *
-     * @hide
-     */
-    public static Uri buildSearchUri(String authority, String docId, String query) {
-        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(authority)
-                .appendPath(PATH_DOCS).appendPath(docId).appendPath(PATH_SEARCH)
-                .appendQueryParameter(PARAM_QUERY, query).build();
-    }
-
-    /**
-     * Extract the {@link DocumentColumns#DOC_ID} from the given Uri.
-     */
-    public static String getDocId(Uri documentUri) {
-        final List<String> paths = documentUri.getPathSegments();
-        if (paths.size() < 2) {
-            throw new IllegalArgumentException("Not a document: " + documentUri);
-        }
-        if (!PATH_DOCS.equals(paths.get(0))) {
-            throw new IllegalArgumentException("Not a document: " + documentUri);
-        }
-        return paths.get(1);
-    }
-
-    /** {@hide} */
-    public static String getSearchQuery(Uri documentUri) {
-        return documentUri.getQueryParameter(PARAM_QUERY);
-    }
-
-    /**
-     * Standard columns for document queries. Document providers <em>must</em>
-     * support at least these columns when queried.
-     */
-    public interface DocumentColumns extends OpenableColumns {
-        /**
-         * Unique ID for a document. Values <em>must</em> never change once
-         * returned, since they may used for long-term Uri permission grants.
+         * Unique ID of a document. This ID is both provided by and interpreted
+         * by a {@link DocumentsProvider}, and should be treated as an opaque
+         * value by client applications.
+         * <p>
+         * Each document must have a unique ID within a provider, but that
+         * single document may be included as a child of multiple directories.
+         * <p>
+         * A provider must always return durable IDs, since they will be used to
+         * issue long-term Uri permission grants when an application interacts
+         * with {@link Intent#ACTION_OPEN_DOCUMENT} and
+         * {@link Intent#ACTION_CREATE_DOCUMENT}.
          * <p>
          * Type: STRING
          */
-        public static final String DOC_ID = "doc_id";
+        public static final String COLUMN_DOCUMENT_ID = "document_id";
 
         /**
-         * MIME type of a document.
+         * Concrete MIME type of a document. For example, "image/png" or
+         * "application/pdf" for openable files. A document can also be a
+         * directory containing additional documents, which is represented with
+         * the {@link #MIME_TYPE_DIR} MIME type.
          * <p>
          * Type: STRING
          *
-         * @see Documents#MIME_TYPE_DIR
+         * @see #MIME_TYPE_DIR
          */
-        public static final String MIME_TYPE = "mime_type";
+        public static final String COLUMN_MIME_TYPE = "mime_type";
+
+        /**
+         * Display name of a document, used as the primary title displayed to a
+         * user.
+         * <p>
+         * Type: STRING
+         */
+        public static final String COLUMN_DISPLAY_NAME = OpenableColumns.DISPLAY_NAME;
+
+        /**
+         * Summary of a document, which may be shown to a user. The summary may
+         * be {@code null}.
+         * <p>
+         * Type: STRING
+         */
+        public static final String COLUMN_SUMMARY = "summary";
 
         /**
          * Timestamp when a document was last modified, in milliseconds since
-         * January 1, 1970 00:00:00.0 UTC, or {@code null} if unknown. Document
-         * providers can update this field using events from
+         * January 1, 1970 00:00:00.0 UTC, or {@code null} if unknown. A
+         * {@link DocumentsProvider} can update this field using events from
          * {@link OnCloseListener} or other reliable
          * {@link ParcelFileDescriptor} transports.
          * <p>
@@ -283,71 +144,227 @@ public final class DocumentsContract {
          *
          * @see System#currentTimeMillis()
          */
-        public static final String LAST_MODIFIED = "last_modified";
+        public static final String COLUMN_LAST_MODIFIED = "last_modified";
 
         /**
-         * Specific icon resource for a document, or {@code null} to resolve
-         * default using {@link #MIME_TYPE}.
+         * Specific icon resource ID for a document, or {@code null} to use
+         * platform default icon based on {@link #COLUMN_MIME_TYPE}.
          * <p>
          * Type: INTEGER (int)
          */
-        public static final String ICON = "icon";
+        public static final String COLUMN_ICON = "icon";
 
         /**
-         * Summary for a document, or {@code null} to omit.
-         * <p>
-         * Type: STRING
-         */
-        public static final String SUMMARY = "summary";
-
-        /**
-         * Flags that apply to a specific document.
+         * Flags that apply to a document.
          * <p>
          * Type: INTEGER (int)
+         *
+         * @see #FLAG_SUPPORTS_WRITE
+         * @see #FLAG_SUPPORTS_DELETE
+         * @see #FLAG_SUPPORTS_THUMBNAIL
+         * @see #FLAG_DIR_PREFERS_GRID
+         * @see #FLAG_DIR_SUPPORTS_CREATE
+         * @see #FLAG_DIR_SUPPORTS_SEARCH
          */
-        public static final String FLAGS = "flags";
+        public static final String COLUMN_FLAGS = "flags";
+
+        /**
+         * Size of a document, in bytes, or {@code null} if unknown.
+         * <p>
+         * Type: INTEGER (long)
+         */
+        public static final String COLUMN_SIZE = OpenableColumns.SIZE;
+
+        /**
+         * MIME type of a document which is a directory that may contain
+         * additional documents.
+         *
+         * @see #COLUMN_MIME_TYPE
+         */
+        public static final String MIME_TYPE_DIR = "vnd.android.document/directory";
+
+        /**
+         * Flag indicating that a document can be represented as a thumbnail.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsContract#getDocumentThumbnail(ContentResolver, Uri,
+         *      Point, CancellationSignal)
+         * @see DocumentsProvider#openDocumentThumbnail(String, Point,
+         *      android.os.CancellationSignal)
+         */
+        public static final int FLAG_SUPPORTS_THUMBNAIL = 1;
+
+        /**
+         * Flag indicating that a document supports writing.
+         * <p>
+         * When a document is opened with {@link Intent#ACTION_OPEN_DOCUMENT},
+         * the calling application is granted both
+         * {@link Intent#FLAG_GRANT_READ_URI_PERMISSION} and
+         * {@link Intent#FLAG_GRANT_WRITE_URI_PERMISSION}. However, the actual
+         * writability of a document may change over time, for example due to
+         * remote access changes. This flag indicates that a document client can
+         * expect {@link ContentResolver#openOutputStream(Uri)} to succeed.
+         *
+         * @see #COLUMN_FLAGS
+         */
+        public static final int FLAG_SUPPORTS_WRITE = 1 << 1;
+
+        /**
+         * Flag indicating that a document is deletable.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsContract#deleteDocument(ContentResolver, Uri)
+         * @see DocumentsProvider#deleteDocument(String)
+         */
+        public static final int FLAG_SUPPORTS_DELETE = 1 << 2;
+
+        /**
+         * Flag indicating that a document is a directory that supports creation
+         * of new files within it. Only valid when {@link #COLUMN_MIME_TYPE} is
+         * {@link #MIME_TYPE_DIR}.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsContract#createDocument(ContentResolver, Uri, String,
+         *      String)
+         * @see DocumentsProvider#createDocument(String, String, String)
+         */
+        public static final int FLAG_DIR_SUPPORTS_CREATE = 1 << 3;
+
+        /**
+         * Flag indicating that a directory supports search. Only valid when
+         * {@link #COLUMN_MIME_TYPE} is {@link #MIME_TYPE_DIR}.
+         *
+         * @see #COLUMN_FLAGS
+         * @see DocumentsProvider#querySearchDocuments(String, String,
+         *      String[])
+         */
+        public static final int FLAG_DIR_SUPPORTS_SEARCH = 1 << 4;
+
+        /**
+         * Flag indicating that a directory prefers its contents be shown in a
+         * larger format grid. Usually suitable when a directory contains mostly
+         * pictures. Only valid when {@link #COLUMN_MIME_TYPE} is
+         * {@link #MIME_TYPE_DIR}.
+         *
+         * @see #COLUMN_FLAGS
+         */
+        public static final int FLAG_DIR_PREFERS_GRID = 1 << 5;
     }
 
     /**
-     * Metadata about a specific root of documents.
+     * Constants related to a root of documents, including {@link Cursor}
+     * columns names and flags.
+     * <p>
+     * All columns are <em>read-only</em> to client applications.
      */
-    public final static class DocumentRoot implements Parcelable {
+    public final static class Root {
+        private Root() {
+        }
+
         /**
-         * Root that represents a storage service, such as a cloud-based
+         * Unique ID of a root. This ID is both provided by and interpreted by a
+         * {@link DocumentsProvider}, and should be treated as an opaque value
+         * by client applications.
+         * <p>
+         * Type: STRING
+         */
+        public static final String COLUMN_ROOT_ID = "root_id";
+
+        /**
+         * Type of a root, used for clustering when presenting multiple roots to
+         * a user.
+         * <p>
+         * Type: INTEGER (int)
+         *
+         * @see #ROOT_TYPE_SERVICE
+         * @see #ROOT_TYPE_SHORTCUT
+         * @see #ROOT_TYPE_DEVICE
+         */
+        public static final String COLUMN_ROOT_TYPE = "root_type";
+
+        /**
+         * Flags that apply to a root.
+         * <p>
+         * Type: INTEGER (int)
+         *
+         * @see #FLAG_LOCAL_ONLY
+         * @see #FLAG_SUPPORTS_CREATE
+         * @see #FLAG_ADVANCED
+         * @see #FLAG_PROVIDES_AUDIO
+         * @see #FLAG_PROVIDES_IMAGES
+         * @see #FLAG_PROVIDES_VIDEO
+         */
+        public static final String COLUMN_FLAGS = "flags";
+
+        /**
+         * Icon resource ID for a root.
+         * <p>
+         * Type: INTEGER (int)
+         */
+        public static final String COLUMN_ICON = "icon";
+
+        /**
+         * Title for a root, which will be shown to a user.
+         * <p>
+         * Type: STRING
+         */
+        public static final String COLUMN_TITLE = "title";
+
+        /**
+         * Summary for this root, which may be shown to a user. The summary may
+         * be {@code null}.
+         * <p>
+         * Type: STRING
+         */
+        public static final String COLUMN_SUMMARY = "summary";
+
+        /**
+         * Document which is a directory that represents the top directory of
+         * this root.
+         * <p>
+         * Type: STRING
+         *
+         * @see Document#COLUMN_DOCUMENT_ID
+         */
+        public static final String COLUMN_DOCUMENT_ID = "document_id";
+
+        /**
+         * Number of bytes available in this root, or {@code null} if unknown or
+         * unbounded.
+         * <p>
+         * Type: INTEGER (long)
+         */
+        public static final String COLUMN_AVAILABLE_BYTES = "available_bytes";
+
+        /**
+         * Type of root that represents a storage service, such as a cloud-based
          * service.
          *
-         * @see #rootType
+         * @see #COLUMN_ROOT_TYPE
          */
         public static final int ROOT_TYPE_SERVICE = 1;
 
         /**
-         * Root that represents a shortcut to content that may be available
-         * elsewhere through another storage root.
+         * Type of root that represents a shortcut to content that may be
+         * available elsewhere through another storage root.
          *
-         * @see #rootType
+         * @see #COLUMN_ROOT_TYPE
          */
         public static final int ROOT_TYPE_SHORTCUT = 2;
 
         /**
-         * Root that represents a physical storage device.
+         * Type of root that represents a physical storage device.
          *
-         * @see #rootType
+         * @see #COLUMN_ROOT_TYPE
          */
         public static final int ROOT_TYPE_DEVICE = 3;
 
         /**
-         * Root that represents a physical storage device that should only be
-         * displayed to advanced users.
-         *
-         * @see #rootType
-         */
-        public static final int ROOT_TYPE_DEVICE_ADVANCED = 4;
-
-        /**
          * Flag indicating that at least one directory under this root supports
-         * creating content.
+         * creating content. Roots with this flag will be shown when an
+         * application interacts with {@link Intent#ACTION_CREATE_DOCUMENT}.
          *
-         * @see #flags
+         * @see #COLUMN_FLAGS
          */
         public static final int FLAG_SUPPORTS_CREATE = 1;
 
@@ -355,138 +372,201 @@ public final class DocumentsContract {
          * Flag indicating that this root offers content that is strictly local
          * on the device. That is, no network requests are made for the content.
          *
-         * @see #flags
+         * @see #COLUMN_FLAGS
+         * @see Intent#EXTRA_LOCAL_ONLY
          */
         public static final int FLAG_LOCAL_ONLY = 1 << 1;
 
-        /** {@hide} */
-        public String authority;
-
         /**
-         * Root type, use for clustering.
+         * Flag indicating that this root should only be visible to advanced
+         * users.
          *
-         * @see #ROOT_TYPE_SERVICE
-         * @see #ROOT_TYPE_DEVICE
+         * @see #COLUMN_FLAGS
          */
-        public int rootType;
+        public static final int FLAG_ADVANCED = 1 << 2;
 
         /**
-         * Flags for this root.
+         * Flag indicating that a root offers audio documents. When a user is
+         * selecting audio, roots not providing audio may be excluded.
          *
-         * @see #FLAG_LOCAL_ONLY
+         * @see #COLUMN_FLAGS
+         * @see Intent#EXTRA_MIME_TYPES
          */
-        public int flags;
+        public static final int FLAG_PROVIDES_AUDIO = 1 << 3;
 
         /**
-         * Icon resource ID for this root.
-         */
-        public int icon;
-
-        /**
-         * Title for this root.
-         */
-        public String title;
-
-        /**
-         * Summary for this root. May be {@code null}.
-         */
-        public String summary;
-
-        /**
-         * Document which is a directory that represents the top of this root.
-         * Must not be {@code null}.
+         * Flag indicating that a root offers video documents. When a user is
+         * selecting video, roots not providing video may be excluded.
          *
-         * @see DocumentColumns#DOC_ID
+         * @see #COLUMN_FLAGS
+         * @see Intent#EXTRA_MIME_TYPES
          */
-        public String docId;
+        public static final int FLAG_PROVIDES_VIDEO = 1 << 4;
 
         /**
-         * Document which is a directory representing recently modified
-         * documents under this root. This directory should return at most two
-         * dozen documents modified within the last 90 days. May be {@code null}
-         * if this root doesn't support recents.
+         * Flag indicating that a root offers image documents. When a user is
+         * selecting images, roots not providing images may be excluded.
          *
-         * @see DocumentColumns#DOC_ID
+         * @see #COLUMN_FLAGS
+         * @see Intent#EXTRA_MIME_TYPES
          */
-        public String recentDocId;
+        public static final int FLAG_PROVIDES_IMAGES = 1 << 5;
+    }
 
-        /**
-         * Number of free bytes of available in this root, or -1 if unknown or
-         * unbounded.
-         */
-        public long availableBytes;
+    /**
+     * Optional boolean flag included in a directory {@link Cursor#getExtras()}
+     * indicating that a document provider is still loading data. For example, a
+     * provider has returned some results, but is still waiting on an
+     * outstanding network request. The provider must send a content changed
+     * notification when loading is finished.
+     *
+     * @see ContentResolver#notifyChange(Uri, android.database.ContentObserver,
+     *      boolean)
+     */
+    public static final String EXTRA_LOADING = "loading";
 
-        /**
-         * Set of MIME type filters describing the content offered by this root,
-         * or {@code null} to indicate that all MIME types are supported. For
-         * example, a provider only supporting audio and video might set this to
-         * {@code ["audio/*", "video/*"]}.
-         */
-        public String[] mimeTypes;
+    /**
+     * Optional string included in a directory {@link Cursor#getExtras()}
+     * providing an informational message that should be shown to a user. For
+     * example, a provider may wish to indicate that not all documents are
+     * available.
+     */
+    public static final String EXTRA_INFO = "info";
 
-        public DocumentRoot() {
+    /**
+     * Optional string included in a directory {@link Cursor#getExtras()}
+     * providing an error message that should be shown to a user. For example, a
+     * provider may wish to indicate that a network error occurred. The user may
+     * choose to retry, resulting in a new query.
+     */
+    public static final String EXTRA_ERROR = "error";
+
+    /** {@hide} */
+    public static final String METHOD_CREATE_DOCUMENT = "android:createDocument";
+    /** {@hide} */
+    public static final String METHOD_DELETE_DOCUMENT = "android:deleteDocument";
+
+    /** {@hide} */
+    public static final String EXTRA_THUMBNAIL_SIZE = "thumbnail_size";
+
+    private static final String PATH_ROOT = "root";
+    private static final String PATH_RECENT = "recent";
+    private static final String PATH_DOCUMENT = "document";
+    private static final String PATH_CHILDREN = "children";
+    private static final String PATH_SEARCH = "search";
+
+    private static final String PARAM_QUERY = "query";
+
+    /**
+     * Build Uri representing the roots of a document provider. When queried, a
+     * provider will return one or more rows with columns defined by
+     * {@link Root}.
+     *
+     * @see DocumentsProvider#queryRoots(String[])
+     */
+    public static Uri buildRootsUri(String authority) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(authority).appendPath(PATH_ROOT).build();
+    }
+
+    /**
+     * Build Uri representing the recently modified documents of a specific
+     * root. When queried, a provider will return zero or more rows with columns
+     * defined by {@link Document}.
+     *
+     * @see DocumentsProvider#queryRecentDocuments(String, String[])
+     * @see #getRootId(Uri)
+     */
+    public static Uri buildRecentDocumentsUri(String authority, String rootId) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(authority).appendPath(PATH_ROOT).appendPath(rootId)
+                .appendPath(PATH_RECENT).build();
+    }
+
+    /**
+     * Build Uri representing the given {@link Document#COLUMN_DOCUMENT_ID} in a
+     * document provider. When queried, a provider will return a single row with
+     * columns defined by {@link Document}.
+     *
+     * @see DocumentsProvider#queryDocument(String, String[])
+     * @see #getDocumentId(Uri)
+     */
+    public static Uri buildDocumentUri(String authority, String documentId) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(authority).appendPath(PATH_DOCUMENT).appendPath(documentId).build();
+    }
+
+    /**
+     * Build Uri representing the children of the given directory in a document
+     * provider. When queried, a provider will return zero or more rows with
+     * columns defined by {@link Document}.
+     *
+     * @param parentDocumentId the document to return children for, which must
+     *            be a directory with MIME type of
+     *            {@link Document#MIME_TYPE_DIR}.
+     * @see DocumentsProvider#queryChildDocuments(String, String[], String)
+     * @see #getDocumentId(Uri)
+     */
+    public static Uri buildChildDocumentsUri(String authority, String parentDocumentId) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(authority)
+                .appendPath(PATH_DOCUMENT).appendPath(parentDocumentId).appendPath(PATH_CHILDREN)
+                .build();
+    }
+
+    /**
+     * Build Uri representing a search for matching documents under a specific
+     * directory in a document provider. When queried, a provider will return
+     * zero or more rows with columns defined by {@link Document}.
+     *
+     * @param parentDocumentId the document to return children for, which must
+     *            be both a directory with MIME type of
+     *            {@link Document#MIME_TYPE_DIR} and have
+     *            {@link Document#FLAG_DIR_SUPPORTS_SEARCH} set.
+     * @see DocumentsProvider#querySearchDocuments(String, String, String[])
+     * @see #getDocumentId(Uri)
+     * @see #getSearchDocumentsQuery(Uri)
+     */
+    public static Uri buildSearchDocumentsUri(
+            String authority, String parentDocumentId, String query) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(authority)
+                .appendPath(PATH_DOCUMENT).appendPath(parentDocumentId).appendPath(PATH_SEARCH)
+                .appendQueryParameter(PARAM_QUERY, query).build();
+    }
+
+    /**
+     * Extract the {@link Root#COLUMN_ROOT_ID} from the given Uri.
+     */
+    public static String getRootId(Uri rootUri) {
+        final List<String> paths = rootUri.getPathSegments();
+        if (paths.size() < 2) {
+            throw new IllegalArgumentException("Not a root: " + rootUri);
         }
-
-        /** {@hide} */
-        public DocumentRoot(Parcel in) {
-            rootType = in.readInt();
-            flags = in.readInt();
-            icon = in.readInt();
-            title = in.readString();
-            summary = in.readString();
-            docId = in.readString();
-            recentDocId = in.readString();
-            availableBytes = in.readLong();
-            mimeTypes = in.readStringArray();
+        if (!PATH_ROOT.equals(paths.get(0))) {
+            throw new IllegalArgumentException("Not a root: " + rootUri);
         }
+        return paths.get(1);
+    }
 
-        /** {@hide} */
-        public Drawable loadIcon(Context context) {
-            if (icon != 0) {
-                if (authority != null) {
-                    final PackageManager pm = context.getPackageManager();
-                    final ProviderInfo info = pm.resolveContentProvider(authority, 0);
-                    if (info != null) {
-                        return pm.getDrawable(info.packageName, icon, info.applicationInfo);
-                    }
-                } else {
-                    return context.getResources().getDrawable(icon);
-                }
-            }
-            return null;
+    /**
+     * Extract the {@link Document#COLUMN_DOCUMENT_ID} from the given Uri.
+     */
+    public static String getDocumentId(Uri documentUri) {
+        final List<String> paths = documentUri.getPathSegments();
+        if (paths.size() < 2) {
+            throw new IllegalArgumentException("Not a document: " + documentUri);
         }
-
-        @Override
-        public int describeContents() {
-            return 0;
+        if (!PATH_DOCUMENT.equals(paths.get(0))) {
+            throw new IllegalArgumentException("Not a document: " + documentUri);
         }
+        return paths.get(1);
+    }
 
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            Preconditions.checkNotNull(docId);
-
-            dest.writeInt(rootType);
-            dest.writeInt(flags);
-            dest.writeInt(icon);
-            dest.writeString(title);
-            dest.writeString(summary);
-            dest.writeString(docId);
-            dest.writeString(recentDocId);
-            dest.writeLong(availableBytes);
-            dest.writeStringArray(mimeTypes);
-        }
-
-        public static final Creator<DocumentRoot> CREATOR = new Creator<DocumentRoot>() {
-            @Override
-            public DocumentRoot createFromParcel(Parcel in) {
-                return new DocumentRoot(in);
-            }
-
-            @Override
-            public DocumentRoot[] newArray(int size) {
-                return new DocumentRoot[size];
-            }
-        };
+    /**
+     * Extract the search query from a Uri built by
+     * {@link #buildSearchDocumentsUri(String, String, String)}.
+     */
+    public static String getSearchDocumentsQuery(Uri searchDocumentsUri) {
+        return searchDocumentsUri.getQueryParameter(PARAM_QUERY);
     }
 
     /**
@@ -497,6 +577,7 @@ public final class DocumentsContract {
      * {@link Intent#ACTION_CREATE_DOCUMENT}.
      *
      * @see Context#grantUriPermission(String, Uri, int)
+     * @see Context#revokeUriPermission(Uri, int)
      * @see ContentResolver#getIncomingUriPermissionGrants(int, int)
      */
     public static Uri[] getOpenDocuments(Context context) {
@@ -520,20 +601,28 @@ public final class DocumentsContract {
     }
 
     /**
-     * Return thumbnail representing the document at the given URI. Callers are
-     * responsible for their own in-memory caching. Given document must have
-     * {@link Documents#FLAG_SUPPORTS_THUMBNAIL} set.
+     * Return thumbnail representing the document at the given Uri. Callers are
+     * responsible for their own in-memory caching.
      *
+     * @param documentUri document to return thumbnail for, which must have
+     *            {@link Document#FLAG_SUPPORTS_THUMBNAIL} set.
+     * @param size optimal thumbnail size desired. A provider may return a
+     *            thumbnail of a different size, but never more than double the
+     *            requested size.
+     * @param signal signal used to indicate that caller is no longer interested
+     *            in the thumbnail.
      * @return decoded thumbnail, or {@code null} if problem was encountered.
-     * @hide
+     * @see DocumentsProvider#openDocumentThumbnail(String, Point,
+     *      android.os.CancellationSignal)
      */
-    public static Bitmap getThumbnail(ContentResolver resolver, Uri documentUri, Point size) {
+    public static Bitmap getDocumentThumbnail(
+            ContentResolver resolver, Uri documentUri, Point size, CancellationSignal signal) {
         final Bundle openOpts = new Bundle();
         openOpts.putParcelable(DocumentsContract.EXTRA_THUMBNAIL_SIZE, size);
 
         AssetFileDescriptor afd = null;
         try {
-            afd = resolver.openTypedAssetFileDescriptor(documentUri, "image/*", openOpts);
+            afd = resolver.openTypedAssetFileDescriptor(documentUri, "image/*", openOpts, signal);
 
             final FileDescriptor fd = afd.getFileDescriptor();
             final long offset = afd.getStartOffset();
@@ -583,38 +672,26 @@ public final class DocumentsContract {
         }
     }
 
-    /** {@hide} */
-    public static List<DocumentRoot> getDocumentRoots(ContentProviderClient client) {
-        try {
-            final Bundle out = client.call(METHOD_GET_ROOTS, null, null);
-            final List<DocumentRoot> roots = out.getParcelableArrayList(EXTRA_ROOTS);
-            return roots;
-        } catch (Exception e) {
-            Log.w(TAG, "Failed to get roots", e);
-            return null;
-        }
-    }
-
     /**
-     * Create a new document under the given parent document with MIME type and
-     * display name.
+     * Create a new document with given MIME type and display name.
      *
-     * @param docId document with {@link Documents#FLAG_SUPPORTS_CREATE}
+     * @param parentDocumentUri directory with
+     *            {@link Document#FLAG_DIR_SUPPORTS_CREATE}
      * @param mimeType MIME type of new document
      * @param displayName name of new document
      * @return newly created document, or {@code null} if failed
-     * @hide
      */
-    public static String createDocument(
-            ContentProviderClient client, String docId, String mimeType, String displayName) {
+    public static Uri createDocument(ContentResolver resolver, Uri parentDocumentUri,
+            String mimeType, String displayName) {
         final Bundle in = new Bundle();
-        in.putString(DocumentColumns.DOC_ID, docId);
-        in.putString(DocumentColumns.MIME_TYPE, mimeType);
-        in.putString(DocumentColumns.DISPLAY_NAME, displayName);
+        in.putString(Document.COLUMN_DOCUMENT_ID, getDocumentId(parentDocumentUri));
+        in.putString(Document.COLUMN_MIME_TYPE, mimeType);
+        in.putString(Document.COLUMN_DISPLAY_NAME, displayName);
 
         try {
-            final Bundle out = client.call(METHOD_CREATE_DOCUMENT, null, in);
-            return out.getString(DocumentColumns.DOC_ID);
+            final Bundle out = resolver.call(parentDocumentUri, METHOD_CREATE_DOCUMENT, null, in);
+            return buildDocumentUri(
+                    parentDocumentUri.getAuthority(), out.getString(Document.COLUMN_DOCUMENT_ID));
         } catch (Exception e) {
             Log.w(TAG, "Failed to create document", e);
             return null;
@@ -622,40 +699,16 @@ public final class DocumentsContract {
     }
 
     /**
-     * Rename the given document.
-     *
-     * @param docId document with {@link Documents#FLAG_SUPPORTS_RENAME}
-     * @return document which may have changed due to rename, or {@code null} if
-     *         rename failed.
-     * @hide
-     */
-    public static String renameDocument(
-            ContentProviderClient client, String docId, String displayName) {
-        final Bundle in = new Bundle();
-        in.putString(DocumentColumns.DOC_ID, docId);
-        in.putString(DocumentColumns.DISPLAY_NAME, displayName);
-
-        try {
-            final Bundle out = client.call(METHOD_RENAME_DOCUMENT, null, in);
-            return out.getString(DocumentColumns.DOC_ID);
-        } catch (Exception e) {
-            Log.w(TAG, "Failed to rename document", e);
-            return null;
-        }
-    }
-
-    /**
      * Delete the given document.
      *
-     * @param docId document with {@link Documents#FLAG_SUPPORTS_DELETE}
-     * @hide
+     * @param documentUri document with {@link Document#FLAG_SUPPORTS_DELETE}
      */
-    public static boolean deleteDocument(ContentProviderClient client, String docId) {
+    public static boolean deleteDocument(ContentResolver resolver, Uri documentUri) {
         final Bundle in = new Bundle();
-        in.putString(DocumentColumns.DOC_ID, docId);
+        in.putString(Document.COLUMN_DOCUMENT_ID, getDocumentId(documentUri));
 
         try {
-            client.call(METHOD_DELETE_DOCUMENT, null, in);
+            final Bundle out = resolver.call(documentUri, METHOD_DELETE_DOCUMENT, null, in);
             return true;
         } catch (Exception e) {
             Log.w(TAG, "Failed to delete document", e);
