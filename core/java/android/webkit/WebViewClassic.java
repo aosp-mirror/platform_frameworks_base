@@ -7949,6 +7949,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
             // triggered in setNewPicture
             Picture picture = mContext.getApplicationInfo().targetSdkVersion <
                     Build.VERSION_CODES.JELLY_BEAN_MR2 ? capturePicture() : null;
+            if (DebugFlags.TRACE_CALLBACK) Log.d(CallbackProxy.LOGTAG, "onNewPicture");
             mPictureListener.onNewPicture(getWebView(), picture);
         }
     }
@@ -8036,6 +8037,7 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
                 // triggered in pageSwapCallback
                 Picture picture = mContext.getApplicationInfo().targetSdkVersion <
                         Build.VERSION_CODES.JELLY_BEAN_MR2 ? capturePicture() : null;
+                if (DebugFlags.TRACE_CALLBACK) Log.d(CallbackProxy.LOGTAG, "onNewPicture");
                 mPictureListener.onNewPicture(getWebView(), picture);
             }
         }

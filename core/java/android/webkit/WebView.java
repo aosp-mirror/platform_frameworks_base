@@ -242,7 +242,7 @@ public class WebView extends AbsoluteLayout
         implements ViewTreeObserver.OnGlobalFocusChangeListener,
         ViewGroup.OnHierarchyChangeListener, ViewDebug.HierarchyHandler {
 
-    private static final String LOGTAG = "webview_proxy";
+    private static final String LOGTAG = "WebView";
 
     // Throwing an exception for incorrect thread usage if the
     // build target is JB MR2 or newer. Defaults to false, and is
@@ -494,6 +494,7 @@ public class WebView extends AbsoluteLayout
         sEnforceThreadChecking = context.getApplicationInfo().targetSdkVersion >=
                 Build.VERSION_CODES.JELLY_BEAN_MR2;
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "WebView<init>");
 
         ensureProviderCreated();
         mProvider.init(javaScriptInterfaces, privateBrowsing);
@@ -508,6 +509,7 @@ public class WebView extends AbsoluteLayout
      */
     public void setHorizontalScrollbarOverlay(boolean overlay) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "setHorizontalScrollbarOverlay=" + overlay);
         mProvider.setHorizontalScrollbarOverlay(overlay);
     }
 
@@ -518,6 +520,7 @@ public class WebView extends AbsoluteLayout
      */
     public void setVerticalScrollbarOverlay(boolean overlay) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "setVerticalScrollbarOverlay=" + overlay);
         mProvider.setVerticalScrollbarOverlay(overlay);
     }
 
@@ -572,6 +575,7 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public void setCertificate(SslCertificate certificate) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "setCertificate=" + certificate);
         mProvider.setCertificate(certificate);
     }
 
@@ -595,6 +599,7 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public void savePassword(String host, String username, String password) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "savePassword=" + host);
         mProvider.savePassword(host, username, password);
     }
 
@@ -614,6 +619,7 @@ public class WebView extends AbsoluteLayout
     public void setHttpAuthUsernamePassword(String host, String realm,
             String username, String password) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "setHttpAuthUsernamePassword=" + host);
         mProvider.setHttpAuthUsernamePassword(host, realm, username, password);
     }
 
@@ -643,6 +649,7 @@ public class WebView extends AbsoluteLayout
      */
     public void destroy() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "destroy");
         mProvider.destroy();
     }
 
@@ -681,6 +688,7 @@ public class WebView extends AbsoluteLayout
      */
     public void setNetworkAvailable(boolean networkUp) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "setNetworkAvailable=" + networkUp);
         mProvider.setNetworkAvailable(networkUp);
     }
 
@@ -697,6 +705,7 @@ public class WebView extends AbsoluteLayout
      */
     public WebBackForwardList saveState(Bundle outState) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "saveState");
         return mProvider.saveState(outState);
     }
 
@@ -713,6 +722,7 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public boolean savePicture(Bundle b, final File dest) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "savePicture=" + dest.getName());
         return mProvider.savePicture(b, dest);
     }
 
@@ -730,6 +740,7 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public boolean restorePicture(Bundle b, File src) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "restorePicture=" + src.getName());
         return mProvider.restorePicture(b, src);
     }
 
@@ -747,6 +758,7 @@ public class WebView extends AbsoluteLayout
      */
     public WebBackForwardList restoreState(Bundle inState) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "restoreState");
         return mProvider.restoreState(inState);
     }
 
@@ -763,6 +775,7 @@ public class WebView extends AbsoluteLayout
      */
     public void loadUrl(String url, Map<String, String> additionalHttpHeaders) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "loadUrl(extra headers)=" + url);
         mProvider.loadUrl(url, additionalHttpHeaders);
     }
 
@@ -773,6 +786,7 @@ public class WebView extends AbsoluteLayout
      */
     public void loadUrl(String url) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "loadUrl=" + url);
         mProvider.loadUrl(url);
     }
 
@@ -787,6 +801,7 @@ public class WebView extends AbsoluteLayout
      */
     public void postUrl(String url, byte[] postData) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "postUrl=" + url);
         mProvider.postUrl(url, postData);
     }
 
@@ -821,6 +836,7 @@ public class WebView extends AbsoluteLayout
      */
     public void loadData(String data, String mimeType, String encoding) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "loadData");
         mProvider.loadData(data, mimeType, encoding);
     }
 
@@ -853,6 +869,7 @@ public class WebView extends AbsoluteLayout
     public void loadDataWithBaseURL(String baseUrl, String data,
             String mimeType, String encoding, String historyUrl) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "loadDataWithBaseURL=" + baseUrl);
         mProvider.loadDataWithBaseURL(baseUrl, data, mimeType, encoding, historyUrl);
     }
 
@@ -869,6 +886,7 @@ public class WebView extends AbsoluteLayout
      */
     public void evaluateJavascript(String script, ValueCallback<String> resultCallback) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "evaluateJavascript=" + script);
         mProvider.evaluateJavaScript(script, resultCallback);
     }
 
@@ -879,6 +897,7 @@ public class WebView extends AbsoluteLayout
      */
     public void saveWebArchive(String filename) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "saveWebArchive=" + filename);
         mProvider.saveWebArchive(filename);
     }
 
@@ -896,6 +915,7 @@ public class WebView extends AbsoluteLayout
      */
     public void saveWebArchive(String basename, boolean autoname, ValueCallback<String> callback) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "saveWebArchive(auto)=" + basename);
         mProvider.saveWebArchive(basename, autoname, callback);
     }
 
@@ -904,6 +924,7 @@ public class WebView extends AbsoluteLayout
      */
     public void stopLoading() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "stopLoading");
         mProvider.stopLoading();
     }
 
@@ -912,6 +933,7 @@ public class WebView extends AbsoluteLayout
      */
     public void reload() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "reload");
         mProvider.reload();
     }
 
@@ -930,6 +952,7 @@ public class WebView extends AbsoluteLayout
      */
     public void goBack() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "goBack");
         mProvider.goBack();
     }
 
@@ -948,6 +971,7 @@ public class WebView extends AbsoluteLayout
      */
     public void goForward() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "goForward");
         mProvider.goForward();
     }
 
@@ -973,6 +997,7 @@ public class WebView extends AbsoluteLayout
      */
     public void goBackOrForward(int steps) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "goBackOrForwad=" + steps);
         mProvider.goBackOrForward(steps);
     }
 
@@ -992,6 +1017,7 @@ public class WebView extends AbsoluteLayout
      */
     public boolean pageUp(boolean top) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "pageUp");
         return mProvider.pageUp(top);
     }
 
@@ -1003,6 +1029,7 @@ public class WebView extends AbsoluteLayout
      */
     public boolean pageDown(boolean bottom) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "pageDown");
         return mProvider.pageDown(bottom);
     }
 
@@ -1015,6 +1042,7 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public void clearView() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "clearView");
         mProvider.clearView();
     }
 
@@ -1034,6 +1062,7 @@ public class WebView extends AbsoluteLayout
      */
     public Picture capturePicture() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "capturePicture");
         return mProvider.capturePicture();
     }
 
@@ -1062,6 +1091,7 @@ public class WebView extends AbsoluteLayout
     public void exportToPdf(OutputStream out, int width, int height,
             ValueCallback<Boolean> resultCallback) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "exportToPdf");
         mProvider.exportToPdf(out, width, height, resultCallback);
     }
 
@@ -1093,6 +1123,7 @@ public class WebView extends AbsoluteLayout
      */
     public void setInitialScale(int scaleInPercent) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "setInitialScale=" + scaleInPercent);
         mProvider.setInitialScale(scaleInPercent);
     }
 
@@ -1103,6 +1134,7 @@ public class WebView extends AbsoluteLayout
      */
     public void invokeZoomPicker() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "invokeZoomPicker");
         mProvider.invokeZoomPicker();
     }
 
@@ -1126,6 +1158,7 @@ public class WebView extends AbsoluteLayout
      */
     public HitTestResult getHitTestResult() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "getHitTestResult");
         return mProvider.getHitTestResult();
     }
 
@@ -1144,6 +1177,7 @@ public class WebView extends AbsoluteLayout
      */
     public void requestFocusNodeHref(Message hrefMsg) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "requestFocusNodeHref");
         mProvider.requestFocusNodeHref(hrefMsg);
     }
 
@@ -1156,6 +1190,7 @@ public class WebView extends AbsoluteLayout
      */
     public void requestImageRef(Message msg) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "requestImageRef");
         mProvider.requestImageRef(msg);
     }
 
@@ -1260,6 +1295,7 @@ public class WebView extends AbsoluteLayout
      */
     public void pauseTimers() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "pauseTimers");
         mProvider.pauseTimers();
     }
 
@@ -1269,6 +1305,7 @@ public class WebView extends AbsoluteLayout
      */
     public void resumeTimers() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "resumeTimers");
         mProvider.resumeTimers();
     }
 
@@ -1281,6 +1318,7 @@ public class WebView extends AbsoluteLayout
      */
     public void onPause() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "onPause");
         mProvider.onPause();
     }
 
@@ -1289,6 +1327,7 @@ public class WebView extends AbsoluteLayout
      */
     public void onResume() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "onResume");
         mProvider.onResume();
     }
 
@@ -1308,6 +1347,7 @@ public class WebView extends AbsoluteLayout
      */
     public void freeMemory() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "freeMemory");
         mProvider.freeMemory();
     }
 
@@ -1319,6 +1359,7 @@ public class WebView extends AbsoluteLayout
      */
     public void clearCache(boolean includeDiskFiles) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "clearCache");
         mProvider.clearCache(includeDiskFiles);
     }
 
@@ -1330,6 +1371,7 @@ public class WebView extends AbsoluteLayout
      */
     public void clearFormData() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "clearFormData");
         mProvider.clearFormData();
     }
 
@@ -1338,6 +1380,7 @@ public class WebView extends AbsoluteLayout
      */
     public void clearHistory() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "clearHistory");
         mProvider.clearHistory();
     }
 
@@ -1347,6 +1390,7 @@ public class WebView extends AbsoluteLayout
      */
     public void clearSslPreferences() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "clearSslPreferences");
         mProvider.clearSslPreferences();
     }
 
@@ -1388,6 +1432,7 @@ public class WebView extends AbsoluteLayout
      */
     public void findNext(boolean forward) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "findNext");
         mProvider.findNext(forward);
     }
 
@@ -1403,6 +1448,7 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public int findAll(String find) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "findAll");
         StrictMode.noteSlowCall("findAll blocks UI: prefer findAllAsync");
         return mProvider.findAll(find);
     }
@@ -1417,6 +1463,7 @@ public class WebView extends AbsoluteLayout
      */
     public void findAllAsync(String find) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "findAllAsync");
         mProvider.findAllAsync(find);
     }
 
@@ -1437,6 +1484,7 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public boolean showFindDialog(String text, boolean showIme) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "showFindDialog");
         return mProvider.showFindDialog(text, showIme);
     }
 
@@ -1472,6 +1520,7 @@ public class WebView extends AbsoluteLayout
      */
     public void clearMatches() {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "clearMatches");
         mProvider.clearMatches();
     }
 
@@ -1532,6 +1581,7 @@ public class WebView extends AbsoluteLayout
     @Deprecated
     public void setPictureListener(PictureListener listener) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "setPictureListener=" + listener);
         mProvider.setPictureListener(listener);
     }
 
@@ -1581,6 +1631,7 @@ public class WebView extends AbsoluteLayout
      */
     public void addJavascriptInterface(Object object, String name) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "addJavascriptInterface=" + name);
         mProvider.addJavascriptInterface(object, name);
     }
 
@@ -1593,6 +1644,7 @@ public class WebView extends AbsoluteLayout
      */
     public void removeJavascriptInterface(String name) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "removeJavascriptInterface=" + name);
         mProvider.removeJavascriptInterface(name);
     }
 
@@ -1682,6 +1734,7 @@ public class WebView extends AbsoluteLayout
 
     public void flingScroll(int vx, int vy) {
         checkThread();
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "flingScroll");
         mProvider.flingScroll(vx, vy);
     }
 

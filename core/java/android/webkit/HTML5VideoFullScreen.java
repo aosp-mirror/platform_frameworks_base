@@ -19,6 +19,7 @@ package android.webkit;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.media.Metadata;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -293,12 +294,16 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         mLayout.setVisibility(View.VISIBLE);
         WebChromeClient client = webView.getWebChromeClient();
         if (client != null) {
+            if (DebugFlags.TRACE_CALLBACK) Log.d(CallbackProxy.LOGTAG, "onShowCustomView");
             client.onShowCustomView(mLayout, mCallback);
             // Plugins like Flash will draw over the video so hide
             // them while we're playing.
             if (webView.getViewManager() != null)
                 webView.getViewManager().hideAll();
 
+            if (DebugFlags.TRACE_CALLBACK) {
+                Log.d(CallbackProxy.LOGTAG, "getVideoLoadingProgressView");
+            }
             mProgressView = client.getVideoLoadingProgressView();
             if (mProgressView != null) {
                 mLayout.addView(mProgressView, layoutParams);
