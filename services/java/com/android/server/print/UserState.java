@@ -19,8 +19,6 @@ package com.android.server.print;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -68,11 +66,6 @@ final class UserState implements PrintSpoolerCallbacks {
 
     private static final char COMPONENT_NAME_SEPARATOR = ':';
 
-    private static final String SHARED_PREFERENCES_FILE = "shared_prefs";
-
-    private static final String KEY_SYSTEM_PRINT_SERVICES_ENABLED =
-            "KEY_SYSTEM_PRINT_SERVICES_ENABLED";
-
     private final SimpleStringSplitter mStringColonSplitter =
             new SimpleStringSplitter(COMPONENT_NAME_SEPARATOR);
 
@@ -105,7 +98,9 @@ final class UserState implements PrintSpoolerCallbacks {
         mUserId = userId;
         mLock = lock;
         mSpooler = new RemotePrintSpooler(context, userId, this);
-        enableSystemPrintServicesOnce();
+        synchronized (mLock) {
+            enableSystemPrintServicesOnFirstBootLocked();
+        }
     }
 
     @Override
@@ -379,11 +374,23 @@ final class UserState implements PrintSpoolerCallbacks {
         return false;
     }
 
+
     private boolean readEnabledPrintServicesLocked() {
         Set<ComponentName> tempEnabledServiceNameSet = new HashSet<ComponentName>();
+        readPrintServicesFromSettingLocked(Settings.Secure.ENABLED_PRINT_SERVICES,
+                tempEnabledServiceNameSet);
+        if (!tempEnabledServiceNameSet.equals(mEnabledServices)) {
+            mEnabledServices.clear();
+            mEnabledServices.addAll(tempEnabledServiceNameSet);
+            return true;
+        }
+        return false;
+    }
 
+    private void readPrintServicesFromSettingLocked(String setting,
+            Set<ComponentName> outServiceNames) {
         String settingValue = Settings.Secure.getStringForUser(mContext.getContentResolver(),
-                Settings.Secure.ENABLED_PRINT_SERVICES, mUserId);
+                setting, mUserId);
         if (!TextUtils.isEmpty(settingValue)) {
             TextUtils.SimpleStringSplitter splitter = mStringColonSplitter;
             splitter.setString(settingValue);
@@ -394,48 +401,72 @@ final class UserState implements PrintSpoolerCallbacks {
                 }
                 ComponentName componentName = ComponentName.unflattenFromString(string);
                 if (componentName != null) {
-                    tempEnabledServiceNameSet.add(componentName);
+                    outServiceNames.add(componentName);
                 }
             }
         }
-
-        if (!tempEnabledServiceNameSet.equals(mEnabledServices)) {
-            mEnabledServices.clear();
-            mEnabledServices.addAll(tempEnabledServiceNameSet);
-            return true;
-        }
-
-        return false;
     }
 
-    private void enableSystemPrintServicesOnce() {
-        SharedPreferences preferences = mContext.getSharedPreferences(
-                SHARED_PREFERENCES_FILE, Context.MODE_PRIVATE);
-        if (preferences.getInt(KEY_SYSTEM_PRINT_SERVICES_ENABLED, 0) == 0) {
-            Editor editor = preferences.edit();
-            editor.putInt(KEY_SYSTEM_PRINT_SERVICES_ENABLED, 1);
-            editor.commit();
+    private void enableSystemPrintServicesOnFirstBootLocked() {
+        // Load enabled and installed services.
+        readEnabledPrintServicesLocked();
+        readInstalledPrintServicesLocked();
 
-            readInstalledPrintServicesLocked();
+        // Load the system services once enabled on first boot.
+        Set<ComponentName> enabledOnFirstBoot = new HashSet<ComponentName>();
+        readPrintServicesFromSettingLocked(
+                Settings.Secure.ENABLED_ON_FIRST_BOOT_SYSTEM_PRINT_SERVICES,
+                enabledOnFirstBoot);
 
-            StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
 
-            final int serviceCount = mInstalledServices.size();
-            for (int i = 0; i < serviceCount; i++) {
-                ServiceInfo serviceInfo = mInstalledServices.get(i).getResolveInfo().serviceInfo;
-                if ((serviceInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                    ComponentName serviceName = new ComponentName(
-                            serviceInfo.packageName, serviceInfo.name);
+        final int serviceCount = mInstalledServices.size();
+        for (int i = 0; i < serviceCount; i++) {
+            ServiceInfo serviceInfo = mInstalledServices.get(i).getResolveInfo().serviceInfo;
+            // Enable system print services if we never did that and are not enabled.
+            if ((serviceInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                ComponentName serviceName = new ComponentName(
+                        serviceInfo.packageName, serviceInfo.name);
+                if (!mEnabledServices.contains(serviceName)
+                        && !enabledOnFirstBoot.contains(serviceName)) {
                     if (builder.length() > 0) {
                         builder.append(":");
                     }
                     builder.append(serviceName.flattenToString());
                 }
             }
-
-            Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                    Settings.Secure.ENABLED_PRINT_SERVICES, builder.toString(), mUserId);
         }
+
+        // Nothing to be enabled - done.
+        if (builder.length() <= 0) {
+            return;
+        }
+
+        String servicesToEnable = builder.toString();
+
+        // Update the enabled services setting.
+        String enabledServices = Settings.Secure.getStringForUser(
+                mContext.getContentResolver(), Settings.Secure.ENABLED_PRINT_SERVICES, mUserId);
+        if (TextUtils.isEmpty(enabledServices)) {
+            enabledServices = servicesToEnable;
+        } else {
+            enabledServices = enabledServices + ":" + servicesToEnable;
+        }
+        Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                Settings.Secure.ENABLED_PRINT_SERVICES, enabledServices, mUserId);
+
+        // Update the enabled on first boot services setting.
+        String enabledOnFirstBootServices = Settings.Secure.getStringForUser(
+                mContext.getContentResolver(),
+                Settings.Secure.ENABLED_ON_FIRST_BOOT_SYSTEM_PRINT_SERVICES, mUserId);
+        if (TextUtils.isEmpty(enabledOnFirstBootServices)) {
+            enabledOnFirstBootServices = servicesToEnable;
+        } else {
+            enabledOnFirstBootServices = enabledOnFirstBootServices + ":" + enabledServices;
+        }
+        Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                Settings.Secure.ENABLED_ON_FIRST_BOOT_SYSTEM_PRINT_SERVICES,
+                enabledOnFirstBootServices, mUserId);
     }
 
     private void onConfigurationChangedLocked() {
