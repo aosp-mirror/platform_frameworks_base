@@ -22,11 +22,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.media.AudioManager;
+import android.media.MediaFormat;
 import android.media.MediaPlayer;
-import android.media.Metadata;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnInfoListener;
+import android.media.Metadata;
 import android.net.Uri;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -40,7 +41,9 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.MediaController.MediaPlayerControl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
+import java.util.Vector;
 
 /**
  * Displays a video file.  The VideoView class
@@ -194,6 +197,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         setFocusable(true);
         setFocusableInTouchMode(true);
         requestFocus();
+        mPendingSubtitleTracks = 0;
         mCurrentState = STATE_IDLE;
         mTargetState  = STATE_IDLE;
     }
@@ -217,6 +221,47 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
         requestLayout();
         invalidate();
     }
+
+    /**
+     * Adds an external subtitle source file (from the provided input stream.)
+     *
+     * Note that a single external subtitle source may contain multiple or no
+     * supported tracks in it. If the source contained at least one track in
+     * it, one will receive an {@link MediaPlayer#MEDIA_INFO_METADATA_UPDATE}
+     * info message. Otherwise, if reading the source takes excessive time,
+     * one will receive a {@link MediaPlayer#MEDIA_INFO_SUBTITLE_TIMED_OUT}
+     * message. If the source contained no supported track (including an empty
+     * source file or null input stream), one will receive a {@link
+     * MediaPlayer#MEDIA_INFO_UNSUPPORTED_SUBTITLE} message. One can find the
+     * total number of available tracks using {@link MediaPlayer#getTrackInfo()}
+     * to see what additional tracks become available after this method call.
+     *
+     * @param is     input stream containing the subtitle data.  It will be
+     *               closed by the media framework.
+     * @param format the format of the subtitle track(s).  Must contain at least
+     *               the mime type ({@link MediaFormat#KEY_MIME}) and the
+     *               language ({@link MediaFormat#KEY_LANGUAGE}) of the file.
+     *               If the file itself contains the language information,
+     *               specify "und" for the language.
+     */
+    public void addSubtitleSource(InputStream is, MediaFormat format) {
+        // always signal unsupported message for now
+        try {
+            if (is != null) {
+                is.close();
+            }
+        } catch (IOException e) {
+        }
+
+        if (mMediaPlayer == null) {
+            ++mPendingSubtitleTracks;
+        } else {
+            mInfoListener.onInfo(
+                    mMediaPlayer, MediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE, 0);
+        }
+    }
+
+    private int mPendingSubtitleTracks;
 
     public void stopPlayback() {
         if (mMediaPlayer != null) {
@@ -253,7 +298,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             mMediaPlayer.setOnVideoSizeChangedListener(mSizeChangedListener);
             mMediaPlayer.setOnCompletionListener(mCompletionListener);
             mMediaPlayer.setOnErrorListener(mErrorListener);
-            mMediaPlayer.setOnInfoListener(mOnInfoListener);
+            mMediaPlayer.setOnInfoListener(mInfoListener);
             mMediaPlayer.setOnBufferingUpdateListener(mBufferingUpdateListener);
             mCurrentBufferPercentage = 0;
             mMediaPlayer.setDataSource(mContext, mUri, mHeaders);
@@ -261,6 +306,12 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mMediaPlayer.setScreenOnWhilePlaying(true);
             mMediaPlayer.prepareAsync();
+
+            for (int ix = 0; ix < mPendingSubtitleTracks; ix++) {
+                mInfoListener.onInfo(
+                        mMediaPlayer, MediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE, 0);
+            }
+
             // we don't set the target state here either, but preserve the
             // target state that was there before.
             mCurrentState = STATE_PREPARING;
@@ -277,6 +328,8 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             mTargetState = STATE_ERROR;
             mErrorListener.onError(mMediaPlayer, MediaPlayer.MEDIA_ERROR_UNKNOWN, 0);
             return;
+        } finally {
+            mPendingSubtitleTracks = 0;
         }
     }
 
@@ -383,6 +436,16 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             if (mOnCompletionListener != null) {
                 mOnCompletionListener.onCompletion(mMediaPlayer);
             }
+        }
+    };
+
+    private MediaPlayer.OnInfoListener mInfoListener =
+        new MediaPlayer.OnInfoListener() {
+        public  boolean onInfo(MediaPlayer mp, int arg1, int arg2) {
+            if (mOnInfoListener != null) {
+                mOnInfoListener.onInfo(mp, arg1, arg2);
+            }
+            return true;
         }
     };
 
@@ -530,6 +593,7 @@ public class VideoView extends SurfaceView implements MediaPlayerControl {
             mMediaPlayer.reset();
             mMediaPlayer.release();
             mMediaPlayer = null;
+            mPendingSubtitleTracks = 0;
             mCurrentState = STATE_IDLE;
             if (cleartargetstate) {
                 mTargetState  = STATE_IDLE;
