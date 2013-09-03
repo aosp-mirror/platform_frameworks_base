@@ -27162,6 +27162,7 @@ package android.view {
 
   public class ScaleGestureDetector {
     ctor public ScaleGestureDetector(android.content.Context, android.view.ScaleGestureDetector.OnScaleGestureListener);
+    ctor public ScaleGestureDetector(android.content.Context, android.view.ScaleGestureDetector.OnScaleGestureListener, android.os.Handler);
     method public float getCurrentSpan();
     method public float getCurrentSpanX();
     method public float getCurrentSpanY();
