@@ -19040,39 +19040,21 @@ package android.print {
     method public void clear();
     method public int describeContents();
     method public int getColorMode();
-    method public int getDuplexMode();
-    method public int getFittingMode();
-    method public android.print.PrintAttributes.Tray getInputTray();
     method public android.print.PrintAttributes.Margins getMargins();
     method public android.print.PrintAttributes.MediaSize getMediaSize();
-    method public int getOrientation();
-    method public android.print.PrintAttributes.Tray getOutputTray();
     method public android.print.PrintAttributes.Resolution getResolution();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int COLOR_MODE_COLOR = 2; // 0x2
     field public static final int COLOR_MODE_MONOCHROME = 1; // 0x1
     field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int DUPLEX_MODE_LONG_EDGE = 2; // 0x2
-    field public static final int DUPLEX_MODE_NONE = 1; // 0x1
-    field public static final int DUPLEX_MODE_SHORT_EDGE = 4; // 0x4
-    field public static final int FITTING_MODE_NONE = 1; // 0x1
-    field public static final int FITTING_MODE_SCALE_TO_FILL = 4; // 0x4
-    field public static final int FITTING_MODE_SCALE_TO_FIT = 2; // 0x2
-    field public static final int ORIENTATION_LANDSCAPE = 2; // 0x2
-    field public static final int ORIENTATION_PORTRAIT = 1; // 0x1
   }
 
   public static final class PrintAttributes.Builder {
     ctor public PrintAttributes.Builder();
     method public android.print.PrintAttributes create();
     method public android.print.PrintAttributes.Builder setColorMode(int);
-    method public android.print.PrintAttributes.Builder setDuplexMode(int);
-    method public android.print.PrintAttributes.Builder setFittingMode(int);
-    method public android.print.PrintAttributes.Builder setInputTray(android.print.PrintAttributes.Tray);
     method public android.print.PrintAttributes.Builder setMargins(android.print.PrintAttributes.Margins);
     method public android.print.PrintAttributes.Builder setMediaSize(android.print.PrintAttributes.MediaSize);
-    method public android.print.PrintAttributes.Builder setOrientation(int);
-    method public android.print.PrintAttributes.Builder setOutputTray(android.print.PrintAttributes.Tray);
     method public android.print.PrintAttributes.Builder setResolution(android.print.PrintAttributes.Resolution);
   }
 
@@ -19086,65 +19068,63 @@ package android.print {
   }
 
   public static final class PrintAttributes.MediaSize {
+    ctor public PrintAttributes.MediaSize(java.lang.String, java.lang.String, int, int, int);
     ctor public PrintAttributes.MediaSize(java.lang.String, java.lang.String, int, int);
-    method public static android.print.PrintAttributes.MediaSize createMediaSize(android.content.pm.PackageManager, int);
+    method public android.print.PrintAttributes.MediaSize asLandscape();
+    method public android.print.PrintAttributes.MediaSize asPortrait();
     method public int getHeightMils();
     method public java.lang.String getId();
-    method public java.lang.String getLabel();
+    method public java.lang.String getLabel(android.content.pm.PackageManager);
     method public int getWidthMils();
-    field public static final int ISO_A0 = 1; // 0x1
-    field public static final int ISO_A1 = 2; // 0x2
-    field public static final int ISO_A10 = 11; // 0xb
-    field public static final int ISO_A2 = 3; // 0x3
-    field public static final int ISO_A3 = 4; // 0x4
-    field public static final int ISO_A4 = 5; // 0x5
-    field public static final int ISO_A5 = 6; // 0x6
-    field public static final int ISO_A6 = 7; // 0x7
-    field public static final int ISO_A7 = 8; // 0x8
-    field public static final int ISO_A8 = 9; // 0x9
-    field public static final int ISO_A9 = 10; // 0xa
-    field public static final int ISO_B0 = 100; // 0x64
-    field public static final int ISO_B1 = 101; // 0x65
-    field public static final int ISO_B10 = 110; // 0x6e
-    field public static final int ISO_B2 = 102; // 0x66
-    field public static final int ISO_B3 = 103; // 0x67
-    field public static final int ISO_B4 = 104; // 0x68
-    field public static final int ISO_B5 = 105; // 0x69
-    field public static final int ISO_B6 = 106; // 0x6a
-    field public static final int ISO_B7 = 107; // 0x6b
-    field public static final int ISO_B8 = 108; // 0x6c
-    field public static final int ISO_B9 = 109; // 0x6d
-    field public static final int ISO_C0 = 200; // 0xc8
-    field public static final int ISO_C1 = 201; // 0xc9
-    field public static final int ISO_C10 = 210; // 0xd2
-    field public static final int ISO_C2 = 202; // 0xca
-    field public static final int ISO_C3 = 203; // 0xcb
-    field public static final int ISO_C4 = 204; // 0xcc
-    field public static final int ISO_C5 = 205; // 0xcd
-    field public static final int ISO_C6 = 206; // 0xce
-    field public static final int ISO_C7 = 207; // 0xcf
-    field public static final int ISO_C8 = 208; // 0xd0
-    field public static final int ISO_C9 = 209; // 0xd1
-    field public static final int NA_GOVT_LETTER = 301; // 0x12d
-    field public static final int NA_JUNIOR_LEGAL = 303; // 0x12f
-    field public static final int NA_LEDGER = 304; // 0x130
-    field public static final int NA_LEGAL = 302; // 0x12e
-    field public static final int NA_LETTER = 300; // 0x12c
-    field public static final int NA_TBLOID = 305; // 0x131
+    method public boolean isPortrait();
+    field public static final android.print.PrintAttributes.MediaSize ISO_A0;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A1;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A10;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A2;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A3;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A4;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A5;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A6;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A7;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A8;
+    field public static final android.print.PrintAttributes.MediaSize ISO_A9;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B0;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B1;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B10;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B2;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B3;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B4;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B5;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B6;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B7;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B8;
+    field public static final android.print.PrintAttributes.MediaSize ISO_B9;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C0;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C1;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C10;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C2;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C3;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C4;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C5;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C6;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C7;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C8;
+    field public static final android.print.PrintAttributes.MediaSize ISO_C9;
+    field public static final android.print.PrintAttributes.MediaSize NA_GOVT_LETTER;
+    field public static final android.print.PrintAttributes.MediaSize NA_JUNIOR_LEGAL;
+    field public static final android.print.PrintAttributes.MediaSize NA_LEDGER;
+    field public static final android.print.PrintAttributes.MediaSize NA_LEGAL;
+    field public static final android.print.PrintAttributes.MediaSize NA_LETTER;
+    field public static final android.print.PrintAttributes.MediaSize NA_TBLOID;
   }
 
   public static final class PrintAttributes.Resolution {
+    ctor public PrintAttributes.Resolution(java.lang.String, java.lang.String, int, int, int);
     ctor public PrintAttributes.Resolution(java.lang.String, java.lang.String, int, int);
     method public int getHorizontalDpi();
     method public java.lang.String getId();
-    method public java.lang.String getLabel();
+    method public java.lang.String getLabel(android.content.pm.PackageManager);
     method public int getVerticalDpi();
-  }
-
-  public static final class PrintAttributes.Tray {
-    ctor public PrintAttributes.Tray(java.lang.String, java.lang.String);
-    method public java.lang.String getId();
-    method public java.lang.String getLabel();
   }
 
   public abstract class PrintDocumentAdapter {
@@ -19170,34 +19150,22 @@ package android.print {
 
   public final class PrintDocumentInfo implements android.os.Parcelable {
     method public int describeContents();
-    method public int getColorMode();
     method public int getContentType();
     method public long getDataSize();
-    method public int getFittingMode();
-    method public android.print.PrintAttributes.Margins getMargins();
-    method public android.print.PrintAttributes.MediaSize getMediaSize();
     method public java.lang.String getName();
-    method public int getOrientation();
     method public int getPageCount();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CONTENT_TYPE_DOCUMENT = 0; // 0x0
     field public static final int CONTENT_TYPE_PHOTO = 1; // 0x1
     field public static final int CONTENT_TYPE_UNKNOWN = -1; // 0xffffffff
     field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final android.print.PrintAttributes.MediaSize MEDIA_SIZE_UNKNOWN;
     field public static final int PAGE_COUNT_UNKNOWN = -1; // 0xffffffff
   }
 
   public static final class PrintDocumentInfo.Builder {
-    ctor public PrintDocumentInfo.Builder(java.lang.String, android.print.PrintAttributes);
     ctor public PrintDocumentInfo.Builder(java.lang.String);
     method public android.print.PrintDocumentInfo create();
-    method public android.print.PrintDocumentInfo.Builder setColorMode(int);
     method public android.print.PrintDocumentInfo.Builder setContentType(int);
-    method public android.print.PrintDocumentInfo.Builder setFittingMode(int);
-    method public android.print.PrintDocumentInfo.Builder setMargins(android.print.PrintAttributes.Margins);
-    method public android.print.PrintDocumentInfo.Builder setMediaSize(android.print.PrintAttributes.MediaSize);
-    method public android.print.PrintDocumentInfo.Builder setOrientation(int);
     method public android.print.PrintDocumentInfo.Builder setPageCount(int);
   }
 
@@ -19244,13 +19212,8 @@ package android.print {
     method public int describeContents();
     method public int getColorModes();
     method public void getDefaults(android.print.PrintAttributes);
-    method public int getDuplexModes();
-    method public int getFittingModes();
-    method public java.util.List<android.print.PrintAttributes.Tray> getInputTrays();
     method public java.util.List<android.print.PrintAttributes.MediaSize> getMediaSizes();
     method public android.print.PrintAttributes.Margins getMinMargins();
-    method public int getOrientations();
-    method public java.util.List<android.print.PrintAttributes.Tray> getOutputTrays();
     method public java.util.List<android.print.PrintAttributes.Resolution> getResolutions();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
@@ -19258,16 +19221,11 @@ package android.print {
 
   public static final class PrinterCapabilitiesInfo.Builder {
     ctor public PrinterCapabilitiesInfo.Builder(android.print.PrinterId);
-    method public android.print.PrinterCapabilitiesInfo.Builder addInputTray(android.print.PrintAttributes.Tray, boolean);
     method public android.print.PrinterCapabilitiesInfo.Builder addMediaSize(android.print.PrintAttributes.MediaSize, boolean);
-    method public android.print.PrinterCapabilitiesInfo.Builder addOutputTray(android.print.PrintAttributes.Tray, boolean);
     method public android.print.PrinterCapabilitiesInfo.Builder addResolution(android.print.PrintAttributes.Resolution, boolean);
     method public android.print.PrinterCapabilitiesInfo create();
     method public android.print.PrinterCapabilitiesInfo.Builder setColorModes(int, int);
-    method public android.print.PrinterCapabilitiesInfo.Builder setDuplexModes(int, int);
-    method public android.print.PrinterCapabilitiesInfo.Builder setFittingModes(int, int);
     method public android.print.PrinterCapabilitiesInfo.Builder setMinMargins(android.print.PrintAttributes.Margins, android.print.PrintAttributes.Margins);
-    method public android.print.PrinterCapabilitiesInfo.Builder setOrientations(int, int);
   }
 
   public final class PrinterId implements android.os.Parcelable {
@@ -19388,6 +19346,7 @@ package android.printservice {
     ctor public PrinterDiscoverySession();
     method public final void addPrinters(java.util.List<android.print.PrinterInfo>);
     method public final java.util.List<android.print.PrinterInfo> getPrinters();
+    method public final java.util.List<android.print.PrinterId> getTrackedPrinters();
     method public final boolean isDestroyed();
     method public final boolean isPrinterDiscoveryStarted();
     method public abstract void onDestroy();
@@ -19397,7 +19356,6 @@ package android.printservice {
     method public abstract void onStopPrinterStateTracking(android.print.PrinterId);
     method public abstract void onValidatePrinters(java.util.List<android.print.PrinterId>);
     method public final void removePrinters(java.util.List<android.print.PrinterId>);
-    method public final void updatePrinters(java.util.List<android.print.PrinterInfo>);
   }
 
 }
@@ -21279,6 +21237,7 @@ package android.provider {
     field public static final java.lang.String ACTION_NFCSHARING_SETTINGS = "android.settings.NFCSHARING_SETTINGS";
     field public static final java.lang.String ACTION_NFC_PAYMENT_SETTINGS = "android.settings.NFC_PAYMENT_SETTINGS";
     field public static final java.lang.String ACTION_NFC_SETTINGS = "android.settings.NFC_SETTINGS";
+    field public static final java.lang.String ACTION_PRINT_SETTINGS = "android.settings.ACTION_PRINT_SETTINGS";
     field public static final java.lang.String ACTION_PRIVACY_SETTINGS = "android.settings.PRIVACY_SETTINGS";
     field public static final java.lang.String ACTION_QUICK_LAUNCH_SETTINGS = "android.settings.QUICK_LAUNCH_SETTINGS";
     field public static final java.lang.String ACTION_SEARCH_SETTINGS = "android.search.action.SEARCH_SETTINGS";
@@ -27162,6 +27121,7 @@ package android.view {
 
   public class ScaleGestureDetector {
     ctor public ScaleGestureDetector(android.content.Context, android.view.ScaleGestureDetector.OnScaleGestureListener);
+    ctor public ScaleGestureDetector(android.content.Context, android.view.ScaleGestureDetector.OnScaleGestureListener, android.os.Handler);
     method public float getCurrentSpan();
     method public float getCurrentSpanX();
     method public float getCurrentSpanY();

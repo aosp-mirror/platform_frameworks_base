@@ -101,28 +101,6 @@ public abstract class PrintDocumentAdapter {
      * LayoutResultCallback#onLayoutFailed(CharSequence)}, if an error occurred.
      * </p>
      * <p>
-     * When doing a layout you may satisfy some of the constraints in the print
-     * attributes such as applying the appropriate fitting, emitting content in the
-     * requested orientation, using the specified margins, generating content with
-     * the desired color mode, producing output with the given media size. Ideally,
-     * you will satisfy all of these constraints. It is important that if you
-     * satisfy a given constraint, you update the {@link PrintDocumentInfo} that
-     * is returned in the given {@link LayoutResultCallback}. This way the printer
-     * will have more accurate information about the content, thus producing a
-     * better output. For example, assume that your application is printing
-     * an image and the print attributes request landscape and fitting mode scale
-     * to fill. The result of this operation should be the entire media is filled
-     * and the content is rotated ninety degrees. In this case it is beneficial
-     * you do the rotation and select a higher resolution image to utilize
-     * the wider media (the height is now the width), rather to use a lower
-     * resolution image that is later stretched by the printer. If you applied
-     * the rotation you have to update the returned print document info to
-     * reflect that the content is already in landscape by calling
-     * {@link PrintDocumentInfo.Builder#setOrientation(int)} with {@link
-     * PrintAttributes#ORIENTATION_LANDSCAPE}. In this case the printer does not
-     * have to rotate the content.
-     * </p>
-     * <p>
      * <strong>Note:</strong> If the content is large and a layout will be
      * performed, it is a good practice to schedule the work on a dedicated
      * thread and register an observer in the provided {@link

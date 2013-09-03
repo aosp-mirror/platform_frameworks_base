@@ -47,7 +47,7 @@ import java.util.List;
  * PrinterDiscoverySession#addPrinters(List)}. Added printers that disappeared are
  * removed by invoking {@link PrinterDiscoverySession#removePrinters(List)}. Added
  * printers whose properties or capabilities changed are updated through a call to
- * {@link PrinterDiscoverySession#updatePrinters(List)}. The printers added in this
+ * {@link PrinterDiscoverySession#addPrinters(List)}. The printers added in this
  * session can be acquired via {@link #getPrinters()} where the returned printers
  * will be an up-to-date snapshot of the printers that you reported during the
  * session. Printers are <strong>not</strong> persisted across sessions.
@@ -88,6 +88,9 @@ public abstract class PrinterDiscoverySession {
 
     private final ArrayMap<PrinterId, PrinterInfo> mPrinters =
             new ArrayMap<PrinterId, PrinterInfo>();
+
+    private final List<PrinterId> mTrackedPrinters =
+            new ArrayList<PrinterId>();
 
     private ArrayMap<PrinterId, PrinterInfo> mLastSentPrinters;
 
@@ -130,7 +133,6 @@ public abstract class PrinterDiscoverySession {
      *
      * @see #addPrinters(List)
      * @see #removePrinters(List)
-     * @see #updatePrinters(List)
      * @see #isDestroyed()
      */
     public final List<PrinterInfo> getPrinters() {
@@ -142,7 +144,7 @@ public abstract class PrinterDiscoverySession {
     }
 
     /**
-     * Adds discovered printers. Adding an already added printer has no effect.
+     * Adds discovered printers. Adding an already added printer updates it.
      * Removed printers can be added again. You can call this method multiple
      * times during the life of this session. Duplicates will be ignored.
      * <p>
@@ -153,7 +155,6 @@ public abstract class PrinterDiscoverySession {
      * @param printers The printers to add.
      *
      * @see #removePrinters(List)
-     * @see #updatePrinters(List)
      * @see #getPrinters()
      * @see #isDestroyed()
      */
@@ -168,18 +169,21 @@ public abstract class PrinterDiscoverySession {
 
         if (mIsDiscoveryStarted) {
             // If during discovery, add the new printers and send them.
-            List<PrinterInfo> addedPrinters = new ArrayList<PrinterInfo>();
+            List<PrinterInfo> addedPrinters = null;
             final int addedPrinterCount = printers.size();
             for (int i = 0; i < addedPrinterCount; i++) {
                 PrinterInfo addedPrinter = printers.get(i);
-                if (mPrinters.get(addedPrinter.getId()) == null) {
-                    mPrinters.put(addedPrinter.getId(), addedPrinter);
+                PrinterInfo oldPrinter = mPrinters.put(addedPrinter.getId(), addedPrinter);
+                if (oldPrinter == null || !oldPrinter.equals(addedPrinter)) {
+                    if (addedPrinters == null) {
+                        addedPrinters = new ArrayList<PrinterInfo>();
+                    }
                     addedPrinters.add(addedPrinter);
                 }
             }
 
             // Send the added printers, if such.
-            if (!addedPrinters.isEmpty()) {
+            if (addedPrinters != null) {
                 sendAddedPrinters(mObserver, addedPrinters);
             }
         } else {
@@ -232,7 +236,6 @@ public abstract class PrinterDiscoverySession {
      * @param printerIds The ids of the removed printers.
      *
      * @see #addPrinters(List)
-     * @see #updatePrinters(List)
      * @see #getPrinters()
      * @see #isDestroyed()
      */
@@ -295,86 +298,6 @@ public abstract class PrinterDiscoverySession {
         }
     }
 
-    /**
-     * Updates added printers. Updating a printer that was not added or that
-     * was removed has no effect. You can call this method multiple times
-     * during the lifetime of this session.
-     * <p>
-     * <strong>Note: </strong> Calls to this method after the session is
-     * destroyed, that is after the {@link #onDestroy()} callback, will be ignored.
-     * </p>
-     *
-     * @param printers The printers to update.
-     *
-     * @see #addPrinters(List)
-     * @see #removePrinters(List)
-     * @see #getPrinters()
-     * @see #isDestroyed()
-     */
-    public final void updatePrinters(List<PrinterInfo> printers) {
-        PrintService.throwIfNotCalledOnMainThread();
-
-        // If the session is destroyed - nothing do to.
-        if (mIsDestroyed) {
-            Log.w(LOG_TAG, "Not updating printers - session destroyed.");
-            return;
-        }
-
-        if (mIsDiscoveryStarted) {
-            // If during discovery, update existing printers and send them.
-            List<PrinterInfo> updatedPrinters = new ArrayList<PrinterInfo>();
-            final int updatedPrinterCount = printers.size();
-            for (int i = 0; i < updatedPrinterCount; i++) {
-                PrinterInfo updatedPrinter = printers.get(i);
-                PrinterInfo oldPrinter = mPrinters.get(updatedPrinter.getId());
-                if (oldPrinter != null && !oldPrinter.equals(updatedPrinter)) {
-                    mPrinters.put(updatedPrinter.getId(), updatedPrinter);
-                    updatedPrinters.add(updatedPrinter);
-                }
-            }
-
-            // Send the updated printers, if such.
-            if (!updatedPrinters.isEmpty()) {
-                sendUpdatedPrinters(mObserver, updatedPrinters);
-            }
-        } else {
-            // Remember the last sent printers if needed.
-            if (mLastSentPrinters == null) {
-                mLastSentPrinters = new ArrayMap<PrinterId, PrinterInfo>(mPrinters);
-            }
-
-            // Update the printers.
-            final int updatedPrinterCount = printers.size();
-            for (int i = 0; i < updatedPrinterCount; i++) {
-                PrinterInfo updatedPrinter = printers.get(i);
-                PrinterInfo oldPrinter = mPrinters.get(updatedPrinter.getId());
-                if (oldPrinter != null && !oldPrinter.equals(updatedPrinter)) {
-                    mPrinters.put(updatedPrinter.getId(), updatedPrinter);
-                }
-            }
-        }
-    }
-
-    private static void sendUpdatedPrinters(IPrintServiceClient observer,
-            List<PrinterInfo> printers) {
-        try {
-            final int printerCount = printers.size();
-            if (printerCount <= MAX_ITEMS_PER_CALLBACK) {
-                observer.onPrintersUpdated(printers);
-            } else {
-                final int transactionCount = (printerCount / MAX_ITEMS_PER_CALLBACK) + 1;
-                for (int i = 0; i < transactionCount; i++) {
-                    final int start = i * MAX_ITEMS_PER_CALLBACK;
-                    final int end = Math.min(start + MAX_ITEMS_PER_CALLBACK, printerCount);
-                    List<PrinterInfo> subPrinters = printers.subList(start, end);
-                    observer.onPrintersUpdated(subPrinters);
-                }
-            }
-        } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error sending updated printers", re);
-        }
-    }
-
     private void sendOutOfDiscoveryPeriodPrinterChanges() {
         // Noting changed since the last discovery period - nothing to do.
         if (mLastSentPrinters == null || mLastSentPrinters.isEmpty()) {
@@ -382,21 +305,11 @@ public abstract class PrinterDiscoverySession {
             return;
         }
 
+        // Determine the added printers.
         List<PrinterInfo> addedPrinters = null;
-        List<PrinterInfo> updatedPrinters = null;
-        List<PrinterId> removedPrinterIds = null;
-
-        // Determine the added and updated printers.
         for (PrinterInfo printer : mPrinters.values()) {
             PrinterInfo sentPrinter = mLastSentPrinters.get(printer.getId());
-            if (sentPrinter != null) {
-                if (!sentPrinter.equals(printer)) {
-                    if (updatedPrinters == null) {
-                        updatedPrinters = new ArrayList<PrinterInfo>();
-                    }
-                    updatedPrinters.add(printer);
-                }
-            } else {
+            if (sentPrinter == null || !sentPrinter.equals(printer)) {
                 if (addedPrinters == null) {
                     addedPrinters = new ArrayList<PrinterInfo>();
                 }
@@ -409,12 +322,8 @@ public abstract class PrinterDiscoverySession {
             sendAddedPrinters(mObserver, addedPrinters);
         }
 
-        // Send the updated printers, if such.
-        if (updatedPrinters != null) {
-            sendUpdatedPrinters(mObserver, updatedPrinters);
-        }
-
         // Determine the removed printers.
+        List<PrinterId> removedPrinterIds = null;
         for (PrinterInfo sentPrinter : mLastSentPrinters.values()) {
             if (!mPrinters.containsKey(sentPrinter.getId())) {
                 if (removedPrinterIds == null) {
@@ -437,14 +346,15 @@ public abstract class PrinterDiscoverySession {
      * added via calling {@link #addPrinters(List)}. Added printers that disappeared
      * should be removed via calling {@link #removePrinters(List)}. Added printers
      * whose properties or capabilities changed should be updated via calling {@link
-     * #updatePrinters(List)}. You will receive a call to call to {@link
-     * #onStopPrinterDiscovery()} when you should stop printer discovery.
+     * #addPrinters(List)}. You will receive a call to {@link #onStopPrinterDiscovery()}
+     * when you should stop printer discovery.
      * <p>
      * During the lifetime of this session all printers that are known to your print
      * service have to be added. The system does not retain any printers across sessions.
      * However, if you were asked to start and then stop performing printer discovery
      * in this session, then a subsequent discovering should not re-discover already
-     * discovered printers.
+     * discovered printers. You can get the printers reported during this session by
+     * calling {@link #getPrinters()}.
      * </p>
      * <p>
      * <strong>Note: </strong>You are also given a list of printers whose availability
@@ -459,7 +369,6 @@ public abstract class PrinterDiscoverySession {
      * @see #onStopPrinterDiscovery()
      * @see #addPrinters(List)
      * @see #removePrinters(List)
-     * @see #updatePrinters(List)
      * @see #isPrinterDiscoveryStarted()
      */
     public abstract void onStartPrinterDiscovery(List<PrinterId> priorityList);
@@ -476,7 +385,7 @@ public abstract class PrinterDiscoverySession {
      * Callback asking you to validate that the given printers are valid, that
      * is they exist. You are responsible for checking whether these printers
      * exist and for the ones that do exist notify the system via calling
-     * {@link #updatePrinters(List)}.
+     * {@link #addPrinters(List)}.
      * <p>
      * <strong>Note: </strong> You are <strong>not required</strong> to provide
      * the printer capabilities when updating the printers that do exist.
@@ -484,7 +393,6 @@ public abstract class PrinterDiscoverySession {
      *
      * @param printerIds The printers to validate.
      *
-     * @see #updatePrinters(List)
      * @see PrinterInfo.Builder#setCapabilities(PrinterCapabilitiesInfo)
      *      PrinterInfo.Builder.setCapabilities(PrinterCapabilitiesInfo)
      */
@@ -494,7 +402,7 @@ public abstract class PrinterDiscoverySession {
      * Callback asking you to start tracking the state of a printer. Tracking
      * the state means that you should do a best effort to observe the state
      * of this printer and notify the system if that state changes via calling
-     * {@link #updatePrinters(List)}.
+     * {@link #addPrinters(List)}.
      * <p>
      * <strong>Note: </strong> A printer can be initially added without its
      * capabilities to avoid polling printers that the user will not select.
@@ -513,7 +421,6 @@ public abstract class PrinterDiscoverySession {
      * @param printerId The printer to start tracking.
      *
      * @see #onStopPrinterStateTracking(PrinterId)
-     * @see #updatePrinters(List)
      * @see PrinterInfo.Builder#setCapabilities(PrinterCapabilitiesInfo)
      *      PrinterInfo.Builder.setCapabilities(PrinterCapabilitiesInfo)
      */
@@ -529,6 +436,32 @@ public abstract class PrinterDiscoverySession {
      * @see #onStartPrinterStateTracking(PrinterId)
      */
     public abstract void onStopPrinterStateTracking(PrinterId printerId);
+
+    /**
+     * Gets the printers that should be tracked. These are printers that are
+     * important to the user and for which you received a call to {@link
+     * #onStartPrinterStateTracking(PrinterId)} asking you to observer their
+     * state and reporting it to the system via {@link #addPrinters(List)}.
+     * You will receive a call to {@link #onStopPrinterStateTracking(PrinterId)}
+     * if you should stop tracking a printer.
+     * <p>
+     * <strong>Note: </strong> Calls to this method after the session is
+     * destroyed, that is after the {@link #onDestroy()} callback, will be ignored.
+     * </p>
+     *
+     * @return The printers.
+     *
+     * @see #onStartPrinterStateTracking(PrinterId)
+     * @see #onStopPrinterStateTracking(PrinterId)
+     * @see #isDestroyed()
+     */
+    public final List<PrinterId> getTrackedPrinters() {
+        PrintService.throwIfNotCalledOnMainThread();
+        if (mIsDestroyed) {
+            return Collections.emptyList();
+        }
+        return new ArrayList<PrinterId>(mTrackedPrinters);
+    }
 
     /**
      * Notifies you that the session is destroyed. After this callback is invoked
@@ -589,13 +522,16 @@ public abstract class PrinterDiscoverySession {
     }
 
     void startPrinterStateTracking(PrinterId printerId) {
-        if (!mIsDestroyed && mObserver != null) {
+        if (!mIsDestroyed && mObserver != null
+                && !mTrackedPrinters.contains(printerId)) {
+            mTrackedPrinters.add(printerId);
             onStartPrinterStateTracking(printerId);
         }
     }
 
     void stopPrinterStateTracking(PrinterId printerId) {
-        if (!mIsDestroyed && mObserver != null) {
+        if (!mIsDestroyed && mObserver != null
+                && mTrackedPrinters.remove(printerId)) {
             onStopPrinterStateTracking(printerId);
         }
     }

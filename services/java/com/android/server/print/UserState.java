@@ -276,22 +276,6 @@ final class UserState implements PrintSpoolerCallbacks {
         }
     }
 
-    public void onPrintersUpdated(List<PrinterInfo> printers) {
-        synchronized (mLock) {
-            throwIfDestroyedLocked();
-            // No services - nothing to do.
-            if (mActiveServices.isEmpty()) {
-                return;
-            }
-            // No session - nothing to do.
-            if (mPrinterDiscoverySession == null) {
-                return;
-            }
-            // Request an updated.
-            mPrinterDiscoverySession.onPrintersUpdatedLocked(printers);
-        }
-    }
-
     public void updateIfNeededLocked() {
         throwIfDestroyedLocked();
         if (readConfigurationLocked()) {
@@ -746,8 +730,8 @@ final class UserState implements PrintSpoolerCallbacks {
             final int addedPrinterCount = printers.size();
             for (int i = 0; i < addedPrinterCount; i++) {
                 PrinterInfo printer = printers.get(i);
-                if (!mPrinters.containsKey(printer.getId())) {
-                    mPrinters.put(printer.getId(), printer);
+                PrinterInfo oldPrinter = mPrinters.put(printer.getId(), printer);
+                if (oldPrinter == null || !oldPrinter.equals(printer)) {
                     if (addedPrinters == null) {
                         addedPrinters = new ArrayList<PrinterInfo>();
                     }
@@ -782,32 +766,6 @@ final class UserState implements PrintSpoolerCallbacks {
             if (removedPrinterIds != null) {
                 mHandler.obtainMessage(SessionHandler.MSG_DISPATCH_PRINTERS_REMOVED,
                         removedPrinterIds).sendToTarget();
-            }
-        }
-
-        public void onPrintersUpdatedLocked(List<PrinterInfo> printers) {
-            if (DEBUG) {
-                Log.i(LOG_TAG, "onPrintersUpdatedLocked()");
-            }
-            if (mIsDestroyed) {
-                Log.w(LOG_TAG, "Not updating printers - session destroyed");
-                return;
-            }
-            List<PrinterInfo> updatedPrinters = null;
-            final int updatedPrinterCount = printers.size();
-            for (int i = 0; i < updatedPrinterCount; i++) {
-                PrinterInfo updatedPrinter = printers.get(i);
-                if (mPrinters.containsKey(updatedPrinter.getId())) {
-                    mPrinters.put(updatedPrinter.getId(), updatedPrinter);
-                    if (updatedPrinters == null) {
-                        updatedPrinters = new ArrayList<PrinterInfo>();
-                    }
-                    updatedPrinters.add(updatedPrinter);
-                }
-            }
-            if (updatedPrinters != null) {
-                mHandler.obtainMessage(SessionHandler.MSG_DISPATCH_PRINTERS_UPDATED,
-                        updatedPrinters).sendToTarget();
             }
         }
 
@@ -870,15 +828,6 @@ final class UserState implements PrintSpoolerCallbacks {
             for (int i = 0; i < observerCount; i++) {
                 IPrinterDiscoveryObserver observer = mDiscoveryObservers.getBroadcastItem(i);
                 handlePrintersRemoved(observer, removedPrinterIds);
-            }
-            mDiscoveryObservers.finishBroadcast();
-        }
-
-        private void handleDispatchPrintersUpdated(List<PrinterInfo> updatedPrinters) {
-            final int observerCount = mDiscoveryObservers.beginBroadcast();
-            for (int i = 0; i < observerCount; i++) {
-                IPrinterDiscoveryObserver observer = mDiscoveryObservers.getBroadcastItem(i);
-                handlePrintersUpdated(observer, updatedPrinters);
             }
             mDiscoveryObservers.finishBroadcast();
         }
@@ -976,43 +925,21 @@ final class UserState implements PrintSpoolerCallbacks {
             }
         }
 
-        private void handlePrintersUpdated(IPrinterDiscoveryObserver observer,
-                List<PrinterInfo> updatedPrinters) {
-            try {
-                final int printerCount = updatedPrinters.size();
-                if (printerCount <= MAX_ITEMS_PER_CALLBACK) {
-                    observer.onPrintersUpdated(updatedPrinters);
-                } else {
-                    // Send the added printers in chunks avoiding the binder transaction limit.
-                    final int transactionCount = (printerCount / MAX_ITEMS_PER_CALLBACK) + 1;
-                    for (int i = 0; i < transactionCount; i++) {
-                        final int start = i * MAX_ITEMS_PER_CALLBACK;
-                        final int end = Math.min(start + MAX_ITEMS_PER_CALLBACK, printerCount);
-                        List<PrinterInfo> subPrinters = updatedPrinters.subList(start, end);
-                        observer.onPrintersUpdated(subPrinters); 
-                    }
-                }
-            } catch (RemoteException re) {
-                Log.e(LOG_TAG, "Error sending updated printers", re);
-            }
-        }
-
         private final class SessionHandler extends Handler {
             public static final int MSG_PRINTERS_ADDED = 1;
             public static final int MSG_PRINTERS_REMOVED = 2;
             public static final int MSG_DISPATCH_PRINTERS_ADDED = 3;
             public static final int MSG_DISPATCH_PRINTERS_REMOVED = 4;
-            public static final int MSG_DISPATCH_PRINTERS_UPDATED = 5;
 
-            public static final int MSG_CREATE_PRINTER_DISCOVERY_SESSION = 6;
-            public static final int MSG_START_PRINTER_DISCOVERY = 7;
-            public static final int MSG_DISPATCH_CREATE_PRINTER_DISCOVERY_SESSION = 8;
-            public static final int MSG_DISPATCH_DESTROY_PRINTER_DISCOVERY_SESSION = 9;
-            public static final int MSG_DISPATCH_START_PRINTER_DISCOVERY = 10;
-            public static final int MSG_DISPATCH_STOP_PRINTER_DISCOVERY = 11;
-            public static final int MSG_VALIDATE_PRINTERS = 12;
-            public static final int MSG_START_PRINTER_STATE_TRACKING = 13;
-            public static final int MSG_STOP_PRINTER_STATE_TRACKING = 14;
+            public static final int MSG_CREATE_PRINTER_DISCOVERY_SESSION = 5;
+            public static final int MSG_START_PRINTER_DISCOVERY = 6;
+            public static final int MSG_DISPATCH_CREATE_PRINTER_DISCOVERY_SESSION = 7;
+            public static final int MSG_DISPATCH_DESTROY_PRINTER_DISCOVERY_SESSION = 8;
+            public static final int MSG_DISPATCH_START_PRINTER_DISCOVERY = 9;
+            public static final int MSG_DISPATCH_STOP_PRINTER_DISCOVERY = 10;
+            public static final int MSG_VALIDATE_PRINTERS = 11;
+            public static final int MSG_START_PRINTER_STATE_TRACKING = 12;
+            public static final int MSG_STOP_PRINTER_STATE_TRACKING = 13;
 
             SessionHandler(Looper looper) {
                 super(looper, null, false);
@@ -1046,11 +973,6 @@ final class UserState implements PrintSpoolerCallbacks {
                     case MSG_DISPATCH_PRINTERS_REMOVED: {
                         List<PrinterId> removedPrinterIds = (List<PrinterId>) message.obj;
                         handleDispatchPrintersRemoved(removedPrinterIds);
-                    } break;
-
-                    case MSG_DISPATCH_PRINTERS_UPDATED: {
-                        List<PrinterInfo> updatedPrinters = (List<PrinterInfo>) message.obj;
-                        handleDispatchPrintersUpdated(updatedPrinters);
                     } break;
 
                     case MSG_CREATE_PRINTER_DISCOVERY_SESSION: {
