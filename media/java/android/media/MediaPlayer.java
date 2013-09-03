@@ -2382,6 +2382,16 @@ public class MediaPlayer
      */
     public static final int MEDIA_INFO_TIMED_TEXT_ERROR = 900;
 
+    /** Subtitle track was not supported by the media framework.
+     * @see android.media.MediaPlayer.OnInfoListener
+     */
+    public static final int MEDIA_INFO_UNSUPPORTED_SUBTITLE = 901;
+
+    /** Reading the subtitle track takes too long.
+     * @see android.media.MediaPlayer.OnInfoListener
+     */
+    public static final int MEDIA_INFO_SUBTITLE_TIMED_OUT = 902;
+
     /**
      * Interface definition of a callback to be invoked to communicate some
      * info and/or warning about the media or its playback.
@@ -2402,6 +2412,8 @@ public class MediaPlayer
          * <li>{@link #MEDIA_INFO_BAD_INTERLEAVING}
          * <li>{@link #MEDIA_INFO_NOT_SEEKABLE}
          * <li>{@link #MEDIA_INFO_METADATA_UPDATE}
+         * <li>{@link #MEDIA_INFO_UNSUPPORTED_SUBTITLE}
+         * <li>{@link #MEDIA_INFO_SUBTITLE_TIMED_OUT}
          * </ul>
          * @param extra an extra code, specific to the info. Typically
          * implementation dependent.
