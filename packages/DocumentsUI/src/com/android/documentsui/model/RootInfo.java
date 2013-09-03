@@ -1,0 +1,72 @@
+/*
+ * Copyright (C) 2013 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.documentsui.model;
+
+import static com.android.documentsui.model.DocumentInfo.getCursorInt;
+import static com.android.documentsui.model.DocumentInfo.getCursorLong;
+import static com.android.documentsui.model.DocumentInfo.getCursorString;
+
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
+import android.database.Cursor;
+import android.graphics.drawable.Drawable;
+import android.provider.DocumentsContract.Root;
+
+/**
+ * Representation of a {@link Root}.
+ */
+public class RootInfo {
+    public String authority;
+    public String rootId;
+    public int rootType;
+    public int flags;
+    public int icon;
+    public String title;
+    public String summary;
+    public String documentId;
+    public long availableBytes;
+
+    public static RootInfo fromRootsCursor(String authority, Cursor cursor) {
+        final RootInfo root = new RootInfo();
+        root.authority = authority;
+        root.rootId = getCursorString(cursor, Root.COLUMN_ROOT_ID);
+        root.rootType = getCursorInt(cursor, Root.COLUMN_ROOT_TYPE);
+        root.flags = getCursorInt(cursor, Root.COLUMN_FLAGS);
+        root.icon = getCursorInt(cursor, Root.COLUMN_ICON);
+        root.title = getCursorString(cursor, Root.COLUMN_TITLE);
+        root.summary = getCursorString(cursor, Root.COLUMN_SUMMARY);
+        root.documentId = getCursorString(cursor, Root.COLUMN_DOCUMENT_ID);
+        root.availableBytes = getCursorLong(cursor, Root.COLUMN_AVAILABLE_BYTES);
+        return root;
+    }
+
+    public Drawable loadIcon(Context context) {
+        if (icon != 0) {
+            if (authority != null) {
+                final PackageManager pm = context.getPackageManager();
+                final ProviderInfo info = pm.resolveContentProvider(authority, 0);
+                if (info != null) {
+                    return pm.getDrawable(info.packageName, icon, info.applicationInfo);
+                }
+            } else {
+                return context.getResources().getDrawable(icon);
+            }
+        }
+        return null;
+    }
+}

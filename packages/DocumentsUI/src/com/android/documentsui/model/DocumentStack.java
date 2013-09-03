@@ -17,11 +17,10 @@
 package com.android.documentsui.model;
 
 import static com.android.documentsui.DocumentsActivity.TAG;
-import static com.android.documentsui.model.Document.asFileNotFoundException;
+import static com.android.documentsui.model.DocumentInfo.asFileNotFoundException;
 
 import android.content.ContentResolver;
 import android.net.Uri;
-import android.provider.DocumentsContract.DocumentRoot;
 import android.util.Log;
 
 import com.android.documentsui.RootsCache;
@@ -33,10 +32,10 @@ import java.io.FileNotFoundException;
 import java.util.LinkedList;
 
 /**
- * Representation of a stack of {@link Document}, usually the result of a
+ * Representation of a stack of {@link DocumentInfo}, usually the result of a
  * user-driven traversal.
  */
-public class DocumentStack extends LinkedList<Document> {
+public class DocumentStack extends LinkedList<DocumentInfo> {
 
     public static String serialize(DocumentStack stack) {
         final JSONArray json = new JSONArray();
@@ -55,7 +54,7 @@ public class DocumentStack extends LinkedList<Document> {
             final JSONArray json = new JSONArray(raw);
             for (int i = 0; i < json.length(); i++) {
                 final Uri uri = Uri.parse(json.getString(i));
-                final Document doc = Document.fromUri(resolver, uri);
+                final DocumentInfo doc = DocumentInfo.fromUri(resolver, uri);
                 stack.add(doc);
             }
         } catch (JSONException e) {
@@ -66,7 +65,7 @@ public class DocumentStack extends LinkedList<Document> {
         return stack;
     }
 
-    public DocumentRoot getRoot(RootsCache roots) {
+    public RootInfo getRoot(RootsCache roots) {
         return roots.findRoot(getLast().uri);
     }
 

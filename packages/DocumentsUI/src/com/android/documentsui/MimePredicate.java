@@ -16,10 +16,10 @@
 
 package com.android.documentsui;
 
-import com.android.documentsui.model.Document;
+import com.android.documentsui.model.DocumentInfo;
 import com.android.internal.util.Predicate;
 
-public class MimePredicate implements Predicate<Document> {
+public class MimePredicate implements Predicate<DocumentInfo> {
     private final String[] mFilters;
 
     public MimePredicate(String[] filters) {
@@ -27,7 +27,7 @@ public class MimePredicate implements Predicate<Document> {
     }
 
     @Override
-    public boolean apply(Document doc) {
+    public boolean apply(DocumentInfo doc) {
         if (doc.isDirectory()) {
             return true;
         }
