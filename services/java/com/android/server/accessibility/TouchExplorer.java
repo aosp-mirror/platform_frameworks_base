@@ -417,9 +417,6 @@ class TouchExplorer implements EventStreamTransformation {
                     mSendTouchInteractionEndDelayed.forceSendAndRemove();
                 }
 
-                // Cache the event until we discern exploration from gesturing.
-                mSendHoverEnterAndMoveDelayed.addEvent(event);
-
                 // If we have the first tap, schedule a long press and break
                 // since we do not want to schedule hover enter because
                 // the delayed callback will kick in before the long click.
@@ -432,11 +429,16 @@ class TouchExplorer implements EventStreamTransformation {
                     break;
                 }
                 if (!mTouchExplorationInProgress) {
-                    // Deliver hover enter with a delay to have a chance
-                    // to detect what the user is trying to do.
-                    final int pointerId = receivedTracker.getPrimaryPointerId();
-                    final int pointerIdBits = (1 << pointerId);
-                    mSendHoverEnterAndMoveDelayed.post(event, true, pointerIdBits, policyFlags);
+                    if (!mSendHoverEnterAndMoveDelayed.isPending()) {
+                        // Deliver hover enter with a delay to have a chance
+                        // to detect what the user is trying to do.
+                        final int pointerId = receivedTracker.getPrimaryPointerId();
+                        final int pointerIdBits = (1 << pointerId);
+                        mSendHoverEnterAndMoveDelayed.post(event, true, pointerIdBits,
+                                policyFlags);
+                    }
+                    // Cache the event until we discern exploration from gesturing.
+                    mSendHoverEnterAndMoveDelayed.addEvent(event);
                 }
             } break;
             case MotionEvent.ACTION_POINTER_DOWN: {
@@ -1719,7 +1721,7 @@ class TouchExplorer implements EventStreamTransformation {
                 } break;
             }
             if (DEBUG) {
-                Slog.i(LOG_TAG_RECEIVED_POINTER_TRACKER, "Received pointer: " + toString());
+                Slog.i(LOG_TAG_RECEIVED_POINTER_TRACKER, "Received pointer:\n" + toString());
             }
         }
 
@@ -1777,7 +1779,7 @@ class TouchExplorer implements EventStreamTransformation {
          */
         public int getPrimaryPointerId() {
             if (mPrimaryPointerId == INVALID_POINTER_ID) {
-                mPrimaryPointerId = findPrimaryPointer();
+                mPrimaryPointerId = findPrimaryPointerId();
             }
             return mPrimaryPointerId;
         }
@@ -1861,17 +1863,21 @@ class TouchExplorer implements EventStreamTransformation {
         }
 
         /**
-         * @return The primary pointer.
+         * @return The primary pointer id.
          */
-        private int findPrimaryPointer() {
+        private int findPrimaryPointerId() {
             int primaryPointerId = INVALID_POINTER_ID;
             long minDownTime = Long.MAX_VALUE;
+
             // Find the pointer that went down first.
-            for (int i = 0, count = mReceivedPointerDownTime.length; i < count; i++) {
-                final long downPointerTime = mReceivedPointerDownTime[i];
+            int pointerIdBits = mReceivedPointersDown;
+            while (pointerIdBits > 0) {
+                final int pointerId = Integer.numberOfTrailingZeros(pointerIdBits);
+                pointerIdBits &= ~(1 << pointerId);
+                final long downPointerTime = mReceivedPointerDownTime[pointerId];
                 if (downPointerTime < minDownTime) {
                     minDownTime = downPointerTime;
-                    primaryPointerId = i;
+                    primaryPointerId = pointerId;
                 }
             }
             return primaryPointerId;
