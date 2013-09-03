@@ -50,6 +50,8 @@ public class RootsCache {
     // TODO: cache roots in local provider to avoid spinning up backends
     // TODO: root updates should trigger UI refresh
 
+    private static final boolean RECENTS_ENABLED = false;
+
     private final Context mContext;
 
     public List<RootInfo> mRoots = Lists.newArrayList();
@@ -68,7 +70,7 @@ public class RootsCache {
     public void update() {
         mRoots.clear();
 
-        {
+        if (RECENTS_ENABLED) {
             // Create special root for recents
             final RootInfo root = new RootInfo();
             root.rootType = Root.ROOT_TYPE_SHORTCUT;

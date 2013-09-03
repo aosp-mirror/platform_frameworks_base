@@ -16,54 +16,20 @@
 
 package com.android.documentsui.model;
 
-import static com.android.documentsui.DocumentsActivity.TAG;
-import static com.android.documentsui.model.DocumentInfo.asFileNotFoundException;
-
-import android.content.ContentResolver;
-import android.net.Uri;
-import android.util.Log;
-
 import com.android.documentsui.RootsCache;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import java.io.FileNotFoundException;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.ProtocolException;
 import java.util.LinkedList;
 
 /**
  * Representation of a stack of {@link DocumentInfo}, usually the result of a
  * user-driven traversal.
  */
-public class DocumentStack extends LinkedList<DocumentInfo> {
-
-    public static String serialize(DocumentStack stack) {
-        final JSONArray json = new JSONArray();
-        for (int i = 0; i < stack.size(); i++) {
-            json.put(stack.get(i).uri);
-        }
-        return json.toString();
-    }
-
-    public static DocumentStack deserialize(ContentResolver resolver, String raw)
-            throws FileNotFoundException {
-        Log.d(TAG, "deserialize: " + raw);
-
-        final DocumentStack stack = new DocumentStack();
-        try {
-            final JSONArray json = new JSONArray(raw);
-            for (int i = 0; i < json.length(); i++) {
-                final Uri uri = Uri.parse(json.getString(i));
-                final DocumentInfo doc = DocumentInfo.fromUri(resolver, uri);
-                stack.add(doc);
-            }
-        } catch (JSONException e) {
-            throw asFileNotFoundException(e);
-        }
-
-        // TODO: handle roots that have gone missing
-        return stack;
-    }
+public class DocumentStack extends LinkedList<DocumentInfo> implements Durable {
+    private static final int VERSION_INIT = 1;
 
     public RootInfo getRoot(RootsCache roots) {
         return roots.findRoot(getLast().uri);
@@ -76,6 +42,39 @@ public class DocumentStack extends LinkedList<DocumentInfo> {
             return peek().displayName;
         } else {
             return null;
+        }
+    }
+
+    @Override
+    public void reset() {
+        clear();
+    }
+
+    @Override
+    public void read(DataInputStream in) throws IOException {
+        final int version = in.readInt();
+        switch (version) {
+            case VERSION_INIT:
+                final int size = in.readInt();
+                for (int i = 0; i < size; i++) {
+                    final DocumentInfo doc = new DocumentInfo();
+                    doc.read(in);
+                    add(doc);
+                }
+                break;
+            default:
+                throw new ProtocolException("Unknown version " + version);
+        }
+    }
+
+    @Override
+    public void write(DataOutputStream out) throws IOException {
+        out.writeInt(VERSION_INIT);
+        final int size = size();
+        out.writeInt(size);
+        for (int i = 0; i < size; i++) {
+            final DocumentInfo doc = get(i);
+            doc.write(out);
         }
     }
 }
