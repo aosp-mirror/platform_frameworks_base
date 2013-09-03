@@ -92,7 +92,8 @@ public class SweepGradient extends Shader {
         final SweepGradient copy;
         switch (mType) {
             case TYPE_COLORS_AND_POSITIONS:
-                copy = new SweepGradient(mCx, mCy, mColors.clone(), mPositions.clone());
+                copy = new SweepGradient(mCx, mCy, mColors.clone(),
+                        mPositions != null ? mPositions.clone() : null);
                 break;
             case TYPE_COLOR_START_AND_COLOR_END:
                 copy = new SweepGradient(mCx, mCy, mColor0, mColor1);
