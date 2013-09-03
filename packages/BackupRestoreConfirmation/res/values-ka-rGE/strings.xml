@@ -16,10 +16,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="backup_confirm_title" msgid="827563724209303345">"სრული დამარქაფება"</string>
+    <string name="backup_confirm_title" msgid="827563724209303345">"სრული სარეზერვო კოპირება"</string>
     <string name="restore_confirm_title" msgid="5469365809567486602">"სრულად აღდგენა"</string>
     <string name="backup_confirm_text" msgid="1878021282758896593">"მოთხოვნილ იქნა სამაგიდო კომპიუტერთან დაკავშირებული ყველა მონაცემის სრულყოფილი სარეზერვო ასლები. \n\nთუ სარეზერვო ასლები თქვენ არ მოგითხოვიათ, არ დაუშვათ ამ ოპერაციის გაგრძელება."</string>
-    <string name="allow_backup_button_label" msgid="4217228747769644068">"ჩემი მონაცემების დამარქაფება"</string>
+    <string name="allow_backup_button_label" msgid="4217228747769644068">"ჩემი მონაცემების სარეზერვო კოპირება"</string>
     <string name="deny_backup_button_label" msgid="6009119115581097708">"სარეზერვო ასლები არ გააკეთო"</string>
     <string name="restore_confirm_text" msgid="7499866728030461776">"დაკავშირებული დესკტოპ კომპიუტერიდან მოხდა ყველა მონაცემის სრული აღდგენის მოთხოვნა. გსურთ, დაუშვათ ეს?\n\nთუ თქვენ თვითონ არ მოითხოვეთ აღდგენა, არ დაუშვათ ამ ოპერაციის გაგრძელება. ის ჩაანაცვლებს მოწყობილობაზე ამჟამად არსებულ ნებისმიერ მონაცემს!"</string>
     <string name="allow_restore_button_label" msgid="3081286752277127827">"ჩემი მონაცემების აღდგენა"</string>
@@ -28,10 +28,10 @@
     <string name="device_encryption_restore_text" msgid="1570864916855208992">"გთხოვთ, ქვემოთ მიუთითოთ თქვენი მოწყობილობის დაშიფვრის პაროლი."</string>
     <string name="device_encryption_backup_text" msgid="5866590762672844664">"გთხოვთ, ქვემოთ მიუთითოთ თქვენი მოწყობილობის დაშიფვრის პაროლი. ეს ასევე გამოყენებული იქნება სათადარიგო არქივის დაშიფრვისათვის."</string>
     <string name="backup_enc_password_text" msgid="4981585714795233099">"გთხოვთ შეიყვანოთ ყველა სამარქაფო ასლის დაშიფრვის პაროლი. თუ ამ ველს ცარიელს დატოვებთ, გამოყენებული იქნება მიმდინარე პაროლი:"</string>
-    <string name="backup_enc_password_optional" msgid="1350137345907579306">"თუ გსურთ მთელი დამარქაფებული მონაცემების დაშიფრვა, შეიყვანეთ პაროლი ქვემოთ:"</string>
+    <string name="backup_enc_password_optional" msgid="1350137345907579306">"თუ გსურთ სრული ლოკალური სარეზერვო კოპიის დაშიფრვა, შეიყვანეთ პაროლი ქვემოთ:"</string>
     <string name="restore_enc_password_text" msgid="6140898525580710823">"თუ აღსადგენი მონაცემები დაშიფრულია, გთხოვთ, შეიყვანოთ პაროლი ქვემოთ:"</string>
     <string name="toast_backup_started" msgid="550354281452756121">"ასლების მომზადება იწყება..."</string>
-    <string name="toast_backup_ended" msgid="3818080769548726424">"დამარქაფება დასრულდა"</string>
+    <string name="toast_backup_ended" msgid="3818080769548726424">"სარეზერვო კოპირება დასრულებულია"</string>
     <string name="toast_restore_started" msgid="7881679218971277385">"აღდგენა იწყება..."</string>
     <string name="toast_restore_ended" msgid="1764041639199696132">"აღდგენა დასრულდა"</string>
     <string name="toast_timeout" msgid="5276598587087626877">"ოპერაციის დროის ლიმიტი ამოიწურა"</string>
