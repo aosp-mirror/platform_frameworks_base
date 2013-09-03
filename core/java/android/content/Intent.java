@@ -3300,8 +3300,10 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Optional extra for {@link #ACTION_SHUTDOWN} that allows the sender to qualify that
      * this shutdown is only for the user space of the system, not a complete shutdown.
-     * Hardware should not be shut down when this is true.  The default if not supplied
-     * is false.
+     * When this is true, hardware devices can use this information to determine that
+     * they shouldn't do a complete shutdown of their device since this is not a
+     * complete shutdown down to the kernel, but only user space restarting.
+     * The default if not supplied is false.
      */
     public static final String EXTRA_SHUTDOWN_USERSPACE_ONLY
             = "android.intent.extra.SHUTDOWN_USERSPACE_ONLY";
