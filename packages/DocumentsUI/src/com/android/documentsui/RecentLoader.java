@@ -78,6 +78,8 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
         return executor;
     }
 
+    private final List<RootInfo> mRoots;
+
     private final HashMap<RootInfo, RecentTask> mTasks = Maps.newHashMap();
 
     private final int mSortOrder = State.SORT_ORDER_LAST_MODIFIED;
@@ -133,8 +135,9 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
         }
     }
 
-    public RecentLoader(Context context) {
+    public RecentLoader(Context context, List<RootInfo> roots) {
         super(context);
+        mRoots = roots;
     }
 
     @Override
@@ -143,8 +146,7 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
             // First time through we kick off all the recent tasks, and wait
             // around to see if everyone finishes quickly.
 
-            final RootsCache roots = DocumentsApplication.getRootsCache(getContext());
-            for (RootInfo root : roots.getRoots()) {
+            for (RootInfo root : mRoots) {
                 if ((root.flags & Root.FLAG_SUPPORTS_RECENTS) != 0) {
                     final RecentTask task = new RecentTask(root.authority, root.rootId);
                     mTasks.put(root, task);

@@ -32,7 +32,6 @@ import android.widget.TextView;
 import libcore.io.IoUtils;
 import libcore.io.Streams;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 public class TestActivity extends Activity {
@@ -50,8 +49,11 @@ public class TestActivity extends Activity {
         view.setOrientation(LinearLayout.VERTICAL);
 
         final CheckBox multiple = new CheckBox(context);
-        multiple.setText("ALLOW_MULTIPLE");
+        multiple.setText("\nALLOW_MULTIPLE\n");
         view.addView(multiple);
+        final CheckBox localOnly = new CheckBox(context);
+        localOnly.setText("\nLOCAL_ONLY\n");
+        view.addView(localOnly);
 
         Button button;
         button = new Button(context);
@@ -64,6 +66,9 @@ public class TestActivity extends Activity {
                 intent.setType("*/*");
                 if (multiple.isChecked()) {
                     intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                }
+                if (localOnly.isChecked()) {
+                    intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
                 }
                 startActivityForResult(intent, 42);
             }
@@ -80,6 +85,28 @@ public class TestActivity extends Activity {
                 intent.setType("image/*");
                 if (multiple.isChecked()) {
                     intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                }
+                if (localOnly.isChecked()) {
+                    intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+                }
+                startActivityForResult(intent, 42);
+            }
+        });
+        view.addView(button);
+
+        button = new Button(context);
+        button.setText("OPEN_DOC audio/ogg");
+        button.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("audio/ogg");
+                if (multiple.isChecked()) {
+                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                }
+                if (localOnly.isChecked()) {
+                    intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
                 }
                 startActivityForResult(intent, 42);
             }
@@ -99,6 +126,9 @@ public class TestActivity extends Activity {
                 if (multiple.isChecked()) {
                     intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
                 }
+                if (localOnly.isChecked()) {
+                    intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+                }
                 startActivityForResult(intent, 42);
             }
         });
@@ -113,6 +143,9 @@ public class TestActivity extends Activity {
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 intent.setType("text/plain");
                 intent.putExtra(Intent.EXTRA_TITLE, "foobar.txt");
+                if (localOnly.isChecked()) {
+                    intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
+                }
                 startActivityForResult(intent, 42);
             }
         });
@@ -128,6 +161,9 @@ public class TestActivity extends Activity {
                 intent.setType("*/*");
                 if (multiple.isChecked()) {
                     intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                }
+                if (localOnly.isChecked()) {
+                    intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
                 }
                 startActivityForResult(Intent.createChooser(intent, "Kittens!"), 42);
             }

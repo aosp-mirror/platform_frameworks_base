@@ -161,6 +161,7 @@ public class DocumentsActivity extends Activity {
         }
 
         mState.localOnly = intent.getBooleanExtra(Intent.EXTRA_LOCAL_ONLY, false);
+        mState.showAdvanced = SettingsActivity.getDisplayAdvancedDevices(this);
 
         if (mState.action == ACTION_MANAGE) {
             mState.sortOrder = SORT_ORDER_LAST_MODIFIED;
@@ -701,6 +702,7 @@ public class DocumentsActivity extends Activity {
         public boolean allowMultiple = false;
         public boolean showSize = false;
         public boolean localOnly = false;
+        public boolean showAdvanced = false;
 
         /** Current user navigation stack; empty implies recents. */
         public DocumentStack stack = new DocumentStack();
@@ -733,6 +735,7 @@ public class DocumentsActivity extends Activity {
             out.writeInt(allowMultiple ? 1 : 0);
             out.writeInt(showSize ? 1 : 0);
             out.writeInt(localOnly ? 1 : 0);
+            out.writeInt(showAdvanced ? 1 : 0);
             DurableUtils.writeToParcel(out, stack);
             out.writeString(currentSearch);
         }
@@ -748,6 +751,7 @@ public class DocumentsActivity extends Activity {
                 state.allowMultiple = in.readInt() != 0;
                 state.showSize = in.readInt() != 0;
                 state.localOnly = in.readInt() != 0;
+                state.showAdvanced = in.readInt() != 0;
                 DurableUtils.readFromParcel(in, state.stack);
                 state.currentSearch = in.readString();
                 return state;
