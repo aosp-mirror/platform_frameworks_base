@@ -30422,6 +30422,7 @@ package android.widget {
     ctor public AbsListView(android.content.Context, android.util.AttributeSet, int);
     method public void afterTextChanged(android.text.Editable);
     method public void beforeTextChanged(java.lang.CharSequence, int, int, int);
+    method public boolean canScrollList(int);
     method public void clearChoices();
     method public void clearTextFilter();
     method public void deferNotifyDataSetChanged();
@@ -30463,7 +30464,7 @@ package android.widget {
     method public int pointToPosition(int, int);
     method public long pointToRowId(int, int);
     method public void reclaimViews(java.util.List<android.view.View>);
-    method public boolean scrollListBy(int);
+    method public void scrollListBy(int);
     method public void setAdapter(android.widget.ListAdapter);
     method public void setCacheColorHint(int);
     method public void setChoiceMode(int);
