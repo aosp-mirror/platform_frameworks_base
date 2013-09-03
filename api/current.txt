@@ -11948,13 +11948,14 @@ package android.location {
     ctor public SettingInjectorService(java.lang.String);
     method protected abstract android.location.SettingInjectorService.Status getStatus();
     method protected final void onHandleIntent(android.content.Intent);
-    field public static final java.lang.String ACTION_INJECTED_SETTING_CHANGED = "com.android.location.InjectedSettingChanged";
+    field public static final java.lang.String ACTION_INJECTED_SETTING_CHANGED = "android.location.InjectedSettingChanged";
+    field public static final java.lang.String ACTION_SERVICE_INTENT = "android.location.SettingInjectorService";
+    field public static final java.lang.String ATTRIBUTES_NAME = "injected-location-setting";
+    field public static final java.lang.String META_DATA_NAME = "android.location.SettingInjectorService";
   }
 
   public static final class SettingInjectorService.Status {
     ctor public SettingInjectorService.Status(java.lang.String, boolean);
-    field public final boolean enabled;
-    field public final java.lang.String summary;
   }
 
 }
