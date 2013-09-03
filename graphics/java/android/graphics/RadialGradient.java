@@ -103,8 +103,8 @@ public class RadialGradient extends Shader {
         final RadialGradient copy;
         switch (mType) {
             case TYPE_COLORS_AND_POSITIONS:
-                copy = new RadialGradient(mX, mY, mRadius, mColors.clone(), mPositions.clone(),
-                        mTileMode);
+                copy = new RadialGradient(mX, mY, mRadius, mColors.clone(),
+                        mPositions != null ? mPositions.clone() : null, mTileMode);
                 break;
             case TYPE_COLOR_CENTER_AND_COLOR_EDGE:
                 copy = new RadialGradient(mX, mY, mRadius, mColor0, mColor1, mTileMode);
