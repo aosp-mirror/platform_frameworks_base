@@ -289,6 +289,7 @@ package android {
     field public static final deprecated int animationResolution = 16843546; // 0x101031a
     field public static final int antialias = 16843034; // 0x101011a
     field public static final int anyDensity = 16843372; // 0x101026c
+    field public static final int apduServiceBanner = 16843755; // 0x10103eb
     field public static final int apiKey = 16843281; // 0x1010211
     field public static final int author = 16843444; // 0x10102b4
     field public static final int authorities = 16842776; // 0x1010018
