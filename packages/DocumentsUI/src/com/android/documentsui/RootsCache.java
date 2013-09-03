@@ -50,7 +50,7 @@ public class RootsCache {
     // TODO: cache roots in local provider to avoid spinning up backends
     // TODO: root updates should trigger UI refresh
 
-    private static final boolean RECENTS_ENABLED = false;
+    private static final boolean RECENTS_ENABLED = true;
 
     private final Context mContext;
 
@@ -119,6 +119,16 @@ public class RootsCache {
         final String docId = DocumentsContract.getDocumentId(uri);
         for (RootInfo root : mRoots) {
             if (Objects.equal(root.authority, authority) && Objects.equal(root.documentId, docId)) {
+                return root;
+            }
+        }
+        return null;
+    }
+
+    @GuardedBy("ActivityThread")
+    public RootInfo getRoot(String authority, String rootId) {
+        for (RootInfo root : mRoots) {
+            if (Objects.equal(root.authority, authority) && Objects.equal(root.rootId, rootId)) {
                 return root;
             }
         }

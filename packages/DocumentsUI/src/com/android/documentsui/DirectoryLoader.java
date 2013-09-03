@@ -48,14 +48,16 @@ class DirectoryResult implements AutoCloseable {
 public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
     private final ForceLoadContentObserver mObserver = new ForceLoadContentObserver();
 
+    private final String mRootId;
     private final Uri mUri;
     private final int mSortOrder;
 
     private CancellationSignal mSignal;
     private DirectoryResult mResult;
 
-    public DirectoryLoader(Context context, Uri uri, int sortOrder) {
+    public DirectoryLoader(Context context, String rootId, Uri uri, int sortOrder) {
         super(context);
+        mRootId = rootId;
         mUri = uri;
         mSortOrder = sortOrder;
     }
@@ -69,12 +71,16 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
             mSignal = new CancellationSignal();
         }
         final DirectoryResult result = new DirectoryResult();
+        final String authority = mUri.getAuthority();
         try {
             result.client = getContext()
-                    .getContentResolver().acquireUnstableContentProviderClient(mUri.getAuthority());
+                    .getContentResolver().acquireUnstableContentProviderClient(authority);
             final Cursor cursor = result.client.query(
-                    mUri, null, null, null, getQuerySortOrder(), mSignal);
-            result.cursor = new SortingCursorWrapper(cursor, mSortOrder);
+                    mUri, null, null, null, getQuerySortOrder(mSortOrder), mSignal);
+            final Cursor withRoot = new RootCursorWrapper(mUri.getAuthority(), mRootId, cursor, -1);
+            final Cursor sorted = new SortingCursorWrapper(withRoot, mSortOrder);
+
+            result.cursor = sorted;
             result.cursor.registerContentObserver(mObserver);
         } catch (Exception e) {
             result.exception = e;
@@ -149,8 +155,8 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
         getContext().getContentResolver().unregisterContentObserver(mObserver);
     }
 
-    private String getQuerySortOrder() {
-        switch (mSortOrder) {
+    public static String getQuerySortOrder(int sortOrder) {
+        switch (sortOrder) {
             case SORT_ORDER_DISPLAY_NAME:
                 return Document.COLUMN_DISPLAY_NAME + " ASC";
             case SORT_ORDER_LAST_MODIFIED:

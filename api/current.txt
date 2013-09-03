@@ -20865,6 +20865,7 @@ package android.provider {
     field public static final int FLAG_PROVIDES_IMAGES = 32; // 0x20
     field public static final int FLAG_PROVIDES_VIDEO = 16; // 0x10
     field public static final int FLAG_SUPPORTS_CREATE = 1; // 0x1
+    field public static final int FLAG_SUPPORTS_RECENTS = 64; // 0x40
     field public static final int ROOT_TYPE_DEVICE = 3; // 0x3
     field public static final int ROOT_TYPE_SERVICE = 1; // 0x1
     field public static final int ROOT_TYPE_SHORTCUT = 2; // 0x2
