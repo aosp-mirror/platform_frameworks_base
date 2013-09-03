@@ -81,7 +81,7 @@ public abstract class HostApduService extends Service {
      * currently active on the logical channel).
      *
      * <p>Note that this next AID may still be resolved to this
-     * service, in which case {@link #processCommandApdu(byte[], int)}
+     * service, in which case {@link #processCommandApdu(byte[], Bundle)}
      * will be called again.
      */
     public static final int DEACTIVATION_DESELECTED = 1;
@@ -248,7 +248,7 @@ public abstract class HostApduService extends Service {
      * transaction.
      *
      * <p>Note: this method may be called anywhere between
-     *    the first {@link #processCommandApdu(byte[], int)}
+     *    the first {@link #processCommandApdu(byte[], Bundle)}
      *    call and a {@link #onDeactivated(int)} call.
      */
     public final void notifyUnhandled() {
