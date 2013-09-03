@@ -774,6 +774,9 @@
          re-validation -->
     <bool name="config_bluetooth_address_validation">false</bool>
 
+    <!-- Boolean indicating if current platform supports BLE peripheral mode -->
+    <bool name="config_bluetooth_le_peripheral_mode_supported">false</bool>
+
     <!-- The default data-use polling period. -->
     <integer name="config_datause_polling_period_sec">600</integer>
 
