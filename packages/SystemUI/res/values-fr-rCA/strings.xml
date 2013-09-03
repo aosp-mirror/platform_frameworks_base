@@ -199,8 +199,6 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Affichage sans fil"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Luminosité"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATIQUE"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"Les notifications s’affichent ici"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"Accédez-y à tout moment en faisant glisser le doigt vers le bas.\nRépétez l\'opération pour accéder aux commandes du système."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Le réseau peut être surveillé"</string>
     <string name="done_button" msgid="1759387181766603361">"Terminé"</string>
     <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Surveillance réseau"</string>

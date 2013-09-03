@@ -199,8 +199,6 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"無線顯示"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"亮度"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"自動"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"通知會在這裡顯示"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"向下快速滑動可隨時存取通知。\n再次向下快速滑動則可使用系統控制介面。"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"網絡可能會受到監控"</string>
     <string name="done_button" msgid="1759387181766603361">"完成"</string>
     <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"網絡監控"</string>
