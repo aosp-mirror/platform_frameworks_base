@@ -105,8 +105,12 @@ public final class ApduServiceInfo implements Parcelable {
             if (onHost) {
                 parser = si.loadXmlMetaData(pm, HostApduService.SERVICE_META_DATA);
                 if (parser == null) {
-                    throw new XmlPullParserException("No " + HostApduService.SERVICE_META_DATA +
-                            " meta-data");
+                    Log.d(TAG, "Didn't find service meta-data, trying legacy.");
+                    parser = si.loadXmlMetaData(pm, HostApduService.OLD_SERVICE_META_DATA);
+                    if (parser == null) {
+                        throw new XmlPullParserException("No " + HostApduService.SERVICE_META_DATA +
+                                " meta-data");
+                    }
                 }
             } else {
                 parser = si.loadXmlMetaData(pm, OffHostApduService.SERVICE_META_DATA);
@@ -170,12 +174,12 @@ public final class ApduServiceInfo implements Parcelable {
                             com.android.internal.R.styleable.AidGroup_description);
                     String groupCategory = groupAttrs.getString(
                             com.android.internal.R.styleable.AidGroup_category);
-                    if (!CardEmulationManager.CATEGORY_PAYMENT.equals(groupCategory)) {
-                        groupCategory = CardEmulationManager.CATEGORY_OTHER;
+                    if (!CardEmulation.CATEGORY_PAYMENT.equals(groupCategory)) {
+                        groupCategory = CardEmulation.CATEGORY_OTHER;
                     }
                     currentGroup = mCategoryToGroup.get(groupCategory);
                     if (currentGroup != null) {
-                        if (!CardEmulationManager.CATEGORY_OTHER.equals(groupCategory)) {
+                        if (!CardEmulation.CATEGORY_OTHER.equals(groupCategory)) {
                             Log.e(TAG, "Not allowing multiple aid-groups in the " +
                                     groupCategory + " category");
                             currentGroup = null;

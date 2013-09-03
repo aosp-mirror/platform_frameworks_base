@@ -42,13 +42,14 @@ public abstract class OffHostApduService extends Service {
      */
     @SdkConstant(SdkConstantType.SERVICE_ACTION)
     public static final String SERVICE_INTERFACE =
-            "android.nfc.OffHostApduService";
+            "android.nfc.cardemulation.action.OFF_HOST_APDU_SERVICE";
 
     /**
      * The name of the meta-data element that contains
      * more information about this service.
      */
-    public static final String SERVICE_META_DATA = "android.nfc.OffHostApduService";
+    public static final String SERVICE_META_DATA =
+            "android.nfc.cardemulation.off_host_apdu_service";
 
     /**
      * The Android platform itself will not bind to this service,
