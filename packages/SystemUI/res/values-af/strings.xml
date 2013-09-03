@@ -197,8 +197,6 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Draadlose aansig"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Helderheid"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"OUTO"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"Kennisgewings verskyn hier"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"Verkry enige tyd toegang tot hulle deur af te sleep.\nSleep weer af vir stelselkontroles."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Netwerk kan dalk gemonitor word"</string>
     <string name="done_button" msgid="1759387181766603361">"Klaar"</string>
     <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Netwerkmonitering"</string>

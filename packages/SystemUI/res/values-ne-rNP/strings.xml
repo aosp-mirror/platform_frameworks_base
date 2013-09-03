@@ -171,7 +171,7 @@
     <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
     <string name="start_dreams" msgid="7219575858348719790">"दिवासपना"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"उडान मोड"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"हवाइजहाज मोड"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"चार्ज हुँदै, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"चार्ज भयो"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"ब्लुटुथ"</string>
@@ -197,8 +197,6 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"ताररहित प्रदर्शन"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"उज्यालपन"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"स्वतः"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"यहाँ जानकारीहरू देखा पर्छन्"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"तल हुत्त्याएर तिनीहरूलाई सधैं पहुँच गर्नुहोस्\nप्रणाली नियन्त्रणको लागि पुनः तल हुत्त्याउनुहोस्"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"सञ्जाल अनुगमित हुन सक्छ"</string>
     <string name="done_button" msgid="1759387181766603361">"भयो"</string>
     <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"सञ्जाल निगरानी"</string>

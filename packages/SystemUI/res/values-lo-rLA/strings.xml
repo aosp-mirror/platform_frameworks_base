@@ -197,8 +197,6 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"ການສະແດງຜົນໄຮ້ສາຍ"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ຄວາມແຈ້ງ"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ອັດຕະໂນມັດ"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"ການແຈ້ງເຕືອນຈະປາກົດບ່ອນນີ້"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"ເຂົ້າເຖິງໄດ້ທຸກເມື່ອໂດຍການປັດນິ້ວລົງ.\nປັດລົງອີກເທື່ອນຶ່ງສຳລັບການຄວບຄຸມລະບົບ."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ການນຳໃຊ້ເຄືອຂ່າຍອາດມີການກວດສອບຕິດຕາມ"</string>
     <string name="done_button" msgid="1759387181766603361">"ແລ້ວໆ"</string>
     <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"ການກວດສອບຕິດຕາມເຄືອຂ່າຍ"</string>
