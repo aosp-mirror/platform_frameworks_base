@@ -16,13 +16,18 @@
 
 package android.security;
 
+import com.android.org.conscrypt.NativeCrypto;
+
 import android.content.Context;
 import android.text.TextUtils;
 
 import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.DSAParameterSpec;
+import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Date;
 
 import javax.security.auth.x500.X500Principal;
@@ -50,9 +55,34 @@ import javax.security.auth.x500.X500Principal;
  * certificate signed by a real Certificate Authority.
  */
 public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
-    private final String mKeystoreAlias;
+    /*
+     * These must be kept in sync with system/security/keystore/defaults.h
+     */
+
+    /* DSA */
+    private static final int DSA_DEFAULT_KEY_SIZE = 1024;
+    private static final int DSA_MIN_KEY_SIZE = 512;
+    private static final int DSA_MAX_KEY_SIZE = 8192;
+
+    /* EC */
+    private static final int EC_DEFAULT_KEY_SIZE = 256;
+    private static final int EC_MIN_KEY_SIZE = 192;
+    private static final int EC_MAX_KEY_SIZE = 521;
+
+    /* RSA */
+    private static final int RSA_DEFAULT_KEY_SIZE = 2048;
+    private static final int RSA_MIN_KEY_SIZE = 512;
+    private static final int RSA_MAX_KEY_SIZE = 8192;
 
     private final Context mContext;
+
+    private final String mKeystoreAlias;
+
+    private final String mKeyType;
+
+    private final int mKeySize;
+
+    private final AlgorithmParameterSpec mSpec;
 
     private final X500Principal mSubjectDN;
 
@@ -84,6 +114,9 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * @param context Android context for the activity
      * @param keyStoreAlias name to use for the generated key in the Android
      *            keystore
+     * @param keyType key algorithm to use (RSA, DSA, EC)
+     * @param keySize size of key to generate
+     * @param spec the underlying key type parameters
      * @param subjectDN X.509 v3 Subject Distinguished Name
      * @param serialNumber X509 v3 certificate serial number
      * @param startDate the start of the self-signed certificate validity period
@@ -93,9 +126,9 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      *             {@code endDate} is before {@code startDate}.
      * @hide should be built with KeyPairGeneratorSpecBuilder
      */
-    public KeyPairGeneratorSpec(Context context, String keyStoreAlias,
-            X500Principal subjectDN, BigInteger serialNumber, Date startDate, Date endDate,
-            int flags) {
+    public KeyPairGeneratorSpec(Context context, String keyStoreAlias, String keyType, int keySize,
+            AlgorithmParameterSpec spec, X500Principal subjectDN, BigInteger serialNumber,
+            Date startDate, Date endDate, int flags) {
         if (context == null) {
             throw new IllegalArgumentException("context == null");
         } else if (TextUtils.isEmpty(keyStoreAlias)) {
@@ -112,13 +145,81 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
             throw new IllegalArgumentException("endDate < startDate");
         }
 
+        final int keyTypeInt = KeyStore.getKeyTypeForAlgorithm(keyType);
+        if (keySize == -1) {
+            keySize = getDefaultKeySizeForType(keyTypeInt);
+        }
+        checkCorrectParametersSpec(keyTypeInt, keySize, spec);
+        checkValidKeySize(keyTypeInt, keySize);
+
         mContext = context;
         mKeystoreAlias = keyStoreAlias;
+        mKeyType = keyType;
+        mKeySize = keySize;
+        mSpec = spec;
         mSubjectDN = subjectDN;
         mSerialNumber = serialNumber;
         mStartDate = startDate;
         mEndDate = endDate;
         mFlags = flags;
+    }
+
+    private static int getDefaultKeySizeForType(int keyType) {
+        if (keyType == NativeCrypto.EVP_PKEY_DSA) {
+            return DSA_DEFAULT_KEY_SIZE;
+        } else if (keyType == NativeCrypto.EVP_PKEY_EC) {
+            return EC_DEFAULT_KEY_SIZE;
+        } else if (keyType == NativeCrypto.EVP_PKEY_RSA) {
+            return RSA_DEFAULT_KEY_SIZE;
+        }
+        throw new IllegalArgumentException("Invalid key type " + keyType);
+    }
+
+    private static void checkValidKeySize(int keyType, int keySize) {
+        if (keyType == NativeCrypto.EVP_PKEY_DSA) {
+            if (keySize < DSA_MIN_KEY_SIZE || keySize > DSA_MAX_KEY_SIZE) {
+                throw new IllegalArgumentException("DSA keys must be >= " + DSA_MIN_KEY_SIZE
+                        + " and <= " + DSA_MAX_KEY_SIZE);
+            }
+        } else if (keyType == NativeCrypto.EVP_PKEY_EC) {
+            if (keySize < EC_MIN_KEY_SIZE || keySize > EC_MAX_KEY_SIZE) {
+                throw new IllegalArgumentException("EC keys must be >= " + EC_MIN_KEY_SIZE
+                        + " and <= " + EC_MAX_KEY_SIZE);
+            }
+        } else if (keyType == NativeCrypto.EVP_PKEY_RSA) {
+            if (keySize < RSA_MIN_KEY_SIZE || keySize > RSA_MAX_KEY_SIZE) {
+                throw new IllegalArgumentException("RSA keys must be >= " + RSA_MIN_KEY_SIZE
+                        + " and <= " + RSA_MAX_KEY_SIZE);
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid key type " + keyType);
+        }
+    }
+
+    private static void checkCorrectParametersSpec(int keyType, int keySize,
+            AlgorithmParameterSpec spec) {
+        if (keyType == NativeCrypto.EVP_PKEY_DSA && spec != null) {
+            if (!(spec instanceof DSAParameterSpec)) {
+                throw new IllegalArgumentException("DSA keys must have DSAParameterSpec specified");
+            }
+        } else if (keyType == NativeCrypto.EVP_PKEY_RSA && spec != null) {
+            if (spec instanceof RSAKeyGenParameterSpec) {
+                RSAKeyGenParameterSpec rsaSpec = (RSAKeyGenParameterSpec) spec;
+                if (keySize != -1 && keySize != rsaSpec.getKeysize()) {
+                    throw new IllegalArgumentException("RSA key size must match: " + keySize
+                            + " vs " + rsaSpec.getKeysize());
+                }
+            } else {
+                throw new IllegalArgumentException("RSA may only use RSAKeyGenParameterSpec");
+            }
+        }
+    }
+
+    /**
+     * Gets the Android context used for operations with this instance.
+     */
+    public Context getContext() {
+        return mContext;
     }
 
     /**
@@ -130,10 +231,28 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     }
 
     /**
-     * Gets the Android context used for operations with this instance.
+     * Returns the key type (e.g., "RSA", "DSA", "EC") specified by this
+     * parameter.
      */
-    public Context getContext() {
-        return mContext;
+    public String getKeyType() {
+        return mKeyType;
+    }
+
+    /**
+     * Returns the key size specified by this parameter. For instance, for RSA
+     * this will return the modulus size and for EC it will return the field
+     * size.
+     */
+    public int getKeySize() {
+        return mKeySize;
+    }
+
+    /**
+     * Returns the {@link AlgorithmParameterSpec} that will be used for creation
+     * of the key pair.
+     */
+    public AlgorithmParameterSpec getAlgorithmParameterSpec() {
+        return mSpec;
     }
 
     /**
@@ -209,6 +328,12 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
         private String mKeystoreAlias;
 
+        private String mKeyType = "RSA";
+
+        private int mKeySize = -1;
+
+        private AlgorithmParameterSpec mSpec;
+
         private X500Principal mSubjectDN;
 
         private BigInteger mSerialNumber;
@@ -242,6 +367,49 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
                 throw new NullPointerException("alias == null");
             }
             mKeystoreAlias = alias;
+            return this;
+        }
+
+        /**
+         * Sets the key type (e.g., RSA, DSA, EC) of the keypair to be created.
+         */
+        public Builder setKeyType(String keyType) throws NoSuchAlgorithmException {
+            if (keyType == null) {
+                throw new NullPointerException("keyType == null");
+            } else {
+                try {
+                    KeyStore.getKeyTypeForAlgorithm(keyType);
+                } catch (IllegalArgumentException e) {
+                    throw new NoSuchAlgorithmException("Unsupported key type: " + keyType);
+                }
+            }
+            mKeyType = keyType;
+            return this;
+        }
+
+        /**
+         * Sets the key size for the keypair to be created. For instance, for a
+         * key type of RSA this will set the modulus size and for a key type of
+         * EC it will select a curve with a matching field size.
+         */
+        public Builder setKeySize(int keySize) {
+            if (keySize < 0) {
+                throw new IllegalArgumentException("keySize < 0");
+            }
+            mKeySize = keySize;
+            return this;
+        }
+
+        /**
+         * Sets the underlying key type's parameters. This is required for DSA
+         * where you must set this to an instance of
+         * {@link java.security.spec.DSAParameterSpec}.
+         */
+        public Builder setAlgorithmParameterSpec(AlgorithmParameterSpec spec) {
+            if (spec == null) {
+                throw new NullPointerException("spec == null");
+            }
+            mSpec = spec;
             return this;
         }
 
@@ -311,8 +479,8 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * @return built instance of {@code KeyPairGeneratorSpec}
          */
         public KeyPairGeneratorSpec build() {
-            return new KeyPairGeneratorSpec(mContext, mKeystoreAlias, mSubjectDN,
-                    mSerialNumber, mStartDate, mEndDate, mFlags);
+            return new KeyPairGeneratorSpec(mContext, mKeystoreAlias, mKeyType, mKeySize, mSpec,
+                    mSubjectDN, mSerialNumber, mStartDate, mEndDate, mFlags);
         }
     }
 }
