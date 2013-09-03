@@ -24,8 +24,8 @@ class SkWStream;
  *      function returns, since the Java InputStream is not managed
  *      by the SkStream.
  */
-SkStream* WrapJavaInputStream(JNIEnv* env, jobject stream,
-                              jbyteArray storage);
+SkStream* CreateJavaInputStreamAdaptor(JNIEnv* env, jobject stream,
+                                       jbyteArray storage);
 
 /**
  *  Copy a Java InputStream.
@@ -33,13 +33,11 @@ SkStream* WrapJavaInputStream(JNIEnv* env, jobject stream,
  *  @param stream Pointer to Java InputStream.
  *  @param storage Java byte array for retrieving data from the
  *      Java InputStream.
- *  @return SkMemoryStream The data in stream will be copied to a new
- *      SkMemoryStream.
- *  FIXME: Could return a more generic return type if ViewStateSerializer
- *  did not require an SkMemoryStream.
+ *  @return SkStreamRewindable The data in stream will be copied
+ *      to a new SkStreamRewindable.
  */
-SkMemoryStream* CopyJavaInputStream(JNIEnv* env, jobject stream,
-                                    jbyteArray storage);
+SkStreamRewindable* CopyJavaInputStream(JNIEnv* env, jobject stream,
+                                        jbyteArray storage);
 
 /**
  *  Get a rewindable stream from a Java InputStream.
@@ -50,7 +48,7 @@ SkMemoryStream* CopyJavaInputStream(JNIEnv* env, jobject stream,
  *  @return SkStreamRewindable Either a wrapper around the Java
  *      InputStream, if possible, or a copy which is rewindable.
  *      Since it may be a wrapper, must not be used after the
- *      caller returns, like the result of WrapJavaInputStream.
+ *      caller returns, like the result of CreateJavaInputStreamAdaptor.
  */
 SkStreamRewindable* GetRewindableStream(JNIEnv* env, jobject stream,
                                         jbyteArray storage);
@@ -69,5 +67,4 @@ android::AssetStreamAdaptor* CheckForAssetStream(JNIEnv* env, jobject stream);
 
 SkWStream* CreateJavaOutputStreamAdaptor(JNIEnv* env, jobject stream,
                                          jbyteArray storage);
-
 #endif

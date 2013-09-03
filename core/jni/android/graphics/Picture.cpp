@@ -39,9 +39,10 @@ public:
     static SkPicture* deserialize(JNIEnv* env, jobject, jobject jstream,
                                   jbyteArray jstorage) {
         SkPicture* picture = NULL;
-        SkAutoTUnref<SkStream> strm(WrapJavaInputStream(env, jstream, jstorage));
-        if (strm.get()) {
-            picture = SkPicture::CreateFromStream(strm.get());
+        SkStream* strm = CreateJavaInputStreamAdaptor(env, jstream, jstorage);
+        if (strm) {
+            picture = SkPicture::CreateFromStream(strm);
+            delete strm;
         }
         return picture;
     }
