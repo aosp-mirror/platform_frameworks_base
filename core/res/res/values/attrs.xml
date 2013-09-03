@@ -5755,11 +5755,11 @@
          describes an injected "Location services" setting. Note that the status value (subtitle)
          for the setting is specified dynamically by a subclass of SettingInjectorService.
      -->
-    <declare-styleable name="InjectedLocationSetting">
-        <!-- The user-visible name (title) of the setting. -->
-        <attr name="label"/>
-        <!-- The icon for the apps covered by the setting. Typically a generic icon for the
-             developer. -->
+    <declare-styleable name="SettingInjectorService">
+        <!-- The title for the preference. -->
+        <attr name="title"/>
+        <!-- The icon for the preference, should refer to all apps covered by the setting. Typically
+             a generic icon for the developer. -->
         <attr name="icon"/>
         <!-- The activity to launch when the setting is clicked on. -->
         <attr name="settingsActivity"/>
