@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service d\'accessibilité. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"lier à un service d\'impression"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service de widget. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"accéder à tous les travaux d\'impression"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Permet à l\'application d\'accéder aux travaux d\'impression créés par une autre application. Les applications standards ne doivent jamais avoir recours à cette fonctionnalité."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"s\'associer à un service d\'impression désynchronisée"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Permet à l\'application autorisée de s\'associer à l\'interface de niveau supérieur d\'un service d\'impression désynchronisée. Cette fonctionnalité ne devrait pas être nécessaire pour les applications standards."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"s\'associer au service NFC"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Permet à l\'application autorisée de s\'associer aux applications qui reproduisent le fonctionnement des cartes NFC. Cette fonctionnalité ne devrait pas être nécessaire pour les applications standards."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"s\'associer à un service de texte"</string>
@@ -1568,6 +1568,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Annulé"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Erreur lors de l\'écriture du contenu"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"inconnu"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Saisissez le NIP"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"NIP actuel"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Nouveau NIP"</string>

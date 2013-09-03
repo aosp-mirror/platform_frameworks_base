@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Tillader, at brugeren binder sig til en grænseflade for en tilgængelighedstjeneste på øverste niveau. Bør aldrig være nødvendigt til almindelige apps."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"forbinde til en udskriftstjeneste"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Tillader, at brugeren forbinder til grænsefladen for en udskriftstjeneste på øverste niveau. Dette bør aldrig være nødvendigt for almindelige apps."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"få adgang til alle udskriftsjob"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Tillader, at brugeren får adgang til udskriftsjob, der er oprettet af en anden app. Dette bør aldrig være nødvendigt for almindelige apps."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"forbinde til en udskriftsspoolertjeneste"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Tillader, at brugeren forbinder til grænsefladen for en udskriftsspoolertjeneste på øverste niveau. Dette bør aldrig være nødvendigt for almindelige apps."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"Knyt til NFC-tjeneste"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Tillader, at indehaveren opretter tilknytninger til applikationer, der efterligner NFC-kort. Dette bør aldrig være nødvendigt for normale apps."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"forpligte sig til en sms-tjeneste"</string>
@@ -1568,6 +1568,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Amerikansk \"Tabloid\""</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Annulleret"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Fejl ved skrivning af indhold"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"ukendt"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Indtast pinkode"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Aktuel pinkode:"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Ny pinkode"</string>

@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"ユーザー補助サービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"印刷サービスへのバインド"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"印刷サービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"すべての印刷ジョブへのアクセス"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"別のアプリが作成した印刷ジョブにアクセスすることを所有者に許可します。通常のアプリでは不要です。"</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"印刷スプーラサービスへのバインド"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"印刷スプーラサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"NFCサービスへのバインド"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"NFCカードをエミュレートしているアプリにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"テキストサービスにバインド"</string>
@@ -1568,6 +1568,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"タブロイド"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"キャンセルされました"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"コンテンツの書き込み中にエラーが発生しました"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"不明"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PINを入力"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"現在のPIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"新しいPIN"</string>

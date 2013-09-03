@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"به دارنده اجازه می‌دهد که به رابط سطح بالای سرویس دسترسی متصل شود. هرگز برای برنامه‌های معمولی مورد نیاز نیست."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"اتصال به یک سرویس چاپ"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"به برنامه اجازه می‌دهد که به رابط سطح بالای سرویس چاپ متصل شود. هرگز برای برنامه‌های معمولی مورد نیاز نیست."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"دسترسی به تمام کارهای چاپ"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"به دارنده اجازه دسترسی به کارهای چاپی ایجاد شده توسط برنامه‌ای دیگر را می‌دهد.هرگز برای برنامه‌های معمولی مورد نیاز نیست."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"اتصال به سرویس هماهنگ‌کننده چاپ"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"به دارنده اجازه می‌دهد که به واسط سطح بالای سرویس هماهنگ‌کننده چاپ متصل شود. هرگز برای برنامه‌های معمولی مورد نیاز نیست."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"اتصال به سرویس NFC"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"به دارنده اجازه می‌دهد به برنامه‌هایی متصل شود که مشابه با کارت‌های NFC عمل می‌کنند. هرگز نباید برای برنامه‌های عادی مورد نیاز باشد."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"اتصال به یک سرویس متنی"</string>
@@ -1568,6 +1568,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"لغو شد"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"خطا هنگام نوشتن محتوا"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"نامعلوم"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"پین را وارد کنید"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"پین کنونی"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"پین جدید"</string>

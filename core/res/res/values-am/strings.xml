@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"ያዢው ወደ የአንድ ተደራሽነት አገልግሎት ከፍተኛ-ደረጃ በይነገጽ እንዲያስር ይፈቅድለታል። ለመደበኛ መተግበሪያዎች መቼም ቢሆን ሊያስፈልግ አይገባም።"</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"ከአንድ የህትመት አገልግሎት ጋር ማያያዝ"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"ያዢው የህትመት አገልግሎቱን ወደ ከፍተኛ-ደረጃ በይነገጽ እንዲጠርዝ ይፈቅድለታል። ለመደበኛ መተግበሪያዎች በጭራሽ አያስፈልግም።"</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"ሁሉንም የህትመት ስራዎችን መድረስ"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"ያዢው በሌላ መተግበሪያ የተፈጠሩ የህትመት ስራዎች እንዲደርስባቸው ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ አያስፈልግም።"</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"ከአንድ የህትመት አስተላላፊ አገልግሎት ጋር ይሰሩ"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"ያዢው የህትመት አስተላላፊ አገልግሎቱን ከከፍተኛ-ደረጃ በይነገጽ ጋር እንዲያስር ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ አያስፈልግም።"</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"ከNFC አገልግሎት ጋር ይሰሩ"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"ያዢው የNFC ካርዶችን የሚያስመስሉ መተግበሪያዎችን እንዲያስር ያስችለዋል። ለመደበኛ መተግበሪያዎች በጭራሽ ሊያስፈልግ አይገባም።"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"ለፅሁፍ አገልግሎት አሰረ"</string>
@@ -1568,6 +1568,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"ታብሎይድ"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"ተትቷል"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"ይዘት መጻፍ ላይ ስህተት"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"አይታወቅም"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"ፒን ያስገቡ"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"የአሁኑ ፒን"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"አዲስ ፒን"</string>
