@@ -28,7 +28,7 @@ import android.net.Uri;
 import android.os.CancellationSignal;
 import android.util.Log;
 
-import com.android.documentsui.model.Document;
+import com.android.documentsui.model.DocumentInfo;
 import com.android.internal.util.Predicate;
 import com.google.android.collect.Lists;
 
@@ -41,7 +41,7 @@ import java.util.List;
 
 class DirectoryResult implements AutoCloseable {
     Cursor cursor;
-    List<Document> contents = Lists.newArrayList();
+    List<DocumentInfo> contents = Lists.newArrayList();
     Exception e;
 
     @Override
@@ -53,11 +53,11 @@ class DirectoryResult implements AutoCloseable {
 public class DirectoryLoader extends UriDerivativeLoader<Uri, DirectoryResult> {
 
     private final int mType;
-    private Predicate<Document> mFilter;
-    private Comparator<Document> mSortOrder;
+    private Predicate<DocumentInfo> mFilter;
+    private Comparator<DocumentInfo> mSortOrder;
 
-    public DirectoryLoader(Context context, Uri uri, int type, Predicate<Document> filter,
-            Comparator<Document> sortOrder) {
+    public DirectoryLoader(Context context, Uri uri, int type, Predicate<DocumentInfo> filter,
+            Comparator<DocumentInfo> sortOrder) {
         super(context, uri);
         mType = type;
         mFilter = filter;
@@ -84,15 +84,15 @@ public class DirectoryLoader extends UriDerivativeLoader<Uri, DirectoryResult> {
         result.cursor.registerContentObserver(mObserver);
 
         while (cursor.moveToNext()) {
-            Document doc = null;
+            DocumentInfo doc = null;
             switch (mType) {
                 case TYPE_NORMAL:
                 case TYPE_SEARCH:
-                    doc = Document.fromDirectoryCursor(uri, cursor);
+                    doc = DocumentInfo.fromDirectoryCursor(uri, cursor);
                     break;
                 case TYPE_RECENT_OPEN:
                     try {
-                        doc = Document.fromRecentOpenCursor(resolver, cursor);
+                        doc = DocumentInfo.fromRecentOpenCursor(resolver, cursor);
                     } catch (FileNotFoundException e) {
                         Log.w(TAG, "Failed to find recent: " + e);
                     }

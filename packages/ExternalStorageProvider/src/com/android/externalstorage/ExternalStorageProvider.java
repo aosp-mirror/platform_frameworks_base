@@ -26,9 +26,8 @@ import android.media.ExifInterface;
 import android.os.CancellationSignal;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.provider.DocumentsContract.DocumentColumns;
-import android.provider.DocumentsContract.DocumentRoot;
-import android.provider.DocumentsContract.Documents;
+import android.provider.DocumentsContract.Document;
+import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
 import android.webkit.MimeTypeMap;
 
@@ -41,7 +40,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 public class ExternalStorageProvider extends DocumentsProvider {
@@ -49,36 +47,54 @@ public class ExternalStorageProvider extends DocumentsProvider {
 
     // docId format: root:path/to/file
 
-    private static final String[] SUPPORTED_COLUMNS = new String[] {
-            DocumentColumns.DOC_ID, DocumentColumns.DISPLAY_NAME, DocumentColumns.SIZE,
-            DocumentColumns.MIME_TYPE, DocumentColumns.LAST_MODIFIED, DocumentColumns.FLAGS
+    private static final String[] DEFAULT_ROOT_PROJECTION = new String[] {
+            Root.COLUMN_ROOT_ID, Root.COLUMN_ROOT_TYPE, Root.COLUMN_FLAGS, Root.COLUMN_ICON,
+            Root.COLUMN_TITLE, Root.COLUMN_SUMMARY, Root.COLUMN_DOCUMENT_ID,
+            Root.COLUMN_AVAILABLE_BYTES,
     };
 
-    private ArrayList<DocumentRoot> mRoots;
-    private HashMap<String, DocumentRoot> mTagToRoot;
-    private HashMap<String, File> mTagToPath;
+    private static final String[] DEFAULT_DOCUMENT_PROJECTION = new String[] {
+            Document.COLUMN_DOCUMENT_ID, Document.COLUMN_MIME_TYPE, Document.COLUMN_DISPLAY_NAME,
+            Document.COLUMN_LAST_MODIFIED, Document.COLUMN_FLAGS, Document.COLUMN_SIZE,
+    };
+
+    private static class RootInfo {
+        public String rootId;
+        public int rootType;
+        public int flags;
+        public int icon;
+        public String title;
+        public String docId;
+    }
+
+    private ArrayList<RootInfo> mRoots;
+    private HashMap<String, RootInfo> mIdToRoot;
+    private HashMap<String, File> mIdToPath;
 
     @Override
     public boolean onCreate() {
         mRoots = Lists.newArrayList();
-        mTagToRoot = Maps.newHashMap();
-        mTagToPath = Maps.newHashMap();
+        mIdToRoot = Maps.newHashMap();
+        mIdToPath = Maps.newHashMap();
 
         // TODO: support multiple storage devices
 
         try {
-            final String tag = "primary";
+            final String rootId = "primary";
             final File path = Environment.getExternalStorageDirectory();
-            mTagToPath.put(tag, path);
+            mIdToPath.put(rootId, path);
 
-            final DocumentRoot root = new DocumentRoot();
-            root.docId = getDocIdForFile(path);
-            root.rootType = DocumentRoot.ROOT_TYPE_DEVICE_ADVANCED;
-            root.title = getContext().getString(R.string.root_internal_storage);
+            final RootInfo root = new RootInfo();
+            root.rootId = "primary";
+            root.rootType = Root.ROOT_TYPE_DEVICE;
+            root.flags = Root.FLAG_SUPPORTS_CREATE | Root.FLAG_LOCAL_ONLY | Root.FLAG_ADVANCED
+                    | Root.FLAG_PROVIDES_AUDIO | Root.FLAG_PROVIDES_VIDEO
+                    | Root.FLAG_PROVIDES_IMAGES;
             root.icon = R.drawable.ic_pdf;
-            root.flags = DocumentRoot.FLAG_LOCAL_ONLY;
+            root.title = getContext().getString(R.string.root_internal_storage);
+            root.docId = getDocIdForFile(path);
             mRoots.add(root);
-            mTagToRoot.put(tag, root);
+            mIdToRoot.put(rootId, root);
         } catch (FileNotFoundException e) {
             throw new IllegalStateException(e);
         }
@@ -86,12 +102,20 @@ public class ExternalStorageProvider extends DocumentsProvider {
         return true;
     }
 
+    private static String[] resolveRootProjection(String[] projection) {
+        return projection != null ? projection : DEFAULT_ROOT_PROJECTION;
+    }
+
+    private static String[] resolveDocumentProjection(String[] projection) {
+        return projection != null ? projection : DEFAULT_DOCUMENT_PROJECTION;
+    }
+
     private String getDocIdForFile(File file) throws FileNotFoundException {
         String path = file.getAbsolutePath();
 
         // Find the most-specific root path
         Map.Entry<String, File> mostSpecific = null;
-        for (Map.Entry<String, File> root : mTagToPath.entrySet()) {
+        for (Map.Entry<String, File> root : mIdToPath.entrySet()) {
             final String rootPath = root.getValue().getPath();
             if (path.startsWith(rootPath) && (mostSpecific == null
                     || rootPath.length() > mostSpecific.getValue().getPath().length())) {
@@ -121,7 +145,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
         final String tag = docId.substring(0, splitIndex);
         final String path = docId.substring(splitIndex + 1);
 
-        File target = mTagToPath.get(tag);
+        File target = mIdToPath.get(tag);
         if (target == null) {
             throw new FileNotFoundException("No root for " + tag);
         }
@@ -143,41 +167,48 @@ public class ExternalStorageProvider extends DocumentsProvider {
         int flags = 0;
 
         if (file.isDirectory()) {
-            flags |= Documents.FLAG_SUPPORTS_SEARCH;
+            flags |= Document.FLAG_DIR_SUPPORTS_SEARCH;
         }
         if (file.isDirectory() && file.canWrite()) {
-            flags |= Documents.FLAG_SUPPORTS_CREATE;
+            flags |= Document.FLAG_DIR_SUPPORTS_CREATE;
         }
         if (file.canWrite()) {
-            flags |= Documents.FLAG_SUPPORTS_WRITE;
-            flags |= Documents.FLAG_SUPPORTS_RENAME;
-            flags |= Documents.FLAG_SUPPORTS_DELETE;
+            flags |= Document.FLAG_SUPPORTS_WRITE;
+            flags |= Document.FLAG_SUPPORTS_DELETE;
         }
 
         final String displayName = file.getName();
         final String mimeType = getTypeForFile(file);
         if (mimeType.startsWith("image/")) {
-            flags |= Documents.FLAG_SUPPORTS_THUMBNAIL;
+            flags |= Document.FLAG_SUPPORTS_THUMBNAIL;
         }
 
         final RowBuilder row = result.newRow();
-        row.offer(DocumentColumns.DOC_ID, docId);
-        row.offer(DocumentColumns.DISPLAY_NAME, displayName);
-        row.offer(DocumentColumns.SIZE, file.length());
-        row.offer(DocumentColumns.MIME_TYPE, mimeType);
-        row.offer(DocumentColumns.LAST_MODIFIED, file.lastModified());
-        row.offer(DocumentColumns.FLAGS, flags);
+        row.offer(Document.COLUMN_DOCUMENT_ID, docId);
+        row.offer(Document.COLUMN_DISPLAY_NAME, displayName);
+        row.offer(Document.COLUMN_SIZE, file.length());
+        row.offer(Document.COLUMN_MIME_TYPE, mimeType);
+        row.offer(Document.COLUMN_LAST_MODIFIED, file.lastModified());
+        row.offer(Document.COLUMN_FLAGS, flags);
     }
 
     @Override
-    public List<DocumentRoot> getDocumentRoots() {
-        // Update free space
-        for (String tag : mTagToRoot.keySet()) {
-            final DocumentRoot root = mTagToRoot.get(tag);
-            final File path = mTagToPath.get(tag);
-            root.availableBytes = path.getFreeSpace();
+    public Cursor queryRoots(String[] projection) throws FileNotFoundException {
+        final MatrixCursor result = new MatrixCursor(resolveRootProjection(projection));
+        for (String rootId : mIdToPath.keySet()) {
+            final RootInfo root = mIdToRoot.get(rootId);
+            final File path = mIdToPath.get(rootId);
+
+            final RowBuilder row = result.newRow();
+            row.offer(Root.COLUMN_ROOT_ID, root.rootId);
+            row.offer(Root.COLUMN_ROOT_TYPE, root.rootType);
+            row.offer(Root.COLUMN_FLAGS, root.flags);
+            row.offer(Root.COLUMN_ICON, root.icon);
+            row.offer(Root.COLUMN_TITLE, root.title);
+            row.offer(Root.COLUMN_DOCUMENT_ID, root.docId);
+            row.offer(Root.COLUMN_AVAILABLE_BYTES, path.getFreeSpace());
         }
-        return mRoots;
+        return result;
     }
 
     @Override
@@ -187,7 +218,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
         displayName = validateDisplayName(mimeType, displayName);
 
         final File file = new File(parent, displayName);
-        if (Documents.MIME_TYPE_DIR.equals(mimeType)) {
+        if (Document.MIME_TYPE_DIR.equals(mimeType)) {
             if (!file.mkdir()) {
                 throw new IllegalStateException("Failed to mkdir " + file);
             }
@@ -204,16 +235,6 @@ public class ExternalStorageProvider extends DocumentsProvider {
     }
 
     @Override
-    public void renameDocument(String docId, String displayName) throws FileNotFoundException {
-        final File file = getFileForDocId(docId);
-        final File newFile = new File(file.getParentFile(), displayName);
-        if (!file.renameTo(newFile)) {
-            throw new IllegalStateException("Failed to rename " + docId);
-        }
-        // TODO: update any outstanding grants
-    }
-
-    @Override
     public void deleteDocument(String docId) throws FileNotFoundException {
         final File file = getFileForDocId(docId);
         if (!file.delete()) {
@@ -222,16 +243,19 @@ public class ExternalStorageProvider extends DocumentsProvider {
     }
 
     @Override
-    public Cursor queryDocument(String docId) throws FileNotFoundException {
-        final MatrixCursor result = new MatrixCursor(SUPPORTED_COLUMNS);
-        includeFile(result, docId, null);
+    public Cursor queryDocument(String documentId, String[] projection)
+            throws FileNotFoundException {
+        final MatrixCursor result = new MatrixCursor(resolveDocumentProjection(projection));
+        includeFile(result, documentId, null);
         return result;
     }
 
     @Override
-    public Cursor queryDocumentChildren(String docId) throws FileNotFoundException {
-        final MatrixCursor result = new MatrixCursor(SUPPORTED_COLUMNS);
-        final File parent = getFileForDocId(docId);
+    public Cursor queryChildDocuments(
+            String parentDocumentId, String[] projection, String sortOrder)
+            throws FileNotFoundException {
+        final MatrixCursor result = new MatrixCursor(resolveDocumentProjection(projection));
+        final File parent = getFileForDocId(parentDocumentId);
         for (File file : parent.listFiles()) {
             includeFile(result, null, file);
         }
@@ -239,9 +263,10 @@ public class ExternalStorageProvider extends DocumentsProvider {
     }
 
     @Override
-    public Cursor querySearch(String docId, String query) throws FileNotFoundException {
-        final MatrixCursor result = new MatrixCursor(SUPPORTED_COLUMNS);
-        final File parent = getFileForDocId(docId);
+    public Cursor querySearchDocuments(String parentDocumentId, String query, String[] projection)
+            throws FileNotFoundException {
+        final MatrixCursor result = new MatrixCursor(resolveDocumentProjection(projection));
+        final File parent = getFileForDocId(parentDocumentId);
 
         final LinkedList<File> pending = new LinkedList<File>();
         pending.add(parent);
@@ -261,22 +286,24 @@ public class ExternalStorageProvider extends DocumentsProvider {
     }
 
     @Override
-    public String getType(String docId) throws FileNotFoundException {
-        final File file = getFileForDocId(docId);
+    public String getDocumentType(String documentId) throws FileNotFoundException {
+        final File file = getFileForDocId(documentId);
         return getTypeForFile(file);
     }
 
     @Override
-    public ParcelFileDescriptor openDocument(String docId, String mode, CancellationSignal signal)
+    public ParcelFileDescriptor openDocument(
+            String documentId, String mode, CancellationSignal signal)
             throws FileNotFoundException {
-        final File file = getFileForDocId(docId);
+        final File file = getFileForDocId(documentId);
         return ParcelFileDescriptor.open(file, ContentResolver.modeToMode(null, mode));
     }
 
     @Override
     public AssetFileDescriptor openDocumentThumbnail(
-            String docId, Point sizeHint, CancellationSignal signal) throws FileNotFoundException {
-        final File file = getFileForDocId(docId);
+            String documentId, Point sizeHint, CancellationSignal signal)
+            throws FileNotFoundException {
+        final File file = getFileForDocId(documentId);
         final ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
                 file, ParcelFileDescriptor.MODE_READ_ONLY);
 
@@ -294,7 +321,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
 
     private static String getTypeForFile(File file) {
         if (file.isDirectory()) {
-            return Documents.MIME_TYPE_DIR;
+            return Document.MIME_TYPE_DIR;
         } else {
             return getTypeForName(file.getName());
         }
@@ -314,7 +341,7 @@ public class ExternalStorageProvider extends DocumentsProvider {
     }
 
     private static String validateDisplayName(String mimeType, String displayName) {
-        if (Documents.MIME_TYPE_DIR.equals(mimeType)) {
+        if (Document.MIME_TYPE_DIR.equals(mimeType)) {
             return displayName;
         } else {
             // Try appending meaningful extension if needed

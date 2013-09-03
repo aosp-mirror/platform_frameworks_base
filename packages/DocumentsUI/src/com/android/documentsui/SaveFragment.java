@@ -31,7 +31,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 
-import com.android.documentsui.model.Document;
+import com.android.documentsui.model.DocumentInfo;
 
 /**
  * Display document title editor and save button.
@@ -39,7 +39,7 @@ import com.android.documentsui.model.Document;
 public class SaveFragment extends Fragment {
     public static final String TAG = "SaveFragment";
 
-    private Document mReplaceTarget;
+    private DocumentInfo mReplaceTarget;
     private EditText mDisplayName;
     private Button mSave;
     private boolean mIgnoreNextEdit;
@@ -128,7 +128,7 @@ public class SaveFragment extends Fragment {
      * without changing the filename. Can be set to {@code null} if user
      * navigates outside the target directory.
      */
-    public void setReplaceTarget(Document replaceTarget) {
+    public void setReplaceTarget(DocumentInfo replaceTarget) {
         mReplaceTarget = replaceTarget;
 
         if (mReplaceTarget != null) {
