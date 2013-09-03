@@ -149,7 +149,7 @@ public abstract class HostApduService extends Service {
 
                 byte[] apdu = dataBundle.getByteArray(KEY_DATA);
                 if (apdu != null) {
-                    byte[] responseApdu = processCommandApdu(apdu, 0);
+                    byte[] responseApdu = processCommandApdu(apdu, null);
                     if (responseApdu != null) {
                         if (mNfcService == null) {
                             Log.e(TAG, "Response not sent; service was deactivated.");
@@ -308,8 +308,11 @@ public abstract class HostApduService extends Service {
      * @param flags
      * @return a byte-array containing the response APDU, or null if no
      *         response APDU can be sent at this point.
+     * @hide
      */
-    public abstract byte[] processCommandApdu(byte[] commandApdu, int flags);
+    public byte[] processCommandApdu(byte[] commandApdu, int flags) {
+        return null;
+    }
 
     /**
      * This method will be called in two possible scenarios:

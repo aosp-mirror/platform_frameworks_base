@@ -15310,7 +15310,6 @@ package android.nfc.cardemulation {
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void onDeactivated(int);
     method public byte[] processCommandApdu(byte[], android.os.Bundle);
-    method public abstract deprecated byte[] processCommandApdu(byte[], int);
     method public final void sendResponseApdu(byte[]);
     field public static final int DEACTIVATION_DESELECTED = 1; // 0x1
     field public static final int DEACTIVATION_LINK_LOSS = 0; // 0x0
