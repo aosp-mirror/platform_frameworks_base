@@ -70,7 +70,6 @@ import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SearchPanelView;
 import com.android.systemui.SystemUI;
-import com.android.systemui.statusbar.phone.BarTransitions;
 import com.android.systemui.statusbar.policy.NotificationRowLayout;
 
 import java.util.ArrayList;
@@ -828,7 +827,7 @@ public abstract class BaseStatusBar extends SystemUI implements
         // Construct the icon.
         final StatusBarIconView iconView = new StatusBarIconView(mContext,
                 notification.getPackageName() + "/0x" + Integer.toHexString(notification.getId()),
-                notification.getNotification(), getStatusBarMode());
+                notification.getNotification());
         iconView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
         final StatusBarIcon ic = new StatusBarIcon(notification.getPackageName(),
@@ -849,10 +848,6 @@ public abstract class BaseStatusBar extends SystemUI implements
             return null;
         }
         return entry;
-    }
-
-    protected int getStatusBarMode() {
-        return BarTransitions.MODE_OPAQUE;
     }
 
     protected void addNotificationViews(NotificationData.Entry entry) {
