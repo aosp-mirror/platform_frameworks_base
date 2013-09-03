@@ -1741,7 +1741,9 @@ public class PhoneStatusBar extends BaseStatusBar {
             mGestureRec.add(event);
         }
 
-        setInteracting(true);
+        if (mStatusBarWindowState == WINDOW_STATE_SHOWING) {
+            setInteracting(true);
+        }
         return false;
     }
 
@@ -1769,7 +1771,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                 && mStatusBarWindowState != state) {
             mStatusBarWindowState = state;
             if (DEBUG_WINDOW_STATE) Log.d(TAG, "Status bar " + windowStateToString(state));
-            mStatusBarWindow.setEnabled(showing);
             if (!showing) {
                 mStatusBarView.collapseAllPanels(false);
             }
@@ -1779,7 +1780,6 @@ public class PhoneStatusBar extends BaseStatusBar {
                 && mNavigationBarWindowState != state) {
             mNavigationBarWindowState = state;
             if (DEBUG_WINDOW_STATE) Log.d(TAG, "Navigation bar " + windowStateToString(state));
-            mNavigationBarView.setEnabled(showing);
         }
     }
 
