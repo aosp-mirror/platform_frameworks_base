@@ -287,102 +287,104 @@ public class ResolverActivity extends AlertActivity implements AdapterView.OnIte
     }
 
     protected void onIntentSelected(ResolveInfo ri, Intent intent, boolean alwaysCheck) {
-        // Build a reasonable intent filter, based on what matched.
-        IntentFilter filter = new IntentFilter();
+        if (mAlwaysUseOption) {
+            // Build a reasonable intent filter, based on what matched.
+            IntentFilter filter = new IntentFilter();
 
-        if (intent.getAction() != null) {
-            filter.addAction(intent.getAction());
-        }
-        Set<String> categories = intent.getCategories();
-        if (categories != null) {
-            for (String cat : categories) {
-                filter.addCategory(cat);
+            if (intent.getAction() != null) {
+                filter.addAction(intent.getAction());
             }
-        }
-        filter.addCategory(Intent.CATEGORY_DEFAULT);
-
-        int cat = ri.match&IntentFilter.MATCH_CATEGORY_MASK;
-        Uri data = intent.getData();
-        if (cat == IntentFilter.MATCH_CATEGORY_TYPE) {
-            String mimeType = intent.resolveType(this);
-            if (mimeType != null) {
-                try {
-                    filter.addDataType(mimeType);
-                } catch (IntentFilter.MalformedMimeTypeException e) {
-                    Log.w("ResolverActivity", e);
-                    filter = null;
+            Set<String> categories = intent.getCategories();
+            if (categories != null) {
+                for (String cat : categories) {
+                    filter.addCategory(cat);
                 }
             }
-        }
-        if (data != null && data.getScheme() != null) {
-            // We need the data specification if there was no type,
-            // OR if the scheme is not one of our magical "file:"
-            // or "content:" schemes (see IntentFilter for the reason).
-            if (cat != IntentFilter.MATCH_CATEGORY_TYPE
-                    || (!"file".equals(data.getScheme())
-                            && !"content".equals(data.getScheme()))) {
-                filter.addDataScheme(data.getScheme());
+            filter.addCategory(Intent.CATEGORY_DEFAULT);
 
-                // Look through the resolved filter to determine which part
-                // of it matched the original Intent.
-                Iterator<PatternMatcher> pIt = ri.filter.schemeSpecificPartsIterator();
-                if (pIt != null) {
-                    String ssp = data.getSchemeSpecificPart();
-                    while (ssp != null && pIt.hasNext()) {
-                        PatternMatcher p = pIt.next();
-                        if (p.match(ssp)) {
-                            filter.addDataSchemeSpecificPart(p.getPath(), p.getType());
-                            break;
-                        }
-                    }
-                }
-                Iterator<IntentFilter.AuthorityEntry> aIt = ri.filter.authoritiesIterator();
-                if (aIt != null) {
-                    while (aIt.hasNext()) {
-                        IntentFilter.AuthorityEntry a = aIt.next();
-                        if (a.match(data) >= 0) {
-                            int port = a.getPort();
-                            filter.addDataAuthority(a.getHost(),
-                                    port >= 0 ? Integer.toString(port) : null);
-                            break;
-                        }
-                    }
-                }
-                pIt = ri.filter.pathsIterator();
-                if (pIt != null) {
-                    String path = data.getPath();
-                    while (path != null && pIt.hasNext()) {
-                        PatternMatcher p = pIt.next();
-                        if (p.match(path)) {
-                            filter.addDataPath(p.getPath(), p.getType());
-                            break;
-                        }
+            int cat = ri.match&IntentFilter.MATCH_CATEGORY_MASK;
+            Uri data = intent.getData();
+            if (cat == IntentFilter.MATCH_CATEGORY_TYPE) {
+                String mimeType = intent.resolveType(this);
+                if (mimeType != null) {
+                    try {
+                        filter.addDataType(mimeType);
+                    } catch (IntentFilter.MalformedMimeTypeException e) {
+                        Log.w("ResolverActivity", e);
+                        filter = null;
                     }
                 }
             }
-        }
+            if (data != null && data.getScheme() != null) {
+                // We need the data specification if there was no type,
+                // OR if the scheme is not one of our magical "file:"
+                // or "content:" schemes (see IntentFilter for the reason).
+                if (cat != IntentFilter.MATCH_CATEGORY_TYPE
+                        || (!"file".equals(data.getScheme())
+                                && !"content".equals(data.getScheme()))) {
+                    filter.addDataScheme(data.getScheme());
 
-        if (filter != null) {
-            final int N = mAdapter.mList.size();
-            ComponentName[] set = new ComponentName[N];
-            int bestMatch = 0;
-            for (int i=0; i<N; i++) {
-                ResolveInfo r = mAdapter.mList.get(i).ri;
-                set[i] = new ComponentName(r.activityInfo.packageName,
-                        r.activityInfo.name);
-                if (r.match > bestMatch) bestMatch = r.match;
+                    // Look through the resolved filter to determine which part
+                    // of it matched the original Intent.
+                    Iterator<PatternMatcher> pIt = ri.filter.schemeSpecificPartsIterator();
+                    if (pIt != null) {
+                        String ssp = data.getSchemeSpecificPart();
+                        while (ssp != null && pIt.hasNext()) {
+                            PatternMatcher p = pIt.next();
+                            if (p.match(ssp)) {
+                                filter.addDataSchemeSpecificPart(p.getPath(), p.getType());
+                                break;
+                            }
+                        }
+                    }
+                    Iterator<IntentFilter.AuthorityEntry> aIt = ri.filter.authoritiesIterator();
+                    if (aIt != null) {
+                        while (aIt.hasNext()) {
+                            IntentFilter.AuthorityEntry a = aIt.next();
+                            if (a.match(data) >= 0) {
+                                int port = a.getPort();
+                                filter.addDataAuthority(a.getHost(),
+                                        port >= 0 ? Integer.toString(port) : null);
+                                break;
+                            }
+                        }
+                    }
+                    pIt = ri.filter.pathsIterator();
+                    if (pIt != null) {
+                        String path = data.getPath();
+                        while (path != null && pIt.hasNext()) {
+                            PatternMatcher p = pIt.next();
+                            if (p.match(path)) {
+                                filter.addDataPath(p.getPath(), p.getType());
+                                break;
+                            }
+                        }
+                    }
+                }
             }
-            if (alwaysCheck) {
-                getPackageManager().addPreferredActivity(filter, bestMatch, set,
-                        intent.getComponent());
-            } else {
-                try {
-                    AppGlobals.getPackageManager().setLastChosenActivity(intent,
-                            intent.resolveTypeIfNeeded(getContentResolver()),
-                            PackageManager.MATCH_DEFAULT_ONLY,
-                            filter, bestMatch, intent.getComponent());
-                } catch (RemoteException re) {
-                    Log.d(TAG, "Error calling setLastChosenActivity\n" + re);
+
+            if (filter != null) {
+                final int N = mAdapter.mList.size();
+                ComponentName[] set = new ComponentName[N];
+                int bestMatch = 0;
+                for (int i=0; i<N; i++) {
+                    ResolveInfo r = mAdapter.mList.get(i).ri;
+                    set[i] = new ComponentName(r.activityInfo.packageName,
+                            r.activityInfo.name);
+                    if (r.match > bestMatch) bestMatch = r.match;
+                }
+                if (alwaysCheck) {
+                    getPackageManager().addPreferredActivity(filter, bestMatch, set,
+                            intent.getComponent());
+                } else {
+                    try {
+                        AppGlobals.getPackageManager().setLastChosenActivity(intent,
+                                intent.resolveTypeIfNeeded(getContentResolver()),
+                                PackageManager.MATCH_DEFAULT_ONLY,
+                                filter, bestMatch, intent.getComponent());
+                    } catch (RemoteException re) {
+                        Log.d(TAG, "Error calling setLastChosenActivity\n" + re);
+                    }
                 }
             }
         }
