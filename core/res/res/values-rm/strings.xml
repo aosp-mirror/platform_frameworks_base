@@ -561,9 +561,9 @@
     <skip />
     <!-- no translation found for permdesc_bindPrintService (7960067623209111135) -->
     <skip />
-    <!-- no translation found for permlab_accessAllPrintJobs (1120792468465711159) -->
+    <!-- no translation found for permlab_bindPrintSpoolerService (6807762783744125954) -->
     <skip />
-    <!-- no translation found for permdesc_accessAllPrintJobs (2978185311041864762) -->
+    <!-- no translation found for permdesc_bindPrintSpoolerService (3680552285933318372) -->
     <skip />
     <!-- no translation found for permlab_bindNfcService (2752731300419410724) -->
     <skip />
@@ -2579,6 +2579,8 @@
     <!-- no translation found for write_fail_reason_cancelled (7091258378121627624) -->
     <skip />
     <!-- no translation found for write_fail_reason_cannot_write (8132505417935337724) -->
+    <skip />
+    <!-- no translation found for reason_unknown (6048913880184628119) -->
     <skip />
     <!-- no translation found for restr_pin_enter_pin (3395953421368476103) -->
     <skip />

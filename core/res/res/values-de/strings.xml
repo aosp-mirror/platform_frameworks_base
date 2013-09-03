@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Ermöglicht dem Halter, sich an die Oberfläche einer Bedienungshilfe auf oberster Ebene zu binden. Sollte nie für normale Apps benötigt werden."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"An einen Druckdienst binden"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Ermöglicht dem Inhaber, sich an die Oberfläche eines Druckdienstes auf oberster Ebene zu binden. Sollte für normale Apps nie benötigt werden."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"Auf alle Druckaufträge zugreifen"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Ermöglicht dem Inhaber den Zugriff auf von einer anderen App erstellte Druckaufträge. Sollte für normale Apps nie benötigt werden."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"An Druck-Spooler-Dienst binden"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Ermöglicht dem Inhaber, sich an die Oberfläche eines Druck-Spooler-Dienstes auf oberster Ebene zu binden. Sollte für normale Apps nie benötigt werden."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"An NFC-Dienst binden"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Ermöglicht dem Inhaber die Bindung an Apps, die NFC-Karten emulieren. Dies sollte für normale Apps niemals notwendig sein."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"An einen Textdienst binden"</string>
@@ -1570,6 +1570,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Abgebrochen"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Fehler beim Schreiben von Inhalten"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"Unbekannt"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN eingeben"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Aktuelle PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Neue PIN"</string>

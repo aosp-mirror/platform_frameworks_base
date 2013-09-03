@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en tillgänglighetstjänst. Ska inte behövas för vanliga appar."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"binda till en utskriftstjänst"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en utskriftstjänst. Ska inte behövas för vanliga appar."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"få tillgång till alla utskriftsjobb"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Ger innehavaren tillgång till utskriftsjobb som skapas med en annan app. Ska inte behövas för normala appar."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"binda till en utskriftskö"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Innehavaren tillåts att binda till den översta nivåns gränssnitt för en utskriftskö. Ska inte behövas för vanliga appar."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"låsa till NFC-tjänsten"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Innehavaren får låsa appar som fungerar som NFC-kort. Behövs normalt inte för vanliga appar."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"bind till en texttjänst"</string>
@@ -1570,6 +1570,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Inställd"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Det gick inte att skriva innehållet"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"okänt"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Ange pinkod"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Aktuell pinkod"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Ny pinkod"</string>

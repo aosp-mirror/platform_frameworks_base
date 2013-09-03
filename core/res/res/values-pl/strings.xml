@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Zezwala na tworzenie powiązania z interfejsem najwyższego poziomu usługi ułatwień dostępu. Nieprzeznaczone dla zwykłych aplikacji."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"tworzenie powiązania z usługą drukowania"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Zezwala na tworzenie powiązania z interfejsem najwyższego poziomu usługi drukowania. Nieprzeznaczone dla zwykłych aplikacji."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"dostęp do wszystkich zadań drukowania"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Zezwala na dostęp do zadań drukowania utworzonych przez inną aplikację. Nieprzeznaczone dla zwykłych aplikacji."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"tworzenie powiązania z usługą buforowania wydruku"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Zezwala na tworzenie powiązania z interfejsem najwyższego poziomu usługi buforowania wydruku. Nieprzeznaczone dla zwykłych aplikacji."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"powiązanie z usługą NFC"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Umożliwia właścicielowi powiązanie z aplikacjami emulującymi karty NFC. Nie powinno być nigdy potrzebne w normalnych aplikacjach."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"tworzenie powiązania z usługą tekstową"</string>
@@ -442,7 +442,7 @@
     <string name="permlab_writeCallLog" msgid="8552045664743499354">"zapisywanie rejestru połączeń"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Zezwala aplikacji na modyfikowanie rejestru połączeń tabletu, w tym danych o połączeniach przychodzących i wychodzących. Złośliwe aplikacje mogą wykorzystać tę możliwość, by wyczyścić lub zmodyfikować rejestr połączeń."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Zezwala aplikacji na modyfikowanie rejestru połączeń telefonu, w tym danych o połączeniach przychodzących i wychodzących. Złośliwe aplikacje mogą wykorzystać tę możliwość, by wyczyścić lub zmodyfikować rejestr połączeń."</string>
-    <string name="permlab_readProfile" msgid="4701889852612716678">"odczyt własnej karty kontaktu"</string>
+    <string name="permlab_readProfile" msgid="4701889852612716678">"odczytywanie własnej karty kontaktu"</string>
     <string name="permdesc_readProfile" product="default" msgid="5462475151849888848">"Pozwala aplikacji na odczyt osobistych informacji przechowywanych w Twoim profilu na urządzeniu (np. imienia i nazwiska lub adresu). Oznacza to, że aplikacja może Cię zidentyfikować i wysłać informacje z Twojego profilu do innych osób."</string>
     <string name="permlab_writeProfile" msgid="907793628777397643">"zmiana własnej karty kontaktu"</string>
     <string name="permdesc_writeProfile" product="default" msgid="5552084294598465899">"Pozwala aplikacji na zmianę lub dodanie osobistych informacji przechowywanych w Twoim profilu na urządzeniu (np. imienia i nazwiska lub adresu). Oznacza to, że aplikacja może Cię zidentyfikować i wysłać informacje z Twojego profilu do innych osób."</string>
@@ -599,7 +599,7 @@
     <string name="permdesc_bluetoothAdmin" product="default" msgid="8931682159331542137">"Pozwala aplikacji na konfigurowanie lokalnego telefonu z funkcją Bluetooth oraz na wykrywanie urządzeń zdalnych i parowanie z nimi."</string>
     <string name="permlab_accessWimaxState" msgid="4195907010610205703">"łączenie się i rozłączanie z siecią WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="6360102877261978887">"Pozawala aplikacji określić, czy obsługa WiMAX jest włączona, oraz uzyskać informacje o wszystkich podłączonych sieciach WiMAX."</string>
-    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"Zmień stan WiMAX"</string>
+    <string name="permlab_changeWimaxState" msgid="2405042267131496579">"zmienianie stanu WiMAX"</string>
     <string name="permdesc_changeWimaxState" product="tablet" msgid="3156456504084201805">"Pozwala aplikacji na nawiązywanie i kończenie połączeń z sieciami WiMAX w tablecie."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Pozwala aplikacji na nawiązywanie i kończenie połączeń z sieciami WiMAX w telefonie."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"parowanie z urządzeniami Bluetooth"</string>
@@ -1570,6 +1570,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Anulowane"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Błąd podczas zapisu treści"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"brak informacji"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Podaj PIN"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Bieżący PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Nowy PIN"</string>

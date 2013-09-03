@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Lehetővé teszi a használó számára, hogy csatlakozzon egy kisegítő szolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"csatlakozás egy nyomtatási szolgáltatáshoz"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Lehetővé teszi a használó számára, hogy csatlakozzon egy nyomtatási szolgáltatás legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"hozzáférés valamennyi nyomtatási feladathoz"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Lehetővé teszi a használó számára, hogy megtekintsen más alkalmazások által létrehozott nyomtatási feladatokat. A normál alkalmazásoknak erre soha nincs szükségük."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"csatlakozás egy nyomtatásisor-kezelő szolgáltatáshoz"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Lehetővé teszi a használó számára, hogy csatlakozzon egy nyomtatásisor-kezelő legfelső szintű kezelőfelületéhez. A normál alkalmazásoknak erre soha nincs szükségük."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"csatlakozás NFC-szolgáltatáshoz"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Az eszköz kezelője csatlakozhat NFC-kártyákat emuláló alkalmazásokhoz. A normál alkalmazásoknak nincs rá szükségük."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"csatlakozás szövegszolgáltatáshoz"</string>
@@ -1570,6 +1570,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"„Tabloid” méret"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Törölve"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Hiba történt a tartalomírás közben"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"ismeretlen"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN kód megadása"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Jelenlegi PIN kód"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Új PIN kód"</string>

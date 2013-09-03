@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"ප‍්‍රවේශ්‍යතා සේවාවේ ඉහළ මට්ටමේ අතුරුමුහුණතට බැඳීමට දරන්නාට අවසර දේ. සාමාන්‍ය යෙදුම් සඳහා කිසිවිටක අවශ්‍ය නොවේ."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"මුද්‍රණ සේවාවකට බද්ධ වී ඇත"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"මුද්‍රණ සේවාව ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"සියලු මුද්‍රණ කාර්යයන් වෙත පිවිසෙන්න"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"වෙනත් යෙදුමකින් සෑදු මුද්‍රණ කාර්ය වෙත පිවිසීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවෙයි."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"මුද්‍රණ සේවාවකට බද්ධ වී ඇත"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"මුද්‍රණ සේවාව ඉහල මට්ටමේ අතුරු මුහුණතක් වෙත සම්බන්ධ කිරීමට ධාරකයාට අවසර දෙන්න. සාමාන්‍ය යෙදුම්වලට කිසි විටෙක අවශ්‍ය නොවෙයි."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"NFC සේවාව වෙත බැඳෙන්න"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"NFC කාඩ් පත් ආදර්ශනය කරන යෙදුම් රඳවනයට සම්බන්ධ වීමට ඉඩ දෙන්න. සාමාන්‍ය යෙදුම් සඳහා කිසිදා අවශ්‍ය නොවෙයි."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"පෙළ සේවාවකට බඳින්න"</string>
@@ -1573,6 +1573,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"කුඩා පුවත්පත"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"අවලංගු කරන ලදි"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"අන්තර්ගතය ලිවීමේදී දෝෂයකි"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"නොදනී"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN එක ඇතුළු කරන්න"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"වත්මන් PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"නව PIN"</string>

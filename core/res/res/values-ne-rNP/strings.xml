@@ -161,7 +161,7 @@
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"आवाज बन्द छ"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"ध्वनि खुल्ला छ"</string>
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"हवाइजहाज मोड"</string>
-    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"उडान मोड खुला छ"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"हवाइजहाज मोड खुला छ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"हवाइजहाज मोड बन्द छ"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"९९९+"</string>
     <string name="safeMode" msgid="2788228061547930246">"सुरक्षित मोड"</string>
@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"एक पहुँच सेवाको उच्च स्तरको कुराकानीलाई पक्का गर्नको लागि समाती राख्नेले अनुमति दिन्छ। साधारण अनुप्रयोगहरूलाई कहिल्यै आवश्यक पर्ने छैन।"</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"एउटा प्रिन्ट सेवासँग जोड्नुहोस्"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"एउटा प्रिन्ट सेवाको उच्च स्तरको इन्टरफेसलाई पक्का गर्नको लागि प्रयोगकर्तालाई अनुमति दिन्छ। साधारण अनुप्रयोगहरूलाई कहिल्यै आवश्यक पर्ने छैन।"</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"सबै प्रिन्ट कार्यहरूको पहुँच गर्नुहोस्"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"प्रयोगकर्तालाई अन्य अनुप्रयोगद्वारा निर्मित प्रिन्ट कार्यहरू पहुँच गर्न अनुमति दिन्छ। साधारण अनुप्रयोगहरूलाई कहिल्यै आवश्यक पर्ने छैन।"</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"प्रिन्ट स्पुलर सेवासँग बाध्नुहोस्"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"प्रिन्ट स्पुलर सेवाको शीर्ष तह इन्टर्फेसलाई बाहकसँग बाँध्न अनुमति दिन्छ। सामान्य अनुप्रयोगलाई कहिल्यै पनि आवाश्यक नपर्न सक्छ।"</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"NFC सेवामा बाँध्नुहोस्"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"NFC कार्डहरू इमुलेट गर्ने अनुप्रयोगहरूलाई बाँध्नका लागि होल्डरलाई अनुमति दिन्छ। सामान्य अनुप्रयोगहरूका लागि कहिल्यै पनि आवश्यक पर्दैन।"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"एउटा पाठ सेवासँग संगठित हुनुहोस्"</string>
@@ -1570,6 +1570,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"रद्द गरियो"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"सामाग्री लेखनमा त्रुटि"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"अज्ञात"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN प्रविष्टि गर्नुहोस्"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"वर्तमान PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"नयाँ PIN"</string>
