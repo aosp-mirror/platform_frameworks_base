@@ -191,7 +191,9 @@ public class DirectoryFragment extends Fragment {
                                 authority, docId, query);
                         return new DirectoryLoader(context, rootId, contentsUri, state.sortOrder);
                     case TYPE_RECENT_OPEN:
-                        return new RecentLoader(context);
+                        final RootsCache roots = DocumentsApplication.getRootsCache(context);
+                        final List<RootInfo> matchingRoots = roots.getMatchingRoots(state);
+                        return new RecentLoader(context, matchingRoots);
                     default:
                         throw new IllegalStateException("Unknown type " + mType);
 
