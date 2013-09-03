@@ -1385,6 +1385,11 @@ final class Settings {
 
                 StringBuilder sb = new StringBuilder();
                 for (final PackageSetting pkg : mPackages.values()) {
+                    if (pkg.pkg == null || pkg.pkg.applicationInfo == null) {
+                        Slog.w(TAG, "Skipping " + pkg + " due to missing metadata");
+                        continue;
+                    }
+
                     final ApplicationInfo ai = pkg.pkg.applicationInfo;
                     final String dataPath = ai.dataDir;
                     final boolean isDebug = (ai.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
