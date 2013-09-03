@@ -16,98 +16,147 @@
 
 package com.android.documentsui;
 
-import static com.android.documentsui.DirectoryFragment.TYPE_NORMAL;
-import static com.android.documentsui.DirectoryFragment.TYPE_RECENT_OPEN;
-import static com.android.documentsui.DirectoryFragment.TYPE_SEARCH;
-import static com.android.documentsui.DocumentsActivity.TAG;
-
-import android.content.ContentResolver;
+import android.content.AsyncTaskLoader;
+import android.content.ContentProviderClient;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
-import android.util.Log;
+import android.os.OperationCanceledException;
+import android.provider.DocumentsContract.Document;
 
-import com.android.documentsui.model.DocumentInfo;
-import com.android.internal.util.Predicate;
-import com.google.android.collect.Lists;
+import com.android.documentsui.DocumentsActivity.DisplayState;
 
 import libcore.io.IoUtils;
 
-import java.io.FileNotFoundException;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 class DirectoryResult implements AutoCloseable {
+    ContentProviderClient client;
     Cursor cursor;
-    List<DocumentInfo> contents = Lists.newArrayList();
-    Exception e;
+    Exception exception;
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         IoUtils.closeQuietly(cursor);
+        ContentProviderClient.closeQuietly(client);
+        cursor = null;
+        client = null;
     }
 }
 
-public class DirectoryLoader extends UriDerivativeLoader<Uri, DirectoryResult> {
+public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
+    private final ForceLoadContentObserver mObserver = new ForceLoadContentObserver();
 
-    private final int mType;
-    private Predicate<DocumentInfo> mFilter;
-    private Comparator<DocumentInfo> mSortOrder;
+    private final Uri mUri;
+    private final int mSortOrder;
 
-    public DirectoryLoader(Context context, Uri uri, int type, Predicate<DocumentInfo> filter,
-            Comparator<DocumentInfo> sortOrder) {
-        super(context, uri);
-        mType = type;
-        mFilter = filter;
+    private CancellationSignal mSignal;
+    private DirectoryResult mResult;
+
+    public DirectoryLoader(Context context, Uri uri, int sortOrder) {
+        super(context);
+        mUri = uri;
         mSortOrder = sortOrder;
     }
 
     @Override
-    public DirectoryResult loadInBackground(Uri uri, CancellationSignal signal) {
+    public final DirectoryResult loadInBackground() {
+        synchronized (this) {
+            if (isLoadInBackgroundCanceled()) {
+                throw new OperationCanceledException();
+            }
+            mSignal = new CancellationSignal();
+        }
         final DirectoryResult result = new DirectoryResult();
         try {
-            loadInBackgroundInternal(result, uri, signal);
+            result.client = getContext()
+                    .getContentResolver().acquireUnstableContentProviderClient(mUri.getAuthority());
+            final Cursor cursor = result.client.query(
+                    mUri, null, null, null, getQuerySortOrder(), mSignal);
+            result.cursor = new SortingCursorWrapper(cursor, mSortOrder);
+            result.cursor.registerContentObserver(mObserver);
         } catch (Exception e) {
-            result.e = e;
+            result.exception = e;
+            ContentProviderClient.closeQuietly(result.client);
+        } finally {
+            synchronized (this) {
+                mSignal = null;
+            }
         }
         return result;
     }
 
-    private void loadInBackgroundInternal(
-            DirectoryResult result, Uri uri, CancellationSignal signal) throws RuntimeException {
-        // TODO: switch to using unstable CPC
-        final ContentResolver resolver = getContext().getContentResolver();
-        final Cursor cursor = resolver.query(uri, null, null, null, null, signal);
-        result.cursor = cursor;
-        result.cursor.registerContentObserver(mObserver);
+    @Override
+    public void cancelLoadInBackground() {
+        super.cancelLoadInBackground();
 
-        while (cursor.moveToNext()) {
-            DocumentInfo doc = null;
-            switch (mType) {
-                case TYPE_NORMAL:
-                case TYPE_SEARCH:
-                    doc = DocumentInfo.fromDirectoryCursor(uri, cursor);
-                    break;
-                case TYPE_RECENT_OPEN:
-                    try {
-                        doc = DocumentInfo.fromRecentOpenCursor(resolver, cursor);
-                    } catch (FileNotFoundException e) {
-                        Log.w(TAG, "Failed to find recent: " + e);
-                    }
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown type");
-            }
-
-            if (doc != null && (mFilter == null || mFilter.apply(doc))) {
-                result.contents.add(doc);
+        synchronized (this) {
+            if (mSignal != null) {
+                mSignal.cancel();
             }
         }
+    }
 
-        if (mSortOrder != null) {
-            Collections.sort(result.contents, mSortOrder);
+    @Override
+    public void deliverResult(DirectoryResult result) {
+        if (isReset()) {
+            IoUtils.closeQuietly(result);
+            return;
+        }
+        DirectoryResult oldResult = mResult;
+        mResult = result;
+
+        if (isStarted()) {
+            super.deliverResult(result);
+        }
+
+        if (oldResult != null && oldResult != result) {
+            IoUtils.closeQuietly(oldResult);
+        }
+    }
+
+    @Override
+    protected void onStartLoading() {
+        if (mResult != null) {
+            deliverResult(mResult);
+        }
+        if (takeContentChanged() || mResult == null) {
+            forceLoad();
+        }
+    }
+
+    @Override
+    protected void onStopLoading() {
+        cancelLoad();
+    }
+
+    @Override
+    public void onCanceled(DirectoryResult result) {
+        IoUtils.closeQuietly(result);
+    }
+
+    @Override
+    protected void onReset() {
+        super.onReset();
+
+        // Ensure the loader is stopped
+        onStopLoading();
+
+        IoUtils.closeQuietly(mResult);
+        mResult = null;
+
+        getContext().getContentResolver().unregisterContentObserver(mObserver);
+    }
+
+    private String getQuerySortOrder() {
+        switch (mSortOrder) {
+            case DisplayState.SORT_ORDER_DISPLAY_NAME:
+                return Document.COLUMN_DISPLAY_NAME + " ASC";
+            case DisplayState.SORT_ORDER_LAST_MODIFIED:
+                return Document.COLUMN_LAST_MODIFIED + " DESC";
+            case DisplayState.SORT_ORDER_SIZE:
+                return Document.COLUMN_SIZE + " DESC";
+            default:
+                return null;
         }
     }
 }

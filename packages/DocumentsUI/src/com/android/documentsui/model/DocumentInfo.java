@@ -17,7 +17,11 @@
 package com.android.documentsui.model;
 
 import android.content.ContentResolver;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.ProviderInfo;
 import android.database.Cursor;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
@@ -33,38 +37,28 @@ import java.util.Comparator;
  * Representation of a {@link Document}.
  */
 public class DocumentInfo {
-    public final Uri uri;
-    public final String mimeType;
-    public final String displayName;
-    public final long lastModified;
-    public final int flags;
-    public final String summary;
-    public final long size;
-
-    private DocumentInfo(Uri uri, String mimeType, String displayName, long lastModified, int flags,
-            String summary, long size) {
-        this.uri = uri;
-        this.mimeType = mimeType;
-        this.displayName = displayName;
-        this.lastModified = lastModified;
-        this.flags = flags;
-        this.summary = summary;
-        this.size = size;
-    }
+    public Uri uri;
+    public String mimeType;
+    public String displayName;
+    public long lastModified;
+    public int flags;
+    public String summary;
+    public long size;
+    public int icon;
 
     public static DocumentInfo fromDirectoryCursor(Uri parent, Cursor cursor) {
+        final DocumentInfo doc = new DocumentInfo();
         final String authority = parent.getAuthority();
         final String docId = getCursorString(cursor, Document.COLUMN_DOCUMENT_ID);
-
-        final Uri uri = DocumentsContract.buildDocumentUri(authority, docId);
-        final String mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
-        final String displayName = getCursorString(cursor, Document.COLUMN_DISPLAY_NAME);
-        final long lastModified = getCursorLong(cursor, Document.COLUMN_LAST_MODIFIED);
-        final int flags = getCursorInt(cursor, Document.COLUMN_FLAGS);
-        final String summary = getCursorString(cursor, Document.COLUMN_SUMMARY);
-        final long size = getCursorLong(cursor, Document.COLUMN_SIZE);
-
-        return new DocumentInfo(uri, mimeType, displayName, lastModified, flags, summary, size);
+        doc.uri = DocumentsContract.buildDocumentUri(authority, docId);
+        doc.mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+        doc.displayName = getCursorString(cursor, Document.COLUMN_DISPLAY_NAME);
+        doc.lastModified = getCursorLong(cursor, Document.COLUMN_LAST_MODIFIED);
+        doc.flags = getCursorInt(cursor, Document.COLUMN_FLAGS);
+        doc.summary = getCursorString(cursor, Document.COLUMN_SUMMARY);
+        doc.size = getCursorLong(cursor, Document.COLUMN_SIZE);
+        doc.icon = getCursorInt(cursor, Document.COLUMN_ICON);
+        return doc;
     }
 
     @Deprecated
@@ -79,14 +73,18 @@ public class DocumentInfo {
             if (!cursor.moveToFirst()) {
                 throw new FileNotFoundException("Missing details for " + uri);
             }
-            final String mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
-            final String displayName = getCursorString(cursor, Document.COLUMN_DISPLAY_NAME);
-            final int flags = getCursorInt(cursor, Document.COLUMN_FLAGS)
-                    & Document.FLAG_SUPPORTS_THUMBNAIL;
-            final String summary = getCursorString(cursor, Document.COLUMN_SUMMARY);
-            final long size = getCursorLong(cursor, Document.COLUMN_SIZE);
 
-            return new DocumentInfo(uri, mimeType, displayName, lastModified, flags, summary, size);
+            final DocumentInfo doc = new DocumentInfo();
+            doc.uri = uri;
+            doc.mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+            doc.displayName = getCursorString(cursor, Document.COLUMN_DISPLAY_NAME);
+            doc.lastModified = lastModified;
+            doc.flags = getCursorInt(cursor, Document.COLUMN_FLAGS)
+                    & Document.FLAG_SUPPORTS_THUMBNAIL;
+            doc.summary = getCursorString(cursor, Document.COLUMN_SUMMARY);
+            doc.size = getCursorLong(cursor, Document.COLUMN_SIZE);
+            doc.icon = getCursorInt(cursor, Document.COLUMN_ICON);
+            return doc;
         } catch (Throwable t) {
             throw asFileNotFoundException(t);
         } finally {
@@ -101,14 +99,16 @@ public class DocumentInfo {
             if (!cursor.moveToFirst()) {
                 throw new FileNotFoundException("Missing details for " + uri);
             }
-            final String mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
-            final String displayName = getCursorString(cursor, Document.COLUMN_DISPLAY_NAME);
-            final long lastModified = getCursorLong(cursor, Document.COLUMN_LAST_MODIFIED);
-            final int flags = getCursorInt(cursor, Document.COLUMN_FLAGS);
-            final String summary = getCursorString(cursor, Document.COLUMN_SUMMARY);
-            final long size = getCursorLong(cursor, Document.COLUMN_SIZE);
-
-            return new DocumentInfo(uri, mimeType, displayName, lastModified, flags, summary, size);
+            final DocumentInfo doc = new DocumentInfo();
+            doc.uri = uri;
+            doc.mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+            doc.displayName = getCursorString(cursor, Document.COLUMN_DISPLAY_NAME);
+            doc.lastModified = getCursorLong(cursor, Document.COLUMN_LAST_MODIFIED);
+            doc.flags = getCursorInt(cursor, Document.COLUMN_FLAGS);
+            doc.summary = getCursorString(cursor, Document.COLUMN_SUMMARY);
+            doc.size = getCursorLong(cursor, Document.COLUMN_SIZE);
+            doc.icon = getCursorInt(cursor, Document.COLUMN_ICON);
+            return doc;
         } catch (Throwable t) {
             throw asFileNotFoundException(t);
         } finally {
@@ -145,6 +145,25 @@ public class DocumentInfo {
         return (flags & Document.FLAG_SUPPORTS_DELETE) != 0;
     }
 
+    public Drawable loadIcon(Context context) {
+        return loadIcon(context, uri.getAuthority(), icon);
+    }
+
+    public static Drawable loadIcon(Context context, String authority, int icon) {
+        if (icon != 0) {
+            if (authority != null) {
+                final PackageManager pm = context.getPackageManager();
+                final ProviderInfo info = pm.resolveContentProvider(authority, 0);
+                if (info != null) {
+                    return pm.getDrawable(info.packageName, icon, info.applicationInfo);
+                }
+            } else {
+                return context.getResources().getDrawable(icon);
+            }
+        }
+        return null;
+    }
+
     public static String getCursorString(Cursor cursor, String columnName) {
         final int index = cursor.getColumnIndex(columnName);
         return (index != -1) ? cursor.getString(index) : null;
@@ -170,6 +189,7 @@ public class DocumentInfo {
         return (index != -1) ? cursor.getInt(index) : 0;
     }
 
+    @Deprecated
     public static class DisplayNameComparator implements Comparator<DocumentInfo> {
         @Override
         public int compare(DocumentInfo lhs, DocumentInfo rhs) {
@@ -184,6 +204,7 @@ public class DocumentInfo {
         }
     }
 
+    @Deprecated
     public static class LastModifiedComparator implements Comparator<DocumentInfo> {
         @Override
         public int compare(DocumentInfo lhs, DocumentInfo rhs) {
@@ -191,6 +212,7 @@ public class DocumentInfo {
         }
     }
 
+    @Deprecated
     public static class SizeComparator implements Comparator<DocumentInfo> {
         @Override
         public int compare(DocumentInfo lhs, DocumentInfo rhs) {
