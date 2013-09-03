@@ -61,6 +61,7 @@ public class RecentsProvider extends ContentProvider {
     public static final String COL_PACKAGE_NAME = "package_name";
     public static final String COL_TIMESTAMP = "timestamp";
 
+    @Deprecated
     public static Uri buildRecentOpen() {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(AUTHORITY).appendPath("recent_open").build();
