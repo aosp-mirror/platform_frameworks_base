@@ -163,7 +163,7 @@ final class RemotePrintService implements DeathRecipient {
 
         if (isBound()) {
             if (DEBUG) {
-                Slog.i(LOG_TAG, "[user: " + mUserId + "] handleOnAllPrintJobsHandled()");
+                Slog.i(LOG_TAG, "[user: " + mUserId + "] onAllPrintJobsHandled()");
             }
 
             // If the service has a printer discovery session
@@ -185,7 +185,7 @@ final class RemotePrintService implements DeathRecipient {
         // which means that there are no print jobs to be cancelled.
         if (isBound()) {
             if (DEBUG) {
-                Slog.i(LOG_TAG, "[user: " + mUserId + "] handleRequestCancelPrintJob()");
+                Slog.i(LOG_TAG, "[user: " + mUserId + "] requestCancelPrintJob()");
             }
             try {
                 mPrintService.requestCancelPrintJob(printJob);
@@ -215,7 +215,7 @@ final class RemotePrintService implements DeathRecipient {
             });
         } else {
             if (DEBUG) {
-                Slog.i(LOG_TAG, "[user: " + mUserId + "] handleOnPrintJobQueued()");
+                Slog.i(LOG_TAG, "[user: " + mUserId + "] onPrintJobQueued()");
             }
             try {
                 mPrintService.onPrintJobQueued(printJob);
@@ -358,7 +358,7 @@ final class RemotePrintService implements DeathRecipient {
             });
         } else {
             if (DEBUG) {
-                Slog.i(LOG_TAG, "[user: " + mUserId + "] handleValidatePrinters()");
+                Slog.i(LOG_TAG, "[user: " + mUserId + "] validatePrinters()");
             }
             try {
                 mPrintService.validatePrinters(printerIds);
@@ -385,7 +385,7 @@ final class RemotePrintService implements DeathRecipient {
             });
         } else {
             if (DEBUG) {
-                Slog.i(LOG_TAG, "[user: " + mUserId + "] handleStartPrinterTracking()");
+                Slog.i(LOG_TAG, "[user: " + mUserId + "] startPrinterTracking()");
             }
             try {
                 mPrintService.startPrinterStateTracking(printerId);
@@ -412,7 +412,7 @@ final class RemotePrintService implements DeathRecipient {
             });
         } else {
             if (DEBUG) {
-                Slog.i(LOG_TAG, "[user: " + mUserId + "] handleStopPrinterTracking()");
+                Slog.i(LOG_TAG, "[user: " + mUserId + "] stopPrinterTracking()");
             }
             try {
                 mPrintService.stopPrinterStateTracking(printerId);
