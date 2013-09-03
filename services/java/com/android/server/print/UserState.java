@@ -62,7 +62,7 @@ final class UserState implements PrintSpoolerCallbacks {
 
     private static final boolean DEBUG = true && Build.IS_DEBUGGABLE;
 
-    private static final int MAX_ITEMS_PER_CALLBACK = 100;
+    private static final int MAX_ITEMS_PER_CALLBACK = 50;
 
     private static final char COMPONENT_NAME_SEPARATOR = ':';
 
@@ -576,10 +576,12 @@ final class UserState implements PrintSpoolerCallbacks {
 
             // Remember we got a start request to match with an end.
             mStartedPrinterDiscoveryTokens.add(observer.asBinder());
+
             // The service are already performing discovery - nothing to do.
             if (mStartedPrinterDiscoveryTokens.size() > 1) {
                 return;
             }
+
             List<RemotePrintService> services = new ArrayList<RemotePrintService>(
                     mActiveServices.values());
             SomeArgs args = SomeArgs.obtain();
@@ -858,11 +860,7 @@ final class UserState implements PrintSpoolerCallbacks {
             final int observerCount = mDiscoveryObservers.beginBroadcast();
             for (int i = 0; i < observerCount; i++) {
                 IPrinterDiscoveryObserver observer = mDiscoveryObservers.getBroadcastItem(i);
-                try {
-                    observer.onPrintersAdded(addedPrinters);
-                } catch (RemoteException re) {
-                    Log.i(LOG_TAG, "Error dispatching added printers", re);
-                }
+                handlePrintersAdded(observer, addedPrinters);
             }
             mDiscoveryObservers.finishBroadcast();
         }
@@ -871,11 +869,7 @@ final class UserState implements PrintSpoolerCallbacks {
             final int observerCount = mDiscoveryObservers.beginBroadcast();
             for (int i = 0; i < observerCount; i++) {
                 IPrinterDiscoveryObserver observer = mDiscoveryObservers.getBroadcastItem(i);
-                try {
-                    observer.onPrintersRemoved(removedPrinterIds);
-                } catch (RemoteException re) {
-                    Log.i(LOG_TAG, "Error dispatching removed printers", re);
-                }
+                handlePrintersRemoved(observer, removedPrinterIds);
             }
             mDiscoveryObservers.finishBroadcast();
         }
@@ -884,11 +878,7 @@ final class UserState implements PrintSpoolerCallbacks {
             final int observerCount = mDiscoveryObservers.beginBroadcast();
             for (int i = 0; i < observerCount; i++) {
                 IPrinterDiscoveryObserver observer = mDiscoveryObservers.getBroadcastItem(i);
-                try {
-                    observer.onPrintersUpdated(updatedPrinters);
-                } catch (RemoteException re) {
-                    Log.i(LOG_TAG, "Error dispatching updated printers", re);
-                }
+                handlePrintersUpdated(observer, updatedPrinters);
             }
             mDiscoveryObservers.finishBroadcast();
         }
@@ -957,7 +947,7 @@ final class UserState implements PrintSpoolerCallbacks {
                         final int start = i * MAX_ITEMS_PER_CALLBACK;
                         final int end = Math.min(start + MAX_ITEMS_PER_CALLBACK, printerCount);
                         List<PrinterInfo> subPrinters = printers.subList(start, end);
-                        observer.onPrintersAdded(subPrinters);
+                        observer.onPrintersAdded(subPrinters); 
                     }
                 }
             } catch (RemoteException re) {
@@ -983,6 +973,27 @@ final class UserState implements PrintSpoolerCallbacks {
                }
             } catch (RemoteException re) {
                 Log.e(LOG_TAG, "Error sending added printers", re);
+            }
+        }
+
+        private void handlePrintersUpdated(IPrinterDiscoveryObserver observer,
+                List<PrinterInfo> updatedPrinters) {
+            try {
+                final int printerCount = updatedPrinters.size();
+                if (printerCount <= MAX_ITEMS_PER_CALLBACK) {
+                    observer.onPrintersUpdated(updatedPrinters);
+                } else {
+                    // Send the added printers in chunks avoiding the binder transaction limit.
+                    final int transactionCount = (printerCount / MAX_ITEMS_PER_CALLBACK) + 1;
+                    for (int i = 0; i < transactionCount; i++) {
+                        final int start = i * MAX_ITEMS_PER_CALLBACK;
+                        final int end = Math.min(start + MAX_ITEMS_PER_CALLBACK, printerCount);
+                        List<PrinterInfo> subPrinters = updatedPrinters.subList(start, end);
+                        observer.onPrintersUpdated(subPrinters); 
+                    }
+                }
+            } catch (RemoteException re) {
+                Log.e(LOG_TAG, "Error sending updated printers", re);
             }
         }
 

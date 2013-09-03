@@ -80,7 +80,7 @@ import java.util.List;
 public abstract class PrinterDiscoverySession {
     private static final String LOG_TAG = "PrinterDiscoverySession";
 
-    private static final int MAX_ITEMS_PER_CALLBACK = 100;
+    private static final int MAX_ITEMS_PER_CALLBACK = 50;
 
     private static int sIdCounter = 0;
 
