@@ -4924,11 +4924,37 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * Scrolls the list items within the view by a specified number of pixels.
      *
      * @param y the amount of pixels to scroll by vertically
-     * @return true if the list is able to scroll, or false if the list is
-     *         already at the beginning/end and unable to scroll any more.
+     * @see #canScrollList(int)
      */
-    public boolean scrollListBy(int y) {
-        return !trackMotionScroll(-y, -y);
+    public void scrollListBy(int y) {
+        trackMotionScroll(-y, -y);
+    }
+
+    /**
+     * Check if the items in the list can be scrolled in a certain direction.
+     *
+     * @param direction Negative to check scrolling up, positive to check
+     *            scrolling down.
+     * @return true if the list can be scrolled in the specified direction,
+     *         false otherwise.
+     * @see #scrollListBy(int)
+     */
+    public boolean canScrollList(int direction) {
+        final int childCount = getChildCount();
+        if (childCount == 0) {
+            return false;
+        }
+
+        final int firstPosition = mFirstPosition;
+        final Rect listPadding = mListPadding;
+        if (direction > 0) {
+            final int lastBottom = getChildAt(childCount - 1).getBottom();
+            final int lastPosition = firstPosition + childCount;
+            return lastPosition < mItemCount || lastBottom > getHeight() - listPadding.bottom;
+        } else {
+            final int firstTop = getChildAt(0).getTop();
+            return firstPosition > 0 || firstTop < listPadding.top;
+        }
     }
 
     /**
