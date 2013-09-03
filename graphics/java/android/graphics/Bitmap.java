@@ -419,6 +419,10 @@ public final class Bitmap implements Parcelable {
          * 
          * It is recommended to use {@link #ARGB_8888} instead of this
          * configuration.
+         *
+         * Note: as of {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE},
+         * any bitmap created with this configuration will be created
+         * using {@link #ARGB_8888} instead.
          * 
          * @deprecated Because of the poor quality of this configuration,
          *             it is advised to use {@link #ARGB_8888} instead.
