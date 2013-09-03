@@ -13256,14 +13256,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     // Keep the DRAWING_CACHE_QUALITY_LOW flag just in case
                     switch (mViewFlags & DRAWING_CACHE_QUALITY_MASK) {
                         case DRAWING_CACHE_QUALITY_AUTO:
-                            quality = Bitmap.Config.ARGB_8888;
-                            break;
                         case DRAWING_CACHE_QUALITY_LOW:
-                            quality = Bitmap.Config.ARGB_8888;
-                            break;
                         case DRAWING_CACHE_QUALITY_HIGH:
-                            quality = Bitmap.Config.ARGB_8888;
-                            break;
                         default:
                             quality = Bitmap.Config.ARGB_8888;
                             break;

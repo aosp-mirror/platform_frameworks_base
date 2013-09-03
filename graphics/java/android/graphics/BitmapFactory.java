@@ -81,7 +81,7 @@ public class BitmapFactory {
          * function to ensure that you are using the bitmap that was used as the
          * decode destination.</p>
          *
-         * @see Bitmap#reconfigure(int,int,Config)
+         * @see Bitmap#reconfigure(int,int, android.graphics.Bitmap.Config)
          */
         public Bitmap inBitmap;
 
