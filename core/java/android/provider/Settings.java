@@ -4937,6 +4937,13 @@ public final class Settings {
                "data_stall_alarm_aggressive_delay_in_ms";
 
        /**
+        * The number of milliseconds to allow the provisioning apn to remain active
+        * @hide
+        */
+       public static final String PROVISIONING_APN_ALARM_DELAY_IN_MS =
+               "provisioning_apn_alarm_delay_in_ms";
+
+       /**
         * The interval in milliseconds at which to check gprs registration
         * after the first registration mismatch of gprs and voice service,
         * to detect possible data network registration problems.
