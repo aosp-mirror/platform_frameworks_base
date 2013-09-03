@@ -233,7 +233,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     /**
      * Returns the key type (e.g., "RSA", "DSA", "EC") specified by this
      * parameter.
-     * @hide
      */
     public String getKeyType() {
         return mKeyType;
@@ -243,7 +242,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
      * Returns the key size specified by this parameter. For instance, for RSA
      * this will return the modulus size and for EC it will return the field
      * size.
-     * @hide
      */
     public int getKeySize() {
         return mKeySize;
@@ -252,7 +250,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
     /**
      * Returns the {@link AlgorithmParameterSpec} that will be used for creation
      * of the key pair.
-     * @hide
      */
     public AlgorithmParameterSpec getAlgorithmParameterSpec() {
         return mSpec;
@@ -375,7 +372,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
 
         /**
          * Sets the key type (e.g., RSA, DSA, EC) of the keypair to be created.
-         * @hide
          */
         public Builder setKeyType(String keyType) throws NoSuchAlgorithmException {
             if (keyType == null) {
@@ -395,7 +391,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * Sets the key size for the keypair to be created. For instance, for a
          * key type of RSA this will set the modulus size and for a key type of
          * EC it will select a curve with a matching field size.
-         * @hide
          */
         public Builder setKeySize(int keySize) {
             if (keySize < 0) {
@@ -409,7 +404,6 @@ public final class KeyPairGeneratorSpec implements AlgorithmParameterSpec {
          * Sets the underlying key type's parameters. This is required for DSA
          * where you must set this to an instance of
          * {@link java.security.spec.DSAParameterSpec}.
-         * @hide
          */
         public Builder setAlgorithmParameterSpec(AlgorithmParameterSpec spec) {
             if (spec == null) {
