@@ -255,7 +255,7 @@ final class ActivityStack {
         //public Handler() {
         //    if (localLOGV) Slog.v(TAG, "Handler started!");
         //}
-        public ActivityStackHandler(Looper looper) {
+        ActivityStackHandler(Looper looper) {
             super(looper);
         }
 
@@ -331,7 +331,6 @@ final class ActivityStack {
         mWindowManager = service.mWindowManager;
         mStackSupervisor = service.mStackSupervisor;
         mContext = context;
-        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mStackId = stackId;
         mCurrentUser = service.mCurrentUserId;
     }
@@ -837,7 +836,7 @@ final class ActivityStack {
         }
     }
 
-    private final void completePauseLocked() {
+    private void completePauseLocked() {
         ActivityRecord prev = mPausingActivity;
         if (DEBUG_PAUSE) Slog.v(TAG, "Complete pause: " + prev);
 
@@ -1765,7 +1764,7 @@ final class ActivityStack {
         for (int taskNdx = 0; taskNdx < numTasks; ++taskNdx) {
             TaskRecord task = mTaskHistory.get(taskNdx);
             final ArrayList<ActivityRecord> activities = task.mActivities;
-            if (activities.size() == 0) {
+            if (activities.isEmpty()) {
                 continue;
             }
             TaskGroup group = new TaskGroup();
@@ -2335,7 +2334,7 @@ final class ActivityStack {
 
         finishActivityResultsLocked(r, resultCode, resultData);
 
-        if (mService.mPendingThumbnails.size() > 0) {
+        if (!mService.mPendingThumbnails.isEmpty()) {
             // There are clients waiting to receive thumbnails so, in case
             // this is an activity that someone is waiting for, add it
             // to the pending list so we can correctly update the clients.
@@ -2561,7 +2560,7 @@ final class ActivityStack {
             cleanUpActivityServicesLocked(r);
         }
 
-        if (mService.mPendingThumbnails.size() > 0) {
+        if (!mService.mPendingThumbnails.isEmpty()) {
             // There are clients waiting to receive thumbnails so, in case
             // this is an activity that someone is waiting for, add it
             // to the pending list so we can correctly update the clients.
@@ -2698,7 +2697,7 @@ final class ActivityStack {
                     mService.mHandler.sendEmptyMessage(
                             ActivityManagerService.CANCEL_HEAVY_NOTIFICATION_MSG);
                 }
-                if (r.app.activities.size() == 0) {
+                if (r.app.activities.isEmpty()) {
                     // No longer have activities, so update oom adj.
                     mService.updateOomAdjLocked();
                 }
@@ -3009,8 +3008,37 @@ final class ActivityStack {
         if (tr == null) {
             return false;
         }
+
         mTaskHistory.remove(tr);
         mTaskHistory.add(0, tr);
+
+        // There is an assumption that moving a task to the back moves it behind the home activity.
+        // We make sure here that some activity in the stack will launch home.
+        ActivityRecord lastActivity = null;
+        int numTasks = mTaskHistory.size();
+        int taskNdx;
+        for (taskNdx = numTasks - 1; taskNdx >= 1; --taskNdx) {
+            final ArrayList<ActivityRecord> activities = mTaskHistory.get(taskNdx).mActivities;
+            int activityNdx;
+            for (activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = activities.get(activityNdx);
+                if (r.mLaunchHomeTaskNext) {
+                    break;
+                }
+                if (taskNdx == 1 && activityNdx == 0) {
+                    // Final activity before tr task.
+                    lastActivity = r;
+                }
+            }
+            if (activityNdx >= 0) {
+                // Early exit, we found an activity that will launchHomeTaskNext.
+                break;
+            }
+        }
+        if (lastActivity != null) {
+            // No early exit, we did not find an activity that will launchHomeTaskNext, set one.
+            lastActivity.mLaunchHomeTaskNext = true;
+        }
 
         if (reason != null &&
                 (reason.intent.getFlags() & Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
@@ -3020,8 +3048,7 @@ final class ActivityStack {
                 mNoAnimActivities.add(r);
             }
         } else {
-            mWindowManager.prepareAppTransition(
-                    AppTransition.TRANSIT_TASK_TO_BACK, false);
+            mWindowManager.prepareAppTransition(AppTransition.TRANSIT_TASK_TO_BACK, false);
         }
         mWindowManager.moveTaskToBottom(task);
 
@@ -3029,9 +3056,8 @@ final class ActivityStack {
             validateAppTokensLocked();
         }
 
-        if (mResumedActivity != null && mResumedActivity.task == tr &&
-                mResumedActivity.mLaunchHomeTaskNext) {
-            // TODO: Can we skip the next line and just pass mResumedAct. to resumeHomeAct.()?
+        if (numTasks <= 1 || (mResumedActivity != null && mResumedActivity.task == tr &&
+                mResumedActivity.mLaunchHomeTaskNext)) {
             mResumedActivity.mLaunchHomeTaskNext = false;
             return mStackSupervisor.resumeHomeActivity(null);
         }
@@ -3175,7 +3201,7 @@ final class ActivityStack {
         return true;
     }
 
-    private final boolean relaunchActivityLocked(ActivityRecord r,
+    private boolean relaunchActivityLocked(ActivityRecord r,
             int changes, boolean andResume) {
         List<ResultInfo> results = null;
         List<Intent> newIntents = null;
@@ -3487,7 +3513,7 @@ final class ActivityStack {
 
     boolean removeTask(TaskRecord task) {
         mTaskHistory.remove(task);
-        return mTaskHistory.size() == 0;
+        return mTaskHistory.isEmpty();
     }
 
     TaskRecord createTaskRecord(int taskId, ActivityInfo info, Intent intent, boolean toTop) {
