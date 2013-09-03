@@ -1244,7 +1244,6 @@
   <java-symbol type="drawable" name="jog_tab_target_yellow" />
   <java-symbol type="drawable" name="magnified_region_frame" />
   <java-symbol type="drawable" name="menu_background" />
-  <java-symbol type="drawable" name="stat_sys_secure" />
   <java-symbol type="id" name="action_mode_bar_stub" />
   <java-symbol type="id" name="button0" />
   <java-symbol type="id" name="button4" />
@@ -1307,7 +1306,6 @@
   <java-symbol type="string" name="global_action_toggle_silent_mode" />
   <java-symbol type="string" name="invalidPuk" />
   <java-symbol type="string" name="lockscreen_carrier_default" />
-  <java-symbol type="string" name="status_bar_device_locked" />
   <java-symbol type="style" name="Animation.LockScreen" />
   <java-symbol type="style" name="Theme.Dialog.RecentApplications" />
   <java-symbol type="style" name="Theme.ExpandedMenu" />
