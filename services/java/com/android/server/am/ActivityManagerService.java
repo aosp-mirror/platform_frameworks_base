@@ -6517,8 +6517,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
                 final long origId = Binder.clearCallingIdentity();
-                stack.moveTaskToBackLocked(taskId, null);
-                Binder.restoreCallingIdentity(origId);
+                try {
+                    stack.moveTaskToBackLocked(taskId, null);
+                } finally {
+                    Binder.restoreCallingIdentity(origId);
+                }
             }
         }
     }
