@@ -140,7 +140,7 @@ static jobject nativeNewInstanceFromStream(JNIEnv* env, jobject clazz,
                                   jboolean isShareable) {
     jobject brd = NULL;
     // for now we don't allow shareable with java inputstreams
-    SkStream* stream = CopyJavaInputStream(env, is, storage);
+    SkStreamRewindable* stream = CopyJavaInputStream(env, is, storage);
 
     if (stream) {
         brd = createBitmapRegionDecoder(env, stream);

@@ -159,8 +159,8 @@ private:
     friend class RewindableJavaStream;
 };
 
-SkStream* WrapJavaInputStream(JNIEnv* env, jobject stream,
-                              jbyteArray storage) {
+SkStream* CreateJavaInputStreamAdaptor(JNIEnv* env, jobject stream,
+                                       jbyteArray storage) {
     static bool gInited;
 
     if (!gInited) {
@@ -190,6 +190,7 @@ SkStream* WrapJavaInputStream(JNIEnv* env, jobject stream,
     return new JavaInputStreamAdaptor(env, stream, storage);
 }
 
+
 static SkMemoryStream* adaptor_to_mem_stream(SkStream* adaptor) {
     SkASSERT(adaptor != NULL);
     SkDynamicMemoryWStream wStream;
@@ -203,9 +204,9 @@ static SkMemoryStream* adaptor_to_mem_stream(SkStream* adaptor) {
     return new SkMemoryStream(data.get());
 }
 
-SkMemoryStream* CopyJavaInputStream(JNIEnv* env, jobject stream,
-                                    jbyteArray storage) {
-    SkAutoTUnref<SkStream> adaptor(WrapJavaInputStream(env, stream, storage));
+SkStreamRewindable* CopyJavaInputStream(JNIEnv* env, jobject stream,
+                                        jbyteArray storage) {
+    SkAutoTUnref<SkStream> adaptor(CreateJavaInputStreamAdaptor(env, stream, storage));
     if (NULL == adaptor.get()) {
         return NULL;
     }
@@ -302,7 +303,7 @@ static size_t get_length_if_supported(JNIEnv* env, jobject jstream) {
 
 SkStreamRewindable* GetRewindableStream(JNIEnv* env, jobject stream,
                                         jbyteArray storage) {
-    SkAutoTUnref<SkStream> adaptor(WrapJavaInputStream(env, stream, storage));
+    SkAutoTUnref<SkStream> adaptor(CreateJavaInputStreamAdaptor(env, stream, storage));
     if (NULL == adaptor.get()) {
         return NULL;
     }
