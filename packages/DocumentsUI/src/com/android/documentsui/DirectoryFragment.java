@@ -397,13 +397,8 @@ public class DirectoryFragment extends Fragment {
                 continue;
             }
 
-            try {
-                if (resolver.delete(doc.uri, null, null) != 1) {
-                    Log.w(TAG, "Failed to delete " + doc);
-                    hadTrouble = true;
-                }
-            } catch (Exception e) {
-                Log.w(TAG, "Failed to delete " + doc + ": " + e);
+            if (!DocumentsContract.deleteDocument(resolver, doc.uri)) {
+                Log.w(TAG, "Failed to delete " + doc);
                 hadTrouble = true;
             }
         }
