@@ -15,8 +15,8 @@
 # This is the list of framework provided keylayouts and key character maps to include.
 # Used by Android.mk and keyboards.mk.
 
-keylayouts := $(notdir $(wildcard $(LOCAL_PATH)/*.kl))
+framework_keylayouts := $(wildcard $(LOCAL_PATH)/*.kl)
 
-keycharmaps := $(notdir $(wildcard $(LOCAL_PATH)/*.kcm))
+framework_keycharmaps := $(wildcard $(LOCAL_PATH)/*.kcm)
 
-keyconfigs := $(notdir $(wildcard $(LOCAL_PATH)/*.idc))
+framework_keyconfigs := $(wildcard $(LOCAL_PATH)/*.idc)
