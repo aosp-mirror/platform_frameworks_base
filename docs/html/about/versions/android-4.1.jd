@@ -41,7 +41,7 @@ sdk.platform.apiLevel=16
     <ol>
       <li><a href="#AndroidBeam">Android Beam</a></li>
       <li><a href="#LocalNsd">Network service discovery</a></li>
-      <li><a href="#WiFiNsd">Wi-Fi Direct service discovery</a></li>
+      <li><a href="#WiFiNsd">Wi-Fi P2P service discovery</a></li>
       <li><a href="#NetworkUsage">Network usage</a></li>
     </ol>
   </li>
@@ -506,11 +506,11 @@ discovered service, allowing you to initiate the connection.</p>
 
 
 
-<h3 id="WiFiNsd">Wi-Fi Direct service discovery</h3>
+<h3 id="WiFiNsd">Wi-Fi P2P service discovery</h3>
 
-<p>The Wi-Fi Direct APIs are enhanced in Android 4.1 to support pre-association service discovery in
+<p>The Wi-Fi P2P APIs are enhanced in Android 4.1 to support pre-association service discovery in
 the {@link android.net.wifi.p2p.WifiP2pManager}. This allows you to discover and filter nearby
-devices by services using Wi-Fi Direct before connecting to one, while Network Service
+devices by services using Wi-Fi P2P before connecting to one, while Network Service
 Discovery allows you to discover a service on an existing connected network (such as a local Wi-Fi
 network).</p>
 
