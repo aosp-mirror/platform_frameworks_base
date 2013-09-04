@@ -764,8 +764,6 @@ public:
     static void doTextBounds(JNIEnv* env, const jchar* text, int count,
                              jobject bounds, const SkPaint& paint, jint bidiFlags) {
         SkRect  r;
-        r.set(0,0,0,0);
-
         SkIRect ir;
 
         sp<TextLayoutValue> value = TextLayoutEngine::getInstance().getValue(&paint,
