@@ -19,6 +19,7 @@ package android.nfc;
 import android.app.Activity;
 import android.app.Application;
 import android.net.Uri;
+import android.nfc.NfcAdapter.ReaderCallback;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -36,7 +37,7 @@ import java.util.List;
  *
  * @hide
  */
-public final class NfcActivityManager extends INdefPushCallback.Stub
+public final class NfcActivityManager extends IAppCallback.Stub
         implements Application.ActivityLifecycleCallbacks {
     static final String TAG = NfcAdapter.TAG;
     static final Boolean DBG = false;
@@ -113,6 +114,8 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
         Uri[] uris = null;
         int flags = 0;
         int readerModeFlags = 0;
+        NfcAdapter.ReaderCallback readerCallback = null;
+        Bundle readerModeExtras = null;
         Binder token;
 
         public NfcActivityState(Activity activity) {
@@ -197,17 +200,20 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
         mDefaultEvent = new NfcEvent(mAdapter);
     }
 
-    public void enableReaderMode(Activity activity, int flags) {
+    public void enableReaderMode(Activity activity, ReaderCallback callback, int flags,
+            Bundle extras) {
         boolean isResumed;
         Binder token;
         synchronized (NfcActivityManager.this) {
             NfcActivityState state = getActivityState(activity);
+            state.readerCallback = callback;
             state.readerModeFlags = flags;
+            state.readerModeExtras = extras;
             token = state.token;
             isResumed = state.resumed;
         }
         if (isResumed) {
-            setReaderMode(token, flags);
+            setReaderMode(token, flags, extras);
         }
     }
 
@@ -216,20 +222,22 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
         Binder token;
         synchronized (NfcActivityManager.this) {
             NfcActivityState state = getActivityState(activity);
+            state.readerCallback = null;
             state.readerModeFlags = 0;
+            state.readerModeExtras = null;
             token = state.token;
             isResumed = state.resumed;
         }
         if (isResumed) {
-            setReaderMode(token, 0);
+            setReaderMode(token, 0, null);
         }
 
     }
 
-    public void setReaderMode(Binder token, int flags) {
+    public void setReaderMode(Binder token, int flags, Bundle extras) {
         if (DBG) Log.d(TAG, "Setting reader mode");
         try {
-            NfcAdapter.sService.setReaderMode(token, flags);
+            NfcAdapter.sService.setReaderMode(token, this, flags, extras);
         } catch (RemoteException e) {
             mAdapter.attemptDeadServiceRecovery(e);
         }
@@ -302,12 +310,12 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
     }
 
     /**
-     * Request or unrequest NFC service callbacks for NDEF push.
+     * Request or unrequest NFC service callbacks.
      * Makes IPC call - do not hold lock.
      */
     void requestNfcServiceCallback() {
         try {
-            NfcAdapter.sService.setNdefPushCallback(this);
+            NfcAdapter.sService.setAppCallback(this);
         } catch (RemoteException e) {
             mAdapter.attemptDeadServiceRecovery(e);
         }
@@ -375,6 +383,22 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
         }
     }
 
+    @Override
+    public void onTagDiscovered(Tag tag) throws RemoteException {
+        NfcAdapter.ReaderCallback callback;
+        synchronized (NfcActivityManager.this) {
+            NfcActivityState state = findResumedActivityState();
+            if (state == null) return;
+
+            callback = state.readerCallback;
+        }
+
+        // Make callback without lock
+        if (callback != null) {
+            callback.onTagDiscovered(tag);
+        }
+
+    }
     /** Callback from Activity life-cycle, on main thread */
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) { /* NO-OP */ }
@@ -387,6 +411,7 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
     @Override
     public void onActivityResumed(Activity activity) {
         int readerModeFlags = 0;
+        Bundle readerModeExtras = null;
         Binder token;
         synchronized (NfcActivityManager.this) {
             NfcActivityState state = findActivityState(activity);
@@ -395,9 +420,10 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
             state.resumed = true;
             token = state.token;
             readerModeFlags = state.readerModeFlags;
+            readerModeExtras = state.readerModeExtras;
         }
         if (readerModeFlags != 0) {
-            setReaderMode(token, readerModeFlags);
+            setReaderMode(token, readerModeFlags, readerModeExtras);
         }
         requestNfcServiceCallback();
     }
@@ -417,7 +443,7 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
         }
         if (readerModeFlagsSet) {
             // Restore default p2p modes
-            setReaderMode(token, 0);
+            setReaderMode(token, 0, null);
         }
     }
 
@@ -441,4 +467,5 @@ public final class NfcActivityManager extends INdefPushCallback.Stub
             }
         }
     }
+
 }
