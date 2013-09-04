@@ -18,6 +18,7 @@ package com.android.documentsui;
 
 import android.database.AbstractCursor;
 import android.database.Cursor;
+import android.os.Bundle;
 
 /**
  * Cursor wrapper that adds columns to identify which root a document came from.
@@ -60,6 +61,11 @@ public class RootCursorWrapper extends AbstractCursor {
         mRootIdIndex = before.length + 1;
         mColumnNames[mAuthorityIndex] = COLUMN_AUTHORITY;
         mColumnNames[mRootIdIndex] = COLUMN_ROOT_ID;
+    }
+
+    @Override
+    public Bundle getExtras() {
+        return mCursor.getExtras();
     }
 
     @Override
@@ -128,5 +134,4 @@ public class RootCursorWrapper extends AbstractCursor {
     public boolean isNull(int column) {
         return mCursor.isNull(column);
     }
-
 }
