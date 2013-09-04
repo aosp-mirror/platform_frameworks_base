@@ -59,7 +59,7 @@ public interface MediaTimeProvider {
      *                  greater than or equal to the last returned time.  Don't
      *                  always set this to true.  E.g. this has undesired
      *                  consequences if the media is seeked between calls.
-     * @throw IllegalStateException if the media is not initialized
+     * @throws IllegalStateException if the media is not initialized
      */
     public long getCurrentTimeUs(boolean precise, boolean monotonic)
             throws IllegalStateException;
