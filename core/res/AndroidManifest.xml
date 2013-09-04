@@ -247,6 +247,7 @@
 
     <protected-broadcast android:name="android.location.GPS_ENABLED_CHANGE" />
     <protected-broadcast android:name="android.location.PROVIDERS_CHANGED" />
+    <protected-broadcast android:name="android.location.MODE_CHANGED" />
     <protected-broadcast android:name="android.location.GPS_FIX_CHANGE" />
     <protected-broadcast android:name="android.net.proxy.PAC_REFRESH" />
 
