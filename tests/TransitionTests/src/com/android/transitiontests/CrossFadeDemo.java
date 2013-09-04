@@ -17,13 +17,13 @@ package com.android.transitiontests;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.transition.ChangeBounds;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Crossfade;
-import android.view.transition.Move;
-import android.view.transition.Scene;
-import android.view.transition.TransitionGroup;
-import android.view.transition.TransitionManager;
+import android.transition.Crossfade;
+import android.transition.Scene;
+import android.transition.TransitionSet;
+import android.transition.TransitionManager;
 
 
 public class CrossFadeDemo extends Activity {
@@ -41,16 +41,17 @@ public class CrossFadeDemo extends Activity {
         View container = (View) findViewById(R.id.container);
         mSceneRoot = (ViewGroup) container.getParent();
 
-        mScene1 = new Scene(mSceneRoot, R.layout.crossfade, this);
-        mScene2 = new Scene(mSceneRoot, R.layout.crossfade_1, this);
+        mScene1 = Scene.getSceneForLayout(mSceneRoot, R.layout.crossfade, this);
+        mScene2 = Scene.getSceneForLayout(mSceneRoot, R.layout.crossfade_1, this);
 
         Crossfade crossfade = new Crossfade();
         crossfade.setFadeBehavior(Crossfade.FADE_BEHAVIOR_CROSSFADE);
         crossfade.setResizeBehavior(Crossfade.RESIZE_BEHAVIOR_NONE);
-        crossfade.setTargetIds(R.id.textview, R.id.textview1, R.id.textview2);
+        crossfade.addTargetId(R.id.textview).addTargetId(R.id.textview1).
+                addTargetId(R.id.textview2);
         mTransitionManager = new TransitionManager();
-        TransitionGroup moveCrossFade = new TransitionGroup();
-        moveCrossFade.addTransitions(crossfade, new Move());
+        TransitionSet moveCrossFade = new TransitionSet();
+        moveCrossFade.addTransition(crossfade).addTransition(new ChangeBounds());
         mTransitionManager.setTransition(mScene1, moveCrossFade);
         mTransitionManager.setTransition(mScene2, moveCrossFade);
         mCurrentScene = 1;

@@ -17,14 +17,14 @@ package com.android.transitiontests;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.transition.ChangeBounds;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Fade;
-import android.view.transition.Move;
-import android.view.transition.Recolor;
-import android.view.transition.Scene;
-import android.view.transition.TransitionGroup;
-import android.view.transition.TransitionManager;
+import android.transition.Fade;
+import android.transition.Recolor;
+import android.transition.Scene;
+import android.transition.TransitionSet;
+import android.transition.TransitionManager;
 
 
 public class Demo3 extends Activity {
@@ -41,11 +41,11 @@ public class Demo3 extends Activity {
         View container = (View) findViewById(R.id.container);
         mSceneRoot = (ViewGroup) container.getParent();
 
-        mSearchScreen = new Scene(mSceneRoot, R.layout.search_screen, this);
-        mResultsScreen = new Scene(mSceneRoot, R.layout.results_screen, this);
+        mSearchScreen = Scene.getSceneForLayout(mSceneRoot, R.layout.search_screen, this);
+        mResultsScreen = Scene.getSceneForLayout(mSceneRoot, R.layout.results_screen, this);
 
-        TransitionGroup transition = new TransitionGroup();
-        transition.addTransitions(new Fade(), new Move(), new Recolor());
+        TransitionSet transition = new TransitionSet();
+        transition.addTransition(new Fade()).addTransition(new ChangeBounds()).addTransition(new Recolor());
 
         mTransitionManager = new TransitionManager();
         mTransitionManager.setTransition(mSearchScreen, transition);

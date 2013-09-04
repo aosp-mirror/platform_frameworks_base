@@ -19,7 +19,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.TransitionManager;
+import android.transition.TransitionManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import static android.widget.LinearLayout.LayoutParams;

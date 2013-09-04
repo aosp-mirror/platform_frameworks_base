@@ -21,11 +21,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Fade;
-import android.view.transition.Move;
-import android.view.transition.Scene;
-import android.view.transition.TransitionGroup;
-import android.view.transition.TransitionManager;
+import android.transition.Fade;
+import android.transition.ChangeBounds;
+import android.transition.Scene;
+import android.transition.TransitionSet;
+import android.transition.TransitionManager;
 
 
 public class Demo1 extends Activity {
@@ -69,9 +69,10 @@ public class Demo1 extends Activity {
     public void sendMessage(View view) {
         if (mFirstTime) {
             mFirstTime = false;
-            TransitionGroup transition = new TransitionGroup();
-            transition.addTransitions(new Fade().setTargetIds(R.id.resultsText, R.id.resultsList),
-                    new Move().setTargetIds(R.id.searchContainer));
+            TransitionSet transition = new TransitionSet();
+            transition.addTransition(new Fade().addTargetId(R.id.resultsText).
+                    addTargetId(R.id.resultsList)).
+                    addTransition(new ChangeBounds().addTargetId(R.id.searchContainer));
             mTransitionManager = new TransitionManager();
             mTransitionManager.setTransition(mSearchScreen, transition);
             mTransitionManager.setTransition(mResultsScreen, transition);

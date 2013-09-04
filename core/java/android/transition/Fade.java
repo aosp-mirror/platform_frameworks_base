@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package android.view.transition;
+package android.transition;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +29,12 @@ import android.view.ViewGroup;
  * or non-visible. Visibility is determined by both the
  * {@link View#setVisibility(int)} state of the view as well as whether it
  * is parented in the current view hierarchy.
+ *
+ * <p>A Fade transition can be described in a resource file by using the
+ * tag <code>fade</code>, along with the standard
+ * attributes of {@link android.R.styleable#Fade} and
+ * {@link android.R.styleable#Transition}.</p>
+
  */
 public class Fade extends Visibility {
 
@@ -93,21 +98,31 @@ public class Fade extends Visibility {
         return anim;
     }
 
-    @Override
-    protected void captureValues(TransitionValues values, boolean start) {
-        super.captureValues(values, start);
-        float alpha = values.view.getAlpha();
-        values.values.put(PROPNAME_ALPHA, alpha);
+    private void captureValues(TransitionValues transitionValues) {
+        float alpha = transitionValues.view.getAlpha();
+        transitionValues.values.put(PROPNAME_ALPHA, alpha);
         int[] loc = new int[2];
-        values.view.getLocationOnScreen(loc);
-        values.values.put(PROPNAME_SCREEN_X, loc[0]);
-        values.values.put(PROPNAME_SCREEN_Y, loc[1]);
+        transitionValues.view.getLocationOnScreen(loc);
+        transitionValues.values.put(PROPNAME_SCREEN_X, loc[0]);
+        transitionValues.values.put(PROPNAME_SCREEN_Y, loc[1]);
     }
 
     @Override
-    protected Animator play(ViewGroup sceneRoot, TransitionValues startValues,
+    public void captureStartValues(TransitionValues transitionValues) {
+        super.captureStartValues(transitionValues);
+        captureValues(transitionValues);
+    }
+
+
+    @Override
+    public void captureEndValues(TransitionValues transitionValues) {
+        super.captureEndValues(transitionValues);
+    }
+
+    @Override
+    public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
             TransitionValues endValues) {
-        Animator animator = super.play(sceneRoot, startValues, endValues);
+        Animator animator = super.createAnimator(sceneRoot, startValues, endValues);
         if (animator == null && startValues != null && endValues != null) {
             boolean endVisible = isVisible(endValues);
             final View endView = endValues.view;
@@ -122,13 +137,18 @@ public class Fade extends Visibility {
     }
 
     @Override
-    protected Animator appear(ViewGroup sceneRoot,
+    public Animator onAppear(ViewGroup sceneRoot,
             TransitionValues startValues, int startVisibility,
             TransitionValues endValues, int endVisibility) {
         if ((mFadingMode & IN) != IN || endValues == null) {
             return null;
         }
         final View endView = endValues.view;
+        if (DBG) {
+            View startView = (startValues != null) ? startValues.view : null;
+            Log.d(LOG_TAG, "Fade.onDisappear: startView, startVis, endView, endVis = " +
+                    startView + ", " + startVisibility + ", " + endView + ", " + endVisibility);
+        }
         // if alpha < 1, just fade it in from the current value
         if (endView.getAlpha() == 1.0f) {
             endView.setAlpha(0);
@@ -137,7 +157,7 @@ public class Fade extends Visibility {
     }
 
     @Override
-    protected Animator disappear(ViewGroup sceneRoot,
+    public Animator onDisappear(ViewGroup sceneRoot,
             TransitionValues startValues, int startVisibility,
             TransitionValues endValues, int endVisibility) {
         if ((mFadingMode & OUT) != OUT) {
@@ -147,7 +167,7 @@ public class Fade extends Visibility {
         View startView = (startValues != null) ? startValues.view : null;
         View endView = (endValues != null) ? endValues.view : null;
         if (DBG) {
-            Log.d(LOG_TAG, "Fade.predisappear: startView, startVis, endView, endVis = " +
+            Log.d(LOG_TAG, "Fade.onDisappear: startView, startVis, endView, endVis = " +
                         startView + ", " + startVisibility + ", " + endView + ", " + endVisibility);
         }
         View overlayView = null;

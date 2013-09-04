@@ -17,14 +17,14 @@ package com.android.transitiontests;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.transition.ChangeBounds;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Crossfade;
-import android.view.transition.Move;
-import android.view.transition.TextChange;
-import android.view.transition.Transition;
-import android.view.transition.TransitionGroup;
-import android.view.transition.TransitionManager;
+import android.transition.Crossfade;
+import android.transition.TextChange;
+import android.transition.Transition;
+import android.transition.TransitionSet;
+import android.transition.TransitionManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -40,9 +40,9 @@ public class CrossfadeMultiple extends Activity {
     TextView mTextView;
     Button mButton;
     Crossfade mCrossfade;
-    TransitionGroup mCrossfadeGroup;
-    TransitionGroup mTextChangeGroup1, mTextChangeGroup2;
-    TransitionGroup mInOutGroup;
+    TransitionSet mCrossfadeGroup;
+    TransitionSet mTextChangeGroup1, mTextChangeGroup2;
+    TransitionSet mInOutGroup;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,34 +57,35 @@ public class CrossfadeMultiple extends Activity {
         mTextView = (TextView) findViewById(R.id.textview);
 
         mCrossfade = new Crossfade();
-        mCrossfade.setTargetIds(R.id.button, R.id.textview, R.id.imageview);
+        mCrossfade.addTargetId(R.id.button).addTargetId(R.id.textview).addTargetId(R.id.imageview);
 
-        mCrossfadeGroup = new TransitionGroup();
+        mCrossfadeGroup = new TransitionSet();
         mCrossfadeGroup.setDuration(300);
-        mCrossfadeGroup.addTransitions(mCrossfade, new Move());
+        mCrossfadeGroup.addTransition(mCrossfade).addTransition(new ChangeBounds());
         mTransition = mCrossfadeGroup;
 
-        mInOutGroup = new TransitionGroup();
+        mInOutGroup = new TransitionSet();
         Crossfade inOut = new Crossfade();
         inOut.setDuration(300);
         inOut.setFadeBehavior(Crossfade.FADE_BEHAVIOR_OUT_IN);
-        Move move = new Move();
-        move.setStartDelay(150);
-        move.setDuration(0);
-        mInOutGroup.addTransitions(inOut, move);
+        ChangeBounds changeBounds = new ChangeBounds();
+        changeBounds.setStartDelay(150);
+        changeBounds.setDuration(0);
+        mInOutGroup.addTransition(inOut).addTransition(changeBounds);
 
-        mTextChangeGroup1 = new TransitionGroup();
+        mTextChangeGroup1 = new TransitionSet();
         TextChange textChangeInOut = new TextChange();
         textChangeInOut.setChangeBehavior(TextChange.CHANGE_BEHAVIOR_OUT_IN);
-        mTextChangeGroup1.addTransitions(textChangeInOut, new Move());
+        mTextChangeGroup1.addTransition(textChangeInOut).addTransition(new ChangeBounds());
 
-        mTextChangeGroup2 = new TransitionGroup();
-        mTextChangeGroup2.setOrdering(TransitionGroup.SEQUENTIALLY);
+        mTextChangeGroup2 = new TransitionSet();
+        mTextChangeGroup2.setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
         TextChange textChangeOut = new TextChange();
         textChangeOut.setChangeBehavior(TextChange.CHANGE_BEHAVIOR_OUT);
         TextChange textChangeIn = new TextChange();
         textChangeIn.setChangeBehavior(TextChange.CHANGE_BEHAVIOR_IN);
-        mTextChangeGroup2.addTransitions(textChangeOut, new Move(), textChangeIn);
+        mTextChangeGroup2.addTransition(textChangeOut).addTransition(new ChangeBounds()).
+                addTransition(textChangeIn);
     }
 
     public void sendMessage(View view) {

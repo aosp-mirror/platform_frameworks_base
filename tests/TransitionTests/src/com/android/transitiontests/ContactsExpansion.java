@@ -18,19 +18,19 @@ package com.android.transitiontests;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.transition.ChangeBounds;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Fade;
-import android.view.transition.Scene;
-import android.view.transition.Transition;
+import android.transition.Fade;
+import android.transition.Scene;
+import android.transition.Transition;
+import android.transition.TransitionSet;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.view.transition.Crossfade;
-import android.view.transition.Move;
-import android.view.transition.Rotate;
-import android.view.transition.TransitionGroup;
-import android.view.transition.TransitionManager;
+import android.transition.Crossfade;
+import android.transition.Rotate;
+import android.transition.TransitionManager;
 
 public class ContactsExpansion extends Activity {
 
@@ -42,7 +42,8 @@ public class ContactsExpansion extends Activity {
 
     View currentItem = null;
 
-    TransitionGroup mMyAutoTransition = new TransitionGroup(TransitionGroup.SEQUENTIALLY);
+    TransitionSet mMyAutoTransition = new TransitionSet().
+            setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,11 +74,12 @@ public class ContactsExpansion extends Activity {
         ((TextView)contactItem.findViewById(R.id.contact_email)).setText(contactsData[dataIndex++]);
         container.addView(contactItem);
 
-        final TransitionGroup myTransition = new TransitionGroup();
-        myTransition.addTransitions(new Fade(Fade.IN),
-                new Rotate().setTargetIds(R.id.contact_arrow),
-                new Move(), new Fade(Fade.OUT),
-                new Crossfade().setTargetIds(R.id.contact_picture));
+        final TransitionSet myTransition = new TransitionSet();
+        myTransition.addTransition(new Fade(Fade.IN)).
+                addTransition(new Rotate().addTargetId(R.id.contact_arrow)).
+                addTransition(new ChangeBounds()).
+                addTransition(new Fade(Fade.OUT)).
+                addTransition(new Crossfade().addTargetId(R.id.contact_picture));
         final ToggleScene toggleScene = new ToggleScene(container, myTransition);
         contactItem.setOnClickListener(new View.OnClickListener() {
             @Override

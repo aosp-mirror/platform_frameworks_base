@@ -16,16 +16,12 @@
 package com.android.transitiontests;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Move;
-import android.view.transition.Scene;
-import android.view.transition.TransitionManager;
+import android.transition.ChangeBounds;
+import android.transition.TransitionManager;
 import android.widget.Button;
-import android.widget.RelativeLayout;
 
 import static android.widget.RelativeLayout.ALIGN_PARENT_LEFT;
 import static android.widget.RelativeLayout.ALIGN_PARENT_RIGHT;
@@ -46,23 +42,19 @@ public class InstanceTargets extends Activity {
     }
 
     public void sendMessage(final View view) {
-        TransitionManager.go(mSceneRoot, new Runnable() {
-            @Override
-            public void run() {
-                for (int i = 0; i < mSceneRoot.getChildCount(); ++i) {
-                    Button button = (Button) mSceneRoot.getChildAt(i);
-                    LayoutParams params = (LayoutParams) button.getLayoutParams();
-                    int rules[] = params.getRules();
-                    if (rules[ALIGN_PARENT_RIGHT] != 0) {
-                        params.removeRule(ALIGN_PARENT_RIGHT);
-                        params.addRule(ALIGN_PARENT_LEFT);
-                    } else {
-                        params.removeRule(ALIGN_PARENT_LEFT);
-                        params.addRule(ALIGN_PARENT_RIGHT);
-                    }
-                    button.setLayoutParams(params);
-                }
+        TransitionManager.beginDelayedTransition(mSceneRoot, new ChangeBounds().addTarget(view));
+        for (int i = 0; i < mSceneRoot.getChildCount(); ++i) {
+            Button button = (Button) mSceneRoot.getChildAt(i);
+            LayoutParams params = (LayoutParams) button.getLayoutParams();
+            int rules[] = params.getRules();
+            if (rules[ALIGN_PARENT_RIGHT] != 0) {
+                params.removeRule(ALIGN_PARENT_RIGHT);
+                params.addRule(ALIGN_PARENT_LEFT);
+            } else {
+                params.removeRule(ALIGN_PARENT_LEFT);
+                params.addRule(ALIGN_PARENT_RIGHT);
             }
-        }, new Move().setTargets(view));
+            button.setLayoutParams(params);
+        }
     }
 }

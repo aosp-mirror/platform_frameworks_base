@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view.transition;
+package android.transition;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -35,6 +35,11 @@ import java.util.ArrayList;
 
 /**
  * This class inflates scenes and transitions from resource files.
+ *
+ * Information on XML resource descriptions for transitions can be found for
+ * {@link android.R.styleable#Transition}, {@link android.R.styleable#TransitionSet},
+ * {@link android.R.styleable#TransitionTarget}, {@link android.R.styleable#Fade},
+ * and {@link android.R.styleable#TransitionManager}.
  */
 public class TransitionInflater {
 
@@ -121,46 +126,12 @@ public class TransitionInflater {
         }
     }
 
-    /**
-     * Loads a {@link Scene} object from a resource
-     *
-     * @param resource The resource id of the scene to load
-     * @return The loaded Scene object
-     * @throws android.content.res.Resources.NotFoundException when the scene
-     * cannot be loaded
-     */
-    public Scene inflateScene(int resource, ViewGroup parent) {
-        Scene scene = mScenes.get(resource);
-        if (scene != null) {
-            return scene;
-        }
-        XmlResourceParser parser =  mContext.getResources().getXml(resource);
-        try {
-            scene = createSceneFromXml(parser, Xml.asAttributeSet(parser), parent);
-            mScenes.put(resource, scene);
-            return scene;
-        } catch (XmlPullParserException e) {
-            InflateException ex = new InflateException(e.getMessage());
-            ex.initCause(e);
-            throw ex;
-        } catch (IOException e) {
-            InflateException ex = new InflateException(
-                    parser.getPositionDescription()
-                            + ": " + e.getMessage());
-            ex.initCause(e);
-            throw ex;
-        } finally {
-            parser.close();
-        }
-    }
-
-
     //
     // Transition loading
     //
 
     private Transition createTransitionFromXml(XmlPullParser parser,
-            AttributeSet attrs, TransitionGroup transitionGroup)
+            AttributeSet attrs, TransitionSet transitionSet)
             throws XmlPullParserException, IOException {
 
         Transition transition = null;
@@ -180,10 +151,14 @@ public class TransitionInflater {
 
             String  name = parser.getName();
             if ("fade".equals(name)) {
-                transition = new Fade();
+                TypedArray a = mContext.obtainStyledAttributes(attrs,
+                        com.android.internal.R.styleable.Fade);
+                int fadingMode = a.getInt(com.android.internal.R.styleable.Fade_fadingMode,
+                        Fade.IN | Fade.OUT);
+                transition = new Fade(fadingMode);
                 newTransition = true;
-            } else if ("move".equals(name)) {
-                transition = new Move();
+            } else if ("changeBounds".equals(name)) {
+                transition = new ChangeBounds();
                 newTransition = true;
             } else if ("slide".equals(name)) {
                 transition = new Slide();
@@ -194,24 +169,31 @@ public class TransitionInflater {
             } else if ("recolor".equals(name)) {
                 transition = new Recolor();
                 newTransition = true;
-            } else if ("transitionGroup".equals(name)) {
-                transition = new TransitionGroup();
-                createTransitionFromXml(parser, attrs, ((TransitionGroup) transition));
+            } else if ("set".equals(name)) {
+                transition = new TransitionSet();
+                TypedArray a = mContext.obtainStyledAttributes(attrs,
+                        com.android.internal.R.styleable.TransitionSet);
+                int ordering = a.getInt(
+                        com.android.internal.R.styleable.TransitionSet_transitionOrdering,
+                        TransitionSet.ORDERING_TOGETHER);
+                ((TransitionSet) transition).setOrdering(ordering);
+                createTransitionFromXml(parser, attrs, ((TransitionSet) transition));
+                a.recycle();
                 newTransition = true;
             } else if ("targets".equals(name)) {
                 if (parser.getDepth() - 1 > depth && transition != null) {
                     // We're inside the child tag - add targets to the child
-                    getTargetIDs(parser, attrs, transition);
-                } else if (parser.getDepth() - 1 == depth && transitionGroup != null) {
-                    // add targets to the group
-                    getTargetIDs(parser, attrs, transitionGroup);
+                    getTargetIds(parser, attrs, transition);
+                } else if (parser.getDepth() - 1 == depth && transitionSet != null) {
+                    // add targets to the set
+                    getTargetIds(parser, attrs, transitionSet);
                 }
             }
             if (transition != null || "targets".equals(name)) {
                 if (newTransition) {
                     loadTransition(transition, attrs);
-                    if (transitionGroup != null) {
-                        transitionGroup.addTransitions(transition);
+                    if (transitionSet != null) {
+                        transitionSet.addTransition(transition);
                     }
                 }
             } else {
@@ -222,7 +204,7 @@ public class TransitionInflater {
         return transition;
     }
 
-    private void getTargetIDs(XmlPullParser parser,
+    private void getTargetIds(XmlPullParser parser,
             AttributeSet attrs, Transition transition) throws XmlPullParserException, IOException {
 
         // Make sure we are on a start tag.
@@ -240,8 +222,9 @@ public class TransitionInflater {
             String  name = parser.getName();
             if (name.equals("target")) {
                 TypedArray a = mContext.obtainStyledAttributes(attrs,
-                        com.android.internal.R.styleable.Transition);
-                int id = a.getResourceId(com.android.internal.R.styleable.Transition_targetID, -1);
+                        com.android.internal.R.styleable.TransitionTarget);
+                int id = a.getResourceId(
+                        com.android.internal.R.styleable.TransitionTarget_targetId, -1);
                 if (id >= 0) {
                     targetIds.add(id);
                 }
@@ -251,11 +234,9 @@ public class TransitionInflater {
         }
         int numTargets = targetIds.size();
         if (numTargets > 0) {
-            int[] targetsArray = new int[numTargets];
-            for (int i = 0; i < targetIds.size(); ++i) {
-                targetsArray[i] = targetIds.get(i);
+            for (int i = 0; i < numTargets; ++i) {
+                transition.addTargetId(targetIds.get(i));
             }
-            transition.setTargetIds(targetsArray);
         }
     }
 
@@ -268,9 +249,9 @@ public class TransitionInflater {
         if (duration >= 0) {
             transition.setDuration(duration);
         }
-        long startOffset = a.getInt(com.android.internal.R.styleable.Transition_startOffset, -1);
-        if (startOffset > 0) {
-            transition.setStartDelay(startOffset);
+        long startDelay = a.getInt(com.android.internal.R.styleable.Transition_startDelay, -1);
+        if (startDelay > 0) {
+            transition.setStartDelay(startDelay);
         }
         final int resID =
                 a.getResourceId(com.android.internal.R.styleable.Animator_interpolator, 0);
@@ -313,20 +294,19 @@ public class TransitionInflater {
     }
 
     private void loadTransition(AttributeSet attrs, ViewGroup sceneRoot,
-            TransitionManager transitionManager)
-            throws Resources.NotFoundException {
+            TransitionManager transitionManager) throws Resources.NotFoundException {
 
         TypedArray a = mContext.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.TransitionManager);
-        int transitionId = attrs.getAttributeResourceValue(
+        int transitionId = a.getResourceId(
                 com.android.internal.R.styleable.TransitionManager_transition, -1);
         Scene fromScene = null, toScene = null;
-        int fromId = attrs.getAttributeResourceValue(
+        int fromId = a.getResourceId(
                 com.android.internal.R.styleable.TransitionManager_fromScene, -1);
-        if (fromId >= 0) fromScene = inflateScene(fromId, sceneRoot);
-        int toId = attrs.getAttributeResourceValue(
+        if (fromId >= 0) fromScene = Scene.getSceneForLayout(sceneRoot, fromId, mContext);
+        int toId = a.getResourceId(
                 com.android.internal.R.styleable.TransitionManager_toScene, -1);
-        if (toId >= 0) toScene = inflateScene(toId, sceneRoot);
+        if (toId >= 0) toScene = Scene.getSceneForLayout(sceneRoot, toId, mContext);
         if (transitionId >= 0) {
             Transition transition = inflateTransition(transitionId);
             if (transition != null) {
@@ -343,51 +323,5 @@ public class TransitionInflater {
             }
         }
         a.recycle();
-    }
-
-    //
-    // Scene loading
-    //
-
-    private Scene createSceneFromXml(XmlPullParser parser, AttributeSet attrs, ViewGroup parent)
-            throws XmlPullParserException, IOException {
-        Scene scene = null;
-
-        // Make sure we are on a start tag.
-        int type;
-        int depth = parser.getDepth();
-
-        while (((type=parser.next()) != XmlPullParser.END_TAG || parser.getDepth() > depth)
-                && type != XmlPullParser.END_DOCUMENT) {
-
-            if (type != XmlPullParser.START_TAG) {
-                continue;
-            }
-
-            String  name = parser.getName();
-            if (name.equals("scene")) {
-                scene = loadScene(attrs, parent);
-            } else {
-                throw new RuntimeException("Unknown scene name: " + parser.getName());
-            }
-        }
-
-        return scene;
-    }
-
-    private Scene loadScene(AttributeSet attrs, ViewGroup parent)
-            throws Resources.NotFoundException {
-
-        Scene scene;
-        TypedArray a = mContext.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.Scene);
-        int layoutId = a.getResourceId(com.android.internal.R.styleable.Scene_layout, -1);
-        if (layoutId >= 0) {
-            scene = new Scene(parent, layoutId, mContext);
-        } else {
-            scene = new Scene(parent);
-        }
-        a.recycle();
-        return scene;
     }
 }

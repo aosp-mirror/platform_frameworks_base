@@ -19,13 +19,13 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Scene;
-import android.view.transition.Transition;
+import android.transition.Scene;
+import android.transition.Transition;
+import android.transition.TransitionSet;
 import android.widget.Button;
-import android.view.transition.Fade;
-import android.view.transition.Move;
-import android.view.transition.TransitionGroup;
-import android.view.transition.TransitionManager;
+import android.transition.Fade;
+import android.transition.ChangeBounds;
+import android.transition.TransitionManager;
 
 
 public class SequenceTest extends Activity {
@@ -33,7 +33,8 @@ public class SequenceTest extends Activity {
     Button mRemovingButton, mInvisibleButton, mGoneButton;
     Scene mScene1, mScene2;
     ViewGroup mSceneRoot;
-    TransitionGroup sequencedFade, reverseSequencedFade;
+    TransitionSet sequencedFade, reverseSequencedFade;
+    Scene mCurrentScene;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,27 +48,33 @@ public class SequenceTest extends Activity {
         mInvisibleButton = (Button) findViewById(R.id.invisibleButton);
         mGoneButton = (Button) findViewById(R.id.goneButton);
 
-        mScene1 = new Scene(mSceneRoot, R.layout.fading_test, this);
-        mScene2 = new Scene(mSceneRoot, R.layout.fading_test_scene_2, this);
+        mScene1 = Scene.getSceneForLayout(mSceneRoot, R.layout.fading_test, this);
+        mScene2 = Scene.getSceneForLayout(mSceneRoot, R.layout.fading_test_scene_2, this);
 
-        Transition fade1 = new Fade().setTargetIds(R.id.removingButton);
-        Transition fade2 = new Fade().setTargetIds(R.id.invisibleButton);
-        Transition fade3 = new Fade().setTargetIds(R.id.goneButton);
-        TransitionGroup fader = new TransitionGroup(TransitionGroup.SEQUENTIALLY);
-        fader.addTransitions(fade1, fade2, fade3, new Move());
+        Transition fade1 = new Fade().addTargetId(R.id.removingButton);
+        Transition fade2 = new Fade().addTargetId(R.id.invisibleButton);
+        Transition fade3 = new Fade().addTargetId(R.id.goneButton);
+        TransitionSet fader = new TransitionSet().
+                setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
+        fader.addTransition(fade1).addTransition(fade2).addTransition(fade3).
+                addTransition(new ChangeBounds());
         sequencedFade = fader;
 
-        reverseSequencedFade = new TransitionGroup(TransitionGroup.SEQUENTIALLY);
-        reverseSequencedFade.addTransitions(new Move(), fade3, fade2, fade1);
+        reverseSequencedFade = new TransitionSet().
+                setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
+        reverseSequencedFade.addTransition(new ChangeBounds()).addTransition(fade3).addTransition(fade2).
+                addTransition(fade1);
 
-        mSceneRoot.setCurrentScene(mScene1);
+        mCurrentScene = mScene1;
     }
 
     public void sendMessage(View view) {
-        if (mSceneRoot.getCurrentScene() == mScene1) {
+        if (mCurrentScene == mScene1) {
             TransitionManager.go(mScene2, sequencedFade);
+            mCurrentScene = mScene2;
         } else {
             TransitionManager.go(mScene1, reverseSequencedFade);
+            mCurrentScene = mScene1;
         }
     }
 }
