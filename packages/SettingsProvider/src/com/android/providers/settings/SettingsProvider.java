@@ -33,6 +33,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.UserInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.AbstractCursor;
 import android.database.Cursor;
@@ -477,6 +478,13 @@ public class SettingsProvider extends ContentProvider {
         try {
             final String value = c.moveToNext() ? c.getString(0) : null;
             if (value == null) {
+                // sanity-check the user before touching the db
+                final UserInfo user = mUserManager.getUserInfo(userHandle);
+                if (user == null) {
+                    // can happen due to races when deleting users; treat as benign
+                    return false;
+                }
+
                 final SecureRandom random = new SecureRandom();
                 final String newAndroidIdValue = Long.toHexString(random.nextLong());
                 final ContentValues values = new ContentValues();
@@ -490,7 +498,7 @@ public class SettingsProvider extends ContentProvider {
                 Slog.d(TAG, "Generated and saved new ANDROID_ID [" + newAndroidIdValue
                         + "] for user " + userHandle);
                 // Write a dropbox entry if it's a restricted profile
-                if (mUserManager.getUserInfo(userHandle).isRestricted()) {
+                if (user.isRestricted()) {
                     DropBoxManager dbm = (DropBoxManager)
                             getContext().getSystemService(Context.DROPBOX_SERVICE);
                     if (dbm != null && dbm.isTagEnabled(DROPBOX_TAG_USERLOG)) {
