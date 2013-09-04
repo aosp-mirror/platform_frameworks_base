@@ -677,11 +677,9 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                                 if (checkedIn) pw.print(" (checked in)");
                                 pw.println(":");
                                 // Don't really need to lock because we uniquely own this object.
-                                if (dumpDetails) {
-                                    processStats.dumpLocked(pw, reqPackage, now, dumpAll);
-                                } else {
-                                    processStats.dumpSummaryLocked(pw, reqPackage, now);
-                                }
+                                // Always dump summary here, dumping all details is just too
+                                // much crud.
+                                processStats.dumpSummaryLocked(pw, reqPackage, now);
                             }
                             if (isCheckin) {
                                 // Rename file suffix to mark that it has checked in.
