@@ -1156,6 +1156,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (changesMade) {
             mContext.sendBroadcastAsUser(new Intent(LocationManager.PROVIDERS_CHANGED_ACTION),
                     UserHandle.ALL);
+            mContext.sendBroadcastAsUser(new Intent(LocationManager.MODE_CHANGED_ACTION),
+                    UserHandle.ALL);
         }
     }
 
