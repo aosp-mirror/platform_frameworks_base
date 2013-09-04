@@ -303,13 +303,14 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * </p>
      * <p>
      * Each area is a rectangle plus weight: xmin, ymin,
-     * xmax, ymax, weight.
+     * xmax, ymax, weight. The rectangle is defined inclusive of the
+     * specified coordinates.
      * </p><p>
      * The coordinate system is based on the active pixel array,
-     * with (0,0) being the top-left of the active pixel array, and
-     * (android.sensor.info.activeArraySize.width,
-     * android.sensor.info.activeArraySize.height) being the
-     * bottom-right point of the active pixel array. The weight
+     * with (0,0) being the top-left pixel in the active pixel array, and
+     * (android.sensor.info.activeArraySize.width - 1,
+     * android.sensor.info.activeArraySize.height - 1) being the
+     * bottom-right pixel in the active pixel array. The weight
      * should be nonnegative.
      * </p><p>
      * If all regions have 0 weight, then no specific metering area
@@ -378,13 +379,14 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * </p>
      * <p>
      * Each area is a rectangle plus weight: xmin, ymin,
-     * xmax, ymax, weight.
+     * xmax, ymax, weight. The rectangle is defined inclusive of the
+     * specified coordinates.
      * </p><p>
      * The coordinate system is based on the active pixel array,
-     * with (0,0) being the top-left of the active pixel array, and
-     * (android.sensor.info.activeArraySize.width,
-     * android.sensor.info.activeArraySize.height) being the
-     * bottom-right point of the active pixel array. The weight
+     * with (0,0) being the top-left pixel in the active pixel array, and
+     * (android.sensor.info.activeArraySize.width - 1,
+     * android.sensor.info.activeArraySize.height - 1) being the
+     * bottom-right pixel in the active pixel array. The weight
      * should be nonnegative.
      * </p><p>
      * If all regions have 0 weight, then no specific focus area
@@ -462,12 +464,15 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
      * <p>
      * Only used in AUTO mode.
      * </p><p>
-     * Each area is a rectangle plus weight: xmin, ymin, xmax,
-     * ymax, weight. The coordinate system is based on the active
-     * pixel array, with (0,0) being the top-left of the active
-     * pixel array, and (android.sensor.info.activeArraySize.width,
-     * android.sensor.info.activeArraySize.height) being the
-     * bottom-right point of the active pixel array. The weight
+     * Each area is a rectangle plus weight: xmin, ymin,
+     * xmax, ymax, weight. The rectangle is defined inclusive of the
+     * specified coordinates.
+     * </p><p>
+     * The coordinate system is based on the active pixel array,
+     * with (0,0) being the top-left pixel in the active pixel array, and
+     * (android.sensor.info.activeArraySize.width - 1,
+     * android.sensor.info.activeArraySize.height - 1) being the
+     * bottom-right pixel in the active pixel array. The weight
      * should be nonnegative.
      * </p><p>
      * If all regions have 0 weight, then no specific metering area
