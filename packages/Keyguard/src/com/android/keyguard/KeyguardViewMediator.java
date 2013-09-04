@@ -153,8 +153,6 @@ public class KeyguardViewMediator {
     private AlarmManager mAlarmManager;
     private AudioManager mAudioManager;
     private StatusBarManager mStatusBarManager;
-    private boolean mShowLockIcon;
-    private boolean mShowingLockIcon;
     private boolean mSwitchingUser;
 
     private boolean mSystemReady;
@@ -494,7 +492,6 @@ public class KeyguardViewMediator {
                 mLockPatternUtils);
 
         final ContentResolver cr = mContext.getContentResolver();
-        mShowLockIcon = (Settings.System.getInt(cr, "show_status_bar_lock", 0) == 1);
 
         mScreenOn = mPM.isScreenOn();
 
@@ -1227,25 +1224,6 @@ public class KeyguardViewMediator {
         if (mStatusBarManager == null) {
             Log.w(TAG, "Could not get status bar manager");
         } else {
-            if (mShowLockIcon) {
-                // Give feedback to user when secure keyguard is active and engaged
-                if (mShowing && isSecure()) {
-                    if (!mShowingLockIcon) {
-                        String contentDescription = mContext.getString(
-                                com.android.internal.R.string.status_bar_device_locked);
-                        mStatusBarManager.setIcon("secure",
-                                com.android.internal.R.drawable.stat_sys_secure, 0,
-                                contentDescription);
-                        mShowingLockIcon = true;
-                    }
-                } else {
-                    if (mShowingLockIcon) {
-                        mStatusBarManager.removeIcon("secure");
-                        mShowingLockIcon = false;
-                    }
-                }
-            }
-
             // Disable aspects of the system/status/navigation bars that must not be re-enabled by
             // windows that appear on top, ever
             int flags = StatusBarManager.DISABLE_NONE;
