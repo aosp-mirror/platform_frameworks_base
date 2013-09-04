@@ -197,8 +197,6 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"תצוגת Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"בהירות"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"אוטומטי"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"הודעות מופיעות כאן"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"גש אליהם בכל עת על ידי החלקה למטה.\nהחלק למטה שוב למעבר למרכז הבקרה של המערכת."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ייתכן שהרשת מנוטרת"</string>
     <string name="done_button" msgid="1759387181766603361">"בוצע"</string>
     <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"ניטור רשתות"</string>

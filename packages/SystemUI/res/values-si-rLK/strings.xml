@@ -197,8 +197,6 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"නොරැහැන් සංදර්ශකය"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"දීප්තිමත් බව"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ස්වයංක්‍රීය"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"දැනුම්දීම් මෙතන පෙන්නුම් කරයි"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"පහලට සර්පණය කිරීමෙන් ඕනෑම වෙලාවක ඒවා වෙත පිවිසෙන්න.\nපද්ධති පාලක සඳහා නැවත පහළට සර්පණය කරන්න."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"ඇතැම් විට ජාලය නිරීක්ෂණය විය හැක"</string>
     <string name="done_button" msgid="1759387181766603361">"හරි"</string>
     <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"ජාල නිරීක්ෂණය කිරීම"</string>

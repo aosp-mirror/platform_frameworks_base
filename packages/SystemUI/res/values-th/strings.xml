@@ -197,8 +197,6 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"จอแสดงผลไร้สาย"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ความสว่าง"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"อัตโนมัติ"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"การแจ้งเตือนจะแสดงขึ้นที่นี่"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"เข้าถึงได้ทุกเมื่อด้วยการกวาดนิ้วลง\nกวาดนิ้วลงอีกครั้งสำหรับการควบคุมระบบ"</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"เครือข่ายอาจได้รับการตรวจสอบ"</string>
     <string name="done_button" msgid="1759387181766603361">"เสร็จสิ้น"</string>
     <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"การตรวจสอบเครือข่าย"</string>

@@ -197,8 +197,6 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Prikaz brezžičnih naprav"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Svetlost"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"SAMODEJNO"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"Obvestila so prikazana tukaj"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"Do njih lahko kadar koli dostopate tako, da povlečete navzdol.\nZa prikaz sistemskih kontrolnikov znova povlecite navzdol."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Omrežje je lahko nadzorovano"</string>
     <string name="done_button" msgid="1759387181766603361">"Dokončano"</string>
     <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Nadzor omrežja"</string>
