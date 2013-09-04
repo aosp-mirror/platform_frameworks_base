@@ -32,7 +32,6 @@ import android.app.FragmentManager;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ComponentName;
-import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -65,6 +64,8 @@ import com.android.documentsui.model.DocumentStack;
 import com.android.documentsui.model.DurableUtils;
 import com.android.documentsui.model.RootInfo;
 
+import libcore.io.IoUtils;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
@@ -80,6 +81,8 @@ public class DocumentsActivity extends Activity {
     private ActionBarDrawerToggle mDrawerToggle;
 
     private static final String EXTRA_STATE = "state";
+
+    private boolean mIgnoreNextNavigation;
 
     private RootsCache mRoots;
     private State mState;
@@ -192,10 +195,20 @@ public class DocumentsActivity extends Activity {
             } catch (IOException e) {
                 Log.w(TAG, "Failed to resume", e);
             } finally {
-                cursor.close();
+                IoUtils.closeQuietly(cursor);
             }
 
-            mDrawerLayout.openDrawer(mRootsContainer);
+            // If restored root isn't valid, fall back to recents
+            final RootInfo root = getCurrentRoot();
+            final List<RootInfo> matchingRoots = mRoots.getMatchingRoots(mState);
+            if (!matchingRoots.contains(root)) {
+                mState.stack.clear();
+            }
+
+            // Only open drawer when showing recents
+            if (mState.stack.isRecents()) {
+                mDrawerLayout.openDrawer(mRootsContainer);
+            }
         }
     }
 
@@ -245,6 +258,14 @@ public class DocumentsActivity extends Activity {
 
         actionBar.setDisplayShowHomeEnabled(true);
 
+        if (mState.action == ACTION_MANAGE) {
+            actionBar.setDisplayHomeAsUpEnabled(false);
+            mDrawerToggle.setDrawerIndicatorEnabled(false);
+        } else {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            mDrawerToggle.setDrawerIndicatorEnabled(true);
+        }
+
         if (mDrawerLayout.isDrawerOpen(mRootsContainer)) {
             actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
             actionBar.setIcon(new ColorDrawable());
@@ -254,33 +275,19 @@ public class DocumentsActivity extends Activity {
             } else if (mState.action == ACTION_CREATE) {
                 actionBar.setTitle(R.string.title_save);
             }
-
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            mDrawerToggle.setDrawerIndicatorEnabled(true);
-
         } else {
             final RootInfo root = getCurrentRoot();
             actionBar.setIcon(root != null ? root.loadIcon(this) : null);
 
-            if (mRoots.isRecentsRoot(root)) {
+            if (mState.stack.size() <= 1) {
                 actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
                 actionBar.setTitle(root.title);
             } else {
+                mIgnoreNextNavigation = true;
                 actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
                 actionBar.setTitle(null);
-                actionBar.setListNavigationCallbacks(mSortAdapter, mSortListener);
-                actionBar.setSelectedNavigationItem(mState.sortOrder);
-            }
-
-            if (mState.stack.size() > 1) {
-                actionBar.setDisplayHomeAsUpEnabled(true);
-                mDrawerToggle.setDrawerIndicatorEnabled(false);
-            } else if (mState.action == ACTION_MANAGE) {
-                actionBar.setDisplayHomeAsUpEnabled(false);
-                mDrawerToggle.setDrawerIndicatorEnabled(false);
-            } else {
-                actionBar.setDisplayHomeAsUpEnabled(true);
-                mDrawerToggle.setDrawerIndicatorEnabled(true);
+                actionBar.setListNavigationCallbacks(mStackAdapter, mStackListener);
+                actionBar.setSelectedNavigationItem(mStackAdapter.getCount() - 1);
             }
         }
     }
@@ -328,12 +335,19 @@ public class DocumentsActivity extends Activity {
 
         final MenuItem createDir = menu.findItem(R.id.menu_create_dir);
         final MenuItem search = menu.findItem(R.id.menu_search);
-        final MenuItem grid =  menu.findItem(R.id.menu_grid);
+        final MenuItem sort = menu.findItem(R.id.menu_sort);
+        final MenuItem sortSize = menu.findItem(R.id.menu_sort_size);
+        final MenuItem grid = menu.findItem(R.id.menu_grid);
         final MenuItem list = menu.findItem(R.id.menu_list);
         final MenuItem settings = menu.findItem(R.id.menu_settings);
 
         grid.setVisible(mState.mode != MODE_GRID);
         list.setVisible(mState.mode != MODE_LIST);
+
+        // No sorting in recents
+        sort.setVisible(cwd != null);
+        // Only sort by size when visible
+        sortSize.setVisible(mState.showSize);
 
         final boolean searchVisible;
         if (mState.action == ACTION_CREATE) {
@@ -375,6 +389,18 @@ public class DocumentsActivity extends Activity {
             return true;
         } else if (id == R.id.menu_search) {
             return false;
+        } else if (id == R.id.menu_sort_name) {
+            mState.sortOrder = State.SORT_ORDER_DISPLAY_NAME;
+            updateDisplayState();
+            return true;
+        } else if (id == R.id.menu_sort_date) {
+            mState.sortOrder = State.SORT_ORDER_LAST_MODIFIED;
+            updateDisplayState();
+            return true;
+        } else if (id == R.id.menu_sort_size) {
+            mState.sortOrder = State.SORT_ORDER_SIZE;
+            updateDisplayState();
+            return true;
         } else if (id == R.id.menu_grid) {
             // TODO: persist explicit user mode for cwd
             mState.mode = MODE_GRID;
@@ -421,25 +447,15 @@ public class DocumentsActivity extends Activity {
         updateActionBar();
     }
 
-    // TODO: support additional sort orders
-    private BaseAdapter mSortAdapter = new BaseAdapter() {
+    private BaseAdapter mStackAdapter = new BaseAdapter() {
         @Override
         public int getCount() {
-            return mState.showSize ? 3 : 2;
+            return mState.stack.size();
         }
 
         @Override
-        public Object getItem(int position) {
-            switch (position) {
-                case 0:
-                    return getText(R.string.sort_name);
-                case 1:
-                    return getText(R.string.sort_date);
-                case 2:
-                    return getText(R.string.sort_size);
-                default:
-                    return null;
-            }
+        public DocumentInfo getItem(int position) {
+            return mState.stack.get(mState.stack.size() - position - 1);
         }
 
         @Override
@@ -455,16 +471,14 @@ public class DocumentsActivity extends Activity {
             }
 
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
-            final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
+            final DocumentInfo doc = getItem(position);
 
-            if (mState.stack.size() > 0) {
-                title.setText(mState.stack.getTitle(mRoots));
+            if (position == 0) {
+                final RootInfo root = getCurrentRoot();
+                title.setText(root.title);
             } else {
-                // No directory means recents
-                title.setText(R.string.root_recent);
+                title.setText(doc.displayName);
             }
-
-            summary.setText((String) getItem(position));
 
             return convertView;
         }
@@ -477,17 +491,31 @@ public class DocumentsActivity extends Activity {
             }
 
             final TextView text1 = (TextView) convertView.findViewById(android.R.id.text1);
-            text1.setText((String) getItem(position));
+            final DocumentInfo doc = getItem(position);
+
+            if (position == 0) {
+                final RootInfo root = getCurrentRoot();
+                text1.setText(root.title);
+            } else {
+                text1.setText(doc.displayName);
+            }
 
             return convertView;
         }
     };
 
-    private OnNavigationListener mSortListener = new OnNavigationListener() {
+    private OnNavigationListener mStackListener = new OnNavigationListener() {
         @Override
         public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-            mState.sortOrder = itemPosition;
-            updateDisplayState();
+            if (mIgnoreNextNavigation) {
+                mIgnoreNextNavigation = false;
+                return false;
+            }
+
+            while (mState.stack.size() > itemPosition + 1) {
+                mState.stack.pop();
+            }
+            onCurrentDirectoryChanged();
             return true;
         }
     };
@@ -629,16 +657,12 @@ public class DocumentsActivity extends Activity {
         final DocumentInfo cwd = getCurrentDirectory();
         final String authority = cwd.uri.getAuthority();
 
-        final ContentProviderClient client = getContentResolver()
-                .acquireUnstableContentProviderClient(authority);
-        try {
-            final Uri childUri = DocumentsContract.createDocument(
-                    getContentResolver(), cwd.uri, mimeType, displayName);
+        final Uri childUri = DocumentsContract.createDocument(
+                getContentResolver(), cwd.uri, mimeType, displayName);
+        if (childUri != null) {
             onFinished(childUri);
-        } catch (Exception e) {
+        } else {
             Toast.makeText(this, R.string.save_error, Toast.LENGTH_SHORT).show();
-        } finally {
-            ContentProviderClient.closeQuietly(client);
         }
     }
 

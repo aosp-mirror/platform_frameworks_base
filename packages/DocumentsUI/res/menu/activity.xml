@@ -28,6 +28,23 @@
         android:actionViewClass="android.widget.SearchView"
         android:imeOptions="actionSearch" />
     <item
+        android:id="@+id/menu_sort"
+        android:title="@string/menu_sort"
+        android:icon="@drawable/ic_menu_sort"
+        android:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/menu_sort_name"
+                android:title="@string/sort_name" />
+            <item
+                android:id="@+id/menu_sort_date"
+                android:title="@string/sort_date" />
+            <item
+                android:id="@+id/menu_sort_size"
+                android:title="@string/sort_size" />
+        </menu>
+    </item>
+    <item
         android:id="@+id/menu_grid"
         android:title="@string/menu_grid"
         android:icon="@drawable/ic_menu_grid"
