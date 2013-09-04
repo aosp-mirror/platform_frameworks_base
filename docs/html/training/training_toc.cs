@@ -405,7 +405,7 @@ include the action bar on devices running Android 2.1 or higher."
           <a href="<?cs var:toroot ?>training/connect-devices-wirelessly/index.html"
              description=
              "How to find and connect to local devices using Network Service
-             Discovery and Wi-Fi Direct in order to create peer-to-peer connections."
+             Discovery and how to create peer-to-peer connections with Wi-Fi."
              >Connecting Devices Wirelessly</a>
         </div>
         <ul>
@@ -414,7 +414,7 @@ include the action bar on devices running Android 2.1 or higher."
           </a>
           </li>
           <li><a href="<?cs var:toroot ?>training/connect-devices-wirelessly/wifi-direct.html">
-            Connecting with Wi-Fi Direct
+            Creating P2P Connections with Wi-Fi
           </a>
           </li>
           <li><a href="<?cs var:toroot ?>training/connect-devices-wirelessly/nsd-wifi-direct.html">
