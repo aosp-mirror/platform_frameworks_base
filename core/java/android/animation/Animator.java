@@ -280,19 +280,9 @@ public abstract class Animator implements Cloneable {
     }
 
     /**
-     * Gets the set of {@link AnimatorPauseListener} objects that are currently
-     * listening for pause/resume events on this animator.
-     *
-     * @return ArrayList<AnimatorListener> The set of pause listeners.
-     */
-    public ArrayList<AnimatorPauseListener> getPauseListeners() {
-        return mPauseListeners;
-    }
-
-    /**
-     * Removes all listeners from this object. This is equivalent to calling
-     * {@link #getListeners()} and {@link #getPauseListeners()} followed by calling
-     * {@link ArrayList#clear()} on the returned lists of listeners.
+     * Removes all {@link #addListener(android.animation.Animator.AnimatorListener) listeners}
+     * and {@link #addPauseListener(android.animation.Animator.AnimatorPauseListener)
+     * pauseListeners} from this object.
      */
     public void removeAllListeners() {
         if (mListeners != null) {

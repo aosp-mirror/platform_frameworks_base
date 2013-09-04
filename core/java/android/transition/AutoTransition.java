@@ -14,22 +14,28 @@
  * limitations under the License.
  */
 
-package android.view.transition;
+package android.transition;
 
 /**
  * Utility class for creating a default transition that automatically fades,
  * moves, and resizes views during a scene change.
+ *
+ * <p>An AutoTransition can be described in a resource file by using the
+ * tag <code>autoTransition</code>, along with the other standard
+ * attributes of {@link android.R.styleable#Transition}.</p>
  */
-public class AutoTransition extends TransitionGroup {
+public class AutoTransition extends TransitionSet {
 
     /**
-     * Constructs an AutoTransition object, which is a TransitionGroup which
+     * Constructs an AutoTransition object, which is a TransitionSet which
      * first fades out disappearing targets, then moves and resizes existing
      * targets, and finally fades in appearing targets.
      *
      */
     public AutoTransition() {
-        setOrdering(SEQUENTIALLY);
-        addTransitions(new Fade(Fade.OUT), new Move(), new Fade(Fade.IN));
+        setOrdering(ORDERING_SEQUENTIAL);
+        addTransition(new Fade(Fade.OUT)).
+                addTransition(new ChangeBounds()).
+                addTransition(new Fade(Fade.IN));
     }
 }

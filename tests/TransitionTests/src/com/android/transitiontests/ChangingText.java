@@ -19,42 +19,43 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Scene;
-import android.widget.Button;
-import android.view.transition.Fade;
-import android.view.transition.Move;
-import android.view.transition.TextChange;
-import android.view.transition.TransitionGroup;
-import android.view.transition.TransitionManager;
+import android.transition.Scene;
+import android.transition.TransitionSet;
+import android.transition.ChangeBounds;
+import android.transition.TextChange;
+import android.transition.TransitionManager;
 
 public class ChangingText extends Activity {
 
     Scene mScene1, mScene2;
     ViewGroup mSceneRoot;
-    TransitionGroup mChanger;
+    TransitionSet mChanger;
+    Scene mCurrentScene;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.changing_text_1);
 
-        View container = (View) findViewById(R.id.container);
+        View container = findViewById(R.id.container);
         mSceneRoot = (ViewGroup) container.getParent();
 
-        mScene1 = new Scene(mSceneRoot, R.layout.changing_text_1, this);
-        mScene2 = new Scene(mSceneRoot, R.layout.changing_text_2, this);
+        mScene1 = Scene.getSceneForLayout(mSceneRoot, R.layout.changing_text_1, this);
+        mScene2 = Scene.getSceneForLayout(mSceneRoot, R.layout.changing_text_2, this);
 
-        mChanger = new TransitionGroup(TransitionGroup.TOGETHER);
-        mChanger.addTransitions(new Move(), new TextChange());
+        mChanger = new TransitionSet().setOrdering(TransitionSet.ORDERING_TOGETHER);
+        mChanger.addTransition(new ChangeBounds()).addTransition(new TextChange());
 
-        mSceneRoot.setCurrentScene(mScene1);
+        mCurrentScene = mScene1;
     }
 
     public void sendMessage(View view) {
-        if (mSceneRoot.getCurrentScene() == mScene1) {
+        if (mCurrentScene == mScene1) {
             TransitionManager.go(mScene2, mChanger);
+            mCurrentScene = mScene2;
         } else {
             TransitionManager.go(mScene1, mChanger);
+            mCurrentScene = mScene1;
         }
     }
 }

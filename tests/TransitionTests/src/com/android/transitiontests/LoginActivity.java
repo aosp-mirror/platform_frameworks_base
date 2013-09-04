@@ -19,14 +19,14 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Scene;
+import android.transition.Scene;
 import android.widget.TextView;
-import android.view.transition.Fade;
-import android.view.transition.Recolor;
-import android.view.transition.Slide;
-import android.view.transition.Transition;
-import android.view.transition.TransitionGroup;
-import android.view.transition.TransitionManager;
+import android.transition.Fade;
+import android.transition.Recolor;
+import android.transition.Slide;
+import android.transition.Transition;
+import android.transition.TransitionSet;
+import android.transition.TransitionManager;
 
 
 public class LoginActivity extends Activity {
@@ -43,32 +43,33 @@ public class LoginActivity extends Activity {
         View container = (View) findViewById(R.id.container);
         mSceneRoot = (ViewGroup) container.getParent();
 
-        mLoginScene = new Scene(mSceneRoot, R.layout.activity_login, this);
-        mPasswordScene = new Scene(mSceneRoot, R.layout.login_password, this);
-        mIncorrectPasswordScene = new Scene(mSceneRoot, R.layout.incorrect_password, this);
-        mUsernameTakenScene = new Scene(mSceneRoot, R.layout.username_taken, this);
-        mSuccessScene = new Scene(mSceneRoot, R.layout.success, this);
-        mNewUserScene = new Scene(mSceneRoot, R.layout.new_user, this);
+        mLoginScene = Scene.getSceneForLayout(mSceneRoot, R.layout.activity_login, this);
+        mPasswordScene = Scene.getSceneForLayout(mSceneRoot, R.layout.login_password, this);
+        mIncorrectPasswordScene = Scene.getSceneForLayout(mSceneRoot, R.layout.incorrect_password, this);
+        mUsernameTakenScene = Scene.getSceneForLayout(mSceneRoot, R.layout.username_taken, this);
+        mSuccessScene = Scene.getSceneForLayout(mSceneRoot, R.layout.success, this);
+        mNewUserScene = Scene.getSceneForLayout(mSceneRoot, R.layout.new_user, this);
 
         mTransitionManager = new TransitionManager();
 
         // Custom transitions in/out of NewUser screen - slide in the 2nd password UI
-        TransitionGroup slider = new TransitionGroup();
-        slider.addTransitions(new Slide().setTargetIds(R.id.retype, R.id.retypeEdit));
-        slider.addTransitions(new Recolor().setTargetIds(R.id.password, R.id.passwordEdit));
-        slider.addTransitions(new Fade());
+        TransitionSet slider = new TransitionSet();
+        slider.addTransition(new Slide().addTargetId(R.id.retype).addTargetId(R.id.retypeEdit));
+        slider.addTransition(new Recolor().addTargetId(R.id.password).
+                addTargetId(R.id.passwordEdit));
+        slider.addTransition(new Fade());
         mTransitionManager.setTransition(mLoginScene, mNewUserScene, slider);
         mTransitionManager.setTransition(mPasswordScene, mNewUserScene, slider);
         mTransitionManager.setTransition(mNewUserScene, mLoginScene, slider);
         mTransitionManager.setTransition(mNewUserScene, mPasswordScene, slider);
 
         // Custom transitions with recoloring password field
-        Transition colorizer = new Recolor().setTargetIds(R.id.password, R.id.passwordEdit);
+        Transition colorizer = new Recolor().addTargetId(R.id.password).
+                addTargetId(R.id.passwordEdit);
         mTransitionManager.setTransition(mLoginScene, mPasswordScene, colorizer);
         mTransitionManager.setTransition(mPasswordScene, mLoginScene, colorizer);
 
         mCurrentScene = mLoginScene;
-        mSceneRoot.setCurrentScene(mLoginScene);
     }
 
     public void applyScene(Scene scene) {

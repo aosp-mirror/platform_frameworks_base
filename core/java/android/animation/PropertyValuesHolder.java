@@ -636,7 +636,7 @@ public class PropertyValuesHolder implements Cloneable {
     }
 
     /**
-     * The TypeEvaluator will the automatically determined based on the type of values
+     * The TypeEvaluator will be automatically determined based on the type of values
      * supplied to PropertyValuesHolder. The evaluator can be manually set, however, if so
      * desired. This may be important in cases where either the type of the values supplied
      * do not match the way that they should be interpolated between, or if the values

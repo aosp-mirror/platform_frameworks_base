@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view.transition;
+package android.transition;
 
 import android.util.ArrayMap;
 import android.view.View;
@@ -33,11 +33,11 @@ import java.util.Map;
  * "Fader" as "android:fader:alpha".
  *
  * <p>These values are cached during the
- * {@link Transition#captureValues(TransitionValues, boolean)}
+ * {@link Transition#captureStartValues(TransitionValues)}
  * capture} phases of a scene change, once when the start values are captured
  * and again when the end values are captured. These start/end values are then
  * passed into the transitions via the
- * for {@link Transition#play(ViewGroup, TransitionValues, TransitionValues)}
+ * for {@link Transition#createAnimator(ViewGroup, TransitionValues, TransitionValues)}
  * method.</p>
  */
 public class TransitionValues {

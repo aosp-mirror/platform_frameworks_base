@@ -17,11 +17,11 @@ package com.android.transitiontests;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.transition.ChangeBounds;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Move;
-import android.view.transition.Scene;
-import android.view.transition.TransitionManager;
+import android.transition.Scene;
+import android.transition.TransitionManager;
 import android.widget.Button;
 
 public class Reparenting extends Activity {
@@ -67,7 +67,7 @@ public class Reparenting extends Activity {
                     newParent.addView(v);
                 }
             });
-            Move reparent = new Move();
+            ChangeBounds reparent = new ChangeBounds();
             reparent.setReparent(true);
             TransitionManager.go(newScene, reparent);
         }

@@ -19,12 +19,12 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Crossfade;
-import android.view.transition.Move;
-import android.view.transition.Scene;
-import android.view.transition.Transition;
-import android.view.transition.TransitionGroup;
-import android.view.transition.TransitionManager;
+import android.transition.Crossfade;
+import android.transition.ChangeBounds;
+import android.transition.Scene;
+import android.transition.Transition;
+import android.transition.TransitionSet;
+import android.transition.TransitionManager;
 import android.widget.ImageView;
 
 public class CrossfadeImage extends Activity {
@@ -48,11 +48,11 @@ public class CrossfadeImage extends Activity {
         mImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
         Crossfade mCrossfade = new Crossfade();
-        mCrossfade.setTargetIds(R.id.contact_picture);
+        mCrossfade.addTargetId(R.id.contact_picture);
 
-        TransitionGroup group = new TransitionGroup();
+        TransitionSet group = new TransitionSet();
         group.setDuration(1500);
-        group.addTransitions(mCrossfade, new Move());
+        group.addTransition(mCrossfade).addTransition(new ChangeBounds());
         mTransition = group;
     }
 
