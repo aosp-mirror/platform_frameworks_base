@@ -77,11 +77,12 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
                     .getContentResolver().acquireUnstableContentProviderClient(authority);
             final Cursor cursor = result.client.query(
                     mUri, null, null, null, getQuerySortOrder(mSortOrder), mSignal);
+            cursor.registerContentObserver(mObserver);
+
             final Cursor withRoot = new RootCursorWrapper(mUri.getAuthority(), mRootId, cursor, -1);
             final Cursor sorted = new SortingCursorWrapper(withRoot, mSortOrder);
 
             result.cursor = sorted;
-            result.cursor.registerContentObserver(mObserver);
         } catch (Exception e) {
             result.exception = e;
             ContentProviderClient.closeQuietly(result.client);
