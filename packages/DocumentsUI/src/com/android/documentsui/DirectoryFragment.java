@@ -412,11 +412,83 @@ public class DirectoryFragment extends Fragment {
         return ((DocumentsActivity) fragment.getActivity()).getDisplayState();
     }
 
+    private interface Footer {
+        public View getView(View convertView, ViewGroup parent);
+    }
+
+    private static class LoadingFooter implements Footer {
+        @Override
+        public View getView(View convertView, ViewGroup parent) {
+            final Context context = parent.getContext();
+            if (convertView == null) {
+                final LayoutInflater inflater = LayoutInflater.from(context);
+                convertView = inflater.inflate(R.layout.item_loading, parent, false);
+            }
+            return convertView;
+        }
+    }
+
+    private class MessageFooter implements Footer {
+        private final int mIcon;
+        private final String mMessage;
+
+        public MessageFooter(int icon, String message) {
+            mIcon = icon;
+            mMessage = message;
+        }
+
+        @Override
+        public View getView(View convertView, ViewGroup parent) {
+            final Context context = parent.getContext();
+            final State state = getDisplayState(DirectoryFragment.this);
+
+            if (convertView == null) {
+                final LayoutInflater inflater = LayoutInflater.from(context);
+                if (state.mode == MODE_LIST) {
+                    convertView = inflater.inflate(R.layout.item_message_list, parent, false);
+                } else if (state.mode == MODE_GRID) {
+                    convertView = inflater.inflate(R.layout.item_message_grid, parent, false);
+                } else {
+                    throw new IllegalStateException();
+                }
+            }
+
+            final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
+            final TextView title = (TextView) convertView.findViewById(android.R.id.title);
+            icon.setImageResource(mIcon);
+            title.setText(mMessage);
+            return convertView;
+        }
+    }
+
     private class DocumentsAdapter extends BaseAdapter {
         private Cursor mCursor;
+        private int mCursorCount;
+
+        private List<Footer> mFooters = Lists.newArrayList();
 
         public void swapCursor(Cursor cursor) {
             mCursor = cursor;
+            mCursorCount = cursor != null ? cursor.getCount() : 0;
+
+            mFooters.clear();
+
+            final Bundle extras = cursor != null ? cursor.getExtras() : null;
+            if (extras != null) {
+                final String info = extras.getString(DocumentsContract.EXTRA_INFO);
+                if (info != null) {
+                    mFooters.add(new MessageFooter(
+                            com.android.internal.R.drawable.ic_menu_info_details, info));
+                }
+                final String error = extras.getString(DocumentsContract.EXTRA_ERROR);
+                if (error != null) {
+                    mFooters.add(new MessageFooter(
+                            com.android.internal.R.drawable.ic_dialog_alert, error));
+                }
+                if (extras.getBoolean(DocumentsContract.EXTRA_LOADING, false)) {
+                    mFooters.add(new LoadingFooter());
+                }
+            }
 
             if (isEmpty()) {
                 mEmptyView.setVisibility(View.VISIBLE);
@@ -429,6 +501,15 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
+            if (position < mCursorCount) {
+                return getDocumentView(position, convertView, parent);
+            } else {
+                position -= mCursorCount;
+                return mFooters.get(position).getView(convertView, parent);
+            }
+        }
+
+        private View getDocumentView(int position, View convertView, ViewGroup parent) {
             final Context context = parent.getContext();
             final State state = getDisplayState(DirectoryFragment.this);
 
@@ -535,20 +616,41 @@ public class DirectoryFragment extends Fragment {
 
         @Override
         public int getCount() {
-            return mCursor != null ? mCursor.getCount() : 0;
+            return mCursorCount + mFooters.size();
         }
 
         @Override
         public Cursor getItem(int position) {
-            if (mCursor != null) {
+            if (position < mCursorCount) {
                 mCursor.moveToPosition(position);
+                return mCursor;
+            } else {
+                return null;
             }
-            return mCursor;
         }
 
         @Override
         public long getItemId(int position) {
             return position;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            if (position < mCursorCount) {
+                return 0;
+            } else {
+                return IGNORE_ITEM_VIEW_TYPE;
+            }
+        }
+
+        @Override
+        public boolean areAllItemsEnabled() {
+            return false;
+        }
+
+        @Override
+        public boolean isEnabled(int position) {
+            return position < mCursorCount;
         }
     }
 

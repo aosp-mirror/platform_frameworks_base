@@ -13,7 +13,20 @@
             android:permission="android.permission.MANAGE_DOCUMENTS">
             <meta-data
                 android:name="android.content.DOCUMENT_PROVIDER"
-                android:resource="@xml/document_provider" />
+                android:value="true" />
+        </provider>
+
+        <!-- TODO: find a better place for tests to live -->
+        <provider
+            android:name=".TestDocumentsProvider"
+            android:authorities="com.example.documents"
+            android:grantUriPermissions="true"
+            android:exported="true"
+            android:permission="android.permission.MANAGE_DOCUMENTS"
+            android:enabled="false">
+            <meta-data
+                android:name="android.content.DOCUMENT_PROVIDER"
+                android:value="true" />
         </provider>
     </application>
 </manifest>

@@ -22,6 +22,7 @@ import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_SIZE;
 
 import android.database.AbstractCursor;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.provider.DocumentsContract.Document;
 
 /**
@@ -93,6 +94,11 @@ public class SortingCursorWrapper extends AbstractCursor {
                 binarySort(mPosition, mValueLong);
                 break;
         }
+    }
+
+    @Override
+    public Bundle getExtras() {
+        return mCursor.getExtras();
     }
 
     @Override
