@@ -52,7 +52,7 @@ public class ServiceInfo extends ComponentInfo
      * Bit in {@link #flags}: If set,
      * {@link android.app.Service#onProvideAssistData(android.os.Bundle)} will
      * be called on the service when it is running in the foreground. Set from
-     * the android.R.attr#provideAssistData attribute.
+     * the {@link android.R.attr#provideAssistData} attribute.
      */
     public static final int FLAG_PROVIDE_ASSIST_DATA = 0x0004;
 
