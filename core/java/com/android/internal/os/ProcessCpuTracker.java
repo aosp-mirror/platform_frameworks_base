@@ -35,7 +35,7 @@ import java.util.Comparator;
 import java.util.StringTokenizer;
 
 public class ProcessCpuTracker {
-    private static final String TAG = "ProcessStats";
+    private static final String TAG = "ProcessCpuTracker";
     private static final boolean DEBUG = false;
     private static final boolean localLOGV = DEBUG || false;
 
