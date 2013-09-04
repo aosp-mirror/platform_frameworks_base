@@ -150,6 +150,8 @@ final class WifiDisplayController implements DumpUtils.Dump {
 
     // Certification
     private boolean mWifiDisplayCertMode;
+    private int mWifiDisplayWpsConfig = WpsInfo.INVALID;
+
     private WifiP2pDevice mThisDevice;
 
     public WifiDisplayController(Context context, Handler handler, Listener listener) {
@@ -179,6 +181,8 @@ final class WifiDisplayController implements DumpUtils.Dump {
                 Settings.Global.WIFI_DISPLAY_ON), false, settingsObserver);
         resolver.registerContentObserver(Settings.Global.getUriFor(
                 Settings.Global.WIFI_DISPLAY_CERTIFICATION_ON), false, settingsObserver);
+        resolver.registerContentObserver(Settings.Global.getUriFor(
+                Settings.Global.WIFI_DISPLAY_WPS_CONFIG), false, settingsObserver);
         updateSettings();
     }
 
@@ -188,6 +192,12 @@ final class WifiDisplayController implements DumpUtils.Dump {
                 Settings.Global.WIFI_DISPLAY_ON, 0) != 0;
         mWifiDisplayCertMode = Settings.Global.getInt(resolver,
                 Settings.Global.WIFI_DISPLAY_CERTIFICATION_ON, 0) != 0;
+
+        mWifiDisplayWpsConfig = WpsInfo.INVALID;
+        if (mWifiDisplayCertMode) {
+            mWifiDisplayWpsConfig = Settings.Global.getInt(resolver,
+                  Settings.Global.WIFI_DISPLAY_WPS_CONFIG, WpsInfo.INVALID);
+        }
 
         updateWfdEnableState();
     }
@@ -608,7 +618,9 @@ final class WifiDisplayController implements DumpUtils.Dump {
             mConnectingDevice = mDesiredDevice;
             WifiP2pConfig config = new WifiP2pConfig();
             WpsInfo wps = new WpsInfo();
-            if (mConnectingDevice.wpsPbcSupported()) {
+            if (mWifiDisplayWpsConfig != WpsInfo.INVALID) {
+                wps.setup = mWifiDisplayWpsConfig;
+            } else if (mConnectingDevice.wpsPbcSupported()) {
                 wps.setup = WpsInfo.PBC;
             } else if (mConnectingDevice.wpsDisplaySupported()) {
                 // We do keypad if peer does display
