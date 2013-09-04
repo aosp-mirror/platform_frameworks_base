@@ -17,7 +17,7 @@ startpage=true
 
 <h2>You should also read</h2>
 <ul>
-  <li><a href="{@docRoot}guide/topics/connectivity/wifip2p.html">Wi-Fi Direct</a></li>
+  <li><a href="{@docRoot}guide/topics/connectivity/wifip2p.html">Wi-Fi P2P</a></li>
 </ul>
 
 
@@ -37,8 +37,8 @@ other machines on the same network.</p>
 <p>This class describes the key APIs for finding and
 connecting to other devices from your application.  Specifically, it
 describes the NSD API for discovering available services and the Wi-Fi
-Direct&trade; API for doing peer-to-peer wireless connections.  This class also
-shows you how to use NSD and Wi-Fi Direct in
+Peer-to-Peer (P2P) API for doing peer-to-peer wireless connections.  This class also
+shows you how to use NSD and Wi-Fi P2P in
 combination to detect the services offered by a device and connect to the
 device when neither device is connected to a network.
 </p>
@@ -49,13 +49,13 @@ device when neither device is connected to a network.
   <dd>Learn how to broadcast services offered by your own application, discover
   services offered on the local network, and use NSD to determine the connection
   details for the service you wish to connect to.</dd>
-  <dt><strong><a href="wifi-direct.html">Connecting with Wi-Fi Direct</a></strong></dt>
+  <dt><strong><a href="wifi-direct.html">Creating P2P Connections with Wi-Fi</a></strong></dt>
   <dd>Learn how to fetch a list of nearby peer devices, create an access point
-  for legacy devices, and connect to other devices capable of Wi-Fi Direct
+  for legacy devices, and connect to other devices capable of Wi-Fi P2P
   connections.</dd>
-  <dt><strong><a href="nsd-wifi-direct.html">Using Wi-Fi Direct for Service
+  <dt><strong><a href="nsd-wifi-direct.html">Using Wi-Fi P2P for Service
       Discovery</a></strong></dt>
   <dd>Learn how to discover services published by nearby devices without being
-  on the same network, using Wi-Fi Direct.</dd>
+  on the same network, using Wi-Fi P2P.</dd>
 </dl>
 
