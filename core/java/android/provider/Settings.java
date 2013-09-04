@@ -5107,6 +5107,21 @@ public final class Settings {
                "wifi_display_certification_on";
 
        /**
+        * WPS Configuration method used by Wifi display, this setting only
+        * takes effect when WIFI_DISPLAY_CERTIFICATION_ON is 1 (enabled).
+        *
+        * Possible values are:
+        *
+        * WpsInfo.INVALID: use default WPS method chosen by framework
+        * WpsInfo.PBC    : use Push button
+        * WpsInfo.KEYPAD : use Keypad
+        * WpsInfo.DISPLAY: use Display
+        * @hide
+        */
+       public static final String WIFI_DISPLAY_WPS_CONFIG =
+           "wifi_display_wps_config";
+
+       /**
         * Whether to notify the user of open networks.
         * <p>
         * If not connected and the scan results have an open network, we will
