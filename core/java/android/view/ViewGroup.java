@@ -1123,6 +1123,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             removeFromArray(index);
             addInArray(child, mChildrenCount);
             child.mParent = this;
+            requestLayout();
+            invalidate();
         }
     }
 
