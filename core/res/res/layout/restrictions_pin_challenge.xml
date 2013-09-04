@@ -18,42 +18,73 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginTop="48dp"
-    android:layout_marginBottom="48dp"
     android:overScrollMode="ifContentScrolls">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dip"
         android:orientation="vertical">
-
-        <TextView android:id="@+id/pin_message"
-            style="?android:attr/textAppearanceMedium"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/restr_pin_create_pin"
-            android:textColor="?android:attr/textColorSecondary" />
+            android:padding="8dip"
+            android:orientation="vertical">
 
-        <EditText android:id="@+id/pin_text"
-            style="?android:attr/textAppearanceMedium"
-            android:layout_marginBottom="16dp"
+            <EditText android:id="@+id/pin_text"
+                android:layout_marginLeft="8dip"
+                android:layout_marginStart="8dip"
+                android:layout_marginRight="8dip"
+                android:layout_marginEnd="8dip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberPassword"
+                android:textColor="?android:attr/textColorPrimary" />
+
+            <TextView android:id="@+id/pin_error_message"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/restr_pin_incorrect"
+                android:gravity="center"/>
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/buttonPanel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/restr_pin_enter_pin"
-            android:inputType="numberPassword"
-            android:textColor="?android:attr/textColorPrimary" />
-
-        <TextView android:id="@+id/pin_error_message"
-            style="?android:attr/textAppearanceSmall"
-            android:layout_marginBottom="16dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/restr_pin_error_doesnt_match"
-            android:textColor="#FFFF0000" />
-
+            android:minHeight="@dimen/alert_dialog_button_bar_height"
+            android:orientation="vertical"
+            android:divider="?android:attr/dividerHorizontal"
+            android:showDividers="beginning"
+            android:dividerPadding="0dip">
+            <LinearLayout
+                style="?android:attr/buttonBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layoutDirection="locale"
+                android:measureWithLargestChild="true">
+                <Button android:id="@+id/pin_cancel_button"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="start"
+                    android:layout_weight="1"
+                    android:maxLines="2"
+                    android:minHeight="@dimen/alert_dialog_button_bar_height"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:textSize="14sp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cancel" />
+                <Button android:id="@+id/pin_ok_button"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_weight="1"
+                    android:maxLines="2"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:textSize="14sp"
+                    android:minHeight="@dimen/alert_dialog_button_bar_height"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ok" />
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
-
 </ScrollView>
