@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
@@ -26,6 +27,7 @@ import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.location.LocationManager;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 
@@ -81,18 +83,18 @@ public class LocationController extends BroadcastReceiver {
         mStatusBarManager
                 = (StatusBarManager) context.getSystemService(Context.STATUS_BAR_SERVICE);
 
-        // Register to listen for changes to the location settings
-        context.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.LOCATION_PROVIDERS_ALLOWED), true,
-                new ContentObserver(new Handler()) {
-                    @Override
-                    public void onChange(boolean selfChange) {
-                        boolean isEnabled = isLocationEnabled();
-                        for (LocationSettingsChangeCallback cb : mSettingsChangeCallbacks) {
-                            cb.onLocationSettingsChanged(isEnabled);
-                        }
-                    }
-                });
+        // Register to listen for changes in location settings.
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(LocationManager.MODE_CHANGED_ACTION);
+        context.registerReceiverAsUser(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (LocationManager.MODE_CHANGED_ACTION.equals(action)) {
+                    locationSettingsChanged();
+                }
+            }
+        }, UserHandle.ALL, intentFilter, null, new Handler());
 
         // Examine the current location state and initialize the status view.
         updateActiveLocationRequests();
@@ -114,28 +116,46 @@ public class LocationController extends BroadcastReceiver {
      *
      * <p>If enabling, a user consent dialog will pop up prompting the user to accept.
      * If the user doesn't accept, network location won't be enabled.
+     *
+     * @return true if attempt to change setting was successful.
      */
-    public void setLocationEnabled(boolean enabled) {
-        final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        if (um.hasUserRestriction(UserManager.DISALLOW_SHARE_LOCATION)) {
-            return;
+    public boolean setLocationEnabled(boolean enabled) {
+        int currentUserId = ActivityManager.getCurrentUser();
+        if (isUserLocationRestricted(currentUserId)) {
+            return false;
         }
         final ContentResolver cr = mContext.getContentResolver();
         // When enabling location, a user consent dialog will pop up, and the
         // setting won't be fully enabled until the user accepts the agreement.
         int mode = enabled
                 ? Settings.Secure.LOCATION_MODE_HIGH_ACCURACY : Settings.Secure.LOCATION_MODE_OFF;
-        Settings.Secure.putInt(cr, Settings.Secure.LOCATION_MODE, mode);
+        return Settings.Secure
+                .putIntForUser(cr, Settings.Secure.LOCATION_MODE, mode, currentUserId);
     }
 
     /**
      * Returns true if location isn't disabled in settings.
      */
     public boolean isLocationEnabled() {
+        int currentUserId = ActivityManager.getCurrentUser();
+        if (isUserLocationRestricted(currentUserId)) {
+            return false;
+        }
+
         ContentResolver resolver = mContext.getContentResolver();
-        int mode = Settings.Secure.getInt(resolver, Settings.Secure.LOCATION_MODE,
-                Settings.Secure.LOCATION_MODE_OFF);
+        int mode = Settings.Secure.getIntForUser(resolver, Settings.Secure.LOCATION_MODE,
+                Settings.Secure.LOCATION_MODE_OFF, currentUserId);
         return mode != Settings.Secure.LOCATION_MODE_OFF;
+    }
+
+    /**
+     * Returns true if the current user is restricted from using location.
+     */
+    private boolean isUserLocationRestricted(int userId) {
+        final UserManager um = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
+        return um.hasUserRestriction(
+                UserManager.DISALLOW_SHARE_LOCATION,
+                new UserHandle(userId));
     }
 
     /**
@@ -185,6 +205,13 @@ public class LocationController extends BroadcastReceiver {
         mAreActiveLocationRequests = areActiveHighPowerLocationRequests();
         if (mAreActiveLocationRequests != hadActiveLocationRequests) {
             refreshViews();
+        }
+    }
+
+    private void locationSettingsChanged() {
+        boolean isEnabled = isLocationEnabled();
+        for (LocationSettingsChangeCallback cb : mSettingsChangeCallbacks) {
+            cb.onLocationSettingsChanged(isEnabled);
         }
     }
 
