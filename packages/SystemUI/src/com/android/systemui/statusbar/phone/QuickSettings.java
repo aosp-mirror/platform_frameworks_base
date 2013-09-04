@@ -640,10 +640,10 @@ class QuickSettings {
                 @Override
                 public boolean onLongClick(View v) {
                     boolean newLocationEnabledState = !mLocationController.isLocationEnabled();
-                    mLocationController.setLocationEnabled(newLocationEnabledState);
-                    if (newLocationEnabledState) {
-                        // Close the notifications tray so that the network location provider
-                        // consent dialog can be shown.
+                    if (mLocationController.setLocationEnabled(newLocationEnabledState)
+                            && newLocationEnabledState) {
+                        // If we've successfully switched from location off to on, close the
+                        // notifications tray to show the network location provider consent dialog.
                         Intent closeDialog = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
                         mContext.sendBroadcast(closeDialog);
                     }
