@@ -974,10 +974,12 @@ public class ListPopupWindow {
      * currently touched list item.
      * <p>
      * Example usage:
-     * <pre>ListPopupWindow myPopup = new ListPopupWindow(context);
+     * <pre>
+     * ListPopupWindow myPopup = new ListPopupWindow(context);
      * myPopup.setAnchor(myAnchor);
      * OnTouchListener dragListener = myPopup.createDragToOpenListener(myAnchor);
-     * myAnchor.setOnTouchListener(dragListener);</pre>
+     * myAnchor.setOnTouchListener(dragListener);
+     * </pre>
      *
      * @param src the view on which the resulting listener will be set
      * @return a touch listener that controls drag-to-open behavior
