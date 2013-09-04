@@ -45,6 +45,10 @@ public class DocumentStack extends LinkedList<DocumentInfo> implements Durable {
         }
     }
 
+    public boolean isRecents() {
+        return size() == 0;
+    }
+
     @Override
     public void reset() {
         clear();

@@ -16,6 +16,7 @@
 
 package com.android.documentsui.model;
 
+import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -26,7 +27,6 @@ import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 
-import com.android.documentsui.RecentsProvider;
 import com.android.documentsui.RootCursorWrapper;
 
 import libcore.io.IoUtils;
@@ -117,41 +117,12 @@ public class DocumentInfo implements Durable {
         return doc;
     }
 
-    @Deprecated
-    public static DocumentInfo fromRecentOpenCursor(ContentResolver resolver, Cursor recentCursor)
-            throws FileNotFoundException {
-        final Uri uri = Uri.parse(getCursorString(recentCursor, RecentsProvider.COL_URI));
-        final long lastModified = getCursorLong(recentCursor, RecentsProvider.COL_TIMESTAMP);
-
-        Cursor cursor = null;
-        try {
-            cursor = resolver.query(uri, null, null, null, null);
-            if (!cursor.moveToFirst()) {
-                throw new FileNotFoundException("Missing details for " + uri);
-            }
-
-            final DocumentInfo doc = new DocumentInfo();
-            doc.uri = uri;
-            doc.mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
-            doc.displayName = getCursorString(cursor, Document.COLUMN_DISPLAY_NAME);
-            doc.lastModified = lastModified;
-            doc.flags = getCursorInt(cursor, Document.COLUMN_FLAGS)
-                    & Document.FLAG_SUPPORTS_THUMBNAIL;
-            doc.summary = getCursorString(cursor, Document.COLUMN_SUMMARY);
-            doc.size = getCursorLong(cursor, Document.COLUMN_SIZE);
-            doc.icon = getCursorInt(cursor, Document.COLUMN_ICON);
-            return doc;
-        } catch (Throwable t) {
-            throw asFileNotFoundException(t);
-        } finally {
-            IoUtils.closeQuietly(cursor);
-        }
-    }
-
     public static DocumentInfo fromUri(ContentResolver resolver, Uri uri) throws FileNotFoundException {
+        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
+                uri.getAuthority());
         Cursor cursor = null;
         try {
-            cursor = resolver.query(uri, null, null, null, null);
+            cursor = client.query(uri, null, null, null, null);
             if (!cursor.moveToFirst()) {
                 throw new FileNotFoundException("Missing details for " + uri);
             }
@@ -169,6 +140,7 @@ public class DocumentInfo implements Durable {
             throw asFileNotFoundException(t);
         } finally {
             IoUtils.closeQuietly(cursor);
+            ContentProviderClient.closeQuietly(client);
         }
     }
 
