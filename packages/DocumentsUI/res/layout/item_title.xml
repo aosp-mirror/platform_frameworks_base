@@ -29,13 +29,4 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textAlignment="viewStart" />
 
-    <TextView
-        android:id="@android:id/summary"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:singleLine="true"
-        android:ellipsize="marquee"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textAlignment="viewStart" />
-
 </LinearLayout>
