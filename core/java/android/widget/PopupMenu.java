@@ -82,8 +82,10 @@ public class PopupMenu implements MenuBuilder.Callback, MenuPresenter.Callback {
      * currently touched list item.
      * <p>
      * Example usage:
-     * <pre>PopupMenu myPopup = new PopupMenu(context, myAnchor);
-     * myAnchor.setOnTouchListener(myPopup.getDragToOpenListener());</pre>
+     * <pre>
+     * PopupMenu myPopup = new PopupMenu(context, myAnchor);
+     * myAnchor.setOnTouchListener(myPopup.getDragToOpenListener());
+     * </pre>
      *
      * @return a touch listener that controls drag-to-open behavior
      */
