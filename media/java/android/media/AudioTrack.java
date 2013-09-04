@@ -735,8 +735,7 @@ public class AudioTrack
    /**
     * Poll for a timestamp on demand.
     *
-    * Use if {@link TimestampListener} is not delivered often enough for your needs,
-    * or if you need to get the most recent timestamp outside of the event callback handler.
+    * Use if you need to get the most recent timestamp outside of the event callback handler.
     * Calling this method too often may be inefficient;
     * if you need a high-resolution mapping between frame position and presentation time,
     * consider implementing that at application level, based on low-resolution timestamps.
@@ -756,8 +755,6 @@ public class AudioTrack
     *         with the estimated time when that frame was presented or is committed to
     *         be presented.
     *         In the case that no timestamp is available, any supplied instance is left unaltered.
-    *
-    * @hide
     */
     public AudioTimestamp getTimestamp(AudioTimestamp timestamp)
     {
