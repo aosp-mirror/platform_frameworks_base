@@ -462,6 +462,7 @@ public class RelativeLayout extends ViewGroup {
 
         views = mSortedVerticalChildren;
         count = views.length;
+        final int targetSdkVersion = getContext().getApplicationInfo().targetSdkVersion;
 
         for (int i = 0; i < count; i++) {
             View child = views[i];
@@ -476,14 +477,26 @@ public class RelativeLayout extends ViewGroup {
 
                 if (isWrapContentWidth) {
                     if (isLayoutRtl()) {
-                        width = Math.max(width, myWidth - params.mLeft);
+                        if (targetSdkVersion < Build.VERSION_CODES.KEY_LIME_PIE) {
+                            width = Math.max(width, myWidth - params.mLeft);
+                        } else {
+                            width = Math.max(width, myWidth - params.mLeft - params.leftMargin);
+                        }
                     } else {
-                        width = Math.max(width, params.mRight);
+                        if (targetSdkVersion < Build.VERSION_CODES.KEY_LIME_PIE) {
+                            width = Math.max(width, params.mRight);
+                        } else {
+                            width = Math.max(width, params.mRight + params.rightMargin);
+                        }
                     }
                 }
 
                 if (isWrapContentHeight) {
-                    height = Math.max(height, params.mBottom);
+                    if (targetSdkVersion < Build.VERSION_CODES.KEY_LIME_PIE) {
+                        height = Math.max(height, params.mBottom);
+                    } else {
+                        height = Math.max(height, params.mBottom + params.bottomMargin);
+                    }
                 }
 
                 if (child != ignore || verticalGravity) {
