@@ -286,6 +286,25 @@ final class WifiDisplayController implements DumpUtils.Dump {
             }
         } else {
             // WFD should be disabled.
+            if (mWfdEnabled || mWfdEnabling) {
+                WifiP2pWfdInfo wfdInfo = new WifiP2pWfdInfo();
+                wfdInfo.setWfdEnabled(false);
+                mWifiP2pManager.setWFDInfo(mWifiP2pChannel, wfdInfo, new ActionListener() {
+                    @Override
+                    public void onSuccess() {
+                        if (DEBUG) {
+                            Slog.d(TAG, "Successfully set WFD info.");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(int reason) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "Failed to set WFD info with reason " + reason + ".");
+                        }
+                    }
+                });
+            }
             mWfdEnabling = false;
             mWfdEnabled = false;
             reportFeatureState();
