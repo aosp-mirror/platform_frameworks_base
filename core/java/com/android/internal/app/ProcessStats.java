@@ -1583,7 +1583,7 @@ public final class ProcessStats implements Parcelable {
                 final int NSRVS = pkgState.mServices.size();
                 if (NPROCS > 0 || NSRVS > 0) {
                     if (!printedHeader) {
-                        pw.println("Per-Package Process Stats:");
+                        pw.println("Per-Package Stats:");
                         printedHeader = true;
                     }
                     pw.print("  * "); pw.print(pkgName); pw.print(" / ");
@@ -1651,7 +1651,8 @@ public final class ProcessStats implements Parcelable {
                         continue;
                     }
                     if (!printedHeader) {
-                        pw.println("Process Stats:");
+                        pw.println();
+                        pw.println("Per-Process Stats:");
                         printedHeader = true;
                     }
                     pw.print("  * "); pw.print(procName); pw.print(" / ");
@@ -2536,7 +2537,8 @@ public final class ProcessStats implements Parcelable {
             if (mActive <= 0) {
                 throw new IllegalStateException("Service " + this + " has mActive=" + mActive);
             }
-            int state = started ? memFactor : STATE_NOTHING;
+            final boolean wasStarted = mStartedState != STATE_NOTHING;
+            final int state = started ? memFactor : STATE_NOTHING;
             if (mStartedState != state) {
                 if (mStartedState != STATE_NOTHING) {
                     addStateTime(SERVICE_STARTED + (mStartedState*SERVICE_COUNT),
@@ -2546,8 +2548,8 @@ public final class ProcessStats implements Parcelable {
                 }
                 mStartedState = state;
                 mStartedStartTime = now;
-                if (mProc != null) {
-                    mProc = mProc.pullFixedProc(mPackage);
+                mProc = mProc.pullFixedProc(mPackage);
+                if (wasStarted != started) {
                     if (started) {
                         mProc.incStartedServices(memFactor, now);
                     } else {
@@ -2561,7 +2563,7 @@ public final class ProcessStats implements Parcelable {
             if (mActive <= 0) {
                 throw new IllegalStateException("Service " + this + " has mActive=" + mActive);
             }
-            int state = bound ? memFactor : STATE_NOTHING;
+            final int state = bound ? memFactor : STATE_NOTHING;
             if (mBoundState != state) {
                 if (mBoundState != STATE_NOTHING) {
                     addStateTime(SERVICE_BOUND + (mBoundState*SERVICE_COUNT),
@@ -2578,7 +2580,7 @@ public final class ProcessStats implements Parcelable {
             if (mActive <= 0) {
                 throw new IllegalStateException("Service " + this + " has mActive=" + mActive);
             }
-            int state = executing ? memFactor : STATE_NOTHING;
+            final int state = executing ? memFactor : STATE_NOTHING;
             if (mExecState != state) {
                 if (mExecState != STATE_NOTHING) {
                     addStateTime(SERVICE_EXEC + (mExecState*SERVICE_COUNT), now - mExecStartTime);
