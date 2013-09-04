@@ -26,21 +26,16 @@ public final class Rational {
     /**
      * <p>Create a Rational with a given numerator and denominator.</p>
      *
-     * <p>
-     * The signs of the numerator and the denominator may be flipped such that the denominator
-     * is always 0.
-     * </p>
+     * <p>The signs of the numerator and the denominator may be flipped such that the denominator
+     * is always positive.</p>
+     *
+     * <p>A rational value with a 0-denominator may be constructed, but will have similar semantics
+     * as float NaN and INF values. The int getter functions return 0 in this case.</p>
      *
      * @param numerator the numerator of the rational
      * @param denominator the denominator of the rational
-     *
-     * @throws IllegalArgumentException if the denominator is 0
      */
     public Rational(int numerator, int denominator) {
-
-        if (denominator == 0) {
-            throw new IllegalArgumentException("Argument 'denominator' is 0");
-        }
 
         if (denominator < 0) {
             numerator = -numerator;
@@ -55,6 +50,9 @@ public final class Rational {
      * Gets the numerator of the rational.
      */
     public int getNumerator() {
+        if (mDenominator == 0) {
+            return 0;
+        }
         return mNumerator;
     }
 
@@ -65,22 +63,41 @@ public final class Rational {
         return mDenominator;
     }
 
+    private boolean isNaN() {
+        return mDenominator == 0 && mNumerator == 0;
+    }
+
+    private boolean isInf() {
+        return mDenominator == 0 && mNumerator > 0;
+    }
+
+    private boolean isNegInf() {
+        return mDenominator == 0 && mNumerator < 0;
+    }
+
     /**
      * <p>Compare this Rational to another object and see if they are equal.</p>
      *
      * <p>A Rational object can only be equal to another Rational object (comparing against any other
      * type will return false).</p>
      *
-     * <p>A Rational object is considered equal to another Rational object if and only if their
-     * reduced forms have the same numerator and denominator.</p>
+     * <p>A Rational object is considered equal to another Rational object if and only if one of
+     * the following holds</p>:
+     * <ul><li>Both are NaN</li>
+     *     <li>Both are infinities of the same sign</li>
+     *     <li>Both have the same numerator and denominator in their reduced form</li>
+     * </ul>
      *
      * <p>A reduced form of a Rational is calculated by dividing both the numerator and the
      * denominator by their greatest common divisor.</p>
      *
      * <pre>
-     *      (new Rational(1, 2)).equals(new Rational(1, 2)) == true  // trivially true
-     *      (new Rational(2, 3)).equals(new Rational(1, 2)) == false // trivially false
-     *      (new Rational(1, 2)).equals(new Rational(2, 4)) == true  // true after reduction
+     *      (new Rational(1, 2)).equals(new Rational(1, 2)) == true   // trivially true
+     *      (new Rational(2, 3)).equals(new Rational(1, 2)) == false  // trivially false
+     *      (new Rational(1, 2)).equals(new Rational(2, 4)) == true   // true after reduction
+     *      (new Rational(0, 0)).equals(new Rational(0, 0)) == true   // NaN.equals(NaN)
+     *      (new Rational(1, 0)).equals(new Rational(5, 0)) == true   // both are +infinity
+     *      (new Rational(1, 0)).equals(new Rational(-1, 0)) == false // +infinity != -infinity
      * </pre>
      *
      * @param obj a reference to another object
@@ -91,13 +108,17 @@ public final class Rational {
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;
-        }
-        if (this == obj) {
-            return true;
-        }
-        if (obj instanceof Rational) {
+        } else if (obj instanceof Rational) {
             Rational other = (Rational) obj;
-            if(mNumerator == other.mNumerator && mDenominator == other.mDenominator) {
+            if (mDenominator == 0 || other.mDenominator == 0) {
+                if (isNaN() && other.isNaN()) {
+                    return true;
+                } else if (isInf() && other.isInf() || isNegInf() && other.isNegInf()) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else if (mNumerator == other.mNumerator && mDenominator == other.mDenominator) {
                 return true;
             } else {
                 int thisGcd = gcd();
@@ -117,7 +138,25 @@ public final class Rational {
 
     @Override
     public String toString() {
-        return mNumerator + "/" + mDenominator;
+        if (isNaN()) {
+            return "NaN";
+        } else if (isInf()) {
+            return "Infinity";
+        } else if (isNegInf()) {
+            return "-Infinity";
+        } else {
+            return mNumerator + "/" + mDenominator;
+        }
+    }
+
+    /**
+     * <p>Convert to a floating point representation.</p>
+     *
+     * @return The floating point representation of this rational number.
+     * @hide
+     */
+    public float toFloat() {
+        return (float) mNumerator / (float) mDenominator;
     }
 
     @Override
