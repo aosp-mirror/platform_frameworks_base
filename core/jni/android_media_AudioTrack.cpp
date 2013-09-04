@@ -742,6 +742,30 @@ static jint android_media_AudioTrack_get_latency(JNIEnv *env,  jobject thiz) {
 
 
 // ----------------------------------------------------------------------------
+static jint android_media_AudioTrack_get_timestamp(JNIEnv *env,  jobject thiz, jlongArray jTimestamp) {
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+
+    if (lpTrack == NULL) {
+        ALOGE("Unable to retrieve AudioTrack pointer for getTimestamp()");
+        return AUDIOTRACK_ERROR;
+    }
+    AudioTimestamp timestamp;
+    status_t status = lpTrack->getTimestamp(timestamp);
+    if (status == OK) {
+        jlong* nTimestamp = (jlong *) env->GetPrimitiveArrayCritical(jTimestamp, NULL);
+        if (nTimestamp == NULL) {
+            ALOGE("Unable to get array for getTimestamp()");
+            return AUDIOTRACK_ERROR;
+        }
+        nTimestamp[0] = (jlong) timestamp.mPosition;
+        nTimestamp[1] = (jlong) ((timestamp.mTime.tv_sec * 1000000000LL) + timestamp.mTime.tv_nsec);
+        env->ReleasePrimitiveArrayCritical(jTimestamp, nTimestamp, 0);
+    }
+    return (jint) android_media_translateErrorCode(status);
+}
+
+
+// ----------------------------------------------------------------------------
 static jint android_media_AudioTrack_set_loop(JNIEnv *env,  jobject thiz,
         jint loopStart, jint loopEnd, jint loopCount) {
     sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
@@ -869,6 +893,7 @@ static JNINativeMethod gMethods[] = {
     {"native_set_position",  "(I)I",     (void *)android_media_AudioTrack_set_position},
     {"native_get_position",  "()I",      (void *)android_media_AudioTrack_get_position},
     {"native_get_latency",   "()I",      (void *)android_media_AudioTrack_get_latency},
+    {"native_get_timestamp", "([J)I",    (void *)android_media_AudioTrack_get_timestamp},
     {"native_set_loop",      "(III)I",   (void *)android_media_AudioTrack_set_loop},
     {"native_reload_static", "()I",      (void *)android_media_AudioTrack_reload},
     {"native_get_output_sample_rate",

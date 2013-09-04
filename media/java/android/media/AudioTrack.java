@@ -732,6 +732,51 @@ public class AudioTrack
         return mSessionId;
     }
 
+   /**
+    * Poll for a timestamp on demand.
+    *
+    * Use if {@link TimestampListener} is not delivered often enough for your needs,
+    * or if you need to get the most recent timestamp outside of the event callback handler.
+    * Calling this method too often may be inefficient;
+    * if you need a high-resolution mapping between frame position and presentation time,
+    * consider implementing that at application level, based on low-resolution timestamps.
+    * The audio data at the returned position may either already have been
+    * presented, or may have not yet been presented but is committed to be presented.
+    * It is not possible to request the time corresponding to a particular position,
+    * or to request the (fractional) position corresponding to a particular time.
+    * If you need such features, consider implementing them at application level.
+    *
+    * @param timestamp a reference to a non-null AudioTimestamp instance allocated
+    *        and owned by caller, or null.
+    * @return that same instance if timestamp parameter is non-null and a timestamp is available,
+    *         or a reference to a new AudioTimestamp instance which is now owned by caller
+    *         if timestamp parameter is null and a timestamp is available,
+    *         or null if no timestamp is available.  In either successful case,
+    *         the AudioTimestamp instance is filled in with a position in frame units, together
+    *         with the estimated time when that frame was presented or is committed to
+    *         be presented.
+    *         In the case that no timestamp is available, any supplied instance is left unaltered.
+    *
+    * @hide
+    */
+    public AudioTimestamp getTimestamp(AudioTimestamp timestamp)
+    {
+        // It's unfortunate, but we have to either create garbage every time or use synchronized
+        long[] longArray = new long[2];
+        int ret = native_get_timestamp(longArray);
+        if (ret == SUCCESS) {
+            if (timestamp == null) {
+                timestamp = new AudioTimestamp();
+            }
+            timestamp.framePosition = longArray[0];
+            timestamp.nanoTime = longArray[1];
+        } else {
+            timestamp = null;
+        }
+        return timestamp;
+    }
+
+
     //--------------------------------------------------------------------------
     // Initialization / configuration
     //--------------------
@@ -1320,6 +1365,11 @@ public class AudioTrack
     private native final int native_get_position();
 
     private native final int native_get_latency();
+
+    // longArray must be a non-null array of length >= 2
+    // [0] is assigned the frame position
+    // [1] is assigned the time in CLOCK_MONOTONIC nanoseconds
+    private native final int native_get_timestamp(long[] longArray);
 
     private native final int native_set_loop(int start, int end, int loopCount);
 
