@@ -128,7 +128,7 @@
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Hakuna SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Shiriki intaneti kwa Bluetooth."</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modi ya ndege."</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Hali ya ndege."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Asilimia <xliff:g id="NUMBER">%d</xliff:g> ya betri"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Mipangilio ya mfumo."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Arifa."</string>
@@ -169,7 +169,7 @@
     <string name="jelly_bean_dream_name" msgid="5992026543636816792">"BeanFlinger"</string>
     <string name="start_dreams" msgid="7219575858348719790">"Hali Tulivu"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
-    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Modi ya ndege"</string>
+    <string name="quick_settings_airplane_mode_label" msgid="5510520633448831350">"Hali ya ndege"</string>
     <string name="quick_settings_battery_charging_label" msgid="490074774465309209">"Inachaji, <xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
     <string name="quick_settings_battery_charged_label" msgid="8865413079414246081">"Imechajiwa"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
@@ -195,8 +195,6 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Uonyeshaji Pasiwaya"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Ung\'avu"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"KIOTOMATIKI"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"Arifa zitaonekana hapa"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"Zifikie wakati wowote kwa kutelezesha chini.\nTelezesha chini tena kupata vidhibiti vya mfumo."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Mtandao unaweza kufuatiliwa"</string>
     <string name="done_button" msgid="1759387181766603361">"Imekamilika"</string>
     <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Ufuatiliaji wa Mtandao"</string>

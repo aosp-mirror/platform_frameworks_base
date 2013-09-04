@@ -197,8 +197,6 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"Kablosuz Ekran"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Parlaklık"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"OTOMATİK"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"Bildirimler burada görünür"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"Aşağıya hızlıca kaydırarak bunlara istediğiniz zaman erişebilirsiniz.\nSistem denetimleri için tekrar hızlıca aşağı kaydırın."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"Ağ izlenebilir"</string>
     <string name="done_button" msgid="1759387181766603361">"Bitti"</string>
     <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"Ağ İzleme"</string>

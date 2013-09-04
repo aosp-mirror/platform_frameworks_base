@@ -42,7 +42,7 @@
     <string name="status_bar_settings_airplane" msgid="4879879698500955300">"თვითმფრინავის რეჟიმი"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"ავტოროტაციის ეკრანი"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"დადუმება"</string>
-    <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"ავტომატური"</string>
+    <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"ავტო."</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"შეტყობინებები"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth მიერთებულია."</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"შეყვანის მეთოდების დაყენება"</string>
@@ -197,8 +197,6 @@
     <string name="quick_settings_wifi_display_no_connection_label" msgid="2355298740765736918">"უსადენო ეკრანი"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"განათება"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"ავტომატურად"</string>
-    <string name="status_bar_help_title" msgid="1199237744086469217">"შეტყობინებები აქ გამოჩნდება"</string>
-    <string name="status_bar_help_text" msgid="7874607155052076323">"მათზე წვდომისათვის, ნებისმიერ დროს გადაფურცლეთ ქვემოთ.\nსისტემის კონტროლისთვისაც გადაფურცლეთ ქვემოთ."</string>
     <string name="ssl_ca_cert_warning" msgid="5848402127455021714">"შესაძლოა ქსელი მონიტორინგის ქვეშ იმყოფება"</string>
     <string name="done_button" msgid="1759387181766603361">"დასრულდა"</string>
     <string name="ssl_ca_cert_dialog_title" msgid="1273796967092027291">"ქსელის მონიტორინგი"</string>
