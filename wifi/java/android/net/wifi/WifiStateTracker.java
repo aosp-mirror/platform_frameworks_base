@@ -22,12 +22,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.BaseNetworkStateTracker;
 import android.net.LinkCapabilities;
-import android.net.LinkInfo;
+import android.net.LinkQualityInfo;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.SamplingDataTracker;
-import android.net.WifiLinkInfo;
+import android.net.WifiLinkQualityInfo;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
@@ -203,35 +203,35 @@ public class WifiStateTracker extends BaseNetworkStateTracker {
 
     /**
      * Return link info
-     * @return an object of type WifiLinkInfo
+     * @return an object of type WifiLinkQualityInfo
      */
     @Override
-    public LinkInfo getLinkInfo() {
+    public LinkQualityInfo getLinkQualityInfo() {
         if (mNetworkInfo == null) {
             // no data available yet; just return
             return null;
         }
 
-        WifiLinkInfo li = new WifiLinkInfo();
-        li.mNetworkType = mNetworkInfo.getType();
+        WifiLinkQualityInfo li = new WifiLinkQualityInfo();
+        li.setNetworkType(mNetworkInfo.getType());
 
         synchronized(mSamplingDataTracker.mSamplingDataLock) {
-            mSamplingDataTracker.setCommonLinkInfoFields(li);
-            li.mTxGood = mSamplingDataTracker.getSampledTxPacketCount();
-            li.mTxBad = mSamplingDataTracker.getSampledTxPacketErrorCount();
+            mSamplingDataTracker.setCommonLinkQualityInfoFields(li);
+            li.setTxGood(mSamplingDataTracker.getSampledTxPacketCount());
+            li.setTxBad(mSamplingDataTracker.getSampledTxPacketErrorCount());
         }
 
         // li.setTheoreticalRxBandwidth(??);
         // li.setTheoreticalTxBandwidth(??);
 
         if (mWifiInfo != null) {
-            li.mBssid = mWifiInfo.getBSSID();
+            li.setBssid(mWifiInfo.getBSSID());
 
             int rssi = mWifiInfo.getRssi();
-            li.mRssi = rssi;
+            li.setRssi(rssi);
 
-            li.mNormalizedSignalStrength = mWifiManager.calculateSignalLevel(rssi,
-                    LinkInfo.NORMALIZED_SIGNAL_STRENGTH_RANGE);
+            li.setNormalizedSignalStrength(mWifiManager.calculateSignalLevel(rssi,
+                    LinkQualityInfo.NORMALIZED_SIGNAL_STRENGTH_RANGE));
         }
 
         return li;

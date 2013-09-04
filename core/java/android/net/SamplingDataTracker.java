@@ -189,7 +189,7 @@ public class SamplingDataTracker
             if (mBeginningSample != null && mEndingSample != null) {
                 return mEndingSample.mTxByteCount - mBeginningSample.mTxByteCount;
             } else {
-                return LinkInfo.UNKNOWN;
+                return LinkQualityInfo.UNKNOWN_LONG;
             }
         }
     }
@@ -199,7 +199,7 @@ public class SamplingDataTracker
             if (mBeginningSample != null && mEndingSample != null) {
                 return mEndingSample.mTxPacketCount - mBeginningSample.mTxPacketCount;
             } else {
-                return LinkInfo.UNKNOWN;
+                return LinkQualityInfo.UNKNOWN_LONG;
             }
         }
     }
@@ -209,7 +209,7 @@ public class SamplingDataTracker
             if (mBeginningSample != null && mEndingSample != null) {
                 return mEndingSample.mTxPacketErrorCount - mBeginningSample.mTxPacketErrorCount;
             } else {
-                return LinkInfo.UNKNOWN;
+                return LinkQualityInfo.UNKNOWN_LONG;
             }
         }
     }
@@ -219,7 +219,7 @@ public class SamplingDataTracker
             if (mBeginningSample != null && mEndingSample != null) {
                 return mEndingSample.mRxByteCount - mBeginningSample.mRxByteCount;
             } else {
-                return LinkInfo.UNKNOWN;
+                return LinkQualityInfo.UNKNOWN_LONG;
             }
         }
     }
@@ -229,7 +229,7 @@ public class SamplingDataTracker
             if (mBeginningSample != null && mEndingSample != null) {
                 return mEndingSample.mRxPacketCount - mBeginningSample.mRxPacketCount;
             } else {
-                return LinkInfo.UNKNOWN;
+                return LinkQualityInfo.UNKNOWN_LONG;
             }
         }
     }
@@ -244,7 +244,7 @@ public class SamplingDataTracker
             long txPacketCount = end.mTxPacketCount - begin.mTxPacketCount;
             return rxPacketCount + txPacketCount;
         } else {
-            return LinkInfo.UNKNOWN;
+            return LinkQualityInfo.UNKNOWN_LONG;
         }
     }
 
@@ -254,7 +254,7 @@ public class SamplingDataTracker
             long txPacketErrorCount = getSampledTxPacketErrorCount();
             return rxPacketErrorCount + txPacketErrorCount;
         } else {
-            return LinkInfo.UNKNOWN;
+            return LinkQualityInfo.UNKNOWN_LONG;
         }
     }
 
@@ -263,7 +263,7 @@ public class SamplingDataTracker
             if (mBeginningSample != null && mEndingSample != null) {
                 return mEndingSample.mRxPacketErrorCount - mBeginningSample.mRxPacketErrorCount;
             } else {
-                return LinkInfo.UNKNOWN;
+                return LinkQualityInfo.UNKNOWN_LONG;
             }
         }
     }
@@ -273,7 +273,7 @@ public class SamplingDataTracker
             if (mEndingSample != null) {
                 return mEndingSample.mTimestamp;
             } else {
-                return LinkInfo.UNKNOWN;
+                return LinkQualityInfo.UNKNOWN_LONG;
             }
         }
     }
@@ -283,17 +283,17 @@ public class SamplingDataTracker
             if (mBeginningSample != null && mEndingSample != null) {
                 return (int) (mEndingSample.mTimestamp - mBeginningSample.mTimestamp);
             } else {
-                return LinkInfo.UNKNOWN;
+                return LinkQualityInfo.UNKNOWN_INT;
             }
         }
     }
 
-    public void setCommonLinkInfoFields(LinkInfo li) {
+    public void setCommonLinkQualityInfoFields(LinkQualityInfo li) {
         synchronized(mSamplingDataLock) {
-            li.mLastDataSampleTime = getSampleTimestamp();
-            li.mDataSampleDuration = getSampleDuration();
-            li.mPacketCount = getSampledPacketCount();
-            li.mPacketErrorCount = getSampledPacketErrorCount();
+            li.setLastDataSampleTime(getSampleTimestamp());
+            li.setDataSampleDuration(getSampleDuration());
+            li.setPacketCount(getSampledPacketCount());
+            li.setPacketErrorCount(getSampledPacketErrorCount());
         }
     }
 }

@@ -103,7 +103,7 @@ public abstract class BaseNetworkStateTracker implements NetworkStateTracker {
     }
 
     @Override
-    public LinkInfo getLinkInfo() {
+    public LinkQualityInfo getLinkQualityInfo() {
         return null;
     }
 
