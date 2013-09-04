@@ -17,12 +17,14 @@
 package android.nfc;
 
 import android.nfc.BeamShareData;
+import android.nfc.Tag;
 
 /**
  * @hide
  */
-interface INdefPushCallback
+interface IAppCallback
 {
     BeamShareData createBeamShareData();
     void onNdefPushComplete();
+    void onTagDiscovered(in Tag tag);
 }

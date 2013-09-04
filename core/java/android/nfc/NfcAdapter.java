@@ -33,6 +33,7 @@ import android.nfc.tech.MifareClassic;
 import android.nfc.tech.Ndef;
 import android.nfc.tech.NfcA;
 import android.nfc.tech.NfcF;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -196,48 +197,65 @@ public final class NfcAdapter {
     public static final int STATE_TURNING_OFF = 4;
 
     /**
-     * Flag for use with {@link #enableReaderMode(Activity, int)}.
+     * Flag for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.
      * <p>
      * Setting this flag enables polling for Nfc-A technology.
      */
     public static final int FLAG_READER_NFC_A = 0x1;
 
     /**
-     * Flag for use with {@link #enableReaderMode(Activity, int)}.
+     * Flag for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.
      * <p>
      * Setting this flag enables polling for Nfc-B technology.
      */
     public static final int FLAG_READER_NFC_B = 0x2;
 
     /**
-     * Flag for use with {@link #enableReaderMode(Activity, int)}.
+     * Flag for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.
      * <p>
      * Setting this flag enables polling for Nfc-F technology.
      */
     public static final int FLAG_READER_NFC_F = 0x4;
 
     /**
-     * Flag for use with {@link #enableReaderMode(Activity, int)}.
+     * Flag for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.
      * <p>
      * Setting this flag enables polling for Nfc-V (ISO15693) technology.
      */
     public static final int FLAG_READER_NFC_V = 0x8;
 
     /**
-     * Flag for use with {@link #enableReaderMode(Activity, int)}.
+     * Flag for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.
      * <p>
      * Setting this flag enables polling for Kovio technology.
      */
     public static final int FLAG_READER_KOVIO = 0x10;
 
     /**
-     * Flag for use with {@link #enableReaderMode(Activity, int)}.
+     * Flag for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.
      * <p>
      * Setting this flag allows the caller to prevent the
      * platform from performing an NDEF check on the tags it
      * finds.
      */
     public static final int FLAG_READER_SKIP_NDEF_CHECK = 0x80;
+
+    /**
+     * Flag for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.
+     * <p>
+     * Setting this flag allows the caller to prevent the
+     * platform from playing sounds when it discovers a tag.
+     */
+    public static final int FLAG_READER_NO_PLATFORM_SOUNDS = 0x100;
+
+    /**
+     * Int Extra for use with {@link #enableReaderMode(Activity, ReaderCallback, int, Bundle)}.
+     * <p>
+     * Setting this integer extra allows the calling application to specify
+     * the delay that the platform will use for performing presence checks
+     * on any discovered tag.
+     */
+    public static final String EXTRA_READER_PRESENCE_CHECK_DELAY = "presence";
 
     /** @hide */
     public static final int FLAG_NDEF_PUSH_NO_CONFIRM = 0x1;
@@ -289,6 +307,14 @@ public final class NfcAdapter {
 
     final NfcActivityManager mNfcActivityManager;
     final Context mContext;
+
+    /**
+     * A callback to be invoked when the system has found a tag in
+     * reader mode.
+     */
+    public interface ReaderCallback {
+        public void onTagDiscovered(Tag tag);
+    }
 
     /**
      * A callback to be invoked when the system successfully delivers your {@link NdefMessage}
@@ -1167,19 +1193,18 @@ public final class NfcAdapter {
      * {@link Ndef} tag technology from being enumerated on the tag, and that
      * NDEF-based tag dispatch will not be functional.
      *
-     * <p>It is recommended to combine this method with
-     * {@link #enableForegroundDispatch(Activity, PendingIntent, IntentFilter[], String[][])
-     * to ensure that tags are delivered to this activity.
-     *
      * <p>For interacting with tags that are emulated on another Android device
      * using Android's host-based card-emulation, the recommended flags are
      * {@link #FLAG_READER_NFC_A} and {@link #FLAG_READER_SKIP_NDEF_CHECK}.
      *
      * @param activity the Activity that requests the adapter to be in reader mode
+     * @param callback the callback to be called when a tag is discovered
      * @param flags Flags indicating poll technologies and other optional parameters
+     * @param extras Additional extras for configuring reader mode.
      */
-    public void enableReaderMode(Activity activity, int flags) {
-        mNfcActivityManager.enableReaderMode(activity, flags);
+    public void enableReaderMode(Activity activity, ReaderCallback callback, int flags,
+            Bundle extras) {
+        mNfcActivityManager.enableReaderMode(activity, callback, flags, extras);
     }
 
     /**
