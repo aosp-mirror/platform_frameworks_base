@@ -301,7 +301,9 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
         synchronized (mLock) {
 
             try {
-                mRemoteDevice.disconnect();
+                if (mRemoteDevice != null) {
+                    mRemoteDevice.disconnect();
+                }
             } catch (CameraRuntimeException e) {
                 throw e.asChecked();
             } catch (RemoteException e) {
