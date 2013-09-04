@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"ອະນຸຍາດໃຫ້ເຈົ້າຂອງ ເຊື່ອມໂຍງສ່ວນຕິດຕໍ່ລະດັບເທິງສຸດ ຂອງບໍລິການການເຂົ້າເຖິງ. ແອັບຯທົ່ວໄປບໍ່ຄວນຈຳເປັນຕ້ອງໃຊ້."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"ຜູກ​ມັດ​ກັບ​ການ​ບໍ​ລິ​ການ​ພິມ"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"ອະນຸຍາດໃຫ້ເຈົ້າຂອງຜູກກັບສ່ວນຕິດຕໍ່ຜູ່ໃຊ້ຂອງການບໍລິການການພິມ. ບໍ່ໜ້າຈະຕ້ອງການສຳລັບແອັບຯທົ່ວໄປ."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"ເຂົ້າເຖິງວຽກການພິມທັງໝົດ"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"ອະນຸຍາດໃຫ້ເຈົ້າຂອງເຂົ້າເຖິງວຽກການພິມທີ່ຖືກສ້າງໂດຍແອັບຯອື່ນ. ບໍ່ໜ້າຈະຕ້ອງການສຳລັບແອັບຯທົ່ວໄປ."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"ຜູກ​ມັດ​ກັບບໍລິການການພິມແບບ spooler"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"ອະນຸຍາດໃຫ້ເຈົ້າຂອງຜູກກັບສ່ວນຕິດຕໍ່ຜູ່ໃຊ້ຂອງການບໍລິການການພິມ. ບໍ່ໜ້າຈະຕ້ອງການສຳລັບແອັບຯທົ່ວໄປ."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"ເຊື່ອມໂຍງກັບບໍລິການ NFC"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"ອະນຸຍາດໃຫ້ຜູ່ຖືອຸປະກອນໃຫ້ສາມາດເຊື່ອມໂຍງແອັບພລິເຄຊັນ ທີ່ຄ້າຍກັບບັດ NFC. ມັນບໍ່ຈຳເປັນຕ້ອງໃຊ້ໃນແອັບຯທຳມະດາ."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"ເຊື່ອມໂຍງໄປຫາບໍລິການສົ່ງຂໍ້ຄວາມ"</string>
@@ -1568,6 +1568,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"ແຖບບລອຍ"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"ຍົກເລີກແລ້ວ"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"ເນື້ອ​ໃນ​ການຂຽນຜິດພາດ"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"ບໍ່ຮູ້ຈັກ"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"ໃສ່ລະຫັດ PIN"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN ປະ​ຈຸ​ບັນ"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"ລະຫັດ PIN ໃໝ່"</string>

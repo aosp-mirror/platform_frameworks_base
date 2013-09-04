@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لخدمة إمكانية الدخول. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"الالتزام بخدمة طباعة"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لخدمة الطباعة. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"الدخول إلى جميع وظائف الطباعة"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"للسماح للمالك بالدخول إلى وظائف الطباعة التي أنشأها تطبيق آخر. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"الالتزام بخدمة التخزين المؤقت للطباعة"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لخدمة التخزين المؤقت للطباعة. لن تكون هناك حاجة إليه مطلقًا مع التطبيقات العادية."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"الربط بخدمة NFC"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"للسماح لحامل البطاقة بالربط بالتطبيقات التي تحاكي بطاقات NFC. لا يتوجب استخدامه على الإطلاق للتطبيقات العادية."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"الالتزام بخدمة إدخال النصوص"</string>
@@ -1568,6 +1568,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"ملغاة"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"حدث خطأ أثناء كتابة المحتوى"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"غير معروف"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"إدخال رقم التعريف الشخصي"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"رقم التعريف الشخصي الحالي"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"رقم التعريف الشخصي الجديد"</string>

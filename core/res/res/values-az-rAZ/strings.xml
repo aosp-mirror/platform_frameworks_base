@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Sahibə giriş xidmətin ən üst səviyyə interfeysi bağlamağa imkan verir. Normal tətbiqlər üçün heç vaxt lazım olmamalıdır."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"çap servisini qoşma"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Sahibinə bir çap xidmətinin ən üst səviyə araüzünü bağlamağa imkan verir. Normal tətbiqlər üçün heç vaxt lazım olmamalıdır."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"bütün çap işlərinə giriş əldə et"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Sahibinə digər tətbiqlər tərəfindən yaradılan çap işlərinə giriş hüququ verir. Normal tətbiqlər üçün tələb olunmamalıdır."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"çap spuler servisinə qoş"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Sahibinə çap spuler xidmətinin ən üst səviyyə interfeysinə bağlamağa imkan verir. Normal tətbiqlər üçün heç vaxt lazım olmamalıdır."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"NFC xidmətlərinə qoşun"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Sahibinə NFC kartlarını emulyasiya edən tətbiqləri bir-birinə qoşmağa icazə verin. Normal tətbiqlər üçün lazım deyil."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"mətn servisini qoşma"</string>
@@ -1568,6 +1568,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Qısa"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Ləğv edildi"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Kontent yazmna xətası"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"naməlum"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN daxil edin"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Cari PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Yeni PIN"</string>

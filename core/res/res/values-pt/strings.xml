@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Permite que o proprietário use a interface de nível superior de um serviço de acessibilidade. Nunca deve ser necessário para aplicativos comuns."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"associar a um serviço de impressão"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Permite que o proprietário use a interface de nível superior de um serviço de impressão. Não deve ser necessário para aplicativos comuns."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"acessar todos os trabalhos de impressão"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Permite que o proprietário acesse trabalhos de impressão criados por outro aplicativo. Não deve ser necessário para aplicativos comuns."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"associar a um serviço de spooler de impressão"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Permite que o proprietário use a interface de nível superior de um serviço de spooler de impressão. Não deve ser necessário para aplicativos comuns."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"associar ao serviço NFC"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Permite ao proprietário associar a aplicativos que emulam cartões NFC. Não deve ser necessário para aplicativos comuns."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"sujeitar-se a um serviço de texto"</string>
@@ -1568,6 +1568,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloide"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Cancelado"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Erro ao gravar o conteúdo"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"desconhecido"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Insira o PIN"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN atual"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Novo PIN"</string>

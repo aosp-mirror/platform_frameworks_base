@@ -160,9 +160,9 @@
     <string name="global_action_toggle_silent_mode" msgid="8219525344246810925">"Mtindo wa kimya"</string>
     <string name="global_action_silent_mode_on_status" msgid="3289841937003758806">"Sauti Imezimwa"</string>
     <string name="global_action_silent_mode_off_status" msgid="1506046579177066419">"Sauti imewashwa"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Modi ya ndege"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Hali ya ndege"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Hali ya ndege IMEWASHWA"</string>
-    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Modi ya ndege IMEZIMWA"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Hali ya ndege IMEZIMWA"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mtindo salama"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Mfumo wa Android"</string>
@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Inamuruhusu mmiliki kufunga kipengee kinachojitokeza katika nyanja mbalimbali za kiwango cha juu cha huduma ya afikiaji. Hapaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"tundika kwenye huduma ya kuchapisha"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Inaruhusu kishikiliaji kujifungilia kiolesura cha kiwango cha juu cha huduma ya kuchapisha. Haipaswi kuhitajika kwa programu za kawaida."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"fikia kazi zote za kuchapisha"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Huruhusu mmiliki kufikia kazi za kuchapisha zilizoundwa na programu nyingine. Haipaswi kuhitajika kwa programu za kawaida kamwe."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"Fungia kwenye huduma ya kuchapisha"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Inaruhusu mtumiaji kujifungia kiolesura cha kiwango cha juu cha huduma ya kuchapisha. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"funga kwenye huduma za NFC"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Huruhusu mmiliki kufunga kwa programu zinazoiga kadi za NFC. Haipaswi kuhitajika kamwe kwa programu za kawaida."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"Imefungwa kwa huduma ya maandishi"</string>
@@ -555,7 +555,7 @@
     <string name="permlab_setWallpaperHints" msgid="3278608165977736538">"rekebisha ukubwa wa mandhari yako"</string>
     <string name="permdesc_setWallpaperHints" msgid="8235784384223730091">"Inaruhusu programu kuweka vidokezo vya ukubwa wa mandhari ya mfumo."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"weka upya mfumo kwa chaguo-msingi za kiwanda"</string>
-    <string name="permdesc_masterClear" msgid="3665380492633910226">"Huruhusu programu kurudisha mfumo kwenye mipangilio yake ya mwanzo, hatua ambayo hufuta data, usanidi, na programu zote zilizosanikishwa."</string>
+    <string name="permdesc_masterClear" msgid="3665380492633910226">"Huruhusu programu kurudisha mfumo kwenye mipangilio yake ya mwanzo, hatua ambayo hufuta data, mipangilio, na programu zote zilizosanikishwa."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"weka muda"</string>
     <string name="permdesc_setTime" product="tablet" msgid="1896341438151152881">"Inaruhusu programu kubadilisha wakati wa saa ya kompyuta kibao."</string>
     <string name="permdesc_setTime" product="default" msgid="1855702730738020">"Inaruhusu programu kubadilisha wakati wa saa ya simu."</string>
@@ -1121,7 +1121,7 @@
     <string name="screen_compat_mode_hint" msgid="1064524084543304459">"Wezesha tena hii katika mipangilio ya Mfumo &gt; Programu &gt;  iliyopakuliwa."</string>
     <string name="smv_application" msgid="3307209192155442829">"Programu <xliff:g id="APPLICATION">%1$s</xliff:g>  (utaratibu  <xliff:g id="PROCESS">%2$s</xliff:g>) imeenda kinyume na sera yake ya StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Shughuli ya <xliff:g id="PROCESS">%1$s</xliff:g> imeenda kinyume na kulazimisha sera yake ya StrictMode."</string>
-    <string name="android_upgrading_title" msgid="1584192285441405746">"Android inapandishwa gredi..."</string>
+    <string name="android_upgrading_title" msgid="1584192285441405746">"Toleo jipya la Android linawekwa..."</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Inasadifisha programu <xliff:g id="NUMBER_0">%1$d</xliff:g> ya <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Programu zinaanza"</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Inamaliza kuwasha."</string>
@@ -1568,6 +1568,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Kijigazeti"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Imeghairiwa"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Hitilafu katika kuandika maudhui"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"haijulikani"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Ingiza PIN"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN ya sasa"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"PIN mpya"</string>

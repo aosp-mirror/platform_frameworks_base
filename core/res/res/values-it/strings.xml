@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Consente al titolare di collegarsi all\'interfaccia di primo livello di un servizio di accessibilità. Non dovrebbe essere mai necessaria per le normali applicazioni."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"collegamento a un servizio di stampa"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Consente al titolare di collegarsi all\'interfaccia di primo livello di un servizio di stampa. Non dovrebbe essere mai necessaria per le normali applicazioni."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"accesso a tutti i processi di stampa"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Consente al titolare di accedere ai processi di stampa creati da un\'altra app. Non dovrebbe essere mai necessaria per le normali applicazioni."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"collegamento a un servizio spooler di stampa"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Consente al titolare di collegarsi all\'interfaccia di primo livello di un servizio spooler di stampa. Non dovrebbe essere mai necessaria per le normali app."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"associazione a servizio NFC"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Consente al titolare di collegarsi alle applicazioni che emulano carte NFC. Non dovrebbe mai essere necessario per le normali applicazioni."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"associazione a un servizio di testo"</string>
@@ -1568,6 +1568,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Annullato"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Errore nella scrittura dei contenuti"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"sconosciuto"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Inserisci PIN"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN corrente"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Nuovo PIN"</string>

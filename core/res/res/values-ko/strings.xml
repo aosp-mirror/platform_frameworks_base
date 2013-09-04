@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"권한을 가진 프로그램이 접근성 서비스에 대한 최상위 인터페이스를 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"인쇄 서비스 사용"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"권한을 가진 프로그램이 인쇄 서비스에 대한 최상위 인터페이스를 사용하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"모든 인쇄 작업에 액세스"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"권한을 가진 프로그램이 다른 앱에서 생성한 인쇄 작업에 액세스하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"인쇄 스풀러 서비스 사용"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"권한을 가진 프로그램이 인쇄 스풀러 서비스에 대한 최상위 인터페이스를 사용하도록 합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"NFC 서비스 사용"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"권한을 가진 프로그램이 NFC 카드를 에뮬레이션하는 애플리케이션을 사용하도록 허용합니다. 일반 앱에는 필요하지 않습니다."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"텍스트 서비스 연결"</string>
@@ -1568,6 +1568,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"타블로이드"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"취소됨"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"콘텐츠 작성 중 오류"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"알 수 없음"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN 입력"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"현재 PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"새 PIN"</string>

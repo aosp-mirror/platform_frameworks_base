@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"מתיר לבעלים להכפיף לממשק ברמה העליונה של שירות זמינות. הרשאה זו אף פעם אינה אמורה להיות נחוצה ליישומים רגילים."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"איגוד לשירות הדפסה"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"ההרשאה הזו מאפשרת לבעלים לבצע איגוד לממשק הרמה העליונה של שירות הדפסה. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"גישה אל כל עבודות ההדפסה"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"ההרשאה הזו מאפשרת לבעלים לגשת לעבודות הדפסה שנוצרו על ידי אפליקציה אחרת. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"איגוד לשירות הדפסה"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"מאפשרת לבעלים לבצע איגוד לממשק ברמה העליונה של שירות הדפסה. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"איגוד לשירות NFC"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"מאפשרת לבעלים לאגד את האפליקציות המחקות כרטיסיות NFC. לעולם לא אמורה להיות נחוצה עבור אפליקציות רגילות."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"הכפפה לשירות טקסט"</string>
@@ -1568,6 +1568,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"בוטלה"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"שגיאה בכתיבת תוכן"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"לא ידוע"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"הזן מספר PIN"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"מספר PIN נוכחי"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"מספר PIN חדש"</string>

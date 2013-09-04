@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"อนุญาตให้เจ้าของเชื่อมโยงกับส่วนติดต่อระดับบนสุดของบริการการเข้าถึง ซึ่งแอปพลิเคชันทั่วไปไม่จำเป็นต้องใช้"</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"เชื่อมโยงกับบริการการพิมพ์"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"อนุญาตให้ผู้ใช้เชื่อมโยงกับอินเทอร์เฟซระดับสูงสุดของบริการการพิมพ์ ซึ่งแอปทั่วไปไม่จำเป็นต้องใช้"</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"เข้าถึงงานพิมพ์ทั้งหมด"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"อนุญาตให้ผู้ใช้สามารถเข้าถึงงานพิมพ์ที่สร้างโดยแอปอื่นได้ ซึ่งแอปทั่วไปไม่จำเป็นต้องใช้"</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"เชื่อมโยงกับบริการจัิดคิวและจัดการการพิมพ์"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"อนุญาตให้ผู้ใช้เชื่อมโยงกับอินเทอร์เฟซระดับสูงสุดของบริการจัดคิวและจัดการการพิมพ์ ซึ่งแอปทั่วไปไม่จำเป็นต้องใช้"</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"เชื่อมโยงกับบริการ NFC"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"อนุญาตให้ผู้ถือเชื่อมโยงกับแอปพลิเคชันที่เลียนแบบการ์ด NFC ไม่จำเป็นสำหรับแอปทั่วไป"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"เชื่อมโยงกับบริการข้อความ"</string>
@@ -1568,6 +1568,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"ยกเลิก"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"ข้อผิดพลาดในการเขียนเนื้อหา"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"ไม่ทราบ"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"ป้อน PIN"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN ปัจจุบัน"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"PIN ใหม่"</string>
