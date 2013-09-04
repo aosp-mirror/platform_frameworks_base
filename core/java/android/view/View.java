@@ -8836,9 +8836,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Change the view's z order in the tree, so it's on top of other sibling
      * views. This ordering change may affect layout, if the parent container
-     * uses an order-dependent layout scheme (e.g., LinearLayout). This
+     * uses an order-dependent layout scheme (e.g., LinearLayout). Prior
+     * to {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE} this
      * method should be followed by calls to {@link #requestLayout()} and
-     * {@link View#invalidate()} on the parent.
+     * {@link View#invalidate()} on the view's parent to force the parent to redraw
+     * with the new child ordering.
      *
      * @see ViewGroup#bringChildToFront(View)
      */
