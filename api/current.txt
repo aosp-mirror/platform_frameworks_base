@@ -10623,6 +10623,10 @@ package android.hardware {
     field public int width;
   }
 
+  public abstract interface FlushCompleteListener {
+    method public abstract void onFlushCompleted(android.hardware.Sensor);
+  }
+
   public class GeomagneticField {
     ctor public GeomagneticField(float, float, float, long);
     method public float getDeclination();
@@ -10635,6 +10639,8 @@ package android.hardware {
   }
 
   public final class Sensor {
+    method public int getFifoMaxEventCount();
+    method public int getFifoReservedEventCount();
     method public float getMaximumRange();
     method public int getMinDelay();
     method public java.lang.String getName();
@@ -10685,6 +10691,7 @@ package android.hardware {
 
   public abstract class SensorManager {
     method public boolean cancelTriggerSensor(android.hardware.TriggerEventListener, android.hardware.Sensor);
+    method public boolean flush(android.hardware.Sensor);
     method public static float getAltitude(float, float);
     method public static void getAngleChange(float[], float[], float[]);
     method public android.hardware.Sensor getDefaultSensor(int);
@@ -10698,7 +10705,9 @@ package android.hardware {
     method public deprecated boolean registerListener(android.hardware.SensorListener, int);
     method public deprecated boolean registerListener(android.hardware.SensorListener, int, int);
     method public boolean registerListener(android.hardware.SensorEventListener, android.hardware.Sensor, int);
+    method public boolean registerListener(android.hardware.SensorEventListener, android.hardware.Sensor, int, int, int, android.hardware.FlushCompleteListener);
     method public boolean registerListener(android.hardware.SensorEventListener, android.hardware.Sensor, int, android.os.Handler);
+    method public boolean registerListener(android.hardware.SensorEventListener, android.hardware.Sensor, int, int, int, android.os.Handler, android.hardware.FlushCompleteListener);
     method public static boolean remapCoordinateSystem(float[], int, int, float[]);
     method public boolean requestTriggerSensor(android.hardware.TriggerEventListener, android.hardware.Sensor);
     method public deprecated void unregisterListener(android.hardware.SensorListener);
