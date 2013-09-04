@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανώτατου επιπέδου μιας υπηρεσίας προσβασιμότητας. Δεν απαιτείται σε κανονικές εφαρμογές."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"δέσμευση σε υπηρεσία εκτύπωσης"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Επιτρέπει στον κάτοχο τη δέσμευση στη διεπαφή ανωτάτου επιπέδου μιας υπηρεσίας εκτύπωσης. Δεν απαιτείται για κανονικές εφαρμογές."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"πρόσβαση σε όλες τις εργασίες εκτύπωσης"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Επιτρέπει στον κάτοχο να αποκτά πρόσβαση σε εργασίες εκτύπωσης από άλλες εφαρμογές. Δεν απαιτείται για κανονικές εφαρμογές."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"σύνδεση με μια υπηρεσία εκτύπωσης σε ουράς"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Επιτρέπει στον κάτοχο τη σύνδεση στη διεπαφή ανωτάτου επιπέδου μιας υπηρεσίας εκτύπωσης σε ουρά. Δεν απαιτείται για κανονικές εφαρμογές."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"σύνδεση με υπηρεσία NFC"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Δίνει στον κάτοχο τη δυνατότητα σύνδεσης με εφαρμογές που προσομοιώνουν κάρτες NFC. Δεν ζητείται ποτέ για κανονικές εφαρμογές."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"δέσμευση σε υπηρεσία ανταλλαγής μηνυμάτων"</string>
@@ -1570,6 +1570,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Ακυρώθηκε"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Σφάλμα κατά την εγγραφή περιεχομένου"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"άγνωστο"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Εισαγωγή PIN"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Ισχύων κωδικός PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Νέος κωδικός PIN"</string>

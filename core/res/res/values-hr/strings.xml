@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Nositelju omogućuje vezanje uz sučelje najviše razine usluge dostupnosti. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"veži se uz uslugu ispisa"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Dopušta nositelju vezanje uza sučelje usluge ispisa najviše razine. Ne bi smjelo biti potrebno za uobičajene aplikacije."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"pristupi svim zadacima ispisa"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Dopušta nositelju pristup zadacima ispisa koje je izradila neka druga aplikacija. Ne bi smjelo biti potrebno za uobičajene aplikacije."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"veži se uz uslugu predmemoriranja ispisa"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Dopušta nositelju vezanje uza sučelje usluge predmemoriranja ispisa najviše razine. Ne bi smjelo biti potrebno za uobičajene aplikacije."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"povezivanje s NFC uslugom"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Omogućuje nositelju povezivanje s aplikacijama koje emuliraju NFC kartice. Nikada ne bi trebalo biti potrebno za uobičajene aplikacije."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"vezanje na tekstualnu uslugu"</string>
@@ -1570,6 +1570,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Otkazano"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Pogreška prilikom pisanja sadržaja"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"nepoznato"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Unesite PIN"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Trenutačni PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Novi PIN"</string>

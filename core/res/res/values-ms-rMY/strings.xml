@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan yang boleh diakses. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"terikat kepada perkhidmatan cetakan"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan cetakan. Tidak sekali-kali diperlukan untuk apl biasa."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"akses semua kerja cetakan"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Membenarkan pemegang mengakses kerja cetakan yang dibuat oleh apl lain. Tidak sekali-kali diperlukan untuk apl biasa."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"terikat kepada perkhidmatan penspul cetakan"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi perkhidmatan penspul cetakan. Tidak sekali-kali diperlukan untuk apl biasa."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"terikat kepada perkhidmatan NFC"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Membenarkan pemegang untuk terikat kepada aplikasi yang mengikut kad NFC. Tidak sekali-kali diperlukan untuk apl normal."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"terikat kepada perkhidmatan teks"</string>
@@ -1570,6 +1570,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Dibatalkan"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Ralat menulis kandungan"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"tidak diketahui"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Masukkan PIN"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN semasa"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"PIN baharu"</string>

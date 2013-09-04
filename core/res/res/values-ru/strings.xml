@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Приложение сможет подключаться к базовому интерфейсу службы специальных возможностей. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"Подключение к службе печати"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Приложение сможет подключаться к базовому интерфейсу службы печати. Это разрешение не используется обычными приложениями."</string>
-    <string name="permlab_accessAllPrintJobs" msgid="1120792468465711159">"Доступ к заданиям печати"</string>
-    <string name="permdesc_accessAllPrintJobs" msgid="2978185311041864762">"Владелец сможет просматривать задания печати, созданные другими приложениями. Это разрешение не используется обычными приложениями."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"подключение к спулеру печати"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Приложение сможет подключаться к базовому интерфейсу спулера печати. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"подключаться к службе NFC"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Приложение сможет подключаться к программам с имитацией карт NFC. Это разрешение не используется обычными приложениями."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"Подключение к службе текстовых сообщений"</string>
@@ -1570,6 +1570,7 @@
     <string name="mediaSize_na_tabloid" msgid="5775966416333578127">"Tabloid (279 х 432 мм)"</string>
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Печать отменена"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Ошибка записи"</string>
+    <string name="reason_unknown" msgid="6048913880184628119">"неизвестно"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Введите PIN-код"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Текущий PIN-код"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Новый PIN-код"</string>
