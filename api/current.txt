@@ -11948,6 +11948,7 @@ package android.location {
     field public static final java.lang.String KEY_PROVIDER_ENABLED = "providerEnabled";
     field public static final java.lang.String KEY_PROXIMITY_ENTERING = "entering";
     field public static final java.lang.String KEY_STATUS_CHANGED = "status";
+    field public static final java.lang.String MODE_CHANGED_ACTION = "android.location.MODE_CHANGED";
     field public static final java.lang.String NETWORK_PROVIDER = "network";
     field public static final java.lang.String PASSIVE_PROVIDER = "passive";
     field public static final java.lang.String PROVIDERS_CHANGED_ACTION = "android.location.PROVIDERS_CHANGED";

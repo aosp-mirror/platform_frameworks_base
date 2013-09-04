@@ -152,10 +152,22 @@ public class LocationManager {
 
     /**
      * Broadcast intent action when the configured location providers
-     * change.
+     * change. If you're interacting with the
+     * {@link android.provider.Settings.Secure#LOCATION_MODE} API,
+     * use {@link #MODE_CHANGED_ACTION} instead.
      */
     public static final String PROVIDERS_CHANGED_ACTION =
         "android.location.PROVIDERS_CHANGED";
+
+    /**
+     * Broadcast intent action when {@link android.provider.Settings.Secure#LOCATION_MODE} changes.
+     * If you're interacting with provider-based APIs such as {@link #getProviders(boolean)}, you
+     * use {@link #PROVIDERS_CHANGED_ACTION} instead.
+     *
+     * In the future, there may be mode changes that do not result in
+     * {@link #PROVIDERS_CHANGED_ACTION} broadcasts.
+     */
+    public static final String MODE_CHANGED_ACTION = "android.location.MODE_CHANGED";
 
     /**
      * Broadcast intent action indicating that the GPS has either started or
