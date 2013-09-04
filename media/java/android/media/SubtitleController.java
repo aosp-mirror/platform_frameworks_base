@@ -38,6 +38,7 @@ public class SubtitleController {
     private Vector<SubtitleTrack> mTracks;
     private SubtitleTrack mSelectedTrack;
     private boolean mShowing;
+    private CaptioningManager mCaptioningManager;
 
     /**
      * Creates a subtitle controller for a media playback object that implements
@@ -56,6 +57,8 @@ public class SubtitleController {
         mRenderers = new Vector<Renderer>();
         mShowing = false;
         mTracks = new Vector<SubtitleTrack>();
+        mCaptioningManager =
+            (CaptioningManager)context.getSystemService(Context.CAPTIONING_SERVICE);
     }
 
     /**
@@ -125,7 +128,7 @@ public class SubtitleController {
      * if no such track exists in this manager.
      */
     public SubtitleTrack getDefaultTrack() {
-        Locale locale = CaptioningManager.getLocale(mContext.getContentResolver());
+        Locale locale = mCaptioningManager.getLocale();
 
         for (SubtitleTrack track: mTracks) {
             MediaFormat format = track.getFormat();
@@ -156,7 +159,7 @@ public class SubtitleController {
             selectTrack(track);
             mTrackIsExplicit = false;
             if (!mVisibilityIsExplicit) {
-                if (CaptioningManager.isEnabled(mContext.getContentResolver())) {
+                if (mCaptioningManager.isEnabled()) {
                     show();
                 } else {
                     hide();
