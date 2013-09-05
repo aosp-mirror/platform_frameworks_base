@@ -1519,6 +1519,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * with this TextView.  By default there is no associated UndoManager, so null
      * is returned.  One can be associated with the TextView through
      * {@link #setUndoManager(android.content.UndoManager, String)}
+     *
+     * @hide
      */
     public final UndoManager getUndoManager() {
         return mEditor == null ? null : mEditor.mUndoManager;
@@ -1535,6 +1537,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @param tag String tag identifying this particular TextView owner in the
      * UndoManager.  This is used to keep the correct association with the
      * {@link android.content.UndoOwner} of any operations inside of the UndoManager.
+     *
+     * @hide
      */
     public final void setUndoManager(UndoManager undoManager, String tag) {
         if (undoManager != null) {
