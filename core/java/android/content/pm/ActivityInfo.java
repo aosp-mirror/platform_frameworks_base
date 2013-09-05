@@ -161,7 +161,7 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int FLAG_SHOW_ON_LOCK_SCREEN = 0x0400;
     /**
-     * Bit in {@link #flags} corresponding to an immersive activity
+     * @hide Bit in {@link #flags} corresponding to an immersive activity
      * that wishes not to be interrupted by notifications.
      * Applications that hide the system notification bar with
      * {@link android.view.WindowManager.LayoutParams#FLAG_FULLSCREEN}
