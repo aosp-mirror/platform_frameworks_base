@@ -20,11 +20,9 @@ import android.net.NetworkInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pGroup;
-import android.net.wifi.p2p.WifiP2pService;
-import android.net.wifi.p2p.WifiP2pService.P2pStatus;
 import android.net.wifi.p2p.WifiP2pProvDiscEvent;
+import android.net.wifi.p2p.WifiP2pService.P2pStatus;
 import android.net.wifi.p2p.nsd.WifiP2pServiceResponse;
-import android.net.wifi.StateChangeResult;
 import android.os.Message;
 import android.util.Log;
 
@@ -36,8 +34,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Listens for events from the wpa_supplicant server, and passes them on
@@ -364,44 +362,33 @@ public class WifiMonitor {
         mWifiStateMachine = wifiStateMachine;
         mMonitoring = false;
 
-        WifiMonitorSingleton.getMonitor().registerInterfaceMonitor(mInterfaceName, this);
+        WifiMonitorSingleton.sInstance.registerInterfaceMonitor(mInterfaceName, this);
     }
 
     public void startMonitoring() {
-        WifiMonitorSingleton.getMonitor().startMonitoring(mInterfaceName);
+        WifiMonitorSingleton.sInstance.startMonitoring(mInterfaceName);
     }
 
     public void stopMonitoring() {
-        WifiMonitorSingleton.getMonitor().stopMonitoring(mInterfaceName);
+        WifiMonitorSingleton.sInstance.stopMonitoring(mInterfaceName);
     }
 
     public void stopSupplicant() {
-        WifiMonitorSingleton.getMonitor().stopSupplicant();
+        WifiMonitorSingleton.sInstance.stopSupplicant();
     }
 
     public void killSupplicant(boolean p2pSupported) {
-        WifiMonitorSingleton.getMonitor().killSupplicant(p2pSupported);
+        WifiMonitorSingleton.sInstance.killSupplicant(p2pSupported);
     }
 
     private static class WifiMonitorSingleton {
-        private static Object sSingletonLock = new Object();
-        private static WifiMonitorSingleton sWifiMonitorSingleton = null;
-        private HashMap<String, WifiMonitor> mIfaceMap = new HashMap<String, WifiMonitor>();
+        private static final WifiMonitorSingleton sInstance = new WifiMonitorSingleton();
+
+        private final HashMap<String, WifiMonitor> mIfaceMap = new HashMap<String, WifiMonitor>();
         private boolean mConnected = false;
         private WifiNative mWifiNative;
 
         private WifiMonitorSingleton() {
-        }
-
-        static WifiMonitorSingleton getMonitor() {
-            if (DBG) Log.d(TAG, "WifiMonitorSingleton gotten");
-            synchronized (sSingletonLock) {
-                if (sWifiMonitorSingleton == null) {
-                    if (DBG) Log.d(TAG, "WifiMonitorSingleton created");
-                    sWifiMonitorSingleton = new WifiMonitorSingleton();
-                }
-            }
-            return sWifiMonitorSingleton;
         }
 
         public synchronized void startMonitoring(String iface) {
@@ -546,6 +533,8 @@ public class WifiMonitor {
                 } else {
                     if (DBG) Log.d(TAG, "Sending to all monitors because there's no interface id");
                     boolean done = false;
+                    // TODO: This isn't thread safe, mIfaceMap & mConnected below are
+                    // usually guarded by (WifiMonitorSingleton.sInstance.this).
                     Iterator<Map.Entry<String, WifiMonitor>> it =
                             mWifiMonitorSingleton.mIfaceMap.entrySet().iterator();
                     while (it.hasNext()) {
@@ -915,12 +904,11 @@ public class WifiMonitor {
         /**
          * Send the state machine a notification that the state of Wifi connectivity
          * has changed.
-         * @param networkId the configured network on which the state change occurred
          * @param newState the new network state
-         * @param BSSID when the new state is {@link DetailedState#CONNECTED
-         * NetworkInfo.DetailedState.CONNECTED},
+         * @param BSSID when the new state is {@link NetworkInfo.DetailedState#CONNECTED},
          * this is the MAC address of the access point. Otherwise, it
          * is {@code null}.
+         * @param netId the configured network on which the state change occurred
          */
         void notifyNetworkStateChange(NetworkInfo.DetailedState newState, String BSSID, int netId) {
             if (newState == NetworkInfo.DetailedState.CONNECTED) {
