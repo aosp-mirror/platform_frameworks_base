@@ -132,7 +132,8 @@ public final class BridgeContext extends Context {
             RenderResources renderResources,
             IProjectCallback projectCallback,
             Configuration config,
-            int targetSdkVersion) {
+            int targetSdkVersion,
+            boolean hasRtlSupport) {
         mProjectKey = projectKey;
         mMetrics = metrics;
         mProjectCallback = projectCallback;
@@ -142,6 +143,9 @@ public final class BridgeContext extends Context {
 
         mApplicationInfo = new ApplicationInfo();
         mApplicationInfo.targetSdkVersion = targetSdkVersion;
+        if (hasRtlSupport) {
+            mApplicationInfo.flags = mApplicationInfo.flags | ApplicationInfo.FLAG_SUPPORTS_RTL;
+        }
 
         mWindowManager = new WindowManagerImpl(mMetrics);
     }
