@@ -1451,7 +1451,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Տեսնել բոլորը"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Ընտրել գործունեությունը"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Տարածել"</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"Սարքը կողպված է:"</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"Ուղարկվում է..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Գործարկե՞լ զննարկիչը:"</string>
@@ -1571,7 +1570,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Չեղարկված է"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Բովանդակության գրելու սխալ"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"անհայտ"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Մուտքագրեք կառավարչի PIN-ը"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Մուտքագրեք PIN-ը"</string>
+    <string name="restr_pin_incorrect" msgid="8571512003955077924">"Սխալ է"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Ընթացիկ PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Նոր PIN"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Հաստատեք նոր PIN-ը"</string>
@@ -1579,9 +1580,10 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN-երը չեն համընկնում: Փորձեք կրկին:"</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN-ը չափազանց կարճ է: Պետք է ունենա առնվազն 4 թվանիշ:"</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"PIN-ը սխալ է: Փորձեք կրկին 1 վայրկյանից:"</item>
-    <item quantity="other" msgid="8030607343223287654">"PIN-ը սխալ է: Փորձեք կրկին <xliff:g id="COUNT">%d</xliff:g> վայրկյանից:"</item>
+    <item quantity="one" msgid="311050995198548675">"Կրկին փորձեք 1 վայրկյանից"</item>
+    <item quantity="other" msgid="4730868920742952817">"Կրկին փորձեք <xliff:g id="COUNT">%d</xliff:g> վայրկյանից"</item>
   </plurals>
+    <string name="restr_pin_try_later" msgid="973144472490532377">"Կրկին փորձեք մի փոքր ուշ"</string>
     <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Սահեցրեք էկրանի եզրով՝ գոտին բացելու համար"</string>
     <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Սահեցրեք էկրանի եզրով՝ համակարգային գոտին բացելու համար"</string>
 </resources>

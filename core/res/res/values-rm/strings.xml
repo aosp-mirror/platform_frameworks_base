@@ -2341,8 +2341,6 @@
     <skip />
     <!-- no translation found for share_action_provider_share_with (5247684435979149216) -->
     <skip />
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
     <!-- no translation found for list_delimeter (3975117572185494152) -->
     <skip />
     <!-- no translation found for sending (3245653681008218030) -->
@@ -2582,7 +2580,11 @@
     <skip />
     <!-- no translation found for reason_unknown (6048913880184628119) -->
     <skip />
+    <!-- no translation found for restr_pin_enter_admin_pin (783643731895143970) -->
+    <skip />
     <!-- no translation found for restr_pin_enter_pin (3395953421368476103) -->
+    <skip />
+    <!-- no translation found for restr_pin_incorrect (8571512003955077924) -->
     <skip />
     <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
     <skip />
@@ -2596,8 +2598,10 @@
     <skip />
     <!-- no translation found for restr_pin_error_too_short (8173982756265777792) -->
     <skip />
-    <!-- no translation found for restr_pin_countdown:one (4835639969503729874) -->
-    <!-- no translation found for restr_pin_countdown:other (8030607343223287654) -->
+    <!-- no translation found for restr_pin_countdown:one (311050995198548675) -->
+    <!-- no translation found for restr_pin_countdown:other (4730868920742952817) -->
+    <!-- no translation found for restr_pin_try_later (973144472490532377) -->
+    <skip />
     <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
     <skip />
     <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->

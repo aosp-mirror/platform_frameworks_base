@@ -1451,7 +1451,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"すべて表示"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"操作の選択"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"共有"</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"端末がロックされています。"</string>
     <string name="list_delimeter" msgid="3975117572185494152">"、 "</string>
     <string name="sending" msgid="3245653681008218030">"送信中..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ブラウザを起動しますか？"</string>
@@ -1571,7 +1570,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"キャンセルされました"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"コンテンツの書き込み中にエラーが発生しました"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"不明"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"管理者PINを入力"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PINを入力"</string>
+    <string name="restr_pin_incorrect" msgid="8571512003955077924">"間違っています"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"現在のPIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"新しいPIN"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"新しいPINの確認"</string>
@@ -1579,9 +1580,10 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PINが一致しません。もう一度お試しください。"</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PINが短すぎます。4桁以上にしてください。"</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"PINが正しくありません。1秒後にもう一度お試しください。"</item>
-    <item quantity="other" msgid="8030607343223287654">"PINが正しくありません。<xliff:g id="COUNT">%d</xliff:g>秒後にもう一度お試しください。"</item>
+    <item quantity="one" msgid="311050995198548675">"1秒後に再試行"</item>
+    <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g>秒後に再試行"</item>
   </plurals>
+    <string name="restr_pin_try_later" msgid="973144472490532377">"しばらくしてから再試行"</string>
     <string name="transient_navigation_confirmation" msgid="4907844043611123426">"画面の端からスワイプしてバーを表示"</string>
     <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"システムバーを表示するには、画面の端からスワイプします"</string>
 </resources>
