@@ -58,7 +58,7 @@ import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
-import android.net.LinkInfo;
+import android.net.LinkQualityInfo;
 import android.net.LinkProperties.CompareResult;
 import android.net.MobileDataStateTracker;
 import android.net.NetworkConfig;
@@ -4689,39 +4689,39 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     };
 
     @Override
-    public LinkInfo getLinkInfo(int networkType) {
+    public LinkQualityInfo getLinkQualityInfo(int networkType) {
         enforceAccessPermission();
         if (isNetworkTypeValid(networkType)) {
-            return mNetTrackers[networkType].getLinkInfo();
+            return mNetTrackers[networkType].getLinkQualityInfo();
         } else {
             return null;
         }
     }
 
     @Override
-    public LinkInfo getActiveLinkInfo() {
+    public LinkQualityInfo getActiveLinkQualityInfo() {
         enforceAccessPermission();
         if (isNetworkTypeValid(mActiveDefaultNetwork)) {
-            return mNetTrackers[mActiveDefaultNetwork].getLinkInfo();
+            return mNetTrackers[mActiveDefaultNetwork].getLinkQualityInfo();
         } else {
             return null;
         }
     }
 
     @Override
-    public LinkInfo[] getAllLinkInfo() {
+    public LinkQualityInfo[] getAllLinkQualityInfo() {
         enforceAccessPermission();
-        final ArrayList<LinkInfo> result = Lists.newArrayList();
+        final ArrayList<LinkQualityInfo> result = Lists.newArrayList();
         for (NetworkStateTracker tracker : mNetTrackers) {
             if (tracker != null) {
-                LinkInfo li = tracker.getLinkInfo();
+                LinkQualityInfo li = tracker.getLinkQualityInfo();
                 if (li != null) {
                     result.add(li);
                 }
             }
         }
 
-        return result.toArray(new LinkInfo[result.size()]);
+        return result.toArray(new LinkQualityInfo[result.size()]);
     }
 
     /* Infrastructure for network sampling */
