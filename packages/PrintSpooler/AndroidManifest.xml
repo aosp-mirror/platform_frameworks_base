@@ -18,7 +18,6 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         package="com.android.printspooler"
-        android:sharedUserId="android.uid.printspooler"
         android:versionName="1"
         android:versionCode="1">
 
