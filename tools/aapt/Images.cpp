@@ -70,6 +70,12 @@ struct image_info
     png_bytepp allocRows;
 };
 
+static void log_warning(png_structp png_ptr, png_const_charp warning_message)
+{
+    const char* imageName = (const char*) png_get_error_ptr(png_ptr);
+    fprintf(stderr, "%s: libpng warning: %s\n", imageName, warning_message);
+}
+
 static void read_png(const char* imageName,
                      png_structp read_ptr, png_infop read_info,
                      image_info* outImageInfo)
@@ -78,6 +84,8 @@ static void read_png(const char* imageName,
     int bit_depth, interlace_type, compression_type;
     int i;
 
+    png_set_error_fn(read_ptr, const_cast<char*>(imageName),
+            NULL /* use default errorfn */, log_warning);
     png_read_info(read_ptr, read_info);
 
     png_get_IHDR(read_ptr, read_info, &outImageInfo->width,
@@ -107,6 +115,8 @@ static void read_png(const char* imageName,
 
     if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
         png_set_gray_to_rgb(read_ptr);
+
+    png_set_interlace_handling(read_ptr);
 
     png_read_update_info(read_ptr, read_info);
 
