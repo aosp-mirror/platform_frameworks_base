@@ -210,10 +210,7 @@ public abstract class PreferenceGroup extends Preference implements GenericInfla
      * @return Whether to allow adding the preference (true), or not (false).
      */
     protected boolean onPrepareAddPreference(Preference preference) {
-        if (!super.isEnabled()) {
-            preference.setEnabled(false);
-        }
-        
+        preference.onParentChanged(this, shouldDisableDependents());
         return true;
     }
 
