@@ -74,6 +74,10 @@ public class SubtitleView extends View {
     private float mSpacingAdd = 0;
     private int mInnerPaddingX = 0;
 
+    public SubtitleView(Context context) {
+        this(context, null);
+    }
+
     public SubtitleView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }

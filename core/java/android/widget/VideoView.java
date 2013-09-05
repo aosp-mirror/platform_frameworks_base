@@ -30,6 +30,7 @@ import android.media.MediaPlayer.OnErrorListener;
 import android.media.MediaPlayer.OnInfoListener;
 import android.media.Metadata;
 import android.media.SubtitleController;
+import android.media.SubtitleTrack.RenderingWidget;
 import android.media.WebVttRenderer;
 import android.net.Uri;
 import android.util.AttributeSet;
@@ -46,7 +47,6 @@ import android.widget.MediaController.MediaPlayerControl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Vector;
 
@@ -100,14 +100,11 @@ public class VideoView extends SurfaceView
     private boolean     mCanSeekBack;
     private boolean     mCanSeekForward;
 
-    /** List of views overlaid on top of the video. */
-    private ArrayList<View> mOverlays;
+    /** Subtitle rendering widget overlaid on top of the video. */
+    private RenderingWidget mSubtitleWidget;
 
-    /**
-     * Listener for overlay layout changes. Invalidates the video view to ensure
-     * that captions are redrawn whenever their layout changes.
-     */
-    private OnLayoutChangeListener mOverlayLayoutListener;
+    /** Listener for changes to subtitle data, used to redraw when needed. */
+    private RenderingWidget.OnChangedListener mSubtitlesChangedListener;
 
     public VideoView(Context context) {
         super(context);
@@ -302,11 +299,10 @@ public class VideoView extends SurfaceView
             mMediaPlayer = new MediaPlayer();
             // TODO: create SubtitleController in MediaPlayer, but we need
             // a context for the subtitle renderers
-            SubtitleController controller = new SubtitleController(
-                    getContext(),
-                    mMediaPlayer.getMediaTimeProvider(),
-                    mMediaPlayer);
-            controller.registerRenderer(new WebVttRenderer(getContext(), null));
+            final Context context = getContext();
+            final SubtitleController controller = new SubtitleController(
+                    context, mMediaPlayer.getMediaTimeProvider(), mMediaPlayer);
+            controller.registerRenderer(new WebVttRenderer(context));
             mMediaPlayer.setSubtitleAnchor(controller, this);
 
             if (mAudioSession != 0) {
@@ -792,12 +788,29 @@ public class VideoView extends SurfaceView
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+
+        if (mSubtitleWidget != null) {
+            mSubtitleWidget.onAttachedToWindow();
+        }
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        if (mSubtitleWidget != null) {
+            mSubtitleWidget.onDetachedFromWindow();
+        }
+    }
+
+    @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
 
-        // Layout overlay views, if necessary.
-        if (changed && mOverlays != null && !mOverlays.isEmpty()) {
-            measureAndLayoutOverlays();
+        if (mSubtitleWidget != null) {
+            measureAndLayoutSubtitleWidget();
         }
     }
 
@@ -805,104 +818,65 @@ public class VideoView extends SurfaceView
     public void draw(Canvas canvas) {
         super.draw(canvas);
 
-        final int count = mOverlays.size();
-        for (int i = 0; i < count; i++) {
-            final View overlay = mOverlays.get(i);
-            overlay.draw(canvas);
+        if (mSubtitleWidget != null) {
+            final int saveCount = canvas.save();
+            canvas.translate(getPaddingLeft(), getPaddingTop());
+            mSubtitleWidget.draw(canvas);
+            canvas.restoreToCount(saveCount);
         }
-    }
-
-    /**
-     * Adds a view to be overlaid on top of this video view. During layout, the
-     * view will be forced to match the bounds, less padding, of the video view.
-     * <p>
-     * Overlays are drawn in the order they are added. The last added overlay
-     * will be drawn on top.
-     *
-     * @param overlay the view to overlay
-     * @see #removeOverlay(View)
-     */
-    private void addOverlay(View overlay) {
-        if (mOverlays == null) {
-            mOverlays = new ArrayList<View>(1);
-        }
-
-        if (mOverlayLayoutListener == null) {
-            mOverlayLayoutListener = new OnLayoutChangeListener() {
-                @Override
-                public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                        int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                    invalidate();
-                }
-            };
-        }
-
-        if (mOverlays.isEmpty()) {
-            setWillNotDraw(false);
-        }
-
-        mOverlays.add(overlay);
-        overlay.addOnLayoutChangeListener(mOverlayLayoutListener);
-        measureAndLayoutOverlays();
-    }
-
-    /**
-     * Removes a view previously added using {@link #addOverlay}.
-     *
-     * @param overlay the view to remove
-     * @see #addOverlay(View)
-     */
-    private void removeOverlay(View overlay) {
-        if (mOverlays == null) {
-            return;
-        }
-
-        overlay.removeOnLayoutChangeListener(mOverlayLayoutListener);
-        mOverlays.remove(overlay);
-
-        if (mOverlays.isEmpty()) {
-            setWillNotDraw(true);
-        }
-
-        invalidate();
     }
 
     /**
      * Forces a measurement and layout pass for all overlaid views.
      *
-     * @see #addOverlay(View)
+     * @see #setSubtitleWidget(RenderingWidget)
      */
-    private void measureAndLayoutOverlays() {
-        final int left = getPaddingLeft();
-        final int top = getPaddingTop();
-        final int right = getWidth() - left - getPaddingRight();
-        final int bottom = getHeight() - top - getPaddingBottom();
-        final int widthSpec = MeasureSpec.makeMeasureSpec(right - left, MeasureSpec.EXACTLY);
-        final int heightSpec = MeasureSpec.makeMeasureSpec(bottom - top, MeasureSpec.EXACTLY);
+    private void measureAndLayoutSubtitleWidget() {
+        final int width = getWidth() - getPaddingLeft() - getPaddingRight();
+        final int height = getHeight() - getPaddingTop() - getPaddingBottom();
 
-        final int count = mOverlays.size();
-        for (int i = 0; i < count; i++) {
-            final View overlay = mOverlays.get(i);
-            overlay.measure(widthSpec, heightSpec);
-            overlay.layout(left, top, right, bottom);
-        }
+        mSubtitleWidget.setSize(width, height);
     }
 
     /** @hide */
     @Override
-    public void setSubtitleView(View view) {
-        if (mSubtitleView == view) {
+    public void setSubtitleWidget(RenderingWidget subtitleWidget) {
+        if (mSubtitleWidget == subtitleWidget) {
             return;
         }
 
-        if (mSubtitleView != null) {
-            removeOverlay(mSubtitleView);
-        }
-        mSubtitleView = view;
-        if (mSubtitleView != null) {
-            addOverlay(mSubtitleView);
-        }
-    }
+        final boolean attachedToWindow = isAttachedToWindow();
+        if (mSubtitleWidget != null) {
+            if (attachedToWindow) {
+                mSubtitleWidget.onDetachedFromWindow();
+            }
 
-    private View mSubtitleView;
+            mSubtitleWidget.setOnChangedListener(null);
+        }
+
+        mSubtitleWidget = subtitleWidget;
+
+        if (subtitleWidget != null) {
+            if (mSubtitlesChangedListener == null) {
+                mSubtitlesChangedListener = new RenderingWidget.OnChangedListener() {
+                    @Override
+                    public void onChanged(RenderingWidget renderingWidget) {
+                        invalidate();
+                    }
+                };
+            }
+
+            setWillNotDraw(false);
+            subtitleWidget.setOnChangedListener(mSubtitlesChangedListener);
+
+            if (attachedToWindow) {
+                subtitleWidget.onAttachedToWindow();
+                requestLayout();
+            }
+        } else {
+            setWillNotDraw(true);
+        }
+
+        invalidate();
+    }
 }

@@ -20,8 +20,7 @@ import java.util.Locale;
 import java.util.Vector;
 
 import android.content.Context;
-import android.media.MediaPlayer.OnSubtitleDataListener;
-import android.view.View;
+import android.media.SubtitleTrack.RenderingWidget;
 import android.view.accessibility.CaptioningManager;
 
 /**
@@ -32,7 +31,6 @@ import android.view.accessibility.CaptioningManager;
  * @hide
  */
 public class SubtitleController {
-    private Context mContext;
     private MediaTimeProvider mTimeProvider;
     private Vector<Renderer> mRenderers;
     private Vector<SubtitleTrack> mTracks;
@@ -50,7 +48,6 @@ public class SubtitleController {
             Context context,
             MediaTimeProvider timeProvider,
             Listener listener) {
-        mContext = context;
         mTimeProvider = timeProvider;
         mListener = listener;
 
@@ -79,11 +76,11 @@ public class SubtitleController {
         return mSelectedTrack;
     }
 
-    private View getSubtitleView() {
+    private RenderingWidget getRenderingWidget() {
         if (mSelectedTrack == null) {
             return null;
         }
-        return mSelectedTrack.getView();
+        return mSelectedTrack.getRenderingWidget();
     }
 
     /**
@@ -110,7 +107,7 @@ public class SubtitleController {
         }
 
         mSelectedTrack = track;
-        mAnchor.setSubtitleView(getSubtitleView());
+        mAnchor.setSubtitleWidget(getRenderingWidget());
 
         if (mSelectedTrack != null) {
             mSelectedTrack.setTimeProvider(mTimeProvider);
@@ -268,17 +265,16 @@ public class SubtitleController {
     }
 
     /**
-     * Subtitle anchor, an object that is able to display a subtitle view,
+     * Subtitle anchor, an object that is able to display a subtitle renderer,
      * e.g. a VideoView.
      */
     public interface Anchor {
         /**
-         * Anchor should set the subtitle view to the supplied view,
-         * or none, if the supplied view is null.
-         *
-         * @param view subtitle view, or null
+         * Anchor should use the supplied subtitle rendering widget, or
+         * none if it is null.
+         * @hide
          */
-        public void setSubtitleView(View view);
+        public void setSubtitleWidget(RenderingWidget subtitleWidget);
     }
 
     private Anchor mAnchor;
@@ -290,11 +286,11 @@ public class SubtitleController {
         }
 
         if (mAnchor != null) {
-            mAnchor.setSubtitleView(null);
+            mAnchor.setSubtitleWidget(null);
         }
         mAnchor = anchor;
         if (mAnchor != null) {
-            mAnchor.setSubtitleView(getSubtitleView());
+            mAnchor.setSubtitleWidget(getRenderingWidget());
         }
     }
 
