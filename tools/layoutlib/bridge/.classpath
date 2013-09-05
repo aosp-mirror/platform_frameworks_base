@@ -7,5 +7,6 @@
 	<classpathentry kind="var" path="ANDROID_PLAT_SRC/out/host/common/obj/JAVA_LIBRARIES/temp_layoutlib_intermediates/javalib.jar" sourcepath="/ANDROID_PLAT_SRC/frameworks/base"/>
 	<classpathentry kind="var" path="ANDROID_PLAT_SRC/prebuilts/misc/common/ninepatch/ninepatch-prebuilt.jar"/>
 	<classpathentry kind="var" path="ANDROID_PLAT_SRC/prebuilts/misc/common/tools-common/tools-common-prebuilt.jar"/>
+	<classpathentry kind="var" path="ANDROID_PLAT_SRC/prebuilts/misc/common/icu4j/icu4j.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
