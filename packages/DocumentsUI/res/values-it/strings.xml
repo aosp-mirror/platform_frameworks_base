@@ -50,6 +50,5 @@
     <string name="toast_failed_delete" msgid="2180678019407244069">"Impossibile eliminare alcuni documenti"</string>
     <string name="more" msgid="7117420986529297171">"Altro"</string>
     <string name="loading" msgid="7933681260296021180">"Caricamento..."</string>
-    <!-- no translation found for share_via (8966594246261344259) -->
-    <skip />
+    <string name="share_via" msgid="8966594246261344259">"Condividi via"</string>
 </resources>
