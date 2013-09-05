@@ -556,7 +556,7 @@ public final class PrintAttributes implements Parcelable {
          * @return New instance in landscape orientation.
          */
         public MediaSize asPortrait() {
-            return new MediaSize(mId, mPackageName, mLabel,
+            return new MediaSize(mId, mLabel, mPackageName,
                     Math.min(mWidthMils, mHeightMils),
                     Math.max(mWidthMils, mHeightMils),
                     mLabelResId);
@@ -569,7 +569,7 @@ public final class PrintAttributes implements Parcelable {
          * @return New instance in landscape orientation.
          */
         public MediaSize asLandscape() {
-            return new MediaSize(mId, mLabel,
+            return new MediaSize(mId, mLabel, mPackageName,
                     Math.max(mWidthMils, mHeightMils),
                     Math.min(mWidthMils, mHeightMils),
                     mLabelResId);

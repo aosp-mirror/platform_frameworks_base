@@ -257,8 +257,96 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
         private boolean mReadHistoryCompleted;
         private boolean mReadHistoryInProgress;
 
-        private final AsyncTask<Void, Void, List<PrinterInfo>> mReadTask =
-                new AsyncTask<Void, Void, List<PrinterInfo>>() {
+        private ReadTask mReadTask;
+
+        private PersistenceManager(Context context) {
+            mStatePersistFile = new AtomicFile(new File(context.getFilesDir(),
+                    PERSIST_FILE_NAME));
+        }
+
+        public boolean isReadHistoryInProgress() {
+            return mReadHistoryInProgress;
+        }
+
+        public boolean isReadHistoryCompleted() {
+            return mReadHistoryCompleted;
+        }
+
+        public boolean stopReadPrinterHistory() {
+            final boolean cancelled = mReadTask.cancel(true);
+            mReadTask = null;
+            return cancelled;
+        }
+
+        public void readPrinterHistory() {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "read history started");
+            }
+            mReadHistoryInProgress = true;
+            mReadTask = new ReadTask();
+            mReadTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
+        }
+
+        @SuppressWarnings("unchecked")
+        public void addPrinterAndWritePrinterHistory(PrinterInfo printer) {
+            if (mHistoricalPrinters.size() >= MAX_HISTORY_LENGTH) {
+                mHistoricalPrinters.remove(0);
+            }
+            mHistoricalPrinters.add(printer);
+            new WriteTask().executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
+                    new ArrayList<PrinterInfo>(mHistoricalPrinters));
+        }
+
+        private List<PrinterInfo> computeFavoritePrinters(List<PrinterInfo> printers) {
+            Map<PrinterId, PrinterRecord> recordMap =
+                    new ArrayMap<PrinterId, PrinterRecord>();
+
+            // Recompute the weights.
+            float currentWeight = 1.0f;
+            final int printerCount = printers.size();
+            for (int i = printerCount - 1; i >= 0; i--) {
+                PrinterInfo printer = printers.get(i);
+                // Aggregate weight for the same printer
+                PrinterRecord record = recordMap.get(printer.getId());
+                if (record == null) {
+                    record = new PrinterRecord(printer);
+                    recordMap.put(printer.getId(), record);
+                }
+                record.weight += currentWeight;
+                currentWeight *= WEIGHT_DECAY_COEFFICIENT;
+            }
+
+            // Soft the favorite printers.
+            List<PrinterRecord> favoriteRecords = new ArrayList<PrinterRecord>(
+                    recordMap.values());
+            Collections.sort(favoriteRecords);
+
+            // Write the favorites to the output.
+            final int favoriteCount = favoriteRecords.size();
+            List<PrinterInfo> favoritePrinters = new ArrayList<PrinterInfo>(favoriteCount);
+            for (int i = 0; i < favoriteCount; i++) {
+                PrinterInfo printer = favoriteRecords.get(i).printer;
+                favoritePrinters.add(printer);
+            }
+
+            return favoritePrinters;
+        }
+
+        private final class PrinterRecord implements Comparable<PrinterRecord> {
+            public final PrinterInfo printer;
+            public float weight;
+
+            public PrinterRecord(PrinterInfo printer) {
+                this.printer = printer;
+            }
+
+            @Override
+            public int compareTo(PrinterRecord another) {
+                return Float.floatToIntBits(another.weight) - Float.floatToIntBits(weight);
+            }
+        }
+
+        private final class ReadTask extends AsyncTask<Void, Void, List<PrinterInfo>> {
             @Override
             protected List<PrinterInfo> doInBackground(Void... args) {
                return doReadPrinterHistory();
@@ -284,6 +372,9 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
 
                 // Start loading the available printers.
                 loadInternal();
+
+                // We are done.
+                mReadTask = null;
             }
 
             private List<PrinterInfo> doReadPrinterHistory() {
@@ -411,8 +502,7 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
             }
         };
 
-        private final AsyncTask<List<PrinterInfo>, Void, Void> mWriteTask =
-                new AsyncTask<List<PrinterInfo>, Void, Void>() {
+        private final class WriteTask extends AsyncTask<List<PrinterInfo>, Void, Void> {
             @Override
             protected Void doInBackground(List<PrinterInfo>... printers) {
                 doWritePrinterHistory(printers[0]);
@@ -473,89 +563,5 @@ public class FusedPrintersProvider extends Loader<List<PrinterInfo>> {
                 }
             }
         };
-
-        private PersistenceManager(Context context) {
-            mStatePersistFile = new AtomicFile(new File(context.getFilesDir(),
-                    PERSIST_FILE_NAME));
-        }
-
-        public boolean isReadHistoryInProgress() {
-            return mReadHistoryInProgress;
-        }
-
-        public boolean isReadHistoryCompleted() {
-            return mReadHistoryCompleted;
-        }
-
-        public boolean stopReadPrinterHistory() {
-            return mReadTask.cancel(true);
-        }
-
-        public void readPrinterHistory() {
-            if (DEBUG) {
-                Log.i(LOG_TAG, "read history started");
-            }
-            mReadHistoryInProgress = true;
-            mReadTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, (Void[]) null);
-        }
-
-        @SuppressWarnings("unchecked")
-        public void addPrinterAndWritePrinterHistory(PrinterInfo printer) {
-            if (mHistoricalPrinters.size() >= MAX_HISTORY_LENGTH) {
-                mHistoricalPrinters.remove(0);
-            }
-            mHistoricalPrinters.add(printer);
-            mWriteTask.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR,
-                    new ArrayList<PrinterInfo>(mHistoricalPrinters));
-        }
-
-        private List<PrinterInfo> computeFavoritePrinters(List<PrinterInfo> printers) {
-            Map<PrinterId, PrinterRecord> recordMap =
-                    new ArrayMap<PrinterId, PrinterRecord>();
-
-            // Recompute the weights.
-            float currentWeight = 1.0f;
-            final int printerCount = printers.size();
-            for (int i = printerCount - 1; i >= 0; i--) {
-                PrinterInfo printer = printers.get(i);
-                // Aggregate weight for the same printer
-                PrinterRecord record = recordMap.get(printer.getId());
-                if (record == null) {
-                    record = new PrinterRecord(printer);
-                    recordMap.put(printer.getId(), record);
-                }
-                record.weight += currentWeight;
-                currentWeight *= WEIGHT_DECAY_COEFFICIENT;
-            }
-
-            // Soft the favorite printers.
-            List<PrinterRecord> favoriteRecords = new ArrayList<PrinterRecord>(
-                    recordMap.values());
-            Collections.sort(favoriteRecords);
-
-            // Write the favorites to the output.
-            final int favoriteCount = favoriteRecords.size();
-            List<PrinterInfo> favoritePrinters = new ArrayList<PrinterInfo>(favoriteCount);
-            for (int i = 0; i < favoriteCount; i++) {
-                PrinterInfo printer = favoriteRecords.get(i).printer;
-                favoritePrinters.add(printer);
-            }
-
-            return favoritePrinters;
-        }
-
-        private final class PrinterRecord implements Comparable<PrinterRecord> {
-            public final PrinterInfo printer;
-            public float weight;
-
-            public PrinterRecord(PrinterInfo printer) {
-                this.printer = printer;
-            }
-
-            @Override
-            public int compareTo(PrinterRecord another) {
-                return Float.floatToIntBits(another.weight) - Float.floatToIntBits(weight);
-            }
-        }
     }
 }
