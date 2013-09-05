@@ -84,6 +84,8 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
 
     private SamplingDataTracker mSamplingDataTracker = new SamplingDataTracker();
 
+    private static final int UNKNOWN = LinkQualityInfo.UNKNOWN_INT;
+
     /**
      * Create a new MobileDataStateTracker
      * @param netType the ConnectivityManager network type
@@ -756,59 +758,59 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
     }
 
     @Override
-    public LinkInfo getLinkInfo() {
+    public LinkQualityInfo getLinkQualityInfo() {
         if (mNetworkInfo == null || mNetworkInfo.getType() == ConnectivityManager.TYPE_NONE) {
             // no data available yet; just return
             return null;
         }
 
-        MobileLinkInfo li = new MobileLinkInfo();
+        MobileLinkQualityInfo li = new MobileLinkQualityInfo();
 
-        li.mNetworkType = mNetworkInfo.getType();
+        li.setNetworkType(mNetworkInfo.getType());
 
-        mSamplingDataTracker.setCommonLinkInfoFields(li);
+        mSamplingDataTracker.setCommonLinkQualityInfoFields(li);
 
         if (mNetworkInfo.getSubtype() != TelephonyManager.NETWORK_TYPE_UNKNOWN) {
-            li.mMobileNetworkType = mNetworkInfo.getSubtype();
+            li.setMobileNetworkType(mNetworkInfo.getSubtype());
 
             NetworkDataEntry entry = getNetworkDataEntry(mNetworkInfo.getSubtype());
             if (entry != null) {
-                li.mTheoreticalRxBandwidth = entry.downloadBandwidth;
-                li.mTheoreticalRxBandwidth = entry.uploadBandwidth;
-                li.mTheoreticalLatency = entry.latency;
+                li.setTheoreticalRxBandwidth(entry.downloadBandwidth);
+                li.setTheoreticalRxBandwidth(entry.uploadBandwidth);
+                li.setTheoreticalLatency(entry.latency);
             }
 
             if (mSignalStrength != null) {
-                li.mNormalizedSignalStrength = getNormalizedSignalStrength(
-                        li.mMobileNetworkType, mSignalStrength);
+                li.setNormalizedSignalStrength(getNormalizedSignalStrength(
+                        li.getMobileNetworkType(), mSignalStrength));
             }
         }
 
         SignalStrength ss = mSignalStrength;
         if (ss != null) {
 
-            li.mRssi = ss.getGsmSignalStrength();
-            li.mGsmErrorRate = ss.getGsmBitErrorRate();
-            li.mCdmaDbm = ss.getCdmaDbm();
-            li.mCdmaEcio = ss.getCdmaEcio();
-            li.mEvdoDbm = ss.getEvdoDbm();
-            li.mEvdoEcio = ss.getEvdoEcio();
-            li.mEvdoSnr = ss.getEvdoSnr();
-            li.mLteSignalStrength = ss.getLteSignalStrength();
-            li.mLteRsrp = ss.getLteRsrp();
-            li.mLteRsrq = ss.getLteRsrq();
-            li.mLteRssnr = ss.getLteRssnr();
-            li.mLteCqi = ss.getLteCqi();
+            li.setRssi(ss.getGsmSignalStrength());
+            li.setGsmErrorRate(ss.getGsmBitErrorRate());
+            li.setCdmaDbm(ss.getCdmaDbm());
+            li.setCdmaEcio(ss.getCdmaEcio());
+            li.setEvdoDbm(ss.getEvdoDbm());
+            li.setEvdoEcio(ss.getEvdoEcio());
+            li.setEvdoSnr(ss.getEvdoSnr());
+            li.setLteSignalStrength(ss.getLteSignalStrength());
+            li.setLteRsrp(ss.getLteRsrp());
+            li.setLteRsrq(ss.getLteRsrq());
+            li.setLteRssnr(ss.getLteRssnr());
+            li.setLteCqi(ss.getLteCqi());
         }
 
         if (VDBG) {
-            Slog.d(TAG, "Returning LinkInfo with"
-                    + " MobileNetworkType = " + String.valueOf(li.mMobileNetworkType)
-                    + " Theoretical Rx BW = " + String.valueOf(li.mTheoreticalRxBandwidth)
-                    + " gsm Signal Strength = " + String.valueOf(li.mRssi)
-                    + " cdma Signal Strength = " + String.valueOf(li.mCdmaDbm)
-                    + " evdo Signal Strength = " + String.valueOf(li.mEvdoDbm)
-                    + " Lte Signal Strength = " + String.valueOf(li.mLteSignalStrength));
+            Slog.d(TAG, "Returning LinkQualityInfo with"
+                    + " MobileNetworkType = " + String.valueOf(li.getMobileNetworkType())
+                    + " Theoretical Rx BW = " + String.valueOf(li.getTheoreticalRxBandwidth())
+                    + " gsm Signal Strength = " + String.valueOf(li.getRssi())
+                    + " cdma Signal Strength = " + String.valueOf(li.getCdmaDbm())
+                    + " evdo Signal Strength = " + String.valueOf(li.getEvdoDbm())
+                    + " Lte Signal Strength = " + String.valueOf(li.getLteSignalStrength()));
         }
 
         return li;
@@ -829,21 +831,21 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
     }
 
     private static NetworkDataEntry [] mTheoreticalBWTable = new NetworkDataEntry[] {
-            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_EDGE,     237,   118, -1),
-            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_GPRS,      48,    40, -1),
-            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_UMTS,     384,    64, -1),
-            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_HSDPA,  14400,    -1, -1),
-            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_HSUPA,  14400,  5760, -1),
-            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_HSPA,   14400,  5760, -1),
-            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_HSPAP,  21000,  5760, -1),
-            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_CDMA,      -1,    -1, -1),
-            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_1xRTT,     -1,    -1, -1),
-            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_EVDO_0,  2468,   153, -1),
-            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_EVDO_A,  3072,  1800, -1),
-            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_EVDO_B, 14700,  1800, -1),
-            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_IDEN,      -1,    -1, -1),
-            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_LTE,   100000, 50000, -1),
-            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_EHRPD,     -1,    -1, -1),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_EDGE,      237,     118, UNKNOWN),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_GPRS,       48,      40, UNKNOWN),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_UMTS,      384,      64, UNKNOWN),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_HSDPA,   14400, UNKNOWN, UNKNOWN),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_HSUPA,   14400,    5760, UNKNOWN),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_HSPA,    14400,    5760, UNKNOWN),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_HSPAP,   21000,    5760, UNKNOWN),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_CDMA,  UNKNOWN, UNKNOWN, UNKNOWN),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_1xRTT, UNKNOWN, UNKNOWN, UNKNOWN),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_EVDO_0,   2468,     153, UNKNOWN),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_EVDO_A,   3072,    1800, UNKNOWN),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_EVDO_B,  14700,    1800, UNKNOWN),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_IDEN,  UNKNOWN, UNKNOWN, UNKNOWN),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_LTE,    100000,   50000, UNKNOWN),
+            new NetworkDataEntry(TelephonyManager.NETWORK_TYPE_EHRPD, UNKNOWN, UNKNOWN, UNKNOWN),
     };
 
     private static NetworkDataEntry getNetworkDataEntry(int networkType) {
@@ -886,10 +888,10 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
             case TelephonyManager.NETWORK_TYPE_IDEN:
             case TelephonyManager.NETWORK_TYPE_EHRPD:
             default:
-                return LinkInfo.UNKNOWN;
+                return UNKNOWN;
         }
 
-        return (level * LinkInfo.NORMALIZED_SIGNAL_STRENGTH_RANGE) /
+        return (level * LinkQualityInfo.NORMALIZED_SIGNAL_STRENGTH_RANGE) /
                 SignalStrength.NUM_SIGNAL_STRENGTH_BINS;
     }
 
