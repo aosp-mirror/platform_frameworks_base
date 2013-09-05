@@ -18,11 +18,7 @@ package com.android.documentsui.model;
 
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.content.pm.ProviderInfo;
 import android.database.Cursor;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
@@ -171,25 +167,6 @@ public class DocumentInfo implements Durable {
 
     public boolean isDeleteSupported() {
         return (flags & Document.FLAG_SUPPORTS_DELETE) != 0;
-    }
-
-    public Drawable loadIcon(Context context) {
-        return loadIcon(context, uri.getAuthority(), icon);
-    }
-
-    public static Drawable loadIcon(Context context, String authority, int icon) {
-        if (icon != 0) {
-            if (authority != null) {
-                final PackageManager pm = context.getPackageManager();
-                final ProviderInfo info = pm.resolveContentProvider(authority, 0);
-                if (info != null) {
-                    return pm.getDrawable(info.packageName, icon, info.applicationInfo);
-                }
-            } else {
-                return context.getResources().getDrawable(icon);
-            }
-        }
-        return null;
     }
 
     public static String getCursorString(Cursor cursor, String columnName) {

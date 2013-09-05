@@ -25,6 +25,8 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.provider.DocumentsContract.Root;
 
+import com.android.documentsui.IconUtils;
+
 import java.util.Objects;
 
 /**
@@ -63,7 +65,7 @@ public class RootInfo {
     }
 
     public Drawable loadIcon(Context context) {
-        return DocumentInfo.loadIcon(context, authority, icon);
+        return IconUtils.loadPackageIcon(context, authority, icon);
     }
 
     @Override
