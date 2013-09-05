@@ -49,7 +49,7 @@ public class CameraBinderDecorator {
     public static final int EACCES = -13;
     public static final int EBUSY = -16;
     public static final int ENODEV = -19;
-    public static final int ENOTSUP = -129;
+    public static final int EOPNOTSUPP = -95;
 
     private static class CameraBinderDecoratorListener implements Decorator.DecoratorListener {
 
@@ -86,7 +86,7 @@ public class CameraBinderDecorator {
                     case ENODEV:
                         UncheckedThrow.throwAnyException(new CameraRuntimeException(
                                 CAMERA_DISCONNECTED));
-                    case ENOTSUP:
+                    case EOPNOTSUPP:
                         UncheckedThrow.throwAnyException(new CameraRuntimeException(
                                 CAMERA_DEPRECATED_HAL));
                 }
