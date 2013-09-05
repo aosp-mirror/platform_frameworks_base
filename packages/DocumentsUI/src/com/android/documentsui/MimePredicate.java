@@ -16,8 +16,12 @@
 
 package com.android.documentsui;
 
+import android.util.Log;
+
 import com.android.documentsui.model.DocumentInfo;
 import com.android.internal.util.Predicate;
+
+import java.util.Arrays;
 
 public class MimePredicate implements Predicate<DocumentInfo> {
     private final String[] mFilters;
@@ -31,16 +35,29 @@ public class MimePredicate implements Predicate<DocumentInfo> {
         if (doc.isDirectory()) {
             return true;
         }
-        for (String filter : mFilters) {
-            if (mimeMatches(filter, doc.mimeType)) {
+        if (mimeMatches(mFilters, doc.mimeType)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean mimeMatches(String[] filters, String[] tests) {
+        if (tests == null) {
+            return false;
+        }
+        for (String test : tests) {
+            if (mimeMatches(filters, test)) {
                 return true;
             }
         }
         return false;
     }
 
-    public static boolean mimeMatches(String filter, String[] tests) {
-        for (String test : tests) {
+    public static boolean mimeMatches(String[] filters, String test) {
+        if (filters == null) {
+            return true;
+        }
+        for (String filter : filters) {
             if (mimeMatches(filter, test)) {
                 return true;
             }
@@ -49,11 +66,11 @@ public class MimePredicate implements Predicate<DocumentInfo> {
     }
 
     public static boolean mimeMatches(String filter, String test) {
-        if (test == null) {
+        if (filter == null || "*/*".equals(filter)) {
+            return true;
+        } else if (test == null) {
             return false;
         } else if (filter.equals(test)) {
-            return true;
-        } else if ("*/*".equals(filter)) {
             return true;
         } else if (filter.endsWith("/*")) {
             return filter.regionMatches(0, test, 0, filter.indexOf('/'));

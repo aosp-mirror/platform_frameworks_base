@@ -337,6 +337,16 @@ public final class DocumentsContract {
         public static final String COLUMN_AVAILABLE_BYTES = "available_bytes";
 
         /**
+         * MIME types supported by this root, or {@code null} if the root
+         * supports all MIME types. Multiple MIME types can be separated by a
+         * newline. For example, a root supporting audio might use
+         * "audio/*\napplication/x-flac".
+         * <p>
+         * Type: String
+         */
+        public static final String COLUMN_MIME_TYPES = "mime_types";
+
+        /**
          * Type of root that represents a storage service, such as a cloud-based
          * service.
          *
@@ -386,40 +396,13 @@ public final class DocumentsContract {
         public static final int FLAG_ADVANCED = 1 << 2;
 
         /**
-         * Flag indicating that a root offers audio documents. When a user is
-         * selecting audio, roots not providing audio may be excluded.
-         *
-         * @see #COLUMN_FLAGS
-         * @see Intent#EXTRA_MIME_TYPES
-         */
-        public static final int FLAG_PROVIDES_AUDIO = 1 << 3;
-
-        /**
-         * Flag indicating that a root offers video documents. When a user is
-         * selecting video, roots not providing video may be excluded.
-         *
-         * @see #COLUMN_FLAGS
-         * @see Intent#EXTRA_MIME_TYPES
-         */
-        public static final int FLAG_PROVIDES_VIDEO = 1 << 4;
-
-        /**
-         * Flag indicating that a root offers image documents. When a user is
-         * selecting images, roots not providing images may be excluded.
-         *
-         * @see #COLUMN_FLAGS
-         * @see Intent#EXTRA_MIME_TYPES
-         */
-        public static final int FLAG_PROVIDES_IMAGES = 1 << 5;
-
-        /**
          * Flag indicating that this root can report recently modified
          * documents.
          *
          * @see #COLUMN_FLAGS
          * @see DocumentsContract#buildRecentDocumentsUri(String, String)
          */
-        public static final int FLAG_SUPPORTS_RECENTS = 1 << 6;
+        public static final int FLAG_SUPPORTS_RECENTS = 1 << 3;
     }
 
     /**
