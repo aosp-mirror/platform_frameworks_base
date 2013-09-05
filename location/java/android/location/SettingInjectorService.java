@@ -16,9 +16,10 @@
 
 package android.location;
 
-import android.app.IntentService;
+import android.app.Service;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
@@ -26,12 +27,12 @@ import android.util.Log;
 
 /**
  * Dynamically specifies the summary (subtitle) and enabled status of a preference injected into
- * the list of location services displayed by the system settings app.
- *
- * The location services list is intended for use only by preferences that affect multiple apps from
- * the same developer. Location settings that apply only to one app should be shown within that app,
+ * the list of app settings displayed by the system settings app
+ * <p/>
+ * For use only by apps that are included in the system image, for preferences that affect multiple
+ * apps. Location settings that apply only to one app should be shown within that app,
  * rather than in the system settings.
- *
+ * <p/>
  * To add a preference to the list, a subclass of {@link SettingInjectorService} must be declared in
  * the manifest as so:
  *
@@ -69,21 +70,17 @@ import android.util.Log;
  *     to the user that it is not part of the system settings.</li>
  * </ul>
  *
- * To ensure a good user experience, the average time from the start of
- * {@link #startService(Intent)} to the end of {@link #onHandleIntent(Intent)} should be less
- * than 300 msec even if your app is not already in memory. This means that both your
- * {@link android.app.Application#onCreate()} and your {@link #getStatus()} must be fast. If
- * either is slow, it can delay the display of settings values for other apps as well.
- *
+ * To ensure a good user experience, your {@link android.app.Application#onCreate()},
+ * {@link #onGetSummary()}, and {@link #onGetEnabled()} methods must all be fast. If any are slow,
+ * it can delay the display of settings values for other apps as well. Note further that all are
+ * called on your app's UI thread.
+ * <p/>
  * For compactness, only one copy of a given setting should be injected. If each account has a
- * distinct value for the setting, then the {@link #getStatus()} value should represent a summary of
- * the state across all of the accounts and {@code settingsActivity} should display the value for
+ * distinct value for the setting, then the {@link #onGetSummary()} value should represent a summary
+ * of the state across all of the accounts and {@code settingsActivity} should display the value for
  * each account.
  */
-// TODO: is there a public list of supported locales?
-// TODO: is there a public list of guidelines for settings text?
-// TODO: would a bound service be better? E.g., we could just disconnect if a service took too long
-public abstract class SettingInjectorService extends IntentService {
+public abstract class SettingInjectorService extends Service {
 
     private static final String TAG = "SettingInjectorService";
 
@@ -138,100 +135,104 @@ public abstract class SettingInjectorService extends IntentService {
     /**
      * Constructor.
      *
-     * @param name used to name the worker thread and in log messages
+     * @param name used to identify your subclass in log messages
      */
     public SettingInjectorService(String name) {
-        super(name);
         mName = name;
     }
 
     @Override
-    final protected void onHandleIntent(Intent intent) {
-        // Get messenger first to ensure intent doesn't get messed with (in case we later decide
-        // to pass intent into getStatus())
-        Messenger messenger = intent.getParcelableExtra(MESSENGER_KEY);
+    public final IBinder onBind(Intent intent) {
+        return null;
+    }
 
-        Status status;
+    @Override
+    public final void onStart(Intent intent, int startId) {
+        super.onStart(intent, startId);
+    }
+
+    @Override
+    public final int onStartCommand(Intent intent, int flags, int startId) {
+        onHandleIntent(intent);
+        stopSelf(startId);
+        return START_NOT_STICKY;
+    }
+
+    private void onHandleIntent(Intent intent) {
+
+        String summary;
         try {
-            status = getStatus();
+            summary = onGetSummary();
         } catch (RuntimeException e) {
-            Log.e(TAG, mName + ": error getting status", e);
-            status = null;
+            // Exception. Send status anyway, so that settings injector can immediately start
+            // loading the status of the next setting.
+            sendStatus(intent, null, true);
+            throw e;
         }
 
-        // Send the status back to the caller via the messenger
+        boolean enabled;
+        try {
+            enabled = onGetEnabled();
+        } catch (RuntimeException e) {
+            // Exception. Send status anyway, so that settings injector can immediately start
+            // loading the status of the next setting.
+            sendStatus(intent, summary, true);
+            throw e;
+        }
+
+        sendStatus(intent, summary, enabled);
+    }
+
+    /**
+     * Send the summary and enabled values back to the caller via the messenger encoded in the
+     * intent.
+     */
+    private void sendStatus(Intent intent, String summary, boolean enabled) {
         Message message = Message.obtain();
         Bundle bundle = new Bundle();
-        if (status != null) {
-            bundle.putString(SUMMARY_KEY, status.summary);
-            bundle.putBoolean(ENABLED_KEY, status.enabled);
-        }
+        bundle.putString(SUMMARY_KEY, summary);
+        bundle.putBoolean(ENABLED_KEY, enabled);
         message.setData(bundle);
 
         if (Log.isLoggable(TAG, Log.DEBUG)) {
-            Log.d(TAG, mName + ": received " + intent + " and " + status
-                    + ", sending message: " + message);
+            Log.d(TAG, mName + ": received " + intent + ", summary=" + summary
+                    + ", enabled=" + enabled + ", sending message: " + message);
         }
+
+        Messenger messenger = intent.getParcelableExtra(MESSENGER_KEY);
         try {
             messenger.send(message);
         } catch (RemoteException e) {
-            Log.e(TAG, mName + ": sending status failed", e);
+            Log.e(TAG, mName + ": sending dynamic status failed", e);
         }
     }
 
     /**
-     * Reads the status of the setting. Should not perform unpredictably-long operations such as
-     * network access--see the running-time comments in the class-level javadoc.
+     * Returns the {@link android.preference.Preference#getSummary()} value (allowed to be null or
+     * empty). Should not perform unpredictably-long operations such as network access--see the
+     * running-time comments in the class-level javadoc.
      *
-     * @return the status of the setting value
+     * @return the {@link android.preference.Preference#getSummary()} value
      */
-    protected abstract Status getStatus();
+    protected abstract String onGetSummary();
 
     /**
-     * Dynamic characteristics of an injected location setting.
+     * Returns the {@link android.preference.Preference#isEnabled()} value. Should not perform
+     * unpredictably-long operations such as network access--see the running-time comments in the
+     * class-level javadoc.
+     * <p/>
+     * Note that to prevent churn in the settings list, there is no support for dynamically choosing
+     * to hide a setting. Instead you should have this method return false, which will disable the
+     * setting and its link to your setting activity. One reason why you might choose to do this is
+     * if {@link android.provider.Settings.Secure#LOCATION_MODE} is {@link
+     * android.provider.Settings.Secure#LOCATION_MODE_OFF}.
+     * <p/>
+     * It is possible that the user may click on the setting before this method returns, so your
+     * settings activity must handle the case where it is invoked even though the setting is
+     * disabled. The simplest approach may be to simply call {@link android.app.Activity#finish()}
+     * when disabled.
+     *
+     * @return the {@link android.preference.Preference#isEnabled()} value
      */
-    public static final class Status {
-
-        /**
-         * The {@link android.preference.Preference#getSummary()} value.
-         *
-         * @hide
-         */
-        public final String summary;
-
-        /**
-         * The {@link android.preference.Preference#isEnabled()} value.
-         *
-         * @hide
-         */
-        public final boolean enabled;
-
-        /**
-         * Constructor.
-         * <p/>
-         * Note that to prevent churn in the settings list, there is no support for dynamically
-         * choosing to hide a setting. Instead you should provide a {@code enabled} value of false,
-         * which will disable the setting and its link to your setting activity. One reason why you
-         * might choose to do this is if {@link android.provider.Settings.Secure#LOCATION_MODE}
-         * is {@link android.provider.Settings.Secure#LOCATION_MODE_OFF}.
-         *
-         * It is possible that the user may click on the setting before you return a false value for
-         * {@code enabled}, so your settings activity must handle the case where it is invoked even
-         * though the setting is disabled. The simplest approach may be to simply call
-         * {@link android.app.Activity#finish()} when disabled.
-         *
-         * @param summary the {@link android.preference.Preference#getSummary()} value (allowed to
-         *                be null or empty)
-         * @param enabled the {@link android.preference.Preference#isEnabled()} value
-         */
-        public Status(String summary, boolean enabled) {
-            this.summary = summary;
-            this.enabled = enabled;
-        }
-
-        @Override
-        public String toString() {
-            return "Status{summary='" + summary + '\'' + ", enabled=" + enabled + '}';
-        }
-    }
+    protected abstract boolean onGetEnabled();
 }
