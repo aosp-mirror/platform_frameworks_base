@@ -21,7 +21,7 @@
     android:paddingEnd="8dip"
     android:minHeight="?android:attr/listPreferredItemHeightSmall"
     android:orientation="vertical"
-    android:gravity="left|center_vertical">
+    android:gravity="start|center_vertical">
 
     <TextView
         android:id="@+id/title"
