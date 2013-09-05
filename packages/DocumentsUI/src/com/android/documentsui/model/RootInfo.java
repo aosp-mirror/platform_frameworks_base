@@ -42,6 +42,7 @@ public class RootInfo {
     public String summary;
     public String documentId;
     public long availableBytes;
+    public String[] mimeTypes;
 
     public static RootInfo fromRootsCursor(String authority, Cursor cursor) {
         final RootInfo root = new RootInfo();
@@ -55,11 +56,8 @@ public class RootInfo {
         root.documentId = getCursorString(cursor, Root.COLUMN_DOCUMENT_ID);
         root.availableBytes = getCursorLong(cursor, Root.COLUMN_AVAILABLE_BYTES);
 
-        // TODO: remove this hack
-        if ("com.google.android.apps.docs.storage".equals(root.authority)) {
-            root.flags &= ~(Root.FLAG_PROVIDES_AUDIO | Root.FLAG_PROVIDES_IMAGES
-                    | Root.FLAG_PROVIDES_VIDEO);
-        }
+        final String raw = getCursorString(cursor, Root.COLUMN_MIME_TYPES);
+        root.mimeTypes = (raw != null) ? raw.split("\n") : null;
 
         return root;
     }
