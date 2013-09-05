@@ -122,7 +122,7 @@ public interface NetworkStateTracker {
      * Get interesting information about this network link
      * @return a copy of link information, null if not available
      */
-    public LinkInfo getLinkInfo();
+    public LinkQualityInfo getLinkQualityInfo();
 
     /**
      * Return the system properties name associated with the tcp buffer sizes
