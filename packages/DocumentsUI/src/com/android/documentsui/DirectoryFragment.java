@@ -566,9 +566,9 @@ public class DirectoryFragment extends Fragment {
                     task.execute(uri);
                 }
             } else if (docIcon != 0) {
-                icon.setImageDrawable(DocumentInfo.loadIcon(context, docAuthority, docIcon));
+                icon.setImageDrawable(IconUtils.loadPackageIcon(context, docAuthority, docIcon));
             } else {
-                icon.setImageDrawable(RootsCache.resolveDocumentIcon(context, docMimeType));
+                icon.setImageDrawable(IconUtils.loadMimeIcon(context, docMimeType));
             }
 
             title.setText(docDisplayName);
