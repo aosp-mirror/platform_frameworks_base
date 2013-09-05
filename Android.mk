@@ -535,16 +535,23 @@ framework_docs_LOCAL_ADDITIONAL_DEPENDENCIES := \
     frameworks/base/docs/knowntags.txt
 
 sample_dir := development/samples
+new_sample_dir := developers/samples/android
 
 # the list here should match the list of samples included in the sdk samples package
 # (see development/build/sdk.atree)
 # remove htmlified samples for now -- samples are still available through the SDK
 web_docs_sample_code_flags := \
 		-hdf android.hasSamples 1 \
+		-samplecode $(new_sample_dir)/input/gestures/BasicGestureDetect/BasicGestureDetect \
+ 		            samples/BasicGestureDetect/ "Basic Gestures" \
 		-samplecode $(sample_dir)/AccelerometerPlay \
  		            samples/AccelerometerPlay "Accelerometer Play" \
 		-samplecode $(sample_dir)/ActionBarCompat \
- 		            samples/ActionBarCompat "Action Bar Compatibility"
+ 		            samples/ActionBarCompat "Action Bar Compatibility" \
+ 		-samplecode $(sample_dir)/BluetoothHDP \
+ 		            samples/BluetoothHDP "Bluetooth HDP Demo" \
+ 		-samplecode $(sample_dir)/BluetoothLeGatt \
+ 		            samples/BluetoothLeGatt "Bluetooth HDP Demo"
 #       -samplecode $(sample_dir)/AndroidBeamDemo \
 # 		            samples/AndroidBeamDemo "Android Beam Demo" \
 # 		-samplecode $(sample_dir)/ApiDemos \
@@ -557,8 +564,6 @@ web_docs_sample_code_flags := \
 # 		            samples/BackupRestore "Backup and Restore" \
 #		-samplecode $(sample_dir)/BluetoothChat \
 # 		            samples/BluetoothChat "Bluetooth Chat" \
-# 		-samplecode $(sample_dir)/BluetoothHDP \
-# 		            samples/BluetoothHDP "Bluetooth HDP Demo" \
 # 		-samplecode $(sample_dir)/BusinessCard \
 # 		            samples/BusinessCard "Business Card" \
 # 		-samplecode $(sample_dir)/ContactManager \
