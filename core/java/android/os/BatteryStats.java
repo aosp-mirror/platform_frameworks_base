@@ -2380,22 +2380,25 @@ public abstract class BatteryStats implements Parcelable {
     
     @SuppressWarnings("unused")
     public void dumpCheckinLocked(
-            PrintWriter pw, List<ApplicationInfo> apps, boolean isUnpluggedOnly) {
+            PrintWriter pw, List<ApplicationInfo> apps, boolean isUnpluggedOnly,
+            boolean includeHistory) {
         prepareForDumpLocked();
         
         long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
 
-        final HistoryItem rec = new HistoryItem();
-        if (startIteratingHistoryLocked()) {
-            HistoryPrinter hprinter = new HistoryPrinter();
-            while (getNextHistoryLocked(rec)) {
-                pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
-                pw.print(0); pw.print(',');
-                pw.print(HISTORY_DATA); pw.print(',');
-                hprinter.printNextItemCheckin(pw, rec, now);
-                pw.println();
+        if (includeHistory) {
+            final HistoryItem rec = new HistoryItem();
+            if (startIteratingHistoryLocked()) {
+                HistoryPrinter hprinter = new HistoryPrinter();
+                while (getNextHistoryLocked(rec)) {
+                    pw.print(BATTERY_STATS_CHECKIN_VERSION); pw.print(',');
+                    pw.print(0); pw.print(',');
+                    pw.print(HISTORY_DATA); pw.print(',');
+                    hprinter.printNextItemCheckin(pw, rec, now);
+                    pw.println();
+                }
+                finishIteratingHistoryLocked();
             }
-            finishIteratingHistoryLocked();
         }
 
         if (apps != null) {
