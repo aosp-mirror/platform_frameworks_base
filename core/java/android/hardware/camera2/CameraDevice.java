@@ -305,6 +305,9 @@ public interface CameraDevice extends AutoCloseable {
      * {@code null} to use the current thread's {@link android.os.Looper
      * looper}.
      *
+     * @return int A unique capture sequence ID used by
+     *             {@link CaptureListener#onCaptureSequenceCompleted}.
+     *
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera is currently busy or unconfigured,
@@ -317,7 +320,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
      */
-    public void capture(CaptureRequest request, CaptureListener listener, Handler handler)
+    public int capture(CaptureRequest request, CaptureListener listener, Handler handler)
             throws CameraAccessException;
 
     /**
@@ -346,6 +349,9 @@ public interface CameraDevice extends AutoCloseable {
      * {@code null} to use the current thread's {@link android.os.Looper
      * looper}.
      *
+     * @return int A unique capture sequence ID used by
+     *             {@link CaptureListener#onCaptureSequenceCompleted}.
+     *
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera is currently busy or unconfigured,
@@ -358,7 +364,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
      */
-    public void captureBurst(List<CaptureRequest> requests, CaptureListener listener,
+    public int captureBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException;
 
     /**
@@ -399,6 +405,9 @@ public interface CameraDevice extends AutoCloseable {
      * {@code null} to use the current thread's {@link android.os.Looper
      * looper}.
      *
+     * @return int A unique capture sequence ID used by
+     *             {@link CaptureListener#onCaptureSequenceCompleted}.
+     *
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera is currently busy or unconfigured,
@@ -413,7 +422,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see #stopRepeating
      * @see #flush
      */
-    public void setRepeatingRequest(CaptureRequest request, CaptureListener listener,
+    public int setRepeatingRequest(CaptureRequest request, CaptureListener listener,
             Handler handler) throws CameraAccessException;
 
     /**
@@ -454,6 +463,9 @@ public interface CameraDevice extends AutoCloseable {
      * {@code null} to use the current thread's {@link android.os.Looper
      * looper}.
      *
+     * @return int A unique capture sequence ID used by
+     *             {@link CaptureListener#onCaptureSequenceCompleted}.
+     *
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera is currently busy or unconfigured,
@@ -468,7 +480,7 @@ public interface CameraDevice extends AutoCloseable {
      * @see #stopRepeating
      * @see #flush
      */
-    public void setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener,
+    public int setRepeatingBurst(List<CaptureRequest> requests, CaptureListener listener,
             Handler handler) throws CameraAccessException;
 
     /**
@@ -601,7 +613,6 @@ public interface CameraDevice extends AutoCloseable {
      * @see #captureBurst
      * @see #setRepeatingRequest
      * @see #setRepeatingBurst
-     *
      */
     public static abstract class CaptureListener {
 
@@ -672,8 +683,13 @@ public interface CameraDevice extends AutoCloseable {
          *
          * <p>The default implementation of this method does nothing.</p>
          *
-         * @param camera The CameraDevice sending the callback.
-         * @param request The request that was given to the CameraDevice
+         * @param camera
+         *            The CameraDevice sending the callback.
+         * @param request
+         *            The request that was given to the CameraDevice
+         * @param failure
+         *            The output failure from the capture, including the failure reason
+         *            and the frame number.
          *
          * @see #capture
          * @see #captureBurst
@@ -681,7 +697,30 @@ public interface CameraDevice extends AutoCloseable {
          * @see #setRepeatingBurst
          */
         public void onCaptureFailed(CameraDevice camera,
-                CaptureRequest request) {
+                CaptureRequest request, CaptureFailure failure) {
+            // default empty implementation
+        }
+
+        /**
+         * This method is called independently of the others in CaptureListener,
+         * when a capture sequence finishes and all {@link CaptureResult}
+         * or {@link CaptureFailure} for it have been returned via this listener.
+         *
+         * @param camera
+         *            The CameraDevice sending the callback.
+         * @param sequenceId
+         *            A sequence ID returned by the {@link #capture} family of functions.
+         * @param frameNumber
+         *            The last frame number (returned by {@link CaptureResult#getFrameNumber}
+         *            or {@link CaptureFailure#getFrameNumber}) in the capture sequence.
+         *
+         * @see CaptureResult#getFrameNumber()
+         * @see CaptureFailure#getFrameNumber()
+         * @see CaptureResult#getSequenceId()
+         * @see CaptureFailure#getSequenceId()
+         */
+        public void onCaptureSequenceCompleted(CameraDevice camera,
+                int sequenceId, int frameNumber) {
             // default empty implementation
         }
     }
