@@ -157,9 +157,8 @@ public class PhoneStatusBarPolicy {
 
         // Sync state
         mService.setIcon("sync_active", R.drawable.stat_sys_sync, 0, null);
-        mService.setIcon("sync_failing", R.drawable.stat_sys_sync_error, 0, null);
         mService.setIconVisibility("sync_active", false);
-        mService.setIconVisibility("sync_failing", false);
+        // "sync_failing" is obsolete: b/1297963
 
         // volume
         mService.setIcon("volume", R.drawable.stat_sys_ringer_silent, 0, null);
@@ -175,10 +174,7 @@ public class PhoneStatusBarPolicy {
     private final void updateSyncState(Intent intent) {
         if (!SHOW_SYNC_ICON) return;
         boolean isActive = intent.getBooleanExtra("active", false);
-        boolean isFailing = intent.getBooleanExtra("failing", false);
         mService.setIconVisibility("sync_active", isActive);
-        // Don't display sync failing icon: BUG 1297963 Set sync error timeout to "never"
-        //mService.setIconVisibility("sync_failing", isFailing && !isActive);
     }
 
     private final void updateSimState(Intent intent) {
