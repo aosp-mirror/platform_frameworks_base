@@ -26,8 +26,8 @@ import android.util.Log;
  * service. It provides APIs for observing the print job state and
  * performing operations on the print job.
  * <p>
- * <strong>Note: </strong> All methods of this class must be executed on the main
- * application thread.
+ * <strong>Note: </strong> All methods of this class must be invoked on
+ * the main application thread.
  * </p>
  */
 public final class PrintJob {

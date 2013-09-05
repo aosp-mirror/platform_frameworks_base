@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * This class encapsulates the interaction between a print service and the
  * system during printer discovery. During printer discovery you are responsible
- * for adding discovered printers, removing already added printers that
+ * for adding discovered printers, removing previously added printers that
  * disappeared, and updating already added printers.
  * <p>
  * During the lifetime of this session you may be asked to start and stop
