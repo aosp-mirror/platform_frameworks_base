@@ -21,7 +21,6 @@ import android.os.Parcelable;
 import android.print.PrintAttributes.Margins;
 import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Resolution;
-import android.print.PrintAttributes.Tray;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,26 +39,16 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
 
     private static final int PROPERTY_MEDIA_SIZE = 0;
     private static final int PROPERTY_RESOLUTION = 1;
-    private static final int PROPERTY_INPUT_TRAY = 2;
-    private static final int PROPERTY_OUTPUT_TRAY = 3;
-    private static final int PROPERTY_DUPLEX_MODE = 4;
-    private static final int PROPERTY_COLOR_MODE = 5;
-    private static final int PROPERTY_FITTING_MODE = 6;
-    private static final int PROPERTY_ORIENTATION = 7;
-    private static final int PROPERTY_COUNT = 8;
+    private static final int PROPERTY_COLOR_MODE = 2;
+    private static final int PROPERTY_COUNT = 3;
 
     private static final Margins DEFAULT_MARGINS = new Margins(0,  0,  0,  0);
 
     private Margins mMinMargins = DEFAULT_MARGINS;
     private List<MediaSize> mMediaSizes;
     private List<Resolution> mResolutions;
-    private List<Tray> mInputTrays;
-    private List<Tray> mOutputTrays;
 
-    private int mDuplexModes;
     private int mColorModes;
-    private int mFittingModes;
-    private int mOrientations;
 
     private final int[] mDefaults = new int[PROPERTY_COUNT];
     private Margins mDefaultMargins = DEFAULT_MARGINS;
@@ -106,32 +95,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
             mResolutions = null;
         }
 
-        if (other.mInputTrays != null) {
-            if (mInputTrays != null) {
-                mInputTrays.clear();
-                mInputTrays.addAll(other.mInputTrays);
-            } else {
-                mInputTrays = new ArrayList<Tray>(other.mInputTrays);
-            }
-        } else {
-            mInputTrays = null;
-        }
-
-        if (other.mOutputTrays != null) {
-            if (mOutputTrays != null) {
-                mOutputTrays.clear();
-                mOutputTrays.addAll(other.mOutputTrays);
-            } else {
-                mOutputTrays = new ArrayList<Tray>(other.mOutputTrays);
-            }
-        } else {
-            mOutputTrays = null;
-        }
-
-        mDuplexModes = other.mDuplexModes;
         mColorModes = other.mColorModes;
-        mFittingModes = other.mFittingModes;
-        mOrientations = other.mOrientations;
 
         final int defaultCount = other.mDefaults.length;
         for (int i = 0; i < defaultCount; i++) {
@@ -169,37 +133,6 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
     }
 
     /**
-     * Gets the available input trays.
-     *
-     * @return The input trays.
-     */
-    public List<Tray> getInputTrays() {
-        return mInputTrays;
-    }
-
-    /**
-     * Gets the available output trays.
-     *
-     * @return The output trays.
-     */
-    public List<Tray> getOutputTrays() {
-        return mOutputTrays;
-    }
-
-    /**
-     * Gets the supported duplex modes.
-     *
-     * @return The duplex modes.
-     *
-     * @see PrintAttributes#DUPLEX_MODE_NONE
-     * @see PrintAttributes#DUPLEX_MODE_LONG_EDGE
-     * @see PrintAttributes#DUPLEX_MODE_SHORT_EDGE
-     */
-    public int getDuplexModes() {
-        return mDuplexModes;
-    }
-
-    /**
      * Gets the supported color modes.
      *
      * @return The color modes.
@@ -209,30 +142,6 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
      */
     public int getColorModes() {
         return mColorModes;
-    }
-
-    /**
-     * Gets the supported fitting modes.
-     *
-     * @return The fitting modes.
-     *
-     * @see PrintAttributes#FITTING_MODE_NONE
-     * @see PrintAttributes#FITTING_MODE_FIT_TO_PAGE
-     */
-    public int getFittingModes() {
-        return mFittingModes;
-    }
-
-    /**
-     * Gets the supported orientations.
-     *
-     * @return The orientations.
-     *
-     * @see PrintAttributes#ORIENTATION_PORTRAIT
-     * @see PrintAttributes#ORIENTATION_LANDSCAPE
-     */
-    public int getOrientations() {
-        return mOrientations;
     }
 
     /**
@@ -255,34 +164,9 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
             outAttributes.setResolution(mResolutions.get(resolutionIndex));
         }
 
-        final int inputTrayIndex = mDefaults[PROPERTY_INPUT_TRAY];
-        if (inputTrayIndex >= 0) {
-            outAttributes.setInputTray(mInputTrays.get(inputTrayIndex));
-        }
-
-        final int outputTrayIndex = mDefaults[PROPERTY_OUTPUT_TRAY];
-        if (outputTrayIndex >= 0) {
-            outAttributes.setOutputTray(mOutputTrays.get(outputTrayIndex));
-        }
-
-        final int duplexMode = mDefaults[PROPERTY_DUPLEX_MODE];
-        if (duplexMode > 0) {
-            outAttributes.setDuplexMode(duplexMode);
-        }
-
         final int colorMode = mDefaults[PROPERTY_COLOR_MODE];
         if (colorMode > 0) {
             outAttributes.setColorMode(colorMode);
-        }
-
-        final int fittingMode = mDefaults[PROPERTY_FITTING_MODE];
-        if (fittingMode > 0) {
-            outAttributes.setFittingMode(fittingMode);
-        }
-
-        final int orientation = mDefaults[PROPERTY_ORIENTATION];
-        if (orientation > 0) {
-            outAttributes.setOrientation(orientation);
         }
     }
 
@@ -290,13 +174,8 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         mMinMargins = readMargins(parcel);
         readMediaSizes(parcel);
         readResolutions(parcel);
-        mInputTrays = readInputTrays(parcel);
-        mOutputTrays = readOutputTrays(parcel);
 
         mColorModes = parcel.readInt();
-        mDuplexModes = parcel.readInt();
-        mFittingModes = parcel.readInt();
-        mOrientations = parcel.readInt();
 
         readDefaults(parcel);
         mDefaultMargins = readMargins(parcel);
@@ -312,13 +191,8 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         writeMargins(mMinMargins, parcel);
         writeMediaSizes(parcel);
         writeResolutions(parcel);
-        writeInputTrays(parcel);
-        writeOutputTrays(parcel);
 
         parcel.writeInt(mColorModes);
-        parcel.writeInt(mDuplexModes);
-        parcel.writeInt(mFittingModes);
-        parcel.writeInt(mOrientations);
 
         writeDefaults(parcel);
         writeMargins(mDefaultMargins, parcel);
@@ -331,12 +205,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         result = prime * result + ((mMinMargins == null) ? 0 : mMinMargins.hashCode());
         result = prime * result + ((mMediaSizes == null) ? 0 : mMediaSizes.hashCode());
         result = prime * result + ((mResolutions == null) ? 0 : mResolutions.hashCode());
-        result = prime * result + ((mInputTrays == null) ? 0 : mInputTrays.hashCode());
-        result = prime * result + ((mOutputTrays == null) ? 0 : mOutputTrays.hashCode());
         result = prime * result + mColorModes;
-        result = prime * result + mDuplexModes;
-        result = prime * result + mFittingModes;
-        result = prime * result + mOrientations;
         result = prime * result + Arrays.hashCode(mDefaults);
         result = prime * result + ((mDefaultMargins == null) ? 0 : mDefaultMargins.hashCode());
         return result;
@@ -375,30 +244,7 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         } else if (!mResolutions.equals(other.mResolutions)) {
             return false;
         }
-        if (mInputTrays == null) {
-            if (other.mInputTrays != null) {
-                return false;
-            }
-        } else if (!mInputTrays.equals(other.mInputTrays)) {
-            return false;
-        }
-        if (mOutputTrays == null) {
-            if (other.mOutputTrays != null) {
-                return false;
-            }
-        } else if (!mOutputTrays.equals(other.mOutputTrays)) {
-            return false;
-        }
-        if (mDuplexModes != other.mDuplexModes) {
-            return false;
-        }
         if (mColorModes != other.mColorModes) {
-            return false;
-        }
-        if (mFittingModes != other.mFittingModes) {
-            return false;
-        }
-        if (mOrientations != other.mOrientations) {
             return false;
         }
         if (!Arrays.equals(mDefaults, other.mDefaults)) {
@@ -421,29 +267,8 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         builder.append("minMargins=").append(mMinMargins);
         builder.append(", mediaSizes=").append(mMediaSizes);
         builder.append(", resolutions=").append(mResolutions);
-        builder.append(", inputTrays=").append(mInputTrays);
-        builder.append(", outputTrays=").append(mOutputTrays);
-        builder.append(", duplexModes=").append(duplexModesToString());
         builder.append(", colorModes=").append(colorModesToString());
-        builder.append(", fittingModes=").append(fittingModesToString());
-        builder.append(", orientations=").append(orientationsToString());
         builder.append("\"}");
-        return builder.toString();
-    }
-
-    private String duplexModesToString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append('[');
-        int duplexModes = mDuplexModes;
-        while (duplexModes != 0) {
-            final int duplexMode = 1 << Integer.numberOfTrailingZeros(duplexModes);
-            duplexModes &= ~duplexMode;
-            if (builder.length() > 0) {
-                builder.append(", ");
-            }
-            builder.append(PrintAttributes.duplexModeToString(duplexMode));
-        }
-        builder.append(']');
         return builder.toString();
     }
 
@@ -458,38 +283,6 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
                 builder.append(", ");
             }
             builder.append(PrintAttributes.colorModeToString(colorMode));
-        }
-        builder.append(']');
-        return builder.toString();
-    }
-
-    private String fittingModesToString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append('[');
-        int fittingModes = mFittingModes;
-        while (fittingModes != 0) {
-            final int fittingMode = 1 << Integer.numberOfTrailingZeros(fittingModes);
-            fittingModes &= ~fittingMode;
-            if (builder.length() > 0) {
-                builder.append(", ");
-            }
-            builder.append(PrintAttributes.fittingModeToString(fittingMode));
-        }
-        builder.append(']');
-        return builder.toString();
-    }
-
-    private String orientationsToString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append('[');
-        int orientations = mOrientations;
-        while (orientations != 0) {
-            final int orientation = 1 << Integer.numberOfTrailingZeros(orientations);
-            orientations &= ~orientation;
-            if (builder.length() > 0) {
-                builder.append(", ");
-            }
-            builder.append(PrintAttributes.orientationToString(orientation));
         }
         builder.append(']');
         return builder.toString();
@@ -550,54 +343,6 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
 
     private Margins readMargins(Parcel parcel) {
         return (parcel.readInt() == 1) ? Margins.createFromParcel(parcel) : null;
-    }
-
-    private void writeInputTrays(Parcel parcel) {
-        if (mInputTrays == null) {
-            parcel.writeInt(0);
-            return;
-        }
-        final int inputTrayCount = mInputTrays.size();
-        parcel.writeInt(inputTrayCount);
-        for (int i = 0; i < inputTrayCount; i++) {
-            mInputTrays.get(i).writeToParcel(parcel);
-        }
-    }
-
-    private List<Tray> readInputTrays(Parcel parcel) {
-        final int inputTrayCount = parcel.readInt();
-        if (inputTrayCount <= 0) {
-            return null;
-        }
-        List<Tray> inputTrays = new ArrayList<Tray>(inputTrayCount);
-        for (int i = 0; i < inputTrayCount; i++) {
-            inputTrays.add(Tray.createFromParcel(parcel));
-        }
-        return inputTrays;
-    }
-
-    private void writeOutputTrays(Parcel parcel) {
-        if (mOutputTrays == null) {
-            parcel.writeInt(0);
-            return;
-        }
-        final int outputTrayCount = mOutputTrays.size();
-        parcel.writeInt(outputTrayCount);
-        for (int i = 0; i < outputTrayCount; i++) {
-            mOutputTrays.get(i).writeToParcel(parcel);
-        }
-    }
-
-    private List<Tray> readOutputTrays(Parcel parcel) {
-        final int outputTrayCount = parcel.readInt();
-        if (outputTrayCount <= 0) {
-            return null;
-        }
-        List<Tray> outputTrays = new ArrayList<Tray>(outputTrayCount);
-        for (int i = 0; i < outputTrayCount; i++) {
-            outputTrays.add(Tray.createFromParcel(parcel));
-        }
-        return outputTrays;
     }
 
     private void readDefaults(Parcel parcel) {
@@ -722,62 +467,6 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         }
 
         /**
-         * Adds an input tray.
-         * <p>
-         * <strong>Required:</strong> No
-         * </p>
-         *
-         * @param inputTray A tray.
-         * @param isDefault Whether this is the default.
-         * @return This builder.
-         *
-         * @throws IllegalArgumentException If set as default and there
-         *     is already a default.
-         *
-         * @see PrintAttributes.Tray
-         */
-        public Builder addInputTray(Tray inputTray, boolean isDefault) {
-            if (mPrototype.mInputTrays == null) {
-                mPrototype.mInputTrays = new ArrayList<Tray>();
-            }
-            final int insertionIndex = mPrototype.mInputTrays.size();
-            mPrototype.mInputTrays.add(inputTray);
-            if (isDefault) {
-                throwIfDefaultAlreadySpecified(PROPERTY_INPUT_TRAY);
-                mPrototype.mDefaults[PROPERTY_INPUT_TRAY] = insertionIndex;
-            }
-            return this;
-        }
-
-        /**
-         * Adds an output tray.
-         * <p>
-         * <strong>Required:</strong> No
-         * </p>
-         *
-         * @param outputTray A tray.
-         * @param isDefault Whether this is the default.
-         * @return This builder.
-         *
-         * @throws IllegalArgumentException If set as default and there
-         *     is already a default.
-         *
-         * @see PrintAttributes.Tray
-         */
-        public Builder addOutputTray(Tray outputTray, boolean isDefault) {
-            if (mPrototype.mOutputTrays == null) {
-                mPrototype.mOutputTrays = new ArrayList<Tray>();
-            }
-            final int insertionIndex = mPrototype.mOutputTrays.size();
-            mPrototype.mOutputTrays.add(outputTray);
-            if (isDefault) {
-                throwIfDefaultAlreadySpecified(PROPERTY_OUTPUT_TRAY);
-                mPrototype.mDefaults[PROPERTY_OUTPUT_TRAY] = insertionIndex;
-            }
-            return this;
-        }
-
-        /**
          * Sets the color modes.
          * <p>
          * <strong>Required:</strong> Yes
@@ -810,103 +499,6 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
         }
 
         /**
-         * Set the duplex modes.
-         * <p>
-         * <strong>Required:</strong> No
-         * </p>
-         *
-         * @param duplexModes The duplex mode bit mask.
-         * @param defaultDuplexMode The default duplex mode.
-         * @return This builder.
-         *
-         * @throws IllegalArgumentException If duplex modes contains an invalid
-         *         mode bit or if the default duplex mode is invalid.
-         *
-         * @see PrintAttributes#DUPLEX_MODE_NONE
-         * @see PrintAttributes#DUPLEX_MODE_LONG_EDGE
-         * @see PrintAttributes#DUPLEX_MODE_SHORT_EDGE
-         */
-        public Builder setDuplexModes(int duplexModes, int defaultDuplexMode) {
-            int currentModes = duplexModes;
-            while (currentModes > 0) {
-                final int currentMode = (1 << Integer.numberOfTrailingZeros(currentModes));
-                currentModes &= ~currentMode;
-                PrintAttributes.enforceValidDuplexMode(currentMode);
-            }
-            if ((duplexModes & defaultDuplexMode) == 0) {
-                throw new IllegalArgumentException("Default duplex mode not in duplex modes.");
-            }
-            PrintAttributes.enforceValidDuplexMode(defaultDuplexMode);
-            mPrototype.mDuplexModes = duplexModes;
-            mPrototype.mDefaults[PROPERTY_DUPLEX_MODE] = defaultDuplexMode;
-            return this;
-        }
-
-        /**
-         * Sets the fitting modes.
-         * <p>
-         * <strong>Required:</strong> No
-         * </p>
-         *
-         * @param fittingModes The fitting mode bit mask.
-         * @param defaultFittingMode The default fitting mode.
-         * @return This builder.
-         *
-         * @throws IllegalArgumentException If fitting modes contains an invalid
-         *         mode bit or if the default fitting mode is invalid.
-         *
-         * @see PrintAttributes#FITTING_MODE_NONE
-         * @see PrintAttributes#FITTING_MODE_FIT_TO_PAGE
-         */
-        public Builder setFittingModes(int fittingModes, int defaultFittingMode) {
-            int currentModes = fittingModes;
-            while (currentModes > 0) {
-                final int currentMode = (1 << Integer.numberOfTrailingZeros(currentModes));
-                currentModes &= ~currentMode;
-                PrintAttributes.enforceValidFittingMode(currentMode);
-            }
-            if ((fittingModes & defaultFittingMode) == 0) {
-                throw new IllegalArgumentException("Default fitting mode not in fiting modes.");
-            }
-            PrintAttributes.enforceValidFittingMode(defaultFittingMode);
-            mPrototype.mFittingModes = fittingModes;
-            mPrototype.mDefaults[PROPERTY_FITTING_MODE] = defaultFittingMode;
-            return this;
-        }
-
-        /**
-         * Sets the orientations.
-         * <p>
-         * <strong>Required:</strong> Yes
-         * </p>
-         *
-         * @param orientations The orientation bit mask.
-         * @param defaultOrientation The default orientation.
-         * @return This builder.
-         *
-         * @throws IllegalArgumentException If orientations contains an invalid
-         *         mode bit or if the default orientation is invalid.
-         *
-         * @see PrintAttributes#ORIENTATION_PORTRAIT
-         * @see PrintAttributes#ORIENTATION_LANDSCAPE
-         */
-        public Builder setOrientations(int orientations, int defaultOrientation) {
-            int currentOrientaions = orientations;
-            while (currentOrientaions > 0) {
-                final int currentOrnt = (1 << Integer.numberOfTrailingZeros(currentOrientaions));
-                currentOrientaions &= ~currentOrnt;
-                PrintAttributes.enforceValidOrientation(currentOrnt);
-            }
-            if ((orientations & defaultOrientation) == 0) {
-                throw new IllegalArgumentException("Default orientation not in orientations.");
-            }
-            PrintAttributes.enforceValidOrientation(defaultOrientation);
-            mPrototype.mOrientations = orientations;
-            mPrototype.mDefaults[PROPERTY_ORIENTATION] = defaultOrientation;
-            return this;
-        }
-
-        /**
          * Crates a new {@link PrinterCapabilitiesInfo} enforcing that all
          * required properties have need specified. See individual methods
          * in this class for reference about required attributes.
@@ -933,12 +525,6 @@ public final class PrinterCapabilitiesInfo implements Parcelable {
             }
             if (mPrototype.mDefaults[PROPERTY_COLOR_MODE] == DEFAULT_UNDEFINED) {
                 throw new IllegalStateException("No default color mode specified.");
-            }
-            if (mPrototype.mOrientations == 0) {
-                throw new IllegalStateException("No oprientation specified.");
-            }
-            if (mPrototype.mDefaults[PROPERTY_ORIENTATION] == DEFAULT_UNDEFINED) {
-                throw new IllegalStateException("No default orientation specified.");
             }
             if (mPrototype.mMinMargins == null) {
                 mPrototype.mMinMargins  = new Margins(0, 0, 0, 0);
