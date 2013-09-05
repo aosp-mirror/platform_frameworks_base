@@ -19052,7 +19052,6 @@ package android.print {
   }
 
   public static final class PrintAttributes.MediaSize {
-    ctor public PrintAttributes.MediaSize(java.lang.String, java.lang.String, int, int, int);
     ctor public PrintAttributes.MediaSize(java.lang.String, java.lang.String, int, int);
     method public android.print.PrintAttributes.MediaSize asLandscape();
     method public android.print.PrintAttributes.MediaSize asPortrait();
@@ -19103,7 +19102,6 @@ package android.print {
   }
 
   public static final class PrintAttributes.Resolution {
-    ctor public PrintAttributes.Resolution(java.lang.String, java.lang.String, int, int, int);
     ctor public PrintAttributes.Resolution(java.lang.String, java.lang.String, int, int);
     method public int getHorizontalDpi();
     method public java.lang.String getId();
