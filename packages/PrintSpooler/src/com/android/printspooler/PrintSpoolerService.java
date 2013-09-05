@@ -41,6 +41,7 @@ import android.print.PrintJobInfo;
 import android.print.PrintManager;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
+import android.text.TextUtils;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
@@ -814,10 +815,9 @@ public final class PrintSpoolerService extends Service {
                                     mediaSize.getWidthMils()));
                             serializer.attribute(null, ATTR_HEIGHT_MILS, String.valueOf(
                                     mediaSize.getHeightMils()));
-                            // Store only the platform localized versions of the label
-                            // since the resource ids for a print service are not stable 
-                            // across application versions.
-                            if ("android".equals(mediaSize.mPackageName)
+                            // We prefer to store only the package name and
+                            // resource id and fallback to the label.
+                            if (!TextUtils.isEmpty(mediaSize.mPackageName)
                                     && mediaSize.mLabelResId > 0) {
                                 serializer.attribute(null, ATTR_PACKAGE_NAME,
                                         mediaSize.mPackageName);
@@ -838,10 +838,9 @@ public final class PrintSpoolerService extends Service {
                                     resolution.getHorizontalDpi()));
                             serializer.attribute(null, ATTR_VERTICAL_DPI, String.valueOf(
                                     resolution.getVerticalDpi()));
-                            // Store only the platform localized versions of the label
-                            // since the resource ids for a print service are not stable 
-                            // across application versions.
-                            if ("android".equals(resolution.mPackageName)
+                            // We prefer to store only the package name and
+                            // resource id and fallback to the label.
+                            if (!TextUtils.isEmpty(mediaSize.mPackageName)
                                     && resolution.mLabelResId > 0) {
                                 serializer.attribute(null, ATTR_PACKAGE_NAME,
                                         resolution.mPackageName);
