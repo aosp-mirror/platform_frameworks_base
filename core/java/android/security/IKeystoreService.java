@@ -444,12 +444,13 @@ public interface IKeystoreService extends IInterface {
             }
 
             @Override
-            public int is_hardware_backed() throws RemoteException {
+            public int is_hardware_backed(String keyType) throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
                 int _result;
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
+                    _data.writeString(keyType);
                     mRemote.transact(Stub.TRANSACTION_is_hardware_backed, _data, _reply, 0);
                     _reply.readException();
                     _result = _reply.readInt();
@@ -593,7 +594,7 @@ public interface IKeystoreService extends IInterface {
     public int duplicate(String srcKey, int srcUid, String destKey, int destUid)
             throws RemoteException;
 
-    public int is_hardware_backed() throws RemoteException;
+    public int is_hardware_backed(String string) throws RemoteException;
 
     public int clear_uid(long uid) throws RemoteException;
 }
