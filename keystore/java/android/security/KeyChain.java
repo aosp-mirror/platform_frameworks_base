@@ -34,6 +34,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -364,7 +365,8 @@ public final class KeyChain {
      * "RSA").
      */
     public static boolean isKeyAlgorithmSupported(String algorithm) {
-        return "RSA".equals(algorithm);
+        final String algUpper = algorithm.toUpperCase(Locale.US);
+        return "DSA".equals(algUpper) || "EC".equals(algUpper) || "RSA".equals(algUpper);
     }
 
     /**
@@ -379,7 +381,7 @@ public final class KeyChain {
             return false;
         }
 
-        return KeyStore.getInstance().isHardwareBacked();
+        return KeyStore.getInstance().isHardwareBacked(algorithm);
     }
 
     private static X509Certificate toCertificate(byte[] bytes) {

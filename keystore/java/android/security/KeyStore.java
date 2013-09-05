@@ -22,6 +22,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
+import java.util.Locale;
+
 /**
  * @hide This should not be made public in its present form because it
  * assumes that private and secret key bytes are available and would
@@ -306,9 +308,14 @@ public class KeyStore {
         }
     }
 
+    // TODO remove this when it's removed from Settings
     public boolean isHardwareBacked() {
+        return isHardwareBacked("RSA");
+    }
+
+    public boolean isHardwareBacked(String keyType) {
         try {
-            return mBinder.is_hardware_backed() == NO_ERROR;
+            return mBinder.is_hardware_backed(keyType.toUpperCase(Locale.US)) == NO_ERROR;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return false;
