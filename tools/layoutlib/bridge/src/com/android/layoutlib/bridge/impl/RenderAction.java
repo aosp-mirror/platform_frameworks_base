@@ -121,7 +121,8 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
 
         // build the context
         mContext = new BridgeContext(mParams.getProjectKey(), metrics, resources,
-                mParams.getProjectCallback(), getConfiguration(), mParams.getTargetSdkVersion());
+                mParams.getProjectCallback(), getConfiguration(), mParams.getTargetSdkVersion(),
+                mParams.isRtlSupported());
 
         setUp();
 
