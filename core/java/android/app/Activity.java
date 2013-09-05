@@ -4870,7 +4870,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * @hide Bit indicating that this activity is "immersive" and should not be
+     * Bit indicating that this activity is "immersive" and should not be
      * interrupted by notifications if possible.
      *
      * This value is initially set by the manifest property
@@ -4953,7 +4953,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * @hide Adjust the current immersive mode setting.
+     * Adjust the current immersive mode setting.
      *
      * Note that changing this value will have no effect on the activity's
      * {@link android.content.pm.ActivityInfo} structure; that is, if
