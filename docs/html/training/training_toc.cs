@@ -993,6 +993,75 @@ include the action bar on devices running Android 2.1 or higher."
 
   <li class="nav-section">
     <div class="nav-section-header">
+      <a href="<?cs var:toroot ?>training/best-background.html">
+      <span class="small">Best Practices for</span><br/>
+              Background Jobs
+      </a>
+    </div>
+    <ul>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/run-background-service/index.html"
+             description=
+             "How to improve UI performance and responsiveness by sending work to a
+             Service running in the background"
+            >Running in a Background Service</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/run-background-service/create-service.html">
+            Creating a Background Service
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/run-background-service/send-request.html">
+            Sending Work Requests to the Background Service
+          </a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/run-background-service/report-status.html">
+            Reporting Work Status
+          </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/load-data-background/index.html"
+             description="How to use CursorLoader to query data without
+             affecting UI responsiveness."
+            >Loading Data in the Background</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/load-data-background/setup-loader.html">
+            Running a Query with a CursorLoader</a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/load-data-background/handle-results.html">
+            Handling the Results</a>
+          </li>
+        </ul>
+      </li>
+
+       <li class="nav-section">
+        <div class="nav-section-header">
+          <a href="<?cs var:toroot ?>training/scheduling/index.html"
+             description="How to use repeating alarms and wake locks
+             to run background jobs."
+            >Managing Device Awake State</a>
+        </div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>training/scheduling/wakelock.html">
+            Keeping the Device Awake</a>
+          </li>
+          <li><a href="<?cs var:toroot ?>training/scheduling/alarms.html">
+            Scheduling Repeating Alarms</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li> <!-- end of Background Jobs -->
+
+  <li class="nav-section">
+    <div class="nav-section-header">
       <a href="<?cs var:toroot ?>training/best-performance.html">
       <span class="small">Best Practices for</span><br/>
               Performance
@@ -1032,47 +1101,6 @@ include the action bar on devices running Android 2.1 or higher."
           <li><a href="<?cs var:toroot ?>training/improving-layouts/smooth-scrolling.html">
             Making ListView Scrolling Smooth
           </a>
-          </li>
-        </ul>
-      </li>
-
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/run-background-service/index.html"
-             description=
-             "How to improve UI performance and responsiveness by sending work to a
-             Service running in the background"
-            >Running in a Background Service</a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/run-background-service/create-service.html">
-            Creating a Background Service
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/run-background-service/send-request.html">
-            Sending Work Requests to the Background Service
-          </a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/run-background-service/report-status.html">
-            Reporting Work Status
-          </a>
-          </li>
-        </ul>
-      </li>
-
-      <li class="nav-section">
-        <div class="nav-section-header">
-          <a href="<?cs var:toroot ?>training/load-data-background/index.html"
-             description="How to use CursorLoader to query data without
-             affecting UI responsiveness."
-            >Loading Data in the Background</a>
-        </div>
-        <ul>
-          <li><a href="<?cs var:toroot ?>training/load-data-background/setup-loader.html">
-            Running a Query with a CursorLoader</a>
-          </li>
-          <li><a href="<?cs var:toroot ?>training/load-data-background/handle-results.html">
-            Handling the Results</a>
           </li>
         </ul>
       </li>
