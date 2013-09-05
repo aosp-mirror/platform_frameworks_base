@@ -55,7 +55,7 @@ import java.util.List;
  * The APIs defined in this class are designed to enable doing part or all
  * of the work on an arbitrary thread. For example, if the printed content
  * does not depend on the UI state, i.e. on what is shown on the screen, then
- * you can off load the entire work on a dedicated thread, thus making your
+ * you can offload the entire work on a dedicated thread, thus making your
  * application interactive while the print work is being performed.
  * </p>
  * <p>
@@ -99,6 +99,7 @@ public abstract class PrintDocumentAdapter {
      * the last argument <code>true</code> or <code>false</code> depending on
      * whether the layout changed the content or not, respectively; and {@link
      * LayoutResultCallback#onLayoutFailed(CharSequence)}, if an error occurred.
+     * Note that you must call one of the methods of the given callback.
      * </p>
      * <p>
      * When doing a layout you may satisfy some of the constraints in the print
@@ -147,13 +148,14 @@ public abstract class PrintDocumentAdapter {
 
     /**
      * Called when specific pages of the content should be written in the
-     * from of a PDF file to the given file descriptor. This method is invoked
+     * form of a PDF file to the given file descriptor. This method is invoked
      * on the main thread.
      *<p>
      * After you are done writing, you should close the file descriptor and
-     * invoke {@link WriteResultCallback #onWriteFinished(List)}, if writing
+     * invoke {@link WriteResultCallback #onWriteFinished(PageRange[]), if writing
      * completed successfully; or {@link WriteResultCallback#onWriteFailed(
-     * CharSequence)}, if an error occurred.
+     * CharSequence)}, if an error occurred. Note that you must call one of
+     * the methods of the given callback.
      * </p>
      * <p>
      * <strong>Note:</strong> If the printed content is large, it is a good
