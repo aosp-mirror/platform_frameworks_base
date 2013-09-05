@@ -183,13 +183,8 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
         // Need a valid handler, or current thread needs to have a looper, if
         // listener is valid
-        if (handler == null && listener != null) {
-            Looper looper = Looper.myLooper();
-            if (looper == null) {
-                throw new IllegalArgumentException(
-                        "No handler given, and current thread has no looper!");
-            }
-            handler = new Handler(looper);
+        if (listener != null) {
+            handler = checkHandler(handler);
         }
 
         synchronized (mLock) {
@@ -271,12 +266,16 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 // impossible
                 return;
             }
-      }
+        }
     }
 
     @Override
     public void setDeviceListener(StateListener listener, Handler handler) {
         synchronized (mLock) {
+            if (listener != null) {
+                handler = checkHandler(handler);
+            }
+
             mDeviceListener = listener;
             mDeviceHandler = handler;
         }
@@ -365,21 +364,113 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
 
     }
 
-    // TODO: unit tests
     public class CameraDeviceCallbacks extends ICameraDeviceCallbacks.Stub {
+
+        //
+        // Constants below need to be kept up-to-date with
+        // frameworks/av/include/camera/camera2/ICameraDeviceCallbacks.h
+        //
+
+        //
+        // Error codes for onCameraError
+        //
+
+        /**
+         * Camera has been disconnected
+         */
+        static final int ERROR_CAMERA_DISCONNECTED = 0;
+
+        /**
+         * Camera has encountered a device-level error
+         * Matches CameraDevice.StateListener#ERROR_CAMERA_DEVICE
+         */
+        static final int ERROR_CAMERA_DEVICE = 1;
+
+        /**
+         * Camera has encountered a service-level error
+         * Matches CameraDevice.StateListener#ERROR_CAMERA_SERVICE
+         */
+        static final int ERROR_CAMERA_SERVICE = 2;
 
         @Override
         public IBinder asBinder() {
             return this;
         }
 
-        // TODO: consider rename to onMessageReceived
         @Override
-        public void notifyCallback(int msgType, int ext1, int ext2) throws RemoteException {
-            if (DEBUG) {
-                Log.d(TAG, "Got message " + msgType + " ext1: " + ext1 + " , ext2: " + ext2);
+        public void onCameraError(final int errorCode) {
+            synchronized (mLock) {
+                if (CameraDevice.this.mDeviceListener == null) return;
+                final StateListener listener = CameraDevice.this.mDeviceListener;
+                Runnable r = null;
+                switch (errorCode) {
+                    case ERROR_CAMERA_DISCONNECTED:
+                        r = new Runnable() {
+                            public void run() {
+                                listener.onDisconnected(CameraDevice.this);
+                            }
+                        };
+                        break;
+                    case ERROR_CAMERA_DEVICE:
+                    case ERROR_CAMERA_SERVICE:
+                        r = new Runnable() {
+                            public void run() {
+                                listener.onError(CameraDevice.this, errorCode);
+                            }
+                        };
+                        break;
+                    default:
+                        Log.e(TAG, "Unknown error from camera device: " + errorCode);
+                }
+                if (r != null) {
+                    CameraDevice.this.mDeviceHandler.post(r);
+                }
             }
-            // TODO implement rest
+        }
+
+        @Override
+        public void onCameraIdle() {
+            if (DEBUG) {
+                Log.d(TAG, "Camera now idle");
+            }
+            synchronized (mLock) {
+                if (CameraDevice.this.mDeviceListener == null) return;
+                final StateListener listener = CameraDevice.this.mDeviceListener;
+                Runnable r = new Runnable() {
+                    public void run() {
+                        listener.onIdle(CameraDevice.this);
+                    }
+                };
+                CameraDevice.this.mDeviceHandler.post(r);
+            }
+        }
+
+        @Override
+        public void onCaptureStarted(int requestId, final long timestamp) {
+            if (DEBUG) {
+                Log.d(TAG, "Capture started for id " + requestId);
+            }
+            final CaptureListenerHolder holder;
+
+            // Get the listener for this frame ID, if there is one
+            synchronized (mLock) {
+                holder = CameraDevice.this.mCaptureListenerMap.get(requestId);
+            }
+
+            if (holder == null) {
+                return;
+            }
+
+            // Dispatch capture start notice
+            holder.getHandler().post(
+                new Runnable() {
+                    public void run() {
+                        holder.getListener().onCaptureStarted(
+                            CameraDevice.this,
+                            holder.getRequest(),
+                            timestamp);
+                    }
+                });
         }
 
         @Override
@@ -427,6 +518,22 @@ public class CameraDevice implements android.hardware.camera2.CameraDevice {
                 });
         }
 
+    }
+
+    /**
+     * Default handler management. If handler is null, get the current thread's
+     * Looper to create a Handler with. If no looper exists, throw exception.
+     */
+    private Handler checkHandler(Handler handler) {
+        if (handler == null) {
+            Looper looper = Looper.myLooper();
+            if (looper == null) {
+                throw new IllegalArgumentException(
+                    "No handler given, and current thread has no looper!");
+            }
+            handler = new Handler(looper);
+        }
+        return handler;
     }
 
     private void checkIfCameraClosed() {

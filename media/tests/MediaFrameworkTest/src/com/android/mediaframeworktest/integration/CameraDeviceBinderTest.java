@@ -30,6 +30,7 @@ import android.media.ImageReader;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
@@ -40,6 +41,7 @@ import static android.hardware.camera2.CameraDevice.TEMPLATE_PREVIEW;
 import com.android.mediaframeworktest.MediaFrameworkIntegrationTestRunner;
 
 import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.Mockito.*;
 
 public class CameraDeviceBinderTest extends AndroidTestCase {
@@ -48,6 +50,12 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
     private static int NUM_CALLBACKS_CHECKED = 10;
     // Wait for capture result timeout value: 1500ms
     private final static int WAIT_FOR_COMPLETE_TIMEOUT_MS = 1500;
+    // Wait for flush timeout value: 1000ms
+    private final static int WAIT_FOR_FLUSH_TIMEOUT_MS = 1000;
+    // Wait for idle timeout value: 2000ms
+    private final static int WAIT_FOR_IDLE_TIMEOUT_MS = 2000;
+    // Wait while camera device starts working on requests
+    private final static int WAIT_FOR_WORK_MS = 300;
     // Default size is VGA, which is mandatory camera supported image size by CDD.
     private static final int DEFAULT_IMAGE_WIDTH = 640;
     private static final int DEFAULT_IMAGE_HEIGHT = 480;
@@ -77,11 +85,19 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
     public class DummyCameraDeviceCallbacks extends ICameraDeviceCallbacks.Stub {
 
         @Override
-        public void notifyCallback(int msgType, int ext1, int ext2) throws RemoteException {
+        public void onCameraError(int errorCode) {
         }
 
         @Override
-        public void onResultReceived(int frameId, CameraMetadataNative result) throws RemoteException {
+        public void onCameraIdle() {
+        }
+
+        @Override
+        public void onCaptureStarted(int requestId, long timestamp) {
+        }
+
+        @Override
+        public void onResultReceived(int frameId, CameraMetadataNative result) {
         }
     }
 
@@ -90,7 +106,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         public boolean matches(Object obj) {
             return !((CameraMetadataNative) obj).isEmpty();
         }
-     }
+    }
 
     private void createDefaultSurface() {
         mImageReader =
@@ -346,6 +362,60 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
     }
 
     @SmallTest
+    public void testCaptureStartedCallbacks() throws Exception {
+        CaptureRequest request = createDefaultBuilder(/* needStream */true).build();
+
+        ArgumentCaptor<Long> timestamps = ArgumentCaptor.forClass(Long.class);
+
+        // Test both single request and streaming request.
+        int requestId1 = submitCameraRequest(request, /* streaming */false);
+        verify(mMockCb, timeout(WAIT_FOR_COMPLETE_TIMEOUT_MS).times(1)).onCaptureStarted(
+                eq(requestId1),
+                anyLong());
+
+        int streamingId = submitCameraRequest(request, /* streaming */true);
+        verify(mMockCb, timeout(WAIT_FOR_COMPLETE_TIMEOUT_MS).atLeast(NUM_CALLBACKS_CHECKED))
+                .onCaptureStarted(
+                        eq(streamingId),
+                        timestamps.capture());
+
+        long timestamp = 0; // All timestamps should be larger than 0.
+        for (Long nextTimestamp : timestamps.getAllValues()) {
+            Log.v(TAG, "next t: " + nextTimestamp + " current t: " + timestamp);
+            assertTrue("Captures are out of order", timestamp < nextTimestamp);
+            timestamp = nextTimestamp;
+        }
+    }
+
+    @SmallTest
+    public void testIdleCallback() throws Exception {
+        int status;
+        CaptureRequest request = createDefaultBuilder(/* needStream */true).build();
+
+        // Try streaming
+        int streamingId = submitCameraRequest(request, /* streaming */true);
+
+        // Wait a bit to fill up the queue
+        SystemClock.sleep(WAIT_FOR_WORK_MS);
+
+        // Cancel and make sure we eventually quiesce
+        status = mCameraUser.cancelRequest(streamingId);
+
+        verify(mMockCb, timeout(WAIT_FOR_IDLE_TIMEOUT_MS).times(1)).onCameraIdle();
+
+        // Submit a few capture requests
+        int requestId1 = submitCameraRequest(request, /* streaming */false);
+        int requestId2 = submitCameraRequest(request, /* streaming */false);
+        int requestId3 = submitCameraRequest(request, /* streaming */false);
+        int requestId4 = submitCameraRequest(request, /* streaming */false);
+        int requestId5 = submitCameraRequest(request, /* streaming */false);
+
+        // And wait for more idle
+        verify(mMockCb, timeout(WAIT_FOR_IDLE_TIMEOUT_MS).times(2)).onCameraIdle();
+
+    }
+
+    @SmallTest
     public void testFlush() throws Exception {
         int status;
 
@@ -367,9 +437,23 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         int requestId4 = submitCameraRequest(request, /* streaming */false);
         int requestId5 = submitCameraRequest(request, /* streaming */false);
 
-        // Then flush
+        // Then flush and wait for idle
         status = mCameraUser.flush();
         assertEquals(CameraBinderTestUtils.NO_ERROR, status);
+
+        verify(mMockCb, timeout(WAIT_FOR_FLUSH_TIMEOUT_MS).times(1)).onCameraIdle();
+
+        // Now a streaming request
+        int streamingId = submitCameraRequest(request, /* streaming */true);
+
+        // Wait a bit to fill up the queue
+        SystemClock.sleep(WAIT_FOR_WORK_MS);
+
+        // Then flush and wait for the idle callback
+        status = mCameraUser.flush();
+        assertEquals(CameraBinderTestUtils.NO_ERROR, status);
+
+        verify(mMockCb, timeout(WAIT_FOR_FLUSH_TIMEOUT_MS).times(2)).onCameraIdle();
 
         // TODO: When errors are hooked up, count that errors + successful
         // requests equal to 5.
