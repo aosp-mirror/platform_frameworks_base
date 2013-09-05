@@ -100,8 +100,6 @@ public class PrintJobConfigActivity extends Activity {
 
     private static final boolean DEBUG = true && Build.IS_DEBUGGABLE;
 
-    private static final boolean LIVE_PREVIEW_SUPPORTED = false;
-
     public static final String EXTRA_PRINT_DOCUMENT_ADAPTER = "printDocumentAdapter";
     public static final String EXTRA_PRINT_ATTRIBUTES = "printAttributes";
     public static final String EXTRA_PRINT_JOB_ID = "printJobId";
@@ -133,8 +131,7 @@ public class PrintJobConfigActivity extends Activity {
 
     private static final int EDITOR_STATE_INITIALIZED = 1;
     private static final int EDITOR_STATE_CONFIRMED_PRINT = 2;
-//    private static final int EDITOR_STATE_CONFIRMED_PREVIEW = 3;
-    private static final int EDITOR_STATE_CANCELLED = 4;
+    private static final int EDITOR_STATE_CANCELLED = 3;
 
     private static final int MIN_COPIES = 1;
     private static final String MIN_COPIES_STRING = String.valueOf(MIN_COPIES);
@@ -240,8 +237,7 @@ public class PrintJobConfigActivity extends Activity {
     }
 
     public boolean onTouchEvent(MotionEvent event) {
-        if (!mEditor.isPrintConfirmed() && !mEditor.isPreviewConfirmed()
-                && mEditor.shouldCloseOnTouch(event)) {
+        if (!mEditor.isPrintConfirmed() && mEditor.shouldCloseOnTouch(event)) {
             if (!mController.isWorking()) {
                 PrintJobConfigActivity.this.finish();
             }
@@ -424,19 +420,7 @@ public class PrintJobConfigActivity extends Activity {
             if (!infoChanged && !layoutChanged
                     && PageRangeUtils.contains(mDocument.pages, mRequestedPages)) {
                 if (mEditor.isDone()) {
-                    PrintJobConfigActivity.this.finish();
-                }
-                return;
-            }
-
-            // If we do not support live preview and the current layout is
-            // not for preview purposes, i.e. the user did not poke the
-            // preview button, then just skip the write.
-            if (!LIVE_PREVIEW_SUPPORTED && !mEditor.isPreviewConfirmed()
-                    && mMetadata.getBoolean(PrintDocumentAdapter.METADATA_KEY_PRINT_PREVIEW)) {
-                mEditor.updateUi();
-                if (mEditor.isDone()) {
-                    PrintJobConfigActivity.this.finish();
+                    requestCreatePdfFileOrFinish();
                 }
                 return;
             }
@@ -526,16 +510,20 @@ public class PrintJobConfigActivity extends Activity {
             }
 
             if (mEditor.isDone()) {
-                if (mEditor.isPrintingToPdf()) {
-                    PrintJobInfo printJob = PrintSpoolerService.peekInstance()
-                            .getPrintJobInfo(mPrintJobId, PrintManager.APP_ID_ANY);
-                    Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
-                    intent.setType("application/pdf");
-                    intent.putExtra(Intent.EXTRA_TITLE, printJob.getLabel());
-                    startActivityForResult(intent, ACTIVITY_REQUEST_CREATE_FILE);
-                } else {
-                    PrintJobConfigActivity.this.finish();
-                }
+                requestCreatePdfFileOrFinish();
+            }
+        }
+
+        private void requestCreatePdfFileOrFinish() {
+            if (mEditor.isPrintingToPdf()) {
+                PrintJobInfo printJob = PrintSpoolerService.peekInstance()
+                        .getPrintJobInfo(mPrintJobId, PrintManager.APP_ID_ANY);
+                Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                intent.setType("application/pdf");
+                intent.putExtra(Intent.EXTRA_TITLE, printJob.getLabel());
+                startActivityForResult(intent, ACTIVITY_REQUEST_CREATE_FILE);
+            } else {
+                PrintJobConfigActivity.this.finish();
             }
         }
 
@@ -1101,7 +1089,8 @@ public class PrintJobConfigActivity extends Activity {
 
         public void addCurrentPrinterToHistory() {
             PrinterInfo printer = (PrinterInfo) mDestinationSpinner.getSelectedItem();
-            if (printer != null) {
+            PrinterId fakePdfPritnerId = mDestinationSpinnerAdapter.mFakePdfPrinter.getId();
+            if (printer != null && !printer.getId().equals(fakePdfPritnerId)) {
                 FusedPrintersProvider printersLoader = (FusedPrintersProvider)
                         (Loader<?>) getLoaderManager().getLoader(
                                 LOADER_ID_PRINTERS_LOADER);
@@ -1324,7 +1313,7 @@ public class PrintJobConfigActivity extends Activity {
         }
 
         public boolean isDone() {
-            return isPrintConfirmed() || isPreviewConfirmed() || isCancelled();
+            return isPrintConfirmed() || isCancelled();
         }
 
         public boolean isPrintConfirmed() {
@@ -1335,10 +1324,6 @@ public class PrintJobConfigActivity extends Activity {
             addCurrentPrinterToHistory();
             mEditorState = EDITOR_STATE_CONFIRMED_PRINT;
             showUi(UI_GENERATING_PRINT_JOB, null);
-        }
-
-        public boolean isPreviewConfirmed() {
-            return mEditorState == EDITOR_STATE_CONFIRMED_PRINT;
         }
 
         public PageRange[] getRequestedPages() {
@@ -1450,7 +1435,7 @@ public class PrintJobConfigActivity extends Activity {
             if (mCurrentUi != UI_EDITING_PRINT_JOB) {
                 return false;
             }
-            if (isPrintConfirmed() || isPreviewConfirmed() || isCancelled()) {
+            if (isPrintConfirmed() || isCancelled()) {
                 mDestinationSpinner.setEnabled(false);
                 mCopiesEditText.setEnabled(false);
                 mMediaSizeSpinner.setEnabled(false);
@@ -1498,9 +1483,9 @@ public class PrintJobConfigActivity extends Activity {
                 mColorModeSpinner.setEnabled(false);
 
                 // Orientation
-                if (mOrientationSpinner.getSelectedItemPosition() != AdapterView.INVALID_POSITION) {
+                if (mOrientationSpinner.getSelectedItemPosition() != 0) {
                     mIgnoreNextOrientationChange = true;
-                    mOrientationSpinner.setSelection(AdapterView.INVALID_POSITION);
+                    mOrientationSpinner.setSelection(0);
                 }
                 mOrientationSpinner.setEnabled(false);
 
@@ -1768,7 +1753,7 @@ public class PrintJobConfigActivity extends Activity {
                 mIgnoreNextColorModeChange = true;
                 mColorModeSpinnerAdapter.clear();
             }
-            if (!mOrientationSpinnerAdapter.isEmpty()) {
+            if (mOrientationSpinner.getSelectedItemPosition() != 0) {
                 mIgnoreNextOrientationChange = true;
                 mOrientationSpinner.setSelection(0);
             }
