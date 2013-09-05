@@ -1070,7 +1070,7 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Exports the contents of this Webview as PDF. Only supported for API levels
-     * {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE} and above.
+     * {@link android.os.Build.VERSION_CODES#KITKAT} and above.
      *
      * TODO(sgurun) the parameter list is stale. Fix it before unhiding.
      *

@@ -893,7 +893,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      * @return true if the fragment class name is valid for this Activity and false otherwise.
      */
     protected boolean isValidFragment(String fragmentName) {
-        if (getApplicationInfo().targetSdkVersion  >= android.os.Build.VERSION_CODES.KEY_LIME_PIE) {
+        if (getApplicationInfo().targetSdkVersion  >= android.os.Build.VERSION_CODES.KITKAT) {
             Log.w(TAG, "Subclasses of PreferenceActivity must override isValidFragment(String)"
                     + " to verify that the Fragment class is valid! " + this.getClass().getName()
                     + " has not checked if fragment " + fragmentName + " is valid.");

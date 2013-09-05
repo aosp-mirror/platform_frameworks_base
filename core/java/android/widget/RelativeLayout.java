@@ -477,13 +477,13 @@ public class RelativeLayout extends ViewGroup {
 
                 if (isWrapContentWidth) {
                     if (isLayoutRtl()) {
-                        if (targetSdkVersion < Build.VERSION_CODES.KEY_LIME_PIE) {
+                        if (targetSdkVersion < Build.VERSION_CODES.KITKAT) {
                             width = Math.max(width, myWidth - params.mLeft);
                         } else {
                             width = Math.max(width, myWidth - params.mLeft - params.leftMargin);
                         }
                     } else {
-                        if (targetSdkVersion < Build.VERSION_CODES.KEY_LIME_PIE) {
+                        if (targetSdkVersion < Build.VERSION_CODES.KITKAT) {
                             width = Math.max(width, params.mRight);
                         } else {
                             width = Math.max(width, params.mRight + params.rightMargin);
@@ -492,7 +492,7 @@ public class RelativeLayout extends ViewGroup {
                 }
 
                 if (isWrapContentHeight) {
-                    if (targetSdkVersion < Build.VERSION_CODES.KEY_LIME_PIE) {
+                    if (targetSdkVersion < Build.VERSION_CODES.KITKAT) {
                         height = Math.max(height, params.mBottom);
                     } else {
                         height = Math.max(height, params.mBottom + params.bottomMargin);
