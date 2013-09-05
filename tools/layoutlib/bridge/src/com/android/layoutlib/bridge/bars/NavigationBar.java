@@ -17,6 +17,7 @@
 package com.android.layoutlib.bridge.bars;
 
 import com.android.resources.Density;
+import com.android.layoutlib.bridge.Bridge;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -26,7 +27,8 @@ import android.widget.TextView;
 
 public class NavigationBar extends CustomBar {
 
-    public NavigationBar(Context context, Density density, int orientation) throws XmlPullParserException {
+    public NavigationBar(Context context, Density density, int orientation, boolean isRtl,
+            boolean rtlEnabled) throws XmlPullParserException {
         super(context, density, orientation, "/bars/navigation_bar.xml", "navigation_bar.xml");
 
         setBackgroundColor(0xFF000000);
@@ -37,14 +39,15 @@ public class NavigationBar extends CustomBar {
         // 0 is a spacer.
         int back = 1;
         int recent = 3;
-        if (orientation == LinearLayout.VERTICAL) {
+        if (orientation == LinearLayout.VERTICAL || (isRtl && !rtlEnabled)) {
+            // If RTL is enabled, then layoutlib mirrors the layout for us.
             back = 3;
             recent = 1;
         }
 
-        loadIcon(back,   "ic_sysbar_back.png", density);
-        loadIcon(2,      "ic_sysbar_home.png", density);
-        loadIcon(recent, "ic_sysbar_recent.png", density);
+        loadIcon(back,   "ic_sysbar_back.png",   density, isRtl);
+        loadIcon(2,      "ic_sysbar_home.png",   density, isRtl);
+        loadIcon(recent, "ic_sysbar_recent.png", density, isRtl);
     }
 
     @Override
