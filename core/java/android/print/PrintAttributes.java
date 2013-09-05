@@ -412,6 +412,8 @@ public final class PrintAttributes implements Parcelable {
          * @throws IllegalArgumentException If the label is empty.
          * @throws IllegalArgumentException If the widthMils is less than or equal to zero.
          * @throws IllegalArgumentException If the heightMils is less than or equal to zero.
+         *
+         * @hide
          */
         public MediaSize(String id, String packageName, int labelResId,
                 int widthMils, int heightMils) {
@@ -441,8 +443,7 @@ public final class PrintAttributes implements Parcelable {
         }
 
         /**
-         * Creates a new instance. You should use this constructor as a fallback
-         * in cases when you do not have a localized string for the label.
+         * Creates a new instance.
          *
          * @param id The unique media size id.
          * @param label The <strong>internationalized</strong> human readable label.
@@ -550,32 +551,28 @@ public final class PrintAttributes implements Parcelable {
 
         /**
          * Returns a new media size in a portrait orientation
-         * which is the height is the lesser dimension.
+         * which is the height is the greater dimension.
          *
          * @return New instance in landscape orientation.
          */
         public MediaSize asPortrait() {
-            if (!TextUtils.isEmpty(mPackageName) && mLabelResId > 0) {
-                return new MediaSize(mId, mPackageName, mLabelResId,
-                        Math.min(mWidthMils, mHeightMils),
-                        Math.max(mWidthMils, mHeightMils));
-            } else {
-                return new MediaSize(mId, mLabel,
-                        Math.min(mWidthMils, mHeightMils),
-                        Math.max(mWidthMils, mHeightMils));
-            }
+            return new MediaSize(mId, mPackageName, mLabel,
+                    Math.min(mWidthMils, mHeightMils),
+                    Math.max(mWidthMils, mHeightMils),
+                    mLabelResId);
         }
 
         /**
          * Returns a new media size in a landscape orientation
-         * which is the height is the greater dimension.
+         * which is the height is the lesser dimension.
          *
          * @return New instance in landscape orientation.
          */
         public MediaSize asLandscape() {
             return new MediaSize(mId, mLabel,
                     Math.max(mWidthMils, mHeightMils),
-                    Math.min(mWidthMils, mHeightMils));
+                    Math.min(mWidthMils, mHeightMils),
+                    mLabelResId);
         }
 
         void writeToParcel(Parcel parcel) {
@@ -601,7 +598,6 @@ public final class PrintAttributes implements Parcelable {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((mId == null) ? 0 : mId.hashCode());
             result = prime * result + mWidthMils;
             result = prime * result + mHeightMils;
             return result;
@@ -619,9 +615,6 @@ public final class PrintAttributes implements Parcelable {
                 return false;
             }
             MediaSize other = (MediaSize) obj;
-            if (!TextUtils.equals(mId, other.mId)) {
-                return false;
-            }
             if (mWidthMils != other.mWidthMils) {
                 return false;
             }
@@ -677,6 +670,8 @@ public final class PrintAttributes implements Parcelable {
          * @throws IllegalArgumentException If the label is empty.
          * @throws IllegalArgumentException If the horizontalDpi is less than or equal to zero.
          * @throws IllegalArgumentException If the verticalDpi is less than or equal to zero.
+         *
+         * @hide
          */
         public Resolution(String id, String packageName, int labelResId,
                 int horizontalDpi, int verticalDpi) {
@@ -706,8 +701,7 @@ public final class PrintAttributes implements Parcelable {
         }
 
         /**
-         * Creates a new instance. You should use this constructor as a fallback
-         * in cases when you do not have a localized string for the label.
+         * Creates a new instance.
          *
          * @param id The unique resolution id.
          * @param label The <strong>internationalized</strong> human readable label.
@@ -825,7 +819,6 @@ public final class PrintAttributes implements Parcelable {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((mId == null) ? 0 : mId.hashCode());
             result = prime * result + mHorizontalDpi;
             result = prime * result + mVerticalDpi;
             return result;
@@ -843,9 +836,6 @@ public final class PrintAttributes implements Parcelable {
                 return false;
             }
             Resolution other = (Resolution) obj;
-            if (!TextUtils.equals(mId, other.mId)) {
-                return false;
-            }
             if (mHorizontalDpi != other.mHorizontalDpi) {
                 return false;
             }
