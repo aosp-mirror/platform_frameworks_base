@@ -1372,7 +1372,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
-    public boolean hasAnyCaCertsInstalled() {
+    public static boolean hasAnyCaCertsInstalled() {
         TrustedCertificateStore certStore = new TrustedCertificateStore();
         Set<String> aliases = certStore.userAliases();
         return aliases != null && !aliases.isEmpty();
