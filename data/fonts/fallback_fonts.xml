@@ -52,7 +52,14 @@
     </family>
     <family>
         <fileset>
-            <file>DroidSansThai.ttf</file>
+            <file variant="elegant">NotoSansThai-Regular.ttf</file>
+            <file variant="elegant">NotoSansThai-Bold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file variant="compact">NotoSansThaiUI-Regular.ttf</file>
+            <file variant="compact">NotoSansThaiUI-Bold.ttf</file>
         </fileset>
     </family>
     <family>
@@ -67,13 +74,26 @@
     </family>
     <family>
         <fileset>
-            <file>DroidSansDevanagari-Regular.ttf</file>
+            <file variant="elegant">NotoSansDevanagari-Regular.ttf</file>
+            <file variant="elegant">NotoSansDevanagari-Bold.ttf</file>
         </fileset>
     </family>
     <family>
         <fileset>
-            <file>DroidSansTamil-Regular.ttf</file>
-            <file>DroidSansTamil-Bold.ttf</file>
+            <file variant="compact">NotoSansDevanagariUI-Regular.ttf</file>
+            <file variant="compact">NotoSansDevanagariUI-Bold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file variant="elegant">NotoSansTamil-Regular.ttf</file>
+            <file variant="elegant">NotoSansTamil-Bold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file variant="compact">NotoSansTamilUI-Regular.ttf</file>
+            <file variant="compact">NotoSansTamilUI-Bold.ttf</file>
         </fileset>
     </family>
     <family>
