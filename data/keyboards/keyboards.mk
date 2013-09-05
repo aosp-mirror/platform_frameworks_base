@@ -17,10 +17,10 @@
 include $(LOCAL_PATH)/common.mk
 
 PRODUCT_COPY_FILES := $(foreach file,$(framework_keylayouts),\
-    $(file):system/usr/keylayout/$(file))
+    $(file):system/usr/keylayout/$(notdir $(file)))
 
 PRODUCT_COPY_FILES += $(foreach file,$(framework_keycharmaps),\
-    $(file):system/usr/keychars/$(file))
+    $(file):system/usr/keychars/$(notdir $(file)))
 
 PRODUCT_COPY_FILES += $(foreach file,$(framework_keyconfigs),\
-    $(file):system/usr/idc/$(file))
+    $(file):system/usr/idc/$(notdir $(file)))

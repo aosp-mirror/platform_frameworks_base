@@ -177,6 +177,9 @@ $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framew
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework-base_intermediates/src/core/java/android/os/IBattery*)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework-base_intermediates)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/android_stubs_current_intermediates)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/usr/idc/frameworks)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/usr/keylayout/frameworks)
+$(call add-clean-step, rm -rf $(PRODUCT_OUT)/system/usr/keychars/frameworks)
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
 # ************************************************
