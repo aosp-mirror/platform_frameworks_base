@@ -69,7 +69,7 @@ final class ReceiverList extends ArrayList<BroadcastFilter>
     }
     
     void dumpLocal(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.print("app="); pw.print(app.toShortString());
+        pw.print(prefix); pw.print("app="); pw.print(app != null ? app.toShortString() : null);
             pw.print(" pid="); pw.print(pid); pw.print(" uid="); pw.print(uid);
             pw.print(" user="); pw.println(userId);
         if (curBroadcast != null || linkedToDeath) {
