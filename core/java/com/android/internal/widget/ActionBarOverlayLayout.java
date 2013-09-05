@@ -19,7 +19,6 @@ package com.android.internal.widget;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.util.Log;
 import android.view.ViewGroup;
 import com.android.internal.app.ActionBarImpl;
 
@@ -85,7 +84,7 @@ public class ActionBarOverlayLayout extends ViewGroup {
         ta.recycle();
 
         mIgnoreWindowContentOverlay = context.getApplicationInfo().targetSdkVersion <
-                Build.VERSION_CODES.KEY_LIME_PIE;
+                Build.VERSION_CODES.KITKAT;
     }
 
     public void setActionBar(ActionBarImpl impl) {
@@ -111,7 +110,7 @@ public class ActionBarOverlayLayout extends ViewGroup {
          */
         mIgnoreWindowContentOverlay = overlayMode &&
                 getContext().getApplicationInfo().targetSdkVersion <
-                        Build.VERSION_CODES.KEY_LIME_PIE;
+                        Build.VERSION_CODES.KITKAT;
     }
 
     public void setShowingForActionMode(boolean showing) {

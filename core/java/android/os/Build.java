@@ -438,7 +438,7 @@ public class Build {
         public static final int JELLY_BEAN_MR2 = 18;
 
         /**
-         * Android X.X: Key Lime Pie, another tasty treat.
+         * Android X.X: KitKat, another tasty treat.
          *
          * <p>Applications targeting this or a later release will get these
          * new changes in behavior:</p>
@@ -448,7 +448,7 @@ public class Build {
          * {@link android.content.Context#bindService}.
          * </ul>
          */
-        public static final int KEY_LIME_PIE = CUR_DEVELOPMENT;
+        public static final int KITKAT = CUR_DEVELOPMENT;
     }
     
     /** The type of build, like "user" or "eng". */

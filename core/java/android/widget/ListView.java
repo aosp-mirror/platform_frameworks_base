@@ -248,7 +248,7 @@ public class ListView extends AbsListView {
      * <p>
      * Note: When first introduced, this method could only be called before
      * setting the adapter with {@link #setAdapter(ListAdapter)}. Starting with
-     * {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, this method may be
+     * {@link android.os.Build.VERSION_CODES#KITKAT}, this method may be
      * called at any time. If the ListView's adapter does not extend
      * {@link HeaderViewListAdapter}, it will be wrapped with a supporting
      * instance of {@link WrapperListAdapter}.
@@ -285,7 +285,7 @@ public class ListView extends AbsListView {
      * <p>
      * Note: When first introduced, this method could only be called before
      * setting the adapter with {@link #setAdapter(ListAdapter)}. Starting with
-     * {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, this method may be
+     * {@link android.os.Build.VERSION_CODES#KITKAT}, this method may be
      * called at any time. If the ListView's adapter does not extend
      * {@link HeaderViewListAdapter}, it will be wrapped with a supporting
      * instance of {@link WrapperListAdapter}.
@@ -341,7 +341,7 @@ public class ListView extends AbsListView {
      * <p>
      * Note: When first introduced, this method could only be called before
      * setting the adapter with {@link #setAdapter(ListAdapter)}. Starting with
-     * {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, this method may be
+     * {@link android.os.Build.VERSION_CODES#KITKAT}, this method may be
      * called at any time. If the ListView's adapter does not extend
      * {@link HeaderViewListAdapter}, it will be wrapped with a supporting
      * instance of {@link WrapperListAdapter}.
@@ -378,7 +378,7 @@ public class ListView extends AbsListView {
      * <p>
      * Note: When first introduced, this method could only be called before
      * setting the adapter with {@link #setAdapter(ListAdapter)}. Starting with
-     * {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, this method may be
+     * {@link android.os.Build.VERSION_CODES#KITKAT}, this method may be
      * called at any time. If the ListView's adapter does not extend
      * {@link HeaderViewListAdapter}, it will be wrapped with a supporting
      * instance of {@link WrapperListAdapter}.

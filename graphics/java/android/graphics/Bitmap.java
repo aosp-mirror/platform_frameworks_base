@@ -420,7 +420,7 @@ public final class Bitmap implements Parcelable {
          * It is recommended to use {@link #ARGB_8888} instead of this
          * configuration.
          *
-         * Note: as of {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE},
+         * Note: as of {@link android.os.Build.VERSION_CODES#KITKAT},
          * any bitmap created with this configuration will be created
          * using {@link #ARGB_8888} instead.
          * 
@@ -1130,7 +1130,7 @@ public final class Bitmap implements Parcelable {
      * getPixels() or setPixels(), then the pixels are uniformly treated as
      * 32bit values, packed according to the Color class.
      *
-     * <p>As of {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, this method
+     * <p>As of {@link android.os.Build.VERSION_CODES#KITKAT}, this method
      * should not be used to calculate the memory usage of the bitmap. Instead,
      * see {@link #getAllocationByteCount()}.
      *
@@ -1143,7 +1143,7 @@ public final class Bitmap implements Parcelable {
     /**
      * Returns the minimum number of bytes that can be used to store this bitmap's pixels.
      *
-     * <p>As of {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, the result of this method can
+     * <p>As of {@link android.os.Build.VERSION_CODES#KITKAT}, the result of this method can
      * no longer be used to determine memory usage of a bitmap. See {@link
      * #getAllocationByteCount()}.</p>
      */

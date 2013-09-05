@@ -56,7 +56,7 @@ public class BitmapFactory {
          * mutable even when decoding a resource which would normally result in
          * an immutable bitmap.</p>
          *
-         * <p>As of {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, any
+         * <p>As of {@link android.os.Build.VERSION_CODES#KITKAT}, any
          * mutable bitmap can be reused to decode any other bitmaps as long as
          * the resulting {@link Bitmap#getByteCount() byte count} of the decoded
          * bitmap is less than or equal to the {@link
@@ -64,7 +64,7 @@ public class BitmapFactory {
          * bitmap. This can be because the intrinsic size is smaller, or its
          * size post scaling (for density / sample size) is smaller.</p>
          *
-         * <p>Prior to {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}
+         * <p>Prior to {@link android.os.Build.VERSION_CODES#KITKAT}
          * additional constraints apply: The image being decoded (whether as a
          * resource or as a stream) must be in jpeg or png format. Only equal
          * sized bitmaps are supported, with {@link #inSampleSize} set to 1.
