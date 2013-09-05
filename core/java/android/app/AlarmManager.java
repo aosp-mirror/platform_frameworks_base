@@ -101,7 +101,7 @@ public class AlarmManager
         mService = service;
 
         final int sdkVersion = ctx.getApplicationInfo().targetSdkVersion;
-        mAlwaysExact = (sdkVersion < Build.VERSION_CODES.KEY_LIME_PIE);
+        mAlwaysExact = (sdkVersion < Build.VERSION_CODES.KITKAT);
     }
 
     private long legacyExactLength() {

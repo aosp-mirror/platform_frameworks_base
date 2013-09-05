@@ -1068,7 +1068,7 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Exports the contents of this Webview as PDF. Only supported for API levels
-     * {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE} and above.
+     * {@link android.os.Build.VERSION_CODES#KITKAT} and above.
      *
      * @param out            The stream to export the PDF contents to. Cannot be null.
      * @param width          The page width. Should be larger than 0.

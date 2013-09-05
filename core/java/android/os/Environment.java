@@ -20,7 +20,6 @@ import android.content.Context;
 import android.os.storage.IMountService;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
-import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -324,7 +323,7 @@ public class Environment {
      * {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission,
      * which is automatically granted if you hold the write permission.
      * <p>
-     * Starting in {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, if your
+     * Starting in {@link android.os.Build.VERSION_CODES#KITKAT}, if your
      * application only needs to store internal data, consider using
      * {@link Context#getExternalFilesDir(String)} or
      * {@link Context#getExternalCacheDir()}, which require no permissions to

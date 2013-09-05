@@ -343,7 +343,7 @@ public final class Settings {
     /**
      * Activity Action: Show settings to manage the user input dictionary.
      * <p>
-     * Starting with {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE},
+     * Starting with {@link android.os.Build.VERSION_CODES#KITKAT},
      * it is guaranteed there will always be an appropriate implementation for this Intent action.
      * In prior releases of the platform this was optional, so ensure you safeguard against it.
      * <p>
