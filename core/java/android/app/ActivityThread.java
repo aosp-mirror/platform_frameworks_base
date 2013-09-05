@@ -76,6 +76,7 @@ import android.util.Log;
 import android.util.LogPrinter;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
+import android.util.SuperNotCalledException;
 import android.view.Display;
 import android.view.HardwareRenderer;
 import android.view.View;
@@ -115,12 +116,6 @@ import libcore.io.EventLogger;
 import libcore.io.IoUtils;
 
 import dalvik.system.CloseGuard;
-
-final class SuperNotCalledException extends AndroidRuntimeException {
-    public SuperNotCalledException(String msg) {
-        super(msg);
-    }
-}
 
 final class RemoteServiceException extends AndroidRuntimeException {
     public RemoteServiceException(String msg) {

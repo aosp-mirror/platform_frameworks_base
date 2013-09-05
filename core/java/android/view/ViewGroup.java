@@ -3182,6 +3182,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
     }
 
+    @Override
+    void dispatchCancelPendingInputEvents() {
+        super.dispatchCancelPendingInputEvents();
+
+        final View[] children = mChildren;
+        final int count = mChildrenCount;
+        for (int i = 0; i < count; i++) {
+            children[i].dispatchCancelPendingInputEvents();
+        }
+    }
+
     /**
      * When this property is set to true, this ViewGroup supports static transformations on
      * children; this causes

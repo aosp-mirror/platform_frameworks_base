@@ -27413,6 +27413,7 @@ package android.view {
     method public boolean canScrollHorizontally(int);
     method public boolean canScrollVertically(int);
     method public void cancelLongPress();
+    method public final void cancelPendingInputEvents();
     method public boolean checkInputConnectionProxy(android.view.View);
     method public void clearAnimation();
     method public void clearFocus();
@@ -27640,6 +27641,7 @@ package android.view {
     method protected void onAnimationEnd();
     method protected void onAnimationStart();
     method protected void onAttachedToWindow();
+    method public void onCancelPendingInputEvents();
     method public boolean onCheckIsTextEditor();
     method protected void onConfigurationChanged(android.content.res.Configuration);
     method protected void onCreateContextMenu(android.view.ContextMenu);
