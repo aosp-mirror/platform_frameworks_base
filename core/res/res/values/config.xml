@@ -1241,4 +1241,8 @@
          To do this, add 21407 item to values-mcc214-mnc04/config.xml -->
     <string-array translatable="false" name="config_operatorConsideredNonRoaming">
     </string-array>
+
+    <!-- Threshold (in ms) under which a screen off / screen on will be considered a reset of the
+         transient navigation confirmation prompt.-->
+    <integer name="config_transient_navigation_confirmation_panic">5000</integer>
 </resources>
