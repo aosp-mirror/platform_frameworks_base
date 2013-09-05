@@ -28,17 +28,21 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.UriMatcher;
+import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.provider.DocumentsContract.Document;
 import android.util.Log;
+
+import com.android.internal.util.ArrayUtils;
 
 import libcore.io.IoUtils;
 
@@ -328,16 +332,24 @@ public abstract class DocumentsProvider extends ContentProvider {
     @Override
     public final Bundle callFromPackage(
             String callingPackage, String method, String arg, Bundle extras) {
+        final Context context = getContext();
+
         if (!method.startsWith("android:")) {
             // Let non-platform methods pass through
             return super.callFromPackage(callingPackage, method, arg, extras);
         }
 
-        // Require that caller can manage given document
         final String documentId = extras.getString(Document.COLUMN_DOCUMENT_ID);
         final Uri documentUri = DocumentsContract.buildDocumentUri(mAuthority, documentId);
-        getContext().enforceCallingOrSelfUriPermission(
-                documentUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION, method);
+
+        // Require that caller can manage given document
+        final boolean callerHasManage =
+                context.checkCallingOrSelfPermission(android.Manifest.permission.MANAGE_DOCUMENTS)
+                == PackageManager.PERMISSION_GRANTED;
+        if (!callerHasManage) {
+            getContext().enforceCallingOrSelfUriPermission(
+                    documentUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION, method);
+        }
 
         final Bundle out = new Bundle();
         try {
@@ -345,14 +357,26 @@ public abstract class DocumentsProvider extends ContentProvider {
                 final String mimeType = extras.getString(Document.COLUMN_MIME_TYPE);
                 final String displayName = extras.getString(Document.COLUMN_DISPLAY_NAME);
 
-                // TODO: issue Uri grant towards calling package
-                // TODO: enforce that package belongs to caller
                 final String newDocumentId = createDocument(documentId, mimeType, displayName);
                 out.putString(Document.COLUMN_DOCUMENT_ID, newDocumentId);
 
+                // Extend permission grant towards caller if needed
+                if (!callerHasManage) {
+                    final Uri newDocumentUri = DocumentsContract.buildDocumentUri(
+                            mAuthority, newDocumentId);
+                    context.grantUriPermission(callingPackage, newDocumentUri,
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                            | Intent.FLAG_PERSIST_GRANT_URI_PERMISSION);
+                }
+
             } else if (METHOD_DELETE_DOCUMENT.equals(method)) {
-                final String docId = extras.getString(Document.COLUMN_DOCUMENT_ID);
-                deleteDocument(docId);
+                deleteDocument(documentId);
+
+                // Document no longer exists, clean up any grants
+                context.revokeUriPermission(documentUri, Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                        | Intent.FLAG_PERSIST_GRANT_URI_PERMISSION);
 
             } else {
                 throw new UnsupportedOperationException("Method not supported " + method);

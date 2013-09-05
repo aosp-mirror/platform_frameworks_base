@@ -33,9 +33,13 @@ import libcore.io.IoUtils;
 import libcore.io.Streams;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 
 public class TestActivity extends Activity {
     private static final String TAG = "TestActivity";
+
+    private static final int CODE_READ = 42;
+    private static final int CODE_WRITE = 43;
 
     private TextView mResult;
 
@@ -49,10 +53,10 @@ public class TestActivity extends Activity {
         view.setOrientation(LinearLayout.VERTICAL);
 
         final CheckBox multiple = new CheckBox(context);
-        multiple.setText("\nALLOW_MULTIPLE\n");
+        multiple.setText("ALLOW_MULTIPLE");
         view.addView(multiple);
         final CheckBox localOnly = new CheckBox(context);
-        localOnly.setText("\nLOCAL_ONLY\n");
+        localOnly.setText("LOCAL_ONLY");
         view.addView(localOnly);
 
         Button button;
@@ -70,7 +74,7 @@ public class TestActivity extends Activity {
                 if (localOnly.isChecked()) {
                     intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
                 }
-                startActivityForResult(intent, 42);
+                startActivityForResult(intent, CODE_READ);
             }
         });
         view.addView(button);
@@ -89,7 +93,7 @@ public class TestActivity extends Activity {
                 if (localOnly.isChecked()) {
                     intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
                 }
-                startActivityForResult(intent, 42);
+                startActivityForResult(intent, CODE_READ);
             }
         });
         view.addView(button);
@@ -108,7 +112,7 @@ public class TestActivity extends Activity {
                 if (localOnly.isChecked()) {
                     intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
                 }
-                startActivityForResult(intent, 42);
+                startActivityForResult(intent, CODE_READ);
             }
         });
         view.addView(button);
@@ -129,7 +133,7 @@ public class TestActivity extends Activity {
                 if (localOnly.isChecked()) {
                     intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
                 }
-                startActivityForResult(intent, 42);
+                startActivityForResult(intent, CODE_READ);
             }
         });
         view.addView(button);
@@ -146,7 +150,7 @@ public class TestActivity extends Activity {
                 if (localOnly.isChecked()) {
                     intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
                 }
-                startActivityForResult(intent, 42);
+                startActivityForResult(intent, CODE_WRITE);
             }
         });
         view.addView(button);
@@ -165,7 +169,7 @@ public class TestActivity extends Activity {
                 if (localOnly.isChecked()) {
                     intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
                 }
-                startActivityForResult(Intent.createChooser(intent, "Kittens!"), 42);
+                startActivityForResult(Intent.createChooser(intent, "Kittens!"), CODE_READ);
             }
         });
         view.addView(button);
@@ -178,20 +182,45 @@ public class TestActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        mResult.setText("resultCode=" + resultCode + ", data=" + String.valueOf(data));
+        mResult.setText(null);
+        String result = "resultCode=" + resultCode + ", data=" + String.valueOf(data);
 
-        final Uri uri = data != null ? data.getData() : null;
-        if (uri != null) {
-            InputStream is = null;
-            try {
-                is = getContentResolver().openInputStream(uri);
-                final int length = Streams.readFullyNoClose(is).length;
-                Log.d(TAG, "read length=" + length);
-            } catch (Exception e) {
-                Log.w(TAG, "Failed to read " + uri, e);
-            } finally {
-                IoUtils.closeQuietly(is);
+        if (requestCode == CODE_READ) {
+            final Uri uri = data != null ? data.getData() : null;
+            if (uri != null) {
+                InputStream is = null;
+                try {
+                    is = getContentResolver().openInputStream(uri);
+                    final int length = Streams.readFullyNoClose(is).length;
+                    result += "; read length=" + length;
+                } catch (Exception e) {
+                    result += "; ERROR";
+                    Log.w(TAG, "Failed to read " + uri, e);
+                } finally {
+                    IoUtils.closeQuietly(is);
+                }
+            } else {
+                result += "no uri?";
+            }
+        } else if (requestCode == CODE_WRITE) {
+            final Uri uri = data != null ? data.getData() : null;
+            if (uri != null) {
+                OutputStream os = null;
+                try {
+                    os = getContentResolver().openOutputStream(uri);
+                    os.write("THE COMPLETE WORKS OF SHAKESPEARE".getBytes());
+                } catch (Exception e) {
+                    result += "; ERROR";
+                    Log.w(TAG, "Failed to write " + uri, e);
+                } finally {
+                    IoUtils.closeQuietly(os);
+                }
+            } else {
+                result += "no uri?";
             }
         }
+
+        Log.d(TAG, result);
+        mResult.setText(result);
     }
 }

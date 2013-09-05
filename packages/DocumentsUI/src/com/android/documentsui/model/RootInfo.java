@@ -52,6 +52,13 @@ public class RootInfo {
         root.summary = getCursorString(cursor, Root.COLUMN_SUMMARY);
         root.documentId = getCursorString(cursor, Root.COLUMN_DOCUMENT_ID);
         root.availableBytes = getCursorLong(cursor, Root.COLUMN_AVAILABLE_BYTES);
+
+        // TODO: remove this hack
+        if ("com.google.android.apps.docs.storage".equals(root.authority)) {
+            root.flags &= ~(Root.FLAG_PROVIDES_AUDIO | Root.FLAG_PROVIDES_IMAGES
+                    | Root.FLAG_PROVIDES_VIDEO);
+        }
+
         return root;
     }
 
