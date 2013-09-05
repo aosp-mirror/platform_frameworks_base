@@ -38,7 +38,6 @@ public final class PrinterDiscoverySession {
 
     private static final int MSG_PRINTERS_ADDED = 1;
     private static final int MSG_PRINTERS_REMOVED = 2;
-    private static final int MSG_PRINTERS_UPDATED = 3;
 
     private final ArrayMap<PrinterId, PrinterInfo> mPrinters =
             new ArrayMap<PrinterId, PrinterInfo>();
@@ -200,8 +199,8 @@ public final class PrinterDiscoverySession {
         final int addedPrinterCount = printers.size();
         for (int i = 0; i < addedPrinterCount; i++) {
             PrinterInfo addedPrinter = printers.get(i);
-            if (mPrinters.get(addedPrinter.getId()) == null) {
-                mPrinters.put(addedPrinter.getId(), addedPrinter);
+            PrinterInfo oldPrinter = mPrinters.put(addedPrinter.getId(), addedPrinter);
+            if (oldPrinter == null || !oldPrinter.equals(addedPrinter)) {
                 printersChanged = true;
             }
         }
@@ -219,25 +218,6 @@ public final class PrinterDiscoverySession {
         for (int i = 0; i < removedPrinterIdCount; i++) {
             PrinterId removedPrinterId = printerIds.get(i);
             if (mPrinters.remove(removedPrinterId) != null) {
-                printersChanged = true;
-            }
-        }
-        if (printersChanged) {
-            notifyOnPrintersChanged();
-        }
-    }
-
-    private void handlePrintersUpdated(List<PrinterInfo> printers) {
-        if (isDestroyed()) {
-            return;
-        }
-        boolean printersChanged = false;
-        final int updatedPrinterCount = printers.size();
-        for (int i = 0; i < updatedPrinterCount; i++) {
-            PrinterInfo updatedPrinter = printers.get(i);
-            PrinterInfo oldPrinter = mPrinters.get(updatedPrinter.getId());
-            if (oldPrinter != null && !oldPrinter.equals(updatedPrinter)) {
-                mPrinters.put(updatedPrinter.getId(), updatedPrinter);
                 printersChanged = true;
             }
         }
@@ -277,11 +257,6 @@ public final class PrinterDiscoverySession {
                     List<PrinterId> printerIds = (List<PrinterId>) message.obj;
                     handlePrintersRemoved(printerIds);
                 } break;
-
-                case MSG_PRINTERS_UPDATED: {
-                    List<PrinterInfo> printers = (List<PrinterInfo>) message.obj;
-                    handlePrintersUpdated(printers);
-                } break;
             }
         }
     }
@@ -309,15 +284,6 @@ public final class PrinterDiscoverySession {
             if (session != null) {
                 session.mHandler.obtainMessage(MSG_PRINTERS_REMOVED,
                         printerIds).sendToTarget();
-            }
-        }
-
-        @Override
-        public void onPrintersUpdated(List<PrinterInfo> printers) {
-            PrinterDiscoverySession session = mWeakSession.get();
-            if (session != null) {
-                session.mHandler.obtainMessage(MSG_PRINTERS_UPDATED,
-                        printers).sendToTarget();
             }
         }
     }

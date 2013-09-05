@@ -36,7 +36,6 @@ import android.print.PrintAttributes;
 import android.print.PrintAttributes.Margins;
 import android.print.PrintAttributes.MediaSize;
 import android.print.PrintAttributes.Resolution;
-import android.print.PrintAttributes.Tray;
 import android.print.PrintDocumentInfo;
 import android.print.PrintJobInfo;
 import android.print.PrintManager;
@@ -51,8 +50,6 @@ import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.FastXmlSerializer;
 
-import libcore.io.IoUtils;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -64,6 +61,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import libcore.io.IoUtils;
 
 /**
  * Service for exposing some of the {@link PrintSpooler} functionality to
@@ -676,6 +675,8 @@ public final class PrintSpoolerService extends Service {
 
         private static final String ATTR_ID = "id";
         private static final String ATTR_LABEL = "label";
+        private static final String ATTR_LABEL_RES_ID = "labelResId";
+        private static final String ATTR_PACKAGE_NAME = "packageName";
         private static final String ATTR_STATE = "state";
         private static final String ATTR_APP_ID = "appId";
         private static final String ATTR_USER_ID = "userId";
@@ -685,13 +686,8 @@ public final class PrintSpoolerService extends Service {
         private static final String TAG_MEDIA_SIZE = "mediaSize";
         private static final String TAG_RESOLUTION = "resolution";
         private static final String TAG_MARGINS = "margins";
-        private static final String TAG_INPUT_TRAY = "inputTray";
-        private static final String TAG_OUTPUT_TRAY = "outputTray";
 
-        private static final String ATTR_DUPLEX_MODE = "duplexMode";
         private static final String ATTR_COLOR_MODE = "colorMode";
-        private static final String ATTR_FITTING_MODE = "fittingMode";
-        private static final String ATTR_ORIENTATION = "orientation";
 
         private static final String ATTR_LOCAL_ID = "printerName";
         private static final String ATTR_SERVICE_NAME = "serviceName";
@@ -806,32 +802,31 @@ public final class PrintSpoolerService extends Service {
                     if (attributes != null) {
                         serializer.startTag(null, TAG_ATTRIBUTES);
 
-                        final int duplexMode = attributes.getDuplexMode();
-                        serializer.attribute(null, ATTR_DUPLEX_MODE,
-                                String.valueOf(duplexMode));
-
                         final int colorMode = attributes.getColorMode();
                         serializer.attribute(null, ATTR_COLOR_MODE,
                                 String.valueOf(colorMode));
-
-                        final int fittingMode = attributes.getFittingMode();
-                        serializer.attribute(null, ATTR_FITTING_MODE,
-                                String.valueOf(fittingMode));
-
-                        final int orientation = attributes.getOrientation();
-                        serializer.attribute(null, ATTR_ORIENTATION,
-                                String.valueOf(orientation));
 
                         MediaSize mediaSize = attributes.getMediaSize();
                         if (mediaSize != null) {
                             serializer.startTag(null, TAG_MEDIA_SIZE);
                             serializer.attribute(null, ATTR_ID, mediaSize.getId());
-                            serializer.attribute(null, ATTR_LABEL, mediaSize.getLabel()
-                                    .toString());
                             serializer.attribute(null, ATTR_WIDTH_MILS, String.valueOf(
                                     mediaSize.getWidthMils()));
                             serializer.attribute(null, ATTR_HEIGHT_MILS, String.valueOf(
                                     mediaSize.getHeightMils()));
+                            // Store only the platform localized versions of the label
+                            // since the resource ids for a print service are not stable 
+                            // across application versions.
+                            if ("android".equals(mediaSize.mPackageName)
+                                    && mediaSize.mLabelResId > 0) {
+                                serializer.attribute(null, ATTR_PACKAGE_NAME,
+                                        mediaSize.mPackageName);
+                                serializer.attribute(null, ATTR_LABEL_RES_ID,
+                                        String.valueOf(mediaSize.mLabelResId));
+                            } else {
+                                serializer.attribute(null, ATTR_LABEL,
+                                        mediaSize.getLabel(getPackageManager()));
+                            }
                             serializer.endTag(null, TAG_MEDIA_SIZE);
                         }
 
@@ -839,12 +834,23 @@ public final class PrintSpoolerService extends Service {
                         if (resolution != null) {
                             serializer.startTag(null, TAG_RESOLUTION);
                             serializer.attribute(null, ATTR_ID, resolution.getId());
-                            serializer.attribute(null, ATTR_LABEL, resolution.getLabel()
-                                    .toString());
                             serializer.attribute(null, ATTR_HORIZONTAL_DPI, String.valueOf(
                                     resolution.getHorizontalDpi()));
                             serializer.attribute(null, ATTR_VERTICAL_DPI, String.valueOf(
                                     resolution.getVerticalDpi()));
+                            // Store only the platform localized versions of the label
+                            // since the resource ids for a print service are not stable 
+                            // across application versions.
+                            if ("android".equals(resolution.mPackageName)
+                                    && resolution.mLabelResId > 0) {
+                                serializer.attribute(null, ATTR_PACKAGE_NAME,
+                                        resolution.mPackageName);
+                                serializer.attribute(null, ATTR_LABEL_RES_ID,
+                                        String.valueOf(resolution.mLabelResId));
+                            } else {
+                                serializer.attribute(null, ATTR_LABEL,
+                                        resolution.getLabel(getPackageManager()));
+                            }
                             serializer.endTag(null, TAG_RESOLUTION);
                         }
 
@@ -860,24 +866,6 @@ public final class PrintSpoolerService extends Service {
                             serializer.attribute(null, ATTR_BOTTOM_MILS, String.valueOf(
                                     margins.getBottomMils()));
                             serializer.endTag(null, TAG_MARGINS);
-                        }
-
-                        Tray inputTray = attributes.getInputTray();
-                        if (inputTray != null) {
-                            serializer.startTag(null, TAG_INPUT_TRAY);
-                            serializer.attribute(null, ATTR_ID, inputTray.getId());
-                            serializer.attribute(null, ATTR_LABEL, inputTray.getLabel()
-                                    .toString());
-                            serializer.endTag(null, TAG_INPUT_TRAY);
-                        }
-
-                        Tray outputTray = attributes.getOutputTray();
-                        if (outputTray != null) {
-                            serializer.startTag(null, TAG_OUTPUT_TRAY);
-                            serializer.attribute(null, ATTR_ID, outputTray.getId());
-                            serializer.attribute(null, ATTR_LABEL, outputTray.getLabel()
-                                    .toString());
-                            serializer.endTag(null, TAG_OUTPUT_TRAY);
                         }
 
                         serializer.endTag(null, TAG_ATTRIBUTES);
@@ -1026,17 +1014,8 @@ public final class PrintSpoolerService extends Service {
 
                 PrintAttributes.Builder builder = new PrintAttributes.Builder();
 
-                String duplexMode = parser.getAttributeValue(null, ATTR_DUPLEX_MODE);
-                builder.setDuplexMode(Integer.parseInt(duplexMode));
-
                 String colorMode = parser.getAttributeValue(null, ATTR_COLOR_MODE);
                 builder.setColorMode(Integer.parseInt(colorMode));
-
-                String fittingMode = parser.getAttributeValue(null, ATTR_FITTING_MODE);
-                builder.setFittingMode(Integer.parseInt(fittingMode));
-
-                String orientation = parser.getAttributeValue(null, ATTR_ORIENTATION);
-                builder.setOrientation(Integer.parseInt(orientation));
 
                 parser.next();
 
@@ -1048,7 +1027,12 @@ public final class PrintSpoolerService extends Service {
                             ATTR_WIDTH_MILS));
                     final int heightMils = Integer.parseInt(parser.getAttributeValue(null,
                             ATTR_HEIGHT_MILS));
-                    MediaSize mediaSize = new MediaSize(id, label, widthMils, heightMils);
+                    String packageName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
+                    final int labelResId = Integer.parseInt(parser.getAttributeValue(null,
+                            ATTR_LABEL_RES_ID));
+                    label = parser.getAttributeValue(null, ATTR_LABEL);
+                    MediaSize mediaSize = new MediaSize(id, label, packageName, labelResId,
+                                widthMils, heightMils);
                     builder.setMediaSize(mediaSize);
                     parser.next();
                     skipEmptyTextTags(parser);
@@ -1064,7 +1048,11 @@ public final class PrintSpoolerService extends Service {
                             ATTR_HORIZONTAL_DPI));
                     final int verticalDpi = Integer.parseInt(parser.getAttributeValue(null,
                             ATTR_VERTICAL_DPI));
-                    Resolution resolution = new Resolution(id, label, horizontalDpi, verticalDpi);
+                    String packageName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
+                    final int labelResId = Integer.parseInt(
+                            parser.getAttributeValue(null, ATTR_LABEL_RES_ID));
+                    Resolution resolution = new Resolution(id, label, packageName, labelResId,
+                                horizontalDpi, verticalDpi);
                     builder.setResolution(resolution);
                     parser.next();
                     skipEmptyTextTags(parser);
@@ -1087,30 +1075,6 @@ public final class PrintSpoolerService extends Service {
                     parser.next();
                     skipEmptyTextTags(parser);
                     expect(parser, XmlPullParser.END_TAG, TAG_MARGINS);
-                    parser.next();
-                }
-
-                skipEmptyTextTags(parser);
-                if (accept(parser, XmlPullParser.START_TAG, TAG_INPUT_TRAY)) {
-                    String id = parser.getAttributeValue(null, ATTR_ID);
-                    label = parser.getAttributeValue(null, ATTR_LABEL);
-                    Tray tray = new Tray(id, label);
-                    builder.setInputTray(tray);
-                    parser.next();
-                    skipEmptyTextTags(parser);
-                    expect(parser, XmlPullParser.END_TAG, TAG_INPUT_TRAY);
-                    parser.next();
-                }
-
-                skipEmptyTextTags(parser);
-                if (accept(parser, XmlPullParser.START_TAG, TAG_OUTPUT_TRAY)) {
-                    String id = parser.getAttributeValue(null, ATTR_ID);
-                    label = parser.getAttributeValue(null, ATTR_LABEL);
-                    Tray tray = new Tray(id, label);
-                    builder.setOutputTray(tray);
-                    parser.next();
-                    skipEmptyTextTags(parser);
-                    expect(parser, XmlPullParser.END_TAG, TAG_OUTPUT_TRAY);
                     parser.next();
                 }
 
