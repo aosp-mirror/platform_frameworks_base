@@ -70,13 +70,17 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         int batteryLevel;
         boolean pluggedIn;
     }
-    static class RSSIState extends State {
+    static class ActivityState extends State {
+        boolean activityIn;
+        boolean activityOut;
+    }
+    static class RSSIState extends ActivityState {
         int signalIconId;
         String signalContentDescription;
         int dataTypeIconId;
         String dataContentDescription;
     }
-    static class WifiState extends State {
+    static class WifiState extends ActivityState {
         String signalContentDescription;
         boolean connected;
     }
@@ -430,6 +434,7 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     // NetworkSignalChanged callback
     @Override
     public void onWifiSignalChanged(boolean enabled, int wifiSignalIconId,
+            boolean activityIn, boolean activityOut,
             String wifiSignalContentDescription, String enabledDesc) {
         // TODO: If view is in awaiting state, disable
         Resources r = mContext.getResources();
@@ -438,6 +443,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
         boolean wifiNotConnected = (wifiSignalIconId > 0) && (enabledDesc == null);
         mWifiState.enabled = enabled;
         mWifiState.connected = wifiConnected;
+        mWifiState.activityIn = enabled && activityIn;
+        mWifiState.activityOut = enabled && activityOut;
         if (wifiConnected) {
             mWifiState.iconId = wifiSignalIconId;
             mWifiState.label = removeDoubleQuotes(enabledDesc);
@@ -468,7 +475,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
     @Override
     public void onMobileDataSignalChanged(
             boolean enabled, int mobileSignalIconId, String signalContentDescription,
-            int dataTypeIconId, String dataContentDescription, String enabledDesc) {
+            int dataTypeIconId, boolean activityIn, boolean activityOut,
+            String dataContentDescription,String enabledDesc) {
         if (deviceHasMobileData()) {
             // TODO: If view is in awaiting state, disable
             Resources r = mContext.getResources();
@@ -481,6 +489,8 @@ class QuickSettingsModel implements BluetoothStateChangeCallback,
             mRSSIState.dataTypeIconId = enabled && (dataTypeIconId > 0) && !mWifiState.enabled
                     ? dataTypeIconId
                     : 0;
+            mRSSIState.activityIn = enabled && activityIn;
+            mRSSIState.activityOut = enabled && activityOut;
             mRSSIState.dataContentDescription = enabled && (dataTypeIconId > 0) && !mWifiState.enabled
                     ? dataContentDescription
                     : r.getString(R.string.accessibility_no_data);
