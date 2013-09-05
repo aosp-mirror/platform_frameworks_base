@@ -57,6 +57,7 @@ import android.util.LongSparseLongArray;
 import android.util.Pools.SynchronizedPool;
 import android.util.Property;
 import android.util.SparseArray;
+import android.util.SuperNotCalledException;
 import android.util.TypedValue;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.AccessibilityIterators.TextSegmentIterator;
@@ -2203,6 +2204,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * instead when layout() is invoked.
      */
     static final int PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT = 0x8;
+
+    /**
+     * Flag indicating that an overridden method correctly  called down to
+     * the superclass implementation as required by the API spec.
+     */
+    static final int PFLAG3_CALLED_SUPER = 0x10;
 
 
     /* End of masks for mPrivateFlags3 */
@@ -5955,6 +5962,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // Invalidate too, since the default behavior for views is to be
         // be drawn at 50% alpha rather than to change the drawable.
         invalidate(true);
+
+        if (!enabled) {
+            cancelPendingInputEvents();
+        }
     }
 
     /**
@@ -12361,6 +12372,61 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mOverlay != null) {
             mOverlay.getOverlayView().dispatchDetachedFromWindow();
         }
+    }
+
+    /**
+     * Cancel any deferred high-level input events that were previously posted to the event queue.
+     *
+     * <p>Many views post high-level events such as click handlers to the event queue
+     * to run deferred in order to preserve a desired user experience - clearing visible
+     * pressed states before executing, etc. This method will abort any events of this nature
+     * that are currently in flight.</p>
+     *
+     * <p>Custom views that generate their own high-level deferred input events should override
+     * {@link #onCancelPendingInputEvents()} and remove those pending events from the queue.</p>
+     *
+     * <p>This will also cancel pending input events for any child views.</p>
+     *
+     * <p>Note that this may not be sufficient as a debouncing strategy for clicks in all cases.
+     * This will not impact newer events posted after this call that may occur as a result of
+     * lower-level input events still waiting in the queue. If you are trying to prevent
+     * double-submitted  events for the duration of some sort of asynchronous transaction
+     * you should also take other steps to protect against unexpected double inputs e.g. calling
+     * {@link #setEnabled(boolean) setEnabled(false)} and re-enabling the view when
+     * the transaction completes, tracking already submitted transaction IDs, etc.</p>
+     */
+    public final void cancelPendingInputEvents() {
+        dispatchCancelPendingInputEvents();
+    }
+
+    /**
+     * Called by {@link #cancelPendingInputEvents()} to cancel input events in flight.
+     * Overridden by ViewGroup to dispatch. Package scoped to prevent app-side meddling.
+     */
+    void dispatchCancelPendingInputEvents() {
+        mPrivateFlags3 &= ~PFLAG3_CALLED_SUPER;
+        onCancelPendingInputEvents();
+        if ((mPrivateFlags3 & PFLAG3_CALLED_SUPER) != PFLAG3_CALLED_SUPER) {
+            throw new SuperNotCalledException("View " + getClass().getSimpleName() +
+                    " did not call through to super.onCancelPendingInputEvents()");
+        }
+    }
+
+    /**
+     * Called as the result of a call to {@link #cancelPendingInputEvents()} on this view or
+     * a parent view.
+     *
+     * <p>This method is responsible for removing any pending high-level input events that were
+     * posted to the event queue to run later. Custom view classes that post their own deferred
+     * high-level events via {@link #post(Runnable)}, {@link #postDelayed(Runnable, long)} or
+     * {@link android.os.Handler} should override this method, call
+     * <code>super.onCancelPendingInputEvents()</code> and remove those callbacks as appropriate.
+     * </p>
+     */
+    public void onCancelPendingInputEvents() {
+        removePerformClickCallback();
+        cancelLongPress();
+        mPrivateFlags3 |= PFLAG3_CALLED_SUPER;
     }
 
     /**
