@@ -18,6 +18,8 @@ package android.content;
 
 /**
  * Representation of an owner of {@link UndoOperation} objects in an {@link UndoManager}.
+ *
+ * @hide
  */
 public class UndoOwner {
     final String mTag;
