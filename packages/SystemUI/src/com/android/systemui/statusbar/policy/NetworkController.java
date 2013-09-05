@@ -27,6 +27,7 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wimax.WimaxManagerConstants;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
@@ -43,6 +44,7 @@ import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.internal.util.AsyncChannel;
+import com.android.systemui.DemoMode;
 import com.android.systemui.R;
 
 import java.io.FileDescriptor;
@@ -51,11 +53,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class NetworkController extends BroadcastReceiver {
+public class NetworkController extends BroadcastReceiver implements DemoMode {
     // debug
     static final String TAG = "StatusBar.NetworkController";
     static final boolean DEBUG = false;
     static final boolean CHATTY = false; // additional diagnostics, but not logspew
+
+    private static final int FLIGHT_MODE_ICON = R.drawable.stat_sys_signal_flightmode;
 
     // telephony
     boolean mHspaDataDistinguishable;
@@ -277,6 +281,7 @@ public class NetworkController extends BroadcastReceiver {
     }
 
     public void refreshSignalCluster(SignalCluster cluster) {
+        if (mDemoMode) return;
         cluster.setWifiIndicators(
                 // only show wifi in the cluster if connected or if wifi-only
                 mWifiEnabled && (mWifiConnected || !mHasMobileDataFeature),
@@ -1051,7 +1056,7 @@ public class NetworkController extends BroadcastReceiver {
             // look again; your radios are now airplanes
             mContentDescriptionPhoneSignal = mContext.getString(
                     R.string.accessibility_airplane_mode);
-            mAirplaneIconId = R.drawable.stat_sys_signal_flightmode;
+            mAirplaneIconId = FLIGHT_MODE_ICON;
             mPhoneSignalIconId = mDataSignalIconId = mDataTypeIconId = mQSDataTypeIconId = 0;
             mQSPhoneSignalIconId = 0;
 
@@ -1359,4 +1364,87 @@ public class NetworkController extends BroadcastReceiver {
         }
     }
 
+    private boolean mDemoMode;
+    private int mDemoInetCondition;
+    private int mDemoWifiLevel;
+    private int mDemoDataTypeIconId;
+    private int mDemoMobileLevel;
+
+    @Override
+    public void dispatchDemoCommand(String command, Bundle args) {
+        if (!mDemoMode && command.equals(COMMAND_ENTER)) {
+            mDemoMode = true;
+            mDemoWifiLevel = mWifiLevel;
+            mDemoInetCondition = mInetCondition;
+            mDemoDataTypeIconId = mDataTypeIconId;
+            mDemoMobileLevel = mLastSignalLevel;
+        } else if (mDemoMode && command.equals(COMMAND_EXIT)) {
+            mDemoMode = false;
+            for (SignalCluster cluster : mSignalClusters) {
+                refreshSignalCluster(cluster);
+            }
+        } else if (mDemoMode && command.equals(COMMAND_NETWORK)) {
+            String airplane = args.getString("airplane");
+            if (airplane != null) {
+                boolean show = airplane.equals("show");
+                for (SignalCluster cluster : mSignalClusters) {
+                    cluster.setIsAirplaneMode(show, FLIGHT_MODE_ICON);
+                }
+            }
+            String fully = args.getString("fully");
+            if (fully != null) {
+                mDemoInetCondition = Boolean.parseBoolean(fully) ? 1 : 0;
+            }
+            String wifi = args.getString("wifi");
+            if (wifi != null) {
+                boolean show = wifi.equals("show");
+                String level = args.getString("level");
+                if (level != null) {
+                    mDemoWifiLevel = level.equals("null") ? -1
+                            : Math.min(Integer.parseInt(level), WifiIcons.WIFI_LEVEL_COUNT - 1);
+                }
+                int iconId = mDemoWifiLevel < 0 ? R.drawable.stat_sys_wifi_signal_null
+                        : WifiIcons.WIFI_SIGNAL_STRENGTH[mDemoInetCondition][mDemoWifiLevel];
+                for (SignalCluster cluster : mSignalClusters) {
+                    cluster.setWifiIndicators(
+                            show,
+                            iconId,
+                            "Demo");
+                }
+            }
+            String mobile = args.getString("mobile");
+            if (mobile != null) {
+                boolean show = mobile.equals("show");
+                String datatype = args.getString("datatype");
+                if (datatype != null) {
+                    mDemoDataTypeIconId =
+                            datatype.equals("1x") ? R.drawable.stat_sys_data_connected_1x :
+                            datatype.equals("3g") ? R.drawable.stat_sys_data_connected_3g :
+                            datatype.equals("4g") ? R.drawable.stat_sys_data_connected_4g :
+                            datatype.equals("e") ? R.drawable.stat_sys_data_connected_e :
+                            datatype.equals("g") ? R.drawable.stat_sys_data_connected_g :
+                            datatype.equals("h") ? R.drawable.stat_sys_data_connected_h :
+                            datatype.equals("lte") ? R.drawable.stat_sys_data_connected_lte :
+                            datatype.equals("roam") ? R.drawable.stat_sys_data_connected_roam :
+                            0;
+                }
+                int[][] icons = TelephonyIcons.TELEPHONY_SIGNAL_STRENGTH;
+                String level = args.getString("level");
+                if (level != null) {
+                    mDemoMobileLevel = level.equals("null") ? -1
+                            : Math.min(Integer.parseInt(level), icons[0].length - 1);
+                }
+                int iconId = mDemoMobileLevel < 0 ? R.drawable.stat_sys_signal_null :
+                        icons[mDemoInetCondition][mDemoMobileLevel];
+                for (SignalCluster cluster : mSignalClusters) {
+                    cluster.setMobileDataIndicators(
+                            show,
+                            iconId,
+                            mDemoDataTypeIconId,
+                            "Demo",
+                            "Demo");
+                }
+            }
+        }
+    }
 }

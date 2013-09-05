@@ -29,11 +29,12 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.BatteryManager;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.View;
 
-public class BatteryMeterView extends View {
+public class BatteryMeterView extends View implements DemoMode {
     public static final String TAG = BatteryMeterView.class.getSimpleName();
     public static final String ACTION_LEVEL_TEST = "com.android.systemui.BATTERY_LEVEL_TEST";
 
@@ -204,7 +205,6 @@ public class BatteryMeterView extends View {
     }
 
     private int getColorForLevel(int percent) {
-        if (mTracker.plugged) return mChargeColor;
         int thresh, color = 0;
         for (int i=0; i<mColors.length; i+=2) {
             thresh = mColors[i];
@@ -216,7 +216,8 @@ public class BatteryMeterView extends View {
 
     @Override
     public void draw(Canvas c) {
-        final int level = mTracker.level;
+        BatteryTracker tracker = mDemoMode ? mDemoTracker : mTracker;
+        final int level = tracker.level;
         float drawFrac = (float) level / 100f;
         final int pt = getPaddingTop();
         final int pl = getPaddingLeft();
@@ -245,8 +246,8 @@ public class BatteryMeterView extends View {
         c.drawRect(frame, mFramePaint);
 
         // fill 'er up
-        final int pct = mTracker.level;
-        final int color = getColorForLevel(pct);
+        final int pct = tracker.level;
+        final int color = tracker.plugged ? mChargeColor : getColorForLevel(pct);
         mBatteryPaint.setColor(color);
 
         if (level >= FULL) {
@@ -270,16 +271,16 @@ public class BatteryMeterView extends View {
             final float x = mWidth * 0.5f;
             final float y = (mHeight + mWarningTextHeight) * 0.48f;
             c.drawText(mWarningString, x, y, mWarningTextPaint);
-        } else if (mTracker.plugged) {
+        } else if (tracker.plugged) {
             final Rect r = new Rect(
                     (int)frame.left + width / 4,  (int)frame.top + height / 5,
                     (int)frame.right - width / 4, (int)frame.bottom - height / 6);
             mLightning.setBounds(r);
             mLightning.draw(c);
-        } else if (mShowPercent && !(mTracker.level == 100 && !SHOW_100_PERCENT)) {
+        } else if (mShowPercent && !(tracker.level == 100 && !SHOW_100_PERCENT)) {
             mTextPaint.setTextSize(height *
                     (SINGLE_DIGIT_PERCENT ? 0.75f
-                            : (mTracker.level == 100 ? 0.38f : 0.5f)));
+                            : (tracker.level == 100 ? 0.38f : 0.5f)));
             mTextHeight = -mTextPaint.getFontMetrics().ascent;
 
             final String str = String.valueOf(SINGLE_DIGIT_PERCENT ? (pct/10) : pct);
@@ -300,6 +301,31 @@ public class BatteryMeterView extends View {
 //
 //            pt.setColor(0xFFFF00FF);
 //            c.drawRect(1, 1, mWidth, mHeight, pt);
+        }
+    }
+
+    private boolean mDemoMode;
+    private BatteryTracker mDemoTracker = new BatteryTracker();
+
+    @Override
+    public void dispatchDemoCommand(String command, Bundle args) {
+        if (!mDemoMode && command.equals(COMMAND_ENTER)) {
+            mDemoMode = true;
+            mDemoTracker.level = mTracker.level;
+            mDemoTracker.plugged = mTracker.plugged;
+        } else if (mDemoMode && command.equals(COMMAND_EXIT)) {
+            mDemoMode = false;
+            postInvalidate();
+        } else if (mDemoMode && command.equals(COMMAND_BATTERY)) {
+           String level = args.getString("level");
+           String plugged = args.getString("plugged");
+           if (level != null) {
+               mDemoTracker.level = Math.min(Math.max(Integer.parseInt(level), 0), 100);
+           }
+           if (plugged != null) {
+               mDemoTracker.plugged = Boolean.parseBoolean(plugged);
+           }
+           postInvalidate();
         }
     }
 }

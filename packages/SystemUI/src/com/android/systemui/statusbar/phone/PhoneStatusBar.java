@@ -47,6 +47,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.InputMethodService;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -79,6 +80,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.systemui.DemoMode;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.BaseStatusBar;
@@ -102,7 +104,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-public class PhoneStatusBar extends BaseStatusBar {
+public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
     static final String TAG = "PhoneStatusBar";
     public static final boolean DEBUG = BaseStatusBar.DEBUG;
     public static final boolean SPEW = false;
@@ -363,7 +365,6 @@ public class PhoneStatusBar extends BaseStatusBar {
         mStatusBarView = (PhoneStatusBarView) mStatusBarWindow.findViewById(R.id.status_bar);
         mStatusBarView.setBar(this);
 
-
         PanelHolder holder = (PanelHolder) mStatusBarWindow.findViewById(R.id.panel_holder);
         mStatusBarView.setPanelHolder(holder);
 
@@ -605,18 +606,13 @@ public class PhoneStatusBar extends BaseStatusBar {
             }
         }
 
-//        final ImageView wimaxRSSI =
-//                (ImageView)sb.findViewById(R.id.wimax_signal);
-//        if (wimaxRSSI != null) {
-//            mNetworkController.addWimaxIconView(wimaxRSSI);
-//        }
-
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(ACTION_DEMO);
         context.registerReceiver(mBroadcastReceiver, filter);
 
         // listen for USER_SETUP_COMPLETE setting (per-user)
@@ -1874,6 +1870,7 @@ public class PhoneStatusBar extends BaseStatusBar {
     }
 
     private void checkBarModes() {
+        if (mDemoMode) return;
         checkBarMode(mStatusBarMode, mStatusBarWindowState, mStatusBarView.getBarTransitions());
         if (mNavigationBarView != null) {
             checkBarMode(mNavigationBarMode,
@@ -2447,6 +2444,19 @@ public class PhoneStatusBar extends BaseStatusBar {
                 repositionNavigationBar();
                 notifyNavigationBarScreenOn(true);
             }
+            else if (ACTION_DEMO.equals(action)) {
+                Bundle bundle = intent.getExtras();
+                if (bundle != null) {
+                    String command = bundle.getString("command", "").trim().toLowerCase();
+                    if (command.length() > 0) {
+                        try {
+                            dispatchDemoCommand(command, bundle);
+                        } catch (Throwable t) {
+                            Log.w(TAG, "Error running demo command, intent=" + intent, t);
+                        }
+                    }
+                }
+            }
         }
     };
 
@@ -2675,5 +2685,67 @@ public class PhoneStatusBar extends BaseStatusBar {
             mWindowManager.removeViewImmediate(mNavigationBarView);
         }
         mContext.unregisterReceiver(mBroadcastReceiver);
+    }
+
+    private boolean mDemoModeAllowed;
+    private boolean mDemoMode;
+    private DemoStatusIcons mDemoStatusIcons;
+
+    @Override
+    public void dispatchDemoCommand(String command, Bundle args) {
+        if (!mDemoModeAllowed) {
+            mDemoModeAllowed = Settings.Global.getInt(mContext.getContentResolver(),
+                    "sysui_demo_allowed", 0) != 0;
+        }
+        if (!mDemoModeAllowed) return;
+        if (command.equals(COMMAND_ENTER)) {
+            mDemoMode = true;
+        } else if (command.equals(COMMAND_EXIT)) {
+            mDemoMode = false;
+            checkBarModes();
+        } else if (!mDemoMode) {
+            // automatically enter demo mode on first demo command
+            dispatchDemoCommand(COMMAND_ENTER, new Bundle());
+        }
+        boolean modeChange = command.equals(COMMAND_ENTER) || command.equals(COMMAND_EXIT);
+        if (modeChange || command.equals(COMMAND_CLOCK)) {
+            dispatchDemoCommandToView(command, args, R.id.clock);
+        }
+        if (modeChange || command.equals(COMMAND_BATTERY)) {
+            dispatchDemoCommandToView(command, args, R.id.battery);
+        }
+        if (modeChange || command.equals(COMMAND_STATUS)) {
+            if (mDemoStatusIcons == null) {
+                mDemoStatusIcons = new DemoStatusIcons(mStatusIcons, mIconSize);
+            }
+            mDemoStatusIcons.dispatchDemoCommand(command, args);
+        }
+        if (mNetworkController != null && (modeChange || command.equals(COMMAND_NETWORK))) {
+            mNetworkController.dispatchDemoCommand(command, args);
+        }
+        if (command.equals(COMMAND_BARS)) {
+            String mode = args.getString("mode");
+            int barMode = "opaque".equals(mode) ? MODE_OPAQUE :
+                    "transparent".equals(mode) ? MODE_TRANSPARENT :
+                    "semi-transparent".equals(mode) ? MODE_SEMI_TRANSPARENT :
+                    -1;
+            if (barMode != -1) {
+                boolean animate = true;
+                if (mStatusBarView != null) {
+                    mStatusBarView.getBarTransitions().transitionTo(barMode, animate);
+                }
+                if (mNavigationBarView != null) {
+                    mNavigationBarView.getBarTransitions().transitionTo(barMode, animate);
+                }
+            }
+        }
+    }
+
+    private void dispatchDemoCommandToView(String command, Bundle args, int id) {
+        if (mStatusBarView == null) return;
+        View v = mStatusBarView.findViewById(id);
+        if (v instanceof DemoMode) {
+            ((DemoMode)v).dispatchDemoCommand(command, args);
+        }
     }
 }
