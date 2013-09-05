@@ -52,7 +52,7 @@ public class RestrictionsPinActivity extends AlertActivity
         super.onCreate(icicle);
 
         mUserManager = (UserManager) getSystemService(Context.USER_SERVICE);
-        mHasRestrictionsPin = mUserManager.hasRestrictionsPin();
+        mHasRestrictionsPin = mUserManager.hasRestrictionsChallenge();
         initUi();
         setupAlert();
     }
@@ -83,7 +83,7 @@ public class RestrictionsPinActivity extends AlertActivity
         super.onResume();
 
         setPositiveButtonState(false);
-        boolean hasPin = mUserManager.hasRestrictionsPin();
+        boolean hasPin = mUserManager.hasRestrictionsChallenge();
         if (hasPin) {
             mPinErrorMessage.setVisibility(View.INVISIBLE);
             mPinText.setOnEditorActionListener(this);
@@ -100,7 +100,7 @@ public class RestrictionsPinActivity extends AlertActivity
 
     private boolean updatePinTimer(int pinTimerMs) {
         if (pinTimerMs < 0) {
-            pinTimerMs = mUserManager.checkRestrictionsPin(null);
+            pinTimerMs = mUserManager.checkRestrictionsChallenge(null);
         }
         boolean enableInput;
         if (pinTimerMs >= 200) {
@@ -128,7 +128,7 @@ public class RestrictionsPinActivity extends AlertActivity
     }
 
     protected void performPositiveButtonAction() {
-        int result = mUserManager.checkRestrictionsPin(mPinText.getText().toString());
+        int result = mUserManager.checkRestrictionsChallenge(mPinText.getText().toString());
         if (result == UserManager.PIN_VERIFICATION_SUCCESS) {
             setResult(RESULT_OK);
             finish();
