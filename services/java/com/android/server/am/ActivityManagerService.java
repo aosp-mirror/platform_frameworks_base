@@ -2466,10 +2466,17 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    String getHomePackageName() {
+    Intent getHomeIntent() {
         Intent intent = new Intent(mTopAction, mTopData != null ? Uri.parse(mTopData) : null);
         intent.setComponent(mTopComponent);
-        intent.addCategory(Intent.CATEGORY_HOME);
+        if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
+            intent.addCategory(Intent.CATEGORY_HOME);
+        }
+        return intent;
+    }
+
+    String getHomePackageName() {
+        Intent intent = getHomeIntent();
         ActivityInfo aInfo = resolveActivityInfo(intent, STOCK_PM_FLAGS, mCurrentUserId);
         if (aInfo != null) {
             final String homePackageName = aInfo.applicationInfo.packageName;
@@ -2495,13 +2502,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             // error message and don't try to start anything.
             return false;
         }
-        Intent intent = new Intent(
-            mTopAction,
-            mTopData != null ? Uri.parse(mTopData) : null);
-        intent.setComponent(mTopComponent);
-        if (mFactoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
-            intent.addCategory(Intent.CATEGORY_HOME);
-        }
+        Intent intent = getHomeIntent();
         ActivityInfo aInfo =
             resolveActivityInfo(intent, STOCK_PM_FLAGS, userId);
         if (aInfo != null) {

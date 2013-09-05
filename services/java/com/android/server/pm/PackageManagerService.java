@@ -9716,10 +9716,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             throw new IllegalArgumentException(
                     "replacePreferredActivity expects filter to have only 1 action.");
         }
-        if (filter.countCategories() != 1) {
-            throw new IllegalArgumentException(
-                    "replacePreferredActivity expects filter to have only 1 category.");
-        }
         if (filter.countDataAuthorities() != 0
                 || filter.countDataPaths() != 0
                 || filter.countDataSchemes() != 0
@@ -9756,8 +9752,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                             removed = new ArrayList<PreferredActivity>();
                         }
                         removed.add(pa);
-                        Log.i(TAG, "Removing preferred activity " + pa.mPref.mComponent + ":");
-                        filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
+                        if (DEBUG_PREFERRED) {
+                            Slog.i(TAG, "Removing preferred activity "
+                                    + pa.mPref.mComponent + ":");
+                            filter.dump(new LogPrinter(Log.INFO, TAG), "  ");
+                        }
                     }
                 }
                 if (removed != null) {
@@ -9874,6 +9873,28 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         return num;
+    }
+
+    @Override
+    public ComponentName getHomeActivities(List<ResolveInfo> allHomeCandidates) {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+
+        final int callingUserId = UserHandle.getCallingUserId();
+        List<ResolveInfo> list = queryIntentActivities(intent, null, 0, callingUserId);
+        ResolveInfo preferred = findPreferredActivity(intent, null, 0, list, 0,
+                true, false, callingUserId);
+
+        allHomeCandidates.clear();
+        if (list != null) {
+            for (ResolveInfo ri : list) {
+                allHomeCandidates.add(ri);
+            }
+        }
+        return (preferred == null || preferred.activityInfo == null)
+                ? null
+                : new ComponentName(preferred.activityInfo.packageName,
+                        preferred.activityInfo.name);
     }
 
     @Override
