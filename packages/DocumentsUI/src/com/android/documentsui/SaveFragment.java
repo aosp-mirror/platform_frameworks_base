@@ -74,7 +74,7 @@ public class SaveFragment extends Fragment {
 
         final ImageView icon = (ImageView) view.findViewById(android.R.id.icon);
         icon.setImageDrawable(
-                RootsCache.resolveDocumentIcon(context, getArguments().getString(EXTRA_MIME_TYPE)));
+                IconUtils.loadMimeIcon(context, getArguments().getString(EXTRA_MIME_TYPE)));
 
         mDisplayName = (EditText) view.findViewById(android.R.id.title);
         mDisplayName.addTextChangedListener(mDisplayNameWatcher);

@@ -206,23 +206,4 @@ public class RootsCache {
         }
         return matching;
     }
-
-    @GuardedBy("ActivityThread")
-    public static Drawable resolveDocumentIcon(Context context, String mimeType) {
-        if (Document.MIME_TYPE_DIR.equals(mimeType)) {
-            return context.getResources().getDrawable(R.drawable.ic_dir);
-        } else {
-            final PackageManager pm = context.getPackageManager();
-            final Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setType(mimeType);
-
-            final ResolveInfo activityInfo = pm.resolveActivity(
-                    intent, PackageManager.MATCH_DEFAULT_ONLY);
-            if (activityInfo != null) {
-                return activityInfo.loadIcon(pm);
-            } else {
-                return null;
-            }
-        }
-    }
 }
