@@ -36,10 +36,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Adapter for printing files. This class could be useful if you
+ * Adapter for printing PDF files. This class could be useful if you
  * want to print a file and intercept when the system is ready
- * spooling the data, so you can deleted the file if it is a
- * temporary one.
+ * spooling the data, so you can delete the file if it is a
+ * temporary one. To achieve this one must override {@link #onFinish()}
+ * and delete the file yourself.
  */
 public class PrintFileDocumentAdapter extends PrintDocumentAdapter {
 
@@ -57,7 +58,7 @@ public class PrintFileDocumentAdapter extends PrintDocumentAdapter {
      * Constructor.
      *
      * @param context Context for accessing resources.
-     * @param file The file to print.
+     * @param file The PDF file to print.
      * @param documentInfo The information about the printed file.
      */
     public PrintFileDocumentAdapter(Context context, File file,
