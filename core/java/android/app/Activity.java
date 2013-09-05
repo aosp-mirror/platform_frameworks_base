@@ -17,6 +17,7 @@
 package android.app;
 
 import android.util.ArrayMap;
+import android.util.SuperNotCalledException;
 import com.android.internal.app.ActionBarImpl;
 import com.android.internal.policy.PolicyManager;
 
@@ -3436,6 +3437,12 @@ public class Activity extends ContextThemeWrapper
                 // activity is finished, no matter what happens to it.
                 mStartedActivity = true;
             }
+
+            final View decor = mWindow != null ? mWindow.peekDecorView() : null;
+            if (decor != null) {
+                decor.cancelPendingInputEvents();
+            }
+            // TODO Consider clearing/flushing other event sources and events for child windows.
         } else {
             if (options != null) {
                 mParent.startActivityFromChild(this, intent, requestCode, options);
