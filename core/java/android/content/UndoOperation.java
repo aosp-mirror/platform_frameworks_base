@@ -23,6 +23,8 @@ import android.os.Parcelable;
  * A single undoable operation.  You must subclass this to implement the state
  * and behavior for your operation.  Instances of this class are placed and
  * managed in an {@link UndoManager}.
+ *
+ * @hide
  */
 public abstract class UndoOperation<DATA> implements Parcelable {
     UndoOwner mOwner;

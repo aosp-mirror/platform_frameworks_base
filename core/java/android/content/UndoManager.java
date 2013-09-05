@@ -50,6 +50,8 @@ import java.util.HashMap;
  * undo/redo them without needing to impact edits in other objects; while
  * within the larger document, all edits can be seen and the user must
  * undo/redo them as a single stream.</p>
+ *
+ * @hide
  */
 public class UndoManager {
     private final HashMap<String, UndoOwner> mOwners = new HashMap<String, UndoOwner>();
