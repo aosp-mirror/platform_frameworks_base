@@ -3334,7 +3334,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (DEBUG_LAYOUT) Slog.i(TAG, "Win " + win + ": isVisibleOrBehindKeyguardLw="
                 + win.isVisibleOrBehindKeyguardLw());
         if (mTopFullscreenOpaqueWindowState == null && (win.getAttrs().privateFlags
-                &WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_NAV_BAR) != 0) {
+                &WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_NAV_BAR) != 0
+                || (win.isVisibleLw() && attrs.type == TYPE_INPUT_METHOD)) {
             if (mForcingShowNavBarLayer < 0) {
                 mForcingShowNavBar = true;
                 mForcingShowNavBarLayer = win.getSurfaceLayer();
