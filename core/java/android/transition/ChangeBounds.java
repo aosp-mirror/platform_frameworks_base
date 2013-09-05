@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view.transition;
+package android.transition;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -33,13 +33,17 @@ import java.util.Map;
 /**
  * This transition captures the layout bounds of target views before and after
  * the scene change and animates those changes during the transition.
+ *
+ * <p>A ChangeBounds transition can be described in a resource file by using the
+ * tag <code>changeBounds</code>, along with the other standard
+ * attributes of {@link android.R.styleable#Transition}.</p>
  */
-public class Move extends Transition {
+public class ChangeBounds extends Transition {
 
-    private static final String PROPNAME_BOUNDS = "android:move:bounds";
-    private static final String PROPNAME_PARENT = "android:move:parent";
-    private static final String PROPNAME_WINDOW_X = "android:move:windowX";
-    private static final String PROPNAME_WINDOW_Y = "android:move:windowY";
+    private static final String PROPNAME_BOUNDS = "android:changeBounds:bounds";
+    private static final String PROPNAME_PARENT = "android:changeBounds:parent";
+    private static final String PROPNAME_WINDOW_X = "android:changeBounds:windowX";
+    private static final String PROPNAME_WINDOW_Y = "android:changeBounds:windowY";
     private static final String[] sTransitionProperties = {
             PROPNAME_BOUNDS,
             PROPNAME_PARENT,
@@ -50,7 +54,7 @@ public class Move extends Transition {
     int[] tempLocation = new int[2];
     boolean mResizeClip = false;
     boolean mReparent = false;
-    private static final String LOG_TAG = "Move";
+    private static final String LOG_TAG = "ChangeBounds";
 
     private static RectEvaluator sRectEvaluator = new RectEvaluator();
 
@@ -64,7 +68,7 @@ public class Move extends Transition {
     }
 
     /**
-     * Setting this flag tells Move to track the before/after parent
+     * Setting this flag tells ChangeBounds to track the before/after parent
      * of every view using this transition. The flag is not enabled by
      * default because it requires the parent instances to be the same
      * in the two scenes or else all parents must use ids to allow
@@ -77,8 +81,7 @@ public class Move extends Transition {
         mReparent = reparent;
     }
 
-    @Override
-    protected void captureValues(TransitionValues values, boolean start) {
+    private void captureValues(TransitionValues values) {
         View view = values.view;
         values.values.put(PROPNAME_BOUNDS, new Rect(view.getLeft(), view.getTop(),
                 view.getRight(), view.getBottom()));
@@ -89,7 +92,17 @@ public class Move extends Transition {
     }
 
     @Override
-    protected Animator play(final ViewGroup sceneRoot, TransitionValues startValues,
+    public void captureStartValues(TransitionValues transitionValues) {
+        captureValues(transitionValues);
+    }
+
+    @Override
+    public void captureEndValues(TransitionValues transitionValues) {
+        captureValues(transitionValues);
+    }
+
+    @Override
+    public Animator createAnimator(final ViewGroup sceneRoot, TransitionValues startValues,
             TransitionValues endValues) {
         if (startValues == null || endValues == null) {
             return null;
@@ -105,7 +118,7 @@ public class Move extends Transition {
         boolean parentsEqual = (startParent == endParent) ||
                 (startParent.getId() == endParent.getId());
         // TODO: Might want reparenting to be separate/subclass transition, or at least
-        // triggered by a property on Move. Otherwise, we're forcing the requirement that
+        // triggered by a property on ChangeBounds. Otherwise, we're forcing the requirement that
         // all parents in layouts have IDs to avoid layout-inflation resulting in a side-effect
         // of reparenting the views.
         if (!mReparent || parentsEqual) {

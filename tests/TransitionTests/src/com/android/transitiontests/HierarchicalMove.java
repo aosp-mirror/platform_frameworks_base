@@ -17,12 +17,12 @@ package com.android.transitiontests;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.transition.ChangeBounds;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Move;
-import android.view.transition.Transition;
-import android.view.transition.TransitionGroup;
-import android.view.transition.TransitionManager;
+import android.transition.Transition;
+import android.transition.TransitionSet;
+import android.transition.TransitionManager;
 import android.widget.Button;
 
 import static android.widget.LinearLayout.LayoutParams;
@@ -59,33 +59,37 @@ public class HierarchicalMove extends Activity {
         //       group (sequentially)
         //          Move 3
         //          Move 4/5
-        TransitionGroup rootTransition = new TransitionGroup(TransitionGroup.SEQUENTIALLY);
+        TransitionSet rootTransition = new TransitionSet().
+                setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
 
         // button0
-        Transition move0 = new Move();
-        move0.setTargets(buttons[0]);
+        Transition move0 = new ChangeBounds();
+        move0.addTarget(buttons[0]);
 
         // buttons 1/2/3/4/5
-        TransitionGroup group12345 = new TransitionGroup(TransitionGroup.SEQUENTIALLY);
+        TransitionSet group12345 = new TransitionSet().
+                setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
 
         // buttons 1/2
-        TransitionGroup group12 = new TransitionGroup(TransitionGroup.TOGETHER);
-        Move move1 = new Move();
-        move1.setTargets(buttons[1]);
-        Move move2 = new Move();
-        move2.setTargets(buttons[2]);
-        group12.addTransitions(move1, move2);
+        TransitionSet group12 = new TransitionSet().
+                setOrdering(TransitionSet.ORDERING_TOGETHER);
+        ChangeBounds changeBounds1 = new ChangeBounds();
+        changeBounds1.addTarget(buttons[1]);
+        ChangeBounds changeBounds2 = new ChangeBounds();
+        changeBounds2.addTarget(buttons[2]);
+        group12.addTransition(changeBounds1).addTransition(changeBounds2);
 
-        TransitionGroup group345 = new TransitionGroup(TransitionGroup.SEQUENTIALLY);
-        Move move3 = new Move();
-        move3.setTargets(buttons[3]);
-        Move move45 = new Move();
-        move45.setTargets(buttons[4], buttons[5]);
-        group345.addTransitions(move3, move45);
+        TransitionSet group345 = new TransitionSet().
+                setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
+        ChangeBounds changeBounds3 = new ChangeBounds();
+        changeBounds3.addTarget(buttons[3]);
+        ChangeBounds changeBounds45 = new ChangeBounds();
+        changeBounds45.addTarget(buttons[4]).addTarget(buttons[5]);
+        group345.addTransition(changeBounds3).addTransition(changeBounds45);
 
-        group12345.addTransitions(move0, group12, group345);
+        group12345.addTransition(move0).addTransition(group12).addTransition(group345);
 
-        rootTransition.addTransitions(group12345);
+        rootTransition.addTransition(group12345);
         rootTransition.setDuration(1000);
         mTransition = rootTransition;
 

@@ -17,15 +17,15 @@ package com.android.transitiontests;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.transition.ChangeBounds;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Scene;
+import android.transition.Scene;
 import android.widget.Button;
-import android.view.transition.Fade;
-import android.view.transition.Move;
-import android.view.transition.TextChange;
-import android.view.transition.TransitionGroup;
-import android.view.transition.TransitionManager;
+import android.transition.Fade;
+import android.transition.TextChange;
+import android.transition.TransitionSet;
+import android.transition.TransitionManager;
 
 public class ClippingText extends Activity {
 
@@ -34,7 +34,8 @@ public class ClippingText extends Activity {
     ViewGroup mSceneRoot;
     //    static Fade sFade = new Fade(R.id.removingButton, R.id.invisibleButton, R.id.goneButton);
     Fade fader;
-    TransitionGroup mChanger;
+    TransitionSet mChanger;
+    Scene mCurrentScene;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -44,22 +45,24 @@ public class ClippingText extends Activity {
         View container = (View) findViewById(R.id.container);
         mSceneRoot = (ViewGroup) container.getParent();
 
-        mScene1 = new Scene(mSceneRoot, R.layout.clipping_text_1, this);
-        mScene2 = new Scene(mSceneRoot, R.layout.clipping_text_2, this);
+        mScene1 = Scene.getSceneForLayout(mSceneRoot, R.layout.clipping_text_1, this);
+        mScene2 = Scene.getSceneForLayout(mSceneRoot, R.layout.clipping_text_2, this);
 
-        mChanger = new TransitionGroup(TransitionGroup.TOGETHER);
-        Move move = new Move();
-        move.setResizeClip(true);
-        mChanger.addTransitions(move, new TextChange());
+        mChanger = new TransitionSet().setOrdering(TransitionSet.ORDERING_TOGETHER);
+        ChangeBounds changeBounds = new ChangeBounds();
+        changeBounds.setResizeClip(true);
+        mChanger.addTransition(changeBounds).addTransition(new TextChange());
 
-        mSceneRoot.setCurrentScene(mScene1);
+        mCurrentScene = mScene1;
     }
 
     public void sendMessage(View view) {
-        if (mSceneRoot.getCurrentScene() == mScene1) {
+        if (mCurrentScene == mScene1) {
             TransitionManager.go(mScene2, mChanger);
+            mCurrentScene = mScene2;
         } else {
             TransitionManager.go(mScene1, mChanger);
+            mCurrentScene = mScene1;
         }
     }
 }

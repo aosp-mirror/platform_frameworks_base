@@ -17,15 +17,12 @@ package com.android.transitiontests;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.transition.ChangeBounds;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.AutoTransition;
-import android.view.transition.Move;
-import android.view.transition.Scene;
-import android.view.transition.TextChange;
-import android.view.transition.Transition;
-import android.view.transition.TransitionGroup;
-import android.view.transition.TransitionManager;
+import android.transition.Scene;
+import android.transition.TransitionSet;
+import android.transition.TransitionManager;
 import android.widget.RadioButton;
 
 public class InterruptionTest extends Activity {
@@ -35,7 +32,8 @@ public class InterruptionTest extends Activity {
     private Scene mScene2;
     private Scene mScene3;
     private Scene mScene4;
-    TransitionGroup mSequencedMove = new TransitionGroup(TransitionGroup.SEQUENTIALLY);
+    TransitionSet mSequencedMove = new TransitionSet().
+            setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -44,24 +42,22 @@ public class InterruptionTest extends Activity {
 
         ViewGroup sceneRoot = (ViewGroup) findViewById(R.id.sceneRoot);
 
-        mScene1 = new Scene(sceneRoot, R.layout.interruption_inner_1, this);
-        mScene2 = new Scene(sceneRoot, R.layout.interruption_inner_2, this);
-        mScene3 = new Scene(sceneRoot, R.layout.interruption_inner_3, this);
-        mScene4 = new Scene(sceneRoot, R.layout.interruption_inner_4, this);
+        mScene1 = Scene.getSceneForLayout(sceneRoot, R.layout.interruption_inner_1, this);
+        mScene2 = Scene.getSceneForLayout(sceneRoot, R.layout.interruption_inner_2, this);
+        mScene3 = Scene.getSceneForLayout(sceneRoot, R.layout.interruption_inner_3, this);
+        mScene4 = Scene.getSceneForLayout(sceneRoot, R.layout.interruption_inner_4, this);
 
         mScene1RB = (RadioButton) findViewById(R.id.scene1RB);
         mScene2RB = (RadioButton) findViewById(R.id.scene2RB);
         mScene3RB = (RadioButton) findViewById(R.id.scene3RB);
         mScene4RB = (RadioButton) findViewById(R.id.scene4RB);
 
-        sceneRoot.setCurrentScene(mScene1);
+        ChangeBounds changeBounds1 = new ChangeBounds();
+        changeBounds1.addTargetId(R.id.button);
+        ChangeBounds changeBounds2 = new ChangeBounds();
+        changeBounds2.addTargetId(R.id.button1);
 
-        Move move1 = new Move();
-        move1.setTargetIds(R.id.button);
-        Move move2 = new Move();
-        move2.setTargetIds(R.id.button1);
-
-        mSequencedMove.addTransitions(move1, move2);
+        mSequencedMove.addTransition(changeBounds1).addTransition(changeBounds2);
         mSequencedMove.setDuration(1000);
     }
 

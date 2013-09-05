@@ -20,18 +20,18 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.transition.Fade;
-import android.view.transition.Scene;
+import android.transition.Fade;
+import android.transition.Scene;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.view.transition.AutoTransition;
-import android.view.transition.Move;
-import android.view.transition.Transition;
-import android.view.transition.TransitionGroup;
-import android.view.transition.TransitionManager;
+import android.transition.AutoTransition;
+import android.transition.ChangeBounds;
+import android.transition.Transition;
+import android.transition.TransitionSet;
+import android.transition.TransitionManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,10 +78,11 @@ public class ListViewAddRemove extends Activity {
             }
         });
         final Transition myTransition = new AutoTransition();
-        final TransitionGroup noFadeIn = new TransitionGroup(TransitionGroup.SEQUENTIALLY);
+        final TransitionSet noFadeIn = new TransitionSet().
+                setOrdering(TransitionSet.ORDERING_SEQUENTIAL);
         Fade fadeIn = new Fade(Fade.IN);
         fadeIn.setDuration(50);
-        noFadeIn.addTransitions(new Fade(Fade.OUT), new Move(), fadeIn);
+        noFadeIn.addTransition(new Fade(Fade.OUT)).addTransition(new ChangeBounds()).addTransition(fadeIn);
 
         myTransition.addListener(new Transition.TransitionListenerAdapter() {
             @Override

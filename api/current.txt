@@ -262,7 +262,7 @@ package android {
     field public static final int activityCloseExitAnimation = 16842939; // 0x10100bb
     field public static final int activityOpenEnterAnimation = 16842936; // 0x10100b8
     field public static final int activityOpenExitAnimation = 16842937; // 0x10100b9
-    field public static final int addPrintersActivity = 16843747; // 0x10103e3
+    field public static final int addPrintersActivity = 16843750; // 0x10103e6
     field public static final int addStatesFromChildren = 16842992; // 0x10100f0
     field public static final int adjustViewBounds = 16843038; // 0x101011e
     field public static final int alertDialogIcon = 16843605; // 0x1010355
@@ -290,14 +290,14 @@ package android {
     field public static final deprecated int animationResolution = 16843546; // 0x101031a
     field public static final int antialias = 16843034; // 0x101011a
     field public static final int anyDensity = 16843372; // 0x101026c
-    field public static final int apduServiceBanner = 16843755; // 0x10103eb
+    field public static final int apduServiceBanner = 16843758; // 0x10103ee
     field public static final int apiKey = 16843281; // 0x1010211
     field public static final int author = 16843444; // 0x10102b4
     field public static final int authorities = 16842776; // 0x1010018
     field public static final int autoAdvanceViewId = 16843535; // 0x101030f
     field public static final int autoCompleteTextViewStyle = 16842859; // 0x101006b
     field public static final int autoLink = 16842928; // 0x10100b0
-    field public static final int autoMirrored = 16843752; // 0x10103e8
+    field public static final int autoMirrored = 16843755; // 0x10103eb
     field public static final int autoStart = 16843445; // 0x10102b5
     field public static final deprecated int autoText = 16843114; // 0x101016a
     field public static final int autoUrlDetect = 16843404; // 0x101028c
@@ -338,7 +338,7 @@ package android {
     field public static final int canRetrieveWindowContent = 16843653; // 0x1010385
     field public static final int candidatesTextStyleSpans = 16843312; // 0x1010230
     field public static final deprecated int capitalize = 16843113; // 0x1010169
-    field public static final int category = 16843749; // 0x10103e5
+    field public static final int category = 16843752; // 0x10103e8
     field public static final int centerBright = 16842956; // 0x10100cc
     field public static final int centerColor = 16843275; // 0x101020b
     field public static final int centerDark = 16842952; // 0x10100c8
@@ -394,7 +394,7 @@ package android {
     field public static final int cropToPadding = 16843043; // 0x1010123
     field public static final int cursorVisible = 16843090; // 0x1010152
     field public static final int customNavigationLayout = 16843474; // 0x10102d2
-    field public static final int customRoots = 16843751; // 0x10103e7
+    field public static final int customRoots = 16843754; // 0x10103ea
     field public static final int customTokens = 16843579; // 0x101033b
     field public static final int cycles = 16843220; // 0x10101d4
     field public static final int dashGap = 16843175; // 0x10101a7
@@ -488,6 +488,7 @@ package android {
     field public static final int fadeScrollbars = 16843434; // 0x10102aa
     field public static final int fadingEdge = 16842975; // 0x10100df
     field public static final int fadingEdgeLength = 16842976; // 0x10100e0
+    field public static final int fadingMode = 16843745; // 0x10103e1
     field public static final int fastScrollAlwaysVisible = 16843573; // 0x1010335
     field public static final int fastScrollEnabled = 16843302; // 0x1010226
     field public static final int fastScrollOverlayPosition = 16843578; // 0x101033a
@@ -613,7 +614,7 @@ package android {
     field public static final int installLocation = 16843447; // 0x10102b7
     field public static final int interpolator = 16843073; // 0x1010141
     field public static final int isAlwaysSyncable = 16843571; // 0x1010333
-    field public static final int isAsciiCapable = 16843750; // 0x10103e6
+    field public static final int isAsciiCapable = 16843753; // 0x10103e9
     field public static final int isAuxiliary = 16843647; // 0x101037f
     field public static final int isDefault = 16843297; // 0x1010221
     field public static final int isIndicator = 16843079; // 0x1010147
@@ -846,7 +847,7 @@ package android {
     field public static final int prompt = 16843131; // 0x101017b
     field public static final int propertyName = 16843489; // 0x10102e1
     field public static final int protectionLevel = 16842761; // 0x1010009
-    field public static final int provideAssistData = 16843756; // 0x10103ec
+    field public static final int provideAssistData = 16843759; // 0x10103ef
     field public static final int publicKey = 16843686; // 0x10103a6
     field public static final int queryActionMsg = 16843227; // 0x10101db
     field public static final int queryAfterZeroResults = 16843394; // 0x1010282
@@ -871,7 +872,7 @@ package android {
     field public static final int reqKeyboardType = 16843304; // 0x1010228
     field public static final int reqNavigation = 16843306; // 0x101022a
     field public static final int reqTouchScreen = 16843303; // 0x1010227
-    field public static final int requireDeviceUnlock = 16843754; // 0x10103ea
+    field public static final int requireDeviceUnlock = 16843757; // 0x10103ed
     field public static final int required = 16843406; // 0x101028e
     field public static final int requiredAccountType = 16843734; // 0x10103d6
     field public static final int requiredForAllUsers = 16843728; // 0x10103d0
@@ -970,12 +971,13 @@ package android {
     field public static final int spinnersShown = 16843595; // 0x101034b
     field public static final int splitMotionEvents = 16843503; // 0x10102ef
     field public static final int src = 16843033; // 0x1010119
-    field public static final int ssp = 16843744; // 0x10103e0
-    field public static final int sspPattern = 16843746; // 0x10103e2
-    field public static final int sspPrefix = 16843745; // 0x10103e1
+    field public static final int ssp = 16843747; // 0x10103e3
+    field public static final int sspPattern = 16843749; // 0x10103e5
+    field public static final int sspPrefix = 16843748; // 0x10103e4
     field public static final int stackFromBottom = 16843005; // 0x10100fd
     field public static final int starStyle = 16842882; // 0x1010082
     field public static final int startColor = 16843165; // 0x101019d
+    field public static final int startDelay = 16843746; // 0x10103e2
     field public static final int startOffset = 16843198; // 0x10101be
     field public static final deprecated int startYear = 16843132; // 0x101017c
     field public static final int stateNotNeeded = 16842774; // 0x1010016
@@ -1019,7 +1021,7 @@ package android {
     field public static final int summaryOff = 16843248; // 0x10101f0
     field public static final int summaryOn = 16843247; // 0x10101ef
     field public static final int supportsRtl = 16843695; // 0x10103af
-    field public static final int supportsSwitchingToNextInputMethod = 16843753; // 0x10103e9
+    field public static final int supportsSwitchingToNextInputMethod = 16843756; // 0x10103ec
     field public static final int supportsUploading = 16843419; // 0x101029b
     field public static final int switchMinWidth = 16843632; // 0x1010370
     field public static final int switchPadding = 16843633; // 0x1010371
@@ -1036,7 +1038,7 @@ package android {
     field public static final int targetActivity = 16843266; // 0x1010202
     field public static final int targetClass = 16842799; // 0x101002f
     field public static final int targetDescriptions = 16843680; // 0x10103a0
-    field public static final int targetID = 16843740; // 0x10103dc
+    field public static final int targetId = 16843740; // 0x10103dc
     field public static final int targetPackage = 16842785; // 0x1010021
     field public static final int targetSdkVersion = 16843376; // 0x1010270
     field public static final int taskAffinity = 16842770; // 0x1010012
@@ -1141,6 +1143,7 @@ package android {
     field public static final int transformPivotX = 16843552; // 0x1010320
     field public static final int transformPivotY = 16843553; // 0x1010321
     field public static final int transition = 16843743; // 0x10103df
+    field public static final int transitionOrdering = 16843744; // 0x10103e0
     field public static final int translationX = 16843554; // 0x1010322
     field public static final int translationY = 16843555; // 0x1010323
     field public static final int type = 16843169; // 0x10101a1
@@ -1159,7 +1162,7 @@ package android {
     field public static final int valueTo = 16843487; // 0x10102df
     field public static final int valueType = 16843488; // 0x10102e0
     field public static final int variablePadding = 16843157; // 0x1010195
-    field public static final int vendor = 16843748; // 0x10103e4
+    field public static final int vendor = 16843751; // 0x10103e7
     field public static final int versionCode = 16843291; // 0x101021b
     field public static final int versionName = 16843292; // 0x101021c
     field public static final int verticalCorrection = 16843322; // 0x101023a
@@ -2350,7 +2353,6 @@ package android.animation {
     method public abstract long getDuration();
     method public android.animation.TimeInterpolator getInterpolator();
     method public java.util.ArrayList<android.animation.Animator.AnimatorListener> getListeners();
-    method public java.util.ArrayList<android.animation.Animator.AnimatorPauseListener> getPauseListeners();
     method public abstract long getStartDelay();
     method public boolean isPaused();
     method public abstract boolean isRunning();
@@ -25561,6 +25563,119 @@ package android.text.util {
 
 }
 
+package android.transition {
+
+  public class AutoTransition extends android.transition.TransitionSet {
+    ctor public AutoTransition();
+  }
+
+  public class ChangeBounds extends android.transition.Transition {
+    ctor public ChangeBounds();
+    method public void captureEndValues(android.transition.TransitionValues);
+    method public void captureStartValues(android.transition.TransitionValues);
+    method public void setReparent(boolean);
+    method public void setResizeClip(boolean);
+  }
+
+  public class Fade extends android.transition.Visibility {
+    ctor public Fade();
+    ctor public Fade(int);
+    field public static final int IN = 1; // 0x1
+    field public static final int OUT = 2; // 0x2
+  }
+
+  public final class Scene {
+    ctor public Scene(android.view.ViewGroup);
+    ctor public Scene(android.view.ViewGroup, android.view.ViewGroup);
+    method public void enter();
+    method public void exit();
+    method public static android.transition.Scene getSceneForLayout(android.view.ViewGroup, int, android.content.Context);
+    method public android.view.ViewGroup getSceneRoot();
+    method public void setEnterAction(java.lang.Runnable);
+    method public void setExitAction(java.lang.Runnable);
+  }
+
+  public abstract class Transition implements java.lang.Cloneable {
+    ctor public Transition();
+    method public android.transition.Transition addListener(android.transition.Transition.TransitionListener);
+    method public android.transition.Transition addTarget(android.view.View);
+    method public android.transition.Transition addTargetId(int);
+    method public abstract void captureEndValues(android.transition.TransitionValues);
+    method public abstract void captureStartValues(android.transition.TransitionValues);
+    method public android.transition.Transition clone();
+    method public android.animation.Animator createAnimator(android.view.ViewGroup, android.transition.TransitionValues, android.transition.TransitionValues);
+    method public long getDuration();
+    method public android.animation.TimeInterpolator getInterpolator();
+    method public java.lang.String getName();
+    method public long getStartDelay();
+    method public java.util.List<java.lang.Integer> getTargetIds();
+    method public java.util.List<android.view.View> getTargets();
+    method public java.lang.String[] getTransitionProperties();
+    method public android.transition.TransitionValues getTransitionValues(android.view.View, boolean);
+    method public android.transition.Transition removeListener(android.transition.Transition.TransitionListener);
+    method public android.transition.Transition removeTarget(android.view.View);
+    method public android.transition.Transition removeTargetId(int);
+    method public android.transition.Transition setDuration(long);
+    method public android.transition.Transition setInterpolator(android.animation.TimeInterpolator);
+    method public android.transition.Transition setStartDelay(long);
+  }
+
+  public static abstract interface Transition.TransitionListener {
+    method public abstract void onTransitionCancel(android.transition.Transition);
+    method public abstract void onTransitionEnd(android.transition.Transition);
+    method public abstract void onTransitionPause(android.transition.Transition);
+    method public abstract void onTransitionResume(android.transition.Transition);
+    method public abstract void onTransitionStart(android.transition.Transition);
+  }
+
+  public class TransitionInflater {
+    method public static android.transition.TransitionInflater from(android.content.Context);
+    method public android.transition.Transition inflateTransition(int);
+    method public android.transition.TransitionManager inflateTransitionManager(int, android.view.ViewGroup);
+  }
+
+  public class TransitionManager {
+    ctor public TransitionManager();
+    method public static void beginDelayedTransition(android.view.ViewGroup);
+    method public static void beginDelayedTransition(android.view.ViewGroup, android.transition.Transition);
+    method public static android.transition.Transition getDefaultTransition();
+    method public static void go(android.transition.Scene);
+    method public static void go(android.transition.Scene, android.transition.Transition);
+    method public void setDefaultTransition(android.transition.Transition);
+    method public void setTransition(android.transition.Scene, android.transition.Transition);
+    method public void setTransition(android.transition.Scene, android.transition.Scene, android.transition.Transition);
+    method public void transitionTo(android.transition.Scene);
+  }
+
+  public class TransitionSet extends android.transition.Transition {
+    ctor public TransitionSet();
+    method public android.transition.TransitionSet addTransition(android.transition.Transition);
+    method public void captureEndValues(android.transition.TransitionValues);
+    method public void captureStartValues(android.transition.TransitionValues);
+    method public int getOrdering();
+    method public android.transition.TransitionSet removeTransition(android.transition.Transition);
+    method public android.transition.TransitionSet setOrdering(int);
+    field public static final int ORDERING_SEQUENTIAL = 1; // 0x1
+    field public static final int ORDERING_TOGETHER = 0; // 0x0
+  }
+
+  public class TransitionValues {
+    ctor public TransitionValues();
+    field public final java.util.Map values;
+    field public android.view.View view;
+  }
+
+  public abstract class Visibility extends android.transition.Transition {
+    ctor public Visibility();
+    method public void captureEndValues(android.transition.TransitionValues);
+    method public void captureStartValues(android.transition.TransitionValues);
+    method public boolean isVisible(android.transition.TransitionValues);
+    method public android.animation.Animator onAppear(android.view.ViewGroup, android.transition.TransitionValues, int, android.transition.TransitionValues, int);
+    method public android.animation.Animator onDisappear(android.view.ViewGroup, android.transition.TransitionValues, int, android.transition.TransitionValues, int);
+  }
+
+}
+
 package android.util {
 
   public class AndroidException extends java.lang.Exception {
@@ -27457,7 +27572,6 @@ package android.view {
     method public java.lang.CharSequence getContentDescription();
     method public final android.content.Context getContext();
     method protected android.view.ContextMenu.ContextMenuInfo getContextMenuInfo();
-    method public android.view.transition.Scene getCurrentScene();
     method public static int getDefaultSize(int, int);
     method public android.view.Display getDisplay();
     method public final int[] getDrawableState();
@@ -29730,155 +29844,6 @@ package android.view.textservice {
 
   public final class TextServicesManager {
     method public android.view.textservice.SpellCheckerSession newSpellCheckerSession(android.os.Bundle, java.util.Locale, android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean);
-  }
-
-}
-
-package android.view.transition {
-
-  public class AutoTransition extends android.view.transition.TransitionGroup {
-    ctor public AutoTransition();
-  }
-
-  public class Crossfade extends android.view.transition.Transition {
-    ctor public Crossfade();
-    method protected void captureValues(android.view.transition.TransitionValues, boolean);
-    method public int getFadeBehavior();
-    method public int getResizeBehavior();
-    method public void setFadeBehavior(int);
-    method public void setResizeBehavior(int);
-    field public static final int FADE_BEHAVIOR_CROSSFADE = 0; // 0x0
-    field public static final int FADE_BEHAVIOR_OUT_IN = 2; // 0x2
-    field public static final int FADE_BEHAVIOR_REVEAL = 1; // 0x1
-    field public static final int RESIZE_BEHAVIOR_NONE = 0; // 0x0
-    field public static final int RESIZE_BEHAVIOR_SCALE = 1; // 0x1
-  }
-
-  public class Fade extends android.view.transition.Visibility {
-    ctor public Fade();
-    ctor public Fade(int);
-    field public static final int IN = 1; // 0x1
-    field public static final int OUT = 2; // 0x2
-  }
-
-  public class Move extends android.view.transition.Transition {
-    ctor public Move();
-    method protected void captureValues(android.view.transition.TransitionValues, boolean);
-    method public void setReparent(boolean);
-    method public void setResizeClip(boolean);
-  }
-
-  public class Recolor extends android.view.transition.Transition {
-    ctor public Recolor();
-    method protected void captureValues(android.view.transition.TransitionValues, boolean);
-  }
-
-  public class Rotate extends android.view.transition.Transition {
-    ctor public Rotate();
-    method protected void captureValues(android.view.transition.TransitionValues, boolean);
-  }
-
-  public final class Scene {
-    ctor public Scene(android.view.ViewGroup);
-    ctor public Scene(android.view.ViewGroup, int, android.content.Context);
-    ctor public Scene(android.view.ViewGroup, android.view.ViewGroup);
-    method public void enter();
-    method public void exit();
-    method public android.view.ViewGroup getSceneRoot();
-    method public void setEnterAction(java.lang.Runnable);
-    method public void setExitAction(java.lang.Runnable);
-  }
-
-  public class Slide extends android.view.transition.Visibility {
-    ctor public Slide();
-  }
-
-  public class TextChange extends android.view.transition.Transition {
-    ctor public TextChange();
-    method protected void captureValues(android.view.transition.TransitionValues, boolean);
-    method public void setChangeBehavior(int);
-    field public static final int CHANGE_BEHAVIOR_IN = 2; // 0x2
-    field public static final int CHANGE_BEHAVIOR_KEEP = 0; // 0x0
-    field public static final int CHANGE_BEHAVIOR_OUT = 1; // 0x1
-    field public static final int CHANGE_BEHAVIOR_OUT_IN = 3; // 0x3
-  }
-
-  public abstract class Transition implements java.lang.Cloneable {
-    ctor public Transition();
-    method public void addListener(android.view.transition.Transition.TransitionListener);
-    method protected void cancel();
-    method protected abstract void captureValues(android.view.transition.TransitionValues, boolean);
-    method public android.view.transition.Transition clone();
-    method public long getDuration();
-    method public android.animation.TimeInterpolator getInterpolator();
-    method public java.util.ArrayList<android.view.transition.Transition.TransitionListener> getListeners();
-    method public java.lang.String getName();
-    method public long getStartDelay();
-    method public int[] getTargetIds();
-    method public android.view.View[] getTargets();
-    method public java.lang.String[] getTransitionProperties();
-    method protected android.view.transition.TransitionValues getTransitionValues(android.view.View, boolean);
-    method protected android.animation.Animator play(android.view.ViewGroup, android.view.transition.TransitionValues, android.view.transition.TransitionValues);
-    method public void removeListener(android.view.transition.Transition.TransitionListener);
-    method public android.view.transition.Transition setDuration(long);
-    method public void setInterpolator(android.animation.TimeInterpolator);
-    method public void setStartDelay(long);
-    method public android.view.transition.Transition setTargetIds(int...);
-    method public android.view.transition.Transition setTargets(android.view.View...);
-  }
-
-  public static abstract interface Transition.TransitionListener {
-    method public abstract void onTransitionCancel(android.view.transition.Transition);
-    method public abstract void onTransitionEnd(android.view.transition.Transition);
-    method public abstract void onTransitionPause(android.view.transition.Transition);
-    method public abstract void onTransitionResume(android.view.transition.Transition);
-    method public abstract void onTransitionStart(android.view.transition.Transition);
-  }
-
-  public class TransitionGroup extends android.view.transition.Transition {
-    ctor public TransitionGroup();
-    ctor public TransitionGroup(int);
-    method public void addTransitions(android.view.transition.Transition...);
-    method protected void captureValues(android.view.transition.TransitionValues, boolean);
-    method public void removeTransition(android.view.transition.Transition);
-    method public void setOrdering(int);
-    field public static final int SEQUENTIALLY = 1; // 0x1
-    field public static final int TOGETHER = 0; // 0x0
-  }
-
-  public class TransitionInflater {
-    method public static android.view.transition.TransitionInflater from(android.content.Context);
-    method public android.view.transition.Scene inflateScene(int, android.view.ViewGroup);
-    method public android.view.transition.Transition inflateTransition(int);
-    method public android.view.transition.TransitionManager inflateTransitionManager(int, android.view.ViewGroup);
-  }
-
-  public class TransitionManager {
-    ctor public TransitionManager();
-    method public static void beginDelayedTransition(android.view.ViewGroup, android.view.transition.Transition);
-    method public android.view.transition.Transition getDefaultTransition();
-    method public static void go(android.view.transition.Scene);
-    method public static void go(android.view.transition.Scene, android.view.transition.Transition);
-    method public static void go(android.view.ViewGroup, java.lang.Runnable);
-    method public static void go(android.view.ViewGroup, java.lang.Runnable, android.view.transition.Transition);
-    method public void setDefaultTransition(android.view.transition.Transition);
-    method public void setTransition(android.view.transition.Scene, android.view.transition.Transition);
-    method public void setTransition(android.view.transition.Scene, android.view.transition.Scene, android.view.transition.Transition);
-    method public void transitionTo(android.view.transition.Scene);
-  }
-
-  public class TransitionValues {
-    ctor public TransitionValues();
-    field public final java.util.Map values;
-    field public android.view.View view;
-  }
-
-  public abstract class Visibility extends android.view.transition.Transition {
-    ctor public Visibility();
-    method protected android.animation.Animator appear(android.view.ViewGroup, android.view.transition.TransitionValues, int, android.view.transition.TransitionValues, int);
-    method protected void captureValues(android.view.transition.TransitionValues, boolean);
-    method protected android.animation.Animator disappear(android.view.ViewGroup, android.view.transition.TransitionValues, int, android.view.transition.TransitionValues, int);
-    method public boolean isVisible(android.view.transition.TransitionValues);
   }
 
 }

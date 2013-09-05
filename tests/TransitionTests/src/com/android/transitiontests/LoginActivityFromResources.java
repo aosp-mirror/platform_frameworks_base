@@ -19,10 +19,10 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Scene;
-import android.view.transition.TransitionInflater;
+import android.transition.Scene;
+import android.transition.TransitionInflater;
 import android.widget.TextView;
-import android.view.transition.TransitionManager;
+import android.transition.TransitionManager;
 
 
 public class LoginActivityFromResources extends Activity {
@@ -36,7 +36,7 @@ public class LoginActivityFromResources extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        View container = (View) findViewById(R.id.container);
+        View container = findViewById(R.id.container);
         mSceneRoot = (ViewGroup) container.getParent();
 
     }
@@ -50,21 +50,19 @@ public class LoginActivityFromResources extends Activity {
         if (mTransitionManager == null) {
             TransitionInflater inflater = TransitionInflater.from(this);
 
-            mLoginScene = inflater.inflateScene(R.scene.login_scene, mSceneRoot);
-            mPasswordScene = inflater.inflateScene(R.scene.password_scene, mSceneRoot);
-            mIncorrectPasswordScene =
-                    inflater.inflateScene(R.scene.incorrect_password_scene,mSceneRoot);
-            mUsernameTakenScene =
-                    inflater.inflateScene(R.scene.username_taken_scene, mSceneRoot);
-            mSuccessScene = inflater.inflateScene(R.scene.success_scene, mSceneRoot);
-            mNewUserScene = inflater.inflateScene(R.scene.new_user_scene, mSceneRoot);
+            mLoginScene = Scene.getSceneForLayout(mSceneRoot, R.layout.activity_login, this);
+            mPasswordScene = Scene.getSceneForLayout(mSceneRoot, R.layout.login_password, this);
+            mIncorrectPasswordScene = Scene.getSceneForLayout(mSceneRoot, R.layout
+                    .incorrect_password, this);
+            mUsernameTakenScene = Scene.getSceneForLayout(mSceneRoot, R.layout.username_taken, this);
+            mSuccessScene = Scene.getSceneForLayout(mSceneRoot, R.layout.success, this);
+            mNewUserScene = Scene.getSceneForLayout(mSceneRoot, R.layout.new_user, this);
 
             mTransitionManager =
                     inflater.inflateTransitionManager(R.transition.login_transition_mgr,
                             mSceneRoot);
 
             mCurrentScene = mLoginScene;
-            mSceneRoot.setCurrentScene(mLoginScene);
         }
         TextView textView = (TextView) view;
         CharSequence text = textView.getText();

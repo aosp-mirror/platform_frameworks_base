@@ -19,10 +19,10 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Scene;
+import android.transition.Scene;
 import android.widget.Button;
-import android.view.transition.Fade;
-import android.view.transition.TransitionManager;
+import android.transition.Fade;
+import android.transition.TransitionManager;
 
 
 public class FadingTest extends Activity {
@@ -31,9 +31,11 @@ public class FadingTest extends Activity {
     Scene mScene1, mScene2;
     ViewGroup mSceneRoot;
     static Fade sFade = new Fade();
+    Scene mCurrentScene;
 
     static {
-        sFade.setTargetIds(R.id.removingButton, R.id.invisibleButton, R.id.goneButton);
+        sFade.addTargetId(R.id.removingButton).addTargetId(R.id.invisibleButton).
+                addTargetId(R.id.goneButton);
     }
 
     @Override
@@ -56,17 +58,19 @@ public class FadingTest extends Activity {
             }
         });
 
-        mScene1 = new Scene(mSceneRoot, R.layout.fading_test, this);
-        mScene2 = new Scene(mSceneRoot, R.layout.fading_test_scene_2, this);
+        mScene1 = Scene.getSceneForLayout(mSceneRoot, R.layout.fading_test, this);
+        mScene2 = Scene.getSceneForLayout(mSceneRoot, R.layout.fading_test_scene_2, this);
 
-        mSceneRoot.setCurrentScene(mScene1);
+        mCurrentScene = mScene1;
     }
 
     public void sendMessage(View view) {
-        if (mSceneRoot.getCurrentScene() == mScene1) {
+        if (mCurrentScene == mScene1) {
             TransitionManager.go(mScene2);
+            mCurrentScene = mScene2;
         } else {
             TransitionManager.go(mScene1);
+            mCurrentScene = mScene1;
         }
     }
 

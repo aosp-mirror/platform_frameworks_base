@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package android.view.transition;
+package android.transition;
 
 import android.animation.Animator;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewOverlay;
-import android.view.ViewParent;
 
 /**
  * This transition tracks changes to the visibility of target views in the
@@ -30,13 +28,13 @@ import android.view.ViewParent;
  * utility for subclasses such as {@link Fade}, which use this visibility
  * information to determine the specific animations to run when visibility
  * changes occur. Subclasses should implement one or both of the methods
- * {@link #appear(ViewGroup, TransitionValues, int, TransitionValues, int), and
- * {@link #disappear(ViewGroup, TransitionValues, int, TransitionValues, int)}.
+ * {@link #onAppear(ViewGroup, TransitionValues, int, TransitionValues, int)},
+ * {@link #onDisappear(ViewGroup, TransitionValues, int, TransitionValues, int)},
  *
  * <p>Note that a view's visibility change is determined by both whether the view
  * itself is changing and whether its parent hierarchy's visibility is changing.
  * That is, a view that appears in the end scene will only trigger a call to
- * {@link #appear(android.view.ViewGroup, TransitionValues, int, TransitionValues, int)
+ * {@link #onAppear(android.view.ViewGroup, TransitionValues, int, TransitionValues, int)
  * appear()} if its parent hierarchy was stable between the start and end scenes.
  * This is done to avoid causing a visibility transition on every node in a hierarchy
  * when only the top-most node is the one that should be transitioned in/out.
@@ -75,11 +73,20 @@ public abstract class Visibility extends Transition {
         return sTransitionProperties;
     }
 
+    private void captureValues(TransitionValues transitionValues) {
+        int visibility = transitionValues.view.getVisibility();
+        transitionValues.values.put(PROPNAME_VISIBILITY, visibility);
+        transitionValues.values.put(PROPNAME_PARENT, transitionValues.view.getParent());
+    }
+
     @Override
-    protected void captureValues(TransitionValues values, boolean start) {
-        int visibility = values.view.getVisibility();
-        values.values.put(PROPNAME_VISIBILITY, visibility);
-        values.values.put(PROPNAME_PARENT, values.view.getParent());
+    public void captureStartValues(TransitionValues transitionValues) {
+        captureValues(transitionValues);
+    }
+
+    @Override
+    public void captureEndValues(TransitionValues transitionValues) {
+        captureValues(transitionValues);
     }
 
     /**
@@ -87,7 +94,7 @@ public abstract class Visibility extends Transition {
      * object. This is determined by testing the same properties in the values
      * object that are used to determine whether the object is appearing or
      * disappearing in the {@link
-     * #play(android.view.ViewGroup, TransitionValues, TransitionValues)}
+     * Transition#createAnimator(ViewGroup, TransitionValues, TransitionValues)}
      * method. This method can be called by, for example, subclasses that want
      * to know whether the object is visible in the same way that Visibility
      * determines it for the actual animation.
@@ -207,14 +214,14 @@ public abstract class Visibility extends Transition {
     }
 
     @Override
-    protected Animator play(ViewGroup sceneRoot, TransitionValues startValues,
+    public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
             TransitionValues endValues) {
         VisibilityInfo visInfo = getVisibilityChangeInfo(startValues, endValues);
         if (visInfo.visibilityChange) {
             // Only transition views that are either targets of this transition
             // or whose parent hierarchies remain stable between scenes
             boolean isTarget = false;
-            if (mTargets != null || mTargetIds != null) {
+            if (mTargets.size() > 0 || mTargetIds.size() > 0) {
                 View startView = startValues != null ? startValues.view : null;
                 View endView = endValues != null ? endValues.view : null;
                 int startId = startView != null ? startView.getId() : -1;
@@ -225,10 +232,10 @@ public abstract class Visibility extends Transition {
                     !isHierarchyVisibilityChanging(sceneRoot,
                             visInfo.startParent, visInfo.endParent))) {
                 if (visInfo.fadeIn) {
-                    return appear(sceneRoot, startValues, visInfo.startVisibility,
+                    return onAppear(sceneRoot, startValues, visInfo.startVisibility,
                             endValues, visInfo.endVisibility);
                 } else {
-                    return disappear(sceneRoot, startValues, visInfo.startVisibility,
+                    return onDisappear(sceneRoot, startValues, visInfo.startVisibility,
                             endValues, visInfo.endVisibility
                     );
                 }
@@ -239,17 +246,20 @@ public abstract class Visibility extends Transition {
 
     /**
      * The default implementation of this method does nothing. Subclasses
-     * should override if they need to set up anything prior to the
-     * transition starting.
+     * should override if they need to create an Animator when targets appear.
+     * The method should only be called by the Visibility class; it is
+     * not intended to be called from external classes.
      *
-     * @param sceneRoot
-     * @param startValues
-     * @param startVisibility
-     * @param endValues
-     * @param endVisibility
-     * @return
+     * @param sceneRoot The root of the transition hierarchy
+     * @param startValues The target values in the start scene
+     * @param startVisibility The target visibility in the start scene
+     * @param endValues The target values in the end scene
+     * @param endVisibility The target visibility in the end scene
+     * @return An Animator to be started at the appropriate time in the
+     * overall transition for this scene change. A null value means no animation
+     * should be run.
      */
-    protected Animator appear(ViewGroup sceneRoot,
+    public Animator onAppear(ViewGroup sceneRoot,
             TransitionValues startValues, int startVisibility,
             TransitionValues endValues, int endVisibility) {
         return null;
@@ -257,17 +267,21 @@ public abstract class Visibility extends Transition {
 
     /**
      * The default implementation of this method does nothing. Subclasses
-     * should override if they need to set up anything prior to the
-     * transition starting.
+     * should override if they need to create an Animator when targets disappear.
+     * The method should only be called by the Visibility class; it is
+     * not intended to be called from external classes.
      *
-     * @param sceneRoot
-     * @param startValues
-     * @param startVisibility
-     * @param endValues
-     * @param endVisibility
-     * @return
+     *
+     * @param sceneRoot The root of the transition hierarchy
+     * @param startValues The target values in the start scene
+     * @param startVisibility The target visibility in the start scene
+     * @param endValues The target values in the end scene
+     * @param endVisibility The target visibility in the end scene
+     * @return An Animator to be started at the appropriate time in the
+     * overall transition for this scene change. A null value means no animation
+     * should be run.
      */
-    protected Animator disappear(ViewGroup sceneRoot,
+    public Animator onDisappear(ViewGroup sceneRoot,
             TransitionValues startValues, int startVisibility,
             TransitionValues endValues, int endVisibility) {
         return null;

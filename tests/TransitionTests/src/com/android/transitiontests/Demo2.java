@@ -19,13 +19,12 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.Fade;
-import android.view.transition.Move;
-import android.view.transition.Recolor;
-import android.view.transition.Scene;
-import android.view.transition.TransitionInflater;
-import android.view.transition.TransitionGroup;
-import android.view.transition.TransitionManager;
+import android.transition.Fade;
+import android.transition.ChangeBounds;
+import android.transition.Recolor;
+import android.transition.Scene;
+import android.transition.TransitionSet;
+import android.transition.TransitionManager;
 
 public class Demo2 extends Activity {
     ViewGroup mSceneRoot;
@@ -51,18 +50,17 @@ public class Demo2 extends Activity {
 //        mSearchScreen = new Scene(this, mSceneRoot, R.layout.search_screen);
 //        mResultsScreen = new Scene(this, mSceneRoot, R.layout.results_screen);
             try {
-                mSearchScreen = TransitionInflater.from(this).
-                        inflateScene(R.scene.search_scene, mSceneRoot);
-                mResultsScreen = TransitionInflater.from(this).
-                        inflateScene(R.scene.results_scene, mSceneRoot);
+                mSearchScreen = Scene.getSceneForLayout(mSceneRoot, R.layout.search_screen, this);
+                mResultsScreen = Scene.getSceneForLayout(mSceneRoot, R.layout.search_screen, this);
             } catch (Exception e) {
                 System.out.println("Problem loading scene resource: " + e);
             }
 
-            TransitionGroup transition = new TransitionGroup();
-            transition.addTransitions(new Fade().setTargetIds(R.id.resultsText, R.id.resultsList),
-                    new Move().setTargetIds(R.id.searchContainer),
-                    new Recolor().setTargetIds(R.id.container));
+            TransitionSet transition = new TransitionSet();
+            transition.addTransition(new Fade().addTargetId(R.id.resultsText).
+                    addTargetId(R.id.resultsList)).
+                    addTransition(new ChangeBounds().addTargetId(R.id.searchContainer)).
+                    addTransition(new Recolor().addTargetId(R.id.container));
             mTransitionManager = new TransitionManager();
             mTransitionManager.setTransition(mSearchScreen, transition);
             mTransitionManager.setTransition(mResultsScreen, transition);

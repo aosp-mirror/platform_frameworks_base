@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view.transition;
+package android.transition;
 
 import android.util.ArrayMap;
 import android.util.LongSparseArray;

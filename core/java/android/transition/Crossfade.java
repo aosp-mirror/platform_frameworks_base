@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view.transition;
+package android.transition;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -24,10 +24,8 @@ import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.TextureView;
@@ -43,6 +41,8 @@ import java.util.Map;
  *
  * <p>Note: This transition is not compatible with {@link TextureView}
  * or {@link SurfaceView}.</p>
+ *
+ * @hide
  */
 public class Crossfade extends Transition {
     // TODO: Add a hook that lets a Transition call user code to query whether it should run on
@@ -121,12 +121,19 @@ public class Crossfade extends Transition {
      * @param fadeBehavior The type of fading animation to use when this
      * transition is run.
      */
-    public void setFadeBehavior(int fadeBehavior) {
+    public Crossfade setFadeBehavior(int fadeBehavior) {
         if (fadeBehavior >= FADE_BEHAVIOR_CROSSFADE && fadeBehavior <= FADE_BEHAVIOR_OUT_IN) {
             mFadeBehavior = fadeBehavior;
         }
+        return this;
     }
 
+    /**
+     * Returns the fading behavior of the animation.
+     *
+     * @return This crossfade object.
+     * @see #setFadeBehavior(int)
+     */
     public int getFadeBehavior() {
         return mFadeBehavior;
     }
@@ -139,18 +146,25 @@ public class Crossfade extends Transition {
      * @param resizeBehavior The type of resizing behavior to use when this
      * transition is run.
      */
-    public void setResizeBehavior(int resizeBehavior) {
+    public Crossfade setResizeBehavior(int resizeBehavior) {
         if (resizeBehavior >= RESIZE_BEHAVIOR_NONE && resizeBehavior <= RESIZE_BEHAVIOR_SCALE) {
             mResizeBehavior = resizeBehavior;
         }
+        return this;
     }
 
+    /**
+     * Returns the resizing behavior of the animation.
+     *
+     * @return This crossfade object.
+     * @see #setResizeBehavior(int)
+     */
     public int getResizeBehavior() {
         return mResizeBehavior;
     }
 
     @Override
-    protected Animator play(ViewGroup sceneRoot, TransitionValues startValues,
+    public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
             TransitionValues endValues) {
         if (startValues == null || endValues == null) {
             return null;
@@ -243,18 +257,16 @@ public class Crossfade extends Transition {
         }
     }
 
-    @Override
-    protected void captureValues(TransitionValues values, boolean start) {
-        View view = values.view;
+    private void captureValues(TransitionValues transitionValues) {
+        View view = transitionValues.view;
         Rect bounds = new Rect(0, 0, view.getWidth(), view.getHeight());
         if (mFadeBehavior != FADE_BEHAVIOR_REVEAL) {
             bounds.offset(view.getLeft(), view.getTop());
         }
-        values.values.put(PROPNAME_BOUNDS, bounds);
+        transitionValues.values.put(PROPNAME_BOUNDS, bounds);
 
         if (Transition.DBG) {
-            Log.d(LOG_TAG, "Captured bounds " + values.values.get(PROPNAME_BOUNDS) + ": start = " +
-                    start);
+            Log.d(LOG_TAG, "Captured bounds " + transitionValues.values.get(PROPNAME_BOUNDS));
         }
         Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(),
                 Bitmap.Config.ARGB_8888);
@@ -264,12 +276,21 @@ public class Crossfade extends Transition {
             Canvas c = new Canvas(bitmap);
             view.draw(c);
         }
-        values.values.put(PROPNAME_BITMAP, bitmap);
+        transitionValues.values.put(PROPNAME_BITMAP, bitmap);
         // TODO: I don't have resources, can't call the non-deprecated method?
         BitmapDrawable drawable = new BitmapDrawable(bitmap);
         // TODO: lrtb will be wrong if the view has transXY set
         drawable.setBounds(bounds);
-        values.values.put(PROPNAME_DRAWABLE, drawable);
+        transitionValues.values.put(PROPNAME_DRAWABLE, drawable);
     }
 
+    @Override
+    public void captureStartValues(TransitionValues transitionValues) {
+        captureValues(transitionValues);
+    }
+
+    @Override
+    public void captureEndValues(TransitionValues transitionValues) {
+        captureValues(transitionValues);
+    }
 }

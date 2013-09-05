@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package android.view.transition;
+package android.transition;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.graphics.Color;
-import android.util.ArrayMap;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -33,6 +32,8 @@ import java.util.Map;
  * starting text stays until the transition ends, at which point it changes
  * to the end text.  This is useful in situations where you want to resize a
  * text view to its new size before displaying the text that goes there.
+ *
+ * @hide
  */
 public class TextChange extends Transition {
     private static final String PROPNAME_TEXT = "android:textchange:text";
@@ -84,15 +85,18 @@ public class TextChange extends Transition {
 
     /**
      * Sets the type of changing animation that will be run, one of
-     * {@link #CHANGE_BEHAVIOR_KEEP} and {@link #CHANGE_BEHAVIOR_OUT_IN}.
+     * {@link #CHANGE_BEHAVIOR_KEEP}, {@link #CHANGE_BEHAVIOR_OUT},
+     * {@link #CHANGE_BEHAVIOR_IN}, and {@link #CHANGE_BEHAVIOR_OUT_IN}.
      *
      * @param changeBehavior The type of fading animation to use when this
      * transition is run.
+     * @return this textChange object.
      */
-    public void setChangeBehavior(int changeBehavior) {
+    public TextChange setChangeBehavior(int changeBehavior) {
         if (changeBehavior >= CHANGE_BEHAVIOR_KEEP && changeBehavior <= CHANGE_BEHAVIOR_OUT_IN) {
             mChangeBehavior = changeBehavior;
         }
+        return this;
     }
 
     @Override
@@ -100,19 +104,38 @@ public class TextChange extends Transition {
         return sTransitionProperties;
     }
 
-    @Override
-    protected void captureValues(TransitionValues values, boolean start) {
-        if (values.view instanceof TextView) {
-            TextView textview = (TextView) values.view;
-            values.values.put(PROPNAME_TEXT, textview.getText());
+    /**
+     * Returns the type of changing animation that will be run.
+     *
+     * @return either {@link #CHANGE_BEHAVIOR_KEEP}, {@link #CHANGE_BEHAVIOR_OUT},
+     * {@link #CHANGE_BEHAVIOR_IN}, or {@link #CHANGE_BEHAVIOR_OUT_IN}.
+     */
+    public int getChangeBehavior() {
+        return mChangeBehavior;
+    }
+
+    private void captureValues(TransitionValues transitionValues) {
+        if (transitionValues.view instanceof TextView) {
+            TextView textview = (TextView) transitionValues.view;
+            transitionValues.values.put(PROPNAME_TEXT, textview.getText());
             if (mChangeBehavior > CHANGE_BEHAVIOR_KEEP) {
-                values.values.put(PROPNAME_TEXT_COLOR, textview.getCurrentTextColor());
+                transitionValues.values.put(PROPNAME_TEXT_COLOR, textview.getCurrentTextColor());
             }
         }
     }
 
     @Override
-    protected Animator play(ViewGroup sceneRoot, TransitionValues startValues,
+    public void captureStartValues(TransitionValues transitionValues) {
+        captureValues(transitionValues);
+    }
+
+    @Override
+    public void captureEndValues(TransitionValues transitionValues) {
+        captureValues(transitionValues);
+    }
+
+    @Override
+    public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,
             TransitionValues endValues) {
         if (startValues == null || endValues == null || !(endValues.view instanceof TextView)) {
             return null;

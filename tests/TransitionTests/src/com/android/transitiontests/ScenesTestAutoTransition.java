@@ -20,10 +20,10 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.transition.AutoTransition;
-import android.view.transition.Scene;
-import android.view.transition.Transition;
-import android.view.transition.TransitionManager;
+import android.transition.AutoTransition;
+import android.transition.Scene;
+import android.transition.Transition;
+import android.transition.TransitionManager;
 
 
 public class ScenesTestAutoTransition extends Activity {
@@ -40,8 +40,8 @@ public class ScenesTestAutoTransition extends Activity {
         View container = (View) findViewById(R.id.container);
         mSceneRoot = (ViewGroup) container.getParent();
 
-        mSearchScreen = new Scene(mSceneRoot, R.layout.search_screen, this);
-        mResultsScreen = new Scene(mSceneRoot, R.layout.results_screen, this);
+        mSearchScreen = Scene.getSceneForLayout(mSceneRoot, R.layout.search_screen, this);
+        mResultsScreen = Scene.getSceneForLayout(mSceneRoot, R.layout.results_screen, this);
     }
 
     public void sendMessage(View view) {
