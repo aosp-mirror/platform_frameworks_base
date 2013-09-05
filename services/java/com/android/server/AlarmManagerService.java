@@ -91,7 +91,7 @@ class AlarmManagerService extends IAlarmManager.Stub {
             = new Intent().addFlags(Intent.FLAG_FROM_BACKGROUND);
     private static final IncreasingTimeOrder sIncreasingTimeOrder = new IncreasingTimeOrder();
     
-    private static final boolean WAKEUP_STATS = true;
+    private static final boolean WAKEUP_STATS = false;
 
     private final Context mContext;
 
