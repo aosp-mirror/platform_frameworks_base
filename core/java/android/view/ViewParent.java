@@ -149,7 +149,7 @@ public interface ViewParent {
      * Change the z order of the child so it's on top of all other children.
      * This ordering change may affect layout, if this container
      * uses an order-dependent layout scheme (e.g., LinearLayout). Prior
-     * to {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE} this
+     * to {@link android.os.Build.VERSION_CODES#KITKAT} this
      * method should be followed by calls to {@link #requestLayout()} and
      * {@link View#invalidate()} on this parent to force the parent to redraw
      * with the new child ordering.

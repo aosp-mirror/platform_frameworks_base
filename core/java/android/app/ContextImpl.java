@@ -726,7 +726,7 @@ class ContextImpl extends Context {
             // name.  This happened to work because when we generated the file name
             // we would stringify it to "null.xml".  Nice.
             if (mPackageInfo.getApplicationInfo().targetSdkVersion <
-                    Build.VERSION_CODES.KEY_LIME_PIE) {
+                    Build.VERSION_CODES.KITKAT) {
                 if (name == null) {
                     name = "null";
                 }
@@ -1453,7 +1453,7 @@ class ContextImpl extends Context {
     public ComponentName startServiceAsUser(Intent service, UserHandle user) {
         try {
             if (service.getComponent() == null && service.getPackage() == null) {
-                if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.KEY_LIME_PIE) {
+                if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.KITKAT) {
                     IllegalArgumentException ex = new IllegalArgumentException(
                             "Service Intent must be explicit: " + service);
                     Log.e(TAG, "This will become an error", ex);
@@ -1485,7 +1485,7 @@ class ContextImpl extends Context {
     public boolean stopServiceAsUser(Intent service, UserHandle user) {
         try {
             if (service.getComponent() == null && service.getPackage() == null) {
-                if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.KEY_LIME_PIE) {
+                if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.KITKAT) {
                     IllegalArgumentException ex = new IllegalArgumentException(
                             "Service Intent must be explicit: " + service);
                     Log.e(TAG, "This will become an error", ex);
@@ -1528,7 +1528,7 @@ class ContextImpl extends Context {
             throw new RuntimeException("Not supported in system context");
         }
         if (service.getComponent() == null && service.getPackage() == null) {
-            if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.KEY_LIME_PIE) {
+            if (getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.KITKAT) {
                 IllegalArgumentException ex = new IllegalArgumentException(
                         "Service Intent must be explicit: " + service);
                 Log.e(TAG, "This will become an error", ex);

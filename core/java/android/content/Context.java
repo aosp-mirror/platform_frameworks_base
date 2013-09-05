@@ -638,7 +638,7 @@ public abstract class Context {
      * {@sample development/samples/ApiDemos/src/com/example/android/apis/content/ExternalStorage.java
      * private_picture}
      * <p>
-     * Starting in {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, no
+     * Starting in {@link android.os.Build.VERSION_CODES#KITKAT}, no
      * permissions are required for the owning application to read or write to
      * this path. Otherwise, {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE}
      * or {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} are required.
@@ -674,7 +674,7 @@ public abstract class Context {
      * the device, including both emulated external storage and physical media
      * slots. This does not include transient devices, such as USB flash drives.
      * <p>
-     * Starting in {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, no
+     * Starting in {@link android.os.Build.VERSION_CODES#KITKAT}, no
      * permissions are required for the owning application to read or write to
      * these paths.
      * <p>
@@ -695,7 +695,7 @@ public abstract class Context {
      * should ensure that multiple instances running under different users don't
      * interfere with each other.
      * <p>
-     * Starting in {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, no
+     * Starting in {@link android.os.Build.VERSION_CODES#KITKAT}, no
      * permissions are required for the owning application to read or write to
      * this path. Otherwise,
      * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} or
@@ -713,7 +713,7 @@ public abstract class Context {
      * the device, including both emulated external storage and physical media
      * slots. This does not include transient devices, such as USB flash drives.
      * <p>
-     * Starting in {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, no
+     * Starting in {@link android.os.Build.VERSION_CODES#KITKAT}, no
      * permissions are required for the owning application to read or write to
      * this path.
      * <p>
@@ -774,7 +774,7 @@ public abstract class Context {
      * each user has their own isolated external storage. Applications only
      * have access to the external storage for the user they're running as.</p>
      * <p>
-     * Starting in {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, no
+     * Starting in {@link android.os.Build.VERSION_CODES#KITKAT}, no
      * permissions are required for the owning application to read or write to
      * this path. Otherwise,
      * {@link android.Manifest.permission#WRITE_EXTERNAL_STORAGE} or
@@ -799,7 +799,7 @@ public abstract class Context {
      * the device, including both emulated external storage and physical media
      * slots. This does not include transient devices, such as USB flash drives.
      * <p>
-     * Starting in {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE}, no
+     * Starting in {@link android.os.Build.VERSION_CODES#KITKAT}, no
      * permissions are required for the owning application to read or write to
      * these paths.
      * <p>
@@ -1651,7 +1651,7 @@ public abstract class Context {
      * should contain either contain the complete class name of a specific service
      * implementation to start or a specific package name to target.  If the
      * Intent is less specified, it will either throw an {@link IllegalArgumentException}
-     * (if the caller targets {@link android.os.Build.VERSION_CODES#KEY_LIME_PIE} or later),
+     * (if the caller targets {@link android.os.Build.VERSION_CODES#KITKAT} or later),
      * or which of multiple matching services it finds and uses will be undefined.  If this service
      * is not already running, it will be instantiated and started (creating a
      * process for it if needed); if it is running then it remains running.
