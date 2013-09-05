@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"Permite al propietario vincularse a la interfaz de nivel superior de un servicio de accesibilidad. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"vincular a un servicio de impresión"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"Permite al propietario vincularse a la interfaz de nivel superior de un servicio de impresión. Las aplicaciones normales no deberían necesitar este permiso."</string>
-    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"Vincular a un servicio de administrador de trabajos de impresión"</string>
-    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Permite al propietario vincularse con la interfaz de nivel superior de un servicio de administrador de trabajos de impresión. Las aplicaciones normales no deberían necesitar este permiso."</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"Vincular a un servicio de administración de trabajos de impresión"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"Permite al propietario vincularse con la interfaz de nivel superior de un servicio de administración de trabajos de impresión. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"Vincular con servicio NFC"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"Permite vincular con aplicaciones que emulen tarjetas NFC. Las aplicaciones normales no deberían necesitar este permiso."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"vincular a un servicio de texto"</string>
@@ -1449,7 +1449,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Ver todas"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Elige actividad"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Compartir con"</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"Dispositivo bloqueado"</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"Enviando..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"¿Deseas iniciar el navegador?"</string>
@@ -1569,7 +1568,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Cancelada"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Error al escribir contenido"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"desconocido"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Ingresar PIN de administrador"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Ingresar PIN"</string>
+    <string name="restr_pin_incorrect" msgid="8571512003955077924">"Incorrecto"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN actual"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"PIN nuevo"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Confirmar PIN nuevo"</string>
@@ -1577,9 +1578,10 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Los PIN no coinciden. Vuelve a intentarlo."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"El PIN es demasiado corto. Debe tener al menos 4 dígitos."</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"PIN incorrecto. Reintentar en 1 s"</item>
-    <item quantity="other" msgid="8030607343223287654">"PIN incorrecto. Reintentar en <xliff:g id="COUNT">%d</xliff:g> s"</item>
+    <item quantity="one" msgid="311050995198548675">"Intentar en 1 s"</item>
+    <item quantity="other" msgid="4730868920742952817">"Intentar en <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
+    <string name="restr_pin_try_later" msgid="973144472490532377">"Volver a intentar más tarde"</string>
     <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Desliza el borde para ver la barra."</string>
     <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Desliza el dedo desde el borde de la pantalla para mostrar la barra del sistema."</string>
 </resources>

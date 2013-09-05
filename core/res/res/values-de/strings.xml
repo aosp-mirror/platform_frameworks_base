@@ -1449,7 +1449,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Alle anzeigen"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Aktivität wählen"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Teilen mit"</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"Gerät gesperrt"</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"Wird gesendet..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Browser starten?"</string>
@@ -1569,7 +1568,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Abgebrochen"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Fehler beim Schreiben von Inhalten"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"Unbekannt"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Administrator-PIN eingeben"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN eingeben"</string>
+    <string name="restr_pin_incorrect" msgid="8571512003955077924">"Falsch"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Aktuelle PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Neue PIN"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Neue PIN bestätigen"</string>
@@ -1577,9 +1578,10 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Die PINs stimmen nicht überein. Bitte versuchen Sie es erneut."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Die PIN ist zu kurz. Sie muss mindestens 4 Ziffern umfassen."</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"Falsche PIN. In 1 Sek. erneut versuchen."</item>
-    <item quantity="other" msgid="8030607343223287654">"Falsche PIN. In <xliff:g id="COUNT">%d</xliff:g> Sek. erneut versuchen."</item>
+    <item quantity="one" msgid="311050995198548675">"In 1 Sek. wiederholen"</item>
+    <item quantity="other" msgid="4730868920742952817">"In <xliff:g id="COUNT">%d</xliff:g> Sek. wiederholen"</item>
   </plurals>
+    <string name="restr_pin_try_later" msgid="973144472490532377">"Später erneut versuchen"</string>
     <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Zum Einblenden der Leiste vom Rand weg wischen"</string>
     <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Zum Einblenden der Systemleiste vom Rand weg wischen"</string>
 </resources>

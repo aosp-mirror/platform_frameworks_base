@@ -1449,7 +1449,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Zobrazit vše"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Vybrat aktivitu"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Sdílet s"</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"Zařízení je uzamčeno."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"Odesílání..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Spustit prohlížeč?"</string>
@@ -1569,7 +1568,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Zrušeno"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Při zápisu obsahu došlo k chybě"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"neznámé"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Zadejte PIN administrátora"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Zadejte kód PIN"</string>
+    <string name="restr_pin_incorrect" msgid="8571512003955077924">"Nesprávné"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Aktuální kód PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Nový kód PIN"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Potvrďte nový PIN"</string>
@@ -1577,9 +1578,10 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Kódy PIN se neshodují. Zkuste to znovu."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Kód PIN je příliš krátký. Musí mít alespoň čtyři číslice."</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"Nesprávný kód PIN. Zkuste to znovu za jednu sekundu."</item>
-    <item quantity="other" msgid="8030607343223287654">"Nesprávný kód PIN. Zkuste to znovu za <xliff:g id="COUNT">%d</xliff:g> s."</item>
+    <item quantity="one" msgid="311050995198548675">"Zkuste to znovu za 1 s"</item>
+    <item quantity="other" msgid="4730868920742952817">"Zkuste to znovu za <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
+    <string name="restr_pin_try_later" msgid="973144472490532377">"Zkuste to znovu později"</string>
     <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Panel zobrazíte přejetím kraje obr."</string>
     <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Systémový panel zobrazíte přejetím přes okraj obrazovky"</string>
 </resources>

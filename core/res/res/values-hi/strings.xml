@@ -288,7 +288,7 @@
     <string name="permlab_setDebugApp" msgid="3022107198686584052">"एप्‍लिकेशन डीबग करना सक्षम करें"</string>
     <string name="permdesc_setDebugApp" msgid="4474512416299013256">"एप्लिकेशन को अन्य एप्लिकेशन के लिए डीबग किया जाना चालू करने देता है. दुर्भावनापूर्ण एप्लिकेशन इसका उपयोग अन्य एप्लिकेशन को समाप्त करने के लिए कर सकते हैं."</string>
     <string name="permlab_changeConfiguration" msgid="4162092185124234480">"सिस्‍टम प्रदर्शन सेटिंग बदलें"</string>
-    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"एप्लिकेशन को वर्तमान कॉन्फ़िगरेशन, जैसे स्थान या समग्र फ़ॉन्ट आकार, बदलने देता है."</string>
+    <string name="permdesc_changeConfiguration" msgid="4372223873154296076">"एप्लिकेशन को वर्तमान कॉन्फ़िगरेशन, जैसे स्थान या समग्र अक्षरों का आकार, बदलने देता है."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"कार मोड सक्षम करें"</string>
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"एप्लिकेशन को कार मोड सक्षम करने देता है."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"अन्‍य एप्‍लिकेशन बंद करें"</string>
@@ -502,16 +502,16 @@
     <string name="permlab_mount_format_filesystems" product="nosdcard" msgid="6227819582624904972">"USB संग्रहण मिटाएं"</string>
     <string name="permlab_mount_format_filesystems" product="default" msgid="262582698639274056">"SD कार्ड मिटाएं"</string>
     <string name="permdesc_mount_format_filesystems" msgid="8784268246779198627">"एप्‍लिकेशन को निकालने योग्‍य संग्रहण फ़ॉर्मेट करने देता है."</string>
-    <string name="permlab_asec_access" msgid="3411338632002193846">"आंतरिक संग्रहण पर जानकारी प्राप्त करें"</string>
-    <string name="permdesc_asec_access" msgid="3094563844593878548">"एप्लिकेशन को आंतरिक संग्रहण की जानकारी प्राप्‍त करने देता है."</string>
-    <string name="permlab_asec_create" msgid="6414757234789336327">"आंतरिक संग्रहण बनाएं"</string>
-    <string name="permdesc_asec_create" msgid="4558869273585856876">"एप्‍लिकेशन को आंतरिक संग्रहण बनाने देता है."</string>
-    <string name="permlab_asec_destroy" msgid="526928328301618022">"आंतरिक संग्रहण नष्ट करें"</string>
-    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"एप्‍लिकेशन को आंतरिक संग्रहण नष्ट करने देता है."</string>
-    <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"आंतरिक संग्रहण माउंट/अनमाउंट करें"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"एप्‍लिकेशन को आंतरिक संग्रहण माउंट/अनमाउंट करने देता है."</string>
-    <string name="permlab_asec_rename" msgid="7496633954080472417">"आंतरिक संग्रहण का नाम बदलें"</string>
-    <string name="permdesc_asec_rename" msgid="1794757588472127675">"एप्‍लिकेशन को आंतरिक संग्रहण का नाम बदलने देता है."</string>
+    <string name="permlab_asec_access" msgid="3411338632002193846">"मोबाइल संग्रहण पर जानकारी प्राप्त करें"</string>
+    <string name="permdesc_asec_access" msgid="3094563844593878548">"एप्लिकेशन को मोबाइल संग्रहण की जानकारी प्राप्‍त करने देता है."</string>
+    <string name="permlab_asec_create" msgid="6414757234789336327">"मोबाइल संग्रहण बनाएं"</string>
+    <string name="permdesc_asec_create" msgid="4558869273585856876">"एप्‍लिकेशन को मोबाइल संग्रहण बनाने देता है."</string>
+    <string name="permlab_asec_destroy" msgid="526928328301618022">"मोबाइल संग्रहण नष्ट करें"</string>
+    <string name="permdesc_asec_destroy" msgid="7218749286145526537">"एप्‍लिकेशन को मोबाइल संग्रहण नष्ट करने देता है."</string>
+    <string name="permlab_asec_mount_unmount" msgid="8877998101944999386">"मोबाइल संग्रहण माउंट/अनमाउंट करें"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="3451360114902490929">"एप्‍लिकेशन को मोबाइल संग्रहण माउंट/अनमाउंट करने देता है."</string>
+    <string name="permlab_asec_rename" msgid="7496633954080472417">"मोबाइल संग्रहण का नाम बदलें"</string>
+    <string name="permdesc_asec_rename" msgid="1794757588472127675">"एप्‍लिकेशन को मोबाइल संग्रहण का नाम बदलने देता है."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"कंपन नियंत्रित करें"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"एप्‍लिकेशन को कंपनकर्ता नियंत्रित करने देता है."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"फ़्लैशलाइट नियंत्रित करें"</string>
@@ -541,8 +541,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"एप्लिकेशन को उपकरण की फ़ोन सुविधाओं तक पहुंचने देता है. यह अनुमति एप्लिकेशन को फ़ोन नंबर और उपकरण आईडी, कॉल सक्रिय है या नहीं, और कॉल द्वारा कनेक्ट किया गया दूरस्‍थ नंबर निर्धारित करने देती है."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"टेबलेट को निष्‍क्रिय होने से रोकें"</string>
     <string name="permlab_wakeLock" product="default" msgid="573480187941496130">"फ़ोन को निष्‍क्रिय होने से रोकें"</string>
-    <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"एप्लिकेशन को टेबलेट को निष्क्रिय हो जाने से रोकता है."</string>
-    <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"एप्लिकेशन को फ़ोन को निष्क्रिय होने से रोकता है."</string>
+    <string name="permdesc_wakeLock" product="tablet" msgid="7311319824400447868">"एप्लिकेशन को टेबलेट को प्रयोग में नहीं हो जाने से रोकता है."</string>
+    <string name="permdesc_wakeLock" product="default" msgid="8559100677372928754">"एप्लिकेशन को फ़ोन को प्रयोग में नहीं होने से रोकता है."</string>
     <string name="permlab_devicePower" product="tablet" msgid="2787034722616350417">"टेबलेट चालू या बंद करें"</string>
     <string name="permlab_devicePower" product="default" msgid="4928622470980943206">"फ़ोन चालू या बंद करें"</string>
     <string name="permdesc_devicePower" product="tablet" msgid="6689862878984631831">"एप्‍लिकेशन को टेबलेट चालू या बंद करने देता है."</string>
@@ -1414,7 +1414,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"अधिक विकल्प"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s, %2$s, %3$s"</string>
-    <string name="storage_internal" msgid="4891916833657929263">"आंतरिक संग्रहण"</string>
+    <string name="storage_internal" msgid="4891916833657929263">"मोबाइल संग्रहण"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"SD कार्ड"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB संग्रहण"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"संपादित करें"</string>
@@ -1449,7 +1449,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"सभी देखें"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"गतिविधि चुनें"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"इसके साथ साझा करें:"</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"उपकरण लॉक कर दिया गया."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"भेजा जा रहा है…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ब्राउज़र लॉन्च करें?"</string>
@@ -1569,7 +1568,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"रद्द कर दी गई"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"सामग्री लिखने में त्रुटि"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"अज्ञात"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"व्यवस्थापक पिन डालें"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN डालें"</string>
+    <string name="restr_pin_incorrect" msgid="8571512003955077924">"गलत"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"वर्तमान पिन"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"नया पिन"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"नए पिन की पुष्टि करें"</string>
@@ -1577,9 +1578,10 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN मिलान नहीं करते हैं. पुनः प्रयास करें."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN बहुत छोटा है. कम से कम 4 अंकों का होना चाहिए."</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"गलत PIN. 1 सेकंड में पुनः प्रयास करें."</item>
-    <item quantity="other" msgid="8030607343223287654">"गलत PIN. <xliff:g id="COUNT">%d</xliff:g> सेकंड में पुनः प्रयास करें."</item>
+    <item quantity="one" msgid="311050995198548675">"1 सेकंड में पुन: प्रयास करें"</item>
+    <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> सेकंड में पुन: प्रयास करें"</item>
   </plurals>
+    <string name="restr_pin_try_later" msgid="973144472490532377">"बाद में पुनः प्रयास करें"</string>
     <string name="transient_navigation_confirmation" msgid="4907844043611123426">"बार को प्रदर्शित करने के लिए स्क्रीन के किनारे को स्वाइप करें"</string>
     <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"सिस्टम बार को प्रदर्शित करने के लिए स्क्रीन के किनारे से स्वाइप करें"</string>
 </resources>

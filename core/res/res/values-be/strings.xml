@@ -1475,7 +1475,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Прагледзець усё"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Выберыце працэс"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Апублікаваць з дапамогай"</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"Прылада заблакаваная."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"Адпраўка..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Запусцiць браўзер?"</string>
@@ -1639,7 +1638,11 @@
     <skip />
     <!-- no translation found for reason_unknown (6048913880184628119) -->
     <skip />
+    <!-- no translation found for restr_pin_enter_admin_pin (783643731895143970) -->
+    <skip />
     <!-- no translation found for restr_pin_enter_pin (3395953421368476103) -->
+    <skip />
+    <!-- no translation found for restr_pin_incorrect (8571512003955077924) -->
     <skip />
     <!-- no translation found for restr_pin_enter_old_pin (1462206225512910757) -->
     <skip />
@@ -1653,8 +1656,10 @@
     <skip />
     <!-- no translation found for restr_pin_error_too_short (8173982756265777792) -->
     <skip />
-    <!-- no translation found for restr_pin_countdown:one (4835639969503729874) -->
-    <!-- no translation found for restr_pin_countdown:other (8030607343223287654) -->
+    <!-- no translation found for restr_pin_countdown:one (311050995198548675) -->
+    <!-- no translation found for restr_pin_countdown:other (4730868920742952817) -->
+    <!-- no translation found for restr_pin_try_later (973144472490532377) -->
+    <skip />
     <!-- no translation found for transient_navigation_confirmation (4907844043611123426) -->
     <skip />
     <!-- no translation found for transient_navigation_confirmation_long (8061685920508086697) -->

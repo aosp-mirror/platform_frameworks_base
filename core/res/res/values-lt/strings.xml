@@ -1449,7 +1449,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Žr. viską"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Pasirinkti veiklą"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Bendrinti su"</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"Įrenginys užrakintas."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"Siunčiama…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Paleisti naršyklę?"</string>
@@ -1569,7 +1568,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Atšaukta"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Klaida rašant turinį"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"nežinoma"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Įveskite administratoriaus PIN kodą"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Įveskite PIN kodą"</string>
+    <string name="restr_pin_incorrect" msgid="8571512003955077924">"Neteisingas"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Dabartinis PIN kodas"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Naujas PIN kodas"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Patvirtinti naują PIN kodą"</string>
@@ -1577,9 +1578,10 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN kodas neatitinka. Bandykite dar kartą."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN kodas per trumpas. Jis turi būti bent 4 skaitmenų."</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"Netinkamas PIN kodas. Band. po 1 sek."</item>
-    <item quantity="other" msgid="8030607343223287654">"Netinkamas PIN kodas. Band. po <xliff:g id="COUNT">%d</xliff:g> sek."</item>
+    <item quantity="one" msgid="311050995198548675">"Band. dar po 1 s"</item>
+    <item quantity="other" msgid="4730868920742952817">"Band. dar po <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
+    <string name="restr_pin_try_later" msgid="973144472490532377">"Vėliau bandykite dar kartą"</string>
     <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Perbr. ekr. kr., kad atsir. juost."</string>
     <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Perbraukite iš ekrano krašto, kad atsirastų sistemos juosta"</string>
 </resources>

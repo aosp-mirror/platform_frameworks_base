@@ -1452,7 +1452,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"සියල්ල බලන්න"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"ක්‍රියාකාරකම තෝරන්න"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"සමඟ බෙදාගන්න"</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"උපාංගයට අගුළු වැටි ඇත."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"යවමින්..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"බ්‍රවුසරය දියත් කරන්නද?"</string>
@@ -1572,7 +1571,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"අවලංගු කරන ලදි"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"අන්තර්ගතය ලිවීමේදී දෝෂයකි"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"නොදනී"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"පරිපාලකයාගේ PIN එක ඇතුළ් කරන්න"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN එක ඇතුළු කරන්න"</string>
+    <string name="restr_pin_incorrect" msgid="8571512003955077924">"වැරදියි"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"වත්මන් PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"නව PIN"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"නව PIN තහවුරු කරන්න"</string>
@@ -1580,9 +1581,10 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN නොගැළපෙයි. නැවත උත්සහ කරන්න."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN කුඩා වැඩිය. ඉලක්කම් 4 වත් විය යුතුය."</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"වැරදි PIN. තත්පරයකින් නැවත උත්සහ කරන්න."</item>
-    <item quantity="other" msgid="8030607343223287654">"වැරදි PIN. තත්පර <xliff:g id="COUNT">%d</xliff:g> කින් නැවත උත්සහ කරන්න."</item>
+    <item quantity="one" msgid="311050995198548675">"තවත් තත්පර ^1 කින් යළි උත්සාහ කරන්න"</item>
+    <item quantity="other" msgid="4730868920742952817">"තත්පර <xliff:g id="COUNT">%d</xliff:g> කින් නැවත උත්සහ කරන්න"</item>
   </plurals>
+    <string name="restr_pin_try_later" msgid="973144472490532377">"පසුව නැවත උත්සාහ කරන්න"</string>
     <string name="transient_navigation_confirmation" msgid="4907844043611123426">"තීරුව අනාවරණයට තිරයේ කෙලවර අදින්න"</string>
     <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"පද්ධති තීරුව අනාවරණයට තිරයේ කෙලවරින් අදින්න"</string>
 </resources>

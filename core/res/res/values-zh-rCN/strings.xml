@@ -360,8 +360,8 @@
     <string name="permdesc_bindAccessibilityService" msgid="7034615928609331368">"允许应用绑定至辅助服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindPrintService" msgid="8462815179572748761">"绑定至打印服务"</string>
     <string name="permdesc_bindPrintService" msgid="7960067623209111135">"允许应用绑定至打印服务的顶级接口。普通应用绝不需要此权限。"</string>
-    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"绑定至打印后台处理程序服务"</string>
-    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"允许应用绑定至打印后台处理程序服务的顶级接口。普通应用绝不需要此权限。"</string>
+    <string name="permlab_bindPrintSpoolerService" msgid="6807762783744125954">"绑定至打印处理服务"</string>
+    <string name="permdesc_bindPrintSpoolerService" msgid="3680552285933318372">"允许应用绑定至打印处理服务的顶级接口。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindNfcService" msgid="2752731300419410724">"绑定到 NFC 服务"</string>
     <string name="permdesc_bindNfcService" msgid="6120647629174066862">"允许应用绑定到模拟 NFC 卡的应用。普通应用绝不需要此权限。"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"绑定至文字服务"</string>
@@ -1449,7 +1449,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"查看全部"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"选择活动"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"分享方式"</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"设备已锁定。"</string>
     <string name="list_delimeter" msgid="3975117572185494152">"、 "</string>
     <string name="sending" msgid="3245653681008218030">"正在发送..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"要启动浏览器吗？"</string>
@@ -1569,7 +1568,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"已取消"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"写入内容时出错"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"未知"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"输入管理员 PIN 码"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"输入 PIN 码"</string>
+    <string name="restr_pin_incorrect" msgid="8571512003955077924">"错误"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"当前 PIN 码"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"新 PIN 码"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"确认新 PIN 码"</string>
@@ -1577,9 +1578,10 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN 码不符，请重试。"</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN 码太短，至少应包含 4 位数字。"</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"PIN 码错误。请在1秒钟后重试。"</item>
-    <item quantity="other" msgid="8030607343223287654">"PIN 码错误。请在<xliff:g id="COUNT">%d</xliff:g>秒钟后重试。"</item>
+    <item quantity="one" msgid="311050995198548675">"1秒后重试"</item>
+    <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g>秒后重试"</item>
   </plurals>
+    <string name="restr_pin_try_later" msgid="973144472490532377">"稍后重试"</string>
     <string name="transient_navigation_confirmation" msgid="4907844043611123426">"从边缘向里滑可显示系统栏"</string>
     <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"从屏幕边缘向里滑可显示系统栏"</string>
 </resources>
