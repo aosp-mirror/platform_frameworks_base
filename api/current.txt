@@ -11129,6 +11129,7 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_SENSITIVITY;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TEMPERATURE;
     field public static final android.hardware.camera2.CameraMetadata.Key SENSOR_TIMESTAMP;
+    field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACES;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_DETECT_MODE;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_IDS;
     field public static final android.hardware.camera2.CameraMetadata.Key STATISTICS_FACE_LANDMARKS;
@@ -11144,14 +11145,16 @@ package android.hardware.camera2 {
     field public static final android.hardware.camera2.CameraMetadata.Key TONEMAP_MODE;
   }
 
-  public static class CaptureResult.Face {
-    ctor public CaptureResult.Face();
+  public final class Face {
     method public android.graphics.Rect getBounds();
     method public int getId();
-    method public android.graphics.Point getLeftEye();
-    method public android.graphics.Point getMouth();
-    method public android.graphics.Point getRightEye();
+    method public android.graphics.Point getLeftEyePosition();
+    method public android.graphics.Point getMouthPosition();
+    method public android.graphics.Point getRightEyePosition();
     method public int getScore();
+    field public static final int ID_UNSUPPORTED = -1; // 0xffffffff
+    field public static final int SCORE_MAX = 100; // 0x64
+    field public static final int SCORE_MIN = 1; // 0x1
   }
 
   public final class Rational {
