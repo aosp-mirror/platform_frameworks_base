@@ -684,20 +684,6 @@ final class RemotePrintService implements DeathRecipient {
             }
         }
 
-        @Override
-        public void onPrintersUpdated(List<PrinterInfo> printers) {
-            RemotePrintService service = mWeakService.get();
-            if (service != null) {
-                throwIfPrinterIdsForPrinterInfoTampered(service.mComponentName, printers);
-                final long identity = Binder.clearCallingIdentity();
-                try {
-                    service.mUserState.onPrintersUpdated(printers);
-                } finally {
-                    Binder.restoreCallingIdentity(identity);
-                }
-            }
-        }
-
         private void throwIfPrinterIdsForPrinterInfoTampered(ComponentName serviceName,
                 List<PrinterInfo> printerInfos) {
             final int printerInfoCount = printerInfos.size();

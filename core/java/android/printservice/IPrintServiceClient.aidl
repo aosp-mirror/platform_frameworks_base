@@ -35,5 +35,4 @@ interface IPrintServiceClient {
 
     void onPrintersAdded(in List<PrinterInfo> printers);
     void onPrintersRemoved(in List<PrinterId> printerIds);
-    void onPrintersUpdated(in List<PrinterInfo> printers);
 }
