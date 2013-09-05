@@ -21,15 +21,11 @@ import static com.android.documentsui.DocumentsActivity.TAG;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
-import android.content.pm.ResolveInfo;
 import android.database.Cursor;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.DocumentsContract;
-import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.util.Log;
 
@@ -153,33 +149,8 @@ public class RootsCache {
         return mRoots;
     }
 
-    /**
-     * Flags that declare explicit content types.
-     */
-    private static final int FLAGS_CONTENT_MASK = Root.FLAG_PROVIDES_IMAGES
-            | Root.FLAG_PROVIDES_AUDIO | Root.FLAG_PROVIDES_VIDEO;
-
     @GuardedBy("ActivityThread")
     public List<RootInfo> getMatchingRoots(State state) {
-
-        // Determine acceptable content flags
-        int includeFlags = 0;
-        for (String acceptMime : state.acceptMimes) {
-            final String[] type = acceptMime.split("/");
-            if (type.length != 2) continue;
-
-            if ("image".equals(type[0])) {
-                includeFlags |= Root.FLAG_PROVIDES_IMAGES;
-            } else if ("audio".equals(type[0])) {
-                includeFlags |= Root.FLAG_PROVIDES_AUDIO;
-            } else if ("video".equals(type[0])) {
-                includeFlags |= Root.FLAG_PROVIDES_VIDEO;
-            } else if ("*".equals(type[0])) {
-                includeFlags |= Root.FLAG_PROVIDES_IMAGES | Root.FLAG_PROVIDES_AUDIO
-                        | Root.FLAG_PROVIDES_VIDEO;
-            }
-        }
-
         ArrayList<RootInfo> matching = Lists.newArrayList();
         for (RootInfo root : mRoots) {
             final boolean supportsCreate = (root.flags & Root.FLAG_SUPPORTS_CREATE) != 0;
@@ -193,13 +164,9 @@ public class RootsCache {
             // Exclude non-local devices when local only
             if (state.localOnly && !localOnly) continue;
 
-            if ((root.flags & FLAGS_CONTENT_MASK) != 0) {
-                // This root offers specific content, so only include if the
-                // caller asked for that content type.
-                if ((root.flags & includeFlags) == 0) {
-                    // Sorry, no overlap.
-                    continue;
-                }
+            // Only include roots that serve requested content
+            if (!MimePredicate.mimeMatches(root.mimeTypes, state.acceptMimes)) {
+                continue;
             }
 
             matching.add(root);
