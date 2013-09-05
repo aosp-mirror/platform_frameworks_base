@@ -306,7 +306,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
     };
 
-    private boolean mInteracting;
+    private int mInteractingWindows;
     private boolean mAutohideSuspended;
     private int mStatusBarMode;
     private int mNavigationBarMode;
@@ -1378,7 +1378,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
         visibilityChanged(true);
 
-        setInteracting(true);
+        setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true);
     }
 
     public void animateCollapsePanels() {
@@ -1662,7 +1662,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
             mPostCollapseCleanup = null;
         }
 
-        setInteracting(false);
+        setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
     }
 
     /**
@@ -1738,7 +1738,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }
 
         if (mStatusBarWindowState == WINDOW_STATE_SHOWING) {
-            setInteracting(true);
+            setInteracting(StatusBarManager.WINDOW_STATUS_BAR, true);
         }
         return false;
     }
@@ -1871,7 +1871,8 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     private void checkBarModes() {
         if (mDemoMode) return;
-        checkBarMode(mStatusBarMode, mStatusBarWindowState, mStatusBarView.getBarTransitions());
+        checkBarMode((mInteractingWindows & StatusBarManager.WINDOW_STATUS_BAR) != 0 ? MODE_OPAQUE
+                : mStatusBarMode, mStatusBarWindowState, mStatusBarView.getBarTransitions());
         if (mNavigationBarView != null) {
             checkBarMode(mNavigationBarMode,
                     mNavigationBarWindowState, mNavigationBarView.getBarTransitions());
@@ -1880,7 +1881,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
 
     private void checkBarMode(int mode, int windowState, BarTransitions transitions) {
         final boolean imeVisible = (mNavigationIconHints & NAVIGATION_HINT_BACK_ALT) != 0;
-        final int finalMode = imeVisible || mInteracting ? MODE_OPAQUE : mode;
+        final int finalMode = imeVisible ? MODE_OPAQUE : mode;
         final boolean animate = windowState == WINDOW_STATE_SHOWING;
         transitions.transitionTo(finalMode, animate);
     }
@@ -1892,9 +1893,11 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
         }};
 
     @Override
-    public void setInteracting(boolean interacting) {
-        mInteracting = interacting;
-        if (mInteracting) {
+    public void setInteracting(int barWindow, boolean interacting) {
+        mInteractingWindows = interacting
+                ? (mInteractingWindows | barWindow)
+                : (mInteractingWindows & ~barWindow);
+        if (mInteractingWindows != 0) {
             suspendAutohide();
         } else {
             resumeSuspendedAutohide();
@@ -2117,7 +2120,7 @@ public class PhoneStatusBar extends BaseStatusBar implements DemoMode {
                     + " scroll " + mScrollView.getScrollX() + "," + mScrollView.getScrollY());
         }
 
-        pw.print("  mInteracting="); pw.println(mInteracting);
+        pw.print("  mInteractingWindows="); pw.println(mInteractingWindows);
         pw.print("  mStatusBarWindowState=");
         pw.println(windowStateToString(mStatusBarWindowState));
         pw.print("  mStatusBarMode=");

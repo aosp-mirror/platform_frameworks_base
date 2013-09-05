@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.app.StatusBarManager;
 import android.graphics.RectF;
 import android.view.MotionEvent;
 import android.view.View;
@@ -86,9 +87,9 @@ public class DelegateViewHelper {
         }
 
         if (action == MotionEvent.ACTION_DOWN) {
-            mBar.setInteracting(true);
+            mBar.setInteracting(StatusBarManager.WINDOW_NAVIGATION_BAR, true);
         } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-            mBar.setInteracting(false);
+            mBar.setInteracting(StatusBarManager.WINDOW_NAVIGATION_BAR, false);
         }
 
         mDelegateView.getLocationOnScreen(mTempPoint);
