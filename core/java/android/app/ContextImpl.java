@@ -710,7 +710,7 @@ class ContextImpl extends Context {
     @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
         SharedPreferencesImpl sp;
-        synchronized (mSync) {
+        synchronized (ContextImpl.class) {
             if (sSharedPrefs == null) {
                 sSharedPrefs = new ArrayMap<String, ArrayMap<String, SharedPreferencesImpl>>();
             }
