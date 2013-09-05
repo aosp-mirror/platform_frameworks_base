@@ -5055,7 +5055,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (statusBarHasFocus) {
             int flags = View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE;
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE
+                    | View.SYSTEM_UI_FLAG_TRANSPARENT_STATUS
+                    | View.SYSTEM_UI_FLAG_TRANSPARENT_NAVIGATION;
             vis = (vis & ~flags) | (mLastSystemUiFlags & flags);
         }
 
