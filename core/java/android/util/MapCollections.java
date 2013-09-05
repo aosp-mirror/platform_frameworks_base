@@ -328,12 +328,12 @@ abstract class MapCollections<K, V> {
 
         @Override
         public Object[] toArray() {
-            return toArrayHelper(1);
+            return toArrayHelper(0);
         }
 
         @Override
         public <T> T[] toArray(T[] array) {
-            return toArrayHelper(array, 1);
+            return toArrayHelper(array, 0);
         }
 
         @Override
