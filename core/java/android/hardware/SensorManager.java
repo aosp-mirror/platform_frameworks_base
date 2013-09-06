@@ -582,7 +582,7 @@ public abstract class SensorManager {
      * @param sensor
      *        The {@link android.hardware.Sensor Sensor} to register to.
      *
-     * @param rate
+     * @param rateUs
      *        The rate {@link android.hardware.SensorEvent sensor events} are
      *        delivered at. This is only a hint to the system. Events may be
      *        received faster or slower than the specified rate. Usually events
@@ -603,14 +603,14 @@ public abstract class SensorManager {
      *
      * @throws IllegalArgumentException when sensor is null or a trigger sensor
      */
-    public boolean registerListener(SensorEventListener listener, Sensor sensor, int rate) {
-        return registerListener(listener, sensor, rate, null);
+    public boolean registerListener(SensorEventListener listener, Sensor sensor, int rateUs) {
+        return registerListener(listener, sensor, rateUs, null);
     }
 
     /**
      * Enables batch mode for a sensor with the given rate and maxBatchReportLatency. If the
      * underlying hardware does not support batch mode, this defaults to
-     * {@link #registerListener(SensorEventListener, Sensor, int)} and other parameters are are
+     * {@link #registerListener(SensorEventListener, Sensor, int)} and other parameters are
      * ignored. In non-batch mode, all sensor events must be reported as soon as they are detected.
      * While in batch mode, sensor events do not need to be reported as soon as they are detected.
      * They can be temporarily stored in batches and reported in batches, as long as no event is
@@ -640,13 +640,13 @@ public abstract class SensorManager {
      * @param listener A {@link android.hardware.SensorEventListener SensorEventListener} object
      *            that will receive the sensor events.
      * @param sensor The {@link android.hardware.Sensor Sensor} to register to.
-     * @param rate The desired delay between two consecutive events in microseconds. This is only a
-     *            hint to the system. Events may be received faster or slower than the specified
+     * @param rateUs The desired delay between two consecutive events in microseconds. This is only
+     *            a hint to the system. Events may be received faster or slower than the specified
      *            rate. Usually events are received faster. Can be one of
      *            {@link #SENSOR_DELAY_NORMAL}, {@link #SENSOR_DELAY_UI},
      *            {@link #SENSOR_DELAY_GAME}, {@link #SENSOR_DELAY_FASTEST} or the delay in
      *            microseconds.
-     * @param maxBatchReportLatency An event in the batch can be delayed by at most
+     * @param maxBatchReportLatencyUs An event in the batch can be delayed by at most
      *            maxBatchReportLatency microseconds. More events can be batched if this value is
      *            large. If this is set to zero, batch mode is disabled and events are delivered in
      *            continuous mode as soon as they are available which is equivalent to calling
@@ -661,7 +661,6 @@ public abstract class SensorManager {
      * @see #unregisterListener(SensorEventListener)
      * @see #flush(Sensor)
      * @throws IllegalArgumentException when sensor or listener is null or a trigger sensor.
-     * @hide
      */
     public boolean registerListener(SensorEventListener listener, Sensor sensor, int rateUs,
             int maxBatchReportLatencyUs, int reservedFlags,
@@ -673,7 +672,9 @@ public abstract class SensorManager {
 
     /**
      * Registers a {@link android.hardware.SensorEventListener SensorEventListener} for the given
-     * sensor. Events are delivered in continuous mode as soon as they are available.
+     * sensor. Events are delivered in continuous mode as soon as they are available. To reduce the
+     * battery usage, use {@link #registerListener(SensorEventListener, Sensor, int, int, int,
+     * FlushCompleteListener)} which enables batch mode for the sensor.
      *
      * <p class="note"></p>
      * Note: Don't use this method with a one shot trigger sensor such as
@@ -688,7 +689,7 @@ public abstract class SensorManager {
      * @param sensor
      *        The {@link android.hardware.Sensor Sensor} to register to.
      *
-     * @param rate
+     * @param rateUs
      *        The rate {@link android.hardware.SensorEvent sensor events} are
      *        delivered at. This is only a hint to the system. Events may be
      *        received faster or slower than the specified rate. Usually events
@@ -713,13 +714,13 @@ public abstract class SensorManager {
      *
      * @throws IllegalArgumentException when sensor is null or a trigger sensor
      */
-    public boolean registerListener(SensorEventListener listener, Sensor sensor, int rate,
+    public boolean registerListener(SensorEventListener listener, Sensor sensor, int rateUs,
             Handler handler) {
         if (listener == null || sensor == null) {
             return false;
         }
 
-        int delay = getDelay(rate);
+        int delay = getDelay(rateUs);
         return registerListenerImpl(listener, sensor, delay, handler, 0, 0, null);
     }
 
@@ -731,7 +732,6 @@ public abstract class SensorManager {
      *        delivered to.
      *
      * @see #registerListener(SensorEventListener, Sensor, int, int, int, FlushCompleteListener)
-     * @hide
      */
     public boolean registerListener(SensorEventListener listener, Sensor sensor, int rateUs,
             int maxBatchReportLatencyUs, int reservedFlags, Handler handler,
@@ -760,7 +760,6 @@ public abstract class SensorManager {
      *         i.e no application is registered for updates from this sensor.
      * @see #registerListener(SensorEventListener, Sensor, int, int, int, FlushCompleteListener)
      * @throws IllegalArgumentException when sensor is null or a trigger sensor.
-     * @hide
      */
     public boolean flush(Sensor sensor) {
         return flushImpl(sensor);
