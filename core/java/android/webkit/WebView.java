@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.os.Message;
 import android.os.StrictMode;
+import android.print.PrintDocumentAdapter;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -1108,32 +1109,21 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Exports the contents of this Webview as PDF. Only supported for API levels
+     * Creates a PrintDocumentAdapter that provides the content of this Webview for printing.
+     * Only supported for API levels
      * {@link android.os.Build.VERSION_CODES#KITKAT} and above.
      *
-     * @param out            The stream to export the PDF contents to. Cannot be null.
-     * @param width          The page width. Should be larger than 0.
-     * @param height         The page height. Should be larger than 0.
-     * @param resultCallback A callback to be invoked when the PDF content is exported.
-     *                       A true indicates success, and a false failure.
-     *
-     * TODO: explain method parameters, margins, consider making the callback
-     * return more meaningful information, explain any threading concerns, HW
-     * draw limitations, and make it public.
-     * TODO: at the moment we are asking app to provide paper size information (width
-     * and height). This is likely not ideal (I think need margin info too).
-     * Another approach would be using PrintAttributes. This is to be clarified later.
-     *
-     * TODO: explain this webview will not draw during export (onDraw will clear to
-     * background color) so recommend taking it offscreen, or putting in a layer with an
-     * overlaid progress UI / spinner.
-     * @hide
+     * The adapter works by converting the Webview contents to a PDF stream. The Webview cannot
+     * be drawn during the conversion process - any such draws are undefined. It is recommended
+     * to use a dedicated off screen Webview for the printing. If necessary, an application may
+     * temporarily hide a visible WebView by using a custom PrintDocumentAdapter instance
+     * wrapped around the object returned and observing the onStart and onFinish methods. See
+     * {@link android.print.PrintDocumentAdapter} for more information.
      */
-    public void exportToPdf(OutputStream out, int width, int height,
-            ValueCallback<Boolean> resultCallback) {
+    public PrintDocumentAdapter createPrintDocumentAdapter() {
         checkThread();
-        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "exportToPdf");
-        mProvider.exportToPdf(out, width, height, resultCallback);
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "createPrintDocumentAdapter");
+        return mProvider.createPrintDocumentAdapter();
     }
 
     /**

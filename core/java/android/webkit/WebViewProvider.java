@@ -26,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.net.http.SslCertificate;
 import android.os.Bundle;
 import android.os.Message;
+import android.print.PrintDocumentAdapter;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -147,8 +148,7 @@ public interface WebViewProvider {
 
     public Picture capturePicture();
 
-    public void exportToPdf(OutputStream out, int width, int height,
-            ValueCallback<Boolean> resultCallback);
+    public PrintDocumentAdapter createPrintDocumentAdapter();
 
     public float getScale();
 
