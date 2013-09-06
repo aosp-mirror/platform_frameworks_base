@@ -88,7 +88,6 @@ public class ExternalStorageProvider extends DocumentsProvider {
             root.rootId = "primary";
             root.rootType = Root.ROOT_TYPE_DEVICE;
             root.flags = Root.FLAG_SUPPORTS_CREATE | Root.FLAG_LOCAL_ONLY | Root.FLAG_ADVANCED;
-            root.icon = R.drawable.ic_pdf;
             root.title = getContext().getString(R.string.root_internal_storage);
             root.docId = getDocIdForFile(path);
             mRoots.add(root);

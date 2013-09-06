@@ -26,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.provider.DocumentsContract.Root;
 
 import com.android.documentsui.IconUtils;
+import com.android.documentsui.R;
 
 import java.util.Objects;
 
@@ -38,6 +39,7 @@ public class RootInfo {
     public int rootType;
     public int flags;
     public int icon;
+    public int localIcon;
     public String title;
     public String summary;
     public String documentId;
@@ -59,11 +61,30 @@ public class RootInfo {
         final String raw = getCursorString(cursor, Root.COLUMN_MIME_TYPES);
         root.mimeTypes = (raw != null) ? raw.split("\n") : null;
 
+        // TODO: remove these special case icons
+        if ("com.android.externalstorage.documents".equals(authority)) {
+            root.localIcon = R.drawable.ic_root_sdcard;
+        }
+        if ("com.android.providers.downloads.documents".equals(authority)) {
+            root.localIcon = R.drawable.ic_root_download;
+        }
+        if ("com.android.providers.media.documents".equals(authority)) {
+            if ("image".equals(root.rootId)) {
+                root.localIcon = R.drawable.ic_doc_image;
+            } else if ("audio".equals(root.rootId)) {
+                root.localIcon = R.drawable.ic_doc_audio;
+            }
+        }
+
         return root;
     }
 
     public Drawable loadIcon(Context context) {
-        return IconUtils.loadPackageIcon(context, authority, icon);
+        if (localIcon != 0) {
+            return context.getResources().getDrawable(localIcon);
+        } else {
+            return IconUtils.loadPackageIcon(context, authority, icon);
+        }
     }
 
     @Override
