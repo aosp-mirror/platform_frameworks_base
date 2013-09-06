@@ -16,7 +16,6 @@
 
 package android.speech.hotword;
 
-import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -47,9 +46,10 @@ public interface HotwordRecognitionListener {
 
     /**
      * Called back when hotword is detected.
-     * The action tells the client what action to take, post hotword-detection.
+     *
+     * @param intent for the activity to launch, post hotword detection.
      */
-    void onHotwordRecognized(PendingIntent intent);
+    void onHotwordRecognized(Intent intent);
 
     /**
      * Called when the HotwordRecognitionService encounters an error.
