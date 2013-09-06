@@ -16,11 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
-import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARENT;
-
-import android.animation.Animator;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -33,6 +28,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 
+import com.android.systemui.BatteryMeterView;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 
@@ -59,6 +55,7 @@ public class PhoneStatusBarView extends PanelBar {
         private final float mAlphaWhenTransparent = 1;
         private View mLeftSide;
         private View mRightSide;
+        private BatteryMeterView mBattery;
 
         public StatusBarTransitions(Context context) {
             super(context, PhoneStatusBarView.this);
@@ -70,6 +67,7 @@ public class PhoneStatusBarView extends PanelBar {
         public void init() {
             mLeftSide = findViewById(R.id.notification_icon_area);
             mRightSide = findViewById(R.id.system_icon_area);
+            mBattery = (BatteryMeterView) findViewById(R.id.battery);
             applyMode(getMode(), false /*animate*/);
         }
 
@@ -84,8 +82,11 @@ public class PhoneStatusBarView extends PanelBar {
         }
 
         public float getAlphaFor(int mode) {
-            final boolean isTransparent = mode == MODE_SEMI_TRANSPARENT || mode == MODE_TRANSPARENT;
-            return isTransparent ? mAlphaWhenTransparent : mAlphaWhenOpaque;
+            return isTransparent(mode) ? mAlphaWhenTransparent : mAlphaWhenOpaque;
+        }
+
+        private boolean isTransparent(int mode) {
+            return mode == MODE_SEMI_TRANSPARENT || mode == MODE_TRANSPARENT;
         }
 
         @Override
@@ -96,13 +97,13 @@ public class PhoneStatusBarView extends PanelBar {
 
         private void applyMode(int mode, boolean animate) {
             if (mLeftSide == null || mRightSide == null) return;
+            mBattery.setBarTransparent(isTransparent(mode));
             float newAlpha = getAlphaFor(mode);
             if (animate) {
                 ObjectAnimator lhs = animateTransitionTo(mLeftSide, newAlpha);
-                ObjectAnimator rhs = animateTransitionTo(mRightSide, newAlpha);
-                AnimatorSet set = new AnimatorSet();
-                set.playTogether(lhs, rhs);
-                set.start();
+                lhs.start();
+                // TODO jspurlock - fix conflicting rhs animations on tablets
+                mRightSide.setAlpha(newAlpha);
             } else {
                 mLeftSide.setAlpha(newAlpha);
                 mRightSide.setAlpha(newAlpha);

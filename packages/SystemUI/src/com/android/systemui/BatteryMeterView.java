@@ -23,6 +23,7 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -41,6 +42,11 @@ public class BatteryMeterView extends View implements DemoMode {
     public static final boolean ENABLE_PERCENT = true;
     public static final boolean SINGLE_DIGIT_PERCENT = false;
     public static final boolean SHOW_100_PERCENT = false;
+
+    private static final LightingColorFilter LIGHTNING_FILTER_OPAQUE =
+            new LightingColorFilter(0x00000000, 0x00000000);
+    private static final LightingColorFilter LIGHTNING_FILTER_TRANS =
+            new LightingColorFilter(0x00999999, 0x00000000);
 
     public static final int FULL = 96;
     public static final int EMPTY = 4;
@@ -214,6 +220,15 @@ public class BatteryMeterView extends View implements DemoMode {
         return color;
     }
 
+    // TODO jspurlock - remove once we draw hollow bolt in code
+    public void setBarTransparent(boolean isTransparent) {
+        mLightning.setColorFilter(isTransparent ? LIGHTNING_FILTER_TRANS : LIGHTNING_FILTER_OPAQUE);
+        BatteryTracker tracker = mDemoMode ? mDemoTracker : mTracker;
+        if (tracker.plugged) {
+            postInvalidate();
+        }
+    }
+
     @Override
     public void draw(Canvas c) {
         BatteryTracker tracker = mDemoMode ? mDemoTracker : mTracker;
@@ -290,17 +305,6 @@ public class BatteryMeterView extends View implements DemoMode {
                     x,
                     y,
                     mTextPaint);
-
-//            Paint pt = new Paint();
-//            pt.setStrokeWidth(1f);
-//            pt.setStyle(Paint.Style.STROKE);
-//            pt.setColor(0xFFFF0000);
-//            c.drawRect(x, y-mTextHeight, x+tw, y, pt);
-//
-//            Slog.v(TAG, "tw=" + tw + " th=" + mTextHeight);
-//
-//            pt.setColor(0xFFFF00FF);
-//            c.drawRect(1, 1, mWidth, mHeight, pt);
         }
     }
 
