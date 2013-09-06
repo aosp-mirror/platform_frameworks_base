@@ -544,7 +544,40 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * @hide Internal book-keeping.
      */
     public int seq;
-    
+
+    /** @hide Native-specific bit mask for MCC config; DO NOT USE UNLESS YOU ARE SURE. */
+    public static final int NATIVE_CONFIG_MCC = 0x0001;
+    /** @hide Native-specific bit mask for MNC config; DO NOT USE UNLESS YOU ARE SURE. */
+    public static final int NATIVE_CONFIG_MNC = 0x0002;
+    /** @hide Native-specific bit mask for LOCALE config; DO NOT USE UNLESS YOU ARE SURE. */
+    public static final int NATIVE_CONFIG_LOCALE = 0x0004;
+    /** @hide Native-specific bit mask for TOUCHSCREEN config; DO NOT USE UNLESS YOU ARE SURE. */
+    public static final int NATIVE_CONFIG_TOUCHSCREEN = 0x0008;
+    /** @hide Native-specific bit mask for KEYBOARD config; DO NOT USE UNLESS YOU ARE SURE. */
+    public static final int NATIVE_CONFIG_KEYBOARD = 0x0010;
+    /** @hide Native-specific bit mask for KEYBOARD_HIDDEN config; DO NOT USE UNLESS YOU
+     * ARE SURE. */
+    public static final int NATIVE_CONFIG_KEYBOARD_HIDDEN = 0x0020;
+    /** @hide Native-specific bit mask for NAVIGATION config; DO NOT USE UNLESS YOU ARE SURE. */
+    public static final int NATIVE_CONFIG_NAVIGATION = 0x0040;
+    /** @hide Native-specific bit mask for ORIENTATION config; DO NOT USE UNLESS YOU ARE SURE. */
+    public static final int NATIVE_CONFIG_ORIENTATION = 0x0080;
+    /** @hide Native-specific bit mask for DENSITY config; DO NOT USE UNLESS YOU ARE SURE. */
+    public static final int NATIVE_CONFIG_DENSITY = 0x0100;
+    /** @hide Native-specific bit mask for SCREEN_SIZE config; DO NOT USE UNLESS YOU ARE SURE. */
+    public static final int NATIVE_CONFIG_SCREEN_SIZE = 0x0200;
+    /** @hide Native-specific bit mask for VERSION config; DO NOT USE UNLESS YOU ARE SURE. */
+    public static final int NATIVE_CONFIG_VERSION = 0x0400;
+    /** @hide Native-specific bit mask for SCREEN_LAYOUT config; DO NOT USE UNLESS YOU ARE SURE. */
+    public static final int NATIVE_CONFIG_SCREEN_LAYOUT = 0x0800;
+    /** @hide Native-specific bit mask for UI_MODE config; DO NOT USE UNLESS YOU ARE SURE. */
+    public static final int NATIVE_CONFIG_UI_MODE = 0x1000;
+    /** @hide Native-specific bit mask for SMALLEST_SCREEN_SIZE config; DO NOT USE UNLESS YOU
+     * ARE SURE. */
+    public static final int NATIVE_CONFIG_SMALLEST_SCREEN_SIZE = 0x2000;
+    /** @hide Native-specific bit mask for LAYOUTDIR config ; DO NOT USE UNLESS YOU ARE SURE.*/
+    public static final int NATIVE_CONFIG_LAYOUTDIR = 0x4000;
+
     /**
      * Construct an invalid Configuration.  You must call {@link #setToDefaults}
      * for this object to be valid.  {@more}
