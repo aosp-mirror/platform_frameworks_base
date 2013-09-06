@@ -1718,20 +1718,20 @@
     
     <!-- Attributes that can be supplied in an AndroidManifest.xml
          <code>screen</code> tag, a child of <code>compatible-screens</code>,
-         which is itseld a child of the root
+         which is itself a child of the root
          {@link #AndroidManifest manifest} tag. -->
     <declare-styleable name="AndroidManifestCompatibleScreensScreen"
                        parent="AndroidManifest.AndroidManifestCompatibleScreens">
         <!-- Specifies a compatible screen size, as per the device
              configuration screen size bins. -->
         <attr name="screenSize">
-            <!-- A small screen configuration, at least 240x320db. -->
+            <!-- A small screen configuration, at least 240x320dp. -->
             <enum name="small" value="200" />
-            <!-- A normal screen configuration, at least 320x480db. -->
+            <!-- A normal screen configuration, at least 320x480dp. -->
             <enum name="normal" value="300" />
-            <!-- A large screen configuration, at least 400x530db. -->
+            <!-- A large screen configuration, at least 400x530dp. -->
             <enum name="large" value="400" />
-            <!-- An extra large screen configuration, at least 600x800db. -->
+            <!-- An extra large screen configuration, at least 600x800dp. -->
             <enum name="xlarge" value="500" />
         </attr>
         <!-- Specifies a compatible screen density, as per the device
@@ -1746,6 +1746,19 @@
             <!-- An extra high density screen, approximately 320dpi. -->
             <enum name="xhdpi" value="320" />
         </attr>
+    </declare-styleable>
+
+    <!-- The <code>input-type</code> tag is a child of the <code>supports-input</code> tag, which
+         is itself a child of the root {@link #AndroidManifest manifest} tag. Each
+         <code>input-type</code> tag specifices the name of a specific input device type. When
+         grouped with the other elements of the parent <code>supports-input</code> tag it defines
+         a collection of input devices, which when all used together, are considered a supported
+         input mechanism for the application. There may be multiple <code>supports-input</code>
+         tags defined, each containing a different combination of input device types. -->
+    <declare-styleable name="AndroidManifestSupportsInputInputType"
+                       parent="AndroidManifest.AndroidManifestSupportsInput">
+        <!-- Specifices the name of the input device type -->
+        <attr name="name" />
     </declare-styleable>
 
     <!-- The attribute that holds a Base64-encoded public key. -->

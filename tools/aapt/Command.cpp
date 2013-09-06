@@ -621,6 +621,7 @@ int doDump(Bundle* bundle)
             bool isLauncherActivity = false;
             bool isSearchable = false;
             bool withinApplication = false;
+            bool withinSupportsInput = false;
             bool withinReceiver = false;
             bool withinService = false;
             bool withinIntentFilter = false;
@@ -711,11 +712,26 @@ int doDump(Bundle* bundle)
             String8 activityIcon;
             String8 receiverName;
             String8 serviceName;
+            Vector<String8> supportedInput;
             while ((code=tree.next()) != ResXMLTree::END_DOCUMENT && code != ResXMLTree::BAD_DOCUMENT) {
                 if (code == ResXMLTree::END_TAG) {
                     depth--;
                     if (depth < 2) {
+                        if (withinSupportsInput && !supportedInput.isEmpty()) {
+                            printf("supports-input: '");
+                            const size_t N = supportedInput.size();
+                            for (size_t i=0; i<N; i++) {
+                                printf("%s", supportedInput[i].string());
+                                if (i != N - 1) {
+                                    printf("' '");
+                                } else {
+                                    printf("'\n");
+                                }
+                            }
+                            supportedInput.clear();
+                        }
                         withinApplication = false;
+                        withinSupportsInput = false;
                     } else if (depth < 3) {
                         if (withinActivity && isMainActivity && isLauncherActivity) {
                             const char *aName = getComponentName(pkg, activityName);
@@ -910,6 +926,8 @@ int doDump(Bundle* bundle)
                             printf(" reqFiveWayNav='%d'", reqFiveWayNav);
                         }
                         printf("\n");
+                    } else if (tag == "supports-input") {
+                        withinSupportsInput = true;
                     } else if (tag == "supports-screens") {
                         smallScreen = getIntegerAttribute(tree,
                                 SMALL_SCREEN_ATTR, NULL, 1);
@@ -1086,66 +1104,85 @@ int doDump(Bundle* bundle)
                             }
                         }
                     }
-                } else if (depth == 3 && withinApplication) {
+                } else if (depth == 3) {
                     withinActivity = false;
                     withinReceiver = false;
                     withinService = false;
                     hasIntentFilter = false;
-                    if(tag == "activity") {
-                        withinActivity = true;
-                        activityName = getAttribute(tree, NAME_ATTR, &error);
-                        if (error != "") {
-                            fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n", error.string());
-                            goto bail;
-                        }
+                    if (withinApplication) {
+                        if(tag == "activity") {
+                            withinActivity = true;
+                            activityName = getAttribute(tree, NAME_ATTR, &error);
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n",
+                                        error.string());
+                                goto bail;
+                            }
 
-                        activityLabel = getResolvedAttribute(&res, tree, LABEL_ATTR, &error);
-                        if (error != "") {
-                            fprintf(stderr, "ERROR getting 'android:label' attribute: %s\n", error.string());
-                            goto bail;
-                        }
+                            activityLabel = getResolvedAttribute(&res, tree, LABEL_ATTR, &error);
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting 'android:label' attribute: %s\n",
+                                        error.string());
+                                goto bail;
+                            }
 
-                        activityIcon = getResolvedAttribute(&res, tree, ICON_ATTR, &error);
-                        if (error != "") {
-                            fprintf(stderr, "ERROR getting 'android:icon' attribute: %s\n", error.string());
-                            goto bail;
-                        }
+                            activityIcon = getResolvedAttribute(&res, tree, ICON_ATTR, &error);
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting 'android:icon' attribute: %s\n",
+                                        error.string());
+                                goto bail;
+                            }
 
-                        int32_t orien = getResolvedIntegerAttribute(&res, tree,
-                                SCREEN_ORIENTATION_ATTR, &error);
-                        if (error == "") {
-                            if (orien == 0 || orien == 6 || orien == 8) {
-                                // Requests landscape, sensorLandscape, or reverseLandscape.
-                                reqScreenLandscapeFeature = true;
-                            } else if (orien == 1 || orien == 7 || orien == 9) {
-                                // Requests portrait, sensorPortrait, or reversePortrait.
-                                reqScreenPortraitFeature = true;
+                            int32_t orien = getResolvedIntegerAttribute(&res, tree,
+                                    SCREEN_ORIENTATION_ATTR, &error);
+                            if (error == "") {
+                                if (orien == 0 || orien == 6 || orien == 8) {
+                                    // Requests landscape, sensorLandscape, or reverseLandscape.
+                                    reqScreenLandscapeFeature = true;
+                                } else if (orien == 1 || orien == 7 || orien == 9) {
+                                    // Requests portrait, sensorPortrait, or reversePortrait.
+                                    reqScreenPortraitFeature = true;
+                                }
+                            }
+                        } else if (tag == "uses-library") {
+                            String8 libraryName = getAttribute(tree, NAME_ATTR, &error);
+                            if (error != "") {
+                                fprintf(stderr,
+                                        "ERROR getting 'android:name' attribute for uses-library"
+                                        " %s\n", error.string());
+                                goto bail;
+                            }
+                            int req = getIntegerAttribute(tree,
+                                    REQUIRED_ATTR, NULL, 1);
+                            printf("uses-library%s:'%s'\n",
+                                    req ? "" : "-not-required", libraryName.string());
+                        } else if (tag == "receiver") {
+                            withinReceiver = true;
+                            receiverName = getAttribute(tree, NAME_ATTR, &error);
+
+                            if (error != "") {
+                                fprintf(stderr,
+                                        "ERROR getting 'android:name' attribute for receiver:"
+                                        " %s\n", error.string());
+                                goto bail;
+                            }
+                        } else if (tag == "service") {
+                            withinService = true;
+                            serviceName = getAttribute(tree, NAME_ATTR, &error);
+
+                            if (error != "") {
+                                fprintf(stderr, "ERROR getting 'android:name' attribute for"
+                                        " service: %s\n", error.string());
+                                goto bail;
                             }
                         }
-                    } else if (tag == "uses-library") {
-                        String8 libraryName = getAttribute(tree, NAME_ATTR, &error);
-                        if (error != "") {
-                            fprintf(stderr, "ERROR getting 'android:name' attribute for uses-library: %s\n", error.string());
-                            goto bail;
-                        }
-                        int req = getIntegerAttribute(tree,
-                                REQUIRED_ATTR, NULL, 1);
-                        printf("uses-library%s:'%s'\n",
-                                req ? "" : "-not-required", libraryName.string());
-                    } else if (tag == "receiver") {
-                        withinReceiver = true;
-                        receiverName = getAttribute(tree, NAME_ATTR, &error);
-
-                        if (error != "") {
-                            fprintf(stderr, "ERROR getting 'android:name' attribute for receiver: %s\n", error.string());
-                            goto bail;
-                        }
-                    } else if (tag == "service") {
-                        withinService = true;
-                        serviceName = getAttribute(tree, NAME_ATTR, &error);
-
-                        if (error != "") {
-                            fprintf(stderr, "ERROR getting 'android:name' attribute for service: %s\n", error.string());
+                    } else if (withinSupportsInput && tag == "input-type") {
+                        String8 name = getAttribute(tree, NAME_ATTR, &error);
+                        if (name != "" && error == "") {
+                            supportedInput.add(name);
+                        } else {
+                            fprintf(stderr, "ERROR getting 'android:name' attribute: %s\n",
+                                    error.string());
                             goto bail;
                         }
                     }
