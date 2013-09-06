@@ -110,6 +110,30 @@ public class ContentProviderClient {
         }
     }
 
+    /** See {@link ContentProvider#canonicalize} */
+    public final Uri canonicalize(Uri url) throws RemoteException {
+        try {
+            return mContentProvider.canonicalize(mPackageName, url);
+        } catch (DeadObjectException e) {
+            if (!mStable) {
+                mContentResolver.unstableProviderDied(mContentProvider);
+            }
+            throw e;
+        }
+    }
+
+    /** See {@link ContentProvider#uncanonicalize} */
+    public final Uri uncanonicalize(Uri url) throws RemoteException {
+        try {
+            return mContentProvider.uncanonicalize(mPackageName, url);
+        } catch (DeadObjectException e) {
+            if (!mStable) {
+                mContentResolver.unstableProviderDied(mContentProvider);
+            }
+            throw e;
+        }
+    }
+
     /** See {@link ContentProvider#insert ContentProvider.insert} */
     public Uri insert(Uri url, ContentValues initialValues)
             throws RemoteException {
