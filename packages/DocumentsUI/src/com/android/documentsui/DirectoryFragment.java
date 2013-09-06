@@ -214,6 +214,12 @@ public class DirectoryFragment extends Fragment {
         updateDisplayState();
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateDisplayState();
+    }
+
     public void updateDisplayState() {
         final State state = getDisplayState(this);
 
@@ -541,7 +547,7 @@ public class DirectoryFragment extends Fragment {
 
             final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
-            final View summaryGrid = convertView.findViewById(R.id.summary_grid);
+            final View line2 = convertView.findViewById(R.id.line2);
             final ImageView icon1 = (ImageView) convertView.findViewById(android.R.id.icon1);
             final TextView summary = (TextView) convertView.findViewById(android.R.id.summary);
             final TextView date = (TextView) convertView.findViewById(R.id.date);
@@ -571,31 +577,32 @@ public class DirectoryFragment extends Fragment {
 
             title.setText(docDisplayName);
 
+            boolean hasLine2 = false;
+
             if (mType == TYPE_RECENT_OPEN) {
                 final RootInfo root = roots.getRoot(docAuthority, docRootId);
                 icon1.setVisibility(View.VISIBLE);
                 icon1.setImageDrawable(root.loadIcon(context));
                 summary.setText(root.getDirectoryString());
                 summary.setVisibility(View.VISIBLE);
+                summary.setTextAlignment(TextView.TEXT_ALIGNMENT_TEXT_END);
+                hasLine2 = true;
             } else {
                 icon1.setVisibility(View.GONE);
                 if (docSummary != null) {
                     summary.setText(docSummary);
                     summary.setVisibility(View.VISIBLE);
+                    hasLine2 = true;
                 } else {
                     summary.setVisibility(View.INVISIBLE);
                 }
-            }
-
-            if (summaryGrid != null) {
-                summaryGrid.setVisibility(
-                        (summary.getVisibility() == View.VISIBLE) ? View.VISIBLE : View.GONE);
             }
 
             if (docLastModified == -1) {
                 date.setText(null);
             } else {
                 date.setText(formatTime(context, docLastModified));
+                hasLine2 = true;
             }
 
             if (state.showSize) {
@@ -604,10 +611,13 @@ public class DirectoryFragment extends Fragment {
                     size.setText(null);
                 } else {
                     size.setText(Formatter.formatFileSize(context, docSize));
+                    hasLine2 = true;
                 }
             } else {
                 size.setVisibility(View.GONE);
             }
+
+            line2.setVisibility(hasLine2 ? View.VISIBLE : View.GONE);
 
             return convertView;
         }

@@ -14,6 +14,9 @@
      limitations under the License.
 -->
 
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@android:id/title"
-    style="?android:attr/listSeparatorTextViewStyle" />
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true" android:drawable="@color/item_root_activated" />
+    <item android:state_activated="true" android:drawable="@color/item_root_activated" />
+    <item android:state_focused="true" android:drawable="@color/item_root_activated" />
+    <item android:drawable="@android:color/white" />
+</selector>

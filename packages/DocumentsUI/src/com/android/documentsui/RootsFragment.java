@@ -40,6 +40,7 @@ import com.android.documentsui.DocumentsActivity.State;
 import com.android.documentsui.SectionedListAdapter.SectionAdapter;
 import com.android.documentsui.model.DocumentInfo;
 import com.android.documentsui.model.RootInfo;
+import com.android.internal.util.Objects;
 
 import java.util.Comparator;
 import java.util.List;
@@ -78,6 +79,7 @@ public class RootsFragment extends Fragment {
         final View view = inflater.inflate(R.layout.fragment_roots, container, false);
         mList = (ListView) view.findViewById(android.R.id.list);
         mList.setOnItemClickListener(mItemListener);
+        mList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 
         return view;
     }
@@ -100,6 +102,21 @@ public class RootsFragment extends Fragment {
 
         mAdapter = new SectionedRootsAdapter(context, matchingRoots, includeApps);
         mList.setAdapter(mAdapter);
+
+        onCurrentRootChanged();
+    }
+
+    public void onCurrentRootChanged() {
+        if (mAdapter == null) return;
+
+        final RootInfo root = ((DocumentsActivity) getActivity()).getCurrentRoot();
+        for (int i = 0; i < mAdapter.getCount(); i++) {
+            final Object item = mAdapter.getItem(i);
+            if (Objects.equal(item, root)) {
+                mList.setItemChecked(i, true);
+                return;
+            }
+        }
     }
 
     private OnItemClickListener mItemListener = new OnItemClickListener() {
