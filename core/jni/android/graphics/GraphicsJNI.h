@@ -91,9 +91,16 @@ public:
     AndroidPixelRef(JNIEnv* env, void* storage, size_t size, jbyteArray storageObj,
                     SkColorTable* ctable);
 
+    /**
+     * Creates an AndroidPixelRef that wraps (and refs) another to reuse/share
+     * the same storage and java byte array refcounting, yet have a different
+     * color table.
+     */
+    AndroidPixelRef(AndroidPixelRef& wrappedPixelRef, SkColorTable* ctable);
+
     virtual ~AndroidPixelRef();
 
-    jbyteArray getStorageObj() { return fStorageObj; }
+    jbyteArray getStorageObj();
 
     void setLocalJNIRef(jbyteArray arr);
 
@@ -110,6 +117,8 @@ public:
     virtual void globalUnref();
 
 private:
+    AndroidPixelRef* const fWrappedPixelRef; // if set, delegate memory management calls to this
+
     JavaVM* fVM;
     bool fOnJavaHeap; // If true, the memory was allocated on the Java heap
 
