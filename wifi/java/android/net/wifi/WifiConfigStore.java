@@ -680,9 +680,15 @@ class WifiConfigStore {
             }
             config.ipAssignment = IpAssignment.DHCP;
             config.proxySettings = ProxySettings.NONE;
-            mConfiguredNetworks.put(config.networkId, config);
-            mNetworkIds.put(configKey(config), config.networkId);
-            localLog("loaded configured network", config.networkId);
+
+            if (mNetworkIds.containsKey(configKey(config))) {
+                // That SSID is already known, just ignore this duplicate entry
+                localLog("discarded duplicate network", config.networkId);
+            } else {
+                mConfiguredNetworks.put(config.networkId, config);
+                mNetworkIds.put(configKey(config), config.networkId);
+                localLog("loaded configured network", config.networkId);
+            }
         }
 
         readIpAndProxyConfigurations();
