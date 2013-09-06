@@ -21,6 +21,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -31,7 +32,6 @@ import android.util.Log;
 /**
  * This class provides a base class for hotword detection service implementations.
  * This class should be extended only if you wish to implement a new hotword recognizer.
- * {@hide}
  */
 public abstract class HotwordRecognitionService extends Service {
     /**
@@ -45,8 +45,7 @@ public abstract class HotwordRecognitionService extends Service {
     private static final String TAG = "HotwordRecognitionService";
 
     /** Debugging flag */
-    // TODO: Turn off.
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
 
     private static final int MSG_START_RECOGNITION = 1;
     private static final int MSG_STOP_RECOGNITION = 2;
@@ -160,7 +159,7 @@ public abstract class HotwordRecognitionService extends Service {
 
         public void startHotwordRecognition(IHotwordRecognitionListener listener) {
             if (DBG) Log.d(TAG, "startRecognition called by: " + listener.asBinder());
-            if (mInternalService != null) {
+            if (mInternalService != null && mInternalService.checkPermissions(listener)) {
                 mInternalService.mHandler.sendMessage(
                         Message.obtain(mInternalService.mHandler, MSG_START_RECOGNITION, listener));
             }
@@ -168,7 +167,7 @@ public abstract class HotwordRecognitionService extends Service {
 
         public void stopHotwordRecognition(IHotwordRecognitionListener listener) {
             if (DBG) Log.d(TAG, "stopRecognition called by: " + listener.asBinder());
-            if (mInternalService != null) {
+            if (mInternalService != null && mInternalService.checkPermissions(listener)) {
                 mInternalService.mHandler.sendMessage(
                         Message.obtain(mInternalService.mHandler, MSG_STOP_RECOGNITION, listener));
             }
@@ -177,6 +176,27 @@ public abstract class HotwordRecognitionService extends Service {
         private void clearReference() {
             mInternalService = null;
         }
+    }
+
+    /**
+     * Checks whether the caller has sufficient permissions
+     *
+     * @param listener to send the error message to in case of error.
+     * @return {@code true} if the caller has enough permissions, {@code false} otherwise.
+     */
+    private boolean checkPermissions(IHotwordRecognitionListener listener) {
+        if (DBG) Log.d(TAG, "checkPermissions");
+        if (checkCallingOrSelfPermission(android.Manifest.permission.HOTWORD_RECOGNITION) ==
+                PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        try {
+            Log.e(TAG, "Recognition service called without HOTWORD_RECOGNITION permissions");
+            listener.onHotwordError(HotwordRecognizer.ERROR_FAILED);
+        } catch (RemoteException e) {
+            Log.e(TAG, "onHotwordError(ERROR_FAILED) message failed", e);
+        }
+        return false;
     }
 
     /**
@@ -216,10 +236,11 @@ public abstract class HotwordRecognitionService extends Service {
 
         /**
          * Called back when hotword is detected.
-         * The action tells the client what action to take, post hotword-detection.
+         *
+         * @param intent for the activity to launch, post hotword detection.
          */
-        public void onHotwordRecognized(PendingIntent intent) throws RemoteException {
-            mListener.onHotwordRecognized(intent);
+        public void onHotwordRecognized(Intent activityIntent) throws RemoteException {
+            mListener.onHotwordRecognized(activityIntent);
         }
 
         /**

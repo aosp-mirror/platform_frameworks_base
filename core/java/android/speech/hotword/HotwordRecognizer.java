@@ -45,8 +45,7 @@ import java.util.Queue;
  */
 public class HotwordRecognizer {
     /** DEBUG value to enable verbose debug prints */
-    // TODO: Turn off.
-    private final static boolean DBG = true;
+    private final static boolean DBG = false;
 
     /** Log messages identifier */
     private static final String TAG = "HotwordRecognizer";
@@ -80,6 +79,9 @@ public class HotwordRecognizer {
 
     /** The service received concurrent start calls */
     public static final int ERROR_SERVICE_ALREADY_STARTED = 6;
+
+    /** Hotword recognition is unavailable on the device */
+    public static final int ERROR_UNAVAILABLE = 7;
 
     /** action codes */
     private static final int MSG_START = 1;
@@ -354,7 +356,7 @@ public class HotwordRecognizer {
                         mInternalListener.onHotwordEvent(msg.arg1, (Bundle) msg.obj);
                         break;
                     case MSG_ON_RECOGNIZED:
-                        mInternalListener.onHotwordRecognized((PendingIntent) msg.obj);
+                        mInternalListener.onHotwordRecognized((Intent) msg.obj);
                         break;
                     case MSG_ON_ERROR:
                         mInternalListener.onHotwordError((Integer) msg.obj);
@@ -380,8 +382,8 @@ public class HotwordRecognizer {
         }
 
         @Override
-        public void onHotwordRecognized(PendingIntent intent) throws RemoteException {
-            Message.obtain(mInternalHandler, MSG_ON_RECOGNIZED, intent)
+        public void onHotwordRecognized(Intent activityIntent) throws RemoteException {
+            Message.obtain(mInternalHandler, MSG_ON_RECOGNIZED, activityIntent)
                     .sendToTarget();
         }
 
