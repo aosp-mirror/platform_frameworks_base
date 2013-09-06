@@ -198,6 +198,8 @@ public class MobileDataStateTracker extends BaseNetworkStateTracker {
             loge("CONNECTED event did not supply link properties.");
             mLinkProperties = new LinkProperties();
         }
+        mLinkProperties.setMtu(mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_mobile_mtu));
         mLinkCapabilities = intent.getParcelableExtra(
                 PhoneConstants.DATA_LINK_CAPABILITIES_KEY);
         if (mLinkCapabilities == null) {
