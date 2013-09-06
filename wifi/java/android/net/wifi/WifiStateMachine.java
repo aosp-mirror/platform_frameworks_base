@@ -51,6 +51,7 @@ import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkUtils;
+import android.net.RouteInfo;
 import android.net.wifi.WpsResult.Status;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pService;
@@ -79,9 +80,12 @@ import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 
+import com.android.server.net.BaseNetworkObserver;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.Inet6Address;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -198,7 +202,18 @@ public class WifiStateMachine extends StateMachine {
     /* Tracks sequence number on a driver time out */
     private int mDriverStartToken = 0;
 
+    /**
+     * The link properties of the wifi interface.
+     * Do not modify this directly; use updateLinkProperties instead.
+     */
     private LinkProperties mLinkProperties;
+
+    /**
+     * Subset of link properties coming from netlink.
+     * Currently includes IPv4 and IPv6 addresses. In the future will also include IPv6 DNS servers
+     * and domains obtained from router advertisements (RFC 6106).
+     */
+    private final LinkProperties mNetlinkLinkProperties;
 
     /* Tracks sequence number on a periodic scan message */
     private int mPeriodicScanToken = 0;
@@ -214,6 +229,39 @@ public class WifiStateMachine extends StateMachine {
     private NetworkInfo mNetworkInfo;
     private SupplicantStateTracker mSupplicantStateTracker;
     private DhcpStateMachine mDhcpStateMachine;
+
+    private class InterfaceObserver extends BaseNetworkObserver {
+        private WifiStateMachine mWifiStateMachine;
+
+        InterfaceObserver(WifiStateMachine wifiStateMachine) {
+            super();
+            mWifiStateMachine = wifiStateMachine;
+        }
+
+        @Override
+        public void addressUpdated(String address, String iface, int flags, int scope) {
+            if (mWifiStateMachine.mInterfaceName.equals(iface)) {
+                if (DBG) {
+                    log("addressUpdated: " + address + " on " + iface +
+                        " flags " + flags + " scope " + scope);
+                }
+                mWifiStateMachine.sendMessage(CMD_IP_ADDRESS_UPDATED, new LinkAddress(address));
+            }
+        }
+
+        @Override
+        public void addressRemoved(String address, String iface, int flags, int scope) {
+            if (mWifiStateMachine.mInterfaceName.equals(iface)) {
+                if (DBG) {
+                    log("addressRemoved: " + address + " on " + iface +
+                        " flags " + flags + " scope " + scope);
+                }
+                mWifiStateMachine.sendMessage(CMD_IP_ADDRESS_REMOVED, new LinkAddress(address));
+            }
+        }
+    }
+
+    private InterfaceObserver mInterfaceObserver;
 
     private AlarmManager mAlarmManager;
     private PendingIntent mScanIntent;
@@ -371,6 +419,12 @@ public class WifiStateMachine extends StateMachine {
     public static final int CMD_SET_BATCHED_SCAN          = BASE + 135;
     public static final int CMD_START_NEXT_BATCHED_SCAN   = BASE + 136;
     public static final int CMD_POLL_BATCHED_SCAN         = BASE + 137;
+
+    /* Link configuration (IP address, DNS, ...) changes */
+    /* An new IP address was added to our interface, or an existing IP address was updated */
+    static final int CMD_IP_ADDRESS_UPDATED               = BASE + 140;
+    /* An IP address was removed from our interface */
+    static final int CMD_IP_ADDRESS_REMOVED               = BASE + 141;
 
     public static final int CONNECT_MODE                   = 1;
     public static final int SCAN_ONLY_MODE                 = 2;
@@ -585,14 +639,21 @@ public class WifiStateMachine extends StateMachine {
         mSupplicantStateTracker = new SupplicantStateTracker(context, this, mWifiConfigStore,
                 getHandler());
         mLinkProperties = new LinkProperties();
+        mNetlinkLinkProperties = new LinkProperties();
 
         mWifiP2pManager = (WifiP2pManager) mContext.getSystemService(Context.WIFI_P2P_SERVICE);
 
         mNetworkInfo.setIsAvailable(false);
-        mLinkProperties.clear();
         mLastBssid = null;
         mLastNetworkId = WifiConfiguration.INVALID_NETWORK_ID;
         mLastSignalLevel = -1;
+
+        mInterfaceObserver = new InterfaceObserver(this);
+        try {
+            mNwService.registerObserver(mInterfaceObserver);
+        } catch (RemoteException e) {
+            loge("Couldn't register interface observer: " + e.toString());
+        }
 
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         Intent scanIntent = new Intent(ACTION_START_SCAN, null);
@@ -1906,19 +1967,82 @@ public class WifiStateMachine extends StateMachine {
         }
     }
 
-    private void configureLinkProperties() {
-        if (mWifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
-            mLinkProperties = mWifiConfigStore.getLinkProperties(mLastNetworkId);
-        } else {
-            synchronized (mDhcpResultsLock) {
-                if ((mDhcpResults != null) && (mDhcpResults.linkProperties != null)) {
-                    mLinkProperties = mDhcpResults.linkProperties;
+    /**
+     * Updates mLinkProperties by merging information from various sources.
+     *
+     * This is needed because the information in mLinkProperties comes from multiple sources (DHCP,
+     * netlink, static configuration, ...). When one of these sources of information has updated
+     * link properties, we can't just assign them to mLinkProperties or we'd lose track of the
+     * information that came from other sources. Instead, when one of those sources has new
+     * information, we update the object that tracks the information from that source and then
+     * call this method to apply the change to mLinkProperties.
+     *
+     * The information in mLinkProperties is currently obtained as follows:
+     * - Interface name: set in the constructor.
+     * - IPv4 and IPv6 addresses: netlink, via mInterfaceObserver.
+     * - IPv4 routes, DNS servers, and domains: DHCP.
+     * - HTTP proxy: the wifi config store.
+     */
+    private void updateLinkProperties() {
+        LinkProperties newLp = new LinkProperties();
+
+        // Interface name and proxy are locally configured.
+        newLp.setInterfaceName(mInterfaceName);
+        newLp.setHttpProxy(mWifiConfigStore.getProxyProperties(mLastNetworkId));
+
+        // IPv4 and IPv6 addresses come from netlink.
+        newLp.setLinkAddresses(mNetlinkLinkProperties.getLinkAddresses());
+
+        // For now, routing and DNS only come from DHCP or static configuration. In the future,
+        // we'll need to merge IPv6 DNS servers and domains coming from netlink.
+        synchronized (mDhcpResultsLock) {
+            // Even when we're using static configuration, we don't need to look at the config
+            // store, because static IP configuration also populates mDhcpResults.
+            if ((mDhcpResults != null) && (mDhcpResults.linkProperties != null)) {
+                LinkProperties lp = mDhcpResults.linkProperties;
+                for (RouteInfo route: lp.getRoutes()) {
+                    newLp.addRoute(route);
                 }
+                for (InetAddress dns: lp.getDnses()) {
+                    newLp.addDns(dns);
+                }
+                newLp.setDomains(lp.getDomains());
             }
-            mLinkProperties.setHttpProxy(mWifiConfigStore.getProxyProperties(mLastNetworkId));
         }
-        mLinkProperties.setInterfaceName(mInterfaceName);
-        if (DBG) log("netId=" + mLastNetworkId  + " Link configured: " + mLinkProperties);
+
+        // If anything has changed, and we're already connected, send out a notification.
+        // If we're still connecting, apps will be notified when we connect.
+        if (!newLp.equals(mLinkProperties)) {
+            if (DBG) {
+                log("Link configuration changed for netId: " + mLastNetworkId
+                        + " old: " + mLinkProperties + "new: " + newLp);
+            }
+            mLinkProperties = newLp;
+            if (getNetworkDetailedState() == DetailedState.CONNECTED) {
+                sendLinkConfigurationChangedBroadcast();
+            }
+        }
+    }
+
+    /**
+     * Clears all our link properties.
+     */
+    private void clearLinkProperties() {
+        // If the network used DHCP, clear the LinkProperties we stored in the config store.
+        if (!mWifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
+            mWifiConfigStore.clearLinkProperties(mLastNetworkId);
+        }
+
+        // Clear the link properties obtained from DHCP and netlink.
+        synchronized(mDhcpResultsLock) {
+            if (mDhcpResults != null && mDhcpResults.linkProperties != null) {
+                mDhcpResults.linkProperties.clear();
+            }
+        }
+        mNetlinkLinkProperties.clear();
+
+        // Now clear the merged link properties.
+        mLinkProperties.clear();
     }
 
     private int getMaxDhcpRetries() {
@@ -2041,15 +2165,10 @@ public class WifiStateMachine extends StateMachine {
         mWifiConfigStore.updateStatus(mLastNetworkId, DetailedState.DISCONNECTED);
 
         /* Clear network properties */
-        mLinkProperties.clear();
+        clearLinkProperties();
 
         /* send event to CM & network change broadcast */
         sendNetworkStateChangeBroadcast(mLastBssid);
-
-        /* Clear IP settings if the network used DHCP */
-        if (!mWifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
-            mWifiConfigStore.clearLinkProperties(mLastNetworkId);
-        }
 
         mLastBssid= null;
         mLastNetworkId = WifiConfiguration.INVALID_NETWORK_ID;
@@ -2149,20 +2268,7 @@ public class WifiStateMachine extends StateMachine {
         }
         mWifiInfo.setInetAddress(addr);
         mWifiInfo.setMeteredHint(dhcpResults.hasMeteredHint());
-        if (getNetworkDetailedState() == DetailedState.CONNECTED) {
-            //DHCP renewal in connected state
-            linkProperties.setHttpProxy(mWifiConfigStore.getProxyProperties(mLastNetworkId));
-            if (!linkProperties.equals(mLinkProperties)) {
-                if (DBG) {
-                    log("Link configuration changed for netId: " + mLastNetworkId
-                            + " old: " + mLinkProperties + "new: " + linkProperties);
-                }
-                mLinkProperties = linkProperties;
-                sendLinkConfigurationChangedBroadcast();
-            }
-        } else {
-            configureLinkProperties();
-        }
+        updateLinkProperties();
     }
 
     private void handleFailedIpConfiguration() {
@@ -2386,6 +2492,17 @@ public class WifiStateMachine extends StateMachine {
                 case WifiP2pService.DISCONNECT_WIFI_REQUEST:
                     mTemporarilyDisconnectWifi = (message.arg1 == 1);
                     replyToMessage(message, WifiP2pService.DISCONNECT_WIFI_RESPONSE);
+                    break;
+                case CMD_IP_ADDRESS_UPDATED:
+                    // addLinkAddress is a no-op if called more than once with the same address.
+                    if (mNetlinkLinkProperties.addLinkAddress((LinkAddress) message.obj)) {
+                        updateLinkProperties();
+                    }
+                    break;
+                case CMD_IP_ADDRESS_REMOVED:
+                    if (mNetlinkLinkProperties.removeLinkAddress((LinkAddress) message.obj)) {
+                        updateLinkProperties();
+                    }
                     break;
                 default:
                     loge("Error! unhandled message" + message);
@@ -3405,8 +3522,7 @@ public class WifiStateMachine extends StateMachine {
                         }
                         if (result.hasProxyChanged()) {
                             log("Reconfiguring proxy on connection");
-                            configureLinkProperties();
-                            sendLinkConfigurationChangedBroadcast();
+                            updateLinkProperties();
                         }
                     }
 
@@ -3460,13 +3576,14 @@ public class WifiStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (!mWifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
+                // TODO: If we're switching between static IP configuration and DHCP, remove the
+                // static configuration first.
                 startDhcp();
             } else {
                 // stop any running dhcp before assigning static IP
                 stopDhcp();
                 DhcpResults dhcpResults = new DhcpResults(
                         mWifiConfigStore.getLinkProperties(mLastNetworkId));
-                dhcpResults.linkProperties.setInterfaceName(mInterfaceName);
                 InterfaceConfiguration ifcg = new InterfaceConfiguration();
                 Iterator<LinkAddress> addrs =
                         dhcpResults.linkProperties.getLinkAddresses().iterator();
