@@ -1784,30 +1784,23 @@ public class KeyguardHostView extends KeyguardViewBase {
             }
         }
 
-        public void onHotwordRecognized(final PendingIntent intent) {
+        public void onHotwordRecognized(final Intent intent) {
             if (DEBUG) Log.d(TAG, "onHotwordRecognized");
             maybeStopHotwordDetector();
+            // See if an activity can handle this intent.
+            if (getContext().getPackageManager().resolveActivity(intent, 0) == null)
+                return;
             if (SecurityMode.None == mCurrentSecuritySelection) {
                 if (intent != null) {
-                    try {
-                        intent.send();
-                    } catch (PendingIntent.CanceledException e) {
-                        Log.w(TAG, "Failed to launch PendingIntent. Encountered CanceledException");
-                    }
+                    mActivityLauncher.launchActivity(intent, true, true, null, null);
                 }
                 mCallback.userActivity(0);
-                mCallback.dismiss(false);
             } else if (ENABLE_HOTWORD_SECURE && mLockPatternUtils.isSecure()) {
                 setOnDismissAction(new OnDismissAction() {
                     @Override
                     public boolean onDismiss() {
                         if (intent != null) {
-                            try {
-                                intent.send();
-                            } catch (PendingIntent.CanceledException e) {
-                                Log.w(TAG, "Failed to launch PendingIntent."
-                                        + "Encountered CanceledException");
-                            }
+                            mActivityLauncher.launchActivity(intent, true, true, null, null);
                         }
                         return false;
                     }
