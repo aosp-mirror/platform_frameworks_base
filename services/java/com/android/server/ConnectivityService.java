@@ -184,7 +184,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static final String ACTION_PKT_CNT_SAMPLE_INTERVAL_ELAPSED =
             "android.net.ConnectivityService.action.PKT_CNT_SAMPLE_INTERVAL_ELAPSED";
 
-    private static final int SAMPLE_INTERVAL_ELAPSED_REQURST_CODE = 0;
+    private static final int SAMPLE_INTERVAL_ELAPSED_REQUEST_CODE = 0;
 
     private PendingIntent mSampleIntervalElapsedIntent;
 
@@ -661,7 +661,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // start network sampling ..
         Intent intent = new Intent(ACTION_PKT_CNT_SAMPLE_INTERVAL_ELAPSED, null);
         mSampleIntervalElapsedIntent = PendingIntent.getBroadcast(mContext,
-                SAMPLE_INTERVAL_ELAPSED_REQURST_CODE, intent, 0);
+                SAMPLE_INTERVAL_ELAPSED_REQUEST_CODE, intent, 0);
 
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         setAlarm(DEFAULT_START_SAMPLING_INTERVAL_IN_SECONDS * 1000, mSampleIntervalElapsedIntent);
@@ -3017,7 +3017,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         public void handleMessage(Message msg) {
             NetworkInfo info;
             switch (msg.what) {
-                case EVENT_CLEAR_NET_TRANSITION_WAKELOCK:
+                case EVENT_CLEAR_NET_TRANSITION_WAKELOCK: {
                     String causedBy = null;
                     synchronized (ConnectivityService.this) {
                         if (msg.arg1 == mNetTransitionWakeLockSerialNumber &&
@@ -3030,49 +3030,44 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         log("NetTransition Wakelock for " + causedBy + " released by timeout");
                     }
                     break;
-                case EVENT_RESTORE_DEFAULT_NETWORK:
+                }
+                case EVENT_RESTORE_DEFAULT_NETWORK: {
                     FeatureUser u = (FeatureUser)msg.obj;
                     u.expire();
                     break;
-                case EVENT_INET_CONDITION_CHANGE:
-                {
+                }
+                case EVENT_INET_CONDITION_CHANGE: {
                     int netType = msg.arg1;
                     int condition = msg.arg2;
                     handleInetConditionChange(netType, condition);
                     break;
                 }
-                case EVENT_INET_CONDITION_HOLD_END:
-                {
+                case EVENT_INET_CONDITION_HOLD_END: {
                     int netType = msg.arg1;
                     int sequence = msg.arg2;
                     handleInetConditionHoldEnd(netType, sequence);
                     break;
                 }
-                case EVENT_SET_NETWORK_PREFERENCE:
-                {
+                case EVENT_SET_NETWORK_PREFERENCE: {
                     int preference = msg.arg1;
                     handleSetNetworkPreference(preference);
                     break;
                 }
-                case EVENT_SET_MOBILE_DATA:
-                {
+                case EVENT_SET_MOBILE_DATA: {
                     boolean enabled = (msg.arg1 == ENABLED);
                     handleSetMobileData(enabled);
                     break;
                 }
-                case EVENT_APPLY_GLOBAL_HTTP_PROXY:
-                {
+                case EVENT_APPLY_GLOBAL_HTTP_PROXY: {
                     handleDeprecatedGlobalHttpProxy();
                     break;
                 }
-                case EVENT_SET_DEPENDENCY_MET:
-                {
+                case EVENT_SET_DEPENDENCY_MET: {
                     boolean met = (msg.arg1 == ENABLED);
                     handleSetDependencyMet(msg.arg2, met);
                     break;
                 }
-                case EVENT_SEND_STICKY_BROADCAST_INTENT:
-                {
+                case EVENT_SEND_STICKY_BROADCAST_INTENT: {
                     Intent intent = (Intent)msg.obj;
                     sendStickyBroadcast(intent);
                     break;
@@ -3101,10 +3096,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         log("EVENT_ENABLE_FAIL_FAST_MOBILE_DATA: stale arg1:" + msg.arg1
                                 + " != tag:" + tag);
                     }
+                    break;
                 }
-                case EVENT_SAMPLE_INTERVAL_ELAPSED:
+                case EVENT_SAMPLE_INTERVAL_ELAPSED: {
                     handleNetworkSamplingTimeout();
                     break;
+                }
             }
         }
     }
