@@ -1351,8 +1351,10 @@ public class MediaPlayer implements SubtitleController.Listener
         mOnInfoListener = null;
         mOnVideoSizeChangedListener = null;
         mOnTimedTextListener = null;
-        mTimeProvider.close();
-        mTimeProvider = null;
+        if (mTimeProvider != null) {
+            mTimeProvider.close();
+            mTimeProvider = null;
+        }
         mOnSubtitleDataListener = null;
         _release();
     }
@@ -1380,11 +1382,17 @@ public class MediaPlayer implements SubtitleController.Listener
         if (mSubtitleController != null) {
             mSubtitleController.reset();
         }
+        if (mTimeProvider != null) {
+            mTimeProvider.close();
+            mTimeProvider = null;
+        }
 
         stayAwake(false);
         _reset();
         // make sure none of the listeners get called anymore
-        mEventHandler.removeCallbacksAndMessages(null);
+        if (mEventHandler != null) {
+            mEventHandler.removeCallbacksAndMessages(null);
+        }
 
         disableProxyListener();
     }
@@ -2121,6 +2129,9 @@ public class MediaPlayer implements SubtitleController.Listener
 
     /** @hide */
     public MediaTimeProvider getMediaTimeProvider() {
+        if (mTimeProvider == null) {
+            mTimeProvider = new TimeProvider(this);
+        }
         return mTimeProvider;
     }
 
@@ -2761,6 +2772,7 @@ public class MediaPlayer implements SubtitleController.Listener
         private static final int REFRESH_AND_NOTIFY_TIME = 1;
         private static final int NOTIFY_STOP = 2;
         private static final int NOTIFY_SEEK = 3;
+        private HandlerThread mHandlerThread;
 
         /** @hide */
         public boolean DEBUG = false;
@@ -2773,7 +2785,18 @@ public class MediaPlayer implements SubtitleController.Listener
                 // we assume starting position
                 mRefresh = true;
             }
-            mEventHandler = new EventHandler();
+
+            Looper looper;
+            if ((looper = Looper.myLooper()) == null &&
+                (looper = Looper.getMainLooper()) == null) {
+                // Create our own looper here in case MP was created without one
+                mHandlerThread = new HandlerThread("MediaPlayerMTPEventThread",
+                      Process.THREAD_PRIORITY_FOREGROUND);
+                mHandlerThread.start();
+                looper = mHandlerThread.getLooper();
+            }
+            mEventHandler = new EventHandler(looper);
+
             mListeners = new MediaTimeProvider.OnMediaTimeListener[0];
             mTimes = new long[0];
             mLastTimeUs = 0;
@@ -2790,6 +2813,17 @@ public class MediaPlayer implements SubtitleController.Listener
         /** @hide */
         public void close() {
             mEventHandler.removeMessages(NOTIFY);
+            if (mHandlerThread != null) {
+                mHandlerThread.quitSafely();
+                mHandlerThread = null;
+            }
+        }
+
+        /** @hide */
+        protected void finalize() {
+            if (mHandlerThread != null) {
+                mHandlerThread.quitSafely();
+            }
         }
 
         /** @hide */
@@ -3055,6 +3089,10 @@ public class MediaPlayer implements SubtitleController.Listener
         }
 
         private class EventHandler extends Handler {
+            public EventHandler(Looper looper) {
+                super(looper);
+            }
+
             @Override
             public void handleMessage(Message msg) {
                 if (msg.what == NOTIFY) {
@@ -3074,11 +3112,6 @@ public class MediaPlayer implements SubtitleController.Listener
                     }
                 }
             }
-        }
-
-        /** @hide */
-        public Handler getHandler() {
-            return mEventHandler;
         }
     }
 }
