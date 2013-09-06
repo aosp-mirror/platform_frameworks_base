@@ -34,15 +34,12 @@ import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.provider.DocumentsContract.Document;
 import android.util.Log;
-
-import com.android.internal.util.ArrayUtils;
 
 import libcore.io.IoUtils;
 
@@ -75,11 +72,12 @@ import java.io.FileNotFoundException;
 public abstract class DocumentsProvider extends ContentProvider {
     private static final String TAG = "DocumentsProvider";
 
-    private static final int MATCH_ROOT = 1;
-    private static final int MATCH_RECENT = 2;
-    private static final int MATCH_DOCUMENT = 3;
-    private static final int MATCH_CHILDREN = 4;
-    private static final int MATCH_SEARCH = 5;
+    private static final int MATCH_ROOTS = 1;
+    private static final int MATCH_ROOT = 2;
+    private static final int MATCH_RECENT = 3;
+    private static final int MATCH_DOCUMENT = 4;
+    private static final int MATCH_CHILDREN = 5;
+    private static final int MATCH_SEARCH = 6;
 
     private String mAuthority;
 
@@ -93,7 +91,8 @@ public abstract class DocumentsProvider extends ContentProvider {
         mAuthority = info.authority;
 
         mMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        mMatcher.addURI(mAuthority, "root", MATCH_ROOT);
+        mMatcher.addURI(mAuthority, "root", MATCH_ROOTS);
+        mMatcher.addURI(mAuthority, "root/*", MATCH_ROOT);
         mMatcher.addURI(mAuthority, "root/*/recent", MATCH_RECENT);
         mMatcher.addURI(mAuthority, "document/*", MATCH_DOCUMENT);
         mMatcher.addURI(mAuthority, "document/*/children", MATCH_CHILDREN);
@@ -256,7 +255,7 @@ public abstract class DocumentsProvider extends ContentProvider {
             String[] selectionArgs, String sortOrder) {
         try {
             switch (mMatcher.match(uri)) {
-                case MATCH_ROOT:
+                case MATCH_ROOTS:
                     return queryRoots(projection);
                 case MATCH_RECENT:
                     return queryRecentDocuments(getRootId(uri), projection);
@@ -285,6 +284,8 @@ public abstract class DocumentsProvider extends ContentProvider {
     public final String getType(Uri uri) {
         try {
             switch (mMatcher.match(uri)) {
+                case MATCH_ROOT:
+                    return DocumentsContract.Root.MIME_TYPE_ITEM;
                 case MATCH_DOCUMENT:
                     return getDocumentType(getDocumentId(uri));
                 default:
@@ -328,15 +329,22 @@ public abstract class DocumentsProvider extends ContentProvider {
         throw new UnsupportedOperationException("Update not supported");
     }
 
-    /** {@hide} */
+    /**
+     * Implementation is provided by the parent class. Can be overridden to
+     * provide additional functionality, but subclasses <em>must</em> always
+     * call the superclass. If the superclass returns {@code null}, the subclass
+     * may implement custom behavior.
+     *
+     * @see #openDocument(String, String, CancellationSignal)
+     * @see #deleteDocument(String)
+     */
     @Override
-    public final Bundle callFromPackage(
-            String callingPackage, String method, String arg, Bundle extras) {
+    public Bundle call(String method, String arg, Bundle extras) {
         final Context context = getContext();
 
         if (!method.startsWith("android:")) {
             // Let non-platform methods pass through
-            return super.callFromPackage(callingPackage, method, arg, extras);
+            return super.call(method, arg, extras);
         }
 
         final String documentId = extras.getString(Document.COLUMN_DOCUMENT_ID);
@@ -364,7 +372,7 @@ public abstract class DocumentsProvider extends ContentProvider {
                 if (!callerHasManage) {
                     final Uri newDocumentUri = DocumentsContract.buildDocumentUri(
                             mAuthority, newDocumentId);
-                    context.grantUriPermission(callingPackage, newDocumentUri,
+                    context.grantUriPermission(getCallingPackage(), newDocumentUri,
                             Intent.FLAG_GRANT_READ_URI_PERMISSION
                             | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                             | Intent.FLAG_PERSIST_GRANT_URI_PERMISSION);

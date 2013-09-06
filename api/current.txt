@@ -3172,6 +3172,7 @@ package android.app {
   public class AppOpsManager {
     method public int checkOp(int, int, java.lang.String);
     method public int checkOpNoThrow(int, int, java.lang.String);
+    method public void checkPackage(int, java.lang.String);
     method public void finishOp(int, int, java.lang.String);
     method public void finishOp(int);
     method public int noteOp(int, int, java.lang.String);
@@ -5624,6 +5625,7 @@ package android.content {
     method public android.os.Bundle call(java.lang.String, java.lang.String, android.os.Bundle);
     method public abstract int delete(android.net.Uri, java.lang.String, java.lang.String[]);
     method public void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
+    method public final java.lang.String getCallingPackage();
     method public final android.content.Context getContext();
     method public final android.content.pm.PathPermission[] getPathPermissions();
     method public final java.lang.String getReadPermission();
@@ -20747,6 +20749,7 @@ package android.provider {
     method public static android.net.Uri buildChildDocumentsUri(java.lang.String, java.lang.String);
     method public static android.net.Uri buildDocumentUri(java.lang.String, java.lang.String);
     method public static android.net.Uri buildRecentDocumentsUri(java.lang.String, java.lang.String);
+    method public static android.net.Uri buildRootUri(java.lang.String, java.lang.String);
     method public static android.net.Uri buildRootsUri(java.lang.String);
     method public static android.net.Uri buildSearchDocumentsUri(java.lang.String, java.lang.String, java.lang.String);
     method public static android.net.Uri createDocument(android.content.ContentResolver, android.net.Uri, java.lang.String, java.lang.String);

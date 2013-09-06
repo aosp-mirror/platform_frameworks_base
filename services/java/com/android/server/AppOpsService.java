@@ -552,6 +552,17 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     @Override
+    public int checkPackage(int uid, String packageName) {
+        synchronized (this) {
+            if (getOpsLocked(uid, packageName, true) != null) {
+                return AppOpsManager.MODE_ALLOWED;
+            } else {
+                return AppOpsManager.MODE_ERRORED;
+            }
+        }
+    }
+
+    @Override
     public int noteOperation(int code, int uid, String packageName) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
@@ -560,7 +571,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (ops == null) {
                 if (DEBUG) Log.d(TAG, "noteOperation: no op for code " + code + " uid " + uid
                         + " package " + packageName);
-                return AppOpsManager.MODE_IGNORED;
+                return AppOpsManager.MODE_ERRORED;
             }
             Op op = getOpLocked(ops, code, true);
             if (op.duration == -1) {
@@ -594,7 +605,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (ops == null) {
                 if (DEBUG) Log.d(TAG, "startOperation: no op for code " + code + " uid " + uid
                         + " package " + packageName);
-                return AppOpsManager.MODE_IGNORED;
+                return AppOpsManager.MODE_ERRORED;
             }
             Op op = getOpLocked(ops, code, true);
             final int switchCode = AppOpsManager.opToSwitch(code);

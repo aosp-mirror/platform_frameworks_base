@@ -145,7 +145,7 @@ public class DocumentsActivity extends Activity {
             mState.action = ACTION_CREATE;
         } else if (Intent.ACTION_GET_CONTENT.equals(action)) {
             mState.action = ACTION_GET_CONTENT;
-        } else if (DocumentsContract.ACTION_MANAGE_DOCUMENTS.equals(action)) {
+        } else if (DocumentsContract.ACTION_MANAGE_ROOT.equals(action)) {
             mState.action = ACTION_MANAGE;
         }
 
@@ -171,12 +171,13 @@ public class DocumentsActivity extends Activity {
         }
 
         if (mState.action == ACTION_MANAGE) {
-            final Uri rootUri = intent.getData();
-            final RootInfo root = mRoots.findRoot(rootUri);
+            final Uri uri = intent.getData();
+            final String rootId = DocumentsContract.getRootId(uri);
+            final RootInfo root = mRoots.getRoot(uri.getAuthority(), rootId);
             if (root != null) {
                 onRootPicked(root, true);
             } else {
-                Log.w(TAG, "Failed to find root: " + rootUri);
+                Log.w(TAG, "Failed to find root: " + uri);
                 finish();
             }
 
@@ -626,14 +627,24 @@ public class DocumentsActivity extends Activity {
             // Replace selected file
             SaveFragment.get(fm).setReplaceTarget(doc);
         } else if (mState.action == ACTION_MANAGE) {
-            // Open the document
-            final Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            intent.setData(doc.uri);
+            // First try managing the document; we expect manager to filter
+            // based on authority, so we don't grant.
+            final Intent manage = new Intent(DocumentsContract.ACTION_MANAGE_DOCUMENT);
+            manage.setData(doc.uri);
+
             try {
-                startActivity(intent);
+                startActivity(manage);
             } catch (ActivityNotFoundException ex) {
-                Toast.makeText(this, R.string.toast_no_application, Toast.LENGTH_SHORT).show();
+                // Fall back to viewing
+                final Intent view = new Intent(Intent.ACTION_VIEW);
+                view.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                view.setData(doc.uri);
+
+                try {
+                    startActivity(view);
+                } catch (ActivityNotFoundException ex2) {
+                    Toast.makeText(this, R.string.toast_no_application, Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }
