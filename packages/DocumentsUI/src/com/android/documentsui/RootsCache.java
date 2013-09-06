@@ -72,7 +72,7 @@ public class RootsCache {
             // Create special root for recents
             final RootInfo root = new RootInfo();
             root.rootType = Root.ROOT_TYPE_SHORTCUT;
-            root.icon = R.drawable.ic_dir;
+            root.icon = R.drawable.ic_root_recent;
             root.flags = Root.FLAG_LOCAL_ONLY | Root.FLAG_SUPPORTS_CREATE;
             root.title = mContext.getString(R.string.root_recent);
             root.availableBytes = -1;
@@ -151,8 +151,12 @@ public class RootsCache {
 
     @GuardedBy("ActivityThread")
     public List<RootInfo> getMatchingRoots(State state) {
+        return getMatchingRoots(mRoots, state);
+    }
+
+    public static List<RootInfo> getMatchingRoots(List<RootInfo> roots, State state) {
         ArrayList<RootInfo> matching = Lists.newArrayList();
-        for (RootInfo root : mRoots) {
+        for (RootInfo root : roots) {
             final boolean supportsCreate = (root.flags & Root.FLAG_SUPPORTS_CREATE) != 0;
             final boolean advanced = (root.flags & Root.FLAG_ADVANCED) != 0;
             final boolean localOnly = (root.flags & Root.FLAG_LOCAL_ONLY) != 0;
@@ -165,7 +169,9 @@ public class RootsCache {
             if (state.localOnly && !localOnly) continue;
 
             // Only include roots that serve requested content
-            if (!MimePredicate.mimeMatches(root.mimeTypes, state.acceptMimes)) {
+            final boolean overlap = MimePredicate.mimeMatches(root.mimeTypes, state.acceptMimes)
+                    || MimePredicate.mimeMatches(state.acceptMimes, root.mimeTypes);
+            if (!overlap) {
                 continue;
             }
 

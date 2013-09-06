@@ -23,14 +23,14 @@
     <item
         android:id="@+id/menu_search"
         android:title="@string/menu_search"
-        android:icon="@drawable/ic_menu_search_holo_light"
+        android:icon="@drawable/ic_menu_search"
         android:showAsAction="always|collapseActionView"
         android:actionViewClass="android.widget.SearchView"
         android:imeOptions="actionSearch" />
     <item
         android:id="@+id/menu_sort"
         android:title="@string/menu_sort"
-        android:icon="@drawable/ic_menu_sortby_holo_light"
+        android:icon="@drawable/ic_menu_sortby"
         android:showAsAction="always">
         <menu>
             <item
@@ -57,6 +57,6 @@
     <item
         android:id="@+id/menu_settings"
         android:title="@string/menu_settings"
-        android:icon="@drawable/ic_perm_group_system_tools"
+        android:icon="@drawable/ic_menu_settings"
         android:showAsAction="never" />
 </menu>

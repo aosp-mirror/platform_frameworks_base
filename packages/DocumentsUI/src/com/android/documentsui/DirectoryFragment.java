@@ -477,13 +477,11 @@ public class DirectoryFragment extends Fragment {
             if (extras != null) {
                 final String info = extras.getString(DocumentsContract.EXTRA_INFO);
                 if (info != null) {
-                    mFooters.add(new MessageFooter(
-                            com.android.internal.R.drawable.ic_menu_info_details, info));
+                    mFooters.add(new MessageFooter(R.drawable.ic_dialog_alert, info));
                 }
                 final String error = extras.getString(DocumentsContract.EXTRA_ERROR);
                 if (error != null) {
-                    mFooters.add(new MessageFooter(
-                            com.android.internal.R.drawable.ic_dialog_alert, error));
+                    mFooters.add(new MessageFooter(R.drawable.ic_dialog_alert, error));
                 }
                 if (extras.getBoolean(DocumentsContract.EXTRA_LOADING, false)) {
                     mFooters.add(new LoadingFooter());
