@@ -22798,6 +22798,26 @@ package android.speech {
 
 }
 
+package android.speech.hotword {
+
+  public abstract class HotwordRecognitionService extends android.app.Service {
+    ctor public HotwordRecognitionService();
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract void onStartHotwordRecognition(android.speech.hotword.HotwordRecognitionService.Callback);
+    method public abstract void onStopHotwordRecognition();
+    field public static final java.lang.String SERVICE_INTERFACE = "android.speech.hotword.HotwordRecognitionService";
+  }
+
+  public static class HotwordRecognitionService.Callback {
+    method public void onError(int) throws android.os.RemoteException;
+    method public void onHotwordEvent(int, android.os.Bundle) throws android.os.RemoteException;
+    method public void onHotwordRecognitionStarted() throws android.os.RemoteException;
+    method public void onHotwordRecognitionStopped() throws android.os.RemoteException;
+    method public void onHotwordRecognized(android.content.Intent) throws android.os.RemoteException;
+  }
+
+}
+
 package android.speech.tts {
 
   public abstract interface SynthesisCallback {
