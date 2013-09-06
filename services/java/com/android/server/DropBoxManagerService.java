@@ -24,6 +24,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Debug;
 import android.os.DropBoxManager;
 import android.os.FileUtils;
@@ -265,8 +266,13 @@ public final class DropBoxManagerService extends IDropBoxManagerService.Stub {
     }
 
     public boolean isTagEnabled(String tag) {
-        return !"disabled".equals(Settings.Global.getString(
-                mContentResolver, Settings.Global.DROPBOX_TAG_PREFIX + tag));
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return !"disabled".equals(Settings.Global.getString(
+                    mContentResolver, Settings.Global.DROPBOX_TAG_PREFIX + tag));
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     public synchronized DropBoxManager.Entry getNextEntry(String tag, long millis) {

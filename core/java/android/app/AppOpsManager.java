@@ -616,6 +616,23 @@ public class AppOpsManager {
     }
 
     /**
+     * Do a quick check to validate if a package name belongs to a UID.
+     *
+     * @throws SecurityException if the package name doesn't belong to the given
+     *             UID, or if ownership cannot be verified.
+     */
+    public void checkPackage(int uid, String packageName) {
+        try {
+            if (mService.checkPackage(uid, packageName) != MODE_ALLOWED) {
+                throw new SecurityException(
+                        "Package " + packageName + " does not belong to " + uid);
+            }
+        } catch (RemoteException e) {
+            throw new SecurityException("Unable to verify package ownership", e);
+        }
+    }
+
+    /**
      * Make note of an application performing an operation.  Note that you must pass
      * in both the uid and name of the application to be checked; this function will verify
      * that these two match, and if not, return {@link #MODE_IGNORED}.  If this call

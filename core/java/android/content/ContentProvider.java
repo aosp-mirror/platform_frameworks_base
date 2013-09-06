@@ -102,6 +102,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     private boolean mExported;
     private boolean mNoPerms;
 
+    private final ThreadLocal<String> mCallingPackage = new ThreadLocal<String>();
+
     private Transport mTransport = new Transport();
 
     /**
@@ -194,8 +196,14 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 return rejectQuery(uri, projection, selection, selectionArgs, sortOrder,
                         CancellationSignal.fromTransport(cancellationSignal));
             }
-            return ContentProvider.this.query(uri, projection, selection, selectionArgs, sortOrder,
-                    CancellationSignal.fromTransport(cancellationSignal));
+            mCallingPackage.set(callingPkg);
+            try {
+                return ContentProvider.this.query(
+                        uri, projection, selection, selectionArgs, sortOrder,
+                        CancellationSignal.fromTransport(cancellationSignal));
+            } finally {
+                mCallingPackage.set(null);
+            }
         }
 
         @Override
@@ -208,7 +216,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
                 return rejectInsert(uri, initialValues);
             }
-            return ContentProvider.this.insert(uri, initialValues);
+            mCallingPackage.set(callingPkg);
+            try {
+                return ContentProvider.this.insert(uri, initialValues);
+            } finally {
+                mCallingPackage.set(null);
+            }
         }
 
         @Override
@@ -216,7 +229,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
-            return ContentProvider.this.bulkInsert(uri, initialValues);
+            mCallingPackage.set(callingPkg);
+            try {
+                return ContentProvider.this.bulkInsert(uri, initialValues);
+            } finally {
+                mCallingPackage.set(null);
+            }
         }
 
         @Override
@@ -238,7 +256,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                     }
                 }
             }
-            return ContentProvider.this.applyBatch(operations);
+            mCallingPackage.set(callingPkg);
+            try {
+                return ContentProvider.this.applyBatch(operations);
+            } finally {
+                mCallingPackage.set(null);
+            }
         }
 
         @Override
@@ -246,7 +269,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
-            return ContentProvider.this.delete(uri, selection, selectionArgs);
+            mCallingPackage.set(callingPkg);
+            try {
+                return ContentProvider.this.delete(uri, selection, selectionArgs);
+            } finally {
+                mCallingPackage.set(null);
+            }
         }
 
         @Override
@@ -255,7 +283,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
-            return ContentProvider.this.update(uri, values, selection, selectionArgs);
+            mCallingPackage.set(callingPkg);
+            try {
+                return ContentProvider.this.update(uri, values, selection, selectionArgs);
+            } finally {
+                mCallingPackage.set(null);
+            }
         }
 
         @Override
@@ -263,8 +296,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 String callingPkg, Uri uri, String mode, ICancellationSignal cancellationSignal)
                 throws FileNotFoundException {
             enforceFilePermission(callingPkg, uri, mode);
-            return ContentProvider.this.openFile(
-                    uri, mode, CancellationSignal.fromTransport(cancellationSignal));
+            mCallingPackage.set(callingPkg);
+            try {
+                return ContentProvider.this.openFile(
+                        uri, mode, CancellationSignal.fromTransport(cancellationSignal));
+            } finally {
+                mCallingPackage.set(null);
+            }
         }
 
         @Override
@@ -272,13 +310,23 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 String callingPkg, Uri uri, String mode, ICancellationSignal cancellationSignal)
                 throws FileNotFoundException {
             enforceFilePermission(callingPkg, uri, mode);
-            return ContentProvider.this.openAssetFile(
-                    uri, mode, CancellationSignal.fromTransport(cancellationSignal));
+            mCallingPackage.set(callingPkg);
+            try {
+                return ContentProvider.this.openAssetFile(
+                        uri, mode, CancellationSignal.fromTransport(cancellationSignal));
+            } finally {
+                mCallingPackage.set(null);
+            }
         }
 
         @Override
         public Bundle call(String callingPkg, String method, String arg, Bundle extras) {
-            return ContentProvider.this.callFromPackage(callingPkg, method, arg, extras);
+            mCallingPackage.set(callingPkg);
+            try {
+                return ContentProvider.this.call(method, arg, extras);
+            } finally {
+                mCallingPackage.set(null);
+            }
         }
 
         @Override
@@ -290,8 +338,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         public AssetFileDescriptor openTypedAssetFile(String callingPkg, Uri uri, String mimeType,
                 Bundle opts, ICancellationSignal cancellationSignal) throws FileNotFoundException {
             enforceFilePermission(callingPkg, uri, "r");
-            return ContentProvider.this.openTypedAssetFile(
-                    uri, mimeType, opts, CancellationSignal.fromTransport(cancellationSignal));
+            mCallingPackage.set(callingPkg);
+            try {
+                return ContentProvider.this.openTypedAssetFile(
+                        uri, mimeType, opts, CancellationSignal.fromTransport(cancellationSignal));
+            } finally {
+                mCallingPackage.set(null);
+            }
         }
 
         @Override
@@ -461,6 +514,28 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     }
 
     /**
+     * Return the package name of the caller that initiated the request being
+     * processed on the current thread. The returned package will have been
+     * verified to belong to the calling UID. Returns {@code null} if not
+     * currently processing a request.
+     * <p>
+     * This will always return {@code null} when processing
+     * {@link #getType(Uri)} or {@link #getStreamTypes(Uri, String)} requests.
+     *
+     * @see Binder#getCallingUid()
+     * @see Context#grantUriPermission(String, Uri, int)
+     * @throws SecurityException if the calling package doesn't belong to the
+     *             calling UID.
+     */
+    public final String getCallingPackage() {
+        final String pkg = mCallingPackage.get();
+        if (pkg != null) {
+            mTransport.mAppOpsManager.checkPackage(Binder.getCallingUid(), pkg);
+        }
+        return pkg;
+    }
+
+    /**
      * Change the permission required to read data from the content
      * provider.  This is normally set for you from its manifest information
      * when the provider is first created.
@@ -529,8 +604,6 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     /** @hide */
     public final void setAppOps(int readOp, int writeOp) {
         if (!mNoPerms) {
-            mTransport.mAppOpsManager = (AppOpsManager)mContext.getSystemService(
-                    Context.APP_OPS_SERVICE);
             mTransport.mReadOp = readOp;
             mTransport.mWriteOp = writeOp;
         }
@@ -1413,6 +1486,8 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
          */
         if (mContext == null) {
             mContext = context;
+            mTransport.mAppOpsManager = (AppOpsManager) mContext.getSystemService(
+                    Context.APP_OPS_SERVICE);
             mMyUid = Process.myUid();
             if (info != null) {
                 setReadPermission(info.readPermission);
@@ -1449,15 +1524,6 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             results[i] = operations.get(i).apply(this, results, i);
         }
         return results;
-    }
-
-    /**
-     * @hide
-     * Front-end to {@link #call(String, String, android.os.Bundle)} that provides the name
-     * of the calling package.
-     */
-    public Bundle callFromPackage(String callingPackag, String method, String arg, Bundle extras) {
-        return call(method, arg, extras);
     }
 
     /**

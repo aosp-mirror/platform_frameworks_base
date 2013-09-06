@@ -34,15 +34,12 @@ import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.OnCloseListener;
 import android.provider.DocumentsContract.Document;
 import android.util.Log;
-
-import com.android.internal.util.ArrayUtils;
 
 import libcore.io.IoUtils;
 
@@ -332,15 +329,22 @@ public abstract class DocumentsProvider extends ContentProvider {
         throw new UnsupportedOperationException("Update not supported");
     }
 
-    /** {@hide} */
+    /**
+     * Implementation is provided by the parent class. Can be overridden to
+     * provide additional functionality, but subclasses <em>must</em> always
+     * call the superclass. If the superclass returns {@code null}, the subclass
+     * may implement custom behavior.
+     *
+     * @see #openDocument(String, String, CancellationSignal)
+     * @see #deleteDocument(String)
+     */
     @Override
-    public final Bundle callFromPackage(
-            String callingPackage, String method, String arg, Bundle extras) {
+    public Bundle call(String method, String arg, Bundle extras) {
         final Context context = getContext();
 
         if (!method.startsWith("android:")) {
             // Let non-platform methods pass through
-            return super.callFromPackage(callingPackage, method, arg, extras);
+            return super.call(method, arg, extras);
         }
 
         final String documentId = extras.getString(Document.COLUMN_DOCUMENT_ID);
@@ -368,7 +372,7 @@ public abstract class DocumentsProvider extends ContentProvider {
                 if (!callerHasManage) {
                     final Uri newDocumentUri = DocumentsContract.buildDocumentUri(
                             mAuthority, newDocumentId);
-                    context.grantUriPermission(callingPackage, newDocumentUri,
+                    context.grantUriPermission(getCallingPackage(), newDocumentUri,
                             Intent.FLAG_GRANT_READ_URI_PERMISSION
                             | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                             | Intent.FLAG_PERSIST_GRANT_URI_PERMISSION);
