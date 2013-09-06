@@ -5986,6 +5986,7 @@ package android.content {
     field public static final int MODE_PRIVATE = 0; // 0x0
     field public static final deprecated int MODE_WORLD_READABLE = 1; // 0x1
     field public static final deprecated int MODE_WORLD_WRITEABLE = 2; // 0x2
+    field public static final java.lang.String NETWORKMANAGEMENT_SERVICE = "network_management";
     field public static final java.lang.String NFC_SERVICE = "nfc";
     field public static final java.lang.String NOTIFICATION_SERVICE = "notification";
     field public static final java.lang.String NSD_SERVICE = "servicediscovery";
@@ -12762,6 +12763,25 @@ package android.media {
     field public static final java.lang.String KEY_WIDTH = "width";
   }
 
+  public abstract class MediaMetadataEditor {
+    method public synchronized void addEditableKey(int);
+    method public abstract void apply();
+    method public synchronized void clear();
+    method public synchronized android.graphics.Bitmap getBitmap(int, android.graphics.Bitmap) throws java.lang.IllegalArgumentException;
+    method public synchronized int[] getEditableKeys();
+    method public synchronized long getLong(int, long) throws java.lang.IllegalArgumentException;
+    method public synchronized java.lang.Object getObject(int, java.lang.Object) throws java.lang.IllegalArgumentException;
+    method public synchronized java.lang.String getString(int, java.lang.String) throws java.lang.IllegalArgumentException;
+    method public synchronized android.media.MediaMetadataEditor putBitmap(int, android.graphics.Bitmap) throws java.lang.IllegalArgumentException;
+    method public synchronized android.media.MediaMetadataEditor putLong(int, long) throws java.lang.IllegalArgumentException;
+    method public synchronized android.media.MediaMetadataEditor putObject(int, java.lang.Object) throws java.lang.IllegalArgumentException;
+    method public synchronized android.media.MediaMetadataEditor putString(int, java.lang.String) throws java.lang.IllegalArgumentException;
+    method public synchronized void removeEditableKeys();
+    field public static final int BITMAP_KEY_ARTWORK = 100; // 0x64
+    field public static final int RATING_KEY_BY_OTHERS = 101; // 0x65
+    field public static final int RATING_KEY_BY_USER = 268435457; // 0x10000001
+  }
+
   public class MediaMetadataRetriever {
     ctor public MediaMetadataRetriever();
     method public java.lang.String extractMetadata(int);
@@ -13178,6 +13198,29 @@ package android.media {
     ctor public NotProvisionedException(java.lang.String);
   }
 
+  public final class Rating implements android.os.Parcelable {
+    method public int describeContents();
+    method public float getPercentRating();
+    method public int getRatingStyle();
+    method public float getStarRating();
+    method public boolean hasHeart();
+    method public boolean isRated();
+    method public boolean isThumbUp();
+    method public static android.media.Rating newHeartRating(boolean);
+    method public static android.media.Rating newPercentageRating(float);
+    method public static android.media.Rating newStarRating(int, float);
+    method public static android.media.Rating newThumbRating(boolean);
+    method public static android.media.Rating newUnratedRating(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int RATING_3_STARS = 3; // 0x3
+    field public static final int RATING_4_STARS = 4; // 0x4
+    field public static final int RATING_5_STARS = 5; // 0x5
+    field public static final int RATING_HEART = 1; // 0x1
+    field public static final int RATING_PERCENTAGE = 6; // 0x6
+    field public static final int RATING_THUMB_UP_DOWN = 2; // 0x2
+  }
+
   public class RemoteControlClient {
     ctor public RemoteControlClient(android.app.PendingIntent);
     ctor public RemoteControlClient(android.app.PendingIntent, android.os.Looper);
@@ -13209,21 +13252,9 @@ package android.media {
     field public static final int PLAYSTATE_STOPPED = 1; // 0x1
   }
 
-  public class RemoteControlClient.MetadataEditor {
-    method public synchronized void addEditableKey(int);
+  public class RemoteControlClient.MetadataEditor extends android.media.MediaMetadataEditor {
     method public synchronized void apply();
-    method public synchronized void clear();
-    method public synchronized void clearEditableKeys();
-    method public synchronized android.media.RemoteControlClient.MetadataEditor putBitmap(int, android.graphics.Bitmap) throws java.lang.IllegalArgumentException;
-    method public synchronized android.media.RemoteControlClient.MetadataEditor putLong(int, long) throws java.lang.IllegalArgumentException;
-    method public synchronized android.media.RemoteControlClient.MetadataEditor putString(int, java.lang.String) throws java.lang.IllegalArgumentException;
     field public static final int BITMAP_KEY_ARTWORK = 100; // 0x64
-    field public static final int LONG_KEY_RATING_BY_OTHERS = 102; // 0x66
-    field public static final int LONG_KEY_RATING_BY_USER = 268435457; // 0x10000001
-    field public static final int LONG_KEY_RATING_TYPE = 101; // 0x65
-    field public static final long RATING_HEART = -1L; // 0xffffffffffffffffL
-    field public static final long RATING_NOT_RATED = -101L; // 0xffffffffffffff9bL
-    field public static final long RATING_THUMB_UP_DOWN = -2L; // 0xfffffffffffffffeL
   }
 
   public static abstract interface RemoteControlClient.OnGetPlaybackPositionListener {
@@ -13231,9 +13262,7 @@ package android.media {
   }
 
   public static abstract interface RemoteControlClient.OnMetadataUpdateListener {
-    method public abstract void onMetadataUpdateBitmap(int, android.graphics.Bitmap);
-    method public abstract void onMetadataUpdateLong(int, long);
-    method public abstract void onMetadataUpdateString(int, java.lang.String);
+    method public abstract void onMetadataUpdate(int, java.lang.Object);
   }
 
   public static abstract interface RemoteControlClient.OnPlaybackPositionUpdateListener {
