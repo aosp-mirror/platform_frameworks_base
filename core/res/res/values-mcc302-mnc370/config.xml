@@ -36,4 +36,8 @@
          note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
     <string translatable="false" name="config_tether_apndata">Fido LTE Tethering,ltedata.apn,,,,,,,,,302,370,,DUN</string>
 
+    <!-- Configure mobile network MTU. Carrier specific value is set here.
+    -->
+    <integer name="config_mobile_mtu">1410</integer>
+
 </resources>
