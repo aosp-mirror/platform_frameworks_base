@@ -25,10 +25,8 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.http.SslCertificate;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.Message;
-import android.os.ParcelFileDescriptor;
-import android.print.PrintAttributes;
+import android.print.PrintDocumentAdapter;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -149,9 +147,7 @@ public interface WebViewProvider {
 
     public Picture capturePicture();
 
-    public void exportToPdf(ParcelFileDescriptor fd, PrintAttributes attributes,
-            ValueCallback<Boolean> resultCallback, CancellationSignal cancellationSignal)
-            throws java.io.IOException;
+    public PrintDocumentAdapter createPrintDocumentAdapter();
 
     public float getScale();
 

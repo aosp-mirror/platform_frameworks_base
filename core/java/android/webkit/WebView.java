@@ -31,9 +31,8 @@ import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Looper;
 import android.os.Message;
-import android.os.ParcelFileDescriptor;
 import android.os.StrictMode;
-import android.print.PrintAttributes;
+import android.print.PrintDocumentAdapter;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -1069,41 +1068,21 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Exports the contents of this Webview as PDF. Only supported for API levels
+     * Creates a PrintDocumentAdapter that provides the content of this Webview for printing.
+     * Only supported for API levels
      * {@link android.os.Build.VERSION_CODES#KITKAT} and above.
      *
-     * TODO(sgurun) the parameter list is stale. Fix it before unhiding.
-     *
-     * @param fd             The FileDescriptor to export the PDF contents to. Cannot be null.
-     * @param width          The page width. Should be larger than 0.
-     * @param height         The page height. Should be larger than 0.
-     * @param resultCallback A callback to be invoked when the PDF content is exported.
-     *                       A true indicates success, and a false failure. Cannot be null.
-     * @param cancellationSignal Signal for cancelling the PDF conversion request. Must not
-     *                       be null.
-     *
-     * The PDF conversion is done asynchronously and the PDF output is written to the provided
-     * file descriptor. The caller should not close the file descriptor until the resultCallback
-     * is called, indicating PDF conversion is complete. Webview will never close the file
-     * descriptor.
-     * Limitations: Webview cannot be drawn during the PDF export so the  application is
-     * recommended to take it offscreen, or putting in a layer with an overlaid progress
-     * UI / spinner.
-     *
-     * If the caller cancels the task using the cancellationSignal, the cancellation will be
-     * acked using the resultCallback signal.
-     *
-     * Throws an exception if an IO error occurs accessing the file descriptor.
-     *
-     * TODO(sgurun) margins, explain the units, make it public.
-     * @hide
+     * The adapter works by converting the Webview contents to a PDF stream. The Webview cannot
+     * be drawn during the conversion process - any such draws are undefined. It is recommended
+     * to use a dedicated off screen Webview for the printing. If necessary, an application may
+     * temporarily hide a visible WebView by using a custom PrintDocumentAdapter instance
+     * wrapped around the object returned and observing the onStart and onFinish methods. See
+     * {@link android.print.PrintDocumentAdapter} for more information.
      */
-    public void exportToPdf(ParcelFileDescriptor fd, PrintAttributes attributes,
-            ValueCallback<Boolean> resultCallback, CancellationSignal cancellationSignal)
-            throws java.io.IOException {
+    public PrintDocumentAdapter createPrintDocumentAdapter() {
         checkThread();
-        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "exportToPdf");
-        mProvider.exportToPdf(fd, attributes, resultCallback, cancellationSignal);
+        if (DebugFlags.TRACE_API) Log.d(LOGTAG, "createPrintDocumentAdapter");
+        return mProvider.createPrintDocumentAdapter();
     }
 
     /**
