@@ -30,11 +30,10 @@
                 <category android:name="android.intent.category.OPENABLE" />
                 <data android:mimeType="*/*" />
             </intent-filter>
-            <!-- data expected to point at existing root to manage -->
             <intent-filter>
-                <action android:name="android.provider.action.MANAGE_DOCUMENTS" />
+                <action android:name="android.provider.action.MANAGE_ROOT" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="vnd.android.document/directory" />
+                <data android:mimeType="vnd.android.document/root" />
             </intent-filter>
         </activity>
 

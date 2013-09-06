@@ -23,6 +23,7 @@ interface IAppOpsService {
     // These first methods are also called by native code, so must
     // be kept in sync with frameworks/native/include/binder/IAppOpsService.h
     int checkOperation(int code, int uid, String packageName);
+    int checkPackage(int uid, String packageName);
     int noteOperation(int code, int uid, String packageName);
     int startOperation(IBinder token, int code, int uid, String packageName);
     void finishOperation(IBinder token, int code, int uid, String packageName);

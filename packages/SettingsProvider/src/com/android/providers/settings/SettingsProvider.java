@@ -567,8 +567,7 @@ public class SettingsProvider extends ContentProvider {
      * Fast path that avoids the use of chatty remoted Cursors.
      */
     @Override
-    public Bundle callFromPackage(String callingPackage, String method, String request,
-            Bundle args) {
+    public Bundle call(String method, String request, Bundle args) {
         int callingUser = UserHandle.getCallingUserId();
         if (args != null) {
             int reqUser = args.getInt(Settings.CALL_METHOD_USER_KEY, callingUser);
@@ -623,7 +622,7 @@ public class SettingsProvider extends ContentProvider {
 
         // Also need to take care of app op.
         if (getAppOpsManager().noteOp(AppOpsManager.OP_WRITE_SETTINGS, Binder.getCallingUid(),
-                callingPackage) != AppOpsManager.MODE_ALLOWED) {
+                getCallingPackage()) != AppOpsManager.MODE_ALLOWED) {
             return null;
         }
 
