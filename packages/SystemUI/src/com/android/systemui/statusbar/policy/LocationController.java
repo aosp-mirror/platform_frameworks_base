@@ -129,6 +129,8 @@ public class LocationController extends BroadcastReceiver {
         // setting won't be fully enabled until the user accepts the agreement.
         int mode = enabled
                 ? Settings.Secure.LOCATION_MODE_HIGH_ACCURACY : Settings.Secure.LOCATION_MODE_OFF;
+        // QuickSettings always runs as the owner, so specifically set the settings
+        // for the current foreground user.
         return Settings.Secure
                 .putIntForUser(cr, Settings.Secure.LOCATION_MODE, mode, currentUserId);
     }
@@ -137,14 +139,11 @@ public class LocationController extends BroadcastReceiver {
      * Returns true if location isn't disabled in settings.
      */
     public boolean isLocationEnabled() {
-        int currentUserId = ActivityManager.getCurrentUser();
-        if (isUserLocationRestricted(currentUserId)) {
-            return false;
-        }
-
         ContentResolver resolver = mContext.getContentResolver();
+        // QuickSettings always runs as the owner, so specifically retrieve the settings
+        // for the current foreground user.
         int mode = Settings.Secure.getIntForUser(resolver, Settings.Secure.LOCATION_MODE,
-                Settings.Secure.LOCATION_MODE_OFF, currentUserId);
+                Settings.Secure.LOCATION_MODE_OFF, ActivityManager.getCurrentUser());
         return mode != Settings.Secure.LOCATION_MODE_OFF;
     }
 
