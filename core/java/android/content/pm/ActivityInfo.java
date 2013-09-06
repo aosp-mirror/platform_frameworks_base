@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.content.res.Configuration;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Printer;
@@ -437,20 +438,20 @@ public class ActivityInfo extends ComponentInfo
      * native side given the bit we have assigned in ActivityInfo.
      */
     public static int[] CONFIG_NATIVE_BITS = new int[] {
-        0x0001, // MNC
-        0x0002, // MCC
-        0x0004, // LOCALE
-        0x0008, // TOUCH SCREEN
-        0x0010, // KEYBOARD
-        0x0020, // KEYBOARD HIDDEN
-        0x0040, // NAVIGATION
-        0x0080, // ORIENTATION
-        0x0800, // SCREEN LAYOUT
-        0x1000, // UI MODE
-        0x0200, // SCREEN SIZE
-        0x2000, // SMALLEST SCREEN SIZE
-        0x0100, // DENSITY
-        0x4000, // LAYOUT DIRECTION
+        Configuration.NATIVE_CONFIG_MNC,                    // MNC
+        Configuration.NATIVE_CONFIG_MCC,                    // MCC
+        Configuration.NATIVE_CONFIG_LOCALE,                 // LOCALE
+        Configuration.NATIVE_CONFIG_TOUCHSCREEN,            // TOUCH SCREEN
+        Configuration.NATIVE_CONFIG_KEYBOARD,               // KEYBOARD
+        Configuration.NATIVE_CONFIG_KEYBOARD_HIDDEN,        // KEYBOARD HIDDEN
+        Configuration.NATIVE_CONFIG_NAVIGATION,             // NAVIGATION
+        Configuration.NATIVE_CONFIG_ORIENTATION,            // ORIENTATION
+        Configuration.NATIVE_CONFIG_SCREEN_LAYOUT,          // SCREEN LAYOUT
+        Configuration.NATIVE_CONFIG_UI_MODE,                // UI MODE
+        Configuration.NATIVE_CONFIG_SCREEN_SIZE,            // SCREEN SIZE
+        Configuration.NATIVE_CONFIG_SMALLEST_SCREEN_SIZE,   // SMALLEST SCREEN SIZE
+        Configuration.NATIVE_CONFIG_DENSITY,                // DENSITY
+        Configuration.NATIVE_CONFIG_LAYOUTDIR,              // LAYOUT DIRECTION
     };
     /** @hide
      * Convert Java change bits to native.
