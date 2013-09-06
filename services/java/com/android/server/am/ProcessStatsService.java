@@ -413,6 +413,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         mWriteLock.lock();
         try {
             synchronized (mAm) {
+                mProcessStats.mTimePeriodEndRealtime = SystemClock.elapsedRealtime();
                 mProcessStats.writeToParcel(current, 0);
             }
             if (historic != null) {
