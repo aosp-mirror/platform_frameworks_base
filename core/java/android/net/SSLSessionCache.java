@@ -19,11 +19,15 @@ package android.net;
 import android.content.Context;
 import android.util.Log;
 
+import com.android.org.conscrypt.ClientSessionContext;
 import com.android.org.conscrypt.FileClientSessionCache;
 import com.android.org.conscrypt.SSLClientSessionCache;
 
 import java.io.File;
 import java.io.IOException;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSessionContext;
 
 /**
  * File-based cache of established SSL sessions.  When re-establishing a
@@ -38,6 +42,34 @@ public final class SSLSessionCache {
     /* package */ final SSLClientSessionCache mSessionCache;
 
     /**
+     * Installs a {@link SSLSessionCache} on a {@link SSLContext}. The cache will
+     * be used on all socket factories created by this context (including factories
+     * created before this call).
+     *
+     * @param cache the cache instance to install, or {@code null} to uninstall any
+     *         existing cache.
+     * @param context the context to install it on.
+     * @throws IllegalArgumentException if the context does not support a session
+     *         cache.
+     *
+     * @hide candidate for public API
+     */
+    public static void install(SSLSessionCache cache, SSLContext context) {
+        SSLSessionContext clientContext = context.getClientSessionContext();
+        if (clientContext instanceof ClientSessionContext) {
+            ((ClientSessionContext) clientContext).setPersistentCache(
+                    cache == null ? null : cache.mSessionCache);
+        } else {
+            throw new IllegalArgumentException("Incompatible SSLContext: " + context);
+        }
+    }
+
+    /** @hide For unit test use only */
+    public SSLSessionCache(SSLClientSessionCache cache) {
+        mSessionCache = cache;
+    }
+
+    /**
      * Create a session cache using the specified directory.
      * Individual session entries will be files within the directory.
      * Multiple instances for the same directory share data internally.
@@ -46,7 +78,7 @@ public final class SSLSessionCache {
      * @throws IOException if the cache can't be opened
      */
     public SSLSessionCache(File dir) throws IOException {
-        mSessionCache = FileClientSessionCache.usingDirectory(dir);
+        this(FileClientSessionCache.usingDirectory(dir));
     }
 
     /**
