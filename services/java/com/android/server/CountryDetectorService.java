@@ -97,11 +97,12 @@ public class CountryDetectorService extends ICountryDetector.Stub implements Run
     }
 
     @Override
-    public Country detectCountry() throws RemoteException {
+    public Country detectCountry() {
         if (!mSystemReady) {
-            throw new RemoteException();
+            return null;   // server not yet active
+        } else {
+            return mCountryDetector.detectCountry();
         }
-        return mCountryDetector.detectCountry();
     }
 
     /**
