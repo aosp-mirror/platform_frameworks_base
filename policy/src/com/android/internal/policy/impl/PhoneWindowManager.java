@@ -460,6 +460,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     PowerManager.WakeLock mBroadcastWakeLock;
     boolean mHavePendingMediaKeyRepeatWithWakeLock;
 
+    private int mCurrentUserId;
+
     // Maps global key codes to the components that will handle them.
     private GlobalKeyManager mGlobalKeyManager;
 
@@ -4813,7 +4815,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         ResolveInfo info = mContext.getPackageManager().resolveActivityAsUser(
                 intent,
                 PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_META_DATA,
-                getCurrentUserId());
+                mCurrentUserId);
         if (info != null) {
             ai = info.activityInfo;
         }
@@ -4826,16 +4828,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         return null;
-    }
-
-    private int getCurrentUserId() {
-        try {
-            UserInfo user = ActivityManagerNative.getDefault().getCurrentUser();
-            return user != null ? user.id : UserHandle.USER_NULL;
-        } catch (RemoteException e) {
-            // noop
-        }
-        return UserHandle.USER_NULL;
     }
 
     void startDockOrHome() {
@@ -5093,9 +5085,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         boolean oldTransientNav = isTransientNavigationAllowed(oldVis);
         boolean isTransientNav = isTransientNavigationAllowed(vis);
         if (mFocusedWindow != null && oldTransientNav != isTransientNav) {
-            final int uid = getCurrentUserId();
             final String pkg = mFocusedWindow.getOwningPackage();
-            mTransientNavigationConfirmation.transientNavigationChanged(uid, pkg, isTransientNav);
+            mTransientNavigationConfirmation.transientNavigationChanged(mCurrentUserId, pkg,
+                    isTransientNav);
         }
         vis = mNavigationBarController.updateVisibilityLw(isTransientNav, oldVis, vis);
 
@@ -5174,6 +5166,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public void setCurrentUserLw(int newUserId) {
+        mCurrentUserId = newUserId;
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.setCurrentUser(newUserId);
         }
