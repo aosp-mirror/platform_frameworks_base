@@ -500,7 +500,7 @@ public class WifiNative {
     }
 
     public void bssFlush() {
-        doBooleanCommand("BSS_FLUSH");
+        doBooleanCommand("BSS_FLUSH 0");
     }
 
     public boolean startWpsPbc(String bssid) {
