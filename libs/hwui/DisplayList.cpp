@@ -358,7 +358,7 @@ void DisplayList::outputViewProperties(const int level) {
     }
     if (mAnimationMatrix) {
         ALOGD("%*sConcatMatrix (animation) %p: " MATRIX_STRING,
-                level * 2, "", mAnimationMatrix, MATRIX_ARGS(mStaticMatrix));
+                level * 2, "", mAnimationMatrix, MATRIX_ARGS(mAnimationMatrix));
     }
     if (mMatrixFlags != 0) {
         if (mMatrixFlags == TRANSLATION) {
