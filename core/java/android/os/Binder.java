@@ -399,17 +399,27 @@ public class Binder implements IBinder {
         // but all that does is rewind it, and we just got these from an IPC,
         // so we'll just call it directly.
         boolean res;
+        // Log any exceptions as warnings, don't silently suppress them.
+        // If the call was FLAG_ONEWAY then these exceptions disappear into the ether.
         try {
             res = onTransact(code, data, reply, flags);
         } catch (RemoteException e) {
+            if ((flags & FLAG_ONEWAY) != 0) {
+                Log.w(TAG, "Binder call failed.", e);
+            }
             reply.setDataPosition(0);
             reply.writeException(e);
             res = true;
         } catch (RuntimeException e) {
+            if ((flags & FLAG_ONEWAY) != 0) {
+                Log.w(TAG, "Caught a RuntimeException from the binder stub implementation.", e);
+            }
             reply.setDataPosition(0);
             reply.writeException(e);
             res = true;
         } catch (OutOfMemoryError e) {
+            // Unconditionally log this, since this is generally unrecoverable.
+            Log.e(TAG, "Caught an OutOfMemoryError from the binder stub implementation.", e);
             RuntimeException re = new RuntimeException("Out of memory", e);
             reply.setDataPosition(0);
             reply.writeException(re);
