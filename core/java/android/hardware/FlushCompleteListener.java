@@ -18,7 +18,6 @@ package android.hardware;
 
 /**
  * Used for receiving a notification when a flush() has been successfully completed.
- * @hide
  */
 public interface FlushCompleteListener {
     /**
