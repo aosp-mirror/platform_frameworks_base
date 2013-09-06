@@ -333,8 +333,11 @@ public abstract class WebSettings {
     }
 
     /**
-     * Sets whether the WebView loads pages in overview mode. The default is
-     * false.
+     * Sets whether the WebView loads pages in overview mode, that is,
+     * zooms out the content to fit on screen by width. This setting is
+     * taken into account when the content width is greater than the width
+     * of the WebView control, for example, when {@link #getUseWideViewPort}
+     * is enabled. The default is false.
      */
     public void setLoadWithOverviewMode(boolean overview) {
         throw new MustOverrideException();
