@@ -894,14 +894,11 @@ public abstract class PreferenceActivity extends ListActivity implements
      */
     protected boolean isValidFragment(String fragmentName) {
         if (getApplicationInfo().targetSdkVersion  >= android.os.Build.VERSION_CODES.KITKAT) {
-            Log.w(TAG, "Subclasses of PreferenceActivity must override isValidFragment(String)"
+            throw new RuntimeException(
+                    "Subclasses of PreferenceActivity must override isValidFragment(String)"
                     + " to verify that the Fragment class is valid! " + this.getClass().getName()
                     + " has not checked if fragment " + fragmentName + " is valid.");
-            // Return true for now, but will eventually return false when all bundled apps
-            // have been modified. TODO: change to return false
-            return true;
         } else {
-            Log.i(TAG, "PreferenceActivity built on pre-KLP launching fragment: " + fragmentName);
             return true;
         }
     }
