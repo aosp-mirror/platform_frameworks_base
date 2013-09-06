@@ -20747,6 +20747,7 @@ package android.provider {
     method public static android.net.Uri buildChildDocumentsUri(java.lang.String, java.lang.String);
     method public static android.net.Uri buildDocumentUri(java.lang.String, java.lang.String);
     method public static android.net.Uri buildRecentDocumentsUri(java.lang.String, java.lang.String);
+    method public static android.net.Uri buildRootUri(java.lang.String, java.lang.String);
     method public static android.net.Uri buildRootsUri(java.lang.String);
     method public static android.net.Uri buildSearchDocumentsUri(java.lang.String, java.lang.String, java.lang.String);
     method public static android.net.Uri createDocument(android.content.ContentResolver, android.net.Uri, java.lang.String, java.lang.String);

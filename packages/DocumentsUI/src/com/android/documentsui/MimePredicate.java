@@ -16,12 +16,8 @@
 
 package com.android.documentsui;
 
-import android.util.Log;
-
 import com.android.documentsui.model.DocumentInfo;
 import com.android.internal.util.Predicate;
-
-import java.util.Arrays;
 
 public class MimePredicate implements Predicate<DocumentInfo> {
     private final String[] mFilters;

@@ -72,7 +72,9 @@ public final class DocumentsContract {
     public static final String META_DATA_DOCUMENT_PROVIDER = "android.content.DOCUMENT_PROVIDER";
 
     /** {@hide} */
-    public static final String ACTION_MANAGE_DOCUMENTS = "android.provider.action.MANAGE_DOCUMENTS";
+    public static final String ACTION_MANAGE_ROOT = "android.provider.action.MANAGE_ROOT";
+    /** {@hide} */
+    public static final String ACTION_MANAGE_DOCUMENT = "android.provider.action.MANAGE_DOCUMENT";
 
     /**
      * Constants related to a document, including {@link Cursor} columns names
@@ -346,6 +348,9 @@ public final class DocumentsContract {
          */
         public static final String COLUMN_MIME_TYPES = "mime_types";
 
+        /** {@hide} */
+        public static final String MIME_TYPE_ITEM = "vnd.android.document/root";
+
         /**
          * Type of root that represents a storage service, such as a cloud-based
          * service.
@@ -459,6 +464,17 @@ public final class DocumentsContract {
     public static Uri buildRootsUri(String authority) {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority).appendPath(PATH_ROOT).build();
+    }
+
+    /**
+     * Build Uri representing the given {@link Root#COLUMN_ROOT_ID} in a
+     * document provider.
+     *
+     * @see #getRootId(Uri)
+     */
+    public static Uri buildRootUri(String authority, String rootId) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(authority).appendPath(PATH_ROOT).appendPath(rootId).build();
     }
 
     /**
