@@ -182,7 +182,7 @@ public final class CaptureRequest extends CameraMetadata implements Parcelable {
 
     /**
      * <p>
-     * When android.sensor.awbMode is not OFF, TRANSFORM_MATRIX
+     * When android.control.awbMode is not OFF, TRANSFORM_MATRIX
      * should be ignored.
      * </p>
      * @see #COLOR_CORRECTION_MODE_TRANSFORM_MATRIX
