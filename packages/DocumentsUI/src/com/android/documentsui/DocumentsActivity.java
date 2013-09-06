@@ -104,7 +104,7 @@ public class DocumentsActivity extends Activity {
                 R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close);
 
         mDrawerLayout.setDrawerListener(mDrawerListener);
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
+        mDrawerLayout.setDrawerShadow(R.drawable.ic_drawer_shadow, GravityCompat.START);
 
         if (icicle != null) {
             mState = icicle.getParcelable(EXTRA_STATE);
