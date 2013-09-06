@@ -416,12 +416,6 @@ public class UserManagerService extends IUserManager.Stub {
         if (restrictions == null) return;
 
         synchronized (mPackagesLock) {
-            // If the user has restrictions already and call is trying to disallow restrictions,
-            // don't modify the flag.
-            if (hasRestrictionsPinLocked(userId)
-                    && restrictions.getBoolean(UserManager.DISALLOW_APP_RESTRICTIONS, false)) {
-                restrictions.putBoolean(UserManager.DISALLOW_APP_RESTRICTIONS, false);
-            }
             mUserRestrictions.get(userId).clear();
             mUserRestrictions.get(userId).putAll(restrictions);
             writeUserLocked(mUsers.get(userId));
@@ -686,7 +680,6 @@ public class UserManagerService extends IUserManager.Stub {
                 writeBoolean(serializer, restrictions, UserManager.DISALLOW_USB_FILE_TRANSFER);
                 writeBoolean(serializer, restrictions, UserManager.DISALLOW_CONFIG_CREDENTIALS);
                 writeBoolean(serializer, restrictions, UserManager.DISALLOW_REMOVE_USER);
-                writeBoolean(serializer, restrictions, UserManager.DISALLOW_APP_RESTRICTIONS);
                 serializer.endTag(null, TAG_RESTRICTIONS);
             }
             serializer.endTag(null, TAG_USER);
@@ -817,7 +810,6 @@ public class UserManagerService extends IUserManager.Stub {
                         readBoolean(parser, restrictions, UserManager.DISALLOW_USB_FILE_TRANSFER);
                         readBoolean(parser, restrictions, UserManager.DISALLOW_CONFIG_CREDENTIALS);
                         readBoolean(parser, restrictions, UserManager.DISALLOW_REMOVE_USER);
-                        readBoolean(parser, restrictions, UserManager.DISALLOW_APP_RESTRICTIONS);
                     }
                 }
             }
@@ -1130,7 +1122,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public boolean changeRestrictionsPin(String newPin) {
+    public boolean setRestrictionsChallenge(String newPin) {
         checkManageUsersPermission("Only system can modify the restrictions pin");
         int userId = UserHandle.getCallingUserId();
         synchronized (mPackagesLock) {
@@ -1157,7 +1149,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public int checkRestrictionsPin(String pin) {
+    public int checkRestrictionsChallenge(String pin) {
         checkManageUsersPermission("Only system can verify the restrictions pin");
         int userId = UserHandle.getCallingUserId();
         synchronized (mPackagesLock) {
@@ -1200,7 +1192,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public boolean hasRestrictionsPin() {
+    public boolean hasRestrictionsChallenge() {
         int userId = UserHandle.getCallingUserId();
         synchronized (mPackagesLock) {
             return hasRestrictionsPinLocked(userId);
@@ -1227,7 +1219,7 @@ public class UserManagerService extends IUserManager.Stub {
             // Remove all user restrictions
             setUserRestrictions(new Bundle(), userHandle);
             // Remove restrictions pin
-            changeRestrictionsPin(null);
+            setRestrictionsChallenge(null);
             // Remove any app restrictions
             cleanAppRestrictions(userHandle, true);
         }
