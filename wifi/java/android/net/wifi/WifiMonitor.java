@@ -26,14 +26,11 @@ import android.net.wifi.p2p.nsd.WifiP2pServiceResponse;
 import android.os.Message;
 import android.util.Log;
 
-
 import com.android.internal.util.Protocol;
 import com.android.internal.util.StateMachine;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -335,10 +332,6 @@ public class WifiMonitor {
 
     /* Indicates assoc reject event */
     public static final int ASSOCIATION_REJECTION_EVENT          = BASE + 43;
-    /**
-     * This indicates the supplicant connection for the monitor is closed
-     */
-    private static final String MONITOR_SOCKET_CLOSED_STR = "connection closed";
 
     /**
      * This indicates a read error on the monitor socket conenction
@@ -352,14 +345,26 @@ public class WifiMonitor {
 
     private final String mInterfaceName;
     private final WifiNative mWifiNative;
-    private final StateMachine mWifiStateMachine;
+    private final StateMachine mStateMachine;
     private boolean mMonitoring;
+
+    // This is a global counter, since it's not monitor specific. However, the existing
+    // implementation forwards all "global" control events like CTRL-EVENT-TERMINATING
+    // to the p2p0 monitor. Is that expected ? It seems a bit surprising.
+    //
+    // TODO: If the p2p0 monitor isn't registered, the behaviour is even more surprising.
+    // The event will be dispatched to all monitors, and each of them will end up incrementing
+    // it in their dispatchXXX method. If we have 5 registered monitors (say), 2 consecutive
+    // recv errors will cause us to disconnect from the supplicant (instead of the intended 10).
+    //
+    // This variable is always accessed and modified under a WifiMonitorSingleton lock.
+    private static int sRecvErrors;
 
     public WifiMonitor(StateMachine wifiStateMachine, WifiNative wifiNative) {
         if (DBG) Log.d(TAG, "Creating WifiMonitor");
         mWifiNative = wifiNative;
         mInterfaceName = wifiNative.mInterfaceName;
-        mWifiStateMachine = wifiStateMachine;
+        mStateMachine = wifiStateMachine;
         mMonitoring = false;
 
         WifiMonitorSingleton.sInstance.registerInterfaceMonitor(mInterfaceName, this);
@@ -402,14 +407,14 @@ public class WifiMonitor {
 
             if (mConnected) {
                 m.mMonitoring = true;
-                m.mWifiStateMachine.sendMessage(SUP_CONNECTION_EVENT);
+                m.mStateMachine.sendMessage(SUP_CONNECTION_EVENT);
             } else {
                 if (DBG) Log.d(TAG, "connecting to supplicant");
                 int connectTries = 0;
                 while (true) {
                     if (mWifiNative.connectToSupplicant()) {
                         m.mMonitoring = true;
-                        m.mWifiStateMachine.sendMessage(SUP_CONNECTION_EVENT);
+                        m.mStateMachine.sendMessage(SUP_CONNECTION_EVENT);
                         new MonitorThread(mWifiNative, this).start();
                         mConnected = true;
                         break;
@@ -421,7 +426,7 @@ public class WifiMonitor {
                         }
                     } else {
                         mIfaceMap.remove(iface);
-                        m.mWifiStateMachine.sendMessage(SUP_DISCONNECTION_EVENT);
+                        m.mStateMachine.sendMessage(SUP_DISCONNECTION_EVENT);
                         Log.e(TAG, "startMonitoring(" + iface + ") failed!");
                         break;
                     }
@@ -431,13 +436,13 @@ public class WifiMonitor {
 
         public synchronized void stopMonitoring(String iface) {
             WifiMonitor m = mIfaceMap.get(iface);
-            if (DBG) Log.d(TAG, "stopMonitoring(" + iface + ") = " + m.mWifiStateMachine);
+            if (DBG) Log.d(TAG, "stopMonitoring(" + iface + ") = " + m.mStateMachine);
             m.mMonitoring = false;
-            m.mWifiStateMachine.sendMessage(SUP_DISCONNECTION_EVENT);
+            m.mStateMachine.sendMessage(SUP_DISCONNECTION_EVENT);
         }
 
         public synchronized void registerInterfaceMonitor(String iface, WifiMonitor m) {
-            if (DBG) Log.d(TAG, "registerInterface(" + iface + "+" + m.mWifiStateMachine + ")");
+            if (DBG) Log.d(TAG, "registerInterface(" + iface + "+" + m.mStateMachine + ")");
             mIfaceMap.put(iface, m);
             if (mWifiNative == null) {
                 mWifiNative = m.mWifiNative;
@@ -449,7 +454,7 @@ public class WifiMonitor {
             // objects will remain in the mIfaceMap; and won't ever get deleted
 
             WifiMonitor m = mIfaceMap.remove(iface);
-            if (DBG) Log.d(TAG, "unregisterInterface(" + iface + "+" + m.mWifiStateMachine + ")");
+            if (DBG) Log.d(TAG, "unregisterInterface(" + iface + "+" + m.mStateMachine + ")");
         }
 
         public synchronized void stopSupplicant() {
@@ -457,26 +462,74 @@ public class WifiMonitor {
         }
 
         public synchronized void killSupplicant(boolean p2pSupported) {
-            mWifiNative.killSupplicant(p2pSupported);
+            WifiNative.killSupplicant(p2pSupported);
             mConnected = false;
-            Iterator<Map.Entry<String, WifiMonitor>> it = mIfaceMap.entrySet().iterator();
-            while (it.hasNext()) {
-                Map.Entry<String, WifiMonitor> e = it.next();
-                WifiMonitor m = e.getValue();
+            for (WifiMonitor m : mIfaceMap.values()) {
                 m.mMonitoring = false;
             }
         }
 
-        private synchronized WifiMonitor getMonitor(String iface) {
-            return mIfaceMap.get(iface);
+        private synchronized boolean dispatchEvent(String eventStr) {
+            String iface;
+            if (eventStr.startsWith("IFNAME=")) {
+                int space = eventStr.indexOf(' ');
+                if (space != -1) {
+                    iface = eventStr.substring(7, space);
+                    if (!mIfaceMap.containsKey(iface) && iface.startsWith("p2p-")) {
+                        // p2p interfaces are created dynamically, but we have
+                        // only one P2p state machine monitoring all of them; look
+                        // for it explicitly, and send messages there ..
+                        iface = "p2p0";
+                    }
+                    eventStr = eventStr.substring(space + 1);
+                } else {
+                    // No point dispatching this event to any interface, the dispatched
+                    // event string will begin with "IFNAME=" which dispatchEvent can't really
+                    // do anything about.
+                    Log.e(TAG, "Dropping malformed event (unparsable iface): " + eventStr);
+                    return false;
+                }
+            } else {
+                // events without prefix belong to p2p0 monitor
+                iface = "p2p0";
+            }
+
+            if (DBG) Log.d(TAG, "Dispatching event to interface: " + iface);
+
+            WifiMonitor m = mIfaceMap.get(iface);
+            if (m != null) {
+                if (m.mMonitoring) {
+                    if (m.dispatchEvent(eventStr)) {
+                        mConnected = false;
+                        return true;
+                    }
+
+                    return false;
+                } else {
+                    if (DBG) Log.d(TAG, "Dropping event because (" + iface + ") is stopped");
+                    return false;
+                }
+            } else {
+                if (DBG) Log.d(TAG, "Sending to all monitors because there's no matching iface");
+                boolean done = false;
+                for (WifiMonitor monitor : mIfaceMap.values()) {
+                    if (monitor.mMonitoring && monitor.dispatchEvent(eventStr)) {
+                        done = true;
+                    }
+                }
+
+                if (done) {
+                    mConnected = false;
+                }
+
+                return done;
+            }
         }
     }
 
     private static class MonitorThread extends Thread {
         private final WifiNative mWifiNative;
         private final WifiMonitorSingleton mWifiMonitorSingleton;
-        private int mRecvErrors = 0;
-        private StateMachine mStateMachine = null;
 
         public MonitorThread(WifiNative wifiNative, WifiMonitorSingleton wifiMonitorSingleton) {
             super("WifiMonitor");
@@ -494,446 +547,390 @@ public class WifiMonitor {
                     Log.d(TAG, "Event [" + eventStr + "]");
                 }
 
-                String iface = "p2p0";
-                WifiMonitor m = null;
-                mStateMachine = null;
-
-                if (eventStr.startsWith("IFNAME=")) {
-                    int space = eventStr.indexOf(' ');
-                    if (space != -1) {
-                        iface = eventStr.substring(7,space);
-                        m = mWifiMonitorSingleton.getMonitor(iface);
-                        if (m == null && iface.startsWith("p2p-")) {
-                            // p2p interfaces are created dynamically, but we have
-                            // only one P2p state machine monitoring all of them; look
-                            // for it explicitly, and send messages there ..
-                            m = mWifiMonitorSingleton.getMonitor("p2p0");
-                        }
-                        eventStr = eventStr.substring(space + 1);
-                    }
-                } else {
-                    // events without prefix belong to p2p0 monitor
-                    m = mWifiMonitorSingleton.getMonitor("p2p0");
-                }
-
-                if (m != null) {
-                    if (m.mMonitoring) {
-                        mStateMachine = m.mWifiStateMachine;
-                    } else {
-                        if (DBG) Log.d(TAG, "Dropping event because monitor (" + iface +
-                                            ") is stopped");
-                        continue;
-                    }
-                }
-
-                if (mStateMachine != null) {
-                    if (dispatchEvent(eventStr)) {
-                        break;
-                    }
-                } else {
-                    if (DBG) Log.d(TAG, "Sending to all monitors because there's no interface id");
-                    boolean done = false;
-                    // TODO: This isn't thread safe, mIfaceMap & mConnected below are
-                    // usually guarded by (WifiMonitorSingleton.sInstance.this).
-                    Iterator<Map.Entry<String, WifiMonitor>> it =
-                            mWifiMonitorSingleton.mIfaceMap.entrySet().iterator();
-                    while (it.hasNext()) {
-                        Map.Entry<String, WifiMonitor> e = it.next();
-                        m = e.getValue();
-                        mStateMachine = m.mWifiStateMachine;
-                        if (dispatchEvent(eventStr)) {
-                            done = true;
-                        }
-                    }
-
-                    if (done) {
-                        // After this thread terminates, we'll no longer
-                        // be connected to the supplicant
-                        if (DBG) Log.d(TAG, "Disconnecting from the supplicant, no more events");
-                        mWifiMonitorSingleton.mConnected = false;
-                        break;
-                    }
+                if (mWifiMonitorSingleton.dispatchEvent(eventStr)) {
+                    if (DBG) Log.d(TAG, "Disconnecting from the supplicant, no more events");
+                    break;
                 }
             }
         }
+    }
 
-        /* @return true if the event was supplicant disconnection */
-        private boolean dispatchEvent(String eventStr) {
+    /* @return true if the event was supplicant disconnection */
+    private boolean dispatchEvent(String eventStr) {
 
-            if (!eventStr.startsWith(EVENT_PREFIX_STR)) {
-                if (eventStr.startsWith(WPA_EVENT_PREFIX_STR) &&
-                        0 < eventStr.indexOf(PASSWORD_MAY_BE_INCORRECT_STR)) {
-                    mStateMachine.sendMessage(AUTHENTICATION_FAILURE_EVENT);
-                } else if (eventStr.startsWith(WPS_SUCCESS_STR)) {
-                    mStateMachine.sendMessage(WPS_SUCCESS_EVENT);
-                } else if (eventStr.startsWith(WPS_FAIL_STR)) {
-                    handleWpsFailEvent(eventStr);
-                } else if (eventStr.startsWith(WPS_OVERLAP_STR)) {
-                    mStateMachine.sendMessage(WPS_OVERLAP_EVENT);
-                } else if (eventStr.startsWith(WPS_TIMEOUT_STR)) {
-                    mStateMachine.sendMessage(WPS_TIMEOUT_EVENT);
-                } else if (eventStr.startsWith(P2P_EVENT_PREFIX_STR)) {
-                    handleP2pEvents(eventStr);
-                } else if (eventStr.startsWith(HOST_AP_EVENT_PREFIX_STR)) {
-                    handleHostApEvents(eventStr);
-                }
-                else {
-                    if (DBG) Log.w(TAG, "couldn't identify event type - " + eventStr);
-                }
-                return false;
+        if (!eventStr.startsWith(EVENT_PREFIX_STR)) {
+            if (eventStr.startsWith(WPA_EVENT_PREFIX_STR) &&
+                    0 < eventStr.indexOf(PASSWORD_MAY_BE_INCORRECT_STR)) {
+                mStateMachine.sendMessage(AUTHENTICATION_FAILURE_EVENT);
+            } else if (eventStr.startsWith(WPS_SUCCESS_STR)) {
+                mStateMachine.sendMessage(WPS_SUCCESS_EVENT);
+            } else if (eventStr.startsWith(WPS_FAIL_STR)) {
+                handleWpsFailEvent(eventStr);
+            } else if (eventStr.startsWith(WPS_OVERLAP_STR)) {
+                mStateMachine.sendMessage(WPS_OVERLAP_EVENT);
+            } else if (eventStr.startsWith(WPS_TIMEOUT_STR)) {
+                mStateMachine.sendMessage(WPS_TIMEOUT_EVENT);
+            } else if (eventStr.startsWith(P2P_EVENT_PREFIX_STR)) {
+                handleP2pEvents(eventStr);
+            } else if (eventStr.startsWith(HOST_AP_EVENT_PREFIX_STR)) {
+                handleHostApEvents(eventStr);
             }
-
-            String eventName = eventStr.substring(EVENT_PREFIX_LEN_STR);
-            int nameEnd = eventName.indexOf(' ');
-            if (nameEnd != -1)
-                eventName = eventName.substring(0, nameEnd);
-            if (eventName.length() == 0) {
-                if (DBG) Log.i(TAG, "Received wpa_supplicant event with empty event name");
-                return false;
+            else {
+                if (DBG) Log.w(TAG, "couldn't identify event type - " + eventStr);
             }
-            /*
-             * Map event name into event enum
-             */
-            int event;
-            if (eventName.equals(CONNECTED_STR))
-                event = CONNECTED;
-            else if (eventName.equals(DISCONNECTED_STR))
-                event = DISCONNECTED;
-            else if (eventName.equals(STATE_CHANGE_STR))
-                event = STATE_CHANGE;
-            else if (eventName.equals(SCAN_RESULTS_STR))
-                event = SCAN_RESULTS;
-            else if (eventName.equals(LINK_SPEED_STR))
-                event = LINK_SPEED;
-            else if (eventName.equals(TERMINATING_STR))
-                event = TERMINATING;
-            else if (eventName.equals(DRIVER_STATE_STR))
-                event = DRIVER_STATE;
-            else if (eventName.equals(EAP_FAILURE_STR))
-                event = EAP_FAILURE;
-            else if (eventName.equals(ASSOC_REJECT_STR))
-                event = ASSOC_REJECT;
-            else
-                event = UNKNOWN;
-
-            String eventData = eventStr;
-            if (event == DRIVER_STATE || event == LINK_SPEED)
-                eventData = eventData.split(" ")[1];
-            else if (event == STATE_CHANGE || event == EAP_FAILURE) {
-                int ind = eventStr.indexOf(" ");
-                if (ind != -1) {
-                    eventData = eventStr.substring(ind + 1);
-                }
-            } else {
-                int ind = eventStr.indexOf(" - ");
-                if (ind != -1) {
-                    eventData = eventStr.substring(ind + 3);
-                }
-            }
-
-            if (event == STATE_CHANGE) {
-                handleSupplicantStateChange(eventData);
-            } else if (event == DRIVER_STATE) {
-                handleDriverEvent(eventData);
-            } else if (event == TERMINATING) {
-                /**
-                 * Close the supplicant connection if we see
-                 * too many recv errors
-                 */
-                if (eventData.startsWith(WPA_RECV_ERROR_STR)) {
-                    if (++mRecvErrors > MAX_RECV_ERRORS) {
-                        if (DBG) {
-                            Log.d(TAG, "too many recv errors, closing connection");
-                        }
-                    } else {
-                        return false;
-                    }
-                }
-
-                // notify and exit
-                mStateMachine.sendMessage(SUP_DISCONNECTION_EVENT);
-                return true;
-            } else if (event == EAP_FAILURE) {
-                if (eventData.startsWith(EAP_AUTH_FAILURE_STR)) {
-                    mStateMachine.sendMessage(AUTHENTICATION_FAILURE_EVENT);
-                }
-            } else if (event == ASSOC_REJECT) {
-                mStateMachine.sendMessage(ASSOCIATION_REJECTION_EVENT);
-            } else {
-                handleEvent(event, eventData);
-            }
-            mRecvErrors = 0;
             return false;
         }
 
-        private void handleDriverEvent(String state) {
-            if (state == null) {
-                return;
+        String eventName = eventStr.substring(EVENT_PREFIX_LEN_STR);
+        int nameEnd = eventName.indexOf(' ');
+        if (nameEnd != -1)
+            eventName = eventName.substring(0, nameEnd);
+        if (eventName.length() == 0) {
+            if (DBG) Log.i(TAG, "Received wpa_supplicant event with empty event name");
+            return false;
+        }
+        /*
+        * Map event name into event enum
+        */
+        int event;
+        if (eventName.equals(CONNECTED_STR))
+            event = CONNECTED;
+        else if (eventName.equals(DISCONNECTED_STR))
+            event = DISCONNECTED;
+        else if (eventName.equals(STATE_CHANGE_STR))
+            event = STATE_CHANGE;
+        else if (eventName.equals(SCAN_RESULTS_STR))
+            event = SCAN_RESULTS;
+        else if (eventName.equals(LINK_SPEED_STR))
+            event = LINK_SPEED;
+        else if (eventName.equals(TERMINATING_STR))
+            event = TERMINATING;
+        else if (eventName.equals(DRIVER_STATE_STR))
+            event = DRIVER_STATE;
+        else if (eventName.equals(EAP_FAILURE_STR))
+            event = EAP_FAILURE;
+        else if (eventName.equals(ASSOC_REJECT_STR))
+            event = ASSOC_REJECT;
+        else
+            event = UNKNOWN;
+
+        String eventData = eventStr;
+        if (event == DRIVER_STATE || event == LINK_SPEED)
+            eventData = eventData.split(" ")[1];
+        else if (event == STATE_CHANGE || event == EAP_FAILURE) {
+            int ind = eventStr.indexOf(" ");
+            if (ind != -1) {
+                eventData = eventStr.substring(ind + 1);
             }
-            if (state.equals("HANGED")) {
-                mStateMachine.sendMessage(DRIVER_HUNG_EVENT);
+        } else {
+            int ind = eventStr.indexOf(" - ");
+            if (ind != -1) {
+                eventData = eventStr.substring(ind + 3);
             }
         }
 
-        /**
-         * Handle all supplicant events except STATE-CHANGE
-         * @param event the event type
-         * @param remainder the rest of the string following the
-         * event name and &quot;&#8195;&#8212;&#8195;&quot;
-         */
-        void handleEvent(int event, String remainder) {
-            switch (event) {
-                case DISCONNECTED:
-                    handleNetworkStateChange(NetworkInfo.DetailedState.DISCONNECTED, remainder);
-                    break;
-
-                case CONNECTED:
-                    handleNetworkStateChange(NetworkInfo.DetailedState.CONNECTED, remainder);
-                    break;
-
-                case SCAN_RESULTS:
-                    mStateMachine.sendMessage(SCAN_RESULTS_EVENT);
-                    break;
-
-                case UNKNOWN:
-                    break;
-            }
-        }
-
-        private void handleWpsFailEvent(String dataString) {
-            final Pattern p = Pattern.compile(WPS_FAIL_PATTERN);
-            Matcher match = p.matcher(dataString);
-            if (match.find()) {
-                String cfgErr = match.group(1);
-                String reason = match.group(2);
-
-                if (reason != null) {
-                    switch(Integer.parseInt(reason)) {
-                        case REASON_TKIP_ONLY_PROHIBITED:
-                            mStateMachine.sendMessage(mStateMachine.obtainMessage(WPS_FAIL_EVENT,
-                                    WifiManager.WPS_TKIP_ONLY_PROHIBITED, 0));
-                            return;
-                        case REASON_WEP_PROHIBITED:
-                            mStateMachine.sendMessage(mStateMachine.obtainMessage(WPS_FAIL_EVENT,
-                                    WifiManager.WPS_WEP_PROHIBITED, 0));
-                            return;
+        if (event == STATE_CHANGE) {
+            handleSupplicantStateChange(eventData);
+        } else if (event == DRIVER_STATE) {
+            handleDriverEvent(eventData);
+        } else if (event == TERMINATING) {
+            /**
+             * Close the supplicant connection if we see
+             * too many recv errors
+             */
+            if (eventData.startsWith(WPA_RECV_ERROR_STR)) {
+                if (++sRecvErrors > MAX_RECV_ERRORS) {
+                    if (DBG) {
+                        Log.d(TAG, "too many recv errors, closing connection");
                     }
-                }
-                if (cfgErr != null) {
-                    switch(Integer.parseInt(cfgErr)) {
-                        case CONFIG_AUTH_FAILURE:
-                            mStateMachine.sendMessage(mStateMachine.obtainMessage(WPS_FAIL_EVENT,
-                                    WifiManager.WPS_AUTH_FAILURE, 0));
-                            return;
-                        case CONFIG_MULTIPLE_PBC_DETECTED:
-                            mStateMachine.sendMessage(mStateMachine.obtainMessage(WPS_FAIL_EVENT,
-                                    WifiManager.WPS_OVERLAP_ERROR, 0));
-                            return;
-                    }
-                }
-            }
-            //For all other errors, return a generic internal error
-            mStateMachine.sendMessage(mStateMachine.obtainMessage(WPS_FAIL_EVENT,
-                    WifiManager.ERROR, 0));
-        }
-
-        /* <event> status=<err> and the special case of <event> reason=FREQ_CONFLICT */
-        private P2pStatus p2pError(String dataString) {
-            P2pStatus err = P2pStatus.UNKNOWN;
-            String[] tokens = dataString.split(" ");
-            if (tokens.length < 2) return err;
-            String[] nameValue = tokens[1].split("=");
-            if (nameValue.length != 2) return err;
-
-            /* Handle the special case of reason=FREQ+CONFLICT */
-            if (nameValue[1].equals("FREQ_CONFLICT")) {
-                return P2pStatus.NO_COMMON_CHANNEL;
-            }
-            try {
-                err = P2pStatus.valueOf(Integer.parseInt(nameValue[1]));
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            }
-            return err;
-        }
-
-        /**
-         * Handle p2p events
-         */
-        private void handleP2pEvents(String dataString) {
-            if (dataString.startsWith(P2P_DEVICE_FOUND_STR)) {
-                mStateMachine.sendMessage(P2P_DEVICE_FOUND_EVENT, new WifiP2pDevice(dataString));
-            } else if (dataString.startsWith(P2P_DEVICE_LOST_STR)) {
-                mStateMachine.sendMessage(P2P_DEVICE_LOST_EVENT, new WifiP2pDevice(dataString));
-            } else if (dataString.startsWith(P2P_FIND_STOPPED_STR)) {
-                mStateMachine.sendMessage(P2P_FIND_STOPPED_EVENT);
-            } else if (dataString.startsWith(P2P_GO_NEG_REQUEST_STR)) {
-                mStateMachine.sendMessage(P2P_GO_NEGOTIATION_REQUEST_EVENT,
-                        new WifiP2pConfig(dataString));
-            } else if (dataString.startsWith(P2P_GO_NEG_SUCCESS_STR)) {
-                mStateMachine.sendMessage(P2P_GO_NEGOTIATION_SUCCESS_EVENT);
-            } else if (dataString.startsWith(P2P_GO_NEG_FAILURE_STR)) {
-                mStateMachine.sendMessage(P2P_GO_NEGOTIATION_FAILURE_EVENT, p2pError(dataString));
-            } else if (dataString.startsWith(P2P_GROUP_FORMATION_SUCCESS_STR)) {
-                mStateMachine.sendMessage(P2P_GROUP_FORMATION_SUCCESS_EVENT);
-            } else if (dataString.startsWith(P2P_GROUP_FORMATION_FAILURE_STR)) {
-                mStateMachine.sendMessage(P2P_GROUP_FORMATION_FAILURE_EVENT, p2pError(dataString));
-            } else if (dataString.startsWith(P2P_GROUP_STARTED_STR)) {
-                mStateMachine.sendMessage(P2P_GROUP_STARTED_EVENT, new WifiP2pGroup(dataString));
-            } else if (dataString.startsWith(P2P_GROUP_REMOVED_STR)) {
-                mStateMachine.sendMessage(P2P_GROUP_REMOVED_EVENT, new WifiP2pGroup(dataString));
-            } else if (dataString.startsWith(P2P_INVITATION_RECEIVED_STR)) {
-                mStateMachine.sendMessage(P2P_INVITATION_RECEIVED_EVENT,
-                        new WifiP2pGroup(dataString));
-            } else if (dataString.startsWith(P2P_INVITATION_RESULT_STR)) {
-                mStateMachine.sendMessage(P2P_INVITATION_RESULT_EVENT, p2pError(dataString));
-            } else if (dataString.startsWith(P2P_PROV_DISC_PBC_REQ_STR)) {
-                mStateMachine.sendMessage(P2P_PROV_DISC_PBC_REQ_EVENT,
-                        new WifiP2pProvDiscEvent(dataString));
-            } else if (dataString.startsWith(P2P_PROV_DISC_PBC_RSP_STR)) {
-                mStateMachine.sendMessage(P2P_PROV_DISC_PBC_RSP_EVENT,
-                        new WifiP2pProvDiscEvent(dataString));
-            } else if (dataString.startsWith(P2P_PROV_DISC_ENTER_PIN_STR)) {
-                mStateMachine.sendMessage(P2P_PROV_DISC_ENTER_PIN_EVENT,
-                        new WifiP2pProvDiscEvent(dataString));
-            } else if (dataString.startsWith(P2P_PROV_DISC_SHOW_PIN_STR)) {
-                mStateMachine.sendMessage(P2P_PROV_DISC_SHOW_PIN_EVENT,
-                        new WifiP2pProvDiscEvent(dataString));
-            } else if (dataString.startsWith(P2P_PROV_DISC_FAILURE_STR)) {
-                mStateMachine.sendMessage(P2P_PROV_DISC_FAILURE_EVENT);
-            } else if (dataString.startsWith(P2P_SERV_DISC_RESP_STR)) {
-                List<WifiP2pServiceResponse> list = WifiP2pServiceResponse.newInstance(dataString);
-                if (list != null) {
-                    mStateMachine.sendMessage(P2P_SERV_DISC_RESP_EVENT, list);
                 } else {
-                    Log.e(TAG, "Null service resp " + dataString);
+                    return false;
+                }
+            }
+
+            // notify and exit
+            mStateMachine.sendMessage(SUP_DISCONNECTION_EVENT);
+            return true;
+        } else if (event == EAP_FAILURE) {
+            if (eventData.startsWith(EAP_AUTH_FAILURE_STR)) {
+                mStateMachine.sendMessage(AUTHENTICATION_FAILURE_EVENT);
+            }
+        } else if (event == ASSOC_REJECT) {
+            mStateMachine.sendMessage(ASSOCIATION_REJECTION_EVENT);
+        } else {
+            handleEvent(event, eventData);
+        }
+        sRecvErrors = 0;
+        return false;
+    }
+
+    private void handleDriverEvent(String state) {
+        if (state == null) {
+            return;
+        }
+        if (state.equals("HANGED")) {
+            mStateMachine.sendMessage(DRIVER_HUNG_EVENT);
+        }
+    }
+
+    /**
+     * Handle all supplicant events except STATE-CHANGE
+     * @param event the event type
+     * @param remainder the rest of the string following the
+     * event name and &quot;&#8195;&#8212;&#8195;&quot;
+     */
+    void handleEvent(int event, String remainder) {
+        switch (event) {
+            case DISCONNECTED:
+                handleNetworkStateChange(NetworkInfo.DetailedState.DISCONNECTED, remainder);
+                break;
+
+            case CONNECTED:
+                handleNetworkStateChange(NetworkInfo.DetailedState.CONNECTED, remainder);
+                break;
+
+            case SCAN_RESULTS:
+                mStateMachine.sendMessage(SCAN_RESULTS_EVENT);
+                break;
+
+            case UNKNOWN:
+                break;
+        }
+    }
+
+    private void handleWpsFailEvent(String dataString) {
+        final Pattern p = Pattern.compile(WPS_FAIL_PATTERN);
+        Matcher match = p.matcher(dataString);
+        if (match.find()) {
+            String cfgErr = match.group(1);
+            String reason = match.group(2);
+
+            if (reason != null) {
+                switch(Integer.parseInt(reason)) {
+                    case REASON_TKIP_ONLY_PROHIBITED:
+                        mStateMachine.sendMessage(mStateMachine.obtainMessage(WPS_FAIL_EVENT,
+                                WifiManager.WPS_TKIP_ONLY_PROHIBITED, 0));
+                        return;
+                    case REASON_WEP_PROHIBITED:
+                        mStateMachine.sendMessage(mStateMachine.obtainMessage(WPS_FAIL_EVENT,
+                                WifiManager.WPS_WEP_PROHIBITED, 0));
+                        return;
+                }
+            }
+            if (cfgErr != null) {
+                switch(Integer.parseInt(cfgErr)) {
+                    case CONFIG_AUTH_FAILURE:
+                        mStateMachine.sendMessage(mStateMachine.obtainMessage(WPS_FAIL_EVENT,
+                                WifiManager.WPS_AUTH_FAILURE, 0));
+                        return;
+                    case CONFIG_MULTIPLE_PBC_DETECTED:
+                        mStateMachine.sendMessage(mStateMachine.obtainMessage(WPS_FAIL_EVENT,
+                                WifiManager.WPS_OVERLAP_ERROR, 0));
+                        return;
                 }
             }
         }
+        //For all other errors, return a generic internal error
+        mStateMachine.sendMessage(mStateMachine.obtainMessage(WPS_FAIL_EVENT,
+                WifiManager.ERROR, 0));
+    }
 
-        /**
-         * Handle hostap events
-         */
-        private void handleHostApEvents(String dataString) {
-            String[] tokens = dataString.split(" ");
-            /* AP-STA-CONNECTED 42:fc:89:a8:96:09 p2p_dev_addr=02:90:4c:a0:92:54 */
-            if (tokens[0].equals(AP_STA_CONNECTED_STR)) {
-                mStateMachine.sendMessage(AP_STA_CONNECTED_EVENT, new WifiP2pDevice(dataString));
-            /* AP-STA-DISCONNECTED 42:fc:89:a8:96:09 p2p_dev_addr=02:90:4c:a0:92:54 */
-            } else if (tokens[0].equals(AP_STA_DISCONNECTED_STR)) {
-                mStateMachine.sendMessage(AP_STA_DISCONNECTED_EVENT, new WifiP2pDevice(dataString));
-            }
+    /* <event> status=<err> and the special case of <event> reason=FREQ_CONFLICT */
+    private P2pStatus p2pError(String dataString) {
+        P2pStatus err = P2pStatus.UNKNOWN;
+        String[] tokens = dataString.split(" ");
+        if (tokens.length < 2) return err;
+        String[] nameValue = tokens[1].split("=");
+        if (nameValue.length != 2) return err;
+
+        /* Handle the special case of reason=FREQ+CONFLICT */
+        if (nameValue[1].equals("FREQ_CONFLICT")) {
+            return P2pStatus.NO_COMMON_CHANNEL;
         }
-
-        /**
-         * Handle the supplicant STATE-CHANGE event
-         * @param dataString New supplicant state string in the format:
-         * id=network-id state=new-state
-         */
-        private void handleSupplicantStateChange(String dataString) {
-            WifiSsid wifiSsid = null;
-            int index = dataString.lastIndexOf("SSID=");
-            if (index != -1) {
-                wifiSsid = WifiSsid.createFromAsciiEncoded(
-                        dataString.substring(index + 5));
-            }
-            String[] dataTokens = dataString.split(" ");
-
-            String BSSID = null;
-            int networkId = -1;
-            int newState  = -1;
-            for (String token : dataTokens) {
-                String[] nameValue = token.split("=");
-                if (nameValue.length != 2) {
-                    continue;
-                }
-
-                if (nameValue[0].equals("BSSID")) {
-                    BSSID = nameValue[1];
-                    continue;
-                }
-
-                int value;
-                try {
-                    value = Integer.parseInt(nameValue[1]);
-                } catch (NumberFormatException e) {
-                    continue;
-                }
-
-                if (nameValue[0].equals("id")) {
-                    networkId = value;
-                } else if (nameValue[0].equals("state")) {
-                    newState = value;
-                }
-            }
-
-            if (newState == -1) return;
-
-            SupplicantState newSupplicantState = SupplicantState.INVALID;
-            for (SupplicantState state : SupplicantState.values()) {
-                if (state.ordinal() == newState) {
-                    newSupplicantState = state;
-                    break;
-                }
-            }
-            if (newSupplicantState == SupplicantState.INVALID) {
-                Log.w(TAG, "Invalid supplicant state: " + newState);
-            }
-            notifySupplicantStateChange(networkId, wifiSsid, BSSID, newSupplicantState);
+        try {
+            err = P2pStatus.valueOf(Integer.parseInt(nameValue[1]));
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
         }
+        return err;
+    }
 
-        private void handleNetworkStateChange(NetworkInfo.DetailedState newState, String data) {
-            String BSSID = null;
-            int networkId = -1;
-            if (newState == NetworkInfo.DetailedState.CONNECTED) {
-                Matcher match = mConnectedEventPattern.matcher(data);
-                if (!match.find()) {
-                    if (DBG) Log.d(TAG, "Could not find BSSID in CONNECTED event string");
-                } else {
-                    BSSID = match.group(1);
-                    try {
-                        networkId = Integer.parseInt(match.group(2));
-                    } catch (NumberFormatException e) {
-                        networkId = -1;
-                    }
-                }
-                notifyNetworkStateChange(newState, BSSID, networkId);
-            }
-        }
-
-        /**
-         * Send the state machine a notification that the state of Wifi connectivity
-         * has changed.
-         * @param newState the new network state
-         * @param BSSID when the new state is {@link NetworkInfo.DetailedState#CONNECTED},
-         * this is the MAC address of the access point. Otherwise, it
-         * is {@code null}.
-         * @param netId the configured network on which the state change occurred
-         */
-        void notifyNetworkStateChange(NetworkInfo.DetailedState newState, String BSSID, int netId) {
-            if (newState == NetworkInfo.DetailedState.CONNECTED) {
-                Message m = mStateMachine.obtainMessage(NETWORK_CONNECTION_EVENT,
-                        netId, 0, BSSID);
-                mStateMachine.sendMessage(m);
+    /**
+     * Handle p2p events
+     */
+    private void handleP2pEvents(String dataString) {
+        if (dataString.startsWith(P2P_DEVICE_FOUND_STR)) {
+            mStateMachine.sendMessage(P2P_DEVICE_FOUND_EVENT, new WifiP2pDevice(dataString));
+        } else if (dataString.startsWith(P2P_DEVICE_LOST_STR)) {
+            mStateMachine.sendMessage(P2P_DEVICE_LOST_EVENT, new WifiP2pDevice(dataString));
+        } else if (dataString.startsWith(P2P_FIND_STOPPED_STR)) {
+            mStateMachine.sendMessage(P2P_FIND_STOPPED_EVENT);
+        } else if (dataString.startsWith(P2P_GO_NEG_REQUEST_STR)) {
+            mStateMachine.sendMessage(P2P_GO_NEGOTIATION_REQUEST_EVENT,
+                    new WifiP2pConfig(dataString));
+        } else if (dataString.startsWith(P2P_GO_NEG_SUCCESS_STR)) {
+            mStateMachine.sendMessage(P2P_GO_NEGOTIATION_SUCCESS_EVENT);
+        } else if (dataString.startsWith(P2P_GO_NEG_FAILURE_STR)) {
+            mStateMachine.sendMessage(P2P_GO_NEGOTIATION_FAILURE_EVENT, p2pError(dataString));
+        } else if (dataString.startsWith(P2P_GROUP_FORMATION_SUCCESS_STR)) {
+            mStateMachine.sendMessage(P2P_GROUP_FORMATION_SUCCESS_EVENT);
+        } else if (dataString.startsWith(P2P_GROUP_FORMATION_FAILURE_STR)) {
+            mStateMachine.sendMessage(P2P_GROUP_FORMATION_FAILURE_EVENT, p2pError(dataString));
+        } else if (dataString.startsWith(P2P_GROUP_STARTED_STR)) {
+            mStateMachine.sendMessage(P2P_GROUP_STARTED_EVENT, new WifiP2pGroup(dataString));
+        } else if (dataString.startsWith(P2P_GROUP_REMOVED_STR)) {
+            mStateMachine.sendMessage(P2P_GROUP_REMOVED_EVENT, new WifiP2pGroup(dataString));
+        } else if (dataString.startsWith(P2P_INVITATION_RECEIVED_STR)) {
+            mStateMachine.sendMessage(P2P_INVITATION_RECEIVED_EVENT,
+                    new WifiP2pGroup(dataString));
+        } else if (dataString.startsWith(P2P_INVITATION_RESULT_STR)) {
+            mStateMachine.sendMessage(P2P_INVITATION_RESULT_EVENT, p2pError(dataString));
+        } else if (dataString.startsWith(P2P_PROV_DISC_PBC_REQ_STR)) {
+            mStateMachine.sendMessage(P2P_PROV_DISC_PBC_REQ_EVENT,
+                    new WifiP2pProvDiscEvent(dataString));
+        } else if (dataString.startsWith(P2P_PROV_DISC_PBC_RSP_STR)) {
+            mStateMachine.sendMessage(P2P_PROV_DISC_PBC_RSP_EVENT,
+                    new WifiP2pProvDiscEvent(dataString));
+        } else if (dataString.startsWith(P2P_PROV_DISC_ENTER_PIN_STR)) {
+            mStateMachine.sendMessage(P2P_PROV_DISC_ENTER_PIN_EVENT,
+                    new WifiP2pProvDiscEvent(dataString));
+        } else if (dataString.startsWith(P2P_PROV_DISC_SHOW_PIN_STR)) {
+            mStateMachine.sendMessage(P2P_PROV_DISC_SHOW_PIN_EVENT,
+                    new WifiP2pProvDiscEvent(dataString));
+        } else if (dataString.startsWith(P2P_PROV_DISC_FAILURE_STR)) {
+            mStateMachine.sendMessage(P2P_PROV_DISC_FAILURE_EVENT);
+        } else if (dataString.startsWith(P2P_SERV_DISC_RESP_STR)) {
+            List<WifiP2pServiceResponse> list = WifiP2pServiceResponse.newInstance(dataString);
+            if (list != null) {
+                mStateMachine.sendMessage(P2P_SERV_DISC_RESP_EVENT, list);
             } else {
-                Message m = mStateMachine.obtainMessage(NETWORK_DISCONNECTION_EVENT,
-                        netId, 0, BSSID);
-                mStateMachine.sendMessage(m);
+                Log.e(TAG, "Null service resp " + dataString);
+            }
+        }
+    }
+
+    /**
+     * Handle hostap events
+     */
+    private void handleHostApEvents(String dataString) {
+        String[] tokens = dataString.split(" ");
+        /* AP-STA-CONNECTED 42:fc:89:a8:96:09 p2p_dev_addr=02:90:4c:a0:92:54 */
+        if (tokens[0].equals(AP_STA_CONNECTED_STR)) {
+            mStateMachine.sendMessage(AP_STA_CONNECTED_EVENT, new WifiP2pDevice(dataString));
+            /* AP-STA-DISCONNECTED 42:fc:89:a8:96:09 p2p_dev_addr=02:90:4c:a0:92:54 */
+        } else if (tokens[0].equals(AP_STA_DISCONNECTED_STR)) {
+            mStateMachine.sendMessage(AP_STA_DISCONNECTED_EVENT, new WifiP2pDevice(dataString));
+        }
+    }
+
+    /**
+     * Handle the supplicant STATE-CHANGE event
+     * @param dataString New supplicant state string in the format:
+     * id=network-id state=new-state
+     */
+    private void handleSupplicantStateChange(String dataString) {
+        WifiSsid wifiSsid = null;
+        int index = dataString.lastIndexOf("SSID=");
+        if (index != -1) {
+            wifiSsid = WifiSsid.createFromAsciiEncoded(
+                    dataString.substring(index + 5));
+        }
+        String[] dataTokens = dataString.split(" ");
+
+        String BSSID = null;
+        int networkId = -1;
+        int newState  = -1;
+        for (String token : dataTokens) {
+            String[] nameValue = token.split("=");
+            if (nameValue.length != 2) {
+                continue;
+            }
+
+            if (nameValue[0].equals("BSSID")) {
+                BSSID = nameValue[1];
+                continue;
+            }
+
+            int value;
+            try {
+                value = Integer.parseInt(nameValue[1]);
+            } catch (NumberFormatException e) {
+                continue;
+            }
+
+            if (nameValue[0].equals("id")) {
+                networkId = value;
+            } else if (nameValue[0].equals("state")) {
+                newState = value;
             }
         }
 
-        /**
-         * Send the state machine a notification that the state of the supplicant
-         * has changed.
-         * @param networkId the configured network on which the state change occurred
-         * @param wifiSsid network name
-         * @param BSSID network address
-         * @param newState the new {@code SupplicantState}
-         */
-        void notifySupplicantStateChange(int networkId, WifiSsid wifiSsid, String BSSID,
-                SupplicantState newState) {
-            mStateMachine.sendMessage(mStateMachine.obtainMessage(SUPPLICANT_STATE_CHANGE_EVENT,
-                    new StateChangeResult(networkId, wifiSsid, BSSID, newState)));
+        if (newState == -1) return;
+
+        SupplicantState newSupplicantState = SupplicantState.INVALID;
+        for (SupplicantState state : SupplicantState.values()) {
+            if (state.ordinal() == newState) {
+                newSupplicantState = state;
+                break;
+            }
         }
+        if (newSupplicantState == SupplicantState.INVALID) {
+            Log.w(TAG, "Invalid supplicant state: " + newState);
+        }
+        notifySupplicantStateChange(networkId, wifiSsid, BSSID, newSupplicantState);
+    }
+
+    private void handleNetworkStateChange(NetworkInfo.DetailedState newState, String data) {
+        String BSSID = null;
+        int networkId = -1;
+        if (newState == NetworkInfo.DetailedState.CONNECTED) {
+            Matcher match = mConnectedEventPattern.matcher(data);
+            if (!match.find()) {
+                if (DBG) Log.d(TAG, "Could not find BSSID in CONNECTED event string");
+            } else {
+                BSSID = match.group(1);
+                try {
+                    networkId = Integer.parseInt(match.group(2));
+                } catch (NumberFormatException e) {
+                    networkId = -1;
+                }
+            }
+            notifyNetworkStateChange(newState, BSSID, networkId);
+        }
+    }
+
+    /**
+     * Send the state machine a notification that the state of Wifi connectivity
+     * has changed.
+     * @param newState the new network state
+     * @param BSSID when the new state is {@link NetworkInfo.DetailedState#CONNECTED},
+     * this is the MAC address of the access point. Otherwise, it
+     * is {@code null}.
+     * @param netId the configured network on which the state change occurred
+     */
+    void notifyNetworkStateChange(NetworkInfo.DetailedState newState, String BSSID, int netId) {
+        if (newState == NetworkInfo.DetailedState.CONNECTED) {
+            Message m = mStateMachine.obtainMessage(NETWORK_CONNECTION_EVENT,
+                    netId, 0, BSSID);
+            mStateMachine.sendMessage(m);
+        } else {
+            Message m = mStateMachine.obtainMessage(NETWORK_DISCONNECTION_EVENT,
+                    netId, 0, BSSID);
+            mStateMachine.sendMessage(m);
+        }
+    }
+
+    /**
+     * Send the state machine a notification that the state of the supplicant
+     * has changed.
+     * @param networkId the configured network on which the state change occurred
+     * @param wifiSsid network name
+     * @param BSSID network address
+     * @param newState the new {@code SupplicantState}
+     */
+    void notifySupplicantStateChange(int networkId, WifiSsid wifiSsid, String BSSID,
+            SupplicantState newState) {
+        mStateMachine.sendMessage(mStateMachine.obtainMessage(SUPPLICANT_STATE_CHANGE_EVENT,
+                new StateChangeResult(networkId, wifiSsid, BSSID, newState)));
     }
 }
