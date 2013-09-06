@@ -1864,7 +1864,8 @@ public class PackageParser {
         }
 
         String manageSpaceActivity = sa.getNonConfigurationString(
-                com.android.internal.R.styleable.AndroidManifestApplication_manageSpaceActivity, 0);
+                com.android.internal.R.styleable.AndroidManifestApplication_manageSpaceActivity,
+                Configuration.NATIVE_CONFIG_VERSION);
         if (manageSpaceActivity != null) {
             ai.manageSpaceActivityName = buildClassName(pkgName, manageSpaceActivity,
                     outError);
@@ -1878,7 +1879,8 @@ public class PackageParser {
             // backupAgent, killAfterRestore, and restoreAnyVersion are only relevant
             // if backup is possible for the given application.
             String backupAgent = sa.getNonConfigurationString(
-                    com.android.internal.R.styleable.AndroidManifestApplication_backupAgent, 0);
+                    com.android.internal.R.styleable.AndroidManifestApplication_backupAgent,
+                    Configuration.NATIVE_CONFIG_VERSION);
             if (backupAgent != null) {
                 ai.backupAgentName = buildClassName(pkgName, backupAgent, outError);
                 if (DEBUG_BACKUP) {
@@ -1999,7 +2001,8 @@ public class PackageParser {
 
         if (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.FROYO) {
             str = sa.getNonConfigurationString(
-                    com.android.internal.R.styleable.AndroidManifestApplication_taskAffinity, 0);
+                    com.android.internal.R.styleable.AndroidManifestApplication_taskAffinity,
+                    Configuration.NATIVE_CONFIG_VERSION);
         } else {
             // Some older apps have been seen to use a resource reference
             // here that on older builds was ignored (with a warning).  We
@@ -2014,7 +2017,8 @@ public class PackageParser {
             CharSequence pname;
             if (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.FROYO) {
                 pname = sa.getNonConfigurationString(
-                        com.android.internal.R.styleable.AndroidManifestApplication_process, 0);
+                        com.android.internal.R.styleable.AndroidManifestApplication_process,
+                        Configuration.NATIVE_CONFIG_VERSION);
             } else {
                 // Some older apps have been seen to use a resource reference
                 // here that on older builds was ignored (with a warning).  We
@@ -2278,7 +2282,8 @@ public class PackageParser {
                 a.info.applicationInfo.uiOptions);
 
         String parentName = sa.getNonConfigurationString(
-                com.android.internal.R.styleable.AndroidManifestActivity_parentActivityName, 0);
+                com.android.internal.R.styleable.AndroidManifestActivity_parentActivityName,
+                Configuration.NATIVE_CONFIG_VERSION);
         if (parentName != null) {
             String parentClassName = buildClassName(a.info.packageName, parentName, outError);
             if (outError[0] == null) {
@@ -2300,7 +2305,8 @@ public class PackageParser {
         }
 
         str = sa.getNonConfigurationString(
-                com.android.internal.R.styleable.AndroidManifestActivity_taskAffinity, 0);
+                com.android.internal.R.styleable.AndroidManifestActivity_taskAffinity,
+                Configuration.NATIVE_CONFIG_VERSION);
         a.info.taskAffinity = buildTaskAffinityName(owner.applicationInfo.packageName,
                 owner.applicationInfo.taskAffinity, str, outError);
 
@@ -2509,7 +2515,8 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestActivityAlias);
 
         String targetActivity = sa.getNonConfigurationString(
-                com.android.internal.R.styleable.AndroidManifestActivityAlias_targetActivity, 0);
+                com.android.internal.R.styleable.AndroidManifestActivityAlias_targetActivity,
+                Configuration.NATIVE_CONFIG_VERSION);
         if (targetActivity == null) {
             outError[0] = "<activity-alias> does not specify android:targetActivity";
             sa.recycle();
@@ -2599,7 +2606,7 @@ public class PackageParser {
 
         String parentName = sa.getNonConfigurationString(
                 com.android.internal.R.styleable.AndroidManifestActivityAlias_parentActivityName,
-                0);
+                Configuration.NATIVE_CONFIG_VERSION);
         if (parentName != null) {
             String parentClassName = buildClassName(a.info.packageName, parentName, outError);
             if (outError[0] == null) {
@@ -3656,7 +3663,8 @@ public class PackageParser {
             if (args.processRes != 0) {
                 CharSequence pname;
                 if (owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.FROYO) {
-                    pname = args.sa.getNonConfigurationString(args.processRes, 0);
+                    pname = args.sa.getNonConfigurationString(args.processRes,
+                            Configuration.NATIVE_CONFIG_VERSION);
                 } else {
                     // Some older apps have been seen to use a resource reference
                     // here that on older builds was ignored (with a warning).  We
