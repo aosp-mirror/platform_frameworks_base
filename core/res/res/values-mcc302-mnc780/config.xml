@@ -41,4 +41,9 @@
     <string-array translatable="false" name="config_operatorConsideredNonRoaming">
         <item>302</item>
     </string-array>
+
+    <!-- Configure mobile network MTU. Carrier specific value is set here.
+    -->
+    <integer name="config_mobile_mtu">1358</integer>
+
 </resources>
