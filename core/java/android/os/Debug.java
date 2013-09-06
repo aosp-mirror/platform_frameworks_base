@@ -158,7 +158,7 @@ public final class Debug
         public int otherSharedClean;
 
         /** @hide */
-        public static final int NUM_OTHER_STATS = 13;
+        public static final int NUM_OTHER_STATS = 14;
 
         /** @hide */
         public static final int NUM_DVK_STATS = 5;
@@ -285,11 +285,12 @@ public final class Debug
                 case 10: return "code mmap";
                 case 11: return "image mmap";
                 case 12: return "Other mmap";
-                case 13: return ".Heap";
-                case 14: return ".LOS";
-                case 15: return ".LinearAlloc";
-                case 16: return ".GC";
-                case 17: return ".JITCache";
+                case 13: return "GPU";
+                case 14: return ".Heap";
+                case 15: return ".LOS";
+                case 16: return ".LinearAlloc";
+                case 17: return ".GC";
+                case 18: return ".JITCache";
                 default: return "????";
             }
         }
