@@ -1451,7 +1451,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Buka konke"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Khetha okwenziwayo"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Yabelana no"</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"Idivayisi ivaliwe."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"Iyathumela..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Qala Isiphequluli?"</string>
@@ -1571,7 +1570,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Kukhanseliwe"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Iphutha ekubhaleni okuqukethwe"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"akwaziwa"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Faka i-PIN yomlawuli"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Faka i-PIN"</string>
+    <string name="restr_pin_incorrect" msgid="8571512003955077924">"Ayilungile"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"I-PIN yamanje"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"I-PIN entsha"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Qinisekisa i-PIN entsha"</string>
@@ -1579,9 +1580,10 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Ama-PIN awafani. Zama futhi."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"I-PIN yimfushane kakhulu. Okungenani kumele ibe namadijithi angu-4."</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"I-PIN engalungile. Zama futhi esekhondini elingu-1."</item>
-    <item quantity="other" msgid="8030607343223287654">"I-PIN engalungile. Zama futhi emasekhondini angu-<xliff:g id="COUNT">%d</xliff:g>."</item>
+    <item quantity="one" msgid="311050995198548675">"Zama futhi kusekhondi elingu-1"</item>
+    <item quantity="other" msgid="4730868920742952817">"Zama futhi kumasekhondi angu-<xliff:g id="COUNT">%d</xliff:g>"</item>
   </plurals>
+    <string name="restr_pin_try_later" msgid="973144472490532377">"Zama futhi emva kwesikhathi"</string>
     <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Swayipha emaphethelweni wesikrini ukuze uveze ibha"</string>
     <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Swayipha kusukela emaphethelweni wesikrini ukuze uveze ibha yesistimu"</string>
 </resources>

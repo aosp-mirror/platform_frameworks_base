@@ -1451,7 +1451,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"सबै हेर्नुहोस्"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"गतिविधि छनौट गर्नुहोस्"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"साझेदारी गर्नुहोस्..."</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"उपकरण लक छ।"</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"पठाउँदै..."</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"ब्राउजर सुरु गर्ने हो?"</string>
@@ -1571,7 +1570,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"रद्द गरियो"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"सामाग्री लेखनमा त्रुटि"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"अज्ञात"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"प्रशासक PIN प्रविष्ट गर्नुहोस्"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"PIN प्रविष्टि गर्नुहोस्"</string>
+    <string name="restr_pin_incorrect" msgid="8571512003955077924">"गलत"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"वर्तमान PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"नयाँ PIN"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"नयाँ PIN निश्चित गर्नुहोस्"</string>
@@ -1579,9 +1580,10 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"PIN हरू मेल खाएनन्। पुनः प्रयास गर्नुहोस्।"</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN अति छोटो भयो। कम्तीमा ४ अङ्क हुन आवश्यक छ।"</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"गलत PIN । १ सेकेन्डमा पुनः प्रयास गर्नुहोस्।"</item>
-    <item quantity="other" msgid="8030607343223287654">"गलत PIN । <xliff:g id="COUNT">%d</xliff:g> सेकेन्डमा पुनः प्रयास गर्नुहोस्।"</item>
+    <item quantity="one" msgid="311050995198548675">"१ सेकेन्ड पछि पुन: प्रयास गर्नुहोला।"</item>
+    <item quantity="other" msgid="4730868920742952817">"<xliff:g id="COUNT">%d</xliff:g> सेकेन्डमा पुन: प्रयास गर्नुहोस्"</item>
   </plurals>
+    <string name="restr_pin_try_later" msgid="973144472490532377">"पछि पुन: प्रयास गर्नुहोस्"</string>
     <string name="transient_navigation_confirmation" msgid="4907844043611123426">"पट्टि देखिने बनाउन स्क्रिनको छेउमा स्वाइप गर्नुहोस्"</string>
     <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"प्रणाली पट्टि देखिने बनाउन स्क्रिनको छेउबाट स्वाइप गर्नुहोस्"</string>
 </resources>
