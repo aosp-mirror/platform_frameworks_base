@@ -56,6 +56,7 @@ enum {
     HEAP_OAT,
     HEAP_ART,
     HEAP_UNKNOWN_MAP,
+    HEAP_GPU,
 
     HEAP_DALVIK_NORMAL,
     HEAP_DALVIK_LARGE,
@@ -64,7 +65,7 @@ enum {
     HEAP_DALVIK_CODE_CACHE,
 
     _NUM_HEAP,
-    _NUM_EXCLUSIVE_HEAP = HEAP_UNKNOWN_MAP+1,
+    _NUM_EXCLUSIVE_HEAP = HEAP_GPU+1,
     _NUM_CORE_HEAP = HEAP_NATIVE+1
 };
 
@@ -135,6 +136,72 @@ static jlong android_os_Debug_getNativeHeapFreeSize(JNIEnv *env, jobject clazz)
 #else
     return -1;
 #endif
+}
+
+// XXX Qualcom-specific!
+static jlong read_gpu_mem(int pid)
+{
+    char line[1024];
+    jlong uss = 0;
+    unsigned temp;
+
+    char tmp[128];
+    FILE *fp;
+
+    sprintf(tmp, "/d/kgsl/proc/%d/mem", pid);
+    fp = fopen(tmp, "r");
+    if (fp == 0) {
+        //ALOGI("Unable to open: %s", tmp);
+        return 0;
+    }
+
+    while (true) {
+        if (fgets(line, 1024, fp) == NULL) {
+            break;
+        }
+
+        //ALOGI("Read: %s", line);
+
+        // Format is:
+        //  gpuaddr useraddr     size    id flags       type            usage sglen
+        // 54676000 54676000     4096     1 ----p     gpumem      arraybuffer     1
+        //
+        // If useraddr is 0, this is gpu mem not otherwise accounted
+        // against the process.
+
+        // Make sure line is long enough.
+        int i = 0;
+        while (i < 9) {
+            if (line[i] == 0) {
+                break;
+            }
+            i++;
+        }
+        if (i < 9) {
+            //ALOGI("Early line term!");
+            continue;
+        }
+
+        // Look to see if useraddr is 00000000.
+        while (i < 17) {
+            if (line[i] != '0') {
+                break;
+            }
+            i++;
+        }
+        if (i < 17) {
+            //ALOGI("useraddr not 0!");
+            continue;
+        }
+
+        uss += atoi(line + i);
+        //ALOGI("Uss now: %ld", uss);
+    }
+
+    fclose(fp);
+
+    // Convert from bytes to KB.
+    return uss / 1024;
 }
 
 static void read_mapinfo(FILE *fp, stats_t* stats)
@@ -340,6 +407,10 @@ static void android_os_Debug_getDirtyPagesPid(JNIEnv *env, jobject clazz,
 
     load_maps(pid, stats);
 
+    jlong gpu = read_gpu_mem(pid);
+    stats[HEAP_GPU].pss += gpu;
+    stats[HEAP_GPU].privateDirty += gpu;
+
     for (int i=_NUM_CORE_HEAP; i<_NUM_EXCLUSIVE_HEAP; i++) {
         stats[HEAP_UNKNOWN].pss += stats[i].pss;
         stats[HEAP_UNKNOWN].swappablePss += stats[i].swappablePss;
@@ -394,34 +465,37 @@ static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid, jl
     char tmp[128];
     FILE *fp;
 
+    pss = uss = read_gpu_mem(pid);
+
     sprintf(tmp, "/proc/%d/smaps", pid);
     fp = fopen(tmp, "r");
-    if (fp == 0) return 0;
 
-    while (true) {
-        if (fgets(line, 1024, fp) == NULL) {
-            break;
-        }
+    if (fp != 0) {
+        while (true) {
+            if (fgets(line, 1024, fp) == NULL) {
+                break;
+            }
 
-        if (line[0] == 'P') {
-            if (strncmp(line, "Pss:", 4) == 0) {
-                char* c = line + 4;
-                while (*c != 0 && (*c < '0' || *c > '9')) {
-                    c++;
+            if (line[0] == 'P') {
+                if (strncmp(line, "Pss:", 4) == 0) {
+                    char* c = line + 4;
+                    while (*c != 0 && (*c < '0' || *c > '9')) {
+                        c++;
+                    }
+                    pss += atoi(c);
+                } else if (strncmp(line, "Private_Clean:", 14)
+                        || strncmp(line, "Private_Dirty:", 14)) {
+                    char* c = line + 14;
+                    while (*c != 0 && (*c < '0' || *c > '9')) {
+                        c++;
+                    }
+                    uss += atoi(c);
                 }
-                pss += atoi(c);
-            } else if (strncmp(line, "Private_Clean:", 14)
-                    || strncmp(line, "Private_Dirty:", 14)) {
-                char* c = line + 14;
-                while (*c != 0 && (*c < '0' || *c > '9')) {
-                    c++;
-                }
-                uss += atoi(c);
             }
         }
-    }
 
-    fclose(fp);
+        fclose(fp);
+    }
 
     if (outUss != NULL) {
         if (env->GetArrayLength(outUss) >= 1) {
