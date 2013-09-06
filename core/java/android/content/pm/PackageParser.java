@@ -1311,6 +1311,9 @@ public class PackageParser {
                 // Just skip this tag
                 XmlUtils.skipCurrentTag(parser);
                 continue;
+            } else if (tagName.equals("supports-input")) {
+                XmlUtils.skipCurrentTag(parser);
+                continue;
                 
             } else if (tagName.equals("eat-comment")) {
                 // Just skip this tag
