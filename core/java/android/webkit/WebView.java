@@ -1123,10 +1123,18 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Sets the initial scale for this WebView. 0 means default. If
-     * {@link WebSettings#getUseWideViewPort()} is true, it zooms out all the
-     * way. Otherwise it starts with 100%. If initial scale is greater than 0,
-     * WebView starts with this value as initial scale.
+     * Sets the initial scale for this WebView. 0 means default.
+     * The behavior for the default scale depends on the state of
+     * {@link WebSettings#getUseWideViewPort()} and
+     * {@link WebSettings#getLoadWithOverviewMode()}.
+     * If the content fits into the WebView control by width, then
+     * the zoom is set to 100%. For wide content, the behavor
+     * depends on the state of {@link WebSettings#getLoadWithOverviewMode()}.
+     * If its value is true, the content will be zoomed out to be fit
+     * by width into the WebView control, otherwise not.
+     *
+     * If initial scale is greater than 0, WebView starts with this value
+     * as initial scale.
      * Please note that unlike the scale properties in the viewport meta tag,
      * this method doesn't take the screen density into account.
      *
