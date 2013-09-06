@@ -210,7 +210,8 @@ public class IconUtils {
         final Resources res = context.getResources();
 
         if (Document.MIME_TYPE_DIR.equals(mimeType)) {
-            return res.getDrawable(R.drawable.ic_dir);
+            // TODO: return a mipmap, since this is used for grid
+            return res.getDrawable(R.drawable.ic_root_folder);
         }
 
         // Look for exact match first
