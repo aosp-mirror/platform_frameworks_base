@@ -24,7 +24,7 @@ import android.content.ISyncContext;
  * Provider specified). See {@link android.content.AbstractThreadedSyncAdapter}.
  * {@hide}
  */
-oneway interface IAnonymousSyncAdapter {
+oneway interface ISyncServiceAdapter {
 
     /**
      * Initiate a sync. SyncAdapter-specific parameters may be specified in

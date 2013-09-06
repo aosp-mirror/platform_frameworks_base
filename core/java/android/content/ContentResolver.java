@@ -141,7 +141,7 @@ public abstract class ContentResolver {
     public static final String SYNC_EXTRAS_PRIORITY = "sync_priority";
 
     /** {@hide} Flag to allow sync to occur on metered network. */
-    public static final String SYNC_EXTRAS_ALLOW_METERED = "allow_metered";
+    public static final String SYNC_EXTRAS_DISALLOW_METERED = "allow_metered";
 
     /**
      * Set by the SyncManager to request that the SyncAdapter initialize itself for
@@ -1744,8 +1744,21 @@ public abstract class ContentResolver {
      */
     public static void cancelSync(Account account, String authority) {
         try {
-            getContentService().cancelSync(account, authority);
+            getContentService().cancelSync(account, authority, null);
         } catch (RemoteException e) {
+        }
+    }
+
+    /**
+     * Cancel any active or pending syncs that are running on this service.
+     *
+     * @param cname the service for which to cancel all active/pending operations.
+     */
+    public static void cancelSync(ComponentName cname) {
+        try {
+            getContentService().cancelSync(null, null, cname);
+        } catch (RemoteException e) {
+            
         }
     }
 
@@ -1815,6 +1828,10 @@ public abstract class ContentResolver {
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#WRITE_SYNC_SETTINGS}.
+     * <p>The bundle for a periodic sync can be queried by applications with the correct
+     * permissions using
+     * {@link ContentResolver#getPeriodicSyncs(Account account, String provider)}, so no
+     * sensitive data should be transferred here.
      *
      * @param account the account to specify in the sync
      * @param authority the provider to specify in the sync request
@@ -1832,13 +1849,7 @@ public abstract class ContentResolver {
         if (authority == null) {
             throw new IllegalArgumentException("authority must not be null");
         }
-        if (extras.getBoolean(SYNC_EXTRAS_MANUAL, false)
-                || extras.getBoolean(SYNC_EXTRAS_DO_NOT_RETRY, false)
-                || extras.getBoolean(SYNC_EXTRAS_IGNORE_BACKOFF, false)
-                || extras.getBoolean(SYNC_EXTRAS_IGNORE_SETTINGS, false)
-                || extras.getBoolean(SYNC_EXTRAS_INITIALIZE, false)
-                || extras.getBoolean(SYNC_EXTRAS_FORCE, false)
-                || extras.getBoolean(SYNC_EXTRAS_EXPEDITED, false)) {
+        if (invalidPeriodicExtras(extras)) {
             throw new IllegalArgumentException("illegal extras were set");
         }
         try {
@@ -1847,6 +1858,26 @@ public abstract class ContentResolver {
             // exception ignored; if this is thrown then it means the runtime is in the midst of
             // being restarted
         }
+    }
+
+    /**
+     * {@hide}
+     * Helper function to throw an <code>IllegalArgumentException</code> if any illegal
+     * extras were set for a periodic sync.
+     *
+     * @param extras bundle to validate.
+     */
+    public static boolean invalidPeriodicExtras(Bundle extras) {
+        if (extras.getBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, false)
+                || extras.getBoolean(ContentResolver.SYNC_EXTRAS_DO_NOT_RETRY, false)
+                || extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_BACKOFF, false)
+                || extras.getBoolean(ContentResolver.SYNC_EXTRAS_IGNORE_SETTINGS, false)
+                || extras.getBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, false)
+                || extras.getBoolean(ContentResolver.SYNC_EXTRAS_FORCE, false)
+                || extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -1875,19 +1906,28 @@ public abstract class ContentResolver {
     }
 
     /**
-     * Remove the specified sync. This will remove any syncs that have been scheduled to run, but
-     * will not cancel any running syncs.
-     * <p>This method requires the caller to hold the permission</p>
-     * If the request is for a periodic sync this will cancel future occurrences of the sync.
-     *
-     * It is possible to cancel a sync using a SyncRequest object that is different from the object
-     * with which you requested the sync. Do so by building a SyncRequest with exactly the same
+     * Remove the specified sync. This will cancel any pending or active syncs. If the request is
+     * for a periodic sync, this call will remove any future occurrences.
+     * <p>If a periodic sync is specified, the caller must hold the permission
+     * {@link android.Manifest.permission#WRITE_SYNC_SETTINGS}. If this SyncRequest targets a
+     * SyncService adapter,the calling application must be signed with the same certificate as the
+     * adapter.
+     *</p>It is possible to cancel a sync using a SyncRequest object that is not the same object
+     * with which you requested the sync. Do so by building a SyncRequest with the same
      * service/adapter, frequency, <b>and</b> extras bundle.
      *
      * @param request SyncRequest object containing information about sync to cancel.
      */
     public static void cancelSync(SyncRequest request) {
-        // TODO: Finish this implementation.
+        if (request == null) {
+            throw new IllegalArgumentException("request cannot be null");
+        }
+        try {
+            getContentService().cancelRequest(request);
+        } catch (RemoteException e) {
+            // exception ignored; if this is thrown then it means the runtime is in the midst of
+            // being restarted
+        }
     }
 
     /**
@@ -1907,7 +1947,23 @@ public abstract class ContentResolver {
             throw new IllegalArgumentException("authority must not be null");
         }
         try {
-            return getContentService().getPeriodicSyncs(account, authority);
+            return getContentService().getPeriodicSyncs(account, authority, null);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    /**
+     * Return periodic syncs associated with the provided component.
+     * <p>The calling application must be signed with the same certificate as the target component,
+     * otherwise this call will fail.
+     */
+    public static List<PeriodicSync> getPeriodicSyncs(ComponentName cname) {
+        if (cname == null) {
+            throw new IllegalArgumentException("Component must not be null");
+        }
+        try {
+            return getContentService().getPeriodicSyncs(null, null, cname);
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }
@@ -1939,6 +1995,38 @@ public abstract class ContentResolver {
         } catch (RemoteException e) {
             // exception ignored; if this is thrown then it means the runtime is in the midst of
             // being restarted
+        }
+    }
+
+    /**
+     * Set whether the provided {@link SyncService} is available to process work.
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#WRITE_SYNC_SETTINGS}.
+     * <p>The calling application must be signed with the same certificate as the target component,
+     * otherwise this call will fail.
+     */
+    public static void setServiceActive(ComponentName cname, boolean active) {
+        try {
+            getContentService().setServiceActive(cname, active);
+        } catch (RemoteException e) {
+            // exception ignored; if this is thrown then it means the runtime is in the midst of
+            // being restarted
+        }
+    }
+
+    /**
+     * Query the state of this sync service.
+     * <p>Set with {@link #setServiceActive(ComponentName cname, boolean active)}.
+     * <p>The calling application must be signed with the same certificate as the target component,
+     * otherwise this call will fail.
+     * @param cname ComponentName referring to a {@link SyncService}
+     * @return true if jobs will be run on this service, false otherwise.
+     */
+    public static boolean isServiceActive(ComponentName cname) {
+        try {
+            return getContentService().isServiceActive(cname);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
         }
     }
 
@@ -1976,8 +2064,8 @@ public abstract class ContentResolver {
     }
 
     /**
-     * Returns true if there is currently a sync operation for the given
-     * account or authority in the pending list, or actively being processed.
+     * Returns true if there is currently a sync operation for the given account or authority
+     * actively being processed.
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#READ_SYNC_STATS}.
      * @param account the account whose setting we are querying
@@ -1985,8 +2073,26 @@ public abstract class ContentResolver {
      * @return true if a sync is active for the given account or authority.
      */
     public static boolean isSyncActive(Account account, String authority) {
+        if (account == null) {
+            throw new IllegalArgumentException("account must not be null");
+        }
+        if (authority == null) {
+            throw new IllegalArgumentException("authority must not be null");
+        }
+
         try {
-            return getContentService().isSyncActive(account, authority);
+            return getContentService().isSyncActive(account, authority, null);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    public static boolean isSyncActive(ComponentName cname) {
+        if (cname == null) {
+            throw new IllegalArgumentException("component name must not be null");
+        }
+        try {
+            return getContentService().isSyncActive(null, null, cname);
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }
@@ -2044,7 +2150,7 @@ public abstract class ContentResolver {
      */
     public static SyncStatusInfo getSyncStatus(Account account, String authority) {
         try {
-            return getContentService().getSyncStatus(account, authority);
+            return getContentService().getSyncStatus(account, authority, null);
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }
@@ -2060,7 +2166,15 @@ public abstract class ContentResolver {
      */
     public static boolean isSyncPending(Account account, String authority) {
         try {
-            return getContentService().isSyncPending(account, authority);
+            return getContentService().isSyncPending(account, authority, null);
+        } catch (RemoteException e) {
+            throw new RuntimeException("the ContentService should always be reachable", e);
+        }
+    }
+
+    public static boolean isSyncPending(ComponentName cname) {
+        try {
+            return getContentService().isSyncPending(null, null, cname);
         } catch (RemoteException e) {
             throw new RuntimeException("the ContentService should always be reachable", e);
         }
