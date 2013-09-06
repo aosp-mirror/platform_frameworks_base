@@ -138,6 +138,7 @@ public class WifiNative {
             localLog(cmdId + "->" + mInterfacePrefix + command);
             boolean result = doBooleanCommandNative(mInterfacePrefix + command);
             localLog(cmdId + "<-" + result);
+            if (DBG) Log.d(mTAG, "   returned " + result);
             return result;
         }
     }
@@ -149,6 +150,7 @@ public class WifiNative {
             localLog(cmdId + "->" + mInterfacePrefix + command);
             int result = doIntCommandNative(mInterfacePrefix + command);
             localLog(cmdId + "<-" + result);
+            if (DBG) Log.d(mTAG, "   returned " + result);
             return result;
         }
     }
@@ -160,6 +162,7 @@ public class WifiNative {
             localLog(cmdId + "->" + mInterfacePrefix + command);
             String result = doStringCommandNative(mInterfacePrefix + command);
             localLog(cmdId + "<-" + result);
+            if (DBG) Log.d(mTAG, "   returned " + result);
             return result;
         }
     }
@@ -281,7 +284,7 @@ public class WifiNative {
 
     /**
      * Format of command
-     * DRIVER WLS_BATCHING SET SCAN_FRQ=x MSCAN=r BESTN=y CHANNEL=<z, w, t> RTT=s
+     * DRIVER WLS_BATCHING SET SCANFREQ=x MSCAN=r BESTN=y CHANNEL=<z, w, t> RTT=s
      * where x is an ascii representation of an integer number of seconds between scans
      *       r is an ascii representation of an integer number of scans per batch
      *       y is an ascii representation of an integer number of the max AP to remember per scan
@@ -295,7 +298,7 @@ public class WifiNative {
      */
     public String setBatchedScanSettings(BatchedScanSettings settings) {
         if (settings == null) return doStringCommand("DRIVER WLS_BATCHING STOP");
-        String cmd = "DRIVER WLS_BATCHING SET SCAN_FRQ=" + settings.scanIntervalSec;
+        String cmd = "DRIVER WLS_BATCHING SET SCANFREQ=" + settings.scanIntervalSec;
         cmd += " MSCAN=" + settings.maxScansPerBatch;
         if (settings.maxApPerScan != BatchedScanSettings.UNSPECIFIED) {
             cmd += " BESTN=" + settings.maxApPerScan;
