@@ -1449,7 +1449,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Xem tất cả"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Chọn hoạt động"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Chia sẻ với"</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"Thiết bị đã bị khóa."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"Đang gửi…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Khởi chạy trình duyệt?"</string>
@@ -1569,7 +1568,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Đã hủy"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Lỗi ghi nội dung"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"không xác định"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Nhập mã PIN của quản trị viên"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Nhập mã PIN"</string>
+    <string name="restr_pin_incorrect" msgid="8571512003955077924">"Không đúng"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Mã PIN hiện tại"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Mã PIN mới"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Xác nhận mã PIN mới"</string>
@@ -1577,9 +1578,10 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Mã PIN không khớp. Hãy thử lại."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Mã PIN quá ngắn. Phải có ít nhất 4 chữ số."</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"Mã PIN không đúng. Hãy thử lại sau 1 giây nữa."</item>
-    <item quantity="other" msgid="8030607343223287654">"Mã PIN không đúng. Hãy thử lại sau <xliff:g id="COUNT">%d</xliff:g> giây nữa."</item>
+    <item quantity="one" msgid="311050995198548675">"Hãy thử lại sau 1 giây"</item>
+    <item quantity="other" msgid="4730868920742952817">"Hãy thử lại sau <xliff:g id="COUNT">%d</xliff:g> giây"</item>
   </plurals>
+    <string name="restr_pin_try_later" msgid="973144472490532377">"Hãy thử lại sau"</string>
     <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Vuốt cạnh màn hình để hiện thanh"</string>
     <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Vuốt từ cạnh màn hình để hiển thị thanh hệ thống"</string>
 </resources>

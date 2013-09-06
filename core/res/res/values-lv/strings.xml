@@ -1449,7 +1449,6 @@
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Skatīt visu"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Darbības izvēle"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Kopīgošana ar:"</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"Ierīce ir bloķēta."</string>
     <string name="list_delimeter" msgid="3975117572185494152">", "</string>
     <string name="sending" msgid="3245653681008218030">"Notiek sūtīšana…"</string>
     <string name="launchBrowserDefault" msgid="2057951947297614725">"Vai palaist pārlūkprogrammu?"</string>
@@ -1569,7 +1568,9 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"Atcelts"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"Rakstot saturu, radās kļūda."</string>
     <string name="reason_unknown" msgid="6048913880184628119">"nezināms"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="783643731895143970">"Administratora PIN ievadīšana"</string>
     <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Ievadiet PIN."</string>
+    <string name="restr_pin_incorrect" msgid="8571512003955077924">"Nepareizs"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"Pašreizējais PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"Jaunais PIN"</string>
     <string name="restr_pin_confirm_pin" msgid="8501523829633146239">"Apstipriniet jauno PIN."</string>
@@ -1577,9 +1578,10 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Ievadītie PIN neatbilst. Mēģiniet vēlreiz."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"PIN ir pārāk īss. Tam ir jābūt vismaz 4 ciparus garam."</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="4835639969503729874">"PIN nav pareizs. Mēģiniet pēc 1 s."</item>
-    <item quantity="other" msgid="8030607343223287654">"PIN nav pareizs. Mēģiniet pēc <xliff:g id="COUNT">%d</xliff:g> s."</item>
+    <item quantity="one" msgid="311050995198548675">"Mēģ. vēl pēc 1 s"</item>
+    <item quantity="other" msgid="4730868920742952817">"Mēģ. vēl pēc <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
+    <string name="restr_pin_try_later" msgid="973144472490532377">"Vēlāk mēģiniet vēlreiz."</string>
     <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Velciet no malas, lai atvērtu joslu"</string>
     <string name="transient_navigation_confirmation_long" msgid="8061685920508086697">"Velciet no ekrāna malas, lai atvērtu sistēmas joslu."</string>
 </resources>
