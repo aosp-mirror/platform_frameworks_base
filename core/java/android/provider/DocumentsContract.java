@@ -251,6 +251,15 @@ public final class DocumentsContract {
          * @see #COLUMN_FLAGS
          */
         public static final int FLAG_DIR_PREFERS_GRID = 1 << 5;
+
+        /**
+         * Flag indicating that a directory prefers its contents be sorted by
+         * {@link #COLUMN_LAST_MODIFIED}. Only valid when
+         * {@link #COLUMN_MIME_TYPE} is {@link #MIME_TYPE_DIR}.
+         *
+         * @see #COLUMN_FLAGS
+         */
+        public static final int FLAG_DIR_PREFERS_LAST_MODIFIED = 1 << 6;
     }
 
     /**
@@ -292,9 +301,6 @@ public final class DocumentsContract {
          * @see #FLAG_LOCAL_ONLY
          * @see #FLAG_SUPPORTS_CREATE
          * @see #FLAG_ADVANCED
-         * @see #FLAG_PROVIDES_AUDIO
-         * @see #FLAG_PROVIDES_IMAGES
-         * @see #FLAG_PROVIDES_VIDEO
          */
         public static final String COLUMN_FLAGS = "flags";
 
