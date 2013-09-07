@@ -491,7 +491,7 @@ public class LinkProperties implements Parcelable {
     /**
      * Compares this {@code LinkProperties} MTU against the target
      *
-     * @@param target LinkProperties to compare.
+     * @param target LinkProperties to compare.
      * @return {@code true} if both are identical, {@code false} otherwise.
      */
     public boolean isIdenticalMtu(LinkProperties target) {
