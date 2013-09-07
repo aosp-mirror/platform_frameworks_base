@@ -16,7 +16,6 @@
 
 package android.print;
 
-import android.print.IPrintClient;
 import android.print.PrinterId;
 import android.print.PrinterInfo;
 
