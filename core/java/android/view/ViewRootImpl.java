@@ -81,6 +81,7 @@ import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Locale;
 
 /**
  * The top of a view hierarchy, implementing the needed protocol between View
@@ -230,6 +231,8 @@ public final class ViewRootImpl implements ViewParent,
     InputStage mFirstPostImeInputStage;
     SyntheticInputStage mSyntheticInputStage;
 
+    boolean mFlipControllerFallbackKeys;
+
     boolean mWindowAttributesChanged = false;
     int mWindowAttributesChangesFlag = 0;
 
@@ -366,6 +369,8 @@ public final class ViewRootImpl implements ViewParent,
         mNoncompatDensity = context.getResources().getDisplayMetrics().noncompatDensityDpi;
         mFallbackEventHandler = PolicyManager.makeNewFallbackEventHandler(context);
         mChoreographer = Choreographer.getInstance();
+        mFlipControllerFallbackKeys =
+            context.getResources().getBoolean(R.bool.flip_controller_fallback_keys);
 
         PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         mAttachInfo.mScreenOn = powerManager.isScreenOn();
@@ -2873,8 +2878,11 @@ public final class ViewRootImpl implements ViewParent,
                 mView.dispatchConfigurationChanged(config);
             }
         }
+
+        mFlipControllerFallbackKeys =
+            mContext.getResources().getBoolean(R.bool.flip_controller_fallback_keys);
     }
-    
+
     /**
      * Return true if child is an ancestor of parent, (or equal to the parent).
      */
@@ -3904,6 +3912,7 @@ public final class ViewRootImpl implements ViewParent,
         private final SyntheticJoystickHandler mJoystick = new SyntheticJoystickHandler();
         private final SyntheticTouchNavigationHandler mTouchNavigation =
                 new SyntheticTouchNavigationHandler();
+        private final SyntheticKeyHandler mKeys = new SyntheticKeyHandler();
 
         public SyntheticInputStage() {
             super(null);
@@ -3926,7 +3935,12 @@ public final class ViewRootImpl implements ViewParent,
                     mTouchNavigation.process(event);
                     return FINISH_HANDLED;
                 }
+            } else if (q.mEvent instanceof KeyEvent) {
+                if (mKeys.process((KeyEvent) q.mEvent)) {
+                    return FINISH_HANDLED;
+                }
             }
+
             return FORWARD;
         }
 
@@ -4800,6 +4814,63 @@ public final class ViewRootImpl implements ViewParent,
                 }
             }
         };
+    }
+
+    final class SyntheticKeyHandler {
+
+        public boolean process(KeyEvent event) {
+            // In some locales (like Japan) controllers use B for confirm and A for back, rather
+            // than vice versa, so we need to special case this here since the input system itself
+            // is not locale-aware.
+            int keyCode;
+            switch(event.getKeyCode()) {
+                case KeyEvent.KEYCODE_BUTTON_A:
+                case KeyEvent.KEYCODE_BUTTON_C:
+                case KeyEvent.KEYCODE_BUTTON_X:
+                case KeyEvent.KEYCODE_BUTTON_Z:
+                    keyCode = mFlipControllerFallbackKeys ?
+                        KeyEvent.KEYCODE_BACK : KeyEvent.KEYCODE_DPAD_CENTER;
+                    break;
+                case KeyEvent.KEYCODE_BUTTON_B:
+                case KeyEvent.KEYCODE_BUTTON_Y:
+                    keyCode = mFlipControllerFallbackKeys ?
+                        KeyEvent.KEYCODE_DPAD_CENTER : KeyEvent.KEYCODE_BACK;
+                    break;
+                case KeyEvent.KEYCODE_BUTTON_THUMBL:
+                case KeyEvent.KEYCODE_BUTTON_THUMBR:
+                case KeyEvent.KEYCODE_BUTTON_START:
+                case KeyEvent.KEYCODE_BUTTON_1:
+                case KeyEvent.KEYCODE_BUTTON_2:
+                case KeyEvent.KEYCODE_BUTTON_3:
+                case KeyEvent.KEYCODE_BUTTON_4:
+                case KeyEvent.KEYCODE_BUTTON_5:
+                case KeyEvent.KEYCODE_BUTTON_6:
+                case KeyEvent.KEYCODE_BUTTON_7:
+                case KeyEvent.KEYCODE_BUTTON_8:
+                case KeyEvent.KEYCODE_BUTTON_9:
+                case KeyEvent.KEYCODE_BUTTON_10:
+                case KeyEvent.KEYCODE_BUTTON_11:
+                case KeyEvent.KEYCODE_BUTTON_12:
+                case KeyEvent.KEYCODE_BUTTON_13:
+                case KeyEvent.KEYCODE_BUTTON_14:
+                case KeyEvent.KEYCODE_BUTTON_15:
+                case KeyEvent.KEYCODE_BUTTON_16:
+                    keyCode = KeyEvent.KEYCODE_DPAD_CENTER;
+                    break;
+                case KeyEvent.KEYCODE_BUTTON_SELECT:
+                case KeyEvent.KEYCODE_BUTTON_MODE:
+                    keyCode = KeyEvent.KEYCODE_MENU;
+                default:
+                    return false;
+            }
+
+            enqueueInputEvent(new KeyEvent(event.getDownTime(), event.getEventTime(),
+                        event.getAction(), keyCode, event.getRepeatCount(), event.getMetaState(),
+                        event.getScanCode(), event.getFlags() | KeyEvent.FLAG_FALLBACK,
+                        event.getSource()));
+            return true;
+        }
+
     }
 
     /**
