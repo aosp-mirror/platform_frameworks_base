@@ -163,8 +163,8 @@ public class LinkPropertiesTest extends TestCase {
             target.addLinkAddress(LINKADDRV6);
             target.addDns(DNS1);
             target.addDns(DNS2);
-            target.addRoute(GATEWAY1);
-            target.addRoute(GATEWAY2);
+            target.addRoute(new RouteInfo(GATEWAY1));
+            target.addRoute(new RouteInfo(GATEWAY2));
             // change mtu
             target.setMtu(1440);
             assertFalse(source.equals(target));
