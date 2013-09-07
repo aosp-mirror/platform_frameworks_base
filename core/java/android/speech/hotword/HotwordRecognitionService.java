@@ -227,7 +227,7 @@ public abstract class HotwordRecognitionService extends Service {
         /**
          * Called on an event of interest to the client.
          *
-         * @param eventType the event type. Event types are defined in {@link HotwordRecognizer}.
+         * @param eventType the event type.
          * @param eventBundle a Bundle containing the hotword event(s).
          */
         public void onHotwordEvent(int eventType, Bundle eventBundle) throws RemoteException {
@@ -237,7 +237,7 @@ public abstract class HotwordRecognitionService extends Service {
         /**
          * Called back when hotword is detected.
          *
-         * @param intent for the activity to launch, post hotword detection.
+         * @param activityIntent for the activity to launch, post hotword detection.
          */
         public void onHotwordRecognized(Intent activityIntent) throws RemoteException {
             mListener.onHotwordRecognized(activityIntent);
@@ -247,7 +247,6 @@ public abstract class HotwordRecognitionService extends Service {
          * Called when the HotwordRecognitionService encounters an error.
          *
          * @param errorCode the error code describing the error that was encountered.
-         *                  Error codes are defined in {@link HotwordRecognizer}.
          */
         public void onError(int errorCode) throws RemoteException {
             mListener.onHotwordError(errorCode);
