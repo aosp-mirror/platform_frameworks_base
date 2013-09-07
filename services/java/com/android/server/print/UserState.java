@@ -779,21 +779,21 @@ final class UserState implements PrintSpoolerCallbacks {
                 return;
             }
             // Remove the printers for that service.
-            List<PrinterInfo> removedPrinters = null;
+            List<PrinterId> removedPrinterIds = null;
             final int printerCount = mPrinters.size();
             for (int i = 0; i < printerCount; i++) {
-                PrinterInfo printer = mPrinters.get(i);
-                if (printer.getId().getServiceName().equals(serviceName)) {
-                    if (removedPrinters == null) {
-                        removedPrinters = new ArrayList<PrinterInfo>();
+                PrinterId printerId = mPrinters.keyAt(i);
+                if (printerId.getServiceName().equals(serviceName)) {
+                    if (removedPrinterIds == null) {
+                        removedPrinterIds = new ArrayList<PrinterId>();
                     }
-                    removedPrinters.add(printer);
+                    removedPrinterIds.add(printerId);
                 }
             }
-            if (!removedPrinters.isEmpty()) {
+            if (!removedPrinterIds.isEmpty()) {
                 mHandler.obtainMessage(
                         SessionHandler.MSG_DISPATCH_PRINTERS_REMOVED,
-                        removedPrinters).sendToTarget();
+                        removedPrinterIds).sendToTarget();
             }
         }
 
