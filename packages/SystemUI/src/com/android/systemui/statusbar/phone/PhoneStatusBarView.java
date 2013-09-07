@@ -97,7 +97,6 @@ public class PhoneStatusBarView extends PanelBar {
 
         private void applyMode(int mode, boolean animate) {
             if (mLeftSide == null || mRightSide == null) return;
-            mBattery.setBarTransparent(isTransparent(mode));
             float newAlpha = getAlphaFor(mode);
             if (animate) {
                 ObjectAnimator lhs = animateTransitionTo(mLeftSide, newAlpha);
