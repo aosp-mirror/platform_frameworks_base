@@ -129,7 +129,12 @@ public class Watchdog extends Thread {
         }
 
         public String describeBlockedStateLocked() {
-            return mCurrentMonitor == null ? mName : mCurrentMonitor.getClass().getName();
+            if (mCurrentMonitor == null) {
+                return "Blocked in handler on " + mName + " (" + getThread().getName() + ")";
+            } else {
+                return "Blocked in monitor " + mCurrentMonitor.getClass().getName()
+                        + " on " + mName + " (" + getThread().getName() + ")";
+            }
         }
 
         @Override
@@ -291,7 +296,7 @@ public class Watchdog extends Thread {
         boolean waitedHalf = false;
         while (true) {
             final ArrayList<HandlerChecker> blockedCheckers;
-            final String name;
+            final String subject;
             final boolean allowRestart;
             synchronized (this) {
                 long timeout = TIME_TO_WAIT;
@@ -336,14 +341,14 @@ public class Watchdog extends Thread {
                 }
 
                 blockedCheckers = getBlockedCheckersLocked();
-                name = describeCheckersLocked(blockedCheckers);
+                subject = describeCheckersLocked(blockedCheckers);
                 allowRestart = mAllowRestart;
             }
 
             // If we got here, that means that the system is most likely hung.
             // First collect stack traces from all threads of the system process.
             // Then kill this process so that the system will restart.
-            EventLog.writeEvent(EventLogTags.WATCHDOG, name);
+            EventLog.writeEvent(EventLogTags.WATCHDOG, subject);
 
             ArrayList<Integer> pids = new ArrayList<Integer>();
             pids.add(Process.myPid());
@@ -379,7 +384,7 @@ public class Watchdog extends Thread {
                     public void run() {
                         mActivity.addErrorToDropBox(
                                 "watchdog", null, "system_server", null, null,
-                                name, null, stack, null);
+                                subject, null, stack, null);
                     }
                 };
             dropboxThread.start();
@@ -396,7 +401,7 @@ public class Watchdog extends Thread {
                 try {
                     Binder.setDumpDisabled("Service dumps disabled due to hung system process.");
                     // 1 = keep waiting, -1 = kill system
-                    int res = controller.systemNotResponding(name);
+                    int res = controller.systemNotResponding(subject);
                     if (res >= 0) {
                         Slog.i(TAG, "Activity controller requested to coninue to wait");
                         waitedHalf = false;
@@ -412,7 +417,7 @@ public class Watchdog extends Thread {
             } else if (!allowRestart) {
                 Slog.w(TAG, "Restart not allowed: Watchdog is *not* killing the system process");
             } else {
-                Slog.w(TAG, "*** WATCHDOG KILLING SYSTEM PROCESS: " + name);
+                Slog.w(TAG, "*** WATCHDOG KILLING SYSTEM PROCESS: " + subject);
                 for (int i=0; i<blockedCheckers.size(); i++) {
                     Slog.w(TAG, blockedCheckers.get(i).getName() + " stack trace:");
                     StackTraceElement[] stackTrace
