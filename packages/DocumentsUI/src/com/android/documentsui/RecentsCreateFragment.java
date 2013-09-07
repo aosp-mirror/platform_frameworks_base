@@ -181,7 +181,6 @@ public class RecentsCreateFragment extends Fragment {
 
             final ImageView icon = (ImageView) convertView.findViewById(android.R.id.icon);
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
-            final View summaryList = convertView.findViewById(R.id.summary_list);
 
             final DocumentStack stack = getItem(position);
             final RootInfo root = stack.getRoot(roots);
@@ -196,8 +195,6 @@ public class RecentsCreateFragment extends Fragment {
             }
             title.setText(builder.toString());
             title.setEllipsize(TruncateAt.MIDDLE);
-
-            summaryList.setVisibility(View.GONE);
 
             return convertView;
         }

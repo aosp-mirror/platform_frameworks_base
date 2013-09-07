@@ -16,110 +16,111 @@
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="180dip"
-    android:paddingBottom="?android:attr/listPreferredItemPaddingEnd"
-    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
+    android:layout_height="@dimen/grid_height"
+    android:background="@drawable/item_doc_grid"
+    android:foreground="@drawable/item_background">
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/chip"
-        android:foreground="@drawable/item_background"
-        android:duplicateParentState="true">
+        android:paddingBottom="6dp"
+        android:orientation="vertical">
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingBottom="6dp"
-            android:orientation="vertical">
+            android:layout_height="0dip"
+            android:layout_weight="1"
+            android:background="#fff">
 
             <ImageView
                 android:id="@android:id/icon"
                 android:layout_width="match_parent"
-                android:layout_height="0dip"
-                android:layout_weight="1"
-                android:background="#bbb"
+                android:layout_height="match_parent"
                 android:scaleType="centerInside"
                 android:contentDescription="@null" />
 
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitXY"
+                android:src="@drawable/ic_grid_gradient_bg"
+                android:contentDescription="@null" />
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingTop="6dp"
+            android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+            android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
+
             <TextView
                 android:id="@android:id/title"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:singleLine="true"
                 android:ellipsize="marquee"
-                android:paddingTop="6dp"
-                android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-                android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textAlignment="viewStart" />
 
-            <LinearLayout
-                android:id="@+id/summary_grid"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-                android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
-
-                <ImageView
-                    android:id="@android:id/icon1"
-                    android:layout_width="24dip"
-                    android:layout_height="24dip"
-                    android:layout_marginEnd="6dip"
-                    android:scaleType="centerInside"
-                    android:contentDescription="@null" />
-
-                <TextView
-                    android:id="@android:id/summary"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_gravity="center_vertical"
-                    android:singleLine="true"
-                    android:ellipsize="marquee"
-                    android:textAlignment="viewStart"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-                android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
-
-                <View
-                    android:layout_width="0dip"
-                    android:layout_height="0dip"
-                    android:layout_weight="1" />
-
-                <TextView
-                    android:id="@+id/size"
-                    android:layout_width="70dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="8dp"
-                    android:singleLine="true"
-                    android:ellipsize="marquee"
-                    android:textAlignment="viewEnd"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-
-                <TextView
-                    android:id="@+id/date"
-                    android:layout_width="70dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:singleLine="true"
-                    android:ellipsize="marquee"
-                    android:textAlignment="viewEnd"
-                    android:textAppearance="?android:attr/textAppearanceSmall" />
-
-            </LinearLayout>
+            <ImageView
+                android:id="@android:id/icon1"
+                android:layout_width="@dimen/root_icon_size"
+                android:layout_height="@dimen/root_icon_size"
+                android:layout_marginStart="8dip"
+                android:scaleType="centerInside"
+                android:contentDescription="@null" />
 
         </LinearLayout>
 
-    </FrameLayout>
+        <LinearLayout
+            android:id="@+id/line2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+            android:paddingEnd="?android:attr/listPreferredItemPaddingEnd">
+
+            <TextView
+                android:id="@+id/date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:minWidth="80dp"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:textAlignment="viewStart"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
+            <TextView
+                android:id="@+id/size"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="8dp"
+                android:minWidth="80dp"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:textAlignment="viewStart"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
+            <TextView
+                android:id="@android:id/summary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="8dp"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:textAlignment="viewStart"
+                android:textAppearance="?android:attr/textAppearanceSmall" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </FrameLayout>
