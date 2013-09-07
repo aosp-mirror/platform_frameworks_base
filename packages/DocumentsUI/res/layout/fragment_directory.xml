@@ -38,8 +38,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:listSelector="@android:color/transparent"
-        android:paddingTop="?android:attr/listPreferredItemPaddingStart"
-        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
         android:visibility="gone" />
 
     <Button
