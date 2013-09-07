@@ -175,6 +175,12 @@
     </family>
     <family>
         <fileset>
+            <file>Padauk-book.ttf</file>
+            <file>Padauk-bookbold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
             <file>NotoSansSymbols-Regular.ttf</file>
         </fileset>
     </family>
