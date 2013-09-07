@@ -53,6 +53,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.SearchView;
 import android.widget.SearchView.OnCloseListener;
 import android.widget.SearchView.OnQueryTextListener;
@@ -481,6 +482,8 @@ public class DocumentsActivity extends Activity {
                 title.setText(doc.displayName);
             }
 
+            // No padding when shown in actionbar
+            convertView.setPadding(0, 0, 0, 0);
             return convertView;
         }
 
@@ -488,17 +491,20 @@ public class DocumentsActivity extends Activity {
         public View getDropDownView(int position, View convertView, ViewGroup parent) {
             if (convertView == null) {
                 convertView = LayoutInflater.from(parent.getContext())
-                        .inflate(android.R.layout.simple_dropdown_item_1line, parent, false);
+                        .inflate(R.layout.item_title, parent, false);
             }
 
-            final TextView text1 = (TextView) convertView.findViewById(android.R.id.text1);
+            final ImageView subdir = (ImageView) convertView.findViewById(R.id.subdir);
+            final TextView title = (TextView) convertView.findViewById(android.R.id.title);
             final DocumentInfo doc = getItem(position);
 
             if (position == 0) {
                 final RootInfo root = getCurrentRoot();
-                text1.setText(root.title);
+                title.setText(root.title);
+                subdir.setVisibility(View.GONE);
             } else {
-                text1.setText(doc.displayName);
+                title.setText(doc.displayName);
+                subdir.setVisibility(View.VISIBLE);
             }
 
             return convertView;
@@ -564,6 +570,11 @@ public class DocumentsActivity extends Activity {
             if (save != null) {
                 save.setReplaceTarget(null);
             }
+        }
+
+        final RootsFragment roots = RootsFragment.get(fm);
+        if (roots != null) {
+            roots.onCurrentRootChanged();
         }
 
         updateActionBar();

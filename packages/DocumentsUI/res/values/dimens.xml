@@ -15,5 +15,8 @@
 -->
 
 <resources>
+    <dimen name="icon_size">32dp</dimen>
+    <dimen name="root_icon_size">24dp</dimen>
     <dimen name="grid_width">180dp</dimen>
+    <dimen name="grid_height">180dp</dimen>
 </resources>
