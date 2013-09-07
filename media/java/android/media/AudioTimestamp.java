@@ -26,9 +26,6 @@ package android.media;
  * is available to the system, but cannot account for any delay unknown to the implementation.
  *
  * @see AudioTrack#getTimestamp
- * @see AudioTrack.TimestampListener
- *
- * @hide
  */
 public final class AudioTimestamp
 {
