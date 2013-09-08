@@ -323,6 +323,30 @@ abstract public class ContentProviderNative extends Binder implements IContentPr
                     reply.writeStrongBinder(cancellationSignal.asBinder());
                     return true;
                 }
+
+                case CANONICALIZE_TRANSACTION:
+                {
+                    data.enforceInterface(IContentProvider.descriptor);
+                    String callingPkg = data.readString();
+                    Uri url = Uri.CREATOR.createFromParcel(data);
+
+                    Uri out = canonicalize(callingPkg, url);
+                    reply.writeNoException();
+                    Uri.writeToParcel(reply, out);
+                    return true;
+                }
+
+                case UNCANONICALIZE_TRANSACTION:
+                {
+                    data.enforceInterface(IContentProvider.descriptor);
+                    String callingPkg = data.readString();
+                    Uri url = Uri.CREATOR.createFromParcel(data);
+
+                    Uri out = uncanonicalize(callingPkg, url);
+                    reply.writeNoException();
+                    Uri.writeToParcel(reply, out);
+                    return true;
+                }
             }
         } catch (Exception e) {
             DatabaseUtils.writeExceptionToParcel(reply, e);
@@ -679,6 +703,47 @@ final class ContentProviderProxy implements IContentProvider
             ICancellationSignal cancellationSignal = ICancellationSignal.Stub.asInterface(
                     reply.readStrongBinder());
             return cancellationSignal;
+        } finally {
+            data.recycle();
+            reply.recycle();
+        }
+    }
+
+    public Uri canonicalize(String callingPkg, Uri url) throws RemoteException
+    {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        try {
+            data.writeInterfaceToken(IContentProvider.descriptor);
+
+            data.writeString(callingPkg);
+            url.writeToParcel(data, 0);
+
+            mRemote.transact(IContentProvider.CANONICALIZE_TRANSACTION, data, reply, 0);
+
+            DatabaseUtils.readExceptionFromParcel(reply);
+            Uri out = Uri.CREATOR.createFromParcel(reply);
+            return out;
+        } finally {
+            data.recycle();
+            reply.recycle();
+        }
+    }
+
+    public Uri uncanonicalize(String callingPkg, Uri url) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        try {
+            data.writeInterfaceToken(IContentProvider.descriptor);
+
+            data.writeString(callingPkg);
+            url.writeToParcel(data, 0);
+
+            mRemote.transact(IContentProvider.UNCANONICALIZE_TRANSACTION, data, reply, 0);
+
+            DatabaseUtils.readExceptionFromParcel(reply);
+            Uri out = Uri.CREATOR.createFromParcel(reply);
+            return out;
         } finally {
             data.recycle();
             reply.recycle();

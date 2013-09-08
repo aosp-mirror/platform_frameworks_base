@@ -137,6 +137,16 @@ public class MockContentProvider extends ContentProvider {
         public ICancellationSignal createCancellationSignal() throws RemoteException {
             return null;
         }
+
+        @Override
+        public Uri canonicalize(String callingPkg, Uri uri) throws RemoteException {
+            return MockContentProvider.this.canonicalize(uri);
+        }
+
+        @Override
+        public Uri uncanonicalize(String callingPkg, Uri uri) throws RemoteException {
+            return MockContentProvider.this.uncanonicalize(uri);
+        }
     }
     private final InversionIContentProvider mIContentProvider = new InversionIContentProvider();
 
