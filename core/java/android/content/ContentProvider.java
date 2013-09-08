@@ -348,8 +348,34 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         }
 
         @Override
-        public ICancellationSignal createCancellationSignal() throws RemoteException {
+        public ICancellationSignal createCancellationSignal() {
             return CancellationSignal.createTransport();
+        }
+
+        @Override
+        public Uri canonicalize(String callingPkg, Uri uri) {
+            if (enforceReadPermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
+                return null;
+            }
+            mCallingPackage.set(callingPkg);
+            try {
+                return ContentProvider.this.canonicalize(uri);
+            } finally {
+                mCallingPackage.set(null);
+            }
+        }
+
+        @Override
+        public Uri uncanonicalize(String callingPkg, Uri uri) {
+            if (enforceReadPermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
+                return null;
+            }
+            mCallingPackage.set(callingPkg);
+            try {
+                return ContentProvider.this.uncanonicalize(uri);
+            } finally {
+                mCallingPackage.set(null);
+            }
         }
 
         private void enforceFilePermission(String callingPkg, Uri uri, String mode)
@@ -839,6 +865,56 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      * @return a MIME type string, or {@code null} if there is no type.
      */
     public abstract String getType(Uri uri);
+
+    /**
+     * Implement this to support canonicalization of URIs that refer to your
+     * content provider.  A canonical URI is one that can be transported across
+     * devices, backup/restore, and other contexts, and still be able to refer
+     * to the same data item.  Typically this is implemented by adding query
+     * params to the URI allowing the content provider to verify that an incoming
+     * canonical URI references the same data as it was originally intended for and,
+     * if it doesn't, to find that data (if it exists) in the current environment.
+     *
+     * <p>For example, if the content provider holds people and a normal URI in it
+     * is created with a row index into that people database, the cananical representation
+     * may have an additional query param at the end which specifies the name of the
+     * person it is intended for.  Later calls into the provider with that URI will look
+     * up the row of that URI's base index and, if it doesn't match or its entry's
+     * name doesn't match the name in the query param, perform a query on its database
+     * to find the correct row to operate on.</p>
+     *
+     * <p>If you implement support for canonical URIs, <b>all</b> incoming calls with
+     * URIs (including this one) must perform this verification and recovery of any
+     * canonical URIs they receive.  In addition, you must also implement
+     * {@link #uncanonicalize} to strip the canonicalization of any of these URIs.</p>
+     *
+     * <p>The default implementation of this method returns null, indicating that
+     * canonical URIs are not supported.</p>
+     *
+     * @param url The Uri to canonicalize.
+     *
+     * @return Return the canonical representation of <var>url</var>, or null if
+     * canonicalization of that Uri is not supported.
+     */
+    public Uri canonicalize(Uri url) {
+        return null;
+    }
+
+    /**
+     * Remove canonicalization from canonical URIs previously returned by
+     * {@link #canonicalize}.  For example, if your implementation is to add
+     * a query param to canonicalize a URI, this method can simply trip any
+     * query params on the URI.  The default implementation always returns the
+     * same <var>url</var> that was passed in.
+     *
+     * @param url The Uri to remove any canonicalization from.
+     *
+     * @return Return the non-canonical representation of <var>url</var>, or return
+     * the <var>url</var> as-is if there is nothing to do.  Never return null.
+     */
+    public Uri uncanonicalize(Uri url) {
+        return url;
+    }
 
     /**
      * @hide
