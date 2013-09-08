@@ -821,6 +821,11 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             int serviceUserId = wallpaper.userId;
             ServiceInfo si = mIPackageManager.getServiceInfo(componentName,
                     PackageManager.GET_META_DATA | PackageManager.GET_PERMISSIONS, serviceUserId);
+            if (si == null) {
+                // The wallpaper component we're trying to use doesn't exist
+                Slog.w(TAG, "Attempted wallpaper " + componentName + " is unavailable");
+                return false;
+            }
             if (!android.Manifest.permission.BIND_WALLPAPER.equals(si.permission)) {
                 String msg = "Selected service does not require "
                         + android.Manifest.permission.BIND_WALLPAPER
