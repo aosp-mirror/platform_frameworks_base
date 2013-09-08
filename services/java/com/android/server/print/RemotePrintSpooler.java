@@ -34,11 +34,14 @@ import android.print.IPrintSpoolerCallbacks;
 import android.print.IPrintSpoolerClient;
 import android.print.PrintAttributes;
 import android.print.PrintJobInfo;
+import android.print.PrintManager;
 import android.util.Slog;
 import android.util.TimedRemoteCaller;
 
 import libcore.io.IoUtils;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -288,6 +291,28 @@ final class RemotePrintSpooler {
             unbindLocked();
             mDestroyed = true;
             mCanUnbind = false;
+        }
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String prefix) {
+        synchronized (mLock) {
+            pw.append(prefix).append("destroyed=")
+                    .append(String.valueOf(mDestroyed)).println();
+            pw.append(prefix).append("bound=")
+                    .append((mRemoteInstance != null) ? "true" : "false").println();
+            pw.append(prefix).append("print jobs:").println();
+            if (mRemoteInstance != null) {
+                List<PrintJobInfo> printJobs = getPrintJobInfos(null,
+                        PrintJobInfo.STATE_ANY, PrintManager.APP_ID_ANY);
+                if (printJobs != null) {
+                    final int printJobCount = printJobs.size();
+                    for (int i = 0; i < printJobCount; i++) {
+                        PrintJobInfo printJob = printJobs.get(i);
+                        pw.append(prefix).append(prefix).append(printJob.toString());
+                        pw.println();
+                    }
+                }
+            }
         }
     }
 
