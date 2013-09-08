@@ -134,4 +134,14 @@ public final class BridgeContentProvider implements IContentProvider {
         // TODO Auto-generated method stub
         return null;
     }
+
+    @Override
+    public Uri canonicalize(String callingPkg, Uri uri) throws RemoteException {
+        return null;
+    }
+
+    @Override
+    public Uri uncanonicalize(String callingPkg, Uri uri) throws RemoteException {
+        return null;
+    }
 }
