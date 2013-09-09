@@ -143,8 +143,8 @@ public class TextChange extends Transition {
         final TextView view = (TextView) endValues.view;
         Map<String, Object> startVals = startValues.values;
         Map<String, Object> endVals = endValues.values;
-        final String startText = (String) startVals.get(PROPNAME_TEXT);
-        final String endText = (String) endVals.get(PROPNAME_TEXT);
+        final CharSequence startText = (CharSequence) startVals.get(PROPNAME_TEXT);
+        final CharSequence endText = (CharSequence) endVals.get(PROPNAME_TEXT);
         if (!startText.equals(endText)) {
             view.setText(startText);
             Animator anim;
