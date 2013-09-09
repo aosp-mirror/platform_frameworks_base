@@ -1827,6 +1827,11 @@ class ContextImpl extends Context {
                       message);
     }
 
+    /**
+     * Logs a warning if the system process directly called a method such as
+     * {@link #startService(Intent)} instead of {@link #startServiceAsUser(Intent, UserHandle)}.
+     * The "AsUser" variants allow us to properly enforce the user's restrictions.
+     */
     private void warnIfCallingFromSystemProcess() {
         if (Process.myUid() == Process.SYSTEM_UID) {
             Slog.w(TAG, "Calling a method in the system process without a qualified user: "
