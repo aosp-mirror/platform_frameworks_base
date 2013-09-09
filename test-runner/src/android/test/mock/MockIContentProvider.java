@@ -114,4 +114,14 @@ public class MockIContentProvider implements IContentProvider {
     public ICancellationSignal createCancellationSignal() throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
+
+    @Override
+    public Uri canonicalize(String callingPkg, Uri uri) throws RemoteException {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
+
+    @Override
+    public Uri uncanonicalize(String callingPkg, Uri uri) throws RemoteException {
+        throw new UnsupportedOperationException("unimplemented mock method");
+    }
 }
