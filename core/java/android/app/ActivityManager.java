@@ -2106,7 +2106,12 @@ public class ActivityManager {
         }
         // If the target is not exported, then nobody else can get to it.
         if (!exported) {
-            Slog.w(TAG, "Permission denied: checkComponentPermission() owningUid=" + owningUid);
+            /*
+            RuntimeException here = new RuntimeException("here");
+            here.fillInStackTrace();
+            Slog.w(TAG, "Permission denied: checkComponentPermission() owningUid=" + owningUid,
+                    here);
+            */
             return PackageManager.PERMISSION_DENIED;
         }
         if (permission == null) {
