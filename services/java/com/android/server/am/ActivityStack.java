@@ -1110,8 +1110,10 @@ final class ActivityStack {
                                 case PAUSED:
                                     // This case created for transitioning activities from
                                     // translucent to opaque {@link Activity#convertToOpaque}.
-                                    mStackSupervisor.mStoppingActivities.remove(r);
-                                    stopActivityLocked(r);
+                                    if (!mStackSupervisor.mStoppingActivities.contains(r)) {
+                                        mStackSupervisor.mStoppingActivities.add(r);
+                                    }
+                                    mStackSupervisor.scheduleIdleLocked();
                                     break;
 
                                 default:
