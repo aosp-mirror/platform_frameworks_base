@@ -2279,9 +2279,12 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (other.mExtras != null && !other.mExtras.isEmpty()) {
             getExtras().putAll(other.mExtras);
         }
-        mRangeInfo = other.mRangeInfo;
-        mCollectionInfo = other.mCollectionInfo;
-        mCollectionItemInfo = other.mCollectionItemInfo;
+        mRangeInfo = (other.mRangeInfo != null)
+                ? RangeInfo.obtain(other.mRangeInfo) : null;
+        mCollectionInfo = (other.mCollectionInfo != null)
+                ? CollectionInfo.obtain(other.mCollectionInfo) : null;
+        mCollectionItemInfo =  (other.mCollectionItemInfo != null)
+                ? CollectionItemInfo.obtain(other.mCollectionItemInfo) : null;
     }
 
     /**
@@ -2602,6 +2605,17 @@ public class AccessibilityNodeInfo implements Parcelable {
         private float mCurrent;
 
         /**
+         * Obtains a pooled instance that is a clone of another one.
+         *
+         * @param other The instance to clone.
+         *
+         * @hide
+         */
+        public static RangeInfo obtain(RangeInfo other) {
+            return obtain(other.mType, other.mMin, other.mMax, other.mCurrent);
+        }
+
+        /**
          * Obtains a pooled instance.
          *
          * @param type The type of the range.
@@ -2708,6 +2722,18 @@ public class AccessibilityNodeInfo implements Parcelable {
         private boolean mHierarchical;
 
         /**
+         * Obtains a pooled instance that is a clone of another one.
+         *
+         * @param other The instance to clone.
+         *
+         * @hide
+         */
+        public static CollectionInfo obtain(CollectionInfo other) {
+            return CollectionInfo.obtain(other.mRowCount, other.mColumnCount,
+                    other.mHierarchical);
+        }
+
+        /**
          * Obtains a pooled instance.
          *
          * @param rowCount The number of rows.
@@ -2794,6 +2820,18 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         private static final SynchronizedPool<CollectionItemInfo> sPool =
                 new SynchronizedPool<CollectionItemInfo>(MAX_POOL_SIZE);
+
+        /**
+         * Obtains a pooled instance that is a clone of another one.
+         *
+         * @param other The instance to clone.
+         *
+         * @hide
+         */
+        public static CollectionItemInfo obtain(CollectionItemInfo other) {
+            return CollectionItemInfo.obtain(other.mRowIndex, other.mRowSpan,
+                    other.mColumnIndex, other.mColumnSpan, other.mHeading);
+        }
 
         /**
          * Obtains a pooled instance.
