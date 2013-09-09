@@ -156,7 +156,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter
     }
 
     @Override
-    public View getItemView(MenuItemImpl item, View convertView, ViewGroup parent) {
+    public View getItemView(final MenuItemImpl item, View convertView, ViewGroup parent) {
         View actionView = item.getActionView();
         if (actionView == null || item.hasCollapsibleActionView()) {
             if (!(convertView instanceof ActionMenuItemView)) {
@@ -165,6 +165,27 @@ public class ActionMenuPresenter extends BaseMenuPresenter
             actionView = super.getItemView(item, convertView, parent);
         }
         actionView.setVisibility(item.isActionViewExpanded() ? View.GONE : View.VISIBLE);
+
+        if (item.hasSubMenu()) {
+            actionView.setOnTouchListener(new ForwardingListener(actionView) {
+                @Override
+                public ListPopupWindow getPopup() {
+                    return mActionButtonPopup != null ? mActionButtonPopup.getPopup() : null;
+                }
+
+                @Override
+                protected boolean onForwardingStarted() {
+                    return onSubMenuSelected((SubMenuBuilder) item.getSubMenu());
+                }
+
+                @Override
+                protected boolean onForwardingStopped() {
+                    return dismissPopupMenus();
+                }
+            });
+        } else {
+            actionView.setOnTouchListener(null);
+        }
 
         final ActionMenuView menuParent = (ActionMenuView) parent;
         final ViewGroup.LayoutParams lp = actionView.getLayoutParams();
