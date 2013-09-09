@@ -239,10 +239,10 @@ public final class PrintServiceInfo implements Parcelable {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("PrintServiceInfo{");
-        builder.append("id:").append(mId).append(", ");
-        builder.append("resolveInfo:").append(mResolveInfo).append(", ");
-        builder.append("settingsActivityName:").append(mSettingsActivityName);
-        builder.append("addPrintersActivityName:").append(mAddPrintersActivityName);
+        builder.append("id=").append(mId);
+        builder.append(", resolveInfo=").append(mResolveInfo);
+        builder.append(", settingsActivityName=").append(mSettingsActivityName);
+        builder.append(", addPrintersActivityName=").append(mAddPrintersActivityName);
         builder.append("}");
         return builder.toString();
     }
