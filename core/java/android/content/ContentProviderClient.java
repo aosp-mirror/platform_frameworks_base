@@ -344,7 +344,10 @@ public class ContentProviderClient {
     /** {@hide} */
     public static void closeQuietly(ContentProviderClient client) {
         if (client != null) {
-            client.release();
+            try {
+                client.release();
+            } catch (Exception ignored) {
+            }
         }
     }
 }

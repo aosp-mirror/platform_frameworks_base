@@ -125,6 +125,9 @@ public class TestDocumentsProvider extends DocumentsProvider {
                 includeFile(result, "_networkfile1");
                 includeFile(result, "_networkfile2");
                 includeFile(result, "_networkfile3");
+                includeFile(result, "_networkfile4");
+                includeFile(result, "_networkfile5");
+                includeFile(result, "_networkfile6");
                 return true;
             } else {
                 return false;
@@ -162,6 +165,8 @@ public class TestDocumentsProvider extends DocumentsProvider {
         includeFile(result, MY_DOC_NULL);
         includeFile(result, "localfile1");
         includeFile(result, "localfile2");
+        includeFile(result, "localfile3");
+        includeFile(result, "localfile4");
 
         synchronized (this) {
             // Try picking up an existing network fetch

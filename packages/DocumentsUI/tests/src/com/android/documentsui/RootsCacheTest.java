@@ -30,7 +30,7 @@ public class RootsCacheTest extends AndroidTestCase {
 
     private static RootInfo buildForMimeTypes(String... mimeTypes) {
         final RootInfo root = new RootInfo();
-        root.mimeTypes = mimeTypes;
+        root.derivedMimeTypes = mimeTypes;
         return root;
     }
 
