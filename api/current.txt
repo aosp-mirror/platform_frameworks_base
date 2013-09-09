@@ -12173,7 +12173,7 @@ package android.media {
     method public int getSampleRate();
     method public int getState();
     method public int getStreamType();
-    method public android.media.AudioTimestamp getTimestamp(android.media.AudioTimestamp);
+    method public boolean getTimestamp(android.media.AudioTimestamp);
     method public void pause() throws java.lang.IllegalStateException;
     method public void play() throws java.lang.IllegalStateException;
     method public void release();
