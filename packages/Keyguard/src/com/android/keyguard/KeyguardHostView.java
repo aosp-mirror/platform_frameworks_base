@@ -50,6 +50,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.speech.hotword.HotwordRecognitionListener;
+import android.speech.hotword.HotwordRecognitionService;
 import android.speech.hotword.HotwordRecognizer;
 import android.telephony.TelephonyManager;
 import android.util.AttributeSet;
@@ -1775,11 +1776,13 @@ public class KeyguardHostView extends KeyguardViewBase {
 
         public void onHotwordEvent(int eventType, Bundle eventBundle) {
             if (DEBUG) Log.d(TAG, "onHotwordEvent: " + eventType);
-            if (eventType == HotwordRecognizer.EVENT_TYPE_STATE_CHANGED) {
-                if (eventBundle != null && eventBundle.containsKey(HotwordRecognizer.PROMPT_TEXT)) {
-                    new KeyguardMessageArea.Helper(
-                            (View) getSecurityView(mCurrentSecuritySelection))
-                        .setMessage(eventBundle.getString(HotwordRecognizer.PROMPT_TEXT),true);
+            if (eventType == HotwordRecognitionService.EVENT_TYPE_PROMPT_CHANGED) {
+                if (eventBundle != null
+                        && eventBundle.containsKey(HotwordRecognitionService.KEY_PROMPT_TEXT)) {
+                    new KeyguardMessageArea
+                        .Helper((View) getSecurityView(mCurrentSecuritySelection))
+                        .setMessage(eventBundle.getString(
+                                HotwordRecognitionService.KEY_PROMPT_TEXT),true);
                 }
             }
         }
