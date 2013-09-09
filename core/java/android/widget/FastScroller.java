@@ -152,9 +152,6 @@ class FastScroller {
     /** The number of headers at the top of the view. */
     private int mHeaderCount;
 
-    /** The number of items in the list. */
-    private int mItemCount = -1;
-
     /** The index of the current section. */
     private int mCurrentSection = -1;
 
@@ -324,6 +321,7 @@ class FastScroller {
 
         getSectionsFromIndexer();
         refreshDrawablePressedState();
+        updateLongList(listView.getChildCount(), listView.getCount());
         setScrollbarPosition(mList.getVerticalScrollbarPosition());
         postAutoHide();
     }
@@ -343,14 +341,10 @@ class FastScroller {
      * @param enabled Whether the fast scroll thumb is enabled.
      */
     public void setEnabled(boolean enabled) {
-        mEnabled = enabled;
+        if (mEnabled != enabled) {
+            mEnabled = enabled;
 
-        if (enabled) {
-            if (mAlwaysShow) {
-                setState(STATE_VISIBLE);
-            }
-        } else {
-            stop();
+            onStateDependencyChanged();
         }
     }
 
@@ -358,19 +352,17 @@ class FastScroller {
      * @return Whether the fast scroll thumb is enabled.
      */
     public boolean isEnabled() {
-        return mEnabled;
+        return mEnabled && (mLongList || mAlwaysShow);
     }
 
     /**
      * @param alwaysShow Whether the fast scroll thumb should always be shown
      */
     public void setAlwaysShow(boolean alwaysShow) {
-        mAlwaysShow = alwaysShow;
+        if (mAlwaysShow != alwaysShow) {
+            mAlwaysShow = alwaysShow;
 
-        if (alwaysShow) {
-            setState(STATE_VISIBLE);
-        } else if (mState == STATE_VISIBLE) {
-            postAutoHide();
+            onStateDependencyChanged();
         }
     }
 
@@ -380,6 +372,23 @@ class FastScroller {
      */
     public boolean isAlwaysShowEnabled() {
         return mAlwaysShow;
+    }
+
+    /**
+     * Called when one of the variables affecting enabled state changes.
+     */
+    private void onStateDependencyChanged() {
+        if (isEnabled()) {
+            if (isAlwaysShowEnabled()) {
+                setState(STATE_VISIBLE);
+            } else if (mState == STATE_VISIBLE) {
+                postAutoHide();
+            }
+        } else {
+            stop();
+        }
+
+        mList.resolvePadding();
     }
 
     public void setScrollBarStyle(int style) {
@@ -438,6 +447,18 @@ class FastScroller {
         if (hasMoreItems && mState != STATE_DRAGGING) {
             final int firstVisibleItem = mList.getFirstVisiblePosition();
             setThumbPos(getPosFromItemCount(firstVisibleItem, visibleItemCount, totalItemCount));
+        }
+
+        updateLongList(visibleItemCount, totalItemCount);
+    }
+
+    private void updateLongList(int visibleItemCount, int totalItemCount) {
+        final boolean longList = visibleItemCount > 0
+                && totalItemCount / visibleItemCount >= MIN_PAGES;
+        if (mLongList != longList) {
+            mLongList = longList;
+
+            onStateDependencyChanged();
         }
     }
 
@@ -795,19 +816,8 @@ class FastScroller {
         mList.postDelayed(mDeferHide, FADE_TIMEOUT);
     }
 
-    private boolean isLongList(int visibleItemCount, int totalItemCount) {
-        // Are there enough pages to require fast scroll? Recompute only if
-        // total count changes.
-        if (mItemCount != totalItemCount && visibleItemCount > 0) {
-            mItemCount = totalItemCount;
-            mLongList = mItemCount / visibleItemCount >= MIN_PAGES;
-        }
-
-        return mLongList;
-    }
-
     public void onScroll(int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        if (!mEnabled || !mAlwaysShow && !isLongList(visibleItemCount, totalItemCount)) {
+        if (!isEnabled()) {
             setState(STATE_NONE);
             return;
         }
@@ -1221,7 +1231,7 @@ class FastScroller {
     }
 
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (!mEnabled) {
+        if (!isEnabled()) {
             return false;
         }
 
@@ -1233,14 +1243,18 @@ class FastScroller {
                     // need to allow the parent time to decide whether it wants
                     // to intercept events. If it does, we will receive a CANCEL
                     // event.
-                    if (mList.isInScrollingContainer()) {
-                        mInitialTouchY = ev.getY();
-                        startPendingDrag();
-                        return false;
+                    if (!mList.isInScrollingContainer()) {
+                        beginDrag();
+                        return true;
                     }
 
-                    beginDrag();
-                    return true;
+                    mInitialTouchY = ev.getY();
+                    startPendingDrag();
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (!isPointInside(ev.getX(), ev.getY())) {
+                    cancelPendingDrag();
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -1253,7 +1267,7 @@ class FastScroller {
     }
 
     public boolean onInterceptHoverEvent(MotionEvent ev) {
-        if (!mEnabled) {
+        if (!isEnabled()) {
             return false;
         }
 
@@ -1269,18 +1283,11 @@ class FastScroller {
     }
 
     public boolean onTouchEvent(MotionEvent me) {
-        if (!mEnabled) {
+        if (!isEnabled()) {
             return false;
         }
 
         switch (me.getActionMasked()) {
-            case MotionEvent.ACTION_DOWN: {
-                if (isPointInside(me.getX(), me.getY())) {
-                    beginDrag();
-                    return true;
-                }
-            } break;
-
             case MotionEvent.ACTION_UP: {
                 if (mHasPendingDrag) {
                     // Allow a tap to scroll.

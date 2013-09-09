@@ -1250,7 +1250,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mFastScroller.setEnabled(true);
         }
 
-        recomputePadding();
+        resolvePadding();
 
         if (mFastScroller != null) {
             mFastScroller.updateLayout();
@@ -1312,7 +1312,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      * @see #setFastScrollAlwaysVisible(boolean)
      */
     public boolean isFastScrollAlwaysVisible() {
-        return mFastScrollEnabled && mFastScrollAlwaysVisible;
+        if (mFastScroller == null) {
+            return mFastScrollEnabled && mFastScrollAlwaysVisible;
+        } else {
+            return mFastScroller.isEnabled() && mFastScroller.isAlwaysShowEnabled();
+        }
     }
 
     @Override
@@ -1331,7 +1335,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     @ViewDebug.ExportedProperty
     public boolean isFastScrollEnabled() {
-        return mFastScrollEnabled;
+        if (mFastScroller == null) {
+            return mFastScrollEnabled;
+        } else {
+            return mFastScroller.isEnabled();
+        }
     }
 
     @Override
@@ -1356,7 +1364,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
      */
     @Override
     protected boolean isVerticalScrollBarHidden() {
-        return mFastScrollEnabled;
+        return isFastScrollEnabled();
     }
 
     /**
