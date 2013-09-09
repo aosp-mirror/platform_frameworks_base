@@ -56,22 +56,6 @@ public class BitmapFactory {
          * mutable even when decoding a resource which would normally result in
          * an immutable bitmap.</p>
          *
-         * <p>As of {@link android.os.Build.VERSION_CODES#KITKAT}, any
-         * mutable bitmap can be reused to decode any other bitmaps as long as
-         * the resulting {@link Bitmap#getByteCount() byte count} of the decoded
-         * bitmap is less than or equal to the {@link
-         * Bitmap#getAllocationByteCount() allocated byte count} of the reused
-         * bitmap. This can be because the intrinsic size is smaller, or its
-         * size post scaling (for density / sample size) is smaller.</p>
-         *
-         * <p>Prior to {@link android.os.Build.VERSION_CODES#KITKAT}
-         * additional constraints apply: The image being decoded (whether as a
-         * resource or as a stream) must be in jpeg or png format. Only equal
-         * sized bitmaps are supported, with {@link #inSampleSize} set to 1.
-         * Additionally, the {@link android.graphics.Bitmap.Config
-         * configuration} of the reused bitmap will override the setting of
-         * {@link #inPreferredConfig}, if set.</p>
-         *
          * <p>You should still always use the returned Bitmap of the decode
          * method and not assume that reusing the bitmap worked, due to the
          * constraints outlined above and failure situations that can occur.
@@ -80,6 +64,36 @@ public class BitmapFactory {
          * but in all cases you should use the Bitmap returned by the decoding
          * function to ensure that you are using the bitmap that was used as the
          * decode destination.</p>
+         *
+         * <h3>Usage with BitmapFactory</h3>
+         *
+         * <p>As of {@link android.os.Build.VERSION_CODES#KITKAT}, any
+         * mutable bitmap can be reused by {@link BitmapFactory} to decode any
+         * other bitmaps as long as the resulting {@link Bitmap#getByteCount()
+         * byte count} of the decoded bitmap is less than or equal to the {@link
+         * Bitmap#getAllocationByteCount() allocated byte count} of the reused
+         * bitmap. This can be because the intrinsic size is smaller, or its
+         * size post scaling (for density / sample size) is smaller.</p>
+         *
+         * <p class="note">Prior to {@link android.os.Build.VERSION_CODES#KITKAT}
+         * additional constraints apply: The image being decoded (whether as a
+         * resource or as a stream) must be in jpeg or png format. Only equal
+         * sized bitmaps are supported, with {@link #inSampleSize} set to 1.
+         * Additionally, the {@link android.graphics.Bitmap.Config
+         * configuration} of the reused bitmap will override the setting of
+         * {@link #inPreferredConfig}, if set.</p>
+         *
+         * <h3>Usage with BitmapRegionDecoder</h3>
+         *
+         * <p>BitmapRegionDecoder will draw its requested content into the Bitmap
+         * provided, clipping if the output content size (post scaling) is larger
+         * than the provided Bitmap. The provided Bitmap's width, height, and
+         * {@link Bitmap.Config} will not be changed.
+         *
+         * <p class="note">BitmapRegionDecoder support for {@link #inBitmap} was
+         * introduced in {@link android.os.Build.VERSION_CODES#JELLY_BEAN}. All
+         * formats supported by BitmapRegionDecoder support Bitmap reuse via
+         * {@link #inBitmap}.</p>
          *
          * @see Bitmap#reconfigure(int,int, android.graphics.Bitmap.Config)
          */
@@ -228,6 +242,9 @@ public class BitmapFactory {
          * bitmap will be scaled to match {@link #inTargetDensity} when loaded,
          * rather than relying on the graphics system scaling it each time it
          * is drawn to a Canvas.
+         *
+         * <p>BitmapRegionDecoder ignores this flag, and will not scale output
+         * based on density. (though {@link #inSampleSize} is supported)</p>
          *
          * <p>This flag is turned on by default and should be turned off if you need
          * a non-scaled version of the bitmap.  Nine-patch bitmaps ignore this
