@@ -12790,6 +12790,7 @@ package android.media {
     ctor public MediaMuxer(java.lang.String, int) throws java.io.IOException;
     method public int addTrack(android.media.MediaFormat);
     method public void release();
+    method public void setLocation(float, float);
     method public void setOrientationHint(int);
     method public void start();
     method public void stop();

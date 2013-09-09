@@ -164,6 +164,18 @@ static void android_media_MediaMuxer_setOrientationHint(
 
 }
 
+static void android_media_MediaMuxer_setLocation(
+        JNIEnv *env, jclass clazz, jint nativeObject, jint latitude, jint longitude) {
+    MediaMuxer* muxer = reinterpret_cast<MediaMuxer *>(nativeObject);
+
+    status_t res = muxer->setLocation(latitude, longitude);
+    if (res != OK) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "Failed to set location");
+        return;
+    }
+}
+
 static void android_media_MediaMuxer_start(JNIEnv *env, jclass clazz,
                                            jint nativeObject) {
     sp<MediaMuxer> muxer(reinterpret_cast<MediaMuxer *>(nativeObject));
@@ -215,6 +227,9 @@ static JNINativeMethod gMethods[] = {
 
     { "nativeSetOrientationHint", "(II)V",
         (void *)android_media_MediaMuxer_setOrientationHint},
+
+    { "nativeSetLocation", "(III)V",
+        (void *)android_media_MediaMuxer_setLocation},
 
     { "nativeStart", "(I)V", (void *)android_media_MediaMuxer_start},
 
