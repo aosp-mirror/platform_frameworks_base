@@ -52,13 +52,13 @@ final class ProcessRecord {
     final int uid;              // uid of process; may be different from 'info' if isolated
     final int userId;           // user of process.
     final String processName;   // name of the process
-    final ProcessStats.ProcessState baseProcessTracker;
     // List of packages running in the process
     final ArrayMap<String, ProcessStats.ProcessState> pkgList
             = new ArrayMap<String, ProcessStats.ProcessState>();
     IApplicationThread thread;  // the actual proc...  may be null only if
                                 // 'persistent' is true (in which case we
                                 // are in the process of launching the app)
+    ProcessStats.ProcessState baseProcessTracker;
     int pid;                    // The process of this application; 0 if none
     boolean starting;           // True if the process is being started
     long lastActivityTime;      // For managing the LRU list
@@ -349,18 +349,15 @@ final class ProcessRecord {
         }
     }
     
-    ProcessRecord(BatteryStatsImpl.Uid.Proc _batteryStats, IApplicationThread _thread,
-            ApplicationInfo _info, String _processName, int _uid,
-            ProcessStats.ProcessState tracker) {
+    ProcessRecord(BatteryStatsImpl.Uid.Proc _batteryStats, ApplicationInfo _info,
+            String _processName, int _uid) {
         batteryStats = _batteryStats;
         info = _info;
         isolated = _info.uid != _uid;
         uid = _uid;
         userId = UserHandle.getUserId(_uid);
         processName = _processName;
-        baseProcessTracker = tracker;
-        pkgList.put(_info.packageName, tracker);
-        thread = _thread;
+        pkgList.put(_info.packageName, null);
         maxAdj = ProcessList.UNKNOWN_ADJ;
         curRawAdj = setRawAdj = -100;
         curAdj = setAdj = -100;
@@ -374,7 +371,53 @@ final class ProcessRecord {
         shortStringName = null;
         stringName = null;
     }
-    
+
+    public void makeActive(IApplicationThread _thread, ProcessStatsService tracker) {
+        if (thread == null) {
+            final ProcessStats.ProcessState origBase = baseProcessTracker;
+            if (origBase != null) {
+                origBase.setState(ProcessStats.STATE_NOTHING,
+                        tracker.getMemFactorLocked(), SystemClock.uptimeMillis(), pkgList);
+                origBase.makeInactive();
+            }
+            baseProcessTracker = tracker.getProcessStateLocked(info.packageName, info.uid,
+                    processName);
+            baseProcessTracker.makeActive();
+            for (int i=0; i<pkgList.size(); i++) {
+                ProcessStats.ProcessState ps = pkgList.valueAt(i);
+                if (ps != null && ps != origBase) {
+                    ps.makeInactive();
+                }
+                ps = tracker.getProcessStateLocked(pkgList.keyAt(i), info.uid, processName);
+                if (ps != baseProcessTracker) {
+                    ps.makeActive();
+                }
+                pkgList.setValueAt(i, ps);
+            }
+        }
+        thread = _thread;
+    }
+
+    public void makeInactive(ProcessStatsService tracker) {
+        if (thread != null) {
+            thread = null;
+            final ProcessStats.ProcessState origBase = baseProcessTracker;
+            if (origBase != null) {
+                origBase.setState(ProcessStats.STATE_NOTHING,
+                        tracker.getMemFactorLocked(), SystemClock.uptimeMillis(), pkgList);
+                origBase.makeInactive();
+            }
+            baseProcessTracker = null;
+            for (int i=0; i<pkgList.size(); i++) {
+                ProcessStats.ProcessState ps = pkgList.valueAt(i);
+                if (ps != null && ps != origBase) {
+                    ps.makeInactive();
+                }
+                pkgList.setValueAt(i, null);
+            }
+        }
+    }
+
     /**
      * This method returns true if any of the activities within the process record are interesting
      * to the user. See HistoryRecord.isInterestingToUserLocked()
@@ -518,10 +561,22 @@ final class ProcessRecord {
         long now = SystemClock.uptimeMillis();
         baseProcessTracker.setState(ProcessStats.STATE_NOTHING,
                 tracker.getMemFactorLocked(), now, pkgList);
-        if (pkgList.size() != 1) {
+        final int N = pkgList.size();
+        if (N != 1) {
+            for (int i=0; i<N; i++) {
+                ProcessStats.ProcessState ps = pkgList.valueAt(i);
+                if (ps != null && ps != baseProcessTracker) {
+                    ps.makeInactive();
+                }
+
+            }
             pkgList.clear();
-            pkgList.put(info.packageName, tracker.getProcessStateLocked(
-                    info.packageName, info.uid, processName));
+            ProcessStats.ProcessState ps = tracker.getProcessStateLocked(
+                    info.packageName, info.uid, processName);
+            pkgList.put(info.packageName, ps);
+            if (thread != null && ps != baseProcessTracker) {
+                ps.makeActive();
+            }
         }
     }
     
