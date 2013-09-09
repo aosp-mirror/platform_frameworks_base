@@ -28405,6 +28405,7 @@ package android.view {
     method public android.view.ViewPropertyAnimator setInterpolator(android.animation.TimeInterpolator);
     method public android.view.ViewPropertyAnimator setListener(android.animation.Animator.AnimatorListener);
     method public android.view.ViewPropertyAnimator setStartDelay(long);
+    method public android.view.ViewPropertyAnimator setUpdateListener(android.animation.ValueAnimator.AnimatorUpdateListener);
     method public void start();
     method public android.view.ViewPropertyAnimator translationX(float);
     method public android.view.ViewPropertyAnimator translationXBy(float);
