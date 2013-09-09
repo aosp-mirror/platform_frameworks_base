@@ -84,7 +84,6 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.Iterator;
@@ -1370,6 +1369,7 @@ public class WifiStateMachine extends StateMachine {
                     countryCode);
         }
         sendMessage(CMD_SET_COUNTRY_CODE, countryCode);
+        mWifiP2pChannel.sendMessage(WifiP2pService.SET_COUNTRY_CODE, countryCode);
     }
 
     /**
@@ -2835,7 +2835,7 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_SET_COUNTRY_CODE:
                     String country = (String) message.obj;
                     if (DBG) log("set country code " + country);
-                    if (!mWifiNative.setCountryCode(country.toUpperCase(Locale.ROOT))) {
+                    if (!mWifiNative.setCountryCode(country)) {
                         loge("Failed to set country code " + country);
                     }
                     break;
@@ -4139,7 +4139,7 @@ public class WifiStateMachine extends StateMachine {
     /**
      * arg2 on the source message has a unique id that needs to be retained in replies
      * to match the request
-     *
+
      * see WifiManager for details
      */
     private Message obtainMessageWithArg2(Message srcMsg) {
