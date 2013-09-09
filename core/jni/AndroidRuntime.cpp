@@ -53,6 +53,7 @@ extern int register_android_graphics_Bitmap(JNIEnv*);
 extern int register_android_graphics_BitmapFactory(JNIEnv*);
 extern int register_android_graphics_BitmapRegionDecoder(JNIEnv*);
 extern int register_android_graphics_Camera(JNIEnv* env);
+extern int register_android_graphics_CreateJavaOutputStreamAdaptor(JNIEnv* env);
 extern int register_android_graphics_Graphics(JNIEnv* env);
 extern int register_android_graphics_Interpolator(JNIEnv* env);
 extern int register_android_graphics_LayerRasterizer(JNIEnv*);
@@ -1137,6 +1138,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_graphics_BitmapFactory),
     REG_JNI(register_android_graphics_BitmapRegionDecoder),
     REG_JNI(register_android_graphics_Camera),
+    REG_JNI(register_android_graphics_CreateJavaOutputStreamAdaptor),
     REG_JNI(register_android_graphics_Canvas),
     REG_JNI(register_android_graphics_ColorFilter),
     REG_JNI(register_android_graphics_DrawFilter),
