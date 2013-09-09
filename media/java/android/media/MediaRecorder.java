@@ -200,6 +200,19 @@ public class MediaRecorder
          * </p>
          */
         public static final int REMOTE_SUBMIX = 8;
+
+        /**
+         * Audio source for preemptible, low-priority software hotword detection
+         * It presents the same gain and pre processing tuning as {@link #VOICE_RECOGNITION}.
+         * <p>
+         * An application should use this audio source when it wishes to do
+         * always-on software hotword detection, while gracefully giving in to any other application
+         * that might want to read from the microphone.
+         * </p>
+         * This is a hidden audio source.
+         * @hide
+         */
+        protected static final int HOTWORD = 1999;
     }
 
     /**
