@@ -23,12 +23,13 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -43,26 +44,27 @@ public class BatteryMeterView extends View implements DemoMode {
     public static final boolean SINGLE_DIGIT_PERCENT = false;
     public static final boolean SHOW_100_PERCENT = false;
 
-    private static final LightingColorFilter LIGHTNING_FILTER_OPAQUE =
-            new LightingColorFilter(0x00000000, 0x00000000);
-    private static final LightingColorFilter LIGHTNING_FILTER_TRANS =
-            new LightingColorFilter(0x00999999, 0x00000000);
-
     public static final int FULL = 96;
     public static final int EMPTY = 4;
 
     int[] mColors;
 
     boolean mShowPercent = true;
-    Paint mFramePaint, mBatteryPaint, mWarningTextPaint, mTextPaint;
+    Paint mFramePaint, mBatteryPaint, mWarningTextPaint, mTextPaint, mBoltPaint;
     int mButtonHeight;
     private float mTextHeight, mWarningTextHeight;
-    Drawable mLightning;
 
     private int mHeight;
     private int mWidth;
     private String mWarningString;
     private final int mChargeColor;
+    private final float[] mBoltPoints;
+    private final Path mBoltPath = new Path();
+
+    private final RectF mFrame = new RectF();
+    private final RectF mButtonFrame = new RectF();
+    private final RectF mClipFrame = new RectF();
+    private final Rect mBoltFrame = new Rect();
 
     private class BatteryTracker extends BroadcastReceiver {
         // current battery status
@@ -175,7 +177,8 @@ public class BatteryMeterView extends View implements DemoMode {
             mColors[2*i] = levels.getInt(i, 0);
             mColors[2*i+1] = colors.getColor(i, 0);
         }
-
+        levels.recycle();
+        colors.recycle();
         mShowPercent = ENABLE_PERCENT && 0 != Settings.System.getInt(
                 context.getContentResolver(), "status_bar_show_battery_percent", 0);
 
@@ -198,8 +201,28 @@ public class BatteryMeterView extends View implements DemoMode {
         mWarningTextPaint.setTypeface(font);
         mWarningTextPaint.setTextAlign(Paint.Align.CENTER);
 
-        mLightning = getResources().getDrawable(R.drawable.lightning);
         mChargeColor = getResources().getColor(R.color.batterymeter_charge_color);
+
+        mBoltPaint = new Paint();
+        mBoltPaint.setAntiAlias(true);
+        mBoltPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));  // punch hole
+        setLayerType(LAYER_TYPE_HARDWARE, null);
+        mBoltPoints = loadBoltPoints(res);
+    }
+
+    private static float[] loadBoltPoints(Resources res) {
+        final int[] pts = res.getIntArray(R.array.batterymeter_bolt_points);
+        int maxX = 0, maxY = 0;
+        for (int i = 0; i < pts.length; i += 2) {
+            maxX = Math.max(maxX, pts[i]);
+            maxY = Math.max(maxY, pts[i + 1]);
+        }
+        final float[] ptsF = new float[pts.length];
+        for (int i = 0; i < pts.length; i += 2) {
+            ptsF[i] = (float)pts[i] / maxX;
+            ptsF[i + 1] = (float)pts[i + 1] / maxY;
+        }
+        return ptsF;
     }
 
     @Override
@@ -220,15 +243,6 @@ public class BatteryMeterView extends View implements DemoMode {
         return color;
     }
 
-    // TODO jspurlock - remove once we draw hollow bolt in code
-    public void setBarTransparent(boolean isTransparent) {
-        mLightning.setColorFilter(isTransparent ? LIGHTNING_FILTER_TRANS : LIGHTNING_FILTER_OPAQUE);
-        BatteryTracker tracker = mDemoMode ? mDemoTracker : mTracker;
-        if (tracker.plugged) {
-            postInvalidate();
-        }
-    }
-
     @Override
     public void draw(Canvas c) {
         BatteryTracker tracker = mDemoMode ? mDemoTracker : mTracker;
@@ -243,22 +257,19 @@ public class BatteryMeterView extends View implements DemoMode {
 
         mButtonHeight = (int) (height * 0.12f);
 
-        final RectF frame = new RectF(0, 0, width, height);
-        frame.offset(pl, pt);
+        mFrame.set(0, 0, width, height);
+        mFrame.offset(pl, pt);
 
-        // Log.v("BatteryGauge", String.format("canvas: %dx%d frame: %s",
-        // c.getWidth(), c.getHeight(), frame.toString()));
+        mButtonFrame.set(
+                mFrame.left + width * 0.25f,
+                mFrame.top,
+                mFrame.right - width * 0.25f,
+                mFrame.top + mButtonHeight);
 
-        final RectF buttonframe = new RectF(
-                frame.left + width * 0.25f,
-                frame.top,
-                frame.right - width * 0.25f,
-                frame.top + mButtonHeight);
-
-        frame.top += mButtonHeight;
+        mFrame.top += mButtonHeight;
 
         // first, draw the battery shape
-        c.drawRect(frame, mFramePaint);
+        c.drawRect(mFrame, mFramePaint);
 
         // fill 'er up
         final int pct = tracker.level;
@@ -271,15 +282,14 @@ public class BatteryMeterView extends View implements DemoMode {
             drawFrac = 0f;
         }
 
-        c.drawRect(buttonframe,
-                drawFrac == 1f ? mBatteryPaint : mFramePaint);
+        c.drawRect(mButtonFrame, drawFrac == 1f ? mBatteryPaint : mFramePaint);
 
-        RectF clip = new RectF(frame);
-        clip.top += (frame.height() * (1f - drawFrac));
+        mClipFrame.set(mFrame);
+        mClipFrame.top += (mFrame.height() * (1f - drawFrac));
 
         c.save(Canvas.CLIP_SAVE_FLAG);
-        c.clipRect(clip);
-        c.drawRect(frame, mBatteryPaint);
+        c.clipRect(mClipFrame);
+        c.drawRect(mFrame, mBatteryPaint);
         c.restore();
 
         if (level <= EMPTY) {
@@ -287,11 +297,28 @@ public class BatteryMeterView extends View implements DemoMode {
             final float y = (mHeight + mWarningTextHeight) * 0.48f;
             c.drawText(mWarningString, x, y, mWarningTextPaint);
         } else if (tracker.plugged) {
-            final Rect r = new Rect(
-                    (int)frame.left + width / 4,  (int)frame.top + height / 5,
-                    (int)frame.right - width / 4, (int)frame.bottom - height / 6);
-            mLightning.setBounds(r);
-            mLightning.draw(c);
+            // draw the bolt
+            final int bl = (int)(mFrame.left + width / 4f);
+            final int bt = (int)(mFrame.top + height / 6f);
+            final int br = (int)(mFrame.right - width / 5f);
+            final int bb = (int)(mFrame.bottom - height / 6f);
+            if (mBoltFrame.left != bl || mBoltFrame.top != bt
+                    || mBoltFrame.right != br || mBoltFrame.bottom != bb) {
+                mBoltFrame.set(bl, bt, br, bb);
+                mBoltPath.reset();
+                mBoltPath.moveTo(
+                        mBoltFrame.left + mBoltPoints[0] * mBoltFrame.width(),
+                        mBoltFrame.top + mBoltPoints[1] * mBoltFrame.height());
+                for (int i = 2; i < mBoltPoints.length; i += 2) {
+                    mBoltPath.lineTo(
+                            mBoltFrame.left + mBoltPoints[i] * mBoltFrame.width(),
+                            mBoltFrame.top + mBoltPoints[i + 1] * mBoltFrame.height());
+                }
+                mBoltPath.lineTo(
+                        mBoltFrame.left + mBoltPoints[0] * mBoltFrame.width(),
+                        mBoltFrame.top + mBoltPoints[1] * mBoltFrame.height());
+            }
+            c.drawPath(mBoltPath, mBoltPaint);
         } else if (mShowPercent && !(tracker.level == 100 && !SHOW_100_PERCENT)) {
             mTextPaint.setTextSize(height *
                     (SINGLE_DIGIT_PERCENT ? 0.75f
