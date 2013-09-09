@@ -1,0 +1,19 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.android.wallpapercropper" >
+        <uses-permission android:name="android.permission.SET_WALLPAPER" />
+        <uses-permission android:name="android.permission.SET_WALLPAPER_HINTS" />
+
+        <application android:requiredForAllUsers="true">
+        <activity
+            android:name="WallpaperCropActivity"
+            android:theme="@style/Theme.WallpaperCropper"
+            android:label="@string/crop_wallpaper"
+            android:finishOnCloseSystemDialogs="true">
+            <intent-filter>
+                <action android:name="android.service.wallpaper.CROP_AND_SET_WALLPAPER" />
+                <data android:mimeType="image/*" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        </application>
+</manifest>
