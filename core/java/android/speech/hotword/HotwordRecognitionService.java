@@ -47,6 +47,39 @@ public abstract class HotwordRecognitionService extends Service {
     /** Debugging flag */
     private static final boolean DBG = false;
 
+    /**
+     * Key used to retrieve a string to be displayed to the user passed to the
+     * {@link android.speech.hotword.HotwordRecognitionListener#onHotwordEvent(int, Bundle)} method.
+     */
+    public static final String KEY_PROMPT_TEXT = "prompt_text";
+
+    /**
+     * Event type used to indicate to the user that the prompt for
+     * hotword recognition has changed.
+     */
+    public static final int EVENT_TYPE_PROMPT_CHANGED = 1;
+
+    /** Audio recording error. */
+    public static final int ERROR_AUDIO = 1;
+
+    /** RecognitionService busy. */
+    public static final int ERROR_RECOGNIZER_BUSY = 2;
+
+    /** This indicates a permanent failure and the clients shouldn't retry on this */
+    public static final int ERROR_FAILED = 3;
+
+    /** Client-side errors */
+    public static final int ERROR_CLIENT = 4;
+
+    /** The service timed out */
+    public static final int ERROR_TIMEOUT = 5;
+
+    /** The service received concurrent start calls */
+    public static final int ERROR_SERVICE_ALREADY_STARTED = 6;
+
+    /** Hotword recognition is unavailable on the device */
+    public static final int ERROR_UNAVAILABLE = 7;
+
     private static final int MSG_START_RECOGNITION = 1;
     private static final int MSG_STOP_RECOGNITION = 2;
 
@@ -94,7 +127,7 @@ public abstract class HotwordRecognitionService extends Service {
             HotwordRecognitionService.this.onStartHotwordRecognition(mCurrentCallback);
         } else {
             try {
-                listener.onHotwordError(HotwordRecognizer.ERROR_RECOGNIZER_BUSY);
+                listener.onHotwordError(ERROR_RECOGNIZER_BUSY);
             } catch (RemoteException e) {
                 if (DBG) Log.d(TAG, "onError call from startRecognition failed");
             }
@@ -105,10 +138,10 @@ public abstract class HotwordRecognitionService extends Service {
     private void dispatchStopRecognition(IHotwordRecognitionListener listener) {
         try {
             if (mCurrentCallback == null) {
-                listener.onHotwordError(HotwordRecognizer.ERROR_CLIENT);
+                listener.onHotwordError(ERROR_CLIENT);
                 Log.w(TAG, "stopRecognition called with no preceding startRecognition - ignoring");
             } else if (mCurrentCallback.mListener.asBinder() != listener.asBinder()) {
-                listener.onHotwordError(HotwordRecognizer.ERROR_RECOGNIZER_BUSY);
+                listener.onHotwordError(ERROR_RECOGNIZER_BUSY);
                 Log.w(TAG, "stopRecognition called by a different caller - ignoring");
             } else { // the correct state
                 mCurrentCallback.onHotwordRecognitionStopped();
@@ -192,7 +225,7 @@ public abstract class HotwordRecognitionService extends Service {
         }
         try {
             Log.e(TAG, "Recognition service called without HOTWORD_RECOGNITION permissions");
-            listener.onHotwordError(HotwordRecognizer.ERROR_FAILED);
+            listener.onHotwordError(ERROR_FAILED);
         } catch (RemoteException e) {
             Log.e(TAG, "onHotwordError(ERROR_FAILED) message failed", e);
         }

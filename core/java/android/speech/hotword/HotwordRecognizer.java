@@ -50,39 +50,6 @@ public class HotwordRecognizer {
     /** Log messages identifier */
     private static final String TAG = "HotwordRecognizer";
 
-    /**
-     * Key used to retrieve a string to be displayed to the user passed to the
-     * {@link android.speech.hotword.HotwordRecognitionListener#onHotwordEvent(int, Bundle)} method.
-     */
-    public static final String PROMPT_TEXT = "prompt_text";
-
-    /**
-     * Event type used to indicate to the user that the hotword service has changed
-     * its state.
-     */
-    public static final int EVENT_TYPE_STATE_CHANGED = 1;
-
-    /** Audio recording error. */
-    public static final int ERROR_AUDIO = 1;
-
-    /** RecognitionService busy. */
-    public static final int ERROR_RECOGNIZER_BUSY = 2;
-
-    /** This indicates a permanent failure and the clients shouldn't retry on this */
-    public static final int ERROR_FAILED = 3;
-
-    /** Client-side errors */
-    public static final int ERROR_CLIENT = 4;
-
-    /** The service timed out */
-    public static final int ERROR_TIMEOUT = 5;
-
-    /** The service received concurrent start calls */
-    public static final int ERROR_SERVICE_ALREADY_STARTED = 6;
-
-    /** Hotword recognition is unavailable on the device */
-    public static final int ERROR_UNAVAILABLE = 7;
-
     /** action codes */
     private static final int MSG_START = 1;
     private static final int MSG_STOP = 2;
@@ -209,7 +176,7 @@ public class HotwordRecognizer {
 
             if (mServiceComponent == null) {
                 Log.e(TAG, "no selected voice recognition service");
-                mListener.onHotwordError(ERROR_CLIENT);
+                mListener.onHotwordError(HotwordRecognitionService.ERROR_CLIENT);
                 return;
             } else {
                 serviceIntent.setComponent(mServiceComponent);
@@ -219,12 +186,12 @@ public class HotwordRecognizer {
                 Log.e(TAG, "bind to recognition service failed");
                 mConnection = null;
                 mService = null;
-                mListener.onHotwordError(ERROR_CLIENT);
+                mListener.onHotwordError(HotwordRecognitionService.ERROR_CLIENT);
                 return;
             }
             putMessage(Message.obtain(mHandler, MSG_START));
         } else {
-            mListener.onHotwordError(ERROR_SERVICE_ALREADY_STARTED);
+            mListener.onHotwordError(HotwordRecognitionService.ERROR_SERVICE_ALREADY_STARTED);
             return;
         }
     }
@@ -252,7 +219,7 @@ public class HotwordRecognizer {
             if (DBG) Log.d(TAG, "service startRecognition command succeeded");
         } catch (final RemoteException e) {
             Log.e(TAG, "startRecognition() failed", e);
-            mListener.onHotwordError(ERROR_CLIENT);
+            mListener.onHotwordError(HotwordRecognitionService.ERROR_CLIENT);
         }
     }
 
@@ -268,7 +235,7 @@ public class HotwordRecognizer {
             if (DBG) Log.d(TAG, "service stopRecognition command succeeded");
         } catch (final RemoteException e) {
             Log.e(TAG, "stopRecognition() failed", e);
-            mListener.onHotwordError(ERROR_CLIENT);
+            mListener.onHotwordError(HotwordRecognitionService.ERROR_CLIENT);
         } finally {
             mPendingTasks.clear();
             mService = null;
@@ -281,7 +248,7 @@ public class HotwordRecognizer {
         if (mService != null) {
             return true;
         }
-        mListener.onHotwordError(ERROR_CLIENT);
+        mListener.onHotwordError(HotwordRecognitionService.ERROR_CLIENT);
         Log.e(TAG, "not connected to the recognition service");
         return false;
     }
