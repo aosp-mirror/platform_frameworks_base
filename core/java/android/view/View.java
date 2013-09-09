@@ -13480,6 +13480,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // Fast path for layouts with no backgrounds
         if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
             dispatchDraw(canvas);
+            if (mOverlay != null && !mOverlay.isEmpty()) {
+                mOverlay.getOverlayView().draw(canvas);
+            }
         } else {
             draw(canvas);
         }
