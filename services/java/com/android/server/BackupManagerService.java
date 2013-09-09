@@ -5358,47 +5358,53 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     // Enable/disable the backup service
+    @Override
     public void setBackupEnabled(boolean enable) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setBackupEnabled");
 
         Slog.i(TAG, "Backup enabled => " + enable);
 
-        boolean wasEnabled = mEnabled;
-        synchronized (this) {
-            Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.BACKUP_ENABLED, enable ? 1 : 0);
-            mEnabled = enable;
-        }
+        long oldId = Binder.clearCallingIdentity();
+        try {
+            boolean wasEnabled = mEnabled;
+            synchronized (this) {
+                Settings.Secure.putInt(mContext.getContentResolver(),
+                        Settings.Secure.BACKUP_ENABLED, enable ? 1 : 0);
+                mEnabled = enable;
+            }
 
-        synchronized (mQueueLock) {
-            if (enable && !wasEnabled && mProvisioned) {
-                // if we've just been enabled, start scheduling backup passes
-                startBackupAlarmsLocked(BACKUP_INTERVAL);
-            } else if (!enable) {
-                // No longer enabled, so stop running backups
-                if (DEBUG) Slog.i(TAG, "Opting out of backup");
+            synchronized (mQueueLock) {
+                if (enable && !wasEnabled && mProvisioned) {
+                    // if we've just been enabled, start scheduling backup passes
+                    startBackupAlarmsLocked(BACKUP_INTERVAL);
+                } else if (!enable) {
+                    // No longer enabled, so stop running backups
+                    if (DEBUG) Slog.i(TAG, "Opting out of backup");
 
-                mAlarmManager.cancel(mRunBackupIntent);
+                    mAlarmManager.cancel(mRunBackupIntent);
 
-                // This also constitutes an opt-out, so we wipe any data for
-                // this device from the backend.  We start that process with
-                // an alarm in order to guarantee wakelock states.
-                if (wasEnabled && mProvisioned) {
-                    // NOTE: we currently flush every registered transport, not just
-                    // the currently-active one.
-                    HashSet<String> allTransports;
-                    synchronized (mTransports) {
-                        allTransports = new HashSet<String>(mTransports.keySet());
+                    // This also constitutes an opt-out, so we wipe any data for
+                    // this device from the backend.  We start that process with
+                    // an alarm in order to guarantee wakelock states.
+                    if (wasEnabled && mProvisioned) {
+                        // NOTE: we currently flush every registered transport, not just
+                        // the currently-active one.
+                        HashSet<String> allTransports;
+                        synchronized (mTransports) {
+                            allTransports = new HashSet<String>(mTransports.keySet());
+                        }
+                        // build the set of transports for which we are posting an init
+                        for (String transport : allTransports) {
+                            recordInitPendingLocked(true, transport);
+                        }
+                        mAlarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
+                                mRunInitIntent);
                     }
-                    // build the set of transports for which we are posting an init
-                    for (String transport : allTransports) {
-                        recordInitPendingLocked(true, transport);
-                    }
-                    mAlarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
-                            mRunInitIntent);
                 }
             }
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
         }
     }
 
