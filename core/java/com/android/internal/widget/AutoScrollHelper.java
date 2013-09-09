@@ -66,7 +66,7 @@ import android.widget.AbsListView;
  * The following scrolling properties may be configured:
  * <ul>
  * <li>Acceleration ramp-up duration, see {@link #setRampUpDuration}. Default
- * value is 2500 milliseconds.
+ * value is 500 milliseconds.
  * <li>Acceleration ramp-down duration, see {@link #setRampDownDuration}.
  * Default value is 500 milliseconds.
  * <li>Target velocity relative to view size, see {@link #setRelativeVelocity}.
@@ -191,7 +191,7 @@ public abstract class AutoScrollHelper implements View.OnTouchListener {
     private static final float DEFAULT_RELATIVE_EDGE = 0.2f;
     private static final float DEFAULT_RELATIVE_VELOCITY = 1f;
     private static final int DEFAULT_ACTIVATION_DELAY = ViewConfiguration.getTapTimeout();
-    private static final int DEFAULT_RAMP_UP_DURATION = 2500;
+    private static final int DEFAULT_RAMP_UP_DURATION = 500;
     private static final int DEFAULT_RAMP_DOWN_DURATION = 500;
 
     /**
