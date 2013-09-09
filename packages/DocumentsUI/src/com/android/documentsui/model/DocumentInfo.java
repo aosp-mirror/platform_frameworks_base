@@ -20,6 +20,8 @@ import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 
@@ -32,15 +34,16 @@ import java.io.DataOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ProtocolException;
-import java.util.Comparator;
 
 /**
  * Representation of a {@link Document}.
  */
-public class DocumentInfo implements Durable {
+public class DocumentInfo implements Durable, Parcelable {
     private static final int VERSION_INIT = 1;
+    private static final int VERSION_SPLIT_URI = 2;
 
-    public Uri uri;
+    public String authority;
+    public String documentId;
     public String mimeType;
     public String displayName;
     public long lastModified;
@@ -49,13 +52,17 @@ public class DocumentInfo implements Durable {
     public long size;
     public int icon;
 
+    /** Derived fields that aren't persisted */
+    public Uri derivedUri;
+
     public DocumentInfo() {
         reset();
     }
 
     @Override
     public void reset() {
-        uri = null;
+        authority = null;
+        documentId = null;
         mimeType = null;
         displayName = null;
         lastModified = -1;
@@ -63,6 +70,8 @@ public class DocumentInfo implements Durable {
         summary = null;
         size = -1;
         icon = 0;
+
+        derivedUri = null;
     }
 
     @Override
@@ -70,8 +79,10 @@ public class DocumentInfo implements Durable {
         final int version = in.readInt();
         switch (version) {
             case VERSION_INIT:
-                final String rawUri = DurableUtils.readNullableString(in);
-                uri = rawUri != null ? Uri.parse(rawUri) : null;
+                throw new ProtocolException("Ignored upgrade");
+            case VERSION_SPLIT_URI:
+                authority = DurableUtils.readNullableString(in);
+                documentId = DurableUtils.readNullableString(in);
                 mimeType = DurableUtils.readNullableString(in);
                 displayName = DurableUtils.readNullableString(in);
                 lastModified = in.readLong();
@@ -79,6 +90,7 @@ public class DocumentInfo implements Durable {
                 summary = DurableUtils.readNullableString(in);
                 size = in.readLong();
                 icon = in.readInt();
+                deriveFields();
                 break;
             default:
                 throw new ProtocolException("Unknown version " + version);
@@ -87,8 +99,9 @@ public class DocumentInfo implements Durable {
 
     @Override
     public void write(DataOutputStream out) throws IOException {
-        out.writeInt(VERSION_INIT);
-        DurableUtils.writeNullableString(out, uri.toString());
+        out.writeInt(VERSION_SPLIT_URI);
+        DurableUtils.writeNullableString(out, authority);
+        DurableUtils.writeNullableString(out, documentId);
         DurableUtils.writeNullableString(out, mimeType);
         DurableUtils.writeNullableString(out, displayName);
         out.writeLong(lastModified);
@@ -98,11 +111,41 @@ public class DocumentInfo implements Durable {
         out.writeInt(icon);
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        DurableUtils.writeToParcel(dest, this);
+    }
+
+    public static final Creator<DocumentInfo> CREATOR = new Creator<DocumentInfo>() {
+        @Override
+        public DocumentInfo createFromParcel(Parcel in) {
+            final DocumentInfo doc = new DocumentInfo();
+            DurableUtils.readFromParcel(in, doc);
+            return doc;
+        }
+
+        @Override
+        public DocumentInfo[] newArray(int size) {
+            return new DocumentInfo[size];
+        }
+    };
+
     public static DocumentInfo fromDirectoryCursor(Cursor cursor) {
-        final DocumentInfo doc = new DocumentInfo();
         final String authority = getCursorString(cursor, RootCursorWrapper.COLUMN_AUTHORITY);
-        final String docId = getCursorString(cursor, Document.COLUMN_DOCUMENT_ID);
-        doc.uri = DocumentsContract.buildDocumentUri(authority, docId);
+        return fromCursor(cursor, authority);
+    }
+
+    public static DocumentInfo fromCursor(Cursor cursor, String authority) {
+        final DocumentInfo doc = new DocumentInfo();
+        doc.authority = authority;
+        doc.documentId = getCursorString(cursor, Document.COLUMN_DOCUMENT_ID);
+        doc.mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
+        doc.documentId = getCursorString(cursor, Document.COLUMN_DOCUMENT_ID);
         doc.mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
         doc.displayName = getCursorString(cursor, Document.COLUMN_DISPLAY_NAME);
         doc.lastModified = getCursorLong(cursor, Document.COLUMN_LAST_MODIFIED);
@@ -110,6 +153,7 @@ public class DocumentInfo implements Durable {
         doc.summary = getCursorString(cursor, Document.COLUMN_SUMMARY);
         doc.size = getCursorLong(cursor, Document.COLUMN_SIZE);
         doc.icon = getCursorInt(cursor, Document.COLUMN_ICON);
+        doc.deriveFields();
         return doc;
     }
 
@@ -122,16 +166,7 @@ public class DocumentInfo implements Durable {
             if (!cursor.moveToFirst()) {
                 throw new FileNotFoundException("Missing details for " + uri);
             }
-            final DocumentInfo doc = new DocumentInfo();
-            doc.uri = uri;
-            doc.mimeType = getCursorString(cursor, Document.COLUMN_MIME_TYPE);
-            doc.displayName = getCursorString(cursor, Document.COLUMN_DISPLAY_NAME);
-            doc.lastModified = getCursorLong(cursor, Document.COLUMN_LAST_MODIFIED);
-            doc.flags = getCursorInt(cursor, Document.COLUMN_FLAGS);
-            doc.summary = getCursorString(cursor, Document.COLUMN_SUMMARY);
-            doc.size = getCursorLong(cursor, Document.COLUMN_SIZE);
-            doc.icon = getCursorInt(cursor, Document.COLUMN_ICON);
-            return doc;
+            return fromCursor(cursor, uri.getAuthority());
         } catch (Throwable t) {
             throw asFileNotFoundException(t);
         } finally {
@@ -140,9 +175,13 @@ public class DocumentInfo implements Durable {
         }
     }
 
+    private void deriveFields() {
+        derivedUri = DocumentsContract.buildDocumentUri(authority, documentId);
+    }
+
     @Override
     public String toString() {
-        return "Document{name=" + displayName + ", uri=" + uri + "}";
+        return "Document{name=" + displayName + ", docId=" + documentId + "}";
     }
 
     public boolean isCreateSupported() {
@@ -189,40 +228,12 @@ public class DocumentInfo implements Durable {
         }
     }
 
+    /**
+     * Missing or null values are returned as 0.
+     */
     public static int getCursorInt(Cursor cursor, String columnName) {
         final int index = cursor.getColumnIndex(columnName);
         return (index != -1) ? cursor.getInt(index) : 0;
-    }
-
-    @Deprecated
-    public static class DisplayNameComparator implements Comparator<DocumentInfo> {
-        @Override
-        public int compare(DocumentInfo lhs, DocumentInfo rhs) {
-            final boolean leftDir = lhs.isDirectory();
-            final boolean rightDir = rhs.isDirectory();
-
-            if (leftDir != rightDir) {
-                return leftDir ? -1 : 1;
-            } else {
-                return compareToIgnoreCaseNullable(lhs.displayName, rhs.displayName);
-            }
-        }
-    }
-
-    @Deprecated
-    public static class LastModifiedComparator implements Comparator<DocumentInfo> {
-        @Override
-        public int compare(DocumentInfo lhs, DocumentInfo rhs) {
-            return Long.compare(rhs.lastModified, lhs.lastModified);
-        }
-    }
-
-    @Deprecated
-    public static class SizeComparator implements Comparator<DocumentInfo> {
-        @Override
-        public int compare(DocumentInfo lhs, DocumentInfo rhs) {
-            return Long.compare(rhs.size, lhs.size);
-        }
     }
 
     public static FileNotFoundException asFileNotFoundException(Throwable t)

@@ -20,6 +20,8 @@ import static com.android.documentsui.DocumentsActivity.TAG;
 import static com.android.documentsui.DocumentsActivity.State.ACTION_MANAGE;
 import static com.android.documentsui.DocumentsActivity.State.MODE_GRID;
 import static com.android.documentsui.DocumentsActivity.State.MODE_LIST;
+import static com.android.documentsui.DocumentsActivity.State.MODE_UNKNOWN;
+import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_UNKNOWN;
 import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 import static com.android.documentsui.model.DocumentInfo.getCursorLong;
 import static com.android.documentsui.model.DocumentInfo.getCursorString;
@@ -91,43 +93,42 @@ public class DirectoryFragment extends Fragment {
 
     private int mType = TYPE_NORMAL;
 
+    private int mLastMode = MODE_UNKNOWN;
+    private int mLastSortOrder = SORT_ORDER_UNKNOWN;
+
     private Point mThumbSize;
 
     private DocumentsAdapter mAdapter;
     private LoaderCallbacks<DirectoryResult> mCallbacks;
 
     private static final String EXTRA_TYPE = "type";
-    private static final String EXTRA_AUTHORITY = "authority";
-    private static final String EXTRA_ROOT_ID = "rootId";
-    private static final String EXTRA_DOC_ID = "docId";
+    private static final String EXTRA_ROOT = "root";
+    private static final String EXTRA_DOC = "doc";
     private static final String EXTRA_QUERY = "query";
 
     private static AtomicInteger sLoaderId = new AtomicInteger(4000);
 
-    private int mLastSortOrder = -1;
-
     private final int mLoaderId = sLoaderId.incrementAndGet();
 
-    public static void showNormal(FragmentManager fm, Uri uri) {
-        show(fm, TYPE_NORMAL, uri.getAuthority(), null, DocumentsContract.getDocumentId(uri), null);
+    public static void showNormal(FragmentManager fm, RootInfo root, DocumentInfo doc) {
+        show(fm, TYPE_NORMAL, root, doc, null);
     }
 
-    public static void showSearch(FragmentManager fm, Uri uri, String query) {
-        show(fm, TYPE_SEARCH, uri.getAuthority(), null, DocumentsContract.getDocumentId(uri),
-                query);
+    public static void showSearch(
+            FragmentManager fm, RootInfo root, DocumentInfo doc, String query) {
+        show(fm, TYPE_SEARCH, root, doc, query);
     }
 
     public static void showRecentsOpen(FragmentManager fm) {
-        show(fm, TYPE_RECENT_OPEN, null, null, null, null);
+        show(fm, TYPE_RECENT_OPEN, null, null, null);
     }
 
-    private static void show(FragmentManager fm, int type, String authority, String rootId,
-            String docId, String query) {
+    private static void show(
+            FragmentManager fm, int type, RootInfo root, DocumentInfo doc, String query) {
         final Bundle args = new Bundle();
         args.putInt(EXTRA_TYPE, type);
-        args.putString(EXTRA_AUTHORITY, authority);
-        args.putString(EXTRA_ROOT_ID, rootId);
-        args.putString(EXTRA_DOC_ID, docId);
+        args.putParcelable(EXTRA_ROOT, root);
+        args.putParcelable(EXTRA_DOC, doc);
         args.putString(EXTRA_QUERY, query);
 
         final DirectoryFragment fragment = new DirectoryFragment();
@@ -167,6 +168,7 @@ public class DirectoryFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
 
         final Context context = getActivity();
+        final State state = getDisplayState(DirectoryFragment.this);
 
         mAdapter = new DocumentsAdapter();
         mType = getArguments().getInt(EXTRA_TYPE);
@@ -174,35 +176,48 @@ public class DirectoryFragment extends Fragment {
         mCallbacks = new LoaderCallbacks<DirectoryResult>() {
             @Override
             public Loader<DirectoryResult> onCreateLoader(int id, Bundle args) {
-                final State state = getDisplayState(DirectoryFragment.this);
-
-                final String authority = getArguments().getString(EXTRA_AUTHORITY);
-                final String rootId = getArguments().getString(EXTRA_ROOT_ID);
-                final String docId = getArguments().getString(EXTRA_DOC_ID);
+                final RootInfo root = getArguments().getParcelable(EXTRA_ROOT);
+                final DocumentInfo doc = getArguments().getParcelable(EXTRA_DOC);
                 final String query = getArguments().getString(EXTRA_QUERY);
 
                 Uri contentsUri;
                 switch (mType) {
                     case TYPE_NORMAL:
-                        contentsUri = DocumentsContract.buildChildDocumentsUri(authority, docId);
-                        return new DirectoryLoader(context, rootId, contentsUri, state.sortOrder);
+                        contentsUri = DocumentsContract.buildChildDocumentsUri(
+                                doc.authority, doc.documentId);
+                        return new DirectoryLoader(context, root, doc, contentsUri);
                     case TYPE_SEARCH:
                         contentsUri = DocumentsContract.buildSearchDocumentsUri(
-                                authority, docId, query);
-                        return new DirectoryLoader(context, rootId, contentsUri, state.sortOrder);
+                                doc.authority, doc.documentId, query);
+                        return new DirectoryLoader(context, root, doc, contentsUri);
                     case TYPE_RECENT_OPEN:
                         final RootsCache roots = DocumentsApplication.getRootsCache(context);
                         final List<RootInfo> matchingRoots = roots.getMatchingRoots(state);
-                        return new RecentLoader(context, matchingRoots);
+                        return new RecentLoader(context, matchingRoots, state.acceptMimes);
                     default:
                         throw new IllegalStateException("Unknown type " + mType);
-
                 }
             }
 
             @Override
             public void onLoadFinished(Loader<DirectoryResult> loader, DirectoryResult result) {
+                if (!isAdded()) return;
+
                 mAdapter.swapCursor(result.cursor);
+
+                // Push latest state up to UI
+                // TODO: if mode change was racing with us, don't overwrite it
+                state.mode = result.mode;
+                state.sortOrder = result.sortOrder;
+                ((DocumentsActivity) context).onStateChanged();
+
+                updateDisplayState();
+
+                if (mLastSortOrder != result.sortOrder) {
+                    mLastSortOrder = result.sortOrder;
+                    mListView.smoothScrollToPosition(0);
+                    mGridView.smoothScrollToPosition(0);
+                }
             }
 
             @Override
@@ -210,6 +225,9 @@ public class DirectoryFragment extends Fragment {
                 mAdapter.swapCursor(null);
             }
         };
+
+        // Kick off loader at least once
+        getLoaderManager().restartLoader(mLoaderId, null, mCallbacks);
 
         updateDisplayState();
     }
@@ -220,21 +238,26 @@ public class DirectoryFragment extends Fragment {
         updateDisplayState();
     }
 
-    public void updateDisplayState() {
+    public void onUserSortOrderChanged() {
+        // User change always triggers reload
+        getLoaderManager().restartLoader(mLoaderId, null, mCallbacks);
+    }
+
+    public void onUserModeChanged() {
+        // Mode change is just display; no need to reload
+        updateDisplayState();
+    }
+
+    private void updateDisplayState() {
         final State state = getDisplayState(this);
 
-        if (mLastSortOrder != state.sortOrder) {
-            getLoaderManager().restartLoader(mLoaderId, null, mCallbacks);
-            mLastSortOrder = state.sortOrder;
-        }
+        mFilter = new MimePredicate(state.acceptMimes);
 
-        mListView.smoothScrollToPosition(0);
-        mGridView.smoothScrollToPosition(0);
+        if (mLastMode == state.mode) return;
+        mLastMode = state.mode;
 
         mListView.setVisibility(state.mode == MODE_LIST ? View.VISIBLE : View.GONE);
         mGridView.setVisibility(state.mode == MODE_GRID ? View.VISIBLE : View.GONE);
-
-        mFilter = new MimePredicate(state.acceptMimes);
 
         final int choiceMode;
         if (state.allowMultiple) {
@@ -254,14 +277,14 @@ public class DirectoryFragment extends Fragment {
             mGridView.setChoiceMode(choiceMode);
             mCurrentView = mGridView;
         } else if (state.mode == MODE_LIST) {
-            thumbSize = getResources().getDimensionPixelSize(android.R.dimen.app_icon_size);
+            thumbSize = getResources().getDimensionPixelSize(R.dimen.icon_size);
             mGridView.setAdapter(null);
             mGridView.setChoiceMode(ListView.CHOICE_MODE_NONE);
             mListView.setAdapter(mAdapter);
             mListView.setChoiceMode(choiceMode);
             mCurrentView = mListView;
         } else {
-            throw new IllegalStateException();
+            throw new IllegalStateException("Unknown state " + state.mode);
         }
 
         mThumbSize = new Point(thumbSize, thumbSize);
@@ -366,7 +389,7 @@ public class DirectoryFragment extends Fragment {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.addCategory(Intent.CATEGORY_DEFAULT);
             intent.setType(doc.mimeType);
-            intent.putExtra(Intent.EXTRA_STREAM, doc.uri);
+            intent.putExtra(Intent.EXTRA_STREAM, doc.derivedUri);
 
         } else if (docs.size() > 1) {
             intent = new Intent(Intent.ACTION_SEND_MULTIPLE);
@@ -377,7 +400,7 @@ public class DirectoryFragment extends Fragment {
             final ArrayList<Uri> uris = Lists.newArrayList();
             for (DocumentInfo doc : docs) {
                 mimeTypes.add(doc.mimeType);
-                uris.add(doc.uri);
+                uris.add(doc.derivedUri);
             }
 
             intent.setType(findCommonMimeType(mimeTypes));
@@ -403,7 +426,7 @@ public class DirectoryFragment extends Fragment {
                 continue;
             }
 
-            if (!DocumentsContract.deleteDocument(resolver, doc.uri)) {
+            if (!DocumentsContract.deleteDocument(resolver, doc.derivedUri)) {
                 Log.w(TAG, "Failed to delete " + doc);
                 hadTrouble = true;
             }
