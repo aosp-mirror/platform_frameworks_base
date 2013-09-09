@@ -3377,7 +3377,7 @@ class ActivityManagerProxy implements IActivityManager
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeString(packageName);
-        data.writeStrongBinder(observer.asBinder());
+        data.writeStrongBinder((observer != null) ? observer.asBinder() : null);
         data.writeInt(userId);
         mRemote.transact(CLEAR_APP_DATA_TRANSACTION, data, reply, 0);
         reply.readException();
