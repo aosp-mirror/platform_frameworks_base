@@ -189,7 +189,13 @@ public:
                     mSize, bitmap->getSize());
             return false;
         }
-        bitmap->setPixelRef(mPixelRef);
+
+        // Create a new pixelref with the new ctable that wraps the previous pixelref
+        SkPixelRef* pr = new AndroidPixelRef(*static_cast<AndroidPixelRef*>(mPixelRef), ctable);
+
+        bitmap->setPixelRef(pr)->unref();
+        // since we're already allocated, we lockPixels right away
+        // HeapAllocator/JavaPixelAllocator behaves this way too
         bitmap->lockPixels();
         return true;
     }
