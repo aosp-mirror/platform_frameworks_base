@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -28,7 +29,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 
-import com.android.systemui.BatteryMeterView;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 
@@ -53,9 +53,7 @@ public class PhoneStatusBarView extends PanelBar {
         private final int mTransparent;
         private final float mAlphaWhenOpaque;
         private final float mAlphaWhenTransparent = 1;
-        private View mLeftSide;
-        private View mRightSide;
-        private BatteryMeterView mBattery;
+        private View mLeftSide, mStatusIcons, mSignalCluster, mClock;
 
         public StatusBarTransitions(Context context) {
             super(context, PhoneStatusBarView.this);
@@ -66,8 +64,9 @@ public class PhoneStatusBarView extends PanelBar {
 
         public void init() {
             mLeftSide = findViewById(R.id.notification_icon_area);
-            mRightSide = findViewById(R.id.system_icon_area);
-            mBattery = (BatteryMeterView) findViewById(R.id.battery);
+            mStatusIcons = findViewById(R.id.statusIcons);
+            mSignalCluster = findViewById(R.id.signal_battery_cluster);
+            mClock = findViewById(R.id.clock);
             applyMode(getMode(), false /*animate*/);
         }
 
@@ -96,16 +95,22 @@ public class PhoneStatusBarView extends PanelBar {
         }
 
         private void applyMode(int mode, boolean animate) {
-            if (mLeftSide == null || mRightSide == null) return;
+            if (mLeftSide == null) return; // pre-init
             float newAlpha = getAlphaFor(mode);
             if (animate) {
-                ObjectAnimator lhs = animateTransitionTo(mLeftSide, newAlpha);
-                lhs.start();
-                // TODO jspurlock - fix conflicting rhs animations on tablets
-                mRightSide.setAlpha(newAlpha);
+                AnimatorSet anims = new AnimatorSet();
+                anims.playTogether(
+                        animateTransitionTo(mLeftSide, newAlpha),
+                        animateTransitionTo(mStatusIcons, newAlpha),
+                        animateTransitionTo(mSignalCluster, newAlpha),
+                        animateTransitionTo(mClock, newAlpha)
+                        );
+                anims.start();
             } else {
                 mLeftSide.setAlpha(newAlpha);
-                mRightSide.setAlpha(newAlpha);
+                mStatusIcons.setAlpha(newAlpha);
+                mSignalCluster.setAlpha(newAlpha);
+                mClock.setAlpha(newAlpha);
             }
         }
     }
