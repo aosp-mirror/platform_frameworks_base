@@ -25,51 +25,64 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
+import android.provider.DocumentsContract.Document;
+import android.provider.DocumentsContract.Root;
 import android.text.format.DateUtils;
 import android.util.Log;
 
 public class RecentsProvider extends ContentProvider {
     private static final String TAG = "RecentsProvider";
 
-    // TODO: offer view of recents that handles backend root resolution before
-    // returning cursor, include extra columns
+    public static final long MAX_HISTORY_IN_MILLIS = DateUtils.DAY_IN_MILLIS * 45;
 
-    public static final String AUTHORITY = "com.android.documentsui.recents";
+    private static final String AUTHORITY = "com.android.documentsui.recents";
 
     private static final UriMatcher sMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
-    private static final int URI_RECENT_OPEN = 1;
-    private static final int URI_RECENT_CREATE = 2;
+    private static final int URI_RECENT = 1;
+    private static final int URI_STATE = 2;
     private static final int URI_RESUME = 3;
 
     static {
-        sMatcher.addURI(AUTHORITY, "recent_open", URI_RECENT_OPEN);
-        sMatcher.addURI(AUTHORITY, "recent_create", URI_RECENT_CREATE);
+        sMatcher.addURI(AUTHORITY, "recent", URI_RECENT);
+        // state/authority/rootId/docId
+        sMatcher.addURI(AUTHORITY, "state/*/*/*", URI_STATE);
+        // resume/packageName
         sMatcher.addURI(AUTHORITY, "resume/*", URI_RESUME);
     }
 
-    private static final String TABLE_RECENT_OPEN = "recent_open";
-    private static final String TABLE_RECENT_CREATE = "recent_create";
-    private static final String TABLE_RESUME = "resume";
+    public static final String TABLE_RECENT = "recent";
+    public static final String TABLE_STATE = "state";
+    public static final String TABLE_RESUME = "resume";
 
-    /**
-     * String of URIs pointing at a storage backend, stored as a JSON array,
-     * starting with root.
-     */
-    public static final String COL_PATH = "path";
-    public static final String COL_URI = "uri";
-    public static final String COL_PACKAGE_NAME = "package_name";
-    public static final String COL_TIMESTAMP = "timestamp";
-
-    @Deprecated
-    public static Uri buildRecentOpen() {
-        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
-                .authority(AUTHORITY).appendPath("recent_open").build();
+    public static class RecentColumns {
+        public static final String STACK = "stack";
+        public static final String TIMESTAMP = "timestamp";
     }
 
-    public static Uri buildRecentCreate() {
+    public static class StateColumns {
+        public static final String AUTHORITY = "authority";
+        public static final String ROOT_ID = Root.COLUMN_ROOT_ID;
+        public static final String DOCUMENT_ID = Document.COLUMN_DOCUMENT_ID;
+        public static final String MODE = "mode";
+        public static final String SORT_ORDER = "sortOrder";
+    }
+
+    public static class ResumeColumns {
+        public static final String PACKAGE_NAME = "package_name";
+        public static final String STACK = "stack";
+        public static final String TIMESTAMP = "timestamp";
+    }
+
+    public static Uri buildRecent() {
         return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
-                .authority(AUTHORITY).appendPath("recent_create").build();
+                .authority(AUTHORITY).appendPath("recent").build();
+    }
+
+    public static Uri buildState(String authority, String rootId, String documentId) {
+        return new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT).authority(AUTHORITY)
+                .appendPath("state").appendPath(authority).appendPath(rootId).appendPath(documentId)
+                .build();
     }
 
     public static Uri buildResume(String packageName) {
@@ -83,35 +96,42 @@ public class RecentsProvider extends ContentProvider {
         private static final String DB_NAME = "recents.db";
 
         private static final int VERSION_INIT = 1;
+        private static final int VERSION_AS_BLOB = 3;
 
         public DatabaseHelper(Context context) {
-            super(context, DB_NAME, null, VERSION_INIT);
+            super(context, DB_NAME, null, VERSION_AS_BLOB);
         }
 
         @Override
         public void onCreate(SQLiteDatabase db) {
-            db.execSQL("CREATE TABLE " + TABLE_RECENT_OPEN + " (" +
-                    COL_URI + " TEXT PRIMARY KEY ON CONFLICT REPLACE," +
-                    COL_TIMESTAMP + " INTEGER" +
+
+            db.execSQL("CREATE TABLE " + TABLE_RECENT + " (" +
+                    RecentColumns.STACK + " BLOB PRIMARY KEY ON CONFLICT REPLACE," +
+                    RecentColumns.TIMESTAMP + " INTEGER" +
                     ")");
 
-            db.execSQL("CREATE TABLE " + TABLE_RECENT_CREATE + " (" +
-                    COL_PATH + " TEXT PRIMARY KEY ON CONFLICT REPLACE," +
-                    COL_TIMESTAMP + " INTEGER" +
+            db.execSQL("CREATE TABLE " + TABLE_STATE + " (" +
+                    StateColumns.AUTHORITY + " TEXT," +
+                    StateColumns.ROOT_ID + " TEXT," +
+                    StateColumns.DOCUMENT_ID + " TEXT," +
+                    StateColumns.MODE + " INTEGER," +
+                    StateColumns.SORT_ORDER + " INTEGER," +
+                    "PRIMARY KEY (" + StateColumns.AUTHORITY + ", " + StateColumns.ROOT_ID + ", "
+                    + StateColumns.DOCUMENT_ID + ")" +
                     ")");
 
             db.execSQL("CREATE TABLE " + TABLE_RESUME + " (" +
-                    COL_PACKAGE_NAME + " TEXT PRIMARY KEY ON CONFLICT REPLACE," +
-                    COL_PATH + " TEXT," +
-                    COL_TIMESTAMP + " INTEGER" +
+                    ResumeColumns.PACKAGE_NAME + " TEXT PRIMARY KEY ON CONFLICT REPLACE," +
+                    ResumeColumns.STACK + " BLOB," +
+                    ResumeColumns.TIMESTAMP + " INTEGER" +
                     ")");
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w(TAG, "Upgrading database; wiping app data");
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_RECENT_OPEN);
-            db.execSQL("DROP TABLE IF EXISTS " + TABLE_RECENT_CREATE);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_RECENT);
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_STATE);
             db.execSQL("DROP TABLE IF EXISTS " + TABLE_RESUME);
             onCreate(db);
         }
@@ -128,22 +148,23 @@ public class RecentsProvider extends ContentProvider {
             String sortOrder) {
         final SQLiteDatabase db = mHelper.getReadableDatabase();
         switch (sMatcher.match(uri)) {
-            case URI_RECENT_OPEN: {
-                return db.query(TABLE_RECENT_OPEN, projection,
-                        buildWhereYounger(DateUtils.WEEK_IN_MILLIS), null, null, null, null);
-            }
-            case URI_RECENT_CREATE: {
-                return db.query(TABLE_RECENT_CREATE, projection,
-                        buildWhereYounger(DateUtils.WEEK_IN_MILLIS), null, null, null, null);
-            }
-            case URI_RESUME: {
+            case URI_RECENT:
+                return db.query(TABLE_RECENT, projection,
+                        RecentColumns.TIMESTAMP + "<" + MAX_HISTORY_IN_MILLIS, null, null, null,
+                        null);
+            case URI_STATE:
+                final String authority = uri.getPathSegments().get(1);
+                final String rootId = uri.getPathSegments().get(2);
+                final String documentId = uri.getPathSegments().get(3);
+                return db.query(TABLE_STATE, projection, StateColumns.AUTHORITY + "=? AND "
+                        + StateColumns.ROOT_ID + "=? AND " + StateColumns.DOCUMENT_ID + "=?",
+                        new String[] { authority, rootId, documentId }, null, null, null);
+            case URI_RESUME:
                 final String packageName = uri.getPathSegments().get(1);
-                return db.query(TABLE_RESUME, projection, COL_PACKAGE_NAME + "=?",
+                return db.query(TABLE_RESUME, projection, ResumeColumns.PACKAGE_NAME + "=?",
                         new String[] { packageName }, null, null, null);
-            }
-            default: {
+            default:
                 throw new UnsupportedOperationException("Unsupported Uri " + uri);
-            }
         }
     }
 
@@ -156,28 +177,37 @@ public class RecentsProvider extends ContentProvider {
     public Uri insert(Uri uri, ContentValues values) {
         final SQLiteDatabase db = mHelper.getWritableDatabase();
         switch (sMatcher.match(uri)) {
-            case URI_RECENT_OPEN: {
-                values.put(COL_TIMESTAMP, System.currentTimeMillis());
-                db.insert(TABLE_RECENT_OPEN, null, values);
-                db.delete(TABLE_RECENT_OPEN, buildWhereOlder(DateUtils.WEEK_IN_MILLIS), null);
+            case URI_RECENT:
+                values.put(RecentColumns.TIMESTAMP, System.currentTimeMillis());
+                db.insert(TABLE_RECENT, null, values);
+                db.delete(
+                        TABLE_RECENT, RecentColumns.TIMESTAMP + ">" + MAX_HISTORY_IN_MILLIS, null);
                 return uri;
-            }
-            case URI_RECENT_CREATE: {
-                values.put(COL_TIMESTAMP, System.currentTimeMillis());
-                db.insert(TABLE_RECENT_CREATE, null, values);
-                db.delete(TABLE_RECENT_CREATE, buildWhereOlder(DateUtils.WEEK_IN_MILLIS), null);
+            case URI_STATE:
+                final String authority = uri.getPathSegments().get(1);
+                final String rootId = uri.getPathSegments().get(2);
+                final String documentId = uri.getPathSegments().get(3);
+
+                final ContentValues key = new ContentValues();
+                key.put(StateColumns.AUTHORITY, authority);
+                key.put(StateColumns.ROOT_ID, rootId);
+                key.put(StateColumns.DOCUMENT_ID, documentId);
+
+                // Ensure that row exists, then update with changed values
+                db.insertWithOnConflict(TABLE_STATE, null, key, SQLiteDatabase.CONFLICT_IGNORE);
+                db.update(TABLE_STATE, values, StateColumns.AUTHORITY + "=? AND "
+                        + StateColumns.ROOT_ID + "=? AND " + StateColumns.DOCUMENT_ID + "=?",
+                        new String[] { authority, rootId, documentId });
+
                 return uri;
-            }
-            case URI_RESUME: {
+            case URI_RESUME:
                 final String packageName = uri.getPathSegments().get(1);
-                values.put(COL_PACKAGE_NAME, packageName);
-                values.put(COL_TIMESTAMP, System.currentTimeMillis());
+                values.put(ResumeColumns.PACKAGE_NAME, packageName);
+                values.put(ResumeColumns.TIMESTAMP, System.currentTimeMillis());
                 db.insert(TABLE_RESUME, null, values);
                 return uri;
-            }
-            default: {
+            default:
                 throw new UnsupportedOperationException("Unsupported Uri " + uri);
-            }
         }
     }
 
@@ -189,13 +219,5 @@ public class RecentsProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         throw new UnsupportedOperationException("Unsupported Uri " + uri);
-    }
-
-    private static String buildWhereOlder(long deltaMillis) {
-        return COL_TIMESTAMP + "<" + (System.currentTimeMillis() - deltaMillis);
-    }
-
-    private static String buildWhereYounger(long deltaMillis) {
-        return COL_TIMESTAMP + ">" + (System.currentTimeMillis() - deltaMillis);
     }
 }

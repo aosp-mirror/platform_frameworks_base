@@ -70,7 +70,7 @@ public class CreateDirectoryFragment extends DialogFragment {
 
                 try {
                     final Uri childUri = DocumentsContract.createDocument(
-                            resolver, cwd.uri, Document.MIME_TYPE_DIR, displayName);
+                            resolver, cwd.derivedUri, Document.MIME_TYPE_DIR, displayName);
 
                     // Navigate into newly created child
                     final DocumentInfo childDoc = DocumentInfo.fromUri(resolver, childUri);

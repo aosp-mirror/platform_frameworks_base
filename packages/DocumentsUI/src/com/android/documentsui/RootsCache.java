@@ -169,8 +169,9 @@ public class RootsCache {
             if (state.localOnly && !localOnly) continue;
 
             // Only include roots that serve requested content
-            final boolean overlap = MimePredicate.mimeMatches(root.mimeTypes, state.acceptMimes)
-                    || MimePredicate.mimeMatches(state.acceptMimes, root.mimeTypes);
+            final boolean overlap =
+                    MimePredicate.mimeMatches(root.derivedMimeTypes, state.acceptMimes) ||
+                    MimePredicate.mimeMatches(state.acceptMimes, root.derivedMimeTypes);
             if (!overlap) {
                 continue;
             }

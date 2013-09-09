@@ -49,6 +49,18 @@ public class MimePredicate implements Predicate<DocumentInfo> {
         return false;
     }
 
+    public static boolean mimeMatches(String filter, String[] tests) {
+        if (tests == null) {
+            return true;
+        }
+        for (String test : tests) {
+            if (mimeMatches(filter, test)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static boolean mimeMatches(String[] filters, String test) {
         if (filters == null) {
             return true;

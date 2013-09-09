@@ -16,8 +16,6 @@
 
 package com.android.documentsui.model;
 
-import com.android.documentsui.RootsCache;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -30,14 +28,13 @@ import java.util.LinkedList;
  */
 public class DocumentStack extends LinkedList<DocumentInfo> implements Durable {
     private static final int VERSION_INIT = 1;
+    private static final int VERSION_ADD_ROOT = 2;
 
-    public RootInfo getRoot(RootsCache roots) {
-        return roots.findRoot(getLast().uri);
-    }
+    public RootInfo root;
 
-    public String getTitle(RootsCache roots) {
-        if (size() == 1) {
-            return getRoot(roots).title;
+    public String getTitle() {
+        if (size() == 1 && root != null) {
+            return root.title;
         } else if (size() > 1) {
             return peek().displayName;
         } else {
@@ -52,6 +49,7 @@ public class DocumentStack extends LinkedList<DocumentInfo> implements Durable {
     @Override
     public void reset() {
         clear();
+        root = null;
     }
 
     @Override
@@ -59,6 +57,12 @@ public class DocumentStack extends LinkedList<DocumentInfo> implements Durable {
         final int version = in.readInt();
         switch (version) {
             case VERSION_INIT:
+                throw new ProtocolException("Ignored upgrade");
+            case VERSION_ADD_ROOT:
+                if (in.readBoolean()) {
+                    root = new RootInfo();
+                    root.read(in);
+                }
                 final int size = in.readInt();
                 for (int i = 0; i < size; i++) {
                     final DocumentInfo doc = new DocumentInfo();
@@ -73,7 +77,13 @@ public class DocumentStack extends LinkedList<DocumentInfo> implements Durable {
 
     @Override
     public void write(DataOutputStream out) throws IOException {
-        out.writeInt(VERSION_INIT);
+        out.writeInt(VERSION_ADD_ROOT);
+        if (root != null) {
+            out.writeBoolean(true);
+            root.write(out);
+        } else {
+            out.writeBoolean(false);
+        }
         final int size = size();
         out.writeInt(size);
         for (int i = 0; i < size; i++) {

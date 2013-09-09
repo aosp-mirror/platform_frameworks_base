@@ -23,28 +23,121 @@ import static com.android.documentsui.model.DocumentInfo.getCursorString;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.provider.DocumentsContract.Root;
 
 import com.android.documentsui.IconUtils;
 import com.android.documentsui.R;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.ProtocolException;
 import java.util.Objects;
 
 /**
  * Representation of a {@link Root}.
  */
-public class RootInfo {
+public class RootInfo implements Durable, Parcelable {
+    private static final int VERSION_INIT = 1;
+
     public String authority;
     public String rootId;
     public int rootType;
     public int flags;
     public int icon;
-    public int localIcon;
     public String title;
     public String summary;
     public String documentId;
     public long availableBytes;
-    public String[] mimeTypes;
+    public String mimeTypes;
+
+    /** Derived fields that aren't persisted */
+    public String[] derivedMimeTypes;
+    public int derivedIcon;
+
+    public RootInfo() {
+        reset();
+    }
+
+    @Override
+    public void reset() {
+        authority = null;
+        rootId = null;
+        rootType = 0;
+        flags = 0;
+        icon = 0;
+        title = null;
+        summary = null;
+        documentId = null;
+        availableBytes = -1;
+        mimeTypes = null;
+
+        derivedMimeTypes = null;
+        derivedIcon = 0;
+    }
+
+    @Override
+    public void read(DataInputStream in) throws IOException {
+        final int version = in.readInt();
+        switch (version) {
+            case VERSION_INIT:
+                authority = DurableUtils.readNullableString(in);
+                rootId = DurableUtils.readNullableString(in);
+                rootType = in.readInt();
+                flags = in.readInt();
+                icon = in.readInt();
+                title = DurableUtils.readNullableString(in);
+                summary = DurableUtils.readNullableString(in);
+                documentId = DurableUtils.readNullableString(in);
+                availableBytes = in.readLong();
+                mimeTypes = DurableUtils.readNullableString(in);
+                deriveFields();
+                break;
+            default:
+                throw new ProtocolException("Unknown version " + version);
+        }
+    }
+
+    @Override
+    public void write(DataOutputStream out) throws IOException {
+        out.writeInt(VERSION_INIT);
+        DurableUtils.writeNullableString(out, authority);
+        DurableUtils.writeNullableString(out, rootId);
+        out.writeInt(rootType);
+        out.writeInt(flags);
+        out.writeInt(icon);
+        DurableUtils.writeNullableString(out, title);
+        DurableUtils.writeNullableString(out, summary);
+        DurableUtils.writeNullableString(out, documentId);
+        out.writeLong(availableBytes);
+        DurableUtils.writeNullableString(out, mimeTypes);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        DurableUtils.writeToParcel(dest, this);
+    }
+
+    public static final Creator<RootInfo> CREATOR = new Creator<RootInfo>() {
+        @Override
+        public RootInfo createFromParcel(Parcel in) {
+            final RootInfo root = new RootInfo();
+            DurableUtils.readFromParcel(in, root);
+            return root;
+        }
+
+        @Override
+        public RootInfo[] newArray(int size) {
+            return new RootInfo[size];
+        }
+    };
 
     public static RootInfo fromRootsCursor(String authority, Cursor cursor) {
         final RootInfo root = new RootInfo();
@@ -57,31 +150,38 @@ public class RootInfo {
         root.summary = getCursorString(cursor, Root.COLUMN_SUMMARY);
         root.documentId = getCursorString(cursor, Root.COLUMN_DOCUMENT_ID);
         root.availableBytes = getCursorLong(cursor, Root.COLUMN_AVAILABLE_BYTES);
-
-        final String raw = getCursorString(cursor, Root.COLUMN_MIME_TYPES);
-        root.mimeTypes = (raw != null) ? raw.split("\n") : null;
-
-        // TODO: remove these special case icons
-        if ("com.android.externalstorage.documents".equals(authority)) {
-            root.localIcon = R.drawable.ic_root_sdcard;
-        }
-        if ("com.android.providers.downloads.documents".equals(authority)) {
-            root.localIcon = R.drawable.ic_root_download;
-        }
-        if ("com.android.providers.media.documents".equals(authority)) {
-            if ("image".equals(root.rootId)) {
-                root.localIcon = R.drawable.ic_doc_image;
-            } else if ("audio".equals(root.rootId)) {
-                root.localIcon = R.drawable.ic_doc_audio;
-            }
-        }
-
+        root.mimeTypes = getCursorString(cursor, Root.COLUMN_MIME_TYPES);
+        root.deriveFields();
         return root;
     }
 
+    private void deriveFields() {
+        derivedMimeTypes = (mimeTypes != null) ? mimeTypes.split("\n") : null;
+
+        // TODO: remove these special case icons
+        if ("com.android.externalstorage.documents".equals(authority)) {
+            derivedIcon = R.drawable.ic_root_sdcard;
+        }
+        if ("com.android.providers.downloads.documents".equals(authority)) {
+            derivedIcon = R.drawable.ic_root_download;
+        }
+        if ("com.android.providers.media.documents".equals(authority)) {
+            if ("image".equals(rootId)) {
+                derivedIcon = R.drawable.ic_doc_image;
+            } else if ("audio".equals(rootId)) {
+                derivedIcon = R.drawable.ic_doc_audio;
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Root{title=" + title + ", rootId=" + rootId + "}";
+    }
+
     public Drawable loadIcon(Context context) {
-        if (localIcon != 0) {
-            return context.getResources().getDrawable(localIcon);
+        if (derivedIcon != 0) {
+            return context.getResources().getDrawable(derivedIcon);
         } else {
             return IconUtils.loadPackageIcon(context, authority, icon);
         }
