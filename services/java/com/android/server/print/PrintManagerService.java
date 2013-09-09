@@ -41,6 +41,8 @@ import android.util.SparseArray;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -295,6 +297,27 @@ public final class PrintManagerService extends IPrintManager.Stub {
             userState.stopPrinterStateTracking(printerId);
         } finally {
             Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.DUMP)
+                != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump PrintManager from from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid());
+            return;
+        }
+
+        synchronized (mLock) {
+            pw.println("PRINT MANAGER STATE (dumpsys print)");
+            final int userStateCount = mUserStates.size();
+            for (int i = 0; i < userStateCount; i++) {
+                UserState userState = mUserStates.get(i);
+                userState.dump(fd, pw, "");
+                pw.println();
+            }
         }
     }
 
