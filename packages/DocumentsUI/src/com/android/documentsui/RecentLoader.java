@@ -17,6 +17,9 @@
 package com.android.documentsui;
 
 import static com.android.documentsui.DocumentsActivity.TAG;
+import static com.android.documentsui.DocumentsActivity.State.MODE_GRID;
+import static com.android.documentsui.DocumentsActivity.State.MODE_LIST;
+import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_LAST_MODIFIED;
 
 import android.content.AsyncTaskLoader;
 import android.content.ContentProviderClient;
@@ -79,6 +82,7 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
     }
 
     private final List<RootInfo> mRoots;
+    private final String[] mAcceptMimes;
 
     private final HashMap<RootInfo, RecentTask> mTasks = Maps.newHashMap();
 
@@ -135,9 +139,10 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
         }
     }
 
-    public RecentLoader(Context context, List<RootInfo> roots) {
+    public RecentLoader(Context context, List<RootInfo> roots, String[] acceptMimes) {
         super(context);
         mRoots = roots;
+        mAcceptMimes = acceptMimes;
     }
 
     @Override
@@ -171,7 +176,15 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
         for (RecentTask task : mTasks.values()) {
             if (task.isDone()) {
                 try {
-                    cursors.add(task.get());
+                    final Cursor cursor = task.get();
+                    final FilteringCursorWrapper filtered = new FilteringCursorWrapper(
+                            cursor, mAcceptMimes) {
+                        @Override
+                        public void close() {
+                            // Ignored, since we manage cursor lifecycle internally
+                        }
+                    };
+                    cursors.add(filtered);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 } catch (ExecutionException e) {
@@ -181,15 +194,14 @@ public class RecentLoader extends AsyncTaskLoader<DirectoryResult> {
         }
 
         final DirectoryResult result = new DirectoryResult();
+
+        final boolean acceptImages = MimePredicate.mimeMatches("image/*", mAcceptMimes);
+        result.mode = acceptImages ? MODE_GRID : MODE_LIST;
+        result.sortOrder = SORT_ORDER_LAST_MODIFIED;
+
         if (cursors.size() > 0) {
             final MergeCursor merged = new MergeCursor(cursors.toArray(new Cursor[cursors.size()]));
-            final SortingCursorWrapper sorted = new SortingCursorWrapper(
-                    merged, State.SORT_ORDER_LAST_MODIFIED) {
-                @Override
-                public void close() {
-                    // Ignored, since we manage cursor lifecycle internally
-                }
-            };
+            final SortingCursorWrapper sorted = new SortingCursorWrapper(merged, result.sortOrder);
             result.cursor = sorted;
         }
         return result;

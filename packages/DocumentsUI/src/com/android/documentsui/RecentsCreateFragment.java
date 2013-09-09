@@ -41,8 +41,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.android.documentsui.RecentsProvider.RecentColumns;
 import com.android.documentsui.model.DocumentStack;
-import com.android.documentsui.model.RootInfo;
 import com.google.android.collect.Lists;
 
 import libcore.io.IoUtils;
@@ -128,7 +128,7 @@ public class RecentsCreateFragment extends Fragment {
 
     public static class RecentsCreateLoader extends UriDerivativeLoader<Uri, List<DocumentStack>> {
         public RecentsCreateLoader(Context context) {
-            super(context, RecentsProvider.buildRecentCreate());
+            super(context, RecentsProvider.buildRecent());
         }
 
         @Override
@@ -137,14 +137,14 @@ public class RecentsCreateFragment extends Fragment {
 
             final ContentResolver resolver = getContext().getContentResolver();
             final Cursor cursor = resolver.query(
-                    uri, null, null, null, RecentsProvider.COL_TIMESTAMP + " DESC", signal);
+                    uri, null, null, null, RecentColumns.TIMESTAMP + " DESC", signal);
             try {
                 while (cursor != null && cursor.moveToNext()) {
-                    final byte[] raw = cursor.getBlob(
-                            cursor.getColumnIndex(RecentsProvider.COL_PATH));
+                    final byte[] rawStack = cursor.getBlob(
+                            cursor.getColumnIndex(RecentColumns.STACK));
                     try {
                         final DocumentStack stack = new DocumentStack();
-                        stack.read(new DataInputStream(new ByteArrayInputStream(raw)));
+                        stack.read(new DataInputStream(new ByteArrayInputStream(rawStack)));
                         result.add(stack);
                     } catch (IOException e) {
                         Log.w(TAG, "Failed to resolve stack: " + e);
@@ -183,8 +183,7 @@ public class RecentsCreateFragment extends Fragment {
             final TextView title = (TextView) convertView.findViewById(android.R.id.title);
 
             final DocumentStack stack = getItem(position);
-            final RootInfo root = stack.getRoot(roots);
-            icon.setImageDrawable(root.loadIcon(context));
+            icon.setImageDrawable(stack.root.loadIcon(context));
 
             final StringBuilder builder = new StringBuilder();
             for (int i = stack.size() - 1; i >= 0; i--) {

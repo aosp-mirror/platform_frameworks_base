@@ -16,18 +16,29 @@
 
 package com.android.documentsui;
 
+import static com.android.documentsui.DocumentsActivity.TAG;
+import static com.android.documentsui.DocumentsActivity.State.MODE_UNKNOWN;
 import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_DISPLAY_NAME;
 import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_LAST_MODIFIED;
 import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_SIZE;
+import static com.android.documentsui.DocumentsActivity.State.SORT_ORDER_UNKNOWN;
+import static com.android.documentsui.model.DocumentInfo.getCursorInt;
 
 import android.content.AsyncTaskLoader;
 import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
 import android.provider.DocumentsContract.Document;
+import android.util.Log;
+
+import com.android.documentsui.DocumentsActivity.State;
+import com.android.documentsui.RecentsProvider.StateColumns;
+import com.android.documentsui.model.DocumentInfo;
+import com.android.documentsui.model.RootInfo;
 
 import libcore.io.IoUtils;
 
@@ -35,6 +46,9 @@ class DirectoryResult implements AutoCloseable {
     ContentProviderClient client;
     Cursor cursor;
     Exception exception;
+
+    int mode = MODE_UNKNOWN;
+    int sortOrder = SORT_ORDER_UNKNOWN;
 
     @Override
     public void close() {
@@ -48,18 +62,18 @@ class DirectoryResult implements AutoCloseable {
 public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
     private final ForceLoadContentObserver mObserver = new ForceLoadContentObserver();
 
-    private final String mRootId;
+    private final RootInfo mRoot;
+    private final DocumentInfo mDoc;
     private final Uri mUri;
-    private final int mSortOrder;
 
     private CancellationSignal mSignal;
     private DirectoryResult mResult;
 
-    public DirectoryLoader(Context context, String rootId, Uri uri, int sortOrder) {
+    public DirectoryLoader(Context context, RootInfo root, DocumentInfo doc, Uri uri) {
         super(context);
-        mRootId = rootId;
+        mRoot = root;
+        mDoc = doc;
         mUri = uri;
-        mSortOrder = sortOrder;
     }
 
     @Override
@@ -70,20 +84,65 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
             }
             mSignal = new CancellationSignal();
         }
-        final DirectoryResult result = new DirectoryResult();
+
+        final ContentResolver resolver = getContext().getContentResolver();
         final String authority = mUri.getAuthority();
+
+        final DirectoryResult result = new DirectoryResult();
+
+        int userMode = State.MODE_UNKNOWN;
+        int userSortOrder = State.SORT_ORDER_UNKNOWN;
+
+        // Pick up any custom modes requested by user
+        Cursor cursor = null;
         try {
-            result.client = getContext()
-                    .getContentResolver().acquireUnstableContentProviderClient(authority);
-            final Cursor cursor = result.client.query(
-                    mUri, null, null, null, getQuerySortOrder(mSortOrder), mSignal);
+            final Uri stateUri = RecentsProvider.buildState(
+                    mRoot.authority, mRoot.rootId, mDoc.documentId);
+            cursor = resolver.query(stateUri, null, null, null, null);
+            if (cursor.moveToFirst()) {
+                userMode = getCursorInt(cursor, StateColumns.MODE);
+                userSortOrder = getCursorInt(cursor, StateColumns.SORT_ORDER);
+            }
+        } finally {
+            IoUtils.closeQuietly(cursor);
+        }
+
+        if (userMode != State.MODE_UNKNOWN) {
+            result.mode = userMode;
+        } else {
+            if ((mDoc.flags & Document.FLAG_DIR_PREFERS_GRID) != 0) {
+                result.mode = State.MODE_GRID;
+            } else {
+                result.mode = State.MODE_LIST;
+            }
+        }
+
+        if (userSortOrder != State.SORT_ORDER_UNKNOWN) {
+            result.sortOrder = userSortOrder;
+        } else {
+            if ((mDoc.flags & Document.FLAG_DIR_PREFERS_LAST_MODIFIED) != 0) {
+                result.sortOrder = State.SORT_ORDER_LAST_MODIFIED;
+            } else {
+                result.sortOrder = State.SORT_ORDER_DISPLAY_NAME;
+            }
+        }
+
+        Log.d(TAG, "userMode=" + userMode + ", userSortOrder=" + userSortOrder + " --> mode="
+                + result.mode + ", sortOrder=" + result.sortOrder);
+
+        try {
+            result.client = resolver.acquireUnstableContentProviderClient(authority);
+            cursor = result.client.query(
+                    mUri, null, null, null, getQuerySortOrder(result.sortOrder), mSignal);
             cursor.registerContentObserver(mObserver);
 
-            final Cursor withRoot = new RootCursorWrapper(mUri.getAuthority(), mRootId, cursor, -1);
-            final Cursor sorted = new SortingCursorWrapper(withRoot, mSortOrder);
+            final Cursor withRoot = new RootCursorWrapper(
+                    mUri.getAuthority(), mRoot.rootId, cursor, -1);
+            final Cursor sorted = new SortingCursorWrapper(withRoot, result.sortOrder);
 
             result.cursor = sorted;
         } catch (Exception e) {
+            Log.d(TAG, "Failed to query", e);
             result.exception = e;
             ContentProviderClient.closeQuietly(result.client);
         } finally {
@@ -91,6 +150,7 @@ public class DirectoryLoader extends AsyncTaskLoader<DirectoryResult> {
                 mSignal = null;
             }
         }
+
         return result;
     }
 

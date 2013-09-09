@@ -20829,6 +20829,7 @@ package android.provider {
     field public static final java.lang.String COLUMN_SIZE = "_size";
     field public static final java.lang.String COLUMN_SUMMARY = "summary";
     field public static final int FLAG_DIR_PREFERS_GRID = 32; // 0x20
+    field public static final int FLAG_DIR_PREFERS_LAST_MODIFIED = 64; // 0x40
     field public static final int FLAG_DIR_SUPPORTS_CREATE = 8; // 0x8
     field public static final int FLAG_DIR_SUPPORTS_SEARCH = 16; // 0x10
     field public static final int FLAG_SUPPORTS_DELETE = 4; // 0x4
