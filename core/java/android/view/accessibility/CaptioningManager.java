@@ -140,7 +140,7 @@ public class CaptioningManager {
      *
      * @param listener the listener to add
      */
-    public void addCaptioningStateChangeListener(CaptioningChangeListener listener) {
+    public void addCaptioningChangeListener(CaptioningChangeListener listener) {
         synchronized (mListeners) {
             if (mListeners.isEmpty()) {
                 registerObserver(Secure.ACCESSIBILITY_CAPTIONING_ENABLED);
@@ -163,11 +163,11 @@ public class CaptioningManager {
 
     /**
      * Removes a listener previously added using
-     * {@link #addCaptioningStateChangeListener}.
+     * {@link #addCaptioningChangeListener}.
      *
      * @param listener the listener to remove
      */
-    public void removeCaptioningStateChangeListener(CaptioningChangeListener listener) {
+    public void removeCaptioningChangeListener(CaptioningChangeListener listener) {
         synchronized (mListeners) {
             mListeners.remove(listener);
 
@@ -366,7 +366,7 @@ public class CaptioningManager {
      * Listener for changes in captioning properties, including enabled state
      * and user style preferences.
      */
-    public abstract class CaptioningChangeListener {
+    public static abstract class CaptioningChangeListener {
         /**
          * Called when the captioning enabled state changes.
          *

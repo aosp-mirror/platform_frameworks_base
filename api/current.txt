@@ -29086,12 +29086,12 @@ package android.view.accessibility {
   }
 
   public class CaptioningManager {
-    method public void addCaptioningStateChangeListener(android.view.accessibility.CaptioningManager.CaptioningChangeListener);
+    method public void addCaptioningChangeListener(android.view.accessibility.CaptioningManager.CaptioningChangeListener);
     method public final float getFontScale();
     method public final java.util.Locale getLocale();
     method public android.view.accessibility.CaptioningManager.CaptionStyle getUserStyle();
     method public final boolean isEnabled();
-    method public void removeCaptioningStateChangeListener(android.view.accessibility.CaptioningManager.CaptioningChangeListener);
+    method public void removeCaptioningChangeListener(android.view.accessibility.CaptioningManager.CaptioningChangeListener);
   }
 
   public static final class CaptioningManager.CaptionStyle {
@@ -29105,7 +29105,7 @@ package android.view.accessibility {
     field public final int foregroundColor;
   }
 
-  public abstract class CaptioningManager.CaptioningChangeListener {
+  public static abstract class CaptioningManager.CaptioningChangeListener {
     ctor public CaptioningManager.CaptioningChangeListener();
     method public void onEnabledChanged(boolean);
     method public void onFontScaleChanged(float);
