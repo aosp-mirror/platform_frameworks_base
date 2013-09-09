@@ -16,11 +16,11 @@
 
 package android.media;
 
+import android.graphics.Canvas;
 import android.os.Handler;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Pair;
-import android.view.View;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -98,16 +98,16 @@ public abstract class SubtitleTrack implements MediaTimeProvider.OnMediaTimeList
     public abstract void onData(String data, boolean eos, long runID);
 
     /**
-     * Called when adding the subtitle rendering view to the view hierarchy, as
-     * well as when showing or hiding the subtitle track, or when the video
+     * Called when adding the subtitle rendering widget to the view hierarchy,
+     * as well as when showing or hiding the subtitle track, or when the video
      * surface position has changed.
      *
-     * @return the view object that displays this subtitle track.  For most
-     * renderers there should be a single shared view instance that is used
-     * for all tracks supported by that renderer, as at most one subtitle
-     * track is visible at one time.
+     * @return the widget that renders this subtitle track. For most renderers
+     *         there should be a single shared instance that is used for all
+     *         tracks supported by that renderer, as at most one subtitle track
+     *         is visible at one time.
      */
-    public abstract View getView();
+    public abstract RenderingWidget getRenderingWidget();
 
     /**
      * Called when the active cues have changed, and the contents of the subtitle
@@ -268,7 +268,7 @@ public abstract class SubtitleTrack implements MediaTimeProvider.OnMediaTimeList
         }
 
         mVisible = true;
-        getView().setVisibility(View.VISIBLE);
+        getRenderingWidget().setVisible(true);
         if (mTimeProvider != null) {
             mTimeProvider.scheduleUpdate(this);
         }
@@ -283,7 +283,7 @@ public abstract class SubtitleTrack implements MediaTimeProvider.OnMediaTimeList
         if (mTimeProvider != null) {
             mTimeProvider.cancelNotifications(this);
         }
-        getView().setVisibility(View.INVISIBLE);
+        getRenderingWidget().setVisible(false);
         mVisible = false;
     }
 
@@ -643,6 +643,63 @@ public abstract class SubtitleTrack implements MediaTimeProvider.OnMediaTimeList
                 mNextRunAtEndTimeMs.mPrevRunAtEndTimeMs = prev;
                 mNextRunAtEndTimeMs = null;
             }
+        }
+    }
+
+    /**
+     * Interface for rendering subtitles onto a Canvas.
+     */
+    public interface RenderingWidget {
+        /**
+         * Sets the widget's callback, which is used to send updates when the
+         * rendered data has changed.
+         *
+         * @param callback update callback
+         */
+        public void setOnChangedListener(OnChangedListener callback);
+
+        /**
+         * Sets the widget's size.
+         *
+         * @param width width in pixels
+         * @param height height in pixels
+         */
+        public void setSize(int width, int height);
+
+        /**
+         * Sets whether the widget should draw subtitles.
+         *
+         * @param visible true if subtitles should be drawn, false otherwise
+         */
+        public void setVisible(boolean visible);
+
+        /**
+         * Renders subtitles onto a {@link Canvas}.
+         *
+         * @param c canvas on which to render subtitles
+         */
+        public void draw(Canvas c);
+
+        /**
+         * Called when the widget is attached to a window.
+         */
+        public void onAttachedToWindow();
+
+        /**
+         * Called when the widget is detached from a window.
+         */
+        public void onDetachedFromWindow();
+
+        /**
+         * Callback used to send updates about changes to rendering data.
+         */
+        public interface OnChangedListener {
+            /**
+             * Called when the rendering data has changed.
+             *
+             * @param renderingWidget the widget whose data has changed
+             */
+            public void onChanged(RenderingWidget renderingWidget);
         }
     }
 }
