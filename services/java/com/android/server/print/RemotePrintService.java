@@ -41,6 +41,7 @@ import android.util.Slog;
 
 import com.android.internal.R;
 
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -135,6 +136,19 @@ final class RemotePrintService implements DeathRecipient {
                 return null;
             }
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, (Void[]) null);
+    }
+
+    public void dump(PrintWriter pw, String prefix) {
+        String tab = "  ";
+        pw.append(prefix).append("service:").println();
+        pw.append(prefix).append(tab).append("componentName=")
+                .append(mComponentName.flattenToString()).println();
+        pw.append(prefix).append(tab).append("destroyed=")
+                .append(String.valueOf(mDestroyed)).println();
+        pw.append(prefix).append(tab).append("bound=")
+                .append(String.valueOf(isBound())).println();
+        pw.append(prefix).append(tab).append("hasDicoverySession=")
+                .append(String.valueOf(mHasPrinterDiscoverySession));
     }
 
     private void failAllActivePrintJobs() {

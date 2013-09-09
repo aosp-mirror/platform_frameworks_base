@@ -20,6 +20,7 @@ import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -154,6 +155,8 @@ import java.util.List;
 public abstract class PrintService extends Service {
 
     private static final String LOG_TAG = "PrintService";
+
+    private static final boolean DEBUG = false;
 
     /**
      * The {@link Intent} action that must be declared as handled by a service
@@ -433,6 +436,9 @@ public abstract class PrintService extends Service {
 
                 case MSG_ON_PRINTJOB_QUEUED: {
                     PrintJobInfo printJobInfo = (PrintJobInfo) message.obj;
+                    if (DEBUG) {
+                        Log.i(LOG_TAG, "Queued: " + printJobInfo);
+                    }
                     onPrintJobQueued(new PrintJob(printJobInfo, mClient));
                 } break;
 
