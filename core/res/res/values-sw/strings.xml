@@ -657,6 +657,10 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Inaruhusu kishikiliaji kuomba programu ya usakinishaji inayotolewa na mto huduma. Haipaswi kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"sikiliza matukio katika hali za mtandao"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Huruhusu programu kusikiliza matukio katika hali za mtandao. Haipaswi kuhitajika kamwe kwa programu za kawaida."</string>
+    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
+    <skip />
+    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Weka kanuni za nenosiri"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Dhibiti urefu na vibambo vinavyoruhusiwa katika manenosiri ya kufungua skrini."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Chunguza majaribio ya kutofun gua skrini"</string>

@@ -657,6 +657,10 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Permet à l\'application autorisée de faire appel à l\'application de configuration fournie par l\'opérateur. Cette fonctionnalité ne devrait pas être nécessaire pour les applications standards."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"détecter des observations sur les conditions du réseau"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Permet à une application de détecter des observations sur les conditions du réseau. Les applications standards ne devraient pas nécessiter cette autorisation."</string>
+    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
+    <skip />
+    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Définir les règles du mot de passe"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Choisir le nombre et le type de caractères autorisés dans les mots de passe de déverrouillage de l\'écran"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Gérer les tentatives de déverrouillage de l\'écran"</string>
@@ -1580,8 +1584,8 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Les codes PIN ne correspondent pas. Veuillez réessayer."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Le code PIN est trop court. Il doit comporter au moins 4 chiffres."</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"Essay. dans 1 s"</item>
-    <item quantity="other" msgid="4730868920742952817">"Essay. dans <xliff:g id="COUNT">%d</xliff:g> s"</item>
+    <item quantity="one" msgid="311050995198548675">"Réessayer dans 1 s"</item>
+    <item quantity="other" msgid="4730868920742952817">"Réessayer dans <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Veuillez réessayer ultérieurement."</string>
     <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Faire glisser côté pour voir barre."</string>

@@ -657,6 +657,10 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Επιτρέπει στον κάτοχο την κλήση της εφαρμογής διαμόρφωσης που παρέχεται από την εταιρεία κινητής τηλεφωνίας. Δεν απαιτείται για κανονικές εφαρμογές."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"λήψη παρατηρήσεων σχετικά με την κατάσταση δικτύου"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Επιτρέπει σε μια εφαρμογή να λαμβάνει παρατηρήσεις σχετικά με την κατάσταση δικτύου. Δεν θα πρέπει να απαιτείται ποτέ για κανονικές εφαρμογές."</string>
+    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
+    <skip />
+    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Ορισμός κανόνων κωδικού πρόσβασης"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Έλεγχος του μεγέθους και των χαρακτήρων που επιτρέπονται στους κωδικούς πρόσβασης ξεκλειδώματος οθόνης."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Παρακολούθηση προσπαθειών ξεκλειδώματος οθόνης"</string>
