@@ -1745,6 +1745,9 @@ public abstract class ContentResolver {
      * @param extras any extras to pass to the SyncAdapter.
      */
     public static void requestSync(Account account, String authority, Bundle extras) {
+        if (extras == null) {
+            throw new IllegalArgumentException("Must specify extras.");
+        }
         SyncRequest request =
             new SyncRequest.Builder()
                 .setSyncAdapter(account, authority)
