@@ -348,6 +348,20 @@ public class WifiConfiguration implements Parcelable {
         linkProperties = new LinkProperties();
     }
 
+    /**
+     * indicates whether the configuration is valid
+     * @return true if valid, false otherwise
+     * @hide
+     */
+    public boolean isValid() {
+        if (allowedKeyManagement.cardinality() > 1) {
+            return false;
+        }
+
+        // TODO: Add more checks
+        return true;
+    }
+
     @Override
     public String toString() {
         StringBuilder sbuf = new StringBuilder();

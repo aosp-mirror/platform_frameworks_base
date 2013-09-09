@@ -170,7 +170,20 @@ public final class WifiService extends IWifiManager.Stub {
                 }
                 /* Client commands are forwarded to state machine */
                 case WifiManager.CONNECT_NETWORK:
-                case WifiManager.SAVE_NETWORK:
+                case WifiManager.SAVE_NETWORK: {
+                    WifiConfiguration config = (WifiConfiguration) msg.obj;
+                    if (config.isValid()) {
+                        mWifiStateMachine.sendMessage(Message.obtain(msg));
+                    } else {
+                        Slog.d(TAG, "ClientHandler.handleMessage ignoring msg=" + msg);
+                        if (msg.what == WifiManager.CONNECT_NETWORK) {
+                            replyFailed(msg, WifiManager.CONNECT_NETWORK_FAILED);
+                        } else {
+                            replyFailed(msg, WifiManager.SAVE_NETWORK_FAILED);
+                        }
+                    }
+                    break;
+                }
                 case WifiManager.FORGET_NETWORK:
                 case WifiManager.START_WPS:
                 case WifiManager.CANCEL_WPS:
@@ -183,6 +196,17 @@ public final class WifiService extends IWifiManager.Stub {
                     Slog.d(TAG, "ClientHandler.handleMessage ignoring msg=" + msg);
                     break;
                 }
+            }
+        }
+
+        private void replyFailed(Message msg, int what) {
+            Message reply = msg.obtain();
+            reply.what = what;
+            reply.arg1 = WifiManager.INVALID_ARGS;
+            try {
+                msg.replyTo.send(reply);
+            } catch (RemoteException e) {
+                // There's not much we can do if reply can't be sent!
             }
         }
     }
@@ -547,7 +571,11 @@ public final class WifiService extends IWifiManager.Stub {
      */
     public void setWifiApEnabled(WifiConfiguration wifiConfig, boolean enabled) {
         enforceChangePermission();
-        mWifiController.obtainMessage(CMD_SET_AP, enabled ? 1 : 0, 0, wifiConfig).sendToTarget();
+        if (wifiConfig.isValid()) {
+            mWifiController.obtainMessage(CMD_SET_AP, enabled ? 1 : 0, 0, wifiConfig).sendToTarget();
+        } else {
+            Slog.e(TAG, "Invalid WifiConfiguration");
+        }
     }
 
     /**
@@ -580,7 +608,11 @@ public final class WifiService extends IWifiManager.Stub {
         enforceChangePermission();
         if (wifiConfig == null)
             return;
-        mWifiStateMachine.setWifiApConfiguration(wifiConfig);
+        if (wifiConfig.isValid()) {
+            mWifiStateMachine.setWifiApConfiguration(wifiConfig);
+        } else {
+            Slog.e(TAG, "Invalid WifiConfiguration");
+        }
     }
 
     /**
@@ -638,10 +670,15 @@ public final class WifiService extends IWifiManager.Stub {
      */
     public int addOrUpdateNetwork(WifiConfiguration config) {
         enforceChangePermission();
-        if (mWifiStateMachineChannel != null) {
-            return mWifiStateMachine.syncAddOrUpdateNetwork(mWifiStateMachineChannel, config);
+        if (config.isValid()) {
+            if (mWifiStateMachineChannel != null) {
+                return mWifiStateMachine.syncAddOrUpdateNetwork(mWifiStateMachineChannel, config);
+            } else {
+                Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
+                return -1;
+            }
         } else {
-            Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
+            Slog.e(TAG, "bad network configuration");
             return -1;
         }
     }

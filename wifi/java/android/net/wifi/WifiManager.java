@@ -1366,6 +1366,13 @@ public class WifiManager {
     /** WPS timed out {@hide} */
     public static final int WPS_TIMED_OUT               = 7;
 
+    /**
+     * Passed with {@link ActionListener#onFailure}.
+     * Indicates that the operation failed due to invalid inputs
+     * @hide
+     */
+    public static final int INVALID_ARGS                = 8;
+
     /** Interface for callback invocation on an application action {@hide} */
     public interface ActionListener {
         /** The operation succeeded */
