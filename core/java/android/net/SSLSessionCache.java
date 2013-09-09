@@ -19,11 +19,15 @@ package android.net;
 import android.content.Context;
 import android.util.Log;
 
+import com.android.org.conscrypt.ClientSessionContext;
 import com.android.org.conscrypt.FileClientSessionCache;
 import com.android.org.conscrypt.SSLClientSessionCache;
 
 import java.io.File;
 import java.io.IOException;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSessionContext;
 
 /**
  * File-based cache of established SSL sessions.  When re-establishing a
@@ -36,6 +40,40 @@ import java.io.IOException;
 public final class SSLSessionCache {
     private static final String TAG = "SSLSessionCache";
     /* package */ final SSLClientSessionCache mSessionCache;
+
+    /**
+     * Installs a {@link SSLSessionCache} on a {@link SSLContext}. The cache will
+     * be used on all socket factories created by this context (including factories
+     * created before this call).
+     *
+     * @param cache the cache instance to install, or {@code null} to uninstall any
+     *         existing cache.
+     * @param context the context to install it on.
+     * @throws IllegalArgumentException if the context does not support a session
+     *         cache.
+     *
+     * @hide candidate for public API
+     */
+    public static void install(SSLSessionCache cache, SSLContext context) {
+        SSLSessionContext clientContext = context.getClientSessionContext();
+        if (clientContext instanceof ClientSessionContext) {
+            ((ClientSessionContext) clientContext).setPersistentCache(
+                    cache == null ? null : cache.mSessionCache);
+        } else {
+            throw new IllegalArgumentException("Incompatible SSLContext: " + context);
+        }
+    }
+
+    /**
+     * NOTE: This needs to be Object (and not SSLClientSessionCache) because apps
+     * that build directly against the framework (and not the SDK) might not declare
+     * a dependency on conscrypt. Javac will then has fail while resolving constructors.
+     *
+     * @hide For unit test use only
+     */
+    public SSLSessionCache(Object cache) {
+        mSessionCache = (SSLClientSessionCache) cache;
+    }
 
     /**
      * Create a session cache using the specified directory.
