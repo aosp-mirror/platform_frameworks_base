@@ -51,5 +51,14 @@
         <item>#FFFF3300</item>
         <item>#FFFFFFFF</item>
     </array>
-
+    <array name="batterymeter_bolt_points">
+        <item>88</item> <item>0</item>
+        <item>459</item><item>1</item>
+        <item>238</item><item>333</item>
+        <item>525</item><item>310</item>
+        <item>120</item><item>840</item>
+        <item>82</item> <item>818</item>
+        <item>246</item><item>373</item>
+        <item>0</item>  <item>408</item>
+    </array>
 </resources>
