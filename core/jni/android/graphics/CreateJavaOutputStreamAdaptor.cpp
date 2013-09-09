@@ -7,12 +7,6 @@
 #include "Utils.h"
 #include <androidfw/Asset.h>
 
-#define RETURN_NULL_IF_NULL(value) \
-    do { if (!(value)) { SkASSERT(0); return NULL; } } while (false)
-
-#define RETURN_ZERO_IF_NULL(value) \
-    do { if (!(value)) { SkASSERT(0); return 0; } } while (false)
-
 static jmethodID    gInputStream_resetMethodID;
 static jmethodID    gInputStream_markMethodID;
 static jmethodID    gInputStream_markSupportedMethodID;
@@ -161,32 +155,6 @@ private:
 
 SkStream* CreateJavaInputStreamAdaptor(JNIEnv* env, jobject stream,
                                        jbyteArray storage) {
-    static bool gInited;
-
-    if (!gInited) {
-        jclass inputStream_Clazz = env->FindClass("java/io/InputStream");
-        RETURN_NULL_IF_NULL(inputStream_Clazz);
-
-        gInputStream_resetMethodID      = env->GetMethodID(inputStream_Clazz,
-                                                           "reset", "()V");
-        gInputStream_markMethodID       = env->GetMethodID(inputStream_Clazz,
-                                                           "mark", "(I)V");
-        gInputStream_markSupportedMethodID = env->GetMethodID(inputStream_Clazz,
-                                                              "markSupported", "()Z");
-        gInputStream_readMethodID       = env->GetMethodID(inputStream_Clazz,
-                                                           "read", "([BII)I");
-        gInputStream_skipMethodID       = env->GetMethodID(inputStream_Clazz,
-                                                           "skip", "(J)J");
-
-        RETURN_NULL_IF_NULL(gInputStream_resetMethodID);
-        RETURN_NULL_IF_NULL(gInputStream_markMethodID);
-        RETURN_NULL_IF_NULL(gInputStream_markSupportedMethodID);
-        RETURN_NULL_IF_NULL(gInputStream_readMethodID);
-        RETURN_NULL_IF_NULL(gInputStream_skipMethodID);
-
-        gInited = true;
-    }
-
     return new JavaInputStreamAdaptor(env, stream, storage);
 }
 
@@ -263,27 +231,19 @@ private:
     const size_t            fLength;
 };
 
+static jclass   gByteArrayInputStream_Clazz;
+static jfieldID gCountField;
+static jfieldID gPosField;
+
 /**
  *  If jstream is a ByteArrayInputStream, return its remaining length. Otherwise
  *  return 0.
  */
 static size_t get_length_from_byte_array_stream(JNIEnv* env, jobject jstream) {
-    static jclass byteArrayInputStream_Clazz;
-    static jfieldID countField;
-    static jfieldID posField;
-
-    byteArrayInputStream_Clazz = env->FindClass("java/io/ByteArrayInputStream");
-    RETURN_ZERO_IF_NULL(byteArrayInputStream_Clazz);
-
-    countField = env->GetFieldID(byteArrayInputStream_Clazz, "count", "I");
-    RETURN_ZERO_IF_NULL(byteArrayInputStream_Clazz);
-    posField = env->GetFieldID(byteArrayInputStream_Clazz, "pos", "I");
-    RETURN_ZERO_IF_NULL(byteArrayInputStream_Clazz);
-
-    if (env->IsInstanceOf(jstream, byteArrayInputStream_Clazz)) {
+    if (env->IsInstanceOf(jstream, gByteArrayInputStream_Clazz)) {
         // Return the remaining length, to keep the same behavior of using the rest of the
         // stream.
-        return env->GetIntField(jstream, countField) - env->GetIntField(jstream, posField);
+        return env->GetIntField(jstream, gCountField) - env->GetIntField(jstream, gPosField);
     }
     return 0;
 }
@@ -321,21 +281,15 @@ SkStreamRewindable* GetRewindableStream(JNIEnv* env, jobject stream,
     return adaptor_to_mem_stream(adaptor.get());
 }
 
+static jclass       gAssetInputStream_Clazz;
+static jmethodID    gGetAssetIntMethodID;
+
 android::AssetStreamAdaptor* CheckForAssetStream(JNIEnv* env, jobject jstream) {
-    static jclass assetInputStream_Clazz;
-    static jmethodID getAssetIntMethodID;
-
-    assetInputStream_Clazz = env->FindClass("android/content/res/AssetManager$AssetInputStream");
-    RETURN_NULL_IF_NULL(assetInputStream_Clazz);
-
-    getAssetIntMethodID = env->GetMethodID(assetInputStream_Clazz, "getAssetInt", "()I");
-    RETURN_NULL_IF_NULL(getAssetIntMethodID);
-
-    if (!env->IsInstanceOf(jstream, assetInputStream_Clazz)) {
+    if (!env->IsInstanceOf(jstream, gAssetInputStream_Clazz)) {
         return NULL;
     }
 
-    jint jasset = env->CallIntMethod(jstream, getAssetIntMethodID);
+    jint jasset = env->CallIntMethod(jstream, gGetAssetIntMethodID);
     android::Asset* a = reinterpret_cast<android::Asset*>(jasset);
     if (NULL == a) {
         jniThrowNullPointerException(env, "NULL native asset");
@@ -406,18 +360,57 @@ SkWStream* CreateJavaOutputStreamAdaptor(JNIEnv* env, jobject stream,
     static bool gInited;
 
     if (!gInited) {
-        jclass outputStream_Clazz = env->FindClass("java/io/OutputStream");
-        RETURN_NULL_IF_NULL(outputStream_Clazz);
-
-        gOutputStream_writeMethodID = env->GetMethodID(outputStream_Clazz,
-                                                       "write", "([BII)V");
-        RETURN_NULL_IF_NULL(gOutputStream_writeMethodID);
-        gOutputStream_flushMethodID = env->GetMethodID(outputStream_Clazz,
-                                                       "flush", "()V");
-        RETURN_NULL_IF_NULL(gOutputStream_flushMethodID);
 
         gInited = true;
     }
 
     return new SkJavaOutputStream(env, stream, storage);
+}
+
+static jclass findClassCheck(JNIEnv* env, const char classname[]) {
+    jclass clazz = env->FindClass(classname);
+    SkASSERT(!env->ExceptionCheck());
+    return clazz;
+}
+
+static jfieldID getFieldIDCheck(JNIEnv* env, jclass clazz,
+                                const char fieldname[], const char type[]) {
+    jfieldID id = env->GetFieldID(clazz, fieldname, type);
+    SkASSERT(!env->ExceptionCheck());
+    return id;
+}
+
+static jmethodID getMethodIDCheck(JNIEnv* env, jclass clazz,
+                                  const char methodname[], const char type[]) {
+    jmethodID id = env->GetMethodID(clazz, methodname, type);
+    SkASSERT(!env->ExceptionCheck());
+    return id;
+}
+
+int register_android_graphics_CreateJavaOutputStreamAdaptor(JNIEnv* env) {
+    jclass inputStream_Clazz = findClassCheck(env, "java/io/InputStream");
+    gInputStream_resetMethodID = getMethodIDCheck(env, inputStream_Clazz, "reset", "()V");
+    gInputStream_markMethodID = getMethodIDCheck(env, inputStream_Clazz, "mark", "(I)V");
+    gInputStream_markSupportedMethodID = getMethodIDCheck(env, inputStream_Clazz, "markSupported", "()Z");
+    gInputStream_readMethodID = getMethodIDCheck(env, inputStream_Clazz, "read", "([BII)I");
+    gInputStream_skipMethodID = getMethodIDCheck(env, inputStream_Clazz, "skip", "(J)J");
+
+    gByteArrayInputStream_Clazz = findClassCheck(env, "java/io/ByteArrayInputStream");
+    // Ref gByteArrayInputStream_Clazz so we can continue to refer to it when
+    // calling IsInstance.
+    gByteArrayInputStream_Clazz = (jclass) env->NewGlobalRef(gByteArrayInputStream_Clazz);
+    gCountField = getFieldIDCheck(env, gByteArrayInputStream_Clazz, "count", "I");
+    gPosField = getFieldIDCheck(env, gByteArrayInputStream_Clazz, "pos", "I");
+
+    gAssetInputStream_Clazz = findClassCheck(env, "android/content/res/AssetManager$AssetInputStream");
+    // Ref gAssetInputStream_Clazz so we can continue to refer to it when
+    // calling IsInstance.
+    gAssetInputStream_Clazz = (jclass) env->NewGlobalRef(gAssetInputStream_Clazz);
+    gGetAssetIntMethodID = getMethodIDCheck(env, gAssetInputStream_Clazz, "getAssetInt", "()I");
+
+    jclass outputStream_Clazz = findClassCheck(env, "java/io/OutputStream");
+    gOutputStream_writeMethodID = getMethodIDCheck(env, outputStream_Clazz, "write", "([BII)V");
+    gOutputStream_flushMethodID = getMethodIDCheck(env, outputStream_Clazz, "flush", "()V");
+
+    return 0;
 }
