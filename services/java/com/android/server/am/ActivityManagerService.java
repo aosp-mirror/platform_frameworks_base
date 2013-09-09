@@ -1574,12 +1574,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             mSystemThread.installSystemApplicationInfo(info);
 
             synchronized (mSelf) {
-                ProcessRecord app = mSelf.newProcessRecordLocked(
-                        mSystemThread.getApplicationThread(), info,
+                ProcessRecord app = mSelf.newProcessRecordLocked(info,
                         info.processName, false);
                 app.persistent = true;
                 app.pid = MY_PID;
                 app.maxAdj = ProcessList.SYSTEM_ADJ;
+                app.makeActive(mSystemThread.getApplicationThread(), mSelf.mProcessStats);
                 mSelf.mProcessNames.put(app.processName, app.uid, app);
                 synchronized (mSelf.mPidsSelfLocked) {
                     mSelf.mPidsSelfLocked.put(app.pid, app);
@@ -2282,7 +2282,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (app == null) {
-            app = newProcessRecordLocked(null, info, processName, isolated);
+            app = newProcessRecordLocked(info, processName, isolated);
             if (app == null) {
                 Slog.w(TAG, "Failed making new process record for "
                         + processName + "/" + info.uid + " isolated=" + isolated);
@@ -4492,7 +4492,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         EventLog.writeEvent(EventLogTags.AM_PROC_BOUND, app.userId, app.pid, app.processName);
 
-        app.thread = thread;
+        app.makeActive(thread, mProcessStats);
         app.curAdj = app.setAdj = -100;
         app.curSchedGroup = app.setSchedGroup = Process.THREAD_GROUP_DEFAULT;
         app.forcingToForeground = null;
@@ -7549,8 +7549,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     // GLOBAL MANAGEMENT
     // =========================================================
 
-    final ProcessRecord newProcessRecordLocked(IApplicationThread thread,
-            ApplicationInfo info, String customProcess, boolean isolated) {
+    final ProcessRecord newProcessRecordLocked(ApplicationInfo info, String customProcess,
+            boolean isolated) {
         String proc = customProcess != null ? customProcess : info.processName;
         BatteryStatsImpl.Uid.Proc ps = null;
         BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
@@ -7578,8 +7578,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (stats) {
             ps = stats.getProcessStatsLocked(info.uid, proc);
         }
-        return new ProcessRecord(ps, thread, info, proc, uid,
-                mProcessStats.getProcessStateLocked(info.packageName, info.uid, proc));
+        return new ProcessRecord(ps, info, proc, uid);
     }
 
     final ProcessRecord addAppLocked(ApplicationInfo info, boolean isolated) {
@@ -7591,7 +7590,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         if (app == null) {
-            app = newProcessRecordLocked(null, info, null, isolated);
+            app = newProcessRecordLocked(info, null, isolated);
             mProcessNames.put(info.processName, app.uid, app);
             if (isolated) {
                 mIsolatedProcesses.put(app.uid, app);
@@ -11794,7 +11793,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         app.resetPackageList(mProcessStats);
         app.unlinkDeathRecipient();
-        app.thread = null;
+        app.makeInactive(mProcessStats);
         app.forcingToForeground = null;
         app.foregroundServices = false;
         app.foregroundActivities = false;
@@ -14695,7 +14694,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private final void setProcessTrackerState(ProcessRecord proc, int memFactor, long now) {
-        proc.baseProcessTracker.setState(proc.repProcState, memFactor, now, proc.pkgList);
+        if (proc.thread != null) {
+            proc.baseProcessTracker.setState(proc.repProcState, memFactor, now, proc.pkgList);
+        }
     }
 
     private final boolean updateOomAdjLocked(ProcessRecord app, int cachedAdj,
