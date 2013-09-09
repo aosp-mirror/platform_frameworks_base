@@ -655,6 +655,10 @@
     <string name="permdesc_invokeCarrierSetup" msgid="4159549152529111920">"Umožňuje držiteľovi vyvolať aplikáciu pre konfiguráciu poskytnutú operátorom. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
     <string name="permlab_accessNetworkConditions" msgid="8206077447838909516">"zachytávať informácie o stave siete"</string>
     <string name="permdesc_accessNetworkConditions" msgid="6899102075825272211">"Umožňuje aplikácii zachytávať informácie o stave siete. Bežné aplikácie by toto povolenie nemali nikdy potrebovať."</string>
+    <!-- no translation found for permlab_hotwordRecognition (3225080408746361313) -->
+    <skip />
+    <!-- no translation found for permdesc_hotwordRecognition (3716741260195364252) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nastaviť pravidlá pre heslo"</string>
     <string name="policydesc_limitPassword" msgid="3252114203919510394">"Ovládanie dĺžky hesiel na odomknutie obrazovky a v nich používané znaky."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Sledovať pokusy o odomknutie obrazovky"</string>
@@ -1578,8 +1582,8 @@
     <string name="restr_pin_error_doesnt_match" msgid="2224214190906994548">"Kódy PIN sa nezhodujú. Skúste to znova."</string>
     <string name="restr_pin_error_too_short" msgid="8173982756265777792">"Kód PIN je príliš krátky. Musí mať minimálne 4 číslice."</string>
   <plurals name="restr_pin_countdown">
-    <item quantity="one" msgid="311050995198548675">"Skúste to znova o 1 s."</item>
-    <item quantity="other" msgid="4730868920742952817">"Skúste to znova o <xliff:g id="COUNT">%d</xliff:g> s."</item>
+    <item quantity="one" msgid="311050995198548675">"Skúste to zas o 1 s"</item>
+    <item quantity="other" msgid="4730868920742952817">"Skúste to zas o <xliff:g id="COUNT">%d</xliff:g> s"</item>
   </plurals>
     <string name="restr_pin_try_later" msgid="973144472490532377">"Skúste to znova neskôr"</string>
     <string name="transient_navigation_confirmation" msgid="4907844043611123426">"Panel zobraz. prejdením okraja obr."</string>
