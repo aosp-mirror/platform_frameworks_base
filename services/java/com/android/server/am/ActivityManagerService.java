@@ -3628,6 +3628,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             info.append(" (").append(activity.shortComponentName).append(")");
         }
         info.append("\n");
+        info.append("PID: ").append(app.pid).append("\n");
         if (annotation != null) {
             info.append("Reason: ").append(annotation).append("\n");
         }
