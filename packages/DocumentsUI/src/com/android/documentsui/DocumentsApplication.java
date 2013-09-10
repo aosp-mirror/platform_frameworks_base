@@ -56,7 +56,11 @@ public class DocumentsApplication extends Application {
         packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         packageFilter.addDataScheme("package");
-        registerReceiver(mPackageReceiver, packageFilter);
+        registerReceiver(mCacheReceiver, packageFilter);
+
+        final IntentFilter localeFilter = new IntentFilter();
+        localeFilter.addAction(Intent.ACTION_LOCALE_CHANGED);
+        registerReceiver(mCacheReceiver, localeFilter);
     }
 
     @Override
@@ -70,7 +74,7 @@ public class DocumentsApplication extends Application {
         }
     }
 
-    private BroadcastReceiver mPackageReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mCacheReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             // TODO: narrow changed/removed to only packages that have backends

@@ -459,6 +459,7 @@ public final class DocumentsContract {
     private static final String PATH_SEARCH = "search";
 
     private static final String PARAM_QUERY = "query";
+    private static final String PARAM_MANAGE = "manage";
 
     /**
      * Build Uri representing the roots of a document provider. When queried, a
@@ -581,6 +582,16 @@ public final class DocumentsContract {
      */
     public static String getSearchDocumentsQuery(Uri searchDocumentsUri) {
         return searchDocumentsUri.getQueryParameter(PARAM_QUERY);
+    }
+
+    /** {@hide} */
+    public static Uri setManageMode(Uri uri) {
+        return uri.buildUpon().appendQueryParameter(PARAM_MANAGE, "true").build();
+    }
+
+    /** {@hide} */
+    public static boolean isManageMode(Uri uri) {
+        return uri.getBooleanQueryParameter(PARAM_MANAGE, false);
     }
 
     /**

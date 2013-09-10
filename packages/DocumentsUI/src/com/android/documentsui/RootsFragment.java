@@ -25,6 +25,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
 import android.provider.DocumentsContract.Root;
+import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -168,7 +169,7 @@ public class RootsFragment extends Fragment {
             }
 
             summary.setText(summaryText);
-            summary.setVisibility(summaryText != null ? View.VISIBLE : View.GONE);
+            summary.setVisibility(TextUtils.isEmpty(summaryText) ? View.GONE : View.VISIBLE);
 
             return convertView;
         }
