@@ -20,10 +20,12 @@ import com.android.ide.common.rendering.api.AdapterBinding;
 import com.android.ide.common.rendering.api.DataBindingItem;
 import com.android.ide.common.rendering.api.IProjectCallback;
 import com.android.ide.common.rendering.api.ResourceReference;
+import com.android.util.Pair;
 
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.SpinnerAdapter;
 
@@ -35,17 +37,23 @@ import java.util.List;
  * and {@link SpinnerAdapter}.
  *
  */
-public class FakeAdapter extends BaseAdapter implements ListAdapter, SpinnerAdapter {
+@SuppressWarnings("deprecation")
+public class FakeAdapter extends BaseAdapter {
 
     // don't use a set because the order is important.
     private final List<ResourceReference> mTypes = new ArrayList<ResourceReference>();
+    private final IProjectCallback mCallback;
+    private final ResourceReference mAdapterRef;
+    private final List<AdapterItem> mItems = new ArrayList<AdapterItem>();
+    private boolean mSkipCallbackParser = false;
 
     public FakeAdapter(ResourceReference adapterRef, AdapterBinding binding,
             IProjectCallback callback) {
-        super(adapterRef, binding, callback);
+        mAdapterRef = adapterRef;
+        mCallback = callback;
 
-        final int repeatCount = getBinding().getRepeatCount();
-        final int itemCount = getBinding().getItemCount();
+        final int repeatCount = binding.getRepeatCount();
+        final int itemCount = binding.getItemCount();
 
         // Need an array to count for each type.
         // This is likely too big, but is the max it can be.
@@ -54,7 +62,7 @@ public class FakeAdapter extends BaseAdapter implements ListAdapter, SpinnerAdap
         // We put several repeating sets.
         for (int r = 0 ; r < repeatCount ; r++) {
             // loop on the type of list items, and add however many for each type.
-            for (DataBindingItem dataBindingItem : getBinding()) {
+            for (DataBindingItem dataBindingItem : binding) {
                 ResourceReference viewRef = dataBindingItem.getViewReference();
                 int typeIndex = mTypes.indexOf(viewRef);
                 if (typeIndex == -1) {
@@ -103,7 +111,11 @@ public class FakeAdapter extends BaseAdapter implements ListAdapter, SpinnerAdap
     public View getView(int position, View convertView, ViewGroup parent) {
         // we don't care about recycling here because we never scroll.
         AdapterItem item = mItems.get(position);
-        return getView(item, null /*parentGroup*/, convertView, parent);
+        Pair<View, Boolean> pair = AdapterHelper.getView(item, null /*parentGroup*/, parent,
+                mCallback, mAdapterRef, mSkipCallbackParser);
+        mSkipCallbackParser = pair.getSecond();
+        return pair.getFirst();
+
     }
 
     @Override
