@@ -6128,8 +6128,4 @@
         <attr name="textView" format="reference" />
     </declare-styleable>
 
-    <declare-styleable name="DocumentsProviderInfo">
-        <attr name="customRoots" format="boolean" />
-    </declare-styleable>
-
 </resources>

@@ -132,18 +132,18 @@ public class MatrixCursorTest extends TestCase {
         MatrixCursor cursor = newMatrixCursor();
 
         cursor.newRow()
-                .offer("float", 4.2f)
-                .offer("string", "foobar")
-                .offer("blob", new byte[] {(byte) 0xaa, (byte) 0x55})
-                .offer("lolwat", "kittens");
+                .add("float", 4.2f)
+                .add("string", "foobar")
+                .add("blob", new byte[] {(byte) 0xaa, (byte) 0x55})
+                .add("lolwat", "kittens");
 
         cursor.newRow();
 
         cursor.newRow()
-                .offer("string", "zero")
-                .offer("string", "one")
-                .offer("string", "two")
-                .offer("lolwat", "kittens");
+                .add("string", "zero")
+                .add("string", "one")
+                .add("string", "two")
+                .add("lolwat", "kittens");
 
         assertTrue(cursor.moveToFirst());
         assertEquals("foobar", cursor.getString(0));

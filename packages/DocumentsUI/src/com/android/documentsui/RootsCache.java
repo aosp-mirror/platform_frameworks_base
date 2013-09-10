@@ -90,7 +90,6 @@ public class RootsCache {
             if (info.metaData != null && info.metaData.containsKey(
                     DocumentsContract.META_DATA_DOCUMENT_PROVIDER)) {
 
-                // TODO: remove deprecated customRoots flag
                 // TODO: populate roots on background thread, and cache results
                 final Uri rootsUri = DocumentsContract.buildRootsUri(info.authority);
                 final ContentProviderClient client = resolver

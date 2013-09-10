@@ -181,12 +181,12 @@ public class ExternalStorageProvider extends DocumentsProvider {
         }
 
         final RowBuilder row = result.newRow();
-        row.offer(Document.COLUMN_DOCUMENT_ID, docId);
-        row.offer(Document.COLUMN_DISPLAY_NAME, displayName);
-        row.offer(Document.COLUMN_SIZE, file.length());
-        row.offer(Document.COLUMN_MIME_TYPE, mimeType);
-        row.offer(Document.COLUMN_LAST_MODIFIED, file.lastModified());
-        row.offer(Document.COLUMN_FLAGS, flags);
+        row.add(Document.COLUMN_DOCUMENT_ID, docId);
+        row.add(Document.COLUMN_DISPLAY_NAME, displayName);
+        row.add(Document.COLUMN_SIZE, file.length());
+        row.add(Document.COLUMN_MIME_TYPE, mimeType);
+        row.add(Document.COLUMN_LAST_MODIFIED, file.lastModified());
+        row.add(Document.COLUMN_FLAGS, flags);
     }
 
     @Override
@@ -197,13 +197,13 @@ public class ExternalStorageProvider extends DocumentsProvider {
             final File path = mIdToPath.get(rootId);
 
             final RowBuilder row = result.newRow();
-            row.offer(Root.COLUMN_ROOT_ID, root.rootId);
-            row.offer(Root.COLUMN_ROOT_TYPE, root.rootType);
-            row.offer(Root.COLUMN_FLAGS, root.flags);
-            row.offer(Root.COLUMN_ICON, root.icon);
-            row.offer(Root.COLUMN_TITLE, root.title);
-            row.offer(Root.COLUMN_DOCUMENT_ID, root.docId);
-            row.offer(Root.COLUMN_AVAILABLE_BYTES, path.getFreeSpace());
+            row.add(Root.COLUMN_ROOT_ID, root.rootId);
+            row.add(Root.COLUMN_ROOT_TYPE, root.rootType);
+            row.add(Root.COLUMN_FLAGS, root.flags);
+            row.add(Root.COLUMN_ICON, root.icon);
+            row.add(Root.COLUMN_TITLE, root.title);
+            row.add(Root.COLUMN_DOCUMENT_ID, root.docId);
+            row.add(Root.COLUMN_AVAILABLE_BYTES, path.getFreeSpace());
         }
         return result;
     }

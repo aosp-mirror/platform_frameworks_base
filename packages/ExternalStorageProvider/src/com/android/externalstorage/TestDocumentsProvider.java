@@ -69,13 +69,13 @@ public class TestDocumentsProvider extends DocumentsProvider {
 
         final MatrixCursor result = new MatrixCursor(resolveRootProjection(projection));
         final RowBuilder row = result.newRow();
-        row.offer(Root.COLUMN_ROOT_ID, MY_ROOT_ID);
-        row.offer(Root.COLUMN_ROOT_TYPE, Root.ROOT_TYPE_SERVICE);
-        row.offer(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_RECENTS);
-        row.offer(Root.COLUMN_TITLE, "_Test title which is really long");
-        row.offer(Root.COLUMN_SUMMARY, "_Summary which is also super long text");
-        row.offer(Root.COLUMN_DOCUMENT_ID, MY_DOC_ID);
-        row.offer(Root.COLUMN_AVAILABLE_BYTES, 1024);
+        row.add(Root.COLUMN_ROOT_ID, MY_ROOT_ID);
+        row.add(Root.COLUMN_ROOT_TYPE, Root.ROOT_TYPE_SERVICE);
+        row.add(Root.COLUMN_FLAGS, Root.FLAG_SUPPORTS_RECENTS);
+        row.add(Root.COLUMN_TITLE, "_Test title which is really long");
+        row.add(Root.COLUMN_SUMMARY, "_Summary which is also super long text");
+        row.add(Root.COLUMN_DOCUMENT_ID, MY_DOC_ID);
+        row.add(Root.COLUMN_AVAILABLE_BYTES, 1024);
         return result;
     }
 
@@ -234,16 +234,16 @@ public class TestDocumentsProvider extends DocumentsProvider {
 
     private static void includeFile(MatrixCursor result, String docId) {
         final RowBuilder row = result.newRow();
-        row.offer(Document.COLUMN_DOCUMENT_ID, docId);
-        row.offer(Document.COLUMN_DISPLAY_NAME, docId);
-        row.offer(Document.COLUMN_LAST_MODIFIED, System.currentTimeMillis());
+        row.add(Document.COLUMN_DOCUMENT_ID, docId);
+        row.add(Document.COLUMN_DISPLAY_NAME, docId);
+        row.add(Document.COLUMN_LAST_MODIFIED, System.currentTimeMillis());
 
         if (MY_DOC_ID.equals(docId)) {
-            row.offer(Document.COLUMN_MIME_TYPE, Document.MIME_TYPE_DIR);
+            row.add(Document.COLUMN_MIME_TYPE, Document.MIME_TYPE_DIR);
         } else if (MY_DOC_NULL.equals(docId)) {
             // No MIME type
         } else {
-            row.offer(Document.COLUMN_MIME_TYPE, "application/octet-stream");
+            row.add(Document.COLUMN_MIME_TYPE, "application/octet-stream");
         }
     }
 }
