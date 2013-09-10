@@ -92,6 +92,7 @@ final public class MediaMuxer {
             Object[] values);
     private static native void nativeSetOrientationHint(int nativeObject,
             int degrees);
+    private static native void nativeSetLocation(int nativeObject, int latitude, int longitude);
     private static native void nativeWriteSampleData(int nativeObject,
             int trackIndex, ByteBuffer byteBuf,
             int offset, int size, long presentationTimeUs, int flags);
@@ -161,6 +162,41 @@ final public class MediaMuxer {
         } else {
             throw new IllegalStateException("Can't set rotation degrees due" +
                     " to wrong state.");
+        }
+    }
+
+    /**
+     * Set and store the geodata (latitude and longitude) in the output file.
+     * This method should be called before {@link #start}. The geodata is stored
+     * in udta box if the output format is
+     * {@link OutputFormat#MUXER_OUTPUT_MPEG_4}, and is ignored for other output
+     * formats. The geodata is stored according to ISO-6709 standard.
+     *
+     * @param latitude Latitude in degrees. Its value must be in the range [-90,
+     * 90].
+     * @param longitude Longitude in degrees. Its value must be in the range
+     * [-180, 180].
+     * @throws IllegalArgumentException If the given latitude or longitude is out
+     * of range.
+     * @throws IllegalStateException If this method is called after {@link #start}.
+     */
+    public void setLocation(float latitude, float longitude) {
+        int latitudex10000  = (int) (latitude * 10000 + 0.5);
+        int longitudex10000 = (int) (longitude * 10000 + 0.5);
+
+        if (latitudex10000 > 900000 || latitudex10000 < -900000) {
+            String msg = "Latitude: " + latitude + " out of range.";
+            throw new IllegalArgumentException(msg);
+        }
+        if (longitudex10000 > 1800000 || longitudex10000 < -1800000) {
+            String msg = "Longitude: " + longitude + " out of range";
+            throw new IllegalArgumentException(msg);
+        }
+
+        if (mState == MUXER_STATE_INITIALIZED && mNativeObject != 0) {
+            nativeSetLocation(mNativeObject, latitudex10000, longitudex10000);
+        } else {
+            throw new IllegalStateException("Can't set location due to wrong state.");
         }
     }
 
