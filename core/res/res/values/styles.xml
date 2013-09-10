@@ -516,6 +516,11 @@ please see styles_device_defaults.xml.
         <item name="android:childDivider">@android:drawable/divider_horizontal_bright_opaque</item>
     </style>
 
+    <style name="Widget.FragmentBreadCrumbs">
+        <item name="android:padding">4dp</item>
+        <item name="android:animateLayoutChanges">true</item>
+    </style>
+
     <style name="Widget.ImageWell">
         <item name="android:background">@android:drawable/panel_picture_frame_background</item>
     </style>
@@ -685,12 +690,6 @@ please see styles_device_defaults.xml.
     <style name="Widget.PopupWindow">
         <item name="android:popupBackground">@android:drawable/editbox_dropdown_background_dark</item>
         <item name="android:popupAnimationStyle">@android:style/Animation.PopupWindow</item>
-    </style>
-
-    <!-- Default style for {@link android.app.FragmentBreadCrumbs} view. -->
-    <style name="Widget.FragmentBreadCrumbs">
-        <item name="android:padding">4dp</item>
-        <item name="android:animateLayoutChanges">true</item>
     </style>
 
     <style name="Widget.KeyboardView" parent="android:Widget">
@@ -1664,6 +1663,9 @@ please see styles_device_defaults.xml.
     <style name="Widget.Holo.ExpandableListView.White">
     </style>
 
+    <style name="Widget.Holo.FragmentBreadCrumbs" parent="Widget.FragmentBreadCrumbs">
+    </style>
+
     <style name="Widget.Holo.Gallery" parent="Widget.Gallery">
     </style>
 
@@ -2091,6 +2093,9 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.Light.ExpandableListView.White">
+    </style>
+
+    <style name="Widget.Holo.Light.FragmentBreadCrumbs" parent="Widget.FragmentBreadCrumbs">
     </style>
 
     <style name="Widget.Holo.Light.Gallery" parent="Widget.Gallery">

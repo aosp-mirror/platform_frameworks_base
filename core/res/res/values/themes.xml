@@ -294,8 +294,8 @@ please see themes_device_defaults.xml.
         <item name="listPopupWindowStyle">@android:style/Widget.ListPopupWindow</item>
         <item name="popupMenuStyle">@android:style/Widget.PopupMenu</item>
         <item name="activityChooserViewStyle">@android:style/Widget.ActivityChooserView</item>
-
         <item name="mediaRouteButtonStyle">@android:style/Widget.DeviceDefault.MediaRouteButton</item>
+        <item name="fragmentBreadCrumbsStyle">@android:style/Widget.FragmentBreadCrumbs</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.PreferenceScreen</item>
@@ -1133,6 +1133,7 @@ please see themes_device_defaults.xml.
         <item name="popupMenuStyle">@android:style/Widget.Holo.PopupMenu</item>
         <item name="stackViewStyle">@android:style/Widget.Holo.StackView</item>
         <item name="activityChooserViewStyle">@android:style/Widget.Holo.ActivityChooserView</item>
+        <item name="fragmentBreadCrumbsStyle">@android:style/Widget.Holo.FragmentBreadCrumbs</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.Holo.PreferenceScreen</item>
@@ -1448,6 +1449,7 @@ please see themes_device_defaults.xml.
         <item name="popupMenuStyle">@android:style/Widget.Holo.Light.PopupMenu</item>
         <item name="stackViewStyle">@android:style/Widget.Holo.StackView</item>
         <item name="activityChooserViewStyle">@android:style/Widget.Holo.Light.ActivityChooserView</item>
+        <item name="fragmentBreadCrumbsStyle">@android:style/Widget.Holo.Light.FragmentBreadCrumbs</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.Holo.PreferenceScreen</item>

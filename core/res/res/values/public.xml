@@ -2078,5 +2078,11 @@
   <public type="attr" name="requireDeviceUnlock" />
   <public type="attr" name="apduServiceBanner" />
   <public type="attr" name="provideAssistData" />
+  <public type="attr" name="fragmentBreadCrumbsStyle" />
+
+  <public type="style" name="Widget.Holo.FragmentBreadCrumbs" />
+  <public type="style" name="Widget.Holo.Light.FragmentBreadCrumbs" />
+  <public type="style" name="Widget.DeviceDefault.FragmentBreadCrumbs" />
+  <public type="style" name="Widget.DeviceDefault.Light.FragmentBreadCrumbs" />
 
 </resources>
