@@ -19,6 +19,7 @@ package com.android.tools.layoutlib.create;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 import com.android.tools.layoutlib.java.AutoCloseable;
 import com.android.tools.layoutlib.java.ModifiedUtf8;
+import com.android.tools.layoutlib.java.Charsets;
 import com.android.tools.layoutlib.java.IntegralToString;
 import com.android.tools.layoutlib.java.UnsafeByteSequence;
 
@@ -114,6 +115,7 @@ public final class CreateInfo implements ICreateInfo {
             IntegralToString.class,
             UnsafeByteSequence.class,
             ModifiedUtf8.class,
+            Charsets.class,
         };
 
     /**
@@ -222,6 +224,7 @@ public final class CreateInfo implements ICreateInfo {
         new String[] {
             "java.lang.AutoCloseable",                         "com.android.tools.layoutlib.java.AutoCloseable",
             "java.nio.charset.ModifiedUtf8",                   "com.android.tools.layoutlib.java.ModifiedUtf8",
+            "java.nio.charset.Charsets",                       "com.android.tools.layoutlib.java.Charsets",
             "java.lang.IntegralToString",                      "com.android.tools.layoutlib.java.IntegralToString",
             "java.lang.UnsafeByteSequence",                    "com.android.tools.layoutlib.java.UnsafeByteSequence",
         };

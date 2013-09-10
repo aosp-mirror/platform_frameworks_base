@@ -172,7 +172,8 @@ This is the easiest: we currently inject the following classes:
 - AutoCloseable is part of Java 7. To enable us to still run on Java 6, a new class is
   injected. The implementation for the class has been taken from Android's libcore
   (platform/libcore/luni/src/main/java/java/lang/AutoCloseable.java).
-- ModifiedUtf8, IntegralToString and UnsafeByteSequence are not part of the standard JAVA VM.
+- Charsets, ModifiedUtf8, IntegralToString and UnsafeByteSequence are not part of the
+  standard JAVA VM.
   They are added to the Dalvik VM for performance reasons. An implementation that is very
   close to the original (which is at platform/libcore/luni/src/main/java/...) is injected.
   Since these classees were in part of the java package, where we can't inject classes,
