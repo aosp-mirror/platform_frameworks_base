@@ -125,6 +125,14 @@ public final class MessageQueue {
     }
 
     Message next() {
+        // Return here if the message loop has already quit and been disposed.
+        // This can happen if the application tries to restart a looper after quit
+        // which is not supported.
+        final int ptr = mPtr;
+        if (ptr == 0) {
+            return null;
+        }
+
         int pendingIdleHandlerCount = -1; // -1 only during first iteration
         int nextPollTimeoutMillis = 0;
         for (;;) {
@@ -132,9 +140,7 @@ public final class MessageQueue {
                 Binder.flushPendingCommands();
             }
 
-            // We can assume mPtr != 0 because the loop is obviously still running.
-            // The looper will not call this method after the loop quits.
-            nativePollOnce(mPtr, nextPollTimeoutMillis);
+            nativePollOnce(ptr, nextPollTimeoutMillis);
 
             synchronized (this) {
                 // Try to retrieve the next message.  Return if found.
