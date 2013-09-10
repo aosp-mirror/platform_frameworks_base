@@ -34,7 +34,6 @@ import android.os.ICancellationSignal;
 import android.os.OperationCanceledException;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 
@@ -196,13 +195,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 return rejectQuery(uri, projection, selection, selectionArgs, sortOrder,
                         CancellationSignal.fromTransport(cancellationSignal));
             }
-            mCallingPackage.set(callingPkg);
+            final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.query(
                         uri, projection, selection, selectionArgs, sortOrder,
                         CancellationSignal.fromTransport(cancellationSignal));
             } finally {
-                mCallingPackage.set(null);
+                setCallingPackage(original);
             }
         }
 
@@ -216,11 +215,11 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
                 return rejectInsert(uri, initialValues);
             }
-            mCallingPackage.set(callingPkg);
+            final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.insert(uri, initialValues);
             } finally {
-                mCallingPackage.set(null);
+                setCallingPackage(original);
             }
         }
 
@@ -229,11 +228,11 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
-            mCallingPackage.set(callingPkg);
+            final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.bulkInsert(uri, initialValues);
             } finally {
-                mCallingPackage.set(null);
+                setCallingPackage(original);
             }
         }
 
@@ -256,11 +255,11 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                     }
                 }
             }
-            mCallingPackage.set(callingPkg);
+            final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.applyBatch(operations);
             } finally {
-                mCallingPackage.set(null);
+                setCallingPackage(original);
             }
         }
 
@@ -269,11 +268,11 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
-            mCallingPackage.set(callingPkg);
+            final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.delete(uri, selection, selectionArgs);
             } finally {
-                mCallingPackage.set(null);
+                setCallingPackage(original);
             }
         }
 
@@ -283,11 +282,11 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             if (enforceWritePermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
                 return 0;
             }
-            mCallingPackage.set(callingPkg);
+            final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.update(uri, values, selection, selectionArgs);
             } finally {
-                mCallingPackage.set(null);
+                setCallingPackage(original);
             }
         }
 
@@ -296,12 +295,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 String callingPkg, Uri uri, String mode, ICancellationSignal cancellationSignal)
                 throws FileNotFoundException {
             enforceFilePermission(callingPkg, uri, mode);
-            mCallingPackage.set(callingPkg);
+            final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.openFile(
                         uri, mode, CancellationSignal.fromTransport(cancellationSignal));
             } finally {
-                mCallingPackage.set(null);
+                setCallingPackage(original);
             }
         }
 
@@ -310,22 +309,22 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 String callingPkg, Uri uri, String mode, ICancellationSignal cancellationSignal)
                 throws FileNotFoundException {
             enforceFilePermission(callingPkg, uri, mode);
-            mCallingPackage.set(callingPkg);
+            final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.openAssetFile(
                         uri, mode, CancellationSignal.fromTransport(cancellationSignal));
             } finally {
-                mCallingPackage.set(null);
+                setCallingPackage(original);
             }
         }
 
         @Override
         public Bundle call(String callingPkg, String method, String arg, Bundle extras) {
-            mCallingPackage.set(callingPkg);
+            final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.call(method, arg, extras);
             } finally {
-                mCallingPackage.set(null);
+                setCallingPackage(original);
             }
         }
 
@@ -338,12 +337,12 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         public AssetFileDescriptor openTypedAssetFile(String callingPkg, Uri uri, String mimeType,
                 Bundle opts, ICancellationSignal cancellationSignal) throws FileNotFoundException {
             enforceFilePermission(callingPkg, uri, "r");
-            mCallingPackage.set(callingPkg);
+            final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.openTypedAssetFile(
                         uri, mimeType, opts, CancellationSignal.fromTransport(cancellationSignal));
             } finally {
-                mCallingPackage.set(null);
+                setCallingPackage(original);
             }
         }
 
@@ -357,11 +356,11 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             if (enforceReadPermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
                 return null;
             }
-            mCallingPackage.set(callingPkg);
+            final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.canonicalize(uri);
             } finally {
-                mCallingPackage.set(null);
+                setCallingPackage(original);
             }
         }
 
@@ -370,11 +369,11 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             if (enforceReadPermission(callingPkg, uri) != AppOpsManager.MODE_ALLOWED) {
                 return null;
             }
-            mCallingPackage.set(callingPkg);
+            final String original = setCallingPackage(callingPkg);
             try {
                 return ContentProvider.this.uncanonicalize(uri);
             } finally {
-                mCallingPackage.set(null);
+                setCallingPackage(original);
             }
         }
 
@@ -537,6 +536,16 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
      */
     public final Context getContext() {
         return mContext;
+    }
+
+    /**
+     * Set the calling package, returning the current value (or {@code null})
+     * which can be used later to restore the previous state.
+     */
+    private String setCallingPackage(String callingPackage) {
+        final String original = mCallingPackage.get();
+        mCallingPackage.set(callingPackage);
+        return original;
     }
 
     /**
